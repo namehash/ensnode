@@ -21,16 +21,16 @@ services:
       - yarn_cache_volume:/usr/local/share/.cache/yarn/v6
     labels:
       - traefik.enable=true
-      - traefik.http.routers.hf-evm-indexer.entrypoints=web
-      - traefik.http.routers.hf-evm-indexer.rule=Host(`linea.evm-indexer.nh.localhost`)
-      - traefik.http.services.hf-evm-indexer.loadbalancer.server.port=42069
+      - traefik.http.routers.linea-nh-evm-indexer.entrypoints=web
+      - traefik.http.routers.linea-nh-evm-indexer.rule=Host(`linea.evm-indexer.nh.localhost`)
+      - traefik.http.services.linea-nh-evm-indexer.loadbalancer.server.port=42069
 
   evm_indexer_base:
     build:
       context: ../
       dockerfile: .local/Dockerfile
     entrypoint: pnpm
-    command: run start
+    command: run dev
     depends_on:
       - postgres_db
       - redis_cache
@@ -47,9 +47,9 @@ services:
       - yarn_cache_volume:/usr/local/share/.cache/yarn/v6
     labels:
       - traefik.enable=true
-      - traefik.http.routers.hf-evm-indexer.entrypoints=web
-      - traefik.http.routers.hf-evm-indexer.rule=Host(`base.evm-indexer.nh.localhost`)
-      - traefik.http.services.hf-evm-indexer.loadbalancer.server.port=42069
+      - traefik.http.routers.base-nh-evm-indexer.entrypoints=web
+      - traefik.http.routers.base-nh-evm-indexer.rule=Host(`base.evm-indexer.nh.localhost`)
+      - traefik.http.services.base-nh-evm-indexer.loadbalancer.server.port=42069
     
   postgres_db:
     container_name: postgres_db
@@ -80,7 +80,10 @@ services:
     # The official v3 Traefik docker image
     image: traefik:v3.2
     # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
+    command:
+      - --api.insecure=true
+      - --providers.docker
+      - --entrypoints.web.address=:80
     ports:
       # The HTTP port
       - "80:80"
