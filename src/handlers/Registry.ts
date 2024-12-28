@@ -1,9 +1,10 @@
 import { Context } from "ponder:registry";
 import { domains, resolvers } from "ponder:schema";
+import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
 import { makeResolverId } from "../lib/ids";
-import { ROOT_NODE, encodeLabelhash, makeSubnodeNamehash } from "../lib/subname-helpers";
+import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
 import { upsertAccount } from "../lib/upserts";
 
 /**
