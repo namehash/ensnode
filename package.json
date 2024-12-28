@@ -21,11 +21,13 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/convict": "^6.1.6",
-    "@types/node": "^20.9.0",
-    "typescript": "^5.2.2"
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
   },
   "engines": {
-    "node": ">=18.14"
+    "node": ">=22.14"
   },
-  "packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf"
+  "resolutions": {
+    "vite": "^5.1.8"
+  }
 }
