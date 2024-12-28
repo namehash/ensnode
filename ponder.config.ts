@@ -1,6 +1,8 @@
 import { createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
+import { PostgresConnectionString } from "./src/lib/db";
+
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";
@@ -22,7 +24,15 @@ const ETH_REGISTRAR_CONTROLLER_OLD_ADDRESS = "0x283Af0B28c62C092C9727F1Ee09c02CA
 const ETH_REGISTRAR_CONTROLLER_ADDRESS = "0x253553366Da8546fC250F225fe3d25d0C782303b";
 const NAME_WRAPPER_ADDRESS = "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401";
 
+const dbConnectionString = PostgresConnectionString.safeFromEnv()?.toRawString();
+
 export default createConfig({
+  database: dbConnectionString
+    ? ({
+        kind: "postgres",
+        connectionString: dbConnectionString,
+      } as const)
+    : undefined,
   networks: {
     mainnet: {
       chainId: 1,

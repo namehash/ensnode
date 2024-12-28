@@ -1,0 +1,96 @@
+services:
+  evm_indexer_linea:
+    build:
+      context: ../
+      dockerfile: .local/Dockerfile
+    entrypoint: pnpm
+    command: run dev
+    depends_on:
+      - postgres_db
+      - redis_cache
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_SCHEMA=linea01
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=abcd1234
+    volumes:
+      - ../:/usr/src/app
+      - /usr/src/app/node_modules
+      - yarn_cache_volume:/usr/local/share/.cache/yarn/v6
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hf-evm-indexer.entrypoints=web
+      - traefik.http.routers.hf-evm-indexer.rule=Host(`linea.evm-indexer.nh.localhost`)
+      - traefik.http.services.hf-evm-indexer.loadbalancer.server.port=42069
+
+  evm_indexer_base:
+    build:
+      context: ../
+      dockerfile: .local/Dockerfile
+    entrypoint: pnpm
+    command: run start
+    depends_on:
+      - postgres_db
+      - redis_cache
+    env_file:
+      - ../.env
+    environment:
+      - DATABASE_SCHEMA=base01
+      - POSTGRES_HOST=postgres_db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=abcd1234
+    volumes:
+      - ../:/usr/src/app
+      - /usr/src/app/node_modules
+      - yarn_cache_volume:/usr/local/share/.cache/yarn/v6
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hf-evm-indexer.entrypoints=web
+      - traefik.http.routers.hf-evm-indexer.rule=Host(`base.evm-indexer.nh.localhost`)
+      - traefik.http.services.hf-evm-indexer.loadbalancer.server.port=42069
+    
+  postgres_db:
+    container_name: postgres_db
+    image: postgres:17.2
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=abcd1234
+    volumes:
+      - postgres_volume:/var/lib/postgresql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    labels:
+      - traefik.enable=false
+
+  redis_cache:
+    container_name: redis_cache
+    image: redis:7-alpine
+    ports:
+      - 63799:6379
+    volumes:
+      - redis_volume:/data
+    labels:
+      - traefik.enable=false
+
+  reverse_proxy:
+    container_name: reverse_proxy
+    # The official v3 Traefik docker image
+    image: traefik:v3.2
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  postgres_volume:
+  redis_volume:
+  yarn_cache_volume:
