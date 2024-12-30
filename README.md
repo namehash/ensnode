@@ -29,7 +29,7 @@ estimated backfill time @ 50rps = 24-36 hours on M1 Macbook (~10x speedup)
   - add a check at callsite to throw the event that causes this
 - [ ] root domain is not `is_migrated`, definitely should be after new registry is created
 
-### todo
+#### next up
 
 - [ ] confirm all the schema relations are configured correctly
 - [ ] integrate rainbow tables for label healing
