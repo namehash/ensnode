@@ -33,7 +33,7 @@ estimated backfill time @ 50rps = 24-36 hours on M1 Macbook (~10x speedup)
 
 - [ ] confirm all the schema relations are configured correctly
 - [ ] integrate rainbow tables for label healing
-  - load the tabel dump into pglite & query synchronously to match existing behavior
+  - load the table dump into pglite (or just postgres) & query synchronously to match existing behavior
   - https://github.com/graphprotocol/ens-rainbow
 - [ ] subgraph graphql implementation within ponder
   - [ ] implement subgraph-style pagination api

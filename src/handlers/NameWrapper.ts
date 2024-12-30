@@ -1,4 +1,4 @@
-import { type Context, type Event, type EventNames, ponder } from "ponder:registry";
+import { type Context, type Event, type EventNames } from "ponder:registry";
 import { domains, wrappedDomains } from "ponder:schema";
 import { type Address, type Hex, stringToBytes } from "viem";
 import { bigintMax } from "../lib/helpers";
