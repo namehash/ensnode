@@ -1,8 +1,9 @@
 import { type Context, type Event, ponder } from "ponder:registry";
 import { domains, resolvers } from "ponder:schema";
-import { hasNullByte, uniq } from "./lib/helpers";
-import { makeResolverId } from "./lib/ids";
-import { upsertAccount, upsertResolver } from "./lib/upserts";
+import { hasNullByte, uniq } from "../../../lib/helpers";
+import { makeResolverId } from "../../../lib/ids";
+import { upsertAccount, upsertResolver } from "../../../lib/upserts";
+import { PonderEnsIndexingHandlerModule } from "../../types";
 
 // there is a legacy resolver abi with different TextChanged events.
 // luckily the subgraph doesn't care about the value parameter so we can use a union
@@ -16,7 +17,10 @@ type AnyTextChangedEvent =
 async function _handleAddrChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:AddrChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:AddrChanged">;
+}) {
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
 
@@ -31,7 +35,9 @@ async function _handleAddrChanged({
   // materialize the resolved add to the domain iff this resolver is active
   const domain = await context.db.find(domains, { id: node });
   if (domain?.resolverId === id) {
-    await context.db.update(domains, { id: node }).set({ resolvedAddress: address });
+    await context.db
+      .update(domains, { id: node })
+      .set({ resolvedAddress: address });
   }
 
   // TODO: log ResolverEvent
@@ -40,7 +46,10 @@ async function _handleAddrChanged({
 async function _handleAddressChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:AddressChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:AddressChanged">;
+}) {
   const { node, coinType, newAddress } = event.args;
   await upsertAccount(context, newAddress);
 
@@ -62,7 +71,10 @@ async function _handleAddressChanged({
 async function _handleNameChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:NameChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:NameChanged">;
+}) {
   const { node, name } = event.args;
   if (hasNullByte(name)) return;
 
@@ -79,7 +91,10 @@ async function _handleNameChanged({
 async function _handleABIChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:ABIChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:ABIChanged">;
+}) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
   const resolver = await upsertResolver(context, {
@@ -94,7 +109,10 @@ async function _handleABIChanged({
 async function _handlePubkeyChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:PubkeyChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:PubkeyChanged">;
+}) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
   const resolver = await upsertResolver(context, {
@@ -122,7 +140,9 @@ async function _handleTextChanged({
   });
 
   // upsert new key
-  await context.db.update(resolvers, { id }).set({ texts: uniq([...resolver.texts, key]) });
+  await context.db
+    .update(resolvers, { id })
+    .set({ texts: uniq([...resolver.texts, key]) });
 
   // TODO: log ResolverEvent
 }
@@ -130,7 +150,10 @@ async function _handleTextChanged({
 async function _handleContenthashChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:ContenthashChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:ContenthashChanged">;
+}) {
   const { node, hash } = event.args;
   const id = makeResolverId(node, event.log.address);
   await upsertResolver(context, {
@@ -146,7 +169,10 @@ async function _handleContenthashChanged({
 async function _handleInterfaceChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:InterfaceChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:InterfaceChanged">;
+}) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
   await upsertResolver(context, {
@@ -161,7 +187,10 @@ async function _handleInterfaceChanged({
 async function _handleAuthorisationChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:AuthorisationChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:AuthorisationChanged">;
+}) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
   await upsertResolver(context, {
@@ -176,7 +205,10 @@ async function _handleAuthorisationChanged({
 async function _handleVersionChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:VersionChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:VersionChanged">;
+}) {
   // a version change nulls out the resolver
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
@@ -185,7 +217,9 @@ async function _handleVersionChanged({
 
   // materialize the Domain's resolvedAddress field
   if (domain.resolverId === id) {
-    await context.db.update(domains, { id: node }).set({ resolvedAddress: null });
+    await context.db
+      .update(domains, { id: node })
+      .set({ resolvedAddress: null });
   }
 
   // clear out the resolver's info
@@ -202,64 +236,88 @@ async function _handleVersionChanged({
 async function _handleDNSRecordChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:DNSRecordChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:DNSRecordChanged">;
+}) {
   // subgraph ignores
 }
 
 async function _handleDNSRecordDeleted({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:DNSRecordDeleted"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:DNSRecordDeleted">;
+}) {
   // subgraph ignores
 }
 
 async function _handleDNSZonehashChanged({
   context,
   event,
-}: { context: Context; event: Event<"Resolver:DNSZonehashChanged"> }) {
+}: {
+  context: Context;
+  event: Event<"Resolver:DNSZonehashChanged">;
+}) {
   // subgraph ignores
 }
 
-// Old registry handlers
-ponder.on("OldRegistryResolvers:AddrChanged", _handleAddrChanged);
-ponder.on("OldRegistryResolvers:AddressChanged", _handleAddressChanged);
-ponder.on("OldRegistryResolvers:NameChanged", _handleNameChanged);
-ponder.on("OldRegistryResolvers:ABIChanged", _handleABIChanged);
-ponder.on("OldRegistryResolvers:PubkeyChanged", _handlePubkeyChanged);
-ponder.on(
-  "OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-  _handleTextChanged,
-);
-ponder.on(
-  "OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
-  _handleTextChanged,
-);
-ponder.on("OldRegistryResolvers:ContenthashChanged", _handleContenthashChanged);
-ponder.on("OldRegistryResolvers:InterfaceChanged", _handleInterfaceChanged);
-ponder.on("OldRegistryResolvers:AuthorisationChanged", _handleAuthorisationChanged);
-ponder.on("OldRegistryResolvers:VersionChanged", _handleVersionChanged);
-ponder.on("OldRegistryResolvers:DNSRecordChanged", _handleDNSRecordChanged);
-ponder.on("OldRegistryResolvers:DNSRecordDeleted", _handleDNSRecordDeleted);
-ponder.on("OldRegistryResolvers:DNSZonehashChanged", _handleDNSZonehashChanged);
+export function initResolverHandlers() {
+  // Old registry handlers
+  ponder.on("OldRegistryResolvers:AddrChanged", _handleAddrChanged);
+  ponder.on("OldRegistryResolvers:AddressChanged", _handleAddressChanged);
+  ponder.on("OldRegistryResolvers:NameChanged", _handleNameChanged);
+  ponder.on("OldRegistryResolvers:ABIChanged", _handleABIChanged);
+  ponder.on("OldRegistryResolvers:PubkeyChanged", _handlePubkeyChanged);
+  ponder.on(
+    "OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+    _handleTextChanged
+  );
+  ponder.on(
+    "OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+    _handleTextChanged
+  );
+  ponder.on(
+    "OldRegistryResolvers:ContenthashChanged",
+    _handleContenthashChanged
+  );
+  ponder.on("OldRegistryResolvers:InterfaceChanged", _handleInterfaceChanged);
+  ponder.on(
+    "OldRegistryResolvers:AuthorisationChanged",
+    _handleAuthorisationChanged
+  );
+  ponder.on("OldRegistryResolvers:VersionChanged", _handleVersionChanged);
+  ponder.on("OldRegistryResolvers:DNSRecordChanged", _handleDNSRecordChanged);
+  ponder.on("OldRegistryResolvers:DNSRecordDeleted", _handleDNSRecordDeleted);
+  ponder.on(
+    "OldRegistryResolvers:DNSZonehashChanged",
+    _handleDNSZonehashChanged
+  );
 
-// New registry handlers
-ponder.on("Resolver:AddrChanged", _handleAddrChanged);
-ponder.on("Resolver:AddressChanged", _handleAddressChanged);
-ponder.on("Resolver:NameChanged", _handleNameChanged);
-ponder.on("Resolver:ABIChanged", _handleABIChanged);
-ponder.on("Resolver:PubkeyChanged", _handlePubkeyChanged);
-ponder.on(
-  "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-  _handleTextChanged,
-);
-ponder.on(
-  "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
-  _handleTextChanged,
-);
-ponder.on("Resolver:ContenthashChanged", _handleContenthashChanged);
-ponder.on("Resolver:InterfaceChanged", _handleInterfaceChanged);
-ponder.on("Resolver:AuthorisationChanged", _handleAuthorisationChanged);
-ponder.on("Resolver:VersionChanged", _handleVersionChanged);
-ponder.on("Resolver:DNSRecordChanged", _handleDNSRecordChanged);
-ponder.on("Resolver:DNSRecordDeleted", _handleDNSRecordDeleted);
-ponder.on("Resolver:DNSZonehashChanged", _handleDNSZonehashChanged);
+  // New registry handlers
+  ponder.on("Resolver:AddrChanged", _handleAddrChanged);
+  ponder.on("Resolver:AddressChanged", _handleAddressChanged);
+  ponder.on("Resolver:NameChanged", _handleNameChanged);
+  ponder.on("Resolver:ABIChanged", _handleABIChanged);
+  ponder.on("Resolver:PubkeyChanged", _handlePubkeyChanged);
+  ponder.on(
+    "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+    _handleTextChanged
+  );
+  ponder.on(
+    "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+    _handleTextChanged
+  );
+  ponder.on("Resolver:ContenthashChanged", _handleContenthashChanged);
+  ponder.on("Resolver:InterfaceChanged", _handleInterfaceChanged);
+  ponder.on("Resolver:AuthorisationChanged", _handleAuthorisationChanged);
+  ponder.on("Resolver:VersionChanged", _handleVersionChanged);
+  ponder.on("Resolver:DNSRecordChanged", _handleDNSRecordChanged);
+  ponder.on("Resolver:DNSRecordDeleted", _handleDNSRecordDeleted);
+  ponder.on("Resolver:DNSZonehashChanged", _handleDNSZonehashChanged);
+}
+
+export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
+  attachHandlers: initResolverHandlers,
+};

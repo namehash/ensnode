@@ -1,8 +1,14 @@
 import { type Context, type Event, ponder } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
 import type { Hex } from "viem";
-import { NAMEHASH_ETH, isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "./lib/ens-helpers";
-import { upsertAccount, upsertRegistration } from "./lib/upserts";
+import {
+  NAMEHASH_ETH,
+  isLabelValid,
+  makeSubnodeNamehash,
+  tokenIdToLabel,
+} from "../../../lib/ens-helpers";
+import { upsertAccount, upsertRegistration } from "../../../lib/upserts";
+import { PonderEnsIndexingHandlerModule } from "../../types";
 
 // all nodes referenced by EthRegistrar are parented to .eth
 const ROOT_NODE = NAMEHASH_ETH;
@@ -11,7 +17,10 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 async function handleNameRegistered({
   context,
   event,
-}: { context: Context; event: Event<"BaseRegistrar:NameRegistered"> }) {
+}: {
+  context: Context;
+  event: Event<"BaseRegistrar:NameRegistered">;
+}) {
   const { id, owner, expires } = event.args;
 
   await upsertAccount(context, owner);
@@ -47,7 +56,12 @@ async function handleNameRegisteredByControllerOld({
   context: Context;
   event: Event<"EthRegistrarControllerOld:NameRegistered">;
 }) {
-  return await setNamePreimage(context, event.args.name, event.args.label, event.args.cost);
+  return await setNamePreimage(
+    context,
+    event.args.name,
+    event.args.label,
+    event.args.cost
+  );
 }
 
 async function handleNameRegisteredByController({
@@ -61,7 +75,7 @@ async function handleNameRegisteredByController({
     context,
     event.args.name,
     event.args.label,
-    event.args.baseCost + event.args.premium,
+    event.args.baseCost + event.args.premium
   );
 }
 
@@ -74,10 +88,20 @@ async function handleNameRenewedByController({
     | Event<"EthRegistrarController:NameRenewed">
     | Event<"EthRegistrarControllerOld:NameRenewed">;
 }) {
-  return await setNamePreimage(context, event.args.name, event.args.label, event.args.cost);
+  return await setNamePreimage(
+    context,
+    event.args.name,
+    event.args.label,
+    event.args.cost
+  );
 }
 
-async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
+async function setNamePreimage(
+  context: Context,
+  name: string,
+  label: Hex,
+  cost: bigint
+) {
   if (!isLabelValid(name)) return;
 
   const node = makeSubnodeNamehash(ROOT_NODE, label);
@@ -85,22 +109,31 @@ async function setNamePreimage(context: Context, name: string, label: Hex, cost:
   if (!domain) throw new Error("domain expected");
 
   if (domain.labelName !== name) {
-    await context.db.update(domains, { id: node }).set({ labelName: name, name: `${name}.eth` });
+    await context.db
+      .update(domains, { id: node })
+      .set({ labelName: name, name: `${name}.eth` });
   }
 
-  await context.db.update(registrations, { id: label }).set({ labelName: name, cost });
+  await context.db
+    .update(registrations, { id: label })
+    .set({ labelName: name, cost });
 }
 
 async function handleNameRenewed({
   context,
   event,
-}: { context: Context; event: Event<"BaseRegistrar:NameRenewed"> }) {
+}: {
+  context: Context;
+  event: Event<"BaseRegistrar:NameRenewed">;
+}) {
   const { id, expires } = event.args;
 
   const label = tokenIdToLabel(id);
   const node = makeSubnodeNamehash(ROOT_NODE, label);
 
-  await context.db.update(registrations, { id: label }).set({ expiryDate: expires });
+  await context.db
+    .update(registrations, { id: label })
+    .set({ expiryDate: expires });
 
   await context.db
     .update(domains, { id: node })
@@ -112,7 +145,10 @@ async function handleNameRenewed({
 async function handleNameTransferred({
   context,
   event,
-}: { context: Context; event: Event<"BaseRegistrar:Transfer"> }) {
+}: {
+  context: Context;
+  event: Event<"BaseRegistrar:Transfer">;
+}) {
   const { tokenId, from, to } = event.args;
 
   await upsertAccount(context, to);
@@ -123,19 +159,40 @@ async function handleNameTransferred({
   const registration = await context.db.find(registrations, { id: label });
   if (!registration) return;
 
-  await context.db.update(registrations, { id: label }).set({ registrantId: to });
+  await context.db
+    .update(registrations, { id: label })
+    .set({ registrantId: to });
 
   await context.db.update(domains, { id: node }).set({ registrantId: to });
 
   // TODO: log Event
 }
 
-ponder.on("BaseRegistrar:NameRegistered", handleNameRegistered);
-ponder.on("BaseRegistrar:NameRenewed", handleNameRenewed);
-ponder.on("BaseRegistrar:Transfer", handleNameTransferred);
+function initEthRegistrarHandlers() {
+  console.log("Indexing Ethereum ENS");
+  ponder.on("BaseRegistrar:NameRegistered", handleNameRegistered);
+  ponder.on("BaseRegistrar:NameRenewed", handleNameRenewed);
+  ponder.on("BaseRegistrar:Transfer", handleNameTransferred);
 
-ponder.on("EthRegistrarControllerOld:NameRegistered", handleNameRegisteredByControllerOld);
-ponder.on("EthRegistrarControllerOld:NameRenewed", handleNameRenewedByController);
+  ponder.on(
+    "EthRegistrarControllerOld:NameRegistered",
+    handleNameRegisteredByControllerOld
+  );
+  ponder.on(
+    "EthRegistrarControllerOld:NameRenewed",
+    handleNameRenewedByController
+  );
 
-ponder.on("EthRegistrarController:NameRegistered", handleNameRegisteredByController);
-ponder.on("EthRegistrarController:NameRenewed", handleNameRenewedByController);
+  ponder.on(
+    "EthRegistrarController:NameRegistered",
+    handleNameRegisteredByController
+  );
+  ponder.on(
+    "EthRegistrarController:NameRenewed",
+    handleNameRenewedByController
+  );
+}
+
+export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
+  attachHandlers: initEthRegistrarHandlers,
+};
