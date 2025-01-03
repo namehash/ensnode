@@ -2,7 +2,11 @@ import { type Context, type Event, ponder } from "ponder:registry";
 import { resolvers } from "ponder:schema";
 import { domains } from "ponder:schema";
 import { type Hex, zeroAddress } from "viem";
-import { NAMEHASH_ZERO, encodeLabelhash, makeSubnodeNamehash } from "../../../lib/ens-helpers";
+import {
+  NAMEHASH_ZERO,
+  encodeLabelhash,
+  makeSubnodeNamehash,
+} from "../../../lib/ens-helpers";
 import { makeResolverId } from "../../../lib/ids";
 import { upsertAccount } from "../../../lib/upserts";
 import { PonderEnsIndexingHandlerModule } from "../../types";
@@ -16,13 +20,18 @@ async function isDomainMigrated(context: Context, node: Hex) {
 
 function isDomainEmpty(domain: typeof domains.$inferSelect) {
   return (
-    domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
+    domain.resolverId === null &&
+    domain.ownerId === zeroAddress &&
+    domain.subdomainCount === 0
   );
 }
 
 // a more accurate name for the following function
 // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64
-async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
+async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+  context: Context,
+  node: Hex
+) {
   const domain = await context.db.find(domains, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
@@ -33,7 +42,10 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
       .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
 
     // recurse to parent
-    return recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.parentId);
+    return recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+      context,
+      domain.parentId
+    );
   }
 }
 
@@ -83,7 +95,9 @@ const _handleNewOwner =
     let domain = await context.db.find(domains, { id: subnode });
     if (domain) {
       // if the domain already exists, this is just an update of the owner record.
-      await context.db.update(domains, { id: domain.id }).set({ ownerId: owner, isMigrated });
+      await context.db
+        .update(domains, { id: domain.id })
+        .set({ ownerId: owner, isMigrated });
     } else {
       // otherwise create the domain
       domain = await context.db.insert(domains).values({
@@ -109,12 +123,17 @@ const _handleNewOwner =
       const labelName = encodeLabelhash(label);
       const name = parent?.name ? `${labelName}.${parent.name}` : labelName;
 
-      await context.db.update(domains, { id: domain.id }).set({ name, labelName });
+      await context.db
+        .update(domains, { id: domain.id })
+        .set({ name, labelName });
     }
 
     // garbage collect newly 'empty' domain iff necessary
     if (owner === zeroAddress) {
-      await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
+      await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+        context,
+        domain.id
+      );
     }
   };
 
@@ -174,53 +193,53 @@ async function _handleNewResolver({
 }
 
 function initRegistryHandlers() {
-  // // setup on old registry
-  // ponder.on("RegistryOld:setup", async ({ context }) => {
-  //   // ensure we have an account for the zeroAddress
-  //   await upsertAccount(context, zeroAddress);
+  // setup on old registry
+  ponder.on(ns("RegistryOld:setup"), async ({ context }) => {
+    // ensure we have an account for the zeroAddress
+    await upsertAccount(context, zeroAddress);
 
-  //   // ensure we have a root Domain, owned by the zeroAddress
-  //   await context.db.insert(domains).values({
-  //     id: NAMEHASH_ZERO,
-  //     ownerId: zeroAddress,
-  //     createdAt: 0n,
-  //     isMigrated: false,
-  //   });
-  // });
+    // ensure we have a root Domain, owned by the zeroAddress
+    await context.db.insert(domains).values({
+      id: NAMEHASH_ZERO,
+      ownerId: zeroAddress,
+      createdAt: 0n,
+      isMigrated: false,
+    });
+  });
 
-  // // old registry functions are proxied to the current handlers
-  // // iff the domain has not yet been migrated
-  // ponder.on("RegistryOld:NewOwner", async ({ context, event }) => {
-  //   const node = makeSubnodeNamehash(event.args.node, event.args.label);
-  //   const isMigrated = await isDomainMigrated(context, node);
-  //   if (isMigrated) return;
-  //   return _handleNewOwner(false)({ context, event });
-  // });
+  // old registry functions are proxied to the current handlers
+  // iff the domain has not yet been migrated
+  ponder.on(ns("RegistryOld:NewOwner"), async ({ context, event }) => {
+    const node = makeSubnodeNamehash(event.args.node, event.args.label);
+    const isMigrated = await isDomainMigrated(context, node);
+    if (isMigrated) return;
+    return _handleNewOwner(false)({ context, event });
+  });
 
-  // ponder.on("RegistryOld:NewResolver", async ({ context, event }) => {
-  //   // NOTE: the subgraph makes an exception for the root node here
-  //   // but i don't know that that's necessary, as in ponder our root node starts out
-  //   // unmigrated and once the NewOwner event is emitted by the new registry,
-  //   // the root will be considered migrated
-  //   // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L246
+  ponder.on(ns("RegistryOld:NewResolver"), async ({ context, event }) => {
+    // NOTE: the subgraph makes an exception for the root node here
+    // but i don't know that that's necessary, as in ponder our root node starts out
+    // unmigrated and once the NewOwner event is emitted by the new registry,
+    // the root will be considered migrated
+    // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L246
 
-  //   // otherwise, only handle iff not migrated
-  //   const isMigrated = await isDomainMigrated(context, event.args.node);
-  //   if (isMigrated) return;
-  //   return _handleNewResolver({ context, event });
-  // });
+    // otherwise, only handle iff not migrated
+    const isMigrated = await isDomainMigrated(context, event.args.node);
+    if (isMigrated) return;
+    return _handleNewResolver({ context, event });
+  });
 
-  // ponder.on("RegistryOld:NewTTL", async ({ context, event }) => {
-  //   const isMigrated = await isDomainMigrated(context, event.args.node);
-  //   if (isMigrated) return;
-  //   return _handleNewTTL({ context, event });
-  // });
+  ponder.on(ns("RegistryOld:NewTTL"), async ({ context, event }) => {
+    const isMigrated = await isDomainMigrated(context, event.args.node);
+    if (isMigrated) return;
+    return _handleNewTTL({ context, event });
+  });
 
-  // ponder.on("RegistryOld:Transfer", async ({ context, event }) => {
-  //   const isMigrated = await isDomainMigrated(context, event.args.node);
-  //   if (isMigrated) return;
-  //   return _handleTransfer({ context, event });
-  // });
+  ponder.on(ns("RegistryOld:Transfer"), async ({ context, event }) => {
+    const isMigrated = await isDomainMigrated(context, event.args.node);
+    if (isMigrated) return;
+    return _handleTransfer({ context, event });
+  });
 
   ponder.on(ns("Registry:NewOwner"), _handleNewOwner(true));
   ponder.on(ns("Registry:NewResolver"), _handleNewResolver);

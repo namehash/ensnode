@@ -147,7 +147,6 @@ async function handleNameTransferred({
 }
 
 function initEthRegistrarHandlers() {
-  console.log("Indexing Ethereum ENS");
   ponder.on(ns("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(ns("BaseRegistrar:NameRenewed"), handleNameRenewed);
   ponder.on(ns("BaseRegistrar:Transfer"), handleNameTransferred);

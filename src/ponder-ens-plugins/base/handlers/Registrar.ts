@@ -2,7 +2,7 @@ import { type Context, type Event, EventNames, ponder } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
 import type { Hex } from "viem";
 import {
-  NAMEHASH_ETH,
+  NAMEHASH_BASE_ETH,
   isLabelValid,
   makeSubnodeNamehash,
   tokenIdToLabel,
@@ -12,7 +12,7 @@ import { PonderEnsIndexingHandlerModule } from "../../types";
 import { type NsType, ns } from "../ponder.config";
 
 // all nodes referenced by EthRegistrar are parented to .eth
-const ROOT_NODE = NAMEHASH_ETH;
+const ROOT_NODE = NAMEHASH_BASE_ETH;
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
 async function handleNameRegistered({
@@ -40,6 +40,8 @@ async function handleNameRegistered({
     registrantId: owner,
     labelName,
   });
+
+  console.log('handleNameRegistered', { id, owner, expires, label, node, labelName });
 
   await context.db.update(domains, { id: node }).set({
     registrantId: owner,

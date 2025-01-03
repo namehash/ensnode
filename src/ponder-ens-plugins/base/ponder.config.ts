@@ -19,7 +19,7 @@ import { RegistrarController } from "./abis/RegistrarController";
 import { Registry } from "./abis/Registry";
 
 // just for testing...
-const END_BLOCK = 20_200_200;
+const END_BLOCK = 24_559_294;
 
 export const ns = createNs(base.id);
 
