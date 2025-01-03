@@ -9,7 +9,6 @@ import {
   setup,
 } from "../../../handlers/Registry";
 import { makeSubnodeNamehash } from "../../../lib/ens-helpers";
-import { PonderEnsIndexingHandlerModule } from "../../types";
 import { ns } from "../ponder.config";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
@@ -18,7 +17,7 @@ async function isDomainMigrated(context: Context, node: Hex) {
   return domain?.isMigrated ?? false;
 }
 
-function initRegistryHandlers() {
+export default function () {
   ponder.on(ns("RegistryOld:setup"), setup);
 
   // old registry functions are proxied to the current handlers
@@ -60,7 +59,3 @@ function initRegistryHandlers() {
   ponder.on(ns("Registry:NewTTL"), handleNewTTL);
   ponder.on(ns("Registry:Transfer"), handleTransfer);
 }
-
-export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
-  attachHandlers: initRegistryHandlers,
-};

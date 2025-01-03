@@ -3,8 +3,8 @@ import { domains, resolvers } from "ponder:schema";
 import { base, mainnet } from "viem/chains";
 import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
+import { NsReturnType } from "../lib/plugins";
 import { upsertAccount, upsertResolver } from "../lib/upserts";
-import { NsReturnType } from "../ponder-ens-plugins/chain";
 
 type NsType<T extends string> = NsReturnType<T, typeof mainnet.id>;
 

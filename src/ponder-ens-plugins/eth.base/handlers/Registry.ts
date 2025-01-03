@@ -6,17 +6,12 @@ import {
   handleTransfer,
   setup,
 } from "../../../handlers/Registry";
-import { PonderEnsIndexingHandlerModule } from "../../types";
 import { ns } from "../ponder.config";
 
-function initRegistryHandlers() {
+export default function () {
   ponder.on(ns("Registry:setup"), setup);
   ponder.on(ns("Registry:NewOwner"), handleNewOwner(true));
   ponder.on(ns("Registry:NewResolver"), handleNewResolver);
   ponder.on(ns("Registry:NewTTL"), handleNewTTL);
   ponder.on(ns("Registry:Transfer"), handleTransfer);
 }
-
-export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
-  attachHandlers: initRegistryHandlers,
-};

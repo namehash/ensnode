@@ -5,8 +5,8 @@ import { type Hex, zeroAddress } from "viem";
 import { mainnet } from "viem/chains";
 import { NAMEHASH_ZERO, encodeLabelhash, makeSubnodeNamehash } from "../lib/ens-helpers";
 import { makeResolverId } from "../lib/ids";
+import { NsReturnType } from "../lib/plugins";
 import { upsertAccount } from "../lib/upserts";
-import { NsReturnType } from "../ponder-ens-plugins/chain";
 
 type NsType<T extends string> = NsReturnType<T, typeof mainnet.id>;
 

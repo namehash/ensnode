@@ -1,8 +1,8 @@
-import { factory, mergeAbis } from "ponder";
+import { createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
 import { mainnet } from "viem/chains";
-import { NsReturnType, createNs } from "../chain";
+import { createNs } from "../../lib/plugins";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";
@@ -10,9 +10,6 @@ import { LegacyPublicResolver } from "./abis/LegacyPublicResolver";
 import { NameWrapper } from "./abis/NameWrapper";
 import { Registry } from "./abis/Registry";
 import { Resolver } from "./abis/Resolver";
-
-// just for testing...
-const END_BLOCK = 12_000_000;
 
 const RESOLVER_ABI = mergeAbis([LegacyPublicResolver, Resolver]);
 
@@ -26,9 +23,7 @@ const NAME_WRAPPER_ADDRESS = "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401";
 
 export const ns = createNs(mainnet.id);
 
-export type NsType<T extends string> = NsReturnType<T, typeof mainnet.id>;
-
-export const config = Object.freeze({
+export const config = createConfig({
   networks: {
     mainnet: {
       chainId: 1,
@@ -41,14 +36,12 @@ export const config = Object.freeze({
       abi: Registry,
       address: REGISTRY_OLD_ADDRESS,
       startBlock: 3327417,
-      endBlock: END_BLOCK,
     },
     [ns("Registry")]: {
       network: "mainnet",
       abi: Registry,
       address: REGISTRY_ADDRESS,
       startBlock: 9380380,
-      endBlock: END_BLOCK,
     },
     [ns("OldRegistryResolvers")]: {
       network: "mainnet",
@@ -59,7 +52,6 @@ export const config = Object.freeze({
         parameter: "resolver",
       }),
       startBlock: 9380380,
-      endBlock: END_BLOCK,
     },
     [ns("Resolver")]: {
       network: "mainnet",
@@ -70,35 +62,40 @@ export const config = Object.freeze({
         parameter: "resolver",
       }),
       startBlock: 9380380,
-      endBlock: END_BLOCK,
     },
     [ns("BaseRegistrar")]: {
       network: "mainnet",
       abi: BaseRegistrar,
       address: BASE_REGISTRAR_ADDRESS,
       startBlock: 9380410,
-      endBlock: END_BLOCK,
     },
     [ns("EthRegistrarControllerOld")]: {
       network: "mainnet",
       abi: EthRegistrarControllerOld,
       address: ETH_REGISTRAR_CONTROLLER_OLD_ADDRESS,
       startBlock: 9380471,
-      endBlock: END_BLOCK,
     },
     [ns("EthRegistrarController")]: {
       network: "mainnet",
       abi: EthRegistrarController,
       address: ETH_REGISTRAR_CONTROLLER_ADDRESS,
-      startBlock: Math.min(16925618, END_BLOCK),
-      endBlock: END_BLOCK,
+      startBlock: 16925618,
     },
     [ns("NameWrapper")]: {
       network: "mainnet",
       abi: NameWrapper,
       address: NAME_WRAPPER_ADDRESS,
-      startBlock: Math.min(16925608, END_BLOCK),
-      endBlock: END_BLOCK,
+      startBlock: 16925608,
     },
   },
-} as const);
+});
+
+export async function activate() {
+  const ponderIndexingModules = await Promise.all([
+    import("./handlers/Registry"),
+    import("./handlers/EthRegistrar"),
+    import("./handlers/Resolver"),
+  ]);
+
+  ponderIndexingModules.map((m) => m.default());
+}

@@ -8,8 +8,9 @@ import {
   tokenIdToLabel,
 } from "../../../lib/ens-helpers";
 import { upsertAccount, upsertRegistration } from "../../../lib/upserts";
-import { PonderEnsIndexingHandlerModule } from "../../types";
-import { type NsType, ns } from "../ponder.config";
+import { ns } from "../ponder.config";
+
+type NsType<T extends string> = ReturnType<typeof ns<T>>;
 
 // all nodes referenced by EthRegistrar are parented to .eth
 const ROOT_NODE = NAMEHASH_ETH;
@@ -146,7 +147,7 @@ async function handleNameTransferred({
   // TODO: log Event
 }
 
-function initEthRegistrarHandlers() {
+export default function () {
   ponder.on(ns("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(ns("BaseRegistrar:NameRenewed"), handleNameRenewed);
   ponder.on(ns("BaseRegistrar:Transfer"), handleNameTransferred);
@@ -157,7 +158,3 @@ function initEthRegistrarHandlers() {
   ponder.on(ns("EthRegistrarController:NameRegistered"), handleNameRegisteredByController);
   ponder.on(ns("EthRegistrarController:NameRenewed"), handleNameRenewedByController);
 }
-
-export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
-  attachHandlers: initEthRegistrarHandlers,
-};

@@ -13,10 +13,9 @@ import {
   handleTextChanged,
   handleVersionChanged,
 } from "../../../handlers/Resolver";
-import { PonderEnsIndexingHandlerModule } from "../../types";
 import { ns } from "../ponder.config";
 
-export function initResolverHandlers() {
+export default function () {
   // New registry handlers
   ponder.on(ns("Resolver:AddrChanged"), handleAddrChanged);
   ponder.on(ns("Resolver:AddressChanged"), handleAddressChanged);
@@ -31,7 +30,3 @@ export function initResolverHandlers() {
   ponder.on(ns("Resolver:DNSRecordDeleted"), handleDNSRecordDeleted);
   ponder.on(ns("Resolver:DNSZonehashChanged"), handleDNSZonehashChanged);
 }
-
-export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
-  attachHandlers: initResolverHandlers,
-};
