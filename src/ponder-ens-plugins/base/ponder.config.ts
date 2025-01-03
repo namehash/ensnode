@@ -17,9 +17,10 @@ import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { L2Resolver } from "./abis/L2Resolver";
 import { RegistrarController } from "./abis/RegistrarController";
 import { Registry } from "./abis/Registry";
+import { EarlyAccessRegistrarController } from "./abis/EARegistrarController";
 
 // just for testing...
-const END_BLOCK = 24_559_294;
+const END_BLOCK = undefined;
 
 export const ns = createNs(base.id);
 
@@ -33,6 +34,9 @@ const BASE_REGISTRAR_START_BLOCK = 17571486;
 
 const REGISTRAR_CONTROLLER_ADDRESS = '0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5';
 const REGISTRAR_CONTROLLER_START_BLOCK = 18619035;
+
+const EA_REGISTRAR_CONTROLLER_ADDRESS = '0xd3e6775ed9b7dc12b205c8e608dc3767b9e5efda';
+const EA_REGISTRAR_CONTROLLER_START_BLOCK = 17575699;
 
 const REVERSE_REGISTRAR_ADDRESS = '0x79ea96012eea67a83431f1701b3dff7e37f9e282';
 const REVERSE_REGISTRAR_START_BLOCK = 17571485;
@@ -77,14 +81,21 @@ export const config = Object.freeze({
       network: "base",
       abi: BaseRegistrar,
       address: BASE_REGISTRAR_ADDRESS,
-      startBlock: 9380410,
+      startBlock: BASE_REGISTRAR_START_BLOCK,
+      endBlock: END_BLOCK,
+    },
+    [ns("EARegistrarController")]: {
+      network: "base",
+      abi: EarlyAccessRegistrarController,
+      address: EA_REGISTRAR_CONTROLLER_ADDRESS,
+      startBlock: EA_REGISTRAR_CONTROLLER_START_BLOCK,
       endBlock: END_BLOCK,
     },
     [ns("RegistrarController")]: {
       network: "base",
       abi: RegistrarController,
       address: REGISTRAR_CONTROLLER_ADDRESS,
-      startBlock: Math.min(REGISTRAR_CONTROLLER_START_BLOCK, END_BLOCK),
+      startBlock: REGISTRAR_CONTROLLER_START_BLOCK,
       endBlock: END_BLOCK,
     },
   },

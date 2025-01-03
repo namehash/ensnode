@@ -167,6 +167,11 @@ function initEthRegistrarHandlers() {
     ns("RegistrarController:NameRenewed"),
     handleNameRenewedByController
   );
+
+  ponder.on(
+    ns("EARegistrarController:NameRegistered"),
+    handleNameRegisteredByController
+  );
 }
 
 export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
