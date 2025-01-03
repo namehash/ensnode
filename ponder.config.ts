@@ -11,7 +11,7 @@ console.log({
     ...baseConfig.contracts,
     ...ethereumConfig.contracts,
   },
-})
+});
 
 export default createConfig({
   networks: {
