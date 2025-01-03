@@ -2,13 +2,12 @@ import { type Context, type Event } from "ponder:registry";
 import { resolvers } from "ponder:schema";
 import { domains } from "ponder:schema";
 import { type Hex, zeroAddress } from "viem";
-import { mainnet } from "viem/chains";
 import { NAMEHASH_ZERO, encodeLabelhash, makeSubnodeNamehash } from "../lib/ens-helpers";
 import { makeResolverId } from "../lib/ids";
 import { NsReturnType } from "../lib/plugins";
 import { upsertAccount } from "../lib/upserts";
 
-type NsType<T extends string> = NsReturnType<T, typeof mainnet.id>;
+type NsType<T extends string> = NsReturnType<T, '/eth'>;
 
 export async function setup({ context }: { context: Context }) {
   // ensure we have an account for the zeroAddress

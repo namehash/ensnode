@@ -2,14 +2,16 @@ import { createConfig, factory } from "ponder";
 import { http, getAbiItem } from "viem";
 import { base } from "viem/chains";
 
-import { createNs } from "../../lib/plugins";
+import { createNs, NsReturnType } from "../../lib/plugins";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EarlyAccessRegistrarController } from "./abis/EARegistrarController";
 import { L2Resolver } from "./abis/L2Resolver";
 import { RegistrarController } from "./abis/RegistrarController";
 import { Registry } from "./abis/Registry";
 
-export const ns = createNs(base.id);
+const rootDomain = '/eth/base' as const
+export const ns = createNs(rootDomain);
+export type NsType<T extends string> = NsReturnType<T, typeof rootDomain>;
 
 const REGISTRY_ADDRESS = "0xb94704422c2a1e396835a571837aa5ae53285a95";
 const REGISTRY_START_BLOCK = 17571480;

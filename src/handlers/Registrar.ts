@@ -6,7 +6,7 @@ import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/ens-he
 import { NsReturnType } from "../lib/plugins";
 import { upsertAccount, upsertRegistration } from "../lib/upserts";
 
-type NsType<T extends string> = NsReturnType<T, typeof mainnet.id>;
+type NsType<T extends string> = NsReturnType<T, "/eth">;
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 

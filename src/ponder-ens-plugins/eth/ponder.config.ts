@@ -1,8 +1,7 @@
 import { createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
-import { mainnet } from "viem/chains";
-import { createNs } from "../../lib/plugins";
+import { createNs, NsReturnType } from "../../lib/plugins";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";
@@ -16,7 +15,9 @@ const RESOLVER_ABI = mergeAbis([LegacyPublicResolver, Resolver]);
 const REGISTRY_OLD_ADDRESS = "0x314159265dd8dbb310642f98f50c066173c1259b";
 const REGISTRY_ADDRESS = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
-export const ns = createNs(mainnet.id);
+const rootDomain = '/eth' as const
+export const ns = createNs(rootDomain);
+export type NsType<T extends string> = NsReturnType<T, typeof rootDomain>;
 
 export const config = createConfig({
   networks: {

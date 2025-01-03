@@ -21,6 +21,6 @@ export default ((): AllConfigs => {
       activateBase();
       return baseConfig as AllConfigs;
     default:
-      throw new Error(`Unsupported ENS_ROOT_NODE: ${process.env.INDEX_ENS_ROOT_NODE}`);
+      throw new Error(`Unsupported INDEX_ENS_ROOT_NODE: ${process.env.INDEX_ENS_ROOT_NODE}`);
   }
 })();
