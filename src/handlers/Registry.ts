@@ -14,7 +14,7 @@ export async function setup({ context }: { context: Context }) {
   // ensure we have an account for the zeroAddress
   await upsertAccount(context, zeroAddress);
 
-  // ensure we have a root Domain, owned by the zeroAddress
+  // ensure we have a root Domain, owned by the zeroAddress, that is default not migrated
   await context.db.insert(domains).values({
     id: NAMEHASH_ZERO,
     ownerId: zeroAddress,

@@ -56,16 +56,6 @@ export const config = createConfig({
       }),
       startBlock: L2_RESOLVER_START_BLOCK,
     },
-    ["eth.base.Resolver"]: {
-      network: "base",
-      abi: L2Resolver,
-      address: factory({
-        address: L2_RESOLVER_ADDRESS,
-        event: getAbiItem({ abi: Registry, name: "NewResolver" }),
-        parameter: "resolver",
-      }),
-      startBlock: L2_RESOLVER_START_BLOCK,
-    },
     [ns("BaseRegistrar")]: {
       network: "base",
       abi: BaseRegistrar,

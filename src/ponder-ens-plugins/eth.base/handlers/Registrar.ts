@@ -149,8 +149,7 @@ export default function () {
   ponder.on(ns("BaseRegistrar:NameRenewed"), handleNameRenewed);
   ponder.on(ns("BaseRegistrar:Transfer"), handleNameTransferred);
 
+  ponder.on(ns("EARegistrarController:NameRegistered"), handleNameRegisteredByController);
   ponder.on(ns("RegistrarController:NameRegistered"), handleNameRegisteredByController);
   ponder.on(ns("RegistrarController:NameRenewed"), handleNameRenewedByController);
-
-  ponder.on(ns("EARegistrarController:NameRegistered"), handleNameRegisteredByController);
 }
