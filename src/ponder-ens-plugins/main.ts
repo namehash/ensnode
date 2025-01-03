@@ -1,5 +1,5 @@
-import basePlugin from "./base/ponder.indexing";
-import ethereumPlugin from "./ethereum/ponder.indexing";
+import basePlugin from "./eth.base/ponder.indexing";
+import ethereumPlugin from "./eth/ponder.indexing";
 
 /**
  * Main entry point for the Ponder ENS plugins.

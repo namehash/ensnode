@@ -41,7 +41,11 @@ async function handleNameRegistered({
     labelName,
   });
 
-  console.log('handleNameRegistered', { id, owner, expires, label, node, labelName });
+  console.log('handleNameRegistered', { event: {
+    block: event.block.number,
+    tx: event.transaction.hash,
+    logIndex: event.log.logIndex,
+  }, id, owner, expires, label, node, labelName });
 
   await context.db.update(domains, { id: node }).set({
     registrantId: owner,
@@ -154,7 +158,7 @@ async function handleNameTransferred({
   // TODO: log Event
 }
 
-function initEthRegistrarHandlers() {
+function initBaseRegistrarHandlers() {
   ponder.on(ns("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(ns("BaseRegistrar:NameRenewed"), handleNameRenewed);
   ponder.on(ns("BaseRegistrar:Transfer"), handleNameTransferred);
@@ -175,5 +179,5 @@ function initEthRegistrarHandlers() {
 }
 
 export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
-  attachHandlers: initEthRegistrarHandlers,
+  attachHandlers: initBaseRegistrarHandlers,
 };

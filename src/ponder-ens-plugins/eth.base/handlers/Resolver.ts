@@ -251,6 +251,9 @@ export function initResolverHandlers() {
   ponder.on(ns("Resolver:DNSRecordChanged"), _handleDNSRecordChanged);
   ponder.on(ns("Resolver:DNSRecordDeleted"), _handleDNSRecordDeleted);
   ponder.on(ns("Resolver:DNSZonehashChanged"), _handleDNSZonehashChanged);
+
+  // FIXME: make sure to use domain name in the indexing handler name
+  // ponder.on("eth.base.Resolver:AddrChanged", _handleAddrChanged);
 }
 
 export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {

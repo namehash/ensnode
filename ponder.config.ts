@@ -1,6 +1,6 @@
 import { createConfig } from "ponder";
-import { config as baseConfig } from "./src/ponder-ens-plugins/base/ponder.config";
-import { config as ethereumConfig } from "./src/ponder-ens-plugins/ethereum/ponder.config";
+import { config as baseConfig } from "./src/ponder-ens-plugins/eth.base/ponder.config";
+import { config as ethereumConfig } from "./src/ponder-ens-plugins/eth/ponder.config";
 
 console.log({
   networks: {
