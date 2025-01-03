@@ -6,7 +6,7 @@ import { NAMEHASH_ZERO, encodeLabelhash, makeSubnodeNamehash } from "../../../li
 import { makeResolverId } from "../../../lib/ids";
 import { upsertAccount } from "../../../lib/upserts";
 import { PonderEnsIndexingHandlerModule } from "../../types";
-import { NsType, ns } from "../ponder.config";
+import { type NsType, ns } from "../ponder.config";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {

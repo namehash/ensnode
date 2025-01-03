@@ -1,4 +1,4 @@
-import { type Context, type Event, ponder } from "ponder:registry";
+import { type Context, type Event, EventNames, ponder } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
 import type { Hex } from "viem";
 import {
@@ -50,28 +50,18 @@ async function handleNameRegistered({
   // TODO: log Event
 }
 
-async function handleNameRegisteredByControllerOld({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<NsType<"EthRegistrarControllerOld:NameRegistered">>;
-}) {
-  return await setNamePreimage(context, event.args.name, event.args.label, event.args.cost);
-}
-
 async function handleNameRegisteredByController({
   context,
   event,
 }: {
   context: Context;
-  event: Event<NsType<"EthRegistrarController:NameRegistered">>;
+  event: Event<NsType<"RegistrarController:NameRegistered">>;
 }) {
   return await setNamePreimage(
     context,
     event.args.name,
     event.args.label,
-    event.args.baseCost + event.args.premium,
+    null
   );
 }
 
@@ -80,14 +70,22 @@ async function handleNameRenewedByController({
   event,
 }: {
   context: Context;
-  event:
-    | Event<NsType<"EthRegistrarController:NameRenewed">>
-    | Event<NsType<"EthRegistrarControllerOld:NameRenewed">>;
+  event: Event<NsType<"RegistrarController:NameRenewed">>;
 }) {
-  return await setNamePreimage(context, event.args.name, event.args.label, event.args.cost);
+  return await setNamePreimage(
+    context,
+    event.args.name,
+    event.args.label,
+    null
+  );
 }
 
-async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
+async function setNamePreimage(
+  context: Context,
+  name: string,
+  label: Hex,
+  cost: bigint | null
+) {
   if (!isLabelValid(name)) return;
 
   const node = makeSubnodeNamehash(ROOT_NODE, label);
@@ -95,10 +93,14 @@ async function setNamePreimage(context: Context, name: string, label: Hex, cost:
   if (!domain) throw new Error("domain expected");
 
   if (domain.labelName !== name) {
-    await context.db.update(domains, { id: node }).set({ labelName: name, name: `${name}.eth` });
+    await context.db
+      .update(domains, { id: node })
+      .set({ labelName: name, name: `${name}.eth` });
   }
 
-  await context.db.update(registrations, { id: label }).set({ labelName: name, cost });
+  await context.db
+    .update(registrations, { id: label })
+    .set({ labelName: name, cost });
 }
 
 async function handleNameRenewed({
@@ -113,7 +115,9 @@ async function handleNameRenewed({
   const label = tokenIdToLabel(id);
   const node = makeSubnodeNamehash(ROOT_NODE, label);
 
-  await context.db.update(registrations, { id: label }).set({ expiryDate: expires });
+  await context.db
+    .update(registrations, { id: label })
+    .set({ expiryDate: expires });
 
   await context.db
     .update(domains, { id: node })
@@ -129,7 +133,7 @@ async function handleNameTransferred({
   context: Context;
   event: Event<NsType<"BaseRegistrar:Transfer">>;
 }) {
-  const { tokenId, from, to } = event.args;
+  const { id: tokenId, from, to } = event.args;
 
   await upsertAccount(context, to);
 
@@ -139,7 +143,9 @@ async function handleNameTransferred({
   const registration = await context.db.find(registrations, { id: label });
   if (!registration) return;
 
-  await context.db.update(registrations, { id: label }).set({ registrantId: to });
+  await context.db
+    .update(registrations, { id: label })
+    .set({ registrantId: to });
 
   await context.db.update(domains, { id: node }).set({ registrantId: to });
 
@@ -147,16 +153,18 @@ async function handleNameTransferred({
 }
 
 function initEthRegistrarHandlers() {
-  console.log("Indexing Ethereum ENS");
   ponder.on(ns("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(ns("BaseRegistrar:NameRenewed"), handleNameRenewed);
   ponder.on(ns("BaseRegistrar:Transfer"), handleNameTransferred);
 
-  ponder.on(ns("EthRegistrarControllerOld:NameRegistered"), handleNameRegisteredByControllerOld);
-  ponder.on(ns("EthRegistrarControllerOld:NameRenewed"), handleNameRenewedByController);
-
-  ponder.on(ns("EthRegistrarController:NameRegistered"), handleNameRegisteredByController);
-  ponder.on(ns("EthRegistrarController:NameRenewed"), handleNameRenewedByController);
+  ponder.on(
+    ns("RegistrarController:NameRegistered"),
+    handleNameRegisteredByController
+  );
+  ponder.on(
+    ns("RegistrarController:NameRenewed"),
+    handleNameRenewedByController
+  );
 }
 
 export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {

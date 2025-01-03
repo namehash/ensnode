@@ -1,3 +1,4 @@
+import basePlugin from "./base/ponder.indexing";
 import ethereumPlugin from "./ethereum/ponder.indexing";
 
 /**
@@ -5,7 +6,7 @@ import ethereumPlugin from "./ethereum/ponder.indexing";
  * It tries to activate all the enlisted plugins.
  */
 function main() {
-  const plugins = [ethereumPlugin];
+  const plugins = [basePlugin, ethereumPlugin];
 
   for (const plugin of plugins) {
     if (plugin.canActivate) {

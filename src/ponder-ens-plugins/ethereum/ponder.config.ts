@@ -1,6 +1,8 @@
 import { factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
+import { mainnet } from "viem/chains";
+import { NsReturnType, createNs } from "../chain";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";
@@ -18,11 +20,13 @@ const REGISTRY_OLD_ADDRESS = "0x314159265dd8dbb310642f98f50c066173c1259b";
 const REGISTRY_ADDRESS = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
 const BASE_REGISTRAR_ADDRESS = "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85";
-const ETH_REGISTRAR_CONTROLLER_OLD_ADDRESS =
-  "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5";
-const ETH_REGISTRAR_CONTROLLER_ADDRESS =
-  "0x253553366Da8546fC250F225fe3d25d0C782303b";
+const ETH_REGISTRAR_CONTROLLER_OLD_ADDRESS = "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5";
+const ETH_REGISTRAR_CONTROLLER_ADDRESS = "0x253553366Da8546fC250F225fe3d25d0C782303b";
 const NAME_WRAPPER_ADDRESS = "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401";
+
+export const ns = createNs(mainnet.id);
+
+export type NsType<T extends string> = NsReturnType<T, typeof mainnet.id>;
 
 export const config = Object.freeze({
   networks: {
@@ -32,21 +36,21 @@ export const config = Object.freeze({
     },
   },
   contracts: {
-    RegistryOld: {
+    [ns("RegistryOld")]: {
       network: "mainnet",
       abi: Registry,
       address: REGISTRY_OLD_ADDRESS,
       startBlock: 3327417,
       endBlock: END_BLOCK,
     },
-    Registry: {
+    [ns("Registry")]: {
       network: "mainnet",
       abi: Registry,
       address: REGISTRY_ADDRESS,
       startBlock: 9380380,
       endBlock: END_BLOCK,
     },
-    OldRegistryResolvers: {
+    [ns("OldRegistryResolvers")]: {
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
@@ -57,7 +61,7 @@ export const config = Object.freeze({
       startBlock: 9380380,
       endBlock: END_BLOCK,
     },
-    Resolver: {
+    [ns("Resolver")]: {
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
@@ -68,28 +72,28 @@ export const config = Object.freeze({
       startBlock: 9380380,
       endBlock: END_BLOCK,
     },
-    BaseRegistrar: {
+    [ns("BaseRegistrar")]: {
       network: "mainnet",
       abi: BaseRegistrar,
       address: BASE_REGISTRAR_ADDRESS,
       startBlock: 9380410,
       endBlock: END_BLOCK,
     },
-    EthRegistrarControllerOld: {
+    [ns("EthRegistrarControllerOld")]: {
       network: "mainnet",
       abi: EthRegistrarControllerOld,
       address: ETH_REGISTRAR_CONTROLLER_OLD_ADDRESS,
       startBlock: 9380471,
       endBlock: END_BLOCK,
     },
-    EthRegistrarController: {
+    [ns("EthRegistrarController")]: {
       network: "mainnet",
       abi: EthRegistrarController,
       address: ETH_REGISTRAR_CONTROLLER_ADDRESS,
       startBlock: Math.min(16925618, END_BLOCK),
       endBlock: END_BLOCK,
     },
-    NameWrapper: {
+    [ns("NameWrapper")]: {
       network: "mainnet",
       abi: NameWrapper,
       address: NAME_WRAPPER_ADDRESS,
