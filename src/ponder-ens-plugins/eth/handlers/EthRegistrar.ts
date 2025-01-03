@@ -1,163 +1,43 @@
-import { type Context, type Event, ponder } from "ponder:registry";
-import { domains, registrations } from "ponder:schema";
-import type { Hex } from "viem";
-import {
-  NAMEHASH_ETH,
-  isLabelValid,
-  makeSubnodeNamehash,
-  tokenIdToLabel,
-} from "../../../lib/ens-helpers";
-import { upsertAccount, upsertRegistration } from "../../../lib/upserts";
-import { PonderEnsIndexingHandlerModule } from "../../types";
-import { type NsType, ns } from "../ponder.config";
+import { ponder } from "ponder:registry";
+import { makeRegistryHandlers } from "../../../handlers/Registrar";
+import { NAMEHASH_ETH } from "../../../lib/ens-helpers";
+import { ns } from "../ponder.config";
 
-// all nodes referenced by EthRegistrar are parented to .eth
-const ROOT_NODE = NAMEHASH_ETH;
-const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
+const {
+  handleNameRegistered,
+  handleNameRegisteredByController,
+  handleNameRenewedByController,
+  handleNameRenewed,
+  handleNameTransferred,
+} = makeRegistryHandlers(NAMEHASH_ETH);
 
-async function handleNameRegistered({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<NsType<"BaseRegistrar:NameRegistered">>;
-}) {
-  const { id, owner, expires } = event.args;
-
-  await upsertAccount(context, owner);
-
-  const label = tokenIdToLabel(id);
-  const node = makeSubnodeNamehash(ROOT_NODE, label);
-
-  // TODO: materialze labelName via rainbow tables ala Registry.ts
-  const labelName = undefined;
-
-  await upsertRegistration(context, {
-    id: label,
-    domainId: node,
-    registrationDate: event.block.timestamp,
-    expiryDate: expires,
-    registrantId: owner,
-    labelName,
-  });
-
-  await context.db.update(domains, { id: node }).set({
-    registrantId: owner,
-    expiryDate: expires + GRACE_PERIOD_SECONDS,
-    labelName,
-  });
-
-  // TODO: log Event
-}
-
-async function handleNameRegisteredByControllerOld({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<NsType<"EthRegistrarControllerOld:NameRegistered">>;
-}) {
-  return await setNamePreimage(context, event.args.name, event.args.label, event.args.cost);
-}
-
-async function handleNameRegisteredByController({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<NsType<"EthRegistrarController:NameRegistered">>;
-}) {
-  return await setNamePreimage(
-    context,
-    event.args.name,
-    event.args.label,
-    event.args.baseCost + event.args.premium,
-  );
-}
-
-async function handleNameRenewedByController({
-  context,
-  event,
-}: {
-  context: Context;
-  event:
-    | Event<NsType<"EthRegistrarController:NameRenewed">>
-    | Event<NsType<"EthRegistrarControllerOld:NameRenewed">>;
-}) {
-  return await setNamePreimage(context, event.args.name, event.args.label, event.args.cost);
-}
-
-async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
-  if (!isLabelValid(name)) return;
-
-  const node = makeSubnodeNamehash(ROOT_NODE, label);
-  const domain = await context.db.find(domains, { id: node });
-  if (!domain) throw new Error("domain expected");
-
-  if (domain.labelName !== name) {
-    await context.db.update(domains, { id: node }).set({ labelName: name, name: `${name}.eth` });
-  }
-
-  await context.db.update(registrations, { id: label }).set({ labelName: name, cost });
-}
-
-async function handleNameRenewed({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<NsType<"BaseRegistrar:NameRenewed">>;
-}) {
-  const { id, expires } = event.args;
-
-  const label = tokenIdToLabel(id);
-  const node = makeSubnodeNamehash(ROOT_NODE, label);
-
-  await context.db.update(registrations, { id: label }).set({ expiryDate: expires });
-
-  await context.db
-    .update(domains, { id: node })
-    .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
-
-  // TODO: log Event
-}
-
-async function handleNameTransferred({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<NsType<"BaseRegistrar:Transfer">>;
-}) {
-  const { tokenId, from, to } = event.args;
-
-  await upsertAccount(context, to);
-
-  const label = tokenIdToLabel(tokenId);
-  const node = makeSubnodeNamehash(ROOT_NODE, label);
-
-  const registration = await context.db.find(registrations, { id: label });
-  if (!registration) return;
-
-  await context.db.update(registrations, { id: label }).set({ registrantId: to });
-
-  await context.db.update(domains, { id: node }).set({ registrantId: to });
-
-  // TODO: log Event
-}
-
-function initEthRegistrarHandlers() {
+export default function () {
   ponder.on(ns("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(ns("BaseRegistrar:NameRenewed"), handleNameRenewed);
-  ponder.on(ns("BaseRegistrar:Transfer"), handleNameTransferred);
 
-  ponder.on(ns("EthRegistrarControllerOld:NameRegistered"), handleNameRegisteredByControllerOld);
-  ponder.on(ns("EthRegistrarControllerOld:NameRenewed"), handleNameRenewedByController);
+  ponder.on(ns("BaseRegistrar:Transfer"), async ({ context, event }) => {
+    return await handleNameTransferred({ context, args: event.args });
+  });
 
-  ponder.on(ns("EthRegistrarController:NameRegistered"), handleNameRegisteredByController);
-  ponder.on(ns("EthRegistrarController:NameRenewed"), handleNameRenewedByController);
+  ponder.on(ns("EthRegistrarControllerOld:NameRegistered"), async ({ context, event }) => {
+    // the old registrar controller just had `cost` param
+    return await handleNameRegisteredByController({ context, args: event.args });
+  });
+  ponder.on(ns("EthRegistrarControllerOld:NameRenewed"), async ({ context, event }) => {
+    return await handleNameRenewedByController({ context, args: event.args });
+  });
+
+  ponder.on(ns("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
+    // the new registrar controller uses baseCost + premium to compute cost
+    return await handleNameRegisteredByController({
+      context,
+      args: {
+        ...event.args,
+        cost: event.args.baseCost + event.args.premium,
+      },
+    });
+  });
+  ponder.on(ns("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
+    return await handleNameRenewedByController({ context, args: event.args });
+  });
 }
-
-export const handlerModule: Readonly<PonderEnsIndexingHandlerModule> = {
-  attachHandlers: initEthRegistrarHandlers,
-};
