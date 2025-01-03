@@ -11,6 +11,8 @@ const {
   handleNameTransferred,
 } = makeRegistryHandlers(NAMEHASH_BASE_ETH);
 
+// support NameRegisteredWithRecord ?
+
 export default function () {
   ponder.on(ns("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(ns("BaseRegistrar:NameRenewed"), handleNameRenewed);
@@ -19,40 +21,28 @@ export default function () {
   ponder.on(ns("BaseRegistrar:Transfer"), async ({ context, event }) => {
     return await handleNameTransferred({
       context,
-      args: {
-        ...event.args,
-        tokenId: event.args.id,
-      },
+      args: { ...event.args, tokenId: event.args.id },
     });
   });
 
   ponder.on(ns("EARegistrarController:NameRegistered"), async ({ context, event }) => {
     return handleNameRegisteredByController({
       context,
-      args: {
-        ...event.args,
-        cost: 0n,
-      },
+      args: { ...event.args, cost: 0n },
     });
   });
 
   ponder.on(ns("RegistrarController:NameRegistered"), async ({ context, event }) => {
     return handleNameRegisteredByController({
       context,
-      args: {
-        ...event.args,
-        cost: 0n,
-      },
+      args: { ...event.args, cost: 0n },
     });
   });
 
   ponder.on(ns("RegistrarController:NameRenewed"), async ({ context, event }) => {
     return handleNameRenewedByController({
       context,
-      args: {
-        ...event.args,
-        cost: 0n,
-      },
+      args: { ...event.args, cost: 0n },
     });
   });
 }
