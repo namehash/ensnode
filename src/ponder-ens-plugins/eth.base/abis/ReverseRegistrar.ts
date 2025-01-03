@@ -137,9 +137,7 @@ export const ReverseRegistrar = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "completeOwnershipHandover",
     outputs: [],
     stateMutability: "payable",
@@ -155,9 +153,7 @@ export const ReverseRegistrar = [
   {
     inputs: [],
     name: "defaultResolver",
-    outputs: [
-      { internalType: "contract NameResolver", name: "", type: "address" },
-    ],
+    outputs: [{ internalType: "contract NameResolver", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
@@ -176,9 +172,7 @@ export const ReverseRegistrar = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "ownershipHandoverExpiresAt",
     outputs: [{ internalType: "uint256", name: "result", type: "uint256" }],
     stateMutability: "view",

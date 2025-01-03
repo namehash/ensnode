@@ -359,9 +359,7 @@ export const L2Resolver = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "completeOwnershipHandover",
     outputs: [],
     stateMutability: "payable",
@@ -465,9 +463,7 @@ export const L2Resolver = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "ownershipHandoverExpiresAt",
     outputs: [{ internalType: "uint256", name: "result", type: "uint256" }],
     stateMutability: "view",
@@ -636,9 +632,7 @@ export const L2Resolver = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "reverseRegistrar_", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "reverseRegistrar_", type: "address" }],
     name: "setReverseRegistrar",
     outputs: [],
     stateMutability: "nonpayable",

@@ -7,7 +7,7 @@ import { makeResolverId } from "../lib/ids";
 import { NsReturnType } from "../lib/plugins";
 import { upsertAccount } from "../lib/upserts";
 
-type NsType<T extends string> = NsReturnType<T, '/eth'>;
+type NsType<T extends string> = NsReturnType<T, "/eth">;
 
 export async function setup({ context }: { context: Context }) {
   // ensure we have an account for the zeroAddress

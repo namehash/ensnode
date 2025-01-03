@@ -13,6 +13,6 @@ export type NsReturnType<
   Domain extends EnsRootDomain,
 > = `${Domain}/${ContractName}`;
 
-export const EnsRootDomains = ['/eth', '/eth/base'] as const
+export const EnsRootDomains = ["/eth", "/eth/base"] as const;
 
-export type EnsRootDomain = typeof EnsRootDomains[number]
+export type EnsRootDomain = (typeof EnsRootDomains)[number];

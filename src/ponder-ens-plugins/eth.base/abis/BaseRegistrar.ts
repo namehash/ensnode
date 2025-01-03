@@ -298,9 +298,7 @@ export const BaseRegistrar = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "completeOwnershipHandover",
     outputs: [],
     stateMutability: "payable",
@@ -373,9 +371,7 @@ export const BaseRegistrar = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "ownershipHandoverExpiresAt",
     outputs: [{ internalType: "uint256", name: "result", type: "uint256" }],
     stateMutability: "view",
@@ -505,9 +501,7 @@ export const BaseRegistrar = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "string", name: "collectionURI_", type: "string" },
-    ],
+    inputs: [{ internalType: "string", name: "collectionURI_", type: "string" }],
     name: "setContractURI",
     outputs: [],
     stateMutability: "nonpayable",

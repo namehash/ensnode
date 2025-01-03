@@ -295,9 +295,7 @@ export const EarlyAccessRegistrarController = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "completeOwnershipHandover",
     outputs: [],
     stateMutability: "payable",
@@ -340,9 +338,7 @@ export const EarlyAccessRegistrarController = [
   {
     inputs: [{ internalType: "address", name: "registrant", type: "address" }],
     name: "discountedRegistrants",
-    outputs: [
-      { internalType: "bool", name: "hasRegisteredWithDiscount", type: "bool" },
-    ],
+    outputs: [{ internalType: "bool", name: "hasRegisteredWithDiscount", type: "bool" }],
     stateMutability: "view",
     type: "function",
   },
@@ -382,9 +378,7 @@ export const EarlyAccessRegistrarController = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address[]", name: "addresses", type: "address[]" },
-    ],
+    inputs: [{ internalType: "address[]", name: "addresses", type: "address[]" }],
     name: "hasRegisteredWithDiscount",
     outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
@@ -398,9 +392,7 @@ export const EarlyAccessRegistrarController = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "pendingOwner", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "pendingOwner", type: "address" }],
     name: "ownershipHandoverExpiresAt",
     outputs: [{ internalType: "uint256", name: "result", type: "uint256" }],
     stateMutability: "view",
@@ -416,9 +408,7 @@ export const EarlyAccessRegistrarController = [
   {
     inputs: [],
     name: "prices",
-    outputs: [
-      { internalType: "contract IPriceOracle", name: "", type: "address" },
-    ],
+    outputs: [{ internalType: "contract IPriceOracle", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
@@ -480,9 +470,7 @@ export const EarlyAccessRegistrarController = [
   {
     inputs: [],
     name: "reverseRegistrar",
-    outputs: [
-      { internalType: "contract IReverseRegistrar", name: "", type: "address" },
-    ],
+    outputs: [{ internalType: "contract IReverseRegistrar", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
@@ -524,9 +512,7 @@ export const EarlyAccessRegistrarController = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "paymentReceiver_", type: "address" },
-    ],
+    inputs: [{ internalType: "address", name: "paymentReceiver_", type: "address" }],
     name: "setPaymentReceiver",
     outputs: [],
     stateMutability: "nonpayable",

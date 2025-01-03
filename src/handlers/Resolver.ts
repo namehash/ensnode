@@ -6,7 +6,7 @@ import { makeResolverId } from "../lib/ids";
 import { NsReturnType } from "../lib/plugins";
 import { upsertAccount, upsertResolver } from "../lib/upserts";
 
-type NsType<T extends string> = NsReturnType<T, '/eth'>;
+type NsType<T extends string> = NsReturnType<T, "/eth">;
 
 // there is a legacy resolver abi with different TextChanged events.
 // luckily the subgraph doesn't care about the value parameter so we can use a union
