@@ -124,7 +124,11 @@ export async function handleNameUnwrapped({
     // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L123
     ...(domain.expiryDate && domain.parentId !== ETH_NODE && { expiryDate: null }),
     ownerId: owner,
+    wrappedOwnerId: null,
   }));
+
+  // delete the WrappedDomain
+  await context.db.delete(wrappedDomains, { id: node });
 
   // TODO: log NameUnwrapped
 }
