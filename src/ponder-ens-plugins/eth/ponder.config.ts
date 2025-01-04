@@ -30,20 +30,20 @@ export const config = createConfig({
     [ns("RegistryOld")]: {
       network: "mainnet",
       abi: Registry,
-      address: REGISTRY_OLD_ADDRESS,
+      address: "0x314159265dd8dbb310642f98f50c066173c1259b",
       startBlock: 3327417,
     },
     [ns("Registry")]: {
       network: "mainnet",
       abi: Registry,
-      address: REGISTRY_ADDRESS,
+      address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
       startBlock: 9380380,
     },
     [ns("OldRegistryResolvers")]: {
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
-        address: REGISTRY_OLD_ADDRESS,
+        address: "0x314159265dd8dbb310642f98f50c066173c1259b",
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
@@ -53,7 +53,7 @@ export const config = createConfig({
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
-        address: REGISTRY_ADDRESS,
+        address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),

@@ -30,7 +30,7 @@ export const makeRegistryHandlers = (root: Hex) => {
       event,
     }: {
       context: Context;
-      event: Event<NsType<"BaseRegistrar:NameRegistered">>;
+      event: Omit<Event<NsType<"BaseRegistrar:NameRegistered">>, "name">;
     }) {
       const { id, owner, expires } = event.args;
 

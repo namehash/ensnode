@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domains } from "ponder:schema";
+import { domains, registrations } from "ponder:schema";
 import { makeRegistryHandlers } from "../../../handlers/Registrar";
 import { NAMEHASH_BASE_ETH, makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/ens-helpers";
 import { upsertAccount } from "../../../lib/upserts";
@@ -13,9 +13,12 @@ const {
   handleNameTransferred,
 } = makeRegistryHandlers(NAMEHASH_BASE_ETH);
 
-// support NameRegisteredWithRecord
-
 export default function () {
+  // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
+  ponder.on(ns("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) =>
+    handleNameRegistered({ context, event }),
+  );
+
   ponder.on(ns("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     // base has 'preminted' names via Registrar#registerOnly, which explicitly does not update Registry.
     // this breaks a subgraph assumption, as it expects a domain to exist (via Registry:NewOwner) before
