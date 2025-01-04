@@ -1,7 +1,6 @@
 import { type Context, type Event } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
 import type { Hex } from "viem";
-import { base, mainnet } from "viem/chains";
 import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/ens-helpers";
 import { NsReturnType } from "../lib/plugins";
 import { upsertAccount, upsertRegistration } from "../lib/upserts";
