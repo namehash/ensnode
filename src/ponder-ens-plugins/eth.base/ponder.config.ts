@@ -13,6 +13,9 @@ const rootDomain = "/eth/base" as const;
 export const ns = createNs(rootDomain);
 export type NsType<T extends string> = NsReturnType<T, typeof rootDomain>;
 
+const START_BLOCK = undefined; // 17607350;
+const END_BLOCK = undefined; // 17607351;
+
 export const config = createConfig({
   networks: {
     base: {
@@ -25,7 +28,8 @@ export const config = createConfig({
       network: "base",
       abi: Registry,
       address: "0xb94704422c2a1e396835a571837aa5ae53285a95",
-      startBlock: 17571480,
+      startBlock: START_BLOCK || 17571480,
+      endBlock: END_BLOCK,
     },
     [ns("Resolver")]: {
       network: "base",
@@ -35,25 +39,29 @@ export const config = createConfig({
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
-      startBlock: 17575714,
+      startBlock: START_BLOCK || 17575714,
+      endBlock: END_BLOCK,
     },
     [ns("BaseRegistrar")]: {
       network: "base",
       abi: BaseRegistrar,
       address: "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
-      startBlock: 17571486,
+      startBlock: START_BLOCK || 17571486,
+      endBlock: END_BLOCK,
     },
     [ns("EARegistrarController")]: {
       network: "base",
       abi: EarlyAccessRegistrarController,
       address: "0xd3e6775ed9b7dc12b205c8e608dc3767b9e5efda",
-      startBlock: 17575699,
+      startBlock: START_BLOCK || 17575699,
+      endBlock: END_BLOCK,
     },
     [ns("RegistrarController")]: {
       network: "base",
       abi: RegistrarController,
       address: "0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5",
-      startBlock: 18619035,
+      startBlock: START_BLOCK || 18619035,
+      endBlock: END_BLOCK,
     },
   },
 });
