@@ -1,6 +1,5 @@
 import { ponder } from "ponder:registry";
 import { makeRegistryHandlers } from "../../../handlers/Registrar";
-import { NAMEHASH_ETH } from "../../../lib/ens-helpers";
 import { ns } from "../ponder.config";
 
 const {
@@ -9,7 +8,7 @@ const {
   handleNameRenewedByController,
   handleNameRenewed,
   handleNameTransferred,
-} = makeRegistryHandlers(NAMEHASH_ETH);
+} = makeRegistryHandlers();
 
 export default function () {
   ponder.on(ns("BaseRegistrar:NameRegistered"), handleNameRegistered);
