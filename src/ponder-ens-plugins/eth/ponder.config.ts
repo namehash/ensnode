@@ -12,12 +12,11 @@ import { Resolver } from "./abis/Resolver";
 
 const RESOLVER_ABI = mergeAbis([LegacyPublicResolver, Resolver]);
 
-const REGISTRY_OLD_ADDRESS = "0x314159265dd8dbb310642f98f50c066173c1259b";
-const REGISTRY_ADDRESS = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
+export const baseName = ".eth" as const;
 
-const rootDomain = "/eth" as const;
-export const ns = createNs(rootDomain);
-export type NsType<T extends string> = NsReturnType<T, typeof rootDomain>;
+const nestedNamespace = "/eth" as const;
+export const ns = createNs(nestedNamespace);
+export type NsType<T extends string> = NsReturnType<T, typeof nestedNamespace>;
 
 export const config = createConfig({
   networks: {

@@ -160,7 +160,7 @@ various resources use both null and zeroAddress to indicate emptiness, this is h
 
 ### ens indexing plugin
 
-l2 ens deployments are very similar — write plugin to make configuring source addresses easy and pass node that domains in these handlers are implicitly parented to (assuming that l2 deployments make nodes against the NAMEHASH_ZERO i.e. every name is basically a 2LD)
+l2 ens deployments are very similar — write plugin to make configuring source addresses easy and pass node that domains in these handlers are implicitly parented to (assuming that l2 deployments make nodes against the ROOT_NODE i.e. every name is basically a 2LD)
 
 ### registry
 

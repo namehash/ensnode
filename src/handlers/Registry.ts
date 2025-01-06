@@ -2,7 +2,7 @@ import { type Context, type Event } from "ponder:registry";
 import { resolvers } from "ponder:schema";
 import { domains } from "ponder:schema";
 import { type Hex, zeroAddress } from "viem";
-import { NAMEHASH_ZERO, encodeLabelhash, makeSubnodeNamehash } from "../lib/ens-helpers";
+import { ROOT_NODE, encodeLabelhash, makeSubnodeNamehash } from "../lib/ens-helpers";
 import { makeResolverId } from "../lib/ids";
 import { NsReturnType } from "../lib/plugins";
 import { upsertAccount } from "../lib/upserts";
@@ -15,7 +15,7 @@ export async function setup({ context }: { context: Context }) {
 
   // ensure we have a root Domain, owned by the zeroAddress, that is default not migrated
   await context.db.insert(domains).values({
-    id: NAMEHASH_ZERO,
+    id: ROOT_NODE,
     ownerId: zeroAddress,
     createdAt: 0n,
     isMigrated: false,

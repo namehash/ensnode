@@ -1,11 +1,26 @@
 import { type Hex, concat, keccak256, namehash, toHex } from "viem";
 
-// TODO: add input validation
-export const ENS_ROOT_DOMAIN_NAME = process.env.INDEX_ENS_ROOT_NODE! as `.${string}.eth`;
+class BaseName {
+  private constructor(private readonly name: `.${string}eth`) {}
+
+  static parse(name: string | undefined = "") {
+    if (!name.startsWith(".")) throw new Error(`BASE NAME should start with '.'`);
+
+    if (!name.endsWith(".eth")) throw new Error(`BASE NAME should end with '.eth'`);
+
+    return new BaseName(name as `.${string}eth`);
+  }
+
+  toString() {
+    return this.name;
+  }
+}
+
+export const BASENAME = BaseName.parse(process.env.INDEX_BASENAME).toString();
 
 // TODO: pull from ens utils lib or something
-export const NAMEHASH_ZERO = namehash("");
-export const NAMEHASH_ROOT = namehash(ENS_ROOT_DOMAIN_NAME.slice(1));
+export const ROOT_NODE = namehash("");
+export const BASENAME_NODE = namehash(BASENAME.slice(1));
 
 // TODO: this should probably be a part of some ens util lib
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));

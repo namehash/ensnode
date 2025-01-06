@@ -1,7 +1,7 @@
 import { type Context, type Event } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
-import type { Hex } from "viem";
-import { ENS_ROOT_DOMAIN_NAME, NAMEHASH_ROOT, isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/ens-helpers";
+import { type Hex, namehash } from "viem";
+import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/ens-helpers";
 import { NsReturnType } from "../lib/plugins";
 import { upsertAccount, upsertRegistration } from "../lib/upserts";
 
@@ -9,26 +9,30 @@ type NsType<T extends string> = NsReturnType<T, "/eth">;
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
-export const makeRegistryHandlers = () => {
-  if (!ENS_ROOT_DOMAIN_NAME || !ENS_ROOT_DOMAIN_NAME.endsWith('.eth')) {
-    throw new Error("ENS_ROOT_DOMAIN_NAME expected to end with '.eth'");
-  }
+export const makeRegistryHandlers = (baseName: `.${`${string}`}eth`) => {
+  const baseNameNode = namehash(baseName.slice(1));
 
   async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
     if (!isLabelValid(name)) return;
 
-    const node = makeSubnodeNamehash(NAMEHASH_ROOT, label);
+    const node = makeSubnodeNamehash(baseNameNode, label);
     const domain = await context.db.find(domains, { id: node });
     if (!domain) throw new Error("domain expected");
 
     if (domain.labelName !== name) {
-      await context.db.update(domains, { id: node }).set({ labelName: name, name: `${name}${ENS_ROOT_DOMAIN_NAME}` });
+      await context.db
+        .update(domains, { id: node })
+        .set({ labelName: name, name: `${name}${baseName}` });
     }
 
     await context.db.update(registrations, { id: label }).set({ labelName: name, cost });
   }
 
   return {
+    get baseNameNode() {
+      return baseNameNode;
+    },
+
     async handleNameRegistered({
       context,
       event,
@@ -41,7 +45,7 @@ export const makeRegistryHandlers = () => {
       await upsertAccount(context, owner);
 
       const label = tokenIdToLabel(id);
-      const node = makeSubnodeNamehash(NAMEHASH_ROOT, label);
+      const node = makeSubnodeNamehash(baseNameNode, label);
 
       // TODO: materialze labelName via rainbow tables ala Registry.ts
       const labelName = undefined;
@@ -94,7 +98,7 @@ export const makeRegistryHandlers = () => {
       const { id, expires } = event.args;
 
       const label = tokenIdToLabel(id);
-      const node = makeSubnodeNamehash(NAMEHASH_ROOT, label);
+      const node = makeSubnodeNamehash(baseNameNode, label);
 
       await context.db.update(registrations, { id: label }).set({ expiryDate: expires });
 
@@ -115,7 +119,7 @@ export const makeRegistryHandlers = () => {
       await upsertAccount(context, to);
 
       const label = tokenIdToLabel(tokenId);
-      const node = makeSubnodeNamehash(NAMEHASH_ROOT, label);
+      const node = makeSubnodeNamehash(baseNameNode, label);
 
       const registration = await context.db.find(registrations, { id: label });
       if (!registration) return;

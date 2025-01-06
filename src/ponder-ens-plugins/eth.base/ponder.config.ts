@@ -9,9 +9,11 @@ import { L2Resolver } from "./abis/L2Resolver";
 import { RegistrarController } from "./abis/RegistrarController";
 import { Registry } from "./abis/Registry";
 
-const rootDomain = "/eth/base" as const;
-export const ns = createNs(rootDomain);
-export type NsType<T extends string> = NsReturnType<T, typeof rootDomain>;
+export const baseName = ".base.eth" as const;
+
+const nestedNamespace = "/eth/base" as const;
+export const ns = createNs(nestedNamespace);
+export type NsType<T extends string> = NsReturnType<T, typeof nestedNamespace>;
 
 const START_BLOCK = undefined; // 17607350;
 const END_BLOCK = undefined; // 17607351;

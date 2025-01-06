@@ -1,9 +1,9 @@
 import { ponder } from "ponder:registry";
 import { domains } from "ponder:schema";
 import { makeRegistryHandlers } from "../../../handlers/Registrar";
-import { NAMEHASH_ROOT, makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/ens-helpers";
+import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/ens-helpers";
 import { upsertAccount } from "../../../lib/upserts";
-import { ns } from "../ponder.config";
+import { baseName, ns } from "../ponder.config";
 
 const {
   handleNameRegistered,
@@ -11,7 +11,8 @@ const {
   handleNameRenewedByController,
   handleNameRenewed,
   handleNameTransferred,
-} = makeRegistryHandlers();
+  baseNameNode,
+} = makeRegistryHandlers(baseName);
 
 export default function () {
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
@@ -27,7 +28,7 @@ export default function () {
     // allowing the base indexer to progress.
     const { id, owner } = event.args;
     const label = tokenIdToLabel(id);
-    const node = makeSubnodeNamehash(NAMEHASH_ROOT, label);
+    const node = makeSubnodeNamehash(baseNameNode, label);
     await upsertAccount(context, owner);
     await context.db
       .insert(domains)
