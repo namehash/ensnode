@@ -18,9 +18,8 @@ export const ownedName = "eth";
 
 export const pluginNamespace = createPluginNamespace(ownedName);
 
-const NAME_WRAPPER_START_BLOCK = 16_925_608;
-const START_BLOCK = NAME_WRAPPER_START_BLOCK;
-const END_BLOCK: number | undefined = 16_934_870;
+const START_BLOCK = 16934751;
+const END_BLOCK: number | undefined = 21_000_000;
 
 export const config = createConfig({
   networks: {

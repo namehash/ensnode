@@ -1,6 +1,6 @@
 import { type Context, type Event, type EventNames } from "ponder:registry";
 import { domains, wrappedDomains } from "ponder:schema";
-import { type Address, type Hex, stringToBytes } from "viem";
+import { type Address, type Hex, hexToBytes } from "viem";
 import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
 import {
@@ -71,7 +71,7 @@ export async function handleNameWrapped({
       owner: Hex;
       fuses: number;
       expiry: bigint;
-      name: string;
+      name: Hex;
     };
   };
 }) {
@@ -80,7 +80,7 @@ export async function handleNameWrapped({
   await upsertAccount(context, owner);
 
   // decode the name emitted by NameWrapper
-  const [label, name] = decodeDNSPacketBytes(stringToBytes(event.args.name));
+  const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
 
   // upsert the healed name iff valid
   if (label) {
