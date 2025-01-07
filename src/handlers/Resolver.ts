@@ -1,5 +1,6 @@
-import { type Context, type Event } from "ponder:registry";
+import { type Context } from "ponder:registry";
 import { domains, resolvers } from "ponder:schema";
+import { Log } from "ponder";
 import { Hex } from "viem";
 import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
@@ -12,7 +13,7 @@ export async function handleAddrChanged({
   context: Context;
   event: {
     args: { node: Hex; a: Hex };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { a: address, node } = event.args;
@@ -42,7 +43,7 @@ export async function handleAddressChanged({
   context: Context;
   event: {
     args: { node: Hex; coinType: bigint; newAddress: Hex };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node, coinType, newAddress } = event.args;
@@ -70,7 +71,7 @@ export async function handleNameChanged({
   context: Context;
   event: {
     args: { node: Hex; name: string };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node, name } = event.args;
@@ -93,7 +94,7 @@ export async function handleABIChanged({
   context: Context;
   event: {
     args: { node: Hex };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node } = event.args;
@@ -114,7 +115,7 @@ export async function handlePubkeyChanged({
   context: Context;
   event: {
     args: { node: Hex };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node } = event.args;
@@ -135,7 +136,7 @@ export async function handleTextChanged({
   context: Context;
   event: {
     args: { node: Hex; indexedKey: string; key: string; value?: string };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node, key } = event.args;
@@ -159,7 +160,7 @@ export async function handleContenthashChanged({
   context: Context;
   event: {
     args: { node: Hex; hash: Hex };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node, hash } = event.args;
@@ -185,7 +186,7 @@ export async function handleInterfaceChanged({
       interfaceID: Hex;
       implementer: Hex;
     };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node } = event.args;
@@ -211,7 +212,7 @@ export async function handleAuthorisationChanged({
       target: Hex;
       isAuthorised: boolean;
     };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   const { node } = event.args;
@@ -235,7 +236,7 @@ export async function handleVersionChanged({
       node: Hex;
       newVersion: bigint;
     };
-    log: { address: Hex };
+    log: Log;
   };
 }) {
   // a version change nulls out the resolver

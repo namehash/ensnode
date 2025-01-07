@@ -1,5 +1,6 @@
 import { type Context } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
+import { Block } from "ponder";
 import { type Hex, namehash } from "viem";
 import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/ens-helpers";
 import { upsertAccount, upsertRegistration } from "../lib/upserts";
@@ -39,7 +40,7 @@ export const makeRegistryHandlers = (managedSubname: `${string}eth`) => {
     }: {
       context: Context;
       event: {
-        block: { timestamp: bigint };
+        block: Block;
         args: { id: bigint; owner: Hex; expires: bigint };
       };
     }) {

@@ -5,8 +5,8 @@ import {
   handleNewOwner,
   handleNewResolver,
   handleNewTTL,
-  handleRootNodeCreation,
   handleTransfer,
+  setupRootNode,
 } from "../../../handlers/Registry";
 import { makeSubnodeNamehash } from "../../../lib/ens-helpers";
 import { ponderNamespace } from "../ponder.config";
@@ -18,7 +18,7 @@ async function isDomainMigrated(context: Context, node: Hex) {
 }
 
 export default function () {
-  ponder.on(ponderNamespace("RegistryOld:setup"), handleRootNodeCreation);
+  ponder.on(ponderNamespace("RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
