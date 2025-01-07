@@ -2,12 +2,12 @@ import { INDEXED_SUBNAME } from "./src/lib/ens-helpers";
 import {
   activate as activateEthBase,
   config as ethBaseConfig,
-  indexedSubname as ethBaseIndexedSubname,
+  managedSubname as ethBaseManagedSubname,
 } from "./src/ponder-ens-plugins/eth.base/ponder.config";
 import {
   activate as activateEth,
   config as ethConfig,
-  indexedSubname as ethIndexedSubname,
+  managedSubname as ethManagedSubname,
 } from "./src/ponder-ens-plugins/eth/ponder.config";
 
 type AllConfigs = typeof ethConfig & typeof ethBaseConfig;
@@ -17,10 +17,10 @@ type AllConfigs = typeof ethConfig & typeof ethBaseConfig;
 // config is run at runtime
 export default ((): AllConfigs => {
   switch (INDEXED_SUBNAME) {
-    case ethIndexedSubname:
+    case ethManagedSubname:
       activateEth();
       return ethConfig as AllConfigs;
-    case ethBaseIndexedSubname:
+    case ethBaseManagedSubname:
       activateEthBase();
       return ethBaseConfig as AllConfigs;
     default:

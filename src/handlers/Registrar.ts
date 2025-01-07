@@ -9,28 +9,28 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 /**
  * A factory function that returns Ponder indexing handlers for a specified index name/subname.
  */
-export const makeRegistryHandlers = (indexedSubname: `${string}eth`) => {
-  const indexedSubnameNode = namehash(indexedSubname);
+export const makeRegistryHandlers = (managedSubname: `${string}eth`) => {
+  const managedSubnameNode = namehash(managedSubname);
 
   async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
     if (!isLabelValid(name)) return;
 
-    const node = makeSubnodeNamehash(indexedSubnameNode, label);
+    const node = makeSubnodeNamehash(managedSubnameNode, label);
     const domain = await context.db.find(domains, { id: node });
     if (!domain) throw new Error("domain expected");
 
     if (domain.labelName !== name) {
       await context.db
         .update(domains, { id: node })
-        .set({ labelName: name, name: `${name}${indexedSubname}` });
+        .set({ labelName: name, name: `${name}${managedSubname}` });
     }
 
     await context.db.update(registrations, { id: label }).set({ labelName: name, cost });
   }
 
   return {
-    get indexedSubnameNode() {
-      return indexedSubnameNode;
+    get managedSubnameNode() {
+      return managedSubnameNode;
     },
 
     async handleNameRegistered({
@@ -48,7 +48,7 @@ export const makeRegistryHandlers = (indexedSubname: `${string}eth`) => {
       await upsertAccount(context, owner);
 
       const label = tokenIdToLabel(id);
-      const node = makeSubnodeNamehash(indexedSubnameNode, label);
+      const node = makeSubnodeNamehash(managedSubnameNode, label);
 
       // TODO: materialze labelName via rainbow tables ala Registry.ts
       const labelName = undefined;
@@ -103,7 +103,7 @@ export const makeRegistryHandlers = (indexedSubname: `${string}eth`) => {
       const { id, expires } = event.args;
 
       const label = tokenIdToLabel(id);
-      const node = makeSubnodeNamehash(indexedSubnameNode, label);
+      const node = makeSubnodeNamehash(managedSubnameNode, label);
 
       await context.db.update(registrations, { id: label }).set({ expiryDate: expires });
 
@@ -128,7 +128,7 @@ export const makeRegistryHandlers = (indexedSubname: `${string}eth`) => {
       await upsertAccount(context, to);
 
       const label = tokenIdToLabel(tokenId);
-      const node = makeSubnodeNamehash(indexedSubnameNode, label);
+      const node = makeSubnodeNamehash(managedSubnameNode, label);
 
       const registration = await context.db.find(registrations, { id: label });
       if (!registration) return;

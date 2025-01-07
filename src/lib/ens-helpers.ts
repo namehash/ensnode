@@ -1,12 +1,12 @@
 import { type Hex, concat, keccak256, namehash, toHex } from "viem";
 
-class IndexedSubname {
+class ManagedSubname {
   private constructor(private readonly name: `${string}eth`) {}
 
   static parse(name: string | undefined = "") {
-    if (!name.endsWith("eth")) throw new Error(`IndexedSubname should end with 'eth'`);
+    if (!name.endsWith("eth")) throw new Error(`ManagedSubname should end with 'eth'`);
 
-    return new IndexedSubname(name as `${string}eth`);
+    return new ManagedSubname(name as `${string}eth`);
   }
 
   toString() {
@@ -14,7 +14,7 @@ class IndexedSubname {
   }
 }
 
-export const INDEXED_SUBNAME = IndexedSubname.parse(process.env.INDEX_SUBNAME).toString();
+export const INDEXED_SUBNAME = ManagedSubname.parse(process.env.INDEX_SUBNAME).toString();
 
 // TODO: pull from ens utils lib or something
 export const ROOT_NODE = namehash("");

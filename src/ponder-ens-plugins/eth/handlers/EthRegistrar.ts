@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import { makeRegistryHandlers } from "../../../handlers/Registrar";
-import { indexedSubname, ponderNamespace } from "../ponder.config";
+import { managedSubname, ponderNamespace } from "../ponder.config";
 
 const {
   handleNameRegistered,
@@ -8,7 +8,7 @@ const {
   handleNameRenewedByController,
   handleNameRenewed,
   handleNameTransferred,
-} = makeRegistryHandlers(indexedSubname);
+} = makeRegistryHandlers(managedSubname);
 
 export default function () {
   ponder.on(ponderNamespace("BaseRegistrar:NameRegistered"), handleNameRegistered);

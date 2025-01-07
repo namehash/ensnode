@@ -12,9 +12,9 @@ import { Resolver } from "./abis/Resolver";
 
 const RESOLVER_ABI = mergeAbis([LegacyPublicResolver, Resolver]);
 
-export const indexedSubname = "eth";
+export const managedSubname = "eth";
 
-export const ponderNamespace = createPonderNamespace(indexedSubname);
+export const ponderNamespace = createPonderNamespace(managedSubname);
 
 export const config = createConfig({
   networks: {
