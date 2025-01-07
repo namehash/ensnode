@@ -1,14 +1,12 @@
 import { type Hex, concat, keccak256, namehash, toHex } from "viem";
 
-class BaseName {
-  private constructor(private readonly name: `.${string}eth`) {}
+class IndexedSubname {
+  private constructor(private readonly name: `${string}eth`) {}
 
   static parse(name: string | undefined = "") {
-    if (!name.startsWith(".")) throw new Error(`BASE NAME should start with '.'`);
+    if (!name.endsWith("eth")) throw new Error(`IndexedSubname should end with 'eth'`);
 
-    if (!name.endsWith(".eth")) throw new Error(`BASE NAME should end with '.eth'`);
-
-    return new BaseName(name as `.${string}eth`);
+    return new IndexedSubname(name as `${string}eth`);
   }
 
   toString() {
@@ -16,11 +14,10 @@ class BaseName {
   }
 }
 
-export const BASENAME = BaseName.parse(process.env.INDEX_BASENAME).toString();
+export const INDEXED_SUBNAME = IndexedSubname.parse(process.env.INDEX_SUBNAME).toString();
 
 // TODO: pull from ens utils lib or something
 export const ROOT_NODE = namehash("");
-export const BASENAME_NODE = namehash(BASENAME.slice(1));
 
 // TODO: this should probably be a part of some ens util lib
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));

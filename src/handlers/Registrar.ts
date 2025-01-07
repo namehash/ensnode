@@ -1,36 +1,36 @@
-import { type Context, type Event } from "ponder:registry";
+import { type Context } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
 import { type Hex, namehash } from "viem";
 import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/ens-helpers";
-import { NsReturnType } from "../lib/plugins";
 import { upsertAccount, upsertRegistration } from "../lib/upserts";
-
-type NsType<T extends string> = NsReturnType<T, "/eth">;
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
-export const makeRegistryHandlers = (baseName: `.${`${string}`}eth`) => {
-  const baseNameNode = namehash(baseName.slice(1));
+/**
+ * A factory function that returns Ponder indexing handlers for a specified index name/subname.
+ */
+export const makeRegistryHandlers = (indexedSubname: `${string}eth`) => {
+  const indexedSubnameNode = namehash(indexedSubname);
 
   async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
     if (!isLabelValid(name)) return;
 
-    const node = makeSubnodeNamehash(baseNameNode, label);
+    const node = makeSubnodeNamehash(indexedSubnameNode, label);
     const domain = await context.db.find(domains, { id: node });
     if (!domain) throw new Error("domain expected");
 
     if (domain.labelName !== name) {
       await context.db
         .update(domains, { id: node })
-        .set({ labelName: name, name: `${name}${baseName}` });
+        .set({ labelName: name, name: `${name}${indexedSubname}` });
     }
 
     await context.db.update(registrations, { id: label }).set({ labelName: name, cost });
   }
 
   return {
-    get baseNameNode() {
-      return baseNameNode;
+    get indexedSubnameNode() {
+      return indexedSubnameNode;
     },
 
     async handleNameRegistered({
@@ -38,14 +38,17 @@ export const makeRegistryHandlers = (baseName: `.${`${string}`}eth`) => {
       event,
     }: {
       context: Context;
-      event: Omit<Event<NsType<"BaseRegistrar:NameRegistered">>, "name">;
+      event: {
+        block: { timestamp: bigint };
+        args: { id: bigint; owner: Hex; expires: bigint };
+      };
     }) {
       const { id, owner, expires } = event.args;
 
       await upsertAccount(context, owner);
 
       const label = tokenIdToLabel(id);
-      const node = makeSubnodeNamehash(baseNameNode, label);
+      const node = makeSubnodeNamehash(indexedSubnameNode, label);
 
       // TODO: materialze labelName via rainbow tables ala Registry.ts
       const labelName = undefined;
@@ -93,12 +96,14 @@ export const makeRegistryHandlers = (baseName: `.${`${string}`}eth`) => {
       event,
     }: {
       context: Context;
-      event: Event<NsType<"BaseRegistrar:NameRenewed">>;
+      event: {
+        args: { id: bigint; expires: bigint };
+      };
     }) {
       const { id, expires } = event.args;
 
       const label = tokenIdToLabel(id);
-      const node = makeSubnodeNamehash(baseNameNode, label);
+      const node = makeSubnodeNamehash(indexedSubnameNode, label);
 
       await context.db.update(registrations, { id: label }).set({ expiryDate: expires });
 
@@ -114,12 +119,16 @@ export const makeRegistryHandlers = (baseName: `.${`${string}`}eth`) => {
       args: { tokenId, from, to },
     }: {
       context: Context;
-      args: Event<NsType<"BaseRegistrar:Transfer">>["args"];
+      args: {
+        tokenId: bigint;
+        from: Hex;
+        to: Hex;
+      };
     }) {
       await upsertAccount(context, to);
 
       const label = tokenIdToLabel(tokenId);
-      const node = makeSubnodeNamehash(baseNameNode, label);
+      const node = makeSubnodeNamehash(indexedSubnameNode, label);
 
       const registration = await context.db.find(registrations, { id: label });
       if (!registration) return;

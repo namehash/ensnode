@@ -13,7 +13,7 @@ import {
   handleTextChanged,
   handleVersionChanged,
 } from "../../../handlers/Resolver";
-import { ns } from "../ponder.config";
+import { ponderNamespace as ns } from "../ponder.config";
 
 export default function () {
   // New registry handlers

@@ -14,56 +14,61 @@ import {
   handleTextChanged,
   handleVersionChanged,
 } from "../../../handlers/Resolver";
-import { ns } from "../ponder.config";
+import { ponderNamespace } from "../ponder.config";
 
 export default function () {
   // Old registry handlers
-  ponder.on(ns("OldRegistryResolvers:AddrChanged"), handleAddrChanged);
-  ponder.on(ns("OldRegistryResolvers:AddressChanged"), handleAddressChanged);
-  ponder.on(ns("OldRegistryResolvers:NameChanged"), handleNameChanged);
-  ponder.on(ns("OldRegistryResolvers:ABIChanged"), handleABIChanged);
-  ponder.on(ns("OldRegistryResolvers:PubkeyChanged"), handlePubkeyChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:AddrChanged"), handleAddrChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:AddressChanged"), handleAddressChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:NameChanged"), handleNameChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:ABIChanged"), handleABIChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:PubkeyChanged"), handlePubkeyChanged);
   ponder.on(
-    ns(
+    ponderNamespace(
       "OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
     ),
     handleTextChanged,
   );
   ponder.on(
-    ns(
+    ponderNamespace(
       "OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
     ),
     handleTextChanged,
   );
-  ponder.on(ns("OldRegistryResolvers:ContenthashChanged"), handleContenthashChanged);
-  ponder.on(ns("OldRegistryResolvers:InterfaceChanged"), handleInterfaceChanged);
-  ponder.on(ns("OldRegistryResolvers:AuthorisationChanged"), handleAuthorisationChanged);
-  ponder.on(ns("OldRegistryResolvers:VersionChanged"), handleVersionChanged);
-  ponder.on(ns("OldRegistryResolvers:DNSRecordChanged"), handleDNSRecordChanged);
-  ponder.on(ns("OldRegistryResolvers:DNSRecordDeleted"), handleDNSRecordDeleted);
-  ponder.on(ns("OldRegistryResolvers:DNSZonehashChanged"), handleDNSZonehashChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:ContenthashChanged"), handleContenthashChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:InterfaceChanged"), handleInterfaceChanged);
+  ponder.on(
+    ponderNamespace("OldRegistryResolvers:AuthorisationChanged"),
+    handleAuthorisationChanged,
+  );
+  ponder.on(ponderNamespace("OldRegistryResolvers:VersionChanged"), handleVersionChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:DNSRecordChanged"), handleDNSRecordChanged);
+  ponder.on(ponderNamespace("OldRegistryResolvers:DNSRecordDeleted"), handleDNSRecordDeleted);
+  ponder.on(ponderNamespace("OldRegistryResolvers:DNSZonehashChanged"), handleDNSZonehashChanged);
 
   // New registry handlers
-  ponder.on(ns("Resolver:AddrChanged"), handleAddrChanged);
-  ponder.on(ns("Resolver:AddressChanged"), handleAddressChanged);
-  ponder.on(ns("Resolver:NameChanged"), handleNameChanged);
-  ponder.on(ns("Resolver:ABIChanged"), handleABIChanged);
-  ponder.on(ns("Resolver:PubkeyChanged"), handlePubkeyChanged);
+  ponder.on(ponderNamespace("Resolver:AddrChanged"), handleAddrChanged);
+  ponder.on(ponderNamespace("Resolver:AddressChanged"), handleAddressChanged);
+  ponder.on(ponderNamespace("Resolver:NameChanged"), handleNameChanged);
+  ponder.on(ponderNamespace("Resolver:ABIChanged"), handleABIChanged);
+  ponder.on(ponderNamespace("Resolver:PubkeyChanged"), handlePubkeyChanged);
   ponder.on(
-    ns("Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)"),
+    ponderNamespace(
+      "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+    ),
     handleTextChanged,
   );
   ponder.on(
-    ns(
+    ponderNamespace(
       "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
     ),
     handleTextChanged,
   );
-  ponder.on(ns("Resolver:ContenthashChanged"), handleContenthashChanged);
-  ponder.on(ns("Resolver:InterfaceChanged"), handleInterfaceChanged);
-  ponder.on(ns("Resolver:AuthorisationChanged"), handleAuthorisationChanged);
-  ponder.on(ns("Resolver:VersionChanged"), handleVersionChanged);
-  ponder.on(ns("Resolver:DNSRecordChanged"), handleDNSRecordChanged);
-  ponder.on(ns("Resolver:DNSRecordDeleted"), handleDNSRecordDeleted);
-  ponder.on(ns("Resolver:DNSZonehashChanged"), handleDNSZonehashChanged);
+  ponder.on(ponderNamespace("Resolver:ContenthashChanged"), handleContenthashChanged);
+  ponder.on(ponderNamespace("Resolver:InterfaceChanged"), handleInterfaceChanged);
+  ponder.on(ponderNamespace("Resolver:AuthorisationChanged"), handleAuthorisationChanged);
+  ponder.on(ponderNamespace("Resolver:VersionChanged"), handleVersionChanged);
+  ponder.on(ponderNamespace("Resolver:DNSRecordChanged"), handleDNSRecordChanged);
+  ponder.on(ponderNamespace("Resolver:DNSRecordDeleted"), handleDNSRecordDeleted);
+  ponder.on(ponderNamespace("Resolver:DNSZonehashChanged"), handleDNSZonehashChanged);
 }

@@ -1,29 +1,29 @@
-import { BASENAME } from "./src/lib/ens-helpers";
+import { INDEXED_SUBNAME } from "./src/lib/ens-helpers";
 import {
-  activate as activateBase,
-  baseName as baseBaseName,
-  config as baseConfig
+  activate as activateEthBase,
+  config as ethBaseConfig,
+  indexedSubname as ethBaseIndexedSubname,
 } from "./src/ponder-ens-plugins/eth.base/ponder.config";
 import {
   activate as activateEth,
-  baseName as ethBaseName,
-  config as ethereumConfig
+  config as ethConfig,
+  indexedSubname as ethIndexedSubname,
 } from "./src/ponder-ens-plugins/eth/ponder.config";
 
-type AllConfigs = typeof ethereumConfig & typeof baseConfig;
+type AllConfigs = typeof ethConfig & typeof ethBaseConfig;
 
 // here we export only a single 'plugin's config, by type it as every config
 // this makes all of the mapping types happy at typecheck-time, but only the relevant
 // config is run at runtime
 export default ((): AllConfigs => {
-  switch (BASENAME) {
-    case ethBaseName:
+  switch (INDEXED_SUBNAME) {
+    case ethIndexedSubname:
       activateEth();
-      return ethereumConfig as AllConfigs;
-    case baseBaseName:
-      activateBase();
-      return baseConfig as AllConfigs;
+      return ethConfig as AllConfigs;
+    case ethBaseIndexedSubname:
+      activateEthBase();
+      return ethBaseConfig as AllConfigs;
     default:
-      throw new Error(`Unsupported base name: ${BASENAME}`);
+      throw new Error(`Unsupported base name: ${INDEXED_SUBNAME}`);
   }
 })();

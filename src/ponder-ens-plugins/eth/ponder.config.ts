@@ -1,7 +1,7 @@
 import { createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
-import { NsReturnType, createNs } from "../../lib/plugins";
+import { createPonderNamespace } from "../../lib/ponder-plugin-utils";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";
@@ -12,11 +12,9 @@ import { Resolver } from "./abis/Resolver";
 
 const RESOLVER_ABI = mergeAbis([LegacyPublicResolver, Resolver]);
 
-export const baseName = ".eth" as const;
+export const indexedSubname = "eth";
 
-const nestedNamespace = "/eth" as const;
-export const ns = createNs(nestedNamespace);
-export type NsType<T extends string> = NsReturnType<T, typeof nestedNamespace>;
+export const ponderNamespace = createPonderNamespace(indexedSubname);
 
 export const config = createConfig({
   networks: {
@@ -26,19 +24,19 @@ export const config = createConfig({
     },
   },
   contracts: {
-    [ns("RegistryOld")]: {
+    [ponderNamespace("RegistryOld")]: {
       network: "mainnet",
       abi: Registry,
       address: "0x314159265dd8dbb310642f98f50c066173c1259b",
       startBlock: 3327417,
     },
-    [ns("Registry")]: {
+    [ponderNamespace("Registry")]: {
       network: "mainnet",
       abi: Registry,
       address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
       startBlock: 9380380,
     },
-    [ns("OldRegistryResolvers")]: {
+    [ponderNamespace("OldRegistryResolvers")]: {
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
@@ -48,7 +46,7 @@ export const config = createConfig({
       }),
       startBlock: 9380380,
     },
-    [ns("Resolver")]: {
+    [ponderNamespace("Resolver")]: {
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
@@ -58,25 +56,25 @@ export const config = createConfig({
       }),
       startBlock: 9380380,
     },
-    [ns("BaseRegistrar")]: {
+    [ponderNamespace("BaseRegistrar")]: {
       network: "mainnet",
       abi: BaseRegistrar,
       address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
       startBlock: 9380410,
     },
-    [ns("EthRegistrarControllerOld")]: {
+    [ponderNamespace("EthRegistrarControllerOld")]: {
       network: "mainnet",
       abi: EthRegistrarControllerOld,
       address: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
       startBlock: 9380471,
     },
-    [ns("EthRegistrarController")]: {
+    [ponderNamespace("EthRegistrarController")]: {
       network: "mainnet",
       abi: EthRegistrarController,
       address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
       startBlock: 16925618,
     },
-    [ns("NameWrapper")]: {
+    [ponderNamespace("NameWrapper")]: {
       network: "mainnet",
       abi: NameWrapper,
       address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",

@@ -1,37 +1,19 @@
 import { type Context, type Event } from "ponder:registry";
 import { domains, resolvers } from "ponder:schema";
-import { base, mainnet } from "viem/chains";
+import { Hex } from "viem";
 import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
-import { NsReturnType } from "../lib/plugins";
 import { upsertAccount, upsertResolver } from "../lib/upserts";
-
-type NsType<T extends string> = NsReturnType<T, "/eth">;
-
-// there is a legacy resolver abi with different TextChanged events.
-// luckily the subgraph doesn't care about the value parameter so we can use a union
-// to unify the codepath
-type AnyTextChangedEvent =
-  | Event<
-      NsType<"Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)">
-    >
-  | Event<
-      NsType<"Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)">
-    >
-  | Event<NsReturnType<"Resolver:TextChanged", "/eth/base">>
-  | Event<
-      NsType<"OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)">
-    >
-  | Event<
-      NsType<"OldRegistryResolvers:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)">
-    >;
 
 export async function handleAddrChanged({
   context,
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:AddrChanged">>;
+  event: {
+    args: { node: Hex; a: Hex };
+    log: { address: Hex };
+  };
 }) {
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
@@ -58,7 +40,10 @@ export async function handleAddressChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:AddressChanged">>;
+  event: {
+    args: { node: Hex; coinType: bigint; newAddress: Hex };
+    log: { address: Hex };
+  };
 }) {
   const { node, coinType, newAddress } = event.args;
   await upsertAccount(context, newAddress);
@@ -83,7 +68,10 @@ export async function handleNameChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:NameChanged">>;
+  event: {
+    args: { node: Hex; name: string };
+    log: { address: Hex };
+  };
 }) {
   const { node, name } = event.args;
   if (hasNullByte(name)) return;
@@ -103,7 +91,10 @@ export async function handleABIChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:ABIChanged">>;
+  event: {
+    args: { node: Hex };
+    log: { address: Hex };
+  };
 }) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
@@ -121,7 +112,10 @@ export async function handlePubkeyChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:PubkeyChanged">>;
+  event: {
+    args: { node: Hex };
+    log: { address: Hex };
+  };
 }) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
@@ -139,7 +133,10 @@ export async function handleTextChanged({
   event,
 }: {
   context: Context;
-  event: AnyTextChangedEvent;
+  event: {
+    args: { node: Hex; indexedKey: string; key: string; value?: string };
+    log: { address: Hex };
+  };
 }) {
   const { node, key } = event.args;
   const id = makeResolverId(node, event.log.address);
@@ -160,7 +157,10 @@ export async function handleContenthashChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:ContenthashChanged">>;
+  event: {
+    args: { node: Hex; hash: Hex };
+    log: { address: Hex };
+  };
 }) {
   const { node, hash } = event.args;
   const id = makeResolverId(node, event.log.address);
@@ -179,7 +179,14 @@ export async function handleInterfaceChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:InterfaceChanged">>;
+  event: {
+    args: {
+      node: Hex;
+      interfaceID: Hex;
+      implementer: Hex;
+    };
+    log: { address: Hex };
+  };
 }) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
@@ -197,7 +204,15 @@ export async function handleAuthorisationChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:AuthorisationChanged">>;
+  event: {
+    args: {
+      node: Hex;
+      owner: Hex;
+      target: Hex;
+      isAuthorised: boolean;
+    };
+    log: { address: Hex };
+  };
 }) {
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
@@ -215,7 +230,13 @@ export async function handleVersionChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:VersionChanged">>;
+  event: {
+    args: {
+      node: Hex;
+      newVersion: bigint;
+    };
+    log: { address: Hex };
+  };
 }) {
   // a version change nulls out the resolver
   const { node } = event.args;
@@ -244,7 +265,14 @@ export async function handleDNSRecordChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:DNSRecordChanged">>;
+  event: {
+    args: {
+      node: Hex;
+      name: Hex;
+      resource: number;
+      record: Hex;
+    };
+  };
 }) {
   // subgraph ignores
 }
@@ -254,7 +282,14 @@ export async function handleDNSRecordDeleted({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:DNSRecordDeleted">>;
+  event: {
+    args: {
+      node: Hex;
+      name: Hex;
+      resource: number;
+      record?: Hex;
+    };
+  };
 }) {
   // subgraph ignores
 }
@@ -264,7 +299,12 @@ export async function handleDNSZonehashChanged({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Resolver:DNSZonehashChanged">>;
+  event: {
+    args: {
+      node: Hex;
+      zonehash: Hex;
+    };
+  };
 }) {
   // subgraph ignores
 }

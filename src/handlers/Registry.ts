@@ -1,19 +1,19 @@
-import { type Context, type Event } from "ponder:registry";
+import { type Context } from "ponder:registry";
 import { resolvers } from "ponder:schema";
 import { domains } from "ponder:schema";
 import { type Hex, zeroAddress } from "viem";
 import { ROOT_NODE, encodeLabelhash, makeSubnodeNamehash } from "../lib/ens-helpers";
 import { makeResolverId } from "../lib/ids";
-import { NsReturnType } from "../lib/plugins";
 import { upsertAccount } from "../lib/upserts";
 
-type NsType<T extends string> = NsReturnType<T, "/eth">;
-
-export async function setup({ context }: { context: Context }) {
+/**
+ * Initialize the ENS root node with the zeroAddress as the owner.
+ */
+export async function handleRootNodeCreation({ context }: { context: Context }) {
   // ensure we have an account for the zeroAddress
   await upsertAccount(context, zeroAddress);
 
-  // ensure we have a root Domain, owned by the zeroAddress, that is default not migrated
+  // initialize the ENS root to be owned by the zeroAddress and not migrated
   await context.db.insert(domains).values({
     id: ROOT_NODE,
     ownerId: zeroAddress,
@@ -50,7 +50,10 @@ export async function handleTransfer({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Registry:Transfer">>;
+  event: {
+    args: { node: Hex; owner: Hex };
+    block: { timestamp: bigint };
+  };
 }) {
   const { node, owner } = event.args;
 
@@ -78,7 +81,10 @@ export const handleNewOwner =
     event,
   }: {
     context: Context;
-    event: Event<NsType<"Registry:NewOwner">>;
+    event: {
+      args: { node: Hex; label: Hex; owner: Hex };
+      block: { timestamp: bigint };
+    };
   }) => {
     const { label, node, owner } = event.args;
 
@@ -131,7 +137,9 @@ export async function handleNewTTL({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Registry:NewTTL">>;
+  event: {
+    args: { node: Hex; ttl: bigint };
+  };
 }) {
   const { node, ttl } = event.args;
 
@@ -148,7 +156,9 @@ export async function handleNewResolver({
   event,
 }: {
   context: Context;
-  event: Event<NsType<"Registry:NewResolver">>;
+  event: {
+    args: { node: Hex; resolver: Hex };
+  };
 }) {
   const { node, resolver: resolverAddress } = event.args;
 

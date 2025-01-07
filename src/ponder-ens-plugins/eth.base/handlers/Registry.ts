@@ -3,15 +3,15 @@ import {
   handleNewOwner,
   handleNewResolver,
   handleNewTTL,
+  handleRootNodeCreation,
   handleTransfer,
-  setup,
 } from "../../../handlers/Registry";
-import { ns } from "../ponder.config";
+import { ponderNamespace } from "../ponder.config";
 
 export default function () {
-  ponder.on(ns("Registry:setup"), setup);
-  ponder.on(ns("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(ns("Registry:NewResolver"), handleNewResolver);
-  ponder.on(ns("Registry:NewTTL"), handleNewTTL);
-  ponder.on(ns("Registry:Transfer"), handleTransfer);
+  ponder.on(ponderNamespace("Registry:setup"), handleRootNodeCreation);
+  ponder.on(ponderNamespace("Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(ponderNamespace("Registry:NewResolver"), handleNewResolver);
+  ponder.on(ponderNamespace("Registry:NewTTL"), handleNewTTL);
+  ponder.on(ponderNamespace("Registry:Transfer"), handleTransfer);
 }
