@@ -2,11 +2,7 @@ import { Context } from "ponder:registry";
 import { domains, resolvers } from "ponder:schema";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
-import {
-  ROOT_NODE,
-  encodeLabelhash,
-  makeSubnodeNamehash,
-} from "../lib/ens-helpers";
+import { ROOT_NODE, encodeLabelhash, makeSubnodeNamehash } from "../lib/ens-helpers";
 import { makeResolverId } from "../lib/ids";
 import { upsertAccount } from "../lib/upserts";
 
@@ -28,18 +24,13 @@ export async function setupRootNode({ context }: { context: Context }) {
 
 function isDomainEmpty(domain: typeof domains.$inferSelect) {
   return (
-    domain.resolverId === null &&
-    domain.ownerId === zeroAddress &&
-    domain.subdomainCount === 0
+    domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
   );
 }
 
 // a more accurate name for the following function
 // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64
-async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(
-  context: Context,
-  node: Hex
-) {
+async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
   const domain = await context.db.find(domains, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
@@ -50,10 +41,7 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(
       .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
 
     // recurse to parent
-    return recursivelyRemoveEmptyDomainFromParentSubdomainCount(
-      context,
-      domain.parentId
-    );
+    return recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.parentId);
   }
 }
 
@@ -109,9 +97,7 @@ export const handleNewOwner =
     let domain = await context.db.find(domains, { id: subnode });
     if (domain) {
       // if the domain already exists, this is just an update of the owner record.
-      await context.db
-        .update(domains, { id: domain.id })
-        .set({ ownerId: owner, isMigrated });
+      await context.db.update(domains, { id: domain.id }).set({ ownerId: owner, isMigrated });
     } else {
       // otherwise create the domain
       domain = await context.db.insert(domains).values({
@@ -137,17 +123,12 @@ export const handleNewOwner =
       const labelName = encodeLabelhash(label);
       const name = parent?.name ? `${labelName}.${parent.name}` : labelName;
 
-      await context.db
-        .update(domains, { id: domain.id })
-        .set({ name, labelName });
+      await context.db.update(domains, { id: domain.id }).set({ name, labelName });
     }
 
     // garbage collect newly 'empty' domain iff necessary
     if (owner === zeroAddress) {
-      await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
-        context,
-        domain.id
-      );
+      await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
     }
   };
 
