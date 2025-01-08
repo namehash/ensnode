@@ -30,7 +30,8 @@ const PARENT_CANNOT_CONTROL = 65536;
 export const checkPccBurned = (fuses: number) =>
   (fuses & PARENT_CANNOT_CONTROL) == PARENT_CANNOT_CONTROL;
 
-// TODO: this is basically just ensjs#bytesToPacket w/ custom validity check
+// this is basically just ensjs#bytesToPacket w/ custom validity check
+// TODO: this should be part of some more standard ens helper lib
 // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L30
 export function decodeDNSPacketBytes(buf: Uint8Array): [string | null, string | null] {
   if (buf.length === 0) return ["", "."];

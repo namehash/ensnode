@@ -35,7 +35,6 @@ export const domains = onchainTable("domains", (t) => ({
   // The account that owns the ERC721 NFT for the domain
   registrantId: t.hex("registrant_id"),
   // The account that owns the wrapped domain
-  // NOTE: this should just be resolved through wrappedDomain.owner
   wrappedOwnerId: t.hex("wrapped_owner_id"),
 
   // The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned
