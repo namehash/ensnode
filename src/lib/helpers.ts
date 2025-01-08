@@ -8,11 +8,11 @@ export const bigintMax = (...args: bigint[]): bigint => args.reduce((a, b) => (a
 
 // makes sure start and end blocks are valid for ponder
 export const blockConfig = (
-  start: number,
+  start: number | undefined,
   startBlock: number,
-  end: number,
+  end: number | undefined,
 ): Pick<ContractConfig, "startBlock" | "endBlock"> => ({
   // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
-  startBlock: Math.min(Math.max(start, startBlock), end || Number.MAX_SAFE_INTEGER),
+  startBlock: Math.min(Math.max(start || 0, startBlock), end || Number.MAX_SAFE_INTEGER),
   endBlock: end,
 });

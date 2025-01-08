@@ -1,4 +1,4 @@
-import { createConfig, factory, mergeAbis } from "ponder";
+import { ContractConfig, createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
 import { mainnet } from "viem/chains";
@@ -18,8 +18,9 @@ export const ownedName = "eth";
 
 export const pluginNamespace = createPluginNamespace(ownedName);
 
-const START_BLOCK = 16934751;
-const END_BLOCK: number | undefined = 21_000_000;
+// constrain the ponder indexing between the following start/end blocks
+const START_BLOCK: ContractConfig["startBlock"] = undefined;
+const END_BLOCK: ContractConfig["endBlock"] = undefined;
 
 export const config = createConfig({
   networks: {
