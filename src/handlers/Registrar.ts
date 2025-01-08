@@ -2,7 +2,7 @@ import { type Context } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
 import { Block } from "ponder";
 import { type Hex, namehash } from "viem";
-import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/subname-helpers";
+import { isLabelIndexable, makeSubnodeNamehash, tokenIdToLabel } from "../lib/subname-helpers";
 import { upsertAccount, upsertRegistration } from "../lib/upserts";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
@@ -14,7 +14,7 @@ export const makeRegistryHandlers = (ownedName: `${string}eth`) => {
   const ownedSubnameNode = namehash(ownedName);
 
   async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
-    if (!isLabelValid(name)) return;
+    if (!isLabelIndexable(name)) return;
 
     const node = makeSubnodeNamehash(ownedSubnameNode, label);
     const domain = await context.db.find(domains, { id: node });

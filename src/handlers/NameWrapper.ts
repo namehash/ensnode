@@ -1,14 +1,10 @@
 import { type Context, type Event, type EventNames } from "ponder:registry";
 import { domains, wrappedDomains } from "ponder:schema";
+import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes } from "viem";
 import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
-import {
-  ETH_NODE,
-  checkPccBurned,
-  decodeDNSPacketBytes,
-  tokenIdToLabel,
-} from "../lib/subname-helpers";
+import { ETH_NODE, decodeDNSPacketBytes, tokenIdToLabel } from "../lib/subname-helpers";
 import { upsertAccount } from "../lib/upserts";
 
 // if the wrappedDomain in question has pcc burned (?) and a higher (?) expiry date, update the domain's expiryDate
@@ -16,8 +12,13 @@ async function materializeDomainExpiryDate(context: Context, node: Hex) {
   const wrappedDomain = await context.db.find(wrappedDomains, { id: node });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
-  // ignore if pcc not burned
-  if (!checkPccBurned(wrappedDomain.fuses)) return;
+  // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L63)
+  // which is the exact INVERSE of the ensjs util of the same name. the subgraph's name is _incorrect_
+  // because it returns true if the PCC is SET _not_ burned
+  // make sure to remember that if you compare the logic in this function to the original subgraph logic [here](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L87)
+
+  // do not update expiry if PCC is burned
+  if (checkPccBurned(BigInt(wrappedDomain.fuses))) return;
 
   // update the domain's expiry to the greater of the two
   await context.db.update(domains, { id: node }).set((domain) => ({
