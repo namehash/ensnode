@@ -10,8 +10,8 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 /**
  * A factory function that returns Ponder indexing handlers for a specified subname.
  */
-export const makeRegistryHandlers = (ownedSubname: `${string}eth`) => {
-  const ownedSubnameNode = namehash(ownedSubname);
+export const makeRegistryHandlers = (ownedName: `${string}eth`) => {
+  const ownedSubnameNode = namehash(ownedName);
 
   async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
     if (!isLabelValid(name)) return;
@@ -23,7 +23,7 @@ export const makeRegistryHandlers = (ownedSubname: `${string}eth`) => {
     if (domain.labelName !== name) {
       await context.db
         .update(domains, { id: node })
-        .set({ labelName: name, name: `${name}${ownedSubname}` });
+        .set({ labelName: name, name: `${name}${ownedName}` });
     }
 
     await context.db.update(registrations, { id: label }).set({ labelName: name, cost });

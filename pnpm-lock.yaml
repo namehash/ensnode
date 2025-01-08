@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  vite: 5.1.8
+
 importers:
 
   .:
@@ -1698,13 +1701,13 @@ packages:
   vite-tsconfig-paths@4.3.1:
     resolution: {integrity: sha512-cfgJwcGOsIxXOLU/nELPny2/LUD/lcf1IbfyeKTv2bsupVbTH/xpFtdQlBmIP1GEK2CjjLxYhFfB+QODFAx5aw==}
     peerDependencies:
-      vite: '*'
+      vite: 5.1.8
     peerDependenciesMeta:
       vite:
         optional: true
 
-  vite@5.0.7:
-    resolution: {integrity: sha512-B4T4rJCDPihrQo2B+h1MbeGL/k/GMAHzhQ8S0LjQ142s6/+l3hHTT095ORvsshj4QCkoWu3Xtmob5mazvakaOw==}
+  vite@5.1.8:
+    resolution: {integrity: sha512-mB8ToUuSmzODSpENgvpFk2fTiU/YQ1tmcVJJ4WZbq4fPdGJkFNVcmVL5k7iDug6xzWjjuGDKAuSievIsD6H7Xw==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -2967,9 +2970,9 @@ snapshots:
       react: 18.3.1
       stacktrace-parser: 0.1.10
       viem: 2.21.57(typescript@5.7.2)
-      vite: 5.0.7(@types/node@20.17.10)
+      vite: 5.1.8(@types/node@20.17.10)
       vite-node: 1.0.2(@types/node@20.17.10)
-      vite-tsconfig-paths: 4.3.1(typescript@5.7.2)(vite@5.0.7(@types/node@20.17.10))
+      vite-tsconfig-paths: 4.3.1(typescript@5.7.2)(vite@5.1.8(@types/node@20.17.10))
     optionalDependencies:
       typescript: 5.7.2
     transitivePeerDependencies:
@@ -3296,7 +3299,7 @@ snapshots:
       debug: 4.4.0(supports-color@8.1.1)
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.0.7(@types/node@20.17.10)
+      vite: 5.1.8(@types/node@20.17.10)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -3307,18 +3310,18 @@ snapshots:
       - supports-color
       - terser
 
-  vite-tsconfig-paths@4.3.1(typescript@5.7.2)(vite@5.0.7(@types/node@20.17.10)):
+  vite-tsconfig-paths@4.3.1(typescript@5.7.2)(vite@5.1.8(@types/node@20.17.10)):
     dependencies:
       debug: 4.4.0(supports-color@8.1.1)
       globrex: 0.1.2
       tsconfck: 3.1.4(typescript@5.7.2)
     optionalDependencies:
-      vite: 5.0.7(@types/node@20.17.10)
+      vite: 5.1.8(@types/node@20.17.10)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@5.0.7(@types/node@20.17.10):
+  vite@5.1.8(@types/node@20.17.10):
     dependencies:
       esbuild: 0.19.12
       postcss: 8.4.49

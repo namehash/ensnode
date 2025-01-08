@@ -2,12 +2,12 @@ import { ACTIVE_PLUGIN } from "./src/lib/plugin-helpers";
 import {
   activate as activateEthBase,
   config as ethBaseConfig,
-  ownedSubname as ethBaseOwnedSubname,
+  ownedName as ethBaseOwnedName,
 } from "./src/plugins/base.eth/ponder.config";
 import {
   activate as activateEth,
   config as ethConfig,
-  ownedSubname as ethOwnedSubname,
+  ownedName as ethOwnedName,
 } from "./src/plugins/eth/ponder.config";
 
 type AllConfigs = typeof ethConfig & typeof ethBaseConfig;
@@ -17,10 +17,10 @@ type AllConfigs = typeof ethConfig & typeof ethBaseConfig;
 // config is run at runtime
 export default ((): AllConfigs => {
   switch (ACTIVE_PLUGIN) {
-    case ethOwnedSubname:
+    case ethOwnedName:
       activateEth();
       return ethConfig as AllConfigs;
-    case ethBaseOwnedSubname:
+    case ethBaseOwnedName:
       activateEthBase();
       return ethBaseConfig as AllConfigs;
     default:

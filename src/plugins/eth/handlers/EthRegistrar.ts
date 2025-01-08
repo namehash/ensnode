@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import { makeRegistryHandlers } from "../../../handlers/Registrar";
-import { ownedSubname, pluginNamespace } from "../ponder.config";
+import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {
   handleNameRegistered,
@@ -8,7 +8,7 @@ const {
   handleNameRenewedByController,
   handleNameRenewed,
   handleNameTransferred,
-} = makeRegistryHandlers(ownedSubname);
+} = makeRegistryHandlers(ownedName);
 
 export default function () {
   ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), handleNameRegistered);

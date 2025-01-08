@@ -3,7 +3,7 @@ import { domains } from "ponder:schema";
 import { makeRegistryHandlers } from "../../../handlers/Registrar";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { upsertAccount } from "../../../lib/upserts";
-import { ownedSubname, pluginNamespace } from "../ponder.config";
+import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {
   handleNameRegistered,
@@ -12,7 +12,7 @@ const {
   handleNameRenewed,
   handleNameTransferred,
   ownedSubnameNode,
-} = makeRegistryHandlers(ownedSubname);
+} = makeRegistryHandlers(ownedName);
 
 export default function () {
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers

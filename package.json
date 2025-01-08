@@ -23,5 +23,8 @@
   },
   "engines": {
     "node": ">=18.14"
+  },
+  "resolutions": {
+    "vite": "5.1.8"
   }
 }
