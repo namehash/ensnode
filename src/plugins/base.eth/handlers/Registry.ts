@@ -6,12 +6,12 @@ import {
   handleTransfer,
   setupRootNode,
 } from "../../../handlers/Registry";
-import { ponderNamespace } from "../ponder.config";
+import { pluginNamespace } from "../ponder.config";
 
 export default function () {
-  ponder.on(ponderNamespace("Registry:setup"), setupRootNode);
-  ponder.on(ponderNamespace("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(ponderNamespace("Registry:NewResolver"), handleNewResolver);
-  ponder.on(ponderNamespace("Registry:NewTTL"), handleNewTTL);
-  ponder.on(ponderNamespace("Registry:Transfer"), handleTransfer);
+  ponder.on(pluginNamespace("Registry:setup"), setupRootNode);
+  ponder.on(pluginNamespace("Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(pluginNamespace("Registry:NewResolver"), handleNewResolver);
+  ponder.on(pluginNamespace("Registry:NewTTL"), handleNewTTL);
+  ponder.on(pluginNamespace("Registry:Transfer"), handleTransfer);
 }

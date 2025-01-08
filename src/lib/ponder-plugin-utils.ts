@@ -16,18 +16,18 @@
  *
  * @example
  * ```ts
- * const ethNs = createPonderNamespace("base.eth");
- * const baseEthNs = createPonderNamespace("base.eth");
+ * const ethNs = createPluginNamespace("base.eth");
+ * const baseEthNs = createPluginNamespace("base.eth");
  *
  * ethNs("Registry"); // returns "/eth/Registry"
  * baseEthNs("Registry"); // returns "/base/eth/Registry"
  * ```
  */
-export function createPonderNamespace<Subname extends EthSubname>(subname: Subname) {
+export function createPluginNamespace<Subname extends EthSubname>(subname: Subname) {
   const path = transformDomain(subname) satisfies PonderNsPath;
 
   /** Creates a name-spaced contract name */
-  return function ponderNamespace<ContractName extends string>(
+  return function pluginNamespace<ContractName extends string>(
     contractName: ContractName,
   ): PonderNamespaceReturnType<ContractName, typeof path> {
     return `${path}/${contractName}`;
@@ -53,7 +53,7 @@ function transformDomain<T extends string>(domain: T): TransformDomain<T> {
   return `/${parts.join("/")}` as TransformDomain<T>;
 }
 
-/** The return type of the `ponderNamespace` function */
+/** The return type of the `pluginNamespace` function */
 export type PonderNamespaceReturnType<
   ContractName extends string,
   NsPath extends PonderNsPath,
