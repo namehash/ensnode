@@ -2,7 +2,7 @@ import { createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
 import { mainnet } from "viem/chains";
-import { createPluginNamespace } from "../../lib/ponder-plugin-utils";
+import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";

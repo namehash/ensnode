@@ -2,7 +2,7 @@ import { createConfig, factory } from "ponder";
 import { http, getAbiItem } from "viem";
 import { base } from "viem/chains";
 
-import { createPluginNamespace } from "../../lib/ponder-plugin-utils";
+import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EarlyAccessRegistrarController } from "./abis/EARegistrarController";
 import { L2Resolver } from "./abis/L2Resolver";
