@@ -9,9 +9,9 @@ import { L2Resolver } from "./abis/L2Resolver";
 import { RegistrarController } from "./abis/RegistrarController";
 import { Registry } from "./abis/Registry";
 
-export const indexedSubname = "base.eth" as const;
+export const ownedSubname = "base.eth" as const;
 
-export const pluginNamespace = createPluginNamespace(indexedSubname);
+export const pluginNamespace = createPluginNamespace(ownedSubname);
 
 export const config = createConfig({
   networks: {
