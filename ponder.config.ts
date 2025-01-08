@@ -1,4 +1,4 @@
-import { ACTIVE_PLUGIN } from "./src/lib/subname-helpers";
+import { ACTIVE_PLUGIN } from "./src/lib/plugin-helpers";
 import {
   activate as activateEthBase,
   config as ethBaseConfig,

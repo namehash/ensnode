@@ -13,8 +13,8 @@
  * distinguish between contracts having the same name, but handling different
  * implementations.
  *
- * Let's say we have two contracts named `Registry`. One handles the `eth` name
- * and the other handles the `base.eth` subname. We need to create a namespaced
+ * Let's say we have two contracts named `Registry`. One handles `eth` subnames
+ * and the other handles `base.eth` subnames. We need to create a namespaced
  * contract name to avoid conflicts.
  * We could use the actual name/subname as a prefix, like `eth/Registry` and
  * `base.eth/Registry`. We cannot do that, though, as Ponder does not support
@@ -78,3 +78,6 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
   | ``
   | `/${string}`
   | `/${string}${T}`;
+
+/** @var the requested active plugin name (see `src/plugins` for available plugins) */
+export const ACTIVE_PLUGIN = process.env.ACTIVE_PLUGIN;
