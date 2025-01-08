@@ -14,7 +14,7 @@ class ManagedSubname {
   }
 }
 
-export const INDEXED_SUBNAME = ManagedSubname.parse(process.env.INDEX_SUBNAME).toString();
+export const ACTIVE_PLUGIN = ManagedSubname.parse(process.env.ACTIVE_PLUGIN).toString();
 
 // TODO: pull from ens utils lib or something
 export const ROOT_NODE = namehash("");

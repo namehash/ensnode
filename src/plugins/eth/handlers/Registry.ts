@@ -8,7 +8,7 @@ import {
   handleTransfer,
   setupRootNode,
 } from "../../../handlers/Registry";
-import { makeSubnodeNamehash } from "../../../lib/ens-helpers";
+import { makeSubnodeNamehash } from "../../../lib/subname-helpers";
 import { ponderNamespace } from "../ponder.config";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not

@@ -2,8 +2,8 @@ import { Context } from "ponder:registry";
 import { domains, resolvers } from "ponder:schema";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
-import { ROOT_NODE, encodeLabelhash, makeSubnodeNamehash } from "../lib/ens-helpers";
 import { makeResolverId } from "../lib/ids";
+import { ROOT_NODE, encodeLabelhash, makeSubnodeNamehash } from "../lib/subname-helpers";
 import { upsertAccount } from "../lib/upserts";
 
 /**

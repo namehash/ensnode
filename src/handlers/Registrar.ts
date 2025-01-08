@@ -2,13 +2,13 @@ import { type Context } from "ponder:registry";
 import { domains, registrations } from "ponder:schema";
 import { Block } from "ponder";
 import { type Hex, namehash } from "viem";
-import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/ens-helpers";
+import { isLabelValid, makeSubnodeNamehash, tokenIdToLabel } from "../lib/subname-helpers";
 import { upsertAccount, upsertRegistration } from "../lib/upserts";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
 /**
- * A factory function that returns Ponder indexing handlers for a specified index name/subname.
+ * A factory function that returns Ponder indexing handlers for a specified subname.
  */
 export const makeRegistryHandlers = (managedSubname: `${string}eth`) => {
   const managedSubnameNode = namehash(managedSubname);

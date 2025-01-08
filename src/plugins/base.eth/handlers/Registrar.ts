@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 import { domains } from "ponder:schema";
 import { makeRegistryHandlers } from "../../../handlers/Registrar";
-import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/ens-helpers";
+import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { upsertAccount } from "../../../lib/upserts";
 import { managedSubname, ponderNamespace } from "../ponder.config";
 

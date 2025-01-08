@@ -17,7 +17,7 @@ export const config = createConfig({
   networks: {
     base: {
       chainId: base.id,
-      transport: http(process.env[`PONDER_RPC_URL_${base.id}`]),
+      transport: http(process.env[`RPC_URL_${base.id}`]),
     },
   },
   contracts: {

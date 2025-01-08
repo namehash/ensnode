@@ -1,6 +1,7 @@
 import { createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
+import { mainnet } from "viem/chains";
 import { createPonderNamespace } from "../../lib/ponder-plugin-utils";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
@@ -19,8 +20,8 @@ export const ponderNamespace = createPonderNamespace(managedSubname);
 export const config = createConfig({
   networks: {
     mainnet: {
-      chainId: 1,
-      transport: http(process.env.PONDER_RPC_URL_1),
+      chainId: mainnet.id,
+      transport: http(process.env[`RPC_URL_${mainnet.id}`]),
     },
   },
   contracts: {
