@@ -1,13 +1,15 @@
 import { ponder } from "ponder:registry";
-import {
+import { makeRegistryHandlers } from "../../../handlers/NameWrapper";
+import { ownedName, pluginNamespace } from "../ponder.config";
+
+const {
   handleExpiryExtended,
   handleFusesSet,
   handleNameUnwrapped,
   handleNameWrapped,
   handleTransferBatch,
   handleTransferSingle,
-} from "../../../handlers/NameWrapper";
-import { pluginNamespace } from "../ponder.config";
+} = makeRegistryHandlers(ownedName);
 
 export default function () {
   ponder.on(pluginNamespace("NameWrapper:NameWrapped"), handleNameWrapped);
