@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { makeRegistryHandlers } from "../../../handlers/NameWrapper";
+import { makeNameWrapperHandlers } from "../../../handlers/NameWrapper";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {
@@ -9,7 +9,7 @@ const {
   handleNameWrapped,
   handleTransferBatch,
   handleTransferSingle,
-} = makeRegistryHandlers(ownedName);
+} = makeNameWrapperHandlers(ownedName);
 
 export default function () {
   ponder.on(pluginNamespace("NameWrapper:NameWrapped"), handleNameWrapped);

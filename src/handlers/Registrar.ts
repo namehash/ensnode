@@ -10,7 +10,7 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 /**
  * A factory function that returns Ponder indexing handlers for a specified subname.
  */
-export const makeRegistryHandlers = (ownedName: `${string}eth`) => {
+export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
   const ownedSubnameNode = namehash(ownedName);
 
   async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {

@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import { domains } from "ponder:schema";
-import { makeRegistryHandlers } from "../../../handlers/Registrar";
+import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { upsertAccount } from "../../../lib/upserts";
 import { ownedName, pluginNamespace } from "../ponder.config";
@@ -12,7 +12,7 @@ const {
   handleNameRenewed,
   handleNameTransferred,
   ownedSubnameNode,
-} = makeRegistryHandlers(ownedName);
+} = makeRegistrarHandlers(ownedName);
 
 export default function () {
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers

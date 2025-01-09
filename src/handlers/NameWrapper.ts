@@ -62,7 +62,7 @@ async function handleTransfer(
   // TODO: log WrappedTransfer
 }
 
-export const makeRegistryHandlers = (ownedName: `${string}eth`) => {
+export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
   const ownedSubnameNode = namehash(ownedName);
 
   return {
