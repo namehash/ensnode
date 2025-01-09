@@ -48,7 +48,7 @@ export function createPluginNamespace<Subname extends string>(subname: Subname) 
 }
 
 type TransformNameIntoPath<Name extends string> = Name extends `${infer Sub}.${infer Rest}`
-  ? `/${TransformNameIntoPath<Rest>}/${Sub}`
+  ? `${TransformNameIntoPath<Rest>}/${Sub}`
   : `/${Name}`;
 
 /**
@@ -67,6 +67,8 @@ function nameIntoPath<Name extends string>(name: Name): TransformNameIntoPath<Na
   // TODO: validate the name
   return `/${name.split(".").reverse().join("/")}` as TransformNameIntoPath<Name>;
 }
+
+const x = nameIntoPath("linea.eth");
 
 /** The return type of the `pluginNamespace` function */
 type PluginNamespaceReturnType<

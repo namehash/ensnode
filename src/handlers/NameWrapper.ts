@@ -1,10 +1,10 @@
 import { type Context, type Event, type EventNames } from "ponder:registry";
 import { domains, wrappedDomains } from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { type Address, type Hex, hexToBytes } from "viem";
+import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
-import { ETH_NODE, decodeDNSPacketBytes, tokenIdToLabel } from "../lib/subname-helpers";
+import { decodeDNSPacketBytes, tokenIdToLabel } from "../lib/subname-helpers";
 import { upsertAccount } from "../lib/upserts";
 
 // if the wrappedDomain in question has pcc burned (?) and a higher (?) expiry date, update the domain's expiryDate
@@ -61,150 +61,154 @@ async function handleTransfer(
 
   // TODO: log WrappedTransfer
 }
-export async function handleNameWrapped({
-  context,
-  event,
-}: {
-  context: Context;
-  event: {
-    args: {
-      node: Hex;
-      owner: Hex;
-      fuses: number;
-      expiry: bigint;
-      name: Hex;
-    };
+
+export const makeRegistryHandlers = (ownedName: `${string}eth`) => {
+  const ownedSubnameNode = namehash(ownedName);
+
+  return {
+    async handleNameWrapped({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: {
+        args: {
+          node: Hex;
+          owner: Hex;
+          fuses: number;
+          expiry: bigint;
+          name: Hex;
+        };
+      };
+    }) {
+      const { node, owner, fuses, expiry } = event.args;
+
+      await upsertAccount(context, owner);
+
+      // decode the name emitted by NameWrapper
+      const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
+
+      // upsert the healed name iff valid
+      if (label) {
+        await context.db.update(domains, { id: node }).set({ labelName: label, name });
+      }
+
+      // update the WrappedDomain that was created in handleTransfer
+      await context.db.update(wrappedDomains, { id: node }).set({
+        name,
+        expiryDate: expiry,
+        fuses,
+      });
+
+      // materialize wrappedOwner relation
+      await context.db.update(domains, { id: node }).set({ wrappedOwnerId: owner });
+
+      // materialize domain expiryDate
+      await materializeDomainExpiryDate(context, node);
+
+      // TODO: log NameWrapped
+    },
+
+    async handleNameUnwrapped({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: {
+        args: {
+          node: Hex;
+          owner: Hex;
+        };
+      };
+    }) {
+      const { node, owner } = event.args;
+
+      await upsertAccount(context, owner);
+
+      await context.db.update(domains, { id: node }).set((domain) => ({
+        // null expiry date if the domain is not a direct child of .eth
+        // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L123
+        ...(domain.expiryDate && domain.parentId !== ownedSubnameNode && { expiryDate: null }),
+        ownerId: owner,
+        wrappedOwnerId: null,
+      }));
+
+      // delete the WrappedDomain
+      await context.db.delete(wrappedDomains, { id: node });
+
+      // TODO: log NameUnwrapped
+    },
+
+    async handleFusesSet({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: {
+        args: {
+          node: Hex;
+          fuses: number;
+        };
+      };
+    }) {
+      const { node, fuses } = event.args;
+
+      // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
+      // we will be more explicit and update logic if necessary
+      await context.db.update(wrappedDomains, { id: node }).set({ fuses });
+    },
+    async handleExpiryExtended({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: {
+        args: {
+          node: Hex;
+          expiry: bigint;
+        };
+      };
+    }) {
+      const { node, expiry } = event.args;
+
+      // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
+      // we will be more explicit and update logic if necessary
+      await context.db.update(wrappedDomains, { id: node }).set({ expiryDate: expiry });
+
+      // materialize the domain's expiryDate
+      await materializeDomainExpiryDate(context, node);
+
+      // TODO: log ExpiryExtended
+    },
+    async handleTransferSingle({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: Event<EventNames> & {
+        args: {
+          id: bigint;
+          to: Hex;
+        };
+      };
+    }) {
+      await handleTransfer(context, event, makeEventId(event, 0), event.args.id, event.args.to);
+    },
+    async handleTransferBatch({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: Event<EventNames> & {
+        args: {
+          ids: readonly bigint[];
+          to: Hex;
+        };
+      };
+    }) {
+      for (const [i, id] of event.args.ids.entries()) {
+        await handleTransfer(context, event, makeEventId(event, i), id, event.args.to);
+      }
+    },
   };
-}) {
-  const { node, owner, fuses, expiry } = event.args;
-
-  await upsertAccount(context, owner);
-
-  // decode the name emitted by NameWrapper
-  const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
-
-  // upsert the healed name iff valid
-  if (label) {
-    await context.db.update(domains, { id: node }).set({ labelName: label, name });
-  }
-
-  // update the WrappedDomain that was created in handleTransfer
-  await context.db.update(wrappedDomains, { id: node }).set({
-    name,
-    expiryDate: expiry,
-    fuses,
-  });
-
-  // materialize wrappedOwner relation
-  await context.db.update(domains, { id: node }).set({ wrappedOwnerId: owner });
-
-  // materialize domain expiryDate
-  await materializeDomainExpiryDate(context, node);
-
-  // TODO: log NameWrapped
-}
-
-export async function handleNameUnwrapped({
-  context,
-  event,
-}: {
-  context: Context;
-  event: {
-    args: {
-      node: Hex;
-      owner: Hex;
-    };
-  };
-}) {
-  const { node, owner } = event.args;
-
-  await upsertAccount(context, owner);
-
-  await context.db.update(domains, { id: node }).set((domain) => ({
-    // null expiry date if the domain is not a direct child of .eth
-    // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L123
-    ...(domain.expiryDate && domain.parentId !== ETH_NODE && { expiryDate: null }),
-    ownerId: owner,
-    wrappedOwnerId: null,
-  }));
-
-  // delete the WrappedDomain
-  await context.db.delete(wrappedDomains, { id: node });
-
-  // TODO: log NameUnwrapped
-}
-
-export async function handleFusesSet({
-  context,
-  event,
-}: {
-  context: Context;
-  event: {
-    args: {
-      node: Hex;
-      fuses: number;
-    };
-  };
-}) {
-  const { node, fuses } = event.args;
-
-  // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
-  // we will be more explicit and update logic if necessary
-  await context.db.update(wrappedDomains, { id: node }).set({ fuses });
-}
-
-export async function handleExpiryExtended({
-  context,
-  event,
-}: {
-  context: Context;
-  event: {
-    args: {
-      node: Hex;
-      expiry: bigint;
-    };
-  };
-}) {
-  const { node, expiry } = event.args;
-
-  // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
-  // we will be more explicit and update logic if necessary
-  await context.db.update(wrappedDomains, { id: node }).set({ expiryDate: expiry });
-
-  // materialize the domain's expiryDate
-  await materializeDomainExpiryDate(context, node);
-
-  // TODO: log ExpiryExtended
-}
-
-export async function handleTransferSingle({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<EventNames> & {
-    args: {
-      id: bigint;
-      to: Hex;
-    };
-  };
-}) {
-  return await handleTransfer(context, event, makeEventId(event, 0), event.args.id, event.args.to);
-}
-
-export async function handleTransferBatch({
-  context,
-  event,
-}: {
-  context: Context;
-  event: Event<EventNames> & {
-    args: {
-      ids: readonly bigint[];
-      to: Hex;
-    };
-  };
-}) {
-  for (const [i, id] of event.args.ids.entries()) {
-    await handleTransfer(context, event, makeEventId(event, i), id, event.args.to);
-  }
-}
+};
