@@ -68,8 +68,6 @@ function nameIntoPath<Name extends string>(name: Name): TransformNameIntoPath<Na
   return `/${name.split(".").reverse().join("/")}` as TransformNameIntoPath<Name>;
 }
 
-const x = nameIntoPath("linea.eth");
-
 /** The return type of the `pluginNamespace` function */
 type PluginNamespaceReturnType<
   ContractName extends string,
