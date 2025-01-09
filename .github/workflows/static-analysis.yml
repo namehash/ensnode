@@ -32,3 +32,6 @@ jobs:
 
       - name: Run Biome CI
         run: pnpm biome ci
+
+      - name: Run TypeScript type checking
+        run: pnpm run typecheck
