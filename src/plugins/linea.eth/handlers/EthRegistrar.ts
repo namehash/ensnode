@@ -22,8 +22,8 @@ export default function () {
     if (event.args.from === zeroAddress) {
       /**
        * Address the issue where in the same transaction the Transfer event occurs before the NameRegistered event.
-       * Example: https://basescan.org/tx/0x4d478a75710fb1edcfad5289b9e5ba76c4d1a0e8d897e2e89adf6d8107aadd66#eventlog
-       * Code: https://github.com/base-org/basenames/blob/1b5c1ad464f061c557c33b60b1821f75dae924cc/src/L2/BaseRegistrar.sol#L272-L273
+       * Example: https://lineascan.build/tx/0x2211c5d857d16b7ac111088c57fb346ab94049cb297f02b0dda7aaf4c14d305b#eventlog
+       * Code: hhttps://github.com/Consensys/linea-ens/blob/main/packages/linea-ens-contracts/contracts/ethregistrar/BaseRegistrarImplementation.sol#L155-L160
        */
 
       const { tokenId: id, to: owner } = event.args;

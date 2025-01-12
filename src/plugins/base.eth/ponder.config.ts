@@ -1,7 +1,8 @@
-import { createConfig, factory } from "ponder";
+import { type ContractConfig, createConfig, factory } from "ponder";
 import { http, getAbiItem } from "viem";
 import { base } from "viem/chains";
 
+import { blockConfig } from "../../lib/helpers";
 import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EarlyAccessRegistrarController } from "./abis/EARegistrarController";
@@ -12,6 +13,11 @@ import { Registry } from "./abis/Registry";
 export const ownedName = "base.eth" as const;
 
 export const pluginNamespace = createPluginNamespace(ownedName);
+
+// constrain the ponder indexing between the following start/end blocks
+// https://ponder.sh/0_6/docs/contracts-and-networks#block-range
+const START_BLOCK: ContractConfig["startBlock"] = 24944146;
+const END_BLOCK: ContractConfig["endBlock"] = undefined;
 
 export const config = createConfig({
   networks: {
@@ -25,7 +31,7 @@ export const config = createConfig({
       network: "base",
       abi: Registry,
       address: "0xb94704422c2a1e396835a571837aa5ae53285a95",
-      startBlock: 17571480,
+      ...blockConfig(START_BLOCK, 17571480, END_BLOCK),
     },
     [pluginNamespace("Resolver")]: {
       network: "base",
@@ -35,25 +41,25 @@ export const config = createConfig({
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
-      startBlock: 17575714,
+      ...blockConfig(START_BLOCK, 17575714, END_BLOCK),
     },
     [pluginNamespace("BaseRegistrar")]: {
       network: "base",
       abi: BaseRegistrar,
       address: "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
-      startBlock: 17571486,
+      ...blockConfig(START_BLOCK, 17571486, END_BLOCK),
     },
     [pluginNamespace("EARegistrarController")]: {
       network: "base",
       abi: EarlyAccessRegistrarController,
       address: "0xd3e6775ed9b7dc12b205c8e608dc3767b9e5efda",
-      startBlock: 17575699,
+      ...blockConfig(START_BLOCK, 17575699, END_BLOCK),
     },
     [pluginNamespace("RegistrarController")]: {
       network: "base",
       abi: RegistrarController,
       address: "0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5",
-      startBlock: 18619035,
+      ...blockConfig(START_BLOCK, 18619035, END_BLOCK),
     },
   },
 });

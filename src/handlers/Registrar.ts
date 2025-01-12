@@ -23,7 +23,7 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
     if (domain.labelName !== name) {
       await context.db
         .update(domains, { id: node })
-        .set({ labelName: name, name: `${name}${ownedName}` });
+        .set({ labelName: name, name: `${name}.${ownedName}` });
     }
 
     await context.db.update(registrations, { id: label }).set({ labelName: name, cost });

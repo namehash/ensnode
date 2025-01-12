@@ -16,8 +16,8 @@ export const pluginNamespace = createPluginNamespace(ownedName);
 
 // constrain the ponder indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range
-const START_BLOCK: ContractConfig["startBlock"] = undefined;
-const END_BLOCK: ContractConfig["endBlock"] = 8398631;
+const START_BLOCK: ContractConfig["startBlock"] = 14490289;
+const END_BLOCK: ContractConfig["endBlock"] = undefined;
 
 export const config = createConfig({
   networks: {
