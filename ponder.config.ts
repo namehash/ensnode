@@ -1,4 +1,3 @@
-import { createConfig } from "ponder";
 import { deepMergeRecursive } from "./src/lib/helpers";
 import { type IntersectionOf, getActivePlugins } from "./src/lib/plugin-helpers";
 import * as baseEthPlugin from "./src/plugins/base.eth/ponder.config";
@@ -11,22 +10,12 @@ const plugins = [baseEthPlugin, ethPlugin, lineaEthPlugin] as const;
 // each plugin can be correctly typechecked
 type AllPluginsConfig = IntersectionOf<(typeof plugins)[number]["config"]>;
 
-const activePlugins = loadActivePlugins();
-
-export default (() =>
-  createConfig({
-    contracts: {
-      ...activePlugins.contracts,
-    },
-    networks: {
-      ...activePlugins.networks,
-    },
-  }) as AllPluginsConfig)();
+export default loadActivePlugins();
 
 /**
  * Activates the indexing handlers included in selected active plugins and returns their combined config.
  */
-function loadActivePlugins() {
+function loadActivePlugins(): AllPluginsConfig {
   const activePlugins = getActivePlugins(plugins);
 
   activePlugins.forEach((plugin) => plugin.activate());
@@ -35,5 +24,5 @@ function loadActivePlugins() {
     .map((plugin) => plugin.config)
     .reduce((acc, val) => deepMergeRecursive(acc, val), {} as AllPluginsConfig);
 
-  return config;
+  return config as AllPluginsConfig;
 }
