@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 import { domains } from "ponder:schema";
+import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { upsertAccount } from "../../../lib/upserts";
@@ -46,7 +47,28 @@ export default function () {
 
   // Base's BaseRegistrar uses `id` instead of `tokenId`
   ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
-    return await handleNameTransferred({
+    if (event.args.from === zeroAddress) {
+      /**
+       * Address the issue where in the same transaction the Transfer event occurs before the NameRegistered event.
+       * Example: https://basescan.org/tx/0x4d478a75710fb1edcfad5289b9e5ba76c4d1a0e8d897e2e89adf6d8107aadd66#eventlog
+       * Code: https://github.com/base-org/basenames/blob/1b5c1ad464f061c557c33b60b1821f75dae924cc/src/L2/BaseRegistrar.sol#L272-L273
+       */
+
+      const { id, to: owner } = event.args;
+      const label = tokenIdToLabel(id);
+      const node = makeSubnodeNamehash(ownedSubnameNode, label);
+
+      await context.db
+        .insert(domains)
+        .values({
+          id: node,
+          ownerId: owner,
+          createdAt: event.block.timestamp,
+        })
+        .onConflictDoNothing();
+    }
+
+    await handleNameTransferred({
       context,
       args: { ...event.args, tokenId: event.args.id },
     });

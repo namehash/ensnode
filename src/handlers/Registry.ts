@@ -15,12 +15,15 @@ export async function setupRootNode({ context }: { context: Context }) {
   await upsertAccount(context, zeroAddress);
 
   // initialize the ENS root to be owned by the zeroAddress and not migrated
-  await context.db.insert(domains).values({
-    id: ROOT_NODE,
-    ownerId: zeroAddress,
-    createdAt: 0n,
-    isMigrated: false,
-  });
+  await context.db
+    .insert(domains)
+    .values({
+      id: ROOT_NODE,
+      ownerId: zeroAddress,
+      createdAt: 0n,
+      isMigrated: false,
+    })
+    .onConflictDoNothing();
 }
 
 function isDomainEmpty(domain: typeof domains.$inferSelect) {

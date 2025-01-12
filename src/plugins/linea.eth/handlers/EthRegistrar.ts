@@ -1,5 +1,8 @@
 import { ponder } from "ponder:registry";
+import { domains } from "ponder:schema";
+import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
+import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {
@@ -8,6 +11,7 @@ const {
   handleNameRenewedByController,
   handleNameRenewed,
   handleNameTransferred,
+  ownedSubnameNode,
 } = makeRegistrarHandlers(ownedName);
 
 export default function () {
@@ -15,6 +19,26 @@ export default function () {
   ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), handleNameRenewed);
 
   ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
+    if (event.args.from === zeroAddress) {
+      /**
+       * Address the issue where in the same transaction the Transfer event occurs before the NameRegistered event.
+       * Example: https://basescan.org/tx/0x4d478a75710fb1edcfad5289b9e5ba76c4d1a0e8d897e2e89adf6d8107aadd66#eventlog
+       * Code: https://github.com/base-org/basenames/blob/1b5c1ad464f061c557c33b60b1821f75dae924cc/src/L2/BaseRegistrar.sol#L272-L273
+       */
+
+      const { tokenId: id, to: owner } = event.args;
+      const label = tokenIdToLabel(id);
+      const node = makeSubnodeNamehash(ownedSubnameNode, label);
+
+      await context.db
+        .insert(domains)
+        .values({
+          id: node,
+          ownerId: owner,
+          createdAt: event.block.timestamp,
+        })
+        .onConflictDoNothing();
+    }
     return await handleNameTransferred({ context, args: event.args });
   });
 

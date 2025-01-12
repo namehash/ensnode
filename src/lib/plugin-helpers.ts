@@ -81,3 +81,33 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
 
 /** @var the requested active plugin name (see `src/plugins` for available plugins) */
 export const ACTIVE_PLUGIN = process.env.ACTIVE_PLUGIN;
+
+/**
+ * Returns the active plugins list based on the `ACTIVE_PLUGIN` environment variable.
+ *
+ * The `ACTIVE_PLUGIN` environment variable is a comma-separated list of plugin
+ * names. The function returns the plugins that are included in the list.
+ *
+ * @param plugins is a list of available plugins
+ * @returns the active plugins
+ */
+export function getActivePlugins<T extends { ownedName: string }>(plugins: readonly T[]): T[] {
+  const pluginsToActivateByOwnedName = ACTIVE_PLUGIN
+    ? ACTIVE_PLUGIN.split(",").map((p) => p.toLowerCase())
+    : [];
+
+  if (!pluginsToActivateByOwnedName.length) {
+    throw new Error("No active plugins found. Please set the ACTIVE_PLUGIN environment variable.");
+  }
+
+  return plugins.filter((plugin) =>
+    pluginsToActivateByOwnedName.includes(plugin.ownedName.toLowerCase()),
+  );
+}
+
+// Helper type to get the intersection of all config types
+export type IntersectionOf<T> = (T extends any ? (x: T) => void : never) extends (
+  x: infer R,
+) => void
+  ? R
+  : never;
