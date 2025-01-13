@@ -13,7 +13,7 @@ import { pluginNamespace } from "../ponder.config";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {
-  const domain = await context.db.find(schema.domains, { id: node });
+  const domain = await context.db.find(schema.domain, { id: node });
   return domain?.isMigrated ?? false;
 }
 

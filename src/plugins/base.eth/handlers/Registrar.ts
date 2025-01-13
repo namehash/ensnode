@@ -31,7 +31,7 @@ export default function () {
     const node = makeSubnodeNamehash(ownedSubnameNode, label);
     await upsertAccount(context, owner);
     await context.db
-      .insert(schema.domains)
+      .insert(schema.domain)
       .values({
         id: node,
         ownerId: owner,

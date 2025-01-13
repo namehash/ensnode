@@ -9,7 +9,7 @@ import { upsertAccount } from "../lib/upserts";
 
 // if the wrappedDomain in question has pcc burned (?) and a higher (?) expiry date, update the domain's expiryDate
 async function materializeDomainExpiryDate(context: Context, node: Hex) {
-  const wrappedDomain = await context.db.find(schema.wrappedDomains, { id: node });
+  const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L63)
@@ -22,7 +22,7 @@ async function materializeDomainExpiryDate(context: Context, node: Hex) {
   if (checkPccBurned(BigInt(wrappedDomain.fuses))) return;
 
   // update the domain's expiry to the greater of the two
-  await context.db.update(schema.domains, { id: node }).set((domain) => ({
+  await context.db.update(schema.domain, { id: node }).set((domain) => ({
     expiryDate: bigintMax(domain.expiryDate ?? 0n, wrappedDomain.expiryDate),
   }));
 }
@@ -38,7 +38,7 @@ async function handleTransfer(
   const node = tokenIdToLabel(tokenId);
 
   // TODO: remove this if it never fires: subgraph upserts domain but shouldn't be necessary
-  const domain = await context.db.find(schema.domains, { id: node });
+  const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) {
     console.log("NameWrapper:handleTransfer called before domain existed");
     console.table({ ...event.args, node });
@@ -46,7 +46,7 @@ async function handleTransfer(
 
   // upsert the WrappedDomain, only changing owner iff exists
   await context.db
-    .insert(schema.wrappedDomains)
+    .insert(schema.wrappedDomain)
     .values({
       id: node,
       ownerId: to,
@@ -91,18 +91,18 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
 
       // upsert the healed name iff valid
       if (label) {
-        await context.db.update(schema.domains, { id: node }).set({ labelName: label, name });
+        await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 
       // update the WrappedDomain that was created in handleTransfer
-      await context.db.update(schema.wrappedDomains, { id: node }).set({
+      await context.db.update(schema.wrappedDomain, { id: node }).set({
         name,
         expiryDate: expiry,
         fuses,
       });
 
       // materialize wrappedOwner relation
-      await context.db.update(schema.domains, { id: node }).set({ wrappedOwnerId: owner });
+      await context.db.update(schema.domain, { id: node }).set({ wrappedOwnerId: owner });
 
       // materialize domain expiryDate
       await materializeDomainExpiryDate(context, node);
@@ -126,7 +126,7 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
 
       await upsertAccount(context, owner);
 
-      await context.db.update(schema.domains, { id: node }).set((domain) => ({
+      await context.db.update(schema.domain, { id: node }).set((domain) => ({
         // null expiry date if the domain is not a direct child of .eth
         // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L123
         ...(domain.expiryDate && domain.parentId !== ownedSubnameNode && { expiryDate: null }),
@@ -135,7 +135,7 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
       }));
 
       // delete the WrappedDomain
-      await context.db.delete(schema.wrappedDomains, { id: node });
+      await context.db.delete(schema.wrappedDomain, { id: node });
 
       // TODO: log NameUnwrapped
     },
@@ -156,7 +156,7 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
 
       // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
       // we will be more explicit and update logic if necessary
-      await context.db.update(schema.wrappedDomains, { id: node }).set({ fuses });
+      await context.db.update(schema.wrappedDomain, { id: node }).set({ fuses });
     },
     async handleExpiryExtended({
       context,
@@ -174,7 +174,7 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
 
       // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
       // we will be more explicit and update logic if necessary
-      await context.db.update(schema.wrappedDomains, { id: node }).set({ expiryDate: expiry });
+      await context.db.update(schema.wrappedDomain, { id: node }).set({ expiryDate: expiry });
 
       // materialize the domain's expiryDate
       await materializeDomainExpiryDate(context, node);
