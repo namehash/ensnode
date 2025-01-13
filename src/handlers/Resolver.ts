@@ -27,10 +27,10 @@ export async function handleAddrChanged({
     addrId: address,
   });
 
-  // materialize the resolved add to the domain iff this resolver is active
+  // materialize the resolved addr to the domain iff this resolver is active
   const domain = await context.db.find(schema.domain, { id: node });
   if (domain?.resolverId === id) {
-    await context.db.update(schema.domain, { id: node }).set({ resolvedAddress: address });
+    await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: address });
   }
 
   // TODO: log ResolverEvent
@@ -247,7 +247,7 @@ export async function handleVersionChanged({
 
   // materialize the Domain's resolvedAddress field
   if (domain.resolverId === id) {
-    await context.db.update(schema.domain, { id: node }).set({ resolvedAddress: null });
+    await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: null });
   }
 
   // clear out the resolver's info

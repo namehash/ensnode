@@ -187,7 +187,7 @@ export async function handleNewResolver({
     // update the domain to point to it, and denormalize the eth addr
     await context.db
       .update(schema.domain, { id: node })
-      .set({ resolverId, resolvedAddress: resolver?.addrId });
+      .set({ resolverId, resolvedAddressId: resolver?.addrId });
   }
 
   // TODO: log DomainEvent

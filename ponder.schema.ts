@@ -17,7 +17,7 @@ export const domain = onchainTable("domains", (t) => ({
   subdomainCount: t.integer("subdomain_count").notNull().default(0),
 
   // Address logged from current resolver, if any
-  resolvedAddress: t.hex("resolved_address"),
+  resolvedAddressId: t.hex("resolved_address_id"),
 
   // The resolver that controls the domain's settings
   resolverId: t.text(),
@@ -45,7 +45,10 @@ export const domain = onchainTable("domains", (t) => ({
 }));
 
 export const domainRelations = relations(domain, ({ one, many }) => ({
-  // has one owner
+  resolvedAddress: one(account, {
+    fields: [domain.resolvedAddressId],
+    references: [account.id],
+  }),
   owner: one(account, {
     fields: [domain.ownerId],
     references: [account.id],
