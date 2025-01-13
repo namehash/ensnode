@@ -1,5 +1,5 @@
 import { type Context } from "ponder:registry";
-import { domains, registrations } from "ponder:schema";
+import schema from "ponder:schema";
 import { Block } from "ponder";
 import { type Hex, namehash } from "viem";
 import { isLabelIndexable, makeSubnodeNamehash, tokenIdToLabel } from "../lib/subname-helpers";
@@ -17,16 +17,16 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
     if (!isLabelIndexable(name)) return;
 
     const node = makeSubnodeNamehash(ownedSubnameNode, label);
-    const domain = await context.db.find(domains, { id: node });
+    const domain = await context.db.find(schema.domains, { id: node });
     if (!domain) throw new Error("domain expected");
 
     if (domain.labelName !== name) {
       await context.db
-        .update(domains, { id: node })
+        .update(schema.domains, { id: node })
         .set({ labelName: name, name: `${name}${ownedName}` });
     }
 
-    await context.db.update(registrations, { id: label }).set({ labelName: name, cost });
+    await context.db.update(schema.registrations, { id: label }).set({ labelName: name, cost });
   }
 
   return {
@@ -63,7 +63,7 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
         labelName,
       });
 
-      await context.db.update(domains, { id: node }).set({
+      await context.db.update(schema.domains, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
         labelName,
@@ -106,10 +106,10 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
       const label = tokenIdToLabel(id);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
-      await context.db.update(registrations, { id: label }).set({ expiryDate: expires });
+      await context.db.update(schema.registrations, { id: label }).set({ expiryDate: expires });
 
       await context.db
-        .update(domains, { id: node })
+        .update(schema.domains, { id: node })
         .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
 
       // TODO: log Event
@@ -131,12 +131,12 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
       const label = tokenIdToLabel(tokenId);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
-      const registration = await context.db.find(registrations, { id: label });
+      const registration = await context.db.find(schema.registrations, { id: label });
       if (!registration) return;
 
-      await context.db.update(registrations, { id: label }).set({ registrantId: to });
+      await context.db.update(schema.registrations, { id: label }).set({ registrantId: to });
 
-      await context.db.update(domains, { id: node }).set({ registrantId: to });
+      await context.db.update(schema.domains, { id: node }).set({ registrantId: to });
 
       // TODO: log Event
     },

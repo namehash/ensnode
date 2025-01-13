@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { domains } from "ponder:schema";
+import schema from "ponder:schema";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { upsertAccount } from "../../../lib/upserts";
@@ -31,7 +31,7 @@ export default function () {
     const node = makeSubnodeNamehash(ownedSubnameNode, label);
     await upsertAccount(context, owner);
     await context.db
-      .insert(domains)
+      .insert(schema.domains)
       .values({
         id: node,
         ownerId: owner,

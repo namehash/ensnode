@@ -1,5 +1,5 @@
 import { type Context } from "ponder:registry";
-import { domains, resolvers } from "ponder:schema";
+import schema from "ponder:schema";
 import { Log } from "ponder";
 import { Hex } from "viem";
 import { hasNullByte, uniq } from "../lib/helpers";
@@ -28,9 +28,9 @@ export async function handleAddrChanged({
   });
 
   // materialize the resolved add to the domain iff this resolver is active
-  const domain = await context.db.find(domains, { id: node });
+  const domain = await context.db.find(schema.domains, { id: node });
   if (domain?.resolverId === id) {
-    await context.db.update(domains, { id: node }).set({ resolvedAddress: address });
+    await context.db.update(schema.domains, { id: node }).set({ resolvedAddress: address });
   }
 
   // TODO: log ResolverEvent
@@ -58,7 +58,7 @@ export async function handleAddressChanged({
 
   // upsert the new coinType
   await context.db
-    .update(resolvers, { id })
+    .update(schema.resolvers, { id })
     .set({ coinTypes: uniq([...resolver.coinTypes, coinType]) });
 
   // TODO: log ResolverEvent
@@ -148,7 +148,7 @@ export async function handleTextChanged({
   });
 
   // upsert new key
-  await context.db.update(resolvers, { id }).set({ texts: uniq([...resolver.texts, key]) });
+  await context.db.update(schema.resolvers, { id }).set({ texts: uniq([...resolver.texts, key]) });
 
   // TODO: log ResolverEvent
 }
@@ -242,16 +242,16 @@ export async function handleVersionChanged({
   // a version change nulls out the resolver
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
-  const domain = await context.db.find(domains, { id: node });
+  const domain = await context.db.find(schema.domains, { id: node });
   if (!domain) throw new Error("domain expected");
 
   // materialize the Domain's resolvedAddress field
   if (domain.resolverId === id) {
-    await context.db.update(domains, { id: node }).set({ resolvedAddress: null });
+    await context.db.update(schema.domains, { id: node }).set({ resolvedAddress: null });
   }
 
   // clear out the resolver's info
-  await context.db.update(resolvers, { id }).set({
+  await context.db.update(schema.resolvers, { id }).set({
     addrId: null,
     contentHash: null,
     coinTypes: [],

@@ -1,5 +1,5 @@
 import { type Context, ponder } from "ponder:registry";
-import { domains } from "ponder:schema";
+import schema from "ponder:schema";
 import { type Hex } from "viem";
 import {
   handleNewOwner,
@@ -13,7 +13,7 @@ import { pluginNamespace } from "../ponder.config";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {
-  const domain = await context.db.find(domains, { id: node });
+  const domain = await context.db.find(schema.domains, { id: node });
   return domain?.isMigrated ?? false;
 }
 
