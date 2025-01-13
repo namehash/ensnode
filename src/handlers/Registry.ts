@@ -1,5 +1,5 @@
 import { Context } from "ponder:registry";
-import { domains, resolvers } from "ponder:schema";
+import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
@@ -16,7 +16,7 @@ export async function setupRootNode({ context }: { context: Context }) {
 
   // initialize the ENS root to be owned by the zeroAddress and not migrated
   await context.db
-    .insert(domains)
+    .insert(schema.domain)
     .values({
       id: ROOT_NODE,
       ownerId: zeroAddress,
@@ -26,7 +26,7 @@ export async function setupRootNode({ context }: { context: Context }) {
     .onConflictDoNothing();
 }
 
-function isDomainEmpty(domain: typeof domains.$inferSelect) {
+function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
   return (
     domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
   );
@@ -35,13 +35,13 @@ function isDomainEmpty(domain: typeof domains.$inferSelect) {
 // a more accurate name for the following function
 // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64
 async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
-  const domain = await context.db.find(domains, { id: node });
+  const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
   if (isDomainEmpty(domain) && domain.parentId !== null) {
     // decrement parent's subdomain count
     await context.db
-      .update(domains, { id: domain.parentId })
+      .update(schema.domain, { id: domain.parentId })
       .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
 
     // recurse to parent
@@ -66,7 +66,7 @@ export async function handleTransfer({
 
   // ensure domain & update owner
   await context.db
-    .insert(domains)
+    .insert(schema.domain)
     .values([{ id: node, ownerId: owner, createdAt: event.block.timestamp }])
     .onConflictDoUpdate({ ownerId: owner });
 
@@ -92,50 +92,42 @@ export const handleNewOwner =
   }) => {
     const { label, node, owner } = event.args;
 
-    const parent = await context.db.find(domains, { id: node });
     const subnode = makeSubnodeNamehash(node, label);
-
-    const incrementSubdomainCountOnParent = async () =>
-      // only increment subdomainCount
-      Boolean(
-        // if the parent domain exists and
-        parent !== null &&
-          // the subdomain doesn't exist yet
-          (await context.db.find(domains, { id: subnode })),
-      );
 
     // ensure owner
     await upsertAccount(context, owner);
 
-    const domain = await context.db
-      .insert(domains)
-      .values({
+    // note that we set isMigrated so that if this domain is being interacted with on the new registry, its migration status is set here
+    let domain = await context.db.find(schema.domain, { id: subnode });
+    if (domain) {
+      // if the domain already exists, this is just an update of the owner record (& isMigrated)
+      await context.db.update(schema.domain, { id: domain.id }).set({ ownerId: owner, isMigrated });
+    } else {
+      // otherwise create the domain
+      domain = await context.db.insert(schema.domain).values({
         id: subnode,
         ownerId: owner,
         parentId: node,
         createdAt: event.block.timestamp,
         isMigrated,
-      })
-      .onConflictDoUpdate(() => ({
-        // if the domain already exists, this is just an update of the owner record (& isMigrated)
-        ownerId: owner,
-        isMigrated,
-      }));
+      });
+
+      // and increment parent subdomainCount
+      await context.db
+        .update(schema.domain, { id: node })
+        .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
+    }
 
     // if the domain doesn't yet have a name, construct it here
     if (!domain.name) {
+      const parent = await context.db.find(schema.domain, { id: node });
+
       // TODO: implement sync rainbow table lookups
       // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L111
       const labelName = encodeLabelhash(label);
       const name = parent?.name ? `${labelName}.${parent.name}` : labelName;
 
-      await context.db.update(domains, { id: domain.id }).set({ name, labelName });
-    }
-
-    if (await incrementSubdomainCountOnParent()) {
-      await context.db
-        .update(domains, { id: parent!.id })
-        .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
+      await context.db.update(schema.domain, { id: domain.id }).set({ name, labelName });
     }
 
     // garbage collect newly 'empty' domain iff necessary
@@ -158,7 +150,7 @@ export async function handleNewTTL({
   // TODO: handle the edge case in which the domain no longer exists?
   // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L215
   // NOTE: i'm not sure this needs to be here, as domains are never deleted (??)
-  await context.db.update(domains, { id: node }).set({ ttl });
+  await context.db.update(schema.domain, { id: node }).set({ ttl });
 
   // TODO: log DomainEvent
 }
@@ -177,7 +169,7 @@ export async function handleNewResolver({
   // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
   // NOTE: old resolver resources are kept for event logs
   if (event.args.resolver === zeroAddress) {
-    await context.db.update(domains, { id: node }).set({ resolverId: null });
+    await context.db.update(schema.domain, { id: node }).set({ resolverId: null });
 
     // garbage collect newly 'empty' domain iff necessary
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
@@ -186,7 +178,7 @@ export async function handleNewResolver({
     const resolverId = makeResolverId(node, resolverAddress);
 
     const resolver = await context.db
-      .insert(resolvers)
+      .insert(schema.resolver)
       .values({
         id: resolverId,
         domainId: event.args.node,
@@ -196,7 +188,7 @@ export async function handleNewResolver({
 
     // update the domain to point to it, and denormalize the eth addr
     await context.db
-      .update(domains, { id: node })
+      .update(schema.domain, { id: node })
       .set({ resolverId, resolvedAddress: resolver?.addrId });
   }
 

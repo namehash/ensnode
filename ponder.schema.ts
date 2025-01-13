@@ -1,7 +1,7 @@
 import { onchainTable, relations } from "ponder";
 import type { Address } from "viem";
 
-export const domains = onchainTable("domains", (t) => ({
+export const domain = onchainTable("domains", (t) => ({
   // The namehash of the name
   id: t.hex().primaryKey(),
   // The human readable name, if known. Unknown portions replaced with hash in square brackets (eg, foo.[1234].eth)
@@ -44,55 +44,55 @@ export const domains = onchainTable("domains", (t) => ({
   // events: [DomainEvent!]! @derivedFrom(field: "domain")
 }));
 
-export const domainRelations = relations(domains, ({ one, many }) => ({
+export const domainRelations = relations(domain, ({ one, many }) => ({
   // has one owner
-  owner: one(accounts, {
-    fields: [domains.ownerId],
-    references: [accounts.id],
+  owner: one(account, {
+    fields: [domain.ownerId],
+    references: [account.id],
   }),
-  parent: one(domains, {
-    fields: [domains.parentId],
-    references: [domains.id],
+  parent: one(domain, {
+    fields: [domain.parentId],
+    references: [domain.id],
   }),
-  resolver: one(resolvers, {
-    fields: [domains.resolverId],
-    references: [resolvers.id],
+  resolver: one(resolver, {
+    fields: [domain.resolverId],
+    references: [resolver.id],
   }),
-  subdomains: many(domains, { relationName: "parent" }),
-  registrant: one(accounts, {
-    fields: [domains.registrantId],
-    references: [accounts.id],
+  subdomains: many(domain, { relationName: "parent" }),
+  registrant: one(account, {
+    fields: [domain.registrantId],
+    references: [account.id],
   }),
-  wrappedOwner: one(accounts, {
-    fields: [domains.wrappedOwnerId],
-    references: [accounts.id],
+  wrappedOwner: one(account, {
+    fields: [domain.wrappedOwnerId],
+    references: [account.id],
   }),
 
   // The wrapped domain associated with the domain
-  wrappedDomain: one(wrappedDomains, {
-    fields: [domains.id],
-    references: [wrappedDomains.domainId],
+  wrappedDomain: one(wrappedDomain, {
+    fields: [domain.id],
+    references: [wrappedDomain.domainId],
   }),
 
   // The registration associated with the domain
-  registration: one(registrations, {
-    fields: [domains.id],
-    references: [registrations.domainId],
+  registration: one(registration, {
+    fields: [domain.id],
+    references: [registration.domainId],
   }),
 }));
 
-export const accounts = onchainTable("accounts", (t) => ({
+export const account = onchainTable("accounts", (t) => ({
   id: t.hex().primaryKey(),
 }));
 
-export const accountsRelations = relations(accounts, ({ many }) => ({
+export const accountRelations = relations(account, ({ many }) => ({
   // account has many domains
-  domains: many(domains),
+  domains: many(domain),
   // TODO: has many wrapped domains
   // TODO: has many registrations
 }));
 
-export const resolvers = onchainTable("resolvers", (t) => ({
+export const resolver = onchainTable("resolvers", (t) => ({
   // The unique identifier for this resolver, which is a concatenation of the domain namehash and the resolver address
   id: t.text().primaryKey(),
   // The domain that this resolver is associated with
@@ -112,18 +112,18 @@ export const resolvers = onchainTable("resolvers", (t) => ({
   // TODO: has many events
 }));
 
-export const resolverRelations = relations(resolvers, ({ one }) => ({
-  addr: one(accounts, {
-    fields: [resolvers.addrId],
-    references: [accounts.id],
+export const resolverRelations = relations(resolver, ({ one }) => ({
+  addr: one(account, {
+    fields: [resolver.addrId],
+    references: [account.id],
   }),
-  domain: one(domains, {
-    fields: [resolvers.domainId],
-    references: [domains.id],
+  domain: one(domain, {
+    fields: [resolver.domainId],
+    references: [domain.id],
   }),
 }));
 
-export const registrations = onchainTable("registrations", (t) => ({
+export const registration = onchainTable("registrations", (t) => ({
   // The unique identifier of the registration
   id: t.hex().primaryKey(),
   // The domain name associated with the registration
@@ -143,18 +143,18 @@ export const registrations = onchainTable("registrations", (t) => ({
   // TODO: events
 }));
 
-export const registrationRelations = relations(registrations, ({ one }) => ({
-  domain: one(domains, {
-    fields: [registrations.domainId],
-    references: [domains.id],
+export const registrationRelations = relations(registration, ({ one }) => ({
+  domain: one(domain, {
+    fields: [registration.domainId],
+    references: [domain.id],
   }),
-  registrant: one(accounts, {
-    fields: [registrations.registrantId],
-    references: [accounts.id],
+  registrant: one(account, {
+    fields: [registration.registrantId],
+    references: [account.id],
   }),
 }));
 
-export const wrappedDomains = onchainTable("wrapped_domains", (t) => ({
+export const wrappedDomain = onchainTable("wrapped_domains", (t) => ({
   // The unique identifier for each instance of the WrappedDomain entity
   id: t.hex().primaryKey(),
   // The domain that is wrapped by this WrappedDomain
@@ -169,13 +169,13 @@ export const wrappedDomains = onchainTable("wrapped_domains", (t) => ({
   name: t.text(),
 }));
 
-export const wrappedDomainRelations = relations(wrappedDomains, ({ one }) => ({
-  domain: one(domains, {
-    fields: [wrappedDomains.domainId],
-    references: [domains.id],
+export const wrappedDomainRelations = relations(wrappedDomain, ({ one }) => ({
+  domain: one(domain, {
+    fields: [wrappedDomain.domainId],
+    references: [domain.id],
   }),
-  owner: one(accounts, {
-    fields: [wrappedDomains.ownerId],
-    references: [accounts.id],
+  owner: one(account, {
+    fields: [wrappedDomain.ownerId],
+    references: [account.id],
   }),
 }));

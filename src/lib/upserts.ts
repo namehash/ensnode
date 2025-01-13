@@ -1,18 +1,21 @@
 import type { Context } from "ponder:registry";
-import { accounts, registrations, resolvers } from "ponder:schema";
+import schema from "ponder:schema";
 import type { Address } from "viem";
 
 export async function upsertAccount(context: Context, address: Address) {
-  return context.db.insert(accounts).values({ id: address }).onConflictDoNothing();
+  return context.db.insert(schema.account).values({ id: address }).onConflictDoNothing();
 }
 
-export async function upsertResolver(context: Context, values: typeof resolvers.$inferInsert) {
-  return context.db.insert(resolvers).values(values).onConflictDoUpdate(values);
+export async function upsertResolver(
+  context: Context,
+  values: typeof schema.resolver.$inferInsert,
+) {
+  return context.db.insert(schema.resolver).values(values).onConflictDoUpdate(values);
 }
 
 export async function upsertRegistration(
   context: Context,
-  values: typeof registrations.$inferInsert,
+  values: typeof schema.registration.$inferInsert,
 ) {
-  return context.db.insert(registrations).values(values).onConflictDoUpdate(values);
+  return context.db.insert(schema.registration).values(values).onConflictDoUpdate(values);
 }

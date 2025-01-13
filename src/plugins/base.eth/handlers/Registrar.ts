@@ -1,5 +1,5 @@
 import { Context, ponder } from "ponder:registry";
-import { domains } from "ponder:schema";
+import schema from "ponder:schema";
 import { Block } from "ponder";
 import { Hex, zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
@@ -34,7 +34,7 @@ function handleDomainNameInitialized({
   const label = tokenIdToLabel(id);
   const node = makeSubnodeNamehash(ownedSubnameNode, label);
   return context.db
-    .insert(domains)
+    .insert(schema.domain)
     .values({
       id: node,
       ownerId: owner,
