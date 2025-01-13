@@ -80,29 +80,29 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
   | `/${string}${T}`;
 
 /** @var the requested active plugin name (see `src/plugins` for available plugins) */
-export const ACTIVE_PLUGIN = process.env.ACTIVE_PLUGIN;
+export const ACTIVE_PLUGINS = process.env.ACTIVE_PLUGINS;
 
 /**
- * Returns the active plugins list based on the `ACTIVE_PLUGIN` environment variable.
+ * Returns the active plugins list based on the `ACTIVE_PLUGINS` environment variable.
  *
- * The `ACTIVE_PLUGIN` environment variable is a comma-separated list of plugin
+ * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
  * names. The function returns the plugins that are included in the list.
  *
  * @param plugins is a list of available plugins
  * @returns the active plugins
  */
 export function getActivePlugins<T extends { ownedName: string }>(plugins: readonly T[]): T[] {
-  const pluginsToActivateByOwnedName = ACTIVE_PLUGIN
-    ? ACTIVE_PLUGIN.split(",").map((p) => p.toLowerCase())
+  const pluginsToActivateByOwnedName = ACTIVE_PLUGINS
+    ? ACTIVE_PLUGINS.split(",").map((p) => p.toLowerCase())
     : [];
 
   if (!pluginsToActivateByOwnedName.length) {
-    throw new Error("No active plugins found. Please set the ACTIVE_PLUGIN environment variable.");
+    throw new Error("No active plugins found. Please set the ACTIVE_PLUGINS environment variable.");
   }
 
-  return plugins.filter((plugin) =>
-    pluginsToActivateByOwnedName.includes(plugin.ownedName.toLowerCase()),
-  );
+  // TODO: drop an error if the plugin is not found
+
+  return plugins.filter((plugin) => pluginsToActivateByOwnedName.includes(plugin.ownedName));
 }
 
 // Helper type to get the intersection of all config types

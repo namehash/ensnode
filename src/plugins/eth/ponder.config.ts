@@ -20,7 +20,7 @@ export const pluginNamespace = createPluginNamespace(ownedName);
 
 // constrain the ponder indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range
-const START_BLOCK: ContractConfig["startBlock"] = 21_610_000;
+const START_BLOCK: ContractConfig["startBlock"] = undefined;
 const END_BLOCK: ContractConfig["endBlock"] = undefined;
 
 export const config = createConfig({
@@ -28,6 +28,7 @@ export const config = createConfig({
     mainnet: {
       chainId: mainnet.id,
       transport: http(process.env[`RPC_URL_${mainnet.id}`]),
+      maxRequestsPerSecond: 250,
     },
   },
   contracts: {
