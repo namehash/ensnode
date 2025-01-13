@@ -1,6 +1,7 @@
-import { ponder } from "ponder:registry";
+import { type Context, ponder } from "ponder:registry";
 import { domains } from "ponder:schema";
-import { zeroAddress } from "viem";
+import { type Block } from "ponder";
+import { Hex, zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
@@ -14,39 +15,66 @@ const {
   ownedSubnameNode,
 } = makeRegistrarHandlers(ownedName);
 
+/**
+ * Idempotent handler to insert a domain record when a new domain is
+ * initialized. For example, right after an NFT token for the domain
+ * is minted.
+ *
+ * @returns a newly created domain record
+ */
+function handleDomainNameInitialized({
+  context,
+  event,
+}: {
+  context: Context;
+  event: { args: { id: bigint; owner: Hex }; block: Block };
+}) {
+  const { id, owner } = event.args;
+  const label = tokenIdToLabel(id);
+  const node = makeSubnodeNamehash(ownedSubnameNode, label);
+  return context.db
+    .insert(domains)
+    .values({
+      id: node,
+      ownerId: owner,
+      createdAt: event.block.timestamp,
+    })
+    .onConflictDoNothing();
+}
+
 export default function () {
   ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), handleNameRenewed);
 
   ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
+    const { tokenId, from, to } = event.args;
+
     if (event.args.from === zeroAddress) {
-      /**
-       * Address the issue where in the same transaction the Transfer event occurs before the NameRegistered event.
-       * Example: https://lineascan.build/tx/0x2211c5d857d16b7ac111088c57fb346ab94049cb297f02b0dda7aaf4c14d305b#eventlog
-       * Code: https://github.com/Consensys/linea-ens/blob/main/packages/linea-ens-contracts/contracts/ethregistrar/BaseRegistrarImplementation.sol#L155-L160
-       */
-
-      const { tokenId: id, to: owner } = event.args;
-      const label = tokenIdToLabel(id);
-      const node = makeSubnodeNamehash(ownedSubnameNode, label);
-
-      await context.db
-        .insert(domains)
-        .values({
-          id: node,
-          ownerId: owner,
-          createdAt: event.block.timestamp,
-        })
-        .onConflictDoNothing();
+      // The ens-subgraph `handleNameTransferred` handler implementation
+      // assumes the domain record exists. However, when an NFT token is
+      // minted, there's no domain record yet created. The very first transfer
+      // event has to initialize the domain record. This is a workaround to
+      // meet the subgraph implementation expectations.
+      await handleDomainNameInitialized({
+        context,
+        event: {
+          ...event,
+          args: { id: tokenId, owner: to },
+        },
+      });
     }
-    return await handleNameTransferred({ context, args: event.args });
+
+    await handleNameTransferred({
+      context,
+      args: { from, to, tokenId },
+    });
   });
 
   // Linea allows the owner of the EthRegistrarController to register subnames for free
   ponder.on(
     pluginNamespace("EthRegistrarController:OwnerNameRegistered"),
     async ({ context, event }) => {
-      return handleNameRegisteredByController({
+      await handleNameRegisteredByController({
         context,
         args: {
           ...event.args,
@@ -60,7 +88,7 @@ export default function () {
   ponder.on(
     pluginNamespace("EthRegistrarController:PohNameRegistered"),
     async ({ context, event }) => {
-      return handleNameRegisteredByController({
+      await handleNameRegisteredByController({
         context,
         args: {
           ...event.args,
@@ -74,7 +102,7 @@ export default function () {
     pluginNamespace("EthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       // the new registrar controller uses baseCost + premium to compute cost
-      return await handleNameRegisteredByController({
+      await handleNameRegisteredByController({
         context,
         args: {
           ...event.args,
@@ -84,6 +112,6 @@ export default function () {
     },
   );
   ponder.on(pluginNamespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
-    return await handleNameRenewedByController({ context, args: event.args });
+    await handleNameRenewedByController({ context, args: event.args });
   });
 }
