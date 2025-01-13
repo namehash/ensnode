@@ -23,7 +23,7 @@ export default function () {
       /**
        * Address the issue where in the same transaction the Transfer event occurs before the NameRegistered event.
        * Example: https://lineascan.build/tx/0x2211c5d857d16b7ac111088c57fb346ab94049cb297f02b0dda7aaf4c14d305b#eventlog
-       * Code: hhttps://github.com/Consensys/linea-ens/blob/main/packages/linea-ens-contracts/contracts/ethregistrar/BaseRegistrarImplementation.sol#L155-L160
+       * Code: https://github.com/Consensys/linea-ens/blob/main/packages/linea-ens-contracts/contracts/ethregistrar/BaseRegistrarImplementation.sol#L155-L160
        */
 
       const { tokenId: id, to: owner } = event.args;

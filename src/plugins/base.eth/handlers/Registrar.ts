@@ -45,7 +45,7 @@ export default function () {
   });
   ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), handleNameRenewed);
 
-  // Base's BaseRegistrar uses `id` instead of `tokenId`
+  // base.eth's BaseRegistrar uses `id` instead of `tokenId`
   ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
     if (event.args.from === zeroAddress) {
       /**
