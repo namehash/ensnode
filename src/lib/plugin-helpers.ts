@@ -100,8 +100,21 @@ export function getActivePlugins<T extends { ownedName: string }>(plugins: reado
     throw new Error("No active plugins found. Please set the ACTIVE_PLUGINS environment variable.");
   }
 
-  // TODO: drop an error if the plugin is not found
+  // Check if the requested plugins are valid and can become active
+  const invalidPlugins = pluginsToActivateByOwnedName.filter(
+    (plugin) => !plugins.some((p) => p.ownedName === plugin),
+  );
 
+  if (invalidPlugins.length) {
+    // Throw an error if there are invalid plugins
+    throw new Error(
+      `Invalid plugin names found: ${invalidPlugins.join(
+        ", ",
+      )}. Please check the ACTIVE_PLUGINS environment variable.`,
+    );
+  }
+
+  // Return the active plugins
   return plugins.filter((plugin) => pluginsToActivateByOwnedName.includes(plugin.ownedName));
 }
 
