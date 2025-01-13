@@ -26,6 +26,7 @@ export type OnchainTable<
   enableRLS: () => Omit<OnchainTable<T>, "enableRLS">;
 };
 
+import { pascalCase } from "change-case";
 import DataLoader from "dataloader";
 import {
   type Column,
@@ -90,15 +91,14 @@ import { GraphQLJSON } from "graphql-scalars";
 type Parent = Record<string, any>;
 type Context = {
   getDataLoader: ReturnType<typeof buildDataLoaderCache>;
-  metadataStore: MetadataStore;
+  metadataStore: any; // NOTE: type metadataStore as any for now
   drizzle: Drizzle<{ [key: string]: OnchainTable }>;
 };
 
 type PluralArgs = {
   where?: { [key: string]: number | string };
-  after?: string;
-  before?: string;
-  limit?: number;
+  first?: number;
+  skip?: number;
   orderBy?: string;
   orderDirection?: "asc" | "desc";
 };
@@ -199,11 +199,11 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
   }
 
   const entityTypes: Record<string, GraphQLObjectType<Parent, Context>> = {};
-  const entityPageTypes: Record<string, GraphQLObjectType> = {};
+  const entityPageTypes: Record<string, GraphQLOutputType> = {};
 
   for (const table of tables) {
     entityTypes[table.tsName] = new GraphQLObjectType({
-      name: table.tsName,
+      name: pascalCase(table.tsName), // NOTE: PascalCase to match subgraph
       fields: () => {
         const fieldConfigMap: GraphQLFieldConfigMap<Parent, Context> = {};
 
@@ -295,9 +295,8 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
                 where: { type: referencedEntityFilterType },
                 orderBy: { type: GraphQLString },
                 orderDirection: { type: GraphQLString },
-                before: { type: GraphQLString },
-                after: { type: GraphQLString },
-                limit: { type: GraphQLInt },
+                first: { type: GraphQLInt },
+                skip: { type: GraphQLInt },
               },
               resolve: (parent, args: PluralArgs, context, info) => {
                 const relationalConditions = [];
@@ -307,13 +306,10 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
                   relationalConditions.push(eq(column, value));
                 }
 
-                const includeTotalCount = selectionIncludesField(info, "totalCount");
-
                 return executePluralQuery(
                   referencedTable,
                   context.drizzle,
                   args,
-                  includeTotalCount,
                   relationalConditions,
                 );
               },
@@ -329,16 +325,9 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
       },
     });
 
-    entityPageTypes[table.tsName] = new GraphQLObjectType({
-      name: `${table.tsName}Page`,
-      fields: () => ({
-        items: {
-          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(entityTypes[table.tsName]!))),
-        },
-        pageInfo: { type: new GraphQLNonNull(GraphQLPageInfo) },
-        totalCount: { type: new GraphQLNonNull(GraphQLInt) },
-      }),
-    });
+    entityPageTypes[table.tsName] = new GraphQLNonNull(
+      new GraphQLList(new GraphQLNonNull(entityTypes[table.tsName]!)),
+    );
   }
 
   const queryFields: Record<string, GraphQLFieldConfig<Parent, Context>> = {};
@@ -374,19 +363,16 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
     };
 
     queryFields[pluralFieldName] = {
-      type: new GraphQLNonNull(entityPageType),
+      type: entityPageType,
       args: {
         where: { type: entityFilterType },
         orderBy: { type: GraphQLString },
         orderDirection: { type: GraphQLString },
-        before: { type: GraphQLString },
-        after: { type: GraphQLString },
-        limit: { type: GraphQLInt },
+        first: { type: GraphQLInt },
+        skip: { type: GraphQLInt },
       },
       resolve: async (_parent, args: PluralArgs, context, info) => {
-        const includeTotalCount = selectionIncludesField(info, "totalCount");
-
-        return executePluralQuery(table, context.drizzle, args, includeTotalCount);
+        return executePluralQuery(table, context.drizzle, args);
       },
     };
   }
@@ -506,7 +492,6 @@ async function executePluralQuery(
   table: TableRelationalConfig,
   drizzle: Drizzle<{ [key: string]: OnchainTable }>,
   args: PluralArgs,
-  includeTotalCount: boolean,
   extraConditions: (SQL | undefined)[] = [],
 ) {
   const rawTable = drizzle._.fullSchema[table.tsName];
@@ -514,10 +499,12 @@ async function executePluralQuery(
   if (rawTable === undefined || baseQuery === undefined)
     throw new Error(`Internal error: Table "${table.tsName}" not found in RQB`);
 
-  const limit = args.limit ?? DEFAULT_LIMIT;
+  const limit = args.first ?? DEFAULT_LIMIT;
   if (limit > MAX_LIMIT) {
     throw new Error(`Invalid limit. Got ${limit}, expected <=${MAX_LIMIT}.`);
   }
+
+  const skip = args.skip ?? 0;
 
   const orderBySchema = buildOrderBySchema(table, args);
   const orderBy = orderBySchema.map(([columnName, direction]) => {
@@ -537,153 +524,14 @@ async function executePluralQuery(
 
   const whereConditions = buildWhereConditions(args.where, table.columns);
 
-  const after = args.after ?? null;
-  const before = args.before ?? null;
+  const rows = await baseQuery.findMany({
+    where: and(...whereConditions, ...extraConditions),
+    orderBy,
+    limit,
+    offset: skip,
+  });
 
-  if (after !== null && before !== null) {
-    throw new Error("Cannot specify both before and after cursors.");
-  }
-
-  let startCursor = null;
-  let endCursor = null;
-  let hasPreviousPage = false;
-  let hasNextPage = false;
-
-  const totalCountPromise = includeTotalCount
-    ? drizzle
-        .select({ count: count() })
-        .from(rawTable)
-        .where(and(...whereConditions, ...extraConditions))
-        .then((rows) => rows[0]?.count ?? null)
-    : Promise.resolve(null);
-
-  // Neither cursors are specified, apply the order conditions and execute.
-  if (after === null && before === null) {
-    const [rows, totalCount] = await Promise.all([
-      baseQuery.findMany({
-        where: and(...whereConditions, ...extraConditions),
-        orderBy,
-        limit: limit + 1,
-      }),
-      totalCountPromise,
-    ]);
-
-    if (rows.length === limit + 1) {
-      rows.pop();
-      hasNextPage = true;
-    }
-
-    startCursor = rows.length > 0 ? encodeCursor(orderBySchema, rows[0]!) : null;
-    endCursor = rows.length > 0 ? encodeCursor(orderBySchema, rows[rows.length - 1]!) : null;
-
-    return {
-      items: rows,
-      totalCount,
-      pageInfo: { hasNextPage, hasPreviousPage, startCursor, endCursor },
-    };
-  }
-
-  if (after !== null) {
-    // User specified an 'after' cursor.
-    const cursorObject = decodeCursor(after);
-    const cursorCondition = buildCursorCondition(table, orderBySchema, "after", cursorObject);
-
-    const [rows, totalCount] = await Promise.all([
-      baseQuery.findMany({
-        where: and(...whereConditions, cursorCondition, ...extraConditions),
-        orderBy,
-        limit: limit + 2,
-      }),
-      totalCountPromise,
-    ]);
-
-    if (rows.length === 0) {
-      return {
-        items: rows,
-        totalCount,
-        pageInfo: { hasNextPage, hasPreviousPage, startCursor, endCursor },
-      };
-    }
-
-    // If the cursor of the first returned record equals the `after` cursor,
-    // `hasPreviousPage` is true. Remove that record.
-    if (encodeCursor(orderBySchema, rows[0]!) === after) {
-      rows.shift();
-      hasPreviousPage = true;
-    } else {
-      // Otherwise, remove the last record.
-      rows.pop();
-    }
-
-    // Now if the length of the records is still equal to limit + 1,
-    // there is a next page.
-    if (rows.length === limit + 1) {
-      rows.pop();
-      hasNextPage = true;
-    }
-
-    // Now calculate the cursors.
-    startCursor = rows.length > 0 ? encodeCursor(orderBySchema, rows[0]!) : null;
-    endCursor = rows.length > 0 ? encodeCursor(orderBySchema, rows[rows.length - 1]!) : null;
-
-    return {
-      items: rows,
-      totalCount,
-      pageInfo: { hasNextPage, hasPreviousPage, startCursor, endCursor },
-    };
-  }
-
-  // User specified a 'before' cursor.
-  const cursorObject = decodeCursor(before!);
-  const cursorCondition = buildCursorCondition(table, orderBySchema, "before", cursorObject);
-
-  // Reverse the order by conditions to get the previous page,
-  // then reverse the results back to the original order.
-  const [rows, totalCount] = await Promise.all([
-    baseQuery
-      .findMany({
-        where: and(...whereConditions, cursorCondition, ...extraConditions),
-        orderBy: orderByReversed,
-        limit: limit + 2,
-      })
-      .then((rows) => rows.reverse()),
-    totalCountPromise,
-  ]);
-
-  if (rows.length === 0) {
-    return {
-      items: rows,
-      totalCount,
-      pageInfo: { hasNextPage, hasPreviousPage, startCursor, endCursor },
-    };
-  }
-
-  // If the cursor of the last returned record equals the `before` cursor,
-  // `hasNextPage` is true. Remove that record.
-  if (encodeCursor(orderBySchema, rows[rows.length - 1]!) === before) {
-    rows.pop();
-    hasNextPage = true;
-  } else {
-    // Otherwise, remove the first record.
-    rows.shift();
-  }
-
-  // Now if the length of the records is equal to limit + 1, we know
-  // there is a previous page.
-  if (rows.length === limit + 1) {
-    rows.shift();
-    hasPreviousPage = true;
-  }
-
-  // Now calculate the cursors.
-  startCursor = rows.length > 0 ? encodeCursor(orderBySchema, rows[0]!) : null;
-  endCursor = rows.length > 0 ? encodeCursor(orderBySchema, rows[rows.length - 1]!) : null;
-
-  return {
-    items: rows,
-    totalCount,
-    pageInfo: { hasNextPage, hasPreviousPage, startCursor, endCursor },
-  };
+  return rows;
 }
 
 const conditionSuffixes = {
@@ -808,7 +656,7 @@ function buildWhereConditions(
         conditions.push(notLike(column, `%${rawValue}`));
         break;
       default:
-        never(conditionSuffix);
+        throw new Error(`Invalid Condition Suffix ${conditionSuffix}`);
     }
   }
 
@@ -829,68 +677,14 @@ function buildOrderBySchema(table: TableRelationalConfig, args: PluralArgs) {
   return [...userColumns, ...missingPkColumns];
 }
 
-function encodeCursor(
-  orderBySchema: [string, "asc" | "desc"][],
-  row: { [k: string]: unknown },
-): string {
-  const cursorObject = Object.fromEntries(
-    orderBySchema.map(([columnName, _]) => [columnName, row[columnName]]),
-  );
-  return encodeRowFragment(cursorObject);
-}
-function decodeCursor(cursor: string): { [k: string]: unknown } {
-  return decodeRowFragment(cursor);
-}
-
 function encodeRowFragment(rowFragment: { [k: string]: unknown }): string {
   return Buffer.from(serialize(rowFragment)).toString("base64");
 }
+
 function decodeRowFragment(encodedRowFragment: string): {
   [k: string]: unknown;
 } {
   return deserialize(Buffer.from(encodedRowFragment, "base64").toString());
-}
-
-function buildCursorCondition(
-  table: TableRelationalConfig,
-  orderBySchema: [string, "asc" | "desc"][],
-  direction: "after" | "before",
-  cursorObject: { [k: string]: unknown },
-): SQL | undefined {
-  const cursorColumns = orderBySchema.map(([columnName, orderDirection]) => {
-    const column = table.columns[columnName];
-    if (column === undefined)
-      throw new Error(`Unknown column "${columnName}" used in orderBy argument`);
-
-    const value = cursorObject[columnName];
-
-    let comparator: typeof gt | typeof lt;
-    let comparatorOrEquals: typeof gte | typeof lte;
-    if (direction === "after") {
-      [comparator, comparatorOrEquals] = orderDirection === "asc" ? [gt, gte] : [lt, lte];
-    } else {
-      [comparator, comparatorOrEquals] = orderDirection === "asc" ? [lt, lte] : [gt, gte];
-    }
-
-    return { column, value, comparator, comparatorOrEquals };
-  });
-
-  const buildCondition = (index: number): SQL | undefined => {
-    if (index === cursorColumns.length - 1) {
-      const { column, value, comparatorOrEquals } = cursorColumns[index]!;
-      return comparatorOrEquals(column, value);
-    }
-
-    const currentColumn = cursorColumns[index]!;
-    const nextCondition = buildCondition(index + 1);
-
-    return or(
-      currentColumn.comparator(currentColumn.column, currentColumn.value),
-      and(eq(currentColumn.column, currentColumn.value), nextCondition),
-    );
-  };
-
-  return buildCondition(0);
 }
 
 export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) {
