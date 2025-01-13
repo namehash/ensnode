@@ -1,5 +1,5 @@
 import type { ContractConfig } from "ponder";
-import { merge as tsDeepMerge } from 'ts-deepmerge';
+import { merge as tsDeepMerge } from "ts-deepmerge";
 
 export const uniq = <T>(arr: T[]): T[] => [...new Set(arr)];
 
