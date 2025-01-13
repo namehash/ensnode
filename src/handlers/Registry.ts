@@ -106,6 +106,7 @@ export const handleNewOwner =
         ownerId: owner,
         parentId: node,
         createdAt: event.block.timestamp,
+        labelhash: event.args.label,
         isMigrated,
       });
 
