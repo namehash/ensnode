@@ -19,7 +19,7 @@ export async function setupRootNode({ context }: { context: Context }) {
     id: ROOT_NODE,
     ownerId: zeroAddress,
     createdAt: 0n,
-    isMigrated: false,
+    isMigrated: true,
   });
 }
 
