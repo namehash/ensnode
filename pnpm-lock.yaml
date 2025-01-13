@@ -20,6 +20,9 @@ importers:
       ponder:
         specifier: ^0.8.24
         version: 0.8.24(@opentelemetry/api@1.9.0)(@types/node@20.17.10)(@types/pg@8.11.10)(hono@4.6.14)(typescript@5.7.2)(viem@2.21.57(typescript@5.7.2))
+      ts-deepmerge:
+        specifier: ^7.0.2
+        version: 7.0.2
       viem:
         specifier: ^2.21.57
         version: 2.21.57(typescript@5.7.2)
@@ -1733,6 +1736,10 @@ packages:
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+
+  ts-deepmerge@7.0.2:
+    resolution: {integrity: sha512-akcpDTPuez4xzULo5NwuoKwYRtjQJ9eoNfBACiBMaXwNAx7B1PKfe5wqUFJuW5uKzQ68YjDFwPaWHDG1KnFGsA==}
+    engines: {node: '>=14.13.1'}
 
   ts-pattern@5.6.0:
     resolution: {integrity: sha512-SL8u60X5+LoEy9tmQHWCdPc2hhb2pKI6I1tU5Jue3v8+iRqZdcT3mWPwKKJy1fMfky6uha82c8ByHAE8PMhKHw==}
@@ -3504,6 +3511,8 @@ snapshots:
       is-number: 7.0.0
 
   tr46@0.0.3: {}
+
+  ts-deepmerge@7.0.2: {}
 
   ts-pattern@5.6.0: {}
 
