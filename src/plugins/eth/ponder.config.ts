@@ -23,31 +23,35 @@ export const pluginNamespace = createPluginNamespace(ownedName);
 const START_BLOCK: ContractConfig["startBlock"] = undefined;
 const END_BLOCK: ContractConfig["endBlock"] = 4_000_000;
 
+const REGISTRY_OLD_ADDRESS = "0x314159265dd8dbb310642f98f50c066173c1259b";
+const REGISTRY_ADDRESS = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
+
 export const config = createConfig({
   networks: {
     mainnet: {
       chainId: mainnet.id,
       transport: http(process.env[`RPC_URL_${mainnet.id}`]),
+      maxRequestsPerSecond: 500,
     },
   },
   contracts: {
     [pluginNamespace("RegistryOld")]: {
       network: "mainnet",
       abi: Registry,
-      address: "0x314159265dd8dbb310642f98f50c066173c1259b",
+      address: REGISTRY_OLD_ADDRESS,
       ...blockConfig(START_BLOCK, 3327417, END_BLOCK),
     },
     [pluginNamespace("Registry")]: {
       network: "mainnet",
       abi: Registry,
-      address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+      address: REGISTRY_ADDRESS,
       ...blockConfig(START_BLOCK, 9380380, END_BLOCK),
     },
     [pluginNamespace("OldRegistryResolvers")]: {
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
-        address: "0x314159265dd8dbb310642f98f50c066173c1259b",
+        address: REGISTRY_OLD_ADDRESS,
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
@@ -57,7 +61,7 @@ export const config = createConfig({
       network: "mainnet",
       abi: RESOLVER_ABI,
       address: factory({
-        address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+        address: REGISTRY_ADDRESS,
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
