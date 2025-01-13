@@ -268,7 +268,9 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
 
                   rowFragment[referenceColumnTsName] = parent[fieldColumnTsName];
                 }
-                const encodedId = encodeRowFragment(rowFragment);
+
+                const encodedId = rowFragment.id as string;
+                if (!encodedId) return null;
 
                 return loader.load(encodedId);
               },
@@ -356,7 +358,7 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
 
         // The `args` object here should be a valid `where` argument that
         // uses the `eq` shorthand for each primary key column.
-        const encodedId = encodeRowFragment(args);
+        const encodedId = args.id as string;
 
         return loader.load(encodedId);
       },
@@ -677,16 +679,6 @@ function buildOrderBySchema(table: TableRelationalConfig, args: PluralArgs) {
   return [...userColumns, ...missingPkColumns];
 }
 
-function encodeRowFragment(rowFragment: { [k: string]: unknown }): string {
-  return Buffer.from(serialize(rowFragment)).toString("base64");
-}
-
-function decodeRowFragment(encodedRowFragment: string): {
-  [k: string]: unknown;
-} {
-  return deserialize(Buffer.from(encodedRowFragment, "base64").toString());
-}
-
 export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) {
   const dataLoaderMap = new Map<TableRelationalConfig, DataLoader<string, any> | undefined>();
   return ({ table }: { table: TableRelationalConfig }) => {
@@ -697,25 +689,16 @@ export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) 
     let dataLoader = dataLoaderMap.get(table);
     if (dataLoader === undefined) {
       dataLoader = new DataLoader(
-        async (encodedIds) => {
-          const decodedRowFragments = encodedIds.map(decodeRowFragment);
-
-          // The decoded row fragments should be valid `where` objects
-          // which use the `eq` object shorthand for each primary key column.
-          const idConditions = decodedRowFragments.map((decodedRowFragment) =>
-            and(...buildWhereConditions(decodedRowFragment, table.columns)),
-          );
+        async (ids) => {
+          // NOTE: use literal ids against id column
+          const idConditions = ids.map((id) => eq(table.columns["id"]!, id));
 
           const rows = await baseQuery.findMany({
             where: or(...idConditions),
-            limit: encodedIds.length,
+            limit: ids.length,
           });
 
-          return decodedRowFragments.map((decodedRowFragment) => {
-            return rows.find((row) =>
-              Object.entries(decodedRowFragment).every(([col, val]) => row[col] === val),
-            );
-          });
+          return ids.map((id) => rows.find((row) => row.id === id));
         },
         { maxBatchSize: 1_000 },
       );
@@ -729,19 +712,4 @@ export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) 
 function getColumnTsName(column: Column) {
   const tableColumns = getTableColumns(column.table);
   return Object.entries(tableColumns).find(([_, c]) => c.name === column.name)![0];
-}
-
-/**
- * Returns `true` if the query includes a specific field.
- * Does not consider nested selections; only works one "layer" deep.
- */
-function selectionIncludesField(info: GraphQLResolveInfo, fieldName: string): boolean {
-  for (const fieldNode of info.fieldNodes) {
-    for (const selection of fieldNode.selectionSet?.selections ?? []) {
-      if (selection.kind === "Field" && selection.name.value === fieldName) {
-        return true;
-      }
-    }
-  }
-  return false;
 }
