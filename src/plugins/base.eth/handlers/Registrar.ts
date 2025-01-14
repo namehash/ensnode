@@ -16,33 +16,6 @@ const {
   ownedSubnameNode,
 } = makeRegistrarHandlers(ownedName);
 
-/**
- * Idempotent handler to insert a domain record when a new domain is
- * initialized. For example, right after an NFT token for the domain
- * is minted.
- *
- * @returns a newly created domain record
- */
-function handleDomainNameInitialized({
-  context,
-  event,
-}: {
-  context: Context;
-  event: { args: { id: bigint; owner: Hex }; block: Block };
-}) {
-  const { id, owner } = event.args;
-  const label = tokenIdToLabel(id);
-  const node = makeSubnodeNamehash(ownedSubnameNode, label);
-  return context.db
-    .insert(schema.domain)
-    .values({
-      id: node,
-      ownerId: owner,
-      createdAt: event.block.timestamp,
-    })
-    .onConflictDoNothing();
-}
-
 export default function () {
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(pluginNamespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) =>
