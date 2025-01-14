@@ -33,11 +33,8 @@ export async function ensureDomainExists(
   context: Context,
   values: typeof schema.domain.$inferInsert,
 ): Promise<typeof schema.domain.$inferSelect> {
-  const domainEntity = await context.db.insert(schema.domain).values(values).onConflictDoNothing();
-
-  if (!domainEntity) {
-    throw new Error("domain expected");
-  }
-
-  return domainEntity;
+  // `onConflictDoUpdate({}}` makes no change to the existing entity
+  // (the delta is an empty object, which means no updates to apply)
+  // and it always returns the existing entity
+  return context.db.insert(schema.domain).values(values).onConflictDoUpdate({});
 }
