@@ -2,8 +2,8 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { Block } from "ponder";
 import { type Hex, namehash } from "viem";
+import { upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { isLabelIndexable, makeSubnodeNamehash, tokenIdToLabel } from "../lib/subname-helpers";
-import { upsertAccount, upsertRegistration } from "../lib/upserts";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 

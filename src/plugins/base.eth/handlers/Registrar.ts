@@ -3,8 +3,8 @@ import schema from "ponder:schema";
 import { Block } from "ponder";
 import { Hex, zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
+import { ensureDomainExists, upsertAccount } from "../../../lib/db-helpers";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
-import { ensureDomainExists, upsertAccount } from "../../../lib/upserts";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {

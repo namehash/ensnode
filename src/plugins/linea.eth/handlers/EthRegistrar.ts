@@ -1,8 +1,8 @@
 import { ponder } from "ponder:registry";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
+import { ensureDomainExists } from "../../../lib/db-helpers";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
-import { ensureDomainExists } from "../../../lib/upserts";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {
