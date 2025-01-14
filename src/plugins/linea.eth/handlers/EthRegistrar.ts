@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
+import schema from "ponder:schema";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { ensureDomainExists } from "../../../lib/db-helpers";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
@@ -29,7 +29,7 @@ export default function () {
       // token ID has been inserted into the database. This is a workaround to
       // meet expectations of the `handleNameTransferred` subgraph
       // implementation.
-      await ensureDomainExists(context, {
+      await context.db.insert(schema.domain).values({
         id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
         ownerId: to,
         createdAt: event.block.timestamp,

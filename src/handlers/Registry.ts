@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
-import { ensureDomainExists, upsertAccount } from "../lib/db-helpers";
+import { upsertAccount } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
 import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
 
@@ -33,12 +33,17 @@ export async function setupRootNode({ context }: { context: Context }) {
   await upsertAccount(context, zeroAddress);
 
   // initialize the ENS root to be owned by the zeroAddress and not migrated
-  await ensureDomainExists(context, {
-    id: ROOT_NODE,
-    ownerId: zeroAddress,
-    createdAt: 0n,
-    isMigrated: false,
-  });
+  await context.db
+    .insert(schema.domain)
+    .values({
+      id: ROOT_NODE,
+      ownerId: zeroAddress,
+      createdAt: 0n,
+      isMigrated: false,
+    })
+    // make sure to only insert the domain entity into database
+    // only if it doesn't already exist
+    .onConflictDoNothing();
 }
 
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {

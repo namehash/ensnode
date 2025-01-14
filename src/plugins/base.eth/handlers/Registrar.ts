@@ -1,9 +1,8 @@
-import { Context, ponder } from "ponder:registry";
+import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { Block } from "ponder";
-import { Hex, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { ensureDomainExists, upsertAccount } from "../../../lib/db-helpers";
+import { upsertAccount } from "../../../lib/db-helpers";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
@@ -27,9 +26,9 @@ export default function () {
     // base has 'preminted' names via Registrar#registerOnly, which explicitly does not update Registry.
     // this breaks a subgraph assumption, as it expects a domain to exist (via Registry:NewOwner) before
     // any Registrar:NameRegistered events. in the future we will likely happily upsert domains, but
-    // in order to avoid prematurely drifting from subgraph equivalancy, we upsert the domain here,
+    // in order to avoid prematurely drifting from subgraph equivalancy, we insert the domain entity here,
     // allowing the base indexer to progress.
-    await ensureDomainExists(context, {
+    await context.db.insert(schema.domain).values({
       id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(event.args.id)),
       ownerId: event.args.owner,
       createdAt: event.block.timestamp,
@@ -52,7 +51,7 @@ export default function () {
       // token ID has been inserted into the database. This is a workaround to
       // meet expectations of the `handleNameTransferred` subgraph
       // implementation.
-      await ensureDomainExists(context, {
+      await context.db.insert(schema.domain).values({
         id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
         ownerId: to,
         createdAt: event.block.timestamp,
