@@ -2,7 +2,7 @@ import { ContractConfig, createConfig, factory, mergeAbis } from "ponder";
 import { http, getAbiItem } from "viem";
 
 import { linea } from "viem/chains";
-import { blockConfig } from "../../lib/helpers";
+import { blockConfig, rpcRequestRateLimit } from "../../lib/helpers";
 import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
@@ -24,7 +24,7 @@ export const config = createConfig({
     linea: {
       chainId: linea.id,
       transport: http(process.env[`RPC_URL_${linea.id}`]),
-      maxRequestsPerSecond: 250,
+      maxRequestsPerSecond: rpcRequestRateLimit(linea.id),
     },
   },
   contracts: {
