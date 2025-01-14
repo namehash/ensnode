@@ -20,7 +20,7 @@ export const blockConfig = (
 
 /**
  * Reads the RPC request rate limit for a given chain ID from the environment
- * variable that follow naming convention: RPC_REQUEST_RATE_LIMIT_{chianId}.
+ * variable: RPC_REQUEST_RATE_LIMIT_{chainId}.
  * For example, for Ethereum mainnet the chainId is `1`, so the env variable
  * can be set as `RPC_REQUEST_RATE_LIMIT_1=400`. This will set the rate limit
  * for the mainnet (chainId=1) to 400 requests per second. If the environment

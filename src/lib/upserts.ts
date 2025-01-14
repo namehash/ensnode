@@ -21,7 +21,7 @@ export async function upsertRegistration(
 }
 
 /**
- * A function to ensure a domain entity for requested node value exists in
+ * Ensure that some domain entity value (not necessarily the provided value) for the requested node exists in
  * the database. It inserts the provided domain entity if it does not exist.
  * Otherwise, just returns the existing domain entity from the db.
  *
