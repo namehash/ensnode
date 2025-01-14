@@ -81,7 +81,6 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   type GraphQLOutputType,
-  type GraphQLResolveInfo,
   GraphQLScalarType,
   GraphQLSchema,
   GraphQLString,

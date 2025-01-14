@@ -108,9 +108,11 @@ export const resolver = onchainTable("resolvers", (t) => ({
   // The content hash for this resolver, in binary format
   contentHash: t.text("content_hash"),
   // The set of observed text record keys for this resolver
-  texts: t.text().array().notNull().default([]),
+  // NOTE: we avoid .notNull.default([]) to match subgraph behavior
+  texts: t.text().array(),
   // The set of observed SLIP-44 coin types for this resolver
-  coinTypes: t.bigint("coin_types").array().notNull().default([]),
+  // NOTE: we avoid .notNull.default([]) to match subgraph behavior
+  coinTypes: t.bigint("coin_types").array(),
 
   // TODO: has many events
 }));
