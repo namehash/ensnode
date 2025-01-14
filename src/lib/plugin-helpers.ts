@@ -79,11 +79,11 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
   | `/${string}`
   | `/${string}${T}`;
 
-/** @var the requested active plugin name (see `src/plugins` for available plugins) */
+/** @var comma separated list of the requested active plugin names (see `src/plugins` for available plugins) */
 export const ACTIVE_PLUGINS = process.env.ACTIVE_PLUGINS;
 
 /**
- * Returns the active plugins list based on the `ACTIVE_PLUGINS` environment variable.
+ * Returns the list of 1 or more active plugins based on the `ACTIVE_PLUGINS` environment variable.
  *
  * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
  * names. The function returns the plugins that are included in the list.
