@@ -21,12 +21,12 @@ export async function upsertRegistration(
 }
 
 /**
- * Idempotent handler to ensure a domain entity for requested node exists in
- * the database. It inserts a domain entity if it does not exist. Otherwise,
- * just returns the existing domain entity from the db.
+ * A function to ensure a domain entity for requested node value exists in
+ * the database. It inserts the provided domain entity if it does not exist.
+ * Otherwise, just returns the existing domain entity from the db.
  *
- * @param context ponder context object
- * @param values domain properties
+ * @param context ponder context to interact with database
+ * @param values domain properties, where `id` is the node value
  * @returns domain database entity
  */
 export async function ensureDomainExists(
