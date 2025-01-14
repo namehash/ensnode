@@ -74,6 +74,7 @@ import {
 import {
   GraphQLBoolean,
   GraphQLEnumType,
+  type GraphQLEnumValueConfigMap,
   type GraphQLFieldConfig,
   type GraphQLFieldConfigMap,
   GraphQLFloat,
@@ -135,6 +136,26 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
         (acc: Record<string, {}>, cur) => ({ ...acc, [cur]: {} }),
         {},
       ),
+    });
+  }
+
+  // construct Entity_orderBy enums
+  const entityOrderByEnums: Record<string, GraphQLEnumType> = {};
+  for (const table of tables) {
+    // Scalar fields
+    const values = Object.keys(table.columns).reduce<GraphQLEnumValueConfigMap>(
+      (acc, columnName) => ({
+        ...acc,
+        [columnName]: { value: columnName },
+      }),
+      {},
+    );
+
+    // TODO: relationships i.e. parent__labelName iff necessary
+
+    entityOrderByEnums[table.tsName] = new GraphQLEnumType({
+      name: `${pascalCase(table.tsName)}_orderBy`,
+      values,
     });
   }
 
@@ -302,11 +323,15 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
             const fields = oneRelation.config?.fields ?? [];
             const references = oneRelation.config?.references ?? [];
 
+            const referencedEntityOrderByType = entityOrderByEnums[referencedTable.tsName];
+            if (!referencedEntityOrderByType)
+              throw new Error(`Entity_orderBy Enum not found for ${referencedTable.tsName}`);
+
             fieldConfigMap[relationName] = {
               type: referencedEntityPageType,
               args: {
                 where: { type: referencedEntityFilterType },
-                orderBy: { type: GraphQLString },
+                orderBy: { type: referencedEntityOrderByType },
                 orderDirection: { type: OrderDirectionEnum },
                 first: { type: GraphQLInt },
                 skip: { type: GraphQLInt },
@@ -375,11 +400,14 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
       },
     };
 
+    const entityOrderByType = entityOrderByEnums[table.tsName];
+    if (!entityOrderByType) throw new Error(`Entity_orderBy Enum not found for ${table.tsName}`);
+
     queryFields[pluralFieldName] = {
       type: entityPageType,
       args: {
         where: { type: entityFilterType },
-        orderBy: { type: GraphQLString },
+        orderBy: { type: entityOrderByType },
         orderDirection: { type: OrderDirectionEnum },
         first: { type: GraphQLInt },
         skip: { type: GraphQLInt },
@@ -526,13 +554,6 @@ async function executePluralQuery(
       throw new Error(`Unknown column "${columnName}" used in orderBy argument`);
     }
     return direction === "asc" ? asc(column) : desc(column);
-  });
-  const orderByReversed = orderBySchema.map(([columnName, direction]) => {
-    const column = table.columns[columnName];
-    if (column === undefined) {
-      throw new Error(`Unknown column "${columnName}" used in orderBy argument`);
-    }
-    return direction === "asc" ? desc(column) : asc(column);
   });
 
   const whereConditions = buildWhereConditions(args.where, table.columns);
