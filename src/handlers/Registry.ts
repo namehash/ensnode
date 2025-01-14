@@ -5,7 +5,7 @@ import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
 import { makeResolverId } from "../lib/ids";
 import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
-import { upsertAccount } from "../lib/upserts";
+import { ensureDomainExists, upsertAccount } from "../lib/upserts";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
@@ -15,15 +15,12 @@ export async function setupRootNode({ context }: { context: Context }) {
   await upsertAccount(context, zeroAddress);
 
   // initialize the ENS root to be owned by the zeroAddress and not migrated
-  await context.db
-    .insert(schema.domain)
-    .values({
-      id: ROOT_NODE,
-      ownerId: zeroAddress,
-      createdAt: 0n,
-      isMigrated: false,
-    })
-    .onConflictDoNothing();
+  await ensureDomainExists(context, {
+    id: ROOT_NODE,
+    ownerId: zeroAddress,
+    createdAt: 0n,
+    isMigrated: false,
+  });
 }
 
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
@@ -104,7 +101,7 @@ export const handleNewOwner =
       await context.db.update(schema.domain, { id: domain.id }).set({ ownerId: owner, isMigrated });
     } else {
       // otherwise create the domain
-      domain = await context.db.insert(schema.domain).values({
+      domain = await ensureDomainExists(context, {
         id: subnode,
         ownerId: owner,
         parentId: node,

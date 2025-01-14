@@ -1,9 +1,8 @@
-import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
-import { type Block } from "ponder";
-import { Hex, zeroAddress } from "viem";
+import { ponder } from "ponder:registry";
+import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
+import { ensureDomainExists } from "../../../lib/upserts";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {
@@ -15,33 +14,6 @@ const {
   ownedSubnameNode,
 } = makeRegistrarHandlers(ownedName);
 
-/**
- * Idempotent handler to insert a domain record when a new domain is
- * initialized. For example, right after an NFT token for the domain
- * is minted.
- *
- * @returns a newly created domain record
- */
-function handleDomainNameInitialized({
-  context,
-  event,
-}: {
-  context: Context;
-  event: { args: { id: bigint; owner: Hex }; block: Block };
-}) {
-  const { id, owner } = event.args;
-  const label = tokenIdToLabel(id);
-  const node = makeSubnodeNamehash(ownedSubnameNode, label);
-  return context.db
-    .insert(schema.domain)
-    .values({
-      id: node,
-      ownerId: owner,
-      createdAt: event.block.timestamp,
-    })
-    .onConflictDoNothing();
-}
-
 export default function () {
   ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), handleNameRenewed);
@@ -52,15 +24,15 @@ export default function () {
     if (event.args.from === zeroAddress) {
       // The ens-subgraph `handleNameTransferred` handler implementation
       // assumes the domain record exists. However, when an NFT token is
-      // minted, there's no domain record yet created. The very first transfer
-      // event has to initialize the domain record. This is a workaround to
-      // meet the subgraph implementation expectations.
-      await handleDomainNameInitialized({
-        context,
-        event: {
-          ...event,
-          args: { id: tokenId, owner: to },
-        },
+      // minted, there's no domain entity in the database yet. The very first
+      // transfer event has to ensure the domain entity for the requested
+      // token ID has been inserted into the database. This is a workaround to
+      // meet expectations of the `handleNameTransferred` subgraph
+      // implementation.
+      await ensureDomainExists(context, {
+        id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
+        ownerId: to,
+        createdAt: event.block.timestamp,
       });
     }
 

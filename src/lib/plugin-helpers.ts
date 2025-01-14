@@ -92,9 +92,7 @@ export const ACTIVE_PLUGINS = process.env.ACTIVE_PLUGINS;
  * @returns the active plugins
  */
 export function getActivePlugins<T extends { ownedName: string }>(plugins: readonly T[]): T[] {
-  const pluginsToActivateByOwnedName = ACTIVE_PLUGINS
-    ? ACTIVE_PLUGINS.split(",").map((p) => p.toLowerCase())
-    : [];
+  const pluginsToActivateByOwnedName = ACTIVE_PLUGINS ? ACTIVE_PLUGINS.split(",") : [];
 
   if (!pluginsToActivateByOwnedName.length) {
     throw new Error("No active plugins found. Please set the ACTIVE_PLUGINS environment variable.");

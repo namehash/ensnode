@@ -19,3 +19,25 @@ export async function upsertRegistration(
 ) {
   return context.db.insert(schema.registration).values(values).onConflictDoUpdate(values);
 }
+
+/**
+ * Idempotent handler to ensure a domain entity for requested node exists in
+ * the database. It inserts a domain entity if it does not exist. Otherwise,
+ * just returns the existing domain entity from the db.
+ *
+ * @param context ponder context object
+ * @param values domain properties
+ * @returns domain database entity
+ */
+export async function ensureDomainExists(
+  context: Context,
+  values: typeof schema.domain.$inferInsert,
+): Promise<typeof schema.domain.$inferSelect> {
+  const domainEntity = await context.db.insert(schema.domain).values(values).onConflictDoNothing();
+
+  if (!domainEntity) {
+    throw new Error("domain expected");
+  }
+
+  return domainEntity;
+}
