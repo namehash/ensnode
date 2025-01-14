@@ -1,6 +1,8 @@
 /**
  * This is ponder's graphql/middleware.ts, copied to fix module realm errors.
- * The only other change is enabling graphql-yoga's GraphiQL.
+ * The following changes were made:
+ * 1. removed ponder's GraphiQL, enabled graphql-yoga's GraphiQL.
+ * 2. builds our custom schema instead of the one provided in hono context
  * https://github.com/ponder-sh/ponder/blob/0a5645ca8dec327b0c21da432ee00810edeb087c/packages/core/src/graphql/middleware.ts
  */
 
@@ -10,6 +12,10 @@ import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 import { type YogaServerInstance, createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
 import { buildDataLoaderCache } from "./graphql";
+
+import { default as schema } from "ponder:schema";
+
+import { buildGraphQLSchema } from "./graphql";
 
 /**
  * Middleware for GraphQL with an interactive web view.
@@ -45,7 +51,7 @@ export const graphql = (
   return createMiddleware(async (c) => {
     if (yoga === undefined) {
       const metadataStore = c.get("metadataStore");
-      const graphqlSchema = c.get("graphqlSchema");
+      const graphqlSchema = buildGraphQLSchema(schema);
       const drizzle = c.get("db");
 
       yoga = createYoga({
