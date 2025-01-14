@@ -109,6 +109,14 @@ type PluralArgs = {
 const DEFAULT_LIMIT = 50 as const;
 const MAX_LIMIT = 1000 as const;
 
+const OrderDirectionEnum = new GraphQLEnumType({
+  name: "OrderDirection",
+  values: {
+    asc: { value: "asc" },
+    desc: { value: "desc" },
+  },
+});
+
 export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
   const tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
 
@@ -299,7 +307,7 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
               args: {
                 where: { type: referencedEntityFilterType },
                 orderBy: { type: GraphQLString },
-                orderDirection: { type: GraphQLString },
+                orderDirection: { type: OrderDirectionEnum },
                 first: { type: GraphQLInt },
                 skip: { type: GraphQLInt },
               },
@@ -372,7 +380,7 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
       args: {
         where: { type: entityFilterType },
         orderBy: { type: GraphQLString },
-        orderDirection: { type: GraphQLString },
+        orderDirection: { type: OrderDirectionEnum },
         first: { type: GraphQLInt },
         skip: { type: GraphQLInt },
       },
