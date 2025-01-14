@@ -173,7 +173,7 @@ export async function handleNewResolver({
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   } else {
     // otherwise upsert the resolver
-    const resolverId = makeResolverId(node, resolverAddress);
+    const resolverId = makeResolverId(resolverAddress, node);
 
     const resolver = await context.db
       .insert(schema.resolver)
