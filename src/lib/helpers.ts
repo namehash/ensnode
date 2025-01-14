@@ -18,13 +18,17 @@ export const blockConfig = (
   endBlock: end,
 });
 
+// default rate limit for request per second to RPC endpoints
+const DEFAULT_RPC_RATE_LIMIT = 50;
+
 /**
  * Reads the RPC request rate limit for a given chain ID from the environment
  * variable: RPC_REQUEST_RATE_LIMIT_{chainId}.
  * For example, for Ethereum mainnet the chainId is `1`, so the env variable
  * can be set as `RPC_REQUEST_RATE_LIMIT_1=400`. This will set the rate limit
  * for the mainnet (chainId=1) to 400 requests per second. If the environment
- * variable is not set for the requested chain ID, the default rate limit is 50 rps.
+ * variable is not set for the requested chain ID, use `DEFAULT_RPC_RATE_LIMIT`
+ * as the default value.
  *
  * The rate limit is the maximum number of requests per second that can be made
  * to the RPC endpoint. For public RPC endpoints, it is recommended to set
@@ -35,7 +39,7 @@ export const blockConfig = (
  * @param chainId the chain ID to read the rate limit for from the environment variable
  * @returns the rate limit in requests per second (rps)
  */
-export const rpcRequestRateLimit = (chainId: number): number | undefined => {
+export const rpcRequestRateLimit = (chainId: number): number => {
   if (typeof process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`] === "string") {
     try {
       return parseInt(process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`]!, 10);
@@ -46,7 +50,7 @@ export const rpcRequestRateLimit = (chainId: number): number | undefined => {
     }
   }
 
-  return 50;
+  return DEFAULT_RPC_RATE_LIMIT;
 };
 
 type AnyObject = { [key: string]: any };
