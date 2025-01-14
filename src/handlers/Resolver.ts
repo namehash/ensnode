@@ -19,7 +19,7 @@ export async function handleAddrChanged({
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
 
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -49,7 +49,7 @@ export async function handleAddressChanged({
   const { node, coinType, newAddress } = event.args;
   await upsertAccount(context, newAddress);
 
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -59,7 +59,7 @@ export async function handleAddressChanged({
   // upsert the new coinType
   await context.db
     .update(schema.resolver, { id })
-    .set({ coinTypes: uniq([...resolver.coinTypes, coinType]) });
+    .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
 
   // TODO: log ResolverEvent
 }
@@ -77,7 +77,7 @@ export async function handleNameChanged({
   const { node, name } = event.args;
   if (hasNullByte(name)) return;
 
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -98,7 +98,7 @@ export async function handleABIChanged({
   };
 }) {
   const { node } = event.args;
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -119,7 +119,7 @@ export async function handlePubkeyChanged({
   };
 }) {
   const { node } = event.args;
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -140,7 +140,7 @@ export async function handleTextChanged({
   };
 }) {
   const { node, key } = event.args;
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -148,7 +148,9 @@ export async function handleTextChanged({
   });
 
   // upsert new key
-  await context.db.update(schema.resolver, { id }).set({ texts: uniq([...resolver.texts, key]) });
+  await context.db
+    .update(schema.resolver, { id })
+    .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
   // TODO: log ResolverEvent
 }
@@ -164,7 +166,7 @@ export async function handleContenthashChanged({
   };
 }) {
   const { node, hash } = event.args;
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -190,7 +192,7 @@ export async function handleInterfaceChanged({
   };
 }) {
   const { node } = event.args;
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -216,7 +218,7 @@ export async function handleAuthorisationChanged({
   };
 }) {
   const { node } = event.args;
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -241,7 +243,7 @@ export async function handleVersionChanged({
 }) {
   // a version change nulls out the resolver
   const { node } = event.args;
-  const id = makeResolverId(node, event.log.address);
+  const id = makeResolverId(event.log.address, node);
   const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error("domain expected");
 
