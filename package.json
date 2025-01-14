@@ -14,7 +14,7 @@
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
     "hono": "^4.6.14",
-    "ponder": "^0.8.24",
+    "ponder": "^0.8.26",
     "ts-deepmerge": "^7.0.2",
     "viem": "^2.21.57"
   },
