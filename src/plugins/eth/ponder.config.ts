@@ -1,5 +1,5 @@
-import { ContractConfig, createConfig, factory, mergeAbis } from "ponder";
-import { http, getAbiItem } from "viem";
+import { ContractConfig, createConfig, mergeAbis } from "ponder";
+import { http } from "viem";
 
 import { mainnet } from "viem/chains";
 import { blockConfig } from "../../lib/helpers";
@@ -47,25 +47,29 @@ export const config = createConfig({
       address: REGISTRY_ADDRESS,
       ...blockConfig(START_BLOCK, 9380380, END_BLOCK),
     },
-    [pluginNamespace("OldRegistryResolvers")]: {
-      network: "mainnet",
-      abi: RESOLVER_ABI,
-      address: factory({
-        address: REGISTRY_OLD_ADDRESS,
-        event: getAbiItem({ abi: Registry, name: "NewResolver" }),
-        parameter: "resolver",
-      }),
-      ...blockConfig(START_BLOCK, 9380380, END_BLOCK),
-    },
     [pluginNamespace("Resolver")]: {
       network: "mainnet",
       abi: RESOLVER_ABI,
-      address: factory({
-        address: REGISTRY_ADDRESS,
-        event: getAbiItem({ abi: Registry, name: "NewResolver" }),
-        parameter: "resolver",
-      }),
-      ...blockConfig(START_BLOCK, 9380380, END_BLOCK),
+      // NOTE: this indexes every event ever emitted that looks like this
+      filter: {
+        event: [
+          "AddrChanged",
+          "AddressChanged",
+          "NameChanged",
+          "ABIChanged",
+          "PubkeyChanged",
+          "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+          "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+          "ContenthashChanged",
+          "InterfaceChanged",
+          "AuthorisationChanged",
+          "VersionChanged",
+          "DNSRecordChanged",
+          "DNSRecordDeleted",
+          "DNSZonehashChanged",
+        ],
+      },
+      ...blockConfig(START_BLOCK, 3327417, END_BLOCK),
     },
     [pluginNamespace("BaseRegistrar")]: {
       network: "mainnet",

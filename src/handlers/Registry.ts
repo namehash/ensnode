@@ -167,7 +167,9 @@ export async function handleNewResolver({
   // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
   // NOTE: old resolver resources are kept for event logs
   if (event.args.resolver === zeroAddress) {
-    await context.db.update(schema.domain, { id: node }).set({ resolverId: null });
+    await context.db
+      .update(schema.domain, { id: node })
+      .set({ resolverId: null, resolvedAddressId: null });
 
     // garbage collect newly 'empty' domain iff necessary
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
@@ -182,12 +184,14 @@ export async function handleNewResolver({
         domainId: event.args.node,
         address: event.args.resolver,
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({}); // noop update to return the existing record
 
     // update the domain to point to it, and denormalize the eth addr
+    // NOTE: this implements the logic as documented here
+    // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L193
     await context.db
       .update(schema.domain, { id: node })
-      .set({ resolverId, resolvedAddressId: resolver?.addrId });
+      .set({ resolverId, resolvedAddressId: resolver.addrId });
   }
 
   // TODO: log DomainEvent
