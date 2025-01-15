@@ -25,11 +25,6 @@ estimated mainnet backfill time @ <=500rps = ~12 hours on M1 Macbook (~14x-28x s
 
 ## next up
 
-- [ ] `where` filter logic [supported suffixes](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#all-filters)
-- [ ] [fulltext search queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#fulltext-search-queries)
-- [ ] `Entity_orderBy` 1-level deep
-  - `sort by one-level deep String or ID types on @entity and @derivedFrom fields`
-- [ ] subgraph [Meta](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#subgraph-metadata) object
 - [ ] confirm all the schema relations are configured correctly
 - [ ] integrate rainbow tables for label healing
   - load the table dump into pglite (or just postgres) & query synchronously to match existing behavior
