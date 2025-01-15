@@ -2,7 +2,7 @@
 
 > powered by ponder
 
-estimated backfill time @ 50rps = 24-36 hours on M1 Macbook (~10x speedup)
+estimated mainnet backfill time @ <=500rps = ~12 hours on M1 Macbook (~14x-28x speedup vs subgraph)
 
 ## goals
 
