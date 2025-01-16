@@ -243,7 +243,9 @@ export async function handleVersionChanged({
   const { node } = event.args;
   const id = makeResolverId(node, event.log.address);
   const domain = await context.db.find(schema.domain, { id: node });
-  if (!domain) throw new Error("domain expected");
+  if (!domain) {
+    return;
+  }
 
   // materialize the Domain's resolvedAddress field
   if (domain.resolverId === id) {
