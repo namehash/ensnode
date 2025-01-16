@@ -18,9 +18,12 @@ export const ownedName = "eth";
 
 export const pluginNamespace = createPluginNamespace(ownedName);
 
+// demo for `didsendit.eth`
+// minted at block: 21_610_362
+
 // constrain the ponder indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range
-const START_BLOCK: ContractConfig["startBlock"] = undefined;
+const START_BLOCK: ContractConfig["startBlock"] = 21_610_262;
 const END_BLOCK: ContractConfig["endBlock"] = undefined;
 
 export const config = createConfig({
@@ -36,13 +39,15 @@ export const config = createConfig({
       network: "mainnet",
       abi: Registry,
       address: "0x314159265dd8dbb310642f98f50c066173c1259b",
-      ...blockConfig(START_BLOCK, 3327417, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("Registry")]: {
       network: "mainnet",
       abi: Registry,
       address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
-      ...blockConfig(START_BLOCK, 9380380, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("OldRegistryResolvers")]: {
       network: "mainnet",
@@ -52,7 +57,8 @@ export const config = createConfig({
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
-      ...blockConfig(START_BLOCK, 9380380, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("Resolver")]: {
       network: "mainnet",
@@ -62,31 +68,36 @@ export const config = createConfig({
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
-      ...blockConfig(START_BLOCK, 9380380, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("BaseRegistrar")]: {
       network: "mainnet",
       abi: BaseRegistrar,
       address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
-      ...blockConfig(START_BLOCK, 9380410, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("EthRegistrarControllerOld")]: {
       network: "mainnet",
       abi: EthRegistrarControllerOld,
       address: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
-      ...blockConfig(START_BLOCK, 9380471, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("EthRegistrarController")]: {
       network: "mainnet",
       abi: EthRegistrarController,
       address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
-      ...blockConfig(START_BLOCK, 16925618, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("NameWrapper")]: {
       network: "mainnet",
       abi: NameWrapper,
       address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
-      ...blockConfig(START_BLOCK, 16925608, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
   },
 });

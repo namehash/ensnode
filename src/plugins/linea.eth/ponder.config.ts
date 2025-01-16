@@ -14,10 +14,13 @@ export const ownedName = "linea.eth";
 
 export const pluginNamespace = createPluginNamespace(ownedName);
 
+// demo for `0xtko.linea.eth`
+// minted at block: 14_491_235
+
 // constrain the ponder indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range
-const START_BLOCK: ContractConfig["startBlock"] = undefined;
-const END_BLOCK: ContractConfig["endBlock"] = undefined;
+const START_BLOCK: ContractConfig["startBlock"] = 14_490_000;
+const END_BLOCK: ContractConfig["endBlock"] = 14_492_000;
 
 export const config = createConfig({
   networks: {
@@ -32,7 +35,8 @@ export const config = createConfig({
       network: "linea",
       abi: Registry,
       address: "0x50130b669B28C339991d8676FA73CF122a121267",
-      ...blockConfig(START_BLOCK, 6682888, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("Resolver")]: {
       network: "linea",
@@ -42,25 +46,29 @@ export const config = createConfig({
         event: getAbiItem({ abi: Registry, name: "NewResolver" }),
         parameter: "resolver",
       }),
-      ...blockConfig(START_BLOCK, 6682888, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("BaseRegistrar")]: {
       network: "linea",
       abi: BaseRegistrar,
       address: "0x6e84390dCc5195414eC91A8c56A5c91021B95704",
-      ...blockConfig(START_BLOCK, 6682892, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("EthRegistrarController")]: {
       network: "linea",
       abi: EthRegistrarController,
       address: "0xDb75Db974B1F2bD3b5916d503036208064D18295",
-      ...blockConfig(START_BLOCK, 6682978, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
     [pluginNamespace("NameWrapper")]: {
       network: "linea",
       abi: NameWrapper,
       address: "0xA53cca02F98D590819141Aa85C891e2Af713C223",
-      ...blockConfig(START_BLOCK, 6682956, END_BLOCK),
+      startBlock: START_BLOCK,
+      endBlock: END_BLOCK,
     },
   },
 });
