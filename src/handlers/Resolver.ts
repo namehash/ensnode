@@ -6,6 +6,12 @@ import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
 import { upsertAccount, upsertResolver } from "../lib/upserts";
 
+// NOTE: both subgraph and this indexer us upserts in this file because a 'Resolver' is _any_
+// contract on the chain that emits an event with this signature, which may or may not actually be
+// an ENS-specific Resolver. because of this each even could theoretically be the first event the
+// indexer has seen for a given Resolver id and therefore needs to use an upsert and not assume
+// anything else about this Resolver's state
+
 export async function handleAddrChanged({
   context,
   event,
@@ -246,13 +252,17 @@ export async function handleVersionChanged({
   const id = makeResolverId(event.log.address, node);
   const domain = await context.db.find(schema.domain, { id: node });
 
-  // materialize the Domain's resolvedAddress field iff exists
+  // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
   if (domain && domain.resolverId === id) {
     await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: null });
   }
 
-  // clear out the resolver's info
-  await context.db.update(schema.resolver, { id }).set({
+  await upsertResolver(context, {
+    id,
+    domainId: node,
+    address: event.log.address,
+
+    // clear out the resolver's info
     addrId: null,
     contentHash: null,
     coinTypes: [],
