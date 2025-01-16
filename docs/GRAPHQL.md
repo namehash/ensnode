@@ -4,7 +4,6 @@
 
 the following features of the subgraph graphql api are explicitly unsupported, because they are not used by ensjs or ens-app-v3
 
-- `_nocase` case-insensitive where filters
 - [fulltext search queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#fulltext-search-queries)
 - 1-level-nested Entity `_orderBy` param
 - subgraph `_Meta_` object (ponder's `_meta` is available)
