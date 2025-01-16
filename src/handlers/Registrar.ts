@@ -18,7 +18,9 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
 
     const node = makeSubnodeNamehash(ownedSubnameNode, label);
     const domain = await context.db.find(schema.domain, { id: node });
-    if (!domain) throw new Error("domain expected");
+    if (!domain) {
+      return;
+    }
 
     if (domain.labelName !== name) {
       await context.db
@@ -106,6 +108,12 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
       const label = tokenIdToLabel(id);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
+      const registration = await context.db.find(schema.registration, { id: label });
+
+      if (!registration) {
+        return;
+      }
+
       await context.db.update(schema.registration, { id: label }).set({ expiryDate: expires });
 
       await context.db
@@ -136,7 +144,13 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
 
       await context.db.update(schema.registration, { id: label }).set({ registrantId: to });
 
-      await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
+      const domain = await context.db.find(schema.domain, { id: node });
+
+      if (!domain) {
+        return;
+      }
+
+      await context.db.update(schema.domain, { id: domain.id }).set({ registrantId: to });
 
       // TODO: log Event
     },

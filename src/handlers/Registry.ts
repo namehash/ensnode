@@ -56,9 +56,17 @@ function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
 // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64
 async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
-  if (!domain) throw new Error(`Domain not found: ${node}`);
+  if (!domain) {
+    return;
+  }
 
   if (isDomainEmpty(domain) && domain.parentId !== null) {
+    const parent = await context.db.find(schema.domain, { id: domain.parentId });
+
+    if (!parent) {
+      return;
+    }
+
     // decrement parent's subdomain count
     await context.db
       .update(schema.domain, { id: domain.parentId })
@@ -132,10 +140,16 @@ export const handleNewOwner =
         isMigrated,
       });
 
-      // and increment parent subdomainCount
-      await context.db
-        .update(schema.domain, { id: node })
-        .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
+      const parent = await context.db.find(schema.domain, { id: node });
+
+      // to support testing a partial-index use case,
+      // first ensure the parent domain exists before incrementing its subdomainCount
+      if (parent) {
+        // and increment parent subdomainCount
+        await context.db
+          .update(schema.domain, { id: parent.id })
+          .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
+      }
     }
 
     // if the domain doesn't yet have a name, construct it here
@@ -205,6 +219,13 @@ export async function handleNewResolver({
         address: event.args.resolver,
       })
       .onConflictDoNothing();
+
+    const domain = await context.db.find(schema.domain, { id: node });
+
+    if (!domain) {
+      console.error(`Domain not found: ${node}`);
+      return;
+    }
 
     // update the domain to point to it, and denormalize the eth addr
     await context.db
