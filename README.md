@@ -1,4 +1,4 @@
-# ens-multichain indexer
+# ENSNode
 
 > powered by ponder
 
