@@ -124,8 +124,8 @@ export function getActivePlugins<T extends { ownedName: string }>(
   return Array.from(uniquePluginsToActivate.values());
 }
 
-// Helper type to get the intersection of all config types
-export type IntersectionOf<T> = (T extends any ? (x: T) => void : never) extends (
+// Helper type to merge multiple types into one
+export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (
   x: infer R,
 ) => void
   ? R
