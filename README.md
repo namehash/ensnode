@@ -1,8 +1,8 @@
-# ens-multichain indexer
+# ensnode
 
 > powered by ponder
 
-estimated mainnet backfill time @ <=500rps = ~12 hours on M1 Macbook (~14x-28x speedup vs subgraph)
+estimated mainnet-only backfill time @ <=500rps = **~15 hours** on M1 Macbook (>10x speedup vs subgraph)
 
 ## goals
 
