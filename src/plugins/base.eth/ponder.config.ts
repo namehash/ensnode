@@ -14,7 +14,7 @@ export const ownedName = "base.eth" as const;
 
 export const pluginNamespace = createPluginNamespace(ownedName);
 
-// constrain the ponder indexing between the following start/end blocks
+// constrain indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range
 const START_BLOCK: ContractConfig["startBlock"] = undefined;
 const END_BLOCK: ContractConfig["endBlock"] = undefined;

@@ -18,13 +18,13 @@ export const blockConfig = (
   endBlock: end,
 });
 
-// default rate limit for request per second to RPC endpoints
+// default request per second rate limit for RPC endpoints
 const DEFAULT_RPC_RATE_LIMIT = 50;
 
 /**
- * Creates the RPC request rate limit for a given chain ID.
+ * Gets the RPC request rate limit for a given chain ID.
  *
- * @param chainId the chain ID to read the rate limit for from the environment variable
+ * @param chainId the chain ID to get the rate limit for
  * @returns the rate limit in requests per second (rps)
  */
 export const rpcRequestRateLimit = (chainId: number): number => {
