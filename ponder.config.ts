@@ -12,8 +12,9 @@ const availablePlugins = [baseEthPlugin, ethPlugin, lineaEthPlugin] as const;
 // of the indexing handlers
 type AllPluginConfigs = MergedTypes<(typeof availablePlugins)[number]["config"]>;
 
-// Activates the indexing handlers of activated plugins and
-// returns the intersection of their combined config.
+// Activates the indexing handlers of activated plugins.
+// Statically typed as the merge of all available plugin configs. However at
+// runtime returns the merge of all activated plugin configs.
 function activatePluginsAndGetConfig(): AllPluginConfigs {
   const activePlugins = getActivePlugins(availablePlugins);
 
@@ -27,6 +28,6 @@ function activatePluginsAndGetConfig(): AllPluginConfigs {
   return activePluginsConfig as AllPluginConfigs;
 }
 
-// The type of the default export is the intersection of all active plugin configs
+// The type of the default export is a merge of all active plugin configs
 // configs so that each plugin can be correctly typechecked
 export default activatePluginsAndGetConfig();

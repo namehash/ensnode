@@ -101,7 +101,8 @@ export function getActivePlugins<T extends { ownedName: string }>(
 
   // Check if the requested plugins are valid and can become active
   const invalidPlugins = requestedPlugins.filter(
-    (plugin) => !availablePlugins.some((p) => p.ownedName === plugin),
+    (requestedPlugin) =>
+      !availablePlugins.some((availablePlugin) => availablePlugin.ownedName === requestedPlugin),
   );
 
   if (invalidPlugins.length) {
@@ -125,8 +126,6 @@ export function getActivePlugins<T extends { ownedName: string }>(
 }
 
 // Helper type to merge multiple types into one
-export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (
-  x: infer R,
-) => void
+export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
   ? R
   : never;
