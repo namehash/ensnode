@@ -9,24 +9,25 @@ import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
- * Any permutation of plugins might be activated and multiple plugins expect
- * the ENS root to exist. This behavior is consistent with the ens-subgraph,
- * which initializes the ENS root node in the same way. However,
- * the ens-subgraph does not have independent plugins. In our case, we have
- * multiple plugins that might be activated independently. Regardless of
- * the permutation of active plugins, they all expect the ENS root to exist.
+ * Any permutation of plugins might be activated (except no plugins activated)
+ * and multiple plugins expect the ENS root to exist. This behavior is
+ * consistent with the ens-subgraph, which initializes the ENS root node in
+ * the same way. However, the ens-subgraph does not have independent plugins.
+ * In our case, we have multiple plugins that might be activated independently.
+ * Regardless of the permutation of active plugins, they all expect
+ * the ENS root to exist.
  *
- * This function has to be used a callback on the Ponder's setup event handler.
+ * This function should be used as the setup event handler for registry
+ * (or shadow registry) contracts.
  * https://ponder.sh/docs/api-reference/indexing-functions#setup-event
- * In case there are multiple setup handlers defined, the order of execution
- * is guaranteed to be the same, and it is the reverse order of
- * the network name configured on a given contract that the setup event was
- * registered for.
- *
- * For example, for setup events registered for contracts on: base, linea, mainnet
- * The order of execution will be: mainnet, linea, base. And if the contracts
- * were registered on: base, ethereum, linea, the order of execution will be:
- * linea, ethereum, base.
+ * In case there are multiple plugins activated, `setupRootNode` will be
+ * executed multiple times. The order of execution of `setupRootNode` is
+ * deterministic based on the reverse order of the network names of the given
+ * contracts associated with the activated plugins. For example,
+ * if the network name were: `base`, `linea`, `mainnet`, the order of execution
+ * will be: `mainnet`, `linea`, `base`.
+ * And if the network name were: `base`, `ethereum`, `linea`, the order of
+ * execution will be: `linea`, `ethereum`, `base`.
  */
 export async function setupRootNode({ context }: { context: Context }) {
   // ensure we have an account for the zeroAddress
