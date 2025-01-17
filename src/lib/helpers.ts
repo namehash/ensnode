@@ -18,6 +18,35 @@ export const blockConfig = (
   endBlock: end,
 });
 
+/**
+ * Gets the RPC endpoint URL for a given chain ID.
+ *
+ * @param chainId the chain ID to get the RPC URL for
+ * @returns the URL of the RPC endpoint
+ */
+export const rpcEndpointUrl = (chainId: number): string => {
+  /**
+   * Reads the RPC URL for a given chain ID from the environment variable:
+   * RPC_URL_{chainId}. For example, for Ethereum mainnet the chainId is `1`,
+   * so the env variable can be set as `RPC_URL_1=https://eth.drpc.org`.
+   */
+  const envVarName = `RPC_URL_${chainId}`;
+
+  // no RPC URL provided in env var
+  if (!process.env[envVarName]) {
+    // throw an error, as the RPC URL is required and no defaults apply
+    throw new Error(`Missing '${envVarName}' environment variable`);
+  }
+
+  try {
+    return new URL(process.env[envVarName] as string).toString();
+  } catch (e) {
+    throw new Error(
+      `Invalid '${envVarName}' environment variable. Please provide a valid URL.`,
+    );
+  }
+};
+
 // default request per second rate limit for RPC endpoints
 const DEFAULT_RPC_RATE_LIMIT = 50;
 
