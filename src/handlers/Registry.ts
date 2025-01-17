@@ -24,9 +24,9 @@ import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
  * executed multiple times. The order of execution of `setupRootNode` is
  * deterministic based on the reverse order of the network names of the given
  * contracts associated with the activated plugins. For example,
- * if the network name were: `base`, `linea`, `mainnet`, the order of execution
+ * if the network names were: `base`, `linea`, `mainnet`, the order of execution
  * will be: `mainnet`, `linea`, `base`.
- * And if the network name were: `base`, `ethereum`, `linea`, the order of
+ * And if the network names were: `base`, `ethereum`, `linea`, the order of
  * execution will be: `linea`, `ethereum`, `base`.
  */
 export async function setupRootNode({ context }: { context: Context }) {
@@ -42,7 +42,7 @@ export async function setupRootNode({ context }: { context: Context }) {
       createdAt: 0n,
       isMigrated: false,
     })
-    // make sure to only insert the domain entity into database
+    // only insert the domain entity into the database if it doesn't already exist
     // only if it doesn't already exist
     .onConflictDoNothing();
 }

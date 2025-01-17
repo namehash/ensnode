@@ -35,13 +35,13 @@ export const rpcEndpointUrl = (chainId: number): string => {
   // no RPC URL provided in env var
   if (!process.env[envVarName]) {
     // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(`Missing '${envVarName}' environment variable`);
+    throw new Error(`Missing '${envVarName}' environment variable. The RPC URL for chainId ${chainId} is required.`);
   }
 
   try {
     return new URL(process.env[envVarName] as string).toString();
   } catch (e) {
-    throw new Error(`Invalid '${envVarName}' environment variable. Please provide a valid URL.`);
+    throw new Error(`Invalid '${envVarName}' environment variable value: '${process.env[envVarName]}'. Please provide a valid RPC URL for chainId ${chainId}.`);
   }
 };
 
