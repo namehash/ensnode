@@ -41,9 +41,7 @@ export const rpcEndpointUrl = (chainId: number): string => {
   try {
     return new URL(process.env[envVarName] as string).toString();
   } catch (e) {
-    throw new Error(
-      `Invalid '${envVarName}' environment variable. Please provide a valid URL.`,
-    );
+    throw new Error(`Invalid '${envVarName}' environment variable. Please provide a valid URL.`);
   }
 };
 
