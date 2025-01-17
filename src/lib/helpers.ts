@@ -40,17 +40,19 @@ const DEFAULT_RPC_RATE_LIMIT = 50;
  * @returns the rate limit in requests per second (rps)
  */
 export const rpcRequestRateLimit = (chainId: number): number => {
-  if (typeof process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`] === "string") {
-    try {
-      return parseInt(process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`]!, 10);
-    } catch (e) {
-      throw new Error(
-        `Invalid RPC_REQUEST_RATE_LIMIT_${chainId} value: ${e}. Please provide a valid number.`,
-      );
-    }
+  const envVarName = `RPC_REQUEST_RATE_LIMIT_${chainId}`;
+
+  if (!process.env[envVarName]) {
+    return DEFAULT_RPC_RATE_LIMIT;
   }
 
-  return DEFAULT_RPC_RATE_LIMIT;
+  try {
+    return parseInt(process.env[envVarName], 10);
+  } catch (e) {
+    throw new Error(
+      `Invalid ${envVarName} value: ${e}. Please provide a valid number.`,
+    );
+  }
 };
 
 type AnyObject = { [key: string]: any };
