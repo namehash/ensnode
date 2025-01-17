@@ -2,7 +2,7 @@
 
 > powered by ponder
 
-estimated mainnet-only backfill time @ <=500rps = **~15 hours** on M1 Macbook (>10x speedup vs subgraph)
+estimated mainnet-only backfill time @ <=500rps = **~13 hours** on M1 Macbook (>10x speedup vs subgraph)
 
 ## goals
 
