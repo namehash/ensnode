@@ -10,11 +10,11 @@ const plugins = [baseEthPlugin, ethPlugin, lineaEthPlugin] as const;
 
 // intersection of all available plugin configs to support correct typechecking
 // of the indexing handlers
-type AllPluginsConfig = IntersectionOf<(typeof plugins)[number]["config"]>;
+type AllPluginConfigs = IntersectionOf<(typeof plugins)[number]["config"]>;
 
 // Activates the indexing handlers of activated plugins and
 // returns the intersection of their combined config.
-function getActivePluginsConfig(): AllPluginsConfig {
+function getActivePluginConfigs(): AllPluginConfigs {
   const activePlugins = getActivePlugins(plugins);
 
   // load indexing handlers from the active plugins into the runtime
@@ -22,11 +22,11 @@ function getActivePluginsConfig(): AllPluginsConfig {
 
   const config = activePlugins
     .map((plugin) => plugin.config)
-    .reduce((acc, val) => deepMergeRecursive(acc, val), {} as AllPluginsConfig);
+    .reduce((acc, val) => deepMergeRecursive(acc, val), {} as AllPluginConfigs);
 
-  return config as AllPluginsConfig;
+  return config as AllPluginConfigs;
 }
 
-// The type of the default export is the intersection of all available plugin
+// The type of the default export is the intersection of all active plugin configs
 // configs so that each plugin can be correctly typechecked
-export default getActivePluginsConfig();
+export default getActivePluginConfigs();
