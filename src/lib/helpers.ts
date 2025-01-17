@@ -31,17 +31,22 @@ export const rpcEndpointUrl = (chainId: number): string => {
    * so the env variable can be set as `RPC_URL_1=https://eth.drpc.org`.
    */
   const envVarName = `RPC_URL_${chainId}`;
+  const envVarValue = process.env[envVarName];
 
   // no RPC URL provided in env var
-  if (!process.env[envVarName]) {
+  if (!envVarValue) {
     // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(`Missing '${envVarName}' environment variable. The RPC URL for chainId ${chainId} is required.`);
+    throw new Error(
+      `Missing '${envVarName}' environment variable. The RPC URL for chainId ${chainId} is required.`,
+    );
   }
 
   try {
-    return new URL(process.env[envVarName] as string).toString();
+    return new URL(envVarValue).toString();
   } catch (e) {
-    throw new Error(`Invalid '${envVarName}' environment variable value: '${process.env[envVarName]}'. Please provide a valid RPC URL for chainId ${chainId}.`);
+    throw new Error(
+      `Invalid '${envVarName}' environment variable value: '${envVarValue}'. Please provide a valid RPC URL.`,
+    );
   }
 };
 
@@ -63,9 +68,10 @@ export const rpcRequestRateLimit = (chainId: number): number => {
    * for the mainnet (chainId=1) to 400 requests per second.
    */
   const envVarName = `RPC_REQUEST_RATE_LIMIT_${chainId}`;
+  const envVarValue = process.env[envVarName];
 
   // no rate limit provided in env var
-  if (!process.env[envVarName]) {
+  if (!envVarValue) {
     // apply default rate limit value
     return DEFAULT_RPC_RATE_LIMIT;
   }
@@ -73,9 +79,19 @@ export const rpcRequestRateLimit = (chainId: number): number => {
   // otherwise
   try {
     // parse the rate limit value from the environment variable
-    return parseInt(process.env[envVarName], 10);
+    const rpcRequestRateLimit = parseInt(envVarValue, 10);
+    
+    if (Number.isNaN(rpcRequestRateLimit)) {
+      throw new Error(`Could not parse rate limit value '${rpcRequestRateLimit}'`);
+    }
+
+    return rpcRequestRateLimit;
   } catch (e) {
-    throw new Error(`Invalid ${envVarName} value: ${e}. Please provide a valid number.`);
+    console.log(e);
+  
+    throw new Error(
+      `Invalid '${envVarName}' environment variable value: '${envVarValue}'. Please provide a valid RPC RATE LIMIT integer.`,
+    );
   }
 };
 
