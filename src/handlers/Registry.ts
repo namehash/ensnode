@@ -43,7 +43,6 @@ export async function setupRootNode({ context }: { context: Context }) {
       isMigrated: false,
     })
     // only insert the domain entity into the database if it doesn't already exist
-    // only if it doesn't already exist
     .onConflictDoNothing();
 }
 

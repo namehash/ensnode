@@ -59,7 +59,7 @@ const DEFAULT_RPC_RATE_LIMIT = 50;
  * @param chainId the chain ID to get the rate limit for
  * @returns the rate limit in requests per second (rps)
  */
-export const rpcRequestRateLimit = (chainId: number): number => {
+export const rpcMaxRequestsPerSecond = (chainId: number): number => {
   /**
    * Reads the RPC request rate limit for a given chain ID from the environment
    * variable: RPC_REQUEST_RATE_LIMIT_{chainId}.
@@ -79,18 +79,16 @@ export const rpcRequestRateLimit = (chainId: number): number => {
   // otherwise
   try {
     // parse the rate limit value from the environment variable
-    const rpcRequestRateLimit = parseInt(envVarValue, 10);
-    
-    if (Number.isNaN(rpcRequestRateLimit)) {
-      throw new Error(`Could not parse rate limit value '${rpcRequestRateLimit}'`);
+    const parsedEnvVarValue = parseInt(envVarValue, 10);
+
+    if (Number.isNaN(parsedEnvVarValue) || parsedEnvVarValue <= 0) {
+      throw new Error(`Rate limit value must be an integer greater than 0.`);
     }
 
-    return rpcRequestRateLimit;
-  } catch (e) {
-    console.log(e);
-  
+    return parsedEnvVarValue;
+  } catch (e: any) {
     throw new Error(
-      `Invalid '${envVarName}' environment variable value: '${envVarValue}'. Please provide a valid RPC RATE LIMIT integer.`,
+      `Invalid '${envVarName}' environment variable value: '${envVarValue}'. ${e.message}`,
     );
   }
 };

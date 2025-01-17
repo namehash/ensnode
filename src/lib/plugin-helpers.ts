@@ -79,28 +79,29 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
   | `/${string}`
   | `/${string}${T}`;
 
-/** @var comma separated list of the requested active plugin names (see `src/plugins` for available plugins) */
-export const ACTIVE_PLUGINS = process.env.ACTIVE_PLUGINS;
-
 /**
- * Returns the list of 1 or more active plugins based on the `ACTIVE_PLUGINS` environment variable.
+ * Returns a list of 1 or more distinct active plugins based on the `ACTIVE_PLUGINS` environment variable.
  *
  * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
  * names. The function returns the plugins that are included in the list.
  *
- * @param plugins is a list of available plugins
+ * @param availablePlugins is a list of available plugins
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { ownedName: string }>(plugins: readonly T[]): T[] {
-  const pluginsToActivateByOwnedName = ACTIVE_PLUGINS ? ACTIVE_PLUGINS.split(",") : [];
+export function getActivePlugins<T extends { ownedName: string }>(
+  availablePlugins: readonly T[],
+): T[] {
+  /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
+  const requestedPluginsEnvVar = process.env.ACTIVE_PLUGINS;
+  const requestedPlugins = requestedPluginsEnvVar ? requestedPluginsEnvVar.split(",") : [];
 
-  if (!pluginsToActivateByOwnedName.length) {
-    throw new Error("No active plugins found. Please set the ACTIVE_PLUGINS environment variable.");
+  if (!requestedPlugins.length) {
+    throw new Error("Set the ACTIVE_PLUGINS environment variable to activate one or more plugins.");
   }
 
   // Check if the requested plugins are valid and can become active
-  const invalidPlugins = pluginsToActivateByOwnedName.filter(
-    (plugin) => !plugins.some((p) => p.ownedName === plugin),
+  const invalidPlugins = requestedPlugins.filter(
+    (plugin) => !availablePlugins.some((p) => p.ownedName === plugin),
   );
 
   if (invalidPlugins.length) {
@@ -112,8 +113,15 @@ export function getActivePlugins<T extends { ownedName: string }>(plugins: reado
     );
   }
 
-  // Return the active plugins
-  return plugins.filter((plugin) => pluginsToActivateByOwnedName.includes(plugin.ownedName));
+  const uniquePluginsToActivate = availablePlugins.reduce((acc, plugin) => {
+    // Only add the plugin if it's not already in the map
+    if (acc.has(plugin.ownedName) === false) {
+      acc.set(plugin.ownedName, plugin);
+    }
+    return acc;
+  }, new Map<string, T>());
+
+  return Array.from(uniquePluginsToActivate.values());
 }
 
 // Helper type to get the intersection of all config types

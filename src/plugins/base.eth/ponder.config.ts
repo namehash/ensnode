@@ -2,7 +2,7 @@ import { type ContractConfig, createConfig, factory } from "ponder";
 import { http, getAbiItem } from "viem";
 import { base } from "viem/chains";
 
-import { blockConfig, rpcEndpointUrl, rpcRequestRateLimit } from "../../lib/helpers";
+import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/helpers";
 import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EarlyAccessRegistrarController } from "./abis/EARegistrarController";
@@ -24,7 +24,7 @@ export const config = createConfig({
     base: {
       chainId: base.id,
       transport: http(rpcEndpointUrl(base.id)),
-      maxRequestsPerSecond: rpcRequestRateLimit(base.id),
+      maxRequestsPerSecond: rpcMaxRequestsPerSecond(base.id),
     },
   },
   contracts: {

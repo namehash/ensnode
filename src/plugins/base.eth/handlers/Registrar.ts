@@ -23,10 +23,10 @@ export default function () {
 
   ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await upsertAccount(context, event.args.owner);
-    // base has 'preminted' names via Registrar#registerOnly, which explicitly does not update Registry.
-    // this breaks a subgraph assumption, as it expects a domain to exist (via Registry:NewOwner) before
-    // any Registrar:NameRegistered events. in the future we will likely happily upsert domains, but
-    // in order to avoid prematurely drifting from subgraph equivalancy, we insert the domain entity here,
+    // Base has 'preminted' names via Registrar#registerOnly, which explicitly
+    // does not update the Registry. This breaks a subgraph assumption, as it
+    // expects a domain to exist (via Registry:NewOwner) before any
+    // Registrar:NameRegistered events. We insert the domain entity here,
     // allowing the base indexer to progress.
     await context.db.insert(schema.domain).values({
       id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(event.args.id)),
@@ -45,12 +45,12 @@ export default function () {
 
     if (event.args.from === zeroAddress) {
       // The ens-subgraph `handleNameTransferred` handler implementation
-      // assumes the domain record exists. However, when an NFT token is
-      // minted, there's no domain entity in the database yet. The very first
-      // transfer event has to ensure the domain entity for the requested
-      // token ID has been inserted into the database. This is a workaround to
-      // meet expectations of the `handleNameTransferred` subgraph
-      // implementation.
+      // assumes an indexed record for the domain already exists. However,
+      // when an NFT token is minted (transferred from `0x0` address),
+      // there's no domain entity in the database yet. That very first transfer
+      // event has to ensure the domain entity for the requested token ID
+      // has been inserted into the database. This is a workaround to meet
+      // expectations of the `handleNameTransferred` subgraph implementation.
       await context.db.insert(schema.domain).values({
         id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
         ownerId: to,

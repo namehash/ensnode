@@ -23,12 +23,12 @@ export default function () {
 
     if (event.args.from === zeroAddress) {
       // The ens-subgraph `handleNameTransferred` handler implementation
-      // assumes the domain record exists. However, when an NFT token is
-      // minted, there's no domain entity in the database yet. The very first
-      // transfer event has to ensure the domain entity for the requested
-      // token ID has been inserted into the database. This is a workaround to
-      // meet expectations of the `handleNameTransferred` subgraph
-      // implementation.
+      // assumes an indexed record for the domain already exists. However,
+      // when an NFT token is minted (transferred from `0x0` address),
+      // there's no domain entity in the database yet. That very first transfer
+      // event has to ensure the domain entity for the requested token ID
+      // has been inserted into the database. This is a workaround to meet
+      // expectations of the `handleNameTransferred` subgraph implementation.
       await context.db.insert(schema.domain).values({
         id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
         ownerId: to,
