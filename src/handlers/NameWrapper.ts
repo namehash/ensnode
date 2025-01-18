@@ -2,10 +2,10 @@ import { type Context, type Event, type EventNames } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
+import { upsertAccount } from "../lib/db-helpers";
 import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
 import { decodeDNSPacketBytes, tokenIdToLabel } from "../lib/subname-helpers";
-import { upsertAccount } from "../lib/upserts";
 
 // if the wrappedDomain in question has pcc burned (?) and a higher (?) expiry date, update the domain's expiryDate
 async function materializeDomainExpiryDate(context: Context, node: Hex) {

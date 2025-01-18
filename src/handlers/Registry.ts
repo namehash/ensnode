@@ -3,29 +3,52 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
+import { upsertAccount } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
 import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
-import { upsertAccount } from "../lib/upserts";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
+ * Any permutation of plugins might be activated (except no plugins activated)
+ * and multiple plugins expect the ENS root to exist. This behavior is
+ * consistent with the ens-subgraph, which initializes the ENS root node in
+ * the same way. However, the ens-subgraph does not have independent plugins.
+ * In our case, we have multiple plugins that might be activated independently.
+ * Regardless of the permutation of active plugins, they all expect
+ * the ENS root to exist.
+ *
+ * This function should be used as the setup event handler for registry
+ * (or shadow registry) contracts.
+ * https://ponder.sh/docs/api-reference/indexing-functions#setup-event
+ * In case there are multiple plugins activated, `setupRootNode` will be
+ * executed multiple times. The order of execution of `setupRootNode` is
+ * deterministic based on the reverse order of the network names of the given
+ * contracts associated with the activated plugins. For example,
+ * if the network names were: `base`, `linea`, `mainnet`, the order of execution
+ * will be: `mainnet`, `linea`, `base`.
+ * And if the network names were: `base`, `ethereum`, `linea`, the order of
+ * execution will be: `linea`, `ethereum`, `base`.
  */
 export async function setupRootNode({ context }: { context: Context }) {
   // ensure we have an account for the zeroAddress
   await upsertAccount(context, zeroAddress);
 
   // initialize the ENS root to be owned by the zeroAddress and not migrated
-  await context.db.insert(schema.domain).values({
-    id: ROOT_NODE,
-    ownerId: zeroAddress,
-    createdAt: 0n,
-    // NOTE: we initialize the root node as migrated because:
-    // 1. this matches subgraph's existing behavior, despite the root node not technically being
-    //    migrated until the new registry is deployed and
-    // 2. other plugins (base, linea) don't have the concept of migration but defaulting to true
-    //    is a reasonable behavior
-    isMigrated: true,
-  });
+  await context.db
+    .insert(schema.domain)
+    .values({
+      id: ROOT_NODE,
+      ownerId: zeroAddress,
+      createdAt: 0n,
+      // NOTE: we initialize the root node as migrated because:
+      // 1. this matches subgraph's existing behavior, despite the root node not technically being
+      //    migrated until the new registry is deployed and
+      // 2. other plugins (base, linea) don't have the concept of migration but defaulting to true
+      //    is a reasonable behavior
+      isMigrated: true,
+    })
+    // only insert the domain entity into the database if it doesn't already exist
+    .onConflictDoNothing();
 }
 
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {

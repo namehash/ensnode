@@ -1,6 +1,6 @@
-# ensnode
+# ENSNode
 
-> powered by ponder
+> a multichain ENS indexer, powered by Ponder
 
 estimated mainnet-only backfill time @ <=500rps = **~13 hours** on M1 Macbook (>10x speedup vs subgraph)
 
@@ -14,7 +14,7 @@ estimated mainnet-only backfill time @ <=500rps = **~13 hours** on M1 Macbook (>
   - 1:1 equivalency of results for queries via ensjs
     - 100% ensjs, ens-app-v3 test suites passing
     - should 'just work', following [this documentation](https://github.com/ensdomains/ensjs/blob/main/docs/basics/custom-subgraph-uris.md)
-  - ensjs equivalency confirmed via [ens-indexer-transition-tools](https://github.com/namehash/ens-indexer-transition-tools)
+  - ensjs equivalency confirmed via [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools)
 - v2 — **optimized multichain indexer w/ unified namespace**
   - true multichain indexing (mainnet, base, linea, etc)
   - flattened, unified, multichain namespace

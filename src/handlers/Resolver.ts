@@ -2,9 +2,9 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { Log } from "ponder";
 import { Hex } from "viem";
+import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
-import { upsertAccount, upsertResolver } from "../lib/upserts";
 
 // NOTE: both subgraph and this indexer us upserts in this file because a 'Resolver' is _any_
 // contract on the chain that emits an event with this signature, which may or may not actually be
