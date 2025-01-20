@@ -7,7 +7,7 @@ import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
 import { decodeDNSPacketBytes, tokenIdToLabel } from "../lib/subname-helpers";
 
-// if the wrappedDomain in question has pcc burned (?) and a higher (?) expiry date, update the domain's expiryDate
+// if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Hex) {
   const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
@@ -18,7 +18,7 @@ async function materializeDomainExpiryDate(context: Context, node: Hex) {
   // make sure to remember that if you compare the logic in this function to the original subgraph logic [here](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L87)
   // related GitHub issue: https://github.com/ensdomains/ens-subgraph/issues/88
 
-  // do not update expiry if PCC is burned
+  // if PCC is burned (not set), we do not update expiry
   if (checkPccBurned(BigInt(wrappedDomain.fuses))) return;
 
   // update the domain's expiry to the greater of the two
