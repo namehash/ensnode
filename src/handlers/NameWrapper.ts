@@ -156,6 +156,9 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
       // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
       // we will be more explicit and update logic if necessary
       await context.db.update(schema.wrappedDomain, { id: node }).set({ fuses });
+
+      // materialize the domain's expiryDate
+      await materializeDomainExpiryDate(context, node);
     },
     async handleExpiryExtended({
       context,
