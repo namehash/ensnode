@@ -127,10 +127,9 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
       await upsertAccount(context, owner);
 
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
-        // null expiry date if the domain is not a direct child of .eth
         // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L123
-        ...(domain.expiryDate && domain.parentId !== ownedSubnameNode && { expiryDate: null }),
-        ownerId: owner,
+        // null expiry date if the domain is not a direct child of .eth
+        expiryDate: domain.parentId !== ownedSubnameNode ? null : domain.expiryDate,
         wrappedOwnerId: null,
       }));
 
