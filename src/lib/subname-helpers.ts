@@ -1,4 +1,3 @@
-import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { type Hex, concat, keccak256, namehash, toHex } from "viem";
 
 // NOTE: most of these utils could/should be pulled in from some (future) ens helper lib, as they
