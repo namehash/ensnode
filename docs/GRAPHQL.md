@@ -5,8 +5,10 @@
 the following features of the subgraph graphql api are explicitly unsupported, because they are not used by ensjs or ens-app-v3
 
 - [fulltext search queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#fulltext-search-queries)
-- 1-level-nested Entity `_orderBy` param
-- subgraph `_Meta_` object (ponder's `_meta` is available)
+- [1-level-nested Entity `_orderBy` param](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-nested-entity-sorting)
+- [subgraph `_Meta_` object](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#subgraph-metadata) (ponder's `_meta` is available)
+- [time travel queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#time-travel-queries)
+- [_change_block filtering](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-block-filtering)
 
 ## notes
 

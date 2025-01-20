@@ -6,11 +6,11 @@ import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
 
-// NOTE: both subgraph and this indexer us upserts in this file because a 'Resolver' is _any_
+// NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
 // contract on the chain that emits an event with this signature, which may or may not actually be
-// an ENS-specific Resolver. because of this each even could theoretically be the first event the
-// indexer has seen for a given Resolver id and therefore needs to use an upsert and not assume
-// anything else about this Resolver's state
+// a contract intended for use with ENS as a Resolver. because of this, each event could be the
+// first event the indexer has seen for this contract (and its Resolver id) and therefore needs not
+// assume a Resolver entity already exists
 
 export async function handleAddrChanged({
   context,
