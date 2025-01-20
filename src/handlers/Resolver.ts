@@ -265,8 +265,8 @@ export async function handleVersionChanged({
     // clear out the resolver's info
     addrId: null,
     contentHash: null,
-    coinTypes: [],
-    texts: [],
+    coinTypes: null,
+    texts: null,
   });
 
   // TODO: log ResolverEvent
