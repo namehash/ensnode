@@ -79,5 +79,53 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
   | `/${string}`
   | `/${string}${T}`;
 
-/** @var the requested active plugin name (see `src/plugins` for available plugins) */
-export const ACTIVE_PLUGIN = process.env.ACTIVE_PLUGIN;
+/**
+ * Returns a list of 1 or more distinct active plugins based on the `ACTIVE_PLUGINS` environment variable.
+ *
+ * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
+ * names. The function returns the plugins that are included in the list.
+ *
+ * @param availablePlugins is a list of available plugins
+ * @returns the active plugins
+ */
+export function getActivePlugins<T extends { ownedName: string }>(
+  availablePlugins: readonly T[],
+): T[] {
+  /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
+  const requestedPluginsEnvVar = process.env.ACTIVE_PLUGINS;
+  const requestedPlugins = requestedPluginsEnvVar ? requestedPluginsEnvVar.split(",") : [];
+
+  if (!requestedPlugins.length) {
+    throw new Error("Set the ACTIVE_PLUGINS environment variable to activate one or more plugins.");
+  }
+
+  // Check if the requested plugins are valid and can become active
+  const invalidPlugins = requestedPlugins.filter(
+    (requestedPlugin) =>
+      !availablePlugins.some((availablePlugin) => availablePlugin.ownedName === requestedPlugin),
+  );
+
+  if (invalidPlugins.length) {
+    // Throw an error if there are invalid plugins
+    throw new Error(
+      `Invalid plugin names found: ${invalidPlugins.join(
+        ", ",
+      )}. Please check the ACTIVE_PLUGINS environment variable.`,
+    );
+  }
+
+  const uniquePluginsToActivate = availablePlugins.reduce((acc, plugin) => {
+    // Only add the plugin if it's not already in the map
+    if (acc.has(plugin.ownedName) === false) {
+      acc.set(plugin.ownedName, plugin);
+    }
+    return acc;
+  }, new Map<string, T>());
+
+  return Array.from(uniquePluginsToActivate.values());
+}
+
+// Helper type to merge multiple types into one
+export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
+  ? R
+  : never;

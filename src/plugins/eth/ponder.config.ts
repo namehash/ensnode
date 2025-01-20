@@ -2,7 +2,7 @@ import { ContractConfig, createConfig, mergeAbis } from "ponder";
 import { http } from "viem";
 
 import { mainnet } from "viem/chains";
-import { blockConfig } from "../../lib/helpers";
+import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/helpers";
 import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
@@ -18,7 +18,7 @@ export const ownedName = "eth";
 
 export const pluginNamespace = createPluginNamespace(ownedName);
 
-// constrain the ponder indexing between the following start/end blocks
+// constrain indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range
 const START_BLOCK: ContractConfig["startBlock"] = undefined;
 const END_BLOCK: ContractConfig["endBlock"] = 21_000_000;
@@ -30,8 +30,8 @@ export const config = createConfig({
   networks: {
     mainnet: {
       chainId: mainnet.id,
-      transport: http(process.env[`RPC_URL_${mainnet.id}`]),
-      maxRequestsPerSecond: 500,
+      transport: http(rpcEndpointUrl(mainnet.id)),
+      maxRequestsPerSecond: rpcMaxRequestsPerSecond(mainnet.id),
     },
   },
   contracts: {
