@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it, vitest } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   DEFAULT_RPC_RATE_LIMIT,
   bigintMax,
@@ -7,8 +7,6 @@ import {
   hasNullByte,
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
-  rpcEndpointUrl,
-  rpcMaxRequestsPerSecond,
   uniq,
 } from "./helpers";
 
@@ -53,11 +51,11 @@ describe("helpers", () => {
     });
 
     it("should throw an error if the URL is invalid", () => {
-      expect(() => parseRpcEndpointUrl("invalid")).toThrowError("Invalid URL 'invalid'");
+      expect(() => parseRpcEndpointUrl("invalid")).toThrowError("'invalid' is not a valid URL");
     });
 
     it("should throw an error if the URL is missing", () => {
-      expect(() => parseRpcEndpointUrl()).toThrowError("Missing value");
+      expect(() => parseRpcEndpointUrl()).toThrowError("Expected value not set");
     });
   });
 
@@ -71,12 +69,12 @@ describe("helpers", () => {
     });
 
     it("should throw an error if the value is invalid", () => {
-      expect(() => parseRpcMaxRequestsPerSecond("invalid")).toThrowError("Not a number 'invalid'");
+      expect(() => parseRpcMaxRequestsPerSecond("invalid")).toThrowError("'invalid' is not a number");
     });
 
     it("should throw an error if the value is out of bounds", () => {
-      expect(() => parseRpcMaxRequestsPerSecond("0")).toThrowError("Not a positive integer '0'");
-      expect(() => parseRpcMaxRequestsPerSecond("-1")).toThrowError("Not a positive integer '-1'");
+      expect(() => parseRpcMaxRequestsPerSecond("0")).toThrowError("'0' is not a positive integer");
+      expect(() => parseRpcMaxRequestsPerSecond("-1")).toThrowError("'-1' is not a positive integer");
     });
   });
 

@@ -36,7 +36,7 @@ export const rpcEndpointUrl = (chainId: number): string => {
   try {
     return parseRpcEndpointUrl(envVarValue);
   } catch (e: any) {
-    throw new Error(`Environment variable parse error: '${envVarName}' was ${e.message}`);
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
@@ -44,13 +44,13 @@ export const parseRpcEndpointUrl = (rawValue?: string): string => {
   // no RPC URL provided
   if (!rawValue) {
     // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(`Missing value`);
+    throw new Error(`Expected value not set`);
   }
 
   try {
     return new URL(rawValue).toString();
   } catch (e) {
-    throw new Error(`Invalid URL '${rawValue}'`);
+    throw new Error(`'${rawValue}' is not a valid URL`);
   }
 };
 
@@ -77,7 +77,7 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
   try {
     return parseRpcMaxRequestsPerSecond(envVarValue);
   } catch (e: any) {
-    throw new Error(`Environment variable parse error: '${envVarName}' was ${e.message}`);
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
@@ -93,11 +93,11 @@ export const parseRpcMaxRequestsPerSecond = (rawValue?: string): number => {
   const parsedValue = parseInt(rawValue, 10);
 
   if (Number.isNaN(parsedValue)) {
-    throw new Error(`Not a number '${rawValue}'`);
+    throw new Error(`'${rawValue}' is not a number`);
   }
 
   if (parsedValue <= 0) {
-    throw new Error(`Not a positive integer '${rawValue}'`);
+    throw new Error(`'${rawValue}' is not a positive integer`);
   }
 
   return parsedValue;
