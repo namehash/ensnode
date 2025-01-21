@@ -12,6 +12,7 @@
     "lint": "biome check --write .",
     "typecheck": "tsc"
   },
+  "packageManager": "pnpm@9.12.0",
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
     "@escape.tech/graphql-armor-max-aliases": "^2.6.0",
