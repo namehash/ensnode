@@ -102,6 +102,13 @@ describe("helpers", () => {
         "Invalid 'RPC_REQUEST_RATE_LIMIT_1' environment variable value: 'invalid'. Rate limit value must be an integer greater than 0.",
       );
     });
+
+    it("should throw an error if the environment variable value is out of bounds", () => {
+      process.env.RPC_REQUEST_RATE_LIMIT_1 = "-1";
+      expect(() => rpcMaxRequestsPerSecond(1)).toThrow(
+        "Invalid 'RPC_REQUEST_RATE_LIMIT_1' environment variable value: '-1'. Rate limit value must be an integer greater than 0.",
+      );
+    });
   });
 
   describe("deepMergeRecursive", () => {

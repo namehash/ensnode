@@ -18,6 +18,7 @@ describe("isLabelIndexable", () => {
   it("should return true for labels without unindexable characters", () => {
     expect(isLabelIndexable("test")).toBe(true);
     expect(isLabelIndexable("example")).toBe(true);
+    expect(isLabelIndexable("21🚀bingo")).toBe(true);
   });
 
   it("should return false for empty labels", () => {
