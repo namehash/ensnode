@@ -99,7 +99,7 @@ export function decodeDNSPacketBytes(buf: Uint8Array): [string | null, string | 
   let hex = Buffer.from(buf).toString("hex");
   let firstLabel = "";
 
-  if (!len) {
+  if (len === 0) {
     return ["", "."];
   }
 
