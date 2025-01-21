@@ -3,6 +3,7 @@ import {
   bigintMax,
   blockConfig,
   deepMergeRecursive,
+  DEFAULT_RPC_RATE_LIMIT,
   hasNullByte,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
@@ -93,7 +94,7 @@ describe("helpers", () => {
     });
 
     it("should return the default rate limit if the environment variable is missing", () => {
-      expect(rpcMaxRequestsPerSecond(1)).toBe(50);
+      expect(rpcMaxRequestsPerSecond(1)).toBe(DEFAULT_RPC_RATE_LIMIT);
     });
 
     it("should throw an error if the environment variable value is invalid", () => {
@@ -104,6 +105,11 @@ describe("helpers", () => {
     });
 
     it("should throw an error if the environment variable value is out of bounds", () => {
+      process.env.RPC_REQUEST_RATE_LIMIT_1 = "0";
+      expect(() => rpcMaxRequestsPerSecond(1)).toThrow(
+        "Invalid 'RPC_REQUEST_RATE_LIMIT_1' environment variable value: '0'. Rate limit value must be an integer greater than 0.",
+      );
+
       process.env.RPC_REQUEST_RATE_LIMIT_1 = "-1";
       expect(() => rpcMaxRequestsPerSecond(1)).toThrow(
         "Invalid 'RPC_REQUEST_RATE_LIMIT_1' environment variable value: '-1'. Rate limit value must be an integer greater than 0.",

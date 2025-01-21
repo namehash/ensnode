@@ -51,7 +51,7 @@ export const rpcEndpointUrl = (chainId: number): string => {
 };
 
 // default request per second rate limit for RPC endpoints
-const DEFAULT_RPC_RATE_LIMIT = 50;
+export const DEFAULT_RPC_RATE_LIMIT = 50;
 
 /**
  * Gets the RPC request rate limit for a given chain ID.
