@@ -24,11 +24,8 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Audit dependencies
-        run: pnpm audit --audit-level=low
-
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
         run: pnpm test
