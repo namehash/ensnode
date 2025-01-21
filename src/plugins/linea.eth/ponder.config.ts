@@ -23,9 +23,9 @@ export const config = createConfig({
   networks: {
     get linea() {
       return {
-      chainId: linea.id,
-      transport: http(rpcEndpointUrl(linea.id)),
-      maxRequestsPerSecond: rpcMaxRequestsPerSecond(linea.id),
+        chainId: linea.id,
+        transport: http(rpcEndpointUrl(linea.id)),
+        maxRequestsPerSecond: rpcMaxRequestsPerSecond(linea.id),
       };
     },
   },
