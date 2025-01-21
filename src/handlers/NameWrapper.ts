@@ -153,12 +153,18 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
     }) {
       const { node, fuses } = event.args;
 
-      // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
-      // we will be more explicit and update logic if necessary
-      await context.db.update(schema.wrappedDomain, { id: node }).set({ fuses });
+      // NOTE: subgraph no-ops this event if there's not a wrappedDomain already in the db.
+      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L144
+      const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
+      if (wrappedDomain) {
+        // set fuses
+        await context.db.update(schema.wrappedDomain, { id: node }).set({ fuses });
 
-      // materialize the domain's expiryDate
-      await materializeDomainExpiryDate(context, node);
+        // materialize the domain's expiryDate because the fuses have potentially changed
+        await materializeDomainExpiryDate(context, node);
+      }
+
+      // TODO: log FusesBurned event
     },
     async handleExpiryExtended({
       context,
@@ -174,12 +180,16 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
     }) {
       const { node, expiry } = event.args;
 
-      // NOTE: subgraph does an implicit ignore if no WrappedDomain record.
-      // we will be more explicit and update logic if necessary
-      await context.db.update(schema.wrappedDomain, { id: node }).set({ expiryDate: expiry });
+      // NOTE: subgraph no-ops this event if there's not a wrappedDomain already in the db.
+      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L169
+      const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
+      if (wrappedDomain) {
+        // update expiryDate
+        await context.db.update(schema.wrappedDomain, { id: node }).set({ expiryDate: expiry });
 
-      // materialize the domain's expiryDate
-      await materializeDomainExpiryDate(context, node);
+        // materialize the domain's expiryDate
+        await materializeDomainExpiryDate(context, node);
+      }
 
       // TODO: log ExpiryExtended
     },
