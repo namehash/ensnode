@@ -1,4 +1,4 @@
-import { namehash } from "viem";
+import { labelhash, namehash, toBytes } from "viem";
 import { describe, expect, it } from "vitest";
 import {
   decodeDNSPacketBytes,
@@ -31,24 +31,25 @@ describe("decodeDNSPacketBytes", () => {
   });
 
   it("should return [null, null] for labels with unindexable characters", () => {
-    const buf = new Uint8Array([116, 101, 115, 116, 0]); // 'test\0'
-    expect(decodeDNSPacketBytes(buf)).toEqual([null, null]);
+    expect(decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
   });
 });
 
 describe("tokenIdToLabel", () => {
   it("should convert bigint tokenId to hex string", () => {
-    const tokenId = BigInt("1234567890123456789012345678901234567890");
-    expect(tokenIdToLabel(tokenId)).toBe(
-      "0x00000000000000000000000000000003a0c92075c0dbf3b8acbc5f96ce3f0ad2",
+    expect(labelhash("vitalik")).toBe(
+      tokenIdToLabel(
+        // https://etherscan.io/token/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85?a=79233663829379634837589865448569342784712482819484549289560981379859480642508#inventory
+        79233663829379634837589865448569342784712482819484549289560981379859480642508n,
+      ),
     );
   });
 });
 
 describe("makeSubnodeNamehash", () => {
   it("should return the correct namehash for a subnode", () => {
-    const node = makeSubnodeNamehash(namehash("base.eth"), tokenIdToLabel(123n));
-
-    expect(node).toBe("0x292d643265e3e6744a5cfadd92c12ca2a65695266118b64f5c4eff14a40d805d");
+    expect(makeSubnodeNamehash(namehash("base.eth"), labelhash("test🚀"))).toBe(
+      namehash("test🚀.base.eth"),
+    );
   });
 });

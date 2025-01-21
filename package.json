@@ -8,6 +8,7 @@
     "start": "ponder start",
     "db": "ponder db",
     "codegen": "ponder codegen",
+    "test": "vitest",
     "lint": "biome check --write .",
     "typecheck": "tsc"
   },
