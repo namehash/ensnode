@@ -35,6 +35,13 @@ describe("decodeDNSPacketBytes", () => {
 
   it("should return [null, null] for labels with unindexable characters", () => {
     expect(decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
+    expect(decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
+    expect(decodeDNSPacketBytes(toBytes("test["))).toEqual([null, null]);
+    expect(decodeDNSPacketBytes(toBytes("test]"))).toEqual([null, null]);
+
+    // TODO: based on the definition of `isLabelIndexable` the empty label ("")
+    // is not indexable, however this test case returns ["", ""] instead of [null, null]
+    // expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
   });
 });
 
