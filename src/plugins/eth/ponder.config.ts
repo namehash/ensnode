@@ -2,7 +2,11 @@ import { ContractConfig, createConfig, mergeAbis } from "ponder";
 import { http } from "viem";
 
 import { mainnet } from "viem/chains";
-import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/helpers";
+import {
+  blockConfig,
+  rpcEndpointUrl,
+  rpcMaxRequestsPerSecond,
+} from "../../lib/helpers";
 import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
@@ -28,10 +32,12 @@ const REGISTRY_ADDRESS = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
 export const config = createConfig({
   networks: {
-    mainnet: {
-      chainId: mainnet.id,
-      transport: http(rpcEndpointUrl(mainnet.id)),
-      maxRequestsPerSecond: rpcMaxRequestsPerSecond(mainnet.id),
+    get mainnet() {
+      return {
+        chainId: mainnet.id,
+        transport: http(rpcEndpointUrl(mainnet.id)),
+        maxRequestsPerSecond: rpcMaxRequestsPerSecond(mainnet.id),
+      };
     },
   },
   contracts: {
