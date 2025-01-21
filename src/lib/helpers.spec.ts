@@ -47,21 +47,15 @@ describe("helpers", () => {
 
   describe("parseRpcEndpointUrl", () => {
     it("should parse a valid RPC URL", () => {
-      expect(parseRpcEndpointUrl("https://eth.drpc.org")).toBe(
-        "https://eth.drpc.org/"
-      );
+      expect(parseRpcEndpointUrl("https://eth.drpc.org")).toBe("https://eth.drpc.org/");
     });
 
     it("should throw an error if the URL is invalid", () => {
-      expect(() => parseRpcEndpointUrl("invalid")).toThrowError(
-        "'invalid' is not a valid URL"
-      );
+      expect(() => parseRpcEndpointUrl("invalid")).toThrowError("'invalid' is not a valid URL");
     });
 
     it("should throw an error if the URL is missing", () => {
-      expect(() => parseRpcEndpointUrl()).toThrowError(
-        "Expected value not set"
-      );
+      expect(() => parseRpcEndpointUrl()).toThrowError("Expected value not set");
     });
   });
 
@@ -76,16 +70,14 @@ describe("helpers", () => {
 
     it("should throw an error if the value is invalid", () => {
       expect(() => parseRpcMaxRequestsPerSecond("invalid")).toThrowError(
-        "'invalid' is not a number"
+        "'invalid' is not a number",
       );
     });
 
     it("should throw an error if the value is out of bounds", () => {
-      expect(() => parseRpcMaxRequestsPerSecond("0")).toThrowError(
-        "'0' is not a positive integer"
-      );
+      expect(() => parseRpcMaxRequestsPerSecond("0")).toThrowError("'0' is not a positive integer");
       expect(() => parseRpcMaxRequestsPerSecond("-1")).toThrowError(
-        "'-1' is not a positive integer"
+        "'-1' is not a positive integer",
       );
     });
   });
