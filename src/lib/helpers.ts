@@ -33,20 +33,24 @@ export const rpcEndpointUrl = (chainId: number): string => {
   const envVarName = `RPC_URL_${chainId}`;
   const envVarValue = process.env[envVarName];
 
-  // no RPC URL provided in env var
-  if (!envVarValue) {
+  try {
+    return parseRpcEndpointUrl(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Environment variable parse error: '${envVarName}' was ${e.message}`);
+  }
+};
+
+export const parseRpcEndpointUrl = (rawValue?: string): string => {
+  // no RPC URL provided
+  if (!rawValue) {
     // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(
-      `Missing '${envVarName}' environment variable. The RPC URL for chainId ${chainId} is required.`,
-    );
+    throw new Error(`Missing value`);
   }
 
   try {
-    return new URL(envVarValue).toString();
+    return new URL(rawValue).toString();
   } catch (e) {
-    throw new Error(
-      `Invalid '${envVarName}' environment variable value: '${envVarValue}'. Please provide a valid RPC URL.`,
-    );
+    throw new Error(`Invalid URL '${rawValue}'`);
   }
 };
 
@@ -70,27 +74,33 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
   const envVarName = `RPC_REQUEST_RATE_LIMIT_${chainId}`;
   const envVarValue = process.env[envVarName];
 
-  // no rate limit provided in env var
-  if (!envVarValue) {
+  try {
+    return parseRpcMaxRequestsPerSecond(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Environment variable parse error: '${envVarName}' was ${e.message}`);
+  }
+};
+
+export const parseRpcMaxRequestsPerSecond = (rawValue?: string): number => {
+  // no rate limit provided
+  if (!rawValue) {
     // apply default rate limit value
     return DEFAULT_RPC_RATE_LIMIT;
   }
 
   // otherwise
-  try {
-    // parse the rate limit value from the environment variable
-    const parsedEnvVarValue = parseInt(envVarValue, 10);
+  // parse the provided raw value
+  const parsedValue = parseInt(rawValue, 10);
 
-    if (Number.isNaN(parsedEnvVarValue) || parsedEnvVarValue <= 0) {
-      throw new Error(`Rate limit value must be an integer greater than 0.`);
-    }
-
-    return parsedEnvVarValue;
-  } catch (e: any) {
-    throw new Error(
-      `Invalid '${envVarName}' environment variable value: '${envVarValue}'. ${e.message}`,
-    );
+  if (Number.isNaN(parsedValue)) {
+    throw new Error(`Not a number '${rawValue}'`);
   }
+
+  if (parsedValue <= 0) {
+    throw new Error(`Not a positive integer '${rawValue}'`);
+  }
+
+  return parsedValue;
 };
 
 type AnyObject = { [key: string]: any };

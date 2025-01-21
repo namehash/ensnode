@@ -1,10 +1,12 @@
 import { afterAll, beforeEach, describe, expect, it, vitest } from "vitest";
 import {
+  DEFAULT_RPC_RATE_LIMIT,
   bigintMax,
   blockConfig,
   deepMergeRecursive,
-  DEFAULT_RPC_RATE_LIMIT,
   hasNullByte,
+  parseRpcEndpointUrl,
+  parseRpcMaxRequestsPerSecond,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
   uniq,
@@ -45,75 +47,36 @@ describe("helpers", () => {
     });
   });
 
-  describe("rpcEndpointUrl", () => {
-    const originalEnv = process.env;
-
-    beforeEach(() => {
-      vitest.resetModules();
-      process.env = { ...originalEnv };
+  describe("parseRpcEndpointUrl", () => {
+    it("should parse a valid RPC URL", () => {
+      expect(parseRpcEndpointUrl("https://eth.drpc.org")).toBe("https://eth.drpc.org/");
     });
 
-    afterAll(() => {
-      process.env = originalEnv;
+    it("should throw an error if the URL is invalid", () => {
+      expect(() => parseRpcEndpointUrl("invalid")).toThrowError("Invalid URL 'invalid'");
     });
 
-    it("should return the RPC endpoint URL from the environment variable", () => {
-      process.env.RPC_URL_1 = "https://eth.drpc.org";
-      expect(rpcEndpointUrl(1)).toContain("https://eth.drpc.org");
-    });
-
-    it("should throw an error if the environment variable is missing", () => {
-      expect(() => rpcEndpointUrl(1)).toThrow(
-        "Missing 'RPC_URL_1' environment variable. The RPC URL for chainId 1 is required.",
-      );
-    });
-
-    it("should throw an error if the environment variable value is invalid", () => {
-      process.env.RPC_URL_1 = "invalid-url";
-      expect(() => rpcEndpointUrl(1)).toThrow(
-        "Invalid 'RPC_URL_1' environment variable value: 'invalid-url'. Please provide a valid RPC URL.",
-      );
+    it("should throw an error if the URL is missing", () => {
+      expect(() => parseRpcEndpointUrl()).toThrowError("Missing value");
     });
   });
 
-  describe("rpcMaxRequestsPerSecond", () => {
-    const originalEnv = process.env;
-
-    beforeEach(() => {
-      vitest.resetModules();
-      process.env = { ...originalEnv };
+  describe("parseRpcMaxRequestsPerSecond", () => {
+    it("should parse the RPC rate limit as a number", () => {
+      expect(parseRpcMaxRequestsPerSecond("10")).toBe(10);
     });
 
-    afterAll(() => {
-      process.env = originalEnv;
+    it("should return the default rate limit if the value is undefined", () => {
+      expect(parseRpcMaxRequestsPerSecond()).toBe(DEFAULT_RPC_RATE_LIMIT);
     });
 
-    it("should return the rate limit from the environment variable", () => {
-      process.env.RPC_REQUEST_RATE_LIMIT_1 = "400";
-      expect(rpcMaxRequestsPerSecond(1)).toBe(400);
+    it("should throw an error if the value is invalid", () => {
+      expect(() => parseRpcMaxRequestsPerSecond("invalid")).toThrowError("Not a number 'invalid'");
     });
 
-    it("should return the default rate limit if the environment variable is missing", () => {
-      expect(rpcMaxRequestsPerSecond(1)).toBe(DEFAULT_RPC_RATE_LIMIT);
-    });
-
-    it("should throw an error if the environment variable value is invalid", () => {
-      process.env.RPC_REQUEST_RATE_LIMIT_1 = "invalid";
-      expect(() => rpcMaxRequestsPerSecond(1)).toThrow(
-        "Invalid 'RPC_REQUEST_RATE_LIMIT_1' environment variable value: 'invalid'. Rate limit value must be an integer greater than 0.",
-      );
-    });
-
-    it("should throw an error if the environment variable value is out of bounds", () => {
-      process.env.RPC_REQUEST_RATE_LIMIT_1 = "0";
-      expect(() => rpcMaxRequestsPerSecond(1)).toThrow(
-        "Invalid 'RPC_REQUEST_RATE_LIMIT_1' environment variable value: '0'. Rate limit value must be an integer greater than 0.",
-      );
-
-      process.env.RPC_REQUEST_RATE_LIMIT_1 = "-1";
-      expect(() => rpcMaxRequestsPerSecond(1)).toThrow(
-        "Invalid 'RPC_REQUEST_RATE_LIMIT_1' environment variable value: '-1'. Rate limit value must be an integer greater than 0.",
-      );
+    it("should throw an error if the value is out of bounds", () => {
+      expect(() => parseRpcMaxRequestsPerSecond("0")).toThrowError("Not a positive integer '0'");
+      expect(() => parseRpcMaxRequestsPerSecond("-1")).toThrowError("Not a positive integer '-1'");
     });
   });
 
