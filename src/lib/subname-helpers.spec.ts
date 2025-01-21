@@ -28,6 +28,7 @@ describe("isLabelIndexable", () => {
 
 describe("decodeDNSPacketBytes", () => {
   // TODO: undo the skip when the decodeDNSPacketBytes implementation can be fixed
+  // related discussion: https://github.com/namehash/ensnode/pull/43#discussion_r1924255145
   it.skip('should return ["", "."] for empty buffer', () => {
     expect(decodeDNSPacketBytes(new Uint8Array())).toEqual(["", "."]);
   });
