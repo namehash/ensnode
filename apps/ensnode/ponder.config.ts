@@ -1,5 +1,5 @@
-import { deepMergeRecursive } from "./src/lib/helpers";
-import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
+import { deepMergeRecursive } from "../../packages/ensnode-core/src/helpers";
+import { type MergedTypes, getActivePlugins } from "../../packages/ensnode-core/src/plugin-helpers";
 import * as baseEthPlugin from "./src/plugins/base.eth/ponder.config";
 import * as ethPlugin from "./src/plugins/eth/ponder.config";
 import * as lineaEthPlugin from "./src/plugins/linea.eth/ponder.config";

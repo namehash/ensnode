@@ -2,13 +2,16 @@ import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Hex } from "viem";
 import {
+  ROOT_NODE,
+  makeSubnodeNamehash,
+} from "../../../../../../packages/ensnode-core/src/subname-helpers";
+import {
   handleNewOwner,
   handleNewResolver,
   handleNewTTL,
   handleTransfer,
   setupRootNode,
 } from "../../../handlers/Registry";
-import { ROOT_NODE, makeSubnodeNamehash } from "../../../lib/subname-helpers";
 import { pluginNamespace } from "../ponder.config";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not

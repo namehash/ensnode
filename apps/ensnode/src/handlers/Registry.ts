@@ -3,9 +3,12 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
+import { makeResolverId } from "../../../../packages/ensnode-core/src/ids";
+import {
+  ROOT_NODE,
+  makeSubnodeNamehash,
+} from "../../../../packages/ensnode-core/src/subname-helpers";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { makeResolverId } from "../lib/ids";
-import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.

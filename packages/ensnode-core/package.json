@@ -1,0 +1,20 @@
+{
+  "name": "ensnode-core",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "vitest"
+  },
+  "dependencies": {
+    "ts-deepmerge": "^7.0.2",
+    "viem": "^2.21.57"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2",
+    "vitest": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.14"
+  }
+}

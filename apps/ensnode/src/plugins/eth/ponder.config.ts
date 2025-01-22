@@ -2,8 +2,12 @@ import { ContractConfig, createConfig, mergeAbis } from "ponder";
 import { http } from "viem";
 
 import { mainnet } from "viem/chains";
-import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/helpers";
-import { createPluginNamespace } from "../../lib/plugin-helpers";
+import {
+  blockConfig,
+  rpcEndpointUrl,
+  rpcMaxRequestsPerSecond,
+} from "../../../../../packages/ensnode-core/src/helpers";
+import { createPluginNamespace } from "../../../../../packages/ensnode-core/src/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";

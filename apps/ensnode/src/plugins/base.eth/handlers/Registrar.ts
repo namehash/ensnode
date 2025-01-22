@@ -1,9 +1,12 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { zeroAddress } from "viem";
+import {
+  makeSubnodeNamehash,
+  tokenIdToLabel,
+} from "../../../../../../packages/ensnode-core/src/subname-helpers";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { upsertAccount } from "../../../lib/db-helpers";
-import { makeSubnodeNamehash, tokenIdToLabel } from "../../../lib/subname-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {

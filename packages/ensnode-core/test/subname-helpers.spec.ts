@@ -5,7 +5,7 @@ import {
   isLabelIndexable,
   makeSubnodeNamehash,
   tokenIdToLabel,
-} from "../src/lib/subname-helpers";
+} from "../src/subname-helpers";
 
 describe("isLabelIndexable", () => {
   it("should return false for labels containing unindexable characters", () => {

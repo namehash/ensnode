@@ -8,7 +8,7 @@ import {
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
   uniq,
-} from "../src/lib/helpers";
+} from "../src/helpers";
 
 describe("helpers", () => {
   describe("uniq", () => {

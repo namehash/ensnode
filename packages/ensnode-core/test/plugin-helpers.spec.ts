@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createPluginNamespace } from "../src/lib/plugin-helpers";
+import { createPluginNamespace } from "../src/plugin-helpers";
 
 describe("createPluginNamespace", () => {
   it("should return a function that creates namespaced contract names", () => {

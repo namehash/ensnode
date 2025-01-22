@@ -1,5 +1,14 @@
 {
   "name": "ensnode-monorepo",
   "version": "0.0.1",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2",
+    "vitest": "^3.0.3"
+  },
+  "resolutions": {
+    "vite": "5.4.12"
+  }
 }

@@ -9,7 +9,7 @@ export const makeResolverId = (address: Address, node: Hex) =>
 export const makeEventId = (
   event: {
     block: { number: bigint };
-    log: { logIndex: bigint };
+    log: { logIndex: number };
   },
   transferIndex?: number,
 ) =>

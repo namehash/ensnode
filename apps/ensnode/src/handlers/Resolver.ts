@@ -2,9 +2,9 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { Log } from "ponder";
 import { Hex } from "viem";
+import { hasNullByte, uniq } from "../../../../packages/ensnode-core/src/helpers";
+import { makeResolverId } from "../../../../packages/ensnode-core/src/ids";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { hasNullByte, uniq } from "../lib/helpers";
-import { makeResolverId } from "../lib/ids";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
 // contract on the chain that emits an event with this signature, which may or may not actually be
