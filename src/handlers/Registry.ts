@@ -208,14 +208,16 @@ export async function handleNewResolver({
     // otherwise upsert the resolver
     const resolverId = makeResolverId(resolverAddress, node);
 
-    const resolver = await context.db
-      .insert(schema.resolver)
-      .values({
+    let resolver = await context.db.find(schema.resolver, { id: resolverId });
+
+    if (!resolver) {
+      // Create a new resolver if it doesn't exist yet
+      resolver = await context.db.insert(schema.resolver).values({
         id: resolverId,
         domainId: event.args.node,
         address: event.args.resolver,
-      })
-      .onConflictDoUpdate({}); // noop update to return the existing record
+      });
+    }
 
     // update the domain to point to it, and denormalize the eth addr
     // NOTE: this implements the logic as documented here
