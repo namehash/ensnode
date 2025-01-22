@@ -25,7 +25,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: cd apps/ensnode && pnpm install --frozen-lockfile
 
       - name: Run unit tests
-        run: pnpm test
+        run: cd apps/ensnode && pnpm test

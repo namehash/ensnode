@@ -1,0 +1,44 @@
+{
+  "name": "ensnode",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ponder dev",
+    "start": "ponder start",
+    "db": "ponder db",
+    "codegen": "ponder codegen",
+    "test": "vitest",
+    "lint": "biome check --write .",
+    "typecheck": "tsc"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "dependencies": {
+    "@ensdomains/ensjs": "^4.0.2",
+    "@escape.tech/graphql-armor-max-aliases": "^2.6.0",
+    "@escape.tech/graphql-armor-max-depth": "^2.4.0",
+    "@escape.tech/graphql-armor-max-tokens": "^2.5.0",
+    "change-case": "^5.4.4",
+    "dataloader": "^2.2.3",
+    "drizzle-orm": "^0.38.3",
+    "graphql": "^16.10.0",
+    "graphql-scalars": "^1.24.0",
+    "graphql-yoga": "^5.10.9",
+    "hono": "^4.6.14",
+    "ponder": "^0.8.26",
+    "ts-deepmerge": "^7.0.2",
+    "viem": "^2.21.57"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2",
+    "vitest": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.14"
+  },
+  "resolutions": {
+    "vite": "5.4.12"
+  }
+}
