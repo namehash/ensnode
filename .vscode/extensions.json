@@ -1,5 +1,3 @@
 {
-  "recommendations": [
-    "biomejs.biome" // Formatter we use. Compliance is verified in our CI.
-  ]
+  "recommendations": ["biomejs.biome"]
 }
