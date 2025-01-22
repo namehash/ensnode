@@ -11,11 +11,7 @@ import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 import { type YogaServerInstance, createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
-import { buildDataLoaderCache } from "./graphql";
-
-import { default as schema } from "ponder:schema";
-
-import { buildGraphQLSchema } from "./graphql";
+import { type Schema, buildDataLoaderCache, buildGraphQLSchema } from "./graphql";
 
 /**
  * Middleware for GraphQL with an interactive web view.
@@ -29,23 +25,19 @@ import { buildGraphQLSchema } from "./graphql";
  * ponder.use("/graphql", graphql());
  *
  */
-export const graphql = (
-  {
-    maxOperationTokens = 1000,
-    maxOperationDepth = 100,
-    maxOperationAliases = 30,
-  }: {
-    maxOperationTokens?: number;
-    maxOperationDepth?: number;
-    maxOperationAliases?: number;
-  } = {
-    // Default limits are from Apollo:
-    // https://www.apollographql.com/blog/prevent-graph-misuse-with-operation-size-and-complexity-limit
-    maxOperationTokens: 1000,
-    maxOperationDepth: 100,
-    maxOperationAliases: 30,
-  },
-) => {
+export const graphql = ({
+  schema,
+  // Default limits are from Apollo:
+  // https://www.apollographql.com/blog/prevent-graph-misuse-with-operation-size-and-complexity-limit
+  maxOperationTokens = 1000,
+  maxOperationDepth = 100,
+  maxOperationAliases = 30,
+}: {
+  schema: Schema;
+  maxOperationTokens?: number;
+  maxOperationDepth?: number;
+  maxOperationAliases?: number;
+}) => {
   let yoga: YogaServerInstance<any, any> | undefined = undefined;
 
   return createMiddleware(async (c) => {
