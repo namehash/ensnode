@@ -14,7 +14,7 @@ export const blockConfig = (
 ): {
   startBlock: number | undefined;
   endBlock: number | undefined;
-}=> ({
+} => ({
   // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
   startBlock: Math.min(Math.max(start || 0, startBlock), end || Number.MAX_SAFE_INTEGER),
   endBlock: end,

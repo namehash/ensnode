@@ -5,7 +5,6 @@ import { type Hex, concat, keccak256, namehash, toHex } from "viem";
 // or exposed by ensjs or viem
 
 export const ROOT_NODE = namehash("");
-export const ETH_NODE = namehash("eth");
 
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
 
