@@ -33,11 +33,15 @@ export default function () {
       // event has to ensure the domain entity for the requested token ID
       // has been inserted into the database. This is a workaround to meet
       // expectations of the `handleNameTransferred` subgraph implementation.
-      await context.db.insert(schema.domain).values({
-        id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
-        ownerId: to,
-        createdAt: event.block.timestamp,
-      });
+      await context.db
+        .insert(schema.domain)
+        .values({
+          id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
+          ownerId: to,
+          createdAt: event.block.timestamp,
+        })
+        // ensure existing domain entity in database has its owner updated
+        .onConflictDoUpdate({ ownerId: to });
     }
 
     await handleNameTransferred({
