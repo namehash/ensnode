@@ -35,3 +35,6 @@ jobs:
 
       - name: Run TypeScript type checks
         run: pnpm run typecheck
+
+      - name: Run Ponder build checks
+        run: pnpm codegen
