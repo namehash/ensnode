@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
-import { upsertAccount } from "../lib/db-helpers";
+import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
 import { ROOT_NODE, makeSubnodeNamehash } from "../lib/subname-helpers";
 
@@ -208,14 +208,11 @@ export async function handleNewResolver({
     // otherwise upsert the resolver
     const resolverId = makeResolverId(resolverAddress, node);
 
-    const resolver = await context.db
-      .insert(schema.resolver)
-      .values({
-        id: resolverId,
-        domainId: event.args.node,
-        address: event.args.resolver,
-      })
-      .onConflictDoUpdate({}); // noop update to return the existing record
+    const resolver = await upsertResolver(context, {
+      id: resolverId,
+      domainId: event.args.node,
+      address: event.args.resolver,
+    });
 
     // update the domain to point to it, and denormalize the eth addr
     // NOTE: this implements the logic as documented here
