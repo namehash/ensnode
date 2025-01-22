@@ -2,6 +2,7 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@9.12.0",
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^20.9.0",
