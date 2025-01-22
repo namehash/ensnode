@@ -1,4 +1,3 @@
-import type { ContractConfig } from "ponder";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
 export const uniq = <T>(arr: T[]): T[] => [...new Set(arr)];
@@ -12,7 +11,10 @@ export const blockConfig = (
   start: number | undefined,
   startBlock: number,
   end: number | undefined,
-): Pick<ContractConfig, "startBlock" | "endBlock"> => ({
+): {
+  startBlock: number | undefined;
+  endBlock: number | undefined;
+}=> ({
   // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
   startBlock: Math.min(Math.max(start || 0, startBlock), end || Number.MAX_SAFE_INTEGER),
   endBlock: end,
