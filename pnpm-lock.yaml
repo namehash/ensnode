@@ -4,6 +4,27 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@biomejs/biome':
+      specifier: ^1.9.4
+      version: 1.9.4
+    '@types/node':
+      specifier: ^20.9.0
+      version: 20.17.14
+    hono:
+      specifier: ^4.6.14
+      version: 4.6.17
+    typescript:
+      specifier: ^5.7.3
+      version: 5.7.3
+    viem:
+      specifier: ^2.21.57
+      version: 2.22.11
+    vitest:
+      specifier: ^3.0.3
+      version: 3.0.3
+
 overrides:
   vite: 5.4.12
 
@@ -27,7 +48,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ensnode-subgraph-graphql
       hono:
-        specifier: ^4.6.14
+        specifier: 'catalog:'
         version: 4.6.17
       ponder:
         specifier: ^0.8.26
@@ -36,38 +57,38 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       viem:
-        specifier: ^2.21.57
+        specifier: 'catalog:'
         version: 2.22.11(typescript@5.7.3)
     devDependencies:
       '@biomejs/biome':
-        specifier: ^1.9.4
+        specifier: 'catalog:'
         version: 1.9.4
       '@types/node':
-        specifier: ^20.9.0
+        specifier: 'catalog:'
         version: 20.17.14
       typescript:
-        specifier: ^5.2.2
+        specifier: 'catalog:'
         version: 5.7.3
       vitest:
-        specifier: ^3.0.3
+        specifier: 'catalog:'
         version: 3.0.3(@types/node@20.17.14)
 
   packages/ensnode-common:
     devDependencies:
       '@biomejs/biome':
-        specifier: ^1.9.4
+        specifier: 'catalog:'
         version: 1.9.4
       '@types/node':
-        specifier: ^20.9.0
+        specifier: 'catalog:'
         version: 20.17.14
       typescript:
-        specifier: ^5.2.2
+        specifier: 'catalog:'
         version: 5.7.3
       viem:
-        specifier: ^2.21.57
+        specifier: 'catalog:'
         version: 2.22.11(typescript@5.7.3)
       vitest:
-        specifier: ^3.0.3
+        specifier: 'catalog:'
         version: 3.0.3(@types/node@20.17.14)
 
   packages/ensnode-subgraph-graphql:
@@ -100,8 +121,18 @@ importers:
         specifier: ^5.10.9
         version: 5.10.10(graphql@16.10.0)
       hono:
-        specifier: ^4.6.14
+        specifier: 'catalog:'
         version: 4.6.17
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 1.9.4
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.17.14
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
 
 packages:
 
@@ -3397,11 +3428,11 @@ snapshots:
   ox@0.6.5(typescript@5.7.3):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
       '@scure/bip32': 1.6.0
       '@scure/bip39': 1.5.0
-      abitype: 1.0.7(typescript@5.7.3)
+      abitype: 1.0.8(typescript@5.7.3)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.7.3

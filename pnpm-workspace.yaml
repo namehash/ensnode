@@ -1,3 +1,11 @@
 packages:
   - apps/*
   - packages/*
+
+catalog:
+  '@biomejs/biome': ^1.9.4
+  '@types/node': ^20.9.0
+  hono: ^4.6.14
+  typescript: ^5.7.3
+  viem: ^2.21.57
+  vitest: ^3.0.3

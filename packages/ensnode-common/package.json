@@ -15,14 +15,14 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "viem": "^2.21.57"
+    "viem": "^catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/node": "^20.9.0",
-    "typescript": "^5.2.2",
-    "viem": "^2.21.57",
-    "vitest": "^3.0.3"
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "viem": "catalog:",
+    "vitest": "catalog:"
   },
   "engines": {
     "node": ">=18.14"
