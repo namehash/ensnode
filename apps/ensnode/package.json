@@ -32,7 +32,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "tsconfigs": "workspace:",
+    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",

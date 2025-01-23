@@ -1,9 +1,5 @@
 {
-  "extends": "tsconfigs/tsconfig.ponder.json",
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "extends": "@namehash/shared-configs/tsconfig.ponder.json",
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules"]
 }

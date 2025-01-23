@@ -3,9 +3,7 @@
     "moduleResolution": "bundler",
     "module": "ESNext",
     "noEmit": true,
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "target": "ES2022",
     "declaration": true,
     "outDir": "dist",

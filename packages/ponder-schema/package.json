@@ -5,6 +5,9 @@
   "type": "module",
   "description": "a shared ponder schema for ensnode",
   "license": "MIT",
+  "scripts": {
+    "lint:ci": "biome ci"
+  },
   "exports": {
     "default": "./src/ponder.schema.ts"
   },
@@ -13,7 +16,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "tsconfigs": "workspace:",
+    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
   }

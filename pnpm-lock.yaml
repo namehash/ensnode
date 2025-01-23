@@ -72,12 +72,12 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
+      '@namehash/shared-configs':
+        specifier: 'workspace:'
+        version: link:../../packages/shared-configs
       '@types/node':
         specifier: 'catalog:'
         version: 20.17.14
-      tsconfigs:
-        specifier: 'workspace:'
-        version: link:../../packages/tsconfigs
       typescript:
         specifier: 'catalog:'
         version: 5.7.3
@@ -118,15 +118,15 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
+      '@namehash/shared-configs':
+        specifier: 'workspace:'
+        version: link:../shared-configs
       '@types/node':
         specifier: 'catalog:'
         version: 20.17.14
       hono:
         specifier: 'catalog:'
         version: 4.6.17
-      tsconfigs:
-        specifier: 'workspace:'
-        version: link:../tsconfigs
       typescript:
         specifier: 'catalog:'
         version: 5.7.3
@@ -136,12 +136,12 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
+      '@namehash/shared-configs':
+        specifier: 'workspace:'
+        version: link:../shared-configs
       '@types/node':
         specifier: 'catalog:'
         version: 20.17.14
-      tsconfigs:
-        specifier: 'workspace:'
-        version: link:../tsconfigs
       typescript:
         specifier: 'catalog:'
         version: 5.7.3
@@ -164,14 +164,14 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      tsconfigs:
+      '@namehash/shared-configs':
         specifier: 'workspace:'
-        version: link:../tsconfigs
+        version: link:../shared-configs
       typescript:
         specifier: 'catalog:'
         version: 5.7.3
 
-  packages/tsconfigs:
+  packages/shared-configs:
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
