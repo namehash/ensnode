@@ -2,6 +2,14 @@
   "name": "ensnode-subgraph-graphql",
   "version": "0.0.1",
   "type": "module",
+  "description": "A Hono middleware for generating Subgraph-compatible GraphQL schema.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ensnode-utils"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-utils",
   "exports": {
     "./middleware": "./src/middleware.ts"
   },

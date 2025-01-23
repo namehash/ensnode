@@ -3,6 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "description": "A multichain ENS indexer, powered by Ponder",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/ensnode"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensnode",
   "scripts": {
     "dev": "ponder dev",
     "start": "ponder start",
