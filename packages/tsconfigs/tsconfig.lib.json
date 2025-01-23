@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "noEmit": true,
+    "lib": [
+      "ES2022"
+    ],
+    "target": "ES2022",
+    "declaration": true,
+    "outDir": "dist",
+    "strict": true,
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}

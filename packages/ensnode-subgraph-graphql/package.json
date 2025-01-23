@@ -22,12 +22,13 @@
     "@escape.tech/graphql-armor-max-tokens": "^2.5.0",
     "change-case": "^5.4.4",
     "dataloader": "^2.2.3",
-    "drizzle-orm": "^0.38.3",
+    "drizzle-orm": "catalog:",
     "graphql": "^16.10.0",
     "graphql-scalars": "^1.24.0",
     "graphql-yoga": "^5.10.9"
   },
   "devDependencies": {
+    "tsconfigs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "hono": "catalog:",

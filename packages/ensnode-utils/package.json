@@ -26,6 +26,7 @@
     "viem": "^catalog:"
   },
   "devDependencies": {
+    "tsconfigs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",

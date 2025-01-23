@@ -1,0 +1,20 @@
+{
+  "name": "ponder-schema",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "a shared ponder schema for ensnode",
+  "license": "MIT",
+  "exports": {
+    "default": "./src/ponder.schema.ts"
+  },
+  "dependencies": {
+    "ponder": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "tsconfigs": "workspace:",
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:"
+  }
+}

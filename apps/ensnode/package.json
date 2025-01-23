@@ -23,14 +23,16 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
+    "ponder-schema": "workspace:*",
     "ensnode-utils": "workspace:*",
     "ensnode-subgraph-graphql": "workspace:*",
     "hono": "catalog:",
-    "ponder": "^0.8.26",
+    "ponder": "catalog:",
     "ts-deepmerge": "^7.0.2",
     "viem": "catalog:"
   },
   "devDependencies": {
+    "tsconfigs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",
