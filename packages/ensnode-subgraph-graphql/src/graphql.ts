@@ -337,7 +337,7 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
                 skip: { type: GraphQLInt },
               },
               resolve: (parent, args: PluralArgs, context, info) => {
-                const relationalConditions = [];
+                const relationalConditions = [] as (SQL | undefined)[];
                 for (let i = 0; i < references.length; i++) {
                   const column = fields[i]!;
                   const value = parent[references[i]!.name];

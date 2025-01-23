@@ -13,6 +13,10 @@ yarn-error.log*
 # Env files
 .env*.local
 
+# Generated files
+build
+dist
+
 # Ponder
 generated
 ponder

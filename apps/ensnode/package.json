@@ -10,20 +10,12 @@
     "codegen": "ponder codegen",
     "test": "echo 'no test to run'",
     "lint": "biome check --write .",
-    "typecheck": "tsc"
+    "typecheck": "tsc --noEmit"
   },
   "packageManager": "pnpm@9.12.0",
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
-    "@escape.tech/graphql-armor-max-aliases": "^2.6.0",
-    "@escape.tech/graphql-armor-max-depth": "^2.4.0",
-    "@escape.tech/graphql-armor-max-tokens": "^2.5.0",
-    "change-case": "^5.4.4",
-    "dataloader": "^2.2.3",
-    "drizzle-orm": "^0.38.3",
-    "graphql": "^16.10.0",
-    "graphql-scalars": "^1.24.0",
-    "graphql-yoga": "^5.10.9",
+    "ensnode-subgraph-graphql": "workspace:*",
     "hono": "^4.6.14",
     "ponder": "^0.8.26",
     "viem": "^2.21.57"

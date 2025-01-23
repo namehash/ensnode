@@ -1,0 +1,34 @@
+{
+  "name": "ensnode-subgraph-graphql",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": "./src/middleware.ts",
+  "publishConfig": {
+    "main": "./dist/middleware.js",
+    "types": "./dist/middleware.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/middleware.js",
+        "require": "./dist/middleware.js",
+        "types": "./dist/middleware.d.ts"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@escape.tech/graphql-armor-max-aliases": "^2.6.0",
+    "@escape.tech/graphql-armor-max-depth": "^2.4.0",
+    "@escape.tech/graphql-armor-max-tokens": "^2.5.0",
+    "change-case": "^5.4.4",
+    "dataloader": "^2.2.3",
+    "drizzle-orm": "^0.38.3",
+    "graphql": "^16.10.0",
+    "graphql-scalars": "^1.24.0",
+    "graphql-yoga": "^5.10.9",
+    "hono": "^4.6.14"
+  }
+}
