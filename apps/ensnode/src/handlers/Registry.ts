@@ -1,8 +1,8 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { makeResolverId } from "ensnode-common/ids";
-import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-common/subname-helpers";
+import { makeResolverId } from "ensnode-utils/ids";
+import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";

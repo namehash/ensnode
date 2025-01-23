@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { makeSubnodeNamehash, tokenIdToLabel } from "ensnode-common/subname-helpers";
+import { makeSubnodeNamehash, tokenIdToLabel } from "ensnode-utils/subname-helpers";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { upsertAccount } from "../../../lib/db-helpers";

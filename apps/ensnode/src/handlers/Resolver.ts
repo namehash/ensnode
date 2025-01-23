@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { hasNullByte, uniq } from "ensnode-common/helpers";
-import { makeResolverId } from "ensnode-common/ids";
+import { hasNullByte, uniq } from "ensnode-utils/helpers";
+import { makeResolverId } from "ensnode-utils/ids";
 import { Log } from "ponder";
 import { Hex } from "viem";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";

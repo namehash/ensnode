@@ -4,7 +4,7 @@ import {
   isLabelIndexable,
   makeSubnodeNamehash,
   tokenIdToLabel,
-} from "ensnode-common/subname-helpers";
+} from "ensnode-utils/subname-helpers";
 import { Block } from "ponder";
 import { type Hex, labelhash, namehash } from "viem";
 import { upsertAccount, upsertRegistration } from "../lib/db-helpers";

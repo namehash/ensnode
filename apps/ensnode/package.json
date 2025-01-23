@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
-    "ensnode-common": "workspace:*",
+    "ensnode-utils": "workspace:*",
     "ensnode-subgraph-graphql": "workspace:*",
     "hono": "catalog:",
     "ponder": "^0.8.26",
