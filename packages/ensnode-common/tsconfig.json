@@ -13,6 +13,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "../../apps/ensnode/src/lib/plugin-helpers.ts",
+    "../../apps/ensnode/test/plugin-helpers.spec.ts"
+  ],
   "exclude": ["*spec.ts"]
 }

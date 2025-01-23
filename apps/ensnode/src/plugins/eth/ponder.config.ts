@@ -1,7 +1,7 @@
 import { ContractConfig, createConfig, mergeAbis } from "ponder";
 import { http } from "viem";
 
-import { createPluginNamespace } from "ensnode-common/plugin-helpers";
+import { createPluginNamespace } from "../../lib/plugin-helpers";
 
 import { mainnet } from "viem/chains";
 import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/ponder-helpers";

@@ -1,8 +1,8 @@
 import { ContractConfig, createConfig } from "ponder";
 import { http } from "viem";
 
-import { createPluginNamespace } from "ensnode-common/plugin-helpers";
 import { linea } from "viem/chains";
+import { createPluginNamespace } from "../../lib/plugin-helpers";
 import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/ponder-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
