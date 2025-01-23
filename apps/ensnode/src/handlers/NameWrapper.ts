@@ -205,7 +205,13 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
         };
       };
     }) {
-      await handleTransfer(context, event, makeEventId(event, 0), event.args.id, event.args.to);
+      await handleTransfer(
+        context,
+        event,
+        makeEventId(event.block.number, event.log.logIndex, 0),
+        event.args.id,
+        event.args.to,
+      );
     },
     async handleTransferBatch({
       context,
@@ -220,7 +226,13 @@ export const makeNameWrapperHandlers = (ownedName: `${string}eth`) => {
       };
     }) {
       for (const [i, id] of event.args.ids.entries()) {
-        await handleTransfer(context, event, makeEventId(event, i), id, event.args.to);
+        await handleTransfer(
+          context,
+          event,
+          makeEventId(event.block.number, event.log.logIndex, i),
+          id,
+          event.args.to,
+        );
       }
     },
   };

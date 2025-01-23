@@ -1,13 +1,10 @@
 import { ContractConfig, createConfig, mergeAbis } from "ponder";
 import { http } from "viem";
 
-import {
-  blockConfig,
-  createPluginNamespace,
-  rpcEndpointUrl,
-  rpcMaxRequestsPerSecond,
-} from "ensnode-common";
+import { createPluginNamespace } from "ensnode-common/plugin-helpers";
+
 import { mainnet } from "viem/chains";
+import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/ponder-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { EthRegistrarControllerOld } from "./abis/EthRegistrarControllerOld";

@@ -31,13 +31,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Biome CI
-        run: pnpm biome ci
+        run: pnpm -r lint:ci
 
       - name: Run TypeScript type checks
         run: pnpm -r typecheck
 
       - name: Run Ponder build checks
-        run: cd apps/ensnode && pnpm codegen
+        run: pnpm --filter ensnode codegen
 
   unit-tests:
     runs-on: ubuntu-latest

@@ -6,13 +6,7 @@ export const makeResolverId = (address: Address, node: Hex) =>
 
 // https://github.com/ensdomains/ens-subgraph/blob/master/src/utils.ts#L5
 // produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`
-export const makeEventId = (
-  event: {
-    block: { number: bigint };
-    log: { logIndex: number };
-  },
-  transferIndex?: number,
-) =>
-  [event.block.number.toString(), event.log.logIndex.toString(), transferIndex?.toString()]
+export const makeEventId = (blockNumber: bigint, logIndex: number, transferIndex?: number) =>
+  [blockNumber.toString(), logIndex.toString(), transferIndex?.toString()]
     .filter(Boolean)
     .join("-");

@@ -8,8 +8,9 @@
     "start": "ponder start",
     "db": "ponder db",
     "codegen": "ponder codegen",
-    "test": "echo 'no test to run'",
+    "test": "vitest",
     "lint": "biome check --write .",
+    "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit"
   },
   "packageManager": "pnpm@9.12.0",
@@ -19,6 +20,7 @@
     "ensnode-subgraph-graphql": "workspace:*",
     "hono": "^4.6.14",
     "ponder": "^0.8.26",
+    "ts-deepmerge": "^7.0.2",
     "viem": "^2.21.57"
   },
   "devDependencies": {
@@ -26,8 +28,5 @@
     "@types/node": "^20.9.0",
     "typescript": "^5.2.2",
     "vitest": "^3.0.3"
-  },
-  "engines": {
-    "node": ">=18.14"
   }
 }

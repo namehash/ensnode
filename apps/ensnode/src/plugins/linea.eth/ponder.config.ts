@@ -1,9 +1,9 @@
-import { ContractConfig, createConfig, factory, mergeAbis } from "ponder";
-import { http, getAbiItem } from "viem";
+import { ContractConfig, createConfig } from "ponder";
+import { http } from "viem";
 
-import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "ensnode-common/helpers";
 import { createPluginNamespace } from "ensnode-common/plugin-helpers";
 import { linea } from "viem/chains";
+import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "../../lib/ponder-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EthRegistrarController } from "./abis/EthRegistrarController";
 import { NameWrapper } from "./abis/NameWrapper";
