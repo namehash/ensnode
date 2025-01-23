@@ -19,18 +19,26 @@
 
 ### Run the indexer
 
+#### Prepare workspace environment
 Clone this repository:
 ```
 git clone git@github.com:namehash/ensnode.git
 cd ensnode
 ```
 
-Install dependencies:
+Install workspace dependencies:
 ```
 pnpm install
 ```
 
-Configure for your local environment:
+#### Prepare application environment
+
+Go into the application root directory:
+```
+cd apps/ensnode
+```
+
+Configure for your local application environment:
 ```
 cp .env.local.example .env.local
 ```
