@@ -7,8 +7,5 @@
   },
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "biomejs.biome"
   }
 }
