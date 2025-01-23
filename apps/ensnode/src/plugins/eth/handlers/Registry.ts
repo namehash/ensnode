@@ -1,10 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
+import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-common/subname-helpers";
 import { type Hex } from "viem";
-import {
-  ROOT_NODE,
-  makeSubnodeNamehash,
-} from "../../../../../../packages/ensnode-core/src/subname-helpers";
 import {
   handleNewOwner,
   handleNewResolver,

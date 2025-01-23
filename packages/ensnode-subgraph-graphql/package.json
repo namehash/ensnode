@@ -2,21 +2,11 @@
   "name": "ensnode-subgraph-graphql",
   "version": "0.0.1",
   "type": "module",
-  "exports": "./src/middleware.ts",
-  "publishConfig": {
-    "main": "./dist/middleware.js",
-    "types": "./dist/middleware.d.ts",
-    "exports": {
-      ".": {
-        "import": "./dist/middleware.js",
-        "require": "./dist/middleware.js",
-        "types": "./dist/middleware.d.ts"
-      },
-      "./package.json": "./package.json"
-    }
+  "exports": {
+    ".": "./src/index.ts",
+    "./middleware": "./src/middleware.ts"
   },
   "scripts": {
-    "build": "tsup",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

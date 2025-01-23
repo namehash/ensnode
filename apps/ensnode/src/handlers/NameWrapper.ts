@@ -1,13 +1,10 @@
 import { type Context, type Event, type EventNames } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
+import { bigintMax } from "ensnode-common/helpers";
+import { makeEventId } from "ensnode-common/ids";
+import { decodeDNSPacketBytes, tokenIdToLabel } from "ensnode-common/subname-helpers";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
-import { bigintMax } from "../../../../packages/ensnode-core/src/helpers";
-import { makeEventId } from "../../../../packages/ensnode-core/src/ids";
-import {
-  decodeDNSPacketBytes,
-  tokenIdToLabel,
-} from "../../../../packages/ensnode-core/src/subname-helpers";
 import { upsertAccount } from "../lib/db-helpers";
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two

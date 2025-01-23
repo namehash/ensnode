@@ -1,0 +1,29 @@
+{
+  "name": "ensnode-common",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./helpers": "./src/helpers.ts",
+    "./ids": "./src/ids.ts",
+    "./plugin-helpers": "./src/plugin-helpers.ts",
+    "./subname-helpers": "./src/subname-helpers.ts"
+  },
+  "scripts": {
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ts-deepmerge": "^7.0.2",
+    "viem": "^2.21.57"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2",
+    "vitest": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.14"
+  }
+}

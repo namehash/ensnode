@@ -32,6 +32,9 @@ importers:
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.7.3)(viem@2.22.11(typescript@5.7.3))
+      ensnode-common:
+        specifier: workspace:*
+        version: link:../../packages/ensnode-common
       ensnode-subgraph-graphql:
         specifier: workspace:*
         version: link:../../packages/ensnode-subgraph-graphql
@@ -58,7 +61,7 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3(@types/node@20.17.14)
 
-  packages/ensnode-core:
+  packages/ensnode-common:
     dependencies:
       ts-deepmerge:
         specifier: ^7.0.2

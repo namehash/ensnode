@@ -1,9 +1,8 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
+import { hasNullByte, makeResolverId, uniq } from "ensnode-common";
 import { Log } from "ponder";
 import { Hex } from "viem";
-import { hasNullByte, uniq } from "../../../../packages/ensnode-core/src/helpers";
-import { makeResolverId } from "../../../../packages/ensnode-core/src/ids";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_

@@ -1,12 +1,12 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Block } from "ponder";
-import { type Hex, labelhash, namehash } from "viem";
 import {
   isLabelIndexable,
   makeSubnodeNamehash,
   tokenIdToLabel,
-} from "../../../../packages/ensnode-core/src/subname-helpers";
+} from "ensnode-common/subname-helpers";
+import { Block } from "ponder";
+import { type Hex, labelhash, namehash } from "viem";
 import { upsertAccount, upsertRegistration } from "../lib/db-helpers";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds

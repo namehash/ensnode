@@ -1,13 +1,10 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
+import { makeResolverId } from "ensnode-common/ids";
+import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-common/subname-helpers";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
-import { makeResolverId } from "../../../../packages/ensnode-core/src/ids";
-import {
-  ROOT_NODE,
-  makeSubnodeNamehash,
-} from "../../../../packages/ensnode-core/src/subname-helpers";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 
 /**

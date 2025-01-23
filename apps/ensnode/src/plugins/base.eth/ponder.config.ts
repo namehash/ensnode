@@ -1,13 +1,9 @@
-import { type ContractConfig, createConfig, factory } from "ponder";
+import { type ContractConfig, createConfig } from "ponder";
 import { http } from "viem";
 import { base } from "viem/chains";
 
-import {
-  blockConfig,
-  rpcEndpointUrl,
-  rpcMaxRequestsPerSecond,
-} from "../../../../../packages/ensnode-core/src/helpers";
-import { createPluginNamespace } from "../../../../../packages/ensnode-core/src/plugin-helpers";
+import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "ensnode-common/helpers";
+import { createPluginNamespace } from "ensnode-common/plugin-helpers";
 import { BaseRegistrar } from "./abis/BaseRegistrar";
 import { EarlyAccessRegistrarController } from "./abis/EARegistrarController";
 import { L2Resolver } from "./abis/L2Resolver";
