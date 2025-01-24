@@ -50,7 +50,7 @@ jobs:
           RPC_URL_1: https://eth.drpc.org
           RPC_URL_8453: https://base.drpc.org
           RPC_URL_59144: https://linea.drpc.org
-          RUNTIME_CHECK_TIMEOUT: 30
+          RUNTIME_CHECK_TIMEOUT: 10
         run: |
           pnpm dev -vv &
           PID=$!
