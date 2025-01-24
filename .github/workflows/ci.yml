@@ -36,15 +36,24 @@ jobs:
       - name: Run TypeScript type checks
         run: pnpm -r typecheck
 
-      # This will run the dev command in the background, wait for 5 seconds,
-      # and then kill the process if it is still running. If the command does
-      # not throw an error within that time, the step will exit successfully.
-      # If it does throw an error, the step will exit and fail the CI pipeline.
+      # This will run the dev command in background, wait for
+      # RUNTIME_CHECK_TIMEOUT seconds, and then kill the process if it is still
+      # running. If the command does not throw an error within that time,
+      # the step will exit successfully. If it does throw an error, the step
+      # will exit and fail the CI pipeline. This runtime check uses a pglite
+      # database that only lives in the CI environment. It will be discarded
+      # after the CI run.
       - name: Run Ponder runtime integrity checks
+        env:
+          ACTIVE_PLUGINS: eth,base.eth,linea.eth
+          RPC_URL_1: https://eth.drpc.org
+          RPC_URL_8453: https://base.drpc.org
+          RPC_URL_59144: https://linea.drpc.org
+          RUNTIME_CHECK_TIMEOUT: 10
         run: |
-          ACTIVE_PLUGINS=eth pnpm --filter ensnode dev &
+          pnpm --filter ensnode dev &
           PID=$!
-          sleep 5
+          sleep $RUNTIME_CHECK_TIMEOUT
           kill $PID || exit 0
           wait $PID
 
