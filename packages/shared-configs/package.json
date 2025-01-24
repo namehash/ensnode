@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "description": "shared configs for the project",
+  "description": "Shared configs for the ENSNode project.",
   "license": "MIT",
   "scripts": {
     "lint:ci": "biome ci"
