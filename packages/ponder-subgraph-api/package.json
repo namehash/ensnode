@@ -28,8 +28,8 @@
     "graphql-yoga": "^5.10.9"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
+    "@namehash/shared-configs": "workspace:",
     "@types/node": "catalog:",
     "hono": "catalog:",
     "typescript": "catalog:"

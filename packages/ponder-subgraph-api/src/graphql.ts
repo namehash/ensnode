@@ -82,6 +82,7 @@ import {
   GraphQLInputObjectType,
   type GraphQLInputType,
   GraphQLInt,
+  GraphQLInterfaceType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
@@ -118,7 +119,32 @@ const OrderDirectionEnum = new GraphQLEnumType({
   },
 });
 
-export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
+/**
+ * the following type describes:
+ * 1. `types` — mapping a polymorphic type name to the set of entities that implement that interface
+ *   ex: DomainEvent -> [TransferEvent, ...]
+ * 2. `fields` — mapping a fieldName to the polymorphic type it represents
+ *
+ * NOTE: in future implementations of ponder, this information may be provided by the schema using
+ * materialized views, and most/all of this code can be removed.
+ */
+export interface PolymorphicConfig {
+  types: Record<string, string[]>;
+  fields: Record<string, string>;
+}
+
+export function buildGraphQLSchema(
+  schema: Schema,
+  polymorphicConfig: PolymorphicConfig = { types: {}, fields: {} },
+): GraphQLSchema {
+  // restructure for easier iteration later on
+  const polymorphicFields = Object.entries(polymorphicConfig.fields)
+    // split fieldPath into segments
+    .map<[string[], string]>(([fieldPath, interfaceTypeName]) => [
+      fieldPath.split("."),
+      interfaceTypeName,
+    ]);
+
   const tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
 
   const tables = Object.values(tablesConfig.tables) as TableRelationalConfig[];
@@ -154,7 +180,7 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
     // TODO: relationships i.e. parent__labelName iff necessary
 
     entityOrderByEnums[table.tsName] = new GraphQLEnumType({
-      name: `${pascalCase(table.tsName)}_orderBy`,
+      name: `${getSubgraphEntityName(table.tsName)}_orderBy`,
       values,
     });
   }
@@ -162,7 +188,7 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
   const entityFilterTypes: Record<string, GraphQLInputObjectType> = {};
   for (const table of tables) {
     const filterType = new GraphQLInputObjectType({
-      name: `${table.tsName}Filter`,
+      name: `${table.tsName}_filter`,
       fields: () => {
         const filterFields: GraphQLInputFieldConfigMap = {
           // Logical operators
@@ -231,11 +257,35 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
   }
 
   const entityTypes: Record<string, GraphQLObjectType<Parent, Context>> = {};
+  const interfaceTypes: Record<string, GraphQLInterfaceType> = {};
   const entityPageTypes: Record<string, GraphQLOutputType> = {};
+
+  // construct polymorphic interfaces
+  for (const [interfaceName, implementingTypeNames] of Object.entries(polymorphicConfig.types)) {
+    interfaceTypes[interfaceName] = new GraphQLInterfaceType({
+      name: interfaceName,
+      // TODO: find the union of the fields available in the provided implementingTypeNames
+      // and convert to graphql representation here
+      fields: {
+        id: { type: new GraphQLNonNull(GraphQLString) },
+        blockNumber: { type: new GraphQLNonNull(GraphQLInt) },
+        transactionID: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolveType: (value, context, info, abstractType) => {
+        console.log(value, info, abstractType);
+        return value?.__typename;
+      },
+    });
+  }
 
   for (const table of tables) {
     entityTypes[table.tsName] = new GraphQLObjectType({
-      name: pascalCase(table.tsName), // NOTE: PascalCase to match subgraph
+      name: getSubgraphEntityName(table.tsName),
+      interfaces: Object.entries(polymorphicConfig.types)
+        // if this table implements an interface...
+        .filter(([, implementingTypeNames]) => implementingTypeNames.includes(table.tsName))
+        // include the interfaceType here
+        .map(([interfaceTypeName]) => interfaceTypes[interfaceTypeName]),
       fields: () => {
         const fieldConfigMap: GraphQLFieldConfigMap<Parent, Context> = {};
 
@@ -359,6 +409,23 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
           }
         }
 
+        // Polymorphic Plural Entity Fields
+        // NOTE: overrides any automatic field definitions from the above
+        const thisTablesPolymorphicFields = polymorphicFields
+          // filter by fieldPaths in this table
+          .filter(([[parent]]) => parent === table.tsName)
+          // map to [fieldName, interfaceTypeName]
+          .map(([[, fieldName], interfaceTypeName]) => [fieldName, interfaceTypeName]);
+
+        for (const [fieldName, interfaceTypeName] of thisTablesPolymorphicFields) {
+          fieldConfigMap[fieldName] = definePolymorphicPluralField({
+            interfaceType: interfaceTypes[interfaceTypeName],
+            referencedTables: tables.filter((table) =>
+              polymorphicConfig.types[interfaceTypeName].includes(table.tsName),
+            ),
+          });
+        }
+
         return fieldConfigMap;
       },
     });
@@ -416,6 +483,23 @@ export function buildGraphQLSchema(schema: Schema): GraphQLSchema {
         return executePluralQuery(table, context.drizzle, args);
       },
     };
+  }
+
+  // Polymorphic Plural Query Fields
+  // NOTE: overrides any automatic field definitions from the above
+  const polymorphicQueryFields = polymorphicFields
+    // filter by fieldPaths that have a parent of query
+    .filter(([[parent]]) => parent === "Query")
+    // map to [fieldName, interfaceTypeName]
+    .map(([[, fieldName], interfaceTypeName]) => [fieldName, interfaceTypeName]);
+
+  for (const [fieldName, interfaceTypeName] of polymorphicQueryFields) {
+    queryFields[fieldName] = definePolymorphicPluralField({
+      interfaceType: interfaceTypes[interfaceTypeName],
+      referencedTables: tables.filter((table) =>
+        polymorphicConfig.types[interfaceTypeName].includes(table.tsName),
+      ),
+    });
   }
 
   queryFields._meta = {
@@ -744,4 +828,45 @@ export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) 
 function getColumnTsName(column: Column) {
   const tableColumns = getTableColumns(column.table);
   return Object.entries(tableColumns).find(([_, c]) => c.name === column.name)![0];
+}
+
+// NOTE: pascalCase but with overrides for all-caps
+// TODO: replace this with a subgraph pascalCase equivalent function to avoid one-off overrides
+function getSubgraphEntityName(tsName: string) {
+  if (tsName === "newTTL") return "NewTTL";
+  return pascalCase(tsName);
+}
+
+function definePolymorphicPluralField({
+  interfaceType,
+  referencedTables,
+}: {
+  interfaceType: GraphQLInterfaceType;
+  referencedTables: TableRelationalConfig[];
+}): GraphQLFieldConfig<Parent, Context> {
+  return {
+    type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(interfaceType))),
+    args: {
+      // TODO: polymorphic type filter & orderBy types
+      // where: { type: referencedEntityFilterType },
+      // orderBy: { type: referencedEntityOrderByType },
+      orderDirection: { type: OrderDirectionEnum },
+      first: { type: GraphQLInt },
+      skip: { type: GraphQLInt },
+    },
+    resolve: (parent, args: PluralArgs, context, info) => {
+      const relationalConditions = [] as (SQL | undefined)[];
+      // for (let i = 0; i < references.length; i++) {
+      //   const column = fields[i]!;
+      //   const value = parent[references[i]!.name];
+      //   relationalConditions.push(eq(column, value));
+      // }
+
+      const referencedTable = referencedTables[0];
+
+      // TODO: in constructed union, select __typename so interface resolveType works as expected
+
+      return executePluralQuery(referencedTable, context.drizzle, args, relationalConditions);
+    },
+  };
 }
