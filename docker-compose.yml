@@ -1,0 +1,28 @@
+services:
+
+  indexer:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - "8080:42069"
+      env_file:
+      - .env.docker
+      depends_on:
+        - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local
