@@ -26,6 +26,7 @@
     "viem": "^catalog:"
   },
   "devDependencies": {
+    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",

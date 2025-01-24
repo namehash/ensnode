@@ -14,7 +14,7 @@
     "./middleware": "./src/middleware.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "@escape.tech/graphql-armor-max-aliases": "^2.6.0",
@@ -28,6 +28,7 @@
     "graphql-yoga": "^5.10.9"
   },
   "devDependencies": {
+    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "hono": "catalog:",

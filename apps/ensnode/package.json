@@ -23,20 +23,19 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
+    "ponder-schema": "workspace:*",
     "ensnode-utils": "workspace:*",
     "ponder-subgraph-api": "workspace:*",
     "hono": "catalog:",
-    "ponder": "^0.8.32",
+    "ponder": "catalog:",
     "ts-deepmerge": "^7.0.2",
     "viem": "catalog:"
   },
   "devDependencies": {
+    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
-  },
-  "resolutions": {
-    "vite": "5.4.12"
   }
 }
