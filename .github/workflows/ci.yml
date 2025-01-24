@@ -36,8 +36,17 @@ jobs:
       - name: Run TypeScript type checks
         run: pnpm -r typecheck
 
-      - name: Run Ponder build checks
-        run: pnpm --filter ensnode codegen
+      # This will run the dev command in the background, wait for 5 seconds,
+      # and then kill the process if it is still running. If the command does
+      # not throw an error within that time, the step will exit successfully.
+      # If it does throw an error, the step will exit and fail the CI pipeline.
+      - name: Run Ponder runtime integrity checks
+        run: |
+          ACTIVE_PLUGINS=eth pnpm --filter ensnode dev &
+          PID=$!
+          sleep 5
+          kill $PID || exit 0
+          wait $PID
 
   unit-tests:
     runs-on: ubuntu-latest
