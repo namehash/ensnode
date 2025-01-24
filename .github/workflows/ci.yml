@@ -55,9 +55,14 @@ jobs:
           pnpm dev &
           PID=$!
           sleep $RUNTIME_CHECK_TIMEOUT
-          kill $PID || exit 0
-          wait $PID
-
+          if ps -p $PID > /dev/null; then
+            kill $PID
+            wait $PID || true
+            exit 0
+          else
+            wait $PID
+            exit $?
+          fi
   unit-tests:
     runs-on: ubuntu-latest
 
