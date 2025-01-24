@@ -1,5 +1,4 @@
 {
   "extends": "@namehash/shared-configs/tsconfig.lib.json",
-  "include": ["src/**/*"],
-  "exclude": ["*spec.ts"]
+  "include": ["src/**/*"]
 }

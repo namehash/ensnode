@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "description": "a shared ponder schema for ensnode",
+  "description": "A shared ponder schema for ENSNode",
   "license": "MIT",
   "scripts": {
     "lint:ci": "biome ci"

@@ -3,8 +3,8 @@
 ENSNode is a multichain indexer for ENS, powered by Ponder.
 
 The ENSNode monorepo contains multiple modules in the following subdirectories:
-- `apps`  executable applications.
-- `packages` for libraries, both published and used here internally, can be embedded into your own apps.
+- [`apps`](apps)  executable applications.
+- [`packages`](packages) for libraries that can be embedded into apps.
 
 The main module of this repository is the ENSNode app found in [`apps/ensnode`](apps/ensnode).
 
@@ -39,7 +39,7 @@ pnpm install
 
 #### Prepare application environment
 
-Go into the application root directory:
+Go into the main ENSNode application root directory:
 ```
 cd apps/ensnode
 ```
@@ -62,15 +62,15 @@ Once your `.env.local` is configured, launch the indexer by running:
 
 To learn more about those commands, go to https://ponder.sh/docs/api-reference/ponder-cli#dev
 
-### Query index
+### Query indexed data
 
-The ENSNode exposes two GraphQL endpoints to query:
+ENSNode exposes two GraphQL endpoints to query:
 - `/` uses a Ponder-native GraphQL schema
 - `/subgraph` uses a subgraph-compatible GraphQL schema
 
 #### Examples
 
-Fetching data about most recently-created domains while skipping some initial records.
+Fetch data about the three most recently-created domains.
 
 <details>
   <summary>Ponder-native query</summary>
@@ -80,17 +80,12 @@ Fetching data about most recently-created domains while skipping some initial re
     domains(
       orderBy: "createdAt"
       orderDirection: "desc"
-      after: "eyJjcmVhdGVkQXQiOnsiX190eXBlIjoiYmlnaW50IiwidmFsdWUiOiIxNjM5ODk1NzYxIn0sImlkIjoiMHhkNTczOGJjNGMxYzdhZDYyYWM0N2IyMWNlYmU1ZGZjOWZkNjVkNTk4NTZmNmYyNDIxYjE5N2Q0ZjgxNmFkZTRjIn0"
       limit: 3
     ) {
       items {
         name
         expiryDate
       }
-      pageInfo {
-        endCursor
-      }
-      totalCount
     }
   }
   ```
@@ -104,23 +99,18 @@ Fetching data about most recently-created domains while skipping some initial re
         "domains": {
           "items": [
             {
-              "name": "cdkey.eth",
-              "expiryDate": "1963241281"
+              "name": "ensanguo.eth",
+              "expiryDate": "1758170255"
             },
             {
-              "name": "threeion.eth",
-              "expiryDate": "1710785665"
+              "name": "fiffer.eth",
+              "expiryDate": "2041994243"
             },
             {
-              "name": "humes.eth",
-              "expiryDate": "1710785665"
+              "name": "rifaisicilia.eth",
+              "expiryDate": "1758170039"
             }
-          ],
-          "pageInfo": {
-            "endCursor": "eyJjcmVhdGVkQXQiOnsiX190eXBlIjoiYmlnaW50IiwidmFsdWUiOiIxNjM5ODk1NzYxIn0sImlkIjoiMHgyZWFmNmQ1YjU1YjdhZWI0NmNiZmRiMjVkN2VjOGY4MWYxNDg2YmFmNWFiNjhkZTM5M2YzYTcyNjM1ZDdmN2FkIn0="
-          },
-          "totalCount": 982390
-        }
+          ]
       }
     }
     ```
@@ -128,11 +118,11 @@ Fetching data about most recently-created domains while skipping some initial re
 </details>
 
 <details>
-  <summary>Subgraph-native query</summary>
+  <summary>Subgraph-compatible query</summary>
 
   ```gql
   {
-    domains(orderBy: createdAt, orderDirection: desc, skip: 40, first: 3) {
+    domains(orderBy: createdAt, orderDirection: desc, first: 3) {
         name
         expiryDate
     }
@@ -147,16 +137,16 @@ Fetching data about most recently-created domains while skipping some initial re
       "data": {
         "domains": [
           {
-            "name": "🐧🐧🐧🐧🐧🐧🐧🐧🐧.eth",
-            "expiryDate": "1710785244"
+            "name": "ensanguo.eth",
+            "expiryDate": "1758170255"
           },
           {
-            "name": "rebelteenapeclub.eth",
-            "expiryDate": "1679228224"
+            "name": "fiffer.eth",
+            "expiryDate": "2041994243"
           },
           {
-            "name": "[b4201276b6f7ffe5a50b0c3c1406c21295ab9f553107ddc9c715be2f9a6f6e90].[e5e14487b78f85faa6e1808e89246cf57dd34831548ff2e6097380d98db2504a].[dec08c9dbbdd0890e300eb5062089b2d4b1c40e3673bbccb5423f7b37dcf9a9c]",
-            "expiryDate": null
+            "name": "rifaisicilia.eth",
+            "expiryDate": "1758170039"
           }
         ]
       }
