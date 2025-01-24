@@ -52,7 +52,7 @@ jobs:
           RPC_URL_59144: https://linea.drpc.org
           RUNTIME_CHECK_TIMEOUT: 30
         run: |
-          pnpm dev &
+          pnpm dev -vv &
           PID=$!
           sleep $RUNTIME_CHECK_TIMEOUT
           if ps -p $PID > /dev/null; then
