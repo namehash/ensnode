@@ -1,6 +1,6 @@
 import { namehash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
-import { makeEventId, makeResolverId } from "./ids";
+import { makeEventId, makeResolverId } from "../src/lib/ids";
 
 describe("ids", () => {
   describe("makeResolverId", () => {

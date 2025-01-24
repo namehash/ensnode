@@ -24,9 +24,9 @@
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
     "ensnode-utils": "workspace:*",
-    "ensnode-subgraph-graphql": "workspace:*",
+    "ponder-subgraph-api": "workspace:*",
     "hono": "catalog:",
-    "ponder": "^0.8.26",
+    "ponder": "^0.8.32",
     "ts-deepmerge": "^7.0.2",
     "viem": "catalog:"
   },

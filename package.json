@@ -7,7 +7,7 @@
     "@biomejs/biome": "^1.9.4"
   },
   "engines": {
-    "node": "18.20.5"
+    "node": ">=18.20.5"
   },
   "resolutions": {
     "vite": "5.4.12"

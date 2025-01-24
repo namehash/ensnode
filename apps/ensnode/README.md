@@ -60,7 +60,7 @@ To learn more about those commands, go to https://ponder.sh/docs/api-reference/p
 
 The ENSNode exposes two GraphQL endpoints to query:
 - `/` uses a Ponder-native GraphQL schema
-- `/subgraph` uses a subgraph-native GraphQL schema
+- `/subgraph` uses a subgraph-compatible GraphQL schema
 
 #### Examples
 
@@ -180,18 +180,6 @@ Fetching data about most recently-created domains while skipping some initial re
   - high quality human-readable (healed) list of names by owner, necessary for many UX
   - (possible) continued backwards compatibility with subgraph
   - support indexing subset of data, i.e. only domains under parent node
-
-## next up
-
-- [ ] `_nocase` case-insensitive where filters
-  - not used interally but ensjs does technically expose this as an available filter to users
-- [ ] confirm all the schema relations are configured correctly
-- [ ] integrate rainbow tables for label healing
-  - load the table dump into pglite (or just postgres) & query synchronously to match existing behavior
-  - https://github.com/graphprotocol/ens-rainbow
-- [ ] CI/CD with indexing?
-  - integrate index to recent block (10m?) and validate with `snapshot-eq` b4 passing
-- [ ] better understand reverse resolution & how that pertains to L2 primary names and impacts the future schema, etc
 
 ## notes
 

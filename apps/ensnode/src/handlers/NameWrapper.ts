@@ -1,11 +1,11 @@
 import { type Context, type Event, type EventNames } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { bigintMax } from "ensnode-utils/helpers";
-import { makeEventId } from "ensnode-utils/ids";
 import { decodeDNSPacketBytes, tokenIdToLabel } from "ensnode-utils/subname-helpers";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { upsertAccount } from "../lib/db-helpers";
+import { bigintMax } from "../lib/helpers";
+import { makeEventId } from "../lib/ids";
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Hex) {
