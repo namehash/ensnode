@@ -11,6 +11,15 @@ export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([
 // converts uint256-encoded nodes to hex
 export const tokenIdToLabel = (tokenId: bigint) => toHex(tokenId, { size: 32 });
 
+// Makes a cross-chain unique registration ID for a given owned name.
+export const makeRegistrationId = (ownedName: string, labelhash: Hex, namehash: Hex) =>
+  ownedName === "eth"
+    ? // To keep subgraph compatibility, we still use labelhash for registrations
+      // handled by `eth` plugin
+      labelhash
+    : // For other plugins, we use the namehash to ensure uniqueness
+      namehash;
+
 /**
  * These characters are prohibited in normalized ENS names per the ENSIP-15
  * standard (https://docs.ens.domains/ensip/15). Names containing labels with

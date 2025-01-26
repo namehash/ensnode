@@ -2,6 +2,7 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import {
   isLabelIndexable,
+  makeRegistrationId,
   makeSubnodeNamehash,
   tokenIdToLabel,
 } from "ensnode-utils/subname-helpers";
@@ -42,7 +43,11 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
         .set({ labelName: name, name: `${name}.${ownedName}` });
     }
 
-    await context.db.update(schema.registration, { id: label }).set({ labelName: name, cost });
+    await context.db
+      .update(schema.registration, {
+        id: makeRegistrationId(ownedName, label, node),
+      })
+      .set({ labelName: name, cost });
   }
 
   return {
@@ -71,7 +76,7 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
       const labelName = undefined;
 
       await upsertRegistration(context, {
-        id: label,
+        id: makeRegistrationId(ownedName, label, node),
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
@@ -122,7 +127,11 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
       const label = tokenIdToLabel(id);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
-      await context.db.update(schema.registration, { id: label }).set({ expiryDate: expires });
+      await context.db
+        .update(schema.registration, {
+          id: makeRegistrationId(ownedName, label, node),
+        })
+        .set({ expiryDate: expires });
 
       await context.db
         .update(schema.domain, { id: node })
@@ -146,11 +155,16 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
 
       const label = tokenIdToLabel(tokenId);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
+      const registrationId = makeRegistrationId(ownedName, label, node);
 
-      const registration = await context.db.find(schema.registration, { id: label });
+      const registration = await context.db.find(schema.registration, {
+        id: registrationId,
+      });
       if (!registration) return;
 
-      await context.db.update(schema.registration, { id: label }).set({ registrantId: to });
+      await context.db
+        .update(schema.registration, { id: registrationId })
+        .set({ registrantId: to });
 
       await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
 
