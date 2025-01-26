@@ -131,10 +131,11 @@ const OrderDirectionEnum = new GraphQLEnumType({
  * the following type describes:
  * 1. `types` — mapping a polymorphic type name to the set of entities that implement that interface
  *   ex: DomainEvent -> [TransferEvent, ...]
- * 2. `fields` — mapping a fieldName to the polymorphic type it represents
+ * 2. `fields` — mapping a typeName to the polymorphic type it represents
+ *   ex: Domain.events -> DomainEvent
  *
- * NOTE: in future implementations of ponder, this information may be provided by the schema using
- * materialized views, and most/all of this code can be removed.
+ * NOTE: in future implementations of ponder, this information could be provided by the schema
+ * using materialized views, and most/all of this code can be removed.
  */
 export interface PolymorphicConfig {
   types: Record<string, string[]>;
