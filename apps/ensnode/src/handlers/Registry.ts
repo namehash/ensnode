@@ -1,11 +1,11 @@
-import { Context } from "ponder:registry";
+import { Context, Event } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { makeResolverId } from "../lib/ids";
+import { makeEventId, makeResolverId } from "../lib/ids";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
@@ -112,9 +112,8 @@ export const handleNewOwner =
     event,
   }: {
     context: Context;
-    event: {
+    event: Omit<Event, "args"> & {
       args: { node: Hex; label: Hex; owner: Hex };
-      block: Block;
     };
   }) => {
     const { label, node, owner } = event.args;
@@ -163,6 +162,16 @@ export const handleNewOwner =
     if (owner === zeroAddress) {
       await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
     }
+
+    // NewOwner event
+    await context.db.insert(schema.newOwner).values({
+      id: makeEventId(event.block.number, event.log.logIndex),
+      blockNumber: event.block.number,
+      transactionID: event.transaction.hash,
+      parentDomainId: node,
+      domainId: subnode,
+      ownerId: owner,
+    });
   };
 
 export async function handleNewTTL({

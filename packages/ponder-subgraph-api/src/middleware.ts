@@ -60,7 +60,12 @@ export const graphql = ({
           return { drizzle, metadataStore, getDataLoader };
         },
         graphqlEndpoint: c.req.path,
-        maskedErrors: process.env.NODE_ENV === "production",
+        maskedErrors: {
+          maskError: (error: unknown, message: string, isDev?: boolean) => {
+            console.error(error);
+            return new Error(message);
+          },
+        },
         logging: false,
         graphiql: true, // NOTE: enable graph-yoga's default graphiql
         parserAndValidationCache: false,
