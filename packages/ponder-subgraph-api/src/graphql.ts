@@ -414,7 +414,7 @@ export function buildGraphQLSchema(
 
                 return executePluralQuery(
                   referencedTable,
-                  schema[table.tsName] as any,
+                  schema[table.tsName] as PgTable,
                   context.drizzle,
                   args,
                   relationalConditions,
@@ -500,7 +500,7 @@ export function buildGraphQLSchema(
         skip: { type: GraphQLInt },
       },
       resolve: async (_parent, args: PluralArgs, context, info) => {
-        return executePluralQuery(table, schema[table.tsName] as any, context.drizzle, args);
+        return executePluralQuery(table, schema[table.tsName] as PgTable, context.drizzle, args);
       },
     };
   }
@@ -659,7 +659,7 @@ async function executePluralQuery(
 
   const whereConditions = buildWhereConditions(args.where, table.columns);
 
-  const query = drizzle
+  const rows = await drizzle
     .select()
     .from(from)
     .where(and(...whereConditions, ...extraConditions))
@@ -667,7 +667,7 @@ async function executePluralQuery(
     .limit(limit)
     .offset(skip);
 
-  return await query;
+  return rows;
 }
 
 const conditionSuffixes = {
@@ -907,7 +907,8 @@ function getIntersectionTable(tables: TableRelationalConfig[]): TableRelationalC
   ).tables["intersectionTable"];
 }
 
-function getColumnsUnion(tables: TableRelationalConfig[]): TableRelationalConfig["columns"] {
+// produces Record<string, Column> that is the union of all columns in tables
+function getColumnsUnion(tables: TableRelationalConfig[]): Record<string, Column> {
   return tables.reduce(
     (memo, table) => ({
       ...memo,
@@ -917,6 +918,7 @@ function getColumnsUnion(tables: TableRelationalConfig[]): TableRelationalConfig
   );
 }
 
+// builds a drizzle subquery from the set of provided tables with given `where` filter
 function buildUnionAllQuery(
   drizzle: Drizzle<{ [key: string]: OnchainTable }>,
   schema: Schema,
@@ -928,6 +930,7 @@ function buildUnionAllQuery(
 
   // builds a subquery per-table like `SELECT columns... from :table (WHERE fk = fkv)`
   const subqueries = tables.map((table) => {
+    // NOTE: every subquery of union must have the same columns of the same types so we
     // build select object with nulls for missing columns, manually casting them to the correct type
     const selectAllColumnsIncludingNulls = allColumnNames.reduce((memo, columnName) => {
       const column = allColumns[columnName];
@@ -956,12 +959,19 @@ function buildUnionAllQuery(
       .$dynamic();
   });
 
-  // joins the subqueries with UNION ALL
+  // joins the subqueries with UNION ALL and aliases it to `intersection_table`
   return subqueries
     .reduce((memo, fragment, i) => (i === 0 ? fragment : memo.unionAll(fragment)))
     .as("intersection_table");
 }
 
+/**
+ * creates the GraphQLFieldConfig for a polymorphic plural field
+ *
+ * @param schema the database schema containing table definitions
+ * @param interfaceType the GraphQL interface type for the polymorphic field
+ * @param referencedTables array of table configs that implement the interface
+ */
 function definePolymorphicPluralField({
   schema,
   interfaceType,
@@ -998,8 +1008,9 @@ function definePolymorphicPluralField({
   };
 }
 
+// finds the foreign key name in a table that references a given GraphQL parentTypeName
 function getForeignKeyFieldName(table: TableRelationalConfig, parentTypeName: string) {
-  // find the first relation field that references the parent type name
+  // 1. find the first relation field that references the parent type name
   const relationName = Object.keys(table.relations).find(
     (relationName) => getSubgraphEntityName(relationName) === parentTypeName,
   );
@@ -1009,11 +1020,11 @@ function getForeignKeyFieldName(table: TableRelationalConfig, parentTypeName: st
   const relation = table.relations[relationName];
   if (!is(relation, One)) return;
 
-  // find the columnName of the correct column
+  // 2. find the columnName of the correct column
   const fkEntry = Object.entries(relation.config?.fields[0].table ?? {}).find(
     ([_, column]) => column.name === relation.config?.fields[0].name,
   );
 
-  // return columnName
+  // 3. columnName is the name of the foreign key column in `table`
   return fkEntry?.[0];
 }
