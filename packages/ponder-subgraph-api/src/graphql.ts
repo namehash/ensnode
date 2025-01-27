@@ -157,7 +157,7 @@ export function buildGraphQLSchema(
       interfaceTypeName,
       implementingTables
         .map((table) => getTableUniqueName(table))
-        .map((tableName) => _tablesConfig.tables[_tablesConfig.tableNamesMap[tableName]]),
+        .map((tableName) => _tablesConfig.tables[_tablesConfig.tableNamesMap[tableName]!]!),
     ]),
   );
 
