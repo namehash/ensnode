@@ -903,19 +903,24 @@ function getIntersectionTableSchema(
 
   // define a pgTable by cloning the common columns w/ builder functions
   // TODO: can we more easily clone theses instead of using builder fns? Object.assign?
-  const intersectionTable = pgTable(interfaceTypeName, (t) => {
+  // NOTE: it's important that this table's dbName is intersection_table, as that is what the
+  //   UNION ALL subquery is aliased to later
+  // TODO: can we use drizzle's .with or something to avoid the magic string?
+  const intersectionTable = pgTable("intersection_table", (t) => {
     function getColumnBuilder(column: Column) {
       const sqlType = column.getSQLType();
 
       // special case for bigint which returns "numeric(78)"
       if (sqlType === "numeric(78)") {
-        return t.numeric("bigint", { precision: 78 });
+        return t.numeric({ precision: 78 });
       }
 
-      // handle standard types
-      const builderMethod = sqlType.split("(")[0]; // remove any parameters
+      // handle standard types, removing any parameters from the SQLType
       // @ts-expect-error we know it is a valid key now
-      return t[builderMethod]();
+      const built = t[sqlType.split("(")[0]]();
+
+      // include .primaryKey if necessary
+      return column.primary ? built.primaryKey() : built;
     }
 
     const columnMap: Record<string, PgColumnBuilderBase> = {};
