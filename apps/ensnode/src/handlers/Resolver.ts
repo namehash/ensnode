@@ -1,10 +1,10 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Log } from "ponder";
 import { Hex } from "viem";
-import { upsertAccount, upsertResolver } from "../lib/db-helpers";
+import { sharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
+import { EventWithArgs } from "../lib/ponder-helpers";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
 // contract on the chain that emits an event with this signature, which may or may not actually be
@@ -17,10 +17,7 @@ export async function handleAddrChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; a: Hex };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; a: Hex }>;
 }) {
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
@@ -39,7 +36,12 @@ export async function handleAddrChanged({
     await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: address });
   }
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.addrChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    addrId: address,
+  });
 }
 
 export async function handleAddressChanged({
@@ -47,10 +49,7 @@ export async function handleAddressChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; coinType: bigint; newAddress: Hex };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; coinType: bigint; newAddress: Hex }>;
 }) {
   const { node, coinType, newAddress } = event.args;
   await upsertAccount(context, newAddress);
@@ -67,7 +66,13 @@ export async function handleAddressChanged({
     .update(schema.resolver, { id })
     .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.multicoinAddrChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    coinType,
+    addr: newAddress,
+  });
 }
 
 export async function handleNameChanged({
@@ -75,10 +80,7 @@ export async function handleNameChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; name: string };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; name: string }>;
 }) {
   const { node, name } = event.args;
   if (hasNullByte(name)) return;
@@ -90,7 +92,12 @@ export async function handleNameChanged({
     address: event.log.address,
   });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.nameChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    name,
+  });
 }
 
 export async function handleABIChanged({
@@ -98,20 +105,24 @@ export async function handleABIChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; contentType: bigint }>;
 }) {
-  const { node } = event.args;
+  const { node, contentType } = event.args;
   const id = makeResolverId(event.log.address, node);
-  const resolver = await upsertResolver(context, {
+
+  // upsert resolveer
+  await upsertResolver(context, {
     id,
     domainId: node,
     address: event.log.address,
   });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.abiChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    contentType,
+  });
 }
 
 export async function handlePubkeyChanged({
@@ -119,20 +130,25 @@ export async function handlePubkeyChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; x: Hex; y: Hex }>;
 }) {
-  const { node } = event.args;
+  const { node, x, y } = event.args;
   const id = makeResolverId(event.log.address, node);
-  const resolver = await upsertResolver(context, {
+
+  // upsert resolver
+  await upsertResolver(context, {
     id,
     domainId: node,
     address: event.log.address,
   });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.pubkeyChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    x,
+    y,
+  });
 }
 
 export async function handleTextChanged({
@@ -140,12 +156,9 @@ export async function handleTextChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; indexedKey: string; key: string; value?: string };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; indexedKey: string; key: string; value?: string }>;
 }) {
-  const { node, key } = event.args;
+  const { node, key, value } = event.args;
   const id = makeResolverId(event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
@@ -158,7 +171,13 @@ export async function handleTextChanged({
     .update(schema.resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.textChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    key,
+    value,
+  });
 }
 
 export async function handleContenthashChanged({
@@ -166,10 +185,7 @@ export async function handleContenthashChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; hash: Hex };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; hash: Hex }>;
 }) {
   const { node, hash } = event.args;
   const id = makeResolverId(event.log.address, node);
@@ -180,7 +196,12 @@ export async function handleContenthashChanged({
     contentHash: hash,
   });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.contenthashChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    hash,
+  });
 }
 
 export async function handleInterfaceChanged({
@@ -188,16 +209,9 @@ export async function handleInterfaceChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: {
-      node: Hex;
-      interfaceID: Hex;
-      implementer: Hex;
-    };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; interfaceID: Hex; implementer: Hex }>;
 }) {
-  const { node } = event.args;
+  const { node, interfaceID, implementer } = event.args;
   const id = makeResolverId(event.log.address, node);
   await upsertResolver(context, {
     id,
@@ -205,7 +219,13 @@ export async function handleInterfaceChanged({
     address: event.log.address,
   });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.interfaceChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    interfaceID,
+    implementer,
+  });
 }
 
 export async function handleAuthorisationChanged({
@@ -213,17 +233,9 @@ export async function handleAuthorisationChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: {
-      node: Hex;
-      owner: Hex;
-      target: Hex;
-      isAuthorised: boolean;
-    };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; owner: Hex; target: Hex; isAuthorised: boolean }>;
 }) {
-  const { node } = event.args;
+  const { node, owner, target, isAuthorised } = event.args;
   const id = makeResolverId(event.log.address, node);
   await upsertResolver(context, {
     id,
@@ -231,7 +243,15 @@ export async function handleAuthorisationChanged({
     address: event.log.address,
   });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.authorisationChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    owner,
+    target,
+    // NOTE: the spelling difference is kept for subgraph backwards-compatibility
+    isAuthorized: isAuthorised,
+  });
 }
 
 export async function handleVersionChanged({
@@ -239,16 +259,10 @@ export async function handleVersionChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: {
-      node: Hex;
-      newVersion: bigint;
-    };
-    log: Log;
-  };
+  event: EventWithArgs<{ node: Hex; newVersion: bigint }>;
 }) {
   // a version change nulls out the resolver
-  const { node } = event.args;
+  const { node, newVersion } = event.args;
   const id = makeResolverId(event.log.address, node);
   const domain = await context.db.find(schema.domain, { id: node });
 
@@ -269,7 +283,12 @@ export async function handleVersionChanged({
     texts: null,
   });
 
-  // TODO: log ResolverEvent
+  // log ResolverEvent
+  await context.db.insert(schema.versionChanged).values({
+    ...sharedEventValues(event),
+    resolverId: id,
+    version: newVersion,
+  });
 }
 
 export async function handleDNSRecordChanged({
@@ -277,14 +296,12 @@ export async function handleDNSRecordChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: {
-      node: Hex;
-      name: Hex;
-      resource: number;
-      record: Hex;
-    };
-  };
+  event: EventWithArgs<{
+    node: Hex;
+    name: Hex;
+    resource: number;
+    record: Hex;
+  }>;
 }) {
   // subgraph ignores
 }
@@ -294,14 +311,12 @@ export async function handleDNSRecordDeleted({
   event,
 }: {
   context: Context;
-  event: {
-    args: {
-      node: Hex;
-      name: Hex;
-      resource: number;
-      record?: Hex;
-    };
-  };
+  event: EventWithArgs<{
+    node: Hex;
+    name: Hex;
+    resource: number;
+    record?: Hex;
+  }>;
 }) {
   // subgraph ignores
 }
@@ -311,12 +326,7 @@ export async function handleDNSZonehashChanged({
   event,
 }: {
   context: Context;
-  event: {
-    args: {
-      node: Hex;
-      zonehash: Hex;
-    };
-  };
+  event: EventWithArgs<{ node: Hex; zonehash: Hex }>;
 }) {
   // subgraph ignores
 }

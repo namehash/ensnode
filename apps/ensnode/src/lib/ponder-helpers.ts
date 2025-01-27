@@ -1,10 +1,7 @@
 import { Event, EventNames } from "ponder:registry";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
-export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<
-  Event<EventNames>,
-  "args"
-> & {
+export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
 };
 
