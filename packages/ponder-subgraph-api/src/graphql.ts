@@ -49,6 +49,8 @@ import {
   eq,
   extractTablesRelationalConfig,
   getTableColumns,
+  getTableName,
+  getTableUniqueName,
   gt,
   gte,
   inArray,
@@ -138,7 +140,7 @@ const OrderDirectionEnum = new GraphQLEnumType({
  * using materialized views, and most/all of this code can be removed.
  */
 export interface PolymorphicConfig {
-  types: Record<string, string[]>;
+  types: Record<string, PgTable<TableConfig>[]>;
   fields: Record<string, string>;
 }
 
@@ -146,17 +148,36 @@ export function buildGraphQLSchema(
   schema: Schema,
   polymorphicConfig: PolymorphicConfig = { types: {}, fields: {} },
 ): GraphQLSchema {
-  // restructure for easier iteration later on
+  const tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
+  const tables = Object.values(tablesConfig.tables) as TableRelationalConfig[];
+
+  // tablesConfig.tableNamesMap is map of public.dbName to tsName
+  // console.log(tablesConfig.tableNamesMap);
+  // console.log(polymorphicConfig.types["DomainEvent"][0]);
+
+  // generate mapping of interfaceTypeName -> TableRelationalConfig[] for simpler logic later
+  const polymorphicTableConfigs = Object.fromEntries(
+    Object.entries(polymorphicConfig.types).map(([interfaceTypeName, implementingTables]) => {
+      // get the list of table tsNames for this type
+      const implementingTableNames = implementingTables.map(
+        (table) => tablesConfig.tableNamesMap[getTableUniqueName(table)],
+      );
+
+      // map interfaceTypeName -> TableRelationalConfig[]
+      return [
+        interfaceTypeName,
+        tables.filter((table) => implementingTableNames.includes(table.tsName)),
+      ];
+    }),
+  );
+
+  // restructure `Type.field` into `[Type, field]` for simpler logic later
   const polymorphicFields = Object.entries(polymorphicConfig.fields)
     // split fieldPath into segments
-    .map<[string[], string]>(([fieldPath, interfaceTypeName]) => [
-      fieldPath.split("."),
+    .map<[[string, string], string]>(([fieldPath, interfaceTypeName]) => [
+      fieldPath.split(".") as [string, string],
       interfaceTypeName,
     ]);
-
-  const tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
-
-  const tables = Object.values(tablesConfig.tables) as TableRelationalConfig[];
 
   const enums = Object.entries(schema).filter((el): el is [string, PgEnum<[string, ...string[]]>] =>
     isPgEnum(el[1]),
@@ -270,11 +291,9 @@ export function buildGraphQLSchema(
   const entityPageTypes: Record<string, GraphQLOutputType> = {};
 
   // construct polymorphic interfaces
-  for (const [interfaceName, implementingTypeNames] of Object.entries(polymorphicConfig.types)) {
+  for (const [interfaceName, implementingTables] of Object.entries(polymorphicTableConfigs)) {
     // compute the intersection table in order to fully specify the graphql interface type
-    const intersectionTable = getIntersectionTable(
-      tables.filter((t) => implementingTypeNames.includes(t.tsName)),
-    );
+    const intersectionTable = getIntersectionTable(implementingTables);
 
     interfaceTypes[interfaceName] = new GraphQLInterfaceType({
       name: interfaceName,
@@ -297,11 +316,14 @@ export function buildGraphQLSchema(
 
   // construct object type for each entity
   for (const table of tables) {
+    const entityTypeName = getSubgraphEntityName(table.tsName);
     entityTypes[table.tsName] = new GraphQLObjectType({
-      name: getSubgraphEntityName(table.tsName),
-      interfaces: Object.entries(polymorphicConfig.types)
-        // if this table implements an interface...
-        .filter(([, implementingTypeNames]) => implementingTypeNames.includes(table.tsName))
+      name: entityTypeName,
+      interfaces: Object.entries(polymorphicTableConfigs)
+        // if this entity implements an interface...
+        .filter(([, implementingTables]) =>
+          implementingTables.map((table) => table.tsName).includes(table.tsName),
+        )
         // include the interfaceType here
         .map(([interfaceTypeName]) => interfaceTypes[interfaceTypeName]),
       fields: () => {
@@ -431,8 +453,8 @@ export function buildGraphQLSchema(
         // Polymorphic Plural Entity Fields
         // NOTE: overrides any automatic field definitions from the above
         const thisTablesPolymorphicFields = polymorphicFields
-          // filter by fieldPaths in this table
-          .filter(([[parent]]) => parent === table.tsName)
+          // filter by fields on this type
+          .filter(([[parent]]) => parent === entityTypeName)
           // map to [fieldName, interfaceTypeName]
           .map(([[, fieldName], interfaceTypeName]) => [fieldName, interfaceTypeName]);
 
@@ -440,9 +462,7 @@ export function buildGraphQLSchema(
           fieldConfigMap[fieldName] = definePolymorphicPluralField({
             schema,
             interfaceType: interfaceTypes[interfaceTypeName],
-            referencedTables: tables.filter((table) =>
-              polymorphicConfig.types[interfaceTypeName].includes(table.tsName),
-            ),
+            referencedTables: polymorphicTableConfigs[interfaceTypeName],
           });
         }
 
@@ -517,9 +537,7 @@ export function buildGraphQLSchema(
     queryFields[fieldName] = definePolymorphicPluralField({
       schema,
       interfaceType: interfaceTypes[interfaceTypeName],
-      referencedTables: tables.filter((table) =>
-        polymorphicConfig.types[interfaceTypeName].includes(table.tsName),
-      ),
+      referencedTables: polymorphicTableConfigs[interfaceTypeName],
     });
   }
 
