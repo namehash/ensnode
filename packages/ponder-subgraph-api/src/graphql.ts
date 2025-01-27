@@ -309,8 +309,6 @@ export function buildGraphQLSchema(
 
         return fieldConfigMap;
       },
-      // differentiate records by materialized __typename
-      resolveType: (value) => value?.__typename,
     });
   }
 
@@ -325,7 +323,7 @@ export function buildGraphQLSchema(
           implementingTables.map((table) => table.tsName).includes(table.tsName),
         )
         // include the interfaceType here
-        .map(([interfaceTypeName]) => interfaceTypes[interfaceTypeName]),
+        .map(([interfaceTypeName]) => interfaceTypes[interfaceTypeName]!),
       fields: () => {
         const fieldConfigMap: GraphQLFieldConfigMap<Parent, Context> = {};
 
@@ -456,13 +454,16 @@ export function buildGraphQLSchema(
           // filter by fields on this type
           .filter(([[parent]]) => parent === entityTypeName)
           // map to [fieldName, interfaceTypeName]
-          .map(([[, fieldName], interfaceTypeName]) => [fieldName, interfaceTypeName]);
+          .map<[string, string]>(([[, fieldName], interfaceTypeName]) => [
+            fieldName,
+            interfaceTypeName,
+          ]);
 
         for (const [fieldName, interfaceTypeName] of thisTablesPolymorphicFields) {
           fieldConfigMap[fieldName] = definePolymorphicPluralField({
             schema,
-            interfaceType: interfaceTypes[interfaceTypeName],
-            referencedTables: polymorphicTableConfigs[interfaceTypeName],
+            interfaceType: interfaceTypes[interfaceTypeName]!,
+            referencedTables: polymorphicTableConfigs[interfaceTypeName]!,
           });
         }
 
@@ -531,13 +532,13 @@ export function buildGraphQLSchema(
     // filter by fieldPaths that have a parent of query
     .filter(([[parent]]) => parent === "Query")
     // map to [fieldName, interfaceTypeName]
-    .map(([[, fieldName], interfaceTypeName]) => [fieldName, interfaceTypeName]);
+    .map<[string, string]>(([[, fieldName], interfaceTypeName]) => [fieldName, interfaceTypeName]);
 
   for (const [fieldName, interfaceTypeName] of polymorphicQueryFields) {
     queryFields[fieldName] = definePolymorphicPluralField({
       schema,
-      interfaceType: interfaceTypes[interfaceTypeName],
-      referencedTables: polymorphicTableConfigs[interfaceTypeName],
+      interfaceType: interfaceTypes[interfaceTypeName]!,
+      referencedTables: polymorphicTableConfigs[interfaceTypeName]!,
     });
   }
 
@@ -882,7 +883,7 @@ function getIntersectionTable(tables: TableRelationalConfig[]): TableRelationalC
   const commonColumnNames = intersectionOf(tables.map((table) => Object.keys(table.columns)));
   const commonRelationsNames = intersectionOf(tables.map((table) => Object.keys(table.relations)));
 
-  const baseTable = tables[0];
+  const baseTable = tables[0]!;
 
   // build a pgTable() and relations() based on the common columns/relations
   const intersectionTable = pgTable("intersection_table", (t) => {
@@ -903,7 +904,7 @@ function getIntersectionTable(tables: TableRelationalConfig[]): TableRelationalC
     const columnMap: Record<string, PgColumnBuilderBase> = {};
 
     for (const columnName of commonColumnNames) {
-      const baseColumn = baseTable.columns[columnName];
+      const baseColumn = baseTable.columns[columnName]!;
       columnMap[columnName] = getColumnBuilder(baseColumn).notNull(baseColumn.notNull);
     }
 
@@ -922,7 +923,7 @@ function getIntersectionTable(tables: TableRelationalConfig[]): TableRelationalC
   return extractTablesRelationalConfig(
     { intersectionTable, intersectionTableRelations },
     createTableRelationsHelpers,
-  ).tables["intersectionTable"];
+  ).tables["intersectionTable"]!;
 }
 
 // produces Record<string, Column> that is the union of all columns in tables
@@ -951,19 +952,19 @@ function buildUnionAllQuery(
     // NOTE: every subquery of union must have the same columns of the same types so we
     // build select object with nulls for missing columns, manually casting them to the correct type
     const selectAllColumnsIncludingNulls = allColumnNames.reduce((memo, columnName) => {
-      const column = allColumns[columnName];
+      const column = allColumns[columnName]!;
       return {
         ...memo,
         [columnName]: sql
           .raw(`${table.columns[columnName]?.name ?? "NULL"}::${column.getSQLType()}`)
-          .as(allColumns[columnName].name),
+          .as(column.name),
       };
     }, {});
 
     // apply the relation filter at subquery level to minimize merged data
     // NOTE: that we use this table's Column so the generated sql references the correct table
     const relationalConditions: SQL[] = Object.entries(where).map(
-      ([foreignKeyName, foreignKeyValue]) => eq(table.columns[foreignKeyName], foreignKeyValue),
+      ([foreignKeyName, foreignKeyValue]) => eq(table.columns[foreignKeyName]!, foreignKeyValue),
     );
 
     return drizzle
@@ -1039,8 +1040,8 @@ function getForeignKeyFieldName(table: TableRelationalConfig, parentTypeName: st
   if (!is(relation, One)) return;
 
   // 2. find the columnName of the correct column
-  const fkEntry = Object.entries(relation.config?.fields[0].table ?? {}).find(
-    ([_, column]) => column.name === relation.config?.fields[0].name,
+  const fkEntry = Object.entries(relation.config?.fields?.[0]?.table ?? {}).find(
+    ([_, column]) => column.name === relation.config?.fields?.[0]?.name,
   );
 
   // 3. columnName is the name of the foreign key column in `table`
