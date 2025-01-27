@@ -1,6 +1,7 @@
-import type { Context } from "ponder:registry";
+import type { Context, Event } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Address } from "viem";
+import { makeEventId } from "./ids";
 
 export async function upsertAccount(context: Context, address: Address) {
   return context.db.insert(schema.account).values({ id: address }).onConflictDoNothing();
@@ -18,4 +19,13 @@ export async function upsertRegistration(
   values: typeof schema.registration.$inferInsert,
 ) {
   return context.db.insert(schema.registration).values(values).onConflictDoUpdate(values);
+}
+
+// simplifies generating the shared event column values from the ponder Event object
+export function sharedEventValues(event: Omit<Event, "args">) {
+  return {
+    id: makeEventId(event.block.number, event.log.logIndex),
+    blockNumber: event.block.number,
+    transactionHash: event.transaction.hash,
+  };
 }

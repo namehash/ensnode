@@ -2,9 +2,8 @@ import { Context, Event } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
-import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
-import { upsertAccount, upsertResolver } from "../lib/db-helpers";
+import { sharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeEventId, makeResolverId } from "../lib/ids";
 
 /**
@@ -80,9 +79,8 @@ export async function handleTransfer({
   event,
 }: {
   context: Context;
-  event: {
+  event: Omit<Event, "args"> & {
     args: { node: Hex; owner: Hex };
-    block: Block;
   };
 }) {
   const { node, owner } = event.args;
@@ -102,7 +100,12 @@ export async function handleTransfer({
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   }
 
-  // TODO: log DomainEvent
+  // log DomainEvent
+  await context.db.insert(schema.transfer).values({
+    ...sharedEventValues(event),
+    domainId: node,
+    ownerId: owner,
+  });
 }
 
 export const handleNewOwner =
@@ -163,11 +166,9 @@ export const handleNewOwner =
       await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
     }
 
-    // NewOwner event
+    // log DomainEvent
     await context.db.insert(schema.newOwner).values({
-      id: makeEventId(event.block.number, event.log.logIndex),
-      blockNumber: event.block.number,
-      transactionID: event.transaction.hash,
+      ...sharedEventValues(event),
       parentDomainId: node,
       domainId: subnode,
       ownerId: owner,
@@ -179,7 +180,7 @@ export async function handleNewTTL({
   event,
 }: {
   context: Context;
-  event: {
+  event: Omit<Event, "args"> & {
     args: { node: Hex; ttl: bigint };
   };
 }) {
@@ -190,7 +191,12 @@ export async function handleNewTTL({
   // NOTE: i'm not sure this needs to be here, as domains are never deleted (??)
   await context.db.update(schema.domain, { id: node }).set({ ttl });
 
-  // TODO: log DomainEvent
+  // log DomainEvent
+  await context.db.insert(schema.newTTL).values({
+    ...sharedEventValues(event),
+    domainId: node,
+    ttl,
+  });
 }
 
 export async function handleNewResolver({
@@ -198,15 +204,17 @@ export async function handleNewResolver({
   event,
 }: {
   context: Context;
-  event: {
+  event: Omit<Event, "args"> & {
     args: { node: Hex; resolver: Hex };
   };
 }) {
   const { node, resolver: resolverAddress } = event.args;
 
+  const resolverId = makeResolverId(resolverAddress, node);
+
   // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
   // NOTE: old resolver resources are kept for event logs
-  if (event.args.resolver === zeroAddress) {
+  if (resolverAddress === zeroAddress) {
     await context.db
       .update(schema.domain, { id: node })
       .set({ resolverId: null, resolvedAddressId: null });
@@ -215,12 +223,10 @@ export async function handleNewResolver({
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   } else {
     // otherwise upsert the resolver
-    const resolverId = makeResolverId(resolverAddress, node);
-
     const resolver = await upsertResolver(context, {
       id: resolverId,
-      domainId: event.args.node,
-      address: event.args.resolver,
+      domainId: node,
+      address: resolverAddress,
     });
 
     // update the domain to point to it, and denormalize the eth addr
@@ -231,5 +237,10 @@ export async function handleNewResolver({
       .set({ resolverId, resolvedAddressId: resolver.addrId });
   }
 
-  // TODO: log DomainEvent
+  // log DomainEvent
+  await context.db.insert(schema.newResolver).values({
+    ...sharedEventValues(event),
+    domainId: node,
+    resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
+  });
 }

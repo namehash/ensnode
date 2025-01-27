@@ -182,11 +182,15 @@ export const wrappedDomainRelations = relations(wrappedDomain, ({ one }) => ({
  * Events
  */
 
-const domainEvent = (t: any) => ({
+const sharedEventColumns = (t: any) => ({
   id: t.text().primaryKey(),
-  domainId: t.hex("domain_id").notNull(),
   blockNumber: t.integer("block_number").notNull(),
   transactionID: t.hex("transaction_id").notNull(),
+});
+
+const domainEvent = (t: any) => ({
+  ...sharedEventColumns(t),
+  domainId: t.hex("domain_id").notNull(),
 });
 
 // Domain Event Entities
@@ -242,90 +246,87 @@ export const expiryExtended = onchainTable("expiry_extended", (t) => ({
 
 // Registration Event Entities
 
-export const nameRegistered = onchainTable("name_registered", (t) => ({
-  ...domainEvent(t),
+const registrationEvent = (t: any) => ({
+  ...sharedEventColumns(t),
   registrationId: t.hex("registration_id").notNull(),
+});
+
+export const nameRegistered = onchainTable("name_registered", (t) => ({
+  ...registrationEvent(t),
   registrantId: t.hex("registrant_id").notNull(),
   expiryDate: t.bigint("expiry_date").notNull(),
 }));
 
 export const nameRenewed = onchainTable("name_renewed", (t) => ({
-  ...domainEvent(t),
-  registrationId: t.hex("registration_id").notNull(),
+  ...registrationEvent(t),
   expiryDate: t.bigint("expiry_date").notNull(),
 }));
 
 export const nameTransferred = onchainTable("name_transferred", (t) => ({
-  ...domainEvent(t),
-  registrationId: t.hex("registration_id").notNull(),
+  ...registrationEvent(t),
   newOwnerId: t.hex("new_owner_id").notNull(),
 }));
 
 // Resolver Event Entities
 
-export const addrChanged = onchainTable("addr_changed", (t) => ({
-  ...domainEvent(t),
+const resolverEvent = (t: any) => ({
+  ...sharedEventColumns(t),
   resolverId: t.text("resolver_id").notNull(),
+});
+
+export const addrChanged = onchainTable("addr_changed", (t) => ({
+  ...resolverEvent(t),
   addrId: t.hex("addr_id").notNull(),
 }));
 
 export const multicoinAddrChanged = onchainTable("multicoin_addr_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   coinType: t.bigint("coin_type").notNull(),
   addr: t.hex().notNull(),
 }));
 
 export const nameChanged = onchainTable("name_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   name: t.text().notNull(),
 }));
 
 export const abiChanged = onchainTable("abi_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   contentType: t.bigint("content_type").notNull(),
 }));
 
 export const pubkeyChanged = onchainTable("pubkey_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   x: t.hex().notNull(),
   y: t.hex().notNull(),
 }));
 
 export const textChanged = onchainTable("text_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   key: t.text().notNull(),
   value: t.text(),
 }));
 
 export const contenthashChanged = onchainTable("contenthash_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   hash: t.hex().notNull(),
 }));
 
 export const interfaceChanged = onchainTable("interface_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   interfaceID: t.hex("interface_id").notNull(),
   implementer: t.hex().notNull(),
 }));
 
 export const authorisationChanged = onchainTable("authorisation_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   owner: t.hex().notNull(),
   target: t.hex().notNull(),
   isAuthorized: t.boolean("is_authorized").notNull(),
 }));
 
 export const versionChanged = onchainTable("version_changed", (t) => ({
-  ...domainEvent(t),
-  resolverId: t.text("resolver_id").notNull(),
+  ...resolverEvent(t),
   version: t.bigint().notNull(),
 }));
 
