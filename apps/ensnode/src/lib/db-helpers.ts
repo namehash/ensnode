@@ -26,6 +26,6 @@ export function sharedEventValues(event: Omit<Event, "args">) {
   return {
     id: makeEventId(event.block.number, event.log.logIndex),
     blockNumber: event.block.number,
-    transactionHash: event.transaction.hash,
+    transactionID: event.transaction.hash,
   };
 }

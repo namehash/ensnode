@@ -51,7 +51,7 @@ export default function () {
 
     await handleNameTransferred({
       context,
-      args: { from, to, tokenId },
+      event: { ...event, args: { from, to, tokenId } },
     });
   });
 
@@ -60,7 +60,7 @@ export default function () {
 
     await handleNameRegisteredByController({
       context,
-      args: { ...event.args, cost: 0n },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
@@ -69,14 +69,14 @@ export default function () {
 
     await handleNameRegisteredByController({
       context,
-      args: { ...event.args, cost: 0n },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
   ponder.on(pluginNamespace("RegistrarController:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewedByController({
       context,
-      args: { ...event.args, cost: 0n },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 }

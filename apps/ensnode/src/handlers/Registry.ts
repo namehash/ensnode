@@ -1,10 +1,11 @@
-import { Context, Event } from "ponder:registry";
+import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import { type Hex, zeroAddress } from "viem";
 import { sharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { makeEventId, makeResolverId } from "../lib/ids";
+import { makeResolverId } from "../lib/ids";
+import { EventWithArgs } from "../lib/ponder-helpers";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
@@ -79,9 +80,7 @@ export async function handleTransfer({
   event,
 }: {
   context: Context;
-  event: Omit<Event, "args"> & {
-    args: { node: Hex; owner: Hex };
-  };
+  event: EventWithArgs<{ node: Hex; owner: Hex }>;
 }) {
   const { node, owner } = event.args;
 
@@ -115,9 +114,7 @@ export const handleNewOwner =
     event,
   }: {
     context: Context;
-    event: Omit<Event, "args"> & {
-      args: { node: Hex; label: Hex; owner: Hex };
-    };
+    event: EventWithArgs<{ node: Hex; label: Hex; owner: Hex }>;
   }) => {
     const { label, node, owner } = event.args;
 
@@ -169,6 +166,7 @@ export const handleNewOwner =
     // log DomainEvent
     await context.db.insert(schema.newOwner).values({
       ...sharedEventValues(event),
+
       parentDomainId: node,
       domainId: subnode,
       ownerId: owner,
@@ -180,9 +178,7 @@ export async function handleNewTTL({
   event,
 }: {
   context: Context;
-  event: Omit<Event, "args"> & {
-    args: { node: Hex; ttl: bigint };
-  };
+  event: EventWithArgs<{ node: Hex; ttl: bigint }>;
 }) {
   const { node, ttl } = event.args;
 
@@ -204,9 +200,7 @@ export async function handleNewResolver({
   event,
 }: {
   context: Context;
-  event: Omit<Event, "args"> & {
-    args: { node: Hex; resolver: Hex };
-  };
+  event: EventWithArgs<{ node: Hex; resolver: Hex }>;
 }) {
   const { node, resolver: resolverAddress } = event.args;
 
