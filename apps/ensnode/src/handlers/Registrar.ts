@@ -2,20 +2,21 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import {
   isLabelIndexable,
-  makeRegistrationId,
   makeSubnodeNamehash,
   tokenIdToLabel,
 } from "ensnode-utils/subname-helpers";
 import { Block } from "ponder";
 import { type Hex, labelhash, namehash } from "viem";
 import { upsertAccount, upsertRegistration } from "../lib/db-helpers";
+import { makeRegistrationId } from "../lib/ids";
+import type { Labelhash, OwnedName } from "../lib/primitives";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
 /**
  * A factory function that returns Ponder indexing handlers for a specified subname.
  */
-export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
+export const makeRegistrarHandlers = (ownedName: OwnedName) => {
   const ownedSubnameNode = namehash(ownedName);
 
   async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
@@ -98,7 +99,7 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
       args: { name, label, cost },
     }: {
       context: Context;
-      args: { name: string; label: Hex; cost: bigint };
+      args: { name: string; label: Labelhash; cost: bigint };
     }) {
       await setNamePreimage(context, name, label, cost);
     },
@@ -108,7 +109,7 @@ export const makeRegistrarHandlers = (ownedName: `${string}eth`) => {
       args: { name, label, cost },
     }: {
       context: Context;
-      args: { name: string; label: Hex; cost: bigint };
+      args: { name: string; label: Labelhash; cost: bigint };
     }) {
       await setNamePreimage(context, name, label, cost);
     },

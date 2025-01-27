@@ -6,6 +6,7 @@ import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
+import type { Labelhash, Node } from "../lib/primitives";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
@@ -113,7 +114,7 @@ export const handleNewOwner =
   }: {
     context: Context;
     event: {
-      args: { node: Hex; label: Hex; owner: Hex };
+      args: { node: Node; label: Labelhash; owner: Hex };
       block: Block;
     };
   }) => {
@@ -171,7 +172,7 @@ export async function handleNewTTL({
 }: {
   context: Context;
   event: {
-    args: { node: Hex; ttl: bigint };
+    args: { node: Node; ttl: bigint };
   };
 }) {
   const { node, ttl } = event.args;
@@ -190,7 +191,7 @@ export async function handleNewResolver({
 }: {
   context: Context;
   event: {
-    args: { node: Hex; resolver: Hex };
+    args: { node: Node; resolver: Hex };
   };
 }) {
   const { node, resolver: resolverAddress } = event.args;

@@ -5,6 +5,7 @@ import { Hex } from "viem";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
+import type { Node } from "../lib/primitives";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
 // contract on the chain that emits an event with this signature, which may or may not actually be
@@ -18,7 +19,7 @@ export async function handleAddrChanged({
 }: {
   context: Context;
   event: {
-    args: { node: Hex; a: Hex };
+    args: { node: Node; a: Hex };
     log: Log;
   };
 }) {
@@ -48,7 +49,7 @@ export async function handleAddressChanged({
 }: {
   context: Context;
   event: {
-    args: { node: Hex; coinType: bigint; newAddress: Hex };
+    args: { node: Node; coinType: bigint; newAddress: Hex };
     log: Log;
   };
 }) {
@@ -76,7 +77,7 @@ export async function handleNameChanged({
 }: {
   context: Context;
   event: {
-    args: { node: Hex; name: string };
+    args: { node: Node; name: string };
     log: Log;
   };
 }) {
@@ -99,7 +100,7 @@ export async function handleABIChanged({
 }: {
   context: Context;
   event: {
-    args: { node: Hex };
+    args: { node: Node };
     log: Log;
   };
 }) {

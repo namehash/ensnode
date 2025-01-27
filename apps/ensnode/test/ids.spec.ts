@@ -1,6 +1,6 @@
-import { namehash, zeroAddress } from "viem";
+import { labelhash, namehash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
-import { makeEventId, makeResolverId } from "../src/lib/ids";
+import { makeEventId, makeRegistrationId, makeResolverId } from "../src/lib/ids";
 
 describe("ids", () => {
   describe("makeResolverId", () => {
@@ -15,6 +15,20 @@ describe("ids", () => {
     it("should match snapshot", () => {
       expect(makeEventId(123n, 456, 1)).toEqual("123-456-1");
       expect(makeEventId(123n, 456)).toEqual("123-456");
+    });
+  });
+
+  describe("makeRegistrationId", () => {
+    it("should use label when ownedName is exactly `eth` to ensure subgraph compatibility", () => {
+      expect(makeRegistrationId("eth", labelhash("vitalik"), namehash("vitalik.eth"))).toEqual(
+        labelhash("vitalik"),
+      );
+    });
+
+    it("should use node when ownedName is not exactly `eth`", () => {
+      expect(
+        makeRegistrationId("linea.eth", labelhash("vitalik"), namehash("vitalik.linea.eth")),
+      ).toEqual(namehash("vitalik.linea.eth"));
     });
   });
 });

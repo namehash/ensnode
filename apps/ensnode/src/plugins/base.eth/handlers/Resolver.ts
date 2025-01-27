@@ -16,7 +16,6 @@ import {
 import { pluginNamespace as ns } from "../ponder.config";
 
 export default function () {
-  // New registry handlers
   ponder.on(ns("Resolver:AddrChanged"), handleAddrChanged);
   ponder.on(ns("Resolver:AddressChanged"), handleAddressChanged);
   ponder.on(ns("Resolver:NameChanged"), handleNameChanged);
