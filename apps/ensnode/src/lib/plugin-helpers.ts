@@ -1,4 +1,4 @@
-import type { OwnedName } from "./primitives";
+import type { OwnedName } from "./types";
 
 /**
  * A factory function that returns a function to create a namespaced contract

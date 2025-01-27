@@ -6,7 +6,7 @@ import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
-import type { Labelhash, Node } from "../lib/primitives";
+import type { Labelhash, Node } from "../lib/types";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.

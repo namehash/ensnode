@@ -6,7 +6,7 @@ import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { upsertAccount } from "../lib/db-helpers";
 import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
-import type { Node, OwnedName } from "../lib/primitives";
+import type { Node, OwnedName } from "../lib/types";
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
