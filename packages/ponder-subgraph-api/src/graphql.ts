@@ -79,7 +79,7 @@ import {
   pgTable,
 } from "drizzle-orm/pg-core";
 import { PgViewBase } from "drizzle-orm/pg-core/view-base";
-import { Relation } from "drizzle-orm/relations";
+import { Relation, TablesRelationalConfig } from "drizzle-orm/relations";
 import {
   GraphQLBoolean,
   GraphQLEnumType,
@@ -148,36 +148,40 @@ export function buildGraphQLSchema(
   schema: Schema,
   polymorphicConfig: PolymorphicConfig = { types: {}, fields: {} },
 ): GraphQLSchema {
-  const tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
-  const tables = Object.values(tablesConfig.tables) as TableRelationalConfig[];
+  // first, construct TablesRelationConfig with the existing schema. this is necessary because
+  // we need access to relations by table, which this helper resolves
+  const _tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
 
-  // tablesConfig.tableNamesMap is map of public.dbName to tsName
-  // console.log(tablesConfig.tableNamesMap);
-  // console.log(polymorphicConfig.types["DomainEvent"][0]);
-
-  // generate mapping of interfaceTypeName -> TableRelationalConfig[] for simpler logic later
+  // next, remap polymorphicConfig.types to interfaceTypeName -> implementing TableRelationalConfig[]
   const polymorphicTableConfigs = Object.fromEntries(
-    Object.entries(polymorphicConfig.types).map(([interfaceTypeName, implementingTables]) => {
-      // get the list of table tsNames for this type
-      const implementingTableNames = implementingTables.map(
-        (table) => tablesConfig.tableNamesMap[getTableUniqueName(table)],
-      );
-
-      // map interfaceTypeName -> TableRelationalConfig[]
-      return [
-        interfaceTypeName,
-        tables.filter((table) => implementingTableNames.includes(table.tsName)),
-      ];
-    }),
+    Object.entries(polymorphicConfig.types).map(([interfaceTypeName, implementingTables]) => [
+      interfaceTypeName,
+      implementingTables
+        .map((table) => getTableUniqueName(table))
+        .map((tableName) => _tablesConfig.tables[_tablesConfig.tableNamesMap[tableName]]),
+    ]),
   );
 
-  // restructure `Type.field` into `[Type, field]` for simpler logic later
+  // use this TablesRelationalConfig to generate the intersection table & relationships
+  // and inject our 'fake' intersection tables into the schema so filters and orderBy entities are
+  // auto generated as normal.
+  Object.assign(
+    schema,
+    ...Object.keys(polymorphicConfig.types).map((interfaceTypeName) =>
+      getIntersectionTableSchema(interfaceTypeName, polymorphicTableConfigs[interfaceTypeName]!),
+    ),
+  );
+
+  // restructure `Type.fieldName` into `[Type, fieldName]` for simpler logic later
   const polymorphicFields = Object.entries(polymorphicConfig.fields)
     // split fieldPath into segments
     .map<[[string, string], string]>(([fieldPath, interfaceTypeName]) => [
       fieldPath.split(".") as [string, string],
       interfaceTypeName,
     ]);
+
+  const tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
+  const tables = Object.values(tablesConfig.tables) as TableRelationalConfig[];
 
   const enums = Object.entries(schema).filter((el): el is [string, PgEnum<[string, ...string[]]>] =>
     isPgEnum(el[1]),
@@ -290,17 +294,17 @@ export function buildGraphQLSchema(
   const interfaceTypes: Record<string, GraphQLInterfaceType> = {};
   const entityPageTypes: Record<string, GraphQLOutputType> = {};
 
-  // construct polymorphic interfaces
-  for (const [interfaceName, implementingTables] of Object.entries(polymorphicTableConfigs)) {
-    // compute the intersection table in order to fully specify the graphql interface type
-    const intersectionTable = getIntersectionTable(implementingTables);
+  // for each polymorphic interface type name
+  for (const interfaceTypeName of Object.keys(polymorphicTableConfigs)) {
+    const table = tablesConfig.tables[interfaceTypeName]!;
 
-    interfaceTypes[interfaceName] = new GraphQLInterfaceType({
-      name: interfaceName,
+    // construct a GraphQLInterfaceType representing the intersection table
+    interfaceTypes[interfaceTypeName] = new GraphQLInterfaceType({
+      name: interfaceTypeName,
       fields: () => {
         const fieldConfigMap: GraphQLFieldConfigMap<Parent, Context> = {};
 
-        for (const [columnName, column] of Object.entries(intersectionTable.columns)) {
+        for (const [columnName, column] of Object.entries(table.columns)) {
           const type = columnToGraphQLCore(column, enumTypes);
           fieldConfigMap[columnName] = {
             type: column.notNull ? new GraphQLNonNull(type) : type,
@@ -314,6 +318,9 @@ export function buildGraphQLSchema(
 
   // construct object type for each entity
   for (const table of tables) {
+    // don't make entityTypes for our fake intersection tables
+    if (isInterfaceType(polymorphicConfig, table.tsName)) continue;
+
     const entityTypeName = getSubgraphEntityName(table.tsName);
     entityTypes[table.tsName] = new GraphQLObjectType({
       name: entityTypeName,
@@ -450,22 +457,20 @@ export function buildGraphQLSchema(
 
         // Polymorphic Plural Entity Fields
         // NOTE: overrides any automatic field definitions from the above
-        const thisTablesPolymorphicFields = polymorphicFields
+        polymorphicFields
           // filter by fields on this type
           .filter(([[parent]]) => parent === entityTypeName)
-          // map to [fieldName, interfaceTypeName]
-          .map<[string, string]>(([[, fieldName], interfaceTypeName]) => [
-            fieldName,
-            interfaceTypeName,
-          ]);
-
-        for (const [fieldName, interfaceTypeName] of thisTablesPolymorphicFields) {
-          fieldConfigMap[fieldName] = definePolymorphicPluralField({
-            schema,
-            interfaceType: interfaceTypes[interfaceTypeName]!,
-            referencedTables: polymorphicTableConfigs[interfaceTypeName]!,
+          // define each polymorphic plural field
+          .forEach(([[, fieldName], interfaceTypeName]) => {
+            fieldConfigMap[fieldName] = definePolymorphicPluralField({
+              schema,
+              interfaceType: interfaceTypes[interfaceTypeName]!,
+              filterType: entityFilterTypes[interfaceTypeName]!,
+              orderByType: entityOrderByEnums[interfaceTypeName]!,
+              intersectionTableConfig: tablesConfig.tables[interfaceTypeName]!,
+              implementingTableConfigs: polymorphicTableConfigs[interfaceTypeName]!,
+            });
           });
-        }
 
         return fieldConfigMap;
       },
@@ -478,6 +483,9 @@ export function buildGraphQLSchema(
 
   const queryFields: Record<string, GraphQLFieldConfig<Parent, Context>> = {};
   for (const table of tables) {
+    // skip making top level query fields for our fake intersection tables
+    if (isInterfaceType(polymorphicConfig, table.tsName)) continue;
+
     const entityType = entityTypes[table.tsName]!;
     const entityPageType = entityPageTypes[table.tsName]!;
     const entityFilterType = entityFilterTypes[table.tsName]!;
@@ -500,11 +508,8 @@ export function buildGraphQLSchema(
       resolve: async (_parent, args, context) => {
         const loader = context.getDataLoader({ table });
 
-        // The `args` object here should be a valid `where` argument that
-        // uses the `eq` shorthand for each primary key column.
-        const encodedId = args.id as string;
-
-        return loader.load(encodedId);
+        // NOTE(subgraph-compat): subgraph api requires an `id` string value on all records
+        return loader.load(args.id as string);
       },
     };
 
@@ -528,19 +533,20 @@ export function buildGraphQLSchema(
 
   // Polymorphic Plural Query Fields
   // NOTE: overrides any automatic field definitions from the above
-  const polymorphicQueryFields = polymorphicFields
-    // filter by fieldPaths that have a parent of query
+  polymorphicFields
+    // filter by fieldPaths that have a parent of Query
     .filter(([[parent]]) => parent === "Query")
-    // map to [fieldName, interfaceTypeName]
-    .map<[string, string]>(([[, fieldName], interfaceTypeName]) => [fieldName, interfaceTypeName]);
-
-  for (const [fieldName, interfaceTypeName] of polymorphicQueryFields) {
-    queryFields[fieldName] = definePolymorphicPluralField({
-      schema,
-      interfaceType: interfaceTypes[interfaceTypeName]!,
-      referencedTables: polymorphicTableConfigs[interfaceTypeName]!,
+    // build each polymorphic plural field
+    .forEach(([[, fieldName], interfaceTypeName]) => {
+      queryFields[fieldName] = definePolymorphicPluralField({
+        schema,
+        interfaceType: interfaceTypes[interfaceTypeName]!,
+        filterType: entityFilterTypes[interfaceTypeName]!,
+        orderByType: entityOrderByEnums[interfaceTypeName]!,
+        intersectionTableConfig: tablesConfig.tables[interfaceTypeName]!,
+        implementingTableConfigs: polymorphicTableConfigs[interfaceTypeName]!,
+      });
     });
-  }
 
   queryFields._meta = {
     type: GraphQLMeta,
@@ -875,18 +881,33 @@ function getSubgraphEntityName(tsName: string) {
   return pascalCase(tsName);
 }
 
-// computes a TableRelationalConfig that has the intersection of available columns and relationships
-function getIntersectionTable(tables: TableRelationalConfig[]): TableRelationalConfig {
-  if (tables.length === 0) throw new Error("Must have some tables to intersect");
+function isInterfaceType(polymorphicConfig: PolymorphicConfig, columnName: string) {
+  return columnName in polymorphicConfig.types;
+}
 
-  // find common column/relation names
-  const commonColumnNames = intersectionOf(tables.map((table) => Object.keys(table.columns)));
-  const commonRelationsNames = intersectionOf(tables.map((table) => Object.keys(table.relations)));
+// defines a table and relations that is the intersection of the provided `tableConfigs`
+function getIntersectionTableSchema(
+  interfaceTypeName: string,
+  tableConfigs: TableRelationalConfig[],
+) {
+  if (tableConfigs.length === 0) throw new Error("Must have some tables to intersect");
 
-  const baseTable = tables[0]!;
+  const baseColumns = tableConfigs[0]!.columns;
+  const baseRelations = tableConfigs[0]!.relations;
 
-  // build a pgTable() and relations() based on the common columns/relations
-  const intersectionTable = pgTable("intersection_table", (t) => {
+  // compute the common columnNames
+  const commonColumnNames = intersectionOf(
+    tableConfigs.map((table) => Object.keys(table.columns)), //
+  );
+
+  // compute the common relationshipNames
+  const commonRelationsNames = intersectionOf(
+    tableConfigs.map((table) => Object.keys(table.relations)),
+  );
+
+  // define a pgTable by cloning the common columns w/ builder functions
+  // TODO: can we more easily clone theses instead of using builder fns? Object.assign?
+  const intersectionTable = pgTable(interfaceTypeName, (t) => {
     function getColumnBuilder(column: Column) {
       const sqlType = column.getSQLType();
 
@@ -904,26 +925,32 @@ function getIntersectionTable(tables: TableRelationalConfig[]): TableRelationalC
     const columnMap: Record<string, PgColumnBuilderBase> = {};
 
     for (const columnName of commonColumnNames) {
-      const baseColumn = baseTable.columns[columnName]!;
+      const baseColumn = baseColumns[columnName]!;
       columnMap[columnName] = getColumnBuilder(baseColumn).notNull(baseColumn.notNull);
     }
 
     return columnMap;
   });
 
+  // define the relationships for this table by cloning the common relationships
   const intersectionTableRelations = relations(intersectionTable, ({ one }) =>
     commonRelationsNames.reduce<Record<string, Relation<any>>>((memo, relationName) => {
-      const relation = baseTable.relations[relationName] as One;
-      memo[relationName] = one(relation.referencedTable, relation.config as any);
+      const relation = baseRelations[relationName];
+
+      if (is(relation, One)) {
+        memo[relationName] = one(relation.referencedTable, relation.config as any);
+      } else if (is(relation, Many)) {
+        // NOTE: unimplemented — only One relations are necessary for relationalConditions later
+      }
+
       return memo;
     }, {}),
   );
 
-  // generate TableRelationalConfig from the fake table definition
-  return extractTablesRelationalConfig(
-    { intersectionTable, intersectionTableRelations },
-    createTableRelationsHelpers,
-  ).tables["intersectionTable"]!;
+  return {
+    [interfaceTypeName]: intersectionTable,
+    [`${interfaceTypeName}Relations`]: intersectionTableRelations,
+  };
 }
 
 // produces Record<string, Column> that is the union of all columns in tables
@@ -989,40 +1016,53 @@ function buildUnionAllQuery(
  *
  * @param schema the database schema containing table definitions
  * @param interfaceType the GraphQL interface type for the polymorphic field
- * @param referencedTables array of table configs that implement the interface
+ * @param filterType the GraphQL input type for filtering records
+ * @param orderByType the GraphQL enum type for ordering records
+ * @param intersectionTableConfig the TableConfig representing the intersection
+ *        of `implementingTableConfigs`
+ * @param implementingTableConfigs array of table configs that implement the interface
  */
 function definePolymorphicPluralField({
   schema,
   interfaceType,
-  referencedTables,
+  filterType,
+  orderByType,
+  intersectionTableConfig,
+  implementingTableConfigs,
 }: {
   schema: Schema;
   interfaceType: GraphQLInterfaceType;
-  referencedTables: TableRelationalConfig[];
+  filterType: GraphQLInputObjectType;
+  orderByType: GraphQLEnumType;
+  intersectionTableConfig: TableRelationalConfig;
+  implementingTableConfigs: TableRelationalConfig[];
 }): GraphQLFieldConfig<Parent, Context> {
   return {
     type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(interfaceType))),
     args: {
-      // TODO: polymorphic type filter & orderBy types
-      // where: { type: referencedEntityFilterType },
-      // orderBy: { type: referencedEntityOrderByType },
+      where: { type: filterType },
+      orderBy: { type: orderByType },
       orderDirection: { type: OrderDirectionEnum },
       first: { type: GraphQLInt },
       skip: { type: GraphQLInt },
     },
     resolve: async (parent, args: PluralArgs, { drizzle }, info) => {
-      // compute the intersection table
-      const intersectionTable = getIntersectionTable(referencedTables);
-
       // find the relation field that references the parent type
-      const foreignKeyName = getForeignKeyFieldName(intersectionTable, info.parentType.name);
+      const foreignKeyName = getForeignKeyFieldName(intersectionTableConfig, info.parentType.name);
+
       // include it in the relationalFilter iff necessary
-      // NOTE: encodes `id` id field
       const relationalFilter = foreignKeyName ? { [foreignKeyName]: parent.id } : {};
 
-      const subquery = buildUnionAllQuery(drizzle, schema, referencedTables, relationalFilter);
+      // construct a UNION ALL subquery
+      const subquery = buildUnionAllQuery(
+        drizzle,
+        schema,
+        implementingTableConfigs,
+        relationalFilter,
+      );
 
-      return executePluralQuery(intersectionTable, subquery, drizzle, args);
+      // pass it to executePluralQuery as usual
+      return executePluralQuery(intersectionTableConfig, subquery, drizzle, args);
     },
   };
 }
