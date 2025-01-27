@@ -31,7 +31,6 @@ export type OnchainTable<
   enableRLS: () => Omit<OnchainTable<T>, "enableRLS">;
 };
 
-import { pascalCase } from "change-case";
 import DataLoader from "dataloader";
 import {
   type Column,
@@ -101,7 +100,7 @@ import {
   GraphQLString,
 } from "graphql";
 import { GraphQLJSON } from "graphql-scalars";
-import { intersectionOf } from "./helpers";
+import { capitalize, intersectionOf } from "./helpers";
 
 type Parent = Record<string, any>;
 type Context = {
@@ -873,12 +872,9 @@ function getColumnTsName(column: Column) {
   return Object.entries(tableColumns).find(([_, c]) => c.name === column.name)![0];
 }
 
-// NOTE: pascalCase but with overrides for all-caps
-// TODO: replace this with a subgraph pascalCase equivalent function to avoid one-off overrides
-// and remove change-case dependency
+// the subgraph's GraphQL types are just the capitalized version of ponder's tsName
 function getSubgraphEntityName(tsName: string) {
-  if (tsName === "newTTL") return "NewTTL";
-  return pascalCase(tsName);
+  return capitalize(tsName);
 }
 
 function isInterfaceType(polymorphicConfig: PolymorphicConfig, columnName: string) {

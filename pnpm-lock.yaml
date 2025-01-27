@@ -18,18 +18,9 @@ catalogs:
     hono:
       specifier: ^4.6.14
       version: 4.6.17
-    ponder:
-      specifier: ^0.8.26
-      version: 0.8.26
     typescript:
       specifier: ^5.7.3
       version: 5.7.3
-    viem:
-      specifier: ^2.22.13
-      version: 2.22.13
-    vitest:
-      specifier: ^3.0.3
-      version: 3.0.3
 
 overrides:
   vite: 5.4.12
@@ -139,9 +130,6 @@ importers:
       '@escape.tech/graphql-armor-max-tokens':
         specifier: ^2.5.0
         version: 2.5.0
-      change-case:
-        specifier: ^5.4.4
-        version: 5.4.4
       dataloader:
         specifier: ^2.2.3
         version: 2.2.3
@@ -859,9 +847,6 @@ packages:
   chalk@5.4.1:
     resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
-
-  change-case@5.4.4:
-    resolution: {integrity: sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w==}
 
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
@@ -2762,8 +2747,6 @@ snapshots:
       supports-color: 7.2.0
 
   chalk@5.4.1: {}
-
-  change-case@5.4.4: {}
 
   check-error@2.1.1: {}
 
