@@ -1,4 +1,4 @@
 {
-  "extends": "@namehash/shared-configs/tsconfig.lib.json",
+  "extends": "@namehash/shared-configs/tsconfig.ponder.json",
   "include": ["src/**/*"]
 }
