@@ -14,7 +14,7 @@ import type { OwnedName } from "../lib/types";
  * The NameWrapper contract encodes a domain's `node` value as uint256 for use as the tokenId
  * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/wrapper/ERC1155Fuse.sol#L262
  */
-export const tokenIdToNode = (tokenId: bigint) => uint256ToHex32(tokenId);
+export const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {

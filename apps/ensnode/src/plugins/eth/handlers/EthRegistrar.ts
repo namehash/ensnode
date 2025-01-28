@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 import { uint256ToHex32 } from "ensnode-utils/subname-helpers";
+import type { Labelhash } from "ensnode-utils/types";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
@@ -7,7 +8,7 @@ import { ownedName, pluginNamespace } from "../ponder.config";
  * ETHRegistrarController contract's tokenId is uint256(labelhash)
  * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/ethregistrar/ETHRegistrarController.sol#L215
  */
-export const tokenIdToLabelhash = (tokenId: bigint) => uint256ToHex32(tokenId);
+export const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
 const {
   handleNameRegistered,
