@@ -44,7 +44,7 @@ jobs:
       # a pglite database that only lives in the CI environment.
       # It will be discarded after the CI run.
       - name: Run Ponder runtime integrity checks
-        working-directory: apps/ensnode
+        working-directory: apps/evm-indexer
         env:
           ACTIVE_PLUGINS: eth,base.eth,linea.eth
           RPC_URL_1: https://eth.drpc.org

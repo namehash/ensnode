@@ -1,5 +1,5 @@
 {
-  "name": "ensnode",
+  "name": "evm-indexer",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -8,9 +8,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "apps/ensnode"
+    "directory": "apps/evm-indexer"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensnode",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/evm-indexer",
   "scripts": {
     "dev": "ponder dev",
     "start": "ponder start",

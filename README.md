@@ -6,7 +6,7 @@ The ENSNode monorepo contains multiple modules in the following subdirectories:
 - [`apps`](apps)  executable applications.
 - [`packages`](packages) for libraries that can be embedded into apps.
 
-The main module of this repository is the ENSNode app found in [`apps/ensnode`](apps/ensnode).
+The main module of this repository is the evm-indexer app found in [`apps/emv-indexer`](apps/evm-indexer).
 
 ## Quick start
 
@@ -41,7 +41,7 @@ pnpm install
 
 Go into the main ENSNode application root directory:
 ```
-cd apps/ensnode
+cd apps/evm-indexer
 ```
 
 Configure for your local application environment:
