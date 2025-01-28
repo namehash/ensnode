@@ -4,7 +4,6 @@ import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-hel
 import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash, namehash } from "viem";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
-import { decodeTokenIdToLabelhash } from "../lib/ens-helpers";
 import { makeRegistrationId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
@@ -59,13 +58,12 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ id: bigint; owner: Hex; expires: bigint }>;
+      event: EventWithArgs<{ label: Labelhash; owner: Hex; expires: bigint }>;
     }) {
-      const { id, owner, expires } = event.args;
+      const { label, owner, expires } = event.args;
 
       await upsertAccount(context, owner);
 
-      const label = decodeTokenIdToLabelhash(id);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
       // TODO: materialze labelName via rainbow tables ala Registry.ts
@@ -126,11 +124,10 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ id: bigint; expires: bigint }>;
+      event: EventWithArgs<{ label: Labelhash; expires: bigint }>;
     }) {
-      const { id, expires } = event.args;
+      const { label, expires } = event.args;
 
-      const label = decodeTokenIdToLabelhash(id);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
       await context.db
@@ -157,12 +154,11 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ tokenId: bigint; from: Hex; to: Hex }>;
+      event: EventWithArgs<{ label: Labelhash; from: Hex; to: Hex }>;
     }) {
-      const { tokenId, to } = event.args;
+      const { label, to } = event.args;
       await upsertAccount(context, to);
 
-      const label = decodeTokenIdToLabelhash(tokenId);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
       const registrationId = makeRegistrationId(ownedName, label, node);
 

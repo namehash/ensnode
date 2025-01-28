@@ -1,15 +1,20 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { decodeDNSPacketBytes } from "ensnode-utils/subname-helpers";
+import { decodeDNSPacketBytes, uint256ToHex32 } from "ensnode-utils/subname-helpers";
 import type { Node } from "ensnode-utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { sharedEventValues, upsertAccount } from "../lib/db-helpers";
-import { decodeTokenIdToNode } from "../lib/ens-helpers";
 import { makeEventId } from "../lib/ids";
 import { bigintMax } from "../lib/lib-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
+
+/**
+ * The NameWrapper contract encodes a domain's `node` value as uint256 for use as the tokenId
+ * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/wrapper/ERC1155Fuse.sol#L262
+ */
+export const tokenIdToNode = (tokenId: bigint) => uint256ToHex32(tokenId);
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
@@ -41,7 +46,7 @@ async function handleTransfer(
   to: Address,
 ) {
   await upsertAccount(context, to);
-  const node = decodeTokenIdToNode(tokenId);
+  const node = tokenIdToNode(tokenId);
 
   // TODO: remove this if it never fires: subgraph upserts domain but shouldn't be necessary
   const domain = await context.db.find(schema.domain, { id: node });

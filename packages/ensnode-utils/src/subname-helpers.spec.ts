@@ -1,4 +1,4 @@
-import { labelhash, namehash, toBytes } from "viem";
+import { labelhash, namehash, toBytes, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
 import {
   decodeDNSPacketBytes,
@@ -46,12 +46,10 @@ describe("decodeDNSPacketBytes", () => {
 });
 
 describe("uint256ToHex32", () => {
-  it("should convert bigint tokenId to hex string", () => {
-    expect(labelhash("vitalik")).toBe(
-      uint256ToHex32(
-        // https://etherscan.io/token/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85?a=79233663829379634837589865448569342784712482819484549289560981379859480642508#inventory
-        79233663829379634837589865448569342784712482819484549289560981379859480642508n,
-      ),
+  it("should convert bigint to hex string", () => {
+    expect(uint256ToHex32(0n)).toBe(zeroHash);
+    expect(uint256ToHex32(2n ** 256n - 1n)).toBe(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
     );
   });
 });

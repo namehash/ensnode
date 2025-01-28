@@ -1,6 +1,13 @@
 import { ponder } from "ponder:registry";
+import { uint256ToHex32 } from "ensnode-utils/subname-helpers";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { ownedName, pluginNamespace } from "../ponder.config";
+
+/**
+ * ETHRegistrarController contract's tokenId is uint256(labelhash)
+ * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/ethregistrar/ETHRegistrarController.sol#L215
+ */
+export const tokenIdToLabelhash = (tokenId: bigint) => uint256ToHex32(tokenId);
 
 const {
   handleNameRegistered,
@@ -11,11 +18,45 @@ const {
 } = makeRegistrarHandlers(ownedName);
 
 export default function () {
-  ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), handleNameRegistered);
-  ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), handleNameRenewed);
+  ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
+    await handleNameRegistered({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          label: tokenIdToLabelhash(event.args.id),
+        },
+      },
+    });
+  });
+
+  ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
+    await handleNameRenewed({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          label: tokenIdToLabelhash(event.args.id),
+        },
+      },
+    });
+  });
 
   ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
-    await handleNameTransferred({ context, event });
+    const { tokenId, from, to } = event.args;
+    await handleNameTransferred({
+      context,
+      event: {
+        ...event,
+        args: {
+          from,
+          to,
+          label: tokenIdToLabelhash(tokenId),
+        },
+      },
+    });
   });
 
   ponder.on(
