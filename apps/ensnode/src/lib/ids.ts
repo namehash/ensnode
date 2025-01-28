@@ -22,7 +22,7 @@ export const makeEventId = (blockNumber: bigint, logIndex: number, transferIndex
  * the .eth Registrar, this leaves no room in the namespace for Registration
  * records from other Registrars (like the base.eth and linea.eth Registrars).
  * To account for this, while preserving backwards compatibility, Registration
- * records created for the .eth Registrar use label as id and those created by
+ * records created for the .eth Registrar use labelhash as id and those created by
  * any other Registrar use node (i.e. namehash(test.base.eth) to avoid
  * collisions that would otherwise occur.
  *
@@ -30,5 +30,12 @@ export const makeEventId = (blockNumber: bigint, logIndex: number, transferIndex
  * @param labelHash the labelHash of the direct subname of `registrarName` that was registered
  * @param node the node of the full name that was registered
  */
-export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) =>
-  registrarName === "eth" ? labelHash : node;
+export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) => {
+  if (registrarName === "eth") {
+    // To keep subgraph compatibility, we still use labelhash for `eth` registrar name
+    return labelHash;
+  }
+
+  // Otherwise, we use the node to ensure registration ID uniqueness
+  return node;
+};
