@@ -1,5 +1,5 @@
+import type { Labelhash, Node } from "ensnode-utils/types";
 import type { Address, Hex } from "viem";
-import type { Labelhash, Node, OwnedName } from "./types";
 
 // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
 export const makeResolverId = (address: Address, node: Hex) =>
@@ -13,7 +13,7 @@ export const makeEventId = (blockNumber: bigint, logIndex: number, transferIndex
     .join("-");
 
 /**
- * Makes a cross-chain unique registration ID.
+ * Makes a cross-registrar unique registration ID.
  *
  * A Registration record's id is historically the labelhash of the label
  * directly under the name the Registrar manages (i.e. for a registration
@@ -26,9 +26,9 @@ export const makeEventId = (blockNumber: bigint, logIndex: number, transferIndex
  * any other Registrar use node (i.e. namehash(test.base.eth) to avoid
  * collisions that would otherwise occur.
  *
- * @param ownedName the ownedName of the ENSNode plugin that is processing the registration event
- * @param label registration's label
- * @param node registration's node
+ * @param registrarName the name of the registrar issuing the registration
+ * @param labelHash the labelHash of the direct subname of `registrarName` that was registered
+ * @param node the node of the full name that was registered
  */
-export const makeRegistrationId = (ownedName: OwnedName, label: Labelhash, node: Node) =>
-  ownedName === "eth" ? label : node;
+export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) =>
+  registrarName === "eth" ? labelHash : node;

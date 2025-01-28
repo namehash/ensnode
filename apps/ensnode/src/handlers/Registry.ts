@@ -2,11 +2,11 @@ import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
+import type { Labelhash, Node } from "ensnode-utils/types";
 import { Block } from "ponder";
 import { type Hex, zeroAddress } from "viem";
 import { upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
-import type { Labelhash, Node } from "../lib/types";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.

@@ -5,11 +5,12 @@ import {
   makeSubnodeNamehash,
   tokenIdToLabel,
 } from "ensnode-utils/subname-helpers";
+import type { Labelhash } from "ensnode-utils/types";
 import { Block } from "ponder";
 import { type Hex, labelhash, namehash } from "viem";
 import { upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { makeRegistrationId } from "../lib/ids";
-import type { Labelhash, OwnedName } from "../lib/types";
+import type { OwnedName } from "../lib/types";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 

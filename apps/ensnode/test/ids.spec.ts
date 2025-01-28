@@ -19,13 +19,13 @@ describe("ids", () => {
   });
 
   describe("makeRegistrationId", () => {
-    it("should use label when ownedName is exactly `eth` to ensure subgraph compatibility", () => {
+    it("should use labelhash when ownedName is `eth` to ensure subgraph compatibility", () => {
       expect(makeRegistrationId("eth", labelhash("vitalik"), namehash("vitalik.eth"))).toEqual(
         labelhash("vitalik"),
       );
     });
 
-    it("should use node when ownedName is not exactly `eth`", () => {
+    it("should use node when ownedName is not `eth`", () => {
       expect(
         makeRegistrationId("linea.eth", labelhash("vitalik"), namehash("vitalik.linea.eth")),
       ).toEqual(namehash("vitalik.linea.eth"));

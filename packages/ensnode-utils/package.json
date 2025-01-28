@@ -14,7 +14,8 @@
     "./helpers": "./src/helpers.ts",
     "./ids": "./src/ids.ts",
     "./plugin-helpers": "./src/plugin-helpers.ts",
-    "./subname-helpers": "./src/subname-helpers.ts"
+    "./subname-helpers": "./src/subname-helpers.ts",
+    "./types": "./src/types.ts"
   },
   "scripts": {
     "lint": "biome check --write .",
