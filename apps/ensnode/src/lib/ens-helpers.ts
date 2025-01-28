@@ -9,3 +9,9 @@ import { uint256ToHex32 } from "ensnode-utils/subname-helpers";
  * - https://github.com/Consensys/linea-ens/blob/main/packages/linea-ens-contracts/contracts/ethregistrar/ETHRegistrarController.sol#L447
  */
 export const decodeTokenIdToLabelhash = (tokenId: bigint) => uint256ToHex32(tokenId);
+
+/**
+ * The NameWrapper contract encodes a domain's `node` value as uint256 for use as the tokenId
+ * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/wrapper/ERC1155Fuse.sol#L262
+ */
+export const decodeTokenIdToNode = (tokenId: bigint) => uint256ToHex32(tokenId);
