@@ -1,4 +1,4 @@
-# ENSNode
+# evm-indexer
 
 > a multichain ENS indexer, powered by Ponder
 
