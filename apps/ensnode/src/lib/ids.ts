@@ -1,5 +1,5 @@
+import type { Labelhash, Node } from "ensnode-utils/types";
 import type { Address, Hex } from "viem";
-import type { Labelhash, Node, OwnedName } from "./types";
 
 // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
 export const makeResolverId = (address: Address, node: Hex) =>
