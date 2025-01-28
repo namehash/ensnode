@@ -13,7 +13,6 @@ ponder.use(
     schema,
 
     // describes the polymorphic (interface) relationships in the schema
-    // TODO: pass table objects instead to avoid magic strings
     polymorphicConfig: {
       types: {
         DomainEvent: [

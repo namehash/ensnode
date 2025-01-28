@@ -110,7 +110,7 @@ export async function handleABIChanged({
   const { node, contentType } = event.args;
   const id = makeResolverId(event.log.address, node);
 
-  // upsert resolveer
+  // upsert resolver
   await upsertResolver(context, {
     id,
     domainId: node,
