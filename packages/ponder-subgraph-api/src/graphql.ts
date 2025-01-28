@@ -48,7 +48,6 @@ import {
   eq,
   extractTablesRelationalConfig,
   getTableColumns,
-  getTableName,
   getTableUniqueName,
   gt,
   gte,
@@ -78,7 +77,7 @@ import {
   pgTable,
 } from "drizzle-orm/pg-core";
 import { PgViewBase } from "drizzle-orm/pg-core/view-base";
-import { Relation, TablesRelationalConfig } from "drizzle-orm/relations";
+import { Relation } from "drizzle-orm/relations";
 import {
   GraphQLBoolean,
   GraphQLEnumType,
@@ -440,7 +439,7 @@ export function buildGraphQLSchema(
 
                 return executePluralQuery(
                   referencedTable,
-                  schema[table.tsName] as PgTable,
+                  schema[referencedTable.tsName] as PgTable,
                   context.drizzle,
                   args,
                   relationalConditions,
