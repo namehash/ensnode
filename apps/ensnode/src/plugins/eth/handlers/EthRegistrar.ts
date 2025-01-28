@@ -25,7 +25,7 @@ export default function () {
         ...event,
         args: {
           ...event.args,
-          label: tokenIdToLabelhash(event.args.id),
+          labelhash: tokenIdToLabelhash(event.args.id),
         },
       },
     });
@@ -38,7 +38,7 @@ export default function () {
         ...event,
         args: {
           ...event.args,
-          label: tokenIdToLabelhash(event.args.id),
+          labelhash: tokenIdToLabelhash(event.args.id),
         },
       },
     });
@@ -53,7 +53,7 @@ export default function () {
         args: {
           from,
           to,
-          label: tokenIdToLabelhash(tokenId),
+          labelhash: tokenIdToLabelhash(tokenId),
         },
       },
     });

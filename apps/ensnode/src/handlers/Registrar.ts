@@ -2,7 +2,7 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import type { Labelhash } from "ensnode-utils/types";
-import { type Hex, labelhash, namehash } from "viem";
+import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { makeRegistrationId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
@@ -14,22 +14,27 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
  * A factory function that returns Ponder indexing handlers for a specified subname.
  */
 export const makeRegistrarHandlers = (ownedName: OwnedName) => {
-  const ownedSubnameNode = namehash(ownedName);
+  const ownedNameNode = namehash(ownedName);
 
-  async function setNamePreimage(context: Context, name: string, label: Labelhash, cost: bigint) {
+  async function setNamePreimage(
+    context: Context,
+    name: string,
+    labelhash: Labelhash,
+    cost: bigint,
+  ) {
     // NOTE: ponder intentionally removes null bytes to spare users the footgun of
     // inserting null bytes into postgres. We don't like this behavior, though, because it's
     // important that 'vitalik\x00'.eth and vitalik.eth are differentiable.
     // https://github.com/ponder-sh/ponder/issues/1456
     // So here we use the labelhash fn to determine whether ponder modified our `name` argument,
     // in which case we know that it used to have null bytes in it, and we should ignore it.
-    const didHaveNullBytes = labelhash(name) !== label;
+    const didHaveNullBytes = _labelhash(name) !== labelhash;
     if (didHaveNullBytes) return;
 
     // if the label is otherwise un-indexable, ignore it (see isLabelIndexable comment for context)
     if (!isLabelIndexable(name)) return;
 
-    const node = makeSubnodeNamehash(ownedSubnameNode, label);
+    const node = makeSubnodeNamehash(ownedNameNode, labelhash);
     const domain = await context.db.find(schema.domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/master/src/ethRegistrar.ts#L101
@@ -43,14 +48,14 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
     await context.db
       .update(schema.registration, {
-        id: makeRegistrationId(ownedName, label, node),
+        id: makeRegistrationId(ownedName, labelhash, node),
       })
       .set({ labelName: name, cost });
   }
 
   return {
     get ownedSubnameNode() {
-      return ownedSubnameNode;
+      return ownedNameNode;
     },
 
     async handleNameRegistered({
@@ -58,19 +63,19 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ label: Labelhash; owner: Hex; expires: bigint }>;
+      event: EventWithArgs<{ labelhash: Labelhash; owner: Hex; expires: bigint }>;
     }) {
-      const { label, owner, expires } = event.args;
+      const { labelhash, owner, expires } = event.args;
 
       await upsertAccount(context, owner);
 
-      const node = makeSubnodeNamehash(ownedSubnameNode, label);
+      const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
       // TODO: materialze labelName via rainbow tables ala Registry.ts
       const labelName = undefined;
 
       await upsertRegistration(context, {
-        id: makeRegistrationId(ownedName, label, node),
+        id: makeRegistrationId(ownedName, labelhash, node),
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
@@ -87,7 +92,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       // log RegistrationEvent
       await context.db.insert(schema.nameRegistered).values({
         ...sharedEventValues(event),
-        registrationId: label,
+        registrationId: labelhash,
         registrantId: owner,
         expiryDate: expires,
       });
@@ -124,15 +129,15 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ label: Labelhash; expires: bigint }>;
+      event: EventWithArgs<{ labelhash: Labelhash; expires: bigint }>;
     }) {
-      const { label, expires } = event.args;
+      const { labelhash, expires } = event.args;
 
-      const node = makeSubnodeNamehash(ownedSubnameNode, label);
+      const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
       await context.db
         .update(schema.registration, {
-          id: makeRegistrationId(ownedName, label, node),
+          id: makeRegistrationId(ownedName, labelhash, node),
         })
         .set({ expiryDate: expires });
 
@@ -144,7 +149,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       await context.db.insert(schema.nameRenewed).values({
         ...sharedEventValues(event),
-        registrationId: label,
+        registrationId: labelhash,
         expiryDate: expires,
       });
     },
@@ -154,13 +159,13 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ label: Labelhash; from: Hex; to: Hex }>;
+      event: EventWithArgs<{ labelhash: Labelhash; from: Hex; to: Hex }>;
     }) {
-      const { label, to } = event.args;
+      const { labelhash, to } = event.args;
       await upsertAccount(context, to);
 
-      const node = makeSubnodeNamehash(ownedSubnameNode, label);
-      const registrationId = makeRegistrationId(ownedName, label, node);
+      const node = makeSubnodeNamehash(ownedNameNode, labelhash);
+      const registrationId = makeRegistrationId(ownedName, labelhash, node);
 
       const registration = await context.db.find(schema.registration, {
         id: registrationId,
@@ -176,7 +181,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       // log RegistrationEvent
       await context.db.insert(schema.nameTransferred).values({
         ...sharedEventValues(event),
-        registrationId: label,
+        registrationId: labelhash,
         newOwnerId: to,
       });
     },
