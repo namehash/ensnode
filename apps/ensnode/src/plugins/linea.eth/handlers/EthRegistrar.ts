@@ -1,9 +1,10 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { makeSubnodeNamehash, tokenIdToLabel } from "ensnode-utils/subname-helpers";
+import { makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { upsertAccount } from "../../../lib/db-helpers";
+import { decodeTokenIdToLabelhash } from "../../../lib/ens-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 const {
@@ -36,7 +37,7 @@ export default function () {
       await context.db
         .insert(schema.domain)
         .values({
-          id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
+          id: makeSubnodeNamehash(ownedSubnameNode, decodeTokenIdToLabelhash(tokenId)),
           ownerId: to,
           createdAt: event.block.timestamp,
         })

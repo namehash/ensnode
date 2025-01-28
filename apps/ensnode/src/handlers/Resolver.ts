@@ -3,8 +3,8 @@ import schema from "ponder:schema";
 import type { Node } from "ensnode-utils/types";
 import { Hex } from "viem";
 import { sharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { hasNullByte, uniq } from "../lib/helpers";
 import { makeResolverId } from "../lib/ids";
+import { hasNullByte, uniq } from "../lib/lib-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_

@@ -1,13 +1,10 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import {
-  isLabelIndexable,
-  makeSubnodeNamehash,
-  tokenIdToLabel,
-} from "ensnode-utils/subname-helpers";
+import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash, namehash } from "viem";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
+import { decodeTokenIdToLabelhash } from "../lib/ens-helpers";
 import { makeRegistrationId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
@@ -68,7 +65,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       await upsertAccount(context, owner);
 
-      const label = tokenIdToLabel(id);
+      const label = decodeTokenIdToLabelhash(id);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
       // TODO: materialze labelName via rainbow tables ala Registry.ts
@@ -133,7 +130,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     }) {
       const { id, expires } = event.args;
 
-      const label = tokenIdToLabel(id);
+      const label = decodeTokenIdToLabelhash(id);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
 
       await context.db
@@ -165,7 +162,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       const { tokenId, to } = event.args;
       await upsertAccount(context, to);
 
-      const label = tokenIdToLabel(tokenId);
+      const label = decodeTokenIdToLabelhash(tokenId);
       const node = makeSubnodeNamehash(ownedSubnameNode, label);
       const registrationId = makeRegistrationId(ownedName, label, node);
 
