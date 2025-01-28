@@ -23,18 +23,6 @@
   - (possible) continued backwards compatibility with subgraph
   - support indexing subset of data, i.e. only domains under parent node
 
-## next up
-
-- [ ] `_nocase` case-insensitive where filters
-  - not used interally but ensjs does technically expose this as an available filter to users
-- [ ] confirm all the schema relations are configured correctly
-- [ ] integrate rainbow tables for label healing
-  - load the table dump into pglite (or just postgres) & query synchronously to match existing behavior
-  - https://github.com/graphprotocol/ens-rainbow
-- [ ] CI/CD with indexing?
-  - integrate index to recent block (10m?) and validate with `snapshot-eq` b4 passing
-- [ ] better understand reverse resolution & how that pertains to L2 primary names and impacts the future schema, etc
-
 ## notes
 
 - eth registry is ERC721, has many controllers (), no knowledge of pricing — delegated to registrar controllers
