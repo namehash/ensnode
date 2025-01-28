@@ -1,4 +1,9 @@
+import { Event, EventNames } from "ponder:registry";
 import { merge as tsDeepMerge } from "ts-deepmerge";
+
+export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
+  args: ARGS;
+};
 
 // makes sure start and end blocks are valid for ponder
 export const blockConfig = (

@@ -11,7 +11,12 @@ import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 import { type YogaServerInstance, createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
-import { type Schema, buildDataLoaderCache, buildGraphQLSchema } from "./graphql";
+import {
+  PolymorphicConfig,
+  type Schema,
+  buildDataLoaderCache,
+  buildGraphQLSchema,
+} from "./graphql";
 
 /**
  * Middleware for GraphQL with an interactive web view.
@@ -27,6 +32,7 @@ import { type Schema, buildDataLoaderCache, buildGraphQLSchema } from "./graphql
  */
 export const graphql = ({
   schema,
+  polymorphicConfig,
   // Default limits are from Apollo:
   // https://www.apollographql.com/blog/prevent-graph-misuse-with-operation-size-and-complexity-limit
   maxOperationTokens = 1000,
@@ -34,6 +40,7 @@ export const graphql = ({
   maxOperationAliases = 30,
 }: {
   schema: Schema;
+  polymorphicConfig?: PolymorphicConfig;
   maxOperationTokens?: number;
   maxOperationDepth?: number;
   maxOperationAliases?: number;
@@ -43,7 +50,7 @@ export const graphql = ({
   return createMiddleware(async (c) => {
     if (yoga === undefined) {
       const metadataStore = c.get("metadataStore");
-      const graphqlSchema = buildGraphQLSchema(schema);
+      const graphqlSchema = buildGraphQLSchema(schema, polymorphicConfig);
       const drizzle = c.get("db");
 
       yoga = createYoga({

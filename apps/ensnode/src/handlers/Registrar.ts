@@ -6,10 +6,10 @@ import {
   tokenIdToLabel,
 } from "ensnode-utils/subname-helpers";
 import type { Labelhash } from "ensnode-utils/types";
-import { Block } from "ponder";
 import { type Hex, labelhash, namehash } from "viem";
-import { upsertAccount, upsertRegistration } from "../lib/db-helpers";
+import { sharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { makeRegistrationId } from "../lib/ids";
+import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
@@ -20,7 +20,7 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 export const makeRegistrarHandlers = (ownedName: OwnedName) => {
   const ownedSubnameNode = namehash(ownedName);
 
-  async function setNamePreimage(context: Context, name: string, label: Hex, cost: bigint) {
+  async function setNamePreimage(context: Context, name: string, label: Labelhash, cost: bigint) {
     // NOTE: ponder intentionally removes null bytes to spare users the footgun of
     // inserting null bytes into postgres. We don't like this behavior, though, because it's
     // important that 'vitalik\x00'.eth and vitalik.eth are differentiable.
@@ -62,10 +62,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: {
-        block: Block;
-        args: { id: bigint; owner: Hex; expires: bigint };
-      };
+      event: EventWithArgs<{ id: bigint; owner: Hex; expires: bigint }>;
     }) {
       const { id, owner, expires } = event.args;
 
@@ -92,26 +89,38 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         labelName,
       });
 
-      // TODO: log Event
+      // log RegistrationEvent
+      await context.db.insert(schema.nameRegistered).values({
+        ...sharedEventValues(event),
+        registrationId: label,
+        registrantId: owner,
+        expiryDate: expires,
+      });
     },
 
     async handleNameRegisteredByController({
       context,
-      args: { name, label, cost },
+      event,
     }: {
       context: Context;
-      args: { name: string; label: Labelhash; cost: bigint };
+      event: EventWithArgs<{
+        name: string;
+        label: Labelhash;
+        cost: bigint;
+      }>;
     }) {
+      const { name, label, cost } = event.args;
       await setNamePreimage(context, name, label, cost);
     },
 
     async handleNameRenewedByController({
       context,
-      args: { name, label, cost },
+      event,
     }: {
       context: Context;
-      args: { name: string; label: Labelhash; cost: bigint };
+      event: EventWithArgs<{ name: string; label: Labelhash; cost: bigint }>;
     }) {
+      const { name, label, cost } = event.args;
       await setNamePreimage(context, name, label, cost);
     },
 
@@ -120,9 +129,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: {
-        args: { id: bigint; expires: bigint };
-      };
+      event: EventWithArgs<{ id: bigint; expires: bigint }>;
     }) {
       const { id, expires } = event.args;
 
@@ -139,20 +146,23 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         .update(schema.domain, { id: node })
         .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
 
-      // TODO: log Event
+      // log RegistrationEvent
+
+      await context.db.insert(schema.nameRenewed).values({
+        ...sharedEventValues(event),
+        registrationId: label,
+        expiryDate: expires,
+      });
     },
 
     async handleNameTransferred({
       context,
-      args: { tokenId, to },
+      event,
     }: {
       context: Context;
-      args: {
-        tokenId: bigint;
-        from: Hex;
-        to: Hex;
-      };
+      event: EventWithArgs<{ tokenId: bigint; from: Hex; to: Hex }>;
     }) {
+      const { tokenId, to } = event.args;
       await upsertAccount(context, to);
 
       const label = tokenIdToLabel(tokenId);
@@ -170,7 +180,12 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
 
-      // TODO: log Event
+      // log RegistrationEvent
+      await context.db.insert(schema.nameTransferred).values({
+        ...sharedEventValues(event),
+        registrationId: label,
+        newOwnerId: to,
+      });
     },
   };
 };

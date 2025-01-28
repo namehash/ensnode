@@ -1,12 +1,13 @@
-import { type Context, type Event, type EventNames } from "ponder:registry";
+import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { decodeDNSPacketBytes, tokenIdToLabel } from "ensnode-utils/subname-helpers";
 import type { Node } from "ensnode-utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
-import { upsertAccount } from "../lib/db-helpers";
+import { sharedEventValues, upsertAccount } from "../lib/db-helpers";
 import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
+import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
@@ -33,7 +34,7 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 
 async function handleTransfer(
   context: Context,
-  event: Event<EventNames>,
+  event: EventWithArgs,
   eventId: string,
   tokenId: bigint,
   to: Address,
@@ -64,7 +65,13 @@ async function handleTransfer(
       ownerId: to,
     });
 
-  // TODO: log WrappedTransfer
+  // log DomainEvent
+  await context.db.insert(schema.wrappedTransfer).values({
+    ...sharedEventValues(event),
+    id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
+    domainId: node,
+    ownerId: to,
+  });
 }
 
 export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
@@ -76,15 +83,13 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: {
-        args: {
-          node: Node;
-          owner: Hex;
-          fuses: number;
-          expiry: bigint;
-          name: Hex;
-        };
-      };
+      event: EventWithArgs<{
+        node: Node;
+        owner: Hex;
+        fuses: number;
+        expiry: bigint;
+        name: Hex;
+      }>;
     }) {
       const { node, owner, fuses, expiry } = event.args;
 
@@ -111,7 +116,15 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       // materialize domain expiryDate
       await materializeDomainExpiryDate(context, node);
 
-      // TODO: log NameWrapped
+      // log DomainEvent
+      await context.db.insert(schema.nameWrapped).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        name,
+        fuses,
+        ownerId: owner,
+        expiryDate: expiry,
+      });
     },
 
     async handleNameUnwrapped({
@@ -119,12 +132,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: {
-        args: {
-          node: Node;
-          owner: Hex;
-        };
-      };
+      event: EventWithArgs<{ node: Node; owner: Hex }>;
     }) {
       const { node, owner } = event.args;
 
@@ -140,7 +148,12 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       // delete the WrappedDomain
       await context.db.delete(schema.wrappedDomain, { id: node });
 
-      // TODO: log NameUnwrapped
+      // log DomainEvent
+      await context.db.insert(schema.nameUnwrapped).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        ownerId: owner,
+      });
     },
 
     async handleFusesSet({
@@ -148,12 +161,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: {
-        args: {
-          node: Node;
-          fuses: number;
-        };
-      };
+      event: EventWithArgs<{ node: Node; fuses: number }>;
     }) {
       const { node, fuses } = event.args;
 
@@ -170,19 +178,19 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         await materializeDomainExpiryDate(context, node);
       }
 
-      // TODO: log FusesBurned event
+      // log DomainEvent
+      await context.db.insert(schema.fusesSet).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        fuses,
+      });
     },
     async handleExpiryExtended({
       context,
       event,
     }: {
       context: Context;
-      event: {
-        args: {
-          node: Node;
-          expiry: bigint;
-        };
-      };
+      event: EventWithArgs<{ node: Node; expiry: bigint }>;
     }) {
       const { node, expiry } = event.args;
 
@@ -199,19 +207,19 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         await materializeDomainExpiryDate(context, node);
       }
 
-      // TODO: log ExpiryExtended
+      // log DomainEvent
+      await context.db.insert(schema.expiryExtended).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        expiryDate: expiry,
+      });
     },
     async handleTransferSingle({
       context,
       event,
     }: {
       context: Context;
-      event: Event<EventNames> & {
-        args: {
-          id: bigint;
-          to: Hex;
-        };
-      };
+      event: EventWithArgs<{ id: bigint; to: Hex }>;
     }) {
       await handleTransfer(
         context,
@@ -226,12 +234,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: Event<EventNames> & {
-        args: {
-          ids: readonly bigint[];
-          to: Hex;
-        };
-      };
+      event: EventWithArgs<{ ids: readonly bigint[]; to: Hex }>;
     }) {
       for (const [i, id] of event.args.ids.entries()) {
         await handleTransfer(
