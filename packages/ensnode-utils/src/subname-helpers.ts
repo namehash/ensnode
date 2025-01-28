@@ -9,8 +9,10 @@ export const ROOT_NODE = namehash("");
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
 
 /**
- * Encodes a uint256 bigint as hex string (sized to 32 bytes), useful for NFTs in the ENS
- * ecosystem which commonly use the uint256(labelhash) as the ERC721/ERC1155 token's tokenId.
+ * Encodes a uint256 bigint as hex string sized to 32 bytes.
+ * Uses include, in the context of ENS, decoding the uint256-encoded tokenId of NFT-issuing contracts
+ * into Node or Labelhash, which is a common behavior in the ENS ecosystem.
+ * (see NameWrapper, ETHRegistrarController)
  */
 export const uint256ToHex32 = (num: bigint) => toHex(num, { size: 32 });
 
