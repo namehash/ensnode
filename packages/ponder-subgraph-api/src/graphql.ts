@@ -117,7 +117,8 @@ type PluralArgs = {
   orderDirection?: "asc" | "desc";
 };
 
-const DEFAULT_LIMIT = 50 as const;
+// NOTE: subgraph defaults to 100 entities in a plural
+const DEFAULT_LIMIT = 100 as const;
 const MAX_LIMIT = 1000 as const;
 
 const OrderDirectionEnum = new GraphQLEnumType({
