@@ -74,8 +74,10 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       // TODO: materialze labelName via rainbow tables ala Registry.ts
       const labelName = undefined;
 
+      const id = makeRegistrationId(ownedName, labelhash, node);
+
       await upsertRegistration(context, {
-        id: makeRegistrationId(ownedName, labelhash, node),
+        id,
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
@@ -92,7 +94,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       // log RegistrationEvent
       await context.db.insert(schema.nameRegistered).values({
         ...sharedEventValues(event),
-        registrationId: labelhash,
+        registrationId: id,
         registrantId: owner,
         expiryDate: expires,
       });
@@ -134,12 +136,9 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       const { labelhash, expires } = event.args;
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
+      const id = makeRegistrationId(ownedName, labelhash, node);
 
-      await context.db
-        .update(schema.registration, {
-          id: makeRegistrationId(ownedName, labelhash, node),
-        })
-        .set({ expiryDate: expires });
+      await context.db.update(schema.registration, { id }).set({ expiryDate: expires });
 
       await context.db
         .update(schema.domain, { id: node })
@@ -149,7 +148,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       await context.db.insert(schema.nameRenewed).values({
         ...sharedEventValues(event),
-        registrationId: labelhash,
+        registrationId: id,
         expiryDate: expires,
       });
     },
@@ -165,23 +164,18 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       await upsertAccount(context, to);
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
-      const registrationId = makeRegistrationId(ownedName, labelhash, node);
+      const id = makeRegistrationId(ownedName, labelhash, node);
 
-      const registration = await context.db.find(schema.registration, {
-        id: registrationId,
-      });
+      const registration = await context.db.find(schema.registration, { id });
       if (!registration) return;
 
-      await context.db
-        .update(schema.registration, { id: registrationId })
-        .set({ registrantId: to });
-
+      await context.db.update(schema.registration, { id }).set({ registrantId: to });
       await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
 
       // log RegistrationEvent
       await context.db.insert(schema.nameTransferred).values({
         ...sharedEventValues(event),
-        registrationId: labelhash,
+        registrationId: id,
         newOwnerId: to,
       });
     },
