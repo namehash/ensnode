@@ -8,7 +8,10 @@ import { upsertAccount } from "../../../lib/db-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 /**
- * Base RegistrarController contract's tokenId is uint256(labelhash)
+ * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
+ * on Base a NFT is minted that tokenizes ownership of the registration. The minted NFT will be
+ * assigned a unique tokenId represented as uint256(labelhash(label)) where label is the direct
+ * subname of base.eth that was registered.
  * https://github.com/base-org/basenames/blob/main/src/L2/RegistrarController.sol#L488
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);

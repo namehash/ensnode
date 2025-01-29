@@ -11,7 +11,9 @@ import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
 
 /**
- * The NameWrapper contract encodes a domain's `node` value as uint256 for use as the tokenId
+ * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
+ * ownership of the name. The minted token will be assigned a unique tokenId represented as
+ * uint256(namehash(name)) where name is the fully qualified ENS name being wrapped.
  * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/wrapper/ERC1155Fuse.sol#L262
  */
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);

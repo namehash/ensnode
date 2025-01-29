@@ -5,7 +5,10 @@ import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { ownedName, pluginNamespace } from "../ponder.config";
 
 /**
- * ETHRegistrarController contract's tokenId is uint256(labelhash)
+ * When direct subnames of .eth are registered through the ETHRegistrarController contract on
+ * Ethereum mainnet, a NFT is minted that tokenizes ownership of the registration. The minted NFT
+ * will be assigned a unique tokenId represented as uint256(labelhash(label)) where label is the
+ * direct subname of .eth that was registered.
  * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/ethregistrar/ETHRegistrarController.sol#L215
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
