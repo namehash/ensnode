@@ -11,7 +11,7 @@ import { ownedName, pluginNamespace } from "../ponder.config";
  * Linea's ETHRegistrarController contract's tokenId is uint256(labelhash)
  * https://github.com/Consensys/linea-ens/blob/main/packages/linea-ens-contracts/contracts/ethregistrar/ETHRegistrarController.sol#L447
  */
-export const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
 const {
   handleNameRegistered,
@@ -78,7 +78,7 @@ export default function () {
 
     await handleNameTransferred({
       context,
-      event: { ...event, args: { from, to, labelhash: labelhash } },
+      event: { ...event, args: { from, to, labelhash } },
     });
   });
 

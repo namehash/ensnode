@@ -11,7 +11,7 @@ import { ownedName, pluginNamespace } from "../ponder.config";
  * Base RegistrarController contract's tokenId is uint256(labelhash)
  * https://github.com/base-org/basenames/blob/main/src/L2/RegistrarController.sol#L488
  */
-export const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
 const {
   handleNameRegistered,
@@ -96,7 +96,7 @@ export default function () {
 
     await handleNameTransferred({
       context,
-      event: { ...event, args: { from, to, labelhash: labelhash } },
+      event: { ...event, args: { from, to, labelhash } },
     });
   });
 
