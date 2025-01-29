@@ -46,7 +46,7 @@ export default function () {
 
     await handleNameTransferred({
       context,
-      args: { from, to, tokenId },
+      event: { ...event, args: { from, to, tokenId } },
     });
   });
 
@@ -56,10 +56,7 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegisteredByController({
         context,
-        args: {
-          ...event.args,
-          cost: 0n,
-        },
+        event: { ...event, args: { ...event.args, cost: 0n } },
       });
     },
   );
@@ -70,10 +67,7 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegisteredByController({
         context,
-        args: {
-          ...event.args,
-          cost: 0n,
-        },
+        event: { ...event, args: { ...event.args, cost: 0n } },
       });
     },
   );
@@ -84,14 +78,17 @@ export default function () {
       // the new registrar controller uses baseCost + premium to compute cost
       await handleNameRegisteredByController({
         context,
-        args: {
-          ...event.args,
-          cost: event.args.baseCost + event.args.premium,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            cost: event.args.baseCost + event.args.premium,
+          },
         },
       });
     },
   );
   ponder.on(pluginNamespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewedByController({ context, args: event.args });
+    await handleNameRenewedByController({ context, event });
   });
 }

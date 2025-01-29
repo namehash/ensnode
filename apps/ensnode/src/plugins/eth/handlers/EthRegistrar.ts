@@ -15,20 +15,20 @@ export default function () {
   ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), handleNameRenewed);
 
   ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
-    await handleNameTransferred({ context, args: event.args });
+    await handleNameTransferred({ context, event });
   });
 
   ponder.on(
     pluginNamespace("EthRegistrarControllerOld:NameRegistered"),
     async ({ context, event }) => {
       // the old registrar controller just had `cost` param
-      await handleNameRegisteredByController({ context, args: event.args });
+      await handleNameRegisteredByController({ context, event });
     },
   );
   ponder.on(
     pluginNamespace("EthRegistrarControllerOld:NameRenewed"),
     async ({ context, event }) => {
-      await handleNameRenewedByController({ context, args: event.args });
+      await handleNameRenewedByController({ context, event });
     },
   );
 
@@ -38,14 +38,17 @@ export default function () {
       // the new registrar controller uses baseCost + premium to compute cost
       await handleNameRegisteredByController({
         context,
-        args: {
-          ...event.args,
-          cost: event.args.baseCost + event.args.premium,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            cost: event.args.baseCost + event.args.premium,
+          },
         },
       });
     },
   );
   ponder.on(pluginNamespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewedByController({ context, args: event.args });
+    await handleNameRenewedByController({ context, event });
   });
 }

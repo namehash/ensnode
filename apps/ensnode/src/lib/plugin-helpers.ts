@@ -1,3 +1,5 @@
+import type { OwnedName } from "./types";
+
 /**
  * A factory function that returns a function to create a namespaced contract
  * name for Ponder indexing handlers.
@@ -88,7 +90,7 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
  * @param availablePlugins is a list of available plugins
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { ownedName: string }>(
+export function getActivePlugins<T extends { ownedName: OwnedName }>(
   availablePlugins: readonly T[],
 ): T[] {
   /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */

@@ -2,10 +2,11 @@ import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
-import { Block } from "ponder";
+import type { Labelhash, Node } from "ensnode-utils/types";
 import { type Hex, zeroAddress } from "viem";
-import { upsertAccount, upsertResolver } from "../lib/db-helpers";
+import { sharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
+import { EventWithArgs } from "../lib/ponder-helpers";
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
@@ -80,10 +81,7 @@ export async function handleTransfer({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; owner: Hex };
-    block: Block;
-  };
+  event: EventWithArgs<{ node: Hex; owner: Hex }>;
 }) {
   const { node, owner } = event.args;
 
@@ -102,7 +100,12 @@ export async function handleTransfer({
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   }
 
-  // TODO: log DomainEvent
+  // log DomainEvent
+  await context.db.insert(schema.transfer).values({
+    ...sharedEventValues(event),
+    domainId: node,
+    ownerId: owner,
+  });
 }
 
 export const handleNewOwner =
@@ -112,10 +115,7 @@ export const handleNewOwner =
     event,
   }: {
     context: Context;
-    event: {
-      args: { node: Hex; label: Hex; owner: Hex };
-      block: Block;
-    };
+    event: EventWithArgs<{ node: Node; label: Labelhash; owner: Hex }>;
   }) => {
     const { label, node, owner } = event.args;
 
@@ -163,6 +163,15 @@ export const handleNewOwner =
     if (owner === zeroAddress) {
       await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
     }
+
+    // log DomainEvent
+    await context.db.insert(schema.newOwner).values({
+      ...sharedEventValues(event),
+
+      parentDomainId: node,
+      domainId: subnode,
+      ownerId: owner,
+    });
   };
 
 export async function handleNewTTL({
@@ -170,9 +179,7 @@ export async function handleNewTTL({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; ttl: bigint };
-  };
+  event: EventWithArgs<{ node: Node; ttl: bigint }>;
 }) {
   const { node, ttl } = event.args;
 
@@ -181,7 +188,12 @@ export async function handleNewTTL({
   // NOTE: i'm not sure this needs to be here, as domains are never deleted (??)
   await context.db.update(schema.domain, { id: node }).set({ ttl });
 
-  // TODO: log DomainEvent
+  // log DomainEvent
+  await context.db.insert(schema.newTTL).values({
+    ...sharedEventValues(event),
+    domainId: node,
+    ttl,
+  });
 }
 
 export async function handleNewResolver({
@@ -189,15 +201,15 @@ export async function handleNewResolver({
   event,
 }: {
   context: Context;
-  event: {
-    args: { node: Hex; resolver: Hex };
-  };
+  event: EventWithArgs<{ node: Node; resolver: Hex }>;
 }) {
   const { node, resolver: resolverAddress } = event.args;
 
+  const resolverId = makeResolverId(resolverAddress, node);
+
   // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
   // NOTE: old resolver resources are kept for event logs
-  if (event.args.resolver === zeroAddress) {
+  if (resolverAddress === zeroAddress) {
     await context.db
       .update(schema.domain, { id: node })
       .set({ resolverId: null, resolvedAddressId: null });
@@ -206,12 +218,10 @@ export async function handleNewResolver({
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   } else {
     // otherwise upsert the resolver
-    const resolverId = makeResolverId(resolverAddress, node);
-
     const resolver = await upsertResolver(context, {
       id: resolverId,
-      domainId: event.args.node,
-      address: event.args.resolver,
+      domainId: node,
+      address: resolverAddress,
     });
 
     // update the domain to point to it, and denormalize the eth addr
@@ -222,5 +232,16 @@ export async function handleNewResolver({
       .set({ resolverId, resolvedAddressId: resolver.addrId });
   }
 
-  // TODO: log DomainEvent
+  // log DomainEvent
+  await context.db.insert(schema.newResolver).values({
+    ...sharedEventValues(event),
+    domainId: node,
+    // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
+    // but there is never a resolver record created for the zeroAddress. so if you query the
+    // `resolver { id }` of a NewResolver event that set the resolver to zeroAddress
+    // ex: newResolver(id: "3745840-2") { id resolver {id} }
+    // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
+    // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
+    resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
+  });
 }
