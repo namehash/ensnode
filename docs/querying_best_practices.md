@@ -1,17 +1,17 @@
-# ENS GraphQL API Querying Best Practices
+# ENSNode API Querying Best Practices
 
 ## Stable Name Identification
 
-When querying the ENS GraphQL API for specific names or sets of names, it's crucial to understand that labels (both known and unknown) should not be treated as immutable identifiers. Here's why:
+When querying the ENSNode API for specific names or sets of names, it's crucial to understand that the representation of labels (both known and unknown) are not immutable identifiers. Here's why:
 
 ### Label Mutability
 
-- An "unknown label" (displayed as `[hex string]`) can transition to a "known label" at any time as new label healing information becomes available
-- While rare, a "known label" could theoretically transition back to "unknown" (though ENSNode implementations aim to only grow the set of healable labels)
-- The text representation of a name may not reliably map to the same node across time (e.g. due to name normalization differences [ENSIP-15: ENS Name Normalization Standard](https://docs.ens.domains/ensip/15))
+- When ENSNode indexes an "unknown label" (represented within ENSNode as `[labelhash]`), ENSNode may transition its representation of that label to become a "known label" at any time as its set of healable labels grows.
+- The set of healable labels is augmented with offchain data. Therefore, from the perspective of an ENSNode client it is also theoretically possible that a "known label" in an ENSNode instance might transition back to its "unknown" representation. Each ENSNode instance makes efforts to avoid this from happening by aiming to only grow (and never shrink) its set of healable labels across time. However, if an ENSNode instance has its set of healable labels reset (ex: due to some manual database administration action, such as a completely new deployment without reading from a backup) then this case may be experienced by an ENSNode client.
+- The [ENSIP-15: ENS Name Normalization Standard](https://docs.ens.domains/ensip/15) may change across time such that the set of normalizable names grows (thankfully it should never shrink). For example, consider a new Unicode release that standardizes new emoji. The ENS Normalize standard may subsequently change to expand support for those new emoji.
 
 
-Therefore, always use the namehash as the stable identifier when querying the API.
+Therefore, always use the node of a name (calculated by the namehash of the name) as the stable identifier when querying the ENSNode API. The node of a name is immutable across time.
 
 ### Recommended Query Pattern
 
@@ -19,7 +19,7 @@ To reliably query for specific names, always:
 
 1. Normalize the name according to ENSIP-15
 2. Calculate the namehash/ID from the normalized name on the client side 
-3. Query using the namehash/ID rather than the name string
+3. Query using the id of the name, rather than the name itself (for backwards compatibility with the ENS Subgraph, the id of the name is actually the node of the name, as calculated by namehash of the name).
 
 Example:
 
