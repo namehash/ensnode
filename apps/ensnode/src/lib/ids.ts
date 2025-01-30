@@ -8,12 +8,13 @@ export const makeResolverId = (address: Address, node: Hex) =>
 /**
  * Makes a cross-registrar unique event ID.
  *
- * The ENS Subgraph indexes events from a single chain. However, ENSNode indexes
- * events from multiple chains, which can lead to event ID collisions. This
- * function allows keeping Subgraph-compatible event IDs while ensuring
- * uniqueness across chains.
+ * The ENS Subgraph indexes events from a single registrar. However, ENSNode
+ * enables indexing of events from multiple registrars, which can lead to event
+ * ID collisions. This function allows keeping Subgraph-compatible event IDs
+ * (produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`)
+ * while ensuring event id uniqueness across registrars.
  *
- * @param registrarName the name of the registrar issuing the registration
+ * @param registrarName the name of the registrar associated with the event
  * @param blockNumber
  * @param logIndex
  * @param transferIndex
@@ -23,7 +24,7 @@ export const makeEventId = (
   registrarName: string,
   blockNumber: bigint,
   logIndex: number,
-  transferIndex?: number,
+  transferIndex?: number
 ) =>
   [
     registrarName === "eth" ? undefined : registrarName,
@@ -58,6 +59,23 @@ export const makeEventId = (
  * @param node the node of the full name that was registered
  * @returns a unique registration id
  */
-export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) => {
-  return registrarName === "eth" ? labelHash : node;
+export const makeRegistrationId = (
+  registrarName: string,
+  labelHash: Labelhash,
+  node: Node
+) => {
+  if (registrarName === "eth") {
+    // For the "v1" of ENSNode (at a minimum) we want to preserve backwards
+    // compatibility with Registration id's issued by the ENS Subgraph.
+    // In the future we'll explore more fundamental solutions to avoiding
+    // Registration id collissions. For now are consciously mixing `labelHash`
+    // and `node` (namehash) values as registration ids. Both are keccak256
+    // hashes, so we take advantage of the odds of a collision being
+    // practically zero.
+    return labelHash;
+  } else {
+    // Avoid collisions between Registrations for the same direct subname from
+    // different Registrars.
+    return node;
+  }
 };

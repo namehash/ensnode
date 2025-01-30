@@ -22,7 +22,7 @@ export async function upsertRegistration(
 }
 
 // shared event values for all event types
-// uses the registrar name to enable event data generation for multiple registrars
+// uses `registrarName` to ensure distinct event ids across separate registrars
 export function createSharedEventValues(registrarName: string) {
   // simplifies generating the shared event column values from the ponder Event object
   return function sharedEventValues(event: Omit<Event, "args">) {
