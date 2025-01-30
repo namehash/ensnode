@@ -1,54 +1,58 @@
-FROM node:20-slim as builder
-
+# Base working stage
+FROM node:20-slim AS base
+RUN apt-get update && \
+    apt-get install -y wget && \
+    npm install -g pnpm
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Data stage
+FROM base AS ensrainbow.data
+RUN wget -nv https://bucket.ensrainbow.io/ens_names.sql.gz
+RUN wget -nv https://bucket.ensrainbow.io/ens_names.sql.gz.sha256sum
+RUN sha256sum -c ens_names.sql.gz.sha256sum
 
-# Copy package files
-COPY package*.json ./
-RUN pnpm install
-
-# Copy source files
-COPY tsconfig.json ./
-COPY src ./src
-
-# Build TypeScript
+# Runtime dependencies stage
+FROM base AS ensrainbow.runtime_deps
+# Copy pnpm workspace configuration files from the root directory
+COPY pnpm-workspace.yaml ./
+# Copy the root package.json and lockfile
+COPY package.json pnpm-lock.yaml ./
+# Copy all pnpm workspace modules
+COPY packages ./packages
+COPY apps ./apps
+# Install dependencies for the entire monorepo
+RUN pnpm install --frozen-lockfile
+# Change to the specific app directory
+WORKDIR /app/apps/ensrainbow
+# Transpile TypeScript files into JavaScript
 RUN pnpm build
 
-FROM node:20-slim as ingestor
-
-WORKDIR /app
-
-# Install pnpm
-RUN npm install -g pnpm
-
+# Application runtime stage
+FROM base AS ensrainbow.runtime
+# Copy top-level dependencies
+COPY --from=ensrainbow.runtime_deps /app/node_modules node_modules
+# Change to the specific app directory
+WORKDIR /app/apps/ensrainbow
 # Copy built files and dependencies
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
-RUN pnpm install --prod
+COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/package*.json .
+COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/node_modules node_modules
+COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/dist dist
 
-# Copy and process the ENS names file
-COPY ens_names.sql.gz ./
-RUN pnpm ingest && rm ens_names.sql.gz
+# Ingestor stage
+FROM ensrainbow.runtime AS ingestor
+# Copy input data
+COPY --from=ensrainbow.data /app/ens_names.sql.gz .
+COPY --from=ensrainbow.data /app/ens_names.sql.gz.sha256sum .
+# Load input data into the key-value store
+RUN node dist/ingest.js
 
-FROM node:20-slim
-
-WORKDIR /app
-
-# Install pnpm
-RUN npm install -g pnpm
-
-# Copy built files, dependencies, and processed data
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
-COPY --from=ingestor /app/data ./data
-RUN pnpm install --prod
-
+# API server stage
+FROM ensrainbow.runtime AS runner
+# Copy key-value store data
+COPY --from=ingestor /app/apps/ensrainbow/data ./data
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3001
-
 EXPOSE 3001
-
-CMD ["pnpm", "start"] 
+# Start the application
+CMD ["node", "dist/index.js"]
