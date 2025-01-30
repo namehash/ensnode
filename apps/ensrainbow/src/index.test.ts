@@ -110,4 +110,16 @@ describe("ENS Rainbow API", () => {
       expect(data.count).toBe(3);
     });
   });
+
+  describe("LevelDB operations", () => {
+    it("should handle values containing null bytes", async () => {
+      const hash = "0x1111111111111111111111111111111111111111111111111111111111111111";
+      const hashBytes = Buffer.from(hash.replace(/^0x/, ""), "hex");
+      const labelWithNull = "test\0label";
+
+      await db.put(hashBytes, labelWithNull);
+      const retrieved = await db.get(hashBytes);
+      expect(retrieved).toBe(labelWithNull);
+    });
+  });
 });

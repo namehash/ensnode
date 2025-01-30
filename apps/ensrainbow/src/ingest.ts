@@ -78,8 +78,6 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
           }
         }
       }
-    } else {
-      bar.tick();
     }
   }
 
