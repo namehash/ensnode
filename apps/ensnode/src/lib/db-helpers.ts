@@ -21,11 +21,15 @@ export async function upsertRegistration(
   return context.db.insert(schema.registration).values(values).onConflictDoUpdate(values);
 }
 
-// simplifies generating the shared event column values from the ponder Event object
-export function sharedEventValues(event: Omit<Event, "args">) {
-  return {
-    id: makeEventId(event.block.number, event.log.logIndex),
-    blockNumber: event.block.number,
-    transactionID: event.transaction.hash,
+// shared event values for all event types
+// uses the registrar name to enable event data generation for multiple registrars
+export function createSharedEventValues(registrarName: string) {
+  // simplifies generating the shared event column values from the ponder Event object
+  return function sharedEventValues(event: Omit<Event, "args">) {
+    return {
+      id: makeEventId(registrarName, event.block.number, event.log.logIndex),
+      blockNumber: event.block.number,
+      transactionID: event.transaction.hash,
+    };
   };
 }

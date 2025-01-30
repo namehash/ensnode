@@ -7,7 +7,7 @@ import {
 } from "ensnode-utils/subname-helpers";
 import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash, namehash } from "viem";
-import { sharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
+import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { makeRegistrationId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
@@ -19,6 +19,7 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
  */
 export const makeRegistrarHandlers = (ownedName: OwnedName) => {
   const ownedSubnameNode = namehash(ownedName);
+  const sharedEventValues = createSharedEventValues(ownedName);
 
   async function setNamePreimage(context: Context, name: string, label: Labelhash, cost: bigint) {
     // NOTE: ponder intentionally removes null bytes to spare users the footgun of

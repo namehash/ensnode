@@ -12,9 +12,17 @@ describe("ids", () => {
   });
 
   describe("makeEventId", () => {
-    it("should match snapshot", () => {
-      expect(makeEventId(123n, 456, 1)).toEqual("123-456-1");
-      expect(makeEventId(123n, 456)).toEqual("123-456");
+    it("should include token id if available", () => {
+      expect(makeEventId("eth", 123n, 456, 1)).toEqual("123-456-1");
+      expect(makeEventId("eth", 123n, 456)).toEqual("123-456");
+    });
+
+    it("should include registrar name when its not `eth`", () => {
+      expect(makeEventId("linea.eth", 123n, 456)).toEqual("linea.eth-123-456");
+    });
+
+    it("should not include registrar name when its `eth`", () => {
+      expect(makeEventId("eth", 123n, 456)).toEqual("123-456");
     });
   });
 

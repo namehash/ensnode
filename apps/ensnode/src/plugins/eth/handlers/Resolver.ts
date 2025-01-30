@@ -1,5 +1,8 @@
 import { ponder } from "ponder:registry";
-import {
+import { makeResolverHandlers } from "../../../handlers/Resolver";
+import { ownedName, pluginNamespace } from "../ponder.config";
+
+const {
   handleABIChanged,
   handleAddrChanged,
   handleAddressChanged,
@@ -13,8 +16,7 @@ import {
   handlePubkeyChanged,
   handleTextChanged,
   handleVersionChanged,
-} from "../../../handlers/Resolver";
-import { pluginNamespace } from "../ponder.config";
+} = makeResolverHandlers(ownedName);
 
 export default function () {
   ponder.on(pluginNamespace("Resolver:AddrChanged"), handleAddrChanged);

@@ -4,7 +4,7 @@ import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { decodeDNSPacketBytes, tokenIdToLabel } from "ensnode-utils/subname-helpers";
 import type { Node } from "ensnode-utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
-import { sharedEventValues, upsertAccount } from "../lib/db-helpers";
+import { createSharedEventValues, upsertAccount } from "../lib/db-helpers";
 import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
@@ -32,50 +32,51 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
   }));
 }
 
-async function handleTransfer(
-  context: Context,
-  event: EventWithArgs,
-  eventId: string,
-  tokenId: bigint,
-  to: Address,
-) {
-  await upsertAccount(context, to);
-  const node = tokenIdToLabel(tokenId);
-
-  // TODO: remove this if it never fires: subgraph upserts domain but shouldn't be necessary
-  const domain = await context.db.find(schema.domain, { id: node });
-  if (!domain) {
-    console.log("NameWrapper:handleTransfer called before domain existed");
-    console.table({ ...event.args, node });
-  }
-
-  // upsert the WrappedDomain, only changing owner iff exists
-  await context.db
-    .insert(schema.wrappedDomain)
-    .values({
-      id: node,
-      ownerId: to,
-      domainId: node,
-
-      // placeholders until we get the NameWrapped event
-      expiryDate: 0n,
-      fuses: 0,
-    })
-    .onConflictDoUpdate({
-      ownerId: to,
-    });
-
-  // log DomainEvent
-  await context.db.insert(schema.wrappedTransfer).values({
-    ...sharedEventValues(event),
-    id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
-    domainId: node,
-    ownerId: to,
-  });
-}
-
 export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
   const ownedSubnameNode = namehash(ownedName);
+  const sharedEventValues = createSharedEventValues(ownedName);
+
+  async function handleTransfer(
+    context: Context,
+    event: EventWithArgs,
+    eventId: string,
+    tokenId: bigint,
+    to: Address,
+  ) {
+    await upsertAccount(context, to);
+    const node = tokenIdToLabel(tokenId);
+
+    // TODO: remove this if it never fires: subgraph upserts domain but shouldn't be necessary
+    const domain = await context.db.find(schema.domain, { id: node });
+    if (!domain) {
+      console.log("NameWrapper:handleTransfer called before domain existed");
+      console.table({ ...event.args, node });
+    }
+
+    // upsert the WrappedDomain, only changing owner iff exists
+    await context.db
+      .insert(schema.wrappedDomain)
+      .values({
+        id: node,
+        ownerId: to,
+        domainId: node,
+
+        // placeholders until we get the NameWrapped event
+        expiryDate: 0n,
+        fuses: 0,
+      })
+      .onConflictDoUpdate({
+        ownerId: to,
+      });
+
+    // log DomainEvent
+    await context.db.insert(schema.wrappedTransfer).values({
+      ...sharedEventValues(event),
+      id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
+      domainId: node,
+      ownerId: to,
+    });
+  }
 
   return {
     async handleNameWrapped({
@@ -224,7 +225,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await handleTransfer(
         context,
         event,
-        makeEventId(event.block.number, event.log.logIndex, 0),
+        makeEventId(ownedName, event.block.number, event.log.logIndex, 0),
         event.args.id,
         event.args.to,
       );
@@ -240,7 +241,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         await handleTransfer(
           context,
           event,
-          makeEventId(event.block.number, event.log.logIndex, i),
+          makeEventId(ownedName, event.block.number, event.log.logIndex, i),
           id,
           event.args.to,
         );

@@ -2,14 +2,11 @@ import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import { type Hex } from "viem";
-import {
-  handleNewOwner,
-  handleNewResolver,
-  handleNewTTL,
-  handleTransfer,
-  setupRootNode,
-} from "../../../handlers/Registry";
-import { pluginNamespace } from "../ponder.config";
+import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
+import { ownedName, pluginNamespace } from "../ponder.config";
+
+const { handleNewOwner, handleNewResolver, handleNewTTL, handleTransfer } =
+  makeRegistryHandlers(ownedName);
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {
