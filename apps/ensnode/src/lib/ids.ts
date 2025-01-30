@@ -5,26 +5,34 @@ import type { Address, Hex } from "viem";
 export const makeResolverId = (address: Address, node: Hex) =>
   [address.toLowerCase(), node].join("-");
 
+/**
+ * Makes a cross-registrar unique event ID.
+ *
+ * The ENS Subgraph indexes events from a single chain. However, ENSNode indexes
+ * events from multiple chains, which can lead to event ID collisions. This
+ * function allows keeping Subgraph-compatible event IDs while ensuring
+ * uniqueness across chains.
+ *
+ * @param registrarName the name of the registrar issuing the registration
+ * @param blockNumber
+ * @param logIndex
+ * @param transferIndex
+ * @returns
+ */
 export const makeEventId = (
   registrarName: string,
   blockNumber: bigint,
   logIndex: number,
   transferIndex?: number,
-) => {
-  const parts = [blockNumber.toString(), logIndex.toString(), transferIndex?.toString()];
-
-  const joinParts = (parts: Array<string | undefined>) => parts.filter(Boolean).join("-");
-
-  return makeId(
-    registrarName,
-    // https://github.com/ensdomains/ens-subgraph/blob/master/src/utils.ts#L5
-    // produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`
-    () => joinParts(parts),
-    // for example registrar name, `linea.eth` produces
-    // `linea.eth-blocknumber-logIndex` or `linea.eth-blocknumber-logindex-transferindex`
-    () => joinParts([registrarName, ...parts]),
-  );
-};
+) =>
+  [
+    registrarName === "eth" ? undefined : registrarName,
+    blockNumber.toString(),
+    logIndex.toString(),
+    transferIndex?.toString(),
+  ]
+    .filter(Boolean)
+    .join("-");
 
 /**
  * Makes a cross-registrar unique registration ID.
@@ -51,44 +59,5 @@ export const makeEventId = (
  * @returns a unique registration id
  */
 export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) => {
-  return makeId(
-    registrarName,
-    // For the "v1" of ENSNode (at a minimum) we want to preserve backwards
-    // compatibility with Registration id's issued by the ENS Subgraph.
-    // In the future we'll explore more fundamental solutions to avoiding
-    // Registration id collissions. For now are consciously mixing `labelHash`
-    // and `node` (namehash) values as registration ids. Both are keccak256
-    // hashes, so we take advantage of the odds of a collision being
-    // practically zero.
-    () => labelHash,
-    // Avoid collisions between Registrations for the same direct subname from
-    // different Registrars.
-    () => node,
-  );
-};
-
-/**
- * ENS Subgraph assumes that all transactions happen on a single chain.
- * However, ENSNode supports multiple chains. This multi-chain support requires
- * unique ID value.
- *
- * This function allows keeping backwards compatibility with the ENS Subgraph by
- * using the `subgraphCompatibleValue` factory, and also allows for unique IDs
- * across chains by using the `crossChainUniqueValue` factory.
- *
- * @param registrarName the name of the registrar issuing the registration
- * @param subgraphCompatibleValue the factory creating a subgraph compatible value
- * @param crossChainUniqueValue the factory creating a cross chain unique value
- * @returns unique id
- */
-export const makeId = <Id>(
-  registrarName: string,
-  subgraphCompatibleValue: () => Id,
-  crossChainUniqueValue: () => Id,
-): Id => {
-  if (registrarName === "eth") {
-    return subgraphCompatibleValue();
-  }
-
-  return crossChainUniqueValue();
+  return registrarName === "eth" ? labelHash : node;
 };
