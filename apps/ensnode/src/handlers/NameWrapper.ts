@@ -1,14 +1,22 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { decodeDNSPacketBytes, tokenIdToLabel } from "ensnode-utils/subname-helpers";
+import { decodeDNSPacketBytes, uint256ToHex32 } from "ensnode-utils/subname-helpers";
 import type { Node } from "ensnode-utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { createSharedEventValues, upsertAccount } from "../lib/db-helpers";
-import { bigintMax } from "../lib/helpers";
 import { makeEventId } from "../lib/ids";
+import { bigintMax } from "../lib/lib-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
+
+/**
+ * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
+ * ownership of the name. The minted token will be assigned a unique tokenId represented as
+ * uint256(namehash(name)) where name is the fully qualified ENS name being wrapped.
+ * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/wrapper/ERC1155Fuse.sol#L262
+ */
+const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
@@ -44,7 +52,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
     to: Address,
   ) {
     await upsertAccount(context, to);
-    const node = tokenIdToLabel(tokenId);
+    const node = tokenIdToNode(tokenId);
 
     // TODO: remove this if it never fires: subgraph upserts domain but shouldn't be necessary
     const domain = await context.db.find(schema.domain, { id: node });

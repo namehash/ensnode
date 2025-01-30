@@ -8,8 +8,13 @@ export const ROOT_NODE = namehash("");
 
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
 
-// converts uint256-encoded nodes to hex
-export const tokenIdToLabel = (tokenId: bigint) => toHex(tokenId, { size: 32 });
+/**
+ * Encodes a uint256 bigint as hex string sized to 32 bytes.
+ * Uses include, in the context of ENS, decoding the uint256-encoded tokenId of NFT-issuing contracts
+ * into Node or Labelhash, which is a common behavior in the ENS ecosystem.
+ * (see NameWrapper, ETHRegistrarController)
+ */
+export const uint256ToHex32 = (num: bigint) => toHex(num, { size: 32 });
 
 /**
  * These characters are prohibited in normalized ENS names per the ENSIP-15
@@ -88,7 +93,7 @@ export const isLabelIndexable = (label: string) => {
  * https://github.com/namehash/ensnode/issues/36
  *
  * TODO: replace this function with ensjs#bytesToPacket when it correctly handles these cases. See
- * commit hash bace0ab55077d9f5cd37bd9d6638c4acb16334a8 for an example implementation.
+ * ensnode commit hash bace0ab55077d9f5cd37bd9d6638c4acb16334a8 for an example implementation.
  *
  */
 export function decodeDNSPacketBytes(buf: Uint8Array): [string | null, string | null] {

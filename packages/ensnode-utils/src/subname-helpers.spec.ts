@@ -1,10 +1,10 @@
-import { labelhash, namehash, toBytes } from "viem";
+import { IntegerOutOfRangeError, labelhash, namehash, toBytes, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
 import {
   decodeDNSPacketBytes,
   isLabelIndexable,
   makeSubnodeNamehash,
-  tokenIdToLabel,
+  uint256ToHex32,
 } from "./subname-helpers";
 
 describe("isLabelIndexable", () => {
@@ -45,14 +45,14 @@ describe("decodeDNSPacketBytes", () => {
   });
 });
 
-describe("tokenIdToLabel", () => {
-  it("should convert bigint tokenId to hex string", () => {
-    expect(labelhash("vitalik")).toBe(
-      tokenIdToLabel(
-        // https://etherscan.io/token/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85?a=79233663829379634837589865448569342784712482819484549289560981379859480642508#inventory
-        79233663829379634837589865448569342784712482819484549289560981379859480642508n,
-      ),
+describe("uint256ToHex32", () => {
+  it("should convert bigint to hex string", () => {
+    expect(() => uint256ToHex32(-1n)).toThrow(IntegerOutOfRangeError);
+    expect(uint256ToHex32(0n)).toBe(zeroHash);
+    expect(uint256ToHex32(2n ** 256n - 1n)).toBe(
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
     );
+    expect(() => uint256ToHex32(2n ** 256n)).toThrow(IntegerOutOfRangeError);
   });
 });
 

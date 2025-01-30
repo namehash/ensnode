@@ -48,7 +48,6 @@ import {
   eq,
   extractTablesRelationalConfig,
   getTableColumns,
-  getTableName,
   getTableUniqueName,
   gt,
   gte,
@@ -78,7 +77,7 @@ import {
   pgTable,
 } from "drizzle-orm/pg-core";
 import { PgViewBase } from "drizzle-orm/pg-core/view-base";
-import { Relation, TablesRelationalConfig } from "drizzle-orm/relations";
+import { Relation } from "drizzle-orm/relations";
 import {
   GraphQLBoolean,
   GraphQLEnumType,
@@ -117,7 +116,8 @@ type PluralArgs = {
   orderDirection?: "asc" | "desc";
 };
 
-const DEFAULT_LIMIT = 50 as const;
+// NOTE: subgraph defaults to 100 entities in a plural
+const DEFAULT_LIMIT = 100 as const;
 const MAX_LIMIT = 1000 as const;
 
 const OrderDirectionEnum = new GraphQLEnumType({
@@ -440,7 +440,7 @@ export function buildGraphQLSchema(
 
                 return executePluralQuery(
                   referencedTable,
-                  schema[table.tsName] as PgTable,
+                  schema[referencedTable.tsName] as PgTable,
                   context.drizzle,
                   args,
                   relationalConditions,

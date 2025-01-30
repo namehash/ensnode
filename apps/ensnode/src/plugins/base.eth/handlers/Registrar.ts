@@ -1,10 +1,20 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { makeSubnodeNamehash, tokenIdToLabel } from "ensnode-utils/subname-helpers";
+import { makeSubnodeNamehash, uint256ToHex32 } from "ensnode-utils/subname-helpers";
+import type { Labelhash } from "ensnode-utils/types";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { upsertAccount } from "../../../lib/db-helpers";
 import { ownedName, pluginNamespace } from "../ponder.config";
+
+/**
+ * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
+ * on Base a NFT is minted that tokenizes ownership of the registration. The minted NFT will be
+ * assigned a unique tokenId represented as uint256(labelhash(label)) where label is the direct
+ * subname of base.eth that was registered.
+ * https://github.com/base-org/basenames/blob/main/src/L2/RegistrarController.sol#L488
+ */
+const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
 const {
   handleNameRegistered,
@@ -17,15 +27,53 @@ const {
 
 export default function () {
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
-  ponder.on(pluginNamespace("BaseRegistrar:NameRegisteredWithRecord"), handleNameRegistered);
+  ponder.on(
+    pluginNamespace("BaseRegistrar:NameRegisteredWithRecord"),
+    async ({ context, event }) => {
+      await handleNameRegistered({
+        context,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            labelhash: tokenIdToLabelhash(event.args.id),
+          },
+        },
+      });
+    },
+  );
 
-  ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), handleNameRegistered);
+  ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
+    await handleNameRegistered({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          labelhash: tokenIdToLabelhash(event.args.id),
+        },
+      },
+    });
+  });
 
-  ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), handleNameRenewed);
+  ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
+    await handleNameRenewed({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          labelhash: tokenIdToLabelhash(event.args.id),
+        },
+      },
+    });
+  });
 
   ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
     // base.eth's BaseRegistrar uses `id` instead of `tokenId`
     const { id: tokenId, from, to } = event.args;
+
+    const labelhash = tokenIdToLabelhash(tokenId);
 
     if (event.args.from === zeroAddress) {
       // Each domain must reference an account of its owner,
@@ -41,7 +89,7 @@ export default function () {
       await context.db
         .insert(schema.domain)
         .values({
-          id: makeSubnodeNamehash(ownedSubnameNode, tokenIdToLabel(tokenId)),
+          id: makeSubnodeNamehash(ownedSubnameNode, labelhash),
           ownerId: to,
           createdAt: event.block.timestamp,
         })
@@ -51,7 +99,7 @@ export default function () {
 
     await handleNameTransferred({
       context,
-      event: { ...event, args: { from, to, tokenId } },
+      event: { ...event, args: { from, to, labelhash } },
     });
   });
 
