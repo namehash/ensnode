@@ -5,7 +5,9 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 
 export const app = new Hono();
-export const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
+export const DATA_DIR = process.env.VITEST
+  ? join(process.cwd(), "test-data")
+  : process.env.DATA_DIR || join(process.cwd(), "data");
 
 console.log(`Initializing ENS Rainbow with data directory: ${DATA_DIR}`);
 
@@ -24,11 +26,7 @@ try {
 }
 
 app.get("/v1/heal/:labelhash", async (c: Context) => {
-  const labelhash = c.req.param("labelhash")?.toLowerCase();
-
-  if (!labelhash) {
-    return c.json({ error: "Missing labelhash parameter" }, 400);
-  }
+  const labelhash = c.req.param("labelhash").toLowerCase();
 
   if (!/^(0x)?[0-9a-f]{64}$/.test(labelhash)) {
     return c.json({ error: "Invalid labelhash - must be a 32 byte hex string" }, 400);

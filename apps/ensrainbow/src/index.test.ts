@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { labelhash } from "viem";
 import { app, db } from "./index";
 
 describe("ENS Rainbow API", () => {
@@ -28,8 +29,8 @@ describe("ENS Rainbow API", () => {
 
   describe("GET /v1/heal/:labelhash", () => {
     it("should return the label for a valid labelhash", async () => {
-      const validLabelhash = "0x7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d7d";
       const validLabel = "test-label";
+      const validLabelhash = labelhash(validLabel);
 
       // Add test data
       const hashBytes = Buffer.from(validLabelhash.replace(/^0x/, ""), "hex");

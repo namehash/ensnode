@@ -28,7 +28,8 @@
     "classic-level": "^1.4.1",
     "hono": "catalog:",
     "progress": "^2.0.3",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@namehash/shared-configs": "workspace:*",

@@ -173,8 +173,12 @@ pnpm ingest:prod
 
 ## Environment Variables
 
+### Server Variables
 - `PORT`: Server port (default: 3001)
 - `DATA_DIR`: Directory for LevelDB data (default: './data')
+
+### Data Ingestion Variables
+- `INPUT_FILE`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.
 
 ## License
 

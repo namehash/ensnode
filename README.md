@@ -16,11 +16,17 @@ A sidecar service for healing ENS labels. It provides a simple API to recover la
 
 ## Libraries
 
-The [`packages`](packages) directory contains shared libraries that can be embedded into apps:
-- `ensnode-utils`: Common utilities used across ENSNode applications
-- `ponder-schema`: Shared Ponder schema definitions
-- `ponder-subgraph-api`: Subgraph API compatibility layer
-- `shared-configs`: Shared configuration files
+### [`packages/ensnode-utils`](packages/ensnode-utils)
+Common utilities used across ENSNode applications
+
+### [`packages/ponder-schema`](packages/ponder-schema)
+Shared Ponder schema definitions
+
+### [`packages/ponder-subgraph-api`](packages/ponder-subgraph-api)
+Subgraph API compatibility layer
+
+### [`packages/shared-configs`](packages/shared-configs)
+Shared configuration files
 
 ## Quick start
 
