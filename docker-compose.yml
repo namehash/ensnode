@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  ensrainbow:
+    build:
+      context: ./apps/ensrainbow
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+volumes:
+  ensrainbow_data:
+    driver: local 

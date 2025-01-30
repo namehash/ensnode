@@ -1,0 +1,7 @@
+node_modules/
+dist/
+data/
+*.log
+.env
+ens_names.sql.gz
+ens_names.sql.gz.sha256sum 

@@ -1,0 +1,43 @@
+{
+  "name": "@ensnode/ensrainbow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ENSRainbow is an ENSNode sidecar service for healing ENS labels",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/ensrainbow"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensrainbow",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "start:prod": "node dist/index.js",
+    "ingest": "tsx src/ingest.ts",
+    "ingest:prod": "node dist/ingest.js",
+    "docker:build": "docker build -t ensnode/ensrainbow .",
+    "docker:push": "docker push ensnode/ensrainbow",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.4.1",
+    "classic-level": "^1.4.1",
+    "hono": "catalog:",
+    "progress": "^2.0.3",
+    "tsx": "^4.7.1"
+  },
+  "devDependencies": {
+    "@namehash/shared-configs": "workspace:*",
+    "@types/node": "^20.17.14",
+    "@types/progress": "^2.0.7",
+    "@types/supertest": "^6.0.2",
+    "@vitest/coverage-v8": "^1.6.0",
+    "supertest": "^6.3.4",
+    "typescript": "^5.3.3",
+    "vitest": "^1.6.0"
+  }
+}
