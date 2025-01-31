@@ -194,7 +194,7 @@ const domainEvent = (t: any) => ({
 });
 
 const domainEventIndex = (t: any) => ({
-  idx: index("idx_domain_id").on(t.domainId, t.id),
+  idx: index().on(t.domainId, t.id),
 });
 
 // Domain Event Entities
@@ -292,7 +292,7 @@ const registrationEvent = (t: any) => ({
 });
 
 const registrationEventIndex = (t: any) => ({
-  idx: index("idk_registration_id").on(t.registrationId, t.id),
+  idx: index().on(t.registrationId, t.id),
 });
 
 export const nameRegistered = onchainTable(
@@ -331,7 +331,7 @@ const resolverEvent = (t: any) => ({
 });
 
 const resolverEventIndex = (t: any) => ({
-  idx: index("idk_resolver_id").on(t.resolverId, t.id),
+  idx: index().on(t.resolverId, t.id),
 });
 
 export const addrChanged = onchainTable(
