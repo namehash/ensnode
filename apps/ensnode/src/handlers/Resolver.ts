@@ -58,7 +58,6 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Hex }>;
     }) {
       const { node, coinType, newAddress } = event.args;
-      await upsertAccount(context, newAddress);
 
       const id = makeResolverId(event.log.address, node);
       const resolver = await upsertResolver(context, {
