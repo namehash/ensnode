@@ -4,6 +4,7 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
+import { Hex, hexToBytes } from 'viem'
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.gz");
@@ -62,8 +63,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
         const [hashVal, name] = parts;
         if (hashVal && name) {
           try {
-            // Convert hex string to Buffer, stripping '0x' prefix
-            const hashBytes = Buffer.from(hashVal.slice(2), "hex");
+            const hashBytes = Buffer.from(hexToBytes(hashVal as Hex));
             batch.put(hashBytes, name);
             batchSize++;
 

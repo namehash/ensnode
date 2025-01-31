@@ -37,10 +37,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      viem:
-        specifier: 'catalog:'
-        version: 2.22.13(typescript@5.7.3)
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4

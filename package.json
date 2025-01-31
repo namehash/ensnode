@@ -16,8 +16,5 @@
   },
   "resolutions": {
     "vite": "5.4.12"
-  },
-  "dependencies": {
-    "viem": "catalog:"
   }
 }

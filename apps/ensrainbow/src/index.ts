@@ -3,6 +3,7 @@ import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
 import { Hono } from "hono";
 import type { Context } from "hono";
+import { isHex, size, hexToBytes } from 'viem'
 
 export const app = new Hono();
 export const DATA_DIR = process.env.VITEST
@@ -28,13 +29,12 @@ try {
 app.get("/v1/heal/:labelhash", async (c: Context) => {
   const labelhash = c.req.param("labelhash").toLowerCase();
 
-  if (!/^(0x)?[0-9a-f]{64}$/.test(labelhash)) {
+  if (!isHex(labelhash) || size(labelhash) !== 32) {
     return c.json({ error: "Invalid labelhash - must be a 32 byte hex string" }, 400);
   }
 
   try {
-    // Convert hex string to Buffer, stripping '0x' prefix if present
-    const hashBytes = Buffer.from(labelhash.replace(/^0x/, ""), "hex");
+    const hashBytes = Buffer.from(hexToBytes(labelhash));
     const label = await db.get(hashBytes);
     console.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
     return c.text(label);
