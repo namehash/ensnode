@@ -1,4 +1,4 @@
-import { isUnknownLabel, unknownLabelAsHex } from "ensnode-utils/subname-helpers";
+import { decodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Hex } from "viem";
 
 interface ENSRainbow {
@@ -35,13 +35,8 @@ function createLabelHealing(ensRainbowApiUrl: URL): ENSRainbow {
 
   return {
     async heal(label, name) {
-      // first, let's make sure this is an encoded unknown label
-      if (!isUnknownLabel(label)) {
-        return null;
-      }
-
       try {
-        const healedLabel = await fetchHealedLabel(unknownLabelAsHex(label));
+        const healedLabel = await fetchHealedLabel(decodeLabelhash(label));
 
         if (!healedLabel) {
           return null;
