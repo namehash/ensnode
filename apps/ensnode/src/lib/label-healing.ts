@@ -23,17 +23,17 @@ const labelHealingNoOp: LabelHealing = Object.freeze({
 
 /**
  * A factory function to
- * @param ensRainbowBaseUrl
+ * @param ensRainbowApiUrl
  * @returns
  */
-function createLabelHealing(ensRainbowBaseUrl: string | undefined): LabelHealing {
+function createLabelHealing(ensRainbowApiUrl: string | undefined): LabelHealing {
   try {
-    if (!ensRainbowBaseUrl) {
+    if (!ensRainbowApiUrl) {
       console.warn("LabelHealing: no ENSRainbow API URL was provided.");
       return labelHealingNoOp;
     }
 
-    const ensRainbowBaseUrlParsed = new URL(ensRainbowBaseUrl);
+    const ensRainbowApiUrlParsed = new URL(ensRainbowApiUrl);
 
     /**
      * Fetches the healed label for the given unknown label.
@@ -48,7 +48,7 @@ function createLabelHealing(ensRainbowBaseUrl: string | undefined): LabelHealing
         }
 
         const response = await fetch(
-          new URL(`/v1/heal/${unknownLabelAsHex(label)}`, ensRainbowBaseUrlParsed).toString(),
+          new URL(`/v1/heal/${unknownLabelAsHex(label)}`, ensRainbowApiUrlParsed).toString(),
         );
 
         if (!response.ok) {
@@ -83,4 +83,4 @@ function createLabelHealing(ensRainbowBaseUrl: string | undefined): LabelHealing
   }
 }
 
-export const labelHealing = createLabelHealing(process.env.ENSRAINBOW_API_BASE_URL);
+export const labelHealing = createLabelHealing(process.env.ENSRAINBOW_API_URL);
