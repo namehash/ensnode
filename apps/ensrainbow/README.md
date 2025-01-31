@@ -2,7 +2,7 @@
 
 ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a simple API endpoint to heal ENS labelhashes back to their original labels.
 
-Special thanks to [The Graph Protocol](https://github.com/graphprotocol/ens-rainbow) for their work on the original ENS rainbow table generation used in the ENS Subgraph.
+Special thanks to [The Graph](https://thegraph.com/) for their work to generate the [original ENS rainbow table](https://github.com/graphprotocol/ens-rainbow) used in the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph).
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@ Special thanks to [The Graph Protocol](https://github.com/graphprotocol/ens-rain
 
 ## System Requirements
 
-- **Storage**: 
+- **Storage**:
   - At least 15 GB of free disk space:
     - 6.37 GB for the compressed rainbow tables download
     - ~7 GB for the LevelDB database after ingestion
@@ -21,7 +21,7 @@ Special thanks to [The Graph Protocol](https://github.com/graphprotocol/ens-rain
 
 ## Architecture Overview
 
-For backwards compatibility with the ENS Subgraph, the current rainbow tables (6.37 GB) are exactly the same as those published by [The Graph Protocol](https://github.com/graphprotocol/ens-rainbow). 
+For backwards compatibility with the ENS Subgraph, the current rainbow tables (6.37 GB) are exactly the same as those published by [The Graph](https://github.com/graphprotocol/ens-rainbow) which are [MIT licensed](https://bucket.ensrainbow.io/THE_GRAPH_LICENSE.txt).
 
 - **Storage Layer**: Uses LevelDB as an embedded key-value store to efficiently map labelhashes to their original labels
 - **API Layer**: Exposes a REST API endpoint that accepts labelhashes and returns the corresponding original label
@@ -36,9 +36,10 @@ The initial release of ENSRainbow focuses on backwards compatibility with the EN
 
 ## Getting the Rainbow Tables
 
-Our copies of the rainbow tables (6.37 GB) are stored in a public bucket. To download them:
+Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket. To download them:
 
-1. Download the rainbow tables and verify checksum:
+1. Download the original ENS rainbow tables and verify checksum:
+
 ```bash
 # Download files
 wget https://bucket.ensrainbow.io/ens_names.sql.gz
@@ -51,12 +52,14 @@ sha256sum -c ens_names.sql.gz.sha256sum
 ## Quick Start with Docker
 
 1. Build the Docker image (includes data ingestion):
+
 ```bash
 # while in the monorepo root directory
 docker build -t ensnode/ensrainbow -f apps/ensrainbow/Dockerfile .
 ```
 
 2. Run the container:
+
 ```bash
 docker run -d -p 3001:3001 ensnode/ensrainbow
 ```
@@ -92,27 +95,35 @@ While we aim for high availability, if you need guaranteed uptime or want to kee
 ## API Endpoints
 
 ### Health Check
+
 ```bash
 curl http://localhost:3001/health
 ```
+
 Response: `{"status":"ok"}`
 
 ### Heal Label
+
 ```bash
 curl http://localhost:3001/v1/heal/0x[labelhash]
 ```
+
 Example:
+
 ```bash
 curl http://localhost:3001/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
+
 Response: `vitalik`
 
 Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
+
 - Labels may or may not be ENS-normalized
 - Labels can contain any valid string, including dots, null bytes, or be empty
 - Clients should handle all possible string values appropriately
 
 Error Responses:
+
 - `400 Bad Request`: When the labelhash parameter is missing or invalid
   ```json
   {
@@ -138,24 +149,29 @@ Error Responses:
   ```
 
 ### Get Count of Healable Labels
+
 ```bash
 curl http://localhost:3001/v1/labels/count
 ```
+
 Response: `{"count":133856480, "timestamp":"2025-01-30T11:18:56Z"}`
 
 ## Local Development
 
 1. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 2. Run data ingestion (requires ens_names.sql.gz):
+
 ```bash
 pnpm ingest
 ```
 
 3. Start the service:
+
 ```bash
 pnpm start
 ```
