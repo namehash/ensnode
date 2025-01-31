@@ -70,7 +70,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       // upsert the new coinType
       await context.db
         .update(schema.resolver, { id })
-        .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
+        .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType.toString()]) });
 
       // log ResolverEvent
       await context.db.insert(schema.multicoinAddrChanged).values({
