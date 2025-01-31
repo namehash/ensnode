@@ -16,19 +16,19 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
     keyEncoding: "binary",
   });
 
-  // Total number of lines in the ENS rainbow table SQL dump
+  // Total number of valid records in the ENS rainbow table SQL dump
   // This number represents the count of unique label-labelhash pairs
   // as of January 30, 2024 from the Graph Protocol's ENS rainbow tables
   // Source file: ens_names.sql.gz
   // SHA256: a6316b1e7770b1f3142f1f21d4248b849a5c6eb998e3e66336912c9750c41f31
-  const TOTAL_LINES = 133_856_894;
+  const TOTAL_VALID_RECORDS = 133_856_894;
   const bar = new ProgressBar(
     "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
     {
       complete: "=",
       incomplete: " ",
       width: 40,
-      total: TOTAL_LINES,
+      total: TOTAL_VALID_RECORDS,
     },
   );
 
@@ -43,6 +43,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   let isCopySection = false;
   let batch = db.batch();
   let batchSize = 0;
+  let processedRecords = 0;
   const MAX_BATCH_SIZE = 10000;
 
   console.log("Loading data into LevelDB...");
@@ -63,18 +64,33 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
 
     const parts = line.trim().split("\t");
     if (parts.length !== 2) {
+      console.warn(`Invalid line format - expected 2 columns but got ${parts.length}: "${line.slice(0, 100)}"`);
       continue;
     }
 
-    const [hashVal, name] = parts;
-    if (!isHex(hashVal) || size(hashVal) !== 32 || !name) {
+    const [labelHash, label] = parts;
+    if (!label) {
+      console.warn(`Missing label for hash ${labelHash}`);
+      continue;
+    }
+
+    let labelHashBytes: Buffer;
+    try {
+      labelHashBytes = Buffer.from(hexToBytes(labelHash as Hex));
+    } catch (e) {
+      console.warn(`Invalid hex format for hash: "${labelHash}"`);
+      continue;
+    }
+
+    if (labelHashBytes.length !== 32) {
+      console.warn(`Invalid hash length ${labelHashBytes.length} bytes (expected 32): "${labelHash}"`);
       continue;
     }
 
     try {
-      const hashBytes = Buffer.from(hexToBytes(hashVal as Hex));
-      batch.put(hashBytes, name);
+      batch.put(labelHashBytes, label);
       batchSize++;
+      processedRecords++;
 
       if (batchSize >= MAX_BATCH_SIZE) {
         await batch.write();
@@ -83,7 +99,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
       }
       bar.tick();
     } catch (e) {
-      console.error(`Error processing hash: ${e} '${hashVal}'`);
+      console.error(`Error processing hash: ${e} '${labelHash}'`);
     }
   }
 
@@ -94,6 +110,13 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
 
   await db.close();
   console.log("\nData loading complete!");
+  
+  // Validate the number of processed records
+  if (processedRecords !== TOTAL_VALID_RECORDS) {
+    console.warn(`Warning: Expected ${TOTAL_VALID_RECORDS} records but processed ${processedRecords}`);
+  } else {
+    console.log(`Successfully processed all ${processedRecords} records`);
+  }
 }
 
 // Check if this module is being run directly

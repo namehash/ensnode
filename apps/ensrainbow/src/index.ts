@@ -27,15 +27,21 @@ try {
 }
 
 app.get("/v1/heal/:labelhash", async (c: Context) => {
-  const labelhash = c.req.param("labelhash").toLowerCase();
+  const labelhash = c.req.param("labelhash");
+  const prefixedLabelHash = (labelhash.startsWith('0x') ? labelhash : `0x${labelhash}`) as `0x${string}`;
 
-  if (!isHex(labelhash) || size(labelhash) !== 32) {
-    return c.json({ error: "Invalid labelhash - must be a 32 byte hex string" }, 400);
+  let labelHashBytes: Uint8Array;
+  try {
+    labelHashBytes = hexToBytes(prefixedLabelHash);
+    if (labelHashBytes.length !== 32) {
+      return c.json({ error: "Invalid labelhash - must be a 32 byte hex string" }, 400);
+    }
+  } catch (error) {
+    return c.json({ error: "Invalid labelhash - must be a valid hex string" }, 400);
   }
 
   try {
-    const hashBytes = Buffer.from(hexToBytes(labelhash));
-    const label = await db.get(hashBytes);
+    const label = await db.get(Buffer.from(labelHashBytes));
     console.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
     return c.text(label);
   } catch (error) {
