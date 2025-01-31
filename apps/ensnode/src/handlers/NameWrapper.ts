@@ -6,6 +6,7 @@ import type { Node } from "ensnode-utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { createSharedEventValues, upsertAccount } from "../lib/db-helpers";
 import { makeEventId } from "../lib/ids";
+import { labelHealing } from "../lib/label-healing";
 import { bigintMax } from "../lib/lib-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
@@ -105,10 +106,16 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await upsertAccount(context, owner);
 
       // decode the name emitted by NameWrapper
-      const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
+      let [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
 
       // upsert the healed name iff valid
       if (label) {
+        // try to heal the label (and name) if possible
+        const labelHealingResult = await labelHealing.heal(label, name);
+        if (labelHealingResult) {
+          [label, name] = labelHealingResult;
+        }
+
         await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 

@@ -5,6 +5,7 @@ import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { makeRegistrationId } from "../lib/ids";
+import { labelHealing } from "../lib/label-healing";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
 
@@ -42,9 +43,18 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
 
     if (domain.labelName !== name) {
+      let domainLabel = name;
+      let domainName = `${name}.${ownedName}`;
+
+      // try to heal the label (and name) if possible
+      const labelHealingResult = await labelHealing.heal(domainLabel, domainName);
+      if (labelHealingResult) {
+        [domainLabel, domainName] = labelHealingResult;
+      }
+
       await context.db
         .update(schema.domain, { id: node })
-        .set({ labelName: name, name: `${name}.${ownedName}` });
+        .set({ labelName: domainLabel, name: domainName });
     }
 
     await context.db

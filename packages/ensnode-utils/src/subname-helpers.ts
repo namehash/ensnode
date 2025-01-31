@@ -58,6 +58,18 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
   UNINDEXABLE_LABEL_CHARACTERS.map((char) => char.charCodeAt(0)),
 );
 
+const UNKNOWN_LABEL_PREFIX = "[" as const;
+const UNKNOWN_LABEL_SUFFIX = "]" as const;
+
+type UnknownLabel = `${typeof UNKNOWN_LABEL_PREFIX}${string}${typeof UNKNOWN_LABEL_SUFFIX}`;
+
+export const isUnknownLabel = (label: string): label is UnknownLabel =>
+  label.startsWith(UNKNOWN_LABEL_PREFIX) &&
+  label.endsWith(UNKNOWN_LABEL_SUFFIX) &&
+  label.length === 66;
+
+export const unknownLabelAsHex = (label: UnknownLabel): Hex => `0x${label.slice(1, -1)}`;
+
 /**
  * Check if any characters in `label` are "unindexable".
  *
@@ -66,6 +78,8 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  */
 export const isLabelIndexable = (label: string) => {
   if (!label) return false;
+
+  if (isUnknownLabel(label)) return true;
 
   for (let i = 0; i < label.length; i++) {
     if (UNINDEXABLE_LABEL_CHARACTER_CODES.has(label.charCodeAt(i))) return false;
