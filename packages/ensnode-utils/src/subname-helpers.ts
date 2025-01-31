@@ -1,4 +1,4 @@
-import { type Hex, concat, keccak256, namehash, toHex } from "viem";
+import { type Hex, concat, isHex, keccak256, namehash, toHex } from "viem";
 
 // NOTE: most of these utils could/should be pulled in from some (future) ens helper lib, as they
 // implement standard and reusable logic for typescript ens libs bu aren't necessarily implemented
@@ -63,12 +63,13 @@ const UNKNOWN_LABEL_SUFFIX = "]" as const;
 
 type UnknownLabel = `${typeof UNKNOWN_LABEL_PREFIX}${string}${typeof UNKNOWN_LABEL_SUFFIX}`;
 
+export const unknownLabelAsHex = (label: UnknownLabel): Hex => `0x${label.slice(1, -1)}`;
+
 export const isUnknownLabel = (label: string): label is UnknownLabel =>
   label.startsWith(UNKNOWN_LABEL_PREFIX) &&
   label.endsWith(UNKNOWN_LABEL_SUFFIX) &&
-  label.length === 66;
-
-export const unknownLabelAsHex = (label: UnknownLabel): Hex => `0x${label.slice(1, -1)}`;
+  label.length === 66 &&
+  isHex(unknownLabelAsHex(label as UnknownLabel));
 
 /**
  * Check if any characters in `label` are "unindexable".
