@@ -1,18 +1,31 @@
 import { isUnknownLabel, unknownLabelAsHex } from "ensnode-utils/subname-helpers";
 
 interface LabelHealing {
+  /**
+   * Attempts to heal the given label. For healed labels,
+   * it also heals the name if provided.
+   */
   heal<Label extends string, Name extends string | null>(
     label: Label,
     name: Name,
   ): Promise<[Label, Name] | null>;
 }
 
+/**
+ * A no-op implementation of `LabelHealing` that does nothing.
+ * Useful when no valid ENSRainbow API URL is provided.
+ */
 const labelHealingNoOp: LabelHealing = Object.freeze({
   async heal() {
     return null;
   },
 });
 
+/**
+ * A factory function to
+ * @param ensRainbowBaseUrl
+ * @returns
+ */
 function createLabelHealing(ensRainbowBaseUrl: string | undefined): LabelHealing {
   try {
     if (!ensRainbowBaseUrl) {
@@ -22,16 +35,20 @@ function createLabelHealing(ensRainbowBaseUrl: string | undefined): LabelHealing
 
     const ensRainbowBaseUrlParsed = new URL(ensRainbowBaseUrl);
 
+    /**
+     * Fetches the healed label for the given unknown label.
+     * @param label any label
+     * @returns healed label if available
+     */
     async function fetchHealedLabel(label: string) {
       try {
+        // first, let's make sure this is an encoded unknown label
         if (!isUnknownLabel(label)) {
           return null;
         }
 
-        const labelHex = unknownLabelAsHex(label);
-
         const response = await fetch(
-          new URL(`/v1/heal/${labelHex}`, ensRainbowBaseUrlParsed).toString(),
+          new URL(`/v1/heal/${unknownLabelAsHex(label)}`, ensRainbowBaseUrlParsed).toString(),
         );
 
         if (!response.ok) {
@@ -48,13 +65,13 @@ function createLabelHealing(ensRainbowBaseUrl: string | undefined): LabelHealing
 
     return {
       async heal(label, name) {
-        console.log("Healing label", label);
         const healedLabel = await fetchHealedLabel(label);
 
         if (!healedLabel) {
           return null;
         }
 
+        // If the name is provided, try to heal it as well
         const healedName = name ? name.replaceAll(label, healedLabel) : null;
 
         return [healedLabel, healedName] as [typeof label, typeof name];
