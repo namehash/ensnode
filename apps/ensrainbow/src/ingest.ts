@@ -4,7 +4,7 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
-import { Hex, hexToBytes } from 'viem'
+import { Hex, hexToBytes, size, isHex } from "viem";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.gz");
@@ -57,27 +57,33 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
       break;
     }
 
-    if (isCopySection) {
-      const parts = line.trim().split("\t");
-      if (parts.length === 2) {
-        const [hashVal, name] = parts;
-        if (hashVal && name) {
-          try {
-            const hashBytes = Buffer.from(hexToBytes(hashVal as Hex));
-            batch.put(hashBytes, name);
-            batchSize++;
+    if (!isCopySection) {
+      continue;
+    }
 
-            if (batchSize >= MAX_BATCH_SIZE) {
-              await batch.write();
-              batch = db.batch();
-              batchSize = 0;
-            }
-            bar.tick();
-          } catch (e) {
-            console.error(`Error processing hash: ${e} '${hashVal}'`);
-          }
-        }
+    const parts = line.trim().split("\t");
+    if (parts.length !== 2) {
+      continue;
+    }
+
+    const [hashVal, name] = parts;
+    if (!isHex(hashVal) || size(hashVal) !== 32 || !name) {
+      continue;
+    }
+
+    try {
+      const hashBytes = Buffer.from(hexToBytes(hashVal as Hex));
+      batch.put(hashBytes, name);
+      batchSize++;
+
+      if (batchSize >= MAX_BATCH_SIZE) {
+        await batch.write();
+        batch = db.batch();
+        batchSize = 0;
       }
+      bar.tick();
+    } catch (e) {
+      console.error(`Error processing hash: ${e} '${hashVal}'`);
     }
   }
 
