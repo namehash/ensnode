@@ -2,7 +2,7 @@
 
 ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a simple API endpoint to heal ENS labelhashes back to their original labels.
 
-Special thanks to [The Graph Protocol](https://github.com/graphprotocol/ens-rainbow) for their work on the original ENS rainbow table generation used in the ENS Subgraph.
+Special thanks to [The Graph Protocol](https://github.com/graphprotocol/ens-rainbow) for their work on the original ENSRainbow table generation used in the ENS Subgraph.
 
 ## Prerequisites
 

@@ -54,8 +54,8 @@ function createLabelHealing(ensRainbowApiUrl: URL): ENSRainbow {
   } satisfies ENSRainbow;
 }
 
-const DEFAULT_ENSRAINBOW_API_URL = "https://api.ensrainbow.io";
+const DEFAULT_ENSRAINBOW_URL = "https://api.ensrainbow.io";
 
 export const labelHealing = createLabelHealing(
-  new URL(process.env.ENSRAINBOW_API_URL || DEFAULT_ENSRAINBOW_API_URL),
+  new URL(process.env.ENSRAINBOW_URL || DEFAULT_ENSRAINBOW_URL),
 );

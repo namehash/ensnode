@@ -7,7 +7,7 @@ import type { Context } from "hono";
 export const app = new Hono();
 export const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 
-console.log(`Initializing ENS Rainbow with data directory: ${DATA_DIR}`);
+console.log(`Initializing ENSRainbow with data directory: ${DATA_DIR}`);
 
 export let db: ClassicLevel<Buffer, string>;
 
@@ -77,7 +77,7 @@ app.get("/v1/labels/count", async (c: Context) => {
 // Only start the server if this file is being run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = parseInt(process.env.PORT || "3001", 10);
-  console.log(`ENS Rainbow server starting on port ${port}...`);
+  console.log(`ENSRainbow server starting on port ${port}...`);
 
   const server = serve({
     fetch: app.fetch,

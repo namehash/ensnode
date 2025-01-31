@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { app, db } from "./index";
 
-describe("ENS Rainbow API", () => {
+describe("ENSRainbow API", () => {
   let server: ReturnType<typeof serve>;
 
   beforeAll(async () => {
@@ -52,7 +52,9 @@ describe("ENS Rainbow API", () => {
       const response = await fetch("http://localhost:3002/v1/heal/invalid-hash");
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data).toEqual({ error: "Invalid labelhash - must be a 32 byte hex string" });
+      expect(data).toEqual({
+        error: "Invalid labelhash - must be a 32 byte hex string",
+      });
     });
 
     it("should handle non-existent labelhash", async () => {
@@ -77,7 +79,10 @@ describe("ENS Rainbow API", () => {
     it("should return 0 when database is empty", async () => {
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
-      const data = (await response.json()) as { count: number; timestamp: string };
+      const data = (await response.json()) as {
+        count: number;
+        timestamp: string;
+      };
       expect(data.count).toBe(0);
     });
 
@@ -105,7 +110,10 @@ describe("ENS Rainbow API", () => {
 
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
-      const data = (await response.json()) as { count: number; timestamp: string };
+      const data = (await response.json()) as {
+        count: number;
+        timestamp: string;
+      };
       expect(data.count).toBe(3);
     });
   });
