@@ -124,7 +124,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   } else {
     console.log(`Successfully ingested all ${processedRecords} records`);
   }
-  console.log(`Total unique labels stored: ${seenLabelHashes.size}`);
+  console.log(`Total unique labelhashes stored: ${seenLabelHashes.size}`);
 }
 
 // Check if this module is being run directly
