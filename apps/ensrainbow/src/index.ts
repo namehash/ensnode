@@ -3,7 +3,8 @@ import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
 import { Hono } from "hono";
 import type { Context } from "hono";
-import { isHex, size, hexToBytes } from 'viem'
+import { isHex } from 'viem'
+import { labelHashToBytes } from "./utils/label-utils";
 
 export const app = new Hono();
 export const DATA_DIR = process.env.VITEST
@@ -26,27 +27,33 @@ try {
   process.exit(1);
 }
 
+
 app.get("/v1/heal/:labelhash", async (c: Context) => {
   const labelhash = c.req.param("labelhash");
-  const prefixedLabelHash = (labelhash.startsWith('0x') ? labelhash : `0x${labelhash}`) as `0x${string}`;
+  
+  if (!labelhash.startsWith('0x')) {
+    return c.json({ error: "Labelhash must be 0x-prefixed" }, 400);
+  }
 
-  let labelHashBytes: Uint8Array;
+  let labelHashBytes: Buffer;
   try {
-    labelHashBytes = hexToBytes(prefixedLabelHash);
-    if (labelHashBytes.length !== 32) {
-      return c.json({ error: "Invalid labelhash - must be a 32 byte hex string" }, 400);
-    }
+    labelHashBytes = labelHashToBytes(labelhash as `0x${string}`);
   } catch (error) {
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 400);
+    }
     return c.json({ error: "Invalid labelhash - must be a valid hex string" }, 400);
   }
 
   try {
-    const label = await db.get(Buffer.from(labelHashBytes));
+    const label = await db.get(labelHashBytes);
     console.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
     return c.text(label);
   } catch (error) {
     if ((error as any).code === "LEVEL_NOT_FOUND") {
-      console.info(`Unhealable labelhash request: ${labelhash}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.info(`Unhealable labelhash request: ${labelhash}`);
+      }
       return c.json({ error: "Not found" }, 404);
     }
     console.error("Error healing label:", error);

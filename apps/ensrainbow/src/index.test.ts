@@ -1,7 +1,8 @@
 import { serve } from "@hono/node-server";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { labelhash, hexToBytes } from "viem";
+import { labelhash } from "viem";
+import { labelHashToBytes } from "./utils/label-utils";
 import { app, db } from "./index";
 
 describe("ENS Rainbow API", () => {
@@ -33,7 +34,7 @@ describe("ENS Rainbow API", () => {
       const validLabelhash = labelhash(validLabel);
 
       // Add test data
-      const labelHashBytes = Buffer.from(hexToBytes(validLabelhash));
+      const labelHashBytes = labelHashToBytes(validLabelhash);
       await db.put(labelHashBytes, validLabel);
 
       const response = await fetch(`http://localhost:3002/v1/heal/${validLabelhash}`);
@@ -53,7 +54,7 @@ describe("ENS Rainbow API", () => {
       const response = await fetch("http://localhost:3002/v1/heal/invalid-hash");
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data).toEqual({ error: "Invalid labelhash - must be a valid hex string" });
+      expect(data).toEqual({ error: "Labelhash must be 0x-prefixed" });
     });
 
     it("should handle non-existent labelhash", async () => {
@@ -85,12 +86,12 @@ describe("ENS Rainbow API", () => {
     it("should return correct count of entries", async () => {
       // Add some test data
       const testData = ["test1", "test2", "test3"].map(label => ({
-        labelHashBytes: labelHashBytes(label),
+        hash: labelhash(label),
         label: label
       }));
 
       for (const entry of testData) {
-        const labelHashBytes = Buffer.from(hexToBytes(entry.hash));
+        const labelHashBytes = labelHashToBytes(entry.hash);
         await db.put(labelHashBytes, entry.label);
       }
 
@@ -104,8 +105,8 @@ describe("ENS Rainbow API", () => {
   describe("LevelDB operations", () => {
     it("should handle values containing null bytes", async () => {
       const labelWithNull = "test\0label";
-      const labelHashBytes = labelHashBytes(labelWithNull);
-      const labelHashBytes = Buffer.from(hexToBytes(labelWithNullLabelhash));
+      const labelWithNullLabelhash = labelhash(labelWithNull);
+      const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);
 
       await db.put(labelHashBytes, labelWithNull);
       const retrieved = await db.get(labelHashBytes);
