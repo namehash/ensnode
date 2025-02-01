@@ -1,4 +1,13 @@
-import { type Hex, concat, keccak256, namehash, toHex } from "viem";
+import {
+  type Hex,
+  bytesToHex,
+  bytesToString,
+  concat,
+  keccak256,
+  namehash,
+  stringToBytes,
+  toHex,
+} from "viem";
 
 // NOTE: most of these utils could/should be pulled in from some (future) ens helper lib, as they
 // implement standard and reusable logic for typescript ens libs bu aren't necessarily implemented
@@ -98,31 +107,38 @@ export const isLabelIndexable = (label: string) => {
  */
 export function decodeDNSPacketBytes(buf: Uint8Array): [string | null, string | null] {
   let offset = 0;
-  let list: string[] = [];
+  let list = new Uint8Array(0);
+  let dot = stringToBytes(".");
   let len = buf[offset++];
-  let hex = Buffer.from(buf).toString("hex");
+  let hex = bytesToHex(buf);
   let firstLabel = "";
-
   if (len === 0) {
-    return ["", "."];
+    return [firstLabel, "."];
   }
 
   while (len) {
     const label = hex.slice((offset + 1) * 2, (offset + 1 + len) * 2);
-    const labelStr = Buffer.from(label, "hex").toString();
+    const labelBytes = Buffer.from(label, "hex");
 
-    if (!isLabelIndexable(labelStr)) {
+    if (!isLabelIndexable(labelBytes.toString())) {
       return [null, null];
     }
 
     if (offset > 1) {
-      list.push(".");
+      list = concatUint8Arrays(list, dot);
     } else {
-      firstLabel = labelStr;
+      firstLabel = labelBytes.toString();
     }
-    list.push(labelStr);
+    list = concatUint8Arrays(list, labelBytes);
     offset += len;
     len = buf[offset++];
   }
-  return [firstLabel, list.join("")];
+  return [firstLabel, bytesToString(list)];
+}
+
+function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
+  const concatenatedArray = new Uint8Array(a.length + b.length);
+  concatenatedArray.set(a);
+  concatenatedArray.set(b, a.length);
+  return concatenatedArray;
 }

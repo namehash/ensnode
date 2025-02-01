@@ -70,7 +70,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       // upsert the new coinType
       await context.db
         .update(schema.resolver, { id })
-        .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
+        .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType.toString()]) });
 
       // log ResolverEvent
       await context.db.insert(schema.multicoinAddrChanged).values({
@@ -187,7 +187,11 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         ...sharedEventValues(event),
         resolverId: id,
         key,
-        value,
+        // ponder's (viem's) event parsing produces empty string for some TextChange events
+        // (which is correct) but the subgraph records null for these instances, so we coalesce
+        // falsy strings to null for compatibility
+        // ex: last TextChanged in 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
+        value: value || null,
       });
     },
 

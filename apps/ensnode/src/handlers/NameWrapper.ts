@@ -20,9 +20,7 @@ const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
-  const wrappedDomain = await context.db.find(schema.wrappedDomain, {
-    id: node,
-  });
+  const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L63)

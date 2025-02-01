@@ -103,7 +103,10 @@ export const resolver = onchainTable("resolvers", (t) => ({
   texts: t.text().array(),
   // The set of observed SLIP-44 coin types for this resolver
   // NOTE: we avoid .notNull.default([]) to match subgraph behavior
-  coinTypes: t.bigint("coin_types").array(),
+  // NOTE: we store coinTypes as a [String!], to avoid loss of precision due to drizzle parsing bug
+  // https://github.com/ponder-sh/ponder/issues/1475
+  // https://github.com/ponder-sh/ponder/pull/1482
+  coinTypes: t.text("coin_types").array(),
 }));
 
 export const resolverRelations = relations(resolver, ({ one, many }) => ({
@@ -194,7 +197,7 @@ const domainEvent = (t: any) => ({
 });
 
 const domainEventIndex = (t: any) => ({
-  idx: index("idx_domain_id").on(t.domainId, t.id),
+  idx: index().on(t.domainId, t.id),
 });
 
 // Domain Event Entities
@@ -292,7 +295,7 @@ const registrationEvent = (t: any) => ({
 });
 
 const registrationEventIndex = (t: any) => ({
-  idx: index("idk_registration_id").on(t.registrationId, t.id),
+  idx: index().on(t.registrationId, t.id),
 });
 
 export const nameRegistered = onchainTable(
@@ -331,7 +334,7 @@ const resolverEvent = (t: any) => ({
 });
 
 const resolverEventIndex = (t: any) => ({
-  idx: index("idk_resolver_id").on(t.resolverId, t.id),
+  idx: index().on(t.resolverId, t.id),
 });
 
 export const addrChanged = onchainTable(

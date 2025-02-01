@@ -66,6 +66,7 @@ import {
 } from "drizzle-orm";
 import {
   type PgColumnBuilderBase,
+  PgDialect,
   type PgEnum,
   PgEnumColumn,
   PgInteger,
@@ -683,13 +684,26 @@ async function executePluralQuery(
 
   const whereConditions = buildWhereConditions(args.where, table.columns);
 
-  const rows = await drizzle
+  const query = drizzle
     .select()
     .from(from)
     .where(and(...whereConditions, ...extraConditions))
     .orderBy(...orderBy)
     .limit(limit)
     .offset(skip);
+
+  const startTime = performance.now();
+
+  // actually execute the query
+  const rows = await query;
+
+  const queryDurationSeconds = (performance.now() - startTime) / 1000;
+  const isSlowQuery = queryDurationSeconds > 2;
+  if (isSlowQuery) {
+    console.warn(`Slow Query Detected (${queryDurationSeconds.toFixed(4)}s)`);
+    console.warn(new PgDialect().sqlToQuery(query.getSQL()).sql);
+    console.log("\n");
+  }
 
   return rows;
 }
