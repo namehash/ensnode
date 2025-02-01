@@ -3,8 +3,8 @@ import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
 import { Hono } from "hono";
 import type { Context } from "hono";
-import { isHex } from 'viem'
 import { labelHashToBytes } from "./utils/label-utils";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 export const app = new Hono();
 export const DATA_DIR = process.env.VITEST
@@ -67,12 +67,14 @@ app.get("/health", (c: Context) => c.json({ status: "ok" }));
 // Get count of healable labels
 app.get("/v1/labels/count", async (c: Context) => {
   try {
-    // LevelDB doesn't maintain a running count of entries, so we need to
-    // iterate through all keys to get an accurate count. This operation
-    // becomes more expensive as the database grows.
     let count = 0;
-    for await (const _ of db.keys()) {
-      count++;
+    try {
+      const countStr = await db.get(LABELHASH_COUNT_KEY);
+      count = parseInt(countStr, 10);
+    } catch (error) {
+      if ((error as any).code !== "LEVEL_NOT_FOUND") {
+        throw error;
+      }
     }
 
     return c.json({

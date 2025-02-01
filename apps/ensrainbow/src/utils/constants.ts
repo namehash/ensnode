@@ -1,0 +1,1 @@
+export const LABELHASH_COUNT_KEY = Buffer.from([0xFF, 0xFF, 0xFF, 0xFF]); 

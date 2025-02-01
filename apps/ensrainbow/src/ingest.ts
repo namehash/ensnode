@@ -6,6 +6,7 @@ import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
 import { Hex } from "viem";
 import { labelHashToBytes } from "./utils/label-utils";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.gz");
@@ -23,6 +24,11 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
     valueEncoding: "utf8",
     keyEncoding: "binary",
   });
+
+  // Clear existing database before starting
+  console.log("Clearing existing database...");
+  await db.clear();
+  console.log("Database cleared.");
 
   const bar = new ProgressBar(
     "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
@@ -47,6 +53,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   let batchSize = 0;
   let processedRecords = 0;
   const MAX_BATCH_SIZE = 10000;
+  const seenLabelHashes = new Set<string>();
 
   console.log("Loading data into LevelDB...");
 
@@ -74,11 +81,19 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
     let labelHashBytes: Buffer;
     try {
       labelHashBytes = labelHashToBytes(labelHash as Hex);
+      const labelHashHex = labelHashBytes.toString('hex');
+      
+      if (seenLabelHashes.has(labelHashHex)) {
+        continue;
+      }
+      
+    //   seenLabelHashes.add(labelHashHex);
       batch.put(labelHashBytes, label);
       batchSize++;
       processedRecords++;
 
       if (batchSize >= MAX_BATCH_SIZE) {
+        batch.put(LABELHASH_COUNT_KEY, processedRecords.toString());
         await batch.write();
         batch = db.batch();
         batchSize = 0;
@@ -96,6 +111,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
 
   // Write any remaining entries
   if (batchSize > 0) {
+    batch.put(LABELHASH_COUNT_KEY, processedRecords.toString());
     await batch.write();
   }
 
@@ -108,6 +124,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   } else {
     console.log(`Successfully ingested all ${processedRecords} records`);
   }
+  console.log(`Total unique labels stored: ${seenLabelHashes.size}`);
 }
 
 // Check if this module is being run directly
