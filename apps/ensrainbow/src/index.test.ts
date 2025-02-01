@@ -85,7 +85,7 @@ describe("ENS Rainbow API", () => {
     it("should return correct count of entries", async () => {
       // Add some test data
       const testData = ["test1", "test2", "test3"].map(label => ({
-        hash: labelhash(label),
+        labelHashBytes: labelHashBytes(label),
         label: label
       }));
 
@@ -104,7 +104,7 @@ describe("ENS Rainbow API", () => {
   describe("LevelDB operations", () => {
     it("should handle values containing null bytes", async () => {
       const labelWithNull = "test\0label";
-      const labelWithNullLabelhash = labelhash(labelWithNull);
+      const labelHashBytes = labelHashBytes(labelWithNull);
       const labelHashBytes = Buffer.from(hexToBytes(labelWithNullLabelhash));
 
       await db.put(labelHashBytes, labelWithNull);
