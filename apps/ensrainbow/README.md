@@ -114,7 +114,13 @@ Example:
 curl http://localhost:3001/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
-Response: `vitalik`
+Response:
+```json
+{
+  "status": "success",
+  "label": "vitalik"
+}
+```
 
 Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
 
@@ -127,23 +133,27 @@ Error Responses:
 - `400 Bad Request`: When the labelhash parameter is missing or invalid
   ```json
   {
-    "error": "Missing labelhash parameter"
+    "status": "error",
+    "error": "Labelhash must be 0x-prefixed"
   }
   ```
   ```json
   {
-    "error": "Invalid labelhash - must be a 32 byte hex string"
+    "status": "error",
+    "error": "Invalid labelhash - must be a valid hex string"
   }
   ```
 - `404 Not Found`: When no label is found for the given labelhash
   ```json
   {
-    "error": "Not found"
+    "status": "error",
+    "error": "Label not found"
   }
   ```
 - `500 Internal Server Error`: When an unexpected error occurs
   ```json
   {
+    "status": "error",
     "error": "Internal server error"
   }
   ```
@@ -201,3 +211,4 @@ pnpm ingest:prod
 Licensed under the MIT License, Copyright © 2023-present [NameHash Labs](https://namehashlabs.org).
 
 See [LICENSE](./LICENSE) for more information.
+
