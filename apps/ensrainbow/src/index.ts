@@ -5,6 +5,7 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { isHex } from 'viem'
 import { labelHashToBytes } from "./utils/label-utils";
+import type { ErrorResponse, SuccessResponse } from "./utils/response-types";
 
 export const app = new Hono();
 export const DATA_DIR = process.env.VITEST
@@ -27,37 +28,53 @@ try {
   process.exit(1);
 }
 
-
 app.get("/v1/heal/:labelhash", async (c: Context) => {
   const labelhash = c.req.param("labelhash");
   
   if (!labelhash.startsWith('0x')) {
-    return c.json({ error: "Labelhash must be 0x-prefixed" }, 400);
+    const response: ErrorResponse = {
+      status: 'error',
+      error: "Labelhash must be 0x-prefixed"
+    };
+    return c.json(response, 400);
   }
 
   let labelHashBytes: Buffer;
   try {
     labelHashBytes = labelHashToBytes(labelhash as `0x${string}`);
   } catch (error) {
-    if (error instanceof Error) {
-      return c.json({ error: error.message }, 400);
-    }
-    return c.json({ error: "Invalid labelhash - must be a valid hex string" }, 400);
+    const response: ErrorResponse = {
+      status: 'error',
+      error: error instanceof Error ? error.message : "Invalid labelhash - must be a valid hex string"
+    };
+    return c.json(response, 400);
   }
 
   try {
     const label = await db.get(labelHashBytes);
     console.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
-    return c.text(label);
+    const response: SuccessResponse = {
+      status: 'success',
+      label
+    };
+    return c.json(response);
   } catch (error) {
     if ((error as any).code === "LEVEL_NOT_FOUND") {
       if (process.env.NODE_ENV === 'development') {
         console.info(`Unhealable labelhash request: ${labelhash}`);
       }
-      return c.json({ error: "Not found" }, 404);
+      const response: ErrorResponse = {
+        status: 'error',
+        error: "Label not found"
+      };
+      return c.json(response, 404);
     }
     console.error("Error healing label:", error);
-    return c.json({ error: "Internal server error" }, 500);
+    const response: ErrorResponse = {
+      status: 'error',
+      error: "Internal server error"
+    };
+    return c.json(response, 500);
   }
 });
 

@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { labelhash } from "viem";
 import { labelHashToBytes } from "./utils/label-utils";
 import { app, db } from "./index";
+import type { ErrorResponse, SuccessResponse } from "./utils/response-types";
 
 describe("ENS Rainbow API", () => {
   let server: ReturnType<typeof serve>;
@@ -39,8 +40,11 @@ describe("ENS Rainbow API", () => {
 
       const response = await fetch(`http://localhost:3002/v1/heal/${validLabelhash}`);
       expect(response.status).toBe(200);
-      const text = await response.text();
-      expect(text).toBe(validLabel);
+      const data = await response.json() as SuccessResponse;
+      expect(data).toEqual({
+        status: 'success',
+        label: validLabel
+      });
     });
 
     it("should handle missing labelhash parameter", async () => {
@@ -53,16 +57,22 @@ describe("ENS Rainbow API", () => {
     it("should reject invalid labelhash format", async () => {
       const response = await fetch("http://localhost:3002/v1/heal/invalid-hash");
       expect(response.status).toBe(400);
-      const data = await response.json();
-      expect(data).toEqual({ error: "Labelhash must be 0x-prefixed" });
+      const data = await response.json() as ErrorResponse;
+      expect(data).toEqual({
+        status: 'error',
+        error: "Labelhash must be 0x-prefixed"
+      });
     });
 
     it("should handle non-existent labelhash", async () => {
       const nonExistentHash = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
       const response = await fetch(`http://localhost:3002/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
-      const data = await response.json();
-      expect(data).toEqual({ error: "Not found" });
+      const data = await response.json() as ErrorResponse;
+      expect(data).toEqual({
+        status: 'error',
+        error: "Label not found"
+      });
     });
   });
 
