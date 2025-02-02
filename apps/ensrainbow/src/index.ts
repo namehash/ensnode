@@ -2,10 +2,10 @@ import { join } from "path";
 import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
 import { Hono } from "hono";
-import type { Context } from "hono";
-import { isHex } from 'viem'
-import { labelHashToBytes } from "./utils/label-utils";
-import type { ErrorResponse, SuccessResponse } from "./utils/response-types";
+import type { Context as HonoContext } from "hono";
+import type { ENSRainbowContext } from "./operations";
+import { countLabels, heal } from "./operations";
+import type { HealthResponse } from "./utils/response-types";
 
 export const app = new Hono();
 export const DATA_DIR = process.env.VITEST
@@ -28,78 +28,24 @@ try {
   process.exit(1);
 }
 
-app.get("/v1/heal/:labelhash", async (c: Context) => {
-  const labelhash = c.req.param("labelhash");
-  
-  if (!labelhash.startsWith('0x')) {
-    const response: ErrorResponse = {
-      status: 'error',
-      error: "Labelhash must be 0x-prefixed"
-    };
-    return c.json(response, 400);
-  }
+const rainbow: ENSRainbowContext = { db };
 
-  let labelHashBytes: Buffer;
-  try {
-    labelHashBytes = labelHashToBytes(labelhash as `0x${string}`);
-  } catch (error) {
-    const response: ErrorResponse = {
-      status: 'error',
-      error: error instanceof Error ? error.message : "Invalid labelhash - must be a valid hex string"
-    };
-    return c.json(response, 400);
-  }
-
-  try {
-    const label = await db.get(labelHashBytes);
-    console.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
-    const response: SuccessResponse = {
-      status: 'success',
-      label
-    };
-    return c.json(response);
-  } catch (error) {
-    if ((error as any).code === "LEVEL_NOT_FOUND") {
-      if (process.env.NODE_ENV === 'development') {
-        console.info(`Unhealable labelhash request: ${labelhash}`);
-      }
-      const response: ErrorResponse = {
-        status: 'error',
-        error: "Label not found"
-      };
-      return c.json(response, 404);
-    }
-    console.error("Error healing label:", error);
-    const response: ErrorResponse = {
-      status: 'error',
-      error: "Internal server error"
-    };
-    return c.json(response, 500);
-  }
+app.get("/v1/heal/:labelhash", async (c: HonoContext) => {
+  const labelhash = c.req.param("labelhash") as `0x${string}`;
+  const result = await heal(rainbow, labelhash);
+  return c.json(result, result.errorCode);
 });
 
 // Health check endpoint
-app.get("/health", (c: Context) => c.json({ status: "ok" }));
+app.get("/health", (c: HonoContext) => {
+  const result: HealthResponse = { status: "ok" };
+  return c.json(result);
+});
 
 // Get count of healable labels
-app.get("/v1/labels/count", async (c: Context) => {
-  try {
-    // LevelDB doesn't maintain a running count of entries, so we need to
-    // iterate through all keys to get an accurate count. This operation
-    // becomes more expensive as the database grows.
-    let count = 0;
-    for await (const _ of db.keys()) {
-      count++;
-    }
-
-    return c.json({
-      count,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("Error counting labels:", error);
-    return c.json({ error: "Internal server error" }, 500);
-  }
+app.get("/v1/labels/count", async (c: HonoContext) => {
+  const result = await countLabels(rainbow);
+  return c.json(result, result.errorCode);
 });
 
 // Only start the server if this file is being run directly

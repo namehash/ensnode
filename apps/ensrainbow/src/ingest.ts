@@ -66,7 +66,9 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
 
     const parts = line.trim().split("\t");
     if (parts.length !== 2) {
-      console.warn(`Invalid line format - expected 2 columns but got ${parts.length}: "${line.slice(0, 100)}"`);
+      console.warn(
+        `Invalid line format - expected 2 columns but got ${parts.length}: "${line.slice(0, 100)}"`,
+      );
       continue;
     }
 
@@ -101,10 +103,12 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
 
   await db.close();
   console.log("\nData ingestion complete!");
-  
+
   // Validate the number of processed records
   if (processedRecords !== TOTAL_EXPECTED_RECORDS) {
-    console.warn(`Warning: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`);
+    console.warn(
+      `Warning: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
+    );
   } else {
     console.log(`Successfully ingested all ${processedRecords} records`);
   }

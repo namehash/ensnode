@@ -1,10 +1,11 @@
 import { serve } from "@hono/node-server";
+import { labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { labelhash } from "viem";
-import { labelHashToBytes } from "./utils/label-utils";
 import { app, db } from "./index";
-import type { ErrorResponse, SuccessResponse } from "./utils/response-types";
+import { labelHashToBytes } from "./utils/label-utils";
+import type { CountResponse, HealError, HealResponse, HealSuccess } from "./utils/response-types";
+import { ErrorCode, StatusCode } from "./utils/response-types";
 
 describe("ENS Rainbow API", () => {
   let server: ReturnType<typeof serve>;
@@ -40,11 +41,12 @@ describe("ENS Rainbow API", () => {
 
       const response = await fetch(`http://localhost:3002/v1/heal/${validLabelhash}`);
       expect(response.status).toBe(200);
-      const data = await response.json() as SuccessResponse;
-      expect(data).toEqual({
-        status: 'success',
-        label: validLabel
-      });
+      const data = (await response.json()) as HealResponse;
+      const expectedData: HealSuccess = {
+        status: StatusCode.Success,
+        label: validLabel,
+      };
+      expect(data).toEqual(expectedData);
     });
 
     it("should handle missing labelhash parameter", async () => {
@@ -57,22 +59,26 @@ describe("ENS Rainbow API", () => {
     it("should reject invalid labelhash format", async () => {
       const response = await fetch("http://localhost:3002/v1/heal/invalid-hash");
       expect(response.status).toBe(400);
-      const data = await response.json() as ErrorResponse;
-      expect(data).toEqual({
-        status: 'error',
-        error: "Labelhash must be 0x-prefixed"
-      });
+      const data = (await response.json()) as HealResponse;
+      const expectedData: HealError = {
+        status: StatusCode.Error,
+        error: "Labelhash must be 0x-prefixed",
+        errorCode: ErrorCode.BadRequest,
+      };
+      expect(data).toEqual(expectedData);
     });
 
     it("should handle non-existent labelhash", async () => {
       const nonExistentHash = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
       const response = await fetch(`http://localhost:3002/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
-      const data = await response.json() as ErrorResponse;
-      expect(data).toEqual({
-        status: 'error',
-        error: "Label not found"
-      });
+      const data = (await response.json()) as HealResponse;
+      const expectedData: HealError = {
+        status: StatusCode.Error,
+        error: "Label not found",
+        errorCode: ErrorCode.NotFound,
+      };
+      expect(data).toEqual(expectedData);
     });
   });
 
@@ -89,15 +95,18 @@ describe("ENS Rainbow API", () => {
     it("should return 0 when database is empty", async () => {
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
-      const data = (await response.json()) as { count: number; timestamp: string };
+      const data = (await response.json()) as CountResponse;
+      expect(data.status).toEqual(StatusCode.Success);
       expect(data.count).toBe(0);
+      expect(typeof data.timestamp).toBe("string");
+      expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
     });
 
     it("should return correct count of entries", async () => {
       // Add some test data
-      const testData = ["test1", "test2", "test3"].map(label => ({
+      const testData = ["test1", "test2", "test3"].map((label) => ({
         hash: labelhash(label),
-        label: label
+        label: label,
       }));
 
       for (const entry of testData) {
@@ -107,8 +116,11 @@ describe("ENS Rainbow API", () => {
 
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
-      const data = (await response.json()) as { count: number; timestamp: string };
+      const data = (await response.json()) as CountResponse;
+      expect(data.status).toEqual(StatusCode.Success);
       expect(data.count).toBe(3);
+      expect(typeof data.timestamp).toBe("string");
+      expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
     });
   });
 
