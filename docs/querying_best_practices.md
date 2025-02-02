@@ -8,10 +8,12 @@ When querying the ENSNode API for specific names or sets of names, it's crucial 
 
 - ENSNode indexes all onchain events where a subname is created in the ENS Registry. When these events are indexed, the labelhash of the subname is always known, however sometimes the label of the subname is unknown (strictly from indexed onchain data). When this happens ENSNode attempts to lookup the label for the labelhash through an attached ENSRainbow server. If this lookup succeeds, ENSNode will represent the subname using its true label. If this lookup fails, some label to represent the subname is still required. Therefore, ENSNode will represent the "unknown label" using its labelhash in the format `[labelhash]`.
 - Changes in the set of healable labels maintained by an ENSRainbow instance can modify the resulting indexed state in attached ENSNode instances.  For example, if at "time 1" ENSRainbow does not have knowledge to heal label X, but at "time 2" it does (from the perspective of an ENSNode client) a label represented as "unknown" at "time 1" could transition to become known at "time 2". Each ENSNode instance should ensure it is attached to an ENSRainbow instance that only grows its set of healable labels across time, such that from the perspective of an ENSNode client a "known label" should never transition back to its "unknown" representation. However, if an ENSNode instance is improperly operated, such a situation could occur.
-- The [ENSIP-15: ENS Name Normalization Standard](https://docs.ens.domains/ensip/15) may change across time such that the set of normalizable names grows (thankfully it should never shrink). For example, consider a new Unicode release that standardizes new emoji. The ENS Normalize standard may subsequently change to expand support for those new emoji.
-
 
 Therefore, always use the node of a name (calculated by the namehash of the name) as the stable identifier when querying the ENSNode API. The node of a name is immutable across time and works for all names, even if they are unknown, unnormalized, or unindexable.
+
+### ENS Normalization Standard Changes
+
+The [ENSIP-15: ENS Name Normalization Standard](https://docs.ens.domains/ensip/15) may change across time such that the set of normalizable names grows (thankfully it should never shrink). For example, consider a new Unicode release that standardizes new emoji. The ENS Normalize standard may subsequently change to expand support for those new emoji.
 
 ### Recommended Query Patterns
 
@@ -30,7 +32,6 @@ Example:
 First, let's prepare the name for querying by normalizing it and calculating its node:
 
 ```typescript
-import { normalize } from '@ensdomains/ensjs/utils'
 import { namehash, normalize } from 'viem/ens'
 
 // 1. Normalize the user input according to ENSIP-15
@@ -74,7 +75,6 @@ The query will return the domain information:
 Here's a complete example showing how to put it all together using a GraphQL client:
 
 ```typescript
-import { normalize } from '@ensdomains/ensjs/utils'
 import { namehash, normalize } from 'viem/ens'
 import { createClient } from 'graphql-request'
 
