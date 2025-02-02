@@ -53,7 +53,6 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   let batchSize = 0;
   let processedRecords = 0;
   const MAX_BATCH_SIZE = 10000;
-  const seenLabelHashes = new Set<string>();
 
   console.log("Loading data into LevelDB...");
 
@@ -83,11 +82,6 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
       labelHashBytes = labelHashToBytes(labelHash as Hex);
       const labelHashHex = labelHashBytes.toString('hex');
       
-      if (seenLabelHashes.has(labelHashHex)) {
-        continue;
-      }
-      
-    //   seenLabelHashes.add(labelHashHex);
       batch.put(labelHashBytes, label);
       batchSize++;
       processedRecords++;
@@ -124,7 +118,6 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   } else {
     console.log(`Successfully ingested all ${processedRecords} records`);
   }
-  console.log(`Total unique labelhashes stored: ${seenLabelHashes.size}`);
 }
 
 // Check if this module is being run directly

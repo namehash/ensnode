@@ -45,6 +45,8 @@ COPY --from=ensrainbow.data /app/ens_names.sql.gz .
 COPY --from=ensrainbow.data /app/ens_names.sql.gz.sha256sum .
 # Load input data into the key-value store
 RUN node dist/ingest.js
+# Verify the number of keys in the database
+RUN node dist/count-keys.js
 
 # API server stage
 FROM ensrainbow.runtime AS runner
