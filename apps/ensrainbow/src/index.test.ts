@@ -1,3 +1,4 @@
+import { join } from "path";
 import { serve } from "@hono/node-server";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -54,7 +55,7 @@ describe("ENS Rainbow API", () => {
       const response = await fetch("http://localhost:3002/v1/heal/invalid-hash");
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data).toEqual({ error: "Labelhash must be 0x-prefixed" });
+      expect(data).toEqual({ error: "Invalid labelhash length 12 characters (expected 66)" });
     });
 
     it("should handle non-existent labelhash", async () => {
@@ -85,7 +86,7 @@ describe("ENS Rainbow API", () => {
 
     it("should return correct count of entries", async () => {
       // Add some test data
-      const testData = ["test1", "test2", "test3"].map(label => ({
+      const testData = ["test1", "test2", "test2", "test3"].map(label => ({
         hash: labelhash(label),
         label: label
       }));

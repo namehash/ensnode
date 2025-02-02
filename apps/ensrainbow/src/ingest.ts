@@ -4,8 +4,10 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
-import { Hex } from "viem";
+import { ByteArray } from "viem";
 import { labelHashToBytes } from "./utils/label-utils";
+import { Labelhash } from "../../../packages/ensnode-utils/src/types";
+import { buildRainbowRecord } from "./utils/rainbow-record";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.gz");
@@ -23,7 +25,7 @@ const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
 async function loadEnsNamesToLevelDB(): Promise<void> {
   // Initialize LevelDB with proper types for key and value
-  const db = new ClassicLevel<Buffer, string>(DATA_DIR, {
+  const db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
     valueEncoding: "utf8",
     keyEncoding: "binary",
   });
@@ -68,34 +70,28 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
       continue;
     }
 
-    const parts = line.trim().split("\t");
-    if (parts.length !== 2) {
-      console.warn(`Invalid line format - expected 2 columns but got ${parts.length}: "${line.slice(0, 100)}"`);
-      continue;
-    }
-
-    const [labelHash, label] = parts;
-    let labelHashBytes: Buffer;
+    let record;
     try {
-      labelHashBytes = labelHashToBytes(labelHash as Hex);
-      batch.put(labelHashBytes, label);
-      batchSize++;
-      processedRecords++;
-
-      if (batchSize >= MAX_BATCH_SIZE) {
-        await batch.write();
-        batch = db.batch();
-        batchSize = 0;
-      }
-      bar.tick();
+      record = buildRainbowRecord(line);
     } catch (e) {
       if (e instanceof Error) {
-        console.warn(`Skipping invalid labelhash: ${e.message} '${labelHash}' - this record would be unreachable via ENS Subgraph`);
+        console.warn(`Skipping invalid record: ${e.message} - this record would be unreachable via ENS Subgraph`);
       } else {
-        console.warn(`Unknown error processing labelhash: '${labelHash}' - skipping record`);
+        console.warn(`Unknown error processing record - skipping`);
       }
       continue;
     }
+
+    batch.put(record.labelHash, record.label);
+    batchSize++;
+    processedRecords++;
+
+    if (batchSize >= MAX_BATCH_SIZE) {
+      await batch.write();
+      batch = db.batch();
+      batchSize = 0;
+    }
+    bar.tick();
   }
 
   // Write any remaining entries
