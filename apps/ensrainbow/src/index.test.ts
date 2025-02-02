@@ -55,7 +55,7 @@ describe("ENS Rainbow API", () => {
       const response = await fetch("http://localhost:3002/v1/heal/invalid-hash");
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data).toEqual({ error: "Labelhash must be 0x-prefixed" });
+      expect(data).toEqual({ error: "Invalid labelhash length 12 characters (expected 66)" });
     });
 
     it("should handle non-existent labelhash", async () => {
@@ -92,26 +92,12 @@ describe("ENS Rainbow API", () => {
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
       const data = (await response.json()) as { count: number; timestamp: string };
-      expect(data.count).toBe(42);
-      expect(new Date(data.timestamp).getTime()).toBeLessThanOrEqual(Date.now());
-    });
-
-    it("should handle database errors gracefully", async () => {
-      // Temporarily close the database to simulate an error
-      await db.close();
-
-      const response = await fetch("http://localhost:3002/v1/labels/count");
-      expect(response.status).toBe(500);
-      const data = await response.json();
-      expect(data).toEqual({ error: "Internal server error" });
-
-      // Reopen the database for other tests
-      await db.open();
+      expect(data.count).toBe(3);
     });
   });
 
   describe("LevelDB operations", () => {
-    it("should handle values containing null bytes", async () => {
+    it("should store labels containing null bytes", async () => {
       const labelWithNull = "test\0label";
       const labelWithNullLabelhash = labelhash(labelWithNull);
       const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);

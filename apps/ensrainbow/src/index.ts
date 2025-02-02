@@ -3,8 +3,8 @@ import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
 import { Hono } from "hono";
 import type { Context } from "hono";
+import { ByteArray } from 'viem'
 import { labelHashToBytes } from "./utils/label-utils";
-import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 export const app = new Hono();
 export const DATA_DIR = process.env.VITEST
@@ -13,11 +13,11 @@ export const DATA_DIR = process.env.VITEST
 
 console.log(`Initializing ENS Rainbow with data directory: ${DATA_DIR}`);
 
-export let db: ClassicLevel<Buffer, string>;
+export let db: ClassicLevel<ByteArray, string>;
 
 // Initialize database with error handling
 try {
-  db = new ClassicLevel<Buffer, string>(DATA_DIR, {
+  db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
     valueEncoding: "utf8",
     keyEncoding: "binary",
   });
@@ -31,11 +31,9 @@ try {
 app.get("/v1/heal/:labelhash", async (c: Context) => {
   const labelhash = c.req.param("labelhash");
   
-  if (!labelhash.startsWith('0x')) {
-    return c.json({ error: "Labelhash must be 0x-prefixed" }, 400);
-  }
 
-  let labelHashBytes: Buffer;
+
+  let labelHashBytes: ByteArray;
   try {
     labelHashBytes = labelHashToBytes(labelhash as `0x${string}`);
   } catch (error) {

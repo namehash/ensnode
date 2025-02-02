@@ -4,8 +4,8 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
-import { Hex } from "viem";
-import { labelHashToBytes } from "./utils/label-utils";
+import { ByteArray } from "viem";
+import { buildRainbowRecord } from "./utils/rainbow-record";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.gz");
@@ -15,11 +15,15 @@ const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.
 // as of January 30, 2024 from the Graph Protocol's ENS rainbow tables
 // Source file: ens_names.sql.gz
 // SHA256: a6316b1e7770b1f3142f1f21d4248b849a5c6eb998e3e66336912c9750c41f31
+// Note: The input file contains one known invalid record at line 10878 
+// where the labelhash value is literally "hash". This record is skipped
+// during ingestion since it would be unreachable through the ENS Subgraph anyway.
+// See: https://github.com/namehash/ensnode/issues/140
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
 async function loadEnsNamesToLevelDB(): Promise<void> {
   // Initialize LevelDB with proper types for key and value
-  const db = new ClassicLevel<Buffer, string>(DATA_DIR, {
+  const db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
     valueEncoding: "utf8",
     keyEncoding: "binary",
   });
@@ -69,35 +73,28 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
       continue;
     }
 
-    const parts = line.trim().split("\t");
-    if (parts.length !== 2) {
-      console.warn(`Invalid line format - expected 2 columns but got ${parts.length}: "${line.slice(0, 100)}"`);
-      continue;
-    }
-
-    const [labelHash, label] = parts;
-    let labelHashBytes: Buffer;
+    let record;
     try {
-      labelHashBytes = labelHashToBytes(labelHash as Hex);
-      
-      batch.put(labelHashBytes, label);
-      batchSize++;
-      processedRecords++;
-
-      if (batchSize >= MAX_BATCH_SIZE) {
-        await batch.write();
-        batch = db.batch();
-        batchSize = 0;
-      }
-      bar.tick();
+      record = buildRainbowRecord(line);
     } catch (e) {
       if (e instanceof Error) {
-        console.warn(`Error processing hash: ${e.message} '${labelHash}'`);
+        console.warn(`Skipping invalid record: ${e.message} - this record would be unreachable via ENS Subgraph`);
       } else {
-        console.warn(`Unknown error processing hash: '${labelHash}'`);
+        console.warn(`Unknown error processing record - skipping`);
       }
       continue;
     }
+
+    batch.put(record.labelHash, record.label);
+    batchSize++;
+    processedRecords++;
+
+    if (batchSize >= MAX_BATCH_SIZE) {
+      await batch.write();
+      batch = db.batch();
+      batchSize = 0;
+    }
+    bar.tick();
   }
 
   // Write any remaining entries
