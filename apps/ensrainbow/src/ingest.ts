@@ -79,7 +79,6 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
     let labelHashBytes: Buffer;
     try {
       labelHashBytes = labelHashToBytes(labelHash as Hex);
-      const labelHashHex = labelHashBytes.toString('hex');
       
       batch.put(labelHashBytes, label);
       batchSize++;
