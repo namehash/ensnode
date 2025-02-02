@@ -7,7 +7,7 @@ When querying the ENSNode API for specific names or sets of names, it's crucial 
 ### Label Mutability
 
 - ENSNode indexes all onchain events where a subname is created in the ENS Registry. When these events are indexed, the labelhash of the subname is always known, however sometimes the label of the subname is unknown (strictly from indexed onchain data). When this happens ENSNode attempts to lookup the label for the labelhash through an attached ENSRainbow server. If this lookup succeeds, ENSNode will represent the subname using its true label. If this lookup fails, some label to represent the subname is still required. Therefore, ENSNode will represent the "unknown label" using its labelhash in the format `[labelhash]`.
-- Changes in the set of healable labels maintained by an ENSRainbow instance can modify the resulting indexed state in attached ENSNode instances.  For example, if at "time 1" ENSRainbow does not have knowledge to heal label X, but at "time 2" it does (from the perspective of an ENSNode client) a label represented as "unknown" at "time 1" could transition to become known at "time 2". Each ENSNode instance should ensure it is attached to an ENSRainbow instance that only grows its set of healable labels across time, such that from the perspective of an ENSNode client a "known label" should never transition back to its "unknown" representation. However, if an ENSNode instance is improperly operated, such a situation could occur.
+- Changes in the set of healable labels maintained by an ENSRainbow instance can modify the resulting indexed state in attached ENSNode instances. For example, if at "time 1" ENSRainbow does not have knowledge to heal label X, but at "time 2" it does (from the perspective of an ENSNode client) a label represented as "unknown" at "time 1" could transition to become known at "time 2". Each ENSNode instance should ensure it is attached to an ENSRainbow instance that only grows its set of healable labels across time, such that from the perspective of an ENSNode client a "known label" should never transition back to its "unknown" representation. However, if an ENSNode instance is improperly operated, such a situation could occur.
 
 ### ENS Normalization Standard Changes
 
@@ -32,21 +32,23 @@ Example:
 First, let's prepare the name for querying by normalizing it and calculating its node:
 
 ```typescript
-import { namehash, normalize } from 'viem/ens'
+import { namehash, normalize } from "viem/ens";
 
 // 1. Normalize the user input according to ENSIP-15
-const userInput = 'Vitalik.eth'
-const normalizedName = normalize(userInput)
+const userInput = "Vitalik.eth";
+const normalizedName = normalize(userInput);
 
 // 2. Calculate the node from the normalized name
-const node = namehash(normalizedName)
+const node = namehash(normalizedName);
 ```
 
 Now use this node to query the domain id in the ENSNode API:
 
 ```graphql
 {
-  domain(id: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835") {
+  domain(
+    id: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835"
+  ) {
     id
     name
     labelName
@@ -75,21 +77,21 @@ The query will return the domain information:
 Here's a complete example showing how to put it all together using a GraphQL client:
 
 ```typescript
-import { namehash, normalize } from 'viem/ens'
-import { createClient } from 'graphql-request'
+import { namehash, normalize } from "viem/ens";
+import { createClient } from "graphql-request";
 
 async function queryENSName(userInput: string) {
   // 1. Normalize the user input
-  const normalizedName = normalize(userInput)
-  
+  const normalizedName = normalize(userInput);
+
   // 2. Calculate the node
-  const node = namehash(normalizedName)
-  
+  const node = namehash(normalizedName);
+
   // 3. Set up the GraphQL client
   const client = createClient({
-    url: 'YOUR_ENSNODE_ENDPOINT'
-  })
-  
+    url: "YOUR_ENSNODE_ENDPOINT",
+  });
+
   // 4. Define the query
   const query = `
     query GetDomain($id: ID!) {
@@ -101,11 +103,11 @@ async function queryENSName(userInput: string) {
         createdAt
       }
     }
-  `
-  
+  `;
+
   // 5. Execute the query
-  const result = await client.request(query, { id: node })
-  return result
+  const result = await client.request(query, { id: node });
+  return result;
 }
 ```
 
@@ -113,8 +115,8 @@ async function queryENSName(userInput: string) {
 
 When querying for name values sourced directly from onchain data (e.g., ENS NFTs, contract events), you must:
 
-1. Skip any normalization step - the name value passed to namehash must be exactly as it appears onchain, even if unnnormalized
-2. Calculate the node by taking the namehash of the onchain name (without any normalization)
+1. Skip any normalization step - the name value passed to namehash must be exactly as it appears onchain, even if unnnormalized.
+2. Calculate the node by taking the namehash of the onchain name (without any normalization). Be warned however that unnormalized labels may contain "." characters within the label value which can confuse namehash if special precautions are not taken.
 3. Query the domain id in the ENSNode API using the node of the name
 
 This pattern is crucial when dealing with unnormalized names that exist onchain. For example, if while examining onchain data you see a registration for "EXAMPLE.eth" (note the uppercase unnormalized characters), attempting to normalize this name in the process of querying ENSNode for additional information about it would result in looking up details for a different node in the ENS Registry (in this case the node for "example.eth" rather than "EXAMPLE.eth").
@@ -126,6 +128,7 @@ The query structure in Pattern 2 remains the same as Pattern 1, except the norma
 ENSNode may return unnormalized labels associated with indexed names. It is important to note that **ENSNode clients should never attempt to normalize labels returned by ENSNode**. This is because when ENSNode returns an unnormalized label, that label is associated with a specific node that has been indexed. Normalizing an unnormalized label in this context would represent a different node.
 
 There are effectively two distinct query patterns to consider:
+
 1. User input / offchain data → ENSNode data: Normalization is appropriate and necessary
 2. Onchain data → ENSNode data: Normalization should NOT be performed
 
