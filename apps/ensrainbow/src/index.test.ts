@@ -103,7 +103,7 @@ describe("ENS Rainbow API", () => {
   });
 
   describe("LevelDB operations", () => {
-    it("should handle values containing null bytes", async () => {
+    it("should store labels containing null bytes", async () => {
       const labelWithNull = "test\0label";
       const labelWithNullLabelhash = labelhash(labelWithNull);
       const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);

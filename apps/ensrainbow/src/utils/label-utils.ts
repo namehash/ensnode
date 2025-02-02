@@ -1,10 +1,10 @@
 import { Hex, hexToBytes } from 'viem';
 
 /**
- * Converts a label hash to bytes, with validation
- * @param labelHash The label hash to convert
+ * Converts a Labelhash to bytes, with validation
+ * @param labelHash The Labelhash to convert
  * @returns A Buffer containing the bytes
- * @throws Error if the input is not a valid 32-byte hex string
+ * @throws Error if `labelHash` is not a valid 32-byte hex string
  */
 export function labelHashToBytes(labelHash: Hex): Buffer {
   try {
