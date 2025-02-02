@@ -5,8 +5,6 @@ import { createGunzip } from "zlib";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
 import { ByteArray } from "viem";
-import { labelHashToBytes } from "./utils/label-utils";
-import { Labelhash } from "../../../packages/ensnode-utils/src/types";
 import { buildRainbowRecord } from "./utils/rainbow-record";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
