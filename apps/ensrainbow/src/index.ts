@@ -5,11 +5,10 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import { ByteArray } from 'viem'
 import { labelHashToBytes } from "./utils/label-utils";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 export const app = new Hono();
-export const DATA_DIR = process.env.VITEST
-  ? join(process.cwd(), "test-data")
-  : process.env.DATA_DIR || join(process.cwd(), "data");
+export const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 
 console.log(`Initializing ENS Rainbow with data directory: ${DATA_DIR}`);
 

@@ -92,7 +92,7 @@ describe("ENS Rainbow API", () => {
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
       const data = (await response.json()) as { count: number; timestamp: string };
-      expect(data.count).toBe(3);
+      expect(data.count).toBe(42);
     });
   });
 
