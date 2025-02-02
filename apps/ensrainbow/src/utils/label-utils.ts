@@ -1,4 +1,4 @@
-import { Hex, hexToBytes } from 'viem';
+import { Hex, hexToBytes } from "viem";
 
 /**
  * Converts a label hash to bytes, with validation
@@ -17,6 +17,6 @@ export function labelHashToBytes(labelHash: Hex): Buffer {
     if (e instanceof Error) {
       throw e;
     }
-    throw new Error('Invalid hex format');
+    throw new Error("Invalid hex format");
   }
-} 
+}

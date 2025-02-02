@@ -1,0 +1,98 @@
+import { ClassicLevel } from "classic-level";
+import { labelHashToBytes } from "./utils/label-utils";
+import type {
+  CountError,
+  CountResponse,
+  CountSuccess,
+  HealError,
+  HealResponse,
+  HealSuccess,
+} from "./utils/response-types";
+import { ErrorCode, StatusCode } from "./utils/response-types";
+
+export interface ENSRainbowContext {
+  db: ClassicLevel<Buffer, string>;
+}
+
+export const heal = async (
+  context: ENSRainbowContext,
+  labelhash: `0x${string}`,
+): Promise<HealResponse> => {
+  if (!labelhash.startsWith("0x")) {
+    const result: HealError = {
+      status: StatusCode.Error,
+      error: "Labelhash must be 0x-prefixed",
+      errorCode: ErrorCode.BadRequest,
+    };
+    return result;
+  }
+
+  let labelHashBytes: Buffer;
+  try {
+    labelHashBytes = labelHashToBytes(labelhash);
+  } catch (error) {
+    const defaultErrorMsg = "Invalid labelhash - must be a valid hex string";
+    const result: HealError = {
+      status: StatusCode.Error,
+      error: (error as Error).message ?? defaultErrorMsg,
+      errorCode: ErrorCode.BadRequest,
+    };
+    return result;
+  }
+
+  try {
+    const label = await context.db.get(labelHashBytes);
+    console.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
+    const result: HealSuccess = {
+      status: StatusCode.Success,
+      label,
+    };
+    return result;
+  } catch (error) {
+    if ((error as any).code === "LEVEL_NOT_FOUND") {
+      if (process.env.NODE_ENV === "development") {
+        console.info(`Unhealable labelhash request: ${labelhash}`);
+      }
+      const result: HealError = {
+        status: StatusCode.Error,
+        error: "Label not found",
+        errorCode: ErrorCode.NotFound,
+      };
+      return result;
+    }
+    console.error("Error healing label:", error);
+    const result: HealError = {
+      status: StatusCode.Error,
+      error: "Internal server error",
+      errorCode: ErrorCode.ServerError,
+    };
+    return result;
+  }
+};
+
+export const countLabels = async (context: ENSRainbowContext): Promise<CountResponse> => {
+  try {
+    // LevelDB doesn't maintain a running count of entries, so we need to
+    // iterate through all keys to get an accurate count. This operation
+    // becomes more expensive as the database grows.
+    let count = 0;
+    for await (const _ of context.db.keys()) {
+      count++;
+    }
+
+    const result: CountSuccess = {
+      status: StatusCode.Success,
+      count,
+      timestamp: new Date().toISOString(),
+    };
+    return result;
+  } catch (error) {
+    console.error("Error counting labels:", error);
+    const result: CountError = {
+      status: StatusCode.Error,
+      error: "Internal server error",
+      errorCode: ErrorCode.ServerError,
+    };
+    return result;
+  }
+};

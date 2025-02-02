@@ -1,6 +1,7 @@
 node_modules/
 dist/
 data/
+test-data/
 *.log
 .env
 ens_names.sql.gz
