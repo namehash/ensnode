@@ -13,8 +13,8 @@ describe("labelHashToBytes", () => {
   // Test case: labelhash without 0x prefix
   it("should throw error when labelhash does not begin with 0x", () => {
     const noPrefix = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-    // @ts-expect-error - Testing invalid input
-    expect(() => labelHashToBytes(noPrefix)).toThrow(
+    // Testing invalid input
+    expect(() => labelHashToBytes(noPrefix as Labelhash)).toThrow(
       "Invalid labelhash length 64 characters (expected 66)",
     );
   });
@@ -22,8 +22,8 @@ describe("labelHashToBytes", () => {
   // Test case: labelhash with 1x prefix
   it("should throw error when labelhash begins with 1x", () => {
     const onePrefix = "1x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-    // @ts-expect-error - Testing invalid input
-    expect(() => labelHashToBytes(onePrefix)).toThrow("Labelhash must be 0x-prefixed");
+    // Testing invalid input
+    expect(() => labelHashToBytes(onePrefix as Labelhash)).toThrow("Labelhash must be 0x-prefixed");
   });
 
   // Test case: mixed-case labelhash characters
