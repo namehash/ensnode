@@ -3,37 +3,46 @@
 ENSNode is a multichain indexer for ENS, powered by Ponder.
 
 The ENSNode monorepo contains multiple modules in the following subdirectories:
-- [`apps`](apps)  executable applications.
+
+- [`apps`](apps) executable applications.
 - [`packages`](packages) for libraries that can be embedded into apps.
 
 ## Applications
 
 ### [`apps/ensnode`](apps/ensnode)
+
 The main ENSNode indexer application enabling multichain indexing for ENS.
 
 ### [`apps/ensrainbow`](apps/ensrainbow)
+
 A sidecar service for healing ENS labels. It provides a simple API to recover labels from their hashes. This optimizes a number of ENS use cases, including indexing of ENS data. See the [ENSRainbow documentation](apps/ensrainbow/README.md) for more details.
 
 ## Documentation
 
 ### [`docs/ensnode`](docs/ensnode)
+
 Documentation website for [ENSNode application](apps/ensnode).
 
 ### [`docs/ensrainbow`](docs/ensrainbow)
+
 Documentation website for [ENSRainbow application](apps/ensrainbow).
 
 ## Libraries
 
 ### [`packages/ensnode-utils`](packages/ensnode-utils)
+
 Common utilities used across ENSNode applications
 
 ### [`packages/ponder-schema`](packages/ponder-schema)
+
 Shared Ponder schema definitions
 
 ### [`packages/ponder-subgraph-api`](packages/ponder-subgraph-api)
+
 Subgraph API compatibility layer
 
 ### [`packages/shared-configs`](packages/shared-configs)
+
 Shared configuration files
 
 ## Quick start
@@ -54,13 +63,16 @@ Shared configuration files
 ### Run the indexer
 
 #### Prepare workspace environment
+
 Clone this repository:
+
 ```
 git clone git@github.com:namehash/ensnode.git
 cd ensnode
 ```
 
 Install workspace dependencies:
+
 ```
 pnpm install
 ```
@@ -68,14 +80,17 @@ pnpm install
 #### Prepare application environment
 
 Go into the main ENSNode application root directory:
+
 ```
 cd apps/ensnode
 ```
 
 Configure for your local application environment:
+
 ```
 cp .env.local.example .env.local
 ```
+
 then review the docs inside your .env.local file for configuration instructions.
 
 - `ACTIVE_PLUGINS` — a comma-separated list of plugin names. Available plugin names are: `eth`, `base.eth`, `linea.eth`. The activated plugins list determines which contracts and chains are indexed. Any permutation of plugins might be activated (except no plugins activated) for single-chain or multi-chain indexing.
@@ -85,6 +100,7 @@ then review the docs inside your .env.local file for configuration instructions.
 - `DATABASE_URL` is your postgres database connection string
 
 Once your `.env.local` is configured, launch the indexer by running:
+
 - `pnpm ponder dev` for development mode,
 - `pnpm ponder start` for production mode.
 
@@ -93,6 +109,7 @@ To learn more about those commands, go to https://ponder.sh/docs/api-reference/p
 ### Query indexed data
 
 ENSNode exposes two GraphQL endpoints to query:
+
 - `/` uses a Ponder-native GraphQL schema
 - `/subgraph` uses a subgraph-compatible GraphQL schema
 
@@ -103,20 +120,16 @@ Fetch data about the three most recently-created domains.
 <details>
   <summary>Ponder-native query</summary>
 
-  ```gql
-  {
-    domains(
-      orderBy: "createdAt"
-      orderDirection: "desc"
-      limit: 3
-    ) {
-      items {
-        name
-        expiryDate
-      }
+```gql
+{
+  domains(orderBy: "createdAt", orderDirection: "desc", limit: 3) {
+    items {
+      name
+      expiryDate
     }
   }
-  ```
+}
+```
 
   <details>
     <summary>Ponder-native response</summary>
@@ -142,20 +155,21 @@ Fetch data about the three most recently-created domains.
       }
     }
     ```
+
   </details>
 </details>
 
 <details>
   <summary>Subgraph-compatible query</summary>
 
-  ```gql
-  {
-    domains(orderBy: createdAt, orderDirection: desc, first: 3) {
-        name
-        expiryDate
-    }
+```gql
+{
+  domains(orderBy: createdAt, orderDirection: desc, first: 3) {
+    name
+    expiryDate
   }
-  ```
+}
+```
 
   <details>
     <summary>Subgraph-native response</summary>
@@ -180,5 +194,6 @@ Fetch data about the three most recently-created domains.
       }
     }
     ```
+
   </details>
 </details>
