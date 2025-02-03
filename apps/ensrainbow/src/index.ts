@@ -2,12 +2,12 @@ import { join } from "path";
 import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
 import { Hono } from "hono";
-import { ByteArray } from 'viem'
-import { labelHashToBytes } from "./utils/label-utils";
-import { LABELHASH_COUNT_KEY } from "./utils/constants";
 import type { Context as HonoContext } from "hono";
+import { ByteArray } from "viem";
 import type { ENSRainbowContext } from "./operations";
 import { countLabels, heal } from "./operations";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
+import { labelHashToBytes } from "./utils/label-utils";
 import type { HealthResponse } from "./utils/response-types";
 
 export const app = new Hono();
@@ -30,7 +30,6 @@ try {
   console.error(`Please ensure the directory ${DATA_DIR} exists and is writable`);
   process.exit(1);
 }
-
 
 const rainbow: ENSRainbowContext = { db };
 

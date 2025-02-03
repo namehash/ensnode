@@ -15,7 +15,7 @@ const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.
 // as of January 30, 2024 from the Graph Protocol's ENS rainbow tables
 // Source file: ens_names.sql.gz
 // SHA256: a6316b1e7770b1f3142f1f21d4248b849a5c6eb998e3e66336912c9750c41f31
-// Note: The input file contains one known invalid record at line 10878 
+// Note: The input file contains one known invalid record at line 10878
 // where the labelhash value is literally "hash". This record is skipped
 // during ingestion since it would be unreachable through the ENS Subgraph anyway.
 // See: https://github.com/namehash/ensnode/issues/140
@@ -78,7 +78,9 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
       record = buildRainbowRecord(line);
     } catch (e) {
       if (e instanceof Error) {
-        console.warn(`Skipping invalid record: ${e.message} - this record would be unreachable via ENS Subgraph`);
+        console.warn(
+          `Skipping invalid record: ${e.message} - this record would be unreachable via ENS Subgraph`,
+        );
       } else {
         console.warn(`Unknown error processing record - skipping`);
       }

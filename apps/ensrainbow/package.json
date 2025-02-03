@@ -23,7 +23,10 @@
     "docker:push": "docker push ensnode/ensrainbow",
     "test": "DATA_DIR=test-data vitest run",
     "test:watch": "DATA_DIR=test-data vitest",
-    "test:coverage": "DATA_DIR=test-data vitest run --coverage"
+    "test:coverage": "DATA_DIR=test-data vitest run --coverage",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hono/node-server": "^1.4.1",

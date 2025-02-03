@@ -1,4 +1,6 @@
 import { ClassicLevel } from "classic-level";
+import { ByteArray } from "viem";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
 import { labelHashToBytes } from "./utils/label-utils";
 import type {
   CountError,
@@ -9,8 +11,6 @@ import type {
   HealSuccess,
 } from "./utils/response-types";
 import { ErrorCode, StatusCode } from "./utils/response-types";
-import { ByteArray } from "viem";
-import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 export interface ENSRainbowContext {
   db: ClassicLevel<ByteArray, string>;

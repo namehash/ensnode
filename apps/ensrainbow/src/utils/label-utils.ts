@@ -1,5 +1,5 @@
-import { hexToBytes, ByteArray } from 'viem';
-import { Labelhash } from '../../../../packages/ensnode-utils/src/types';
+import { ByteArray, hexToBytes } from "viem";
+import { Labelhash } from "../../../../packages/ensnode-utils/src/types";
 
 /**
  * Converts a Labelhash to bytes, with validation
@@ -13,13 +13,14 @@ export function labelHashToBytes(labelHash: Labelhash): ByteArray {
       throw new Error(`Invalid labelhash length ${labelHash.length} characters (expected 66)`);
     }
     if (labelHash !== labelHash.toLowerCase()) {
-      throw new Error('Labelhash must be in lowercase');
+      throw new Error("Labelhash must be in lowercase");
     }
-    if (!labelHash.startsWith('0x')) {
-      throw new Error('Labelhash must be 0x-prefixed');
+    if (!labelHash.startsWith("0x")) {
+      throw new Error("Labelhash must be 0x-prefixed");
     }
     const bytes = hexToBytes(labelHash);
-    if (bytes.length !== 32) { // should be redundant but keeping it for the principle of defensive programming
+    if (bytes.length !== 32) {
+      // should be redundant but keeping it for the principle of defensive programming
       throw new Error(`Invalid labelhash length ${bytes.length} bytes (expected 32)`);
     }
     return bytes;
@@ -27,6 +28,6 @@ export function labelHashToBytes(labelHash: Labelhash): ByteArray {
     if (e instanceof Error) {
       throw e;
     }
-    throw new Error('Invalid hex format');
+    throw new Error("Invalid hex format");
   }
-} 
+}
