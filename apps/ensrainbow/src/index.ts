@@ -2,6 +2,9 @@ import { join } from "path";
 import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
 import { Hono } from "hono";
+import { ByteArray } from 'viem'
+import { labelHashToBytes } from "./utils/label-utils";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
 import type { Context as HonoContext } from "hono";
 import type { ENSRainbowContext } from "./operations";
 import { countLabels, heal } from "./operations";
@@ -14,11 +17,11 @@ export const DATA_DIR = process.env.VITEST
 
 console.log(`Initializing ENS Rainbow with data directory: ${DATA_DIR}`);
 
-export let db: ClassicLevel<Buffer, string>;
+export let db: ClassicLevel<ByteArray, string>;
 
 // Initialize database with error handling
 try {
-  db = new ClassicLevel<Buffer, string>(DATA_DIR, {
+  db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
     valueEncoding: "utf8",
     keyEncoding: "binary",
   });
@@ -27,6 +30,7 @@ try {
   console.error(`Please ensure the directory ${DATA_DIR} exists and is writable`);
   process.exit(1);
 }
+
 
 const rainbow: ENSRainbowContext = { db };
 

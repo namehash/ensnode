@@ -180,7 +180,20 @@ pnpm install
 pnpm ingest
 ```
 
-3. Start the service:
+3. Verify database contents (optional):
+
+```bash
+# Count and verify the number of labels in the database
+pnpm count-keys
+```
+
+This will:
+- Read and display the existing count from the database (if present)
+- Count all unique labels in the database
+- Store the count for future reference
+- Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
+
+4. Start the service:
 
 ```bash
 pnpm start
@@ -195,6 +208,7 @@ pnpm build
 # Run with compiled JavaScript
 pnpm start:prod
 pnpm ingest:prod
+pnpm count-keys:prod
 ```
 
 ## Environment Variables

@@ -2,10 +2,13 @@ import { serve } from "@hono/node-server";
 import { labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { labelhash } from "viem";
+import { labelHashToBytes } from "./utils/label-utils";
 import { app, db } from "./index";
 import { labelHashToBytes } from "./utils/label-utils";
 import type { CountResponse, HealError, HealResponse, HealSuccess } from "./utils/response-types";
 import { ErrorCode, StatusCode } from "./utils/response-types";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 describe("ENS Rainbow API", () => {
   let server: ReturnType<typeof serve>;
@@ -91,7 +94,7 @@ describe("ENS Rainbow API", () => {
     });
   });
 
-  describe("GET /v1/count", () => {
+  describe("GET /v1/labels/count", () => {
     it("should return 0 when database is empty", async () => {
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
@@ -102,23 +105,15 @@ describe("ENS Rainbow API", () => {
       expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
     });
 
-    it("should return correct count of entries", async () => {
-      // Add some test data
-      const testData = ["test1", "test2", "test3"].map((label) => ({
-        hash: labelhash(label),
-        label: label,
-      }));
-
-      for (const entry of testData) {
-        const labelHashBytes = labelHashToBytes(entry.hash);
-        await db.put(labelHashBytes, entry.label);
-      }
+    it("should return correct count from LABEL_COUNT_KEY", async () => {
+      // Set a specific count in the database
+      await db.put(LABELHASH_COUNT_KEY, "42");
 
       const response = await fetch("http://localhost:3002/v1/labels/count");
       expect(response.status).toBe(200);
       const data = (await response.json()) as CountResponse;
       expect(data.status).toEqual(StatusCode.Success);
-      expect(data.count).toBe(3);
+      expect(data.count).toBe(42);
       expect(typeof data.timestamp).toBe("string");
       expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
     });
