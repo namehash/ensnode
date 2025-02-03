@@ -1,4 +1,7 @@
-# ENSNode API Querying Best Practices
+---
+title: ENSNode API Querying Best Practices
+description: A guide about querying best practices
+---
 
 ## Stable Name Identification
 
