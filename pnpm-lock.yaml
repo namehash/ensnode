@@ -149,6 +149,21 @@ importers:
         specifier: ^0.33.5
         version: 0.33.5
 
+  docs/ensrainbow:
+    dependencies:
+      '@astrojs/starlight':
+        specifier: ^0.31.1
+        version: 0.31.1(astro@5.2.3(@types/node@20.17.14)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))
+      '@astrojs/vercel':
+        specifier: ^8.0.5
+        version: 8.0.5(astro@5.2.3(@types/node@20.17.14)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))(react@18.2.0)(rollup@4.31.0)
+      astro:
+        specifier: ^5.2.3
+        version: 5.2.3(@types/node@20.17.14)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
+
   packages/ensnode-utils:
     devDependencies:
       '@biomejs/biome':

@@ -19,6 +19,9 @@ A sidecar service for healing ENS labels. It provides a simple API to recover la
 ### [`docs/ensnode`](docs/ensnode)
 Documentation website for [ENSNode application](apps/ensnode).
 
+### [`docs/ensrainbow`](docs/ensrainbow)
+Documentation website for [ENSRainbow application](apps/ensrainbow).
+
 ## Libraries
 
 ### [`packages/ensnode-utils`](packages/ensnode-utils)
