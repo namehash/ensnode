@@ -14,6 +14,11 @@ The main ENSNode indexer application enabling multichain indexing for ENS.
 ### [`apps/ensrainbow`](apps/ensrainbow)
 A sidecar service for healing ENS labels. It provides a simple API to recover labels from their hashes. This optimizes a number of ENS use cases, including indexing of ENS data. See the [ENSRainbow documentation](apps/ensrainbow/README.md) for more details.
 
+## Documentation
+
+### [`docs/ensnode`](docs/ensnode)
+Documentation website for [ENSNode application](apps/ensnode).
+
 ## Libraries
 
 ### [`packages/ensnode-utils`](packages/ensnode-utils)
