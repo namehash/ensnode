@@ -5,7 +5,7 @@ import { createGunzip } from "zlib";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
 import { ByteArray } from "viem";
-import { buildRainbowRecord } from "./utils/rainbow-record";
+import { buildRainbowRecord } from "./utils/rainbow-record.js";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.gz");

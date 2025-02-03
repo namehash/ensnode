@@ -1,8 +1,8 @@
 import { join } from "path";
 import { ClassicLevel } from "classic-level";
 import { ByteArray } from "viem";
-import { byteArraysEqual } from "./utils/byte-utils";
-import { LABELHASH_COUNT_KEY } from "./utils/constants";
+import { byteArraysEqual } from "./utils/byte-utils.js";
+import { LABELHASH_COUNT_KEY } from "./utils/constants.js";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 
