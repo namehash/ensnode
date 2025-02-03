@@ -24,8 +24,8 @@ const TOTAL_EXPECTED_RECORDS = 133_856_894;
 async function loadEnsNamesToLevelDB(): Promise<void> {
   // Initialize LevelDB with proper types for key and value
   const db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
-    valueEncoding: "utf8",
     keyEncoding: "binary",
+    valueEncoding: "utf8",
   });
 
   // Clear existing database before starting

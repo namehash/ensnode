@@ -9,8 +9,8 @@ const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 async function countKeys(): Promise<void> {
   // Initialize LevelDB with same configuration as ingest.ts
   const db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
-    valueEncoding: "utf8",
     keyEncoding: "binary",
+    valueEncoding: "utf8",
   });
 
   // Try to read existing count

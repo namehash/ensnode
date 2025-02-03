@@ -22,8 +22,8 @@ export let db: ClassicLevel<ByteArray, string>;
 // Initialize database with error handling
 try {
   db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
-    valueEncoding: "utf8",
     keyEncoding: "binary",
+    valueEncoding: "utf8",
   });
 } catch (error) {
   console.error("Failed to initialize database:", error);
