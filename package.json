@@ -14,7 +14,9 @@
   "engines": {
     "node": ">=18.20.5"
   },
-  "resolutions": {
-    "vite": "5.4.12"
+  "pnpm": {
+    "overrides": {
+      "ponder>vite": "5.4.14"
+    }
   }
 }
