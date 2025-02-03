@@ -1,6 +1,7 @@
 import { ByteArray, labelhash } from 'viem';
 import { Labelhash } from '../../../../packages/ensnode-utils/src/types';
 import { labelHashToBytes } from './label-utils';
+import { byteArraysEqual } from './byte-utils';
 
 export interface RainbowRecord {
   labelHash: ByteArray;
@@ -36,15 +37,9 @@ export function buildRainbowRecord(line: string, options: RainbowRecordOptions =
   if (options.validateLabelHash) {
     const computedLabelHash = labelHashToBytes(labelhash(label) as Labelhash);
 
-    if (computedLabelHash.length !== labelHash.length) {
-      throw new Error(`Labelhash validation failed: length mismatch ${computedLabelHash.length} !== ${labelHash.length}`);
-    }
-
-    for (let i = 0; i < computedLabelHash.length; i++) {
-      if (computedLabelHash[i] !== labelHash[i]) {
+    if (!byteArraysEqual(labelHash, computedLabelHash)) {
         throw new Error(`Labelhash validation failed: computed hash does not match provided hash`);
-      }
-    }
+     }
   }
 
   return {

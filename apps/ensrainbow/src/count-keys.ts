@@ -1,12 +1,14 @@
 import { join } from "path";
 import { ClassicLevel } from "classic-level";
 import { LABELHASH_COUNT_KEY } from "./utils/constants";
+import { ByteArray } from "viem";
+import { byteArraysEqual } from "./utils/byte-utils";
 
 const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
 
 async function countKeys(): Promise<void> {
   // Initialize LevelDB with same configuration as ingest.ts
-  const db = new ClassicLevel<Buffer, string>(DATA_DIR, {
+  const db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
     valueEncoding: "utf8",
     keyEncoding: "binary",
   });
@@ -28,7 +30,7 @@ async function countKeys(): Promise<void> {
   let count = 0;
   for await (const [key] of db.iterator()) {
     // Don't count the count key itself
-    if (!key.equals(LABELHASH_COUNT_KEY)) {
+    if (!byteArraysEqual(key, LABELHASH_COUNT_KEY)) {
       count++;
     }
   }

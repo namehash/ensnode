@@ -9,25 +9,18 @@ import type {
   HealSuccess,
 } from "./utils/response-types";
 import { ErrorCode, StatusCode } from "./utils/response-types";
+import { ByteArray } from "viem";
+import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 export interface ENSRainbowContext {
-  db: ClassicLevel<Buffer, string>;
+  db: ClassicLevel<ByteArray, string>;
 }
 
 export const heal = async (
   context: ENSRainbowContext,
   labelhash: `0x${string}`,
 ): Promise<HealResponse> => {
-  if (!labelhash.startsWith("0x")) {
-    const result: HealError = {
-      status: StatusCode.Error,
-      error: "Labelhash must be 0x-prefixed",
-      errorCode: ErrorCode.BadRequest,
-    };
-    return result;
-  }
-
-  let labelHashBytes: Buffer;
+  let labelHashBytes: ByteArray;
   try {
     labelHashBytes = labelHashToBytes(labelhash);
   } catch (error) {
@@ -72,13 +65,8 @@ export const heal = async (
 
 export const countLabels = async (context: ENSRainbowContext): Promise<CountResponse> => {
   try {
-    // LevelDB doesn't maintain a running count of entries, so we need to
-    // iterate through all keys to get an accurate count. This operation
-    // becomes more expensive as the database grows.
-    let count = 0;
-    for await (const _ of context.db.keys()) {
-      count++;
-    }
+    const countStr = await context.db.get(LABELHASH_COUNT_KEY);
+    const count = parseInt(countStr, 10);
 
     const result: CountSuccess = {
       status: StatusCode.Success,
@@ -87,7 +75,7 @@ export const countLabels = async (context: ENSRainbowContext): Promise<CountResp
     };
     return result;
   } catch (error) {
-    console.error("Error counting labels:", error);
+    console.error("Failed to retrieve label count:", error);
     const result: CountError = {
       status: StatusCode.Error,
       error: "Internal server error",

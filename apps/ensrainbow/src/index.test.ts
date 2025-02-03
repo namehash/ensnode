@@ -2,10 +2,8 @@ import { serve } from "@hono/node-server";
 import { labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { labelhash } from "viem";
 import { labelHashToBytes } from "./utils/label-utils";
 import { app, db } from "./index";
-import { labelHashToBytes } from "./utils/label-utils";
 import type { CountResponse, HealError, HealResponse, HealSuccess } from "./utils/response-types";
 import { ErrorCode, StatusCode } from "./utils/response-types";
 import { LABELHASH_COUNT_KEY } from "./utils/constants";
@@ -65,7 +63,7 @@ describe("ENS Rainbow API", () => {
       const data = (await response.json()) as HealResponse;
       const expectedData: HealError = {
         status: StatusCode.Error,
-        error: "Labelhash must be 0x-prefixed",
+        error: "Invalid labelhash length 12 characters (expected 66)",
         errorCode: ErrorCode.BadRequest,
       };
       expect(data).toEqual(expectedData);
@@ -95,14 +93,13 @@ describe("ENS Rainbow API", () => {
   });
 
   describe("GET /v1/labels/count", () => {
-    it("should return 0 when database is empty", async () => {
+    it("should throw an error when database is empty", async () => {
       const response = await fetch("http://localhost:3002/v1/labels/count");
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
-      expect(data.status).toEqual(StatusCode.Success);
-      expect(data.count).toBe(0);
-      expect(typeof data.timestamp).toBe("string");
-      expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
+      expect(data.status).toEqual(StatusCode.Error);
+      expect(data.error).toBe("Internal server error");
+      expect(data.errorCode).toEqual(ErrorCode.ServerError);
     });
 
     it("should return correct count from LABEL_COUNT_KEY", async () => {
