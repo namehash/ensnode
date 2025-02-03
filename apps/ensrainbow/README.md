@@ -134,27 +134,26 @@ Error Responses:
   ```json
   {
     "status": "error",
-    "error": "Labelhash must be 0x-prefixed"
+    "error": "Invalid labelhash - must be a valid hex string",
+    "errorCode": 400
   }
   ```
-  ```json
-  {
-    "status": "error",
-    "error": "Invalid labelhash - must be a valid hex string"
-  }
-  ```
+
 - `404 Not Found`: When no label is found for the given labelhash
   ```json
   {
     "status": "error",
-    "error": "Label not found"
+    "error": "Label not found",
+    "errorCode": 404
   }
   ```
+
 - `500 Internal Server Error`: When an unexpected error occurs
   ```json
   {
     "status": "error",
-    "error": "Internal server error"
+    "error": "Internal server error",
+    "errorCode": 500
   }
   ```
 
@@ -164,7 +163,14 @@ Error Responses:
 curl http://localhost:3001/v1/labels/count
 ```
 
-Response: `{"count":133856480, "timestamp":"2025-01-30T11:18:56Z"}`
+Response:
+```json
+{
+  "status": "success",
+  "count": 133856480,
+  "timestamp": "2024-01-30T11:18:56Z"
+}
+```
 
 ## Local Development
 
@@ -225,4 +231,3 @@ pnpm count-keys:prod
 Licensed under the MIT License, Copyright © 2023-present [NameHash Labs](https://namehashlabs.org).
 
 See [LICENSE](./LICENSE) for more information.
-
