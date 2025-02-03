@@ -1,10 +1,11 @@
 {
   "extends": "@namehash/shared-configs/tsconfig.lib.json",
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "**/*.test.ts"],
   "compilerOptions": {
     "allowImportingTsExtensions": false,
     "noEmit": false,
+    "rootDir": "src",
     "outDir": "dist"
   }
 }

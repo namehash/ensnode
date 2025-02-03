@@ -96,6 +96,9 @@ importers:
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
+      ensnode-utils:
+        specifier: workspace:*
+        version: link:../../packages/ensnode-utils
       hono:
         specifier: 'catalog:'
         version: 4.6.17
