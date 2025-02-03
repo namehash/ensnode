@@ -31,6 +31,7 @@
   "dependencies": {
     "@hono/node-server": "^1.4.1",
     "classic-level": "^1.4.1",
+    "ensnode-utils": "workspace:*",
     "hono": "catalog:",
     "progress": "^2.0.3",
     "tsx": "^4.7.1",

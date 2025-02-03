@@ -1,5 +1,5 @@
+import type { Labelhash } from "ensnode-utils/types";
 import { ByteArray, labelhash } from "viem";
-import { Labelhash } from "../../../../packages/ensnode-utils/src/types";
 import { byteArraysEqual } from "./byte-utils";
 import { labelHashToBytes } from "./label-utils";
 

@@ -1,5 +1,5 @@
+import type { Labelhash } from "ensnode-utils/types";
 import { describe, expect, it } from "vitest";
-import { Labelhash } from "../../../../packages/ensnode-utils/src/types";
 import { labelHashToBytes } from "./label-utils";
 
 describe("labelHashToBytes", () => {

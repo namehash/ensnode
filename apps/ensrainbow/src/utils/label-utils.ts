@@ -1,5 +1,5 @@
+import type { Labelhash } from "ensnode-utils/types";
 import { ByteArray, hexToBytes } from "viem";
-import { Labelhash } from "../../../../packages/ensnode-utils/src/types";
 
 /**
  * Converts a Labelhash to bytes, with validation
