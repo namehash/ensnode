@@ -15,12 +15,15 @@
     "./types": "./src/types.ts"
   },
   "scripts": {
+    "test": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
   "devDependencies": {
+    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

@@ -187,9 +187,15 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
+      '@namehash/shared-configs':
+        specifier: 'workspace:'
+        version: link:../shared-configs
       typescript:
         specifier: 'catalog:'
         version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.0.3(@types/node@20.17.14)
 
   packages/ponder-schema:
     dependencies:
