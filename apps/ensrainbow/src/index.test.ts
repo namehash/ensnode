@@ -1,12 +1,12 @@
 import { serve } from "@hono/node-server";
 import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import type { CountResponse, HealError, HealResponse, HealSuccess } from "ensrainbow-sdk/types";
 import { labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { app, db } from "./index";
 import { LABELHASH_COUNT_KEY } from "./utils/constants";
-import { labelHashToBytes } from "./utils/label-utils";
 
 describe("ENS Rainbow API", () => {
   let server: ReturnType<typeof serve>;
