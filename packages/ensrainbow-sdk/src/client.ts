@@ -9,30 +9,16 @@ export interface EnsRainbowApiClientOptions {
  *
  * @example
  * ```typescript
- * // default options, implicit
- * const client = new EnsRainbowApiClient();
- *
- * // default options, explicit
- * const client = new EnsRainbowApiClient(defaultClientOptions());
- *
- * // custom options
  * const client = new EnsRainbowApiClient({
- *  endpointUrl: new URL("https://my-custom-api.ensrainbow.io"),
+ *  endpointUrl: new URL("https://api.ensrainbow.io"),
  * });
  * ```
  */
 export class EnsRainbowApiClient {
-  private readonly options: EnsRainbowApiClientOptions;
+  constructor(private readonly options: EnsRainbowApiClientOptions) {}
 
   /**
-   *
-   * @param options if not provided, default options will be used
-   */
-  constructor(options?: EnsRainbowApiClientOptions) {
-    this.options = options || defaultClientOptions();
-  }
-
-  /**
+   * Heal a labelhash to its original label.
    *
    * Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
    *
@@ -47,7 +33,6 @@ export class EnsRainbowApiClient {
    *
    * @example
    * ```typescript
-   * const client = new EnsRainbowApiClient();
    * const response = await client.heal(
    *  "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
    * );
@@ -75,15 +60,4 @@ export class EnsRainbowApiClient {
       } satisfies HealError;
     }
   }
-}
-
-const DEFAULT_ENSRAINBOW_API_URL = "https://api.ensrainbow.io";
-
-/**
- * @returns default client options
- */
-export function defaultClientOptions(): EnsRainbowApiClientOptions {
-  return {
-    endpointUrl: new URL(DEFAULT_ENSRAINBOW_API_URL),
-  };
 }
