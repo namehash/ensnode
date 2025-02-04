@@ -22,6 +22,9 @@
     "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
+  "dependencies": {
+    "viem": "catalog:"
+  },
   "devDependencies": {
     "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
