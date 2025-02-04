@@ -5,6 +5,7 @@ import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { makeRegistrationId } from "../lib/ids";
+import { heal } from "../lib/label-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
 
@@ -76,8 +77,9 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
-      // TODO: materialze labelName via rainbow tables ala Registry.ts
-      const labelName = undefined;
+      // materialze labelName via rainbow tables ala Registry.ts
+      // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/ethRegistrar.ts#L56-L61
+      const labelName = await heal(labelhash);
 
       const id = makeRegistrationId(ownedName, labelhash, node);
 

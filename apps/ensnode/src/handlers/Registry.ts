@@ -6,6 +6,7 @@ import type { Labelhash, Node } from "ensnode-utils/types";
 import { type Hex, zeroAddress } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
+import { heal } from "../lib/label-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
 
@@ -126,9 +127,9 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         if (!domain.name) {
           const parent = await context.db.find(schema.domain, { id: node });
 
-          // TODO: implement sync rainbow table lookups
-          // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L111
-          const labelName = encodeLabelhash(label);
+          // sync rainbow table lookups
+          // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
+          const labelName = (await heal(label)) || encodeLabelhash(label);
           const name = parent?.name ? `${labelName}.${parent.name}` : labelName;
 
           await context.db.update(schema.domain, { id: domain.id }).set({ name, labelName });
