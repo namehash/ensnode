@@ -53,6 +53,9 @@ importers:
       ensnode-utils:
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
+      ensrainbow-sdk:
+        specifier: workspace:*
+        version: link:../../packages/ensrainbow-sdk
       hono:
         specifier: 'catalog:'
         version: 4.6.17
