@@ -20,7 +20,7 @@ const ensRainbowApiClient = new EnsRainbowApiClient({
  **/
 export async function heal(labelhash: Labelhash) {
   try {
-    // runtime check, ENS rainbow encodes this logic as well
+    // runtime check, ENS rainbow enforces this validation as well
     labelHashToBytes(labelhash);
   } catch (error) {
     console.error(`Invalid labelhash - must be a valid hex string: ${error}`);

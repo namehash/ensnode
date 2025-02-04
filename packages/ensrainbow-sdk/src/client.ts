@@ -19,15 +19,16 @@ export class EnsRainbowApiClient {
   constructor(private readonly options: EnsRainbowApiClientOptions) {}
 
   /**
-   * Heal a labelhash to its original label.
+   * Attempt to heal a labelhash to its original label.
    *
-   * Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
+   * Note on returned labels: ENSRainbow returns labels exactly as they are
+   * represented in source rainbow table data. This means:
    *
    * - Labels may or may not be ENS-normalized
    * - Labels can contain any valid string, including dots, null bytes, or be empty
    * - Clients should handle all possible string values appropriately
    *
-   * @param labelhash
+   * @param labelhash all lowercase hex string with 0x prefix with length of 66 characters in total
    * @returns
    *
    * @link https://github.com/namehash/ensnode/tree/effc77d/apps/ensrainbow#heal-label
