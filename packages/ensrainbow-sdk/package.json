@@ -13,6 +13,7 @@
   "exports": {
     "./client": "./src/client.ts",
     "./consts": "./src/consts.ts",
+    "./label-utils": "./src/label-utils.ts",
     "./types": "./src/types.ts"
   },
   "scripts": {
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
+    "ensnode-utils": "workspace:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
