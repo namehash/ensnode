@@ -22,7 +22,7 @@ export const pluginNamespace = createPluginNamespace(ownedName);
 // constrain indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range
 const START_BLOCK: ContractConfig["startBlock"] = undefined;
-const END_BLOCK: ContractConfig["endBlock"] = undefined;
+const END_BLOCK: ContractConfig["endBlock"] = 4_000_000;
 
 const REGISTRY_OLD_ADDRESS = "0x314159265dd8dbb310642f98f50c066173c1259b";
 const REGISTRY_ADDRESS = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
@@ -54,24 +54,29 @@ export const config = createConfig({
       network: "mainnet",
       abi: RESOLVER_ABI,
       // NOTE: this indexes every event ever emitted that looks like this
-      filter: {
-        event: [
-          "AddrChanged",
-          "AddressChanged",
-          "NameChanged",
-          "ABIChanged",
-          "PubkeyChanged",
-          "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-          "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
-          "ContenthashChanged",
-          "InterfaceChanged",
-          "AuthorisationChanged",
-          "VersionChanged",
-          "DNSRecordChanged",
-          "DNSRecordDeleted",
-          "DNSZonehashChanged",
-        ],
-      },
+      filter: [
+        { event: "AddrChanged", args: {} },
+        { event: "AddressChanged", args: {} },
+        { event: "NameChanged", args: {} },
+        { event: "ABIChanged", args: {} },
+        { event: "PubkeyChanged", args: {} },
+        {
+          event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+          args: {},
+        },
+        {
+          event:
+            "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+          args: {},
+        },
+        { event: "ContenthashChanged", args: {} },
+        { event: "InterfaceChanged", args: {} },
+        { event: "AuthorisationChanged", args: {} },
+        { event: "VersionChanged", args: {} },
+        { event: "DNSRecordChanged", args: {} },
+        { event: "DNSRecordDeleted", args: {} },
+        { event: "DNSZonehashChanged", args: {} },
+      ],
       ...blockConfig(START_BLOCK, 3327417, END_BLOCK),
     },
     [pluginNamespace("BaseRegistrar")]: {

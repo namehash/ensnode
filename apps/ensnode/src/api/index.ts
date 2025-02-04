@@ -1,15 +1,22 @@
-import { ponder } from "ponder:registry";
-import { default as schema } from "ponder:schema";
-import { graphql as ponderGraphQL } from "ponder";
+import { db } from "ponder:api";
+import schema from "ponder:schema";
+import { Hono } from "hono";
+import { client, graphql as ponderGraphQL } from "ponder";
 import { graphql as subgraphGraphQL } from "ponder-subgraph-api/middleware";
 
+const app = new Hono();
+
+// use ponder client support
+app.use("/sql/*", client({ db, schema }));
+
 // use ponder middleware at root
-ponder.use("/", ponderGraphQL());
+app.use("/", ponderGraphQL({ db, schema }));
 
 // use our custom graphql middleware at /subgraph
-ponder.use(
+app.use(
   "/subgraph",
   subgraphGraphQL({
+    db,
     schema,
 
     // describes the polymorphic (interface) relationships in the schema
@@ -48,3 +55,5 @@ ponder.use(
     },
   }),
 );
+
+export default app;

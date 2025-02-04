@@ -145,9 +145,12 @@ export interface PolymorphicConfig {
 }
 
 export function buildGraphQLSchema(
-  schema: Schema,
+  _schema: Schema,
   polymorphicConfig: PolymorphicConfig = { types: {}, fields: {} },
 ): GraphQLSchema {
+  // copy schema to avoid injecting `intersection_table`s into ponder's schema object
+  const schema: Schema = { ..._schema };
+
   // first, construct TablesRelationConfig with the existing schema. this is necessary because
   // we need access to relations by table, which this helper resolves
   const _tablesConfig = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
