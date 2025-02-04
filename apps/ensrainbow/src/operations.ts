@@ -1,5 +1,6 @@
 import { ClassicLevel } from "classic-level";
 import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import type {
   CountError,
   CountResponse,
@@ -10,7 +11,6 @@ import type {
 } from "ensrainbow-sdk/types";
 import { ByteArray } from "viem";
 import { LABELHASH_COUNT_KEY } from "./utils/constants.js";
-import { labelHashToBytes } from "./utils/label-utils.js";
 
 export interface ENSRainbowContext {
   db: ClassicLevel<ByteArray, string>;

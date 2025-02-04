@@ -1,4 +1,5 @@
-import type { HealError, HealResponse, Labelhash } from "./types";
+import type { Labelhash } from "ensnode-utils/types";
+import type { HealError, HealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;

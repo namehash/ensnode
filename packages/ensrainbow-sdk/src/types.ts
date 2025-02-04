@@ -56,5 +56,3 @@ export interface CountError extends BaseCountResponse<typeof StatusCode.Error> {
 }
 
 export type CountResponse = CountSuccess | CountError;
-
-export type Labelhash = `0x${string}`;
