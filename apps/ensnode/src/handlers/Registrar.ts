@@ -4,7 +4,7 @@ import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-hel
 import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
-import { heal } from "../lib/graphnode-helpers";
+import { labelByHash } from "../lib/graphnode-helpers";
 import { makeRegistrationId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
@@ -79,7 +79,13 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       // materialze labelName via rainbow tables ala Registry.ts
       // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/ethRegistrar.ts#L56-L61
-      const labelName = await heal(labelhash);
+      const label = await labelByHash(labelhash);
+      const canIndexLabel = isLabelIndexable(label);
+      // NOTE: undefined type is helpful for passing to drizzle, which
+      // will ignore the input rather that set the value in the db to `NULL`
+      // if we were to return `null`.
+      const labelName = canIndexLabel ? label : undefined;
+      const name = canIndexLabel ? `${label}.${ownedName}` : undefined;
 
       const id = makeRegistrationId(ownedName, labelhash, node);
 
@@ -96,6 +102,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
         labelName,
+        name,
       });
 
       // log RegistrationEvent

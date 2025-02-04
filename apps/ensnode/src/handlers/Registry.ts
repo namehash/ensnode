@@ -1,11 +1,11 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
+import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import type { Labelhash, Node } from "ensnode-utils/types";
 import { type Hex, zeroAddress } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { heal } from "../lib/graphnode-helpers";
+import { labelByHash } from "../lib/graphnode-helpers";
 import { makeResolverId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
@@ -129,7 +129,8 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
           // sync rainbow table lookups
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
-          const labelName = (await heal(label)) || encodeLabelhash(label);
+          const label = await labelByHash(event.args.label);
+          const labelName = isLabelIndexable(label) ? label : encodeLabelhash(event.args.label);
           const name = parent?.name ? `${labelName}.${parent.name}` : labelName;
 
           await context.db.update(schema.domain, { id: domain.id }).set({ name, labelName });

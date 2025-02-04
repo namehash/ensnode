@@ -73,7 +73,7 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  * Related logic in ENS Subgraph:
  * https://github.com/ensdomains/ens-subgraph/blob/master/src/utils.ts#L68
  */
-export const isLabelIndexable = (label: string) => {
+export const isLabelIndexable = (label: string | null): boolean => {
   if (!label) return false;
 
   for (let i = 0; i < label.length; i++) {

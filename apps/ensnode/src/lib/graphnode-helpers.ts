@@ -1,53 +1,38 @@
-import { isLabelIndexable } from "ensnode-utils/subname-helpers";
 import type { Labelhash } from "ensnode-utils/types";
 import { EnsRainbowApiClient } from "ensrainbow-sdk/client";
-import { DEFAULT_ENSRAINBOW_URL } from "ensrainbow-sdk/consts";
+import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
-import { normalize } from "viem/ens";
 
 const ensRainbowApiClient = new EnsRainbowApiClient({
   endpointUrl: new URL(process.env.ENSRAINBOW_URL || DEFAULT_ENSRAINBOW_URL),
 });
 
 /**
- * Heal a labelhash to its original label.
+ * Heal a labelhash to its original label. It mirrors `ens.nameByHash` function:
+ * https://github.com/graphprotocol/graph-node/blob/master/runtime/test/wasm_test/api_version_0_0_4/ens_name_by_hash.ts#L9-L11
  *
  * @returns a healed label for a given labelhash, if possible.
  *
- * NOTE: undefined return type is helpful for passing to drizzle, which
- * will ignore the input rather that set the value in the db to `NULL`
- * if we were to return `null`.
  **/
-export async function heal(labelhash: Labelhash) {
-  try {
-    // runtime check, ENS rainbow enforces this validation as well
-    labelHashToBytes(labelhash);
-  } catch (error) {
-    console.error(`Invalid labelhash - must be a valid hex string: ${error}`);
-
-    return undefined;
-  }
+export async function labelByHash(labelhash: Labelhash): Promise<string | null> {
+  // runtime check, ENS rainbow enforces this validation as well
+  labelHashToBytes(labelhash);
 
   const healResponse = await ensRainbowApiClient.heal(labelhash);
 
-  if (healResponse.status === "error") {
-    console.error(`Error healing labelhash ${labelhash}: ${healResponse.error}`);
-
-    return undefined;
+  if (healResponse.status === StatusCode.Success) {
+    return healResponse.label;
   }
 
-  const { label } = healResponse;
+  if (healResponse.errorCode === ErrorCode.NotFound) {
+    // This is a warning because it's possible that the labelhash is not
+    // recorded in the ENSRainbow database.
+    console.warn(`Healing labelhash error: '${labelhash}' not found`);
 
-  // if the indexer can't store the label yet, consider it unhealable
-  if (!isLabelIndexable(label)) {
-    return undefined;
+    return null;
   }
 
-  // if the label isn't normalized, consider it unhealable
-  if (label !== normalize(label)) {
-    return undefined;
-  }
-
-  // this is a healed, normalized label that the indexer can store
-  return label;
+  throw new Error(
+    `Healing labelhash error ${labelhash}: ${healResponse.error}; error code: ${healResponse.errorCode}`,
+  );
 }
