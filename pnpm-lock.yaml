@@ -99,6 +99,9 @@ importers:
       ensnode-utils:
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
+      ensrainbow-sdk:
+        specifier: workspace:*
+        version: link:../../packages/ensrainbow-sdk
       hono:
         specifier: 'catalog:'
         version: 4.6.17
@@ -181,6 +184,15 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.0.3(@types/node@20.17.14)
+
+  packages/ensrainbow-sdk:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 1.9.4
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
 
   packages/ponder-schema:
     dependencies:

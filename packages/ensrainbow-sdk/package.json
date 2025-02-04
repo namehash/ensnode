@@ -1,0 +1,21 @@
+{
+  "name": "ensrainbow-sdk",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ensrainbow-sdk"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint:ci": "biome ci"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:"
+  }
+}
