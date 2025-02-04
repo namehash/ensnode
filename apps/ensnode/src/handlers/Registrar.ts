@@ -4,8 +4,8 @@ import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-hel
 import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
+import { heal } from "../lib/graphnode-helpers";
 import { makeRegistrationId } from "../lib/ids";
-import { heal } from "../lib/label-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
 

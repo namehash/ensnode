@@ -5,8 +5,8 @@ import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import type { Labelhash, Node } from "ensnode-utils/types";
 import { type Hex, zeroAddress } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
+import { heal } from "../lib/graphnode-helpers";
 import { makeResolverId } from "../lib/ids";
-import { heal } from "../lib/label-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { heal } from "../src/lib/label-helpers";
+import { heal } from "../src/lib/graphnode-helpers";
 
 describe("heal", () => {
   it("heals a labelhash", async () => {
