@@ -105,7 +105,6 @@ import { capitalize, intersectionOf } from "./helpers";
 type Parent = Record<string, any>;
 type Context = {
   getDataLoader: ReturnType<typeof buildDataLoaderCache>;
-  metadataStore: any; // NOTE: type metadataStore as any for now
   drizzle: Drizzle<{ [key: string]: OnchainTable }>;
 };
 
@@ -551,17 +550,9 @@ export function buildGraphQLSchema(
       });
     });
 
-  queryFields._meta = {
-    type: GraphQLMeta,
-    resolve: async (_source, _args, context) => {
-      const status = await context.metadataStore.getStatus();
-      return { status };
-    },
-  };
-
   return new GraphQLSchema({
     // Include these here so they are listed first in the printed schema.
-    types: [GraphQLJSON, GraphQLBigInt, GraphQLPageInfo, GraphQLMeta],
+    types: [GraphQLJSON, GraphQLBigInt, GraphQLPageInfo],
     query: new GraphQLObjectType({
       name: "Query",
       fields: queryFields,
@@ -592,11 +583,6 @@ const GraphQLBigInt = new GraphQLScalarType({
       );
     }
   },
-});
-
-const GraphQLMeta = new GraphQLObjectType({
-  name: "Meta",
-  fields: { status: { type: GraphQLJSON } },
 });
 
 const columnToGraphQLCore = (

@@ -41,10 +41,6 @@ export const graphql = (
 ) => {
   const graphqlSchema = buildGraphQLSchema(schema, polymorphicConfig);
 
-  // const metadataStore = getMetadataStore({
-  //   database: globalThis.PONDER_DATABASE,
-  // });
-
   const yoga = createYoga({
     graphqlEndpoint: "*", // Disable built-in route validation, use Hono routing instead
     schema: graphqlSchema,
