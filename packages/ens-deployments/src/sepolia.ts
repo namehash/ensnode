@@ -14,7 +14,7 @@ import { Resolver as eth_Resolver } from "./abis/eth/Resolver";
 
 export default {
   eth: {
-    chain: { sepolia },
+    chain: sepolia,
 
     // Addresses and Start Blocks from ENS Sepolia Subgraph Manifest
     // https://ipfs.io/ipfs/QmdDtoN9QCRsBUsyoiiUUMQPPmPp5jimUQe81828UyWLtg

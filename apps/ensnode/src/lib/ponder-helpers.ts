@@ -5,7 +5,7 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
   args: ARGS;
 };
 
-// makes sure start and end blocks are valid for ponder, defaulting to 0
+// makes sure start and end blocks are valid for ponder
 export const blockConfig = (
   start: number | undefined,
   startBlock: number | undefined,

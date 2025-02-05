@@ -14,7 +14,7 @@ import { Resolver as eth_Resolver } from "./abis/eth/Resolver";
 
 export default {
   eth: {
-    chain: { anvil },
+    chain: anvil,
 
     // Addresses and Start Blocks from ens-test-env
     contracts: {

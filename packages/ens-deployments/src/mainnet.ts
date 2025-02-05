@@ -28,7 +28,7 @@ import { Resolver as linea_Resolver } from "./abis/linea/Resolver";
 
 export default {
   eth: {
-    chain: { mainnet },
+    chain: mainnet,
 
     // Mainnet Addresses and Start Blocks from ENS Mainnet Subgraph Manifest
     // https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
@@ -94,7 +94,7 @@ export default {
     },
   },
   base: {
-    chain: { base },
+    chain: base,
 
     // Base Addresses and Start Blocks from Basenames
     // https://github.com/base-org/basenames
@@ -140,7 +140,7 @@ export default {
     },
   },
   linea: {
-    chain: { linea },
+    chain: linea,
 
     // Linea Addresses and Start Blocks from Linea ENS
     // https://github.com/Consensys/linea-ens

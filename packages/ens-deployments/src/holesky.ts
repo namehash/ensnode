@@ -14,7 +14,7 @@ import { Resolver as eth_Resolver } from "./abis/eth/Resolver";
 
 export default {
   eth: {
-    chain: { holesky },
+    chain: holesky,
 
     // Addresses and Start Blocks from ENS Holesky Subgraph Manifest
     // https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex

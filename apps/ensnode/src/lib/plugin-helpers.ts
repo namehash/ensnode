@@ -1,8 +1,7 @@
-import { PluginName } from "@namehash/ens-deployments";
-import { NetworkConfig, createConfig } from "ponder";
-import { http } from "viem";
-import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
-import type { PonderENSPlugin } from "./types";
+import { NetworkConfig } from "ponder";
+import { http, Chain } from "viem";
+import { rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
+import type { OwnedName } from "./types";
 
 /**
  * A factory function that returns a function to create a namespaced contract
@@ -94,7 +93,7 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
  * @param availablePlugins is a list of available plugins
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { ownedName: PluginName }>(
+export function getActivePlugins<T extends { ownedName: OwnedName }>(
   availablePlugins: readonly T[],
 ): T[] {
   /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
@@ -146,39 +145,17 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
   ? R
   : never;
 
-export function definePonderENSPlugin<PLUGIN_NAME extends PluginName>(
-  pluginName: PLUGIN_NAME,
-  handlers: () => Promise<{ default: VoidFunction }>[],
-): PonderENSPlugin<PLUGIN_NAME> {
-  const namespace = createPluginNamespace(pluginName);
+export interface PonderENSPlugin<OWNED_NAME extends OwnedName> {
+  ownedName: OWNED_NAME;
+  namespace: typeof createPluginNamespace<OWNED_NAME>;
+  config: any;
+  activate: VoidFunction;
+}
 
+export function mapToNetworkConfig(chain: Chain): NetworkConfig {
   return {
-    ownedName: pluginName,
-    namespace,
-    createConfig({ chain, contracts, startBlock, endBlock }) {
-      const network: NetworkConfig = {
-        chainId: chain.id,
-        transport: http(rpcEndpointUrl(chain.id)),
-        maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
-      };
-
-      return createConfig({
-        networks: { base: network },
-        contracts: Object.fromEntries(
-          Object.entries(contracts).map(([contractName, contractConfig]) => [
-            // wrap contractNames in pluginNamespace to avoid ponder.on() collisions between plugins
-            namespace(contractName),
-            // map each AddressBookContractConfig to `ponder#ContractConfig` with the correct network
-            {
-              network: "base",
-              ...contractConfig,
-              ...blockConfig(startBlock, contractConfig.startBlock, endBlock),
-            },
-          ]),
-        ),
-      });
-    },
-
-    activate: () => Promise.all(handlers()).then((modules) => modules.map((m) => m.default())),
+    chainId: chain.id,
+    transport: http(rpcEndpointUrl(chain.id)),
+    maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
   };
 }

@@ -47,7 +47,7 @@ export type ContractsConfig<CONTRACT_NAMES extends string> = Record<
  * Encodes a plugin's source chain and contract configs
  */
 export interface PluginConfig<CONTRACT_NAMES extends string> {
-  chain: Record<string, Chain>;
+  chain: Chain;
   contracts: ContractsConfig<CONTRACT_NAMES>;
 }
 

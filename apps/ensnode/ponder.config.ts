@@ -1,22 +1,16 @@
-import { ENSDeploymentChain } from "@namehash/ens-deployments";
 import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
 import { deepMergeRecursive } from "./src/lib/ponder-helpers";
-import { plugin as baseEthPlugin } from "./src/plugins/base.eth/ponder.config";
-import { plugin as ethPlugin } from "./src/plugins/eth/ponder.config";
-import { plugin as lineaEthPlugin } from "./src/plugins/linea.eth/ponder.config";
-
-import addressbook from "@namehash/ens-deployments";
-
-const ENS_DEPLOYMENT_CHAIN: ENSDeploymentChain = "mainnet";
-const deploymentConfig = addressbook[ENS_DEPLOYMENT_CHAIN];
+import * as baseEthPlugin from "./src/plugins/base.eth/ponder.config";
+import * as ethPlugin from "./src/plugins/eth/ponder.config";
+import * as lineaEthPlugin from "./src/plugins/linea.eth/ponder.config";
 
 // list of all available plugins
 // any available plugin can be activated at runtime
-const availablePlugins = [ethPlugin, baseEthPlugin, lineaEthPlugin] as const;
+const availablePlugins = [baseEthPlugin, ethPlugin, lineaEthPlugin] as const;
 
 // merge of all available plugin configs to support correct typechecking
 // of the indexing handlers
-type AllPluginConfigs = MergedTypes<ReturnType<(typeof availablePlugins)[number]["createConfig"]>>;
+type AllPluginConfigs = MergedTypes<(typeof availablePlugins)[number]["config"]>;
 
 // Activates the indexing handlers of activated plugins.
 // Statically typed as the merge of all available plugin configs. However at
@@ -28,18 +22,7 @@ function activatePluginsAndGetConfig(): AllPluginConfigs {
   activePlugins.forEach((plugin) => plugin.activate());
 
   const activePluginsConfig = activePlugins
-    .map((plugin) => {
-      const pluginConfig = deploymentConfig[plugin.ownedName];
-      if (!pluginConfig) {
-        throw new Error(`Deployment PluginConfig for ${plugin.ownedName} not found.`);
-      }
-
-      return plugin.createConfig({
-        ...pluginConfig,
-        startBlock: undefined,
-        endBlock: undefined,
-      });
-    })
+    .map((plugin) => plugin.config)
     .reduce((acc, val) => deepMergeRecursive(acc, val), {} as AllPluginConfigs);
 
   return activePluginsConfig as AllPluginConfigs;
