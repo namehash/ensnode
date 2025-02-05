@@ -2,8 +2,7 @@ import type { ContractConfig } from "ponder";
 import type { Chain } from "viem";
 
 /**
- * A plugin name.
- *
+ * A plugin name
  */
 export type PluginName = "eth" | "base" | "linea";
 
@@ -33,14 +32,14 @@ export type PluginContractNames = {
 /**
  * A `ponder#ContractConfig` sans network, as it is provided by the contextual 'deployment'.
  */
-export type AddressBookContractConfig = Omit<ContractConfig, "network">;
+export type PluginContractConfig = Omit<ContractConfig, "network">;
 
 /**
  * Encodes the set of `ponder#ContractConfig`s within a plugin that indexes specific contracts.
  */
-export type ContractsConfig<CONTRACT_NAMES extends string> = Record<
+export type PluginContractsConfig<CONTRACT_NAMES extends string> = Record<
   CONTRACT_NAMES,
-  AddressBookContractConfig
+  PluginContractConfig
 >;
 
 /**
@@ -48,7 +47,7 @@ export type ContractsConfig<CONTRACT_NAMES extends string> = Record<
  */
 export interface PluginConfig<CONTRACT_NAMES extends string> {
   chain: Chain;
-  contracts: ContractsConfig<CONTRACT_NAMES>;
+  contracts: PluginContractsConfig<CONTRACT_NAMES>;
 }
 
 /**

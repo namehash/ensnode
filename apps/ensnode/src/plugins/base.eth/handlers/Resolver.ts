@@ -1,33 +1,33 @@
 import { ponder } from "ponder:registry";
 import { makeResolverHandlers } from "../../../handlers/Resolver";
-import { pluginNamespace as ns, ownedName } from "../ponder.config";
+import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
 
-const {
-  handleABIChanged,
-  handleAddrChanged,
-  handleAddressChanged,
-  handleContenthashChanged,
-  handleDNSRecordChanged,
-  handleDNSRecordDeleted,
-  handleDNSZonehashChanged,
-  handleInterfaceChanged,
-  handleNameChanged,
-  handlePubkeyChanged,
-  handleTextChanged,
-  handleVersionChanged,
-} = makeResolverHandlers(ownedName);
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"base.eth">) {
+  const {
+    handleABIChanged,
+    handleAddrChanged,
+    handleAddressChanged,
+    handleContenthashChanged,
+    handleDNSRecordChanged,
+    handleDNSRecordDeleted,
+    handleDNSZonehashChanged,
+    handleInterfaceChanged,
+    handleNameChanged,
+    handlePubkeyChanged,
+    handleTextChanged,
+    handleVersionChanged,
+  } = makeResolverHandlers(ownedName);
 
-export default function () {
-  ponder.on(ns("Resolver:AddrChanged"), handleAddrChanged);
-  ponder.on(ns("Resolver:AddressChanged"), handleAddressChanged);
-  ponder.on(ns("Resolver:NameChanged"), handleNameChanged);
-  ponder.on(ns("Resolver:ABIChanged"), handleABIChanged);
-  ponder.on(ns("Resolver:PubkeyChanged"), handlePubkeyChanged);
-  ponder.on(ns("Resolver:TextChanged"), handleTextChanged);
-  ponder.on(ns("Resolver:ContenthashChanged"), handleContenthashChanged);
-  ponder.on(ns("Resolver:InterfaceChanged"), handleInterfaceChanged);
-  ponder.on(ns("Resolver:VersionChanged"), handleVersionChanged);
-  ponder.on(ns("Resolver:DNSRecordChanged"), handleDNSRecordChanged);
-  ponder.on(ns("Resolver:DNSRecordDeleted"), handleDNSRecordDeleted);
-  ponder.on(ns("Resolver:DNSZonehashChanged"), handleDNSZonehashChanged);
+  ponder.on(namespace("Resolver:AddrChanged"), handleAddrChanged);
+  ponder.on(namespace("Resolver:AddressChanged"), handleAddressChanged);
+  ponder.on(namespace("Resolver:NameChanged"), handleNameChanged);
+  ponder.on(namespace("Resolver:ABIChanged"), handleABIChanged);
+  ponder.on(namespace("Resolver:PubkeyChanged"), handlePubkeyChanged);
+  ponder.on(namespace("Resolver:TextChanged"), handleTextChanged);
+  ponder.on(namespace("Resolver:ContenthashChanged"), handleContenthashChanged);
+  ponder.on(namespace("Resolver:InterfaceChanged"), handleInterfaceChanged);
+  ponder.on(namespace("Resolver:VersionChanged"), handleVersionChanged);
+  ponder.on(namespace("Resolver:DNSRecordChanged"), handleDNSRecordChanged);
+  ponder.on(namespace("Resolver:DNSRecordDeleted"), handleDNSRecordDeleted);
+  ponder.on(namespace("Resolver:DNSZonehashChanged"), handleDNSZonehashChanged);
 }

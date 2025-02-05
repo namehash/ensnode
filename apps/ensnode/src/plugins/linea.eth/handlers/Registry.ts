@@ -1,14 +1,18 @@
 import { ponder } from "ponder:registry";
 import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
-import { ownedName, pluginNamespace } from "../ponder.config";
+import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
 
-const { handleNewOwner, handleNewResolver, handleNewTTL, handleTransfer } =
-  makeRegistryHandlers(ownedName);
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"linea.eth">) {
+  const {
+    handleNewOwner, //
+    handleNewResolver,
+    handleNewTTL,
+    handleTransfer,
+  } = makeRegistryHandlers(ownedName);
 
-export default function () {
-  ponder.on(pluginNamespace("Registry:setup"), setupRootNode);
-  ponder.on(pluginNamespace("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(pluginNamespace("Registry:NewResolver"), handleNewResolver);
-  ponder.on(pluginNamespace("Registry:NewTTL"), handleNewTTL);
-  ponder.on(pluginNamespace("Registry:Transfer"), handleTransfer);
+  ponder.on(namespace("Registry:setup"), setupRootNode);
+  ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(namespace("Registry:NewResolver"), handleNewResolver);
+  ponder.on(namespace("Registry:NewTTL"), handleNewTTL);
+  ponder.on(namespace("Registry:Transfer"), handleTransfer);
 }
