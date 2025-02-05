@@ -8,7 +8,7 @@ import { blockConfig } from "../../lib/ponder-helpers";
 const deployment = DeploymentConfigs["mainnet"];
 const { chain, contracts } = deployment["eth"]!;
 
-export const ownedName = "eth";
+export const ownedName = "eth" as const;
 export const pluginNamespace = createPluginNamespace(ownedName);
 
 // constrain indexing between the following start/end blocks

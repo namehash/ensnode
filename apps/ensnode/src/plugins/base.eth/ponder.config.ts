@@ -9,7 +9,6 @@ const deployment = DeploymentConfigs["mainnet"];
 const { chain, contracts } = deployment["base"]!;
 
 export const ownedName = "base.eth" as const;
-
 export const pluginNamespace = createPluginNamespace(ownedName);
 
 // constrain indexing between the following start/end blocks

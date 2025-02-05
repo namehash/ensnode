@@ -6,9 +6,9 @@ import { blockConfig } from "../../lib/ponder-helpers";
 
 // TODO: dynamically create config with this as argument
 const deployment = DeploymentConfigs["mainnet"];
-const { chain, contracts } = deployment["eth"]!;
+const { chain, contracts } = deployment["linea"]!;
 
-export const ownedName = "linea.eth";
+export const ownedName = "linea.eth" as const;
 export const pluginNamespace = createPluginNamespace(ownedName);
 
 // constrain indexing between the following start/end blocks
