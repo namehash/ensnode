@@ -7,11 +7,11 @@ import sepolia from "./sepolia";
 
 export * from "./types";
 
-export const DeploymentConfigs: Record<ENSDeploymentChain, ENSDeploymentConfig> = {
+export const DeploymentConfigs = {
   mainnet,
   sepolia,
   holesky,
   "ens-test-env": ensTestEnv,
-};
+} satisfies Record<ENSDeploymentChain, ENSDeploymentConfig>;
 
 export default DeploymentConfigs;

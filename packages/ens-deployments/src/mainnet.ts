@@ -68,7 +68,7 @@ export default {
           { event: "DNSRecordChanged", args: {} },
           { event: "DNSRecordDeleted", args: {} },
           { event: "DNSZonehashChanged", args: {} },
-        ],
+        ] as const,
         startBlock: 3327417,
       },
       BaseRegistrar: {
@@ -119,7 +119,7 @@ export default {
           { event: "DNSRecordChanged", args: {} },
           { event: "DNSRecordDeleted", args: {} },
           { event: "DNSZonehashChanged", args: {} },
-        ],
+        ] as const,
         startBlock: 17571480,
       },
       BaseRegistrar: {
@@ -167,7 +167,7 @@ export default {
           { event: "DNSZonehashChanged", args: {} },
         ],
         startBlock: 6682888,
-      },
+      } as const,
       BaseRegistrar: {
         abi: linea_BaseRegistrar,
         address: "0x6e84390dCc5195414eC91A8c56A5c91021B95704",
