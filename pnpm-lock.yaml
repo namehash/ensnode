@@ -50,6 +50,9 @@ importers:
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+      '@namehash/ens-deployments':
+        specifier: workspace:*
+        version: link:../../packages/ens-deployments
       ensnode-utils:
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
@@ -160,6 +163,25 @@ importers:
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
+
+  packages/ens-deployments:
+    dependencies:
+      ponder:
+        specifier: 'catalog:'
+        version: 0.9.2(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+      viem:
+        specifier: 'catalog:'
+        version: 2.22.13(typescript@5.7.3)(zod@3.24.1)
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 1.9.4
+      '@namehash/shared-configs':
+        specifier: 'workspace:'
+        version: link:../shared-configs
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
 
   packages/ensnode-utils:
     devDependencies:

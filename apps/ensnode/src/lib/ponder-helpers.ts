@@ -1,21 +1,21 @@
-import { Event, EventNames } from "ponder:registry";
+import { Event } from "ponder:registry";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
 };
 
-// makes sure start and end blocks are valid for ponder
+// makes sure start and end blocks are valid for ponder, defaulting to 0
 export const blockConfig = (
   start: number | undefined,
-  startBlock: number,
+  startBlock: number | undefined,
   end: number | undefined,
 ): {
   startBlock: number | undefined;
   endBlock: number | undefined;
 } => ({
   // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
-  startBlock: Math.min(Math.max(start || 0, startBlock), end || Number.MAX_SAFE_INTEGER),
+  startBlock: Math.min(Math.max(start || 0, startBlock || 0), end || Number.MAX_SAFE_INTEGER),
   endBlock: end,
 });
 

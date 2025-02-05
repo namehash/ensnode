@@ -1,9 +1,19 @@
+import { PluginConfig, PluginContractNames } from "@namehash/ens-deployments";
+import type { ContractConfig, createConfig } from "ponder";
+import { createPluginNamespace } from "./plugin-helpers";
+
+export type PonderPluginOptions<PLUGIN_NAME extends keyof PluginContractNames> = Pick<
+  ContractConfig,
+  "startBlock" | "endBlock"
+> &
+  PluginConfig<PluginContractNames[PLUGIN_NAME]>;
+
 /**
- * An owned name for a plugin. Must end with `eth`.
- *
- * Owned names are used to distinguish between plugins that handle different
- * subnames. For example, a plugin that handles `eth` subnames will have an
- * owned name of `eth`, while a plugin that handles `base.eth` subnames will
- * have an owned name of `base.eth`.
+ * A Ponder Plugin provides a config and an `activate` fn
  */
-export type OwnedName = string;
+export interface PonderENSPlugin<PLUGIN_NAME extends keyof PluginContractNames> {
+  ownedName: PLUGIN_NAME;
+  namespace: ReturnType<typeof createPluginNamespace<PLUGIN_NAME>>;
+  createConfig: (options: PonderPluginOptions<PLUGIN_NAME>) => ReturnType<typeof createConfig>;
+  activate: VoidFunction;
+}
