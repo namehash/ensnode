@@ -1,7 +1,7 @@
 import { PluginConfig, PluginContractNames, PluginName } from "@namehash/ens-deployments";
-import { ContractConfig, NetworkConfig, createConfig } from "ponder";
-import { http, Narrow } from "viem";
-import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
+import type { ContractConfig, NetworkConfig } from "ponder";
+import { http, Chain } from "viem";
+import { rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
 import type { OwnedName } from "./types";
 
 /**
@@ -146,11 +146,32 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
   ? R
   : never;
 
-export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, OWNED_NAME extends OwnedName> {
+type NamespaceForOwnedName<OWNED_NAME extends OwnedName> = ReturnType<
+  typeof createPluginNamespace<OWNED_NAME>
+>;
+
+export interface PonderENSPlugin<
+  PLUGIN_NAME extends PluginName,
+  OWNED_NAME extends OwnedName,
+  CONFIG,
+> {
   pluginName: PLUGIN_NAME;
   ownedName: OWNED_NAME;
-  config: Record<string, unknown>;
+  config: CONFIG;
   activate: VoidFunction;
+}
+
+export function mapChainToNetworkConfig(chain: Chain) {
+  return {
+    chainId: chain.id,
+    transport: http(rpcEndpointUrl(chain.id)),
+    maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
+  } satisfies NetworkConfig;
+}
+
+export interface CreatePonderENSPluginArgs<PLUGIN_NAME extends PluginName> {
+  config: PluginConfig<PluginContractNames[PLUGIN_NAME]>;
+  extraContractConfig?: Pick<ContractConfig, "startBlock" | "endBlock">;
 }
 
 /**
@@ -159,67 +180,33 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, OWNED_NAME exte
 export function definePonderENSPlugin<
   PLUGIN_NAME extends PluginName,
   OWNED_NAME extends OwnedName,
+  CONFIG,
 >({
   pluginName,
   ownedName,
+  createConfig,
   handlers,
 }: {
   pluginName: PLUGIN_NAME;
   ownedName: OWNED_NAME;
+  createConfig: (
+    namespace: NamespaceForOwnedName<OWNED_NAME>,
+    args: CreatePonderENSPluginArgs<PLUGIN_NAME>,
+  ) => CONFIG;
   handlers: Promise<{ default: PonderENSPluginHandler<OWNED_NAME> }>[];
 }) {
   const namespace = createPluginNamespace(ownedName);
 
-  return function createPonderENSPlugin({
-    config: { chain, contracts },
-    extraContractConfig: { startBlock: globalStart, endBlock: globalEnd } = {},
-  }: {
-    config: PluginConfig<PluginContractNames[PLUGIN_NAME]>;
-    extraContractConfig?: Pick<ContractConfig, "startBlock" | "endBlock">;
-  }) {
-    // construct the ponder NetworkConfig
-    const networkName = chain.id.toString();
-    const network = {
-      chainId: chain.id,
-      transport: http(rpcEndpointUrl(chain.id)),
-      maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
-    } satisfies NetworkConfig;
-
-    // Infer contract types from PluginConfig
-    type ContractNames = PluginContractNames[PLUGIN_NAME];
-    type NetworkConfigs = { [key in typeof networkName]: typeof network };
-    type ContractConfigs = {
-      [key in ReturnType<typeof namespace<ContractNames>>]: Narrow<ContractConfig>;
-    };
-
-    // remap the `PonderPluginConfig#contracts` object to ponder's `Config#contracts` while
-    // maintaining concrete types
-    const mappedContracts = (Object.keys(contracts) as ContractNames[]).reduce(
-      (acc, contractName) => {
-        acc[namespace(contractName)] = {
-          network: networkName,
-          ...contracts[contractName],
-          ...blockConfig(globalStart, contracts[contractName].startBlock, globalEnd),
-        };
-        return acc;
-      },
-      {} as ContractConfigs,
-    );
-
+  return function createPonderENSPlugin(args: CreatePonderENSPluginArgs<PLUGIN_NAME>) {
     return {
       pluginName,
       ownedName,
-      // NOTE: we type `createConfig` with the network
-      config: createConfig({
-        networks: { [networkName]: network } as NetworkConfigs,
-        // remap the `PonderPluginConfig#contracts` object to ponder's Config#contracts
-        contracts: mappedContracts,
-      }),
+      config: createConfig(namespace, args),
       activate: () =>
         Promise.all(handlers).then((modules) =>
           modules.map((m) => m.default({ ownedName, namespace })),
         ),
-    } satisfies PonderENSPlugin<PLUGIN_NAME, OWNED_NAME>;
+    };
   };
 }
 
@@ -228,7 +215,7 @@ export function definePonderENSPlugin<
  */
 export type PonderENSPluginHandlerOptions<OWNED_NAME extends OwnedName> = {
   ownedName: OwnedName;
-  namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
+  namespace: NamespaceForOwnedName<OWNED_NAME>;
 };
 
 /**

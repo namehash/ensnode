@@ -2,10 +2,18 @@ import type { ContractConfig } from "ponder";
 import type { Chain } from "viem";
 
 /**
- * A plugin name
+ * ENSDeploymentChain encodes the possible values of the root chain ENS is deployed to.
+ */
+export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
+
+/**
+ * Encodes a unique plugin name
  */
 export type PluginName = "eth" | "base" | "linea";
 
+/**
+ * Maps from PluginName to the valid & necessary contract names.
+ */
 export type PluginContractNames = {
   eth:
     | "RegistryOld"
@@ -35,19 +43,11 @@ export type PluginContractNames = {
 export type PluginContractConfig = Omit<ContractConfig, "network">;
 
 /**
- * Encodes the set of `ponder#ContractConfig`s within a plugin that indexes specific contracts.
- */
-export type PluginContractsConfig<CONTRACT_NAMES extends string> = Record<
-  CONTRACT_NAMES,
-  PluginContractConfig
->;
-
-/**
- * Encodes a plugin's source chain and contract configs
+ * Encodes a plugin's source chain and contract configs.
  */
 export interface PluginConfig<CONTRACT_NAMES extends string> {
   chain: Chain;
-  contracts: PluginContractsConfig<CONTRACT_NAMES>;
+  contracts: Record<CONTRACT_NAMES, PluginContractConfig>;
 }
 
 /**
@@ -70,6 +70,3 @@ export type ENSDeploymentConfig = {
   base?: PluginConfig<PluginContractNames["base"]>;
   linea?: PluginConfig<PluginContractNames["linea"]>;
 };
-
-// ENSDeploymentChain encodes the possible values of the root chain ENS is deployed to
-export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
