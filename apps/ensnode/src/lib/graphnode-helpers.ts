@@ -1,11 +1,12 @@
 import type { Labelhash } from "ensnode-utils/types";
 import { EnsRainbowApiClient } from "ensrainbow-sdk/client";
-import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
+import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import type { HealResponse } from "ensrainbow-sdk/types";
+import { ensRainbowEndpointUrl } from "./ponder-helpers";
 
 const ensRainbowApiClient = new EnsRainbowApiClient({
-  endpointUrl: new URL(process.env.ENSRAINBOW_URL || DEFAULT_ENSRAINBOW_URL),
+  endpointUrl: new URL(ensRainbowEndpointUrl()),
 });
 
 /**

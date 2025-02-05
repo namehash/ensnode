@@ -1,4 +1,5 @@
-import { Event, EventNames } from "ponder:registry";
+import type { Event } from "ponder:registry";
+import { DEFAULT_ENSRAINBOW_URL } from "ensrainbow-sdk/consts";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
@@ -102,6 +103,36 @@ export const parseRpcMaxRequestsPerSecond = (rawValue?: string): number => {
   }
 
   return parsedValue;
+};
+
+/**
+ * Gets the ENSRainbow API endpoint URL.
+ *
+ * @returns the ENSRainbow API endpoint URL
+ */
+export const ensRainbowEndpointUrl = (): string => {
+  const envVarName = "ENSRAINBOW_URL";
+  const envVarValue = process.env[envVarName];
+
+  try {
+    return parseEnsRainbowEndpointUrl(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
+  }
+};
+
+export const parseEnsRainbowEndpointUrl = (rawValue?: string): string => {
+  // no ENSRainbow URL provided
+  if (!rawValue) {
+    // apply default URL value
+    return DEFAULT_ENSRAINBOW_URL;
+  }
+
+  try {
+    return new URL(rawValue).toString();
+  } catch (e) {
+    throw new Error(`'${rawValue}' is not a valid URL`);
+  }
 };
 
 type AnyObject = { [key: string]: any };

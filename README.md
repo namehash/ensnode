@@ -100,6 +100,7 @@ then review the docs inside your .env.local file for configuration instructions.
 - `RPC_REQUEST_RATE_LIMIT_*` — optional, you can change the rate limit for RPC requests per second.
 - `DATABASE_SCHEMA` is arbitrary, with the limitations mentioned in the linked documentation
 - `DATABASE_URL` is your postgres database connection string
+- `ENSRAINBOW_URL` is URL pointing to a deployment of the [ENSRainbow application](apps/ensrainbow/)
 
 Once your `.env.local` is configured, launch the indexer by running:
 

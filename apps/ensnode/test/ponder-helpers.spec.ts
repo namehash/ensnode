@@ -1,8 +1,10 @@
+import { DEFAULT_ENSRAINBOW_URL } from "ensrainbow-sdk/consts";
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_RPC_RATE_LIMIT,
   blockConfig,
   deepMergeRecursive,
+  parseEnsRainbowEndpointUrl,
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
 } from "../src/lib/ponder-helpers";
@@ -54,6 +56,28 @@ describe("ponder helpers", () => {
       expect(() => parseRpcMaxRequestsPerSecond("-1")).toThrowError(
         "'-1' is not a positive integer",
       );
+    });
+  });
+
+  describe("parseEnsRainbowEndpointUrl", () => {
+    it("should parse a valid ENSRainbow endpoint URL", () => {
+      expect(parseEnsRainbowEndpointUrl("https://api.ensrainbow.io")).toBe(
+        "https://api.ensrainbow.io/",
+      );
+    });
+
+    it("should throw an error if the URL is invalid", () => {
+      expect(() => parseEnsRainbowEndpointUrl("almost_an_URL")).toThrowError(
+        "'almost_an_URL' is not a valid URL",
+      );
+    });
+
+    it("should not throw an error if the URL is missing", () => {
+      expect(() => parseEnsRainbowEndpointUrl()).not.toThrowError();
+    });
+
+    it("should return the default URL if the URL is missing", () => {
+      expect(parseEnsRainbowEndpointUrl()).toBe(DEFAULT_ENSRAINBOW_URL);
     });
   });
 
