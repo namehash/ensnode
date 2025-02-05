@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { EnsRainbowApiClient } from "./client";
-import { DEFAULT_ENSRAINBOW_URL } from "./consts";
+import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 import type { HealError, HealSuccess } from "./types";
 
 describe("EnsRainbowApiClient", () => {
@@ -18,8 +18,8 @@ describe("EnsRainbowApiClient", () => {
     );
 
     expect(response).toEqual({
-      status: "success",
       label: "vitalik",
+      status: StatusCode.Success,
     } satisfies HealSuccess);
   });
 
@@ -29,9 +29,9 @@ describe("EnsRainbowApiClient", () => {
     );
 
     expect(response).toEqual({
-      status: "error",
       error: "Label not found",
-      errorCode: 404,
+      errorCode: ErrorCode.NotFound,
+      status: StatusCode.Error,
     } satisfies HealError);
   });
 
@@ -39,9 +39,9 @@ describe("EnsRainbowApiClient", () => {
     const response = await client.heal("0xinvalid");
 
     expect(response).toEqual({
-      status: "error",
       error: "Invalid labelhash length 9 characters (expected 66)",
-      errorCode: 400,
-    } satisfies HealError);
+      errorCode: ErrorCode.BadRequest,
+      status: StatusCode.Error,
+    });
   });
 });
