@@ -1,6 +1,6 @@
 import { PluginConfig, PluginContractNames, PluginName } from "@namehash/ens-deployments";
 import { ContractConfig, NetworkConfig, createConfig } from "ponder";
-import { http } from "viem";
+import { http, Narrow } from "viem";
 import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
 import type { OwnedName } from "./types";
 
@@ -168,7 +168,7 @@ export function definePonderENSPlugin<
   ownedName: OWNED_NAME;
   handlers: Promise<{ default: PonderENSPluginHandler<OWNED_NAME> }>[];
 }) {
-  const namespace = createPluginNamespace<OWNED_NAME>(ownedName);
+  const namespace = createPluginNamespace(ownedName);
 
   return function createPonderENSPlugin({
     config: { chain, contracts },
@@ -177,6 +177,7 @@ export function definePonderENSPlugin<
     config: PluginConfig<PluginContractNames[PLUGIN_NAME]>;
     extraContractConfig?: Pick<ContractConfig, "startBlock" | "endBlock">;
   }) {
+    // construct the ponder NetworkConfig
     const networkName = chain.id.toString();
     const network = {
       chainId: chain.id,
@@ -184,27 +185,35 @@ export function definePonderENSPlugin<
       maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
     } satisfies NetworkConfig;
 
+    // Infer contract types from PluginConfig
+    type ContractNames = PluginContractNames[PLUGIN_NAME];
+    type NetworkConfigs = { [key in typeof networkName]: typeof network };
+    type ContractConfigs = {
+      [key in ReturnType<typeof namespace<ContractNames>>]: Narrow<ContractConfig>;
+    };
+
+    // remap the `PonderPluginConfig#contracts` object to ponder's `Config#contracts` while
+    // maintaining concrete types
+    const mappedContracts = (Object.keys(contracts) as ContractNames[]).reduce(
+      (acc, contractName) => {
+        acc[namespace(contractName)] = {
+          network: networkName,
+          ...contracts[contractName],
+          ...blockConfig(globalStart, contracts[contractName].startBlock, globalEnd),
+        };
+        return acc;
+      },
+      {} as ContractConfigs,
+    );
+
     return {
       pluginName,
       ownedName,
-      // the ponder#createConfig happens here
+      // NOTE: we type `createConfig` with the network
       config: createConfig({
-        networks: { [networkName]: network },
+        networks: { [networkName]: network } as NetworkConfigs,
         // remap the `PonderPluginConfig#contracts` object to ponder's Config#contracts
-        contracts: Object.fromEntries(
-          // use Object.keys & enforce key type to avoid losing type info with Object.entries().map()
-          (Object.keys(contracts) as Array<keyof typeof contracts>).map((contractName) => [
-            // namespace each contract
-            namespace(contractName),
-
-            // use the deployment's contract config, on this network, with any overrides
-            {
-              network: networkName,
-              ...contracts[contractName],
-              ...blockConfig(globalStart, contracts[contractName].startBlock, globalEnd),
-            },
-          ]),
-        ),
+        contracts: mappedContracts,
       }),
       activate: () =>
         Promise.all(handlers).then((modules) =>
