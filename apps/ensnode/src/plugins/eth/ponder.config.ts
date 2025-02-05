@@ -54,24 +54,29 @@ export const config = createConfig({
       network: "mainnet",
       abi: RESOLVER_ABI,
       // NOTE: this indexes every event ever emitted that looks like this
-      filter: {
-        event: [
-          "AddrChanged",
-          "AddressChanged",
-          "NameChanged",
-          "ABIChanged",
-          "PubkeyChanged",
-          "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-          "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
-          "ContenthashChanged",
-          "InterfaceChanged",
-          "AuthorisationChanged",
-          "VersionChanged",
-          "DNSRecordChanged",
-          "DNSRecordDeleted",
-          "DNSZonehashChanged",
-        ],
-      },
+      filter: [
+        { event: "AddrChanged", args: {} },
+        { event: "AddressChanged", args: {} },
+        { event: "NameChanged", args: {} },
+        { event: "ABIChanged", args: {} },
+        { event: "PubkeyChanged", args: {} },
+        {
+          event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+          args: {},
+        },
+        {
+          event:
+            "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+          args: {},
+        },
+        { event: "ContenthashChanged", args: {} },
+        { event: "InterfaceChanged", args: {} },
+        { event: "AuthorisationChanged", args: {} },
+        { event: "VersionChanged", args: {} },
+        { event: "DNSRecordChanged", args: {} },
+        { event: "DNSRecordDeleted", args: {} },
+        { event: "DNSZonehashChanged", args: {} },
+      ],
       ...blockConfig(START_BLOCK, 3327417, END_BLOCK),
     },
     [pluginNamespace("BaseRegistrar")]: {
