@@ -51,7 +51,8 @@ export class EnsRainbowApiClient {
    * - Clients should handle all possible string values appropriately
    *
    * @param labelhash all lowercase hex string with 0x prefix with length of 66 characters in total
-   * @returns
+   * @returns a response with the status and the label if successful
+   * @throws an error if the request fails or the labelhash is not found or invalid
    *
    * @example
    * ```typescript
@@ -69,18 +70,9 @@ export class EnsRainbowApiClient {
    * ```
    */
   async heal(labelhash: Labelhash): Promise<HealResponse> {
-    try {
-      const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
 
-      return response.json() as Promise<HealResponse>;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      return {
-        error: errorMessage,
-        errorCode: 500,
-        status: "error",
-      } satisfies HealError;
-    }
+    return response.json() as Promise<HealResponse>;
   }
 
   /**

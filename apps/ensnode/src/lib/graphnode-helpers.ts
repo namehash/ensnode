@@ -2,6 +2,7 @@ import type { Labelhash } from "ensnode-utils/types";
 import { EnsRainbowApiClient } from "ensrainbow-sdk/client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
+import type { HealResponse } from "ensrainbow-sdk/types";
 
 const ensRainbowApiClient = new EnsRainbowApiClient({
   endpointUrl: new URL(process.env.ENSRAINBOW_URL || DEFAULT_ENSRAINBOW_URL),
@@ -15,10 +16,19 @@ const ensRainbowApiClient = new EnsRainbowApiClient({
  *
  **/
 export async function labelByHash(labelhash: Labelhash): Promise<string | null> {
-  // runtime check, ENS rainbow enforces this validation as well
+  // runtime check, ENSRainbow API enforces this validation as well
   labelHashToBytes(labelhash);
 
-  const healResponse = await ensRainbowApiClient.heal(labelhash);
+  let healResponse: HealResponse;
+
+  try {
+    healResponse = await ensRainbowApiClient.heal(labelhash);
+  } catch (error) {
+    // If the client fails to fetch data, we log the error
+    // and return null to the caller.
+    console.error(`ENSRainbow Client error ${labelhash}: ${error}`);
+    return null;
+  }
 
   if (healResponse.status === StatusCode.Success) {
     return healResponse.label;
