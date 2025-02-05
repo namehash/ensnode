@@ -1,4 +1,5 @@
 import type { Labelhash } from "ensnode-utils/types";
+import { DEFAULT_ENSRAINBOW_URL } from "./consts";
 import type { HealError, HealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
@@ -10,13 +11,34 @@ export interface EnsRainbowApiClientOptions {
  *
  * @example
  * ```typescript
+ * // default options
+ * const client = new EnsRainbowApiClient();
+ * // custom options
  * const client = new EnsRainbowApiClient({
  *  endpointUrl: new URL("https://api.ensrainbow.io"),
  * });
  * ```
  */
 export class EnsRainbowApiClient {
-  constructor(private readonly options: EnsRainbowApiClientOptions) {}
+  private readonly options: EnsRainbowApiClientOptions;
+
+  /**
+   * Create default client options.
+   *
+   * @returns default options
+   */
+  static defaultOptions(): EnsRainbowApiClientOptions {
+    return {
+      endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
+    };
+  }
+
+  constructor(options: Partial<EnsRainbowApiClientOptions> = {}) {
+    this.options = {
+      ...EnsRainbowApiClient.defaultOptions(),
+      ...options,
+    };
+  }
 
   /**
    * Attempt to heal a labelhash to its original label.
@@ -30,8 +52,6 @@ export class EnsRainbowApiClient {
    *
    * @param labelhash all lowercase hex string with 0x prefix with length of 66 characters in total
    * @returns
-   *
-   * @link https://github.com/namehash/ensnode/tree/effc77d/apps/ensrainbow#heal-label
    *
    * @example
    * ```typescript
@@ -61,5 +81,14 @@ export class EnsRainbowApiClient {
         status: "error",
       } satisfies HealError;
     }
+  }
+
+  /**
+   * Get current client options.
+   *
+   * @returns the current client options
+   */
+  getOptions(): EnsRainbowApiClientOptions {
+    return this.options;
   }
 }

@@ -7,8 +7,21 @@ describe("EnsRainbowApiClient", () => {
   let client: EnsRainbowApiClient;
 
   beforeEach(() => {
-    client = new EnsRainbowApiClient({
+    client = new EnsRainbowApiClient();
+  });
+
+  it("should apply default options when no options provided", () => {
+    expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
+    });
+  });
+
+  it("should apply custom options when provided", () => {
+    const customEndpointUrl = new URL("http://lb-api.ensrainbow.com");
+    client = new EnsRainbowApiClient({ endpointUrl: customEndpointUrl });
+
+    expect(client.getOptions()).toEqual({
+      endpointUrl: customEndpointUrl,
     });
   });
 
