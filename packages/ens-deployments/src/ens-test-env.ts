@@ -10,23 +10,23 @@ export default {
     // https://github.com/ensdomains/ens-test-env/
     contracts: {
       RegistryOld: {
-        address: "0x314159265dd8dbb310642f98f50c066173c1259b",
+        address: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
       },
       Registry: {
-        address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       },
       Resolver: {},
       BaseRegistrar: {
-        address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+        address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
       },
       EthRegistrarControllerOld: {
-        address: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
+        address: "0xf5059a5D33d5853360D16C683c16e67980206f36",
       },
       EthRegistrarController: {
-        address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
+        address: "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
       },
       NameWrapper: {
-        address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+        address: "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
       },
     },
   },
