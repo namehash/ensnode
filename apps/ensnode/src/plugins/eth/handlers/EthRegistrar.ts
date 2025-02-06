@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 import { uint256ToHex32 } from "ensnode-utils/subname-helpers";
 import type { Labelhash } from "ensnode-utils/types";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
@@ -13,7 +13,7 @@ import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

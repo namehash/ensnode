@@ -1,4 +1,5 @@
 import { Event } from "ponder:registry";
+import DeploymentConfigs, { ENSDeploymentChain } from "@namehash/ens-deployments";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
@@ -118,3 +119,20 @@ export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
 ): T & U {
   return tsDeepMerge(target, source) as T & U;
 }
+
+/**
+ * Gets the ENS Deployment Chain, defaulting to mainnet.
+ *
+ * @throws if not a valid deployment chain value
+ */
+export const ensDeploymentChain = (): ENSDeploymentChain => {
+  const value = process.env.ENS_DEPLOYMENT_CHAIN;
+  if (!value) return "mainnet";
+
+  const validValues = Object.keys(DeploymentConfigs);
+  if (!validValues.includes(value)) {
+    throw new Error(`Error: ENS_DEPLOYMENT_CHAIN must be one of ${validValues.join(" | ")}`);
+  }
+
+  return value as ENSDeploymentChain;
+};

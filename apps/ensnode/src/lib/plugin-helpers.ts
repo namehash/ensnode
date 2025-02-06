@@ -150,12 +150,7 @@ type NamespaceForOwnedName<OWNED_NAME extends OwnedName> = ReturnType<
   typeof createPluginNamespace<OWNED_NAME>
 >;
 
-export interface PonderENSPlugin<
-  PLUGIN_NAME extends PluginName,
-  OWNED_NAME extends OwnedName,
-  CONFIG,
-> {
-  pluginName: PLUGIN_NAME;
+export interface PonderENSPlugin<OWNED_NAME extends OwnedName, CONFIG> {
   ownedName: OWNED_NAME;
   config: CONFIG;
   activate: VoidFunction;
@@ -174,49 +169,21 @@ export interface CreatePonderENSPluginArgs<PLUGIN_NAME extends PluginName> {
   extraContractConfig?: Pick<ContractConfig, "startBlock" | "endBlock">;
 }
 
-/**
- * Defines a Ponder ENS Plugin by specifying its `pluginName`, `ownedName` and its `handlers`.
- * `createConfig` is passed the plugin's namespace and deployment config.
- */
-export function definePonderENSPlugin<
-  PLUGIN_NAME extends PluginName,
-  OWNED_NAME extends OwnedName,
-  CONFIG,
->({
-  pluginName,
-  ownedName,
-  createConfig,
-  handlers,
-}: {
-  pluginName: PLUGIN_NAME;
-  ownedName: OWNED_NAME;
-  createConfig: (
-    namespace: NamespaceForOwnedName<OWNED_NAME>,
-    args: CreatePonderENSPluginArgs<PLUGIN_NAME>,
-  ) => CONFIG;
-  handlers: Promise<{ default: PonderENSPluginHandler<OWNED_NAME> }>[];
-}): (
-  args: CreatePonderENSPluginArgs<PLUGIN_NAME>,
-) => PonderENSPlugin<PLUGIN_NAME, OWNED_NAME, CONFIG> {
-  const namespace = createPluginNamespace(ownedName);
-
-  return function createPonderENSPlugin(args: CreatePonderENSPluginArgs<PLUGIN_NAME>) {
-    return {
-      pluginName,
-      ownedName,
-      config: createConfig(namespace, args),
-      activate: () =>
-        Promise.all(handlers).then((modules) =>
-          modules.map((m) => m.default({ ownedName, namespace })),
-        ),
-    };
+export const activateHandlers =
+  <OWNED_NAME extends OwnedName>({
+    handlers,
+    ...args
+  }: PonderENSPluginHandlerArgs<OWNED_NAME> & {
+    handlers: Promise<{ default: PonderENSPluginHandler<OWNED_NAME> }>[];
+  }) =>
+  async () => {
+    await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
   };
-}
 
 /**
  * An ENS Plugin's handlers are configured with ownedName and namespace
  */
-export type PonderENSPluginHandlerOptions<OWNED_NAME extends OwnedName> = {
+export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   ownedName: OwnedName;
   namespace: NamespaceForOwnedName<OWNED_NAME>;
 };
@@ -225,5 +192,5 @@ export type PonderENSPluginHandlerOptions<OWNED_NAME extends OwnedName> = {
  * An ENS Plugin Handler
  */
 export type PonderENSPluginHandler<OWNED_NAME extends OwnedName> = (
-  options: PonderENSPluginHandlerOptions<OWNED_NAME>,
+  options: PonderENSPluginHandlerArgs<OWNED_NAME>,
 ) => void;

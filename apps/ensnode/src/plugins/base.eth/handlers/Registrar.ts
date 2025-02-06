@@ -5,7 +5,7 @@ import type { Labelhash } from "ensnode-utils/types";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { upsertAccount } from "../../../lib/db-helpers";
-import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
@@ -16,7 +16,7 @@ import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"base.eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

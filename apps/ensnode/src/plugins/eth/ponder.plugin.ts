@@ -1,5 +1,10 @@
 import { createConfig, mergeAbis } from "ponder";
-import { definePonderENSPlugin, mapChainToNetworkConfig } from "../../lib/plugin-helpers";
+import { DEPLOYMENT_CONFIG, END_BLOCK, START_BLOCK } from "../../lib/globals";
+import {
+  activateHandlers,
+  createPluginNamespace,
+  mapChainToNetworkConfig,
+} from "../../lib/plugin-helpers";
 import { blockConfig } from "../../lib/ponder-helpers";
 
 // eth plugin abis
@@ -11,86 +16,92 @@ import { NameWrapper as eth_NameWrapper } from "./abis/NameWrapper";
 import { Registry as eth_Registry } from "./abis/Registry";
 import { Resolver as eth_Resolver } from "./abis/Resolver";
 
-export const createPlugin = definePonderENSPlugin({
-  // uses the 'eth' plugin config for deployments
-  pluginName: "eth" as const,
-  // the Registry/Registrar handlers in this plugin manage subdomains of '.eth'
-  ownedName: "eth" as const,
-  createConfig: (
-    namespace,
-    { config: { chain, contracts }, extraContractConfig: { startBlock, endBlock } = {} },
-  ) =>
-    createConfig({
-      networks: { mainnet: mapChainToNetworkConfig(chain) },
-      contracts: {
-        [namespace("RegistryOld")]: {
-          network: "mainnet",
-          abi: eth_Registry,
-          address: contracts.RegistryOld.address,
-          ...blockConfig(startBlock, contracts.RegistryOld.startBlock, endBlock),
+// uses the 'eth' plugin config for deployments
+const { chain, contracts } = DEPLOYMENT_CONFIG.eth!;
+
+// the Registry/Registrar handlers in this plugin manage subdomains of '.eth'
+export const ownedName = "eth" as const;
+
+const namespace = createPluginNamespace(ownedName);
+
+export const config = createConfig({
+  networks: {
+    get mainnet() {
+      return mapChainToNetworkConfig(chain);
+    },
+  },
+  contracts: {
+    [namespace("RegistryOld")]: {
+      network: "mainnet",
+      abi: eth_Registry,
+      address: contracts.RegistryOld.address,
+      ...blockConfig(START_BLOCK, contracts.RegistryOld.startBlock, END_BLOCK),
+    },
+    [namespace("Registry")]: {
+      network: "mainnet",
+      abi: eth_Registry,
+      address: contracts.Registry.address,
+      ...blockConfig(START_BLOCK, contracts.Registry.startBlock, END_BLOCK),
+    },
+    [namespace("Resolver")]: {
+      network: "mainnet",
+      abi: mergeAbis([eth_LegacyPublicResolver, eth_Resolver]),
+      // NOTE: this indexes every event ever emitted that looks like this
+      filter: [
+        { event: "AddrChanged", args: {} },
+        { event: "AddressChanged", args: {} },
+        { event: "NameChanged", args: {} },
+        { event: "ABIChanged", args: {} },
+        { event: "PubkeyChanged", args: {} },
+        {
+          event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+          args: {},
         },
-        [namespace("Registry")]: {
-          network: "mainnet",
-          abi: eth_Registry,
-          address: contracts.Registry.address,
-          ...blockConfig(startBlock, contracts.Registry.startBlock, endBlock),
+        {
+          event:
+            "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+          args: {},
         },
-        [namespace("Resolver")]: {
-          network: "mainnet",
-          abi: mergeAbis([eth_LegacyPublicResolver, eth_Resolver]),
-          // NOTE: this indexes every event ever emitted that looks like this
-          filter: [
-            { event: "AddrChanged", args: {} },
-            { event: "AddressChanged", args: {} },
-            { event: "NameChanged", args: {} },
-            { event: "ABIChanged", args: {} },
-            { event: "PubkeyChanged", args: {} },
-            {
-              event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-              args: {},
-            },
-            {
-              event:
-                "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
-              args: {},
-            },
-            { event: "ContenthashChanged", args: {} },
-            { event: "InterfaceChanged", args: {} },
-            { event: "AuthorisationChanged", args: {} },
-            { event: "VersionChanged", args: {} },
-            { event: "DNSRecordChanged", args: {} },
-            { event: "DNSRecordDeleted", args: {} },
-            { event: "DNSZonehashChanged", args: {} },
-          ],
-          // address: contracts.Resolver.address,
-          ...blockConfig(startBlock, contracts.Resolver.startBlock, endBlock),
-        },
-        [namespace("BaseRegistrar")]: {
-          network: "mainnet",
-          abi: eth_BaseRegistrar,
-          address: contracts.BaseRegistrar.address,
-          ...blockConfig(startBlock, contracts.BaseRegistrar.startBlock, endBlock),
-        },
-        [namespace("EthRegistrarControllerOld")]: {
-          network: "mainnet",
-          abi: eth_EthRegistrarControllerOld,
-          address: contracts.EthRegistrarControllerOld.address,
-          ...blockConfig(startBlock, contracts.EthRegistrarControllerOld.startBlock, endBlock),
-        },
-        [namespace("EthRegistrarController")]: {
-          network: "mainnet",
-          abi: eth_EthRegistrarController,
-          address: contracts.EthRegistrarController.address,
-          ...blockConfig(startBlock, contracts.EthRegistrarController.startBlock, endBlock),
-        },
-        [namespace("NameWrapper")]: {
-          network: "mainnet",
-          abi: eth_NameWrapper,
-          address: contracts.NameWrapper.address,
-          ...blockConfig(startBlock, contracts.NameWrapper.startBlock, endBlock),
-        },
-      },
-    }),
+        { event: "ContenthashChanged", args: {} },
+        { event: "InterfaceChanged", args: {} },
+        { event: "AuthorisationChanged", args: {} },
+        { event: "VersionChanged", args: {} },
+        { event: "DNSRecordChanged", args: {} },
+        { event: "DNSRecordDeleted", args: {} },
+        { event: "DNSZonehashChanged", args: {} },
+      ],
+      ...blockConfig(START_BLOCK, contracts.Resolver.startBlock, END_BLOCK),
+    },
+    [namespace("BaseRegistrar")]: {
+      network: "mainnet",
+      abi: eth_BaseRegistrar,
+      address: contracts.BaseRegistrar.address,
+      ...blockConfig(START_BLOCK, contracts.BaseRegistrar.startBlock, END_BLOCK),
+    },
+    [namespace("EthRegistrarControllerOld")]: {
+      network: "mainnet",
+      abi: eth_EthRegistrarControllerOld,
+      address: contracts.EthRegistrarControllerOld.address,
+      ...blockConfig(START_BLOCK, contracts.EthRegistrarControllerOld.startBlock, END_BLOCK),
+    },
+    [namespace("EthRegistrarController")]: {
+      network: "mainnet",
+      abi: eth_EthRegistrarController,
+      address: contracts.EthRegistrarController.address,
+      ...blockConfig(START_BLOCK, contracts.EthRegistrarController.startBlock, END_BLOCK),
+    },
+    [namespace("NameWrapper")]: {
+      network: "mainnet",
+      abi: eth_NameWrapper,
+      address: contracts.NameWrapper.address,
+      ...blockConfig(START_BLOCK, contracts.NameWrapper.startBlock, END_BLOCK),
+    },
+  },
+});
+
+export const activate = activateHandlers({
+  ownedName,
+  namespace,
   handlers: [
     import("./handlers/Registry"),
     import("./handlers/EthRegistrar"),

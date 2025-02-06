@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import { type Hex } from "viem";
 import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
-import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {
@@ -11,7 +11,7 @@ async function isDomainMigrated(context: Context, node: Hex) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
   const {
     handleNewOwner, //
     handleNewResolver,

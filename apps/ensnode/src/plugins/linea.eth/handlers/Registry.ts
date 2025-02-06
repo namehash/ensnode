@@ -1,8 +1,8 @@
 import { ponder } from "ponder:registry";
 import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
-import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"linea.eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
   const {
     handleNewOwner, //
     handleNewResolver,

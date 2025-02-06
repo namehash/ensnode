@@ -1,8 +1,8 @@
 import { ponder } from "ponder:registry";
 import { makeNameWrapperHandlers } from "../../../handlers/NameWrapper";
-import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"linea.eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
   const {
     handleNameWrapped,
     handleNameUnwrapped,

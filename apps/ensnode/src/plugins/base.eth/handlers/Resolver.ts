@@ -1,8 +1,8 @@
 import { ponder } from "ponder:registry";
 import { makeResolverHandlers } from "../../../handlers/Resolver";
-import { PonderENSPluginHandlerOptions } from "../../../lib/plugin-helpers";
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerOptions<"base.eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
   const {
     handleABIChanged,
     handleAddrChanged,
