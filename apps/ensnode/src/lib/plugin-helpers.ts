@@ -172,6 +172,12 @@ export type PonderENSPluginHandler<OWNED_NAME extends OwnedName> = (
   options: PonderENSPluginHandlerArgs<OWNED_NAME>,
 ) => void;
 
+/**
+ * A helper function for defining a PonderENSPlugin's `activate()` function.
+ *
+ * Given a set of handler file imports, returns a function that executes them with the provided
+ * `ownedName` and `namespace`.
+ */
 export const activateHandlers =
   <OWNED_NAME extends OwnedName>({
     handlers,

@@ -12,7 +12,7 @@ export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-e
 export type PluginName = "eth" | "base" | "linea";
 
 /**
- * Maps from PluginName to the valid & necessary contract names.
+ * Maps from PluginName to the valid & necessary contract names, which helps with typechecking.
  */
 export type PluginContractNames = {
   eth:
