@@ -78,7 +78,7 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  *
  * @returns `true` if the label is indexable, `false` otherwise.
  */
-export const isLabelIndexable = (label: string | null): boolean => {
+export const isLabelIndexable = (label: string | null): label is string => {
   if (!label) return false;
 
   for (let i = 0; i < label.length; i++) {

@@ -77,38 +77,45 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
-      // attempt to heal the label associated with labelhash via ENSRainbow
-      // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/ethRegistrar.ts#L56-L61
-      const label = await labelByHash(labelhash);
-      const canIndexLabel = isLabelIndexable(label);
-      // NOTE: undefined type is helpful for passing to drizzle, which
-      // will ignore the input rather that set the value in the db to `NULL`
-      // if we were to return `null`.
-      const labelName = canIndexLabel ? label : undefined;
-      const name = canIndexLabel ? `${label}.${ownedName}` : undefined;
-
-      const id = makeRegistrationId(ownedName, labelhash, node);
-
-      await upsertRegistration(context, {
-        id,
+      // prepare registration entity object
+      const registration = {
+        id: makeRegistrationId(ownedName, labelhash, node),
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-        labelName,
-      });
+        // labelName is set later if the label is indexable
+        labelName: undefined as string | undefined,
+      } satisfies typeof schema.registration.$inferInsert;
 
-      await context.db.update(schema.domain, { id: node }).set({
+      // prepare domain entity object
+      const domain = {
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName,
-        name,
-      });
+        labelName: undefined as string | undefined,
+        name: undefined as string | undefined,
+      } satisfies Partial<typeof schema.domain.$inferInsert>;
+
+      // attempt to heal the label associated with labelhash via ENSRainbow
+      // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/ethRegistrar.ts#L56-L61
+      const label = await labelByHash(labelhash);
+      if (isLabelIndexable(label)) {
+        domain.labelName = label;
+        domain.name = `${label}.${ownedName}`;
+        registration.labelName = label;
+      }
+
+      // akin to domain.save()
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ethRegistrar.ts#L63
+      await context.db.update(schema.domain, { id: node }).set(domain);
+      // akin to registration.save()
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ethRegistrar.ts#L64
+      await upsertRegistration(context, registration);
 
       // log RegistrationEvent
       await context.db.insert(schema.nameRegistered).values({
         ...sharedEventValues(event),
-        registrationId: id,
+        registrationId: registration.id,
         registrantId: owner,
         expiryDate: expires,
       });

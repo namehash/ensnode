@@ -101,40 +101,62 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
         // note that we set isMigrated so that if this domain is being interacted with on the new registry, its migration status is set here
         let domain = await context.db.find(schema.domain, { id: subnode });
-        if (domain) {
-          // if the domain already exists, this is just an update of the owner record (& isMigrated)
-          await context.db
-            .update(schema.domain, { id: domain.id })
-            .set({ ownerId: owner, isMigrated });
-        } else {
-          // otherwise create the domain
+        let parent = await context.db.find(schema.domain, { id: node });
+
+        // creating a new domain, akin to
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L98-L102
+        if (domain === null) {
           domain = await context.db.insert(schema.domain).values({
             id: subnode,
-            ownerId: owner,
-            parentId: node,
             createdAt: event.block.timestamp,
             labelhash: event.args.label,
+            subdomainCount: 0,
+            ownerId: owner,
+            parentId: null,
             isMigrated,
           });
-
-          // and increment parent subdomainCount
-          await context.db
-            .update(schema.domain, { id: node })
-            .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
         }
 
-        // if the domain doesn't yet have a name, construct it here
-        if (!domain.name) {
-          const parent = await context.db.find(schema.domain, { id: node });
+        // increment subdomainCount of parent domain, akin to
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L104-L107
+        if (domain.parentId === null && parent !== null) {
+          await context.db
+            .update(schema.domain, { id: parent.id })
+            .set((parent) => ({ subdomainCount: parent.subdomainCount + 1 }));
+        }
 
+        // setting the domain's name and labelName, akin to
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L109-L129
+        if (domain.name === null) {
           // attempt to heal the label associated with labelhash via ENSRainbow
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
-          const label = await labelByHash(event.args.label);
-          const labelName = isLabelIndexable(label) ? label : encodeLabelhash(event.args.label);
-          const name = parent?.name ? `${labelName}.${parent.name}` : labelName;
-
-          await context.db.update(schema.domain, { id: domain.id }).set({ name, labelName });
+          let label = await labelByHash(event.args.label);
+          if (isLabelIndexable(label)) {
+            domain.labelName = label;
+          } else {
+            label = encodeLabelhash(event.args.label);
+          }
+          // deciding domain's name, akin to
+          // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L117-L128
+          if (
+            event.args.node === "0x0000000000000000000000000000000000000000000000000000000000000000"
+          ) {
+            // node value equals to namehash(''), use the label for the domain name
+            domain.name = label;
+          } else {
+            let name = parent?.name;
+            if (label && name) {
+              domain.name = `${label}.${name}`;
+            }
+          }
         }
+
+        domain.ownerId = event.args.owner;
+        domain.parentId = event.args.node;
+        domain.labelhash = event.args.label;
+        domain.isMigrated = isMigrated;
+        // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L135
+        await context.db.update(schema.domain, { id: domain.id }).set(domain);
 
         // garbage collect newly 'empty' domain iff necessary
         if (owner === zeroAddress) {
