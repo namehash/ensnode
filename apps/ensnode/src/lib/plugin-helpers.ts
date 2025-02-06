@@ -176,6 +176,7 @@ export interface CreatePonderENSPluginArgs<PLUGIN_NAME extends PluginName> {
 
 /**
  * Defines a Ponder ENS Plugin by specifying its `pluginName`, `ownedName` and its `handlers`.
+ * `createConfig` is passed the plugin's namespace and deployment config.
  */
 export function definePonderENSPlugin<
   PLUGIN_NAME extends PluginName,
@@ -194,7 +195,9 @@ export function definePonderENSPlugin<
     args: CreatePonderENSPluginArgs<PLUGIN_NAME>,
   ) => CONFIG;
   handlers: Promise<{ default: PonderENSPluginHandler<OWNED_NAME> }>[];
-}) {
+}): (
+  args: CreatePonderENSPluginArgs<PLUGIN_NAME>,
+) => PonderENSPlugin<PLUGIN_NAME, OWNED_NAME, CONFIG> {
   const namespace = createPluginNamespace(ownedName);
 
   return function createPonderENSPlugin(args: CreatePonderENSPluginArgs<PLUGIN_NAME>) {

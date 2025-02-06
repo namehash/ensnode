@@ -40,7 +40,7 @@ export type PluginContractNames = {
 /**
  * A `ponder#ContractConfig` sans network, as it is provided by the contextual 'deployment'.
  */
-export type PluginContractConfig = Omit<ContractConfig, "network">;
+export type PluginContractConfig = Omit<ContractConfig, "network" | "abi">;
 
 /**
  * Encodes a plugin's source chain and contract configs.

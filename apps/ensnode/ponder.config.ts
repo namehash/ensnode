@@ -3,9 +3,9 @@ import { type MergedTypes, PonderENSPlugin, getActivePlugins } from "./src/lib/p
 import { deepMergeRecursive } from "./src/lib/ponder-helpers";
 
 import type { ContractConfig } from "ponder";
-import { default as createBaseEthPlugin } from "./src/plugins/base.eth/ponder.plugin";
-import { default as createEthPlugin } from "./src/plugins/eth/ponder.plugin";
-import { default as createLineaEthPlugin } from "./src/plugins/linea.eth/ponder.plugin";
+import { createPlugin as createBaseEthPlugin } from "./src/plugins/base.eth/ponder.plugin";
+import { createPlugin as createEthPlugin } from "./src/plugins/eth/ponder.plugin";
+import { createPlugin as createLineaEthPlugin } from "./src/plugins/linea.eth/ponder.plugin";
 
 // constrain indexing between the following start/end blocks
 // https://ponder.sh/0_6/docs/contracts-and-networks#block-range

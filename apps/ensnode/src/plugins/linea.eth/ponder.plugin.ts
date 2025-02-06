@@ -2,7 +2,14 @@ import { createConfig } from "ponder";
 import { definePonderENSPlugin, mapChainToNetworkConfig } from "../../lib/plugin-helpers";
 import { blockConfig } from "../../lib/ponder-helpers";
 
-export default definePonderENSPlugin({
+// linea plugin abis
+import { BaseRegistrar as linea_BaseRegistrar } from "./abis/BaseRegistrar";
+import { EthRegistrarController as linea_EthRegistrarController } from "./abis/EthRegistrarController";
+import { NameWrapper as linea_NameWrapper } from "./abis/NameWrapper";
+import { Registry as linea_Registry } from "./abis/Registry";
+import { Resolver as linea_Resolver } from "./abis/Resolver";
+
+export const createPlugin = definePonderENSPlugin({
   // uses the 'linea' plugin config for deployments
   pluginName: "linea" as const,
   // the Registry/Registrar handlers in this plugin manage subdomains of '.linea.eth'
@@ -16,27 +23,47 @@ export default definePonderENSPlugin({
       contracts: {
         [namespace("Registry")]: {
           network: "linea",
-          ...contracts.Registry,
-          ...blockConfig(startBlock, contracts.Registry.startBlock, endBlock),
+          abi: linea_Registry,
+          address: contracts.Registry.address,
+          // ...blockConfig(startBlock, contracts.Registry.startBlock, endBlock),
         },
         [namespace("Resolver")]: {
           network: "linea",
-          ...contracts.Resolver,
+          abi: linea_Resolver,
+          // NOTE: this indexes every event ever emitted that looks like this
+          filter: [
+            { event: "AddrChanged", args: {} },
+            { event: "AddressChanged", args: {} },
+            { event: "NameChanged", args: {} },
+            { event: "ABIChanged", args: {} },
+            { event: "PubkeyChanged", args: {} },
+            { event: "TextChanged", args: {} },
+            { event: "ContenthashChanged", args: {} },
+            { event: "InterfaceChanged", args: {} },
+            { event: "VersionChanged", args: {} },
+            { event: "DNSRecordChanged", args: {} },
+            { event: "DNSRecordDeleted", args: {} },
+            { event: "DNSZonehashChanged", args: {} },
+          ],
+          address: contracts.Resolver.address,
           ...blockConfig(startBlock, contracts.Resolver.startBlock, endBlock),
         },
         [namespace("BaseRegistrar")]: {
           network: "linea",
-          ...contracts.BaseRegistrar,
+          abi: linea_BaseRegistrar,
+          address: contracts.BaseRegistrar.address,
           ...blockConfig(startBlock, contracts.BaseRegistrar.startBlock, endBlock),
         },
         [namespace("EthRegistrarController")]: {
           network: "linea",
-          ...contracts.EthRegistrarController,
+          abi: linea_EthRegistrarController,
+          address: contracts.EthRegistrarController.address,
           ...blockConfig(startBlock, contracts.EthRegistrarController.startBlock, endBlock),
         },
         [namespace("NameWrapper")]: {
           network: "linea",
-          ...contracts.NameWrapper,
+          abi: linea_NameWrapper,
+          address: contracts.NameWrapper.address,
           ...blockConfig(startBlock, contracts.NameWrapper.startBlock, endBlock),
         },
       },
