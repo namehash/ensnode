@@ -4,7 +4,8 @@ import type { ENSDeploymentConfig } from "./types";
 
 export default {
   eth: {
-    chain: anvil,
+    // ens-test-env uses anvil with chain id 1337
+    chain: { ...anvil, id: 1337 },
 
     // Addresses and Start Blocks from ens-test-env
     // https://github.com/ensdomains/ens-test-env/

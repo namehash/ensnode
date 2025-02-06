@@ -1,4 +1,4 @@
-import type { PluginName } from "@namehash/ens-deployments";
+import type { PluginContractConfig, PluginName } from "@namehash/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
@@ -201,7 +201,7 @@ export function networksConfigForChain(chain: Chain) {
         transport: http(rpcEndpointUrl(chain.id)),
         maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
         // disable rpc caching for anvil node
-        ...(chain.id === 31337 && { disableCache: true }),
+        ...(chain.id === 1337 && { disableCache: true }),
       } satisfies NetworkConfig;
     },
   };
@@ -211,7 +211,7 @@ export function networksConfigForChain(chain: Chain) {
  * Defines a `ponder#ContractConfig['network']` given a contract's config, injecting the global
  * start/end blocks to constrain indexing range.
  */
-export function networkConfigForContract<CONTRACT_CONFIG extends { startBlock?: number }>(
+export function networkConfigForContract<CONTRACT_CONFIG extends PluginContractConfig>(
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,
 ) {
