@@ -2,9 +2,9 @@ import { DEPLOYMENT_CONFIG } from "./src/lib/globals";
 import { type MergedTypes, PonderENSPlugin, getActivePlugins } from "./src/lib/plugin-helpers";
 import { deepMergeRecursive } from "./src/lib/ponder-helpers";
 
-import * as baseEthPlugin from "./src/plugins/base.eth/ponder.plugin";
+import * as baseEthPlugin from "./src/plugins/base/ponder.plugin";
 import * as ethPlugin from "./src/plugins/eth/ponder.plugin";
-import * as lineaEthPlugin from "./src/plugins/linea.eth/ponder.plugin";
+import * as lineaEthPlugin from "./src/plugins/linea/ponder.plugin";
 
 ////////
 // First, generate AllPluginConfigs type representing the merged types of each plugin's `config`,
