@@ -14,24 +14,14 @@ const ensRainbowApiClient = new EnsRainbowApiClient({
  * It mirrors the `ens.nameByHash` function implemented in GraphNode:
  * https://github.com/graphprotocol/graph-node/blob/master/runtime/test/wasm_test/api_version_0_0_4/ens_name_by_hash.ts#L9-L11
  *
- * @returns if the labelhash is found, the original label is returned; otherwise, null.
+ * @returns the original label if found, or null if not found for the labelhash.
+ * @throws if the labelhash is not correctly formatted, or server error occurs, or connection error occurs.
  **/
 export async function labelByHash(labelhash: Labelhash): Promise<string | null> {
-  // runtime check, ENSRainbow API enforces this validation as well
-  labelHashToBytes(labelhash);
-
-  let healResponse: HealResponse;
-
-  try {
-    healResponse = await ensRainbowApiClient.heal(labelhash);
-  } catch (error) {
-    // If the client fails to fetch data, we log the error
-    // and return null to the caller.
-    console.error(`ENSRainbow Client error ${labelhash}: ${error}`);
-    return null;
-  }
+  const healResponse = await ensRainbowApiClient.heal(labelhash);
 
   if (healResponse.status === StatusCode.Success) {
+    // original label found for the labelhash
     return healResponse.label;
   }
 
