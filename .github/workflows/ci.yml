@@ -84,23 +84,3 @@ jobs:
 
       - name: Run unit tests
         run: pnpm -r test
-
-  ensrainbow-docker-build-and-push:
-    runs-on: ubuntu-latest
-    needs: [static-analysis, unit-tests]
-    # we only build the docker image after a push to the branch
-    if: github.event_name == 'push'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build & Push Docker image for ENSRainbow app
-        env:
-          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow
-          TAG: ${{ github.ref == 'refs/heads/main' && 'latest' || github.ref == 'refs/heads/alpha' && 'alpha' || github.ref == 'refs/heads/subgraph' && 'subgraph' }}
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker build -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG -t $IMAGE_NAME:${{ github.sha }} .
-          docker push $IMAGE_NAME:$TAG
-          docker push $IMAGE_NAME:${{ github.sha }}

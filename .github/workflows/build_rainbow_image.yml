@@ -3,7 +3,7 @@ name: Build ENSRainbow Docker image
 on:
   push:
     branches:
-      - 111-transition-deployments-to-github-actions
+      - 111-transition-deployments-to-github-actions-tmp
 
 jobs:
   ensrainbow-docker-build-and-push:
