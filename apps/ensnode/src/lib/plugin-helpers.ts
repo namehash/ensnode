@@ -1,5 +1,5 @@
-import type { PluginConfig, PluginContractNames, PluginName } from "@namehash/ens-deployments";
-import type { ContractConfig, NetworkConfig } from "ponder";
+import type { PluginName } from "@namehash/ens-deployments";
+import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
 import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
@@ -95,7 +95,7 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
  * @param availablePlugins is a list of available plugins
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { ownedName: OwnedName }>(
+export function getActivePlugins<T extends { pluginName: PluginName }>(
   availablePlugins: readonly T[],
 ): T[] {
   /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
@@ -109,7 +109,7 @@ export function getActivePlugins<T extends { ownedName: OwnedName }>(
   // Check if the requested plugins are valid and can become active
   const invalidPlugins = requestedPlugins.filter(
     (requestedPlugin) =>
-      !availablePlugins.some((availablePlugin) => availablePlugin.ownedName === requestedPlugin),
+      !availablePlugins.some((availablePlugin) => availablePlugin.pluginName === requestedPlugin),
   );
 
   if (invalidPlugins.length) {
@@ -123,18 +123,18 @@ export function getActivePlugins<T extends { ownedName: OwnedName }>(
 
   const uniquePluginsToActivate = availablePlugins.reduce((acc, plugin) => {
     // Check if the plugin was requested
-    if (requestedPlugins.includes(plugin.ownedName) === false) {
+    if (requestedPlugins.includes(plugin.pluginName) === false) {
       // avoid unnecessary processing
       return acc;
     }
 
     // Check if the plugin was already added to the list
-    if (acc.has(plugin.ownedName)) {
+    if (acc.has(plugin.pluginName)) {
       // avoid duplicates
       return acc;
     }
 
-    acc.set(plugin.ownedName, plugin);
+    acc.set(plugin.pluginName, plugin);
 
     return acc;
   }, new Map<string, T>());
@@ -147,20 +147,30 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
   ? R
   : never;
 
-type NamespaceForOwnedName<OWNED_NAME extends OwnedName> = ReturnType<
-  typeof createPluginNamespace<OWNED_NAME>
->;
-
-export interface PonderENSPlugin<OWNED_NAME extends OwnedName, CONFIG> {
-  ownedName: OWNED_NAME;
+/**
+ * A PonderENSPlugin provides a pluginName to identify it, a ponder config, and an activate
+ * function to load handlers.
+ */
+export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
+  pluginName: PLUGIN_NAME;
   config: CONFIG;
   activate: VoidFunction;
 }
 
-export interface CreatePonderENSPluginArgs<PLUGIN_NAME extends PluginName> {
-  config: PluginConfig<PluginContractNames[PLUGIN_NAME]>;
-  extraContractConfig?: Pick<ContractConfig, "startBlock" | "endBlock">;
-}
+/**
+ * An ENS Plugin's handlers are configured with ownedName and namespace.
+ */
+export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
+  ownedName: OwnedName;
+  namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
+};
+
+/**
+ * An ENS Plugin Handler
+ */
+export type PonderENSPluginHandler<OWNED_NAME extends OwnedName> = (
+  options: PonderENSPluginHandlerArgs<OWNED_NAME>,
+) => void;
 
 export const activateHandlers =
   <OWNED_NAME extends OwnedName>({
@@ -174,32 +184,25 @@ export const activateHandlers =
   };
 
 /**
- * An ENS Plugin's handlers are configured with ownedName and namespace
+ * Defines a ponder#NetworksConfig for a single, specific chain.
+ * Implemented as a computed getter to avoid runtime assertions for unused RPC env vars.
  */
-export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
-  ownedName: OwnedName;
-  namespace: NamespaceForOwnedName<OWNED_NAME>;
-};
-
-/**
- * An ENS Plugin Handler
- */
-export type PonderENSPluginHandler<OWNED_NAME extends OwnedName> = (
-  options: PonderENSPluginHandlerArgs<OWNED_NAME>,
-) => void;
-
-// export function networkNamesInPlugin
-
 export function networksConfigForChain(chain: Chain) {
   return {
-    [chain.id.toString()]: {
-      chainId: chain.id,
-      transport: http(rpcEndpointUrl(chain.id)),
-      maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
-    } satisfies NetworkConfig,
+    get [chain.id.toString()]() {
+      return {
+        chainId: chain.id,
+        transport: http(rpcEndpointUrl(chain.id)),
+        maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
+      } satisfies NetworkConfig;
+    },
   };
 }
 
+/**
+ * Defines a `ponder#ContractConfig['network']` given a contract's config, injecting the global
+ * start/end blocks to constrain indexing range.
+ */
 export function networkConfigForContract<CONTRACT_CONFIG extends { startBlock?: number }>(
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,

@@ -17,10 +17,10 @@ import { Registry as eth_Registry } from "./abis/Registry";
 import { Resolver as eth_Resolver } from "./abis/Resolver";
 
 // uses the 'eth' plugin config for deployments
-const pluginName = "eth" as const;
+export const pluginName = "eth" as const;
 
 // the Registry/Registrar handlers in this plugin manage subdomains of '.eth'
-export const ownedName = "eth" as const;
+const ownedName = "eth" as const;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);

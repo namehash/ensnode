@@ -15,10 +15,10 @@ import { Registry as linea_Registry } from "./abis/Registry";
 import { Resolver as linea_Resolver } from "./abis/Resolver";
 
 // uses the 'linea' plugin config for deployments
-const pluginName = "linea" as const;
+export const pluginName = "linea" as const;
 
 // the Registry/Registrar handlers in this plugin manage subdomains of '.linea.eth'
-export const ownedName = "linea.eth" as const;
+const ownedName = "linea.eth" as const;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);

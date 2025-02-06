@@ -15,10 +15,10 @@ import { RegistrarController as base_RegistrarController } from "./abis/Registra
 import { Registry as base_Registry } from "./abis/Registry";
 
 // uses the 'base' plugin config for deployments
-const pluginName = "base" as const;
+export const pluginName = "base" as const;
 
 // the Registry/Registrar handlers in this plugin manage subdomains of '.base.eth'
-export const ownedName = "base.eth" as const;
+const ownedName = "base.eth" as const;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);

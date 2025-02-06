@@ -95,7 +95,7 @@ cp .env.local.example .env.local
 
 then review the docs inside your .env.local file for configuration instructions.
 
-- `ACTIVE_PLUGINS` — a comma-separated list of plugin names. Available plugin names are: `eth`, `base.eth`, `linea.eth`. The activated plugins list determines which contracts and chains are indexed. Any permutation of plugins might be activated (except no plugins activated) for single-chain or multi-chain indexing.
+- `ACTIVE_PLUGINS` — a comma-separated list of plugin names. Available plugin names are: `eth`, `base`, `linea`. The activated plugins list determines which contracts and chains are indexed. Any permutation of plugins might be activated (except no plugins activated) for single-chain or multi-chain indexing.
 - `RPC_URL_*` — optional, but you can use private ones to speed the syncing process up
 - `RPC_REQUEST_RATE_LIMIT_*` — optional, you can change the rate limit for RPC requests per second.
 - `DATABASE_SCHEMA` is arbitrary, with the limitations mentioned in the linked documentation

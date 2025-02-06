@@ -125,7 +125,7 @@ export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
  *
  * @throws if not a valid deployment chain value
  */
-export const ensDeploymentChain = (): ENSDeploymentChain => {
+export const getEnsDeploymentChain = (): ENSDeploymentChain => {
   const value = process.env.ENS_DEPLOYMENT_CHAIN;
   if (!value) return "mainnet";
 
