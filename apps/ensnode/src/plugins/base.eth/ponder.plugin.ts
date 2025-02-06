@@ -1,11 +1,11 @@
 import { createConfig } from "ponder";
-import { DEPLOYMENT_CONFIG, END_BLOCK, START_BLOCK } from "../../lib/globals";
+import { DEPLOYMENT_CONFIG } from "../../lib/globals";
 import {
   activateHandlers,
   createPluginNamespace,
-  mapChainToNetworkConfig,
+  networkConfigForContract,
+  networksConfigForChain,
 } from "../../lib/plugin-helpers";
-import { blockConfig } from "../../lib/ponder-helpers";
 
 // base plugin abis
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/BaseRegistrar";
@@ -15,28 +15,23 @@ import { RegistrarController as base_RegistrarController } from "./abis/Registra
 import { Registry as base_Registry } from "./abis/Registry";
 
 // uses the 'base' plugin config for deployments
-const { chain, contracts } = DEPLOYMENT_CONFIG.base!;
+const pluginName = "base" as const;
 
 // the Registry/Registrar handlers in this plugin manage subdomains of '.base.eth'
 export const ownedName = "base.eth" as const;
 
+const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
 export const config = createConfig({
-  networks: {
-    get base() {
-      return mapChainToNetworkConfig(chain);
-    },
-  },
+  networks: networksConfigForChain(chain),
   contracts: {
     [namespace("Registry")]: {
-      network: "base",
+      network: networkConfigForContract(chain, contracts.Registry),
       abi: base_Registry,
-      address: contracts.Registry.address,
-      ...blockConfig(START_BLOCK, contracts.Registry.startBlock, END_BLOCK),
     },
     [namespace("Resolver")]: {
-      network: "base",
+      network: networkConfigForContract(chain, contracts.Resolver),
       abi: base_L2Resolver,
       // NOTE: this indexes every event ever emitted that looks like this
       filter: [
@@ -53,25 +48,18 @@ export const config = createConfig({
         { event: "DNSRecordDeleted", args: {} },
         { event: "DNSZonehashChanged", args: {} },
       ],
-      ...blockConfig(START_BLOCK, contracts.Resolver.startBlock, END_BLOCK),
     },
     [namespace("BaseRegistrar")]: {
-      network: "base",
+      network: networkConfigForContract(chain, contracts.BaseRegistrar),
       abi: base_BaseRegistrar,
-      address: contracts.BaseRegistrar.address,
-      ...blockConfig(START_BLOCK, contracts.BaseRegistrar.startBlock, END_BLOCK),
     },
     [namespace("EARegistrarController")]: {
-      network: "base",
+      network: networkConfigForContract(chain, contracts.EARegistrarController),
       abi: base_EarlyAccessRegistrarController,
-      address: contracts.EARegistrarController.address,
-      ...blockConfig(START_BLOCK, contracts.EARegistrarController.startBlock, END_BLOCK),
     },
     [namespace("RegistrarController")]: {
-      network: "base",
+      network: networkConfigForContract(chain, contracts.RegistrarController),
       abi: base_RegistrarController,
-      address: contracts.RegistrarController.address,
-      ...blockConfig(START_BLOCK, contracts.RegistrarController.startBlock, END_BLOCK),
     },
   },
 });

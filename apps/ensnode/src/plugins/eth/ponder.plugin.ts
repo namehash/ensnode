@@ -1,11 +1,11 @@
 import { createConfig, mergeAbis } from "ponder";
-import { DEPLOYMENT_CONFIG, END_BLOCK, START_BLOCK } from "../../lib/globals";
+import { DEPLOYMENT_CONFIG } from "../../lib/globals";
 import {
   activateHandlers,
   createPluginNamespace,
-  mapChainToNetworkConfig,
+  networkConfigForContract,
+  networksConfigForChain,
 } from "../../lib/plugin-helpers";
-import { blockConfig } from "../../lib/ponder-helpers";
 
 // eth plugin abis
 import { BaseRegistrar as eth_BaseRegistrar } from "./abis/BaseRegistrar";
@@ -17,34 +17,27 @@ import { Registry as eth_Registry } from "./abis/Registry";
 import { Resolver as eth_Resolver } from "./abis/Resolver";
 
 // uses the 'eth' plugin config for deployments
-const { chain, contracts } = DEPLOYMENT_CONFIG.eth!;
+const pluginName = "eth" as const;
 
 // the Registry/Registrar handlers in this plugin manage subdomains of '.eth'
 export const ownedName = "eth" as const;
 
+const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
 export const config = createConfig({
-  networks: {
-    get mainnet() {
-      return mapChainToNetworkConfig(chain);
-    },
-  },
+  networks: networksConfigForChain(chain),
   contracts: {
     [namespace("RegistryOld")]: {
-      network: "mainnet",
+      network: networkConfigForContract(chain, contracts.RegistryOld),
       abi: eth_Registry,
-      address: contracts.RegistryOld.address,
-      ...blockConfig(START_BLOCK, contracts.RegistryOld.startBlock, END_BLOCK),
     },
     [namespace("Registry")]: {
-      network: "mainnet",
+      network: networkConfigForContract(chain, contracts.Registry),
       abi: eth_Registry,
-      address: contracts.Registry.address,
-      ...blockConfig(START_BLOCK, contracts.Registry.startBlock, END_BLOCK),
     },
     [namespace("Resolver")]: {
-      network: "mainnet",
+      network: networkConfigForContract(chain, contracts.Resolver),
       abi: mergeAbis([eth_LegacyPublicResolver, eth_Resolver]),
       // NOTE: this indexes every event ever emitted that looks like this
       filter: [
@@ -70,31 +63,22 @@ export const config = createConfig({
         { event: "DNSRecordDeleted", args: {} },
         { event: "DNSZonehashChanged", args: {} },
       ],
-      ...blockConfig(START_BLOCK, contracts.Resolver.startBlock, END_BLOCK),
     },
     [namespace("BaseRegistrar")]: {
-      network: "mainnet",
+      network: networkConfigForContract(chain, contracts.BaseRegistrar),
       abi: eth_BaseRegistrar,
-      address: contracts.BaseRegistrar.address,
-      ...blockConfig(START_BLOCK, contracts.BaseRegistrar.startBlock, END_BLOCK),
     },
     [namespace("EthRegistrarControllerOld")]: {
-      network: "mainnet",
+      network: networkConfigForContract(chain, contracts.EthRegistrarControllerOld),
       abi: eth_EthRegistrarControllerOld,
-      address: contracts.EthRegistrarControllerOld.address,
-      ...blockConfig(START_BLOCK, contracts.EthRegistrarControllerOld.startBlock, END_BLOCK),
     },
     [namespace("EthRegistrarController")]: {
-      network: "mainnet",
+      network: networkConfigForContract(chain, contracts.EthRegistrarController),
       abi: eth_EthRegistrarController,
-      address: contracts.EthRegistrarController.address,
-      ...blockConfig(START_BLOCK, contracts.EthRegistrarController.startBlock, END_BLOCK),
     },
     [namespace("NameWrapper")]: {
-      network: "mainnet",
+      network: networkConfigForContract(chain, contracts.NameWrapper),
       abi: eth_NameWrapper,
-      address: contracts.NameWrapper.address,
-      ...blockConfig(START_BLOCK, contracts.NameWrapper.startBlock, END_BLOCK),
     },
   },
 });

@@ -1,7 +1,8 @@
-import { PluginConfig, PluginContractNames, PluginName } from "@namehash/ens-deployments";
+import type { PluginConfig, PluginContractNames, PluginName } from "@namehash/ens-deployments";
 import type { ContractConfig, NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
-import { rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
+import { END_BLOCK, START_BLOCK } from "./globals";
+import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
 import type { OwnedName } from "./types";
 
 /**
@@ -156,14 +157,6 @@ export interface PonderENSPlugin<OWNED_NAME extends OwnedName, CONFIG> {
   activate: VoidFunction;
 }
 
-export function mapChainToNetworkConfig(chain: Chain) {
-  return {
-    chainId: chain.id,
-    transport: http(rpcEndpointUrl(chain.id)),
-    maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
-  } satisfies NetworkConfig;
-}
-
 export interface CreatePonderENSPluginArgs<PLUGIN_NAME extends PluginName> {
   config: PluginConfig<PluginContractNames[PLUGIN_NAME]>;
   extraContractConfig?: Pick<ContractConfig, "startBlock" | "endBlock">;
@@ -194,3 +187,27 @@ export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
 export type PonderENSPluginHandler<OWNED_NAME extends OwnedName> = (
   options: PonderENSPluginHandlerArgs<OWNED_NAME>,
 ) => void;
+
+// export function networkNamesInPlugin
+
+export function networksConfigForChain(chain: Chain) {
+  return {
+    [chain.id.toString()]: {
+      chainId: chain.id,
+      transport: http(rpcEndpointUrl(chain.id)),
+      maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
+    } satisfies NetworkConfig,
+  };
+}
+
+export function networkConfigForContract<CONTRACT_CONFIG extends { startBlock?: number }>(
+  chain: Chain,
+  contractConfig: CONTRACT_CONFIG,
+) {
+  return {
+    [chain.id.toString()]: {
+      ...contractConfig,
+      ...blockConfig(START_BLOCK, contractConfig.startBlock, END_BLOCK),
+    },
+  };
+}

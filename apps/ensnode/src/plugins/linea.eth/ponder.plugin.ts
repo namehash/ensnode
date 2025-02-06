@@ -1,11 +1,11 @@
 import { createConfig } from "ponder";
-import { DEPLOYMENT_CONFIG, END_BLOCK, START_BLOCK } from "../../lib/globals";
+import { DEPLOYMENT_CONFIG } from "../../lib/globals";
 import {
   activateHandlers,
   createPluginNamespace,
-  mapChainToNetworkConfig,
+  networkConfigForContract,
+  networksConfigForChain,
 } from "../../lib/plugin-helpers";
-import { blockConfig } from "../../lib/ponder-helpers";
 
 // linea plugin abis
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/BaseRegistrar";
@@ -15,28 +15,23 @@ import { Registry as linea_Registry } from "./abis/Registry";
 import { Resolver as linea_Resolver } from "./abis/Resolver";
 
 // uses the 'linea' plugin config for deployments
-const { chain, contracts } = DEPLOYMENT_CONFIG.linea!;
+const pluginName = "linea" as const;
 
 // the Registry/Registrar handlers in this plugin manage subdomains of '.linea.eth'
 export const ownedName = "linea.eth" as const;
 
+const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
 export const config = createConfig({
-  networks: {
-    get linea() {
-      return mapChainToNetworkConfig(chain);
-    },
-  },
+  networks: networksConfigForChain(chain),
   contracts: {
     [namespace("Registry")]: {
-      network: "linea",
+      network: networkConfigForContract(chain, contracts.Registry),
       abi: linea_Registry,
-      address: contracts.Registry.address,
-      ...blockConfig(START_BLOCK, contracts.Registry.startBlock, END_BLOCK),
     },
     [namespace("Resolver")]: {
-      network: "linea",
+      network: networkConfigForContract(chain, contracts.Resolver),
       abi: linea_Resolver,
       // NOTE: this indexes every event ever emitted that looks like this
       filter: [
@@ -53,25 +48,18 @@ export const config = createConfig({
         { event: "DNSRecordDeleted", args: {} },
         { event: "DNSZonehashChanged", args: {} },
       ],
-      ...blockConfig(START_BLOCK, contracts.Resolver.startBlock, END_BLOCK),
     },
     [namespace("BaseRegistrar")]: {
-      network: "linea",
+      network: networkConfigForContract(chain, contracts.BaseRegistrar),
       abi: linea_BaseRegistrar,
-      address: contracts.BaseRegistrar.address,
-      ...blockConfig(START_BLOCK, contracts.BaseRegistrar.startBlock, END_BLOCK),
     },
     [namespace("EthRegistrarController")]: {
-      network: "linea",
+      network: networkConfigForContract(chain, contracts.EthRegistrarController),
       abi: linea_EthRegistrarController,
-      address: contracts.EthRegistrarController.address,
-      ...blockConfig(START_BLOCK, contracts.EthRegistrarController.startBlock, END_BLOCK),
     },
     [namespace("NameWrapper")]: {
-      network: "linea",
+      network: networkConfigForContract(chain, contracts.NameWrapper),
       abi: linea_NameWrapper,
-      address: contracts.NameWrapper.address,
-      ...blockConfig(START_BLOCK, contracts.NameWrapper.startBlock, END_BLOCK),
     },
   },
 });
