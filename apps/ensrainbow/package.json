@@ -19,8 +19,6 @@
     "ingest:prod": "node dist/ingest.js",
     "count-keys": "tsx src/count-keys.ts",
     "count-keys:prod": "node dist/count-keys.js",
-    "docker:build": "docker build -t ensnode/ensrainbow .",
-    "docker:push": "docker push ensnode/ensrainbow",
     "test": "DATA_DIR=test-data vitest run",
     "test:watch": "DATA_DIR=test-data vitest",
     "test:coverage": "DATA_DIR=test-data vitest run --coverage",

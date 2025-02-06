@@ -27,7 +27,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     const node = makeSubnodeNamehash(event.args.node, event.args.label);
     const isMigrated = await isDomainMigrated(context, node);
     if (isMigrated) return;
-    return handleNewOwner(false)({ context, event });
+    await handleNewOwner(false)({ context, event });
   });
 
   ponder.on(namespace("RegistryOld:NewResolver"), async ({ context, event }) => {
@@ -38,13 +38,13 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     // NOTE: the subgraph must include an exception here for the root node because it starts out
     // isMigrated: true, but we definitely still want to handle NewResolver events for it.
     if (isMigrated && !isRootNode) return;
-    return handleNewResolver({ context, event });
+    await handleNewResolver({ context, event });
   });
 
   ponder.on(namespace("RegistryOld:NewTTL"), async ({ context, event }) => {
     const isMigrated = await isDomainMigrated(context, event.args.node);
     if (isMigrated) return;
-    return handleNewTTL({ context, event });
+    await handleNewTTL({ context, event });
   });
 
   ponder.on(namespace("RegistryOld:Transfer"), async ({ context, event }) => {
@@ -56,7 +56,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
 
     const isMigrated = await isDomainMigrated(context, event.args.node);
     if (isMigrated) return;
-    return handleTransfer({ context, event });
+    await handleTransfer({ context, event });
   });
 
   ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));

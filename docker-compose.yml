@@ -1,16 +1,39 @@
-version: '3.8'
-
 services:
-  ensrainbow:
+  ensnode:
     build:
-      context: ./apps/ensrainbow
-      dockerfile: Dockerfile
+      dockerfile: ./apps/ensnode/Dockerfile
+    image: namehash/ensnode
     ports:
-      - "3001:3000"
+      - "3001:42069"
     environment:
-      - NODE_ENV=production
-    restart: unless-stopped
+      DATABASE_SCHEMA: public
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
+      NODE_ENV: production
+      ENSRAINBOW_URL: http://ensrainbow:3000
+    # depends_on:
+    #   - ensrainbow
+  # ensrainbow:
+  #   build:
+  #     dockerfile: ./apps/ensrainbow/Dockerfile
+  #   image: namehash/ensrainbow
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     NODE_ENV: production
+  #   restart: unless-stopped
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ponder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
+  postgres_data:
+    driver: local
   ensrainbow_data:
-    driver: local 
+    driver: local
