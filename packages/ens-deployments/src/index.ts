@@ -12,6 +12,6 @@ export const DeploymentConfigs = {
   sepolia,
   holesky,
   "ens-test-env": ensTestEnv,
-};
+} satisfies Record<ENSDeploymentChain, ENSDeploymentConfig>;
 
 export default DeploymentConfigs;
