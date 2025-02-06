@@ -10,11 +10,11 @@ const ensRainbowApiClient = new EnsRainbowApiClient({
 });
 
 /**
- * Heal a labelhash to its original label. It mirrors `ens.nameByHash` function:
+ * Attempt to heal a labelhash to its original label.
+ * It mirrors the `ens.nameByHash` function implemented in GraphNode:
  * https://github.com/graphprotocol/graph-node/blob/master/runtime/test/wasm_test/api_version_0_0_4/ens_name_by_hash.ts#L9-L11
  *
- * @returns a healed label for a given labelhash, if possible.
- *
+ * @returns if the labelhash is found, the original label is returned; otherwise, null.
  **/
 export async function labelByHash(labelhash: Labelhash): Promise<string | null> {
   // runtime check, ENSRainbow API enforces this validation as well
@@ -36,14 +36,11 @@ export async function labelByHash(labelhash: Labelhash): Promise<string | null> 
   }
 
   if (healResponse.errorCode === ErrorCode.NotFound) {
-    // This is a warning because it's possible that the labelhash is not
-    // recorded in the ENSRainbow database.
-    console.warn(`Healing labelhash error: '${labelhash}' not found`);
-
+    // no original label found for the labelhash
     return null;
   }
 
   throw new Error(
-    `Healing labelhash error ${labelhash}: ${healResponse.error}; error code: ${healResponse.errorCode}`,
+    `Error healing labelhash: "${labelhash}". Error (${healResponse.errorCode}): ${healResponse.error}.`,
   );
 }

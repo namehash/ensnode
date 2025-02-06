@@ -72,6 +72,11 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  *
  * Related logic in ENS Subgraph:
  * https://github.com/ensdomains/ens-subgraph/blob/master/src/utils.ts#L68
+ *
+ * @param label - The label to check. Note:
+ * passing a `null` value is symbolic for the idea that the label is unindexable.
+ *
+ * @returns `true` if the label is indexable, `false` otherwise.
  */
 export const isLabelIndexable = (label: string | null): boolean => {
   if (!label) return false;

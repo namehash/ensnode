@@ -23,6 +23,7 @@ describe("isLabelIndexable", () => {
 
   it("should return false for empty labels", () => {
     expect(isLabelIndexable("")).toBe(false);
+    expect(isLabelIndexable(null)).toBe(false);
   });
 });
 

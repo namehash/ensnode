@@ -31,30 +31,30 @@ describe("EnsRainbowApiClient", () => {
     );
 
     expect(response).toEqual({
-      label: "vitalik",
       status: StatusCode.Success,
+      label: "vitalik",
     } satisfies HealSuccess);
   });
 
-  it("should return an error for an unknown labelhash", async () => {
+  it("should return a not found error for an unknown labelhash", async () => {
     const response = await client.heal(
       "0xf64dc17ae2e2b9b16dbcb8cb05f35a2e6080a5ff1dc53ac0bc48f0e79111f264",
     );
 
     expect(response).toEqual({
+      status: StatusCode.Error,
       error: "Label not found",
       errorCode: ErrorCode.NotFound,
-      status: StatusCode.Error,
     } satisfies HealError);
   });
 
-  it("should return an error for an invalid labelhash", async () => {
+  it("should return a bad request error for an invalid labelhash", async () => {
     const response = await client.heal("0xinvalid");
 
     expect(response).toEqual({
+      status: StatusCode.Error,
       error: "Invalid labelhash length 9 characters (expected 66)",
       errorCode: ErrorCode.BadRequest,
-      status: StatusCode.Error,
     });
   });
 });

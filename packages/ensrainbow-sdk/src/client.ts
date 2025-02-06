@@ -1,6 +1,6 @@
 import type { Labelhash } from "ensnode-utils/types";
 import { DEFAULT_ENSRAINBOW_URL } from "./consts";
-import type { HealError, HealResponse } from "./types";
+import type { HealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;
@@ -38,6 +38,14 @@ export class EnsRainbowApiClient {
       ...EnsRainbowApiClient.defaultOptions(),
       ...options,
     };
+
+    if (this.options.endpointUrl === EnsRainbowApiClient.defaultOptions().endpointUrl) {
+      console.warn(
+        `Using default public ENSRainbow server which may cause increased network latency.
+        For production, use your own ENSRainbow server that runs on the same network
+        as the service using EnsRainbowApiClient.`,
+      );
+    }
   }
 
   /**
@@ -50,14 +58,14 @@ export class EnsRainbowApiClient {
    * - Labels can contain any valid string, including dots, null bytes, or be empty
    * - Clients should handle all possible string values appropriately
    *
-   * @param labelhash all lowercase hex string with 0x prefix with length of 66 characters in total
-   * @returns a response with the status and the label if successful
-   * @throws an error if the request fails or the labelhash is not found or invalid
+   * @param labelhash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
+   * @returns a `HealResponse` indicating the result of the request and the healed label if successful
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
    *
    * @example
    * ```typescript
    * const response = await client.heal(
-   *  "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
+   *   "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
    * );
    *
    * console.log(response);
@@ -65,7 +73,20 @@ export class EnsRainbowApiClient {
    * // Output:
    * // {
    * //   status: "success",
-   * //   label: "reverse",
+   * //   label: "vitalik"
+   * // }
+   *
+   * const notFoundResponse = await client.heal(
+   *   "0xf64dc17ae2e2b9b16dbcb8cb05f35a2e6080a5ff1dc53ac0bc48f0e79111f264"
+   * );
+   *
+   * console.log(notFoundResponse);
+   *
+   * // Output:
+   * // {
+   * //   status: "error",
+   * //   error: "Label not found",
+   * //   errorCode: 404
    * // }
    * ```
    */
@@ -80,7 +101,7 @@ export class EnsRainbowApiClient {
    *
    * @returns the current client options
    */
-  getOptions(): EnsRainbowApiClientOptions {
-    return this.options;
+  getOptions(): Readonly<EnsRainbowApiClientOptions> {
+    return Object.freeze(this.options);
   }
 }

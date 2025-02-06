@@ -77,7 +77,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
-      // materialze labelName via rainbow tables ala Registry.ts
+      // attempt to heal the label associated with labelhash via ENSRainbow
       // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/ethRegistrar.ts#L56-L61
       const label = await labelByHash(labelhash);
       const canIndexLabel = isLabelIndexable(label);

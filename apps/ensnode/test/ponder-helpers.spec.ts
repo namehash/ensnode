@@ -60,20 +60,14 @@ describe("ponder helpers", () => {
   });
 
   describe("parseEnsRainbowEndpointUrl", () => {
-    it("should parse a valid ENSRainbow endpoint URL", () => {
-      expect(parseEnsRainbowEndpointUrl("https://api.ensrainbow.io")).toBe(
-        "https://api.ensrainbow.io/",
-      );
+    it("should parse a custom ENSRainbow endpoint URL", () => {
+      expect(parseEnsRainbowEndpointUrl("https://api.ens.rocks")).toBe("https://api.ens.rocks/");
     });
 
     it("should throw an error if the URL is invalid", () => {
       expect(() => parseEnsRainbowEndpointUrl("almost_an_URL")).toThrowError(
         "'almost_an_URL' is not a valid URL",
       );
-    });
-
-    it("should not throw an error if the URL is missing", () => {
-      expect(() => parseEnsRainbowEndpointUrl()).not.toThrowError();
     });
 
     it("should return the default URL if the URL is missing", () => {

@@ -127,7 +127,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         if (!domain.name) {
           const parent = await context.db.find(schema.domain, { id: node });
 
-          // sync rainbow table lookups
+          // attempt to heal the label associated with labelhash via ENSRainbow
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
           const label = await labelByHash(event.args.label);
           const labelName = isLabelIndexable(label) ? label : encodeLabelhash(event.args.label);
