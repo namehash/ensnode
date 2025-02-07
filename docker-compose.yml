@@ -1,6 +1,32 @@
 version: '3.8'
 
 services:
+
+  ensnode:
+      build:
+        context: .
+        dockerfile: ./apps/ensnode/Dockerfile
+      ports:
+        - "42069:42069"
+      env_file:
+      - ./apps/ensnode/.env.local
+      environment:
+        DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
+      depends_on:
+        - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ponder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   ensrainbow:
     build:
       context: ./apps/ensrainbow
@@ -12,5 +38,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  ensrainbow_data:
-    driver: local 
+  postgres_data:
+    driver: local

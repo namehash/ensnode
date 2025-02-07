@@ -10,12 +10,12 @@ COPY pnpm-workspace.yaml ./
 # Copy the root package.json and lockfile
 COPY package.json pnpm-lock.yaml ./
 # Copy all pnpm workspace modules
+COPY apps ./apps
 COPY packages ./packages
-COPY apps/ensnode ./ensnode
 # Install dependencies for the entire monorepo
 RUN pnpm install --frozen-lockfile
 # Change to the specific app directory
-WORKDIR /app/ensnode
+WORKDIR /app/apps/ensnode
 
 EXPOSE 42069
-CMD [ "pnpm", "start" ]
+CMD ["pnpm", "exec", "ponder", "start"]
