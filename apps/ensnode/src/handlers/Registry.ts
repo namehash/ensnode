@@ -99,7 +99,6 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // so we ensure the account exists before inserting the domain
         await upsertAccount(context, owner);
 
-        // note that we set isMigrated so that if this domain is being interacted with on the new registry, its migration status is set here
         let domain = await context.db.find(schema.domain, { id: subnode });
         let parent = await context.db.find(schema.domain, { id: node });
 
@@ -111,6 +110,8 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
             createdAt: event.block.timestamp,
             labelhash: event.args.label,
             ownerId: owner,
+            // note that we set isMigrated so that if this domain is being interacted with on the new registry,
+            // its migration status is set here
             isMigrated,
           });
         }
