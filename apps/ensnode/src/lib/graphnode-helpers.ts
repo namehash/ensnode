@@ -1,13 +1,21 @@
 import type { Labelhash } from "ensnode-utils/types";
 import { EnsRainbowApiClient } from "ensrainbow-sdk/client";
 import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
-import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
-import type { HealResponse } from "ensrainbow-sdk/types";
 import { ensRainbowEndpointUrl } from "./ponder-helpers";
 
 const ensRainbowApiClient = new EnsRainbowApiClient({
   endpointUrl: new URL(ensRainbowEndpointUrl()),
 });
+
+if (
+  ensRainbowApiClient.getOptions().endpointUrl === EnsRainbowApiClient.defaultOptions().endpointUrl
+) {
+  console.warn(
+    `Using default public ENSRainbow server which may cause increased network latency.
+    For production, use your own ENSRainbow server that runs on the same network
+    as ENSNode server.`,
+  );
+}
 
 /**
  * Attempt to heal a labelhash to its original label.
