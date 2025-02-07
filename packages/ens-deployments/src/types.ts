@@ -3,6 +3,9 @@ import type { Chain } from "viem";
 
 /**
  * ENSDeploymentChain encodes the possible values of the root chain ENS is deployed to.
+ *
+ * Note that `ens-test-env` is the specific local Anvil deterministic deployment used in the ens
+ * ecosystem for testing purposes.
  */
 export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
 
