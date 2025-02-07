@@ -74,7 +74,7 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  * https://github.com/ensdomains/ens-subgraph/blob/master/src/utils.ts#L68
  *
  * @param label - The label to check. Note:
- * passing a `null` value is symbolic for the idea that the label is unindexable.
+ * A `null` value for `label` represents an unhealable labelhash.
  *
  * @returns `true` if the label is indexable, `false` otherwise.
  */

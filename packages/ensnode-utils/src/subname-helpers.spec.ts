@@ -23,6 +23,9 @@ describe("isLabelIndexable", () => {
 
   it("should return false for empty labels", () => {
     expect(isLabelIndexable("")).toBe(false);
+  });
+
+  it("should return false for unhealable lablelhash", () => {
     expect(isLabelIndexable(null)).toBe(false);
   });
 });
