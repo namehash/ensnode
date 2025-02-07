@@ -10,6 +10,8 @@ import { makeResolverId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
 
+type Domain = typeof schema.domain.$inferInsert;
+
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
  * Any permutation of plugins might be activated (except no plugins activated)
@@ -62,7 +64,7 @@ function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
 }
 
 // a more accurate name for the following function
-// https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64
+// https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64-L82
 async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
@@ -75,6 +77,60 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
 
     // recurse to parent
     return recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.parentId);
+  }
+}
+
+// create a basic domain database entity object
+// akin to new Domain(node)
+function newDomain(node: Node): Domain {
+  return {
+    id: node,
+  } as Domain;
+}
+
+// create a domain database entity object
+// akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L34-L44
+function createDomain(node: Node, timestamp: bigint): Domain {
+  const EMPTY_ADDRESS = zeroAddress;
+
+  let domain = newDomain(node);
+  if (node == ROOT_NODE) {
+    domain = newDomain(node);
+    domain.ownerId = EMPTY_ADDRESS;
+    domain.isMigrated = true;
+    domain.createdAt = timestamp;
+    domain.subdomainCount = 0;
+  }
+  return domain;
+}
+
+// get the domain database entity object
+// akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L46-L56
+async function getDomain(
+  context: Context,
+  node: Node,
+  timestamp: bigint = 0n,
+): Promise<Domain | null> {
+  let domain = await context.db.find(schema.domain, { id: node });
+  if (domain == null && node == ROOT_NODE) {
+    return createDomain(node, timestamp);
+  } else {
+    return domain;
+  }
+}
+
+// upsert the domain database entity object
+// akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L84-L87
+async function saveDomain(context: Context, domain: Domain): Promise<void> {
+  // insert or update the domain database entity object
+  await context.db
+    .insert(schema.domain)
+    .values(domain)
+    .onConflictDoUpdate(() => domain);
+
+  // garbage collect newly 'empty' domain iff necessary
+  if (domain.ownerId === zeroAddress) {
+    await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
   }
 }
 
@@ -93,27 +149,23 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       }) => {
         const { label, node, owner } = event.args;
 
-        const subnode = makeSubnodeNamehash(node, label);
-
         // Each domain must reference an account of its owner,
         // so we ensure the account exists before inserting the domain
+        // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L91-L92
         await upsertAccount(context, owner);
 
-        let domain = await context.db.find(schema.domain, { id: subnode });
-        let parent = await context.db.find(schema.domain, { id: node });
+        // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L94-L96
+        const subnode = makeSubnodeNamehash(node, label);
+        let domain = await getDomain(context, subnode);
+        let parent = await getDomain(context, node);
 
         // creating a new domain, akin to
-        // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L98-L102
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L98-L102
         if (domain === null) {
-          domain = await context.db.insert(schema.domain).values({
-            id: subnode,
-            createdAt: event.block.timestamp,
-            labelhash: event.args.label,
-            ownerId: owner,
-            // note that we set isMigrated so that if this domain is being interacted with on the new registry,
-            // its migration status is set here
-            isMigrated,
-          });
+          // prepare domain entity object
+          domain = newDomain(subnode);
+          domain.createdAt = event.block.timestamp;
+          domain.subdomainCount = 0;
         }
 
         // increment subdomainCount of parent domain, akin to
@@ -153,14 +205,11 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         domain.ownerId = event.args.owner;
         domain.parentId = event.args.node;
         domain.labelhash = event.args.label;
+        // note that we set isMigrated so that if this domain is being interacted with
+        // on the new registry, its migration status is set here
         domain.isMigrated = isMigrated;
         // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L135
-        await context.db.update(schema.domain, { id: domain.id }).set(domain);
-
-        // garbage collect newly 'empty' domain iff necessary
-        if (owner === zeroAddress) {
-          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
-        }
+        await saveDomain(context, domain);
 
         // log DomainEvent
         await context.db.insert(schema.newOwner).values({
