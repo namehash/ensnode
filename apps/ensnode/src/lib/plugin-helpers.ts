@@ -205,7 +205,7 @@ export function networksConfigForChain(chain: Chain) {
         transport: http(rpcEndpointUrl(chain.id)),
         maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
         // disable rpc caching for anvil node
-        ...(chain.id === 1337 && { disableCache: true }),
+        ...(chain.name === "Anvil" && { disableCache: true }),
       } satisfies NetworkConfig;
     },
   };
