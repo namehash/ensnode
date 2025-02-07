@@ -4,8 +4,8 @@ services:
 
   ensnode:
       build:
-        context: .
         dockerfile: ./apps/ensnode/Dockerfile
+      image: namehash/ensnode
       ports:
         - "42069:42069"
       env_file:
@@ -17,7 +17,7 @@ services:
         - postgres
 
   postgres:
-    image: postgres:16
+    image: postgres:17
     container_name: postgres-db
     environment:
       POSTGRES_USER: postgres
@@ -30,8 +30,8 @@ services:
 
   ensrainbow:
     build:
-      context: ./apps/ensrainbow
-      dockerfile: Dockerfile
+      dockerfile: ./apps/ensrainbow/Dockerfile
+    image: namehash/ensrainbow
     ports:
       - "3001:3000"
     environment:

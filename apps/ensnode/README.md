@@ -49,7 +49,7 @@ estimated mainnet-only backfill time @ <=500rps = **~13 hours** on M1 Macbook (>
 To build the Docker image, navigate to the top of the monorepo and run the following command:
 
 ```bash
-docker build -f apps/ensnode/Dockerfile -t ensnode .
+docker build -f apps/ensnode/Dockerfile -t namehash/ensnode .
 ```
 
 This command will use the Dockerfile located in the `apps/ensnode` directory to create the image.
@@ -64,7 +64,7 @@ The team responsible for this repository is publishing its own Docker image unde
 To run the application using Docker, you can use the following command:
 
 ```bash
-docker run -p 42069:42069 ensnode
+docker run -p 42069:42069 namehash/ensnode
 ```
 
 This command will start the container and map port `42069` from the container to your local machine, allowing you to access the application.
