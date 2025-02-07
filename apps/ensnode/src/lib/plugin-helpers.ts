@@ -3,7 +3,7 @@ import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
 import { uniq } from "./lib-helpers";
-import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
+import { constrainBlockrange, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
 import type { OwnedName } from "./types";
 
 /**
@@ -222,7 +222,7 @@ export function networkConfigForContract<CONTRACT_CONFIG extends PluginContractC
   return {
     [chain.id.toString()]: {
       ...contractConfig,
-      ...blockConfig(START_BLOCK, contractConfig.startBlock, END_BLOCK),
+      ...constrainBlockrange(START_BLOCK, contractConfig.startBlock, END_BLOCK),
     },
   };
 }

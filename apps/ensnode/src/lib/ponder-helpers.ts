@@ -6,8 +6,18 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
   args: ARGS;
 };
 
-// makes sure start and end blocks are valid for ponder
-export const blockConfig = (
+/**
+ * Given a global start and end block (defaulting to undefined), configures a ContractConfig to use
+ * a start and end block that maintains validity within ponder (which requires that every contract's
+ * start and end block be within the global range).
+ *
+ * @param start minimum possible start block number for the current index
+ * @param startBlock the preferred start block for the given contract
+ * @param end maximum possible end block number for the current index
+ * @returns the start and end blocks, contrained to the provided `start` and `end`
+ *  aka START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
+ */
+export const constrainBlockrange = (
   start: number | undefined,
   startBlock: number | undefined,
   end: number | undefined,
