@@ -9,13 +9,14 @@ import { app, db } from "./index";
 import { LABELHASH_COUNT_KEY } from "./utils/constants";
 
 describe("ENS Rainbow API", () => {
+  const port = 3223;
   let server: ReturnType<typeof serve>;
 
   beforeAll(async () => {
     // Start the server on a different port than the main app
     server = serve({
       fetch: app.fetch,
-      port: 3002,
+      port,
     });
   });
 
@@ -40,7 +41,7 @@ describe("ENS Rainbow API", () => {
       const labelHashBytes = labelHashToBytes(validLabelhash);
       await db.put(labelHashBytes, validLabel);
 
-      const response = await fetch(`http://localhost:3002/v1/heal/${validLabelhash}`);
+      const response = await fetch(`http://localhost:${port}/v1/heal/${validLabelhash}`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as HealResponse;
       const expectedData: HealSuccess = {
@@ -51,14 +52,14 @@ describe("ENS Rainbow API", () => {
     });
 
     it("should handle missing labelhash parameter", async () => {
-      const response = await fetch("http://localhost:3002/v1/heal/");
+      const response = await fetch(`http://localhost:${port}/v1/heal/`);
       expect(response.status).toBe(404); // Hono returns 404 for missing parameters
       const text = await response.text();
       expect(text).toBe("404 Not Found"); // Hono's default 404 response
     });
 
     it("should reject invalid labelhash format", async () => {
-      const response = await fetch("http://localhost:3002/v1/heal/invalid-hash");
+      const response = await fetch(`http://localhost:${port}/v1/heal/invalid-hash`);
       expect(response.status).toBe(400);
       const data = (await response.json()) as HealResponse;
       const expectedData: HealError = {
@@ -71,7 +72,7 @@ describe("ENS Rainbow API", () => {
 
     it("should handle non-existent labelhash", async () => {
       const nonExistentHash = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-      const response = await fetch(`http://localhost:3002/v1/heal/${nonExistentHash}`);
+      const response = await fetch(`http://localhost:${port}/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
       const data = (await response.json()) as HealResponse;
       const expectedData: HealError = {
@@ -85,7 +86,7 @@ describe("ENS Rainbow API", () => {
 
   describe("GET /health", () => {
     it("should return ok status", async () => {
-      const response = await fetch("http://localhost:3002/health");
+      const response = await fetch(`http://localhost:${port}/health`);
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toEqual({ status: "ok" });
@@ -94,7 +95,7 @@ describe("ENS Rainbow API", () => {
 
   describe("GET /v1/labels/count", () => {
     it("should throw an error when database is empty", async () => {
-      const response = await fetch("http://localhost:3002/v1/labels/count");
+      const response = await fetch(`http://localhost:${port}/v1/labels/count`);
       expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
       expect(data.status).toEqual(StatusCode.Error);
@@ -106,7 +107,7 @@ describe("ENS Rainbow API", () => {
       // Set a specific count in the database
       await db.put(LABELHASH_COUNT_KEY, "42");
 
-      const response = await fetch("http://localhost:3002/v1/labels/count");
+      const response = await fetch(`http://localhost:${port}/v1/labels/count`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as CountResponse;
       expect(data.status).toEqual(StatusCode.Success);
