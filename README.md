@@ -31,6 +31,10 @@ View the [ENSRainbow docs](https://www.ensrainbow.io).
 
 ## Libraries
 
+### [`packages/ens-deployments`](packages/ens-deployments)
+
+Convenient central location for the ENS Protocol's contracts' `address` and `startBlock` configuration for each independent ENS deployment (i.e. `mainnet`, `sepolia`, `holesky`, `ens-test-env`).
+
 ### [`packages/ensnode-utils`](packages/ensnode-utils)
 
 Common utilities used across ENSNode applications
@@ -95,6 +99,8 @@ cp .env.local.example .env.local
 
 then review the docs inside your .env.local file for configuration instructions.
 
+- `ENS_DEPLOYMENT_CHAIN` — one of `mainnet`, `sepolia`, `holesky`, or `ens-test-env` (optional, default: `mainnet`)
+  - defines which ENS Deployment to index from
 - `ACTIVE_PLUGINS` — a comma-separated list of plugin names. Available plugin names are: `eth`, `base`, `linea`. The activated plugins list determines which contracts and chains are indexed. Any permutation of plugins might be activated (except no plugins activated) for single-chain or multi-chain indexing.
 - `RPC_URL_*` — optional, but you can use private ones to speed the syncing process up
 - `RPC_REQUEST_RATE_LIMIT_*` — optional, you can change the rate limit for RPC requests per second.
