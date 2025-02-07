@@ -102,10 +102,10 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       }
 
       // akin to domain.save()
-      // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ethRegistrar.ts#L63
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
       await context.db.update(schema.domain, { id: node }).set(domain);
       // akin to registration.save()
-      // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ethRegistrar.ts#L64
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
       await upsertRegistration(context, registration);
 
       // log RegistrationEvent

@@ -64,7 +64,7 @@ function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
 }
 
 // a more accurate name for the following function
-// https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64-L82
+// https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64-L82
 async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
@@ -169,7 +169,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         }
 
         // increment subdomainCount of parent domain, akin to
-        // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L104-L107
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L104-L107
         if (domain.parentId === null && parent !== null) {
           await context.db
             .update(schema.domain, { id: parent.id })
@@ -177,7 +177,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         }
 
         // setting the domain's name and labelName, akin to
-        // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L109-L129
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L109-L129
         if (domain.name === null) {
           // attempt to heal the label associated with labelhash via ENSRainbow
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
@@ -188,7 +188,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
             label = encodeLabelhash(event.args.label);
           }
           // deciding domain's name, akin to
-          // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L117-L128
+          // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L117-L128
           if (
             event.args.node === "0x0000000000000000000000000000000000000000000000000000000000000000"
           ) {
