@@ -41,3 +41,33 @@ estimated mainnet-only backfill time @ <=500rps = **~13 hours** on M1 Macbook (>
   - removes centralized dependency on the CCIP Gateway
   - flaky test experience with .cb.id name gateway
   - also helps indexer discovery
+
+## Dockerfile
+
+> Instructions for building the Docker image for ENSNode.
+
+To build the Docker image, navigate to the top of the monorepo and run the following command:
+
+```bash
+docker build -f apps/ensnode/Dockerfile -t ensnode .
+```
+
+This command will use the Dockerfile located in the `apps/ensnode` directory to create the image.
+
+### Important Note
+The Dockerfile expects the build context to be at the top of the monorepo. This means that all the necessary files and directories it needs to access during the build process should be available from that location. If you run the build command from a different directory, the Dockerfile may not find the required files, leading to errors. Keeping the context at the top ensures everything is organized and accessible for a smooth build process.
+
+### Team and Docker Image Repository
+The team responsible for this repository is publishing its own Docker image under the following Docker image repository: [ENSNode image repository](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensnode). This allows users to easily pull the pre-built image without needing to build it themselves.
+
+### Running the Application
+To run the application using Docker, you can use the following command:
+
+```bash
+docker run -p 42069:42069 ensnode
+```
+
+This command will start the container and map port `42069` from the container to your local machine, allowing you to access the application.
+
+### Docker Compose
+For a more convenient setup, you can also use Docker Compose. Refer to the Docker Compose usage instructions at the top of the monorepo for details on how to run the application with Docker Compose, which simplifies the process of managing multi-container applications.
