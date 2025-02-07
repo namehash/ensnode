@@ -84,17 +84,13 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-        // labelName is set later if the label is indexable
-        labelName: undefined as string | undefined,
-      } satisfies typeof schema.registration.$inferInsert;
+      } as typeof schema.registration.$inferInsert;
 
       // prepare domain entity object
       const domain = {
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName: undefined as string | undefined,
-        name: undefined as string | undefined,
-      } satisfies Partial<typeof schema.domain.$inferInsert>;
+      } as Partial<typeof schema.domain.$inferInsert>;
 
       // attempt to heal the label associated with labelhash via ENSRainbow
       // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/ethRegistrar.ts#L56-L61

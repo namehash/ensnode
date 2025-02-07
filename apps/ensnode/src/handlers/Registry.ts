@@ -110,9 +110,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
             id: subnode,
             createdAt: event.block.timestamp,
             labelhash: event.args.label,
-            subdomainCount: 0,
             ownerId: owner,
-            parentId: null,
             isMigrated,
           });
         }
