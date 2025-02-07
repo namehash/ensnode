@@ -18,6 +18,7 @@ export default {
         startBlock: 9380380,
       },
       Resolver: {
+        // NOTE: no address, events identified by `ContractConfig#filter`
         startBlock: 3327417,
       },
       BaseRegistrar: {
@@ -49,6 +50,7 @@ export default {
         startBlock: 17571480,
       },
       Resolver: {
+        // NOTE: no address, events identified by `ContractConfig#filter`
         startBlock: 17571480,
       },
       BaseRegistrar: {
@@ -76,6 +78,7 @@ export default {
         startBlock: 6682888,
       },
       Resolver: {
+        // NOTE: no address, events identified by `ContractConfig#filter`
         startBlock: 6682888,
       },
       BaseRegistrar: {

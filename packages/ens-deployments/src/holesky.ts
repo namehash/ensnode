@@ -18,6 +18,7 @@ export default {
         startBlock: 801613,
       },
       Resolver: {
+        // NOTE: no address, events identified by `ContractConfig#filter`
         startBlock: 801536,
       },
       BaseRegistrar: {

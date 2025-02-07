@@ -1,5 +1,6 @@
-import { DEPLOYMENT_CONFIG } from "./src/lib/globals";
-import { type MergedTypes, PonderENSPlugin, getActivePlugins } from "./src/lib/plugin-helpers";
+import { PluginName } from "@namehash/ens-deployments";
+import { SELECTED_DEPLOYMENT_CONFIG } from "./src/lib/globals";
+import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
 import { deepMergeRecursive } from "./src/lib/ponder-helpers";
 
 import * as baseEthPlugin from "./src/plugins/base/ponder.plugin";
@@ -16,33 +17,26 @@ const ALL_PLUGINS = [ethPlugin, baseEthPlugin, lineaEthPlugin] as const;
 type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]>;
 
 ////////
-// Next, filter available plugins by those that the user has activated.
+// Next, filter ALL_PLUGINS by those that are available and that the user has activated.
 ////////
 
-const availablePlugins = [
-  // an ENS deployment always has a root chain that it is deployed to which will use the 'eth' plugin
-  ethPlugin,
-  // the rest of the plugins are optional, and should not be 'available' if the deployment does not
-  // specify them.
-  // TODO: raise a runtime warning if the user attempts to activate an unavailable plugin
-  "base" in DEPLOYMENT_CONFIG && baseEthPlugin,
-  "linea" in DEPLOYMENT_CONFIG && lineaEthPlugin,
-] as PonderENSPlugin<any, any>[];
+// the available PluginNames are those that the selected ENS Deployment defines as available
+const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as PluginName[];
 
 // filter the set of available plugins by those that are 'active' in the env
-const activePlugins = getActivePlugins(availablePlugins);
+const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);
 
 ////////
-// Next, merge the plugins' configs into a single ponder config.
+// Next, merge the plugins' configs into a single ponder config and activate their handlers.
 ////////
-
-// load indexing handlers from the active plugins into the runtime
-activePlugins.forEach((plugin) => plugin.activate());
 
 // merge the resulting configs
 const activePluginsMergedConfig = activePlugins
   .map((plugin) => plugin.config)
   .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as AllPluginConfigs;
+
+// load indexing handlers from the active plugins into the runtime
+activePlugins.forEach((plugin) => plugin.activate());
 
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.

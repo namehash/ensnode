@@ -2,6 +2,7 @@ import type { PluginContractConfig, PluginName } from "@namehash/ens-deployments
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
+import { uniq } from "./lib-helpers";
 import { blockConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
 import type { OwnedName } from "./types";
 
@@ -92,24 +93,25 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
  * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
  * names. The function returns the plugins that are included in the list.
  *
- * @param availablePlugins is a list of available plugins
+ * @param allPlugins a list of all plugins
+ * @param availablePluginNames is a list of plugin names that can be used
  * @returns the active plugins
  */
 export function getActivePlugins<T extends { pluginName: PluginName }>(
-  availablePlugins: readonly T[],
+  allPlugins: readonly T[],
+  availablePluginNames: PluginName[],
 ): T[] {
   /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
   const requestedPluginsEnvVar = process.env.ACTIVE_PLUGINS;
-  const requestedPlugins = requestedPluginsEnvVar ? requestedPluginsEnvVar.split(",") : [];
+  const requestedPluginNames = requestedPluginsEnvVar ? requestedPluginsEnvVar.split(",") : [];
 
-  if (!requestedPlugins.length) {
+  if (!requestedPluginNames.length) {
     throw new Error("Set the ACTIVE_PLUGINS environment variable to activate one or more plugins.");
   }
 
-  // Check if the requested plugins are valid and can become active
-  const invalidPlugins = requestedPlugins.filter(
-    (requestedPlugin) =>
-      !availablePlugins.some((availablePlugin) => availablePlugin.pluginName === requestedPlugin),
+  // Check if the requested plugins are valid at all
+  const invalidPlugins = requestedPluginNames.filter(
+    (requestedPlugin) => !allPlugins.some((plugin) => plugin.pluginName === requestedPlugin),
   );
 
   if (invalidPlugins.length) {
@@ -121,25 +123,27 @@ export function getActivePlugins<T extends { pluginName: PluginName }>(
     );
   }
 
-  const uniquePluginsToActivate = availablePlugins.reduce((acc, plugin) => {
-    // Check if the plugin was requested
-    if (requestedPlugins.includes(plugin.pluginName) === false) {
-      // avoid unnecessary processing
-      return acc;
-    }
+  // Ensure that the requested plugins only reference availablePluginNames
+  const unavailablePlugins = requestedPluginNames.filter(
+    (name) => !availablePluginNames.includes(name as PluginName),
+  );
 
-    // Check if the plugin was already added to the list
-    if (acc.has(plugin.pluginName)) {
-      // avoid duplicates
-      return acc;
-    }
+  if (unavailablePlugins.length) {
+    throw new Error(
+      `Requested plugins are not available in this deployment: ${unavailablePlugins.join(
+        ", ",
+      )}. Available plugins are: ${availablePluginNames.join(", ")}`,
+    );
+  }
 
-    acc.set(plugin.pluginName, plugin);
-
-    return acc;
-  }, new Map<string, T>());
-
-  return Array.from(uniquePluginsToActivate.values());
+  return (
+    // return the set of all plugins...
+    allPlugins
+      // filtered by those that are available to the selected deployment
+      .filter((plugin) => availablePluginNames.includes(plugin.pluginName))
+      // and are requested by the user
+      .filter((plugin) => requestedPluginNames.includes(plugin.pluginName))
+  );
 }
 
 // Helper type to merge multiple types into one

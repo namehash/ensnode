@@ -9,6 +9,7 @@ export default {
 
     // Addresses and Start Blocks from ens-test-env
     // https://github.com/ensdomains/ens-test-env/
+    // NOTE: no startBlocks, as a default of 0 is intentional for an Anvil chain
     contracts: {
       RegistryOld: {
         address: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
@@ -16,7 +17,9 @@ export default {
       Registry: {
         address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       },
-      Resolver: {},
+      Resolver: {
+        // NOTE: no address, events identified by `ContractConfig#filter`
+      },
       BaseRegistrar: {
         address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
       },
