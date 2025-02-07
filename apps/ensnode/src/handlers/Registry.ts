@@ -11,6 +11,9 @@ import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
 
 type Domain = typeof schema.domain.$inferInsert;
+type Resolver = typeof schema.resolver.$inferInsert;
+
+const EMPTY_ADDRESS = zeroAddress;
 
 /**
  * Initialize the ENS root node with the zeroAddress as the owner.
@@ -57,27 +60,28 @@ export async function setupRootNode({ context }: { context: Context }) {
     .onConflictDoNothing();
 }
 
-function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
-  return (
-    domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
-  );
-}
+// direct port of the following function
+// https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L64-L82
+async function recurseDomainDelete(context: Context, domain: Domain) {
+  if (
+    (domain.resolverId == null || domain.resolverId!.split("-")[0] === EMPTY_ADDRESS) &&
+    domain.ownerId === EMPTY_ADDRESS &&
+    domain.subdomainCount === 0
+  ) {
+    const parentDomain = await context.db.find(schema.domain, {
+      id: domain.parentId!,
+    });
+    if (parentDomain !== null) {
+      await context.db
+        .update(schema.domain, { id: domain.parentId! })
+        .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
+      return recurseDomainDelete(context, parentDomain);
+    }
 
-// a more accurate name for the following function
-// https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64-L82
-async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
-  const domain = await context.db.find(schema.domain, { id: node });
-  if (!domain) throw new Error(`Domain not found: ${node}`);
-
-  if (isDomainEmpty(domain) && domain.parentId !== null) {
-    // decrement parent's subdomain count
-    await context.db
-      .update(schema.domain, { id: domain.parentId })
-      .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
-
-    // recurse to parent
-    return recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.parentId);
+    return null;
   }
+
+  return domain.id;
 }
 
 // create a basic domain database entity object
@@ -91,8 +95,6 @@ function newDomain(node: Node): Domain {
 // create a domain database entity object
 // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L34-L44
 function createDomain(node: Node, timestamp: bigint): Domain {
-  const EMPTY_ADDRESS = zeroAddress;
-
   let domain = newDomain(node);
   if (node == ROOT_NODE) {
     domain = newDomain(node);
@@ -122,16 +124,13 @@ async function getDomain(
 // upsert the domain database entity object
 // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L84-L87
 async function saveDomain(context: Context, domain: Domain): Promise<void> {
+  await recurseDomainDelete(context, domain);
+
   // insert or update the domain database entity object
   await context.db
     .insert(schema.domain)
     .values(domain)
     .onConflictDoUpdate(() => domain);
-
-  // garbage collect newly 'empty' domain iff necessary
-  if (domain.ownerId === zeroAddress) {
-    await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
-  }
 }
 
 export const makeRegistryHandlers = (ownedName: OwnedName) => {
@@ -233,16 +232,17 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       // so we ensure the account exists before inserting the domain
       await upsertAccount(context, owner);
 
-      // ensure domain & update owner
-      await context.db
-        .insert(schema.domain)
-        .values([{ id: node, ownerId: owner, createdAt: event.block.timestamp }])
-        .onConflictDoUpdate({ ownerId: owner });
+      let domain = await getDomain(context, node);
 
-      // garbage collect newly 'empty' domain iff necessary
-      if (owner === zeroAddress) {
-        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
+      // domain should exists if it's being transferred
+      if (domain === null) {
+        throw new Error(`Domain ${node} does not exist`);
       }
+
+      // update the domain owner
+      // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L156-L157
+      domain.ownerId = owner;
+      await saveDomain(context, domain);
 
       // log DomainEvent
       await context.db.insert(schema.transfer).values({
@@ -281,34 +281,43 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{ node: Node; resolver: Hex }>;
     }) {
-      const { node, resolver: resolverAddress } = event.args;
+      let id: string | null;
 
-      const resolverId = makeResolverId(resolverAddress, node);
-
-      // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
-      // NOTE: old resolver resources are kept for event logs
-      if (resolverAddress === zeroAddress) {
-        await context.db
-          .update(schema.domain, { id: node })
-          .set({ resolverId: null, resolvedAddressId: null });
-
-        // garbage collect newly 'empty' domain iff necessary
-        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
+      // if resolver is set to 0x0, set id to null
+      // we don't want to create a resolver entity for 0x0
+      if (event.args.resolver === zeroAddress) {
+        id = null;
       } else {
-        // otherwise upsert the resolver
-        const resolver = await upsertResolver(context, {
-          id: resolverId,
-          domainId: node,
-          address: resolverAddress,
-        });
-
-        // update the domain to point to it, and denormalize the eth addr
-        // NOTE: this implements the logic as documented here
-        // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L193
-        await context.db
-          .update(schema.domain, { id: node })
-          .set({ resolverId, resolvedAddressId: resolver.addrId });
+        id = makeResolverId(event.args.resolver, event.args.node);
       }
+
+      let node = event.args.node;
+      let domain = await getDomain(context, node)!;
+
+      if (domain === null) {
+        throw new Error(`Domain ${node} does not exist`);
+      }
+
+      domain.resolverId = id;
+
+      if (id) {
+        let resolver = (await context.db.find(schema.resolver, {
+          id,
+        })) as Resolver | null;
+        if (resolver == null) {
+          resolver = { id } as Resolver;
+          resolver.domainId = event.args.node;
+          resolver.address = event.args.resolver;
+          await upsertResolver(context, resolver);
+          // since this is a new resolver entity, there can't be a resolved address yet so set to null
+          domain.resolvedAddressId = null;
+        } else {
+          domain.resolvedAddressId = resolver.addrId;
+        }
+      } else {
+        domain.resolvedAddressId = null;
+      }
+      await saveDomain(context, domain);
 
       // log DomainEvent
       await context.db.insert(schema.newResolver).values({
@@ -320,7 +329,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // ex: newResolver(id: "3745840-2") { id resolver {id} }
         // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
         // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
-        resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
+        resolverId: id || zeroAddress,
       });
     },
   };
