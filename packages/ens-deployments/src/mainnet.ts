@@ -63,7 +63,7 @@ export default {
      * The owner of 'base.eth' in the ENS Registry on the mainnet "ENS deployment"
      * (e.g. Coinbase) has the ability to change this configuration at any time.
      *
-     * NOTE: Based on the ENSIP-10 (WIldcard Resolution) standard, any subnames of 'base.eth'
+     * NOTE: Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of 'base.eth'
      * that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward
      * resolution of their data delegated to the subregistry defined below. Instead their forward
      * resolution will be managed according to the state defined in the ENS Registry.
@@ -113,7 +113,7 @@ export default {
      * The owner of 'linea.eth' in the ENS Registry on the mainnet "ENS deployment"
      * (e.g. Consensys) has the ability to change this configuration at any time.
      *
-     * NOTE: Based on the ENSIP-10 (WIldcard Resolution) standard, any subnames of 'linea.eth'
+     * NOTE: Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of 'linea.eth'
      * that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward
      * resolution of their data delegated to the subregistry defined below. Instead their forward
      * resolution will be managed according to the state defined in the ENS Registry.
