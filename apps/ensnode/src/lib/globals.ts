@@ -18,11 +18,12 @@ export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChai
  * Note that here, we define the global DEPLOYMENT_CONFIG as the _merge_ of mainnet (which fully
  * specifies all plugin configs), overrided with the SELECTED_DEPLOYMENT_CONFIG.
  *
- * This ensures that at type-check-time every plugin's `config` has valid values and
- * therefore its type can continue to be inferred. At runtime the plugins that are not in this
- * specific ENS Deployment's specification are mis-configured to point to the mainnet deployment,
- * BUT those plugins are filtered out of the available plugins at runtime (in ponder.config.ts),
- * and those mis-configured plugins are never executed.
+ * This ensures that at type-check-time and in `ALL_PLUGINS` every plugin's `config` has valid values
+ * (and therefore its type can continue to be inferred). This means that initially upon building the
+ * plugin configs, if the user is selecting a deployment that does not fully specify every available
+ * plugin, the plugins that are not in that deployment's specification are technically pointing at
+ * the mainnet deployment. This is never an issue, however, as those plugin are filtered out
+ * (see ponder.config.ts and `getActivePlugins`) and never activated.
  */
 export const DEPLOYMENT_CONFIG = {
   ...DeploymentConfigs.mainnet,

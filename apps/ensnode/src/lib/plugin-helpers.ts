@@ -3,7 +3,12 @@ import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
 import { uniq } from "./lib-helpers";
-import { constrainBlockrange, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "./ponder-helpers";
+import {
+  constrainBlockrange,
+  getEnsDeploymentChain,
+  rpcEndpointUrl,
+  rpcMaxRequestsPerSecond,
+} from "./ponder-helpers";
 import type { OwnedName } from "./types";
 
 /**
@@ -130,9 +135,7 @@ export function getActivePlugins<T extends { pluginName: PluginName }>(
 
   if (unavailablePlugins.length) {
     throw new Error(
-      `Requested plugins are not available in this deployment: ${unavailablePlugins.join(
-        ", ",
-      )}. Available plugins are: ${availablePluginNames.join(", ")}`,
+      `Requested plugins are not available the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(", ")}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(", ")}`,
     );
   }
 

@@ -2,9 +2,13 @@ import { anvil } from "viem/chains";
 
 import type { ENSDeploymentConfig } from "./types";
 
+/**
+ * The `ens-test-env` ENSDeploymentConfig represents the deterministic deployment of ENS to a local
+ * Anvil node by https://github.com/ensdomains/ens-test-env used for testing and loal development.
+ */
 export default {
   eth: {
-    // ens-test-env uses anvil with chain id 1337
+    // ens-test-env uses anvil with chain id of 1337
     chain: { ...anvil, id: 1337 },
 
     // Addresses and Start Blocks from ens-test-env
