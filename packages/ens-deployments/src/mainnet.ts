@@ -2,7 +2,13 @@ import { base, linea, mainnet } from "viem/chains";
 
 import type { ENSDeploymentConfig } from "./types";
 
+/**
+ * The "ENS deployment" configuration for 'mainnet'.
+ */
 export default {
+  /**
+   * Subregistry for direct subnames of 'eth' on the mainnet "ENS deployment".
+   */
   eth: {
     chain: mainnet,
 
@@ -18,8 +24,9 @@ export default {
         startBlock: 9380380,
       },
       Resolver: {
-        // NOTE: no address, events identified by `ContractConfig#filter`
-        startBlock: 3327417,
+        // No singular address as any number of Resolver contracts may deployed
+        // Events identified by `ContractConfig#filter`
+        startBlock: 3327417, // based on startBlock of RegistryOld on Mainnet
       },
       BaseRegistrar: {
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
@@ -39,7 +46,28 @@ export default {
       },
     },
   },
+
+  /**
+   * Subregistry for direct subnames of 'base.eth' on the mainnet "ENS deployment".
+   */
   base: {
+    /**
+     * As of 9-Feb-2025 the Resolver for 'base.eth' in the mainnet "ENS deployment" is
+     * 0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31.
+     *
+     * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
+     * the forward resolution of data associated with subnames of 'base.eth' to an offchain
+     * gateway server operated by Coinbase that uses the following subregistry contracts on
+     * Base as its source of truth.
+     *
+     * The owner of 'base.eth' in the ENS Registry on the mainnet "ENS deployment"
+     * (e.g. Coinbase) has the ability to change this configuration at any time.
+     *
+     * NOTE: Based on the ENSIP-10 (WIldcard Resolution) standard, any subnames of 'base.eth'
+     * that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward
+     * resolution of their data delegated to the subregistry defined below. Instead their forward
+     * resolution will be managed according to the state defined in the ENS Registry.
+     */
     chain: base,
 
     // Base Addresses and Start Blocks from Basenames
@@ -50,8 +78,9 @@ export default {
         startBlock: 17571480,
       },
       Resolver: {
-        // NOTE: no address, events identified by `ContractConfig#filter`
-        startBlock: 17571480,
+        // No singular address as any number of Resolver contracts may deployed
+        // Events identified by `ContractConfig#filter`
+        startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
         address: "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
@@ -67,7 +96,28 @@ export default {
       },
     },
   },
+
+  /**
+   * Subregistry for direct subnames of 'linea.eth' on the mainnet "ENS deployment".
+   */
   linea: {
+    /**
+     * As of 9-Feb-2025 the Resolver for 'linea.eth' in the mainnet "ENS deployment" is
+     * 0xde16ee87B0C019499cEBDde29c9F7686560f679a.
+     *
+     * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
+     * the forward resolution of data associated with subnames of 'linea.eth' to an offchain
+     * gateway server operated by Consensys that uses the following subregistry contracts on
+     * Linea as its source of truth.
+     *
+     * The owner of 'linea.eth' in the ENS Registry on the mainnet "ENS deployment"
+     * (e.g. Consensys) has the ability to change this configuration at any time.
+     *
+     * NOTE: Based on the ENSIP-10 (WIldcard Resolution) standard, any subnames of 'linea.eth'
+     * that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward
+     * resolution of their data delegated to the subregistry defined below. Instead their forward
+     * resolution will be managed according to the state defined in the ENS Registry.
+     */
     chain: linea,
 
     // Linea Addresses and Start Blocks from Linea ENS
@@ -78,8 +128,9 @@ export default {
         startBlock: 6682888,
       },
       Resolver: {
-        // NOTE: no address, events identified by `ContractConfig#filter`
-        startBlock: 6682888,
+        // No singular address as any number of Resolver contracts may deployed
+        // Events identified by `ContractConfig#filter`
+        startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {
         address: "0x6e84390dCc5195414eC91A8c56A5c91021B95704",

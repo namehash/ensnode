@@ -2,7 +2,13 @@ import { holesky } from "viem/chains";
 
 import type { ENSDeploymentConfig } from "./types";
 
+/**
+ * The "ENS deployment" configuration for 'holesky'.
+ */
 export default {
+  /**
+   * Subregistry for direct subnames of 'eth' on the Holesky "ENS deployment".
+   */
   eth: {
     chain: holesky,
 
@@ -18,8 +24,9 @@ export default {
         startBlock: 801613,
       },
       Resolver: {
-        // NOTE: no address, events identified by `ContractConfig#filter`
-        startBlock: 801536,
+        // No singular address as any number of Resolver contracts may deployed
+        // Events identified by `ContractConfig#filter`
+        startBlock: 801536, // based on startBlock of RegistryOld on Holeksy
       },
       BaseRegistrar: {
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
@@ -39,4 +46,8 @@ export default {
       },
     },
   },
+  /**
+   * On the Holesky "ENS deployment" there is no known subregistry for direct
+   * subnames of 'base.eth' or 'linea.eth'.
+   */
 } satisfies ENSDeploymentConfig;

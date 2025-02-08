@@ -1,4 +1,4 @@
-import type { PluginContractConfig, PluginName } from "@namehash/ens-deployments";
+import type { SubregistryContractConfig, SubregistryName } from "@namehash/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
@@ -102,9 +102,9 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
  * @param availablePluginNames is a list of plugin names that can be used
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { pluginName: PluginName }>(
+export function getActivePlugins<T extends { pluginName: SubregistryName }>(
   allPlugins: readonly T[],
-  availablePluginNames: PluginName[],
+  availablePluginNames: SubregistryName[],
 ): T[] {
   /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
   const requestedPluginsEnvVar = process.env.ACTIVE_PLUGINS;
@@ -130,12 +130,16 @@ export function getActivePlugins<T extends { pluginName: PluginName }>(
 
   // Ensure that the requested plugins only reference availablePluginNames
   const unavailablePlugins = requestedPluginNames.filter(
-    (name) => !availablePluginNames.includes(name as PluginName),
+    (name) => !availablePluginNames.includes(name as SubregistryName),
   );
 
   if (unavailablePlugins.length) {
     throw new Error(
-      `Requested plugins are not available the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(", ")}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(", ")}`,
+      `Requested plugins are not available the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(
+        ", ",
+      )}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(
+        ", ",
+      )}`,
     );
   }
 
@@ -158,7 +162,7 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
  * A PonderENSPlugin provides a pluginName to identify it, a ponder config, and an activate
  * function to load handlers.
  */
-export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
+export interface PonderENSPlugin<PLUGIN_NAME extends SubregistryName, CONFIG> {
   pluginName: PLUGIN_NAME;
   config: CONFIG;
   activate: VoidFunction;
@@ -218,7 +222,7 @@ export function networksConfigForChain(chain: Chain) {
  * Defines a `ponder#ContractConfig['network']` given a contract's config, injecting the global
  * start/end blocks to constrain indexing range.
  */
-export function networkConfigForContract<CONTRACT_CONFIG extends PluginContractConfig>(
+export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryContractConfig>(
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,
 ) {

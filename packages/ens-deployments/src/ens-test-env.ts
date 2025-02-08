@@ -3,12 +3,18 @@ import { anvil } from "viem/chains";
 import type { ENSDeploymentConfig } from "./types";
 
 /**
- * The `ens-test-env` ENSDeploymentConfig represents the deterministic deployment of ENS to a local
- * Anvil node by https://github.com/ensdomains/ens-test-env used for testing and loal development.
+ * The "ENS deployment" configuration for 'ens-test-env'.
+ *
+ * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
+ * protocol changes, running deterministic test suites, and local development.
+ * https://github.com/ensdomains/ens-test-env
  */
 export default {
+  /**
+   * Subregistry for direct subnames of 'eth' on the 'ens-test-env' "ENS deployment".
+   */
   eth: {
-    // ens-test-env uses anvil with chain id of 1337
+    // ens-test-env runs on a local Anvil chain with id 1337
     chain: { ...anvil, id: 1337 },
 
     // Addresses and Start Blocks from ens-test-env
@@ -22,7 +28,8 @@ export default {
         address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       },
       Resolver: {
-        // NOTE: no address, events identified by `ContractConfig#filter`
+        // No singular address as any number of Resolver contracts may deployed
+        // Events identified by `ContractConfig#filter`
       },
       BaseRegistrar: {
         address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
@@ -38,4 +45,8 @@ export default {
       },
     },
   },
+  /**
+   * On the 'ens-test-env' "ENS deployment" there is no known subregistry for direct
+   * subnames of 'base.eth' or 'linea.eth'.
+   */
 } satisfies ENSDeploymentConfig;

@@ -2,7 +2,13 @@ import { sepolia } from "viem/chains";
 
 import type { ENSDeploymentConfig } from "./types";
 
+/**
+ * The "ENS deployment" configuration for 'sepolia'.
+ */
 export default {
+  /**
+   * Subregistry for direct subnames of 'eth' on the Sepolia "ENS deployment".
+   */
   eth: {
     chain: sepolia,
 
@@ -18,8 +24,9 @@ export default {
         startBlock: 3702728,
       },
       Resolver: {
-        // NOTE: no address, events identified by `ContractConfig#filter`
-        startBlock: 3702721,
+        // No singular address as any number of Resolver contracts may deployed
+        // Events identified by `ContractConfig#filter`
+        startBlock: 3702721, // based on startBlock of RegistryOld on Sepolia
       },
       BaseRegistrar: {
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
@@ -39,4 +46,8 @@ export default {
       },
     },
   },
+  /**
+   * On the Sepolia "ENS deployment" there is no known subregistry for direct
+   * subnames of 'base.eth' or 'linea.eth'.
+   */
 } satisfies ENSDeploymentConfig;

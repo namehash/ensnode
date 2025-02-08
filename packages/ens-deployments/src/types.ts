@@ -2,41 +2,59 @@ import type { ContractConfig } from "ponder";
 import type { Chain } from "viem";
 
 /**
- * ENSDeploymentChain encodes the supported values of the root chain ENS is deployed to.
+ * Encodes a set of chains known to provide an "ENS deployment".
  *
- * Each ENSDeploymentChain will map to an ENSDeploymentConfig which dictates the available plugins
- * and their PluginConfig. See the comment in packages/ens-deployments/src/index.ts for context.
+ * Each "ENS deployment" is a single, unified namespace of ENS names with:
+ * - A root Registry deployed to the "ENS Deployment" chain.
+ * - A capability to expand from that root Registry across any number of chains, subregistries, and offchain resources.
  *
- * Note that `ens-test-env` is the specific local Anvil deterministic deployment used in the ens
- * ecosystem for testing purposes. https://github.com/ensdomains/ens-test-env
+ * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
+ * protocol changes, running deterministic test suites, and local development.
+ * https://github.com/ensdomains/ens-test-env
  */
 export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
 
 /**
- * Encodes a unique plugin name.
+ * Encodes a set of known subregistries.
  */
-export type PluginName = "eth" | "base" | "linea";
+export type SubregistryName = "eth" | "base" | "linea";
 
 /**
  * A `ponder#ContractConfig` sans network, as it is provided by the contextual 'deployment', and
  * sans abi, which is specified in the ponder config (necessary for inferred types, it seems).
  */
-export type PluginContractConfig = Omit<ContractConfig, "network" | "abi">;
+export type SubregistryContractConfig = Omit<ContractConfig, "network" | "abi">;
 
 /**
- * Encodes a plugin's source chain and contract configs.
+ * Encodes the deployment of a subregistry, including the target chain and contracts.
  */
-export interface PluginConfig {
+export interface SubregistryDeploymentConfig {
   chain: Chain;
-  contracts: Record<string, PluginContractConfig>;
+  contracts: Record<string, SubregistryContractConfig>;
 }
 
 /**
- * An ENS Deployment provides the PluginConfigs for a specific ENS Deployment. See the comment in
- * packages/ens-deployments/src/index.ts for additional context.
+ * Encodes the set of known subregistries for an "ENS deployment".
  */
 export type ENSDeploymentConfig = {
-  eth: PluginConfig;
-  base?: PluginConfig;
-  linea?: PluginConfig;
+  /**
+   * Subregistry for direct subnames of 'eth'.
+   *
+   * Required for each "ENS deployment".
+   */
+  eth: SubregistryDeploymentConfig;
+
+  /**
+   * Subregistry for direct subnames of 'base.eth'.
+   *
+   * Optional for each "ENS deployment".
+   */
+  base?: SubregistryDeploymentConfig;
+
+  /**
+   * Subregistry for direct subnames of 'linea.eth'.
+   *
+   * Optional for each "ENS deployment".
+   */
+  linea?: SubregistryDeploymentConfig;
 };
