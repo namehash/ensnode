@@ -33,7 +33,7 @@ export const config = createConfig({
     [namespace("Resolver")]: {
       network: networkConfigForContract(chain, contracts.Resolver),
       abi: base_L2Resolver,
-      // NOTE: this indexes every event ever emitted that looks like this
+      // NOTE: this indexes every event emitted that looks like this
       filter: [
         { event: "AddrChanged", args: {} },
         { event: "AddressChanged", args: {} },
