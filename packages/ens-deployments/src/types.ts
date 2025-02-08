@@ -2,7 +2,7 @@ import type { ContractConfig } from "ponder";
 import type { Chain } from "viem";
 
 /**
- * ENSDeploymentChain encodes the possible values of the root chain ENS is deployed to.
+ * ENSDeploymentChain encodes the supported values of the root chain ENS is deployed to.
  *
  * Note that `ens-test-env` is the specific local Anvil deterministic deployment used in the ens
  * ecosystem for testing purposes.
