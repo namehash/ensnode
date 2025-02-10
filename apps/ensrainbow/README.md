@@ -11,13 +11,20 @@ Special thanks to [The Graph](https://thegraph.com/) for their work to generate 
 
 ## System Requirements
 
+### Build-time Requirements
 - **Storage**:
   - At least 15 GB of free disk space:
     - 6.37 GB for the compressed rainbow tables download
     - ~7 GB for the LevelDB database after ingestion
     - Additional temporary space during build/ingestion
-- **Memory**: Minimum 4 GB RAM recommended for optimal performance
-- **Docker**: The final Docker image size is 7.61 GB due to the included LevelDB database
+- **Memory**: At least 4 GB RAM recommended during data ingestion
+
+### Runtime Requirements
+- **Storage**: 7.61 GB for the Docker image (pre-built with LevelDB database)
+- **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
+- **CPU**: Minimal requirements - operates well with low CPU resources
+
+You can find our pre-built Docker image at [GitHub Packages](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensrainbow).
 
 ## Architecture Overview
 
