@@ -11,7 +11,7 @@ services:
       env_file:
       - ./apps/ensnode/.env.local
       environment:
-        # Ovveride DATABASE_URL from .env.local Refer to docker compose postgres instance
+        # Override DATABASE_URL from .env.local to refer to docker compose postgres instance
         DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
       depends_on:
         - postgres
