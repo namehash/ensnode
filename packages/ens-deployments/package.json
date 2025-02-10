@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "description": "Contract addresses and startBlocks for each ENS deployment",
+  "description": "Catalog of ENS deployments, including key contract addresses and other attributes.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   "scripts": {
     "lint:ci": "biome ci"
   },
-  "dependencies": {
+  "peerDependencies": {
     "viem": "catalog:"
   },
   "devDependencies": {

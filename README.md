@@ -33,7 +33,7 @@ View the [ENSRainbow docs](https://www.ensrainbow.io).
 
 ### [`packages/ens-deployments`](packages/ens-deployments)
 
-Convenient central location for the ENS Protocol's contracts' `address` and `startBlock` configuration for each independent ENS deployment (i.e. `mainnet`, `sepolia`, `holesky`, `ens-test-env`).
+Convenient catalog of ENS deployments including contracts' `address` and `startBlock` and `filter`.
 
 ### [`packages/ensnode-utils`](packages/ensnode-utils)
 

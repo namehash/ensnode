@@ -11,6 +11,10 @@ For example, the canonical ENS deployment on mainnet includes:
 
 Each deployment is independent - for instance, the Sepolia and Holesky testnet deployments are separate from the canonical mainnet deployment. This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each deployment.
 
+## Terminology
+
+If you are unfamiliar with any of the terminology used here, please reference the [terminology](https://www.ensnode.io/reference/terminology) document for additional context.
+
 ## Overview
 
 Each ENS deployment is defined as a separate configuration that includes:
