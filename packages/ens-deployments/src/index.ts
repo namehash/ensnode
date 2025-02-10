@@ -8,7 +8,7 @@ import sepolia from "./sepolia";
 export * from "./types";
 
 /**
- * Mapping from a set of "ENS deployments" to known details about the deployment.
+ * Mapping from a set of ENSDeploymentChains to an "ENS deployment".
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with a distinct
  * onchain root Registry but with the capability of spanning from that root Registry

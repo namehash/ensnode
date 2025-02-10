@@ -135,11 +135,7 @@ export function getActivePlugins<T extends { pluginName: SubregistryName }>(
 
   if (unavailablePlugins.length) {
     throw new Error(
-      `Requested plugins are not available the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(
-        ", ",
-      )}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(
-        ", ",
-      )}`,
+      `Requested plugins are not available in the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(", ")}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(", ")}`,
     );
   }
 

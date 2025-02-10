@@ -63,28 +63,8 @@ export default {
      * The owner of 'base.eth' in the ENS Registry on the mainnet "ENS deployment"
      * (e.g. Coinbase) has the ability to change this configuration at any time.
      *
-     * NOTE: Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of 'base.eth'
-     * that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward
-     * resolution of their data delegated to the subregistry defined below. Instead their forward
-     * resolution will be managed according to the state defined in the ENS Registry.
-     *
-     * As of 9-Feb-2025 a number of subnames of 'base.eth' exist in the ENS Registry on mainnet.
-     * This includes:
-     * - gov.base.eth
-     * - bootcamp.base.eth
-     * - grants.base.eth
-     * - bridge.base.eth
-     * - portal.base.eth
-     * - faucet.base.eth
-     * - bonjour.base.eth
-     * - gm.base.eth
-     * - mint.base.eth
-     *
-     * These subnames (and any others added beneath 'base.eth' in the mainnet ENS Registry) will NOT
-     * be properly represented during indexing until futher enhancements are made to ENSNode.
-     *
-     * The current implementation of ENSNode fully defers the indexed state of subnames of 'base.eth'
-     * to the contracts defined below.
+     * See the reference documentation for additional context:
+     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: base,
 
@@ -131,21 +111,8 @@ export default {
      * The owner of 'linea.eth' in the ENS Registry on the mainnet "ENS deployment"
      * (e.g. Consensys) has the ability to change this configuration at any time.
      *
-     * NOTE: Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of 'linea.eth'
-     * that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward
-     * resolution of their data delegated to the subregistry defined below. Instead their forward
-     * resolution will be managed according to the state defined in the ENS Registry.
-     *
-     * As of 9-Feb-2025 a number of subnames of 'linea.eth' exist in the ENS Registry on mainnet.
-     * This includes:
-     * - bridge.linea.eth
-     * - devconnect.linea.eth
-     *
-     * These subnames (and any others added beneath 'linea.eth' in the mainnet ENS Registry) will NOT
-     * be properly represented during indexing until futher enhancements are made to ENSNode.
-     *
-     * The current implementation of ENSNode fully defers the indexed state of subnames of 'linea.eth'
-     * to the contracts defined below.
+     * See the reference documentation for additional context:
+     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
      */
     chain: linea,
 
