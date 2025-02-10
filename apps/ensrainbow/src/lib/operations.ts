@@ -47,9 +47,7 @@ export const heal = async (
     return result;
   } catch (error) {
     if ((error as any).code === "LEVEL_NOT_FOUND") {
-      if (process.env.NODE_ENV === "development") {
-        logger.info(`Unhealable labelhash request: ${labelhash}`);
-      }
+      logger.info(`Unhealable labelhash request: ${labelhash}`);
       const result: HealError = {
         status: StatusCode.Error,
         error: "Label not found",
