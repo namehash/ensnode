@@ -131,18 +131,21 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           // attempt to heal the label associated with labelhash via ENSRainbow
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
           const healedLabel = await labelByHash(labelhash);
+          const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
-          // only use the healed label label if it is indexable
-          // otherwise, use encoded labelhash as the label
-          const label = isLabelIndexable(healedLabel) ? healedLabel : encodeLabelhash(labelhash);
-          // update the name using the parent's name and the label value
-          // (either healed label or encoded labelhash)
+          // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
           // NOTE: for the root node, the parent is null, so we just use the label value as is
+          const label = validLabel || encodeLabelhash(labelhash);
           const name = parent?.name ? `${label}.${parent.name}` : label;
 
-          // akin to domain.save() c68a889
-          // https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
-          await context.db.update(schema.domain, { id: domain.id }).set({ name, labelName: label });
+          // akin to domain.save()
+          // via https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
+          await context.db.update(schema.domain, { id: domain.id }).set({
+            name,
+            // NOTE: only update Domain.labelName iff label is healed and valid
+            // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
+            labelName: validLabel,
+          });
         }
 
         // garbage collect newly 'empty' domain iff necessary
