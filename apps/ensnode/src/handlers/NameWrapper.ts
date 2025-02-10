@@ -20,7 +20,9 @@ const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 // if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
-  const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
+  const wrappedDomain = await context.db.find(schema.wrappedDomain, {
+    id: node,
+  });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L63)
@@ -76,12 +78,15 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       });
 
     // log DomainEvent
-    await context.db.insert(schema.wrappedTransfer).values({
-      ...sharedEventValues(event),
-      id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
-      domainId: node,
-      ownerId: to,
-    });
+    await context.db
+      .insert(schema.wrappedTransfer)
+      .values({
+        ...sharedEventValues(event),
+        id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
+        domainId: node,
+        ownerId: to,
+      })
+      .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
   }
 
   return {
@@ -124,14 +129,17 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await materializeDomainExpiryDate(context, node);
 
       // log DomainEvent
-      await context.db.insert(schema.nameWrapped).values({
-        ...sharedEventValues(event),
-        domainId: node,
-        name,
-        fuses,
-        ownerId: owner,
-        expiryDate: expiry,
-      });
+      await context.db
+        .insert(schema.nameWrapped)
+        .values({
+          ...sharedEventValues(event),
+          domainId: node,
+          name,
+          fuses,
+          ownerId: owner,
+          expiryDate: expiry,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameUnwrapped({
@@ -156,11 +164,14 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await context.db.delete(schema.wrappedDomain, { id: node });
 
       // log DomainEvent
-      await context.db.insert(schema.nameUnwrapped).values({
-        ...sharedEventValues(event),
-        domainId: node,
-        ownerId: owner,
-      });
+      await context.db
+        .insert(schema.nameUnwrapped)
+        .values({
+          ...sharedEventValues(event),
+          domainId: node,
+          ownerId: owner,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleFusesSet({
@@ -186,11 +197,14 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       }
 
       // log DomainEvent
-      await context.db.insert(schema.fusesSet).values({
-        ...sharedEventValues(event),
-        domainId: node,
-        fuses,
-      });
+      await context.db
+        .insert(schema.fusesSet)
+        .values({
+          ...sharedEventValues(event),
+          domainId: node,
+          fuses,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
     async handleExpiryExtended({
       context,
@@ -215,11 +229,14 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       }
 
       // log DomainEvent
-      await context.db.insert(schema.expiryExtended).values({
-        ...sharedEventValues(event),
-        domainId: node,
-        expiryDate: expiry,
-      });
+      await context.db
+        .insert(schema.expiryExtended)
+        .values({
+          ...sharedEventValues(event),
+          domainId: node,
+          expiryDate: expiry,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
     async handleTransferSingle({
       context,

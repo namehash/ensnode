@@ -109,12 +109,15 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       await upsertRegistration(context, registration);
 
       // log RegistrationEvent
-      await context.db.insert(schema.nameRegistered).values({
-        ...sharedEventValues(event),
-        registrationId: registration.id,
-        registrantId: owner,
-        expiryDate: expires,
-      });
+      await context.db
+        .insert(schema.nameRegistered)
+        .values({
+          ...sharedEventValues(event),
+          registrationId: registration.id,
+          registrantId: owner,
+          expiryDate: expires,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameRegisteredByController({
@@ -163,11 +166,14 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       // log RegistrationEvent
 
-      await context.db.insert(schema.nameRenewed).values({
-        ...sharedEventValues(event),
-        registrationId: id,
-        expiryDate: expires,
-      });
+      await context.db
+        .insert(schema.nameRenewed)
+        .values({
+          ...sharedEventValues(event),
+          registrationId: id,
+          expiryDate: expires,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameTransferred({
@@ -190,11 +196,14 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
 
       // log RegistrationEvent
-      await context.db.insert(schema.nameTransferred).values({
-        ...sharedEventValues(event),
-        registrationId: id,
-        newOwnerId: to,
-      });
+      await context.db
+        .insert(schema.nameTransferred)
+        .values({
+          ...sharedEventValues(event),
+          registrationId: id,
+          newOwnerId: to,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
   };
 };

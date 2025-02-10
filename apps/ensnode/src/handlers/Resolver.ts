@@ -43,11 +43,14 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       }
 
       // log ResolverEvent
-      await context.db.insert(schema.addrChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        addrId: address,
-      });
+      await context.db
+        .insert(schema.addrChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          addrId: address,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleAddressChanged({
@@ -72,12 +75,15 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
 
       // log ResolverEvent
-      await context.db.insert(schema.multicoinAddrChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        coinType,
-        addr: newAddress,
-      });
+      await context.db
+        .insert(schema.multicoinAddrChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          coinType,
+          addr: newAddress,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameChanged({
@@ -98,11 +104,14 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db.insert(schema.nameChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        name,
-      });
+      await context.db
+        .insert(schema.nameChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          name,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleABIChanged({
@@ -123,11 +132,14 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db.insert(schema.abiChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        contentType,
-      });
+      await context.db
+        .insert(schema.abiChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          contentType,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handlePubkeyChanged({
@@ -148,12 +160,15 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db.insert(schema.pubkeyChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        x,
-        y,
-      });
+      await context.db
+        .insert(schema.pubkeyChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          x,
+          y,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleTextChanged({
@@ -182,16 +197,19 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
       // log ResolverEvent
-      await context.db.insert(schema.textChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        key,
-        // ponder's (viem's) event parsing produces empty string for some TextChange events
-        // (which is correct) but the subgraph records null for these instances, so we coalesce
-        // falsy strings to null for compatibility
-        // ex: last TextChanged in 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
-        value: value || null,
-      });
+      await context.db
+        .insert(schema.textChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          key,
+          // ponder's (viem's) event parsing produces empty string for some TextChange events
+          // (which is correct) but the subgraph records null for these instances, so we coalesce
+          // falsy strings to null for compatibility
+          // ex: last TextChanged in 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
+          value: value || null,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleContenthashChanged({
@@ -211,11 +229,14 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db.insert(schema.contenthashChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        hash,
-      });
+      await context.db
+        .insert(schema.contenthashChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          hash,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleInterfaceChanged({
@@ -234,12 +255,15 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db.insert(schema.interfaceChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        interfaceID,
-        implementer,
-      });
+      await context.db
+        .insert(schema.interfaceChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          interfaceID,
+          implementer,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleAuthorisationChanged({
@@ -263,14 +287,17 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db.insert(schema.authorisationChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        owner,
-        target,
-        // NOTE: the spelling difference is kept for subgraph backwards-compatibility
-        isAuthorized: isAuthorised,
-      });
+      await context.db
+        .insert(schema.authorisationChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          owner,
+          target,
+          // NOTE: the spelling difference is kept for subgraph backwards-compatibility
+          isAuthorized: isAuthorised,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleVersionChanged({
@@ -303,11 +330,14 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db.insert(schema.versionChanged).values({
-        ...sharedEventValues(event),
-        resolverId: id,
-        version: newVersion,
-      });
+      await context.db
+        .insert(schema.versionChanged)
+        .values({
+          ...sharedEventValues(event),
+          resolverId: id,
+          version: newVersion,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleDNSRecordChanged({

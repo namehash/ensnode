@@ -211,13 +211,16 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         await saveDomain(context, domain);
 
         // log DomainEvent
-        await context.db.insert(schema.newOwner).values({
-          ...sharedEventValues(event),
+        await context.db
+          .insert(schema.newOwner)
+          .values({
+            ...sharedEventValues(event),
 
-          parentDomainId: node,
-          domainId: subnode,
-          ownerId: owner,
-        });
+            parentDomainId: node,
+            domainId: subnode,
+            ownerId: owner,
+          })
+          .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
       },
     async handleTransfer({
       context,
@@ -245,11 +248,14 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       await saveDomain(context, domain);
 
       // log DomainEvent
-      await context.db.insert(schema.transfer).values({
-        ...sharedEventValues(event),
-        domainId: node,
-        ownerId: owner,
-      });
+      await context.db
+        .insert(schema.transfer)
+        .values({
+          ...sharedEventValues(event),
+          domainId: node,
+          ownerId: owner,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNewTTL({
@@ -267,11 +273,14 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       await context.db.update(schema.domain, { id: node }).set({ ttl });
 
       // log DomainEvent
-      await context.db.insert(schema.newTTL).values({
-        ...sharedEventValues(event),
-        domainId: node,
-        ttl,
-      });
+      await context.db
+        .insert(schema.newTTL)
+        .values({
+          ...sharedEventValues(event),
+          domainId: node,
+          ttl,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNewResolver({
@@ -320,17 +329,20 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       await saveDomain(context, domain);
 
       // log DomainEvent
-      await context.db.insert(schema.newResolver).values({
-        ...sharedEventValues(event),
-        domainId: node,
-        // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
-        // but there is never a resolver record created for the zeroAddress. so if you query the
-        // `resolver { id }` of a NewResolver event that set the resolver to zeroAddress
-        // ex: newResolver(id: "3745840-2") { id resolver {id} }
-        // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
-        // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
-        resolverId: id || zeroAddress,
-      });
+      await context.db
+        .insert(schema.newResolver)
+        .values({
+          ...sharedEventValues(event),
+          domainId: node,
+          // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
+          // but there is never a resolver record created for the zeroAddress. so if you query the
+          // `resolver { id }` of a NewResolver event that set the resolver to zeroAddress
+          // ex: newResolver(id: "3745840-2") { id resolver {id} }
+          // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
+          // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
+          resolverId: id || zeroAddress,
+        })
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
   };
 };
