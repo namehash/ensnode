@@ -1,10 +1,37 @@
 version: '3.8'
 
 services:
+
+  ensnode:
+      build:
+        dockerfile: ./apps/ensnode/Dockerfile
+      image: namehash/ensnode
+      ports:
+        - "42069:42069"
+      env_file:
+      - ./apps/ensnode/.env.local
+      environment:
+        # Override DATABASE_URL from .env.local to refer to docker compose postgres instance
+        DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
+      depends_on:
+        - postgres
+
+  postgres:
+    image: postgres:17
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ponder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   ensrainbow:
     build:
-      context: ./apps/ensrainbow
-      dockerfile: Dockerfile
+      dockerfile: ./apps/ensrainbow/Dockerfile
+    image: namehash/ensrainbow
     ports:
       - "3001:3000"
     environment:
@@ -12,5 +39,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  ensrainbow_data:
-    driver: local 
+  postgres_data:
+    driver: local
