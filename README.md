@@ -202,7 +202,7 @@ Fetch data about the three most recently-created domains.
 
 ## Using Docker Compose
 
-Docker Compose is a tool that allows you to define and run multi-container Docker applications. In this monorepo, we use Docker Compose to set up the ENSNode application along with its dependencies, such as a PostgreSQL database.
+Docker Compose is a tool that allows you to define and run multi-container Docker applications. In this monorepo, we use Docker Compose to set up the ENSNode application along with its dependencies: a PostgreSQL database and ENSRainbow.
 
 ### Prerequisites
 
@@ -226,11 +226,11 @@ Before you can use Docker Compose, ensure you have the following installed on yo
 
    Then, edit the `.env.local` file to configure your local settings as needed.
 
-### Running the Application
+### Running the Applications
 
 To start the ENSNode application and its dependencies using Docker Compose, follow these steps:
 
-1. **Open a Terminal**: Navigate to the root directory of the ENSNode repository where the `docker-compose.yml` file is located.
+1. **Open a Terminal**: Navigate to the root directory of the ENSNode monorepo where the `docker-compose.yml` file is located.
 
 2. **Run Docker Compose**: Execute the following command to start the application:
    ```bash
@@ -249,11 +249,11 @@ To start the ENSNode application and its dependencies using Docker Compose, foll
 
 ### Expected Outcome
 
-After running `docker-compose up`, you should see logs in your terminal indicating that the services are starting. Once everything is up and running, you can interact with the ENSNode application through the provided URLs.
+After running `docker-compose up`, you should see logs in your terminal indicating that the services are starting. Once everything is up and running, you can interact with the ENSNode application through the hostnames referenced above.
 
-### Stopping the Application
+### Stopping the Applications
 
-To stop the running application, you can press `Ctrl + C` in the terminal where Docker Compose is running. If you want to remove the containers and networks created by Docker Compose, you can run:
+To stop the running applications, you can press `Ctrl + C` in the terminal where Docker Compose is running. If you want to remove the containers and networks created by Docker Compose, you can run:
 ```bash
 docker-compose down
 ```
@@ -262,4 +262,4 @@ This command will stop and remove all containers defined in the `docker-compose.
 
 ### Summary
 
-Using Docker Compose simplifies the process of setting up and running the ENSNode application along with its dependencies. By following the steps above, you can quickly get the application running on your local machine without needing to manually configure each component.
+Using Docker Compose simplifies the process of setting up and running ENSNode along with its dependencies. By following the steps above, you can quickly get the application running on your local machine without needing to manually configure each component.
