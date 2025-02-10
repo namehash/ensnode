@@ -86,7 +86,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         domainId: node,
         ownerId: to,
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
   }
 
   return {
@@ -139,7 +139,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
           ownerId: owner,
           expiryDate: expiry,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameUnwrapped({
@@ -171,7 +171,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
           domainId: node,
           ownerId: owner,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleFusesSet({
@@ -204,7 +204,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
           domainId: node,
           fuses,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
     async handleExpiryExtended({
       context,
@@ -236,7 +236,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
           domainId: node,
           expiryDate: expiry,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
     async handleTransferSingle({
       context,

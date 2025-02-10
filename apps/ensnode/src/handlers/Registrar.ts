@@ -105,7 +105,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
           registrantId: owner,
           expiryDate: expires,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameRegisteredByController({
@@ -161,7 +161,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
           registrationId: id,
           expiryDate: expires,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameTransferred({
@@ -191,7 +191,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
           registrationId: id,
           newOwnerId: to,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
   };
 };

@@ -149,7 +149,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
             domainId: subnode,
             ownerId: owner,
           })
-          .onConflictDoNothing();
+          .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
       },
     async handleTransfer({
       context,
@@ -183,7 +183,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           domainId: node,
           ownerId: owner,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNewTTL({
@@ -208,7 +208,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           domainId: node,
           ttl,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNewResolver({
@@ -261,7 +261,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
           resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
   };
 };

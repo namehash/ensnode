@@ -50,7 +50,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           resolverId: id,
           addrId: address,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleAddressChanged({
@@ -83,7 +83,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           coinType,
           addr: newAddress,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleNameChanged({
@@ -111,7 +111,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           resolverId: id,
           name,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleABIChanged({
@@ -139,7 +139,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           resolverId: id,
           contentType,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handlePubkeyChanged({
@@ -168,7 +168,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           x,
           y,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleTextChanged({
@@ -209,7 +209,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           // ex: last TextChanged in 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
           value: value || null,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleContenthashChanged({
@@ -236,7 +236,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           resolverId: id,
           hash,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleInterfaceChanged({
@@ -263,7 +263,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           interfaceID,
           implementer,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleAuthorisationChanged({
@@ -297,7 +297,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           // NOTE: the spelling difference is kept for subgraph backwards-compatibility
           isAuthorized: isAuthorised,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleVersionChanged({
@@ -337,7 +337,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           resolverId: id,
           version: newVersion,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
 
     async handleDNSRecordChanged({
