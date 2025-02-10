@@ -1,5 +1,6 @@
 import { anvil } from "viem/chains";
 
+import { ETHResolverFilter } from "./filters";
 import type { ENSDeploymentConfig } from "./types";
 
 /**
@@ -28,8 +29,7 @@ export default {
         address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       },
       Resolver: {
-        // No singular address as any number of Resolver contracts may deployed
-        // Events identified by `ContractConfig#filter`
+        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
       },
       BaseRegistrar: {
         address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",

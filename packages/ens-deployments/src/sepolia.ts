@@ -1,5 +1,6 @@
 import { sepolia } from "viem/chains";
 
+import { ETHResolverFilter } from "./filters";
 import type { ENSDeploymentConfig } from "./types";
 
 /**
@@ -24,8 +25,7 @@ export default {
         startBlock: 3702728,
       },
       Resolver: {
-        // No singular address as any number of Resolver contracts may deployed
-        // Events identified by `ContractConfig#filter`
+        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
         startBlock: 3702721, // based on startBlock of RegistryOld on Sepolia
       },
       BaseRegistrar: {

@@ -1,5 +1,6 @@
 import { base, linea, mainnet } from "viem/chains";
 
+import { BaseResolverFilter, ETHResolverFilter, LineaResolverFilter } from "./filters";
 import type { ENSDeploymentConfig } from "./types";
 
 /**
@@ -24,8 +25,7 @@ export default {
         startBlock: 9380380,
       },
       Resolver: {
-        // No singular address as any number of Resolver contracts may deployed
-        // Events identified by `ContractConfig#filter`
+        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
         startBlock: 3327417, // based on startBlock of RegistryOld on Mainnet
       },
       BaseRegistrar: {
@@ -76,8 +76,7 @@ export default {
         startBlock: 17571480,
       },
       Resolver: {
-        // No singular address as any number of Resolver contracts may deployed
-        // Events identified by `ContractConfig#filter`
+        filter: BaseResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
         startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
@@ -124,8 +123,7 @@ export default {
         startBlock: 6682888,
       },
       Resolver: {
-        // No singular address as any number of Resolver contracts may deployed
-        // Events identified by `ContractConfig#filter`
+        filter: LineaResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
         startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {

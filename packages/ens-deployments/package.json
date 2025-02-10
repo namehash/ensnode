@@ -9,8 +9,7 @@
     "lint:ci": "biome ci"
   },
   "dependencies": {
-    "viem": "catalog:",
-    "ponder": "catalog:"
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@namehash/shared-configs": "workspace:",

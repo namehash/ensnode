@@ -39,30 +39,7 @@ export const config = createConfig({
     [namespace("Resolver")]: {
       network: networkConfigForContract(chain, contracts.Resolver),
       abi: mergeAbis([eth_LegacyPublicResolver, eth_Resolver]),
-      // NOTE: this indexes every event emitted that looks like this
-      filter: [
-        { event: "AddrChanged", args: {} },
-        { event: "AddressChanged", args: {} },
-        { event: "NameChanged", args: {} },
-        { event: "ABIChanged", args: {} },
-        { event: "PubkeyChanged", args: {} },
-        {
-          event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-          args: {},
-        },
-        {
-          event:
-            "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
-          args: {},
-        },
-        { event: "ContenthashChanged", args: {} },
-        { event: "InterfaceChanged", args: {} },
-        { event: "AuthorisationChanged", args: {} },
-        { event: "VersionChanged", args: {} },
-        { event: "DNSRecordChanged", args: {} },
-        { event: "DNSRecordDeleted", args: {} },
-        { event: "DNSZonehashChanged", args: {} },
-      ],
+      filter: contracts.Resolver.filter,
     },
     [namespace("BaseRegistrar")]: {
       network: networkConfigForContract(chain, contracts.BaseRegistrar),

@@ -1,5 +1,4 @@
-import type { ContractConfig } from "ponder";
-import type { Chain } from "viem";
+import type { Address, Chain } from "viem";
 
 /**
  * Encodes a set of chains known to provide an "ENS deployment".
@@ -20,10 +19,15 @@ export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-e
 export type SubregistryName = "eth" | "base" | "linea";
 
 /**
- * A `ponder#ContractConfig` sans network, as it is provided by the contextual 'deployment', and
- * sans abi, which is specified in the ponder config (necessary for inferred types, it seems).
+ * Defines the address and startBlock of a contract relevant to indexing a subregistry. Note that
+ * address is undefined, because some contracts (i.e. Resolver) are defined by their event signatures
+ * and not a specific address.
  */
-export type SubregistryContractConfig = Omit<ContractConfig, "network" | "abi">;
+export interface SubregistryContractConfig {
+  readonly address?: Address;
+  readonly filter?: { event: string; args: Record<string, unknown> }[];
+  readonly startBlock?: number;
+}
 
 /**
  * Encodes the deployment of a subregistry, including the target chain and contracts.
