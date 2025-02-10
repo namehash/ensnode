@@ -1,3 +1,14 @@
+import type { PluginContractConfig, PluginName } from "@namehash/ens-deployments";
+import type { NetworkConfig } from "ponder";
+import { http, Chain } from "viem";
+import { END_BLOCK, START_BLOCK } from "./globals";
+import { uniq } from "./lib-helpers";
+import {
+  constrainBlockrange,
+  getEnsDeploymentChain,
+  rpcEndpointUrl,
+  rpcMaxRequestsPerSecond,
+} from "./ponder-helpers";
 import type { OwnedName } from "./types";
 
 /**
@@ -87,24 +98,25 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
  * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
  * names. The function returns the plugins that are included in the list.
  *
- * @param availablePlugins is a list of available plugins
+ * @param allPlugins a list of all plugins
+ * @param availablePluginNames is a list of plugin names that can be used
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { ownedName: OwnedName }>(
-  availablePlugins: readonly T[],
+export function getActivePlugins<T extends { pluginName: PluginName }>(
+  allPlugins: readonly T[],
+  availablePluginNames: PluginName[],
 ): T[] {
   /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
   const requestedPluginsEnvVar = process.env.ACTIVE_PLUGINS;
-  const requestedPlugins = requestedPluginsEnvVar ? requestedPluginsEnvVar.split(",") : [];
+  const requestedPluginNames = requestedPluginsEnvVar ? requestedPluginsEnvVar.split(",") : [];
 
-  if (!requestedPlugins.length) {
+  if (!requestedPluginNames.length) {
     throw new Error("Set the ACTIVE_PLUGINS environment variable to activate one or more plugins.");
   }
 
-  // Check if the requested plugins are valid and can become active
-  const invalidPlugins = requestedPlugins.filter(
-    (requestedPlugin) =>
-      !availablePlugins.some((availablePlugin) => availablePlugin.ownedName === requestedPlugin),
+  // Check if the requested plugins are valid at all
+  const invalidPlugins = requestedPluginNames.filter(
+    (requestedPlugin) => !allPlugins.some((plugin) => plugin.pluginName === requestedPlugin),
   );
 
   if (invalidPlugins.length) {
@@ -116,28 +128,104 @@ export function getActivePlugins<T extends { ownedName: OwnedName }>(
     );
   }
 
-  const uniquePluginsToActivate = availablePlugins.reduce((acc, plugin) => {
-    // Check if the plugin was requested
-    if (requestedPlugins.includes(plugin.ownedName) === false) {
-      // avoid unnecessary processing
-      return acc;
-    }
+  // Ensure that the requested plugins only reference availablePluginNames
+  const unavailablePlugins = requestedPluginNames.filter(
+    (name) => !availablePluginNames.includes(name as PluginName),
+  );
 
-    // Check if the plugin was already added to the list
-    if (acc.has(plugin.ownedName)) {
-      // avoid duplicates
-      return acc;
-    }
+  if (unavailablePlugins.length) {
+    throw new Error(
+      `Requested plugins are not available the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(", ")}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(", ")}`,
+    );
+  }
 
-    acc.set(plugin.ownedName, plugin);
-
-    return acc;
-  }, new Map<string, T>());
-
-  return Array.from(uniquePluginsToActivate.values());
+  return (
+    // return the set of all plugins...
+    allPlugins
+      // filtered by those that are available to the selected deployment
+      .filter((plugin) => availablePluginNames.includes(plugin.pluginName))
+      // and are requested by the user
+      .filter((plugin) => requestedPluginNames.includes(plugin.pluginName))
+  );
 }
 
 // Helper type to merge multiple types into one
 export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
   ? R
   : never;
+
+/**
+ * A PonderENSPlugin provides a pluginName to identify it, a ponder config, and an activate
+ * function to load handlers.
+ */
+export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
+  pluginName: PLUGIN_NAME;
+  config: CONFIG;
+  activate: VoidFunction;
+}
+
+/**
+ * An ENS Plugin's handlers are configured with ownedName and namespace.
+ */
+export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
+  ownedName: OwnedName;
+  namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
+};
+
+/**
+ * An ENS Plugin Handler
+ */
+export type PonderENSPluginHandler<OWNED_NAME extends OwnedName> = (
+  options: PonderENSPluginHandlerArgs<OWNED_NAME>,
+) => void;
+
+/**
+ * A helper function for defining a PonderENSPlugin's `activate()` function.
+ *
+ * Given a set of handler file imports, returns a function that executes them with the provided
+ * `ownedName` and `namespace`.
+ */
+export const activateHandlers =
+  <OWNED_NAME extends OwnedName>({
+    handlers,
+    ...args
+  }: PonderENSPluginHandlerArgs<OWNED_NAME> & {
+    handlers: Promise<{ default: PonderENSPluginHandler<OWNED_NAME> }>[];
+  }) =>
+  async () => {
+    await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
+  };
+
+/**
+ * Defines a ponder#NetworksConfig for a single, specific chain.
+ * Implemented as a computed getter to avoid runtime assertions for unused RPC env vars.
+ */
+export function networksConfigForChain(chain: Chain) {
+  return {
+    get [chain.id.toString()]() {
+      return {
+        chainId: chain.id,
+        transport: http(rpcEndpointUrl(chain.id)),
+        maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
+        // disable rpc caching for anvil node
+        ...(chain.name === "Anvil" && { disableCache: true }),
+      } satisfies NetworkConfig;
+    },
+  };
+}
+
+/**
+ * Defines a `ponder#ContractConfig['network']` given a contract's config, injecting the global
+ * start/end blocks to constrain indexing range.
+ */
+export function networkConfigForContract<CONTRACT_CONFIG extends PluginContractConfig>(
+  chain: Chain,
+  contractConfig: CONTRACT_CONFIG,
+) {
+  return {
+    [chain.id.toString()]: {
+      ...contractConfig,
+      ...constrainBlockrange(START_BLOCK, contractConfig.startBlock, END_BLOCK),
+    },
+  };
+}

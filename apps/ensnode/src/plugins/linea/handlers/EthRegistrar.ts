@@ -5,7 +5,7 @@ import type { Labelhash } from "ensnode-utils/types";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { upsertAccount } from "../../../lib/db-helpers";
-import { ownedName, pluginNamespace } from "../ponder.config";
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
 /**
  * When direct subnames of linea.eth are registered through the linea.eth ETHRegistrarController
@@ -16,17 +16,17 @@ import { ownedName, pluginNamespace } from "../ponder.config";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-const {
-  handleNameRegistered,
-  handleNameRegisteredByController,
-  handleNameRenewedByController,
-  handleNameRenewed,
-  handleNameTransferred,
-  ownedSubnameNode,
-} = makeRegistrarHandlers(ownedName);
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
+  const {
+    handleNameRegistered,
+    handleNameRegisteredByController,
+    handleNameRenewedByController,
+    handleNameRenewed,
+    handleNameTransferred,
+    ownedSubnameNode,
+  } = makeRegistrarHandlers(ownedName);
 
-export default function () {
-  ponder.on(pluginNamespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
+  ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
       event: {
@@ -39,7 +39,7 @@ export default function () {
     });
   });
 
-  ponder.on(pluginNamespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
+  ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewed({
       context,
       event: {
@@ -52,7 +52,7 @@ export default function () {
     });
   });
 
-  ponder.on(pluginNamespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
+  ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
     const { tokenId, from, to } = event.args;
 
     const labelhash = tokenIdToLabelhash(tokenId);
@@ -86,44 +86,35 @@ export default function () {
   });
 
   // Linea allows the owner of the EthRegistrarController to register subnames for free
-  ponder.on(
-    pluginNamespace("EthRegistrarController:OwnerNameRegistered"),
-    async ({ context, event }) => {
-      await handleNameRegisteredByController({
-        context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
-      });
-    },
-  );
+  ponder.on(namespace("EthRegistrarController:OwnerNameRegistered"), async ({ context, event }) => {
+    await handleNameRegisteredByController({
+      context,
+      event: { ...event, args: { ...event.args, cost: 0n } },
+    });
+  });
 
   // Linea allows any wallet address holding a Proof of Humanity (Poh) to register one subname for free
-  ponder.on(
-    pluginNamespace("EthRegistrarController:PohNameRegistered"),
-    async ({ context, event }) => {
-      await handleNameRegisteredByController({
-        context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
-      });
-    },
-  );
+  ponder.on(namespace("EthRegistrarController:PohNameRegistered"), async ({ context, event }) => {
+    await handleNameRegisteredByController({
+      context,
+      event: { ...event, args: { ...event.args, cost: 0n } },
+    });
+  });
 
-  ponder.on(
-    pluginNamespace("EthRegistrarController:NameRegistered"),
-    async ({ context, event }) => {
-      // the new registrar controller uses baseCost + premium to compute cost
-      await handleNameRegisteredByController({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            cost: event.args.baseCost + event.args.premium,
-          },
+  ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
+    // the new registrar controller uses baseCost + premium to compute cost
+    await handleNameRegisteredByController({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          cost: event.args.baseCost + event.args.premium,
         },
-      });
-    },
-  );
-  ponder.on(pluginNamespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
+      },
+    });
+  });
+  ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewedByController({ context, event });
   });
 }

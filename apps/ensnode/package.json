@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
+    "@namehash/ens-deployments": "workspace:*",
     "ensnode-utils": "workspace:*",
     "ensrainbow-sdk": "workspace:*",
     "hono": "catalog:",
