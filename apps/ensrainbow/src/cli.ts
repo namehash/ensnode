@@ -11,10 +11,12 @@ interface IngestArgs {
   "input-file": string;
   "data-dir": string;
   "validate-hashes": boolean;
+  "log-level": LogLevel;
 }
 
 interface CountArgs {
   "data-dir": string;
+  "log-level": LogLevel;
 }
 
 interface ServeArgs {
@@ -44,6 +46,12 @@ yargs(hideBin(process.argv))
           type: "boolean",
           description: "Validate that stored labelhashes match computed hashes",
           default: false,
+        })
+        .option("log-level", {
+          type: "string",
+          description: "Log level (error, warn, info, debug)",
+          choices: ["error", "warn", "info", "debug"],
+          default: "info",
         });
     },
     async (argv: ArgumentsCamelCase<IngestArgs>) => {
@@ -51,6 +59,7 @@ yargs(hideBin(process.argv))
         inputFile: argv["input-file"],
         dataDir: argv["data-dir"],
         validateHashes: argv["validate-hashes"],
+        logLevel: argv["log-level"],
       });
     },
   )
@@ -58,15 +67,23 @@ yargs(hideBin(process.argv))
     "count",
     "Count number of labels in the database",
     (yargs: Argv) => {
-      return yargs.option("data-dir", {
-        type: "string",
-        description: "Directory containing LevelDB data",
-        default: getDataDir(),
-      });
+      return yargs
+        .option("data-dir", {
+          type: "string",
+          description: "Directory containing LevelDB data",
+          default: getDataDir(),
+        })
+        .option("log-level", {
+          type: "string",
+          description: "Log level (error, warn, info, debug)",
+          choices: ["error", "warn", "info", "debug"],
+          default: "info",
+        });
     },
     async (argv: ArgumentsCamelCase<CountArgs>) => {
       await countCommand({
         dataDir: argv["data-dir"],
+        logLevel: argv["log-level"],
       });
     },
   )

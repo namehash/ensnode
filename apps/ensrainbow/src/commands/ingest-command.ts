@@ -127,6 +127,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   }
 
   if (invalidRecords > 0) {
-    log.warn(`Found ${invalidRecords} invalid records during processing`);
+    log.warn(`Found ${invalidRecords} records with invalid hashes during processing`);
   }
 }
