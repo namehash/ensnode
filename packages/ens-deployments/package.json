@@ -1,0 +1,21 @@
+{
+  "name": "@namehash/ens-deployments",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Contract addresses and startBlocks for each ENS deployment",
+  "license": "MIT",
+  "scripts": {
+    "lint:ci": "biome ci"
+  },
+  "dependencies": {
+    "viem": "catalog:",
+    "ponder": "catalog:"
+  },
+  "devDependencies": {
+    "@namehash/shared-configs": "workspace:",
+    "@biomejs/biome": "catalog:",
+    "typescript": "catalog:"
+  },
+  "exports": "./src/index.ts"
+}

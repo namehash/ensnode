@@ -1,21 +1,32 @@
-import { Event, EventNames } from "ponder:registry";
+import { Event } from "ponder:registry";
+import DeploymentConfigs, { ENSDeploymentChain } from "@namehash/ens-deployments";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
 };
 
-// makes sure start and end blocks are valid for ponder
-export const blockConfig = (
+/**
+ * Given a global start and end block (defaulting to undefined), configures a ContractConfig to use
+ * a start and end block that maintains validity within ponder (which requires that every contract's
+ * start and end block be within the global range).
+ *
+ * @param start minimum possible start block number for the current index
+ * @param startBlock the preferred start block for the given contract
+ * @param end maximum possible end block number for the current index
+ * @returns the start and end blocks, contrained to the provided `start` and `end`
+ *  aka START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
+ */
+export const constrainBlockrange = (
   start: number | undefined,
-  startBlock: number,
+  startBlock: number | undefined,
   end: number | undefined,
 ): {
   startBlock: number | undefined;
   endBlock: number | undefined;
 } => ({
   // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
-  startBlock: Math.min(Math.max(start || 0, startBlock), end || Number.MAX_SAFE_INTEGER),
+  startBlock: Math.min(Math.max(start || 0, startBlock || 0), end || Number.MAX_SAFE_INTEGER),
   endBlock: end,
 });
 
@@ -118,3 +129,20 @@ export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
 ): T & U {
   return tsDeepMerge(target, source) as T & U;
 }
+
+/**
+ * Gets the ENS Deployment Chain, defaulting to mainnet.
+ *
+ * @throws if not a valid deployment chain value
+ */
+export const getEnsDeploymentChain = (): ENSDeploymentChain => {
+  const value = process.env.ENS_DEPLOYMENT_CHAIN;
+  if (!value) return "mainnet";
+
+  const validValues = Object.keys(DeploymentConfigs);
+  if (!validValues.includes(value)) {
+    throw new Error(`Error: ENS_DEPLOYMENT_CHAIN must be one of ${validValues.join(" | ")}`);
+  }
+
+  return value as ENSDeploymentChain;
+};

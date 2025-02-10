@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_RPC_RATE_LIMIT,
-  blockConfig,
+  constrainBlockrange,
   deepMergeRecursive,
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
@@ -10,12 +10,12 @@ import {
 describe("ponder helpers", () => {
   describe("blockConfig", () => {
     it("should return valid startBlock and endBlock", () => {
-      const config = blockConfig(5, 10, 20);
+      const config = constrainBlockrange(5, 10, 20);
       expect(config).toEqual({ startBlock: 10, endBlock: 20 });
     });
 
     it("should handle undefined start and end", () => {
-      const config = blockConfig(undefined, 10, undefined);
+      const config = constrainBlockrange(undefined, 10, undefined);
       expect(config).toEqual({ startBlock: 10, endBlock: undefined });
     });
   });

@@ -106,11 +106,7 @@ export const resolver = onchainTable("resolvers", (t) => ({
   texts: t.jsonb().$type<string[]>(),
   // The set of observed SLIP-44 coin types for this resolver
   // NOTE: we avoid .notNull.default([]) to match subgraph behavior
-  // NOTE: we store coinTypes as a [String!], to avoid loss of precision due to drizzle parsing bug
-  // https://github.com/ponder-sh/ponder/issues/1475
-  // https://github.com/ponder-sh/ponder/pull/1482
-  // TODO: revert back to t.bigint().array()
-  coinTypes: t.text("coin_types").array(),
+  coinTypes: t.bigint().array(),
 }));
 
 export const resolverRelations = relations(resolver, ({ one, many }) => ({

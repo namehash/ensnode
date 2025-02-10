@@ -46,7 +46,7 @@ jobs:
       - name: Run Ponder runtime integrity checks
         working-directory: apps/ensnode
         env:
-          ACTIVE_PLUGINS: eth,base.eth,linea.eth
+          ACTIVE_PLUGINS: eth,base,linea
           RPC_URL_1: https://eth.drpc.org
           RPC_URL_8453: https://base.drpc.org
           RPC_URL_59144: https://linea.drpc.org

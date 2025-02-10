@@ -3,10 +3,7 @@ import schema from "ponder:schema";
 import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import { type Hex } from "viem";
 import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
-import { ownedName, pluginNamespace } from "../ponder.config";
-
-const { handleNewOwner, handleNewResolver, handleNewTTL, handleTransfer } =
-  makeRegistryHandlers(ownedName);
+import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {
@@ -14,19 +11,26 @@ async function isDomainMigrated(context: Context, node: Hex) {
   return domain?.isMigrated ?? false;
 }
 
-export default function () {
-  ponder.on(pluginNamespace("RegistryOld:setup"), setupRootNode);
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
+  const {
+    handleNewOwner, //
+    handleNewResolver,
+    handleNewTTL,
+    handleTransfer,
+  } = makeRegistryHandlers(ownedName);
+
+  ponder.on(namespace("RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
-  ponder.on(pluginNamespace("RegistryOld:NewOwner"), async ({ context, event }) => {
+  ponder.on(namespace("RegistryOld:NewOwner"), async ({ context, event }) => {
     const node = makeSubnodeNamehash(event.args.node, event.args.label);
     const isMigrated = await isDomainMigrated(context, node);
     if (isMigrated) return;
     return handleNewOwner(false)({ context, event });
   });
 
-  ponder.on(pluginNamespace("RegistryOld:NewResolver"), async ({ context, event }) => {
+  ponder.on(namespace("RegistryOld:NewResolver"), async ({ context, event }) => {
     const isMigrated = await isDomainMigrated(context, event.args.node);
     const isRootNode = event.args.node === ROOT_NODE;
 
@@ -37,13 +41,13 @@ export default function () {
     return handleNewResolver({ context, event });
   });
 
-  ponder.on(pluginNamespace("RegistryOld:NewTTL"), async ({ context, event }) => {
+  ponder.on(namespace("RegistryOld:NewTTL"), async ({ context, event }) => {
     const isMigrated = await isDomainMigrated(context, event.args.node);
     if (isMigrated) return;
     return handleNewTTL({ context, event });
   });
 
-  ponder.on(pluginNamespace("RegistryOld:Transfer"), async ({ context, event }) => {
+  ponder.on(namespace("RegistryOld:Transfer"), async ({ context, event }) => {
     // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
     // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
     // of the ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
@@ -55,8 +59,8 @@ export default function () {
     return handleTransfer({ context, event });
   });
 
-  ponder.on(pluginNamespace("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(pluginNamespace("Registry:NewResolver"), handleNewResolver);
-  ponder.on(pluginNamespace("Registry:NewTTL"), handleNewTTL);
-  ponder.on(pluginNamespace("Registry:Transfer"), handleTransfer);
+  ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(namespace("Registry:NewResolver"), handleNewResolver);
+  ponder.on(namespace("Registry:NewTTL"), handleNewTTL);
+  ponder.on(namespace("Registry:Transfer"), handleTransfer);
 }

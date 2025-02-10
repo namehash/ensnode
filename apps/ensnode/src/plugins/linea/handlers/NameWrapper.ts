@@ -2,14 +2,14 @@ import { ponder } from "ponder:registry";
 import { makeNameWrapperHandlers } from "../../../handlers/NameWrapper";
 import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
   const {
-    handleExpiryExtended,
-    handleFusesSet,
-    handleNameUnwrapped,
     handleNameWrapped,
-    handleTransferBatch,
+    handleNameUnwrapped,
+    handleFusesSet,
+    handleExpiryExtended,
     handleTransferSingle,
+    handleTransferBatch,
   } = makeNameWrapperHandlers(ownedName);
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);
