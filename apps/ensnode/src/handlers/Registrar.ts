@@ -39,7 +39,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     const node = makeSubnodeNamehash(ownedNameNode, labelhash);
     const domain = await context.db.find(schema.domain, { id: node });
 
-    // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/master/src/ethRegistrar.ts#L101
+    // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
 
     if (domain.labelName !== name) {
@@ -77,36 +77,37 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
-      // prepare registration entity object
-      const registration = {
+      // attempt to heal the label associated with labelhash via ENSRainbow
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
+      const healedLabel = await labelByHash(labelhash);
+
+      // only update the label if it is indexable
+      // undefined value means no change to the label
+      const label = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+
+      // only update the name if the label is indexable
+      // undefined value means no change to the name
+      const name = isLabelIndexable(healedLabel) ? `${label}.${ownedName}` : undefined;
+
+      // akin to domain.save() at
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
+      await context.db.update(schema.domain, { id: node }).set({
+        registrantId: owner,
+        expiryDate: expires + GRACE_PERIOD_SECONDS,
+        labelName: label,
+        name,
+      });
+
+      // akin to registration.save() at
+      //https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
+      const registration = await upsertRegistration(context, {
         id: makeRegistrationId(ownedName, labelhash, node),
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-      } as typeof schema.registration.$inferInsert;
-
-      // prepare domain entity object
-      const domain = {
-        registrantId: owner,
-        expiryDate: expires + GRACE_PERIOD_SECONDS,
-      } as Partial<typeof schema.domain.$inferInsert>;
-
-      // attempt to heal the label associated with labelhash via ENSRainbow
-      // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/ethRegistrar.ts#L56-L61
-      const label = await labelByHash(labelhash);
-      if (isLabelIndexable(label)) {
-        domain.labelName = label;
-        domain.name = `${label}.${ownedName}`;
-        registration.labelName = label;
-      }
-
-      // akin to domain.save()
-      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
-      await context.db.update(schema.domain, { id: node }).set(domain);
-      // akin to registration.save()
-      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
-      await upsertRegistration(context, registration);
+        labelName: label,
+      });
 
       // log RegistrationEvent
       await context.db
