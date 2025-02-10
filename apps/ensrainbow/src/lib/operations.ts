@@ -2,15 +2,19 @@ import { ClassicLevel } from "classic-level";
 import { ByteArray } from "viem";
 import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
 import { labelHashToBytes } from "../utils/label-utils.js";
-import type {
+import { createLogger } from "../utils/logger.js";
+import {
   CountError,
   CountResponse,
   CountSuccess,
+  ErrorCode,
   HealError,
   HealResponse,
   HealSuccess,
+  StatusCode,
 } from "../utils/response-types.js";
-import { ErrorCode, StatusCode } from "../utils/response-types.js";
+
+const logger = createLogger();
 
 export interface ENSRainbowContext {
   db: ClassicLevel<ByteArray, string>;
@@ -35,7 +39,7 @@ export const heal = async (
 
   try {
     const label = await context.db.get(labelHashBytes);
-    console.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
+    logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
     const result: HealSuccess = {
       status: StatusCode.Success,
       label,
@@ -44,7 +48,7 @@ export const heal = async (
   } catch (error) {
     if ((error as any).code === "LEVEL_NOT_FOUND") {
       if (process.env.NODE_ENV === "development") {
-        console.info(`Unhealable labelhash request: ${labelhash}`);
+        logger.info(`Unhealable labelhash request: ${labelhash}`);
       }
       const result: HealError = {
         status: StatusCode.Error,
@@ -53,7 +57,7 @@ export const heal = async (
       };
       return result;
     }
-    console.error("Error healing label:", error);
+    logger.error("Error healing label:", error);
     const result: HealError = {
       status: StatusCode.Error,
       error: "Internal server error",
@@ -75,7 +79,7 @@ export const countLabels = async (context: ENSRainbowContext): Promise<CountResp
     };
     return result;
   } catch (error) {
-    console.error("Failed to retrieve label count:", error);
+    logger.error("Failed to retrieve label count:", error);
     const result: CountError = {
       status: StatusCode.Error,
       error: "Internal server error",
