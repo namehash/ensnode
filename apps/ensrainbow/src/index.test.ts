@@ -1,17 +1,28 @@
 import { serve } from "@hono/node-server";
-import { labelhash } from "viem";
+import { ClassicLevel } from "classic-level";
+import { ByteArray, labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { app, db } from "./index";
-import { LABELHASH_COUNT_KEY } from "./utils/constants";
-import { labelHashToBytes } from "./utils/label-utils";
-import type { CountResponse, HealError, HealResponse, HealSuccess } from "./utils/response-types";
-import { ErrorCode, StatusCode } from "./utils/response-types";
+import { createServer } from "./commands/server-command.js";
+import { initializeDatabase } from "./lib/database.js";
+import { LABELHASH_COUNT_KEY } from "./utils/constants.js";
+import { labelHashToBytes } from "./utils/label-utils.js";
+import type {
+  CountResponse,
+  HealError,
+  HealResponse,
+  HealSuccess,
+} from "./utils/response-types.js";
+import { ErrorCode, StatusCode } from "./utils/response-types.js";
 
 describe("ENS Rainbow API", () => {
   let server: ReturnType<typeof serve>;
+  let db: ClassicLevel<ByteArray, string>;
+  let app: ReturnType<typeof createServer>;
 
   beforeAll(async () => {
+    db = initializeDatabase("test-data");
+    app = createServer(db, console);
     // Start the server on a different port than the main app
     server = serve({
       fetch: app.fetch,
@@ -29,6 +40,7 @@ describe("ENS Rainbow API", () => {
   afterAll(async () => {
     // Cleanup
     await server.close();
+    await db.close();
   });
 
   describe("GET /v1/heal/:labelhash", () => {
