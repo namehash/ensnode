@@ -54,7 +54,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   let invalidRecords = 0;
   const MAX_BATCH_SIZE = 10000;
 
-  log.info("Loading data into LevelDB...");
+  log.info("Ingesting data into LevelDB...");
 
   for await (const line of rl) {
     if (line.startsWith("COPY public.ens_names")) {
@@ -88,7 +88,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     } catch (e) {
       if (e instanceof Error) {
         log.warn(
-          `Skipping invalid record: ${e.message} - this record would be unreachable via ENS Subgraph`,
+          `Skipping invalid record: ${e.message} - this record is safe to skip as it would be unreachable by the ENS Subgraph`,
         );
       } else {
         log.warn(`Unknown error processing record - skipping`);

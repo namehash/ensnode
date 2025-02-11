@@ -23,7 +23,7 @@ describe("ENS Rainbow API", () => {
   beforeAll(async () => {
     db = initializeDatabase("test-data");
     app = createServer(db, console);
-    // Start the server on a different port than the main app
+    // Start the server on a different port than what ENSRainbow defaults to
     server = serve({
       fetch: app.fetch,
       port: 3002,
