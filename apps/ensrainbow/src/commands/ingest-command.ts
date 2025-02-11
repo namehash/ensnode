@@ -18,7 +18,6 @@ import { countCommand } from "./count-command.js";
 export interface IngestCommandOptions {
   inputFile: string;
   dataDir: string;
-  validateHashes?: boolean;
   logLevel?: LogLevel;
 }
 
@@ -97,18 +96,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       }
       invalidRecords++;
       continue;
-    }
-
-    if (options.validateHashes) {
-      const computedHash = labelHashToBytes(labelhash(record.label));
-      const storedHash = record.labelHash;
-      if (!byteArraysEqual(computedHash, storedHash)) {
-        log.warn(
-          `Hash mismatch for label "${record.label}": stored=${storedHash}, computed=${computedHash}`,
-        );
-        invalidRecords++;
-        continue;
-      }
     }
 
     batch.put(record.labelHash, record.label);

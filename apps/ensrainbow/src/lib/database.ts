@@ -72,17 +72,22 @@ export const createDatabase = async (
   }
 };
 
-export const openDatabase = (dataDir: string, logLevel: LogLevel = "info"): ENSRainbowDB => {
+export const openDatabase = async (
+  dataDir: string,
+  logLevel: LogLevel = "info",
+): Promise<ENSRainbowDB> => {
   const logger = createLogger(logLevel);
   logger.info(`Opening existing database in directory: ${dataDir}`);
 
   try {
-    return new ClassicLevel<ByteArray, string>(dataDir, {
+    const db = new ClassicLevel<ByteArray, string>(dataDir, {
       keyEncoding: "view",
       valueEncoding: "utf8",
       createIfMissing: false,
       errorIfExists: false,
     });
+    await db.open();
+    return db;
   } catch (error) {
     if (error instanceof Error && error.message.includes("does not exist")) {
       logger.error(`No database found at ${dataDir}`);
