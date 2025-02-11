@@ -4,11 +4,11 @@ import { createGunzip } from "zlib";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import ProgressBar from "progress";
 import { labelhash } from "viem";
-import { createDatabase } from "../lib/database.js";
-import { byteArraysEqual } from "../utils/byte-utils.js";
-import { LogLevel, createLogger } from "../utils/logger.js";
-import { buildRainbowRecord } from "../utils/rainbow-record.js";
-import { countCommand } from "./count-command.js";
+import { createDatabase } from "../lib/database";
+import { byteArraysEqual } from "../utils/byte-utils";
+import { LogLevel, createLogger } from "../utils/logger";
+import { buildRainbowRecord } from "../utils/rainbow-record";
+import { countCommand } from "./count-command";
 
 export interface IngestCommandOptions {
   inputFile: string;
@@ -31,6 +31,7 @@ const TOTAL_EXPECTED_RECORDS = 133_856_894;
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
   const db = await createDatabase(options.dataDir, options.logLevel);
+  await db.open();
 
   const bar = new ProgressBar(
     "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",

@@ -6,10 +6,10 @@ import type { CountResponse, HealError, HealResponse, HealSuccess } from "ensrai
 import { labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { createDatabase } from "../lib/database.js";
-import type { ENSRainbowDB } from "../lib/database.js";
-import { LABELHASH_COUNT_KEY } from "../lib/database.js";
-import { createServer } from "./server-command.js";
+import { createDatabase } from "../lib/database";
+import type { ENSRainbowDB } from "../lib/database";
+import { LABELHASH_COUNT_KEY } from "../lib/database";
+import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
