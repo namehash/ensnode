@@ -6,26 +6,12 @@ on:
       - feat/restructure-ensrainbow-image-build
 
 jobs:
-  static-analysis:
+  image-build-and-push:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-
-      - name: Audit dependencies
-        run: pnpm audit --audit-level=low
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Build & Push Docker image for ENSRainbow app
         env:
