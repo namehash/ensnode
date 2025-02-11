@@ -13,7 +13,7 @@ import { LogLevel, createLogger } from "../utils/logger";
  *
  * - Values are UTF-8 strings and represent:
  *   - For labelhash entries: the label that was hashed to create the labelhash
- *   - For count entries: The count as a string number
+ *   - For count entries: The non-negative integer count of labelhash entries formatted as a string.
  */
 export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
 
