@@ -1,14 +1,21 @@
 import { createReadStream } from "fs";
-import { join } from "path";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
-import { ClassicLevel } from "classic-level";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import ProgressBar from "progress";
-import { ByteArray } from "viem";
-import { buildRainbowRecord } from "./utils/rainbow-record.js";
+import { labelhash } from "viem";
+import { createDatabase } from "../lib/database";
+import { byteArraysEqual } from "../utils/byte-utils";
+import { LogLevel, createLogger } from "../utils/logger";
+import { buildRainbowRecord } from "../utils/rainbow-record";
+import { countCommand } from "./count-command";
 
-const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), "data");
-const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.gz");
+export interface IngestCommandOptions {
+  inputFile: string;
+  dataDir: string;
+  validateHashes?: boolean;
+  logLevel?: LogLevel;
+}
 
 // Total number of expected records in the ENS rainbow table SQL dump
 // This number represents the count of unique label-labelhash pairs
@@ -21,17 +28,10 @@ const INPUT_FILE = process.env.INPUT_FILE || join(process.cwd(), "ens_names.sql.
 // See: https://github.com/namehash/ensnode/issues/140
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
-async function loadEnsNamesToLevelDB(): Promise<void> {
-  // Initialize LevelDB with proper types for key and value
-  const db = new ClassicLevel<ByteArray, string>(DATA_DIR, {
-    keyEncoding: "binary",
-    valueEncoding: "utf8",
-  });
-
-  // Clear existing database before starting
-  console.log("Clearing existing database...");
-  await db.clear();
-  console.log("Database cleared.");
+export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
+  const log = createLogger(options.logLevel);
+  const db = await createDatabase(options.dataDir, options.logLevel);
+  await db.open();
 
   const bar = new ProgressBar(
     "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
@@ -44,7 +44,7 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   );
 
   // Create a read stream for the gzipped file
-  const fileStream = createReadStream(INPUT_FILE);
+  const fileStream = createReadStream(options.inputFile);
   const gunzip = createGunzip();
   const rl = createInterface({
     input: fileStream.pipe(gunzip),
@@ -55,9 +55,10 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   let batch = db.batch();
   let batchSize = 0;
   let processedRecords = 0;
+  let invalidRecords = 0;
   const MAX_BATCH_SIZE = 10000;
 
-  console.log("Loading data into LevelDB...");
+  log.info("Ingesting data into LevelDB...");
 
   for await (const line of rl) {
     if (line.startsWith("COPY public.ens_names")) {
@@ -78,13 +79,26 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
       record = buildRainbowRecord(line);
     } catch (e) {
       if (e instanceof Error) {
-        console.warn(
-          `Skipping invalid record: ${e.message} - this record would be unreachable via ENS Subgraph`,
+        log.warn(
+          `Skipping invalid record: ${e.message} - this record is safe to skip as it would be unreachable by the ENS Subgraph`,
         );
       } else {
-        console.warn(`Unknown error processing record - skipping`);
+        log.warn(`Unknown error processing record - skipping`);
       }
+      invalidRecords++;
       continue;
+    }
+
+    if (options.validateHashes) {
+      const computedHash = labelHashToBytes(labelhash(record.label));
+      const storedHash = record.labelHash;
+      if (!byteArraysEqual(computedHash, storedHash)) {
+        log.warn(
+          `Hash mismatch for label "${record.label}": stored=${storedHash}, computed=${computedHash}`,
+        );
+        invalidRecords++;
+        continue;
+      }
     }
 
     batch.put(record.labelHash, record.label);
@@ -105,21 +119,25 @@ async function loadEnsNamesToLevelDB(): Promise<void> {
   }
 
   await db.close();
-  console.log("\nData ingestion complete!");
+  log.info("\nData ingestion complete!");
 
   // Validate the number of processed records
   if (processedRecords !== TOTAL_EXPECTED_RECORDS) {
-    console.warn(
-      `Warning: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
+    log.error(
+      `Error: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
     );
   } else {
     console.log(`Successfully ingested all ${processedRecords} records`);
   }
-}
 
-// Check if this module is being run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  loadEnsNamesToLevelDB()
-    .then(() => console.log("Done!"))
-    .catch(console.error);
+  if (invalidRecords > 0) {
+    log.error(`Found ${invalidRecords} records with invalid hashes during processing`);
+  }
+
+  // Run count as second phase
+  log.info("\nStarting count verification phase...");
+  await countCommand({
+    dataDir: options.dataDir,
+    logLevel: options.logLevel,
+  });
 }

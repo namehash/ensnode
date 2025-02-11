@@ -1,7 +1,7 @@
 import type { Labelhash } from "ensnode-utils/types";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { ByteArray, labelhash } from "viem";
-import { byteArraysEqual } from "./byte-utils.js";
+import { byteArraysEqual } from "./byte-utils";
 
 export interface RainbowRecord {
   labelHash: ByteArray;
