@@ -1,7 +1,6 @@
 import { ClassicLevel } from "classic-level";
-import { ByteArray } from "viem";
-import { LABELHASH_COUNT_KEY } from "./utils/constants.js";
-import { labelHashToBytes } from "./utils/label-utils.js";
+import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import type {
   CountError,
   CountResponse,
@@ -9,8 +8,9 @@ import type {
   HealError,
   HealResponse,
   HealSuccess,
-} from "./utils/response-types.js";
-import { ErrorCode, StatusCode } from "./utils/response-types.js";
+} from "ensrainbow-sdk/types";
+import { ByteArray } from "viem";
+import { LABELHASH_COUNT_KEY } from "./utils/constants.js";
 
 export interface ENSRainbowContext {
   db: ClassicLevel<ByteArray, string>;

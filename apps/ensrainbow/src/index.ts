@@ -1,12 +1,12 @@
 import { join } from "path";
 import { serve } from "@hono/node-server";
 import { ClassicLevel } from "classic-level";
+import type { HealthResponse } from "ensrainbow-sdk/types";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { ByteArray } from "viem";
 import type { ENSRainbowContext } from "./operations.js";
 import { countLabels, heal } from "./operations.js";
-import type { HealthResponse } from "./utils/response-types.js";
 
 export const app = new Hono();
 export const DATA_DIR = process.env.VITEST

@@ -4,6 +4,7 @@ import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-hel
 import type { Labelhash } from "ensnode-utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
+import { labelByHash } from "../lib/graphnode-helpers";
 import { makeRegistrationId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName } from "../lib/types";
@@ -38,7 +39,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     const node = makeSubnodeNamehash(ownedNameNode, labelhash);
     const domain = await context.db.find(schema.domain, { id: node });
 
-    // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/master/src/ethRegistrar.ts#L101
+    // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
 
     if (domain.labelName !== name) {
@@ -76,24 +77,36 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
-      // TODO: materialze labelName via rainbow tables ala Registry.ts
-      const labelName = undefined;
+      // attempt to heal the label associated with labelhash via ENSRainbow
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
+      const healedLabel = await labelByHash(labelhash);
 
-      const id = makeRegistrationId(ownedName, labelhash, node);
+      // only update the label if it is indexable
+      // undefined value means no change to the label
+      const label = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
-      await upsertRegistration(context, {
-        id,
+      // only update the name if the label is indexable
+      // undefined value means no change to the name
+      const name = isLabelIndexable(healedLabel) ? `${label}.${ownedName}` : undefined;
+
+      // akin to domain.save() at
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
+      await context.db.update(schema.domain, { id: node }).set({
+        registrantId: owner,
+        expiryDate: expires + GRACE_PERIOD_SECONDS,
+        labelName: label,
+        name,
+      });
+
+      // akin to registration.save() at
+      //https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
+      const registration = await upsertRegistration(context, {
+        id: makeRegistrationId(ownedName, labelhash, node),
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-        labelName,
-      });
-
-      await context.db.update(schema.domain, { id: node }).set({
-        registrantId: owner,
-        expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName,
+        labelName: label,
       });
 
       // log RegistrationEvent
@@ -101,7 +114,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         .insert(schema.nameRegistered)
         .values({
           ...sharedEventValues(event),
-          registrationId: id,
+          registrationId: registration.id,
           registrantId: owner,
           expiryDate: expires,
         })
