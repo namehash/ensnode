@@ -22,7 +22,7 @@ describe("Validate Command", () => {
     const db = await createDatabase(tempDir);
     await db.close();
 
-    await validateCommand({ dataDir: tempDir });
+    await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
   });
 
   it("should validate a database with valid records", async () => {
@@ -43,7 +43,7 @@ describe("Validate Command", () => {
 
     await db.close();
 
-    await validateCommand({ dataDir: tempDir });
+    await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
   });
 
   it("should detect invalid labelhash format", async () => {
@@ -55,7 +55,7 @@ describe("Validate Command", () => {
 
     await db.close();
 
-    await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
+    await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
   });
 
   it("should detect labelhash mismatch", async () => {
@@ -68,7 +68,7 @@ describe("Validate Command", () => {
 
     await db.close();
 
-    await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
+    await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
   });
 
   it("should detect missing count key", async () => {
@@ -81,7 +81,7 @@ describe("Validate Command", () => {
 
     await db.close();
 
-    await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
+    await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
   });
 
   it("should detect incorrect count", async () => {
@@ -97,6 +97,6 @@ describe("Validate Command", () => {
 
     await db.close();
 
-    await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
+    await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
   });
 });

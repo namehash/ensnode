@@ -57,13 +57,15 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
 
   if (!storedCount) {
     log.error("Count key missing from database");
+    throw new Error("Count key missing from database");
+  }
+
+  const parsedCount = parseNonNegativeInteger(storedCount);
+  if (parsedCount !== actualCount) {
+    log.error(`Count mismatch: stored=${parsedCount}, actual=${actualCount}`);
+    throw new Error(`Count mismatch: stored=${parsedCount}, actual=${actualCount}`);
   } else {
-    const parsedCount = parseNonNegativeInteger(storedCount);
-    if (parsedCount !== actualCount) {
-      log.error(`Count mismatch: stored=${parsedCount}, actual=${actualCount}`);
-    } else {
-      log.info(`Count verified: ${actualCount} records`);
-    }
+    log.info(`Count verified: ${actualCount} records`);
   }
 
   // Report results
@@ -76,6 +78,7 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
   const hasErrors = invalidHashes > 0 || hashMismatches > 0 || !storedCount;
   if (hasErrors) {
     log.error("\nValidation failed! See errors above.");
+    throw new Error("Validation failed");
   } else {
     log.info("\nValidation successful! No errors found.");
   }
