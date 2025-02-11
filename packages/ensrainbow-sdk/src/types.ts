@@ -1,4 +1,4 @@
-import { ErrorCode, StatusCode } from "./consts";
+import { ErrorCode, StatusCode } from "./consts.js";
 
 export type StatusCode = (typeof StatusCode)[keyof typeof StatusCode];
 

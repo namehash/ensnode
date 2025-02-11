@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { EnsRainbowApiClient } from "./client";
-import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-import type { HealError, HealSuccess } from "./types";
+import { EnsRainbowApiClient } from "./client.js";
+import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts.js";
+import type { HealError, HealSuccess } from "./types.js";
 
 describe("EnsRainbowApiClient", () => {
   let client: EnsRainbowApiClient;

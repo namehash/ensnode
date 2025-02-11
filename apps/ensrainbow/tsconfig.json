@@ -6,6 +6,8 @@
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
   }
 }

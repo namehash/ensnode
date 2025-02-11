@@ -1,7 +1,7 @@
 import { join } from "path";
 import { ClassicLevel } from "classic-level";
 import { ByteArray } from "viem";
-import { LogLevel, createLogger } from "../utils/logger";
+import { LogLevel, createLogger } from "../utils/logger.js";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
 

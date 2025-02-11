@@ -1,6 +1,6 @@
 import type { Labelhash } from "ensnode-utils/types";
-import { DEFAULT_ENSRAINBOW_URL } from "./consts";
-import type { HealResponse } from "./types";
+import { DEFAULT_ENSRAINBOW_URL } from "./consts.js";
+import { HealResponse } from "./types.js";
 
 export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;

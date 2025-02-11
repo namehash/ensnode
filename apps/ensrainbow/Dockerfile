@@ -23,20 +23,25 @@ COPY apps ./apps
 # Install dependencies for the entire monorepo
 RUN pnpm install --frozen-lockfile
 # Change to the specific app directory
+WORKDIR /app/packages/ensrainbow-sdk
+# Build the SDK package first
+RUN pnpm build
+# Build the main app
 WORKDIR /app/apps/ensrainbow
 # Transpile TypeScript files into JavaScript
 RUN pnpm build
 
 # Application runtime stage
 FROM base AS ensrainbow.runtime
-# Copy top-level dependencies
-COPY --from=ensrainbow.runtime_deps /app/node_modules node_modules
+# Copy top-level dependencies and workspace packages
+COPY --from=ensrainbow.runtime_deps /app/node_modules /app/node_modules
+COPY --from=ensrainbow.runtime_deps /app/packages /app/packages
 # Change to the specific app directory
 WORKDIR /app/apps/ensrainbow
 # Copy built files and dependencies
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/package*.json .
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/node_modules node_modules
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/dist dist
+COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/package*.json ./
+COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/node_modules ./node_modules
+COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/dist ./dist
 
 # Ingestor stage
 FROM ensrainbow.runtime AS ingestor
