@@ -1,15 +1,9 @@
-# Base working stage
-FROM node:20-slim AS base
+# API server stage
+FROM ghcr.io/namehash/ensnode/ensrainbow-data AS base
+
 RUN apt-get update && \
-    apt-get install -y wget && \
     npm install -g pnpm
 WORKDIR /app
-
-# Data stage
-FROM base AS ensrainbow.data
-RUN wget -nv https://bucket.ensrainbow.io/ens_names.sql.gz
-RUN wget -nv https://bucket.ensrainbow.io/ens_names.sql.gz.sha256sum
-RUN sha256sum -c ens_names.sql.gz.sha256sum
 
 # Runtime dependencies stage
 FROM base AS ensrainbow.runtime_deps
@@ -38,20 +32,6 @@ COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/package*.json .
 COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/node_modules node_modules
 COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/dist dist
 
-# Ingestor stage
-FROM ensrainbow.runtime AS ingestor
-# Copy input data
-COPY --from=ensrainbow.data /app/ens_names.sql.gz .
-COPY --from=ensrainbow.data /app/ens_names.sql.gz.sha256sum .
-# Load input data into the key-value store
-RUN node dist/ingest.js
-# Verify the number of keys in the database
-RUN node dist/count-keys.js
-
-# API server stage
-FROM ensrainbow.runtime AS runner
-# Copy key-value store data
-COPY --from=ingestor /app/apps/ensrainbow/data ./data
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3001
