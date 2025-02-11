@@ -1,4 +1,4 @@
-import { openDatabase, safeGet } from "../lib/database.js";
+import { ENSRainbowDB, safeGet } from "../lib/database.js";
 import { LABELHASH_COUNT_KEY } from "../lib/database.js";
 import { byteArraysEqual } from "../utils/byte-utils.js";
 import { LogLevel, createLogger } from "../utils/logger.js";
@@ -9,9 +9,8 @@ export interface CountCommandOptions {
   logLevel?: LogLevel;
 }
 
-export async function countCommand(options: CountCommandOptions): Promise<void> {
+export async function countCommand(db: ENSRainbowDB, options: CountCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
-  const db = openDatabase(options.dataDir, options.logLevel);
 
   // Try to read existing count
   const existingCountStr = await safeGet(db, LABELHASH_COUNT_KEY);
