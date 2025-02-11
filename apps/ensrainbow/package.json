@@ -30,6 +30,7 @@
     "@hono/node-server": "^1.4.1",
     "classic-level": "^1.4.1",
     "ensnode-utils": "workspace:*",
+    "ensrainbow-sdk": "workspace:*",
     "hono": "catalog:",
     "progress": "^2.0.3",
     "tsx": "^4.7.1",

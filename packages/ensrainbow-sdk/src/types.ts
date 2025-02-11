@@ -1,15 +1,6 @@
-export const StatusCode = {
-  Success: "success",
-  Error: "error",
-} as const;
+import { ErrorCode, StatusCode } from "./consts";
 
 export type StatusCode = (typeof StatusCode)[keyof typeof StatusCode];
-
-export const ErrorCode = {
-  BadRequest: 400,
-  NotFound: 404,
-  ServerError: 500,
-} as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 

@@ -1,7 +1,7 @@
 import type { Labelhash } from "ensnode-utils/types";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
-import { labelHashToBytes } from "./label-utils";
 import { buildRainbowRecord } from "./rainbow-record";
 
 describe("buildRainbowRecord", () => {

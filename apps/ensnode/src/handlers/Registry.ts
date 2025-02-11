@@ -1,10 +1,11 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
+import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
 import type { Labelhash, Node } from "ensnode-utils/types";
 import { type Hex, zeroAddress } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
+import { labelByHash } from "../lib/graphnode-helpers";
 import { makeResolverId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
@@ -61,7 +62,7 @@ function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
 }
 
 // a more accurate name for the following function
-// https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L64
+// https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64
 async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
@@ -90,16 +91,19 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         context: Context;
         event: EventWithArgs<{ node: Node; label: Labelhash; owner: Hex }>;
       }) => {
-        const { label, node, owner } = event.args;
-
-        const subnode = makeSubnodeNamehash(node, label);
+        const { label: labelhash, node, owner } = event.args;
 
         // Each domain must reference an account of its owner,
         // so we ensure the account exists before inserting the domain
         await upsertAccount(context, owner);
 
-        // note that we set isMigrated so that if this domain is being interacted with on the new registry, its migration status is set here
+        // get database entity for the domain and the parent
+        const subnode = makeSubnodeNamehash(node, labelhash);
+        const parent = await context.db.find(schema.domain, { id: node });
         let domain = await context.db.find(schema.domain, { id: subnode });
+
+        // note that we set isMigrated so that if this domain is being
+        // interacted with on the new registry, its migration status is set here
         if (domain) {
           // if the domain already exists, this is just an update of the owner record (& isMigrated)
           await context.db
@@ -124,17 +128,28 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
         // if the domain doesn't yet have a name, construct it here
         if (!domain.name) {
-          const parent = await context.db.find(schema.domain, { id: node });
+          // attempt to heal the label associated with labelhash via ENSRainbow
+          // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
+          const healedLabel = await labelByHash(labelhash);
+          const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
-          // TODO: implement sync rainbow table lookups
-          // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L111
-          const labelName = encodeLabelhash(label);
-          const name = parent?.name ? `${labelName}.${parent.name}` : labelName;
+          // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
+          // NOTE: for the root node, the parent is null, so we just use the label value as is
+          const label = validLabel || encodeLabelhash(labelhash);
+          const name = parent?.name ? `${label}.${parent.name}` : label;
 
-          await context.db.update(schema.domain, { id: domain.id }).set({ name, labelName });
+          // akin to domain.save()
+          // via https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
+          await context.db.update(schema.domain, { id: domain.id }).set({
+            name,
+            // NOTE: only update Domain.labelName iff label is healed and valid
+            // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
+            labelName: validLabel,
+          });
         }
 
         // garbage collect newly 'empty' domain iff necessary
+        // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
           await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
         }
@@ -196,7 +211,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       const { node, ttl } = event.args;
 
       // TODO: handle the edge case in which the domain no longer exists?
-      // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L215
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L215
       // NOTE: i'm not sure this needs to be here, as domains are never deleted (??)
       await context.db.update(schema.domain, { id: node }).set({ ttl });
 
@@ -241,7 +256,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
         // update the domain to point to it, and denormalize the eth addr
         // NOTE: this implements the logic as documented here
-        // https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L193
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
         await context.db
           .update(schema.domain, { id: node })
           .set({ resolverId, resolvedAddressId: resolver.addrId });
