@@ -38,6 +38,4 @@ export async function countCommand(db: ENSRainbowDB, options: CountCommandOption
 
   log.info(`Total number of keys (excluding count key): ${count}`);
   log.info(`Updated count in database under LABELHASH_COUNT_KEY`);
-
-  await db.close();
 }
