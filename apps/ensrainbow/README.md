@@ -68,10 +68,10 @@ docker compose build ensrainbow
 2. Run the container:
 
 ```bash
-docker run -d -p 3001:3001 ensnode/ensrainbow
+docker run -d -p 3223:3223 ensnode/ensrainbow
 ```
 
-The service will be available at `http://localhost:3001`.
+The service will be available at `http://localhost:3223`.
 
 ## NameHash Labs Hosted Instance
 
@@ -84,7 +84,7 @@ NameHash Labs operates a freely available instance of ENSRainbow for the ENS com
 
 ### Using the Hosted Instance
 
-Simply replace `localhost:3001` with `api.ensrainbow.io` in the API examples:
+Simply replace `localhost:3223` with `api.ensrainbow.io` in the API examples:
 
 ```bash
 # Health check
@@ -104,7 +104,7 @@ While we aim for high availability, if you need guaranteed uptime or want to kee
 ### Health Check
 
 ```bash
-curl http://localhost:3001/health
+curl http://localhost:3223/health
 ```
 
 Response: `{"status":"ok"}`
@@ -112,13 +112,13 @@ Response: `{"status":"ok"}`
 ### Heal Label
 
 ```bash
-curl http://localhost:3001/v1/heal/0x[labelhash]
+curl http://localhost:3223/v1/heal/0x[labelhash]
 ```
 
 Example:
 
 ```bash
-curl http://localhost:3001/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 Response:
@@ -167,7 +167,7 @@ Error Responses:
 ### Get Count of Healable Labels
 
 ```bash
-curl http://localhost:3001/v1/labels/count
+curl http://localhost:3223/v1/labels/count
 ```
 
 Success Response:
@@ -223,10 +223,10 @@ You can verify the service is running by checking the health endpoint or retriev
 
 ```bash
 # Health check
-curl http://localhost:3001/health
+curl http://localhost:3223/health
 
 # Get count of healable labels
-curl http://localhost:3001/v1/labels/count
+curl http://localhost:3223/v1/labels/count
 ```
 
 Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
@@ -234,7 +234,7 @@ Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
 ## Environment Variables
 
 ### Server Variables
-- `PORT`: Server port (default: 3001)
+- `PORT`: Server port (default: 3223)
 - `DATA_DIR`: Directory for LevelDB data (default: './data')
 - `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
 

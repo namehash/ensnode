@@ -71,7 +71,7 @@ yargs(hideBin(process.argv))
         .option("port", {
           type: "number",
           description: "Port to listen on",
-          default: 3001,
+          default: 3223,
         })
         .option("data-dir", {
           type: "string",
