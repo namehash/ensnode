@@ -1,16 +1,15 @@
+import { promises as fs } from "fs";
 import { serve } from "@hono/node-server";
 import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import type { CountResponse, HealError, HealResponse, HealSuccess } from "ensrainbow-sdk/types";
 import { labelhash } from "viem";
-import { promises as fs } from "fs";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase } from "../lib/database.js";
-import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
 import type { ENSRainbowDB } from "../lib/database.js";
+import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
 import { createServer } from "./server-command.js";
-import { ByteArray } from "viem";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
@@ -21,7 +20,7 @@ describe("Server Command Tests", () => {
   beforeAll(async () => {
     db = await createDatabase("test-data", "error");
     app = createServer(db, console);
-    
+
     // Start the server on a different port than what ENSRainbow defaults to
     server = serve({
       fetch: app.fetch,
@@ -32,8 +31,8 @@ describe("Server Command Tests", () => {
   beforeEach(async () => {
     // Clear database before each test
     for await (const key of db.keys()) {
-        await db.del(key);
-      }
+      await db.del(key);
+    }
   });
 
   afterAll(async () => {
@@ -112,7 +111,9 @@ describe("Server Command Tests", () => {
       expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
       expect(data.status).toEqual(StatusCode.Error);
-      expect(data.error).toBe("Label count not initialized. Check that the ingest command has been run.");
+      expect(data.error).toBe(
+        "Label count not initialized. Check that the ingest command has been run.",
+      );
       expect(data.errorCode).toEqual(ErrorCode.ServerError);
     });
 

@@ -1,8 +1,5 @@
-import { ByteArray } from "viem";
-import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
+import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
-import { createLogger, LogLevel } from "../utils/logger.js";
-import { parseNonNegativeInteger } from "../utils/number-utils.js";
 import {
   CountError,
   CountResponse,
@@ -11,8 +8,11 @@ import {
   HealResponse,
   HealSuccess,
 } from "ensrainbow-sdk/types";
+import { ByteArray } from "viem";
+import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
+import { LogLevel, createLogger } from "../utils/logger.js";
+import { parseNonNegativeInteger } from "../utils/number-utils.js";
 import { ENSRainbowDB, safeGet } from "./database.js";
-import { StatusCode, ErrorCode } from "ensrainbow-sdk/consts";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
@@ -47,7 +47,7 @@ export class ENSRainbowServer {
           errorCode: ErrorCode.NotFound,
         } satisfies HealError;
       }
-      
+
       logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
       return {
         status: StatusCode.Success,
@@ -99,4 +99,4 @@ export class ENSRainbowServer {
       } satisfies CountError;
     }
   }
-} 
+}

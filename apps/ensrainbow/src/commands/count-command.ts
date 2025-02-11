@@ -1,4 +1,3 @@
-import { ByteArray } from "viem";
 import { openDatabase } from "../lib/database.js";
 import { byteArraysEqual } from "../utils/byte-utils.js";
 import { LABELHASH_COUNT_KEY } from "../utils/constants.js";

@@ -1,16 +1,16 @@
 import { join } from "path";
 import { ClassicLevel } from "classic-level";
 import { ByteArray } from "viem";
-import { createLogger, LogLevel } from "../utils/logger";
+import { LogLevel, createLogger } from "../utils/logger";
 
 /**
  * Type representing the ENSRainbow LevelDB database.
- * 
+ *
  * Schema:
  * - Keys are binary encoded and represent:
  *   - For labelhash entries: The raw bytes of the ENS labelhash
  *   - For count entries: A special key format for storing label counts
- * 
+ *
  * - Values are UTF-8 strings and represent:
  *   - For labelhash entries: the label that was hashed to create the labelhash
  *   - For count entries: The count as a string number
@@ -20,8 +20,8 @@ export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
 export const getDataDir = () => process.env.DATA_DIR || join(process.cwd(), "data");
 
 export const createDatabase = async (
-  dataDir: string, 
-  logLevel: LogLevel = "info"
+  dataDir: string,
+  logLevel: LogLevel = "info",
 ): Promise<ENSRainbowDB> => {
   const logger = createLogger(logLevel);
   logger.info(`Creating new database in directory: ${dataDir}`);
@@ -35,12 +35,11 @@ export const createDatabase = async (
     });
   } catch (error) {
     if (error instanceof Error && error.message.includes("exists")) {
-
-
       logger.error(`Database already exists at ${dataDir}`);
       logger.error("If you want to use an existing database, use openDatabase() instead");
-      logger.error("If you want to clear the existing database, use createDatabase with clearIfExists=true");
-    
+      logger.error(
+        "If you want to clear the existing database, use createDatabase with clearIfExists=true",
+      );
     } else {
       logger.error("Failed to create database:", error);
       logger.error(`Please ensure the directory ${dataDir} is writable`);
@@ -80,7 +79,7 @@ export const openDatabase = (dataDir: string, logLevel: LogLevel = "info"): ENSR
  * Helper function to safely get a value from the database.
  * Returns null if the key is not found.
  * Throws an error for any other database error.
- * 
+ *
  * @param db The ENSRainbow database instance
  * @param key The ByteArray key to look up
  * @returns The value as a string if found, null if not found
