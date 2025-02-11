@@ -1,5 +1,5 @@
 import { ByteArray } from "viem";
-import { initializeDatabase } from "../lib/database.js";
+import { openDatabase } from "../lib/database.js";
 import { byteArraysEqual } from "../utils/byte-utils.js";
 import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
 import { LogLevel, createLogger } from "../utils/logger.js";
@@ -11,7 +11,7 @@ export interface CountCommandOptions {
 
 export async function countCommand(options: CountCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
-  const db = initializeDatabase(options.dataDir);
+  const db = openDatabase(options.dataDir, options.logLevel);
 
   // Try to read existing count
   try {

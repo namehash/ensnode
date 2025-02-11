@@ -5,9 +5,9 @@ export interface Logger {
   debug: (...args: any[]) => void;
 }
 
-export type LogLevel = "error" | "warn" | "info" | "debug";
+export type LogLevel = keyof typeof logLevels;
 
-const logLevels = {
+export const logLevels = {
   error: 0,
   warn: 1,
   info: 2,

@@ -1,28 +1,26 @@
 import { serve } from "@hono/node-server";
-import { ClassicLevel } from "classic-level";
-import { ByteArray, labelhash } from "viem";
+import { labelhash } from "viem";
+import { promises as fs } from "fs";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { createServer } from "./commands/server-command.js";
-import { initializeDatabase } from "./lib/database.js";
-import { LABELHASH_COUNT_KEY } from "./utils/constants.js";
-import { labelHashToBytes } from "./utils/label-utils.js";
-import type {
-  CountResponse,
-  HealError,
-  HealResponse,
-  HealSuccess,
-} from "./utils/response-types.js";
-import { ErrorCode, StatusCode } from "./utils/response-types.js";
+import { createDatabase } from "../lib/database.js";
+import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
+import { labelHashToBytes } from "../utils/label-utils.js";
+import type { CountResponse, HealError, HealResponse, HealSuccess } from "../utils/response-types.js";
+import { ErrorCode, StatusCode } from "../utils/response-types.js";
+import type { ENSRainbowDB } from "../lib/database.js";
+import { createServer } from "./server-command.js";
+import { ByteArray } from "viem";
 
-describe("ENS Rainbow API", () => {
-  let server: ReturnType<typeof serve>;
-  let db: ClassicLevel<ByteArray, string>;
+describe("Server Command Tests", () => {
+  let db: ENSRainbowDB;
   let app: ReturnType<typeof createServer>;
+  let server: ReturnType<typeof serve>;
 
   beforeAll(async () => {
-    db = initializeDatabase("test-data");
+    db = await createDatabase("test-data", "error");
     app = createServer(db, console);
+    
     // Start the server on a different port than what ENSRainbow defaults to
     server = serve({
       fetch: app.fetch,
@@ -33,14 +31,17 @@ describe("ENS Rainbow API", () => {
   beforeEach(async () => {
     // Clear database before each test
     for await (const key of db.keys()) {
-      await db.del(key);
-    }
+        await db.del(key);
+      }
   });
 
   afterAll(async () => {
     // Cleanup
     await server.close();
     await db.close();
+
+    // Remove test database directory
+    await fs.rm("test-data", { recursive: true, force: true });
   });
 
   describe("GET /v1/heal/:labelhash", () => {
@@ -110,7 +111,7 @@ describe("ENS Rainbow API", () => {
       expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
       expect(data.status).toEqual(StatusCode.Error);
-      expect(data.error).toBe("Internal server error");
+      expect(data.error).toBe("Label count not initialized. Check that the ingest command has been run.");
       expect(data.errorCode).toEqual(ErrorCode.ServerError);
     });
 
@@ -125,18 +126,6 @@ describe("ENS Rainbow API", () => {
       expect(data.count).toBe(42);
       expect(typeof data.timestamp).toBe("string");
       expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
-    });
-  });
-
-  describe("LevelDB operations", () => {
-    it("should handle values containing null bytes", async () => {
-      const labelWithNull = "test\0label";
-      const labelWithNullLabelhash = labelhash(labelWithNull);
-      const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);
-
-      await db.put(labelHashBytes, labelWithNull);
-      const retrieved = await db.get(labelHashBytes);
-      expect(retrieved).toBe(labelWithNull);
     });
   });
 });

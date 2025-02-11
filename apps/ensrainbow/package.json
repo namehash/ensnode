@@ -17,8 +17,6 @@
     "start:prod": "node dist/cli.js serve",
     "ingest": "tsx src/cli.ts ingest",
     "ingest:prod": "node dist/cli.js ingest",
-    "count-keys": "tsx src/cli.ts count",
-    "count-keys:prod": "node dist/cli.js count",
     "docker:build": "docker build -t ensnode/ensrainbow .",
     "docker:push": "docker push ensnode/ensrainbow",
     "test": "DATA_DIR=test-data vitest run",
@@ -48,8 +46,5 @@
     "supertest": "^6.3.4",
     "typescript": "^5.3.3",
     "vitest": "^1.6.0"
-  },
-  "bin": {
-    "ensrainbow": "./dist/cli.js"
   }
 }

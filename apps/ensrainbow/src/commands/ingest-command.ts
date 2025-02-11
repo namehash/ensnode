@@ -4,11 +4,12 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 import { ByteArray, labelhash } from "viem";
-import { initializeDatabase } from "../lib/database.js";
+import { createDatabase } from "../lib/database.js";
 import { byteArraysEqual } from "../utils/byte-utils.js";
 import { labelHashToBytes } from "../utils/label-utils.js";
 import { LogLevel, createLogger } from "../utils/logger.js";
 import { buildRainbowRecord } from "../utils/rainbow-record.js";
+import { countCommand } from "./count-command.js";
 
 export interface IngestCommandOptions {
   inputFile: string;
@@ -18,11 +19,19 @@ export interface IngestCommandOptions {
 }
 
 // Total number of expected records in the ENS rainbow table SQL dump
+// This number represents the count of unique label-labelhash pairs
+// as of January 30, 2024 from the Graph Protocol's ENS rainbow tables
+// Source file: ens_names.sql.gz
+// SHA256: a6316b1e7770b1f3142f1f21d4248b849a5c6eb998e3e66336912c9750c41f31
+// Note: The input file contains one known invalid record at line 10878
+// where the labelhash value is literally "hash". This record is skipped
+// during ingestion since it would be unreachable through the ENS Subgraph anyway.
+// See: https://github.com/namehash/ensnode/issues/140
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
-  const db = initializeDatabase(options.dataDir);
+  const db = await createDatabase(options.dataDir, options.logLevel);
 
   // Clear existing database before starting
   log.info("Clearing existing database...");
@@ -73,18 +82,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     let record;
     try {
       record = buildRainbowRecord(line);
-
-      if (options.validateHashes) {
-        const computedHash = labelHashToBytes(labelhash(record.label));
-        const storedHash = record.labelHash;
-        if (!byteArraysEqual(computedHash, storedHash)) {
-          log.warn(
-            `Hash mismatch for label "${record.label}": stored=${storedHash}, computed=${computedHash}`,
-          );
-          invalidRecords++;
-          continue;
-        }
-      }
     } catch (e) {
       if (e instanceof Error) {
         log.warn(
@@ -95,6 +92,18 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       }
       invalidRecords++;
       continue;
+    }
+
+    if (options.validateHashes) {
+      const computedHash = labelHashToBytes(labelhash(record.label));
+      const storedHash = record.labelHash;
+      if (!byteArraysEqual(computedHash, storedHash)) {
+        log.warn(
+          `Hash mismatch for label "${record.label}": stored=${storedHash}, computed=${computedHash}`,
+        );
+        invalidRecords++;
+        continue;
+      }
     }
 
     batch.put(record.labelHash, record.label);
@@ -119,14 +128,21 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
 
   // Validate the number of processed records
   if (processedRecords !== TOTAL_EXPECTED_RECORDS) {
-    log.warn(
-      `Warning: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
+    log.error(
+      `Error: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
     );
   } else {
-    log.info(`Successfully ingested all ${processedRecords} records`);
+    console.log(`Successfully ingested all ${processedRecords} records`);
   }
 
   if (invalidRecords > 0) {
-    log.warn(`Found ${invalidRecords} records with invalid hashes during processing`);
+    log.error(`Found ${invalidRecords} records with invalid hashes during processing`);
   }
+
+  // Run count as second phase
+  log.info("\nStarting count verification phase...");
+  await countCommand({
+    dataDir: options.dataDir,
+    logLevel: options.logLevel,
+  });
 }
