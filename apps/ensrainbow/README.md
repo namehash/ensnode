@@ -251,6 +251,24 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 2. The database is properly closed to prevent data corruption
 3. The process exits with appropriate status code (0 for success, 1 for errors)
 
+### Database Validation
+
+The service includes a validation command to verify database integrity:
+
+```bash
+# For development
+pnpm validate
+
+# For production build
+pnpm validate:prod
+```
+
+The validator performs the following checks:
+- Verifies all keys are valid labelhashes
+- Ensures stored labels match their corresponding labelhashes
+- Validates the total record count
+- Reports detailed statistics including valid hashes, invalid hashes, and any mismatches
+
 ## License
 
 Licensed under the MIT License, Copyright © 2023-present [NameHash Labs](https://namehashlabs.org).

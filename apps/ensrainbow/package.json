@@ -17,6 +17,8 @@
     "serve:prod": "node dist/cli.js serve",
     "ingest": "tsx src/cli.ts ingest",
     "ingest:prod": "node dist/cli.js ingest",
+    "validate": "tsx src/cli.ts validate",
+    "validate:prod": "node dist/cli.js validate",
     "docker:build": "docker build -t ensnode/ensrainbow .",
     "docker:push": "docker push ensnode/ensrainbow",
     "test": "DATA_DIR=test-data vitest run",
