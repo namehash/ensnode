@@ -1,4 +1,4 @@
-import type { Address, Chain } from "viem";
+import type { Abi, Address, Chain } from "viem";
 
 /**
  * Encodes a set of chains known to provide an "ENS deployment".
@@ -24,6 +24,7 @@ export type SubregistryName = "eth" | "base" | "linea";
  * and not a specific address.
  */
 export interface SubregistryContractConfig {
+  readonly abi: Abi;
   readonly address?: Address;
   readonly filter?: { event: string; args: Record<string, unknown> }[];
   readonly startBlock?: number;

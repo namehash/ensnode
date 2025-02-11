@@ -18,9 +18,12 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
+    "@namehash/shared-configs": "workspace:",
     "typescript": "catalog:"
   },
-  "exports": "./src/index.ts"
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@ponder/utils": "^0.2.3"
+  }
 }
