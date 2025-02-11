@@ -6,7 +6,7 @@ import ProgressBar from "progress";
 import { ByteArray, labelhash } from "viem";
 import { createDatabase } from "../lib/database.js";
 import { byteArraysEqual } from "../utils/byte-utils.js";
-import { labelHashToBytes } from "../utils/label-utils.js";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { LogLevel, createLogger } from "../utils/logger.js";
 import { buildRainbowRecord } from "../utils/rainbow-record.js";
 import { countCommand } from "./count-command.js";

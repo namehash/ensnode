@@ -4,7 +4,7 @@ import { promises as fs } from "fs";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase } from "../lib/database.js";
 import type { ENSRainbowDB } from "../lib/database.js";
-import { labelHashToBytes } from "../utils/label-utils.js";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 
 describe("Ingest Command Tests", () => {
   let db: ENSRainbowDB;

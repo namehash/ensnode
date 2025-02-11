@@ -1,19 +1,18 @@
 import { ByteArray } from "viem";
 import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
-import { labelHashToBytes } from "../utils/label-utils.js";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { createLogger, LogLevel } from "../utils/logger.js";
 import { parseNonNegativeInteger } from "../utils/number-utils.js";
 import {
   CountError,
   CountResponse,
   CountSuccess,
-  ErrorCode,
   HealError,
   HealResponse,
   HealSuccess,
-  StatusCode,
-} from "../utils/response-types.js";
+} from "ensrainbow-sdk/types";
 import { ENSRainbowDB, safeGet } from "./database.js";
+import { StatusCode, ErrorCode } from "ensrainbow-sdk/consts";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;

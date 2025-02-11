@@ -4,7 +4,7 @@ import type { Context as HonoContext } from "hono";
 import { ENSRainbowDB, openDatabase } from "../lib/database.js";
 import { ENSRainbowServer } from "../lib/server.js";
 import { LogLevel, Logger, createLogger } from "../utils/logger.js";
-import type { HealthResponse } from "../utils/response-types.js";
+import type { HealthResponse } from "ensrainbow-sdk/types";
 
 export interface ServerCommandOptions {
   dataDir: string;
