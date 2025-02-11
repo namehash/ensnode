@@ -7,6 +7,11 @@ import { serverCommand } from "./commands/server-command.js";
 import { getDataDir } from "./lib/database.js";
 import { LogLevel, logLevels } from "./utils/logger.js";
 
+function getDefaultLogLevel(): LogLevel {
+  const envLogLevel = process.env.LOG_LEVEL as LogLevel;
+  return envLogLevel && envLogLevel in logLevels ? envLogLevel : "info";
+}
+
 interface IngestArgs {
   "input-file": string;
   "data-dir": string;
@@ -46,7 +51,7 @@ yargs(hideBin(process.argv))
           type: "string",
           description: "Log level (error, warn, info, debug)",
           choices: Object.keys(logLevels),
-          default: "info",
+          default: getDefaultLogLevel(),
         });
     },
     async (argv: ArgumentsCamelCase<IngestArgs>) => {
@@ -77,7 +82,7 @@ yargs(hideBin(process.argv))
           type: "string",
           description: "Log level (error, warn, info, debug)",
           choices: Object.keys(logLevels),
-          default: "info",
+          default: getDefaultLogLevel(),
         });
     },
     async (argv: ArgumentsCamelCase<ServeArgs>) => {
