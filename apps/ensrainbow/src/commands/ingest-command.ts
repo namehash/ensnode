@@ -32,11 +32,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   const log = createLogger(options.logLevel);
   const db = await createDatabase(options.dataDir, options.logLevel);
 
-  // Clear existing database before starting
-  log.info("Clearing existing database...");
-  await db.clear();
-  log.info("Database cleared.");
-
   const bar = new ProgressBar(
     "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
     {

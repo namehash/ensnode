@@ -198,7 +198,7 @@ pnpm ingest
 3. Start the service:
 
 ```bash
-pnpm start
+pnpm serve
 ```
 
 Note: The steps above use the development mode which runs TypeScript files directly. For production builds:
@@ -208,7 +208,7 @@ Note: The steps above use the development mode which runs TypeScript files direc
 pnpm build
 
 # Run with compiled JavaScript
-pnpm start:prod
+pnpm serve:prod
 pnpm ingest:prod
 ```
 
@@ -234,12 +234,6 @@ Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
 ### Data Ingestion Variables
 - `INPUT_FILE`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.
 
-## License
-
-Licensed under the MIT License, Copyright © 2023-present [NameHash Labs](https://namehashlabs.org).
-
-See [LICENSE](./LICENSE) for more information.
-
 ## Service Management
 
 ### Graceful Shutdown
@@ -249,3 +243,9 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 1. The HTTP server stops accepting new connections
 2. The database is properly closed to prevent data corruption
 3. The process exits with appropriate status code (0 for success, 1 for errors)
+
+## License
+
+Licensed under the MIT License, Copyright © 2023-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.

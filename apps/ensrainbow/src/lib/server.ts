@@ -9,22 +9,21 @@ import {
   HealSuccess,
 } from "ensrainbow-sdk/types";
 import { ByteArray } from "viem";
-import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
-import { LogLevel, createLogger } from "../utils/logger.js";
+import { LogLevel, Logger, createLogger } from "../utils/logger.js";
 import { parseNonNegativeInteger } from "../utils/number-utils.js";
+import { LABELHASH_COUNT_KEY } from "./database.js";
 import { ENSRainbowDB, safeGet } from "./database.js";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private readonly logLevel?: LogLevel;
+  private readonly logger: Logger;
 
   constructor(db: ENSRainbowDB, logLevel?: LogLevel) {
     this.db = db;
-    this.logLevel = logLevel;
+    this.logger = createLogger(logLevel);
   }
 
   async heal(labelhash: `0x${string}`): Promise<HealResponse> {
-    const logger = createLogger(this.logLevel);
     let labelHashBytes: ByteArray;
     try {
       labelHashBytes = labelHashToBytes(labelhash);
@@ -40,7 +39,7 @@ export class ENSRainbowServer {
     try {
       const label = await safeGet(this.db, labelHashBytes);
       if (label === null) {
-        logger.info(`Unhealable labelhash request: ${labelhash}`);
+        this.logger.info(`Unhealable labelhash request: ${labelhash}`);
         return {
           status: StatusCode.Error,
           error: "Label not found",
@@ -48,13 +47,13 @@ export class ENSRainbowServer {
         } satisfies HealError;
       }
 
-      logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
+      this.logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
       return {
         status: StatusCode.Success,
         label,
       } satisfies HealSuccess;
     } catch (error) {
-      logger.error("Error healing label:", error);
+      this.logger.error("Error healing label:", error);
       return {
         status: StatusCode.Error,
         error: "Internal server error",
@@ -64,7 +63,6 @@ export class ENSRainbowServer {
   }
 
   async labelCount(): Promise<CountResponse> {
-    const logger = createLogger(this.logLevel);
     try {
       const countStr = await safeGet(this.db, LABELHASH_COUNT_KEY);
       if (countStr === null) {
@@ -77,7 +75,7 @@ export class ENSRainbowServer {
 
       const count = parseNonNegativeInteger(countStr);
       if (count === null) {
-        logger.error(`Invalid label count value in database: ${countStr}`);
+        this.logger.error(`Invalid label count value in database: ${countStr}`);
         return {
           status: StatusCode.Error,
           error: "Internal server error: Invalid label count format",
@@ -91,7 +89,7 @@ export class ENSRainbowServer {
         timestamp: new Date().toISOString(),
       } satisfies CountSuccess;
     } catch (error) {
-      logger.error("Failed to retrieve label count:", error);
+      this.logger.error("Failed to retrieve label count:", error);
       return {
         status: StatusCode.Error,
         error: "Internal server error",

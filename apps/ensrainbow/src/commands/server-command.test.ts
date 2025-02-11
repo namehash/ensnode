@@ -8,7 +8,7 @@ import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase } from "../lib/database.js";
 import type { ENSRainbowDB } from "../lib/database.js";
-import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
+import { LABELHASH_COUNT_KEY } from "../lib/database.js";
 import { createServer } from "./server-command.js";
 
 describe("Server Command Tests", () => {

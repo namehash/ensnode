@@ -13,8 +13,8 @@
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensrainbow",
   "scripts": {
     "build": "tsc",
-    "start": "tsx src/cli.ts serve",
-    "start:prod": "node dist/cli.js serve",
+    "serve": "tsx src/cli.ts serve",
+    "serve:prod": "node dist/cli.js serve",
     "ingest": "tsx src/cli.ts ingest",
     "ingest:prod": "node dist/cli.js ingest",
     "docker:build": "docker build -t ensnode/ensrainbow .",

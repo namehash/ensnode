@@ -3,6 +3,8 @@ import { ClassicLevel } from "classic-level";
 import { ByteArray } from "viem";
 import { LogLevel, createLogger } from "../utils/logger";
 
+export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
+
 /**
  * Type representing the ENSRainbow LevelDB database.
  *
@@ -12,7 +14,11 @@ import { LogLevel, createLogger } from "../utils/logger";
  *   - For count entries: A special key format for storing label counts
  *
  * - Values are UTF-8 strings and represent:
- *   - For labelhash entries: the label that was hashed to create the labelhash
+ *   - For labelhash entries: the label that was hashed to create the labelhash.
+ *     Labels are stored exactly as they appear in source data and:
+ *     - May or may not be ENS-normalized
+ *     - Can contain any valid string, including dots and null bytes
+ *     - Can be empty strings
  *   - For count entries: The non-negative integer count of labelhash entries formatted as a string.
  */
 export type ENSRainbowDB = ClassicLevel<ByteArray, string>;

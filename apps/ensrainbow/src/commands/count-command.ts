@@ -1,7 +1,8 @@
-import { openDatabase } from "../lib/database.js";
+import { openDatabase, safeGet } from "../lib/database.js";
+import { LABELHASH_COUNT_KEY } from "../lib/database.js";
 import { byteArraysEqual } from "../utils/byte-utils.js";
-import { LABELHASH_COUNT_KEY } from "../utils/constants.js";
 import { LogLevel, createLogger } from "../utils/logger.js";
+import { parseNonNegativeInteger } from "../utils/number-utils.js";
 
 export interface CountCommandOptions {
   dataDir: string;
@@ -13,15 +14,14 @@ export async function countCommand(options: CountCommandOptions): Promise<void> 
   const db = openDatabase(options.dataDir, options.logLevel);
 
   // Try to read existing count
-  try {
-    const existingCount = await db.get(LABELHASH_COUNT_KEY);
-    log.info(`Existing count in database: ${existingCount}`);
-  } catch (error: any) {
-    if (error.code !== "LEVEL_NOT_FOUND") {
-      log.error("Error reading existing count:", error);
-    } else {
-      log.info("No existing count found in database");
-    }
+  const existingCountStr = await safeGet(db, LABELHASH_COUNT_KEY);
+  if (existingCountStr === null) {
+    log.info("No existing count found in database");
+  } else {
+    const existingCount = parseNonNegativeInteger(existingCountStr);
+    existingCount !== null
+      ? log.warn(`Existing count in database: ${existingCount}`)
+      : log.warn(`Invalid count value in database: ${existingCountStr}`);
   }
 
   log.info("Counting keys in database...");
