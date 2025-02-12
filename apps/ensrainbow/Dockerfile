@@ -32,7 +32,7 @@ COPY packages/ensnode-utils ./packages/ensnode-utils
 WORKDIR /app/apps/ensrainbow
 # copy ensrainbow package.json & src directory only
 COPY apps/ensrainbow/package*.json ./
-COPY apps/ensrainbow/src ./
+COPY apps/ensrainbow/src ./src
 
 # install
 RUN pnpm install --frozen-lockfile
