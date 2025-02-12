@@ -7,7 +7,7 @@ Special thanks to [The Graph](https://thegraph.com/) for their work to generate 
 ## Prerequisites
 
 - Docker installed on your system
-- Node.js v20 or later (for local development)
+- Node.js v18 or later (for local development) — see monorepo package.json for engines spec
 
 ## System Requirements
 
@@ -58,7 +58,7 @@ sha256sum -c ens_names.sql.gz.sha256sum
 
 ## Quick Start with Docker
 
-1. Build the Docker image (includes data ingestion):
+1. Build the Docker image (includes data download & ingestion):
 
 ```bash
 # while in the monorepo root directory
@@ -208,17 +208,6 @@ pnpm ingest
 pnpm serve
 ```
 
-Note: The steps above use the development mode which runs TypeScript files directly. For production builds:
-
-```bash
-# Build TypeScript
-pnpm build
-
-# Run with compiled JavaScript
-pnpm serve:prod
-pnpm ingest:prod
-```
-
 You can verify the service is running by checking the health endpoint or retrieving the label count:
 
 ```bash
@@ -256,11 +245,7 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 The service includes a validation command to verify database integrity:
 
 ```bash
-# For development
 pnpm validate
-
-# For production build
-pnpm validate:prod
 ```
 
 Validation performs the following checks:
