@@ -11,7 +11,9 @@ services:
     environment:
       # Override DATABASE_URL from .env.local to refer to docker compose postgres instance
       DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
-      ENSRAINBOW_URL: https://ensrainbow:3000
+      DATABASE_SCHEMA: local
+      ENSRAINBOW_URL: http://ensrainbow:3001
+      PORT: 42069
     depends_on:
       - ensrainbow
       - postgres
@@ -31,24 +33,27 @@ services:
   ensrainbow:
     build:
       dockerfile: ./apps/ensrainbow/Dockerfile
+    container_name: ensrainbow
     image: namehash/ensrainbow
     ports:
-      - "3001:3000"
+      - "3001:3001"
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+      PORT: 3001
     restart: unless-stopped
 
   ensadmin:
     build:
       dockerfile: ./apps/ensadmin/Dockerfile
     image: namehash/ensadmin
+    command: pnpm preview --host 0.0.0.0
     ports:
       - "4173:4173"
     env_file:
       - ./apps/ensadmin/.env.local
     environment:
       # override ENSNODE_URL from .env.local to refer to docker compose ensnode instance
-      - VITE_ENSNODE_URL=http://localhost:42069
+      VITE_ENSNODE_URL: http://localhost:42069
     depends_on:
       - ensnode
 

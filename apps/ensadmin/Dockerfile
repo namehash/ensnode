@@ -18,5 +18,5 @@ WORKDIR /app/apps/ensadmin
 # Prepare production bundle
 RUN pnpm build
 
-EXPOSE 42069
-CMD ["pnpm", "start"]
+EXPOSE 4173
+CMD ["pnpm", "preview"]
