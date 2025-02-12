@@ -1,0 +1,34 @@
+name: Build and deploy ENSNode
+
+on:
+  push:
+    branches:
+      - feat/railway-ensnode-deployments
+
+jobs:
+#   image-build-and-push:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Build & Push Docker image for the ENSRainbow app
+#         env:
+#           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensnode
+#           TAG: latest
+#         run: |
+#           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+#           docker build -f apps/ensnode/Dockerfile -t $IMAGE_NAME:$TAG .
+#           docker push $IMAGE_NAME:$TAG
+
+  deploy:
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - name: Deploy ENSNode on Railway
+        run: |
+         railway redeploy ${{ secrets.RAINBOW_SVC_ID }}
+            
