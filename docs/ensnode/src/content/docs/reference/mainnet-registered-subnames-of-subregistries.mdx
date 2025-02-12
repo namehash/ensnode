@@ -1,0 +1,46 @@
+---
+title: Mainnet-Registered Subnames of Subregistries
+---
+
+The current architecture ('v1') of ENSNode derives from that of the ENS Subgraph which was not architected with multi-chain multi-registry use in mind. When running ENSNode with a single-plugin enabled, only the subnames registered in the plugin's indexed subregistry are included in the index, as designed.
+
+When running ENSNode **with multiple plugins enabled**, however, the behavior of mainnet-registered subnames of subregistries managed by the additional plugins should be considered undefined. The specific names that are registered on mainnet for these subregistries are listed below.
+
+## Context
+
+Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of subregistries (i.e. `.base.eth`, `.linea.eth`) that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward resolution of their data delegated to the subregistry defined below. Instead their forward resolution will be managed according to the state defined in the ENS Registry.
+
+These subnames (and any others added beneath `base.eth` or `.linea.eth` in the mainnet ENS Registry) may or may not be properly represented during indexing until futher enhancements are made to ENSNode ('v2').
+
+## Current Behavior
+
+Imagine the situation in which a name (i.e. `gov.base.eth`) is registered on both ETH Mainnet and Base and certain records are set for the name on each chain.
+
+ENSNode currently uses ponder in `omnichain` mode, processing all events across all chains in serial order by timestamp. This means that in that scenario the state of `gov.base.eth` in the resulting index will be determined by the order of the events in time, regardless which chain they occurred on.
+
+In the near future, ENSNode will operate in ponder's `multichain` mode, processing events in parallel by chain. With that same scenario, the state of `gov.base.eth` depends on the (unknown) order in which ponder processes backfill events, and could differ from expectations.
+
+v2 of ENSNode will handle this behavior accurately.
+
+## Mainnet-Registered Subnames of .base.eth
+
+As of 9-Feb-2025 a number of subnames of 'base.eth' exist in the ENS Registry on mainnet.
+
+This includes:
+- gov.base.eth
+- bootcamp.base.eth
+- grants.base.eth
+- bridge.base.eth
+- portal.base.eth
+- faucet.base.eth
+- bonjour.base.eth
+- gm.base.eth
+- mint.base.eth
+
+## Mainnet-Registered Subnames of .linea.eth
+
+As of 9-Feb-2025 a number of subnames of 'linea.eth' exist in the ENS Registry on mainnet.
+
+This includes:
+- bridge.linea.eth
+- devconnect.linea.eth
