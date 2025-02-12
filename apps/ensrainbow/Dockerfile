@@ -38,4 +38,4 @@ ENV NODE_ENV=production
 ENV PORT=3001
 EXPOSE 3001
 # Start the application
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/cli.js", "serve"]

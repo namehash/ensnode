@@ -1,3 +1,4 @@
+import { promises as fs } from "fs";
 import { serve } from "@hono/node-server";
 import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
@@ -5,15 +6,22 @@ import type { CountResponse, HealError, HealResponse, HealSuccess } from "ensrai
 import { labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { app, db } from "./index";
-import { LABELHASH_COUNT_KEY } from "./utils/constants";
+import { createDatabase } from "../lib/database.js";
+import type { ENSRainbowDB } from "../lib/database.js";
+import { LABELHASH_COUNT_KEY } from "../lib/database.js";
+import { createServer } from "./server-command.js";
 
-describe("ENS Rainbow API", () => {
+describe("Server Command Tests", () => {
+  let db: ENSRainbowDB;
   const port = 3223;
+  let app: ReturnType<typeof createServer>;
   let server: ReturnType<typeof serve>;
 
   beforeAll(async () => {
-    // Start the server on a different port than the main app
+    db = await createDatabase("test-data", "error");
+    app = createServer(db, console);
+
+    // Start the server on a different port than what ENSRainbow defaults to
     server = serve({
       fetch: app.fetch,
       port,
@@ -30,6 +38,10 @@ describe("ENS Rainbow API", () => {
   afterAll(async () => {
     // Cleanup
     await server.close();
+    await db.close();
+
+    // Remove test database directory
+    await fs.rm("test-data", { recursive: true, force: true });
   });
 
   describe("GET /v1/heal/:labelhash", () => {
@@ -99,7 +111,9 @@ describe("ENS Rainbow API", () => {
       expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
       expect(data.status).toEqual(StatusCode.Error);
-      expect(data.error).toBe("Internal server error");
+      expect(data.error).toBe(
+        "Label count not initialized. Check that the ingest command has been run.",
+      );
       expect(data.errorCode).toEqual(ErrorCode.ServerError);
     });
 
@@ -114,18 +128,6 @@ describe("ENS Rainbow API", () => {
       expect(data.count).toBe(42);
       expect(typeof data.timestamp).toBe("string");
       expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
-    });
-  });
-
-  describe("LevelDB operations", () => {
-    it("should handle values containing null bytes", async () => {
-      const labelWithNull = "test\0label";
-      const labelWithNullLabelhash = labelhash(labelWithNull);
-      const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);
-
-      await db.put(labelHashBytes, labelWithNull);
-      const retrieved = await db.get(labelHashBytes);
-      expect(retrieved).toBe(labelWithNull);
     });
   });
 });
