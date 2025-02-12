@@ -13,6 +13,7 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
   try {
     const isValid = await validate(db, log);
     if (!isValid) {
+      // Throw error to ensure process exits with non-zero status code for CI/CD and scripts
       throw new Error("Validation failed");
     }
   } finally {
