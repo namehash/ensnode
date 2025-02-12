@@ -1,16 +1,13 @@
 import { createReadStream } from "fs";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
-import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import ProgressBar from "progress";
-import { labelhash } from "viem";
 import {
   clearIngestionMarker,
   createDatabase,
   exitIfIncompleteIngestion,
   markIngestionStarted,
 } from "../lib/database.js";
-import { byteArraysEqual } from "../utils/byte-utils.js";
 import { LogLevel, createLogger } from "../utils/logger.js";
 import { buildRainbowRecord } from "../utils/rainbow-record.js";
 import { countCommand } from "./count-command.js";
