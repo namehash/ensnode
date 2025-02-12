@@ -33,7 +33,7 @@ View the [ENSRainbow docs](https://www.ensrainbow.io).
 
 ### [`packages/ens-deployments`](packages/ens-deployments)
 
-Convenient catalog of ENS deployments including contracts' `address` and `startBlock` and `filter`.
+Convenient catalog of ENS deployments including chain, contract addresses, start blocks, and event filters.
 
 ### [`packages/ensnode-utils`](packages/ensnode-utils)
 

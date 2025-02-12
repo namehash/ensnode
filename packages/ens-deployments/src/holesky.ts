@@ -4,7 +4,7 @@ import { holesky } from "viem/chains";
 import { ETHResolverFilter } from "./filters";
 import type { ENSDeploymentConfig } from "./types";
 
-// Eth ABIs
+// Subregistry ABIs for direct subnames of 'eth' on Holesky
 import { BaseRegistrar as eth_BaseRegistrar } from "./abis/eth/BaseRegistrar";
 import { EthRegistrarController as eth_EthRegistrarController } from "./abis/eth/EthRegistrarController";
 import { EthRegistrarControllerOld as eth_EthRegistrarControllerOld } from "./abis/eth/EthRegistrarControllerOld";

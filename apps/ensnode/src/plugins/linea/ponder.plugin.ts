@@ -26,6 +26,7 @@ export const config = createConfig({
     [namespace("Resolver")]: {
       network: networkConfigForContract(chain, contracts.Resolver),
       abi: contracts.Resolver.abi,
+      // index Resolver by event signatures, not address
       filter: contracts.Resolver.filter,
     },
     [namespace("BaseRegistrar")]: {

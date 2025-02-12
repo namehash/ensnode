@@ -19,16 +19,37 @@ export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-e
 export type SubregistryName = "eth" | "base" | "linea";
 
 /**
- * Defines the address and startBlock of a contract relevant to indexing a subregistry. Note that
- * address is undefined, because some contracts (i.e. Resolver) are defined by their event signatures
- * and not a specific address.
+ * EventFilter specifies a given event's name and arguments to filter that event by.
+ * It is intentionally a subset of ponder's `ContractConfig['filter']`.
  */
-export interface SubregistryContractConfig {
-  readonly abi: Abi;
-  readonly address?: Address;
-  readonly filter?: { event: string; args: Record<string, unknown> }[];
-  readonly startBlock?: number;
+export interface EventFilter {
+  event: string;
+  args: Record<string, unknown>;
 }
+
+/**
+ * Defines the abi, address, filter, and startBlock of a contract relevant to indexing a subregistry.
+ * A contract is located on-chain either by a static `address` or the event signatures (`filter`)
+ * one should filter the chain for.
+ *
+ * @param abi - the ABI of the contract
+ * @param address - (optional) address of the contract
+ * @param filter - (optional) array of event signatures to filter the log by
+ * @param startBlock - block number the contract was deployed in
+ */
+export type SubregistryContractConfig =
+  | {
+      readonly abi: Abi;
+      readonly address: Address;
+      readonly filter?: never;
+      readonly startBlock: number;
+    }
+  | {
+      readonly abi: Abi;
+      readonly address?: never;
+      readonly filter: EventFilter[];
+      readonly startBlock: number;
+    };
 
 /**
  * Encodes the deployment of a subregistry, including the target chain and contracts.

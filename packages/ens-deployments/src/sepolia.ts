@@ -4,7 +4,7 @@ import { sepolia } from "viem/chains";
 import { ETHResolverFilter } from "./filters";
 import type { ENSDeploymentConfig } from "./types";
 
-// Eth ABIs
+// Subregistry ABIs for direct subnames of 'eth' on Sepolia
 import { BaseRegistrar as eth_BaseRegistrar } from "./abis/eth/BaseRegistrar";
 import { EthRegistrarController as eth_EthRegistrarController } from "./abis/eth/EthRegistrarController";
 import { EthRegistrarControllerOld as eth_EthRegistrarControllerOld } from "./abis/eth/EthRegistrarControllerOld";
@@ -64,7 +64,9 @@ export default {
     },
   },
   /**
-   * On the Sepolia "ENS deployment" there is no known subregistry for direct
-   * subnames of 'base.eth' or 'linea.eth'.
+   * On the Sepolia "ENS deployment" there is no known subregistry for direct subnames of 'base.eth'.
+   *
+   * linea.eth's L1Resolver is deployed to Sepolia, but we do not index Linea Sepolia names here.
+   * https://github.com/Consensys/linea-ens/tree/main/packages/linea-ens-resolver/deployments/sepolia
    */
 } satisfies ENSDeploymentConfig;

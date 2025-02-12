@@ -20,7 +20,8 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@namehash/shared-configs": "workspace:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "viem": "catalog:"
   },
   "exports": "./src/index.ts",
   "dependencies": {
