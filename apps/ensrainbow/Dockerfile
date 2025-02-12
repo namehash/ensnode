@@ -6,27 +6,24 @@ RUN apt-get update && \
     npm install -g pnpm
 WORKDIR /app
 
-# Runtime dependencies stage
-FROM base AS ensrainbow.runtime_deps
-# Copy pnpm workspace configuration files from the root directory
+###################
+## Application Deps — standard monorepo pnpm install from base
+###################
+
+FROM base AS app-deps
 COPY pnpm-workspace.yaml ./
-# Copy the root package.json and lockfile
 COPY package.json pnpm-lock.yaml ./
-# Copy all pnpm workspace modules
 COPY packages ./packages
 COPY apps ./apps
-# Install dependencies for the entire monorepo
 RUN pnpm install --frozen-lockfile
-# Change to the specific app directory
-WORKDIR /app/apps/ensrainbow
-# Transpile TypeScript files into JavaScript
-RUN pnpm build
 
-# Application runtime stage
-FROM base AS ensrainbow.runtime
-# Copy top-level dependencies
-COPY --from=ensrainbow.runtime_deps /app/node_modules node_modules
-# Change to the specific app directory
+###################
+## App Server — runs server w/ data dir
+###################
+
+FROM app-deps AS app
+
+# cwd to ensrainbow
 WORKDIR /app/apps/ensrainbow
 # Copy built files and dependencies
 COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/package*.json .
@@ -35,7 +32,8 @@ COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/dist dist
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3001
-EXPOSE 3001
-# Start the application
-CMD ["node", "dist/cli.js", "serve"]
+ENV PORT=3223
+EXPOSE 3223
+
+# serve
+CMD ["pnpm", "run", "serve"]

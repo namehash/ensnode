@@ -11,7 +11,7 @@ import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
-import { PolymorphicConfig, buildDataLoaderCache, buildGraphQLSchema } from "./graphql.js";
+import { PolymorphicConfig, buildDataLoaderCache, buildGraphQLSchema } from "./graphql";
 
 export const graphql = (
   {

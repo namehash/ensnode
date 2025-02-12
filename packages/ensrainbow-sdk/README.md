@@ -1,6 +1,8 @@
 # ENSRainbow SDK
 
-TypeScript library for interacting with [ENSRainbow API](apps/ensrainbow).
+TypeScript library for interacting with the [ENSRainbow API](https://github.com/namehash/ensnode/tree/main/apps/ensrainbow).
+
+Learn more about [ENSRainbow](https://ensrainbow.io) and [ENSNode](https://ensnode.io).
 
 ## License
 
