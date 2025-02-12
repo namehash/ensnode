@@ -1,7 +1,11 @@
 import { join } from "path";
 import { ClassicLevel } from "classic-level";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { ByteArray } from "viem";
+import { labelhash } from "viem";
+import { byteArraysEqual } from "../utils/byte-utils.js";
 import { LogLevel, Logger, createLogger } from "../utils/logger";
+import { parseNonNegativeInteger } from "../utils/number-utils.js";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
 export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
@@ -157,5 +161,97 @@ export async function safeGet(db: ENSRainbowDB, key: ByteArray): Promise<string 
       return null;
     }
     throw error;
+  }
+}
+
+/**
+ * Validates the database contents.
+ * Returns true if validation passes, false if validation fails.
+ *
+ * @param db The ENSRainbow database instance
+ * @param logger The logger instance to use for messages
+ * @returns boolean indicating if validation passed
+ */
+export async function validate(db: ENSRainbowDB, logger: Logger): Promise<boolean> {
+  let totalKeys = 0;
+  let validHashes = 0;
+  let invalidHashes = 0;
+  let hashMismatches = 0;
+
+  logger.info("Starting database validation...");
+
+  // Check if ingestion is in progress
+  const ingestionInProgress = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
+  if (ingestionInProgress) {
+    logger.error("Database is in an invalid state: ingestion in progress flag is set");
+    return false;
+  }
+
+  // Validate each key-value pair
+  for await (const [key, value] of db.iterator()) {
+    totalKeys++;
+
+    // Skip keys not associated with rainbow records
+    if (
+      byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
+      byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+    ) {
+      continue;
+    }
+
+    // Verify key is a valid labelhash by converting it to hex string
+    const keyHex = `0x${Buffer.from(key).toString("hex")}` as `0x${string}`;
+    try {
+      labelHashToBytes(keyHex);
+      validHashes++;
+    } catch (e) {
+      logger.error(`Invalid labelhash key format: ${keyHex}`);
+      invalidHashes++;
+      continue;
+    }
+
+    // Verify hash matches label
+    const computedHash = labelHashToBytes(labelhash(value));
+    if (!byteArraysEqual(computedHash, key)) {
+      logger.error(
+        `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(computedHash).toString("hex")}`,
+      );
+      hashMismatches++;
+    }
+  }
+
+  let rainbowRecordCount = totalKeys;
+  // Verify count
+  const storedCount = await safeGet(db, LABELHASH_COUNT_KEY);
+
+  if (!storedCount) {
+    logger.error("Count key missing from database");
+    return false;
+  } else {
+    rainbowRecordCount = rainbowRecordCount - 1;
+  }
+
+  const parsedCount = parseNonNegativeInteger(storedCount);
+  if (parsedCount !== rainbowRecordCount) {
+    logger.error(`Count mismatch: stored=${parsedCount}, actual=${rainbowRecordCount}`);
+    return false;
+  } else {
+    logger.info(`Count verified: ${rainbowRecordCount} rainbow records`);
+  }
+
+  // Report results
+  logger.info("\nValidation Results:");
+  logger.info(`Total keys: ${totalKeys}`);
+  logger.info(`Valid rainbow records: ${validHashes}`);
+  logger.info(`Invalid rainbow records: ${invalidHashes}`);
+  logger.info(`labelhash mismatches: ${hashMismatches}`);
+
+  const hasErrors = invalidHashes > 0 || hashMismatches > 0;
+  if (hasErrors) {
+    logger.error("\nValidation failed! See errors above.");
+    return false;
+  } else {
+    logger.info("\nValidation successful! No errors found.");
+    return true;
   }
 }
