@@ -45,19 +45,18 @@ To use these configurations in your project:
 
 ```ts
 import { DeploymentConfigs } from '@namehash/ens-deployments';
-import { hexToBigInt, namehash } from "viem";
+import { namehash } from "viem";
 
-// access the address and abi for the NameWrapper on mainnet
-const nameWrapperConfig = DeploymentConfigs.mainnet.contracts.NameWrapper;
+// access the address and abi for the root Registry on mainnet
+const registryConfig = DeploymentConfigs.mainnet.eth.contracts.Registry;
 
-// for example, querying the NameWrapper with viem...
-const tokenId = hexToBigInt(namehash('vitalik.eth'));
-const data = await publicClient.readContract({
-  abi: nameWrapperConfig.abi,
-  address: nameWrapperConfig.address,
-  functionName: 'ownerOf',
-  args: [tokenId]
-})
+// for example, querying the Registry with viem...
+const vitaliksResolverAddress = await publicClient.readContract({
+  abi: registryConfig.abi,
+  address: registryConfig.address,
+  functionName: "resolver",
+  args: [namehash("vitalik.eth")],
+});
 ```
 
 The exported `DeploymentConfigs` provides a mapping from an `ENSDeploymentChain` (e.g. `"mainnet"`, `"sepolia"`, `"holesky"`, `"ens-test-env"`) to the corresponding deployment configuration.
