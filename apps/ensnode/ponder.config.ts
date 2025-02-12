@@ -1,7 +1,7 @@
-import { SubregistryName } from "@namehash/ens-deployments";
 import { SELECTED_DEPLOYMENT_CONFIG } from "./src/lib/globals";
 import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
 import { deepMergeRecursive } from "./src/lib/ponder-helpers";
+import type { PluginName } from "./src/lib/types";
 
 import * as baseEthPlugin from "./src/plugins/base/ponder.plugin";
 import * as ethPlugin from "./src/plugins/eth/ponder.plugin";
@@ -21,7 +21,7 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]>;
 ////////
 
 // the available PluginNames are those that the selected ENS Deployment defines as available
-const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as SubregistryName[];
+const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as PluginName[];
 
 // filter the set of available plugins by those that are 'active' in the env
 const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);

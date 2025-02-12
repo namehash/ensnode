@@ -15,7 +15,7 @@
     "lint:ci": "biome ci"
   },
   "peerDependencies": {
-    "viem": "catalog:"
+    "viem": "^catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

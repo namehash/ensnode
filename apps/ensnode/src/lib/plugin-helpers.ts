@@ -1,15 +1,14 @@
-import type { SubregistryContractConfig, SubregistryName } from "@namehash/ens-deployments";
+import type { SubregistryContractConfig } from "@namehash/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
-import { uniq } from "./lib-helpers";
 import {
   constrainBlockrange,
   getEnsDeploymentChain,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "./ponder-helpers";
-import type { OwnedName } from "./types";
+import type { OwnedName, PluginName } from "./types";
 
 /**
  * A factory function that returns a function to create a namespaced contract
@@ -102,9 +101,9 @@ type PluginNamespacePath<T extends PluginNamespacePath = "/"> =
  * @param availablePluginNames is a list of plugin names that can be used
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { pluginName: SubregistryName }>(
+export function getActivePlugins<T extends { pluginName: PluginName }>(
   allPlugins: readonly T[],
-  availablePluginNames: SubregistryName[],
+  availablePluginNames: PluginName[],
 ): T[] {
   /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
   const requestedPluginsEnvVar = process.env.ACTIVE_PLUGINS;
@@ -130,7 +129,7 @@ export function getActivePlugins<T extends { pluginName: SubregistryName }>(
 
   // Ensure that the requested plugins only reference availablePluginNames
   const unavailablePlugins = requestedPluginNames.filter(
-    (name) => !availablePluginNames.includes(name as SubregistryName),
+    (name) => !availablePluginNames.includes(name as PluginName),
   );
 
   if (unavailablePlugins.length) {
@@ -158,7 +157,7 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
  * A PonderENSPlugin provides a pluginName to identify it, a ponder config, and an activate
  * function to load handlers.
  */
-export interface PonderENSPlugin<PLUGIN_NAME extends SubregistryName, CONFIG> {
+export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
   pluginName: PLUGIN_NAME;
   config: CONFIG;
   activate: VoidFunction;
