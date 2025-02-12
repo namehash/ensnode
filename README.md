@@ -253,12 +253,12 @@ To start the ENSNode application and its dependencies using Docker Compose, foll
    - Build the Docker images for the ENSNode, ENSRainbow, and ENSAdmin applications.
    - Start the PostgreSQL database container.
    - Start the ENSNode application, which will be accessible on port `42069`.
-   - Start the ENSRainbow application, which will be accessible on port `3001`.
+   - Start the ENSRainbow application, which will be accessible on port `3223`.
    - Start the ENSAdmin application, which will be accessible on port `4173`.
 
 3. **Access the Applications**: Once the containers are running, you can access the applications in your web browser:
    - **ENSNode**: Open [http://localhost:42069](http://localhost:42069) to access the ENSNode indexer.
-   - **ENSRainbow**: Open [http://localhost:3001](http://localhost:3001) to access the ENSRainbow service.
+   - **ENSRainbow**: Open [http://localhost:3223](http://localhost:3223) to access the ENSRainbow service.
    - **ENSAdmin**: Open [http://localhost:4173](http://localhost:4173) to access the ENSAdmin service.
 
 ### Expected Outcome

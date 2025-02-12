@@ -5,56 +5,78 @@ RUN apt-get update && \
     npm install -g pnpm
 WORKDIR /app
 
-# Data stage
-FROM base AS ensrainbow.data
-RUN wget -nv https://bucket.ensrainbow.io/ens_names.sql.gz
-RUN wget -nv https://bucket.ensrainbow.io/ens_names.sql.gz.sha256sum
+###################
+## Data Stage — heavily cached remote data
+###################
+
+FROM base AS db-data
+ADD "https://bucket.ensrainbow.io/ens_names.sql.gz" ./ens_names.sql.gz
+ADD "https://bucket.ensrainbow.io/ens_names.sql.gz.sha256sum" ./ens_names.sql.gz.sha256sum
 RUN sha256sum -c ens_names.sql.gz.sha256sum
 
-# Runtime dependencies stage
-FROM base AS ensrainbow.runtime_deps
-# Copy pnpm workspace configuration files from the root directory
+###################
+## Ingest Dependencies Stage — minimal deps for ingest script
+###################
+
+FROM base AS ingest-deps
+
+# copy pnpm files from the root directory
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# copy just the dependent packages (sync with package.json)
+# TODO: this could be even more minimal
+COPY packages/ensrainbow-sdk ./packages/ensrainbow-sdk
+COPY packages/ensnode-utils ./packages/ensnode-utils
+
+# cwd to ensrainbow
+WORKDIR /app/apps/ensrainbow
+# copy ensrainbow package.json & src directory only
+COPY apps/ensrainbow/package*.json ./
+COPY apps/ensrainbow/src ./
+
+# install
+RUN pnpm install --frozen-lockfile
+
+###################
+## Ingest Runtime Stage — produces data dir artifact
+###################
+
+FROM ingest-deps AS ingest
+
+WORKDIR /app/apps/ensrainbow
+# copy ens_names.sql.gz from db-data
+COPY --from=db-data /app/ens_names.sql.gz .
+
+# produce the data dir artifact & cleanup
+RUN pnpm run ingest && rm ens_names.sql.gz
+
+###################
+## Application Deps — standard monorepo pnpm install from base
+###################
+
+FROM base AS app-deps
 COPY pnpm-workspace.yaml ./
-# Copy the root package.json and lockfile
 COPY package.json pnpm-lock.yaml ./
-# Copy all pnpm workspace modules
 COPY packages ./packages
 COPY apps ./apps
-# Install dependencies for the entire monorepo
 RUN pnpm install --frozen-lockfile
-# Change to the specific app directory
+
+###################
+## App Server — runs server w/ data dir
+###################
+
+FROM app-deps AS app
+
+# cwd to ensrainbow
 WORKDIR /app/apps/ensrainbow
-# Transpile TypeScript files into JavaScript
-RUN pnpm build
 
-# Application runtime stage
-FROM base AS ensrainbow.runtime
-# Copy top-level dependencies
-COPY --from=ensrainbow.runtime_deps /app/node_modules node_modules
-# Change to the specific app directory
-WORKDIR /app/apps/ensrainbow
-# Copy built files and dependencies
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/package*.json .
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/node_modules node_modules
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/dist dist
+# copy data dir from ingest
+COPY --from=ingest /app/apps/ensrainbow/data ./data
 
-# Ingestor stage
-FROM ensrainbow.runtime AS ingestor
-# Copy input data
-COPY --from=ensrainbow.data /app/ens_names.sql.gz .
-COPY --from=ensrainbow.data /app/ens_names.sql.gz.sha256sum .
-# Load input data into the key-value store
-RUN node dist/cli.js ingest
-# Verify the number of keys in the database
-RUN node dist/cli.js count
-
-# API server stage
-FROM ensrainbow.runtime AS runner
-# Copy key-value store data
-COPY --from=ingestor /app/apps/ensrainbow/data ./data
-# Set environment variables
+# set environment variables
 ENV NODE_ENV=production
-ENV PORT=3001
-EXPOSE 3001
-# Start the application
-CMD ["node", "dist/cli.js", "serve"]
+ENV PORT=3223
+EXPOSE 3223
+
+# serve
+CMD ["pnpm", "run", "serve"]

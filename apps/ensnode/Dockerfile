@@ -1,7 +1,7 @@
 # Base working stage
 FROM node:18-slim
 RUN apt-get update && \
-    npm install -g pnpm 
+    npm install -g pnpm
 WORKDIR /app
 
 # Copy pnpm workspace configuration files from the root directory
