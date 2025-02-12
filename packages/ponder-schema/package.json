@@ -1,10 +1,20 @@
 {
   "name": "ponder-schema",
-  "private": true,
   "version": "0.0.1",
   "type": "module",
   "description": "A shared ponder schema for ENSNode",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ponder-schema"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-schema",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "Ponder"
+  ],
   "scripts": {
     "lint:ci": "biome ci"
   },
@@ -19,5 +29,8 @@
     "@namehash/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
