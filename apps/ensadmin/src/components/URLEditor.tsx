@@ -2,17 +2,16 @@ import { Check, Edit2, X } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { cn } from "../utils/ui";
-import { DEFAULT_BASE_URL } from "../utils/url";
 import { Button } from "./ui/button";
 
 interface URLEditorProps {
-  currentUrl: string;
+  currentUrl: URL;
   className?: string;
 }
 
 export function URLEditor({ currentUrl, className }: URLEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(currentUrl);
+  const [inputValue, setInputValue] = useState(currentUrl.toString());
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -53,7 +52,7 @@ export function URLEditor({ currentUrl, className }: URLEditorProps) {
   };
 
   const handleCancel = () => {
-    setInputValue(currentUrl);
+    setInputValue(currentUrl.toString());
     setError(null);
     setIsEditing(false);
   };
@@ -69,7 +68,7 @@ export function URLEditor({ currentUrl, className }: URLEditorProps) {
   if (!isEditing) {
     return (
       <div className={cn("flex items-center gap-2", className)}>
-        <span className="text-muted-foreground font-normal">{currentUrl}</span>
+        <span className="text-muted-foreground font-normal">{currentUrl.toString()}</span>
         <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8">
           <Edit2 className="h-4 w-4" />
           <span className="sr-only">Edit URL</span>
@@ -97,7 +96,7 @@ export function URLEditor({ currentUrl, className }: URLEditorProps) {
             placeholder="Enter ENSNode URL"
           />
           <datalist id="ensnode-urls">
-            <option value={DEFAULT_BASE_URL} />
+            <option value={currentUrl.toString()} />
           </datalist>
         </div>
         <Button

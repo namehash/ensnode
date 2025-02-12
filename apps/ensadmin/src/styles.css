@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@import "graphiql/graphiql.css";
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -19,6 +21,6 @@
 }
 
 /* Ensure the GraphiQL interface fills the available space */
-.graphiql-container>div {
+.graphiql-container > div {
   height: 100% !important;
 }

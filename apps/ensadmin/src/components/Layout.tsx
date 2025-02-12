@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "../utils/ui";
 import { URLEditor } from "./URLEditor";
 
-export function Layout({ children, ensnodeUrl }: PropsWithChildren<{ ensnodeUrl: string }>) {
+export function Layout({ children, ensnodeUrl }: PropsWithChildren<{ ensnodeUrl: URL }>) {
   const location = useLocation();
 
   const tabs = [

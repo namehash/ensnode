@@ -7,7 +7,7 @@ import { cn } from "../utils/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface AppContext {
-  ensnodeUrl: string;
+  ensnodeUrl: URL;
 }
 
 interface BlockInfo {
@@ -53,7 +53,7 @@ export function About() {
     const fetchStatus = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${ensnodeUrl}/status`);
+        const response = await fetch(new URL("/status", ensnodeUrl));
         if (!response.ok) {
           throw new Error("Failed to fetch status");
         }

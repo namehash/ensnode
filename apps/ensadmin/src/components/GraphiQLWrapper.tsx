@@ -1,10 +1,9 @@
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL } from "graphiql";
 import { useOutletContext } from "react-router-dom";
-import "graphiql/graphiql.css";
 
 interface AppContext {
-  ensnodeUrl: string;
+  ensnodeUrl: URL;
 }
 
 interface GraphiQLWrapperProps {
@@ -15,11 +14,11 @@ export function GraphiQLWrapper({ endpoint }: GraphiQLWrapperProps) {
   const { ensnodeUrl } = useOutletContext<AppContext>();
   const url =
     endpoint === "subgraph"
-      ? `${ensnodeUrl}/subgraph`
+      ? new URL("/subgraph", ensnodeUrl)
       : // TODO: update to `/ponder` when available
-        `${ensnodeUrl}/`;
+        new URL("/", ensnodeUrl);
 
-  const fetcher = createGraphiQLFetcher({ url });
+  const fetcher = createGraphiQLFetcher({ url: url.toString() });
 
   // Create a unique storage namespace for each endpoint
   const storageNamespace = `graphiql:${endpoint}`;
@@ -47,10 +46,10 @@ export function GraphiQLWrapper({ endpoint }: GraphiQLWrapperProps) {
   return (
     <>
       {/* Endpoint URL */}
-      <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto">
+      <div className="bg-gray-50 px-6 py-2 border-b border-gray-200">
+        <div className="mx-auto">
           <p className="text-sm text-gray-600">
-            Endpoint: <code className="bg-gray-100 px-2 py-1 rounded">{url}</code>
+            Endpoint: <code className="bg-gray-100 px-2 py-1 rounded">{url.toString()}</code>
           </p>
         </div>
       </div>

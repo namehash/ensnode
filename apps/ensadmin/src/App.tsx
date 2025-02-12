@@ -3,11 +3,11 @@ import { About } from "./components/About";
 import { GraphiQLWrapper } from "./components/GraphiQLWrapper";
 import { Layout } from "./components/Layout";
 import { PonderClient } from "./components/PonderClient";
-import { getEnsNodeUrl } from "./utils/url";
+import { ensNodeUrl } from "./utils/url";
 
 function AppRoutes() {
   const [searchParams] = useSearchParams();
-  const ensnodeUrl = getEnsNodeUrl(searchParams);
+  const ensnodeUrl = ensNodeUrl(searchParams);
 
   return (
     <Layout ensnodeUrl={ensnodeUrl}>
@@ -18,7 +18,7 @@ function AppRoutes() {
 
 function RedirectToDefault() {
   const [searchParams] = useSearchParams();
-  const ensnodeUrl = getEnsNodeUrl(searchParams);
+  const ensnodeUrl = ensNodeUrl(searchParams);
   const to = ensnodeUrl ? `/about?ensnode=${ensnodeUrl}` : "/about";
 
   return <Navigate to={to} replace />;
