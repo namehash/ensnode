@@ -9,10 +9,10 @@ import {
   HealSuccess,
 } from "ensrainbow-sdk/types";
 import { ByteArray } from "viem";
-import { LogLevel, Logger, createLogger } from "../utils/logger";
-import { parseNonNegativeInteger } from "../utils/number-utils";
-import { LABELHASH_COUNT_KEY } from "./database";
-import { ENSRainbowDB, safeGet } from "./database";
+import { LogLevel, Logger, createLogger } from "../utils/logger.js";
+import { parseNonNegativeInteger } from "../utils/number-utils.js";
+import { LABELHASH_COUNT_KEY } from "./database.js";
+import { ENSRainbowDB, safeGet } from "./database.js";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;

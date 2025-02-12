@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseNonNegativeInteger } from "./number-utils";
+import { parseNonNegativeInteger } from "./number-utils.js";
 
 describe("parseNonNegativeInteger", () => {
   test("valid non-negative integers", () => {

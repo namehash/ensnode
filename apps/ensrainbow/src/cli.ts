@@ -2,10 +2,10 @@ import { join } from "path";
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
-import { ingestCommand } from "./commands/ingest-command";
-import { serverCommand } from "./commands/server-command";
-import { getDataDir } from "./lib/database";
-import { LogLevel, logLevels } from "./utils/logger";
+import { ingestCommand } from "./commands/ingest-command.js";
+import { serverCommand } from "./commands/server-command.js";
+import { getDataDir } from "./lib/database.js";
+import { LogLevel, logLevels } from "./utils/logger.js";
 
 function getDefaultLogLevel(): LogLevel {
   const envLogLevel = process.env.LOG_LEVEL as LogLevel;
