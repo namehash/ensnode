@@ -37,14 +37,13 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      '@changesets/cli':
-        specifier: ^2.27.12
-        version: 2.27.12
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
         version: 1.9.4
+      '@changesets/cli':
+        specifier: ^2.27.12
+        version: 2.27.12
       typescript:
         specifier: 'catalog:'
         version: 5.7.3

@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.27.12",
     "typescript": "catalog:"
   },
   "engines": {
@@ -19,8 +20,5 @@
     "overrides": {
       "ponder>vite": "5.4.14"
     }
-  },
-  "dependencies": {
-    "@changesets/cli": "^2.27.12"
   }
 }
