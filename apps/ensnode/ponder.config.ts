@@ -1,7 +1,7 @@
-import { PluginName } from "@namehash/ens-deployments";
 import { SELECTED_DEPLOYMENT_CONFIG } from "./src/lib/globals";
 import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
 import { deepMergeRecursive } from "./src/lib/ponder-helpers";
+import type { PluginName } from "./src/lib/types";
 
 import * as baseEthPlugin from "./src/plugins/base/ponder.plugin";
 import * as ethPlugin from "./src/plugins/eth/ponder.plugin";

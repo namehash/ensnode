@@ -1,9 +1,27 @@
 import { join } from "path";
 import { ClassicLevel } from "classic-level";
 import { ByteArray } from "viem";
-import { LogLevel, createLogger } from "../utils/logger";
+import { LogLevel, Logger, createLogger } from "../utils/logger";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
+export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
+
+/**
+ * Checks if there's an incomplete ingestion and exits with a helpful error message if one is found
+ * @param db The ENSRainbow database instance
+ * @param logger The logger instance to use for error messages
+ */
+export async function exitIfIncompleteIngestion(db: ENSRainbowDB, logger: Logger): Promise<void> {
+  if (await isIngestionInProgress(db)) {
+    logger.error("Error: Database is in an incomplete state!");
+    logger.error("An ingestion was started but not completed successfully.");
+    logger.error("To fix this:");
+    logger.error("1. Delete the data directory");
+    logger.error("2. Run the ingestion command again: ensrainbow ingest <input-file>");
+    await db.close();
+    process.exit(1);
+  }
+}
 
 /**
  * Type representing the ENSRainbow LevelDB database.
@@ -80,6 +98,38 @@ export const openDatabase = (dataDir: string, logLevel: LogLevel = "info"): ENSR
     process.exit(1);
   }
 };
+
+/**
+ * Check if an ingestion is in progress
+ * @param db The ENSRainbow database instance
+ * @returns true if an ingestion is in progress, false otherwise
+ */
+export async function isIngestionInProgress(db: ENSRainbowDB): Promise<boolean> {
+  const value = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
+  return value !== null;
+}
+
+/**
+ * Mark that an ingestion has started
+ * @param db The ENSRainbow database instance
+ */
+export async function markIngestionStarted(db: ENSRainbowDB): Promise<void> {
+  await db.put(INGESTION_IN_PROGRESS_KEY, "true");
+}
+
+/**
+ * Clear the ingestion in progress marker
+ * @param db The ENSRainbow database instance
+ */
+export async function clearIngestionMarker(db: ENSRainbowDB): Promise<void> {
+  try {
+    await db.del(INGESTION_IN_PROGRESS_KEY);
+  } catch (error) {
+    if ((error as any).code !== "LEVEL_NOT_FOUND") {
+      throw error;
+    }
+  }
+}
 
 /**
  * Helper function to safely get a value from the database.

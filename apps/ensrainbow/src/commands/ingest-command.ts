@@ -4,7 +4,13 @@ import { createGunzip } from "zlib";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import ProgressBar from "progress";
 import { labelhash } from "viem";
-import { createDatabase } from "../lib/database";
+
+import {
+  clearIngestionMarker,
+  createDatabase,
+  exitIfIncompleteIngestion,
+  markIngestionStarted,
+} from "../lib/database";
 import { byteArraysEqual } from "../utils/byte-utils";
 import { LogLevel, createLogger } from "../utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
@@ -32,6 +38,12 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   const log = createLogger(options.logLevel);
   const db = await createDatabase(options.dataDir, options.logLevel);
   await db.open();
+
+  // Check if there's an incomplete ingestion
+  await exitIfIncompleteIngestion(db, log);
+
+  // Mark ingestion as started
+  await markIngestionStarted(db);
 
   const bar = new ProgressBar(
     "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
@@ -118,7 +130,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     await batch.write();
   }
 
-  await db.close();
   log.info("\nData ingestion complete!");
 
   // Validate the number of processed records
@@ -136,8 +147,14 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
 
   // Run count as second phase
   log.info("\nStarting count verification phase...");
-  await countCommand({
+  await countCommand(db, {
     dataDir: options.dataDir,
     logLevel: options.logLevel,
   });
+
+  // Clear the ingestion marker since we completed successfully
+  await clearIngestionMarker(db);
+
+  log.info("Data ingestion and count verification complete!");
+  await db.close();
 }
