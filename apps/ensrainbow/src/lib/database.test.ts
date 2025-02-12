@@ -153,4 +153,21 @@ describe("Database", () => {
       }
     });
   });
+
+  describe("LevelDB operations", () => {
+    it("should handle values containing null bytes", async () => {
+      const db = await createDatabase(tempDir);
+      try {
+        const labelWithNull = "test\0label";
+        const labelWithNullLabelhash = labelhash(labelWithNull);
+        const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);
+
+        await db.put(labelHashBytes, labelWithNull);
+        const retrieved = await db.get(labelHashBytes);
+        expect(retrieved).toBe(labelWithNull);
+      } finally {
+        await db.close();
+      }
+    });
+  });
 });
