@@ -251,6 +251,25 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 2. The database is properly closed to prevent data corruption
 3. The process exits with appropriate status code (0 for success, 1 for errors)
 
+### Database Validation
+
+The service includes a validation command to verify database integrity:
+
+```bash
+# For development
+pnpm validate
+
+# For production build
+pnpm validate:prod
+```
+
+Validation performs the following checks:
+- Verifies all keys are valid labelhashes or are one of the special keys used internally by ENSRainbow
+- Ensures stored labels match their corresponding labelhashes
+- Validates the total rainbow record count
+- Verifies no ingestion is currently in progress
+- Reports detailed statistics including valid rainbow records, invalid labelhashes, and any labelhash mismatches
+
 ## License
 
 Licensed under the MIT License, Copyright © 2023-present [NameHash Labs](https://namehashlabs.org).

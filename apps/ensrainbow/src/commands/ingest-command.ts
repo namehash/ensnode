@@ -1,9 +1,7 @@
 import { createReadStream } from "fs";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
-import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import ProgressBar from "progress";
-import { labelhash } from "viem";
 
 import {
   clearIngestionMarker,
@@ -11,7 +9,6 @@ import {
   exitIfIncompleteIngestion,
   markIngestionStarted,
 } from "../lib/database";
-import { byteArraysEqual } from "../utils/byte-utils";
 import { LogLevel, createLogger } from "../utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
 import { countCommand } from "./count-command";
@@ -19,7 +16,6 @@ import { countCommand } from "./count-command";
 export interface IngestCommandOptions {
   inputFile: string;
   dataDir: string;
-  validateHashes?: boolean;
   logLevel?: LogLevel;
 }
 
@@ -37,7 +33,6 @@ const TOTAL_EXPECTED_RECORDS = 133_856_894;
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
   const db = await createDatabase(options.dataDir, options.logLevel);
-  await db.open();
 
   // Check if there's an incomplete ingestion
   await exitIfIncompleteIngestion(db, log);
@@ -99,18 +94,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       }
       invalidRecords++;
       continue;
-    }
-
-    if (options.validateHashes) {
-      const computedHash = labelHashToBytes(labelhash(record.label));
-      const storedHash = record.labelHash;
-      if (!byteArraysEqual(computedHash, storedHash)) {
-        log.warn(
-          `Hash mismatch for label "${record.label}": stored=${storedHash}, computed=${computedHash}`,
-        );
-        invalidRecords++;
-        continue;
-      }
     }
 
     batch.put(record.labelHash, record.label);

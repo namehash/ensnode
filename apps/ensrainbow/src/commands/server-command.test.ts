@@ -18,7 +18,7 @@ describe("Server Command Tests", () => {
   let server: ReturnType<typeof serve>;
 
   beforeAll(async () => {
-    db = await createDatabase("test-data", "error");
+    db = await createDatabase("test-data-server", "error");
     app = createServer(db, console);
 
     // Start the server on a different port than what ENSRainbow defaults to
@@ -41,7 +41,7 @@ describe("Server Command Tests", () => {
     await db.close();
 
     // Remove test database directory
-    await fs.rm("test-data", { recursive: true, force: true });
+    await fs.rm("test-data-server", { recursive: true, force: true });
   });
 
   describe("GET /v1/heal/:labelhash", () => {
