@@ -18,7 +18,7 @@ describe("Validate Command", () => {
     await rm(tempDir, { recursive: true, force: true });
   });
 
-  it("should throw for invalid database", async () => {
+  it("should throw an error when validating an empty/uninitialized database", async () => {
     await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
   });
 
