@@ -51,12 +51,14 @@ export const createDatabase = async (
   logger.info(`Creating new database in directory: ${dataDir}`);
 
   try {
-    return new ClassicLevel<ByteArray, string>(dataDir, {
+    const db = new ClassicLevel<ByteArray, string>(dataDir, {
       keyEncoding: "view",
       valueEncoding: "utf8",
       createIfMissing: true,
       errorIfExists: true,
     });
+    await db.open();
+    return db;
   } catch (error) {
     if (error instanceof Error && error.message.includes("exists")) {
       logger.error(`Database already exists at ${dataDir}`);
