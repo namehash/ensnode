@@ -27,7 +27,7 @@
     "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
-  "dependencies": {
+  "peerDependencies": {
     "viem": "catalog:"
   },
   "devDependencies": {
