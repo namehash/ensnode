@@ -61,10 +61,14 @@ export const createDatabase = async (
       createIfMissing: true,
       errorIfExists: true,
     });
+    logger.info("Opening database...");
     await db.open();
     return db;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("exists")) {
+    if (
+      (error as any).code === "LEVEL_DATABASE_NOT_OPEN" &&
+      (error as any).cause?.message?.includes("exists")
+    ) {
       logger.error(`Database already exists at ${dataDir}`);
       logger.error("If you want to use an existing database, use openDatabase() instead");
       logger.error(
