@@ -1,6 +1,5 @@
 {
   "name": "@namehash/ens-deployments",
-  "private": true,
   "version": "0.0.1",
   "type": "module",
   "description": "Contract addresses and startBlocks for each ENS deployment",
@@ -27,5 +26,8 @@
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
   },
-  "exports": "./src/index.ts"
+  "exports": "./src/index.ts",
+  "publishConfig": {
+    "access": "public"
+  }
 }
