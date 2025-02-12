@@ -263,11 +263,11 @@ pnpm validate
 pnpm validate:prod
 ```
 
-The validator performs the following checks:
-- Verifies all keys are valid labelhashes
+Validation performs the following checks:
+- Verifies all keys are valid labelhashes or are one of the special keys used internally by ENSRainbow
 - Ensures stored labels match their corresponding labelhashes
-- Validates the total record count
-- Reports detailed statistics including valid hashes, invalid hashes, and any mismatches
+- Validates the total rainbow record count
+- Reports detailed statistics including valid rainbow records, invalid labelhashes, and any labelhash mismatches
 
 ## License
 

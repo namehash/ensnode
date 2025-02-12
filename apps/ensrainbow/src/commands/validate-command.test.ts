@@ -11,7 +11,7 @@ describe("Validate Command", () => {
   let tempDir: string;
 
   beforeEach(async () => {
-    tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-"));
+    tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-validate"));
   });
 
   afterEach(async () => {

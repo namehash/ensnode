@@ -25,7 +25,7 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
   for await (const [key, value] of db.iterator()) {
     totalKeys++;
 
-    // Skip count key
+    // Skip keys not associated with rainbow records
     if (byteArraysEqual(key, LABELHASH_COUNT_KEY)) {
       continue;
     }
@@ -71,9 +71,9 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
   // Report results
   log.info("\nValidation Results:");
   log.info(`Total keys: ${totalKeys}`);
-  log.info(`Valid hashes: ${validHashes}`);
-  log.info(`Invalid hashes: ${invalidHashes}`);
-  log.info(`Hash mismatches: ${hashMismatches}`);
+  log.info(`Valid rainbow records: ${validHashes}`);
+  log.info(`Invalid rainbow records: ${invalidHashes}`);
+  log.info(`labelhash mismatches: ${hashMismatches}`);
 
   const hasErrors = invalidHashes > 0 || hashMismatches > 0 || !storedCount;
   if (hasErrors) {
