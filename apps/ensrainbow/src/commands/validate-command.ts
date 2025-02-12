@@ -82,7 +82,7 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
     log.error(`Count mismatch: stored=${parsedCount}, actual=${rainbowRecordCount}`);
     throw new Error(`Count mismatch: stored=${parsedCount}, actual=${rainbowRecordCount}`);
   } else {
-    log.info(`Count verified: ${rainbowRecordCount} records`);
+    log.info(`Count verified: ${rainbowRecordCount} rainbow records`);
   }
 
   // Report results
