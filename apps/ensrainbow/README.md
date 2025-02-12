@@ -267,6 +267,7 @@ Validation performs the following checks:
 - Verifies all keys are valid labelhashes or are one of the special keys used internally by ENSRainbow
 - Ensures stored labels match their corresponding labelhashes
 - Validates the total rainbow record count
+- Verifies no ingestion is currently in progress
 - Reports detailed statistics including valid rainbow records, invalid labelhashes, and any labelhash mismatches
 
 ## License

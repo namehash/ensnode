@@ -1,6 +1,11 @@
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { labelhash } from "viem";
-import { LABELHASH_COUNT_KEY, openDatabase, safeGet } from "../lib/database.js";
+import {
+  INGESTION_IN_PROGRESS_KEY,
+  LABELHASH_COUNT_KEY,
+  openDatabase,
+  safeGet,
+} from "../lib/database.js";
 import { byteArraysEqual } from "../utils/byte-utils.js";
 import { LogLevel, createLogger } from "../utils/logger.js";
 import { parseNonNegativeInteger } from "../utils/number-utils.js";
@@ -26,7 +31,10 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
     totalKeys++;
 
     // Skip keys not associated with rainbow records
-    if (byteArraysEqual(key, LABELHASH_COUNT_KEY)) {
+    if (
+      byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
+      byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+    ) {
       continue;
     }
 
@@ -51,21 +59,30 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
     }
   }
 
+  let rainbowRecordCount = totalKeys;
   // Verify count
   const storedCount = await safeGet(db, LABELHASH_COUNT_KEY);
-  const actualCount = totalKeys - 1; // Subtract 1 for count key
 
   if (!storedCount) {
     log.error("Count key missing from database");
     throw new Error("Count key missing from database");
+  } else {
+    rainbowRecordCount = rainbowRecordCount - 1;
+  }
+
+  // Check if ingestion is in progress
+  const ingestionInProgress = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
+  if (ingestionInProgress) {
+    log.error("Database is in an invalid state: ingestion in progress flag is set");
+    throw new Error("Database is in an invalid state: ingestion in progress flag is set");
   }
 
   const parsedCount = parseNonNegativeInteger(storedCount);
-  if (parsedCount !== actualCount) {
-    log.error(`Count mismatch: stored=${parsedCount}, actual=${actualCount}`);
-    throw new Error(`Count mismatch: stored=${parsedCount}, actual=${actualCount}`);
+  if (parsedCount !== rainbowRecordCount) {
+    log.error(`Count mismatch: stored=${parsedCount}, actual=${rainbowRecordCount}`);
+    throw new Error(`Count mismatch: stored=${parsedCount}, actual=${rainbowRecordCount}`);
   } else {
-    log.info(`Count verified: ${actualCount} records`);
+    log.info(`Count verified: ${rainbowRecordCount} records`);
   }
 
   // Report results
@@ -75,7 +92,7 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
   log.info(`Invalid rainbow records: ${invalidHashes}`);
   log.info(`labelhash mismatches: ${hashMismatches}`);
 
-  const hasErrors = invalidHashes > 0 || hashMismatches > 0 || !storedCount;
+  const hasErrors = invalidHashes > 0 || hashMismatches > 0;
   if (hasErrors) {
     log.error("\nValidation failed! See errors above.");
     throw new Error("Validation failed");
