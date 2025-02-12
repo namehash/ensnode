@@ -241,28 +241,30 @@ To start the ENSNode application and its dependencies using Docker Compose, foll
 
 2. **Run Docker Compose**: Execute the following command to start the application:
    ```bash
-   docker-compose up
+   docker compose up
    ```
 
    This command will:
-   - Build the Docker images for the ENSNode and ENSRainbow applications.
+   - Build the Docker images for the ENSNode, ENSRainbow, and ENSAdmin applications.
    - Start the PostgreSQL database container.
    - Start the ENSNode application, which will be accessible on port `42069`.
    - Start the ENSRainbow application, which will be accessible on port `3001`.
+   - Start the ENSAdmin application, which will be accessible on port `4173`.
 
 3. **Access the Applications**: Once the containers are running, you can access the applications in your web browser:
    - **ENSNode**: Open [http://localhost:42069](http://localhost:42069) to access the ENSNode indexer.
    - **ENSRainbow**: Open [http://localhost:3001](http://localhost:3001) to access the ENSRainbow service.
+   - **ENSAdmin**: Open [http://localhost:4173](http://localhost:4173) to access the ENSAdmin service.
 
 ### Expected Outcome
 
-After running `docker-compose up`, you should see logs in your terminal indicating that the services are starting. Once everything is up and running, you can interact with the ENSNode application through the hostnames referenced above.
+After running `docker compose up`, you should see logs in your terminal indicating that the services are starting. Once everything is up and running, you can interact with the ENSNode application through the hostnames referenced above.
 
 ### Stopping the Applications
 
 To stop the running applications, you can press `Ctrl + C` in the terminal where Docker Compose is running. If you want to remove the containers and networks created by Docker Compose, you can run:
 ```bash
-docker-compose down
+docker compose down
 ```
 
 This command will stop and remove all containers defined in the `docker-compose.yml` file.
