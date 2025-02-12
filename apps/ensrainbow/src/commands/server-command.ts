@@ -2,7 +2,7 @@ import { serve } from "@hono/node-server";
 import type { HealthResponse } from "ensrainbow-sdk/types";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
-import { ENSRainbowDB, openDatabase } from "../lib/database.js";
+import { ENSRainbowDB, exitIfIncompleteIngestion, openDatabase } from "../lib/database.js";
 import { ENSRainbowServer } from "../lib/server.js";
 import { LogLevel, Logger, createLogger } from "../utils/logger.js";
 
@@ -46,6 +46,10 @@ export function createServer(db: ENSRainbowDB, log: Logger, logLevel: LogLevel =
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
   const db = await openDatabase(options.dataDir, options.logLevel);
+
+  // Check for incomplete ingestion
+  await exitIfIncompleteIngestion(db, log);
+
   const app = createServer(db, log, options.logLevel);
 
   log.info(`ENS Rainbow server starting on port ${options.port}...`);
