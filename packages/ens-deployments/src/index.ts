@@ -8,27 +8,33 @@ import sepolia from "./sepolia";
 export * from "./types";
 
 /**
- * A 'deployment' of ENS is a single, unified namespace of ENS names across potentially many chains
- * and sub-registries. Here, each config defines the associated chains and plugins
- * available for indexing that deployment's ENS names.
+ * Mapping from a set of ENSDeploymentChains to an "ENS deployment".
  *
- * For example, the canonical ETH Mainnet deployment of ENS includes names managed by the mainnet ETH
- * Registry, as well as Basenames and Linea L2 Registries (& off-chain names like .cb.id, though we
- * are only concerned with on-chain names in this context). The contract configuration for each of
- * these possible plugins are specified as part of a `ENSDeploymentConfig`.
+ * Each "ENS deployment" is a single, unified namespace of ENS names with a distinct
+ * onchain root Registry but with the capability of spanning from that root Registry
+ * across many chains, subregistries, and offchain resources.
  *
- * The Sepolia and Holesky testnet ENS Deployments are completely independent of the canonical ETH
- * Mainnet deployment. These testnet ENS deployments use the .eth plugin, just configured with the
- * proper addresses on their respective chains.
+ * For example, as of 9-Feb-2025 the canonical "ENS deployment" on mainnet includes:
+ * - A root Registry on mainnet.
+ * - An onchain subregistry for direct subnames of 'eth' on mainnet.
+ * - An onchain subregistry for direct subnames of 'base.eth' on Base.
+ * - An onchain subregistry for direct subnames of 'linea.eth' on Linea.
+ * - An offchain subregistry for subnames of '.cb.id'.
+ * - An offchain subregistry for subnames of '.uni.eth'.
+ * - Etc..
  *
- * Similarly, the ens-test-env deployment is the version of ENS deployed to a local Anvil chain
- * for testing protocol changes and running deterministic test suites.
+ * Each "ENS deployment" is independent of the others. For example, the Sepolia and Holesky
+ * testnet "ENS deployments" are independent of the canonical "ENS deployment" on mainnet.
+ *
+ * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
+ * protocol changes, running deterministic test suites, and local development.
+ * https://github.com/ensdomains/ens-test-env
  */
 export const DeploymentConfigs = {
   mainnet,
   sepolia,
   holesky,
   "ens-test-env": ensTestEnv,
-} satisfies Record<ENSDeploymentChain, ENSDeploymentConfig>;
+} as const satisfies Record<ENSDeploymentChain, ENSDeploymentConfig>;
 
 export default DeploymentConfigs;

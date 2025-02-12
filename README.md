@@ -23,17 +23,19 @@ A sidecar service for healing ENS labels. It provides a simple API to recover la
 
 View the [ENSNode docs](https://www.ensnode.io).
 
-
 ### [`docs/ensrainbow`](docs/ensrainbow)
 
 View the [ENSRainbow docs](https://www.ensrainbow.io).
-
 
 ## Libraries
 
 ### [`packages/ens-deployments`](packages/ens-deployments)
 
-Convenient central location for the ENS Protocol's contracts' `address` and `startBlock` configuration for each independent ENS deployment (i.e. `mainnet`, `sepolia`, `holesky`, `ens-test-env`).
+Convenient catalog of ENS deployments including chain, contract addresses, start blocks, and event filters.
+
+### [`packages/ensrainbow-sdk`](packages/ensrainbow-sdk)
+
+TypeScript library for interacting with the [ENSRainbow API](apps/ensrainbow).
 
 ### [`packages/ensnode-utils`](packages/ensnode-utils)
 
@@ -221,12 +223,14 @@ Before you can use Docker Compose, ensure you have the following installed on yo
 ### Setting Up the Environment
 
 1. **Clone the Repository**: If you haven't already, clone the ENSNode repository to your local machine:
+
    ```bash
    git clone git@github.com:namehash/ensnode.git
    cd ensnode
    ```
 
 2. **Prepare the Environment**: Ensure you have a `.env.local` file in the `apps/ensnode` directory. This file contains environment variables needed for the application. You can create it by copying the example file:
+
    ```bash
    cp apps/ensnode/.env.local.example apps/ensnode/.env.local
    ```
@@ -240,6 +244,7 @@ To start the ENSNode application and its dependencies using Docker Compose, foll
 1. **Open a Terminal**: Navigate to the root directory of the ENSNode monorepo where the `docker-compose.yml` file is located.
 
 2. **Run Docker Compose**: Execute the following command to start the application:
+
    ```bash
    docker compose up
    ```
@@ -263,6 +268,7 @@ After running `docker compose up`, you should see logs in your terminal indicati
 ### Stopping the Applications
 
 To stop the running applications, you can press `Ctrl + C` in the terminal where Docker Compose is running. If you want to remove the containers and networks created by Docker Compose, you can run:
+
 ```bash
 docker compose down
 ```
