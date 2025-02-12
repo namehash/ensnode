@@ -44,9 +44,9 @@ FROM ensrainbow.runtime AS ingestor
 COPY --from=ensrainbow.data /app/ens_names.sql.gz .
 COPY --from=ensrainbow.data /app/ens_names.sql.gz.sha256sum .
 # Load input data into the key-value store
-RUN node dist/ingest.js
+RUN node dist/cli.js ingest
 # Verify the number of keys in the database
-RUN node dist/count-keys.js
+RUN node dist/cli.js count
 
 # API server stage
 FROM ensrainbow.runtime AS runner
@@ -57,4 +57,4 @@ ENV NODE_ENV=production
 ENV PORT=3001
 EXPOSE 3001
 # Start the application
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/cli.js", "serve"]

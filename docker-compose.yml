@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   ensnode:
@@ -13,8 +11,9 @@ services:
     environment:
       # Override DATABASE_URL from .env.local to refer to docker compose postgres instance
       DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
-      ENSRAINBOW_URL: http://ensrainbow:3000
+      ENSRAINBOW_URL: https://ensrainbow:3000
     depends_on:
+      - ensrainbow
       - postgres
 
   postgres:

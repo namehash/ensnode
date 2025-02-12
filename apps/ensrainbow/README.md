@@ -11,13 +11,20 @@ Special thanks to [The Graph](https://thegraph.com/) for their work to generate 
 
 ## System Requirements
 
+### Build-time Requirements
 - **Storage**:
   - At least 15 GB of free disk space:
     - 6.37 GB for the compressed rainbow tables download
     - ~7 GB for the LevelDB database after ingestion
     - Additional temporary space during build/ingestion
-- **Memory**: Minimum 4 GB RAM recommended for optimal performance
-- **Docker**: The final Docker image size is 7.61 GB due to the included LevelDB database
+- **Memory**: At least 4 GB RAM recommended during data ingestion
+
+### Runtime Requirements
+- **Storage**: 7.61 GB for the Docker image (pre-built with LevelDB database)
+- **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
+- **CPU**: Minimal requirements - operates well with low CPU resources
+
+You can find our pre-built Docker image at [GitHub Packages](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensrainbow).
 
 ## Architecture Overview
 
@@ -148,7 +155,7 @@ Error Responses:
   }
   ```
 
-- `500 Internal Server Error`: When an unexpected error occurs
+- `500 Internal Server Error`: When an unexpected error occurs or database is not initialized
   ```json
   {
     "status": "error",
@@ -163,12 +170,21 @@ Error Responses:
 curl http://localhost:3001/v1/labels/count
 ```
 
-Response:
+Success Response:
 ```json
 {
   "status": "success",
   "count": 133856894,
   "timestamp": "2024-01-30T11:18:56Z"
+}
+```
+
+Error Response (if database not initialized):
+```json
+{
+  "status": "error",
+  "error": "Label count not initialized. Check that the ingest command has been run.",
+  "errorCode": 500
 }
 ```
 
@@ -180,29 +196,16 @@ Response:
 pnpm install
 ```
 
-2. Run data ingestion (requires ens_names.sql.gz):
+2. Run data ingestion (requires ens_names.sql.gz) and verify the number of unique label-labelhash pairs in the database:
 
 ```bash
 pnpm ingest
 ```
 
-3. Verify database contents (optional):
+3. Start the service:
 
 ```bash
-# Count and verify the number of labels in the database
-pnpm count-keys
-```
-
-This will:
-- Read and display the existing count from the database (if present)
-- Count all unique labels in the database
-- Store the count for future reference
-- Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
-
-4. Start the service:
-
-```bash
-pnpm start
+pnpm serve
 ```
 
 Note: The steps above use the development mode which runs TypeScript files directly. For production builds:
@@ -212,19 +215,41 @@ Note: The steps above use the development mode which runs TypeScript files direc
 pnpm build
 
 # Run with compiled JavaScript
-pnpm start:prod
+pnpm serve:prod
 pnpm ingest:prod
-pnpm count-keys:prod
 ```
+
+You can verify the service is running by checking the health endpoint or retrieving the label count:
+
+```bash
+# Health check
+curl http://localhost:3001/health
+
+# Get count of healable labels
+curl http://localhost:3001/v1/labels/count
+```
+
+Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
 
 ## Environment Variables
 
 ### Server Variables
 - `PORT`: Server port (default: 3001)
 - `DATA_DIR`: Directory for LevelDB data (default: './data')
+- `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
 
 ### Data Ingestion Variables
 - `INPUT_FILE`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.
+
+## Service Management
+
+### Graceful Shutdown
+
+The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when receiving Ctrl+C or Docker stop commands). During shutdown:
+
+1. The HTTP server stops accepting new connections
+2. The database is properly closed to prevent data corruption
+3. The process exits with appropriate status code (0 for success, 1 for errors)
 
 ## License
 

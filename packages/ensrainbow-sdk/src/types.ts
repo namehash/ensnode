@@ -41,6 +41,7 @@ export interface BaseCountResponse<Status extends StatusCode> {
 
 export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success> {
   status: typeof StatusCode.Success;
+  /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
   count: number;
   timestamp: string;
   error?: undefined;
