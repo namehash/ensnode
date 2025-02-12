@@ -26,6 +26,13 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
 
   log.info("Starting database validation...");
 
+  // Check if ingestion is in progress
+  const ingestionInProgress = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
+  if (ingestionInProgress) {
+    log.error("Database is in an invalid state: ingestion in progress flag is set");
+    throw new Error("Database is in an invalid state: ingestion in progress flag is set");
+  }
+
   // Validate each key-value pair
   for await (const [key, value] of db.iterator()) {
     totalKeys++;
@@ -70,12 +77,6 @@ export async function validateCommand(options: ValidateCommandOptions): Promise<
     rainbowRecordCount = rainbowRecordCount - 1;
   }
 
-  // Check if ingestion is in progress
-  const ingestionInProgress = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
-  if (ingestionInProgress) {
-    log.error("Database is in an invalid state: ingestion in progress flag is set");
-    throw new Error("Database is in an invalid state: ingestion in progress flag is set");
-  }
 
   const parsedCount = parseNonNegativeInteger(storedCount);
   if (parsedCount !== rainbowRecordCount) {
