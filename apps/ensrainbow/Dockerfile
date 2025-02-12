@@ -1,4 +1,5 @@
-# API server stage
+# ensrainbow-data contains already populated DB that will be served by the application
+# Using a prebuilt image reduces build time for infrequently changing data
 FROM ghcr.io/namehash/ensnode/ensrainbow-data AS base
 
 RUN apt-get update && \

@@ -62,7 +62,7 @@ sha256sum -c ens_names.sql.gz.sha256sum
 
 ```bash
 # while in the monorepo root directory
-docker build -t ensnode/ensrainbow -f apps/ensrainbow/Dockerfile.app .
+docker build -t ensnode/ensrainbow -f apps/ensrainbow/Dockerfile .
 ```
 
 2. Run the container:

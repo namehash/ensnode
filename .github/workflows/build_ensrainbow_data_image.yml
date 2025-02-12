@@ -10,7 +10,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build & Push Docker image for ENSRainbow app
+      - name: Build & Push Docker image for the ENSRainbow-data
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow-data
           TAG: latest
