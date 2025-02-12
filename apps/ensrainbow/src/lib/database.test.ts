@@ -131,7 +131,7 @@ describe("Database", () => {
       }
     });
 
-    it("should throw when ingestion is in progress", async () => {
+    it("should detect when ingestion is in progress", async () => {
       const db = await createDatabase(tempDir);
 
       try {
