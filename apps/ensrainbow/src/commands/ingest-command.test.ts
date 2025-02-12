@@ -10,7 +10,7 @@ describe("Ingest Command Tests", () => {
   let db: ENSRainbowDB;
 
   beforeAll(async () => {
-    db = await createDatabase("test-data");
+    db = await createDatabase("test-data-ingest");
   });
 
   beforeEach(async () => {
@@ -23,7 +23,7 @@ describe("Ingest Command Tests", () => {
   afterAll(async () => {
     await db.close();
     // Remove test database directory
-    await fs.rm("test-data", { recursive: true, force: true });
+    await fs.rm("test-data-ingest", { recursive: true, force: true });
   });
 
   describe("LevelDB operations", () => {
