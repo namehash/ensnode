@@ -4,31 +4,51 @@ on:
   push:
     branches:
       - feat/railway-ensnode-deployments
+      - main
+      - alpha
+      - subgraph
 
 jobs:
-#   image-build-and-push:
-#     runs-on: ubuntu-latest
+  image-build-and-push:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-#       - name: Build & Push Docker image for the ENSRainbow app
-#         env:
-#           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensnode
-#           TAG: latest
-#         run: |
-#           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-#           docker build -f apps/ensnode/Dockerfile -t $IMAGE_NAME:$TAG .
-#           docker push $IMAGE_NAME:$TAG
+      - name: Extract Branch Name
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+    
+      - name: Determine tag
+        run: |
+            if [[ "$BRANCH" == "main" ]]; then
+            echo "TAG=latest" >> $GITHUB_ENV
+            elif [[ "$BRANCH" == "alpha" ]]; then
+            echo "TAG=alpha" >> $GITHUB_ENV
+            elif [[ "$BRANCH" == "subgraph" ]]; then
+            echo "TAG=subgraph" >> $GITHUB_ENV
+            else
+            echo "Branch not recognized, skipping workflow"
+            exit 1
+            fi
+            echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+      - name: Build & Push Docker image for the ENSNode
+        env:
+          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensnode
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -f apps/ensnode/Dockerfile -t $IMAGE_NAME:$TAG .
+          docker push $IMAGE_NAME:$TAG
 
   deploy:
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
+    needs: image-build-and-push
     env:
         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - name: Deploy ENSNode on Railway
+        if:  ${{ needs.image-build-and-push.outputs.tag }} != 'latest'
         run: |
          railway redeploy --service ${{ secrets.RAINBOW_SVC_ID }} --yes
             
