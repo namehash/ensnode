@@ -1,4 +1,3 @@
-import type { PluginContractConfig } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
@@ -134,7 +133,11 @@ export function getActivePlugins<T extends { pluginName: PluginName }>(
 
   if (unavailablePlugins.length) {
     throw new Error(
-      `Requested plugins are not available in the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(", ")}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(", ")}`,
+      `Requested plugins are not available in the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(
+        ", ",
+      )}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(
+        ", ",
+      )}`,
     );
   }
 
