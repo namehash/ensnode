@@ -28,7 +28,7 @@ FROM app-deps AS app
 WORKDIR /app/apps/ensrainbow
 
 # copy data dir from ensrainbow-data
-COPY --from=ensrainbow-data /app/apps/ensrainbow/data ./data
+COPY --from=ensrainbow-data /data ./data
 
 # Set environment variables
 ENV NODE_ENV=production

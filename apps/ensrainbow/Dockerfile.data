@@ -43,3 +43,11 @@ RUN pnpm run ingest
 
 # cleanup input file to reduce image size
 RUN rm ens_names.sql.gz
+
+###################
+## Output Image — just the data dir
+###################
+
+FROM base
+
+COPY --from=ingest /app/apps/ensrainbow/data ./data
