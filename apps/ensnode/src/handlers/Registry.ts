@@ -143,8 +143,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
             name,
             // NOTE: only update Domain.labelName iff label is healed and valid
             // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
-            // TODO: pass labelName as normal once ponder treats undefined as no-op
-            ...(validLabel && { labelName: validLabel }),
+            labelName: validLabel,
           });
         }
 
