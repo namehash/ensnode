@@ -38,5 +38,8 @@ WORKDIR /app/apps/ensrainbow
 COPY --from=db-data /app/ens_names.sql.gz .
 COPY --from=db-data /app/THE_GRAPH_LICENSE.txt .
 
-# produce the data dir artifact & cleanup
-RUN pnpm run ingest && rm ens_names.sql.gz
+# produce the data dir artifact
+RUN pnpm run ingest
+
+# cleanup input file to reduce image size
+RUN rm ens_names.sql.gz
