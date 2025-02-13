@@ -83,9 +83,7 @@ export class EnsRainbowApiClient {
    * ```
    */
   async heal(labelhash: Labelhash): Promise<HealResponse> {
-    const response = await fetch(
-      new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl)
-    );
+    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
 
     return response.json() as Promise<HealResponse>;
   }

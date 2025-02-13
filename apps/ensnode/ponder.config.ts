@@ -21,9 +21,7 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]>;
 ////////
 
 // the available PluginNames are those that the selected ENS Deployment defines as available
-const availablePluginNames = Object.keys(
-  SELECTED_DEPLOYMENT_CONFIG
-) as PluginName[];
+const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as PluginName[];
 
 // filter the set of available plugins by those that are 'active' in the env
 const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);

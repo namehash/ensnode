@@ -12,8 +12,7 @@ import DeploymentConfigs from "@ensnode/ens-deployments";
 import type { ContractConfig } from "ponder";
 import { getEnsDeploymentChain } from "./ponder-helpers";
 
-export const SELECTED_DEPLOYMENT_CONFIG =
-  DeploymentConfigs[getEnsDeploymentChain()];
+export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChain()];
 
 /**
  * Note that here, we define the global DEPLOYMENT_CONFIG as the _merge_ of mainnet (which fully

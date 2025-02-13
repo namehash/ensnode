@@ -10,10 +10,7 @@
     "directory": "packages/ens-deployments"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ens-deployments",
-  "keywords": [
-    "ENS",
-    "ENSNode"
-  ],
+  "keywords": ["ENS", "ENSNode"],
   "scripts": {
     "lint:ci": "biome ci"
   },

@@ -1,9 +1,6 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import {
-  makeSubnodeNamehash,
-  uint256ToHex32,
-} from "@ensnode/utils/subname-helpers";
+import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
@@ -17,13 +14,9 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  * subname of base.eth that was registered.
  * https://github.com/base-org/basenames/blob/main/src/L2/RegistrarController.sol#L488
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash =>
-  uint256ToHex32(tokenId);
+const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({
-  ownedName,
-  namespace,
-}: PonderENSPluginHandlerArgs<"base.eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -34,53 +27,44 @@ export default function ({
   } = makeRegistrarHandlers(ownedName);
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
-  ponder.on(
-    namespace("BaseRegistrar:NameRegisteredWithRecord"),
-    async ({ context, event }) => {
-      await handleNameRegistered({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            labelhash: tokenIdToLabelhash(event.args.id),
-          },
+  ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
+    await handleNameRegistered({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          labelhash: tokenIdToLabelhash(event.args.id),
         },
-      });
-    }
-  );
+      },
+    });
+  });
 
-  ponder.on(
-    namespace("BaseRegistrar:NameRegistered"),
-    async ({ context, event }) => {
-      await handleNameRegistered({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            labelhash: tokenIdToLabelhash(event.args.id),
-          },
+  ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
+    await handleNameRegistered({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          labelhash: tokenIdToLabelhash(event.args.id),
         },
-      });
-    }
-  );
+      },
+    });
+  });
 
-  ponder.on(
-    namespace("BaseRegistrar:NameRenewed"),
-    async ({ context, event }) => {
-      await handleNameRenewed({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            labelhash: tokenIdToLabelhash(event.args.id),
-          },
+  ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
+    await handleNameRenewed({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          labelhash: tokenIdToLabelhash(event.args.id),
         },
-      });
-    }
-  );
+      },
+    });
+  });
 
   ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
     // base.eth's BaseRegistrar uses `id` instead of `tokenId`
@@ -116,37 +100,28 @@ export default function ({
     });
   });
 
-  ponder.on(
-    namespace("EARegistrarController:NameRegistered"),
-    async ({ context, event }) => {
-      // TODO: registration expected here
+  ponder.on(namespace("EARegistrarController:NameRegistered"), async ({ context, event }) => {
+    // TODO: registration expected here
 
-      await handleNameRegisteredByController({
-        context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
-      });
-    }
-  );
+    await handleNameRegisteredByController({
+      context,
+      event: { ...event, args: { ...event.args, cost: 0n } },
+    });
+  });
 
-  ponder.on(
-    namespace("RegistrarController:NameRegistered"),
-    async ({ context, event }) => {
-      // TODO: registration expected here
+  ponder.on(namespace("RegistrarController:NameRegistered"), async ({ context, event }) => {
+    // TODO: registration expected here
 
-      await handleNameRegisteredByController({
-        context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
-      });
-    }
-  );
+    await handleNameRegisteredByController({
+      context,
+      event: { ...event, args: { ...event.args, cost: 0n } },
+    });
+  });
 
-  ponder.on(
-    namespace("RegistrarController:NameRenewed"),
-    async ({ context, event }) => {
-      await handleNameRenewedByController({
-        context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
-      });
-    }
-  );
+  ponder.on(namespace("RegistrarController:NameRenewed"), async ({ context, event }) => {
+    await handleNameRenewedByController({
+      context,
+      event: { ...event, args: { ...event.args, cost: 0n } },
+    });
+  });
 }

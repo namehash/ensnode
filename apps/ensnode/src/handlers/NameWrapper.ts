@@ -1,10 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import {
-  decodeDNSPacketBytes,
-  uint256ToHex32,
-} from "@ensnode/utils/subname-helpers";
+import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Node } from "@ensnode/utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { createSharedEventValues, upsertAccount } from "../lib/db-helpers";
@@ -52,7 +49,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
     event: EventWithArgs,
     eventId: string,
     tokenId: bigint,
-    to: Address
+    to: Address,
   ) {
     await upsertAccount(context, to);
     const node = tokenIdToNode(tokenId);
@@ -115,9 +112,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
 
       // upsert the healed name iff valid
       if (label) {
-        await context.db
-          .update(schema.domain, { id: node })
-          .set({ labelName: label, name });
+        await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 
       // update the WrappedDomain that was created in handleTransfer
@@ -128,9 +123,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       });
 
       // materialize wrappedOwner relation
-      await context.db
-        .update(schema.domain, { id: node })
-        .set({ wrappedOwnerId: owner });
+      await context.db.update(schema.domain, { id: node }).set({ wrappedOwnerId: owner });
 
       // materialize domain expiryDate
       await materializeDomainExpiryDate(context, node);
@@ -163,8 +156,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
         // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L123
         // null expiry date if the domain is not a direct child of .eth
-        expiryDate:
-          domain.parentId !== ownedSubnameNode ? null : domain.expiryDate,
+        expiryDate: domain.parentId !== ownedSubnameNode ? null : domain.expiryDate,
         wrappedOwnerId: null,
       }));
 
@@ -198,9 +190,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       });
       if (wrappedDomain) {
         // set fuses
-        await context.db
-          .update(schema.wrappedDomain, { id: node })
-          .set({ fuses });
+        await context.db.update(schema.wrappedDomain, { id: node }).set({ fuses });
 
         // materialize the domain's expiryDate because the fuses have potentially changed
         await materializeDomainExpiryDate(context, node);
@@ -232,9 +222,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       });
       if (wrappedDomain) {
         // update expiryDate
-        await context.db
-          .update(schema.wrappedDomain, { id: node })
-          .set({ expiryDate: expiry });
+        await context.db.update(schema.wrappedDomain, { id: node }).set({ expiryDate: expiry });
 
         // materialize the domain's expiryDate
         await materializeDomainExpiryDate(context, node);
@@ -262,7 +250,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         event,
         makeEventId(ownedName, event.block.number, event.log.logIndex, 0),
         event.args.id,
-        event.args.to
+        event.args.to,
       );
     },
     async handleTransferBatch({
@@ -278,7 +266,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
           event,
           makeEventId(ownedName, event.block.number, event.log.logIndex, i),
           id,
-          event.args.to
+          event.args.to,
         );
       }
     },

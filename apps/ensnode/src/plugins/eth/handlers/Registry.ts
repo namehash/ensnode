@@ -2,10 +2,7 @@ import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { ROOT_NODE, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
 import { type Hex } from "viem";
-import {
-  makeRegistryHandlers,
-  setupRootNode,
-} from "../../../handlers/Registry";
+import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
 // a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
@@ -14,10 +11,7 @@ async function isDomainMigrated(context: Context, node: Hex) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({
-  ownedName,
-  namespace,
-}: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
   const {
     handleNewOwner, //
     handleNewResolver,
@@ -36,19 +30,16 @@ export default function ({
     return handleNewOwner(false)({ context, event });
   });
 
-  ponder.on(
-    namespace("RegistryOld:NewResolver"),
-    async ({ context, event }) => {
-      const isMigrated = await isDomainMigrated(context, event.args.node);
-      const isRootNode = event.args.node === ROOT_NODE;
+  ponder.on(namespace("RegistryOld:NewResolver"), async ({ context, event }) => {
+    const isMigrated = await isDomainMigrated(context, event.args.node);
+    const isRootNode = event.args.node === ROOT_NODE;
 
-      // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L246
-      // NOTE: the subgraph must include an exception here for the root node because it starts out
-      // isMigrated: true, but we definitely still want to handle NewResolver events for it.
-      if (isMigrated && !isRootNode) return;
-      return handleNewResolver({ context, event });
-    }
-  );
+    // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L246
+    // NOTE: the subgraph must include an exception here for the root node because it starts out
+    // isMigrated: true, but we definitely still want to handle NewResolver events for it.
+    if (isMigrated && !isRootNode) return;
+    return handleNewResolver({ context, event });
+  });
 
   ponder.on(namespace("RegistryOld:NewTTL"), async ({ context, event }) => {
     const isMigrated = await isDomainMigrated(context, event.args.node);

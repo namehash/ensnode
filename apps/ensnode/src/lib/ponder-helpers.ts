@@ -1,14 +1,9 @@
 import type { Event } from "ponder:registry";
-import DeploymentConfigs, {
-  ENSDeploymentChain,
-} from "@ensnode/ens-deployments";
+import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL } from "ensrainbow-sdk/consts";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
-export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<
-  Event,
-  "args"
-> & {
+export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
 };
 
@@ -26,16 +21,13 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<
 export const constrainBlockrange = (
   start: number | undefined,
   startBlock: number | undefined,
-  end: number | undefined
+  end: number | undefined,
 ): {
   startBlock: number | undefined;
   endBlock: number | undefined;
 } => ({
   // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
-  startBlock: Math.min(
-    Math.max(start || 0, startBlock || 0),
-    end || Number.MAX_SAFE_INTEGER
-  ),
+  startBlock: Math.min(Math.max(start || 0, startBlock || 0), end || Number.MAX_SAFE_INTEGER),
   endBlock: end,
 });
 
@@ -57,9 +49,7 @@ export const rpcEndpointUrl = (chainId: number): string => {
   try {
     return parseRpcEndpointUrl(envVarValue);
   } catch (e: any) {
-    throw new Error(
-      `Error parsing environment variable '${envVarName}': ${e.message}.`
-    );
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
@@ -100,9 +90,7 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
   try {
     return parseRpcMaxRequestsPerSecond(envVarValue);
   } catch (e: any) {
-    throw new Error(
-      `Error parsing environment variable '${envVarName}': ${e.message}.`
-    );
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
@@ -140,9 +128,7 @@ export const ensRainbowEndpointUrl = (): string => {
   try {
     return parseEnsRainbowEndpointUrl(envVarValue);
   } catch (e: any) {
-    throw new Error(
-      `Error parsing environment variable '${envVarName}': ${e.message}.`
-    );
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
@@ -170,7 +156,7 @@ type AnyObject = { [key: string]: any };
  */
 export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
   target: T,
-  source: U
+  source: U,
 ): T & U {
   return tsDeepMerge(target, source) as T & U;
 }
@@ -186,9 +172,7 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
 
   const validValues = Object.keys(DeploymentConfigs);
   if (!validValues.includes(value)) {
-    throw new Error(
-      `Error: ENS_DEPLOYMENT_CHAIN must be one of ${validValues.join(" | ")}`
-    );
+    throw new Error(`Error: ENS_DEPLOYMENT_CHAIN must be one of ${validValues.join(" | ")}`);
   }
 
   return value as ENSDeploymentChain;

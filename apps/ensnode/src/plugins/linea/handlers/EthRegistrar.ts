@@ -1,9 +1,6 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import {
-  makeSubnodeNamehash,
-  uint256ToHex32,
-} from "@ensnode/utils/subname-helpers";
+import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
@@ -17,13 +14,9 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  * direct subname of linea.eth that was registered.
  * https://github.com/Consensys/linea-ens/blob/main/packages/linea-ens-contracts/contracts/ethregistrar/ETHRegistrarController.sol#L447
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash =>
-  uint256ToHex32(tokenId);
+const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({
-  ownedName,
-  namespace,
-}: PonderENSPluginHandlerArgs<"linea.eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -33,37 +26,31 @@ export default function ({
     ownedSubnameNode,
   } = makeRegistrarHandlers(ownedName);
 
-  ponder.on(
-    namespace("BaseRegistrar:NameRegistered"),
-    async ({ context, event }) => {
-      await handleNameRegistered({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            labelhash: tokenIdToLabelhash(event.args.id),
-          },
+  ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
+    await handleNameRegistered({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          labelhash: tokenIdToLabelhash(event.args.id),
         },
-      });
-    }
-  );
+      },
+    });
+  });
 
-  ponder.on(
-    namespace("BaseRegistrar:NameRenewed"),
-    async ({ context, event }) => {
-      await handleNameRenewed({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            labelhash: tokenIdToLabelhash(event.args.id),
-          },
+  ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
+    await handleNameRenewed({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          labelhash: tokenIdToLabelhash(event.args.id),
         },
-      });
-    }
-  );
+      },
+    });
+  });
 
   ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
     const { tokenId, from, to } = event.args;
@@ -99,47 +86,35 @@ export default function ({
   });
 
   // Linea allows the owner of the EthRegistrarController to register subnames for free
-  ponder.on(
-    namespace("EthRegistrarController:OwnerNameRegistered"),
-    async ({ context, event }) => {
-      await handleNameRegisteredByController({
-        context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
-      });
-    }
-  );
+  ponder.on(namespace("EthRegistrarController:OwnerNameRegistered"), async ({ context, event }) => {
+    await handleNameRegisteredByController({
+      context,
+      event: { ...event, args: { ...event.args, cost: 0n } },
+    });
+  });
 
   // Linea allows any wallet address holding a Proof of Humanity (Poh) to register one subname for free
-  ponder.on(
-    namespace("EthRegistrarController:PohNameRegistered"),
-    async ({ context, event }) => {
-      await handleNameRegisteredByController({
-        context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
-      });
-    }
-  );
+  ponder.on(namespace("EthRegistrarController:PohNameRegistered"), async ({ context, event }) => {
+    await handleNameRegisteredByController({
+      context,
+      event: { ...event, args: { ...event.args, cost: 0n } },
+    });
+  });
 
-  ponder.on(
-    namespace("EthRegistrarController:NameRegistered"),
-    async ({ context, event }) => {
-      // the new registrar controller uses baseCost + premium to compute cost
-      await handleNameRegisteredByController({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            cost: event.args.baseCost + event.args.premium,
-          },
+  ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
+    // the new registrar controller uses baseCost + premium to compute cost
+    await handleNameRegisteredByController({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...event.args,
+          cost: event.args.baseCost + event.args.premium,
         },
-      });
-    }
-  );
-  ponder.on(
-    namespace("EthRegistrarController:NameRenewed"),
-    async ({ context, event }) => {
-      await handleNameRenewedByController({ context, event });
-    }
-  );
+      },
+    });
+  });
+  ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
+    await handleNameRenewedByController({ context, event });
+  });
 }
