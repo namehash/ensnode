@@ -8,28 +8,45 @@ export interface HealthResponse {
   status: "ok";
 }
 
-export interface BaseHealResponse<Status extends StatusCode> {
+export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
   status: Status;
   label?: string | undefined;
   error?: string | undefined;
-  errorCode?: ErrorCode | undefined;
+  errorCode?: Error | undefined;
 }
 
-export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success> {
+export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success, never> {
   status: typeof StatusCode.Success;
   label: string;
   error?: never;
   errorCode?: never;
 }
 
-export interface HealError extends BaseHealResponse<typeof StatusCode.Error> {
+export interface HealNotFoundError
+  extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.NotFound> {
   status: typeof StatusCode.Error;
   label?: never;
   error: string;
-  errorCode: ErrorCode;
+  errorCode: typeof ErrorCode.NotFound;
 }
 
-export type HealResponse = HealSuccess | HealError;
+export interface HealServerError
+  extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
+  status: typeof StatusCode.Error;
+  label?: never;
+  error: string;
+  errorCode: typeof ErrorCode.ServerError;
+}
+
+export interface HealBadRequestError
+  extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.BadRequest> {
+  status: typeof StatusCode.Error;
+  label?: never;
+  error: string;
+  errorCode: typeof ErrorCode.BadRequest;
+}
+
+export type HealResponse = HealSuccess | HealNotFoundError | HealServerError | HealBadRequestError;
 
 export interface BaseCountResponse<Status extends StatusCode> {
   status: Status;

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { EnsRainbowApiClient } from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-import type { HealError, HealSuccess } from "./types";
+import type { HealNotFoundError, HealSuccess } from "./types";
 
 describe("EnsRainbowApiClient", () => {
   let client: EnsRainbowApiClient;
@@ -50,7 +50,7 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Error,
       error: "Label not found",
       errorCode: ErrorCode.NotFound,
-    } satisfies HealError);
+    } satisfies HealNotFoundError);
   });
 
   it("should only cache heal responses that are safe to cache", async () => {

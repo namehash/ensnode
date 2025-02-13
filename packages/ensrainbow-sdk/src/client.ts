@@ -2,7 +2,7 @@ import type { Cache } from "@ensnode/utils/cache";
 import { LruCache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-import type { HealResponse } from "./types";
+import type { HealResponse, HealServerError } from "./types";
 
 export interface EnsRainbowApiClientOptions {
   /**
@@ -17,6 +17,8 @@ export interface EnsRainbowApiClientOptions {
    */
   endpointUrl: URL;
 }
+
+export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
 
 /**
  * ENSRainbow API client
@@ -33,7 +35,7 @@ export interface EnsRainbowApiClientOptions {
  */
 export class EnsRainbowApiClient {
   private readonly options: EnsRainbowApiClientOptions;
-  private readonly cache: Cache<Labelhash, HealResponse>;
+  private readonly cache: Cache<Labelhash, CacheableHealResponse>;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -55,7 +57,7 @@ export class EnsRainbowApiClient {
       ...options,
     };
 
-    this.cache = new LruCache<HealResponse>(this.options.cacheCapacity);
+    this.cache = new LruCache<Labelhash, CacheableHealResponse>(this.options.cacheCapacity);
   }
 
   /**
@@ -66,7 +68,7 @@ export class EnsRainbowApiClient {
    * @param response the heal response to check
    * @returns true if the response is cacheable, false otherwise
    */
-  public static isCacheableHealResponse(response: HealResponse): boolean {
+  public static isCacheableHealResponse(response: HealResponse): response is CacheableHealResponse {
     return response.status !== StatusCode.Error || response.errorCode !== ErrorCode.ServerError;
   }
 
