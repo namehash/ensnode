@@ -92,8 +92,11 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       await context.db.update(schema.domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName: validLabel,
-        name,
+        // TODO: pass these values as normal once ponder treats undefined as no-op
+        // labelName: validLabel,
+        // name,
+        ...(validLabel && { labelName: validLabel }),
+        ...(name && { name }),
       });
 
       // akin to registration.save() at
