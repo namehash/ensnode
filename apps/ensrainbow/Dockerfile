@@ -26,9 +26,9 @@ FROM app-deps AS app
 # cwd to ensrainbow
 WORKDIR /app/apps/ensrainbow
 # Copy built files and dependencies
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/package*.json .
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/node_modules node_modules
-COPY --from=ensrainbow.runtime_deps /app/apps/ensrainbow/dist dist
+COPY --from=app-deps /app/apps/ensrainbow/package*.json .
+COPY --from=app-deps /app/apps/ensrainbow/node_modules node_modules
+COPY --from=app-deps /app/apps/ensrainbow/dist dist
 
 # Set environment variables
 ENV NODE_ENV=production

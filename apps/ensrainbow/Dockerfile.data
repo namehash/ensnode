@@ -32,7 +32,7 @@ COPY packages/ensnode-utils ./packages/ensnode-utils
 WORKDIR /app/apps/ensrainbow
 # copy ensrainbow package.json & src directory only
 COPY apps/ensrainbow/package*.json ./
-COPY apps/ensrainbow/src ./
+COPY apps/ensrainbow/src ./src
 
 # install
 RUN pnpm install --frozen-lockfile
@@ -49,17 +49,6 @@ COPY --from=db-data /app/ens_names.sql.gz .
 
 # produce the data dir artifact & cleanup
 RUN pnpm run ingest && rm ens_names.sql.gz
-
-###################
-## Application Deps — standard monorepo pnpm install from base
-###################
-
-FROM base AS app-deps
-COPY pnpm-workspace.yaml ./
-COPY package.json pnpm-lock.yaml ./
-COPY packages ./packages
-COPY apps ./apps
-RUN pnpm install --frozen-lockfile
 
 ###################
 ## App Server — runs server w/ data dir
