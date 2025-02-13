@@ -1,12 +1,11 @@
 # Base working stage
 FROM node:18-slim AS base
 RUN apt-get update && \
-    apt-get install -y wget && \
     npm install -g pnpm
 WORKDIR /app
 
 ###################
-## Data Stage — heavily cached remote data
+## Data Stage — download ens_name.sql archive & checksum
 ###################
 
 FROM base AS db-data
@@ -16,30 +15,20 @@ ADD "https://bucket.ensrainbow.io/THE_GRAPH_LICENSE.txt" ./THE_GRAPH_LICENSE.txt
 RUN sha256sum -c ens_names.sql.gz.sha256sum
 
 ###################
-## Ingest Dependencies Stage — minimal deps for ingest script
+## Dependencies Stage — standard monorepo pnpm install from base
 ###################
 
 FROM base AS ingest-deps
 
-# copy pnpm files from the root directory
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml ./
+COPY packages ./packages
+COPY apps ./apps
 
-# copy just the dependent packages (sync with package.json)
-# TODO: this could be even more minimal
-COPY packages/ensrainbow-sdk ./packages/ensrainbow-sdk
-COPY packages/ensnode-utils ./packages/ensnode-utils
-
-# cwd to ensrainbow
-WORKDIR /app/apps/ensrainbow
-# copy ensrainbow package.json & src directory only
-COPY apps/ensrainbow/package*.json ./
-COPY apps/ensrainbow/src ./src
-
-# install
 RUN pnpm install --frozen-lockfile
 
 ###################
-## Ingest Runtime Stage — produces data dir artifact
+## Runtime Stage — produces data dir artifact
 ###################
 
 FROM ingest-deps AS ingest
@@ -51,16 +40,3 @@ COPY --from=db-data /app/THE_GRAPH_LICENSE.txt .
 
 # produce the data dir artifact & cleanup
 RUN pnpm run ingest && rm ens_names.sql.gz
-
-###################
-## Output image
-###################
-
-FROM app-deps AS app
-
-# cwd to ensrainbow
-WORKDIR /app/apps/ensrainbow
-
-# copy data dir from ingest
-COPY --from=ingest /app/apps/ensrainbow/data ./data
-COPY --from=ingest /app/apps/ensrainbow/THE_GRAPH_LICENSE.txt ./data
