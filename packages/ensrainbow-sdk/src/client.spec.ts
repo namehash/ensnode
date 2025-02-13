@@ -13,7 +13,7 @@ describe("EnsRainbowApiClient", () => {
   it("should apply default options when no options provided", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
-      cacheSize: EnsRainbowApiClient.DEFAULT_CACHE_SIZE,
+      cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
     });
   });
 
@@ -21,12 +21,12 @@ describe("EnsRainbowApiClient", () => {
     const customEndpointUrl = new URL("http://lb-api.ensrainbow.com");
     client = new EnsRainbowApiClient({
       endpointUrl: customEndpointUrl,
-      cacheSize: 0,
+      cacheCapacity: 0,
     });
 
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
-      cacheSize: 0,
+      cacheCapacity: 0,
     });
   });
 

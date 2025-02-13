@@ -5,7 +5,7 @@ import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 import type { HealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
-  cacheSize: number;
+  cacheCapacity: number;
   endpointUrl: URL;
 }
 
@@ -26,7 +26,7 @@ export class EnsRainbowApiClient {
   private readonly options: EnsRainbowApiClientOptions;
   private readonly cache: Cache<Labelhash, HealResponse>;
 
-  public static readonly DEFAULT_CACHE_SIZE = 1000;
+  public static readonly DEFAULT_CACHE_CAPACITY = 1000;
   /**
    * Create default client options.
    *
@@ -35,7 +35,7 @@ export class EnsRainbowApiClient {
   static defaultOptions(): EnsRainbowApiClientOptions {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
-      cacheSize: EnsRainbowApiClient.DEFAULT_CACHE_SIZE,
+      cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
     };
   }
 
@@ -45,11 +45,18 @@ export class EnsRainbowApiClient {
       ...options,
     };
 
-    this.cache = new LruCache<HealResponse>(this.options.cacheSize);
+    this.cache = new LruCache<HealResponse>(this.options.cacheCapacity);
   }
 
+  /**
+   * Determine if a heal response is cacheable.
+   *
+   * Server errors at not cachable and should be retried.
+   *
+   * @param response the heal response to check
+   * @returns true if the response is cacheable, false otherwise
+   */
   public static isCacheableHealResponse(response: HealResponse): boolean {
-    // cache all responses except for server errors
     return response.status !== StatusCode.Error || response.errorCode !== ErrorCode.ServerError;
   }
 
