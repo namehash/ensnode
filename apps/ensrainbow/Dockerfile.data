@@ -48,6 +48,6 @@ RUN rm ens_names.sql.gz
 ## Output Image — just the data dir
 ###################
 
-FROM base
+FROM base AS ensrainbow-data
 
 COPY --from=ingest /app/apps/ensrainbow/data ./data
