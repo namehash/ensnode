@@ -118,10 +118,7 @@ export const resolver = onchainTable("resolvers", (t) => ({
   contentHash: t.text("content_hash"),
   // The set of observed text record keys for this resolver
   // NOTE: we avoid .notNull.default([]) to match subgraph behavior
-  // NOTE: due to a serialization bug (likely in drizzle), we temporarily use a jsonb column here
-  // https://github.com/ponder-sh/ponder/issues/1484
-  // TODO: revert back to t.text().array(),
-  texts: t.jsonb().$type<string[]>(),
+  texts: t.text().array(),
   // The set of observed SLIP-44 coin types for this resolver
   // NOTE: we avoid .notNull.default([]) to match subgraph behavior
   coinTypes: t.bigint().array(),
