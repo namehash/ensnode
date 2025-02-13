@@ -1,4 +1,3 @@
-import { PluginName } from "@ensnode/ens-deployments";
 import { SELECTED_DEPLOYMENT_CONFIG } from "./src/lib/globals";
 import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
 import { deepMergeRecursive } from "./src/lib/ponder-helpers";
