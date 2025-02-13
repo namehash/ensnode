@@ -9,7 +9,6 @@
  */
 
 import DeploymentConfigs from "@ensnode/ens-deployments";
-import type { ContractConfig } from "ponder";
 import { getEnsDeploymentChain } from "./ponder-helpers";
 
 export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChain()];
