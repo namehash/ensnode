@@ -1,8 +1,9 @@
-# @namehash/ens-deployments
+# @ensnode/ens-deployments
 
 This package provides configurations for each known "ENS deployment". An ENS deployment represents a single, unified namespace of ENS names with a distinct onchain root Registry and the capability to span across multiple chains, subregistries, and offchain resources.
 
 For example, the canonical ENS deployment on mainnet includes:
+
 - A root Registry on mainnet
 - An onchain subregistry for direct subnames of 'eth' on mainnet
 - An onchain subregistry for direct subnames of 'base.eth' on Base
@@ -18,6 +19,7 @@ If you are unfamiliar with any of the terminology used here, please reference th
 ## Overview
 
 Each ENS deployment is defined as a separate configuration that includes:
+
 - **Chain configuration:** The target blockchain (e.g. mainnet, sepolia, holesky, or a local test environment).
 - **Subregistry details:** For example, configurations for direct subnames of `eth` (required for every deployment), and for `base.eth` and `linea.eth` in the mainnet deployment.
 - **Contract information:** Addresses, start blocks, and event filters for relevant contracts like the Registry, Resolver, BaseRegistrar, and Controller contracts.
@@ -26,6 +28,7 @@ Each ENS deployment is defined as a separate configuration that includes:
 
 - **mainnet**
   Provides configurations for the main Ethereum network and includes subregistries for:
+
   - `eth` – mainnet ENS registry
   - `base` – subnames of `.base.eth` on Base
   - `linea` – subnames of `.linea.eth` on Linea
@@ -44,7 +47,7 @@ Each ENS deployment is defined as a separate configuration that includes:
 To use these configurations in your project:
 
 ```ts
-import { DeploymentConfigs } from '@namehash/ens-deployments';
+import { DeploymentConfigs } from "@ensnode/ens-deployments";
 import { namehash } from "viem";
 
 // access the address and abi for the root Registry on mainnet
