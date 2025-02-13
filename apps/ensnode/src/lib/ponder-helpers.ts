@@ -1,6 +1,6 @@
 import type { Event } from "ponder:registry";
 import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
-import { DEFAULT_ENSRAINBOW_URL } from "ensrainbow-sdk/consts";
+import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk/consts";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {

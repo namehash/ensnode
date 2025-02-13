@@ -1,6 +1,6 @@
 import { join } from "path";
+import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
-import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { ByteArray, labelhash } from "viem";
 
 import { byteArraysEqual } from "../utils/byte-utils";
@@ -218,7 +218,9 @@ export async function validate(db: ENSRainbowDB, logger: Logger): Promise<boolea
     const computedHash = labelHashToBytes(labelhash(value));
     if (!byteArraysEqual(computedHash, key)) {
       logger.error(
-        `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(computedHash).toString("hex")}`,
+        `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
+          computedHash,
+        ).toString("hex")}`,
       );
       hashMismatches++;
     }
