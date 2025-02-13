@@ -5,7 +5,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 ###################
-## Data Stage — download ens_name.sql archive & checksum
+## Data Stage — download ENS Subgraph rainbow table archive & checksum
 ###################
 
 FROM base AS db-data
