@@ -5,7 +5,16 @@ import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 import type { HealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
+  /**
+   * The maximum number of `HealResponse` values to cache.
+   * Must be a non-negative integer.
+   * Setting to 0 will disable caching.
+   */
   cacheCapacity: number;
+
+  /**
+   * The URL of the ENSRainbow API endpoint.
+   */
   endpointUrl: URL;
 }
 
@@ -27,6 +36,7 @@ export class EnsRainbowApiClient {
   private readonly cache: Cache<Labelhash, HealResponse>;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
+
   /**
    * Create default client options.
    *

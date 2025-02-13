@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { LruCache } from "./cache";
 
 describe("LruCache", () => {
+  it("throws Error if capacity is not an integer", () => {
+    expect(() => {
+      new LruCache<string>(1.5);
+    }).toThrow();
+  });
+
   it("throws Error if capacity < 0", () => {
     expect(() => {
       new LruCache<string>(-1);

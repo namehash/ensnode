@@ -1,3 +1,6 @@
+/**
+ * Cache that maps from string -> ValueType.
+ */
 export interface Cache<Key extends string, Value> {
   /**
    * Store a value in the cache with the given key.
@@ -32,7 +35,7 @@ export interface Cache<Key extends string, Value> {
 }
 
 /**
- * Cache that maps from string -> ValueType with a LRU (least recently used) eviction policy.
+ * Cache with a LRU (least recently used) eviction policy.
  *
  * `get` and `set` are O(1) operations.
  *
@@ -42,11 +45,24 @@ export class LruCache<ValueType> implements Cache<string, ValueType> {
   private readonly _cache = new Map<string, ValueType>();
   private readonly _capacity: number;
 
+  /**
+   * Create a new LRU cache with the given capacity.
+   *
+   * @param capacity The maximum number of items in the cache.
+   * @throws Error if capacity is not an integer or is negative.
+   */
   public constructor(capacity: number) {
-    if (capacity < 0)
+    if (!Number.isInteger(capacity)) {
       throw new Error(
-        `LruCache requires capacity greater than 0 but capacity of ${capacity} requested.`,
+        `LruCache requires capacity to be an integer but a capacity of ${capacity} was requested.`,
       );
+    }
+
+    if (capacity < 0) {
+      throw new Error(
+        `LruCache requires a non-negative capacity but a capacity of ${capacity} was requested.`,
+      );
+    }
 
     this._capacity = capacity;
   }
