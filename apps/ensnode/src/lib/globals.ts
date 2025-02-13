@@ -9,7 +9,6 @@
  */
 
 import DeploymentConfigs from "@namehash/ens-deployments";
-import type { ContractConfig } from "ponder";
 import { getEnsDeploymentChain } from "./ponder-helpers";
 
 export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChain()];
@@ -32,7 +31,7 @@ export const DEPLOYMENT_CONFIG = {
 
 /**
  * Constrain indexing between the following start/end blocks
- * https://ponder.sh/0_6/docs/contracts-and-networks#block-range
+ * https://ponder.sh/docs/contracts-and-networks#block-range
  *
  * NOTE: with a single variable here it only really makes sense to use start/end blocks when running
  * a single plugin (namely the eth plugin, in order to take snapshots). setting start/end blocks
@@ -41,5 +40,5 @@ export const DEPLOYMENT_CONFIG = {
  *
  * TODO: allow runtime configuration, in particular for setting END_BLOCK on eth plugin
  */
-export const START_BLOCK: ContractConfig["startBlock"] = undefined;
-export const END_BLOCK: ContractConfig["endBlock"] = undefined;
+export const START_BLOCK: number | undefined = undefined;
+export const END_BLOCK: number | undefined = undefined;
