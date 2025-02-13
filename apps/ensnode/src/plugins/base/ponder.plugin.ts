@@ -7,13 +7,6 @@ import {
   networksConfigForChain,
 } from "../../lib/plugin-helpers";
 
-// base plugin abis
-import { BaseRegistrar as base_BaseRegistrar } from "./abis/BaseRegistrar";
-import { EarlyAccessRegistrarController as base_EarlyAccessRegistrarController } from "./abis/EARegistrarController";
-import { L2Resolver as base_L2Resolver } from "./abis/L2Resolver";
-import { RegistrarController as base_RegistrarController } from "./abis/RegistrarController";
-import { Registry as base_Registry } from "./abis/Registry";
-
 // uses the 'base' plugin config for deployments
 export const pluginName = "base" as const;
 
@@ -28,38 +21,25 @@ export const config = createConfig({
   contracts: {
     [namespace("Registry")]: {
       network: networkConfigForContract(chain, contracts.Registry),
-      abi: base_Registry,
+      abi: contracts.Registry.abi,
     },
     [namespace("Resolver")]: {
       network: networkConfigForContract(chain, contracts.Resolver),
-      abi: base_L2Resolver,
-      // NOTE: this indexes every event ever emitted that looks like this
-      filter: [
-        { event: "AddrChanged", args: {} },
-        { event: "AddressChanged", args: {} },
-        { event: "NameChanged", args: {} },
-        { event: "ABIChanged", args: {} },
-        { event: "PubkeyChanged", args: {} },
-        { event: "TextChanged", args: {} },
-        { event: "ContenthashChanged", args: {} },
-        { event: "InterfaceChanged", args: {} },
-        { event: "VersionChanged", args: {} },
-        { event: "DNSRecordChanged", args: {} },
-        { event: "DNSRecordDeleted", args: {} },
-        { event: "DNSZonehashChanged", args: {} },
-      ],
+      abi: contracts.Resolver.abi,
+      // index Resolver by event signatures, not address
+      filter: contracts.Resolver.filter,
     },
     [namespace("BaseRegistrar")]: {
       network: networkConfigForContract(chain, contracts.BaseRegistrar),
-      abi: base_BaseRegistrar,
+      abi: contracts.BaseRegistrar.abi,
     },
     [namespace("EARegistrarController")]: {
       network: networkConfigForContract(chain, contracts.EARegistrarController),
-      abi: base_EarlyAccessRegistrarController,
+      abi: contracts.EARegistrarController.abi,
     },
     [namespace("RegistrarController")]: {
       network: networkConfigForContract(chain, contracts.RegistrarController),
-      abi: base_RegistrarController,
+      abi: contracts.RegistrarController.abi,
     },
   },
 });

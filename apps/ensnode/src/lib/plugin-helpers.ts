@@ -1,15 +1,14 @@
-import type { PluginContractConfig, PluginName } from "@ensnode/ens-deployments";
+import type { PluginContractConfig } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
-import { uniq } from "./lib-helpers";
 import {
   constrainBlockrange,
   getEnsDeploymentChain,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "./ponder-helpers";
-import type { OwnedName } from "./types";
+import type { OwnedName, PluginName } from "./types";
 
 /**
  * A factory function that returns a function to create a namespaced contract
@@ -135,7 +134,7 @@ export function getActivePlugins<T extends { pluginName: PluginName }>(
 
   if (unavailablePlugins.length) {
     throw new Error(
-      `Requested plugins are not available the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(", ")}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(", ")}`,
+      `Requested plugins are not available in the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(", ")}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(", ")}`,
     );
   }
 
@@ -218,7 +217,7 @@ export function networksConfigForChain(chain: Chain) {
  * Defines a `ponder#ContractConfig['network']` given a contract's config, injecting the global
  * start/end blocks to constrain indexing range.
  */
-export function networkConfigForContract<CONTRACT_CONFIG extends PluginContractConfig>(
+export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryContractConfig>(
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,
 ) {

@@ -1,17 +1,20 @@
-import { openDatabase, safeGet } from "../lib/database.js";
-import { LABELHASH_COUNT_KEY } from "../lib/database.js";
-import { byteArraysEqual } from "../utils/byte-utils.js";
-import { LogLevel, createLogger } from "../utils/logger.js";
-import { parseNonNegativeInteger } from "../utils/number-utils.js";
+import {
+  ENSRainbowDB,
+  INGESTION_IN_PROGRESS_KEY,
+  LABELHASH_COUNT_KEY,
+  safeGet,
+} from "../lib/database";
+import { byteArraysEqual } from "../utils/byte-utils";
+import { LogLevel, createLogger } from "../utils/logger";
+import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export interface CountCommandOptions {
   dataDir: string;
   logLevel?: LogLevel;
 }
 
-export async function countCommand(options: CountCommandOptions): Promise<void> {
+export async function countCommand(db: ENSRainbowDB, options: CountCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
-  const db = openDatabase(options.dataDir, options.logLevel);
 
   // Try to read existing count
   const existingCountStr = await safeGet(db, LABELHASH_COUNT_KEY);
@@ -29,7 +32,10 @@ export async function countCommand(options: CountCommandOptions): Promise<void> 
   let count = 0;
   for await (const [key] of db.iterator()) {
     // Don't count the count key itself
-    if (!byteArraysEqual(key, LABELHASH_COUNT_KEY)) {
+    if (
+      !byteArraysEqual(key, LABELHASH_COUNT_KEY) &&
+      !byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+    ) {
       count++;
     }
   }
@@ -39,6 +45,4 @@ export async function countCommand(options: CountCommandOptions): Promise<void> 
 
   log.info(`Total number of keys (excluding count key): ${count}`);
   log.info(`Updated count in database under LABELHASH_COUNT_KEY`);
-
-  await db.close();
 }

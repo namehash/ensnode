@@ -35,25 +35,13 @@ describe("buildRainbowRecord", () => {
     expect(() => buildRainbowRecord(invalidLine)).toThrow("Invalid labelhash length");
   });
 
-  describe("with validation enabled", () => {
-    it("should accept valid labelhash", () => {
-      const label = "test-label";
-      const validLabelhash = labelhash(label);
-      const line = `${validLabelhash}\t${label}`;
+  it("should handle a labelhash that does not match the label", () => {
+    const label = "test-label";
+    const wrongLabelhash = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    const line = `${wrongLabelhash}\t${label}`;
 
-      const record = buildRainbowRecord(line, { validateLabelHash: true });
-      expect(record.label).toBe(label);
-      expect(record.labelHash).toEqual(labelHashToBytes(validLabelhash as Labelhash));
-    });
-
-    it("should throw on mismatched labelhash", () => {
-      const label = "test-label";
-      const wrongLabelhash = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-      const line = `${wrongLabelhash}\t${label}`;
-
-      expect(() => buildRainbowRecord(line, { validateLabelHash: true })).toThrow(
-        "Labelhash validation failed: computed hash does not match provided hash",
-      );
-    });
+    const record = buildRainbowRecord(line);
+    expect(record.label).toBe(label);
+    expect(record.labelHash).toEqual(labelHashToBytes(wrongLabelhash as Labelhash));
   });
 });

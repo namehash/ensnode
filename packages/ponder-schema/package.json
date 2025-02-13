@@ -12,6 +12,7 @@
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-schema",
   "keywords": ["ENS", "ENSNode", "Ponder"],
   "scripts": {
+    "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
   "exports": {

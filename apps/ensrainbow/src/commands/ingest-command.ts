@@ -1,19 +1,21 @@
 import { createReadStream } from "fs";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
-import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import ProgressBar from "progress";
-import { labelhash } from "viem";
-import { createDatabase } from "../lib/database.js";
-import { byteArraysEqual } from "../utils/byte-utils.js";
-import { LogLevel, createLogger } from "../utils/logger.js";
-import { buildRainbowRecord } from "../utils/rainbow-record.js";
-import { countCommand } from "./count-command.js";
+
+import {
+  clearIngestionMarker,
+  createDatabase,
+  exitIfIncompleteIngestion,
+  markIngestionStarted,
+} from "../lib/database";
+import { LogLevel, createLogger } from "../utils/logger";
+import { buildRainbowRecord } from "../utils/rainbow-record";
+import { countCommand } from "./count-command";
 
 export interface IngestCommandOptions {
   inputFile: string;
   dataDir: string;
-  validateHashes?: boolean;
   logLevel?: LogLevel;
 }
 
@@ -31,6 +33,12 @@ const TOTAL_EXPECTED_RECORDS = 133_856_894;
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
   const log = createLogger(options.logLevel);
   const db = await createDatabase(options.dataDir, options.logLevel);
+
+  // Check if there's an incomplete ingestion
+  await exitIfIncompleteIngestion(db, log);
+
+  // Mark ingestion as started
+  await markIngestionStarted(db);
 
   const bar = new ProgressBar(
     "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
@@ -88,18 +96,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       continue;
     }
 
-    if (options.validateHashes) {
-      const computedHash = labelHashToBytes(labelhash(record.label));
-      const storedHash = record.labelHash;
-      if (!byteArraysEqual(computedHash, storedHash)) {
-        log.warn(
-          `Hash mismatch for label "${record.label}": stored=${storedHash}, computed=${computedHash}`,
-        );
-        invalidRecords++;
-        continue;
-      }
-    }
-
     batch.put(record.labelHash, record.label);
     batchSize++;
     processedRecords++;
@@ -117,7 +113,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     await batch.write();
   }
 
-  await db.close();
   log.info("\nData ingestion complete!");
 
   // Validate the number of processed records
@@ -135,8 +130,14 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
 
   // Run count as second phase
   log.info("\nStarting count verification phase...");
-  await countCommand({
+  await countCommand(db, {
     dataDir: options.dataDir,
     logLevel: options.logLevel,
   });
+
+  // Clear the ingestion marker since we completed successfully
+  await clearIngestionMarker(db);
+
+  log.info("Data ingestion and count verification complete!");
+  await db.close();
 }

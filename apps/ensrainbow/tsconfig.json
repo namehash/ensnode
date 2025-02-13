@@ -1,11 +1,5 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.lib.json",
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "**/*.test.ts"],
-  "compilerOptions": {
-    "allowImportingTsExtensions": false,
-    "noEmit": false,
-    "rootDir": "src",
-    "outDir": "dist"
-  }
+  "exclude": ["node_modules", "**/*.test.ts"]
 }

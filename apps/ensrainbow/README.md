@@ -7,7 +7,7 @@ Special thanks to [The Graph](https://thegraph.com/) for their work to generate 
 ## Prerequisites
 
 - Docker installed on your system
-- Node.js v20 or later (for local development)
+- Node.js v18 or later (for local development) — see monorepo package.json for engines spec
 
 ## System Requirements
 
@@ -58,7 +58,7 @@ sha256sum -c ens_names.sql.gz.sha256sum
 
 ## Quick Start with Docker
 
-1. Build the Docker image (includes data ingestion):
+1. Build the Docker image (includes data download & ingestion):
 
 ```bash
 # while in the monorepo root directory
@@ -68,10 +68,10 @@ docker build -t ensnode/ensrainbow -f apps/ensrainbow/Dockerfile .
 2. Run the container:
 
 ```bash
-docker run -d -p 3001:3001 ensnode/ensrainbow
+docker run -d -p 3223:3223 ensnode/ensrainbow
 ```
 
-The service will be available at `http://localhost:3001`.
+The service will be available at `http://localhost:3223`.
 
 ## NameHash Labs Hosted Instance
 
@@ -84,7 +84,7 @@ NameHash Labs operates a freely available instance of ENSRainbow for the ENS com
 
 ### Using the Hosted Instance
 
-Simply replace `localhost:3001` with `api.ensrainbow.io` in the API examples:
+Simply replace `localhost:3223` with `api.ensrainbow.io` in the API examples:
 
 ```bash
 # Health check
@@ -104,7 +104,7 @@ While we aim for high availability, if you need guaranteed uptime or want to kee
 ### Health Check
 
 ```bash
-curl http://localhost:3001/health
+curl http://localhost:3223/health
 ```
 
 Response: `{"status":"ok"}`
@@ -112,13 +112,13 @@ Response: `{"status":"ok"}`
 ### Heal Label
 
 ```bash
-curl http://localhost:3001/v1/heal/0x[labelhash]
+curl http://localhost:3223/v1/heal/0x[labelhash]
 ```
 
 Example:
 
 ```bash
-curl http://localhost:3001/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 Response:
@@ -167,7 +167,7 @@ Error Responses:
 ### Get Count of Healable Labels
 
 ```bash
-curl http://localhost:3001/v1/labels/count
+curl http://localhost:3223/v1/labels/count
 ```
 
 Success Response:
@@ -208,25 +208,14 @@ pnpm ingest
 pnpm serve
 ```
 
-Note: The steps above use the development mode which runs TypeScript files directly. For production builds:
-
-```bash
-# Build TypeScript
-pnpm build
-
-# Run with compiled JavaScript
-pnpm serve:prod
-pnpm ingest:prod
-```
-
 You can verify the service is running by checking the health endpoint or retrieving the label count:
 
 ```bash
 # Health check
-curl http://localhost:3001/health
+curl http://localhost:3223/health
 
 # Get count of healable labels
-curl http://localhost:3001/v1/labels/count
+curl http://localhost:3223/v1/labels/count
 ```
 
 Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
@@ -234,7 +223,7 @@ Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
 ## Environment Variables
 
 ### Server Variables
-- `PORT`: Server port (default: 3001)
+- `PORT`: Server port (default: 3223)
 - `DATA_DIR`: Directory for LevelDB data (default: './data')
 - `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
 
@@ -250,6 +239,21 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 1. The HTTP server stops accepting new connections
 2. The database is properly closed to prevent data corruption
 3. The process exits with appropriate status code (0 for success, 1 for errors)
+
+### Database Validation
+
+The service includes a validation command to verify database integrity:
+
+```bash
+pnpm validate
+```
+
+Validation performs the following checks:
+- Verifies all keys are valid labelhashes or are one of the special keys used internally by ENSRainbow
+- Ensures stored labels match their corresponding labelhashes
+- Validates the total rainbow record count
+- Verifies no ingestion is currently in progress
+- Reports detailed statistics including valid rainbow records, invalid labelhashes, and any labelhash mismatches
 
 ## License
 

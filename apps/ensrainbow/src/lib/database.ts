@@ -1,9 +1,31 @@
 import { join } from "path";
 import { ClassicLevel } from "classic-level";
-import { ByteArray } from "viem";
-import { LogLevel, createLogger } from "../utils/logger";
+import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
+import { ByteArray, labelhash } from "viem";
+
+import { byteArraysEqual } from "../utils/byte-utils";
+import { LogLevel, Logger, createLogger } from "../utils/logger";
+import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
+export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
+
+/**
+ * Checks if there's an incomplete ingestion and exits with a helpful error message if one is found
+ * @param db The ENSRainbow database instance
+ * @param logger The logger instance to use for error messages
+ */
+export async function exitIfIncompleteIngestion(db: ENSRainbowDB, logger: Logger): Promise<void> {
+  if (await isIngestionInProgress(db)) {
+    logger.error("Error: Database is in an incomplete state!");
+    logger.error("An ingestion was started but not completed successfully.");
+    logger.error("To fix this:");
+    logger.error("1. Delete the data directory");
+    logger.error("2. Run the ingestion command again: ensrainbow ingest <input-file>");
+    await db.close();
+    process.exit(1);
+  }
+}
 
 /**
  * Type representing the ENSRainbow LevelDB database.
@@ -33,14 +55,20 @@ export const createDatabase = async (
   logger.info(`Creating new database in directory: ${dataDir}`);
 
   try {
-    return new ClassicLevel<ByteArray, string>(dataDir, {
+    const db = new ClassicLevel<ByteArray, string>(dataDir, {
       keyEncoding: "view",
       valueEncoding: "utf8",
       createIfMissing: true,
       errorIfExists: true,
     });
+    logger.info("Opening database...");
+    await db.open();
+    return db;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("exists")) {
+    if (
+      (error as any).code === "LEVEL_DATABASE_NOT_OPEN" &&
+      (error as any).cause?.message?.includes("exists")
+    ) {
       logger.error(`Database already exists at ${dataDir}`);
       logger.error("If you want to use an existing database, use openDatabase() instead");
       logger.error(
@@ -54,17 +82,22 @@ export const createDatabase = async (
   }
 };
 
-export const openDatabase = (dataDir: string, logLevel: LogLevel = "info"): ENSRainbowDB => {
+export const openDatabase = async (
+  dataDir: string,
+  logLevel: LogLevel = "info",
+): Promise<ENSRainbowDB> => {
   const logger = createLogger(logLevel);
   logger.info(`Opening existing database in directory: ${dataDir}`);
 
   try {
-    return new ClassicLevel<ByteArray, string>(dataDir, {
+    const db = new ClassicLevel<ByteArray, string>(dataDir, {
       keyEncoding: "view",
       valueEncoding: "utf8",
       createIfMissing: false,
       errorIfExists: false,
     });
+    await db.open();
+    return db;
   } catch (error) {
     if (error instanceof Error && error.message.includes("does not exist")) {
       logger.error(`No database found at ${dataDir}`);
@@ -80,6 +113,38 @@ export const openDatabase = (dataDir: string, logLevel: LogLevel = "info"): ENSR
     process.exit(1);
   }
 };
+
+/**
+ * Check if an ingestion is in progress
+ * @param db The ENSRainbow database instance
+ * @returns true if an ingestion is in progress, false otherwise
+ */
+export async function isIngestionInProgress(db: ENSRainbowDB): Promise<boolean> {
+  const value = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
+  return value !== null;
+}
+
+/**
+ * Mark that an ingestion has started
+ * @param db The ENSRainbow database instance
+ */
+export async function markIngestionStarted(db: ENSRainbowDB): Promise<void> {
+  await db.put(INGESTION_IN_PROGRESS_KEY, "true");
+}
+
+/**
+ * Clear the ingestion in progress marker
+ * @param db The ENSRainbow database instance
+ */
+export async function clearIngestionMarker(db: ENSRainbowDB): Promise<void> {
+  try {
+    await db.del(INGESTION_IN_PROGRESS_KEY);
+  } catch (error) {
+    if ((error as any).code !== "LEVEL_NOT_FOUND") {
+      throw error;
+    }
+  }
+}
 
 /**
  * Helper function to safely get a value from the database.
@@ -100,5 +165,97 @@ export async function safeGet(db: ENSRainbowDB, key: ByteArray): Promise<string 
       return null;
     }
     throw error;
+  }
+}
+
+/**
+ * Validates the database contents.
+ * Returns true if validation passes, false if validation fails.
+ *
+ * @param db The ENSRainbow database instance
+ * @param logger The logger instance to use for messages
+ * @returns boolean indicating if validation passed
+ */
+export async function validate(db: ENSRainbowDB, logger: Logger): Promise<boolean> {
+  let totalKeys = 0;
+  let validHashes = 0;
+  let invalidHashes = 0;
+  let hashMismatches = 0;
+
+  logger.info("Starting database validation...");
+
+  // Check if ingestion is in progress
+  const ingestionInProgress = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
+  if (ingestionInProgress) {
+    logger.error("Database is in an invalid state: ingestion in progress flag is set");
+    return false;
+  }
+
+  // Validate each key-value pair
+  for await (const [key, value] of db.iterator()) {
+    totalKeys++;
+
+    // Skip keys not associated with rainbow records
+    if (
+      byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
+      byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+    ) {
+      continue;
+    }
+
+    // Verify key is a valid labelhash by converting it to hex string
+    const keyHex = `0x${Buffer.from(key).toString("hex")}` as `0x${string}`;
+    try {
+      labelHashToBytes(keyHex);
+      validHashes++;
+    } catch (e) {
+      logger.error(`Invalid labelhash key format: ${keyHex}`);
+      invalidHashes++;
+      continue;
+    }
+
+    // Verify hash matches label
+    const computedHash = labelHashToBytes(labelhash(value));
+    if (!byteArraysEqual(computedHash, key)) {
+      logger.error(
+        `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(computedHash).toString("hex")}`,
+      );
+      hashMismatches++;
+    }
+  }
+
+  let rainbowRecordCount = totalKeys;
+  // Verify count
+  const storedCount = await safeGet(db, LABELHASH_COUNT_KEY);
+
+  if (!storedCount) {
+    logger.error("Count key missing from database");
+    return false;
+  } else {
+    rainbowRecordCount = rainbowRecordCount - 1;
+  }
+
+  const parsedCount = parseNonNegativeInteger(storedCount);
+  if (parsedCount !== rainbowRecordCount) {
+    logger.error(`Count mismatch: stored=${parsedCount}, actual=${rainbowRecordCount}`);
+    return false;
+  } else {
+    logger.info(`Count verified: ${rainbowRecordCount} rainbow records`);
+  }
+
+  // Report results
+  logger.info("\nValidation Results:");
+  logger.info(`Total keys: ${totalKeys}`);
+  logger.info(`Valid rainbow records: ${validHashes}`);
+  logger.info(`Invalid rainbow records: ${invalidHashes}`);
+  logger.info(`labelhash mismatches: ${hashMismatches}`);
+
+  const hasErrors = invalidHashes > 0 || hashMismatches > 0;
+  if (hasErrors) {
+    logger.error("\nValidation failed! See errors above.");
+    return false;
+  } else {
+    logger.info("\nValidation successful! No errors found.");
+    return true;
   }
 }

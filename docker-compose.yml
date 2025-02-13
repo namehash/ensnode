@@ -1,24 +1,36 @@
 services:
-
   ensnode:
-      build:
-        dockerfile: ./apps/ensnode/Dockerfile
-      image: namehash/ensnode
-      ports:
-        - "42069:42069"
-      env_file:
-      - ./apps/ensnode/.env.local
-      environment:
-        # Override DATABASE_URL from .env.local to refer to docker compose postgres instance
-        DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
-        ENSRAINBOW_URL: https://ensrainbow:3000
-      depends_on:
-        - ensrainbow
-        - postgres
+    container_name: ensnode
+    image: namehash/ensnode
+    build:
+      dockerfile: ./apps/ensnode/Dockerfile
+    ports:
+      - "42069:42069"
+    env_file:
+    - ./apps/ensnode/.env.local
+    environment:
+      # Override DATABASE_URL to point to docker compose postgres
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
+      # Override ENSRAINBOW_URL to point to docker compose ensrainbow
+      ENSRAINBOW_URL: http://ensrainbow:3223
+    depends_on:
+      - ensrainbow
+      - postgres
+
+  ensrainbow:
+    container_name: ensrainbow
+    image: namehash/ensrainbow
+    build:
+      dockerfile: ./apps/ensrainbow/Dockerfile
+    environment:
+      PORT: 3223
+    ports:
+      - "3223:3223"
+    restart: unless-stopped
 
   postgres:
+    container_name: postgres
     image: postgres:17
-    container_name: postgres-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -27,16 +39,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  ensrainbow:
-    build:
-      dockerfile: ./apps/ensrainbow/Dockerfile
-    image: namehash/ensrainbow
-    ports:
-      - "3001:3000"
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped
 
 volumes:
   postgres_data:
