@@ -1,14 +1,14 @@
 /**
  * Cache that maps from string -> ValueType.
  */
-export interface Cache<Key extends string, Value> {
+export interface Cache<KeyType extends string, ValueType> {
   /**
    * Store a value in the cache with the given key.
    *
    * @param key Cache key
    * @param value Value to store
    */
-  set(key: Key, value: Value): void;
+  set(key: KeyType, value: ValueType): void;
 
   /**
    * Retrieve a value from the cache with the given key.
@@ -16,7 +16,7 @@ export interface Cache<Key extends string, Value> {
    * @param key Cache key
    * @returns The cached value if it exists, otherwise undefined
    */
-  get(key: Key): Value | undefined;
+  get(key: KeyType): ValueType | undefined;
 
   /**
    * Clear the cache.
@@ -35,13 +35,13 @@ export interface Cache<Key extends string, Value> {
 }
 
 /**
- * Cache with a LRU (least recently used) eviction policy.
+ * Cache that maps from string -> ValueType with a LRU (least recently used) eviction policy.
  *
  * `get` and `set` are O(1) operations.
  *
  * @link https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU
  */
-export class LruCache<ValueType> implements Cache<string, ValueType> {
+export class LruCache<KeyType extends string, ValueType> implements Cache<KeyType, ValueType> {
   private readonly _cache = new Map<string, ValueType>();
   private readonly _capacity: number;
 
