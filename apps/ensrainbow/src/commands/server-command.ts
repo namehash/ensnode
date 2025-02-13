@@ -2,9 +2,9 @@ import { serve } from "@hono/node-server";
 import type { HealthResponse } from "ensrainbow-sdk/types";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
-import { ENSRainbowDB, exitIfIncompleteIngestion, openDatabase } from "../lib/database.js";
-import { ENSRainbowServer } from "../lib/server.js";
-import { LogLevel, Logger, createLogger } from "../utils/logger.js";
+import { ENSRainbowDB, exitIfIncompleteIngestion, openDatabase } from "../lib/database";
+import { ENSRainbowServer } from "../lib/server";
+import { LogLevel, Logger, createLogger } from "../utils/logger";
 
 export interface ServerCommandOptions {
   dataDir: string;

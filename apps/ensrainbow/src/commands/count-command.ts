@@ -3,10 +3,10 @@ import {
   INGESTION_IN_PROGRESS_KEY,
   LABELHASH_COUNT_KEY,
   safeGet,
-} from "../lib/database.js";
-import { byteArraysEqual } from "../utils/byte-utils.js";
-import { LogLevel, createLogger } from "../utils/logger.js";
-import { parseNonNegativeInteger } from "../utils/number-utils.js";
+} from "../lib/database";
+import { byteArraysEqual } from "../utils/byte-utils";
+import { LogLevel, createLogger } from "../utils/logger";
+import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export interface CountCommandOptions {
   dataDir: string;
