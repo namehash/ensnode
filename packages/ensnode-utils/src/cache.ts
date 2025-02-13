@@ -1,99 +1,85 @@
-import { PriorityQueue } from "./queue";
-
-export interface ICache<Key extends string, Value> {
+export interface Cache<Key extends string, Value> {
   /**
-   * Store a value in the cache with the given key
+   * Store a value in the cache with the given key.
+   *
    * @param key Cache key
    * @param value Value to store
    */
   set(key: Key, value: Value): void;
 
   /**
-   * Retrieve a value from the cache
+   * Retrieve a value from the cache with the given key.
+   *
    * @param key Cache key
-   * @returns The stored value if exists and not expired, undefined otherwise
+   * @returns The cached value if it exists, otherwise undefined
    */
   get(key: Key): Value | undefined;
 
   /**
-   * Clean up resources and clear the cache
+   * Clear the cache.
    */
-  dispose(): void;
+  clear(): void;
+
+  /**
+   * The current number of items in the cache. Always a non-negative integer.
+   */
+  get size(): number;
+
+  /**
+   * The maximum number of items in the cache. Always a non-negative integer that is >= size().
+   */
+  get capacity(): number;
 }
 
-type Timestamp = number;
+/**
+ * Cache that maps from string -> ValueType with a LRU (least recently used) eviction policy.
+ *
+ * `get` and `set` are O(1) operations.
+ *
+ * @link https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU
+ */
+export class LruCache<ValueType> implements Cache<string, ValueType> {
+  private readonly _cache = new Map<string, ValueType>();
+  private readonly _capacity: number;
 
-export class MemoryCache<Key extends string, Value> implements ICache<Key, Value> {
-  private cache = new Map<Key, { value: Value; timestamp: Timestamp }>();
-  private expiryQueue = new ExpiryQueue<Timestamp, Key>();
-  private cleanupTimer: number;
+  public constructor(capacity: number) {
+    if (capacity < 0)
+      throw new Error(
+        `LruCache requires capacity greater than 0 but capacity of ${capacity} requested.`,
+      );
 
-  constructor(
-    private readonly ttl: number = 1 * 1000,
-    cleanupInterval: number = 5 * 1000,
-  ) {
-    this.cleanupTimer = setInterval(() => this.cleanup(), cleanupInterval) as unknown as number;
+    this._capacity = capacity;
   }
 
-  set(key: Key, value: Value): void {
-    const timestamp = Date.now() as Timestamp;
-    this.cache.set(key, { value, timestamp });
-    this.expiryQueue.push(timestamp, key);
-  }
+  public set(key: string, value: ValueType) {
+    this._cache.set(key, value);
 
-  get(key: Key): Value | undefined {
-    if (!this.cache.has(key)) {
-      return undefined;
-    }
-
-    const entry = this.cache.get(key)!;
-
-    if (Date.now() - entry.timestamp > this.ttl) {
-      this.cache.delete(key);
-      return undefined;
-    }
-
-    return entry.value;
-  }
-
-  private cleanup(): void {
-    const now = Date.now();
-    while (true) {
-      const oldest = this.expiryQueue.peek();
-      if (!oldest || now - oldest[0] <= this.ttl) break;
-
-      this.expiryQueue.pop();
-      // Only delete if the key in cache still has the same timestamp
-      const entry = this.cache.get(oldest[1]);
-      if (entry && entry.timestamp === oldest[0]) {
-        this.cache.delete(oldest[1]);
-      }
+    if (this._cache.size > this._capacity) {
+      // oldestKey is guaranteed to be defined
+      const oldestKey = this._cache.keys().next().value as string;
+      this._cache.delete(oldestKey);
     }
   }
 
-  dispose(): void {
-    clearInterval(this.cleanupTimer);
-    this.cache.clear();
-  }
-}
-
-export class ExpiryQueue<Timestamp extends number, Key> {
-  private queue: PriorityQueue<Timestamp, Key>;
-
-  constructor() {
-    // Sort by timestamp in ascending order
-    this.queue = new PriorityQueue((a, b) => a[0] - b[0]);
+  public get(key: string) {
+    const value = this._cache.get(key);
+    if (value) {
+      // The key is already in the cache, move it to the end (most recent)
+      this._cache.delete(key);
+      this._cache.set(key, value);
+    }
+    return value;
   }
 
-  push(timestamp: Timestamp, key: Key): void {
-    this.queue.push([timestamp, key]);
+  public clear() {
+    this._cache.clear();
   }
 
-  peek(): [Timestamp, Key] | undefined {
-    return this.queue.peek();
+  public get size() {
+    return this._cache.size;
   }
 
-  pop(): [Timestamp, Key] | undefined {
-    return this.queue.pop();
+  public get capacity() {
+    return this._capacity;
   }
 }

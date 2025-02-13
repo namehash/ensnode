@@ -18,13 +18,13 @@ export interface BaseHealResponse<Status extends StatusCode> {
 export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success> {
   status: typeof StatusCode.Success;
   label: string;
-  error?: undefined;
-  errorCode?: undefined;
+  error?: never;
+  errorCode?: never;
 }
 
 export interface HealError extends BaseHealResponse<typeof StatusCode.Error> {
   status: typeof StatusCode.Error;
-  label?: undefined;
+  label?: never;
   error: string;
   errorCode: ErrorCode;
 }
@@ -44,14 +44,14 @@ export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Succes
   /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
   count: number;
   timestamp: string;
-  error?: undefined;
-  errorCode?: undefined;
+  error?: never;
+  errorCode?: never;
 }
 
 export interface CountError extends BaseCountResponse<typeof StatusCode.Error> {
   status: typeof StatusCode.Error;
-  count?: undefined;
-  timestamp?: undefined;
+  count?: never;
+  timestamp?: never;
   error: string;
   errorCode: ErrorCode;
 }
