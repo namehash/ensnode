@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
     needs: image-build-and-push
-    if:  ${{ needs.image-build-and-push.outputs.tag }} != 'latest'
+    if:  ${{ needs.image-build-and-push.outputs.svc_id }}
     env:
         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         SVC_ID: ${{ needs.image-build-and-push.outputs.svc_id }}
