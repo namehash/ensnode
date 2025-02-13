@@ -6,27 +6,29 @@ export interface IPriorityQueue<T> {
   isEmpty(): boolean;
 }
 
-export class PriorityQueue<T> implements IPriorityQueue<T> {
-  private heap: T[] = [];
+export class PriorityQueue<Priority extends number, Value>
+  implements IPriorityQueue<[Priority, Value]>
+{
+  private heap: Array<[Priority, Value]> = [];
 
-  constructor(private readonly compare: (a: T, b: T) => number) {}
+  constructor(private readonly compare: (a: [Priority, Value], b: [Priority, Value]) => number) {}
 
-  push(item: T): void {
+  push(item: [Priority, Value]): void {
     this.heap.push(item);
     this.bubbleUp(this.heap.length - 1);
   }
 
-  peek(): T | undefined {
+  peek(): [Priority, Value] | undefined {
     return this.heap[0];
   }
 
-  pop(): T | undefined {
+  pop(): [Priority, Value] | undefined {
     if (this.isEmpty()) return undefined;
 
     const result = this.heap[0];
-    const last = this.heap.pop()!;
+    const last = this.heap.pop();
 
-    if (!this.isEmpty()) {
+    if (this.heap.length > 0 && last) {
       this.heap[0] = last;
       this.bubbleDown(0);
     }
@@ -45,12 +47,14 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
   private bubbleUp(index: number): void {
     while (index > 0) {
       const parentIndex = Math.floor((index - 1) / 2);
-      if (this.compare(this.heap[parentIndex], this.heap[index]) <= 0) break;
+      const parent = this.heap[parentIndex];
+      const current = this.heap[index];
 
-      [this.heap[parentIndex], this.heap[index]] = [
-        this.heap[index],
-        this.heap[parentIndex],
-      ];
+      if (!parent || !current) break;
+      if (this.compare(parent, current) <= 0) break;
+
+      this.heap[parentIndex] = current;
+      this.heap[index] = parent;
       index = parentIndex;
     }
   }
@@ -61,25 +65,25 @@ export class PriorityQueue<T> implements IPriorityQueue<T> {
       const leftChild = 2 * index + 1;
       const rightChild = 2 * index + 2;
 
-      if (
-        leftChild < this.heap.length &&
-        this.compare(this.heap[leftChild], this.heap[smallest]) < 0
-      ) {
+      const current = this.heap[smallest];
+      const left = this.heap[leftChild];
+      const right = this.heap[rightChild];
+
+      if (!current) break;
+
+      if (left && leftChild < this.heap.length && this.compare(left, current) < 0) {
         smallest = leftChild;
       }
-      if (
-        rightChild < this.heap.length &&
-        this.compare(this.heap[rightChild], this.heap[smallest]) < 0
-      ) {
+
+      if (right && rightChild < this.heap.length && this.compare(right, this.heap[smallest]!) < 0) {
         smallest = rightChild;
       }
 
       if (smallest === index) break;
 
-      [this.heap[index], this.heap[smallest]] = [
-        this.heap[smallest],
-        this.heap[index],
-      ];
+      const tmp = this.heap[index];
+      this.heap[index] = this.heap[smallest]!;
+      this.heap[smallest] = tmp!;
       index = smallest;
     }
   }

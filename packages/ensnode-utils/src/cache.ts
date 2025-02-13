@@ -23,29 +23,22 @@ export interface ICache<Key extends string, Value> {
 
 type Timestamp = number;
 
-export class MemoryCache<Key extends string, Value>
-  implements ICache<Key, Value>
-{
+export class MemoryCache<Key extends string, Value> implements ICache<Key, Value> {
   private cache = new Map<Key, { value: Value; timestamp: Timestamp }>();
-  private expiryQueue = new PriorityQueue<[Timestamp, Key]>(
-    (a, b) => a[0] - b[0]
-  );
+  private expiryQueue = new ExpiryQueue<Timestamp, Key>();
   private cleanupTimer: number;
 
   constructor(
     private readonly ttl: number = 1 * 1000,
-    cleanupInterval: number = 5 * 1000
+    cleanupInterval: number = 5 * 1000,
   ) {
-    this.cleanupTimer = setInterval(
-      () => this.cleanup(),
-      cleanupInterval
-    ) as unknown as number;
+    this.cleanupTimer = setInterval(() => this.cleanup(), cleanupInterval) as unknown as number;
   }
 
   set(key: Key, value: Value): void {
     const timestamp = Date.now() as Timestamp;
     this.cache.set(key, { value, timestamp });
-    this.expiryQueue.push([timestamp, key]);
+    this.expiryQueue.push(timestamp, key);
   }
 
   get(key: Key): Value | undefined {
@@ -85,10 +78,11 @@ export class MemoryCache<Key extends string, Value>
 }
 
 export class ExpiryQueue<Timestamp extends number, Key> {
-  private queue: PriorityQueue<[Timestamp, Key]>;
+  private queue: PriorityQueue<Timestamp, Key>;
 
   constructor() {
-    this.queue = new PriorityQueue<[Timestamp, Key]>((a, b) => a[0] - b[0]);
+    // Sort by timestamp in ascending order
+    this.queue = new PriorityQueue((a, b) => a[0] - b[0]);
   }
 
   push(timestamp: Timestamp, key: Key): void {

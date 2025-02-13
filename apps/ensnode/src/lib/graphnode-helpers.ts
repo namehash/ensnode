@@ -1,9 +1,12 @@
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk/client";
 import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
+import { HealResponse } from "@ensnode/ensrainbow-sdk/types";
+import { MemoryCache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
 import { ensRainbowEndpointUrl } from "./ponder-helpers";
 
 const ensRainbowApiClient = new EnsRainbowApiClient({
+  cache: new MemoryCache<Labelhash, HealResponse>(),
   endpointUrl: new URL(ensRainbowEndpointUrl()),
 });
 

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { type ICache, MemoryCache, ExpiryQueue } from "./cache";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ExpiryQueue, type ICache, MemoryCache } from "./cache";
 
 describe("MemoryCache", () => {
   let cache: ICache<string, string>;
@@ -111,8 +111,7 @@ describe("MemoryCache", () => {
       }
 
       // Calculate average operation time
-      const avgOperationTime =
-        operations.reduce((a, b) => a + b, 0) / operations.length;
+      const avgOperationTime = operations.reduce((a, b) => a + b, 0) / operations.length;
       expect(avgOperationTime).toBeLessThan(1); // Each operation should take less than 1ms
 
       // Verify heap operations are O(log n)
