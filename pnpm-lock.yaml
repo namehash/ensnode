@@ -19,8 +19,8 @@ catalogs:
       specifier: ^4.6.14
       version: 4.6.17
     ponder:
-      specifier: ^0.9.8
-      version: 0.9.8
+      specifier: ^0.9.10
+      version: 0.9.10
     typescript:
       specifier: ^5.7.3
       version: 5.7.3
@@ -64,7 +64,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.8(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+        version: 0.9.10(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
       ponder-schema:
         specifier: workspace:*
         version: link:../../packages/ponder-schema
@@ -242,7 +242,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.8(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+        version: 0.9.10(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
       viem:
         specifier: 'catalog:'
         version: 2.22.13(typescript@5.7.3)(zod@3.24.1)
@@ -3212,8 +3212,8 @@ packages:
   pkg-types@1.3.1:
     resolution: {integrity: sha512-/Jm5M4RvtBFVkKWRu2BLUTNP8/M2a+UwuAX+ae4770q1qVGtfjG+WTCupoZixokjmHiry8uI+dlY8KXYV5HVVQ==}
 
-  ponder@0.9.8:
-    resolution: {integrity: sha512-Ppv1b6soWjadoNyqj3GgQSWB5Sfps5WlSUzIE6mDGSkxHCHhEsQ4itc2Y3rvK9v817Cl7X4PIwzFswkcZWfKEg==}
+  ponder@0.9.10:
+    resolution: {integrity: sha512-WqyYPrbEhlVFsMI6AppSStecU8Z5pP+U6tvv5K+D6JHgCIcskJaezEcISTcK5FZogtz+opxggfEyx/cy3FklOg==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -7420,7 +7420,7 @@ snapshots:
       mlly: 1.7.4
       pathe: 2.0.2
 
-  ponder@0.9.8(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1):
+  ponder@0.9.10(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
