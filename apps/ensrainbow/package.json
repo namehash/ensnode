@@ -1,5 +1,5 @@
 {
-  "name": "@namehash/ensrainbow",
+  "name": "@ensnode/ensrainbow",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -27,15 +27,15 @@
     "@hono/node-server": "^1.4.1",
     "bun": "^1.2.2",
     "classic-level": "^1.4.1",
-    "ensnode-utils": "workspace:*",
-    "ensrainbow-sdk": "workspace:*",
+    "@ensnode/utils": "workspace:*",
+    "@ensnode/ensrainbow-sdk": "workspace:*",
     "hono": "catalog:",
     "progress": "^2.0.3",
     "viem": "catalog:",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:*",
+    "@ensnode/shared-configs": "workspace:*",
     "@types/node": "^20.17.14",
     "@types/progress": "^2.0.7",
     "@types/supertest": "^6.0.2",

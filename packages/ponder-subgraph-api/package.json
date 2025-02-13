@@ -1,5 +1,5 @@
 {
-  "name": "ponder-subgraph-api",
+  "name": "@ensnode/ponder-subgraph",
   "version": "0.0.1",
   "type": "module",
   "description": "A Hono middleware for generating Subgraph-compatible GraphQL schema.",
@@ -10,6 +10,7 @@
     "directory": "packages/ponder-subgraph-api"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-subgraph-api",
+  "keywords": ["Ponder", "Subgraph"],
   "exports": {
     "./middleware": "./src/middleware.ts"
   },
@@ -29,12 +30,15 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@namehash/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:",
     "@types/node": "catalog:",
     "hono": "catalog:",
     "typescript": "catalog:"
   },
   "peerDependencies": {
     "hono": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
