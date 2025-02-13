@@ -1,8 +1,10 @@
+import type { ICache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL } from "./consts";
 import type { HealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
+  cache?: ICache<Labelhash, HealResponse>;
   endpointUrl: URL;
 }
 
@@ -83,9 +85,22 @@ export class EnsRainbowApiClient {
    * ```
    */
   async heal(labelhash: Labelhash): Promise<HealResponse> {
-    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    if (this.options.cache) {
+      const cached = this.options.cache.get(labelhash);
 
-    return response.json() as Promise<HealResponse>;
+      if (cached) {
+        return cached;
+      }
+    }
+
+    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    const responseJson = (await response.json()) as HealResponse;
+
+    if (this.options.cache) {
+      this.options.cache.set(labelhash, responseJson);
+    }
+
+    return responseJson;
   }
 
   /**
