@@ -1,5 +1,5 @@
 {
-  "name": "@namehash/ens-deployments",
+  "name": "@ensnode/ens-deployments",
   "version": "0.0.1",
   "type": "module",
   "description": "Contract addresses and startBlocks for each ENS deployment",
@@ -22,7 +22,7 @@
     "ponder": "catalog:"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
   },

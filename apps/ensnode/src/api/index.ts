@@ -2,7 +2,7 @@ import { db } from "ponder:api";
 import schema from "ponder:schema";
 import { Hono } from "hono";
 import { client, graphql as ponderGraphQL } from "ponder";
-import { graphql as subgraphGraphQL } from "ponder-subgraph-api/middleware";
+import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 
 const app = new Hono();
 
@@ -33,7 +33,11 @@ app.use(
           schema.fusesSet,
           schema.expiryExtended,
         ],
-        RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+        RegistrationEvent: [
+          schema.nameRegistered,
+          schema.nameRenewed,
+          schema.nameTransferred,
+        ],
         ResolverEvent: [
           schema.addrChanged,
           schema.multicoinAddrChanged,
@@ -53,7 +57,7 @@ app.use(
         "Resolver.events": "ResolverEvent",
       },
     },
-  }),
+  })
 );
 
 export default app;

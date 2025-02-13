@@ -1,10 +1,18 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
-import type { Labelhash, Node } from "ensnode-utils/types";
+import {
+  ROOT_NODE,
+  isLabelIndexable,
+  makeSubnodeNamehash,
+} from "@ensnode/utils/subname-helpers";
+import type { Labelhash, Node } from "@ensnode/utils/types";
 import { type Hex, zeroAddress } from "viem";
-import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
+import {
+  createSharedEventValues,
+  upsertAccount,
+  upsertResolver,
+} from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";
 import { makeResolverId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
@@ -57,13 +65,18 @@ export async function setupRootNode({ context }: { context: Context }) {
 
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
   return (
-    domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
+    domain.resolverId === null &&
+    domain.ownerId === zeroAddress &&
+    domain.subdomainCount === 0
   );
 }
 
 // a more accurate name for the following function
 // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64
-async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
+async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+  context: Context,
+  node: Hex
+) {
   const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
@@ -74,7 +87,10 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
       .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
 
     // recurse to parent
-    return recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.parentId);
+    return recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+      context,
+      domain.parentId
+    );
   }
 }
 
@@ -131,7 +147,9 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           // attempt to heal the label associated with labelhash via ENSRainbow
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
           const healedLabel = await labelByHash(labelhash);
-          const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+          const validLabel = isLabelIndexable(healedLabel)
+            ? healedLabel
+            : undefined;
 
           // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
           // NOTE: for the root node, the parent is null, so we just use the label value as is
@@ -151,7 +169,10 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // garbage collect newly 'empty' domain iff necessary
         // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
-          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
+          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+            context,
+            domain.id
+          );
         }
 
         // log DomainEvent
@@ -182,12 +203,17 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       // ensure domain & update owner
       await context.db
         .insert(schema.domain)
-        .values([{ id: node, ownerId: owner, createdAt: event.block.timestamp }])
+        .values([
+          { id: node, ownerId: owner, createdAt: event.block.timestamp },
+        ])
         .onConflictDoUpdate({ ownerId: owner });
 
       // garbage collect newly 'empty' domain iff necessary
       if (owner === zeroAddress) {
-        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
+        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+          context,
+          node
+        );
       }
 
       // log DomainEvent
@@ -245,7 +271,10 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           .set({ resolverId: null, resolvedAddressId: null });
 
         // garbage collect newly 'empty' domain iff necessary
-        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
+        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+          context,
+          node
+        );
       } else {
         // otherwise upsert the resolver
         const resolver = await upsertResolver(context, {
@@ -274,7 +303,8 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           // ex: newResolver(id: "3745840-2") { id resolver {id} }
           // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
           // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
-          resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
+          resolverId:
+            resolverAddress === zeroAddress ? zeroAddress : resolverId,
         })
         .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },

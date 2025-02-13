@@ -1,8 +1,12 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Node } from "ensnode-utils/types";
+import type { Node } from "@ensnode/utils/types";
 import { Hex } from "viem";
-import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
+import {
+  createSharedEventValues,
+  upsertAccount,
+  upsertResolver,
+} from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
 import { hasNullByte, uniq } from "../lib/lib-helpers";
 import { EventWithArgs } from "../lib/ponder-helpers";
@@ -39,7 +43,9 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       // materialize the resolved addr to the domain iff this resolver is active
       const domain = await context.db.find(schema.domain, { id: node });
       if (domain?.resolverId === id) {
-        await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: address });
+        await context.db
+          .update(schema.domain, { id: node })
+          .set({ resolvedAddressId: address });
       }
 
       // log ResolverEvent
@@ -314,7 +320,9 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
       if (domain && domain.resolverId === id) {
-        await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: null });
+        await context.db
+          .update(schema.domain, { id: node })
+          .set({ resolvedAddressId: null });
       }
 
       await upsertResolver(context, {

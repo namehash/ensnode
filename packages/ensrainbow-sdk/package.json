@@ -1,5 +1,5 @@
 {
-  "name": "ensrainbow-sdk",
+  "name": "@ensnode/ensrainbow-sdk",
   "version": "0.0.1",
   "type": "module",
   "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
@@ -31,9 +31,9 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
-    "ensnode-utils": "workspace:",
+    "@ensnode/utils": "workspace:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },

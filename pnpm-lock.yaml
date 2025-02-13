@@ -53,27 +53,27 @@ importers:
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
-      '@namehash/ens-deployments':
+      '@ensnode/ens-deployments':
         specifier: workspace:*
         version: link:../../packages/ens-deployments
-      ensnode-utils:
-        specifier: workspace:*
-        version: link:../../packages/ensnode-utils
-      ensrainbow-sdk:
+      '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
         version: link:../../packages/ensrainbow-sdk
+      '@ensnode/ponder-schema':
+        specifier: workspace:*
+        version: link:../../packages/ponder-schema
+      '@ensnode/ponder-subgraph':
+        specifier: workspace:*
+        version: link:../../packages/ponder-subgraph-api
+      '@ensnode/utils':
+        specifier: workspace:*
+        version: link:../../packages/ensnode-utils
       hono:
         specifier: 'catalog:'
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
         version: 0.9.2(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
-      ponder-schema:
-        specifier: workspace:*
-        version: link:../../packages/ponder-schema
-      ponder-subgraph-api:
-        specifier: workspace:*
-        version: link:../../packages/ponder-subgraph-api
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -84,7 +84,7 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      '@namehash/shared-configs':
+      '@ensnode/shared-configs':
         specifier: 'workspace:'
         version: link:../../packages/shared-configs
       '@types/node':
@@ -99,18 +99,18 @@ importers:
 
   apps/ensrainbow:
     dependencies:
+      '@ensnode/ensrainbow-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ensrainbow-sdk
+      '@ensnode/utils':
+        specifier: workspace:*
+        version: link:../../packages/ensnode-utils
       '@hono/node-server':
         specifier: ^1.4.1
         version: 1.13.3(hono@4.6.17)
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
-      ensnode-utils:
-        specifier: workspace:*
-        version: link:../../packages/ensnode-utils
-      ensrainbow-sdk:
-        specifier: workspace:*
-        version: link:../../packages/ensrainbow-sdk
       hono:
         specifier: 'catalog:'
         version: 4.6.17
@@ -127,7 +127,7 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
-      '@namehash/shared-configs':
+      '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../../packages/shared-configs
       '@types/node':
@@ -191,7 +191,7 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      '@namehash/shared-configs':
+      '@ensnode/shared-configs':
         specifier: 'workspace:'
         version: link:../shared-configs
       typescript:
@@ -203,7 +203,7 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      '@namehash/shared-configs':
+      '@ensnode/shared-configs':
         specifier: 'workspace:'
         version: link:../shared-configs
       '@types/node':
@@ -228,10 +228,10 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      '@namehash/shared-configs':
+      '@ensnode/shared-configs':
         specifier: 'workspace:'
         version: link:../shared-configs
-      ensnode-utils:
+      '@ensnode/utils':
         specifier: 'workspace:'
         version: link:../ensnode-utils
       typescript:
@@ -253,7 +253,7 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      '@namehash/shared-configs':
+      '@ensnode/shared-configs':
         specifier: 'workspace:'
         version: link:../shared-configs
       typescript:
@@ -290,7 +290,7 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      '@namehash/shared-configs':
+      '@ensnode/shared-configs':
         specifier: 'workspace:'
         version: link:../shared-configs
       '@types/node':

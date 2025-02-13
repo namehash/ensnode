@@ -1,4 +1,4 @@
-import type { Labelhash } from "ensnode-utils/types";
+import type { Labelhash } from "@ensnode/utils/types";
 import { ByteArray, hexToBytes } from "viem";
 
 /**
@@ -10,7 +10,9 @@ import { ByteArray, hexToBytes } from "viem";
 export function labelHashToBytes(labelHash: Labelhash): ByteArray {
   try {
     if (labelHash.length !== 66) {
-      throw new Error(`Invalid labelhash length ${labelHash.length} characters (expected 66)`);
+      throw new Error(
+        `Invalid labelhash length ${labelHash.length} characters (expected 66)`
+      );
     }
     if (labelHash !== labelHash.toLowerCase()) {
       throw new Error("Labelhash must be in lowercase");
@@ -21,7 +23,9 @@ export function labelHashToBytes(labelHash: Labelhash): ByteArray {
     const bytes = hexToBytes(labelHash);
     if (bytes.length !== 32) {
       // should be redundant but keeping it for the principle of defensive programming
-      throw new Error(`Invalid labelhash length ${bytes.length} bytes (expected 32)`);
+      throw new Error(
+        `Invalid labelhash length ${bytes.length} bytes (expected 32)`
+      );
     }
     return bytes;
   } catch (e) {

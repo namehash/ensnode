@@ -1,4 +1,4 @@
-import type { Labelhash } from "ensnode-utils/types";
+import type { Labelhash } from "@ensnode/utils/types";
 import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
 import { ByteArray, labelhash } from "viem";
 import { byteArraysEqual } from "./byte-utils.js";
@@ -27,12 +27,14 @@ export interface RainbowRecordOptions {
  */
 export function buildRainbowRecord(
   line: string,
-  options: RainbowRecordOptions = {},
+  options: RainbowRecordOptions = {}
 ): RainbowRecord {
   const parts = line.trim().split("\t");
   if (parts.length !== 2) {
     throw new Error(
-      `Invalid line format - expected 2 columns but got ${parts.length}: "${line.slice(0, 100)}"`,
+      `Invalid line format - expected 2 columns but got ${
+        parts.length
+      }: "${line.slice(0, 100)}"`
     );
   }
 
@@ -43,7 +45,9 @@ export function buildRainbowRecord(
     const computedLabelHash = labelHashToBytes(labelhash(label) as Labelhash);
 
     if (!byteArraysEqual(labelHash, computedLabelHash)) {
-      throw new Error(`Labelhash validation failed: computed hash does not match provided hash`);
+      throw new Error(
+        `Labelhash validation failed: computed hash does not match provided hash`
+      );
     }
   }
 

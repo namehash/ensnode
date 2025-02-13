@@ -1,5 +1,5 @@
 {
-  "name": "ensnode-utils",
+  "name": "@ensnode/utils",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -28,7 +28,7 @@
     "viem": "^catalog:"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",

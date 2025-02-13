@@ -1,9 +1,16 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
-import type { Labelhash } from "ensnode-utils/types";
+import {
+  isLabelIndexable,
+  makeSubnodeNamehash,
+} from "@ensnode/utils/subname-helpers";
+import type { Labelhash } from "@ensnode/utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
-import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
+import {
+  createSharedEventValues,
+  upsertAccount,
+  upsertRegistration,
+} from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";
 import { makeRegistrationId } from "../lib/ids";
 import { EventWithArgs } from "../lib/ponder-helpers";
@@ -22,7 +29,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     context: Context,
     name: string,
     labelhash: Labelhash,
-    cost: bigint,
+    cost: bigint
   ) {
     // NOTE: ponder intentionally removes null bytes to spare users the footgun of
     // inserting null bytes into postgres. We don't like this behavior, though, because it's
@@ -40,7 +47,8 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     const domain = await context.db.find(schema.domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
-    if (!domain) throw new Error("domain expected in setNamePreimage but not found");
+    if (!domain)
+      throw new Error("domain expected in setNamePreimage but not found");
 
     if (domain.labelName !== name) {
       await context.db
@@ -87,7 +95,9 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       // only update the name if the label is indexable
       // undefined value means no change to the name
-      const name = isLabelIndexable(healedLabel) ? `${label}.${ownedName}` : undefined;
+      const name = isLabelIndexable(healedLabel)
+        ? `${label}.${ownedName}`
+        : undefined;
 
       // akin to domain.save() at
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
@@ -159,7 +169,9 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
       const id = makeRegistrationId(ownedName, labelhash, node);
 
-      await context.db.update(schema.registration, { id }).set({ expiryDate: expires });
+      await context.db
+        .update(schema.registration, { id })
+        .set({ expiryDate: expires });
 
       await context.db
         .update(schema.domain, { id: node })
@@ -193,8 +205,12 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       const registration = await context.db.find(schema.registration, { id });
       if (!registration) return;
 
-      await context.db.update(schema.registration, { id }).set({ registrantId: to });
-      await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
+      await context.db
+        .update(schema.registration, { id })
+        .set({ registrantId: to });
+      await context.db
+        .update(schema.domain, { id: node })
+        .set({ registrantId: to });
 
       // log RegistrationEvent
       await context.db

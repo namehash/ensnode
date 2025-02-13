@@ -1,5 +1,5 @@
 {
-  "name": "ponder-schema",
+  "name": "@ensnode/ponder-schema",
   "version": "0.0.1",
   "type": "module",
   "description": "The ponder schema for ENSNode",
@@ -26,7 +26,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
   },

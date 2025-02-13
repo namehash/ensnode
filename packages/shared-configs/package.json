@@ -1,5 +1,5 @@
 {
-  "name": "@namehash/shared-configs",
+  "name": "@ensnode/shared-configs",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -8,7 +8,10 @@
   "scripts": {
     "lint:ci": "biome ci"
   },
-  "files": ["./tsconfig.ponder.json", "./tsconfig.lib.json"],
+  "files": [
+    "./tsconfig.ponder.json",
+    "./tsconfig.lib.json"
+  ],
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"

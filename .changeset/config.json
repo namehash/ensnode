@@ -10,10 +10,9 @@
   "ignore": [
     "ensnode",
     "@ensnode/ensrainbow",
+    "@ensnode/utils",
 
     "@docs/ensnode",
-    "@docs/ensrainbow",
-
-    "ensnode-utils"
+    "@docs/ensrainbow"
   ]
 }
