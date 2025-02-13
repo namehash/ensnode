@@ -19,14 +19,21 @@ jobs:
       - name: Extract Branch Name
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
     
+      # We need to recognize which branch had push incomin
+      # Based on that create Docker image with corresponding label - use TAG variable for this
+      # For alhpa/subgraph TAG we need also to specify corresponding Railway SVC_ID which is used for service redeployment
       - name: Determine tag
         run: |
             if [[ "$BRANCH" == "main" ]]; then
             echo "TAG=latest" >> $GITHUB_ENV
             elif [[ "$BRANCH" == "alpha" ]]; then
             echo "TAG=alpha" >> $GITHUB_ENV
+            echo "SVC_ID=${{ secrets.ALPHA_SVC_ID }}" >> "$GITHUB_OUTPUT"
             elif [[ "$BRANCH" == "subgraph" ]]; then
             echo "TAG=subgraph" >> $GITHUB_ENV
+            echo "SVC_ID=${{ secrets.SUBGRAPH_SVC_ID }}" >> "$GITHUB_OUTPUT"
+            elif [[ "$BRANCH" == "feat/railway-ensnode-deployments" ]]; then
+            echo "TAG=latest" >> $GITHUB_ENV
             else
             echo "Branch not recognized, skipping workflow"
             exit 1
@@ -50,5 +57,5 @@ jobs:
       - name: Deploy ENSNode on Railway
         if:  ${{ needs.image-build-and-push.outputs.tag }} != 'latest'
         run: |
-         railway redeploy --service ${{ secrets.RAINBOW_SVC_ID }} --yes
+         railway redeploy --service ${{ needs.image-build-and-push.outputs.svc_id }} --yes
             
