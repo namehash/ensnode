@@ -11,6 +11,9 @@ on:
 jobs:
   image-build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.deterimne_tag.outputs.tag }}
+      output2: ${{ steps.deterimne_tag.outputs.svc_id }}
 
     steps:
       - name: Checkout repository
@@ -23,6 +26,7 @@ jobs:
       # Based on that create Docker image with corresponding label - use TAG variable for this
       # For alhpa/subgraph TAG we need also to specify corresponding Railway SVC_ID which is used for service redeployment
       - name: Determine tag
+        id: deterimne_tag
         run: |
             if [[ "$BRANCH" == "main" ]]; then
             echo "TAG=latest" >> $GITHUB_ENV
@@ -51,11 +55,12 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
     needs: image-build-and-push
+    if:  ${{ needs.image-build-and-push.outputs.tag }} != 'latest'
     env:
         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        SVC_ID: ${{ needs.image-build-and-push.outputs.svc_id }}
     steps:
       - name: Deploy ENSNode on Railway
-        if:  ${{ needs.image-build-and-push.outputs.tag }} != 'latest'
         run: |
-         railway redeploy --service ${{ needs.image-build-and-push.outputs.svc_id }} --yes
+         railway redeploy --service ${{ env.SVC_ID }} --yes
             
