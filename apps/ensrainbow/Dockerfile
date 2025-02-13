@@ -1,7 +1,8 @@
 # ensrainbow-data contains an already ingested DB that will be served by the ENSRainbow app
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
-FROM ghcr.io/namehash/ensnode/ensrainbow-data AS base
+FROM ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
 
+FROM node:18-slim AS base
 RUN apt-get update && \
     npm install -g pnpm
 WORKDIR /app
@@ -25,6 +26,10 @@ FROM app-deps AS app
 
 # cwd to ensrainbow
 WORKDIR /app/apps/ensrainbow
+
+# copy data dir from ensrainbow-data
+COPY --from=ensrainbow-data /app/apps/ensrainbow/data ./data
+COPY --from=ensrainbow-data /app/apps/ensrainbow/THE_GRAPH_LICENSE.txt ./data
 # Copy built files and dependencies
 COPY --from=app-deps /app/apps/ensrainbow/package*.json .
 COPY --from=app-deps /app/apps/ensrainbow/node_modules node_modules
