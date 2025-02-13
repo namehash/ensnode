@@ -1,5 +1,5 @@
-# ensrainbow-data contains already populated DB that will be served by the application
-# Using a prebuilt image reduces build time for infrequently changing data
+# ensrainbow-data contains an already ingested DB that will be served by the ENSRainbow app
+# Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
 FROM ghcr.io/namehash/ensnode/ensrainbow-data AS base
 
 RUN apt-get update && \
