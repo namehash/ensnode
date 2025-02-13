@@ -28,7 +28,7 @@ COPY apps ./apps
 RUN pnpm install --frozen-lockfile
 
 ###################
-## Runtime Stage — produces data dir artifact
+## Runtime Stage — ingest to produce data dir artifact
 ###################
 
 FROM ingest-deps AS ingest
