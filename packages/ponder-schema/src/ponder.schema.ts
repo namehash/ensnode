@@ -46,15 +46,33 @@ export const domain = onchainTable("domains", (t) => ({
 }));
 
 export const domainRelations = relations(domain, ({ one, many }) => ({
-  resolvedAddress: one(account, { fields: [domain.resolvedAddressId], references: [account.id] }),
+  resolvedAddress: one(account, {
+    fields: [domain.resolvedAddressId],
+    references: [account.id],
+  }),
   owner: one(account, { fields: [domain.ownerId], references: [account.id] }),
   parent: one(domain, { fields: [domain.parentId], references: [domain.id] }),
-  resolver: one(resolver, { fields: [domain.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [domain.resolverId],
+    references: [resolver.id],
+  }),
   subdomains: many(domain, { relationName: "parent" }),
-  registrant: one(account, { fields: [domain.registrantId], references: [account.id] }),
-  wrappedOwner: one(account, { fields: [domain.wrappedOwnerId], references: [account.id] }),
-  wrappedDomain: one(wrappedDomain, { fields: [domain.id], references: [wrappedDomain.domainId] }),
-  registration: one(registration, { fields: [domain.id], references: [registration.domainId] }),
+  registrant: one(account, {
+    fields: [domain.registrantId],
+    references: [account.id],
+  }),
+  wrappedOwner: one(account, {
+    fields: [domain.wrappedOwnerId],
+    references: [account.id],
+  }),
+  wrappedDomain: one(wrappedDomain, {
+    fields: [domain.id],
+    references: [wrappedDomain.domainId],
+  }),
+  registration: one(registration, {
+    fields: [domain.id],
+    references: [registration.domainId],
+  }),
 
   // event relations
   transfers: many(transfer),
@@ -100,10 +118,7 @@ export const resolver = onchainTable("resolvers", (t) => ({
   contentHash: t.text("content_hash"),
   // The set of observed text record keys for this resolver
   // NOTE: we avoid .notNull.default([]) to match subgraph behavior
-  // NOTE: due to a serialization bug (likely in drizzle), we temporarily use a jsonb column here
-  // https://github.com/ponder-sh/ponder/issues/1484
-  // TODO: revert back to t.text().array(),
-  texts: t.jsonb().$type<string[]>(),
+  texts: t.text().array(),
   // The set of observed SLIP-44 coin types for this resolver
   // NOTE: we avoid .notNull.default([]) to match subgraph behavior
   coinTypes: t.bigint().array(),
@@ -148,8 +163,14 @@ export const registration = onchainTable("registrations", (t) => ({
 }));
 
 export const registrationRelations = relations(registration, ({ one, many }) => ({
-  domain: one(domain, { fields: [registration.domainId], references: [domain.id] }),
-  registrant: one(account, { fields: [registration.registrantId], references: [account.id] }),
+  domain: one(domain, {
+    fields: [registration.domainId],
+    references: [domain.id],
+  }),
+  registrant: one(account, {
+    fields: [registration.registrantId],
+    references: [account.id],
+  }),
 
   // event relations
   nameRegistereds: many(nameRegistered),
@@ -177,8 +198,14 @@ export const wrappedDomain = onchainTable("wrapped_domains", (t) => ({
 }));
 
 export const wrappedDomainRelations = relations(wrappedDomain, ({ one }) => ({
-  domain: one(domain, { fields: [wrappedDomain.domainId], references: [domain.id] }),
-  owner: one(account, { fields: [wrappedDomain.ownerId], references: [account.id] }),
+  domain: one(domain, {
+    fields: [wrappedDomain.domainId],
+    references: [domain.id],
+  }),
+  owner: one(account, {
+    fields: [wrappedDomain.ownerId],
+    references: [account.id],
+  }),
 }));
 
 /**
@@ -447,12 +474,21 @@ export const transferRelations = relations(transfer, ({ one }) => ({
 export const newOwnerRelations = relations(newOwner, ({ one }) => ({
   domain: one(domain, { fields: [newOwner.domainId], references: [domain.id] }),
   owner: one(account, { fields: [newOwner.ownerId], references: [account.id] }),
-  parentDomain: one(domain, { fields: [newOwner.parentDomainId], references: [domain.id] }),
+  parentDomain: one(domain, {
+    fields: [newOwner.parentDomainId],
+    references: [domain.id],
+  }),
 }));
 
 export const newResolverRelations = relations(newResolver, ({ one }) => ({
-  domain: one(domain, { fields: [newResolver.domainId], references: [domain.id] }),
-  resolver: one(resolver, { fields: [newResolver.resolverId], references: [resolver.id] }),
+  domain: one(domain, {
+    fields: [newResolver.domainId],
+    references: [domain.id],
+  }),
+  resolver: one(resolver, {
+    fields: [newResolver.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const newTTLRelations = relations(newTTL, ({ one }) => ({
@@ -460,18 +496,36 @@ export const newTTLRelations = relations(newTTL, ({ one }) => ({
 }));
 
 export const wrappedTransferRelations = relations(wrappedTransfer, ({ one }) => ({
-  domain: one(domain, { fields: [wrappedTransfer.domainId], references: [domain.id] }),
-  owner: one(account, { fields: [wrappedTransfer.ownerId], references: [account.id] }),
+  domain: one(domain, {
+    fields: [wrappedTransfer.domainId],
+    references: [domain.id],
+  }),
+  owner: one(account, {
+    fields: [wrappedTransfer.ownerId],
+    references: [account.id],
+  }),
 }));
 
 export const nameWrappedRelations = relations(nameWrapped, ({ one }) => ({
-  domain: one(domain, { fields: [nameWrapped.domainId], references: [domain.id] }),
-  owner: one(account, { fields: [nameWrapped.ownerId], references: [account.id] }),
+  domain: one(domain, {
+    fields: [nameWrapped.domainId],
+    references: [domain.id],
+  }),
+  owner: one(account, {
+    fields: [nameWrapped.ownerId],
+    references: [account.id],
+  }),
 }));
 
 export const nameUnwrappedRelations = relations(nameUnwrapped, ({ one }) => ({
-  domain: one(domain, { fields: [nameUnwrapped.domainId], references: [domain.id] }),
-  owner: one(account, { fields: [nameUnwrapped.ownerId], references: [account.id] }),
+  domain: one(domain, {
+    fields: [nameUnwrapped.domainId],
+    references: [domain.id],
+  }),
+  owner: one(account, {
+    fields: [nameUnwrapped.ownerId],
+    references: [account.id],
+  }),
 }));
 
 export const fusesSetRelations = relations(fusesSet, ({ one }) => ({
@@ -479,7 +533,10 @@ export const fusesSetRelations = relations(fusesSet, ({ one }) => ({
 }));
 
 export const expiryExtendedRelations = relations(expiryExtended, ({ one }) => ({
-  domain: one(domain, { fields: [expiryExtended.domainId], references: [domain.id] }),
+  domain: one(domain, {
+    fields: [expiryExtended.domainId],
+    references: [domain.id],
+  }),
 }));
 
 // Registration Event Relations
@@ -489,7 +546,10 @@ export const nameRegisteredRelations = relations(nameRegistered, ({ one }) => ({
     fields: [nameRegistered.registrationId],
     references: [registration.id],
   }),
-  registrant: one(account, { fields: [nameRegistered.registrantId], references: [account.id] }),
+  registrant: one(account, {
+    fields: [nameRegistered.registrantId],
+    references: [account.id],
+  }),
 }));
 
 export const nameRenewedRelations = relations(nameRenewed, ({ one }) => ({
@@ -504,48 +564,84 @@ export const nameTransferredRelations = relations(nameTransferred, ({ one }) => 
     fields: [nameTransferred.registrationId],
     references: [registration.id],
   }),
-  newOwner: one(account, { fields: [nameTransferred.newOwnerId], references: [account.id] }),
+  newOwner: one(account, {
+    fields: [nameTransferred.newOwnerId],
+    references: [account.id],
+  }),
 }));
 
 // Resolver Event Relations
 
 export const addrChangedRelations = relations(addrChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [addrChanged.resolverId], references: [resolver.id] }),
-  addr: one(account, { fields: [addrChanged.addrId], references: [account.id] }),
+  resolver: one(resolver, {
+    fields: [addrChanged.resolverId],
+    references: [resolver.id],
+  }),
+  addr: one(account, {
+    fields: [addrChanged.addrId],
+    references: [account.id],
+  }),
 }));
 
 export const multicoinAddrChangedRelations = relations(multicoinAddrChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [multicoinAddrChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [multicoinAddrChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const nameChangedRelations = relations(nameChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [nameChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [nameChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const abiChangedRelations = relations(abiChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [abiChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [abiChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const pubkeyChangedRelations = relations(pubkeyChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [pubkeyChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [pubkeyChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const textChangedRelations = relations(textChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [textChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [textChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const contenthashChangedRelations = relations(contenthashChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [contenthashChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [contenthashChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const interfaceChangedRelations = relations(interfaceChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [interfaceChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [interfaceChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const authorisationChangedRelations = relations(authorisationChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [authorisationChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [authorisationChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));
 
 export const versionChangedRelations = relations(versionChanged, ({ one }) => ({
-  resolver: one(resolver, { fields: [versionChanged.resolverId], references: [resolver.id] }),
+  resolver: one(resolver, {
+    fields: [versionChanged.resolverId],
+    references: [resolver.id],
+  }),
 }));

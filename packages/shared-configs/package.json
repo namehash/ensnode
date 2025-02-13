@@ -1,5 +1,5 @@
 {
-  "name": "@namehash/shared-configs",
+  "name": "@ensnode/shared-configs",
   "private": true,
   "version": "0.0.1",
   "type": "module",

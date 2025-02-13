@@ -1,5 +1,5 @@
-import { ErrorCode, StatusCode } from "ensrainbow-sdk/consts";
-import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
+import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
+import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import {
   CountError,
   CountResponse,
@@ -7,7 +7,7 @@ import {
   HealError,
   HealResponse,
   HealSuccess,
-} from "ensrainbow-sdk/types";
+} from "@ensnode/ensrainbow-sdk/types";
 import { ByteArray } from "viem";
 import { LogLevel, Logger, createLogger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";

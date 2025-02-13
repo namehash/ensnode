@@ -1,5 +1,5 @@
+import type { HealthResponse } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
-import type { HealthResponse } from "ensrainbow-sdk/types";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { ENSRainbowDB, exitIfIncompleteIngestion, openDatabase } from "../lib/database";

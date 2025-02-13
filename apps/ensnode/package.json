@@ -23,19 +23,19 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
-    "@namehash/ens-deployments": "workspace:*",
-    "ensnode-utils": "workspace:*",
-    "ensrainbow-sdk": "workspace:*",
+    "@ensnode/ens-deployments": "workspace:*",
+    "@ensnode/utils": "workspace:*",
+    "@ensnode/ensrainbow-sdk": "workspace:*",
     "hono": "catalog:",
     "ponder": "catalog:",
-    "ponder-schema": "workspace:*",
-    "ponder-subgraph-api": "workspace:*",
+    "@ensnode/ponder-schema": "workspace:*",
+    "@ensnode/ponder-subgraph": "workspace:*",
     "ts-deepmerge": "^7.0.2",
     "viem": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@namehash/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

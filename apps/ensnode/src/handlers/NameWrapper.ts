@@ -1,8 +1,8 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { decodeDNSPacketBytes, uint256ToHex32 } from "ensnode-utils/subname-helpers";
-import type { Node } from "ensnode-utils/types";
+import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
+import type { Node } from "@ensnode/utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 import { createSharedEventValues, upsertAccount } from "../lib/db-helpers";
 import { makeEventId } from "../lib/ids";

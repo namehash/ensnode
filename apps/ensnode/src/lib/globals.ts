@@ -8,7 +8,8 @@
  * Additionally, we specify the global start/end block range that is currently helpful for development.
  */
 
-import DeploymentConfigs from "@namehash/ens-deployments";
+import DeploymentConfigs from "@ensnode/ens-deployments";
+import type { ContractConfig } from "ponder";
 import { getEnsDeploymentChain } from "./ponder-helpers";
 
 export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChain()];

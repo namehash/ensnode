@@ -5,10 +5,12 @@
   "packageManager": "pnpm@9.12.0",
   "scripts": {
     "lint": "biome check --write .",
-    "lint:ci": "biome ci"
+    "lint:ci": "biome ci",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.27.12",
     "typescript": "catalog:"
   },
   "engines": {
