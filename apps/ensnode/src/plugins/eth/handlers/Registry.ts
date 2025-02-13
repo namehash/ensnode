@@ -1,6 +1,6 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { ROOT_NODE, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
+import { ROOT_NODE, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
 import { type Hex } from "viem";
 import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";

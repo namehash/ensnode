@@ -1,8 +1,8 @@
 import { db } from "ponder:api";
 import schema from "ponder:schema";
+import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 import { Hono } from "hono";
 import { client, graphql as ponderGraphQL } from "ponder";
-import { graphql as subgraphGraphQL } from "ponder-subgraph-api/middleware";
 
 const app = new Hono();
 

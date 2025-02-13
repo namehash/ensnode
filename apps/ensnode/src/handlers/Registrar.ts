@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { isLabelIndexable, makeSubnodeNamehash } from "ensnode-utils/subname-helpers";
-import type { Labelhash } from "ensnode-utils/types";
+import { isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
+import type { Labelhash } from "@ensnode/utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";

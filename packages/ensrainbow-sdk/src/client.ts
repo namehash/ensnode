@@ -1,4 +1,4 @@
-import type { Labelhash } from "ensnode-utils/types";
+import type { Labelhash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL } from "./consts";
 import type { HealResponse } from "./types";
 

@@ -1,6 +1,6 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Node } from "ensnode-utils/types";
+import type { Node } from "@ensnode/utils/types";
 import { Hex } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";

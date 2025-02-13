@@ -1,5 +1,5 @@
 {
-  "name": "ensrainbow-sdk",
+  "name": "@ensnode/ensrainbow-sdk",
   "version": "0.0.1",
   "type": "module",
   "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
@@ -10,6 +10,7 @@
     "directory": "packages/ensrainbow-sdk"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk",
+  "keywords": ["ENS", "ENSNode", "ENSRainbow"],
   "exports": {
     "./client": "./src/client.ts",
     "./consts": "./src/consts.ts",
@@ -22,14 +23,17 @@
     "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
-  "dependencies": {
+  "peerDependencies": {
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@namehash/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
-    "ensnode-utils": "workspace:",
+    "@ensnode/utils": "workspace:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
