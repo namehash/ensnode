@@ -1,11 +1,13 @@
 import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import {
-  CountError,
   CountResponse,
+  CountServerError,
   CountSuccess,
-  HealError,
+  HealBadRequestError,
+  HealNotFoundError,
   HealResponse,
+  HealServerError,
   HealSuccess,
 } from "@ensnode/ensrainbow-sdk/types";
 import { ByteArray } from "viem";
@@ -33,7 +35,7 @@ export class ENSRainbowServer {
         status: StatusCode.Error,
         error: (error as Error).message ?? defaultErrorMsg,
         errorCode: ErrorCode.BadRequest,
-      } satisfies HealError;
+      } satisfies HealBadRequestError;
     }
 
     try {
@@ -44,7 +46,7 @@ export class ENSRainbowServer {
           status: StatusCode.Error,
           error: "Label not found",
           errorCode: ErrorCode.NotFound,
-        } satisfies HealError;
+        } satisfies HealNotFoundError;
       }
 
       this.logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
@@ -58,7 +60,7 @@ export class ENSRainbowServer {
         status: StatusCode.Error,
         error: "Internal server error",
         errorCode: ErrorCode.ServerError,
-      } satisfies HealError;
+      } satisfies HealServerError;
     }
   }
 
@@ -70,7 +72,7 @@ export class ENSRainbowServer {
           status: StatusCode.Error,
           error: "Label count not initialized. Check that the ingest command has been run.",
           errorCode: ErrorCode.ServerError,
-        } satisfies CountError;
+        } satisfies CountServerError;
       }
 
       const count = parseNonNegativeInteger(countStr);
@@ -80,7 +82,7 @@ export class ENSRainbowServer {
           status: StatusCode.Error,
           error: "Internal server error: Invalid label count format",
           errorCode: ErrorCode.ServerError,
-        } satisfies CountError;
+        } satisfies CountServerError;
       }
 
       return {
@@ -94,7 +96,7 @@ export class ENSRainbowServer {
         status: StatusCode.Error,
         error: "Internal server error",
         errorCode: ErrorCode.ServerError,
-      } satisfies CountError;
+      } satisfies CountServerError;
     }
   }
 }

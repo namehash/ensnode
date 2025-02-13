@@ -48,15 +48,15 @@ export interface HealBadRequestError
 
 export type HealResponse = HealSuccess | HealNotFoundError | HealServerError | HealBadRequestError;
 
-export interface BaseCountResponse<Status extends StatusCode> {
+export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
   status: Status;
   count?: number | undefined;
   timestamp?: string | undefined;
   error?: string | undefined;
-  errorCode?: ErrorCode | undefined;
+  errorCode?: Error | undefined;
 }
 
-export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success> {
+export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success, never> {
   status: typeof StatusCode.Success;
   /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
   count: number;
@@ -65,12 +65,13 @@ export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Succes
   errorCode?: never;
 }
 
-export interface CountError extends BaseCountResponse<typeof StatusCode.Error> {
+export interface CountServerError
+  extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
   status: typeof StatusCode.Error;
   count?: never;
   timestamp?: never;
   error: string;
-  errorCode: ErrorCode;
+  errorCode: typeof ErrorCode.ServerError;
 }
 
-export type CountResponse = CountSuccess | CountError;
+export type CountResponse = CountSuccess | CountServerError;
