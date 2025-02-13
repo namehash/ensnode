@@ -4,6 +4,10 @@ RUN apt-get update && \
     npm install -g pnpm 
 WORKDIR /app
 
+# Define the environment variables during the build process
+ARG VITE_ENSNODE_URL
+ENV VITE_ENSNODE_URL=${VITE_ENSNODE_URL}
+
 # Copy pnpm workspace configuration files from the root directory
 COPY pnpm-workspace.yaml ./
 # Copy the root package.json and lockfile
