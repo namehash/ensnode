@@ -29,11 +29,9 @@ WORKDIR /app/apps/ensrainbow
 
 # copy data dir from ensrainbow-data
 COPY --from=ensrainbow-data /app/apps/ensrainbow/data ./data
-COPY --from=ensrainbow-data /app/apps/ensrainbow/THE_GRAPH_LICENSE.txt ./data
 # Copy built files and dependencies
 COPY --from=app-deps /app/apps/ensrainbow/package*.json .
 COPY --from=app-deps /app/apps/ensrainbow/node_modules node_modules
-COPY --from=app-deps /app/apps/ensrainbow/dist dist
 
 # Set environment variables
 ENV NODE_ENV=production
