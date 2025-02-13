@@ -1,5 +1,5 @@
 {
-  "extends": "@namehash/shared-configs/tsconfig.lib.json",
+  "extends": "@ensnode/shared-configs/tsconfig.lib.json",
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "**/*.test.ts"]
 }

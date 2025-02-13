@@ -1,6 +1,6 @@
 import { tmpdir } from "os";
 import { join } from "path";
-import { labelHashToBytes } from "ensrainbow-sdk/label-utils";
+import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
