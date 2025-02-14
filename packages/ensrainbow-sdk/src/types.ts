@@ -8,52 +8,100 @@ export interface HealthResponse {
   status: "ok";
 }
 
-export interface BaseHealResponse<Status extends StatusCode> {
+export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
   status: Status;
   label?: string | undefined;
   error?: string | undefined;
-  errorCode?: ErrorCode | undefined;
+  errorCode?: Error | undefined;
 }
 
-export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success> {
+export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success, never> {
   status: typeof StatusCode.Success;
   label: string;
-  error?: undefined;
-  errorCode?: undefined;
+  error?: never;
+  errorCode?: never;
 }
 
-export interface HealError extends BaseHealResponse<typeof StatusCode.Error> {
+export interface HealNotFoundError
+  extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.NotFound> {
   status: typeof StatusCode.Error;
-  label?: undefined;
+  label?: never;
   error: string;
-  errorCode: ErrorCode;
+  errorCode: typeof ErrorCode.NotFound;
 }
 
-export type HealResponse = HealSuccess | HealError;
+export interface HealServerError
+  extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
+  status: typeof StatusCode.Error;
+  label?: never;
+  error: string;
+  errorCode: typeof ErrorCode.ServerError;
+}
 
-export interface BaseCountResponse<Status extends StatusCode> {
+export interface HealBadRequestError
+  extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.BadRequest> {
+  status: typeof StatusCode.Error;
+  label?: never;
+  error: string;
+  errorCode: typeof ErrorCode.BadRequest;
+}
+
+export type HealResponse = HealSuccess | HealNotFoundError | HealServerError | HealBadRequestError;
+export type HealError = Exclude<HealResponse, HealSuccess>;
+
+/**
+ * Server errors should not be cached.
+ */
+export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
+
+/**
+ * Determine if a heal response is an error.
+ *
+ * @param response the heal response to check
+ * @returns true if the response is an error, false otherwise
+ */
+export const isHealError = (response: HealResponse): response is HealError => {
+  return response.status === StatusCode.Error;
+};
+
+/**
+ * Determine if a heal response is cacheable.
+ *
+ * Server errors at not cachable and should be retried.
+ *
+ * @param response the heal response to check
+ * @returns true if the response is cacheable, false otherwise
+ */
+export const isCacheableHealResponse = (
+  response: HealResponse,
+): response is CacheableHealResponse => {
+  return response.status !== StatusCode.Error || response.errorCode !== ErrorCode.ServerError;
+};
+
+export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
   status: Status;
   count?: number | undefined;
   timestamp?: string | undefined;
   error?: string | undefined;
-  errorCode?: ErrorCode | undefined;
+  errorCode?: Error | undefined;
 }
 
-export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success> {
+export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success, never> {
   status: typeof StatusCode.Success;
   /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
   count: number;
   timestamp: string;
-  error?: undefined;
-  errorCode?: undefined;
+  error?: never;
+  errorCode?: never;
 }
 
-export interface CountError extends BaseCountResponse<typeof StatusCode.Error> {
+export interface CountServerError
+  extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
   status: typeof StatusCode.Error;
-  count?: undefined;
-  timestamp?: undefined;
+  count?: never;
+  timestamp?: never;
   error: string;
-  errorCode: ErrorCode;
+  errorCode: typeof ErrorCode.ServerError;
 }
 
-export type CountResponse = CountSuccess | CountError;
+export type CountResponse = CountSuccess | CountServerError;

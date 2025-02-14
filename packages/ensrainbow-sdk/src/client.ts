@@ -1,10 +1,21 @@
-import type { ICache } from "@ensnode/utils/cache";
+import type { Cache } from "@ensnode/utils/cache";
+import { LruCache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL } from "./consts";
-import type { HealResponse } from "./types";
+import type { CacheableHealResponse, HealResponse } from "./types";
+import { isCacheableHealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
-  cache?: ICache<Labelhash, HealResponse>;
+  /**
+   * The maximum number of `HealResponse` values to cache.
+   * Must be a non-negative integer.
+   * Setting to 0 will disable caching.
+   */
+  cacheCapacity: number;
+
+  /**
+   * The URL of the ENSRainbow API endpoint.
+   */
   endpointUrl: URL;
 }
 
@@ -23,6 +34,9 @@ export interface EnsRainbowApiClientOptions {
  */
 export class EnsRainbowApiClient {
   private readonly options: EnsRainbowApiClientOptions;
+  private readonly cache: Cache<Labelhash, CacheableHealResponse>;
+
+  public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
   /**
    * Create default client options.
@@ -32,6 +46,7 @@ export class EnsRainbowApiClient {
   static defaultOptions(): EnsRainbowApiClientOptions {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
+      cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
     };
   }
 
@@ -40,6 +55,8 @@ export class EnsRainbowApiClient {
       ...EnsRainbowApiClient.defaultOptions(),
       ...options,
     };
+
+    this.cache = new LruCache<Labelhash, CacheableHealResponse>(this.options.cacheCapacity);
   }
 
   /**
@@ -85,22 +102,20 @@ export class EnsRainbowApiClient {
    * ```
    */
   async heal(labelhash: Labelhash): Promise<HealResponse> {
-    if (this.options.cache) {
-      const cached = this.options.cache.get(labelhash);
+    const cachedResult = this.cache.get(labelhash);
 
-      if (cached) {
-        return cached;
-      }
+    if (cachedResult) {
+      return cachedResult;
     }
 
     const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
-    const responseJson = (await response.json()) as HealResponse;
+    const healResponse = (await response.json()) as HealResponse;
 
-    if (this.options.cache) {
-      this.options.cache.set(labelhash, responseJson);
+    if (isCacheableHealResponse(healResponse)) {
+      this.cache.set(labelhash, healResponse);
     }
 
-    return responseJson;
+    return healResponse;
   }
 
   /**

@@ -3,9 +3,13 @@ import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import type {
   CountResponse,
-  HealError,
+  CountServerError,
+  CountSuccess,
+  HealBadRequestError,
+  HealNotFoundError,
   HealResponse,
   HealSuccess,
+  HealthResponse,
 } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
 import { labelhash } from "viem";
@@ -79,7 +83,7 @@ describe("Server Command Tests", () => {
       const response = await fetch(`http://localhost:${port}/v1/heal/invalid-hash`);
       expect(response.status).toBe(400);
       const data = (await response.json()) as HealResponse;
-      const expectedData: HealError = {
+      const expectedData: HealBadRequestError = {
         status: StatusCode.Error,
         error: "Invalid labelhash length 12 characters (expected 66)",
         errorCode: ErrorCode.BadRequest,
@@ -92,7 +96,7 @@ describe("Server Command Tests", () => {
       const response = await fetch(`http://localhost:${port}/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
       const data = (await response.json()) as HealResponse;
-      const expectedData: HealError = {
+      const expectedData: HealNotFoundError = {
         status: StatusCode.Error,
         error: "Label not found",
         errorCode: ErrorCode.NotFound,
@@ -106,7 +110,10 @@ describe("Server Command Tests", () => {
       const response = await fetch(`http://localhost:${port}/health`);
       expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data).toEqual({ status: "ok" });
+      const expectedData: HealthResponse = {
+        status: "ok",
+      };
+      expect(data).toEqual(expectedData);
     });
   });
 
@@ -115,11 +122,12 @@ describe("Server Command Tests", () => {
       const response = await fetch(`http://localhost:${port}/v1/labels/count`);
       expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
-      expect(data.status).toEqual(StatusCode.Error);
-      expect(data.error).toBe(
-        "Label count not initialized. Check that the ingest command has been run.",
-      );
-      expect(data.errorCode).toEqual(ErrorCode.ServerError);
+      const expectedData: CountServerError = {
+        status: StatusCode.Error,
+        error: "Label count not initialized. Check that the ingest command has been run.",
+        errorCode: ErrorCode.ServerError,
+      };
+      expect(data).toEqual(expectedData);
     });
 
     it("should return correct count from LABEL_COUNT_KEY", async () => {
@@ -129,9 +137,12 @@ describe("Server Command Tests", () => {
       const response = await fetch(`http://localhost:${port}/v1/labels/count`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as CountResponse;
-      expect(data.status).toEqual(StatusCode.Success);
-      expect(data.count).toBe(42);
-      expect(typeof data.timestamp).toBe("string");
+      const expectedData: CountSuccess = {
+        status: StatusCode.Success,
+        count: 42,
+        timestamp: expect.any(String),
+      };
+      expect(data).toEqual(expectedData);
       expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
     });
   });
