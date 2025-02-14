@@ -2,8 +2,6 @@
 
 ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a simple API endpoint to heal ENS labelhashes back to their original labels.
 
-Special thanks to [The Graph](https://thegraph.com/) for their work to generate the [original ENS rainbow table](https://github.com/graphprotocol/ens-rainbow) used in the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph).
-
 ## Prerequisites
 
 - Docker installed on your system
@@ -295,6 +293,10 @@ If you need to start fresh with the database:
 1. Stop any running ENSRainbow processes
 2. Delete the LevelDB data directory (default: './data')
 3. Run the ingest command again
+
+### Special Thanks
+
+Special thanks to [The Graph](https://thegraph.com/) for their work to generate the [original ENS rainbow table](https://github.com/graphprotocol/ens-rainbow) used in the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph).
 
 ## License
 
