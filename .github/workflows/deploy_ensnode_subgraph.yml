@@ -28,21 +28,27 @@ jobs:
       - name: Determine tag
         id: deterimne_tag
         run: |
-            if [[ "$BRANCH" == "main" ]]; then
-            echo "TAG=latest" >> $GITHUB_ENV
-            elif [[ "$BRANCH" == "alpha" ]]; then
-            echo "TAG=alpha" >> $GITHUB_ENV
-            echo "SVC_ID=${{ secrets.ALPHA_SVC_ID }}" >> "$GITHUB_OUTPUT"
-            elif [[ "$BRANCH" == "subgraph" ]]; then
-            echo "TAG=subgraph" >> $GITHUB_ENV
-            echo "SVC_ID=${{ secrets.SUBGRAPH_SVC_ID }}" >> "$GITHUB_OUTPUT"
-            elif [[ "$BRANCH" == "feat/railway-ensnode-deployments" ]]; then
-            echo "TAG=latest" >> $GITHUB_ENV
-            else
-            echo "Branch not recognized, skipping workflow"
-            exit 1
-            fi
+            case "$BRANCH" in
+              "main")
+                echo "TAG=latest" >> $GITHUB_ENV
+                ;;
+              "alpha")
+                echo "TAG=alpha" >> $GITHUB_ENV
+                echo "SVC_ID=${{ secrets.ALPHA_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                ;;
+              "subgraph")
+                echo "TAG=subgraph" >> $GITHUB_ENV
+                echo "SVC_ID=${{ secrets.SUBGRAPH_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                ;;
+              "feat/railway-ensnode-deployments")
+                echo "TAG=latest" >> $GITHUB_ENV
+                ;;
+              *)
+                echo "Branch not recognized, skipping workflow"
+                exit 1
+            esac
             echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+            
       - name: Build & Push Docker image for the ENSNode
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensnode
