@@ -14,7 +14,6 @@
   "scripts": {
     "serve": "bun src/cli.ts serve",
     "ingest": "bun src/cli.ts ingest",
-    "count": "bun src/cli.ts count",
     "validate": "bun src/cli.ts validate",
     "test": "DATA_DIR=test-data vitest run",
     "test:watch": "DATA_DIR=test-data vitest",

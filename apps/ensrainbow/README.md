@@ -199,13 +199,13 @@ pnpm install
 2. Run data ingestion (requires ens_names.sql.gz) and verify the number of unique label-labelhash pairs in the database:
 
 ```bash
-pnpm ingest
+pnpm run ingest
 ```
 
 3. Start the service:
 
 ```bash
-pnpm serve
+pnpm run serve
 ```
 
 You can verify the service is running by checking the health endpoint or retrieving the label count:
@@ -240,20 +240,59 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 2. The database is properly closed to prevent data corruption
 3. The process exits with appropriate status code (0 for success, 1 for errors)
 
-### Database Validation
+## Command Line Interface
 
-The service includes a validation command to verify database integrity:
+ENSRainbow provides a command-line interface (CLI) for managing the service. You can view detailed help for any command by adding `--help` after the command:
 
 ```bash
-pnpm validate
+pnpm ingest --help     # Show help for the ingest command
+pnpm validate --help   # Show help for the validate command
+pnpm serve --help      # Show help for the serve command
 ```
 
-Validation performs the following checks:
-- Verifies all keys are valid labelhashes or are one of the special keys used internally by ENSRainbow
-- Ensures stored labels match their corresponding labelhashes
-- Validates the total rainbow record count
-- Verifies no ingestion is currently in progress
-- Reports detailed statistics including valid rainbow records, invalid labelhashes, and any labelhash mismatches
+### Key Commands
+
+#### Data Ingestion
+```bash
+pnpm ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
+```
+Ingests the rainbow table data into LevelDB. The process will exit with:
+- Code 0: Successful ingestion
+- Code 1: Error during ingestion
+
+#### Database Validation
+```bash
+pnpm validate [--data-dir path/to/datdba]
+```
+Validates the database integrity by:
+- Verifying all keys are valid labelhashes
+- Ensuring stored labels match their corresponding labelhashes
+- Validating the total rainbow record count
+- Verifying no ingestion is currently in progress
+
+The process will exit with:
+- Code 0: Validation successful
+- Code 1: Validation failed or errors encountered
+
+#### Server
+```bash
+pnpm serve [--port 3223] [--data-dir path/to/db]
+```
+Starts the HTTP server. The process will exit with:
+- Code 0: Clean shutdown
+- Code 1: Error during operation
+
+### Common Options
+All commands support these options:
+- `--data-dir`: Directory for LevelDB data (default: './data')
+- `--log-level`: Logging level: "debug", "info", "warn", "error" (default: "info")
+
+
+### Database Management
+If you need to start fresh with the database:
+1. Stop any running ENSRainbow processes
+2. Delete the LevelDB data directory (default: './data')
+3. Run the ingest command again
 
 ## License
 
