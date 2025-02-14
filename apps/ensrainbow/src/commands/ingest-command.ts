@@ -9,9 +9,9 @@ import {
   exitIfIncompleteIngestion,
   markIngestionStarted,
 } from "../lib/database";
+import { getLogger } from "../utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
 import { countCommand } from "./count-command";
-import { getLogger } from "../utils/logger";
 
 export interface IngestCommandOptions {
   inputFile: string;
@@ -130,7 +130,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   // Run count as second phase
   logger.info("\nStarting count verification phase...");
   await countCommand(db, {
-    dataDir: options.dataDir
+    dataDir: options.dataDir,
   });
 
   // Clear the ingestion marker since we completed successfully

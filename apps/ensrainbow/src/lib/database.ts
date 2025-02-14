@@ -47,9 +47,7 @@ export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
 
 export const getDataDir = () => process.env.DATA_DIR || join(process.cwd(), "data");
 
-export const createDatabase = async (
-  dataDir: string,
-): Promise<ENSRainbowDB> => {
+export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
   const logger = getLogger();
   logger.info(`Creating new database in directory: ${dataDir}`);
 
@@ -81,9 +79,7 @@ export const createDatabase = async (
   }
 };
 
-export const openDatabase = async (
-  dataDir: string,
-): Promise<ENSRainbowDB> => {
+export const openDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
   const logger = getLogger();
   logger.info(`Opening existing database in directory: ${dataDir}`);
 

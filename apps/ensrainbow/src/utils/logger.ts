@@ -1,4 +1,4 @@
-import { getLogger as createLogger, Logger, LogLevel } from "@ensnode/utils/logger";
+import { LogLevel, Logger, getLogger as createLogger } from "@ensnode/utils/logger";
 
 let ensrainbowLogger: Logger | undefined;
 

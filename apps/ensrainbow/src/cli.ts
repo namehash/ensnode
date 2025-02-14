@@ -1,4 +1,5 @@
 import { join } from "path";
+import { LOG_LEVELS, LogLevel } from "@ensnode/utils/logger";
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
@@ -6,7 +7,6 @@ import { ingestCommand } from "./commands/ingest-command";
 import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDataDir } from "./lib/database";
-import { LogLevel, LOG_LEVELS } from "@ensnode/utils/logger";
 import { getLogger } from "./utils/logger";
 
 function getDefaultLogLevel(): LogLevel {
@@ -59,7 +59,7 @@ yargs(hideBin(process.argv))
       getLogger({ level: argv["log-level"] });
       await ingestCommand({
         inputFile: argv["input-file"],
-        dataDir: argv["data-dir"]
+        dataDir: argv["data-dir"],
       });
     },
   )
@@ -89,7 +89,7 @@ yargs(hideBin(process.argv))
       getLogger({ level: argv["log-level"] });
       await serverCommand({
         port: argv.port,
-        dataDir: argv["data-dir"]
+        dataDir: argv["data-dir"],
       });
     },
   )
@@ -113,7 +113,7 @@ yargs(hideBin(process.argv))
     async (argv: ArgumentsCamelCase<ValidateArgs>) => {
       getLogger({ level: argv["log-level"] });
       await validateCommand({
-        dataDir: argv["data-dir"]
+        dataDir: argv["data-dir"],
       });
     },
   )
