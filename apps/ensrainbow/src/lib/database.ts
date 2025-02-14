@@ -4,7 +4,7 @@ import { ClassicLevel } from "classic-level";
 import { ByteArray, labelhash } from "viem";
 
 import { byteArraysEqual } from "../utils/byte-utils";
-import { LogLevel, Logger, createLogger } from "../utils/logger";
+import { getLogger } from "@ensnode/utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
@@ -13,10 +13,10 @@ export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]
 /**
  * Checks if there's an incomplete ingestion and exits with a helpful error message if one is found
  * @param db The ENSRainbow database instance
- * @param logger The logger instance to use for error messages
  */
-export async function exitIfIncompleteIngestion(db: ENSRainbowDB, logger: Logger): Promise<void> {
+export async function exitIfIncompleteIngestion(db: ENSRainbowDB): Promise<void> {
   if (await isIngestionInProgress(db)) {
+    const logger = getLogger();
     logger.error("Error: Database is in an incomplete state!");
     logger.error("An ingestion was started but not completed successfully.");
     logger.error("To fix this:");
@@ -49,9 +49,8 @@ export const getDataDir = () => process.env.DATA_DIR || join(process.cwd(), "dat
 
 export const createDatabase = async (
   dataDir: string,
-  logLevel: LogLevel = "info",
 ): Promise<ENSRainbowDB> => {
-  const logger = createLogger(logLevel);
+  const logger = getLogger();
   logger.info(`Creating new database in directory: ${dataDir}`);
 
   try {
@@ -84,9 +83,8 @@ export const createDatabase = async (
 
 export const openDatabase = async (
   dataDir: string,
-  logLevel: LogLevel = "info",
 ): Promise<ENSRainbowDB> => {
-  const logger = createLogger(logLevel);
+  const logger = getLogger();
   logger.info(`Opening existing database in directory: ${dataDir}`);
 
   try {
@@ -173,15 +171,15 @@ export async function safeGet(db: ENSRainbowDB, key: ByteArray): Promise<string 
  * Returns true if validation passes, false if validation fails.
  *
  * @param db The ENSRainbow database instance
- * @param logger The logger instance to use for messages
  * @returns boolean indicating if validation passed
  */
-export async function validate(db: ENSRainbowDB, logger: Logger): Promise<boolean> {
+export async function validate(db: ENSRainbowDB): Promise<boolean> {
   let totalKeys = 0;
   let validHashes = 0;
   let invalidHashes = 0;
   let hashMismatches = 0;
 
+  const logger = getLogger();
   logger.info("Starting database validation...");
 
   // Check if ingestion is in progress

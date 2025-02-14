@@ -6,11 +6,11 @@ import { ingestCommand } from "./commands/ingest-command";
 import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDataDir } from "./lib/database";
-import { LogLevel, logLevels } from "./utils/logger";
+import { LogLevel, LOG_LEVELS, getLogger } from "@ensnode/utils/logger";
 
 function getDefaultLogLevel(): LogLevel {
   const envLogLevel = process.env.LOG_LEVEL as LogLevel;
-  return envLogLevel && envLogLevel in logLevels ? envLogLevel : "info";
+  return envLogLevel || "info";
 }
 
 interface IngestArgs {
@@ -50,15 +50,15 @@ yargs(hideBin(process.argv))
         .option("log-level", {
           type: "string",
           description: "Log level (error, warn, info, debug)",
-          choices: Object.keys(logLevels),
+          choices: LOG_LEVELS,
           default: getDefaultLogLevel(),
         });
     },
     async (argv: ArgumentsCamelCase<IngestArgs>) => {
+      getLogger({ level: argv["log-level"] });
       await ingestCommand({
         inputFile: argv["input-file"],
-        dataDir: argv["data-dir"],
-        logLevel: argv["log-level"],
+        dataDir: argv["data-dir"]
       });
     },
   )
@@ -80,15 +80,15 @@ yargs(hideBin(process.argv))
         .option("log-level", {
           type: "string",
           description: "Log level (error, warn, info, debug)",
-          choices: Object.keys(logLevels),
+          choices: LOG_LEVELS,
           default: getDefaultLogLevel(),
         });
     },
     async (argv: ArgumentsCamelCase<ServeArgs>) => {
+      getLogger({ level: argv["log-level"] });
       await serverCommand({
         port: argv.port,
-        dataDir: argv["data-dir"],
-        logLevel: argv["log-level"],
+        dataDir: argv["data-dir"]
       });
     },
   )
@@ -105,14 +105,14 @@ yargs(hideBin(process.argv))
         .option("log-level", {
           type: "string",
           description: "Log level (error, warn, info, debug)",
-          choices: Object.keys(logLevels),
+          choices: LOG_LEVELS,
           default: getDefaultLogLevel(),
         });
     },
     async (argv: ArgumentsCamelCase<ValidateArgs>) => {
+      getLogger({ level: argv["log-level"] });
       await validateCommand({
-        dataDir: argv["data-dir"],
-        logLevel: argv["log-level"],
+        dataDir: argv["data-dir"]
       });
     },
   )

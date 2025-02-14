@@ -9,7 +9,7 @@ import {
   HealSuccess,
 } from "@ensnode/ensrainbow-sdk/types";
 import { ByteArray } from "viem";
-import { LogLevel, Logger, createLogger } from "../utils/logger";
+import { Logger, getLogger } from "@ensnode/utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 import { LABELHASH_COUNT_KEY } from "./database";
 import { ENSRainbowDB, safeGet } from "./database";
@@ -18,9 +18,9 @@ export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
   private readonly logger: Logger;
 
-  constructor(db: ENSRainbowDB, logLevel?: LogLevel) {
+  constructor(db: ENSRainbowDB) {
     this.db = db;
-    this.logger = createLogger(logLevel);
+    this.logger = getLogger();
   }
 
   async heal(labelhash: `0x${string}`): Promise<HealResponse> {

@@ -9,7 +9,6 @@ import type {
 } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
 import { labelhash } from "viem";
-/// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase } from "../lib/database";
 import type { ENSRainbowDB } from "../lib/database";
@@ -23,8 +22,8 @@ describe("Server Command Tests", () => {
   let server: ReturnType<typeof serve>;
 
   beforeAll(async () => {
-    db = await createDatabase("test-data-server", "error");
-    app = createServer(db, console);
+    db = await createDatabase("test-data-server");
+    app = createServer(db);
 
     // Start the server on a different port than what ENSRainbow defaults to
     server = serve({

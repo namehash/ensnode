@@ -9,14 +9,13 @@ import {
   exitIfIncompleteIngestion,
   markIngestionStarted,
 } from "../lib/database";
-import { LogLevel, createLogger } from "../utils/logger";
+import { getLogger } from "@ensnode/utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
 import { countCommand } from "./count-command";
 
 export interface IngestCommandOptions {
   inputFile: string;
   dataDir: string;
-  logLevel?: LogLevel;
 }
 
 // Total number of expected records in the ENS rainbow table SQL dump
@@ -31,11 +30,11 @@ export interface IngestCommandOptions {
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
-  const log = createLogger(options.logLevel);
-  const db = await createDatabase(options.dataDir, options.logLevel);
+  const logger = getLogger();
+  const db = await createDatabase(options.dataDir);
 
   // Check if there's an incomplete ingestion
-  await exitIfIncompleteIngestion(db, log);
+  await exitIfIncompleteIngestion(db);
 
   // Mark ingestion as started
   await markIngestionStarted(db);
@@ -65,7 +64,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   let invalidRecords = 0;
   const MAX_BATCH_SIZE = 10000;
 
-  log.info("Ingesting data into LevelDB...");
+  logger.info("Ingesting data into LevelDB...");
 
   for await (const line of rl) {
     if (line.startsWith("COPY public.ens_names")) {
@@ -86,11 +85,11 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       record = buildRainbowRecord(line);
     } catch (e) {
       if (e instanceof Error) {
-        log.warn(
+        logger.warn(
           `Skipping invalid record: ${e.message} - this record is safe to skip as it would be unreachable by the ENS Subgraph`,
         );
       } else {
-        log.warn(`Unknown error processing record - skipping`);
+        logger.warn(`Unknown error processing record - skipping`);
       }
       invalidRecords++;
       continue;
@@ -113,11 +112,11 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     await batch.write();
   }
 
-  log.info("\nData ingestion complete!");
+  logger.info("\nData ingestion complete!");
 
   // Validate the number of processed records
   if (processedRecords !== TOTAL_EXPECTED_RECORDS) {
-    log.error(
+    logger.error(
       `Error: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
     );
   } else {
@@ -125,19 +124,18 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   }
 
   if (invalidRecords > 0) {
-    log.error(`Found ${invalidRecords} records with invalid hashes during processing`);
+    logger.error(`Found ${invalidRecords} records with invalid hashes during processing`);
   }
 
   // Run count as second phase
-  log.info("\nStarting count verification phase...");
+  logger.info("\nStarting count verification phase...");
   await countCommand(db, {
-    dataDir: options.dataDir,
-    logLevel: options.logLevel,
+    dataDir: options.dataDir
   });
 
   // Clear the ingestion marker since we completed successfully
   await clearIngestionMarker(db);
 
-  log.info("Data ingestion and count verification complete!");
+  logger.info("Data ingestion and count verification complete!");
   await db.close();
 }
