@@ -14,6 +14,7 @@
   "exports": {
     "./helpers": "./src/helpers.ts",
     "./ids": "./src/ids.ts",
+    "./logger": "./src/logger.ts",
     "./plugin-helpers": "./src/plugin-helpers.ts",
     "./subname-helpers": "./src/subname-helpers.ts",
     "./types": "./src/types.ts"
@@ -37,5 +38,9 @@
   },
   "engines": {
     "node": ">=18.14"
+  },
+  "dependencies": {
+    "pino": "^8.19.0",
+    "pino-pretty": "^10.3.1"
   }
 }
