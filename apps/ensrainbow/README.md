@@ -82,6 +82,8 @@ NameHash Labs operates a freely available instance of ENSRainbow for the ENS com
 - Is maintained and monitored by the NameHash Labs team
 - Runs the latest version of ENSRainbow
 
+> **Important**: While the hosted instance is freely available, we strongly recommend running your own ENSRainbow instance alongside ENSNode in your infrastructure. Co-locating these services on the same local network significantly improves indexing performance and reduces latency for label healing operations. This setup is particularly important for production environments where optimal performance is crucial.
+
 ### Using the Hosted Instance
 
 Simply replace `localhost:3223` with `api.ensrainbow.io` in the API examples:
