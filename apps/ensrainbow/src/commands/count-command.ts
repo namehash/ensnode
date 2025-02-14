@@ -5,7 +5,7 @@ import {
   safeGet,
 } from "../lib/database";
 import { byteArraysEqual } from "../utils/byte-utils";
-import { getLogger } from "@ensnode/utils/logger";
+import { getLogger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export interface CountCommandOptions {

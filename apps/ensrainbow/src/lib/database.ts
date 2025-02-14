@@ -4,7 +4,7 @@ import { ClassicLevel } from "classic-level";
 import { ByteArray, labelhash } from "viem";
 
 import { byteArraysEqual } from "../utils/byte-utils";
-import { getLogger } from "@ensnode/utils/logger";
+import { getLogger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;

@@ -9,10 +9,11 @@ import {
   HealSuccess,
 } from "@ensnode/ensrainbow-sdk/types";
 import { ByteArray } from "viem";
-import { Logger, getLogger } from "@ensnode/utils/logger";
+import { getLogger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 import { LABELHASH_COUNT_KEY } from "./database";
 import { ENSRainbowDB, safeGet } from "./database";
+import { Logger } from "@ensnode/utils/logger";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;

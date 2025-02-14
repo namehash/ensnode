@@ -6,7 +6,8 @@ import { ingestCommand } from "./commands/ingest-command";
 import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDataDir } from "./lib/database";
-import { LogLevel, LOG_LEVELS, getLogger } from "@ensnode/utils/logger";
+import { LogLevel, LOG_LEVELS } from "@ensnode/utils/logger";
+import { getLogger } from "./utils/logger";
 
 function getDefaultLogLevel(): LogLevel {
   const envLogLevel = process.env.LOG_LEVEL as LogLevel;

@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { ENSRainbowDB, exitIfIncompleteIngestion, openDatabase } from "../lib/database";
 import { ENSRainbowServer } from "../lib/server";
-import { getLogger } from "@ensnode/utils/logger";
+import { getLogger } from "../utils/logger";
 
 export interface ServerCommandOptions {
   dataDir: string;

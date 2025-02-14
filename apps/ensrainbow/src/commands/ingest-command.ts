@@ -9,9 +9,9 @@ import {
   exitIfIncompleteIngestion,
   markIngestionStarted,
 } from "../lib/database";
-import { getLogger } from "@ensnode/utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
 import { countCommand } from "./count-command";
+import { getLogger } from "../utils/logger";
 
 export interface IngestCommandOptions {
   inputFile: string;
