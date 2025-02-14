@@ -58,7 +58,8 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker build -f apps/ensnode/Dockerfile -t $IMAGE_NAME:$TAG .
           docker push $IMAGE_NAME:$TAG
-          echo "DOCKER_IMAGE_ID=`docker inspect --format={{.ID}} $IMAGE_NAME:$TAG"` >> "$GITHUB_OUTPUT"
+          DOCKER_IMAGE_ID=`docker inspect --format={{.ID}} $IMAGE_NAME:$TAG`
+          echo "DOCKER_IMAGE_ID=$DOCKER_IMAGE_ID" >> "$GITHUB_OUTPUT"
 
   deploy:
     runs-on: ubuntu-latest
