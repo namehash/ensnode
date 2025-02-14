@@ -63,7 +63,6 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    container: ghcr.io/railwayapp/cli:latest
     needs: image-build-and-push
     if:  ${{ needs.image-build-and-push.outputs.svc_id }} != ''
     env:
@@ -76,7 +75,7 @@ jobs:
     steps:
       - name: Deploy if necessary
         run: |
-          apk add curl jq
+          apt install jq
           API_RESPONSE=`curl --request POST \
           --silent \
           --url https://backboard.railway.app/graphql/v2 \
