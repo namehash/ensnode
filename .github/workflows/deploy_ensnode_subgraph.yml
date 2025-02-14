@@ -76,6 +76,7 @@ jobs:
     steps:
       - name: Deploy if necessary
         run: |
+          apt install curl jq
           API_RESPONSE=`curl --request POST \
           --silent \
           --url https://backboard.railway.app/graphql/v2 \
