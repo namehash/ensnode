@@ -1,20 +1,20 @@
-import pino from 'pino';
+import pino from "pino";
 
 export const LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace"] as const;
-export type LogLevel = typeof LOG_LEVELS[number];
+export type LogLevel = (typeof LOG_LEVELS)[number];
 
 let globalLogger: pino.Logger | undefined;
 
 export function getLogger(options?: { level?: LogLevel }): pino.Logger {
   if (!globalLogger) {
     globalLogger = pino({
-      level: process.env.LOG_LEVEL || options?.level || 'info',
+      level: process.env.LOG_LEVEL || options?.level || "info",
       transport: {
-        target: 'pino-pretty',
+        target: "pino-pretty",
         options: {
           colorize: true,
-          translateTime: 'HH:MM:ss',
-          ignore: 'pid,hostname',
+          translateTime: "HH:MM:ss",
+          ignore: "pid,hostname",
         },
       },
     });
@@ -28,4 +28,4 @@ export function getLogger(options?: { level?: LogLevel }): pino.Logger {
 }
 
 // Re-export pino types for convenience
-export type { Logger } from 'pino'; 
+export type { Logger } from "pino";
