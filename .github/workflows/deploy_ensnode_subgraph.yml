@@ -1,0 +1,107 @@
+name: Build and deploy ENSNode
+
+on:
+  push:
+    branches:
+      - feat/railway-ensnode-deployments
+      - main
+      - alpha
+      - subgraph
+
+jobs:
+  image-build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.determine_tag.outputs.tag }}
+      svc_id: ${{ steps.determine_tag.outputs.svc_id }}
+      docker_image_id: ${{ steps.determine_tag.outputs.docker_image_id }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Branch Name
+        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+    
+      # We need to recognize which branch had push incomin
+      # Based on that create Docker image with corresponding label - use TAG variable for this
+      # For alhpa/subgraph TAG we need also to specify corresponding Railway SVC_ID which is used for service redeployment
+      - name: Determine tag
+        id: determine_tag
+        run: |
+            case "$BRANCH" in
+              "main")
+                echo "TAG=latest" >> $GITHUB_ENV
+                ;;
+              "alpha")
+                echo "TAG=alpha" >> $GITHUB_ENV
+                echo "SVC_ID=${{ secrets.ALPHA_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                ;;
+              "subgraph")
+                echo "TAG=subgraph" >> $GITHUB_ENV
+                echo "SVC_ID=${{ secrets.SUBGRAPH_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                ;;
+              "feat/railway-ensnode-deployments")
+                echo "TAG=subgraph" >> $GITHUB_ENV
+                echo "SVC_ID=${{ secrets.SUBGRAPH_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                ;;
+              *)
+                echo "Branch not recognized, skipping workflow"
+                exit 1
+            esac
+            echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build & Push Docker image for the ENSNode
+        env:
+          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensnode
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -f apps/ensnode/Dockerfile -t $IMAGE_NAME:$TAG .
+          docker push $IMAGE_NAME:$TAG
+          DOCKER_IMAGE_ID=`docker inspect --format={{.ID}} $IMAGE_NAME:$TAG`
+          echo "DOCKER_IMAGE_ID=$DOCKER_IMAGE_ID" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: image-build-and-push
+    if:  ${{ needs.image-build-and-push.outputs.svc_id }} != ''
+    env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+        RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
+        TAG: ${{ needs.image-build-and-push.outputs.tag }}
+        SVC_ID: ${{ needs.image-build-and-push.outputs.svc_id }}
+        DOCKER_IMAGE_ID: ${{ needs.image-build-and-push.outputs.docker_image_id }}
+    steps:
+      - name: Deploy if necessary
+        run: |
+          apt install jq
+          API_RESPONSE=`curl --request POST \
+          --silent \
+          --url https://backboard.railway.app/graphql/v2 \
+          --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "query": "query variables($projectId: String!, $environmentId: String!) { variables(projectId: $projectId, environmentId: $environmentId) }",
+              "variables": {
+                "projectId": "'${{ env.RAILWAY_PROJECT_ID }}'" ,
+                "environmentId": "'${{ env.RAILWAY_ENVIRONMENT_ID }}'"
+              }
+          }'`
+          VARIABLE_NAME=${${{ env.TAG }}^^}_DATABASE_SCHEMA
+          CURRENT_SCHEMA=`${API_RESPONSE} | jq '.data.variables.'${VARIABLE_NAME}`
+          echo "Calculated schema variable: ${VARIABLE_NAME}"
+          #TODO FOR NOW JUST REPLACE DOCKER IMAGE ID. EXTEND LOGIC IN FUTURE
+          if [[ "$CURRENT_SCHEMA" != "${{ env.DOCKER_IMAGE_ID }}" ]]; then
+          curl --request POST \
+              --silent \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ env.DOCKER_IMAGE_ID }}\" }) }"}'
+          else
+              echo "Skipping environment variable update"
+          fi
+
+          
+            
