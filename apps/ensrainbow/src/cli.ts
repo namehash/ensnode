@@ -50,7 +50,7 @@ yargs(hideBin(process.argv))
         })
         .option("log-level", {
           type: "string",
-          description: "Log level (error, warn, info, debug)",
+          description: "Log level (fatal, error, warn, info, debug, trace)",
           choices: LOG_LEVELS,
           default: getDefaultLogLevel(),
         });
@@ -80,7 +80,7 @@ yargs(hideBin(process.argv))
         })
         .option("log-level", {
           type: "string",
-          description: "Log level (error, warn, info, debug)",
+          description: "Log level (fatal, error, warn, info, debug, trace)",
           choices: LOG_LEVELS,
           default: getDefaultLogLevel(),
         });
@@ -105,7 +105,7 @@ yargs(hideBin(process.argv))
         })
         .option("log-level", {
           type: "string",
-          description: "Log level (error, warn, info, debug)",
+          description: "Log level (fatal, error, warn, info, debug, trace)",
           choices: LOG_LEVELS,
           default: getDefaultLogLevel(),
         });
