@@ -1,0 +1,20 @@
+name: Build ENSRainbow-data image
+
+on: workflow_dispatch
+
+jobs:
+  image-build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build & Push Docker image for the ENSRainbow-data
+        env:
+          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow-data
+          TAG: latest
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -f apps/ensrainbow/Dockerfile.data -t $IMAGE_NAME:$TAG .
+          docker push $IMAGE_NAME:$TAG

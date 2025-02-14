@@ -54,14 +54,16 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
     await upsertAccount(context, to);
     const node = tokenIdToNode(tokenId);
 
-    // TODO: remove this if it never fires: subgraph upserts domain but shouldn't be necessary
+    // NOTE: subgraph technically upserts domain with `createOrLoadDomain()` here, but domain
+    // is guaranteed to exist. we encode this stricter logic here to illustrate that fact.
+    // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/nameWrapper.ts#L197C18-L197C36
     const domain = await context.db.find(schema.domain, { id: node });
     if (!domain) {
-      console.log("NameWrapper:handleTransfer called before domain existed");
       console.table({ ...event.args, node });
+      throw new Error(`NameWrapper:handleTransfer called before domain '${node}' exists.`);
     }
 
-    // upsert the WrappedDomain, only changing owner iff exists
+    // upsert the WrappedDomain
     await context.db
       .insert(schema.wrappedDomain)
       .values({
@@ -73,9 +75,11 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         expiryDate: 0n,
         fuses: 0,
       })
-      .onConflictDoUpdate({
-        ownerId: to,
-      });
+      // if exists, only update owner
+      .onConflictDoUpdate({ ownerId: to });
+
+    // materialize `Domain.wrappedOwner`
+    await context.db.update(schema.domain, { id: node }).set({ wrappedOwnerId: to });
 
     // log DomainEvent
     await context.db

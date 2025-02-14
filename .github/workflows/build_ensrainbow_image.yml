@@ -1,0 +1,24 @@
+name: Build ENSRainbow image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  image-build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build & Push Docker image for the ENSRainbow app
+        env:
+          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow
+          TAG: latest
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG -t $IMAGE_NAME:${{ github.sha }} .
+          docker push $IMAGE_NAME:$TAG
+          docker push $IMAGE_NAME:${{ github.sha }}
