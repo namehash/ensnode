@@ -47,6 +47,36 @@ export interface HealBadRequestError
 }
 
 export type HealResponse = HealSuccess | HealNotFoundError | HealServerError | HealBadRequestError;
+export type HealError = Exclude<HealResponse, HealSuccess>;
+
+/**
+ * Server errors should not be cached.
+ */
+export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
+
+/**
+ * Determine if a heal response is an error.
+ *
+ * @param response the heal response to check
+ * @returns true if the response is an error, false otherwise
+ */
+export const isHealError = (response: HealResponse): response is HealError => {
+  return response.status === StatusCode.Error;
+};
+
+/**
+ * Determine if a heal response is cacheable.
+ *
+ * Server errors at not cachable and should be retried.
+ *
+ * @param response the heal response to check
+ * @returns true if the response is cacheable, false otherwise
+ */
+export const isCacheableHealResponse = (
+  response: HealResponse,
+): response is CacheableHealResponse => {
+  return response.status !== StatusCode.Error || response.errorCode !== ErrorCode.ServerError;
+};
 
 export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
   status: Status;

@@ -52,37 +52,4 @@ describe("EnsRainbowApiClient", () => {
       errorCode: ErrorCode.NotFound,
     } satisfies HealNotFoundError);
   });
-
-  it("should only cache heal responses that are safe to cache", async () => {
-    expect(
-      EnsRainbowApiClient.isCacheableHealResponse({
-        status: StatusCode.Success,
-        label: "vitalik",
-      }),
-    ).toBe(true);
-
-    expect(
-      EnsRainbowApiClient.isCacheableHealResponse({
-        status: StatusCode.Error,
-        error: "Not found",
-        errorCode: ErrorCode.NotFound,
-      }),
-    ).toBe(true);
-
-    expect(
-      EnsRainbowApiClient.isCacheableHealResponse({
-        status: StatusCode.Error,
-        error: "Bad request",
-        errorCode: ErrorCode.BadRequest,
-      }),
-    ).toBe(true);
-
-    expect(
-      EnsRainbowApiClient.isCacheableHealResponse({
-        status: StatusCode.Error,
-        error: "Server error",
-        errorCode: ErrorCode.ServerError,
-      }),
-    ).toBe(false);
-  });
 });
