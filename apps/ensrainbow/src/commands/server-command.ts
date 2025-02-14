@@ -15,9 +15,13 @@ export interface ServerCommandOptions {
 /**
  * Creates and configures the ENS Rainbow server application
  */
-export function createServer(db: ENSRainbowDB, log: Logger, logLevel: LogLevel = "info"): Hono {
+export async function createServer(
+  db: ENSRainbowDB,
+  log: Logger,
+  logLevel: LogLevel = "info",
+): Promise<Hono> {
   const app = new Hono();
-  const rainbow = new ENSRainbowServer(db, logLevel);
+  const rainbow = await ENSRainbowServer.init(db, logLevel);
 
   app.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     const labelhash = c.req.param("labelhash") as `0x${string}`;
@@ -50,7 +54,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
   // Check for incomplete ingestion
   await exitIfIncompleteIngestion(db, log);
 
-  const app = createServer(db, log, options.logLevel);
+  const app = await createServer(db, log, options.logLevel);
 
   log.info(`ENS Rainbow server starting on port ${options.port}...`);
 

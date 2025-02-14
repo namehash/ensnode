@@ -179,15 +179,6 @@ Success Response:
 }
 ```
 
-Error Response (if database not initialized):
-```json
-{
-  "status": "error",
-  "error": "Label count not initialized. Check that the ingest command has been run.",
-  "errorCode": 500
-}
-```
-
 ## Local Development
 
 1. Install dependencies:

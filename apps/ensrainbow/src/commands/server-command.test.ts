@@ -8,6 +8,7 @@ import type {
   HealSuccess,
 } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 import { labelhash } from "viem";
 /// <reference types="vitest" />
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -19,18 +20,32 @@ import { createServer } from "./server-command";
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
   const port = 3223;
-  let app: ReturnType<typeof createServer>;
+  let app: Hono;
   let server: ReturnType<typeof serve>;
+  const TEST_DB_DIR = "test-data-server";
 
   beforeAll(async () => {
-    db = await createDatabase("test-data-server", "error");
-    app = createServer(db, console);
+    // Clean up any existing test database
+    await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
 
-    // Start the server on a different port than what ENSRainbow defaults to
-    server = serve({
-      fetch: app.fetch,
-      port,
-    });
+    try {
+      db = await createDatabase(TEST_DB_DIR, "error");
+
+      // Initialize label count to be able to start server
+      await db.put(LABELHASH_COUNT_KEY, "0");
+
+      app = await createServer(db, console);
+
+      // Start the server on a different port than what ENSRainbow defaults to
+      server = serve({
+        fetch: app.fetch,
+        port,
+      });
+    } catch (error) {
+      // Ensure cleanup if setup fails
+      await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
+      throw error;
+    }
   });
 
   beforeEach(async () => {
@@ -42,11 +57,13 @@ describe("Server Command Tests", () => {
 
   afterAll(async () => {
     // Cleanup
-    await server.close();
-    await db.close();
-
-    // Remove test database directory
-    await fs.rm("test-data-server", { recursive: true, force: true });
+    try {
+      if (server) await server.close();
+      if (db) await db.close();
+      await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
+    } catch (error) {
+      console.error("Cleanup failed:", error);
+    }
   });
 
   describe("GET /v1/heal/:labelhash", () => {
