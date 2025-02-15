@@ -1,18 +1,28 @@
-import pino from "pino";
+import pino, { LevelWithSilent } from "pino";
 
-export const LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace", "silent"] as const;
-export type LogLevel = (typeof LOG_LEVELS)[number];
+export type LogLevel = LevelWithSilent;
 
 export const DEFAULT_LOG_LEVEL: LogLevel = "info";
 
+// The main reason for keeping our own validation, even though we're using Pino's types, is
+// to provide a better user experience with clear error messages when invalid log levels are
+// provided through environment variables.
+export const VALID_LOG_LEVELS: LogLevel[] = [
+  "fatal",
+  "error",
+  "warn",
+  "info",
+  "debug",
+  "trace",
+  "silent",
+];
+
 export function parseLogLevel(level: string): LogLevel {
   const normalizedLevel = level.toLowerCase();
-  if (LOG_LEVELS.includes(normalizedLevel as LogLevel)) {
+  if (VALID_LOG_LEVELS.includes(normalizedLevel as LogLevel)) {
     return normalizedLevel as LogLevel;
   }
-  throw new Error(
-    `Invalid log level "${level}". Valid levels are: ${LOG_LEVELS.join(", ")}`
-  );
+  throw new Error(`Invalid log level "${level}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}`);
 }
 
 export function getEnvLogLevel(): LogLevel {
@@ -26,16 +36,14 @@ export function getEnvLogLevel(): LogLevel {
   } catch (error) {
     // Log error to console since we can't use logger yet
     console.error(
-      `Invalid LOG_LEVEL environment variable value "${envLogLevel}". Valid levels are: ${LOG_LEVELS.join(
-        ", "
-      )}. Defaulting to "${DEFAULT_LOG_LEVEL}".`
+      `Invalid LOG_LEVEL environment variable value "${envLogLevel}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}. Defaulting to "${DEFAULT_LOG_LEVEL}".`,
     );
     return DEFAULT_LOG_LEVEL;
   }
 }
 
 export function createLogger(level: LogLevel = DEFAULT_LOG_LEVEL): pino.Logger {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
 
   return pino({
     level,
@@ -43,11 +51,11 @@ export function createLogger(level: LogLevel = DEFAULT_LOG_LEVEL): pino.Logger {
       ? {} // In production, use default pino output format
       : {
           transport: {
-            target: 'pino-pretty',
+            target: "pino-pretty",
             options: {
               colorize: true,
-              translateTime: 'HH:MM:ss',
-              ignore: 'pid,hostname',
+              translateTime: "HH:MM:ss",
+              ignore: "pid,hostname",
             },
           },
         }),

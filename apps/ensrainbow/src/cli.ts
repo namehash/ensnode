@@ -37,7 +37,7 @@ yargs(hideBin(process.argv))
           type: "string",
           description: "Directory to store LevelDB data",
           default: getDataDir(),
-        })
+        });
     },
     async (argv: ArgumentsCamelCase<IngestArgs>) => {
       await ingestCommand({
@@ -60,7 +60,7 @@ yargs(hideBin(process.argv))
           type: "string",
           description: "Directory containing LevelDB data",
           default: getDataDir(),
-        })
+        });
     },
     async (argv: ArgumentsCamelCase<ServeArgs>) => {
       await serverCommand({
@@ -73,12 +73,11 @@ yargs(hideBin(process.argv))
     "validate",
     "Validate the integrity of the LevelDB database",
     (yargs: Argv) => {
-      return yargs
-        .option("data-dir", {
-          type: "string",
-          description: "Directory containing LevelDB data",
-          default: getDataDir(),
-        })
+      return yargs.option("data-dir", {
+        type: "string",
+        description: "Directory containing LevelDB data",
+        default: getDataDir(),
+      });
     },
     async (argv: ArgumentsCamelCase<ValidateArgs>) => {
       await validateCommand({

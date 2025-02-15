@@ -44,7 +44,7 @@ export function createServer(db: ENSRainbowDB): Hono {
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
   logger.info(`ENS Rainbow server starting on port ${options.port}...`);
-  
+
   const db = await openDatabase(options.dataDir);
 
   // Check for incomplete ingestion

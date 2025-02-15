@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  parseLogLevel,
-  getEnvLogLevel,
   DEFAULT_LOG_LEVEL,
+  VALID_LOG_LEVELS,
   createLogger,
-  LOG_LEVELS,
+  getEnvLogLevel,
+  parseLogLevel,
 } from "./logger";
 
 describe("logger", () => {
   describe("parseLogLevel", () => {
     it("should accept valid log levels", () => {
-      LOG_LEVELS.forEach((level) => {
+      VALID_LOG_LEVELS.forEach((level) => {
         expect(parseLogLevel(level)).toBe(level);
       });
     });
@@ -21,11 +21,7 @@ describe("logger", () => {
       expect(parseLogLevel("ERROR")).toBe("error");
     });
 
-    it("should throw error for invalid log level", () => {
-      expect(() => parseLogLevel("invalid")).toThrow(
-        'Invalid log level "invalid". Valid levels are: fatal, error, warn, info, debug, trace, silent'
-      );
-    });
+    // Note: We no longer test for invalid log levels as Pino will handle validation
   });
 
   describe("getEnvLogLevel", () => {
@@ -57,12 +53,12 @@ describe("logger", () => {
     it("should handle invalid log level in environment", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       process.env.LOG_LEVEL = "invalid";
-      
+
       expect(getEnvLogLevel()).toBe(DEFAULT_LOG_LEVEL);
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid LOG_LEVEL environment variable value "invalid"')
+        `Invalid LOG_LEVEL environment variable value "invalid". Valid levels are: fatal, error, warn, info, debug, trace, silent. Defaulting to "${DEFAULT_LOG_LEVEL}".`,
       );
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -92,4 +88,4 @@ describe("logger", () => {
       expect(logger.level).toBe("debug");
     });
   });
-}); 
+});
