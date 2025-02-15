@@ -9,15 +9,15 @@ ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a s
 
 ## System Requirements
 
-### Build-time Requirements
+### Data Ingestion Requirements (`ingest` command)
 - **Storage**:
   - At least 15 GB of free disk space:
     - 6.37 GB for the compressed rainbow tables download
     - ~7 GB for the LevelDB database after ingestion
     - Additional temporary space during build/ingestion
-- **Memory**: At least 4 GB RAM recommended during data ingestion
+- **Memory**: At least 4 GB RAM recommended
 
-### Runtime Requirements
+### Server Requirements (`serve` command)
 - **Storage**: 7.61 GB for the Docker image (pre-built with LevelDB database)
 - **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
 - **CPU**: Minimal requirements - operates well with low CPU resources
