@@ -11,11 +11,11 @@ export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as B
 export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 
 /**
- * Checks if there's an incomplete ingestion and throws an error if one is found
+ * Ensures db does not have an incomplete ingestion.
  * @param db The ENSRainbow database instance
  * @throws Error if an incomplete ingestion is detected
  */
-export async function checkIngestionState(db: ENSRainbowDB): Promise<void> {
+export async function ensureIngestionNotIncomplete(db: ENSRainbowDB): Promise<void> {
   if (await isIngestionInProgress(db)) {
     await db.close();
     const errorMessage =
