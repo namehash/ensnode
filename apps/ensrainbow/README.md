@@ -286,13 +286,15 @@ The service will be available at `http://localhost:3223`.
 pnpm install
 ```
 
-3. Run data ingestion:
+3. [Get the Rainbow Tables](#getting-the-rainbow-tables)
+
+4. Run data ingestion and verify the number of unique label-labelhash pairs in the database:
 
 ```bash
 pnpm run ingest
 ```
 
-4. Start the service:
+5. Start the service:
 
 ```bash
 pnpm run serve
