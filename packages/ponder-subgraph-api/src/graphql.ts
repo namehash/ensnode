@@ -224,7 +224,7 @@ export function buildGraphQLSchema(
   const entityFilterTypes: Record<string, GraphQLInputObjectType> = {};
   for (const table of tables) {
     const filterType = new GraphQLInputObjectType({
-      name: `${table.tsName}_filter`,
+      name: `${getSubgraphEntityName(table.tsName)}_filter`,
       fields: () => {
         const filterFields: GraphQLInputFieldConfigMap = {
           // Logical operators
