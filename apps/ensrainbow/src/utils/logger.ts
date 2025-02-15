@@ -4,9 +4,9 @@ export type LogLevel = LevelWithSilent;
 
 export const DEFAULT_LOG_LEVEL: LogLevel = "info";
 
-// The main reason for keeping our own validation, even though we're using Pino's types, is
+// Creating our own definition of the log levels recognized by Pino
 // to provide a better user experience with clear error messages when invalid log levels are
-// provided through environment variables.
+// parsed.
 export const VALID_LOG_LEVELS: LogLevel[] = [
   "fatal",
   "error",
@@ -17,12 +17,12 @@ export const VALID_LOG_LEVELS: LogLevel[] = [
   "silent",
 ];
 
-export function parseLogLevel(level: string): LogLevel {
+export function parseLogLevel(maybeLevel: string): LogLevel {
   const normalizedLevel = level.toLowerCase();
   if (VALID_LOG_LEVELS.includes(normalizedLevel as LogLevel)) {
     return normalizedLevel as LogLevel;
   }
-  throw new Error(`Invalid log level "${level}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}`);
+  throw new Error(`Invalid log level "${level}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}.`);
 }
 
 export function getEnvLogLevel(): LogLevel {
@@ -36,7 +36,7 @@ export function getEnvLogLevel(): LogLevel {
   } catch (error) {
     // Log error to console since we can't use logger yet
     console.error(
-      `Invalid LOG_LEVEL environment variable value "${envLogLevel}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}. Defaulting to "${DEFAULT_LOG_LEVEL}".`,
+      `Environment variable error: (LOG_LEVEL): ${error.message}`,
     );
     return DEFAULT_LOG_LEVEL;
   }

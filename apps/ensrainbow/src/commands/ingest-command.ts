@@ -127,7 +127,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   }
 
   // Run count as second phase
-  logger.info("\nStarting count verification phase...");
+  logger.info("\nStarting rainbow record counting phase...");
   await countCommand(db);
 
   // Clear the ingestion marker since we completed successfully
