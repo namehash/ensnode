@@ -3,9 +3,47 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 import { ingestCommand } from "./commands/ingest-command";
-import { serverCommand } from "./commands/server-command";
+import { DEFAULT_PORT, serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDataDir } from "./lib/database";
+import { LogLevel, VALID_LOG_LEVELS } from "./utils/logger";
+import { parseNonNegativeInteger } from "./utils/number-utils";
+
+function getDefaultLogLevel(): LogLevel {
+  const envLogLevel = process.env.LOG_LEVEL as LogLevel;
+  return envLogLevel && VALID_LOG_LEVELS.includes(envLogLevel) ? envLogLevel : "info";
+}
+
+function getEnvPort(): number {
+  const envPort = process.env.PORT;
+  if (!envPort) {
+    return DEFAULT_PORT;
+  }
+
+  try {
+    const port = parseNonNegativeInteger(envPort);
+    if (port === null) {
+      throw new Error(`Invalid port number "${envPort}". Port must be a non-negative integer.`);
+    }
+
+    return port;
+  } catch (error: unknown) {
+    const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
+    // Log error to console since we can't use logger yet
+    console.error(errorMessage); //TODO: Use logger?
+    throw new Error(errorMessage);
+  }
+}
+
+function validatePortConfiguration(cliPort: number): void {
+  const envPort = process.env.PORT;
+  if (envPort !== undefined && cliPort !== getEnvPort()) {
+    throw new Error(
+      `Port conflict: Command line argument (${cliPort}) differs from PORT environment variable (${envPort}). ` +
+        `Please use only one method to specify the port.`,
+    );
+  }
+}
 
 interface IngestArgs {
   "input-file": string;
@@ -54,7 +92,7 @@ yargs(hideBin(process.argv))
         .option("port", {
           type: "number",
           description: "Port to listen on",
-          default: 3223,
+          default: getEnvPort(),
         })
         .option("data-dir", {
           type: "string",
@@ -63,6 +101,7 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv: ArgumentsCamelCase<ServeArgs>) => {
+      validatePortConfiguration(argv.port);
       await serverCommand({
         port: argv.port,
         dataDir: argv["data-dir"],

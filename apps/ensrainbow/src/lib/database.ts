@@ -46,7 +46,7 @@ export async function ensureIngestionNotIncomplete(db: ENSRainbowDB): Promise<vo
  */
 export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
 
-export const getDataDir = () => process.env.DATA_DIR || join(process.cwd(), "data");
+export const getDataDir = () => join(process.cwd(), "data");
 
 export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
   logger.info(`Creating new database in directory: ${dataDir}`);
@@ -71,11 +71,12 @@ export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => 
       logger.error(
         "If you want to clear the existing database, use createDatabase with clearIfExists=true",
       );
+      throw new Error("Database already exists");
     } else {
       logger.error("Failed to create database:", error);
       logger.error(`Please ensure the directory ${dataDir} is writable`);
+      throw error;
     }
-    process.exit(1);
   }
 };
 

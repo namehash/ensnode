@@ -3,11 +3,16 @@ import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import type {
   CountResponse,
-  HealError,
+  CountServerError,
+  CountSuccess,
+  HealBadRequestError,
+  HealNotFoundError,
   HealResponse,
   HealSuccess,
+  HealthResponse,
 } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createDatabase } from "../lib/database";
@@ -17,19 +22,33 @@ import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
-  const port = 3223;
-  let app: ReturnType<typeof createServer>;
+  const nonDefaultPort = 3224;
+  let app: Hono;
   let server: ReturnType<typeof serve>;
+  const TEST_DB_DIR = "test-data-server";
 
   beforeAll(async () => {
-    db = await createDatabase("test-data-server");
-    app = createServer(db);
+    // Clean up any existing test database
+    await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
 
-    // Start the server on a different port than what ENSRainbow defaults to
-    server = serve({
-      fetch: app.fetch,
-      port,
-    });
+    try {
+      db = await createDatabase(TEST_DB_DIR);
+
+      // Initialize label count to be able to start server
+      await db.put(LABELHASH_COUNT_KEY, "0");
+
+      app = await createServer(db);
+
+      // Start the server on a different port than what ENSRainbow defaults to
+      server = serve({
+        fetch: app.fetch,
+        port: nonDefaultPort,
+      });
+    } catch (error) {
+      // Ensure cleanup if setup fails
+      await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
+      throw error;
+    }
   });
 
   beforeEach(async () => {
@@ -41,11 +60,13 @@ describe("Server Command Tests", () => {
 
   afterAll(async () => {
     // Cleanup
-    await server.close();
-    await db.close();
-
-    // Remove test database directory
-    await fs.rm("test-data-server", { recursive: true, force: true });
+    try {
+      if (server) await server.close();
+      if (db) await db.close();
+      await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
+    } catch (error) {
+      console.error("Cleanup failed:", error);
+    }
   });
 
   describe("GET /v1/heal/:labelhash", () => {
@@ -57,7 +78,7 @@ describe("Server Command Tests", () => {
       const labelHashBytes = labelHashToBytes(validLabelhash);
       await db.put(labelHashBytes, validLabel);
 
-      const response = await fetch(`http://localhost:${port}/v1/heal/${validLabelhash}`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelhash}`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as HealResponse;
       const expectedData: HealSuccess = {
@@ -68,17 +89,17 @@ describe("Server Command Tests", () => {
     });
 
     it("should handle missing labelhash parameter", async () => {
-      const response = await fetch(`http://localhost:${port}/v1/heal/`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/`);
       expect(response.status).toBe(404); // Hono returns 404 for missing parameters
       const text = await response.text();
       expect(text).toBe("404 Not Found"); // Hono's default 404 response
     });
 
     it("should reject invalid labelhash format", async () => {
-      const response = await fetch(`http://localhost:${port}/v1/heal/invalid-hash`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/invalid-hash`);
       expect(response.status).toBe(400);
       const data = (await response.json()) as HealResponse;
-      const expectedData: HealError = {
+      const expectedData: HealBadRequestError = {
         status: StatusCode.Error,
         error: "Invalid labelhash length 12 characters (expected 66)",
         errorCode: ErrorCode.BadRequest,
@@ -88,10 +109,10 @@ describe("Server Command Tests", () => {
 
     it("should handle non-existent labelhash", async () => {
       const nonExistentHash = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-      const response = await fetch(`http://localhost:${port}/v1/heal/${nonExistentHash}`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
       const data = (await response.json()) as HealResponse;
-      const expectedData: HealError = {
+      const expectedData: HealNotFoundError = {
         status: StatusCode.Error,
         error: "Label not found",
         errorCode: ErrorCode.NotFound,
@@ -102,35 +123,42 @@ describe("Server Command Tests", () => {
 
   describe("GET /health", () => {
     it("should return ok status", async () => {
-      const response = await fetch(`http://localhost:${port}/health`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/health`);
       expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data).toEqual({ status: "ok" });
+      const expectedData: HealthResponse = {
+        status: "ok",
+      };
+      expect(data).toEqual(expectedData);
     });
   });
 
   describe("GET /v1/labels/count", () => {
     it("should throw an error when database is empty", async () => {
-      const response = await fetch(`http://localhost:${port}/v1/labels/count`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
       expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
-      expect(data.status).toEqual(StatusCode.Error);
-      expect(data.error).toBe(
-        "Label count not initialized. Check that the ingest command has been run.",
-      );
-      expect(data.errorCode).toEqual(ErrorCode.ServerError);
+      const expectedData: CountServerError = {
+        status: StatusCode.Error,
+        error: "Label count not initialized. Check that the ingest command has been run.",
+        errorCode: ErrorCode.ServerError,
+      };
+      expect(data).toEqual(expectedData);
     });
 
     it("should return correct count from LABEL_COUNT_KEY", async () => {
       // Set a specific count in the database
       await db.put(LABELHASH_COUNT_KEY, "42");
 
-      const response = await fetch(`http://localhost:${port}/v1/labels/count`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as CountResponse;
-      expect(data.status).toEqual(StatusCode.Success);
-      expect(data.count).toBe(42);
-      expect(typeof data.timestamp).toBe("string");
+      const expectedData: CountSuccess = {
+        status: StatusCode.Success,
+        count: 42,
+        timestamp: expect.any(String),
+      };
+      expect(data).toEqual(expectedData);
       expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
     });
   });

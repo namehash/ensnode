@@ -2,8 +2,6 @@
 
 ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a simple API endpoint to heal ENS labelhashes back to their original labels.
 
-Special thanks to [The Graph](https://thegraph.com/) for their work to generate the [original ENS rainbow table](https://github.com/graphprotocol/ens-rainbow) used in the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph).
-
 ## Prerequisites
 
 - Docker installed on your system
@@ -11,15 +9,15 @@ Special thanks to [The Graph](https://thegraph.com/) for their work to generate 
 
 ## System Requirements
 
-### Build-time Requirements
+### Data Ingestion Requirements (`ingest` command)
 - **Storage**:
   - At least 15 GB of free disk space:
     - 6.37 GB for the compressed rainbow tables download
     - ~7 GB for the LevelDB database after ingestion
     - Additional temporary space during build/ingestion
-- **Memory**: At least 4 GB RAM recommended during data ingestion
+- **Memory**: At least 4 GB RAM recommended
 
-### Runtime Requirements
+### API Server Requirements (`serve` command)
 - **Storage**: 7.61 GB for the Docker image (pre-built with LevelDB database)
 - **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
 - **CPU**: Minimal requirements - operates well with low CPU resources
@@ -82,29 +80,14 @@ NameHash Labs operates a freely available instance of ENSRainbow for the ENS com
 - Is maintained and monitored by the NameHash Labs team
 - Runs the latest version of ENSRainbow
 
-### Using the Hosted Instance
-
-Simply replace `localhost:3223` with `api.ensrainbow.io` in the API examples:
-
-```bash
-# Health check
-curl https://api.ensrainbow.io/health
-
-# Heal a label
-curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
-
-# Get count of healable labels
-curl https://api.ensrainbow.io/v1/labels/count
-```
-
-While we aim for high availability, if you need guaranteed uptime or want to keep your requests private, we recommend running your own instance using the instructions above.
+> **Important**: While we provide a freely available hosted instance for the ENS community, we strongly recommend running your own ENSRainbow instance alongside ENSNode in your infrastructure. Co-locating these services on the same local network significantly improves indexing performance.
 
 ## API Endpoints
 
 ### Health Check
 
 ```bash
-curl http://localhost:3223/health
+curl https://api.ensrainbow.io/health
 ```
 
 Response: `{"status":"ok"}`
@@ -112,13 +95,35 @@ Response: `{"status":"ok"}`
 ### Heal Label
 
 ```bash
-curl http://localhost:3223/v1/heal/0x[labelhash]
+curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
 ```
 
-Example:
+The `labelhash` parameter must be strictly formatted as a "normalized labelhash" according to these requirements:
+- Must start with '0x'
+- Must be exactly 66 characters long (including '0x' prefix)
+- Must be lowercase
+- Must be a valid hex string that converts to exactly 32 bytes
 
+For example, this is a valid "normalized labelhash":
+```
+0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+```
+
+These would be invalid:
+```
+# Too short
+0xaf2c
+# Not lowercase
+0xAF2CAA1C2CA1D027F1AC823B529D0A67CD144264B2789FA2EA4D63A67C7103CC
+# Missing 0x prefix
+af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+```
+
+Examples:
+
+1. Successful request:
 ```bash
-curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 Response:
@@ -126,6 +131,34 @@ Response:
 {
   "status": "success",
   "label": "vitalik"
+}
+```
+
+2. Invalid labelhash format:
+```bash
+curl https://api.ensrainbow.io/v1/heal/0xinvalid
+```
+
+Response:
+```json
+{
+  "status": "error",
+  "error": "Invalid labelhash - must be a valid hex string",
+  "errorCode": 400
+}
+```
+
+3. Label not found:
+```bash
+curl https://api.ensrainbow.io/v1/heal/0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+```
+
+Response:
+```json
+{
+  "status": "error",
+  "error": "Label not found",
+  "errorCode": 404
 }
 ```
 
@@ -155,19 +188,10 @@ Error Responses:
   }
   ```
 
-- `500 Internal Server Error`: When an unexpected error occurs or database is not initialized
-  ```json
-  {
-    "status": "error",
-    "error": "Internal server error",
-    "errorCode": 500
-  }
-  ```
-
 ### Get Count of Healable Labels
 
 ```bash
-curl http://localhost:3223/v1/labels/count
+curl https://api.ensrainbow.io/v1/labels/count
 ```
 
 Success Response:
@@ -176,15 +200,6 @@ Success Response:
   "status": "success",
   "count": 133856894,
   "timestamp": "2024-01-30T11:18:56Z"
-}
-```
-
-Error Response (if database not initialized):
-```json
-{
-  "status": "error",
-  "error": "Label count not initialized. Check that the ingest command has been run.",
-  "errorCode": 500
 }
 ```
 
@@ -199,13 +214,13 @@ pnpm install
 2. Run data ingestion (requires ens_names.sql.gz) and verify the number of unique label-labelhash pairs in the database:
 
 ```bash
-pnpm ingest
+pnpm run ingest
 ```
 
 3. Start the service:
 
 ```bash
-pnpm serve
+pnpm run serve
 ```
 
 You can verify the service is running by checking the health endpoint or retrieving the label count:
@@ -222,16 +237,20 @@ Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
 
 ## Environment Variables
 
-### Server Variables
-- `PORT`: Server port (default: 3223)
-- `DATA_DIR`: Directory for LevelDB data (default: './data')
+The following environment variables can be used to configure different aspects of the service:
+
+### Global Variables
+These variables affect all commands:
 - `LOG_LEVEL`: Logging level, one of: "fatal", "error", "warn", "info", "debug", "trace", "silent" (default: "info"). Case-insensitive.
 - `NODE_ENV`: Environment setting that affects logging format:
   - When set to "production": Uses standard pino JSON output format for optimal performance and machine parsing
   - Other values (development/test/etc): Uses pretty-printed, human-readable output with colors and formatted timestamps
 
-### Data Ingestion Variables
-- `INPUT_FILE`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.
+### Server Command Variables
+These variables affect the ENSRainbow server operation:
+- `PORT`: Server port (default: 3223)
+
+
 
 ## Service Management
 
@@ -243,20 +262,67 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 2. The database is properly closed to prevent data corruption
 3. The process exits with appropriate status code (0 for success, 1 for errors)
 
-### Database Validation
+## Command Line Interface
 
-The service includes a validation command to verify database integrity:
+ENSRainbow provides a command-line interface (CLI) for managing the service. You can view detailed help for any command by adding `--help` after the command:
 
 ```bash
-pnpm validate
+pnpm ingest --help     # Show help for the ingest command
+pnpm validate --help   # Show help for the validate command
+pnpm serve --help      # Show help for the serve command
 ```
 
-Validation performs the following checks:
-- Verifies all keys are valid labelhashes or are one of the special keys used internally by ENSRainbow
-- Ensures stored labels match their corresponding labelhashes
-- Validates the total rainbow record count
-- Verifies no ingestion is currently in progress
-- Reports detailed statistics including valid rainbow records, invalid labelhashes, and any labelhash mismatches
+### Key Commands
+
+#### Data Ingestion
+```bash
+pnpm ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
+```
+
+`input-file`: Path to the gzipped [SQL dump file containing ENS rainbow tables](#getting-the-rainbow-tables) (default: './ens_names.sql.gz'). Only used during data ingestion.
+
+`data-dir`: Directory for the LevelDB database. If not provided, defaults to `data/`
+
+Ingests the rainbow table data into LevelDB. The process will exit with:
+- Code 0: Successful ingestion
+- Code 1: Error during ingestion
+
+#### Database Validation
+```bash
+pnpm validate [--data-dir path/to/db]
+```
+Validates the database integrity by:
+- Verifying the keys for all rainbow records are valid labelhashes
+- Ensuring stored labels match their corresponding labelhashes
+- Validating the total rainbow record count
+- Verifying no ingestion was interrupted before successful completion
+
+The process will exit with:
+- Code 0: Validation successful
+- Code 1: Validation failed or errors encountered
+
+#### API Server
+```bash
+pnpm serve [--port 3223] [--data-dir path/to/db]
+```
+Starts the API server. The process will exit with:
+- Code 0: Clean shutdown
+- Code 1: Error during operation
+
+### Common Options
+All commands support these options:
+- `--data-dir`: Directory for LevelDB data (default: './data')
+- `--log-level`: Logging level: "debug", "info", "warn", "error" (default: "info")
+
+### Database Management
+If you need to start fresh with the database:
+1. Stop any running ENSRainbow processes
+2. Delete the LevelDB data directory (default: './data')
+3. Run the ingest command again
+
+### Special Thanks
+
+Special thanks to [The Graph](https://thegraph.com/) for their work to generate the [original ENS rainbow table](https://github.com/graphprotocol/ens-rainbow) and [ENS Labs](https://www.enslabs.org/) for developing the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph).
 
 ## License
 
