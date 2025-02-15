@@ -74,11 +74,12 @@ export const createDatabase = async (
       logger.error(
         "If you want to clear the existing database, use createDatabase with clearIfExists=true",
       );
+      throw new Error("Database already exists");
     } else {
       logger.error("Failed to create database:", error);
       logger.error(`Please ensure the directory ${dataDir} is writable`);
+      throw error;
     }
-    process.exit(1);
   }
 };
 
