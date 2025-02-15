@@ -242,7 +242,7 @@ The following environment variables can be used to configure different aspects o
 ### Global Variables
 These variables affect all commands:
 - `LOG_LEVEL`: Logging level for all operations, one of: "debug", "info", "warn", "error". If not provided, defaults to `info`
-- `NODE_ENV`: Standard environment variable (used for logging format)
+- `NODE_ENV`: Standard Node.js environment variable used to indicate the current environment, such as "development, "test", or "production". If "production" a performance optimized logging format is used.
 
 ### Server Command Variables
 These variables affect the ENSRainbow server operation:
