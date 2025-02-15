@@ -21,7 +21,7 @@ The initial release of ENSRainbow focuses on backwards compatibility with the EN
 
 ### Client SDK
 
-ENSRainbow provides an official TypeScript/JavaScript client SDK to simplify integration with the API. You can find the SDK package at [@namehash/ensrainbow-client](https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-client).
+ENSRainbow provides an official TypeScript client SDK to simplify integrations with the API. You can find the SDK package at [@ensnode/ensrainbow-sdk](https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk).
 
 The SDK provides a simple, type-safe interface for all API endpoints and handles proper formatting of labelhashes and error handling.
 
@@ -209,7 +209,7 @@ All commands support these options:
 
 ## Getting the Rainbow Tables
 
-Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket. To download them:
+Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket.
 
 1. Download the original ENS rainbow tables and verify checksum:
 
@@ -269,7 +269,7 @@ The service will be available at `http://localhost:3223`.
 pnpm install
 ```
 
-2. Run data ingestion (requires ens_names.sql.gz) and verify the number of unique label-labelhash pairs in the database:
+2. Run data ingestion:
 
 ```bash
 pnpm run ingest
