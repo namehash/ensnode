@@ -21,7 +21,11 @@ describe("logger", () => {
       expect(parseLogLevel("ERROR")).toBe("error");
     });
 
-    // Note: We no longer test for invalid log levels as Pino will handle validation
+    it("should throw error for invalid log level", () => {
+      expect(() => parseLogLevel("invalid")).toThrow(
+        'Invalid log level "invalid". Valid levels are: fatal, error, warn, info, debug, trace, silent',
+      );
+    });
   });
 
   describe("getEnvLogLevel", () => {
