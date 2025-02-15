@@ -25,12 +25,23 @@ function getEnvPort(): number {
     if (port === null) {
       throw new Error(`Invalid port number "${envPort}". Port must be a non-negative integer.`);
     }
+
     return port;
   } catch (error: unknown) {
     const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
     // Log error to console since we can't use logger yet
     console.error(errorMessage);
     throw new Error(errorMessage);
+  }
+}
+
+function validatePortConfiguration(cliPort: number): void {
+  const envPort = process.env.PORT;
+  if (envPort !== undefined && cliPort !== getEnvPort()) {
+    throw new Error(
+      `Port conflict: Command line argument (${cliPort}) differs from PORT environment variable (${envPort}). ` +
+        `Please use only one method to specify the port.`,
+    );
   }
 }
 
@@ -106,6 +117,7 @@ yargs(hideBin(process.argv))
         });
     },
     async (argv: ArgumentsCamelCase<ServeArgs>) => {
+      validatePortConfiguration(argv.port);
       await serverCommand({
         port: argv.port,
         dataDir: argv["data-dir"],
