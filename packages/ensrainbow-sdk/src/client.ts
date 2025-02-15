@@ -119,11 +119,17 @@ export class EnsRainbowApiClient {
   }
 
   /**
-   * Get current client options.
+   * Get a copy of the current client options.
    *
-   * @returns the current client options
+   * @returns a copy of the current client options.
    */
   getOptions(): Readonly<EnsRainbowApiClientOptions> {
-    return Object.freeze(this.options);
+    // build a deep copy to prevent modification
+    const deepCopy = {
+      cacheCapacity: this.options.cacheCapacity,
+      endpointUrl: new URL(this.options.endpointUrl.href),
+    } satisfies EnsRainbowApiClientOptions;
+
+    return Object.freeze(deepCopy);
   }
 }
