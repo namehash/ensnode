@@ -14,7 +14,7 @@ export interface EnsRainbowApiClientOptions {
   cacheCapacity: number;
 
   /**
-   * The URL of the ENSRainbow API endpoint.
+   * The URL of an ENSRainbow API endpoint.
    */
   endpointUrl: URL;
 }
