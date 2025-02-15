@@ -4,9 +4,9 @@ import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
 import {
+  checkIngestionState,
   clearIngestionMarker,
   createDatabase,
-  exitIfIncompleteIngestion,
   markIngestionStarted,
 } from "../lib/database";
 import { logger } from "../utils/logger";
@@ -33,7 +33,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   const db = await createDatabase(options.dataDir);
 
   // Check if there's an incomplete ingestion
-  await exitIfIncompleteIngestion(db);
+  await checkIngestionState(db);
 
   // Mark ingestion as started
   await markIngestionStarted(db);
@@ -126,7 +126,10 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     logger.error(`Found ${invalidRecords} records with invalid hashes during processing`);
   }
 
-  // Run count as second phase
+  // Run count as second phase to verify the number of unique records in the database.
+  // While processedRecords tells us how many records we ingested, we need to count
+  // the actual database entries to confirm how many unique label-labelhash pairs exist,
+  // as the input data could potentially contain duplicates.
   logger.info("\nStarting rainbow record counting phase...");
   await countCommand(db);
 

@@ -11,18 +11,21 @@ export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as B
 export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 
 /**
- * Checks if there's an incomplete ingestion and exits with a helpful error message if one is found
+ * Checks if there's an incomplete ingestion and throws an error if one is found
  * @param db The ENSRainbow database instance
+ * @throws Error if an incomplete ingestion is detected
  */
-export async function exitIfIncompleteIngestion(db: ENSRainbowDB): Promise<void> {
+export async function checkIngestionState(db: ENSRainbowDB): Promise<void> {
   if (await isIngestionInProgress(db)) {
-    logger.error("Error: Database is in an incomplete state!");
-    logger.error("An ingestion was started but not completed successfully.");
-    logger.error("To fix this:");
-    logger.error("1. Delete the data directory");
-    logger.error("2. Run the ingestion command again: ensrainbow ingest <input-file>");
     await db.close();
-    process.exit(1);
+    const errorMessage =
+      "Database is in an incomplete state! " +
+      "An ingestion was started but not completed successfully.\n" +
+      "To fix this:\n" +
+      "1. Delete the data directory\n" +
+      "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
   }
 }
 

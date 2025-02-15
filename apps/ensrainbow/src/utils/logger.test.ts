@@ -54,16 +54,11 @@ describe("logger", () => {
       expect(getEnvLogLevel()).toBe("debug");
     });
 
-    it("should handle invalid log level in environment", () => {
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    it("should error when invalid log level in environment", () => {
       process.env.LOG_LEVEL = "invalid";
-
-      expect(getEnvLogLevel()).toBe(DEFAULT_LOG_LEVEL);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        `Invalid LOG_LEVEL environment variable value "invalid". Valid levels are: fatal, error, warn, info, debug, trace, silent. Defaulting to "${DEFAULT_LOG_LEVEL}".`,
+      expect(() => getEnvLogLevel()).toThrow(
+        'Environment variable error: (LOG_LEVEL): Invalid log level "invalid". Valid levels are: fatal, error, warn, info, debug, trace, silent.',
       );
-
-      consoleSpy.mockRestore();
     });
   });
 

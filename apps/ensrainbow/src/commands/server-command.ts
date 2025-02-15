@@ -2,7 +2,7 @@ import type { HealthResponse } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
-import { ENSRainbowDB, exitIfIncompleteIngestion, openDatabase } from "../lib/database";
+import { ENSRainbowDB, checkIngestionState, openDatabase } from "../lib/database";
 import { ENSRainbowServer } from "../lib/server";
 import { logger } from "../utils/logger";
 
@@ -47,8 +47,8 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
 
   const db = await openDatabase(options.dataDir);
 
-  // Check for incomplete ingestion
-  await exitIfIncompleteIngestion(db);
+  // Check if there's an incomplete ingestion
+  await checkIngestionState(db); //TODO: remove
 
   const app = createServer(db);
 

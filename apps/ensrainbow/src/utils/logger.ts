@@ -18,11 +18,13 @@ export const VALID_LOG_LEVELS: LogLevel[] = [
 ];
 
 export function parseLogLevel(maybeLevel: string): LogLevel {
-  const normalizedLevel = level.toLowerCase();
+  const normalizedLevel = maybeLevel.toLowerCase();
   if (VALID_LOG_LEVELS.includes(normalizedLevel as LogLevel)) {
     return normalizedLevel as LogLevel;
   }
-  throw new Error(`Invalid log level "${level}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}.`);
+  throw new Error(
+    `Invalid log level "${maybeLevel}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}.`,
+  );
 }
 
 export function getEnvLogLevel(): LogLevel {
@@ -33,12 +35,11 @@ export function getEnvLogLevel(): LogLevel {
 
   try {
     return parseLogLevel(envLogLevel);
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = `Environment variable error: (LOG_LEVEL): ${error instanceof Error ? error.message : String(error)}`;
     // Log error to console since we can't use logger yet
-    console.error(
-      `Environment variable error: (LOG_LEVEL): ${error.message}`,
-    );
-    return DEFAULT_LOG_LEVEL;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 }
 
