@@ -30,7 +30,7 @@ function getEnvPort(): number {
   } catch (error: unknown) {
     const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
     // Log error to console since we can't use logger yet
-    console.error(errorMessage);
+    console.error(errorMessage); //TODO: Use logger?
     throw new Error(errorMessage);
   }
 }
