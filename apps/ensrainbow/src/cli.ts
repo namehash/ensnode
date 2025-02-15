@@ -3,22 +3,35 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 import { ingestCommand } from "./commands/ingest-command";
-import { serverCommand } from "./commands/server-command";
+import { DEFAULT_PORT, serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDataDir } from "./lib/database";
 import { LogLevel, logLevels } from "./utils/logger";
+import { parseNonNegativeInteger } from "./utils/number-utils";
 
 function getDefaultLogLevel(): LogLevel {
   const envLogLevel = process.env.LOG_LEVEL as LogLevel;
   return envLogLevel && envLogLevel in logLevels ? envLogLevel : "info";
 }
 
-const DEFAULT_PORT = 3223;
-
-function getDefaultPort(): number {
+function getEnvPort(): number {
   const envPort = process.env.PORT;
-  const port = envPort ? parseInt(envPort, 10) : DEFAULT_PORT;
-  return isNaN(port) ? DEFAULT_PORT : port;
+  if (!envPort) {
+    return DEFAULT_PORT;
+  }
+
+  try {
+    const port = parseNonNegativeInteger(envPort);
+    if (port === null) {
+      throw new Error(`Invalid port number "${envPort}". Port must be a non-negative integer.`);
+    }
+    return port;
+  } catch (error: unknown) {
+    const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
+    // Log error to console since we can't use logger yet
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
 }
 
 interface IngestArgs {
@@ -78,7 +91,7 @@ yargs(hideBin(process.argv))
         .option("port", {
           type: "number",
           description: "Port to listen on",
-          default: getDefaultPort(),
+          default: getEnvPort(),
         })
         .option("data-dir", {
           type: "string",
