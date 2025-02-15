@@ -4,9 +4,9 @@ import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
 import {
-  checkIngestionState,
   clearIngestionMarker,
   createDatabase,
+  ensureIngestionNotIncomplete,
   markIngestionStarted,
 } from "../lib/database";
 import { logger } from "../utils/logger";
@@ -32,110 +32,113 @@ const TOTAL_EXPECTED_RECORDS = 133_856_894;
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
   const db = await createDatabase(options.dataDir);
 
-  // Check if there's an incomplete ingestion
-  await checkIngestionState(db);
+  try {
+    // Check if there's an incomplete ingestion
+    await ensureIngestionNotIncomplete(db);
 
-  // Mark ingestion as started
-  await markIngestionStarted(db);
+    // Mark ingestion as started
+    await markIngestionStarted(db);
 
-  const bar = new ProgressBar(
-    "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
-    {
-      complete: "=",
-      incomplete: " ",
-      width: 40,
-      total: TOTAL_EXPECTED_RECORDS,
-    },
-  );
-
-  // Create a read stream for the gzipped file
-  const fileStream = createReadStream(options.inputFile);
-  const gunzip = createGunzip();
-  const rl = createInterface({
-    input: fileStream.pipe(gunzip),
-    crlfDelay: Infinity,
-  });
-
-  let isCopySection = false;
-  let batch = db.batch();
-  let batchSize = 0;
-  let processedRecords = 0;
-  let invalidRecords = 0;
-  const MAX_BATCH_SIZE = 10000;
-
-  logger.info("Ingesting data into LevelDB...");
-
-  for await (const line of rl) {
-    if (line.startsWith("COPY public.ens_names")) {
-      isCopySection = true;
-      continue;
-    }
-
-    if (line.startsWith("\\.")) {
-      break;
-    }
-
-    if (!isCopySection) {
-      continue;
-    }
-
-    let record;
-    try {
-      record = buildRainbowRecord(line);
-    } catch (e) {
-      if (e instanceof Error) {
-        logger.warn(
-          `Skipping invalid record: ${e.message} - this record is safe to skip as it would be unreachable by the ENS Subgraph`,
-        );
-      } else {
-        logger.warn(`Unknown error processing record - skipping`);
-      }
-      invalidRecords++;
-      continue;
-    }
-
-    batch.put(record.labelHash, record.label);
-    batchSize++;
-    processedRecords++;
-
-    if (batchSize >= MAX_BATCH_SIZE) {
-      await batch.write();
-      batch = db.batch();
-      batchSize = 0;
-    }
-    bar.tick();
-  }
-
-  // Write any remaining entries
-  if (batchSize > 0) {
-    await batch.write();
-  }
-
-  logger.info("\nData ingestion complete!");
-
-  // Validate the number of processed records
-  if (processedRecords !== TOTAL_EXPECTED_RECORDS) {
-    logger.error(
-      `Error: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
+    const bar = new ProgressBar(
+      "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
+      {
+        complete: "=",
+        incomplete: " ",
+        width: 40,
+        total: TOTAL_EXPECTED_RECORDS,
+      },
     );
-  } else {
-    console.log(`Successfully ingested all ${processedRecords} records`);
+
+    // Create a read stream for the gzipped file
+    const fileStream = createReadStream(options.inputFile);
+    const gunzip = createGunzip();
+    const rl = createInterface({
+      input: fileStream.pipe(gunzip),
+      crlfDelay: Infinity,
+    });
+
+    let isCopySection = false;
+    let batch = db.batch();
+    let batchSize = 0;
+    let processedRecords = 0;
+    let invalidRecords = 0;
+    const MAX_BATCH_SIZE = 10000;
+
+    logger.info("Ingesting data into LevelDB...");
+
+    for await (const line of rl) {
+      if (line.startsWith("COPY public.ens_names")) {
+        isCopySection = true;
+        continue;
+      }
+
+      if (line.startsWith("\\.")) {
+        break;
+      }
+
+      if (!isCopySection) {
+        continue;
+      }
+
+      let record;
+      try {
+        record = buildRainbowRecord(line);
+      } catch (e) {
+        if (e instanceof Error) {
+          logger.warn(
+            `Skipping invalid record: ${e.message} - this record is safe to skip as it would be unreachable by the ENS Subgraph`,
+          );
+        } else {
+          logger.warn(`Unknown error processing record - skipping`);
+        }
+        invalidRecords++;
+        continue;
+      }
+
+      batch.put(record.labelHash, record.label);
+      batchSize++;
+      processedRecords++;
+
+      if (batchSize >= MAX_BATCH_SIZE) {
+        await batch.write();
+        batch = db.batch();
+        batchSize = 0;
+      }
+      bar.tick();
+    }
+
+    // Write any remaining entries
+    if (batchSize > 0) {
+      await batch.write();
+    }
+
+    logger.info("\nData ingestion complete!");
+
+    // Validate the number of processed records
+    if (processedRecords !== TOTAL_EXPECTED_RECORDS) {
+      logger.error(
+        `Error: Expected ${TOTAL_EXPECTED_RECORDS} records but processed ${processedRecords}`,
+      );
+    } else {
+      console.log(`Successfully ingested all ${processedRecords} records`);
+    }
+
+    if (invalidRecords > 0) {
+      logger.error(`Found ${invalidRecords} records with invalid hashes during processing`);
+    }
+
+    // Run count as second phase to verify the number of unique records in the database.
+    // While processedRecords tells us how many records we ingested, we need to count
+    // the actual database entries to confirm how many unique label-labelhash pairs exist,
+    // as the input data could potentially contain duplicates.
+    logger.info("\nStarting rainbow record counting phase...");
+    await countCommand(db);
+
+    // Clear the ingestion marker since we completed successfully
+    await clearIngestionMarker(db);
+
+    logger.info("Data ingestion and count verification complete!");
+  } finally {
+    await db.close();
   }
-
-  if (invalidRecords > 0) {
-    logger.error(`Found ${invalidRecords} records with invalid hashes during processing`);
-  }
-
-  // Run count as second phase to verify the number of unique records in the database.
-  // While processedRecords tells us how many records we ingested, we need to count
-  // the actual database entries to confirm how many unique label-labelhash pairs exist,
-  // as the input data could potentially contain duplicates.
-  logger.info("\nStarting rainbow record counting phase...");
-  await countCommand(db);
-
-  // Clear the ingestion marker since we completed successfully
-  await clearIngestionMarker(db);
-
-  logger.info("Data ingestion and count verification complete!");
-  await db.close();
 }

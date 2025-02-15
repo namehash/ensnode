@@ -2,7 +2,7 @@ import type { HealthResponse } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
-import { ENSRainbowDB, checkIngestionState, openDatabase } from "../lib/database";
+import { ENSRainbowDB, ensureIngestionNotIncomplete, openDatabase } from "../lib/database";
 import { ENSRainbowServer } from "../lib/server";
 import { logger } from "../utils/logger";
 
@@ -47,30 +47,35 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
 
   const db = await openDatabase(options.dataDir);
 
-  // Check if there's an incomplete ingestion
-  await checkIngestionState(db); //TODO: remove
+  try {
+    // Check if there's an incomplete ingestion
+    await ensureIngestionNotIncomplete(db);
 
-  const app = createServer(db);
+    const app = createServer(db);
 
-  const server = serve({
-    fetch: app.fetch,
-    port: options.port,
-  });
+    const server = serve({
+      fetch: app.fetch,
+      port: options.port,
+    });
 
-  // Handle graceful shutdown
-  const shutdown = async () => {
-    logger.info("Shutting down server...");
-    try {
-      await server.close();
-      await db.close();
-      logger.info("Server shutdown complete");
-      process.exit(0);
-    } catch (error) {
-      logger.error("Error during shutdown:", error);
-      process.exit(1);
-    }
-  };
+    // Handle graceful shutdown
+    const shutdown = async () => {
+      logger.info("Shutting down server...");
+      try {
+        await server.close();
+        await db.close();
+        logger.info("Server shutdown complete");
+        process.exit(0);
+      } catch (error) {
+        logger.error("Error during shutdown:", error);
+        process.exit(1);
+      }
+    };
 
-  process.on("SIGTERM", shutdown);
-  process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
+    process.on("SIGINT", shutdown);
+  } catch (error) {
+    await db.close();
+    throw error;
+  }
 }

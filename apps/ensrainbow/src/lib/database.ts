@@ -17,7 +17,6 @@ export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]
  */
 export async function ensureIngestionNotIncomplete(db: ENSRainbowDB): Promise<void> {
   if (await isIngestionInProgress(db)) {
-    await db.close();
     const errorMessage =
       "Database is in an incomplete state! " +
       "An ingestion was started but not completed successfully.\n" +
