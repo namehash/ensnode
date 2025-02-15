@@ -80,10 +80,10 @@ export const isCacheableHealResponse = (
 
 export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
   status: Status;
-  count?: number | undefined;
-  timestamp?: string | undefined;
-  error?: string | undefined;
-  errorCode?: Error | undefined;
+  count?: number | never;
+  timestamp?: string | never;
+  error?: string | never;
+  errorCode?: Error | never;
 }
 
 export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success, never> {
