@@ -6,13 +6,8 @@ import { ingestCommand } from "./commands/ingest-command";
 import { DEFAULT_PORT, serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDataDir } from "./lib/database";
-import { LogLevel, VALID_LOG_LEVELS } from "./utils/logger";
+import { logger } from "./utils/logger";
 import { parseNonNegativeInteger } from "./utils/number-utils";
-
-function getDefaultLogLevel(): LogLevel {
-  const envLogLevel = process.env.LOG_LEVEL as LogLevel;
-  return envLogLevel && VALID_LOG_LEVELS.includes(envLogLevel) ? envLogLevel : "info";
-}
 
 function getEnvPort(): number {
   const envPort = process.env.PORT;
@@ -29,8 +24,7 @@ function getEnvPort(): number {
     return port;
   } catch (error: unknown) {
     const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
-    // Log error to console since we can't use logger yet
-    console.error(errorMessage); //TODO: Use logger?
+    logger.error(errorMessage);
     throw new Error(errorMessage);
   }
 }

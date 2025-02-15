@@ -50,9 +50,6 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
   const db = await openDatabase(options.dataDir);
 
   try {
-    // Check if there's an incomplete ingestion
-    await ensureIngestionNotIncomplete(db);
-
     const app = await createServer(db);
 
     const server = serve({

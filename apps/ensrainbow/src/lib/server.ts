@@ -13,7 +13,11 @@ import {
 import { ByteArray } from "viem";
 import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
-import { LABELHASH_COUNT_KEY, isIngestionInProgress } from "./database";
+import {
+  LABELHASH_COUNT_KEY,
+  ensureIngestionNotIncomplete,
+  isIngestionInProgress,
+} from "./database";
 import { ENSRainbowDB, safeGet } from "./database";
 
 export class ENSRainbowServer {
@@ -33,9 +37,7 @@ export class ENSRainbowServer {
     const server = new ENSRainbowServer(db);
 
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
-    if (await isIngestionInProgress(db)) {
-      throw new Error("Database is in an invalid state: ingestion in progress flag is set");
-    }
+    await ensureIngestionNotIncomplete(db);
 
     // Verify we can get the rainbow record count
     const countResponse = await server.labelCount();
