@@ -8,20 +8,17 @@ import {
   HealResponse,
   HealSuccess,
 } from "@ensnode/ensrainbow-sdk/types";
-import { Logger } from "@ensnode/utils/logger";
 import { ByteArray } from "viem";
-import { getLogger } from "../utils/logger";
+import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 import { LABELHASH_COUNT_KEY } from "./database";
 import { ENSRainbowDB, safeGet } from "./database";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private readonly logger: Logger;
 
   constructor(db: ENSRainbowDB) {
     this.db = db;
-    this.logger = getLogger();
   }
 
   async heal(labelhash: `0x${string}`): Promise<HealResponse> {
@@ -40,7 +37,7 @@ export class ENSRainbowServer {
     try {
       const label = await safeGet(this.db, labelHashBytes);
       if (label === null) {
-        this.logger.info(`Unhealable labelhash request: ${labelhash}`);
+        logger.info(`Unhealable labelhash request: ${labelhash}`);
         return {
           status: StatusCode.Error,
           error: "Label not found",
@@ -48,13 +45,13 @@ export class ENSRainbowServer {
         } satisfies HealError;
       }
 
-      this.logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
+      logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
       return {
         status: StatusCode.Success,
         label,
       } satisfies HealSuccess;
     } catch (error) {
-      this.logger.error("Error healing label:", error);
+      logger.error("Error healing label:", error);
       return {
         status: StatusCode.Error,
         error: "Internal server error",
@@ -76,7 +73,7 @@ export class ENSRainbowServer {
 
       const count = parseNonNegativeInteger(countStr);
       if (count === null) {
-        this.logger.error(`Invalid label count value in database: ${countStr}`);
+        logger.error(`Invalid label count value in database: ${countStr}`);
         return {
           status: StatusCode.Error,
           error: "Internal server error: Invalid label count format",
@@ -90,7 +87,7 @@ export class ENSRainbowServer {
         timestamp: new Date().toISOString(),
       } satisfies CountSuccess;
     } catch (error) {
-      this.logger.error("Failed to retrieve label count:", error);
+      logger.error("Failed to retrieve label count:", error);
       return {
         status: StatusCode.Error,
         error: "Internal server error",

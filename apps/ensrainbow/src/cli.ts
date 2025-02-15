@@ -1,5 +1,4 @@
 import { join } from "path";
-import { LOG_LEVELS, LogLevel } from "@ensnode/utils/logger";
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
@@ -7,28 +6,19 @@ import { ingestCommand } from "./commands/ingest-command";
 import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDataDir } from "./lib/database";
-import { getLogger } from "./utils/logger";
-
-function getDefaultLogLevel(): LogLevel {
-  const envLogLevel = process.env.LOG_LEVEL as LogLevel;
-  return envLogLevel || "info";
-}
 
 interface IngestArgs {
   "input-file": string;
   "data-dir": string;
-  "log-level": LogLevel;
 }
 
 interface ServeArgs {
   port: number;
   "data-dir": string;
-  "log-level": LogLevel;
 }
 
 interface ValidateArgs {
   "data-dir": string;
-  "log-level": LogLevel;
 }
 
 yargs(hideBin(process.argv))
@@ -48,15 +38,8 @@ yargs(hideBin(process.argv))
           description: "Directory to store LevelDB data",
           default: getDataDir(),
         })
-        .option("log-level", {
-          type: "string",
-          description: "Log level (fatal, error, warn, info, debug, trace)",
-          choices: LOG_LEVELS,
-          default: getDefaultLogLevel(),
-        });
     },
     async (argv: ArgumentsCamelCase<IngestArgs>) => {
-      getLogger({ level: argv["log-level"] });
       await ingestCommand({
         inputFile: argv["input-file"],
         dataDir: argv["data-dir"],
@@ -78,15 +61,8 @@ yargs(hideBin(process.argv))
           description: "Directory containing LevelDB data",
           default: getDataDir(),
         })
-        .option("log-level", {
-          type: "string",
-          description: "Log level (fatal, error, warn, info, debug, trace)",
-          choices: LOG_LEVELS,
-          default: getDefaultLogLevel(),
-        });
     },
     async (argv: ArgumentsCamelCase<ServeArgs>) => {
-      getLogger({ level: argv["log-level"] });
       await serverCommand({
         port: argv.port,
         dataDir: argv["data-dir"],
@@ -103,15 +79,8 @@ yargs(hideBin(process.argv))
           description: "Directory containing LevelDB data",
           default: getDataDir(),
         })
-        .option("log-level", {
-          type: "string",
-          description: "Log level (fatal, error, warn, info, debug, trace)",
-          choices: LOG_LEVELS,
-          default: getDefaultLogLevel(),
-        });
     },
     async (argv: ArgumentsCamelCase<ValidateArgs>) => {
-      getLogger({ level: argv["log-level"] });
       await validateCommand({
         dataDir: argv["data-dir"],
       });

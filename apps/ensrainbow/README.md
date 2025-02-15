@@ -225,7 +225,10 @@ Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
 ### Server Variables
 - `PORT`: Server port (default: 3223)
 - `DATA_DIR`: Directory for LevelDB data (default: './data')
-- `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
+- `LOG_LEVEL`: Logging level, one of: "fatal", "error", "warn", "info", "debug", "trace", "silent" (default: "info"). Case-insensitive.
+- `NODE_ENV`: Environment setting that affects logging format:
+  - When set to "production": Uses standard pino JSON output format for optimal performance and machine parsing
+  - Other values (development/test/etc): Uses pretty-printed, human-readable output with colors and formatted timestamps
 
 ### Data Ingestion Variables
 - `INPUT_FILE`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.

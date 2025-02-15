@@ -4,7 +4,7 @@ import { ClassicLevel } from "classic-level";
 import { ByteArray, labelhash } from "viem";
 
 import { byteArraysEqual } from "../utils/byte-utils";
-import { getLogger } from "../utils/logger";
+import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
@@ -16,7 +16,6 @@ export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]
  */
 export async function exitIfIncompleteIngestion(db: ENSRainbowDB): Promise<void> {
   if (await isIngestionInProgress(db)) {
-    const logger = getLogger();
     logger.error("Error: Database is in an incomplete state!");
     logger.error("An ingestion was started but not completed successfully.");
     logger.error("To fix this:");
@@ -48,7 +47,6 @@ export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
 export const getDataDir = () => process.env.DATA_DIR || join(process.cwd(), "data");
 
 export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
-  const logger = getLogger();
   logger.info(`Creating new database in directory: ${dataDir}`);
 
   try {
@@ -80,7 +78,6 @@ export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => 
 };
 
 export const openDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
-  const logger = getLogger();
   logger.info(`Opening existing database in directory: ${dataDir}`);
 
   try {
@@ -175,7 +172,6 @@ export async function validate(db: ENSRainbowDB): Promise<boolean> {
   let invalidHashes = 0;
   let hashMismatches = 0;
 
-  const logger = getLogger();
   logger.info("Starting database validation...");
 
   // Check if ingestion is in progress

@@ -5,16 +5,14 @@ import {
   safeGet,
 } from "../lib/database";
 import { byteArraysEqual } from "../utils/byte-utils";
-import { getLogger } from "../utils/logger";
+import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export interface CountCommandOptions {
   dataDir: string;
 }
 
-export async function countCommand(db: ENSRainbowDB, options: CountCommandOptions): Promise<void> {
-  const logger = getLogger();
-
+export async function countCommand(db: ENSRainbowDB): Promise<void> {
   // Try to read existing count
   const existingCountStr = await safeGet(db, LABELHASH_COUNT_KEY);
   if (existingCountStr === null) {

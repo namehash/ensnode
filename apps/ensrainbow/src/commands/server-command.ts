@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { ENSRainbowDB, exitIfIncompleteIngestion, openDatabase } from "../lib/database";
 import { ENSRainbowServer } from "../lib/server";
-import { getLogger } from "../utils/logger";
+import { logger } from "../utils/logger";
 
 export interface ServerCommandOptions {
   dataDir: string;
@@ -17,7 +17,6 @@ export interface ServerCommandOptions {
 export function createServer(db: ENSRainbowDB): Hono {
   const app = new Hono();
   const rainbow = new ENSRainbowServer(db);
-  const logger = getLogger();
 
   app.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     const labelhash = c.req.param("labelhash") as `0x${string}`;
@@ -44,15 +43,14 @@ export function createServer(db: ENSRainbowDB): Hono {
 }
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
-  const logger = getLogger();
+  logger.info(`ENS Rainbow server starting on port ${options.port}...`);
+  
   const db = await openDatabase(options.dataDir);
 
   // Check for incomplete ingestion
   await exitIfIncompleteIngestion(db);
 
   const app = createServer(db);
-
-  logger.info(`ENS Rainbow server starting on port ${options.port}...`);
 
   const server = serve({
     fetch: app.fetch,
