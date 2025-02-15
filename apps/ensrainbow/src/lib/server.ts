@@ -27,14 +27,14 @@ export class ENSRainbowServer {
 
   /**
    * Creates a new ENSRainbowServer instance
-   * @param db The ENSRainbow database instance
+   * @param db The ENSRainbowDB instance
    * @param logLevel Optional log level
-   * @throws Error if database validation fails
+   * @throws Error if a "lite" validation of the database fails
    */
   public static async init(db: ENSRainbowDB, logLevel?: LogLevel): Promise<ENSRainbowServer> {
     const server = new ENSRainbowServer(db, logLevel);
 
-    // Check if ingestion is in progress
+    // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
     if (await isIngestionInProgress(db)) {
       throw new Error("Database is in an invalid state: ingestion in progress flag is set");
     }
@@ -42,7 +42,7 @@ export class ENSRainbowServer {
     // Verify we can get the rainbow record count
     const countResponse = await server.labelCount();
     if (countResponse.status === StatusCode.Error) {
-      throw new Error(`Failed to get rainbow record count: ${countResponse.error}`);
+      throw new Error(`Database is in an invalid state: failed to get rainbow record count: ${countResponse.error}`);
     }
 
     return server;

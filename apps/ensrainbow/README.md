@@ -17,7 +17,7 @@ ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a s
     - Additional temporary space during build/ingestion
 - **Memory**: At least 4 GB RAM recommended
 
-### Server Requirements (`serve` command)
+### API Server Requirements (`serve` command)
 - **Storage**: 7.61 GB for the Docker image (pre-built with LevelDB database)
 - **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
 - **CPU**: Minimal requirements - operates well with low CPU resources
@@ -80,7 +80,7 @@ NameHash Labs operates a freely available instance of ENSRainbow for the ENS com
 - Is maintained and monitored by the NameHash Labs team
 - Runs the latest version of ENSRainbow
 
-> **Important**: While we provide a freely available hosted instance, we strongly recommend running your own ENSRainbow instance alongside ENSNode in your infrastructure. Co-locating these services on the same local network significantly improves indexing performance, reduces latency, ensures guaranteed uptime, and maintains data privacy. This setup is particularly important for production environments.
+> **Important**: While we provide a freely available hosted instance for the ENS community, we strongly recommend running your own ENSRainbow instance alongside ENSNode in your infrastructure. Co-locating these services on the same local network significantly improves indexing performance.
 
 ## API Endpoints
 
@@ -98,13 +98,13 @@ Response: `{"status":"ok"}`
 curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
 ```
 
-The `labelhash` parameter must be strictly formatted according to these requirements:
+The `labelhash` parameter must be strictly formatted as a "normalized labelhash" according to these requirements:
 - Must start with '0x'
 - Must be exactly 66 characters long (including '0x' prefix)
 - Must be lowercase
 - Must be a valid hex string that converts to exactly 32 bytes
 
-For example, this is a valid labelhash:
+For example, this is a valid "normalized labelhash":
 ```
 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
@@ -286,23 +286,23 @@ Ingests the rainbow table data into LevelDB. The process will exit with:
 
 #### Database Validation
 ```bash
-pnpm validate [--data-dir path/to/datdba]
+pnpm validate [--data-dir path/to/db]
 ```
 Validates the database integrity by:
-- Verifying all keys are valid labelhashes
+- Verifying the keys for all rainbow records are valid labelhashes
 - Ensuring stored labels match their corresponding labelhashes
 - Validating the total rainbow record count
-- Verifying no ingestion is currently in progress
+- Verifying no ingestion was interrupted before successful completion
 
 The process will exit with:
 - Code 0: Validation successful
 - Code 1: Validation failed or errors encountered
 
-#### Server
+#### API Server
 ```bash
 pnpm serve [--port 3223] [--data-dir path/to/db]
 ```
-Starts the HTTP server. The process will exit with:
+Starts the API server. The process will exit with:
 - Code 0: Clean shutdown
 - Code 1: Error during operation
 
@@ -320,7 +320,7 @@ If you need to start fresh with the database:
 
 ### Special Thanks
 
-Special thanks to [The Graph](https://thegraph.com/) for their work to generate the [original ENS rainbow table](https://github.com/graphprotocol/ens-rainbow) used in the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph).
+Special thanks to [The Graph](https://thegraph.com/) for their work to generate the [original ENS rainbow table](https://github.com/graphprotocol/ens-rainbow) and [ENS Labs](https://www.enslabs.org/) for developing the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph).
 
 ## License
 
