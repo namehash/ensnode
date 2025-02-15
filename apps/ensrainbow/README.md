@@ -237,13 +237,17 @@ Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
 
 ## Environment Variables
 
-### Server Variables
-- `PORT`: Server port (default: 3223)
-- `DATA_DIR`: Directory for LevelDB data (default: './data')
-- `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
+The following environment variables can be used to configure different aspects of the service:
 
-### Data Ingestion Variables
-- `INPUT_FILE`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.
+### Global Variables
+These variables affect all commands:
+- `DATA_DIR`: Default directory for the LevelDB database. If not provided, defaults to `data/`
+- `LOG_LEVEL`: Logging level for all operations, one of: "debug", "info", "warn", "error". If not provided, defaults to `info`
+
+### Server Command Variables
+These variables affect the ENSRainbow server operation:
+- `PORT`: Server port (default: 3223)
+- `NODE_ENV`: Standard environment variable (not used explicitly by the service)
 
 ## Service Management
 
@@ -271,6 +275,11 @@ pnpm serve --help      # Show help for the serve command
 ```bash
 pnpm ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
 ```
+
+`input-file`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.
+
+`data-dir`: Directory for the LevelDB database. If not provided, defaults to `data/`
+
 Ingests the rainbow table data into LevelDB. The process will exit with:
 - Code 0: Successful ingestion
 - Code 1: Error during ingestion
