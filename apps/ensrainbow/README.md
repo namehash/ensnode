@@ -87,7 +87,7 @@ NameHash Labs operates a freely available instance of ENSRainbow for the ENS com
 ### Health Check
 
 ```bash
-curl http://https://api.ensrainbow.io/health
+curl https://api.ensrainbow.io/health
 ```
 
 Response: `{"status":"ok"}`
@@ -95,13 +95,14 @@ Response: `{"status":"ok"}`
 ### Heal Label
 
 ```bash
-curl http://https://api.ensrainbow.io/v1/heal/0x[labelhash]
+curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
 ```
 
-Example:
+Examples:
 
+1. Successful request:
 ```bash
-curl http://https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 Response:
@@ -109,6 +110,34 @@ Response:
 {
   "status": "success",
   "label": "vitalik"
+}
+```
+
+2. Invalid labelhash format:
+```bash
+curl https://api.ensrainbow.io/v1/heal/0xinvalid
+```
+
+Response:
+```json
+{
+  "status": "error",
+  "error": "Invalid labelhash - must be a valid hex string",
+  "errorCode": 400
+}
+```
+
+3. Label not found:
+```bash
+curl https://api.ensrainbow.io/v1/heal/0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+```
+
+Response:
+```json
+{
+  "status": "error",
+  "error": "Label not found",
+  "errorCode": 404
 }
 ```
 
@@ -141,7 +170,7 @@ Error Responses:
 ### Get Count of Healable Labels
 
 ```bash
-curl http://https://api.ensrainbow.io/v1/labels/count
+curl https://api.ensrainbow.io/v1/labels/count
 ```
 
 Success Response:
