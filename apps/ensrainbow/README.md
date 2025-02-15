@@ -155,15 +155,6 @@ Error Responses:
   }
   ```
 
-- `500 Internal Server Error`: When an unexpected error occurs or database is not initialized
-  ```json
-  {
-    "status": "error",
-    "error": "Internal server error",
-    "errorCode": 500
-  }
-  ```
-
 ### Get Count of Healable Labels
 
 ```bash
