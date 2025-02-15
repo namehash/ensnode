@@ -80,31 +80,14 @@ NameHash Labs operates a freely available instance of ENSRainbow for the ENS com
 - Is maintained and monitored by the NameHash Labs team
 - Runs the latest version of ENSRainbow
 
-> **Important**: While the hosted instance is freely available, we strongly recommend running your own ENSRainbow instance alongside ENSNode in your infrastructure. Co-locating these services on the same local network significantly improves indexing performance and reduces latency for label healing operations. This setup is particularly important for production environments where optimal performance is crucial.
-
-### Using the Hosted Instance
-
-Simply replace `localhost:3223` with `api.ensrainbow.io` in the API examples:
-
-```bash
-# Health check
-curl https://api.ensrainbow.io/health
-
-# Heal a label
-curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
-
-# Get count of healable labels
-curl https://api.ensrainbow.io/v1/labels/count
-```
-
-While we aim for high availability, if you need guaranteed uptime or want to keep your requests private, we recommend running your own instance using the instructions above.
+> **Important**: While we provide a freely available hosted instance, we strongly recommend running your own ENSRainbow instance alongside ENSNode in your infrastructure. Co-locating these services on the same local network significantly improves indexing performance, reduces latency, ensures guaranteed uptime, and maintains data privacy. This setup is particularly important for production environments.
 
 ## API Endpoints
 
 ### Health Check
 
 ```bash
-curl http://localhost:3223/health
+curl http://https://api.ensrainbow.io/health
 ```
 
 Response: `{"status":"ok"}`
@@ -112,13 +95,13 @@ Response: `{"status":"ok"}`
 ### Heal Label
 
 ```bash
-curl http://localhost:3223/v1/heal/0x[labelhash]
+curl http://https://api.ensrainbow.io/v1/heal/0x[labelhash]
 ```
 
 Example:
 
 ```bash
-curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+curl http://https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 Response:
@@ -158,7 +141,7 @@ Error Responses:
 ### Get Count of Healable Labels
 
 ```bash
-curl http://localhost:3223/v1/labels/count
+curl http://https://api.ensrainbow.io/v1/labels/count
 ```
 
 Success Response:
