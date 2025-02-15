@@ -98,6 +98,27 @@ Response: `{"status":"ok"}`
 curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
 ```
 
+The `labelhash` parameter must be strictly formatted according to these requirements:
+- Must start with '0x'
+- Must be exactly 66 characters long (including '0x' prefix)
+- Must be lowercase
+- Must be a valid hex string that converts to exactly 32 bytes
+
+For example, this is a valid labelhash:
+```
+0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+```
+
+These would be invalid:
+```
+# Too short
+0xaf2c
+# Not lowercase
+0xAF2CAA1C2CA1D027F1AC823B529D0A67CD144264B2789FA2EA4D63A67C7103CC
+# Missing 0x prefix
+af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+```
+
 Examples:
 
 1. Successful request:
