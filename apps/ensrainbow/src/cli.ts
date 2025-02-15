@@ -13,6 +13,14 @@ function getDefaultLogLevel(): LogLevel {
   return envLogLevel && envLogLevel in logLevels ? envLogLevel : "info";
 }
 
+const DEFAULT_PORT = 3223;
+
+function getDefaultPort(): number {
+  const envPort = process.env.PORT;
+  const port = envPort ? parseInt(envPort, 10) : DEFAULT_PORT;
+  return isNaN(port) ? DEFAULT_PORT : port;
+}
+
 interface IngestArgs {
   "input-file": string;
   "data-dir": string;
@@ -70,7 +78,7 @@ yargs(hideBin(process.argv))
         .option("port", {
           type: "number",
           description: "Port to listen on",
-          default: 3223,
+          default: getDefaultPort(),
         })
         .option("data-dir", {
           type: "string",

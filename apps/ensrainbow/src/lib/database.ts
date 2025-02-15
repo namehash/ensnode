@@ -45,7 +45,7 @@ export async function exitIfIncompleteIngestion(db: ENSRainbowDB, logger: Logger
  */
 export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
 
-export const getDataDir = () => process.env.DATA_DIR || join(process.cwd(), "data");
+export const getDataDir = () => join(process.cwd(), "data");
 
 export const createDatabase = async (
   dataDir: string,

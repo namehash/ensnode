@@ -42,7 +42,9 @@ export class ENSRainbowServer {
     // Verify we can get the rainbow record count
     const countResponse = await server.labelCount();
     if (countResponse.status === StatusCode.Error) {
-      throw new Error(`Database is in an invalid state: failed to get rainbow record count: ${countResponse.error}`);
+      throw new Error(
+        `Database is in an invalid state: failed to get rainbow record count: ${countResponse.error}`,
+      );
     }
 
     return server;

@@ -241,13 +241,13 @@ The following environment variables can be used to configure different aspects o
 
 ### Global Variables
 These variables affect all commands:
-- `DATA_DIR`: Default directory for the LevelDB database. If not provided, defaults to `data/`
 - `LOG_LEVEL`: Logging level for all operations, one of: "debug", "info", "warn", "error". If not provided, defaults to `info`
+- `NODE_ENV`: Standard environment variable (used for logging format)
 
 ### Server Command Variables
 These variables affect the ENSRainbow server operation:
 - `PORT`: Server port (default: 3223)
-- `NODE_ENV`: Standard environment variable (not used explicitly by the service)
+
 
 ## Service Management
 
@@ -276,7 +276,7 @@ pnpm serve --help      # Show help for the serve command
 pnpm ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
 ```
 
-`input-file`: Path to the gzipped SQL dump file containing ENS rainbow tables (default: './ens_names.sql.gz'). Only used during data ingestion.
+`input-file`: Path to the gzipped [SQL dump file containing ENS rainbow tables](#getting-the-rainbow-tables) (default: './ens_names.sql.gz'). Only used during data ingestion.
 
 `data-dir`: Directory for the LevelDB database. If not provided, defaults to `data/`
 
@@ -310,7 +310,6 @@ Starts the API server. The process will exit with:
 All commands support these options:
 - `--data-dir`: Directory for LevelDB data (default: './data')
 - `--log-level`: Logging level: "debug", "info", "warn", "error" (default: "info")
-
 
 ### Database Management
 If you need to start fresh with the database:

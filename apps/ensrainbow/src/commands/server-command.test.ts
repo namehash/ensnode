@@ -23,7 +23,7 @@ import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
-  const port = 3223;
+  const nonDefaultPort = 3224;
   let app: Hono;
   let server: ReturnType<typeof serve>;
   const TEST_DB_DIR = "test-data-server";
@@ -43,7 +43,7 @@ describe("Server Command Tests", () => {
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({
         fetch: app.fetch,
-        port,
+        port: nonDefaultPort,
       });
     } catch (error) {
       // Ensure cleanup if setup fails
@@ -79,7 +79,7 @@ describe("Server Command Tests", () => {
       const labelHashBytes = labelHashToBytes(validLabelhash);
       await db.put(labelHashBytes, validLabel);
 
-      const response = await fetch(`http://localhost:${port}/v1/heal/${validLabelhash}`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelhash}`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as HealResponse;
       const expectedData: HealSuccess = {
@@ -90,14 +90,14 @@ describe("Server Command Tests", () => {
     });
 
     it("should handle missing labelhash parameter", async () => {
-      const response = await fetch(`http://localhost:${port}/v1/heal/`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/`);
       expect(response.status).toBe(404); // Hono returns 404 for missing parameters
       const text = await response.text();
       expect(text).toBe("404 Not Found"); // Hono's default 404 response
     });
 
     it("should reject invalid labelhash format", async () => {
-      const response = await fetch(`http://localhost:${port}/v1/heal/invalid-hash`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/invalid-hash`);
       expect(response.status).toBe(400);
       const data = (await response.json()) as HealResponse;
       const expectedData: HealBadRequestError = {
@@ -110,7 +110,7 @@ describe("Server Command Tests", () => {
 
     it("should handle non-existent labelhash", async () => {
       const nonExistentHash = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-      const response = await fetch(`http://localhost:${port}/v1/heal/${nonExistentHash}`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
       const data = (await response.json()) as HealResponse;
       const expectedData: HealNotFoundError = {
@@ -124,7 +124,7 @@ describe("Server Command Tests", () => {
 
   describe("GET /health", () => {
     it("should return ok status", async () => {
-      const response = await fetch(`http://localhost:${port}/health`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/health`);
       expect(response.status).toBe(200);
       const data = await response.json();
       const expectedData: HealthResponse = {
@@ -136,7 +136,7 @@ describe("Server Command Tests", () => {
 
   describe("GET /v1/labels/count", () => {
     it("should throw an error when database is empty", async () => {
-      const response = await fetch(`http://localhost:${port}/v1/labels/count`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
       expect(response.status).toBe(500);
       const data = (await response.json()) as CountResponse;
       const expectedData: CountServerError = {
@@ -151,7 +151,7 @@ describe("Server Command Tests", () => {
       // Set a specific count in the database
       await db.put(LABELHASH_COUNT_KEY, "42");
 
-      const response = await fetch(`http://localhost:${port}/v1/labels/count`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as CountResponse;
       const expectedData: CountSuccess = {
