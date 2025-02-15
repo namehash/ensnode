@@ -48,8 +48,8 @@ export class LruCache<KeyType extends string, ValueType> implements Cache<KeyTyp
   /**
    * Create a new LRU cache with the given capacity.
    *
-   * @param capacity The maximum number of items in the cache.
-   * @throws Error if capacity is not an integer or is negative.
+   * @param capacity The maximum number of items in the cache. If set to 0, the cache is effectively disabled.
+   * @throws Error if capacity is not a non-negative integer.
    */
   public constructor(capacity: number) {
     if (!Number.isInteger(capacity)) {
