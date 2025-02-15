@@ -169,7 +169,7 @@ pnpm serve --help      # Show help for the serve command
 
 #### Data Ingestion
 ```bash
-pnpm ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
+pnpm run ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
 ```
 
 `input-file`: Path to the gzipped [SQL dump file containing ENS rainbow tables](#getting-the-rainbow-tables) (default: './ens_names.sql.gz'). Only used during data ingestion.
@@ -182,7 +182,7 @@ Ingests the rainbow table data into LevelDB. The process will exit with:
 
 #### Database Validation
 ```bash
-pnpm validate [--data-dir path/to/db]
+pnpm run validate [--data-dir path/to/db]
 ```
 Validates the database integrity by:
 - Verifying the keys for all rainbow records are valid labelhashes
@@ -196,7 +196,7 @@ The process will exit with:
 
 #### API Server
 ```bash
-pnpm serve [--port 3223] [--data-dir path/to/db]
+pnpm run serve [--port 3223] [--data-dir path/to/db]
 ```
 Starts the API server. The process will exit with:
 - Code 0: Clean shutdown
@@ -211,21 +211,21 @@ All commands support these options:
 
 Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket.
 
-1. Download the original ENS rainbow tables and verify checksum:
+1. Download the original ENS rainbow tables:
 
 ```bash
 # Download files
 wget https://bucket.ensrainbow.io/ens_names.sql.gz
 wget https://bucket.ensrainbow.io/ens_names.sql.gz.sha256sum
+wget https://bucket.ensrainbow.io/THE_GRAPH_LICENSE.txt
+```
 
+2. Verify the checksum:
+
+```bash
 # Verify checksum
 sha256sum -c ens_names.sql.gz.sha256sum
 ```
-
-## Prerequisites
-
-- Docker installed on your system
-- Node.js v18 or later (for local development) — see monorepo package.json for engines spec
 
 ## System Requirements
 
@@ -242,11 +242,26 @@ sha256sum -c ens_names.sql.gz.sha256sum
 - **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
 - **CPU**: Minimal requirements - operates well with low CPU resources
 
-You can find our pre-built Docker image at [GitHub Packages](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensrainbow).
-
 ## Quick Start with Docker
 
-1. Build the Docker image (includes data download & ingestion):
+This section assumes you have already installed Docker on your system.
+
+### Option 1: Using the Pre-built Image (Recommended)
+
+We provide a pre-built Docker image that includes the database already ingested, making it the fastest way to get started:
+
+```bash
+docker pull ghcr.io/namehash/ensnode/ensrainbow:latest
+docker run -d -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow:latest
+```
+
+The service will be available at `http://localhost:3223`.
+
+### Option 2: Building Your Own Image
+
+If you prefer to build the image yourself (includes data download & ingestion):
+
+1. Build the Docker image:
 
 ```bash
 # while in the monorepo root directory
@@ -263,24 +278,25 @@ The service will be available at `http://localhost:3223`.
 
 ## Local Development
 
-1. Install dependencies:
+1. Ensure you have Node.js v18 or later installed
+
+2. Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-2. Run data ingestion:
+3. Run data ingestion:
 
 ```bash
 pnpm run ingest
 ```
 
-3. Start the service:
+4. Start the service:
 
 ```bash
 pnpm run serve
 ```
-
 You can verify the service is running by checking the health endpoint or retrieving the label count:
 
 ```bash
