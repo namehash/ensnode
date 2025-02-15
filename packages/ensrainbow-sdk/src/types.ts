@@ -10,9 +10,9 @@ export interface HealthResponse {
 
 export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
   status: Status;
-  label?: string | undefined;
-  error?: string | undefined;
-  errorCode?: Error | undefined;
+  label?: string | never;
+  error?: string | never;
+  errorCode?: Error | never;
 }
 
 export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success, never> {
@@ -75,7 +75,7 @@ export const isHealError = (response: HealResponse): response is HealError => {
 export const isCacheableHealResponse = (
   response: HealResponse,
 ): response is CacheableHealResponse => {
-  return response.status !== StatusCode.Error || response.errorCode !== ErrorCode.ServerError;
+  return response.status === StatusCode.Success || response.errorCode !== ErrorCode.ServerError;
 };
 
 export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
