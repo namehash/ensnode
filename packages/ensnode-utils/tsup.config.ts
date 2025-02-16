@@ -7,7 +7,7 @@ export default defineConfig({
   },
   platform: "browser",
   format: ["esm", "cjs"],
-  target: "es2020",
+  target: "es2022",
   bundle: true,
   splitting: false,
   sourcemap: true,

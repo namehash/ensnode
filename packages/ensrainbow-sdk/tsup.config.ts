@@ -4,11 +4,20 @@ export default defineConfig({
   entry: {
     client: "src/client.ts",
     consts: "src/consts.ts",
+    "label-utils": "src/label-utils.ts",
     types: "src/types.ts",
   },
-  format: ["esm"],
+  platform: "browser",
+  format: ["esm", "cjs"],
+  target: "es2022",
+  bundle: true,
+  splitting: false,
+  sourcemap: true,
   dts: true,
   clean: true,
-  sourcemap: true,
-  external: ["viem"],
+  external: ["viem", "@ensnode/utils"],
+  outDir: "./dist",
+  esbuildOptions(options) {
+    options.mainFields = ["browser", "module", "main"];
+  },
 });
