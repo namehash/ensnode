@@ -12,14 +12,18 @@
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk",
   "keywords": ["ENS", "ENSNode", "ENSRainbow"],
   "exports": {
+    ".": "./src/index.ts",
     "./client": "./src/client.ts",
     "./consts": "./src/consts.ts",
-    "./label-utils": "./src/label-utils.ts",
-    "./types": "./src/types.ts"
+    "./label-utils": "./src/label-utils.ts"
   },
   "publishConfig": {
     "access": "public",
     "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "./client": {
         "types": "./dist/client.d.ts",
         "default": "./dist/client.js"
@@ -28,9 +32,9 @@
         "types": "./dist/consts.d.ts",
         "default": "./dist/consts.js"
       },
-      "./types": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
+      "./label-utils": {
+        "types": "./dist/label-utils.d.ts",
+        "default": "./dist/label-utils.js"
       }
     },
     "main": "./dist/index.js",

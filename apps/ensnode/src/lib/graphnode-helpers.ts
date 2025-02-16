@@ -1,6 +1,5 @@
-import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk/client";
-import { ErrorCode } from "@ensnode/ensrainbow-sdk/consts";
-import { isHealError } from "@ensnode/ensrainbow-sdk/types";
+import { EnsRainbowApiClient, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
+
 import type { Labelhash } from "@ensnode/utils/types";
 import { ensRainbowEndpointUrl } from "./ponder-helpers";
 

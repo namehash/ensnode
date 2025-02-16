@@ -4,8 +4,9 @@ export default defineConfig({
   entry: {
     client: "src/client.ts",
     consts: "src/consts.ts",
+    index: "src/index.ts",
+    labelUtils: "src/label-utils.ts",
     "label-utils": "src/label-utils.ts",
-    types: "src/types.ts",
   },
   platform: "browser",
   format: ["esm", "cjs"],

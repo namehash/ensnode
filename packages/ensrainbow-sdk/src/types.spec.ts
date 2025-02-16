@@ -1,17 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { EnsRainbow, isCacheableHealResponse, isHealError } from "./client";
 import { ErrorCode, StatusCode } from "./consts";
-import {
-  HealBadRequestError,
-  HealNotFoundError,
-  HealServerError,
-  HealSuccess,
-  isCacheableHealResponse,
-  isHealError,
-} from "./types";
 
 describe("HealResponse error detection", () => {
   it("should not consider HealSuccess responses to be errors", async () => {
-    const response: HealSuccess = {
+    const response: EnsRainbow.HealSuccess = {
       status: StatusCode.Success,
       label: "vitalik",
     };
@@ -20,7 +13,7 @@ describe("HealResponse error detection", () => {
   });
 
   it("should consider HealNotFoundError responses to be errors", async () => {
-    const response: HealNotFoundError = {
+    const response: EnsRainbow.HealError = {
       status: StatusCode.Error,
       error: "Not found",
       errorCode: ErrorCode.NotFound,
@@ -30,7 +23,7 @@ describe("HealResponse error detection", () => {
   });
 
   it("should consider HealBadRequestError responses to be errors", async () => {
-    const response: HealBadRequestError = {
+    const response: EnsRainbow.HealError = {
       status: StatusCode.Error,
       error: "Bad request",
       errorCode: ErrorCode.BadRequest,
@@ -40,7 +33,7 @@ describe("HealResponse error detection", () => {
   });
 
   it("should consider HealServerError responses to be errors", async () => {
-    const response: HealServerError = {
+    const response: EnsRainbow.HealError = {
       status: StatusCode.Error,
       error: "Server error",
       errorCode: ErrorCode.ServerError,
@@ -52,7 +45,7 @@ describe("HealResponse error detection", () => {
 
 describe("HealResponse cacheability", () => {
   it("should consider HealSuccess responses cacheable", async () => {
-    const response: HealSuccess = {
+    const response: EnsRainbow.HealSuccess = {
       status: StatusCode.Success,
       label: "vitalik",
     };
@@ -61,7 +54,7 @@ describe("HealResponse cacheability", () => {
   });
 
   it("should consider HealNotFoundError responses cacheable", async () => {
-    const response: HealNotFoundError = {
+    const response: EnsRainbow.HealError = {
       status: StatusCode.Error,
       error: "Not found",
       errorCode: ErrorCode.NotFound,
@@ -71,7 +64,7 @@ describe("HealResponse cacheability", () => {
   });
 
   it("should consider HealBadRequestError responses cacheable", async () => {
-    const response: HealBadRequestError = {
+    const response: EnsRainbow.HealError = {
       status: StatusCode.Error,
       error: "Bad request",
       errorCode: ErrorCode.BadRequest,
@@ -81,7 +74,7 @@ describe("HealResponse cacheability", () => {
   });
 
   it("should consider HealServerError responses not cacheable", async () => {
-    const response: HealServerError = {
+    const response: EnsRainbow.HealError = {
       status: StatusCode.Error,
       error: "Server error",
       errorCode: ErrorCode.ServerError,
