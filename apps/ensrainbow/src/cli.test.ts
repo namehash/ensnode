@@ -19,7 +19,7 @@ describe("CLI", () => {
   beforeEach(async () => {
     // Set test environment
     process.env.NODE_ENV = "test";
-    
+
     // Clear PORT before each test
     delete process.env.PORT;
     tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-cli"));
@@ -91,9 +91,9 @@ describe("CLI", () => {
     describe("ingest command", () => {
       it("should execute ingest command with custom data directory", async () => {
         const customInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
-        
+
         await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
-        
+
         // Verify database was created by trying to validate it
         await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
       });
@@ -109,15 +109,21 @@ describe("CLI", () => {
 
         // Mock server shutdown to prevent process.exit
         // const mockShutdown = vi.fn();
-        const serverPromise = cli.parse(["serve", "--port", customPort.toString(), "--data-dir", testDataDir]);
-        
+        const serverPromise = cli.parse([
+          "serve",
+          "--port",
+          customPort.toString(),
+          "--data-dir",
+          testDataDir,
+        ]);
+
         // Give server time to start
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         // Make a request to health endpoint
         const response = await fetch(`http://localhost:${customPort}/health`);
         expect(response.status).toBe(200);
-        
+
         // Cleanup - send SIGINT to stop server
         process.emit("SIGINT", "SIGINT");
         await serverPromise;
@@ -133,10 +139,10 @@ describe("CLI", () => {
 
         // Start server
         const serverPromise = cli.parse(["serve", "--data-dir", testDataDir]);
-        
+
         // Give server time to start
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         // Make a request to health endpoint
         const response = await fetch(`http://localhost:${customPort}/health`);
         expect(response.status).toBe(200);
@@ -148,27 +154,32 @@ describe("CLI", () => {
         expect(countData.count).toBe(63);
 
         // Make a request to heal endpoint with valid labelhash
-        const healResponse = await fetch(`http://localhost:${customPort}/v1/heal/0x73338cf209492ea926532bf0a21a859c9be97ba8623061fd0b8390ef6844a1ec`);
+        const healResponse = await fetch(
+          `http://localhost:${customPort}/v1/heal/0x73338cf209492ea926532bf0a21a859c9be97ba8623061fd0b8390ef6844a1ec`,
+        );
         expect(healResponse.status).toBe(200);
         const healData = await healResponse.json();
         expect(healData.label).toBe("materiauxbricolage");
         expect(healData.status).toBe("success");
 
         // Make a request to heal endpoint with non-healable labelhash
-        const nonHealableResponse = await fetch(`http://localhost:${customPort}/v1/heal/0x745156acaa628d9cb587c847f1b03b9c5f4ba573d67699112e6a11bb6a8c24cf`);
+        const nonHealableResponse = await fetch(
+          `http://localhost:${customPort}/v1/heal/0x745156acaa628d9cb587c847f1b03b9c5f4ba573d67699112e6a11bb6a8c24cf`,
+        );
         expect(nonHealableResponse.status).toBe(404);
         const nonHealableData = await nonHealableResponse.json();
         expect(nonHealableData.errorCode).toBe(404);
         expect(nonHealableData.error).toBe("Label not found");
 
-        
         // Make a request to heal endpoint with invalid labelhash
-        const invalidHealResponse = await fetch(`http://localhost:${customPort}/v1/heal/0x1234567890`);
+        const invalidHealResponse = await fetch(
+          `http://localhost:${customPort}/v1/heal/0x1234567890`,
+        );
         expect(invalidHealResponse.status).toBe(400);
         const invalidHealData = await invalidHealResponse.json();
         expect(invalidHealData.errorCode).toBe(400);
         expect(invalidHealData.error).toBe("Invalid labelhash length 12 characters (expected 66)");
-        
+
         // Cleanup - send SIGINT to stop server
         process.emit("SIGINT", "SIGINT");
         await serverPromise;
@@ -176,7 +187,9 @@ describe("CLI", () => {
 
       it("should throw on port conflict", async () => {
         process.env.PORT = "5000";
-        await expect(cli.parse(["serve", "--port", "4000", "--data-dir", testDataDir])).rejects.toThrow("Port conflict");
+        await expect(
+          cli.parse(["serve", "--port", "4000", "--data-dir", testDataDir]),
+        ).rejects.toThrow("Port conflict");
       });
     });
 
