@@ -6,7 +6,9 @@
   "scripts": {
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "packages:build": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/utils\" --filter=\"!@ensnode/shared-configs\" build",
+    "packages:dev": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/utils\" --filter=\"!@ensnode/shared-configs\" dev"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

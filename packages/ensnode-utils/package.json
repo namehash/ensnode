@@ -28,8 +28,8 @@
     "viem": "^catalog:"
   },
   "devDependencies": {
-    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
+    "@ensnode/shared-configs": "workspace:",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "viem": "catalog:",
