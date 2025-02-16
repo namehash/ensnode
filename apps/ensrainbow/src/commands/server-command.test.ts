@@ -15,9 +15,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { createDatabase } from "../lib/database";
-import type { ENSRainbowDB } from "../lib/database";
-import { LABELHASH_COUNT_KEY } from "../lib/database";
+import { ENSRainbowDB } from "../lib/database";
 import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
@@ -32,10 +30,10 @@ describe("Server Command Tests", () => {
     await fs.rm(TEST_DB_DIR, { recursive: true, force: true });
 
     try {
-      db = await createDatabase(TEST_DB_DIR);
+      db = await ENSRainbowDB.create(TEST_DB_DIR);
 
       // Initialize label count to be able to start server
-      await db.put(LABELHASH_COUNT_KEY, "0");
+      await db.setRainbowRecordCount(0);
 
       app = await createServer(db);
 
@@ -53,9 +51,7 @@ describe("Server Command Tests", () => {
 
   beforeEach(async () => {
     // Clear database before each test
-    for await (const key of db.keys()) {
-      await db.del(key);
-    }
+    await db.clear();
   });
 
   afterAll(async () => {
@@ -148,7 +144,7 @@ describe("Server Command Tests", () => {
 
     it("should return correct count from LABEL_COUNT_KEY", async () => {
       // Set a specific count in the database
-      await db.put(LABELHASH_COUNT_KEY, "42");
+      await db.setRainbowRecordCount(42);
 
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
       expect(response.status).toBe(200);

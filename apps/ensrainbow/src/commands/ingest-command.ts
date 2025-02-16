@@ -3,15 +3,9 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
-import {
-  clearIngestionMarker,
-  createDatabase,
-  ensureIngestionNotIncomplete,
-  markIngestionStarted,
-} from "../lib/database";
+import { ENSRainbowDB } from "../lib/database";
 import { logger } from "../utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
-import { countCommand } from "./count-command";
 
 export interface IngestCommandOptions {
   inputFile: string;
@@ -30,14 +24,23 @@ export interface IngestCommandOptions {
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
-  const db = await createDatabase(options.dataDir);
+  const db = await ENSRainbowDB.create(options.dataDir);
 
   try {
     // Check if there's an incomplete ingestion
-    await ensureIngestionNotIncomplete(db);
+    if (await db.isIngestionInProgress()) {
+      const errorMessage =
+        "Database is in an incomplete state! " +
+        "An ingestion was started but not completed successfully.\n" +
+        "To fix this:\n" +
+        "1. Delete the data directory\n" +
+        "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
 
     // Mark ingestion as started
-    await markIngestionStarted(db);
+    await db.markIngestionStarted();
 
     const bar = new ProgressBar(
       "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
@@ -127,17 +130,26 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       logger.error(`Found ${invalidRecords} records with invalid hashes during processing`);
     }
 
-    // Run count as second phase to verify the number of unique records in the database.
-    // While processedRecords tells us how many records we ingested, we need to count
-    // the actual database entries to confirm how many unique label-labelhash pairs exist,
-    // as the input data could potentially contain duplicates.
-    logger.info("\nStarting rainbow record counting phase...");
-    await countCommand(db);
+    // Store the count of rainbow records
+    await db.setRainbowRecordCount(processedRecords);
+    logger.info(`Updated rainbow record count in database: ${processedRecords}`);
+
+    // Verify the count matches what we stored
+    const storedCount = await db.getRainbowRecordCount();
+    if (storedCount !== processedRecords) {
+      logger.error(`Count mismatch: stored=${storedCount}, actual=${processedRecords}`);
+      throw new Error("Count verification failed");
+    }
 
     // Clear the ingestion marker since we completed successfully
-    await clearIngestionMarker(db);
+    await db.clearIngestionMarker();
 
     logger.info("Data ingestion and count verification complete!");
+  } catch (error) {
+    // If anything goes wrong, make sure to clear the ingestion marker
+    // so the database can be used again
+    await db.clearIngestionMarker();
+    throw error;
   } finally {
     await db.close();
   }

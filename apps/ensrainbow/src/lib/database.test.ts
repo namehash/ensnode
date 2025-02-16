@@ -5,11 +5,10 @@ import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  ENSRainbowDB,
   INGESTION_IN_PROGRESS_KEY,
   LABELHASH_COUNT_KEY,
-  createDatabase,
   parseNonNegativeInteger,
-  validate,
 } from "./database";
 
 describe("Database", () => {
@@ -25,9 +24,9 @@ describe("Database", () => {
 
   describe("validate", () => {
     it("should detect an empty database", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
       try {
-        const isValid = await validate(db);
+        const isValid = await db.validate();
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -35,7 +34,7 @@ describe("Database", () => {
     });
 
     it("should validate a database with valid records", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
 
       const testData = [
         { label: "vitalik", labelhash: labelhash("vitalik") },
@@ -51,7 +50,7 @@ describe("Database", () => {
         // Add count
         await db.put(LABELHASH_COUNT_KEY, testData.length.toString());
 
-        const isValid = await validate(db);
+        const isValid = await db.validate();
         expect(isValid).toBe(true);
       } finally {
         await db.close();
@@ -59,7 +58,7 @@ describe("Database", () => {
     });
 
     it("should detect invalid labelhash format", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
 
       try {
         // Add labelhash count key
@@ -69,7 +68,7 @@ describe("Database", () => {
         const invalidLabelhash = new Uint8Array([1, 2, 3]); // Too short
         await db.put(invalidLabelhash, "test");
 
-        const isValid = await validate(db);
+        const isValid = await db.validate();
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -77,7 +76,7 @@ describe("Database", () => {
     });
 
     it("should detect labelhash mismatch", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
 
       try {
         // Add labelhash count key
@@ -88,7 +87,7 @@ describe("Database", () => {
         const wrongLabelhash = labelhash("ethereum");
         await db.put(labelHashToBytes(wrongLabelhash), label);
 
-        const isValid = await validate(db);
+        const isValid = await db.validate();
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -96,7 +95,7 @@ describe("Database", () => {
     });
 
     it("should detect missing count key", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
 
       try {
         // Add record without count
@@ -104,7 +103,7 @@ describe("Database", () => {
         const vitalikLabelhash = labelhash(label);
         await db.put(labelHashToBytes(vitalikLabelhash), label);
 
-        const isValid = await validate(db);
+        const isValid = await db.validate();
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -112,7 +111,7 @@ describe("Database", () => {
     });
 
     it("should detect incorrect count", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
 
       try {
         // Add record
@@ -123,7 +122,7 @@ describe("Database", () => {
         // Add incorrect count
         await db.put(LABELHASH_COUNT_KEY, "2");
 
-        const isValid = await validate(db);
+        const isValid = await db.validate();
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -131,7 +130,7 @@ describe("Database", () => {
     });
 
     it("should detect when ingestion is in progress", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
 
       try {
         // Add a valid record
@@ -145,7 +144,7 @@ describe("Database", () => {
         // Set ingestion in progress flag
         await db.put(INGESTION_IN_PROGRESS_KEY, "true");
 
-        const isValid = await validate(db);
+        const isValid = await db.validate();
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -155,7 +154,7 @@ describe("Database", () => {
 
   describe("LevelDB operations", () => {
     it("should handle values containing null bytes", async () => {
-      const db = await createDatabase(tempDir);
+      const db = await ENSRainbowDB.create(tempDir);
       try {
         const labelWithNull = "test\0label";
         const labelWithNullLabelhash = labelhash(labelWithNull);

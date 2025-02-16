@@ -12,18 +12,13 @@ import {
 } from "@ensnode/ensrainbow-sdk/types";
 import { ByteArray } from "viem";
 import { logger } from "../utils/logger";
-import { parseNonNegativeInteger } from "./database";
-import {
-  LABELHASH_COUNT_KEY,
-  ensureIngestionNotIncomplete,
-  isIngestionInProgress,
-} from "./database";
-import { ENSRainbowLevelDB, safeGet } from "./database";
+import { ENSRainbowDB, parseNonNegativeInteger } from "./database";
+import { LABELHASH_COUNT_KEY } from "./database";
 
 export class ENSRainbowServer {
-  private readonly db: ENSRainbowLevelDB;
+  private readonly db: ENSRainbowDB;
 
-  private constructor(db: ENSRainbowLevelDB) {
+  private constructor(db: ENSRainbowDB) {
     this.db = db;
   }
 
@@ -33,11 +28,20 @@ export class ENSRainbowServer {
    * @param logLevel Optional log level
    * @throws Error if a "lite" validation of the database fails
    */
-  public static async init(db: ENSRainbowLevelDB): Promise<ENSRainbowServer> {
+  public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
     const server = new ENSRainbowServer(db);
 
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
-    await ensureIngestionNotIncomplete(db);
+    if (await db.isIngestionInProgress()) {
+      const errorMessage =
+        "Database is in an incomplete state! " +
+        "An ingestion was started but not completed successfully.\n" +
+        "To fix this:\n" +
+        "1. Delete the data directory\n" +
+        "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
 
     // Verify we can get the rainbow record count
     const countResponse = await server.labelCount();
@@ -64,7 +68,7 @@ export class ENSRainbowServer {
     }
 
     try {
-      const label = await safeGet(this.db, labelHashBytes);
+      const label = await this.db.safeGet(labelHashBytes);
       if (label === null) {
         logger.info(`Unhealable labelhash request: ${labelhash}`);
         return {
@@ -91,7 +95,7 @@ export class ENSRainbowServer {
 
   async labelCount(): Promise<CountResponse> {
     try {
-      const countStr = await safeGet(this.db, LABELHASH_COUNT_KEY);
+      const countStr = await this.db.safeGet(LABELHASH_COUNT_KEY);
       if (countStr === null) {
         return {
           status: StatusCode.Error,
