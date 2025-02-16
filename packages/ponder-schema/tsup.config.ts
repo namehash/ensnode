@@ -2,9 +2,14 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/ponder.schema.ts"],
-  format: ["esm"],
+  platform: "neutral",
+  format: ["esm", "cjs"],
+  target: "es2020",
+  bundle: true,
+  splitting: false,
+  sourcemap: true,
   dts: true,
   clean: true,
-  sourcemap: true,
-  platform: "node",
+  external: ["viem", "ponder"],
+  outDir: "./dist",
 });

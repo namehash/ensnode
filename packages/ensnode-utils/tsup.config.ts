@@ -1,7 +1,10 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: {
+    "subname-helpers": "src/subname-helpers.ts",
+    types: "src/types.ts",
+  },
   platform: "browser",
   format: ["esm", "cjs"],
   target: "es2020",
@@ -10,7 +13,7 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  external: ["viem", "@ponder/utils"],
+  external: ["viem"],
   outDir: "./dist",
   esbuildOptions(options) {
     options.mainFields = ["browser", "module", "main"];

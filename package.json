@@ -8,8 +8,8 @@
     "lint:ci": "biome ci",
     "changeset": "changeset",
     "release": "changeset publish",
-    "packages:build": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/utils\" --filter=\"!@ensnode/shared-configs\" build",
-    "packages:dev": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/utils\" --filter=\"!@ensnode/shared-configs\" dev"
+    "packages:build": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/shared-configs\" build",
+    "packages:dev": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/shared-configs\" dev"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
