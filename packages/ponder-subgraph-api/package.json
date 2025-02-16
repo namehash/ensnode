@@ -14,7 +14,21 @@
   "exports": {
     "./middleware": "./src/middleware.ts"
   },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "./middleware": {
+        "types": "./dist/middleware.d.ts",
+        "default": "./dist/middleware.js"
+      }
+    },
+    "main": "./dist/middleware.js",
+    "module": "./dist/middleware.mjs",
+    "types": "./dist/middleware.d.ts"
+  },
   "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint:ci": "biome ci"
   },
@@ -33,12 +47,10 @@
     "@ensnode/shared-configs": "workspace:",
     "@types/node": "catalog:",
     "hono": "catalog:",
+    "tsup": "catalog:",
     "typescript": "catalog:"
   },
   "peerDependencies": {
     "hono": "catalog:"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
