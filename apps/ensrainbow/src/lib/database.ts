@@ -104,7 +104,7 @@ export const openDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
       logger.error("Failed to open database:", error);
       logger.error(`Please ensure you have read permissions for ${dataDir}`);
     }
-    process.exit(1);
+    throw error;
   }
 };
 

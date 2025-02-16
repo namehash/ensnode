@@ -14,7 +14,6 @@ describe("CLI", () => {
   let tempDir: string;
   let testDataDir: string;
   let cli: ReturnType<typeof createCLI>;
-  const originalExit = process.exit;
 
   beforeEach(async () => {
     // Set test environment
@@ -24,9 +23,6 @@ describe("CLI", () => {
     delete process.env.PORT;
     tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-cli"));
     testDataDir = join(tempDir, "test-db-directory");
-
-    // Mock process.exit to prevent actual exits during tests
-    process.exit = vi.fn() as any;
 
     // Create CLI instance with process.exit disabled
     cli = createCLI({ exitProcess: false });
@@ -45,7 +41,6 @@ describe("CLI", () => {
       delete process.env.NODE_ENV;
     }
     await rm(tempDir, { recursive: true, force: true });
-    process.exit = originalExit;
     vi.restoreAllMocks();
   });
 
@@ -107,8 +102,6 @@ describe("CLI", () => {
         const customInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
         await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
 
-        // Mock server shutdown to prevent process.exit
-        // const mockShutdown = vi.fn();
         const serverPromise = cli.parse([
           "serve",
           "--port",

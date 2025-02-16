@@ -64,10 +64,9 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
         await server.close();
         await db.close();
         logger.info("Server shutdown complete");
-        process.exit(0);
       } catch (error) {
         logger.error("Error during shutdown:", error);
-        process.exit(1);
+        throw error;
       }
     };
 
