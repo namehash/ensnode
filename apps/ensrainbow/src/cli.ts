@@ -9,7 +9,7 @@ import { getDataDir } from "./lib/database";
 import { logger } from "./utils/logger";
 import { parseNonNegativeInteger } from "./utils/number-utils";
 
-function getEnvPort(): number {
+export function getEnvPort(): number {
   const envPort = process.env.PORT;
   if (!envPort) {
     return DEFAULT_PORT;
@@ -29,7 +29,7 @@ function getEnvPort(): number {
   }
 }
 
-function validatePortConfiguration(cliPort: number): void {
+export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
   if (envPort !== undefined && cliPort !== getEnvPort()) {
     throw new Error(
@@ -53,72 +53,85 @@ interface ValidateArgs {
   "data-dir": string;
 }
 
-yargs(hideBin(process.argv))
-  .scriptName("ensrainbow")
-  .command(
-    "ingest",
-    "Ingest labels from SQL dump into LevelDB",
-    (yargs: Argv) => {
-      return yargs
-        .option("input-file", {
-          type: "string",
-          description: "Path to the gzipped SQL dump file",
-          default: join(process.cwd(), "ens_names.sql.gz"),
-        })
-        .option("data-dir", {
-          type: "string",
-          description: "Directory to store LevelDB data",
-          default: getDataDir(),
+export interface CLIOptions {
+  exitProcess?: boolean;
+}
+
+export function createCLI(options: CLIOptions = {}) {
+  const { exitProcess = true } = options;
+
+  return yargs()
+    .scriptName("ensrainbow")
+    .exitProcess(exitProcess)
+    .command(
+      "ingest",
+      "Ingest labels from SQL dump into LevelDB",
+      (yargs: Argv) => {
+        return yargs
+          .option("input-file", {
+            type: "string",
+            description: "Path to the gzipped SQL dump file",
+            default: join(process.cwd(), "ens_names.sql.gz"),
+          })
+          .option("data-dir", {
+            type: "string",
+            description: "Directory to store LevelDB data",
+            default: getDataDir(),
+          });
+      },
+      async (argv: ArgumentsCamelCase<IngestArgs>) => {
+        await ingestCommand({
+          inputFile: argv["input-file"],
+          dataDir: argv["data-dir"],
         });
-    },
-    async (argv: ArgumentsCamelCase<IngestArgs>) => {
-      await ingestCommand({
-        inputFile: argv["input-file"],
-        dataDir: argv["data-dir"],
-      });
-    },
-  )
-  .command(
-    "serve",
-    "Start the ENS Rainbow API server",
-    (yargs: Argv) => {
-      return yargs
-        .option("port", {
-          type: "number",
-          description: "Port to listen on",
-          default: getEnvPort(),
-        })
-        .option("data-dir", {
+      },
+    )
+    .command(
+      "serve",
+      "Start the ENS Rainbow API server",
+      (yargs: Argv) => {
+        return yargs
+          .option("port", {
+            type: "number",
+            description: "Port to listen on",
+            default: getEnvPort(),
+          })
+          .option("data-dir", {
+            type: "string",
+            description: "Directory containing LevelDB data",
+            default: getDataDir(),
+          });
+      },
+      async (argv: ArgumentsCamelCase<ServeArgs>) => {
+        validatePortConfiguration(argv.port);
+        await serverCommand({
+          port: argv.port,
+          dataDir: argv["data-dir"],
+        });
+      },
+    )
+    .command(
+      "validate",
+      "Validate the integrity of the LevelDB database",
+      (yargs: Argv) => {
+        return yargs.option("data-dir", {
           type: "string",
           description: "Directory containing LevelDB data",
           default: getDataDir(),
         });
-    },
-    async (argv: ArgumentsCamelCase<ServeArgs>) => {
-      validatePortConfiguration(argv.port);
-      await serverCommand({
-        port: argv.port,
-        dataDir: argv["data-dir"],
-      });
-    },
-  )
-  .command(
-    "validate",
-    "Validate the integrity of the LevelDB database",
-    (yargs: Argv) => {
-      return yargs.option("data-dir", {
-        type: "string",
-        description: "Directory containing LevelDB data",
-        default: getDataDir(),
-      });
-    },
-    async (argv: ArgumentsCamelCase<ValidateArgs>) => {
-      await validateCommand({
-        dataDir: argv["data-dir"],
-      });
-    },
-  )
-  .demandCommand(1, "You must specify a command")
-  .strict()
-  .help()
-  .parse();
+      },
+      async (argv: ArgumentsCamelCase<ValidateArgs>) => {
+        await validateCommand({
+          dataDir: argv["data-dir"],
+        });
+      },
+    )
+    .demandCommand(1, "You must specify a command")
+    .strict()
+    .help();
+}
+
+// Only execute if this is the main module
+if (require.main === module) {
+  createCLI().parse(hideBin(process.argv));
+}
