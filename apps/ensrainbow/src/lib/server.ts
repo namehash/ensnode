@@ -12,18 +12,18 @@ import {
 } from "@ensnode/ensrainbow-sdk/types";
 import { ByteArray } from "viem";
 import { logger } from "../utils/logger";
-import { parseNonNegativeInteger } from "../utils/number-utils";
+import { parseNonNegativeInteger } from "./database";
 import {
   LABELHASH_COUNT_KEY,
   ensureIngestionNotIncomplete,
   isIngestionInProgress,
 } from "./database";
-import { ENSRainbowDB, safeGet } from "./database";
+import { ENSRainbowLevelDB, safeGet } from "./database";
 
 export class ENSRainbowServer {
-  private readonly db: ENSRainbowDB;
+  private readonly db: ENSRainbowLevelDB;
 
-  private constructor(db: ENSRainbowDB) {
+  private constructor(db: ENSRainbowLevelDB) {
     this.db = db;
   }
 
@@ -33,7 +33,7 @@ export class ENSRainbowServer {
    * @param logLevel Optional log level
    * @throws Error if a "lite" validation of the database fails
    */
-  public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
+  public static async init(db: ENSRainbowLevelDB): Promise<ENSRainbowServer> {
     const server = new ENSRainbowServer(db);
 
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)

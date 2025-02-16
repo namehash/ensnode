@@ -2,7 +2,7 @@ import type { HealthResponse } from "@ensnode/ensrainbow-sdk/types";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
-import { ENSRainbowDB, ensureIngestionNotIncomplete, openDatabase } from "../lib/database";
+import { ENSRainbowLevelDB, ensureIngestionNotIncomplete, openDatabase } from "../lib/database";
 import { ENSRainbowServer } from "../lib/server";
 import { logger } from "../utils/logger";
 
@@ -14,7 +14,7 @@ export interface ServerCommandOptions {
 /**
  * Creates and configures the ENS Rainbow server application
  */
-export async function createServer(db: ENSRainbowDB): Promise<Hono> {
+export async function createServer(db: ENSRainbowLevelDB): Promise<Hono> {
   const app = new Hono();
   const rainbow = await ENSRainbowServer.init(db);
 

@@ -1,18 +1,18 @@
 import {
-  ENSRainbowDB,
+  ENSRainbowLevelDB,
   INGESTION_IN_PROGRESS_KEY,
   LABELHASH_COUNT_KEY,
   safeGet,
 } from "../lib/database";
-import { byteArraysEqual } from "../utils/byte-utils";
+import { byteArraysEqual } from "../lib/database";
 import { logger } from "../utils/logger";
-import { parseNonNegativeInteger } from "../utils/number-utils";
+import { parseNonNegativeInteger } from "../lib/database";
 
 export interface CountCommandOptions {
   dataDir: string;
 }
 
-export async function countCommand(db: ENSRainbowDB): Promise<void> {
+export async function countCommand(db: ENSRainbowLevelDB): Promise<void> {
   // Try to read existing count
   const existingCountStr = await safeGet(db, LABELHASH_COUNT_KEY);
   if (existingCountStr === null) {

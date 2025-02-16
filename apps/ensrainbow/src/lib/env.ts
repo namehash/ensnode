@@ -1,6 +1,6 @@
 import { join } from "path/posix";
 import { logger } from "../utils/logger";
-import { parseNonNegativeInteger } from "../utils/number-utils";
+import { parseNonNegativeInteger } from "./database";
 
 export const getDataDir = () => join(process.cwd(), "data");
 

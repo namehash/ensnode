@@ -2,9 +2,7 @@ import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
 import { ByteArray, labelhash } from "viem";
 
-import { byteArraysEqual } from "../utils/byte-utils";
 import { logger } from "../utils/logger";
-import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
 export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
@@ -14,7 +12,7 @@ export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]
  * @param db The ENSRainbow database instance
  * @throws Error if an incomplete ingestion is detected
  */
-export async function ensureIngestionNotIncomplete(db: ENSRainbowDB): Promise<void> {
+export async function ensureIngestionNotIncomplete(db: ENSRainbowLevelDB): Promise<void> {
   if (await isIngestionInProgress(db)) {
     const errorMessage =
       "Database is in an incomplete state! " +
@@ -43,9 +41,9 @@ export async function ensureIngestionNotIncomplete(db: ENSRainbowDB): Promise<vo
  *     - Can be empty strings
  *   - For count entries: The non-negative integer count of labelhash entries formatted as a string.
  */
-export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
+type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
 
-export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
+export const createDatabase = async (dataDir: string): Promise<ENSRainbowLevelDB> => {
   logger.info(`Creating new database in directory: ${dataDir}`);
 
   try {
@@ -77,7 +75,7 @@ export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => 
   }
 };
 
-export const openDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
+export const openDatabase = async (dataDir: string): Promise<ENSRainbowLevelDB> => {
   logger.info(`Opening existing database in directory: ${dataDir}`);
 
   try {
@@ -110,7 +108,7 @@ export const openDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
  * @param db The ENSRainbow database instance
  * @returns true if an ingestion is in progress, false otherwise
  */
-export async function isIngestionInProgress(db: ENSRainbowDB): Promise<boolean> {
+export async function isIngestionInProgress(db: ENSRainbowLevelDB): Promise<boolean> {
   const value = await safeGet(db, INGESTION_IN_PROGRESS_KEY);
   return value !== null;
 }
@@ -119,7 +117,7 @@ export async function isIngestionInProgress(db: ENSRainbowDB): Promise<boolean> 
  * Mark that an ingestion has started
  * @param db The ENSRainbow database instance
  */
-export async function markIngestionStarted(db: ENSRainbowDB): Promise<void> {
+export async function markIngestionStarted(db: ENSRainbowLevelDB): Promise<void> {
   await db.put(INGESTION_IN_PROGRESS_KEY, "true");
 }
 
@@ -127,7 +125,7 @@ export async function markIngestionStarted(db: ENSRainbowDB): Promise<void> {
  * Clear the ingestion in progress marker
  * @param db The ENSRainbow database instance
  */
-export async function clearIngestionMarker(db: ENSRainbowDB): Promise<void> {
+export async function clearIngestionMarker(db: ENSRainbowLevelDB): Promise<void> {
   try {
     await db.del(INGESTION_IN_PROGRESS_KEY);
   } catch (error) {
@@ -147,7 +145,7 @@ export async function clearIngestionMarker(db: ENSRainbowDB): Promise<void> {
  * @returns The value as a string if found, null if not found
  * @throws Error if any database error occurs other than key not found
  */
-export async function safeGet(db: ENSRainbowDB, key: ByteArray): Promise<string | null> {
+export async function safeGet(db: ENSRainbowLevelDB, key: ByteArray): Promise<string | null> {
   try {
     const value = await db.get(key);
     return value;
@@ -166,7 +164,7 @@ export async function safeGet(db: ENSRainbowDB, key: ByteArray): Promise<string 
  * @param db The ENSRainbow database instance
  * @returns boolean indicating if validation passed
  */
-export async function validate(db: ENSRainbowDB): Promise<boolean> {
+export async function validate(db: ENSRainbowLevelDB): Promise<boolean> {
   let totalKeys = 0;
   let validHashes = 0;
   let invalidHashes = 0;
@@ -251,3 +249,28 @@ export async function validate(db: ENSRainbowDB): Promise<boolean> {
     return true;
   }
 }
+export function byteArraysEqual(a: ByteArray, b: ByteArray): boolean {
+  return a.length === b.length && a.every((val, i) => val === b[i]);
+}/**
+ * Parses a string into a non-negative integer.
+ * @param input The string to parse
+ * @returns The parsed non-negative integer, or null if invalid
+ */
+export function parseNonNegativeInteger(input: string): number | null {
+  const trimmed = input.trim();
+
+  // Early return for empty strings or -0
+  if (!trimmed || trimmed === "-0") {
+    return null;
+  }
+
+  const num = Number(input);
+
+  // Ensure it's a finite number, an integer, and non-negative
+  if (Number.isFinite(num) && Number.isInteger(num) && num >= 0) {
+    return num;
+  }
+
+  return null; // Return null if invalid
+}
+
