@@ -10,6 +10,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
+  platform: "node",
   external: [
     "@escape.tech/graphql-armor-max-aliases",
     "@escape.tech/graphql-armor-max-depth",
