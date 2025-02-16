@@ -1,6 +1,77 @@
 import type { Labelhash } from "@ensnode/utils/types";
-import { DEFAULT_ENSRAINBOW_URL } from "./consts";
-import type { HealResponse } from "./types";
+import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
+
+export namespace EnsRainbow {
+  export type ApiClientOptions = EnsRainbowApiClientOptions;
+
+  export interface ApiClient {
+    count(): Promise<CountResponse>;
+
+    heal(labelhash: Labelhash): Promise<HealResponse>;
+
+    health(): Promise<HealthResponse>;
+
+    getOptions(): Readonly<EnsRainbowApiClientOptions>;
+  }
+
+  type StatusCode = (typeof StatusCode)[keyof typeof StatusCode];
+
+  type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
+
+  export interface HealthResponse {
+    status: "ok";
+  }
+
+  interface BaseHealResponse<Status extends StatusCode> {
+    status: Status;
+    label?: string | undefined;
+    error?: string | undefined;
+    errorCode?: ErrorCode | undefined;
+  }
+
+  export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success> {
+    status: typeof StatusCode.Success;
+    label: string;
+    error?: undefined;
+    errorCode?: undefined;
+  }
+
+  export interface HealError extends BaseHealResponse<typeof StatusCode.Error> {
+    status: typeof StatusCode.Error;
+    label?: undefined;
+    error: string;
+    errorCode: ErrorCode;
+  }
+
+  export type HealResponse = HealSuccess | HealError;
+
+  interface BaseCountResponse<Status extends StatusCode> {
+    status: Status;
+    count?: number | undefined;
+    timestamp?: string | undefined;
+    error?: string | undefined;
+    errorCode?: ErrorCode | undefined;
+  }
+
+  export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success> {
+    status: typeof StatusCode.Success;
+    /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
+    count: number;
+    timestamp: string;
+    error?: undefined;
+    errorCode?: undefined;
+  }
+
+  export interface CountError extends BaseCountResponse<typeof StatusCode.Error> {
+    status: typeof StatusCode.Error;
+    count?: undefined;
+    timestamp?: undefined;
+    error: string;
+    errorCode: ErrorCode;
+  }
+
+  export type CountResponse = CountSuccess | CountError;
+}
 
 export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;
@@ -19,7 +90,7 @@ export interface EnsRainbowApiClientOptions {
  * });
  * ```
  */
-export class EnsRainbowApiClient {
+export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
 
   /**
@@ -27,13 +98,13 @@ export class EnsRainbowApiClient {
    *
    * @returns default options
    */
-  static defaultOptions(): EnsRainbowApiClientOptions {
+  static defaultOptions(): EnsRainbow.ApiClientOptions {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
     };
   }
 
-  constructor(options: Partial<EnsRainbowApiClientOptions> = {}) {
+  constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
     this.options = {
       ...EnsRainbowApiClient.defaultOptions(),
       ...options,
@@ -82,10 +153,22 @@ export class EnsRainbowApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash): Promise<HealResponse> {
+  async heal(labelhash: Labelhash): Promise<EnsRainbow.HealResponse> {
     const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
 
-    return response.json() as Promise<HealResponse>;
+    return response.json() as Promise<EnsRainbow.HealResponse>;
+  }
+
+  async count(): Promise<EnsRainbow.CountResponse> {
+    const response = await fetch(new URL("/v1/labels/count", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.CountResponse>;
+  }
+
+  async health(): Promise<EnsRainbow.HealthResponse> {
+    const response = await fetch(new URL("/health", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.HealthResponse>;
   }
 
   /**

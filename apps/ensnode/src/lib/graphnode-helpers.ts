@@ -1,5 +1,4 @@
-import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk/client";
-import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
+import { EnsRainbowApiClient, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 import type { Labelhash } from "@ensnode/utils/types";
 import { ensRainbowEndpointUrl } from "./ponder-helpers";
 

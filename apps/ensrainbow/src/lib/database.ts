@@ -1,5 +1,5 @@
 import { join } from "path";
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
+import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { ClassicLevel } from "classic-level";
 import { ByteArray, labelhash } from "viem";
 

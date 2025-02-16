@@ -1,4 +1,4 @@
-import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk/consts";
+import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_RPC_RATE_LIMIT,

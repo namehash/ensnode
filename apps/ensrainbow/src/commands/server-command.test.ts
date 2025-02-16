@@ -1,12 +1,5 @@
 import { promises as fs } from "fs";
-import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
-import type {
-  CountResponse,
-  HealError,
-  HealResponse,
-  HealSuccess,
-} from "@ensnode/ensrainbow-sdk/types";
+import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { serve } from "@hono/node-server";
 import { labelhash } from "viem";
 /// <reference types="vitest" />
@@ -60,8 +53,8 @@ describe("Server Command Tests", () => {
 
       const response = await fetch(`http://localhost:${port}/v1/heal/${validLabelhash}`);
       expect(response.status).toBe(200);
-      const data = (await response.json()) as HealResponse;
-      const expectedData: HealSuccess = {
+      const data = (await response.json()) as EnsRainbow.HealResponse;
+      const expectedData: EnsRainbow.HealSuccess = {
         status: StatusCode.Success,
         label: validLabel,
       };
@@ -78,8 +71,8 @@ describe("Server Command Tests", () => {
     it("should reject invalid labelhash format", async () => {
       const response = await fetch(`http://localhost:${port}/v1/heal/invalid-hash`);
       expect(response.status).toBe(400);
-      const data = (await response.json()) as HealResponse;
-      const expectedData: HealError = {
+      const data = (await response.json()) as EnsRainbow.HealResponse;
+      const expectedData: EnsRainbow.HealError = {
         status: StatusCode.Error,
         error: "Invalid labelhash length 12 characters (expected 66)",
         errorCode: ErrorCode.BadRequest,
@@ -91,8 +84,8 @@ describe("Server Command Tests", () => {
       const nonExistentHash = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
       const response = await fetch(`http://localhost:${port}/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
-      const data = (await response.json()) as HealResponse;
-      const expectedData: HealError = {
+      const data = (await response.json()) as EnsRainbow.HealResponse;
+      const expectedData: EnsRainbow.HealError = {
         status: StatusCode.Error,
         error: "Label not found",
         errorCode: ErrorCode.NotFound,
@@ -114,7 +107,7 @@ describe("Server Command Tests", () => {
     it("should throw an error when database is empty", async () => {
       const response = await fetch(`http://localhost:${port}/v1/labels/count`);
       expect(response.status).toBe(500);
-      const data = (await response.json()) as CountResponse;
+      const data = (await response.json()) as EnsRainbow.CountResponse;
       expect(data.status).toEqual(StatusCode.Error);
       expect(data.error).toBe(
         "Label count not initialized. Check that the ingest command has been run.",
@@ -128,7 +121,7 @@ describe("Server Command Tests", () => {
 
       const response = await fetch(`http://localhost:${port}/v1/labels/count`);
       expect(response.status).toBe(200);
-      const data = (await response.json()) as CountResponse;
+      const data = (await response.json()) as EnsRainbow.CountResponse;
       expect(data.status).toEqual(StatusCode.Success);
       expect(data.count).toBe(42);
       expect(typeof data.timestamp).toBe("string");
