@@ -28,10 +28,6 @@
         "types": "./dist/consts.d.ts",
         "default": "./dist/consts.js"
       },
-      "./label-utils": {
-        "types": "./dist/label-utils.d.ts",
-        "default": "./dist/label-utils.js"
-      },
       "./types": {
         "types": "./dist/types.d.ts",
         "default": "./dist/types.js"
