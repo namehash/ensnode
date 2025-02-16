@@ -2,8 +2,17 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/index.ts"],
-  format: ["esm"],
+  platform: "browser",
+  format: ["esm", "cjs"],
+  target: "es2022",
+  bundle: true,
+  splitting: false,
+  sourcemap: true,
   dts: true,
   clean: true,
-  sourcemap: true,
+  external: ["viem", "@ponder/utils"],
+  outDir: "./dist",
+  esbuildOptions(options) {
+    options.mainFields = ["browser", "module", "main"];
+  },
 });

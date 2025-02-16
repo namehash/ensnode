@@ -2,11 +2,8 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
-    client: "src/client.ts",
-    consts: "src/consts.ts",
-    index: "src/index.ts",
-    labelUtils: "src/label-utils.ts",
-    "label-utils": "src/label-utils.ts",
+    "subname-helpers": "src/subname-helpers.ts",
+    types: "src/types.ts",
   },
   platform: "browser",
   format: ["esm", "cjs"],
@@ -16,7 +13,7 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  external: ["viem", "@ensnode/utils"],
+  external: ["viem"],
   outDir: "./dist",
   esbuildOptions(options) {
     options.mainFields = ["browser", "module", "main"];

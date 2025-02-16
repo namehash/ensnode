@@ -2,9 +2,16 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/ponder.schema.ts"],
-  format: ["esm"],
-  dts: true,
-  clean: true,
+  platform: "neutral",
+  format: ["esm", "cjs"],
+  target: "es2022",
+  bundle: true,
+  splitting: false,
   sourcemap: true,
-  platform: "node",
+  dts: {
+    resolve: true,
+  },
+  clean: true,
+  external: ["viem", "ponder", "drizzle-orm", "drizzle-orm/pg-core"],
+  outDir: "./dist",
 });
