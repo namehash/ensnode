@@ -11,4 +11,9 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
+  external: ["viem"],
+  treeshake: true,
+  env: {
+    NODE_ENV: "production",
+  },
 });
