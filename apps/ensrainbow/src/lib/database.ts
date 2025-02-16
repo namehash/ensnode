@@ -29,14 +29,6 @@ export class ENSRainbowDB {
   private constructor(private readonly db: ENSRainbowLevelDB) {}
 
   /**
-   * Internal method to wrap an existing ENSRainbowLevelDB instance.
-   * This is used for backward compatibility only.
-   */
-  public static async wrap(db: ENSRainbowLevelDB): Promise<ENSRainbowDB> {
-    return new ENSRainbowDB(db);
-  }
-
-  /**
    * Creates a new ENSRainbowDB instance with a fresh database.
    */
   public static async create(dataDir: string): Promise<ENSRainbowDB> {
