@@ -9,7 +9,7 @@ export default defineConfig({
     "label-utils": "src/label-utils.ts",
   },
   platform: "browser",
-  format: ["esm", "cjs"],
+  format: ["esm"],
   target: "es2022",
   bundle: true,
   splitting: false,

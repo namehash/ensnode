@@ -7,7 +7,7 @@ export default defineConfig({
     helpers: "src/helpers.ts",
   },
   platform: "node",
-  format: ["esm", "cjs"],
+  format: ["esm"],
   target: "node16",
   bundle: true,
   splitting: false,
