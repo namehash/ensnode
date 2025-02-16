@@ -13,6 +13,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.27.12",
+    "tsup": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
