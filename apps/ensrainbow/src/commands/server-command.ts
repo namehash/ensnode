@@ -11,8 +11,6 @@ export interface ServerCommandOptions {
   port: number;
 }
 
-export const DEFAULT_PORT = 3223;
-
 /**
  * Creates and configures the ENS Rainbow server application
  */

@@ -3,31 +3,9 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 import { ingestCommand } from "./commands/ingest-command";
-import { DEFAULT_PORT, serverCommand } from "./commands/server-command";
+import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
-import { getDataDir } from "./lib/database";
-import { logger } from "./utils/logger";
-import { parseNonNegativeInteger } from "./utils/number-utils";
-
-export function getEnvPort(): number {
-  const envPort = process.env.PORT;
-  if (!envPort) {
-    return DEFAULT_PORT;
-  }
-
-  try {
-    const port = parseNonNegativeInteger(envPort);
-    if (port === null) {
-      throw new Error(`Invalid port number "${envPort}". Port must be a non-negative integer.`);
-    }
-
-    return port;
-  } catch (error: unknown) {
-    const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
-    logger.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-}
+import { getDataDir, getEnvPort } from "./lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;

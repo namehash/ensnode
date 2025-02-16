@@ -1,4 +1,3 @@
-import { join } from "path";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
 import { ByteArray, labelhash } from "viem";
@@ -45,8 +44,6 @@ export async function ensureIngestionNotIncomplete(db: ENSRainbowDB): Promise<vo
  *   - For count entries: The non-negative integer count of labelhash entries formatted as a string.
  */
 export type ENSRainbowDB = ClassicLevel<ByteArray, string>;
-
-export const getDataDir = () => join(process.cwd(), "data");
 
 export const createDatabase = async (dataDir: string): Promise<ENSRainbowDB> => {
   logger.info(`Creating new database in directory: ${dataDir}`);
