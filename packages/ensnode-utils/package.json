@@ -1,6 +1,5 @@
 {
   "name": "@ensnode/utils",
-  "private": true,
   "version": "0.0.1",
   "type": "module",
   "description": "A utility library for interacting with ENS data",
@@ -12,13 +11,25 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-utils",
   "exports": {
-    "./helpers": "./src/helpers.ts",
-    "./ids": "./src/ids.ts",
-    "./plugin-helpers": "./src/plugin-helpers.ts",
     "./subname-helpers": "./src/subname-helpers.ts",
     "./types": "./src/types.ts"
   },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "./subname-helpers": {
+        "types": "./dist/subname-helpers.d.ts",
+        "default": "./dist/subname-helpers.js"
+      },
+      "./types": {
+        "types": "./dist/types.d.ts",
+        "default": "./dist/types.js"
+      }
+    }
+  },
   "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest",
@@ -31,6 +42,7 @@
     "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:",
     "@types/node": "catalog:",
+    "tsup": "^8.3.6",
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "catalog:"

@@ -6,11 +6,14 @@ export default defineConfig({
     graphql: "src/graphql.ts",
     helpers: "src/helpers.ts",
   },
-  format: ["esm"],
+  platform: "node",
+  format: ["esm", "cjs"],
+  target: "node16",
+  bundle: true,
+  splitting: false,
+  sourcemap: true,
   dts: true,
   clean: true,
-  sourcemap: true,
-  platform: "node",
   external: [
     "@escape.tech/graphql-armor-max-aliases",
     "@escape.tech/graphql-armor-max-depth",
@@ -22,4 +25,5 @@ export default defineConfig({
     "graphql-yoga",
     "hono",
   ],
+  outDir: "./dist",
 });
