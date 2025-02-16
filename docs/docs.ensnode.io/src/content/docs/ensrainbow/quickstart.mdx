@@ -1,5 +1,6 @@
 ---
-title: Quick Start
+title: ENSRainbow Quickstart
+description: Get started building ENS applications with your own ENSNode.
 ---
 
 ## Quick Start with Docker
@@ -68,6 +69,7 @@ curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b27
 ```
 
 Response:
+
 ```json
 {
   "status": "success",
@@ -84,6 +86,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
 Error Responses:
 
 - `400 Bad Request`: When the labelhash parameter is missing or invalid
+
   ```json
   {
     "status": "error",
@@ -93,6 +96,7 @@ Error Responses:
   ```
 
 - `404 Not Found`: When no label is found for the given labelhash
+
   ```json
   {
     "status": "error",
@@ -117,6 +121,7 @@ curl http://localhost:3223/v1/labels/count
 ```
 
 Success Response:
+
 ```json
 {
   "status": "success",
@@ -126,6 +131,7 @@ Success Response:
 ```
 
 Error Response (if database not initialized):
+
 ```json
 {
   "status": "error",
@@ -137,6 +143,7 @@ Error Response (if database not initialized):
 ## Environment Variables
 
 ### Server Variables
+
 - `PORT`: Server port (default: 3223)
 - `DATA_DIR`: Directory for LevelDB data (default: './data')
 - `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
