@@ -41,9 +41,9 @@
     "@types/progress": "^2.0.7",
     "@types/supertest": "^6.0.2",
     "@types/yargs": "^17.0.32",
-    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/coverage-v8": "catalog:",
     "supertest": "^6.3.4",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.0"
+    "vitest": "catalog:"
   }
 }
