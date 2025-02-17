@@ -9,6 +9,20 @@ on:
       - main
 
 jobs:
+  changed-packages:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for package changes
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+
   static-analysis:
     runs-on: ubuntu-latest
 
@@ -35,6 +49,10 @@ jobs:
 
       - name: Run TypeScript type checks
         run: pnpm -r typecheck
+
+      - name: Build packages
+        if: needs.changed-packages.outputs.packages == 'true'
+        run: pnpm packages:build
 
       # This will run the dev command in background, wait for
       # RUNTIME_CHECK_TIMEOUT_SECONDS seconds, and then kill the process if it
@@ -84,4 +102,3 @@ jobs:
 
       - name: Run unit tests
         run: pnpm -r test
-        
