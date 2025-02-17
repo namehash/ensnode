@@ -36,7 +36,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         addrId: address,
       });
 
-      // materialize the resolved addr to the domain iff this resolver is active
+      // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
       const domain = await context.db.find(schema.domain, { id: node });
       if (domain?.resolverId === id) {
         await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: address });

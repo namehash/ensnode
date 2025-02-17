@@ -236,9 +236,11 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
       const resolverId = makeResolverId(resolverAddress, node);
 
+      const isZeroResolver = resolverAddress === zeroAddress;
+
       // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
       // NOTE: old resolver resources are kept for event logs
-      if (resolverAddress === zeroAddress) {
+      if (isZeroResolver) {
         await context.db
           .update(schema.domain, { id: node })
           .set({ resolverId: null, resolvedAddressId: null });
@@ -256,9 +258,13 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // update the domain to point to it, and denormalize the eth addr
         // NOTE: this implements the logic as documented here
         // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
-        await context.db
-          .update(schema.domain, { id: node })
-          .set({ resolverId, resolvedAddressId: resolver.addrId });
+        await context.db.update(schema.domain, { id: node }).set({
+          resolverId,
+          // TODO: once this issue is resolved, remove the unnecessary coalescing
+          // i.e. just `resolvedAddressId: resolver.addrId`
+          // https://github.com/ponder-sh/ponder/issues/1532
+          resolvedAddressId: resolver.addrId || null,
+        });
       }
 
       // log DomainEvent
@@ -273,7 +279,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           // ex: newResolver(id: "3745840-2") { id resolver {id} }
           // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
           // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
-          resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
+          resolverId: isZeroResolver ? zeroAddress : resolverId,
         })
         .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },
