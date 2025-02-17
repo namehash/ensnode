@@ -1,11 +1,14 @@
-name: Build and deploy ENSNode
+name: Build and deploy to Railway ENSNode service
 
 on:
   push:
     branches:
       - feat/railway-ensnode-deployments
+      # Build and push'latest' Docker image. Skip deployments
       - main
+      # Build and push 'alpha' Docker image. Update 'alpha' Railway shared environment variables.
       - alpha
+      # Build and push 'subgraph' Docker image. Update 'subgraph' Railway shared environment variables.
       - subgraph
 
 jobs:
@@ -23,9 +26,9 @@ jobs:
       - name: Extract Branch Name
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
     
-      # We need to recognize which branch had push incomin
+      # We need to recognize which branch had an incoming push
       # Based on that create Docker image with corresponding label - use TAG variable for this
-      # For alhpa/subgraph TAG we need also to specify corresponding Railway SVC_ID which is used for service redeployment
+      # For alpha/subgraph TAG we need also to specify corresponding Railway SVC_ID which is used for service redeployment
       - name: Determine tag
         id: determine_tag
         run: |
@@ -51,7 +54,7 @@ jobs:
             esac
             echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Build & Push Docker image for the ENSNode
+      - name: Build & Push Docker image for ENSNode to Github Container registry
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensnode
         run: |
@@ -76,6 +79,7 @@ jobs:
       - name: Deploy if necessary
         run: |
           apt install jq
+          # Send Railway API request to get all shared variables. We need those to check if we really need to redeploy.
           API_RESPONSE=`curl --request POST \
           --silent \
           --url https://backboard.railway.app/graphql/v2 \
@@ -89,10 +93,13 @@ jobs:
               }
           }'`
           VARIABLE_NAME=${${{ env.TAG }}^^}_DATABASE_SCHEMA
+          echo "Looking for: ${VARIABLE_NAME} environment variable"
+          # Filter all env variables from response except one that is defining schema for specific deployment.
           CURRENT_SCHEMA=`${API_RESPONSE} | jq '.data.variables.'${VARIABLE_NAME}`
-          echo "Calculated schema variable: ${VARIABLE_NAME}"
           #TODO FOR NOW JUST REPLACE DOCKER IMAGE ID. EXTEND LOGIC IN FUTURE
+          # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
           if [[ "$CURRENT_SCHEMA" != "${{ env.DOCKER_IMAGE_ID }}" ]]; then
+          # Sending Railway API request to update specifc shared variable
           curl --request POST \
               --silent \
               --url https://backboard.railway.app/graphql/v2 \
@@ -100,7 +107,7 @@ jobs:
               --header 'Content-Type: application/json' \
               --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ env.DOCKER_IMAGE_ID }}\" }) }"}'
           else
-              echo "Skipping environment variable update"
+              echo "Skipping environment variable update. No new deployment needed"
           fi
 
           
