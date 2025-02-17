@@ -12,8 +12,7 @@ import {
 } from "@ensnode/ensrainbow-sdk/types";
 import { ByteArray } from "viem";
 import { logger } from "../utils/logger";
-import { ENSRainbowDB, parseNonNegativeInteger } from "./database";
-import { LABELHASH_COUNT_KEY } from "./database";
+import { ENSRainbowDB, LABELHASH_COUNT_KEY, parseNonNegativeInteger } from "./database";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
