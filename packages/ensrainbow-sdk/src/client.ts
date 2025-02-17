@@ -1,9 +1,9 @@
-import type { Cache } from "@ensnode/utils/cache";
-import { LruCache } from "@ensnode/utils/cache";
-import type { Labelhash } from "@ensnode/utils/types";
-import { DEFAULT_ENSRAINBOW_URL } from "./consts";
-import type { CacheableHealResponse, HealResponse } from "./types";
-import { isCacheableHealResponse } from "./types";
+import type {Cache} from "@ensnode/utils/cache";
+import {LruCache} from "@ensnode/utils/cache";
+import type {Labelhash} from "@ensnode/utils/types";
+import {DEFAULT_ENSRAINBOW_URL} from "./consts";
+import type {CacheableHealResponse, CountResponse, HealResponse, HealthResponse} from "./types";
+import {isCacheableHealResponse} from "./types";
 
 export interface EnsRainbowApiClientOptions {
   /**
@@ -116,6 +116,52 @@ export class EnsRainbowApiClient {
     }
 
     return healResponse;
+  }
+
+  /**
+   * Get Count of Healable Labels
+   *
+   * @returns a `CountResponse` indicating the result and the timestamp of the request and the number of healable labels if successful
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
+   *
+   * @example
+   *
+   * const response = await client.count();
+   *
+   * console.log(response);
+   *
+   * // {
+   * //   "status": "success",
+   * //   "count": 133856894,
+   * //   "timestamp": "2024-01-30T11:18:56Z"
+   * // }
+   *
+   */
+  async count(): Promise<EnsRainbow.CountResponse> {
+    const response = await fetch(new URL("/v1/labels/count", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.CountResponse>;
+  }
+
+  /**
+   *
+   * Simple verification that the service is running, either in your local setup or for the provided hosted instance
+   *
+   * @returns a status of ENS Rainbow service
+   * @example
+   *
+   * const response = await client.health();
+   *
+   * console.log(response);
+   *
+   * // {
+   * //   "status": "ok",
+   * // }
+   */
+  async health(): Promise<EnsRainbow.HealthResponse> {
+    const response = await fetch(new URL("/health", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.HealthResponse>;
   }
 
   /**

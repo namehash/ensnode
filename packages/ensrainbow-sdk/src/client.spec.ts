@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { EnsRainbowApiClient, EnsRainbowApiClientOptions } from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-import type { HealBadRequestError, HealNotFoundError, HealSuccess } from "./types";
+import type {
+  CountResponse,
+  CountSuccess,
+  HealBadRequestError,
+  HealNotFoundError,
+  HealSuccess,
+  HealthResponse
+} from "./types";
 
 describe("EnsRainbowApiClient", () => {
   let client: EnsRainbowApiClient;
@@ -61,5 +68,22 @@ describe("EnsRainbowApiClient", () => {
       error: "Invalid labelhash length 9 characters (expected 66)",
       errorCode: ErrorCode.BadRequest,
     } satisfies HealBadRequestError);
+  });
+
+  it("should return a count of healable labels", async () => {
+    const response = await client.count();
+
+    expect(response satisfies CountResponse).toBeTruthy();
+    expect(response.status).toEqual(StatusCode.Success);
+    expect(typeof response.count === "number").toBeTruthy();
+    expect(typeof response.timestamp === "string").toBeTruthy();
+  });
+
+  it("should return a positive health check", async () => {
+    const response = await client.health();
+
+    expect(response).toEqual({
+      status: "ok"
+    } satisfies HealthResponse);
   });
 });
