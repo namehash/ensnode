@@ -1,9 +1,107 @@
 import type { Cache } from "@ensnode/utils/cache";
 import { LruCache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
-import { DEFAULT_ENSRAINBOW_URL } from "./consts";
-import type { CacheableHealResponse, HealResponse } from "./types";
-import { isCacheableHealResponse } from "./types";
+import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
+
+export namespace EnsRainbow {
+  export type ApiClientOptions = EnsRainbowApiClientOptions;
+
+  export interface ApiClient {
+    count(): Promise<CountResponse>;
+
+    heal(labelhash: Labelhash): Promise<HealResponse>;
+
+    health(): Promise<HealthResponse>;
+
+    getOptions(): Readonly<EnsRainbowApiClientOptions>;
+  }
+
+  type StatusCode = (typeof StatusCode)[keyof typeof StatusCode];
+
+  type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
+
+  export interface HealthResponse {
+    status: "ok";
+  }
+
+  export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
+    status: Status;
+    label?: string | never;
+    error?: string | never;
+    errorCode?: Error | never;
+  }
+
+  export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success, never> {
+    status: typeof StatusCode.Success;
+    label: string;
+    error?: never;
+    errorCode?: never;
+  }
+
+  export interface HealNotFoundError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.NotFound> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.NotFound;
+  }
+
+  export interface HealServerError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.ServerError;
+  }
+
+  export interface HealBadRequestError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.BadRequest> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.BadRequest;
+  }
+
+  export type HealResponse =
+    | HealSuccess
+    | HealNotFoundError
+    | HealServerError
+    | HealBadRequestError;
+  export type HealError = Exclude<HealResponse, HealSuccess>;
+
+  /**
+   * Server errors should not be cached.
+   */
+  export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
+
+  export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
+    status: Status;
+    count?: number | never;
+    timestamp?: string | never;
+    error?: string | never;
+    errorCode?: Error | never;
+  }
+
+  export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success, never> {
+    status: typeof StatusCode.Success;
+    /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
+    count: number;
+    timestamp: string;
+    error?: never;
+    errorCode?: never;
+  }
+
+  export interface CountServerError
+    extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
+    status: typeof StatusCode.Error;
+    count?: never;
+    timestamp?: never;
+    error: string;
+    errorCode: typeof ErrorCode.ServerError;
+  }
+
+  export type CountResponse = CountSuccess | CountServerError;
+}
 
 export interface EnsRainbowApiClientOptions {
   /**
@@ -32,9 +130,9 @@ export interface EnsRainbowApiClientOptions {
  * });
  * ```
  */
-export class EnsRainbowApiClient {
+export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
-  private readonly cache: Cache<Labelhash, CacheableHealResponse>;
+  private readonly cache: Cache<Labelhash, EnsRainbow.CacheableHealResponse>;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -43,20 +141,22 @@ export class EnsRainbowApiClient {
    *
    * @returns default options
    */
-  static defaultOptions(): EnsRainbowApiClientOptions {
+  static defaultOptions(): EnsRainbow.ApiClientOptions {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
     };
   }
 
-  constructor(options: Partial<EnsRainbowApiClientOptions> = {}) {
+  constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
     this.options = {
       ...EnsRainbowApiClient.defaultOptions(),
       ...options,
     };
 
-    this.cache = new LruCache<Labelhash, CacheableHealResponse>(this.options.cacheCapacity);
+    this.cache = new LruCache<Labelhash, EnsRainbow.CacheableHealResponse>(
+      this.options.cacheCapacity,
+    );
   }
 
   /**
@@ -101,7 +201,7 @@ export class EnsRainbowApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash): Promise<HealResponse> {
+  async heal(labelhash: Labelhash): Promise<EnsRainbow.HealResponse> {
     const cachedResult = this.cache.get(labelhash);
 
     if (cachedResult) {
@@ -109,13 +209,25 @@ export class EnsRainbowApiClient {
     }
 
     const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
-    const healResponse = (await response.json()) as HealResponse;
+    const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
       this.cache.set(labelhash, healResponse);
     }
 
     return healResponse;
+  }
+
+  async count(): Promise<EnsRainbow.CountResponse> {
+    const response = await fetch(new URL("/v1/labels/count", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.CountResponse>;
+  }
+
+  async health(): Promise<EnsRainbow.HealthResponse> {
+    const response = await fetch(new URL("/health", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.HealthResponse>;
   }
 
   /**
@@ -133,3 +245,29 @@ export class EnsRainbowApiClient {
     return Object.freeze(deepCopy);
   }
 }
+
+/**
+ * Determine if a heal response is an error.
+ *
+ * @param response the heal response to check
+ * @returns true if the response is an error, false otherwise
+ */
+export const isHealError = (
+  response: EnsRainbow.HealResponse,
+): response is EnsRainbow.HealError => {
+  return response.status === StatusCode.Error;
+};
+
+/**
+ * Determine if a heal response is cacheable.
+ *
+ * Server errors at not cachable and should be retried.
+ *
+ * @param response the heal response to check
+ * @returns true if the response is cacheable, false otherwise
+ */
+export const isCacheableHealResponse = (
+  response: EnsRainbow.HealResponse,
+): response is EnsRainbow.CacheableHealResponse => {
+  return response.status === StatusCode.Success || response.errorCode !== ErrorCode.ServerError;
+};
