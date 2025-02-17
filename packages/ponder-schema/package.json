@@ -10,11 +10,7 @@
     "directory": "packages/ponder-schema"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-schema",
-  "keywords": [
-    "ENS",
-    "ENSNode",
-    "Ponder"
-  ],
+  "keywords": ["ENS", "ENSNode", "Ponder"],
   "publishConfig": {
     "access": "public",
     "exports": {
