@@ -218,6 +218,18 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return healResponse;
   }
 
+  async count(): Promise<EnsRainbow.CountResponse> {
+    const response = await fetch(new URL("/v1/labels/count", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.CountResponse>;
+  }
+
+  async health(): Promise<EnsRainbow.HealthResponse> {
+    const response = await fetch(new URL("/health", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.HealthResponse>;
+  }
+
   /**
    * Get Count of Healable Labels
    *
