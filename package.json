@@ -20,6 +20,7 @@
     "overrides": {
       "ponder>vite": "5.4.14",
       "astro>esbuild": "0.25.0",
+      "tsx>esbuild": "0.25.0",
       "vite>esbuild": "0.25.0"
     }
   }
