@@ -1,4 +1,4 @@
-import type { HealthResponse } from "@ensnode/ensrainbow-sdk/types";
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
@@ -30,7 +30,7 @@ export async function createServer(db: ENSRainbowDB): Promise<Hono> {
 
   app.get("/health", (c: HonoContext) => {
     logger.debug("Health check request");
-    const result: HealthResponse = { status: "ok" };
+    const result: EnsRainbow.HealthResponse = { status: "ok" };
     return c.json(result);
   });
 

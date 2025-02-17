@@ -1,14 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { EnsRainbowApiClient, EnsRainbowApiClientOptions } from "./client";
+import {
+  type EnsRainbow,
+  EnsRainbowApiClient,
+  EnsRainbowApiClientOptions,
+  isCacheableHealResponse,
+  isHealError,
+} from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-import type {
-  CountResponse,
-  CountSuccess,
-  HealBadRequestError,
-  HealNotFoundError,
-  HealSuccess,
-  HealthResponse
-} from "./types";
 
 describe("EnsRainbowApiClient", () => {
   let client: EnsRainbowApiClient;
@@ -45,7 +43,7 @@ describe("EnsRainbowApiClient", () => {
     expect(response).toEqual({
       status: StatusCode.Success,
       label: "vitalik",
-    } satisfies HealSuccess);
+    } satisfies EnsRainbow.HealSuccess);
   });
 
   it("should return a not found error for an unknown labelhash", async () => {
@@ -57,7 +55,7 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Error,
       error: "Label not found",
       errorCode: ErrorCode.NotFound,
-    } satisfies HealNotFoundError);
+    } satisfies EnsRainbow.HealNotFoundError);
   });
 
   it("should return a bad request error for an invalid labelhash", async () => {
@@ -67,7 +65,7 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Error,
       error: "Invalid labelhash length 9 characters (expected 66)",
       errorCode: ErrorCode.BadRequest,
-    } satisfies HealBadRequestError);
+    } satisfies EnsRainbow.HealBadRequestError);
   });
 
   it("should return a count of healable labels", async () => {
@@ -85,5 +83,87 @@ describe("EnsRainbowApiClient", () => {
     expect(response).toEqual({
       status: "ok"
     } satisfies HealthResponse);
+  });
+});
+
+describe("HealResponse error detection", () => {
+  it("should not consider HealSuccess responses to be errors", async () => {
+    const response: EnsRainbow.HealSuccess = {
+      status: StatusCode.Success,
+      label: "vitalik",
+    };
+
+    expect(isHealError(response)).toBe(false);
+  });
+
+  it("should consider HealNotFoundError responses to be errors", async () => {
+    const response: EnsRainbow.HealNotFoundError = {
+      status: StatusCode.Error,
+      error: "Not found",
+      errorCode: ErrorCode.NotFound,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+
+  it("should consider HealBadRequestError responses to be errors", async () => {
+    const response: EnsRainbow.HealBadRequestError = {
+      status: StatusCode.Error,
+      error: "Bad request",
+      errorCode: ErrorCode.BadRequest,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+
+  it("should consider HealServerError responses to be errors", async () => {
+    const response: EnsRainbow.HealServerError = {
+      status: StatusCode.Error,
+      error: "Server error",
+      errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+});
+
+describe("HealResponse cacheability", () => {
+  it("should consider HealSuccess responses cacheable", async () => {
+    const response: EnsRainbow.HealSuccess = {
+      status: StatusCode.Success,
+      label: "vitalik",
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(true);
+  });
+
+  it("should consider HealNotFoundError responses cacheable", async () => {
+    const response: EnsRainbow.HealNotFoundError = {
+      status: StatusCode.Error,
+      error: "Not found",
+      errorCode: ErrorCode.NotFound,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(true);
+  });
+
+  it("should consider HealBadRequestError responses cacheable", async () => {
+    const response: EnsRainbow.HealBadRequestError = {
+      status: StatusCode.Error,
+      error: "Bad request",
+      errorCode: ErrorCode.BadRequest,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(true);
+  });
+
+  it("should consider HealServerError responses not cacheable", async () => {
+    const response: EnsRainbow.HealServerError = {
+      status: StatusCode.Error,
+      error: "Server error",
+      errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
   });
 });
