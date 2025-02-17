@@ -42,13 +42,14 @@ describe("Database", () => {
       ];
 
       try {
-        // Add test records
+        // Add test records using batch
+        const batch = db.batch();
         for (const { label, labelhash } of testData) {
-          await db.put(labelHashToBytes(labelhash), label);
+          batch.put(labelHashToBytes(labelhash), label);
         }
-
         // Add count
-        await db.put(LABELHASH_COUNT_KEY, testData.length.toString());
+        batch.put(LABELHASH_COUNT_KEY, testData.length.toString());
+        await batch.write();
 
         const isValid = await db.validate();
         expect(isValid).toBe(true);
@@ -61,12 +62,14 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
+        // Add records using batch
+        const batch = db.batch();
         // Add labelhash count key
-        await db.put(LABELHASH_COUNT_KEY, "1");
-
+        batch.put(LABELHASH_COUNT_KEY, "1");
         // Add record with invalid labelhash format
         const invalidLabelhash = new Uint8Array([1, 2, 3]); // Too short
-        await db.put(invalidLabelhash, "test");
+        batch.put(invalidLabelhash, "test");
+        await batch.write();
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -79,13 +82,15 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
+        // Add records using batch
+        const batch = db.batch();
         // Add labelhash count key
-        await db.put(LABELHASH_COUNT_KEY, "1");
-
+        batch.put(LABELHASH_COUNT_KEY, "1");
         // Add record with mismatched labelhash
         const label = "vitalik";
         const wrongLabelhash = labelhash("ethereum");
-        await db.put(labelHashToBytes(wrongLabelhash), label);
+        batch.put(labelHashToBytes(wrongLabelhash), label);
+        await batch.write();
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -98,10 +103,12 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
-        // Add record without count
+        // Add record using batch
+        const batch = db.batch();
         const label = "vitalik";
         const vitalikLabelhash = labelhash(label);
-        await db.put(labelHashToBytes(vitalikLabelhash), label);
+        batch.put(labelHashToBytes(vitalikLabelhash), label);
+        await batch.write();
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -114,13 +121,15 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
+        // Add records using batch
+        const batch = db.batch();
         // Add record
         const label = "vitalik";
         const vitalikLabelhash = labelhash(label);
-        await db.put(labelHashToBytes(vitalikLabelhash), label);
-
+        batch.put(labelHashToBytes(vitalikLabelhash), label);
         // Add incorrect count
-        await db.put(LABELHASH_COUNT_KEY, "2");
+        batch.put(LABELHASH_COUNT_KEY, "2");
+        await batch.write();
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -133,16 +142,17 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
+        // Add records using batch
+        const batch = db.batch();
         // Add a valid record
         const label = "vitalik";
         const vitalikLabelhash = labelhash(label);
-        await db.put(labelHashToBytes(vitalikLabelhash), label);
-
+        batch.put(labelHashToBytes(vitalikLabelhash), label);
         // Add correct count
-        await db.put(LABELHASH_COUNT_KEY, "1");
-
+        batch.put(LABELHASH_COUNT_KEY, "1");
         // Set ingestion in progress flag
-        await db.put(INGESTION_IN_PROGRESS_KEY, "true");
+        batch.put(INGESTION_IN_PROGRESS_KEY, "true");
+        await batch.write();
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -160,8 +170,12 @@ describe("Database", () => {
         const labelWithNullLabelhash = labelhash(labelWithNull);
         const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);
 
-        await db.put(labelHashBytes, labelWithNull);
-        const retrieved = await db.get(labelHashBytes);
+        // Add record using batch
+        const batch = db.batch();
+        batch.put(labelHashBytes, labelWithNull);
+        await batch.write();
+
+        const retrieved = await db.safeGet(labelHashBytes);
         expect(retrieved).toBe(labelWithNull);
       } finally {
         await db.close();

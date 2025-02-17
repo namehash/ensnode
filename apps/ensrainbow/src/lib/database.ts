@@ -275,26 +275,10 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Puts a value into the database.
-   */
-  public async put(key: ByteArray, value: string): Promise<void> {
-    await this.db.put(key, value);
-  }
-
-  /**
-   * Gets a value from the database.
-   */
-  public async get(key: ByteArray): Promise<string> {
-    return this.db.get(key);
-  }
-
-  /**
    * Clears the database.
    */
   public async clear(): Promise<void> {
-    for await (const key of this.db.keys()) {
-      await this.db.del(key);
-    }
+    await this.db.clear();
   }
 }
 

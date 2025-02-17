@@ -29,7 +29,9 @@ describe("Validate Command", () => {
       // Add a valid record
       const label = "vitalik";
       const vitalikLabelhash = labelhash(label);
-      await db.put(labelHashToBytes(vitalikLabelhash), label);
+      const batch = db.batch();
+      batch.put(labelHashToBytes(vitalikLabelhash), label);
+      await batch.write();
       await db.setRainbowRecordCount(1);
       await db.close();
 
