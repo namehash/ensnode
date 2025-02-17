@@ -78,7 +78,8 @@ jobs:
     steps:
       - name: Deploy if necessary
         run: |
-          apt install jq
+          # Install jq for JSON Railway API response parsing
+          sudo apt install jq
           # Send Railway API request to get all shared variables. We need those to check if we really need to redeploy.
           API_RESPONSE=`curl --request POST \
           --silent \
