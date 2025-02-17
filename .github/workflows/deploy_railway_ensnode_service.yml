@@ -37,22 +37,21 @@ jobs:
                 ;;
               "alpha")
                 echo "TAG=alpha" >> $GITHUB_ENV
-                echo "SVC_ID=${{ secrets.ALPHA_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                echo "SVC_ID="${{ secrets.ALPHA_SVC_ID }} >> "$GITHUB_OUTPUT"
                 ;;
               "subgraph")
                 echo "TAG=subgraph" >> $GITHUB_ENV
-                echo "SVC_ID=${{ secrets.SUBGRAPH_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                echo "SVC_ID="${{ secrets.SUBGRAPH_SVC_ID }} >> "$GITHUB_OUTPUT"
                 ;;
               "feat/railway-ensnode-deployments")
                 echo "TAG=subgraph" >> $GITHUB_ENV
-                echo "SVC_ID=${{ secrets.SUBGRAPH_SVC_ID }}" >> "$GITHUB_OUTPUT"
+                echo "SVC_ID="${{ secrets.SUBGRAPH_SVC_ID }} >> "$GITHUB_OUTPUT"
                 ;;
               *)
                 echo "Branch not recognized, skipping workflow"
                 exit 1
             esac
             echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
-            echo "SVC_ID=testing" >> "$GITHUB_OUTPUT"
 
       - name: Build & Push Docker image for ENSNode to Github Container registry
         env:
