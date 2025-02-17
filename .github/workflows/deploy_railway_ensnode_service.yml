@@ -15,9 +15,9 @@ jobs:
   image-build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.determine_tag.outputs.tag }}
-      svc_id: ${{ steps.determine_tag.outputs.svc_id }}
-      docker_image_id: ${{ steps.determine_tag.outputs.docker_image_id }}
+      tag: ${{ steps.determine_tag.outputs.TAG }}
+      svc_id: ${{ steps.determine_tag.outputs.SVC_ID }}
+      docker_image_id: ${{ steps.determine_tag.outputs.DOCKER_IMAGE_ID }}
 
     steps:
       - name: Checkout repository
@@ -95,7 +95,7 @@ jobs:
           echo "Before uppercase: ${TAG}"
           TAG=${TAG^^}
           echo ${After uppercase ${TAG}}
-          VARIABLE_NAME=${^^}_DATABASE_SCHEMA
+          VARIABLE_NAME=${TAG^^}_DATABASE_SCHEMA
           echo "Looking for: ${VARIABLE_NAME} environment variable"
           # Filter all env variables from response except one that is defining schema for specific deployment.
           CURRENT_SCHEMA=`${API_RESPONSE} | jq '.data.variables.'${VARIABLE_NAME}`
