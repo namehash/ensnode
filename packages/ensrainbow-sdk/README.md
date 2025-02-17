@@ -6,7 +6,7 @@ Learn more about [ENSRainbow](https://ensrainbow.io) and [ENSNode](https://ensno
 
 ## API Reference
 
-#### Heal Label
+### Heal Label
 Attempt to heal a labelhash to its original label.
 
 ```typescript
@@ -23,7 +23,7 @@ console.log(response);
 // }
 ```
 
-#### Label Count
+### Label Count
 Get Count of Healable Labels
 
 ```typescript
@@ -38,7 +38,7 @@ console.log(response);
 // }
 ```
 
-#### Health Check
+### Health Check
 Simple verification that the service is running, either in your local setup or for the provided hosted instance
 
 ```typescript
@@ -52,7 +52,7 @@ console.log(response);
 ```
 
 ### Response Types & Error Handling
-Each API endpoint has a designated error type to account for possible mishaps that could occur during a request.
+Each API endpoint has a designated response type that includes a successful and an erroneous response to account for possible mishaps that could occur during a request.
 
 Below is an example of a failed `heal` operation, that shows the resulting error returned by the SDK
 
