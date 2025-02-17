@@ -22,8 +22,8 @@ catalogs:
       specifier: ^4.6.14
       version: 4.6.17
     ponder:
-      specifier: ^0.9.14
-      version: 0.9.14
+      specifier: ^0.9.15
+      version: 0.9.15
     typescript:
       specifier: ^5.7.3
       version: 5.7.3
@@ -194,7 +194,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.14(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+        version: 0.9.15(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -372,7 +372,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.14(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+        version: 0.9.15(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
       viem:
         specifier: 'catalog:'
         version: 2.22.13(typescript@5.7.3)(zod@3.24.1)
@@ -4499,8 +4499,8 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  ponder@0.9.14:
-    resolution: {integrity: sha512-AGbFNghxa9OMHIGpMcdhnrEYDLgYMCSdwKaI4bq2RZUJ0eYz+8Rcf2zQOr8PuwjQ4grBcE6M9NijNwn7naS+NQ==}
+  ponder@0.9.15:
+    resolution: {integrity: sha512-Dbo+3XztboMET/SOFGSeaFaH1Q1RZ9cjI6NAGNVbIjz3dOjk10ejpDF/VBC875fO+5sj2m6glzLbRZeD2ZeLog==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -10480,7 +10480,7 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  ponder@0.9.14(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1):
+  ponder@0.9.15(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
