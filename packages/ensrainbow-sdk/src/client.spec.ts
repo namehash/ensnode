@@ -81,7 +81,7 @@ describe("EnsRainbowApiClient", () => {
     const response = await client.health();
 
     expect(response).toEqual({
-      status: "ok"
+      status: "ok",
     } satisfies HealthResponse);
   });
 });
