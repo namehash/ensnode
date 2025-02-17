@@ -52,6 +52,7 @@ jobs:
                 exit 1
             esac
             echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+            echo "SVC_ID=testing" >> "$GITHUB_OUTPUT"
 
       - name: Build & Push Docker image for ENSNode to Github Container registry
         env:
