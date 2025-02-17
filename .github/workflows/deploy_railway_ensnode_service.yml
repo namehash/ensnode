@@ -78,8 +78,6 @@ jobs:
     steps:
       - name: Deploy if necessary
         run: |
-          # Install jq for JSON Railway API response parsing
-          sudo apt install jq
           # Send Railway API request to get all shared variables. We need those to check if we really need to redeploy.
           API_RESPONSE=`curl --request POST \
           --silent \
@@ -93,7 +91,11 @@ jobs:
                 "environmentId": "'${{ env.RAILWAY_ENVIRONMENT_ID }}'"
               }
           }'`
-          VARIABLE_NAME=${${{ env.TAG }}^^}_DATABASE_SCHEMA
+          TAG=${{ env.TAG }}
+          echo "Before uppercase: ${TAG}"
+          TAG=${TAG^^}
+          echo ${After uppercase ${TAG}}
+          VARIABLE_NAME=${^^}_DATABASE_SCHEMA
           echo "Looking for: ${VARIABLE_NAME} environment variable"
           # Filter all env variables from response except one that is defining schema for specific deployment.
           CURRENT_SCHEMA=`${API_RESPONSE} | jq '.data.variables.'${VARIABLE_NAME}`
