@@ -1,5 +1,6 @@
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk/client";
-import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk/consts";
+import { ErrorCode } from "@ensnode/ensrainbow-sdk/consts";
+import { isHealError } from "@ensnode/ensrainbow-sdk/types";
 import type { Labelhash } from "@ensnode/utils/types";
 import { ensRainbowEndpointUrl } from "./ponder-helpers";
 
@@ -28,7 +29,7 @@ if (
 export async function labelByHash(labelhash: Labelhash): Promise<string | null> {
   const healResponse = await ensRainbowApiClient.heal(labelhash);
 
-  if (healResponse.status === StatusCode.Success) {
+  if (!isHealError(healResponse)) {
     // original label found for the labelhash
     return healResponse.label;
   }

@@ -1,8 +1,21 @@
+import type { Cache } from "@ensnode/utils/cache";
+import { LruCache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL } from "./consts";
-import type { HealResponse } from "./types";
+import type { CacheableHealResponse, HealResponse } from "./types";
+import { isCacheableHealResponse } from "./types";
 
 export interface EnsRainbowApiClientOptions {
+  /**
+   * The maximum number of `HealResponse` values to cache.
+   * Must be a non-negative integer.
+   * Setting to 0 will disable caching.
+   */
+  cacheCapacity: number;
+
+  /**
+   * The URL of an ENSRainbow API endpoint.
+   */
   endpointUrl: URL;
 }
 
@@ -21,6 +34,9 @@ export interface EnsRainbowApiClientOptions {
  */
 export class EnsRainbowApiClient {
   private readonly options: EnsRainbowApiClientOptions;
+  private readonly cache: Cache<Labelhash, CacheableHealResponse>;
+
+  public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
   /**
    * Create default client options.
@@ -30,6 +46,7 @@ export class EnsRainbowApiClient {
   static defaultOptions(): EnsRainbowApiClientOptions {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
+      cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
     };
   }
 
@@ -38,6 +55,8 @@ export class EnsRainbowApiClient {
       ...EnsRainbowApiClient.defaultOptions(),
       ...options,
     };
+
+    this.cache = new LruCache<Labelhash, CacheableHealResponse>(this.options.cacheCapacity);
   }
 
   /**
@@ -83,17 +102,34 @@ export class EnsRainbowApiClient {
    * ```
    */
   async heal(labelhash: Labelhash): Promise<HealResponse> {
-    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    const cachedResult = this.cache.get(labelhash);
 
-    return response.json() as Promise<HealResponse>;
+    if (cachedResult) {
+      return cachedResult;
+    }
+
+    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    const healResponse = (await response.json()) as HealResponse;
+
+    if (isCacheableHealResponse(healResponse)) {
+      this.cache.set(labelhash, healResponse);
+    }
+
+    return healResponse;
   }
 
   /**
-   * Get current client options.
+   * Get a copy of the current client options.
    *
-   * @returns the current client options
+   * @returns a copy of the current client options.
    */
   getOptions(): Readonly<EnsRainbowApiClientOptions> {
-    return Object.freeze(this.options);
+    // build a deep copy to prevent modification
+    const deepCopy = {
+      cacheCapacity: this.options.cacheCapacity,
+      endpointUrl: new URL(this.options.endpointUrl.href),
+    } satisfies EnsRainbowApiClientOptions;
+
+    return Object.freeze(deepCopy);
   }
 }

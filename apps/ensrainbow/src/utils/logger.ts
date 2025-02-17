@@ -1,34 +1,70 @@
-export interface Logger {
-  error: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-  info: (...args: any[]) => void;
-  debug: (...args: any[]) => void;
+import pino, { LevelWithSilent } from "pino";
+
+export type LogLevel = LevelWithSilent;
+
+export const DEFAULT_LOG_LEVEL: LogLevel = "info";
+
+// Creating our own definition of the log levels recognized by Pino
+// to provide a better user experience with clear error messages when invalid log levels are
+// parsed.
+export const VALID_LOG_LEVELS: LogLevel[] = [
+  "fatal",
+  "error",
+  "warn",
+  "info",
+  "debug",
+  "trace",
+  "silent",
+];
+
+export function parseLogLevel(maybeLevel: string): LogLevel {
+  const normalizedLevel = maybeLevel.toLowerCase();
+  if (VALID_LOG_LEVELS.includes(normalizedLevel as LogLevel)) {
+    return normalizedLevel as LogLevel;
+  }
+  throw new Error(
+    `Invalid log level "${maybeLevel}". Valid levels are: ${VALID_LOG_LEVELS.join(", ")}.`,
+  );
 }
 
-export type LogLevel = keyof typeof logLevels;
+export function getEnvLogLevel(): LogLevel {
+  const envLogLevel = process.env.LOG_LEVEL;
+  if (!envLogLevel) {
+    return DEFAULT_LOG_LEVEL;
+  }
 
-export const logLevels = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  debug: 3,
-} as const;
-
-export function createLogger(level: LogLevel = "info"): Logger {
-  const currentLogLevel = logLevels[level];
-
-  return {
-    error: (...args: any[]) => {
-      if (currentLogLevel >= logLevels.error) console.error(...args);
-    },
-    warn: (...args: any[]) => {
-      if (currentLogLevel >= logLevels.warn) console.warn(...args);
-    },
-    info: (...args: any[]) => {
-      if (currentLogLevel >= logLevels.info) console.log(...args);
-    },
-    debug: (...args: any[]) => {
-      if (currentLogLevel >= logLevels.debug) console.debug(...args);
-    },
-  };
+  try {
+    return parseLogLevel(envLogLevel);
+  } catch (error: unknown) {
+    const errorMessage = `Environment variable error: (LOG_LEVEL): ${error instanceof Error ? error.message : String(error)}`;
+    // Log error to console since we can't use logger yet
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
 }
+
+export function createLogger(level: LogLevel = DEFAULT_LOG_LEVEL): pino.Logger {
+  const isProduction = process.env.NODE_ENV === "production";
+
+  return pino({
+    level,
+    ...(isProduction
+      ? {} // In production, use default pino output format
+      : {
+          transport: {
+            target: "pino-pretty",
+            options: {
+              colorize: true,
+              translateTime: "HH:MM:ss",
+              ignore: "pid,hostname",
+            },
+          },
+        }),
+  });
+}
+
+// Create and export the global logger instance
+export const logger = createLogger(getEnvLogLevel());
+
+// Re-export pino types for convenience
+export type { Logger } from "pino";

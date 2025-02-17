@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { EnsRainbowApiClient } from "./client";
+import { EnsRainbowApiClient, EnsRainbowApiClientOptions } from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-import type { HealError, HealSuccess } from "./types";
+import type { HealBadRequestError, HealNotFoundError, HealSuccess } from "./types";
 
 describe("EnsRainbowApiClient", () => {
   let client: EnsRainbowApiClient;
@@ -13,16 +13,21 @@ describe("EnsRainbowApiClient", () => {
   it("should apply default options when no options provided", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
-    });
+      cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+    } satisfies EnsRainbowApiClientOptions);
   });
 
   it("should apply custom options when provided", () => {
-    const customEndpointUrl = new URL("http://lb-api.ensrainbow.com");
-    client = new EnsRainbowApiClient({ endpointUrl: customEndpointUrl });
+    const customEndpointUrl = new URL("http://custom-endpoint.com");
+    client = new EnsRainbowApiClient({
+      endpointUrl: customEndpointUrl,
+      cacheCapacity: 0,
+    });
 
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
-    });
+      cacheCapacity: 0,
+    } satisfies EnsRainbowApiClientOptions);
   });
 
   it("should heal a known labelhash", async () => {
@@ -45,7 +50,7 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Error,
       error: "Label not found",
       errorCode: ErrorCode.NotFound,
-    } satisfies HealError);
+    } satisfies HealNotFoundError);
   });
 
   it("should return a bad request error for an invalid labelhash", async () => {
@@ -55,6 +60,6 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Error,
       error: "Invalid labelhash length 9 characters (expected 66)",
       errorCode: ErrorCode.BadRequest,
-    });
+    } satisfies HealBadRequestError);
   });
 });

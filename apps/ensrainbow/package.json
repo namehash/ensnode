@@ -14,11 +14,10 @@
   "scripts": {
     "serve": "bun src/cli.ts serve",
     "ingest": "bun src/cli.ts ingest",
-    "count": "bun src/cli.ts count",
     "validate": "bun src/cli.ts validate",
-    "test": "DATA_DIR=test-data vitest run",
-    "test:watch": "DATA_DIR=test-data vitest",
-    "test:coverage": "DATA_DIR=test-data vitest run --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit"
@@ -32,7 +31,9 @@
     "hono": "catalog:",
     "progress": "^2.0.3",
     "viem": "catalog:",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "pino": "^8.19.0",
+    "pino-pretty": "^10.3.1"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
