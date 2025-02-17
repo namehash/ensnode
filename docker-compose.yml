@@ -28,6 +28,20 @@ services:
       - "3223:3223"
     restart: unless-stopped
 
+  ensadmin:
+    build:
+      dockerfile: ./apps/ensadmin/Dockerfile
+    image: namehash/ensadmin
+    ports:
+      - "4173:4173"
+    env_file:
+      - ./apps/ensadmin/.env.local
+    environment:
+      # override VITE_ENSNODE_URL from .env.local to refer to docker compose ensnode instance
+      VITE_ENSNODE_URL: http://ensnode:42069
+    depends_on:
+      - ensnode
+
   postgres:
     container_name: postgres
     image: postgres:17
@@ -39,21 +53,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  ensadmin:
-    build:
-      dockerfile: ./apps/ensadmin/Dockerfile
-    image: namehash/ensadmin
-    command: pnpm preview --host 0.0.0.0
-    ports:
-      - "4173:4173"
-    env_file:
-      - ./apps/ensadmin/.env.local
-    environment:
-      # override ENSNODE_URL from .env.local to refer to docker compose ensnode instance
-      VITE_ENSNODE_URL: http://localhost:42069
-    depends_on:
-      - ensnode
 
 volumes:
   postgres_data:
