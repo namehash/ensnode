@@ -10,7 +10,10 @@
     "directory": "packages/ponder-subgraph-api"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-subgraph-api",
-  "keywords": ["Ponder", "Subgraph"],
+  "keywords": [
+    "Ponder",
+    "Subgraph"
+  ],
   "exports": {
     "./middleware": "./src/middleware.ts"
   },
@@ -28,7 +31,6 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint:ci": "biome ci"
   },

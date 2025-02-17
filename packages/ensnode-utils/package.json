@@ -34,7 +34,6 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest",
