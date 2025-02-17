@@ -71,7 +71,7 @@ describe("EnsRainbowApiClient", () => {
   it("should return a count of healable labels", async () => {
     const response = await client.count();
 
-    expect(response satisfies CountResponse).toBeTruthy();
+    expect(response satisfies EnsRainbow.CountResponse).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.count === "number").toBeTruthy();
     expect(typeof response.timestamp === "string").toBeTruthy();
@@ -82,7 +82,7 @@ describe("EnsRainbowApiClient", () => {
 
     expect(response).toEqual({
       status: "ok",
-    } satisfies HealthResponse);
+    } satisfies EnsRainbow.HealthResponse);
   });
 });
 
