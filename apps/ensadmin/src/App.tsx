@@ -1,4 +1,5 @@
 import { Navigate, Outlet, Route, Routes, useSearchParams } from "react-router-dom";
+
 import { About } from "./components/About";
 import { GraphiQLWrapper } from "./components/GraphiQLWrapper";
 import { Layout } from "./components/Layout";

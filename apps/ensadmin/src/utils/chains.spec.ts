@@ -1,9 +1,9 @@
 import { anvil, base, holesky, linea, mainnet, sepolia } from "viem/chains";
 import { describe, expect, it } from "vitest";
-import { SupportedChainId, getBlockExplorerUrl, getChainName } from "./chains";
+
+import { SupportedChainId, getBlockExplorerBlockUrl, getChainName } from "./chains";
 
 describe("chains", () => {
-  const randomBlockNumber = () => getRandomArbitrary(1_000, 10_000);
   describe("getChainName", () => {
     it("should get chain name", () => {
       expect(getChainName(mainnet.id)).toBe(mainnet.name);
@@ -12,7 +12,7 @@ describe("chains", () => {
     });
   });
 
-  describe("getBlockExplorerUrl", () => {
+  describe("getBlockExplorerBlockUrl", () => {
     it("should get block explorer url for supported chains", () => {
       const supprotedChains = [
         [mainnet.id, mainnet.blockExplorers.default.url],
@@ -23,21 +23,17 @@ describe("chains", () => {
       ] as const;
 
       for (const [chainId, blockExplorerUrl] of supprotedChains) {
-        const blockNumber = randomBlockNumber();
-        expect(getBlockExplorerUrl(chainId, blockNumber)).toBe(
+        const blockNumber = 1_001;
+        expect(getBlockExplorerBlockUrl(chainId, blockNumber)).toBe(
           `${blockExplorerUrl}/block/${blockNumber}`,
         );
       }
     });
 
     it("should return null for unsupported chain", () => {
-      const blockNumber = randomBlockNumber();
-      expect(getBlockExplorerUrl(anvil.id, blockNumber)).toBe(null);
-      expect(getBlockExplorerUrl(4321234 as SupportedChainId, blockNumber)).toBe(null);
+      const blockNumber = 1_001;
+      expect(getBlockExplorerBlockUrl(anvil.id, blockNumber)).toBe(null);
+      expect(getBlockExplorerBlockUrl(4321234 as SupportedChainId, blockNumber)).toBe(null);
     });
   });
 });
-
-function getRandomArbitrary(min: number, max: number): number {
-  return Math.random() * (max - min) + min;
-}

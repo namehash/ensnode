@@ -16,7 +16,7 @@ export function GraphiQLWrapper({ endpoint }: GraphiQLWrapperProps) {
     endpoint === "subgraph"
       ? new URL("/subgraph", ensnodeUrl)
       : // TODO: update to `/ponder` when available
-        new URL("/", ensnodeUrl);
+      new URL("/", ensnodeUrl);
 
   const fetcher = createGraphiQLFetcher({ url: url.toString() });
 

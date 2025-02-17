@@ -2,8 +2,10 @@ import { formatDistanceToNow } from "date-fns";
 import { ExternalLink, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { getBlockExplorerUrl, getChainName, isSupportedChain } from "../utils/chains";
+
+import { getBlockExplorerBlockUrl, getChainName, isSupportedChain } from "../utils/chains";
 import { cn } from "../utils/ui";
+
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface AppContext {
@@ -155,7 +157,7 @@ export function About() {
             return null;
           }
 
-          const blockExplorerUrl = getBlockExplorerUrl(chainIdNum, chainStatus.block.number);
+          const blockExplorerUrl = getBlockExplorerBlockUrl(chainIdNum, chainStatus.block.number);
           const timestamp = new Date(chainStatus.block.timestamp * 1000);
 
           return (

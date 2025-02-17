@@ -12,8 +12,10 @@ export function ensNodeUrl(params: URLSearchParams): URL {
   const urlSearchParamName = "ensnode";
 
   try {
-    if (params.has(urlSearchParamName)) {
-      return new URL(params.get(urlSearchParamName)!.toString());
+    const rawUrlSearchParamName = params.get(urlSearchParamName);
+
+    if (rawUrlSearchParamName) {
+      return new URL(rawUrlSearchParamName.toString());
     }
   } catch {
     throw new Error(

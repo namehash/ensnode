@@ -19,7 +19,10 @@ export function getChainName(chainId: SupportedChainId): string {
   return chains[chainId as keyof typeof chains]?.name || `Chain ${chainId}`;
 }
 
-export function getBlockExplorerUrl(chainId: SupportedChainId, blockNumber: number): string | null {
+export function getBlockExplorerBlockUrl(
+  chainId: SupportedChainId,
+  blockNumber: number,
+): string | null {
   if (chainId === anvil.id) return null;
 
   const chain = chains[chainId];

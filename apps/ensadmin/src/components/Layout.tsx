@@ -1,7 +1,9 @@
 import { Code2, Database, Info } from "lucide-react";
 import type { PropsWithChildren } from "react";
 import { Link, useLocation } from "react-router-dom";
+
 import { cn } from "../utils/ui";
+
 import { URLEditor } from "./URLEditor";
 
 export function Layout({ children, ensnodeUrl }: PropsWithChildren<{ ensnodeUrl: URL }>) {
