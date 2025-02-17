@@ -4,8 +4,8 @@
   "private": true,
   "packageManager": "pnpm@9.12.0",
   "scripts": {
-    "lint": "biome check --write .",
-    "lint:ci": "biome ci",
+    "lint": "pnpm -r lint",
+    "lint:ci": "pnpm -r lint:ci",
     "changeset": "changeset"
   },
   "devDependencies": {
