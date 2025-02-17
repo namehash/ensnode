@@ -1,4 +1,4 @@
-import { join } from "path/posix";
+import { join } from "path";
 import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "./database";
 
