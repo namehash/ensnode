@@ -130,26 +130,17 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       logger.error(`Found ${invalidRecords} records with invalid hashes during processing`);
     }
 
-    // Store the count of rainbow records
-    await db.setRainbowRecordCount(processedRecords);
-    logger.info(`Updated rainbow record count in database: ${processedRecords}`);
-
-    // Verify the count matches what we stored
-    const storedCount = await db.getRainbowRecordCount();
-    if (storedCount !== processedRecords) {
-      logger.error(`Count mismatch: stored=${storedCount}, actual=${processedRecords}`);
-      throw new Error("Count verification failed");
-    }
+    // Run count as second phase to verify the number of unique records in the database.
+    // While processedRecords tells us how many records we ingested, we need to count
+    // the actual database entries to confirm how many unique label-labelhash pairs exist,
+    // as the input data could potentially contain duplicates.
+    logger.info("\nStarting rainbow record counting phase...");
+    await db.countRainbowRecords();
 
     // Clear the ingestion marker since we completed successfully
     await db.clearIngestionMarker();
 
     logger.info("Data ingestion and count verification complete!");
-  } catch (error) {
-    // If anything goes wrong, make sure to clear the ingestion marker
-    // so the database can be used again
-    await db.clearIngestionMarker();
-    throw error;
   } finally {
     await db.close();
   }

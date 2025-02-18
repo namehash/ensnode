@@ -56,7 +56,7 @@ export class ENSRainbowServer {
     }
 
     try {
-      const label = await this.db.safeGet(labelHashBytes);
+      const label = await this.db.get(labelHashBytes);
       if (label === null) {
         logger.info(`Unhealable labelhash request: ${labelhash}`);
         return {
@@ -83,7 +83,7 @@ export class ENSRainbowServer {
 
   async labelCount(): Promise<EnsRainbow.CountResponse> {
     try {
-      const countStr = await this.db.safeGet(LABELHASH_COUNT_KEY);
+      const countStr = await this.db.get(LABELHASH_COUNT_KEY);
       if (countStr === null) {
         return {
           status: StatusCode.Error,

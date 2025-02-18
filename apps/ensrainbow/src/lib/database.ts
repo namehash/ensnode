@@ -99,7 +99,7 @@ export class ENSRainbowDB {
    * @returns true if an ingestion is in progress, false otherwise
    */
   public async isIngestionInProgress(): Promise<boolean> {
-    const value = await this.safeGet(INGESTION_IN_PROGRESS_KEY);
+    const value = await this.get(INGESTION_IN_PROGRESS_KEY);
     return value !== null;
   }
 
@@ -164,7 +164,7 @@ export class ENSRainbowDB {
    * @throws Error if count is not found or is improperly formatted
    */
   public async getRainbowRecordCount(): Promise<number> {
-    const countStr = await this.safeGet(LABELHASH_COUNT_KEY);
+    const countStr = await this.get(LABELHASH_COUNT_KEY);
     if (countStr === null) {
       throw new Error("No count found in database");
     }
@@ -280,6 +280,35 @@ export class ENSRainbowDB {
   public async clear(): Promise<void> {
     await this.db.clear();
   }
+
+  public async countRainbowRecords(): Promise<void> {
+    // Try to read existing count
+    try {
+      const existingCount = await this.getRainbowRecordCount();
+      logger.warn(`Existing count in database: ${existingCount}`);
+    } catch (error) {
+      logger.info("No existing count found in database");
+    }
+
+    logger.info("Counting keys in database...");
+
+    let count = 0;
+    for await (const [key] of this.db.iterator()) {
+      // Skip keys not associated with rainbow records
+      if (
+        !byteArraysEqual(key, LABELHASH_COUNT_KEY) &&
+        !byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+      ) {
+        count++;
+      }
+    }
+
+    // Store the count
+    await this.setRainbowRecordCount(count);
+
+    logger.info(`Total number of keys (excluding count key): ${count}`);
+    logger.info(`Updated count in database under LABELHASH_COUNT_KEY`);
+  }
 }
 
 export function byteArraysEqual(a: ByteArray, b: ByteArray): boolean {
@@ -292,14 +321,14 @@ export function byteArraysEqual(a: ByteArray, b: ByteArray): boolean {
  * @returns The parsed non-negative integer, or null if invalid
  */
 export function parseNonNegativeInteger(maybeNumber: string): number | null {
-  const trimmed = input.trim();
+  const trimmed = maybeNumber.trim();
 
   // Early return for empty strings or -0
   if (!trimmed || trimmed === "-0") {
     return null;
   }
 
-  const num = Number(input);
+  const num = Number(maybeNumber);
 
   // Ensure it's a finite number, an integer, and non-negative
   if (Number.isFinite(num) && Number.isInteger(num) && num >= 0) {

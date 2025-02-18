@@ -175,7 +175,7 @@ describe("Database", () => {
         batch.put(labelHashBytes, labelWithNull);
         await batch.write();
 
-        const retrieved = await db.safeGet(labelHashBytes);
+        const retrieved = await db.get(labelHashBytes);
         expect(retrieved).toBe(labelWithNull);
       } finally {
         await db.close();

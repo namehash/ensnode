@@ -5,7 +5,7 @@ import yargs from "yargs/yargs";
 import { ingestCommand } from "./commands/ingest-command";
 import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
-import { getDataDir, getEnvPort } from "./lib/env";
+import { getDefaultDataSubDir, getEnvPort } from "./lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
@@ -54,7 +54,7 @@ export function createCLI(options: CLIOptions = {}) {
           .option("data-dir", {
             type: "string",
             description: "Directory to store LevelDB data",
-            default: getDataDir(),
+            default: getDefaultDataSubDir(),
           });
       },
       async (argv: ArgumentsCamelCase<IngestArgs>) => {
@@ -77,7 +77,7 @@ export function createCLI(options: CLIOptions = {}) {
           .option("data-dir", {
             type: "string",
             description: "Directory containing LevelDB data",
-            default: getDataDir(),
+            default: getDefaultDataSubDir(),
           });
       },
       async (argv: ArgumentsCamelCase<ServeArgs>) => {
@@ -95,7 +95,7 @@ export function createCLI(options: CLIOptions = {}) {
         return yargs.option("data-dir", {
           type: "string",
           description: "Directory containing LevelDB data",
-          default: getDataDir(),
+          default: getDefaultDataSubDir(),
         });
       },
       async (argv: ArgumentsCamelCase<ValidateArgs>) => {
