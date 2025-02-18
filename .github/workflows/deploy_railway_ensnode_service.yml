@@ -78,9 +78,6 @@ jobs:
               }
           }'`
           TAG=${{ env.TAG }}
-          echo "Before uppercase: ${TAG}"
-          TAG=${TAG^^}
-          echo ${After uppercase ${TAG}}
           VARIABLE_NAME=${TAG^^}_DATABASE_SCHEMA
           echo "Looking for: ${VARIABLE_NAME} environment variable"
           # Filter all env variables from response except one that is defining schema for specific deployment.
