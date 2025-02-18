@@ -60,10 +60,7 @@ describe("Server Command Tests", () => {
       const validLabelhash = labelhash(validLabel);
 
       // Add test data
-      const labelHashBytes = labelHashToBytes(validLabelhash);
-      const batch = db.batch();
-      batch.put(labelHashBytes, validLabel);
-      await batch.write();
+      await db.addRainbowRecord(validLabel);
 
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelhash}`);
       expect(response.status).toBe(200);

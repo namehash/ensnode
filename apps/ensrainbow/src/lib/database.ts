@@ -26,7 +26,10 @@ export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
 
 export class ENSRainbowDB {
-  private constructor(private readonly db: ENSRainbowLevelDB) {}
+  private constructor(
+    private readonly db: ENSRainbowLevelDB,
+    private readonly dataDir: string,
+  ) {}
 
   /**
    * Creates a new ENSRainbowDB instance with a fresh database.
@@ -43,16 +46,16 @@ export class ENSRainbowDB {
       });
       logger.info("Opening database...");
       await db.open();
-      return new ENSRainbowDB(db);
+      return new ENSRainbowDB(db, dataDir);
     } catch (error) {
       if (
         (error as any).code === "LEVEL_DATABASE_NOT_OPEN" &&
         (error as any).cause?.message?.includes("exists")
       ) {
         logger.error(`Database already exists at ${dataDir}`);
-        logger.error("If you want to use an existing database, use open() instead");
+        logger.error("If you want to use an existing database, omit ingestion step");
         logger.error(
-          "If you want to clear the existing database, use createDatabase with clearIfExists=true",
+          "If you want to start fresh with a new database, first remove the existing database directory",
         );
         throw new Error("Database already exists");
       } else {
@@ -77,11 +80,11 @@ export class ENSRainbowDB {
         errorIfExists: false,
       });
       await db.open();
-      return new ENSRainbowDB(db);
+      return new ENSRainbowDB(db, dataDir);
     } catch (error) {
       if (error instanceof Error && error.message.includes("does not exist")) {
         logger.error(`No database found at ${dataDir}`);
-        logger.error("If you want to create a new database, use create() instead");
+        logger.error("If you want to create a new database, start the ingestion step");
       } else if ((error as any).code === "LEVEL_LOCKED") {
         logger.error(`Database at ${dataDir} is locked - it may be in use by another process`);
         logger.error("Please ensure no other instances of the application are running");
@@ -156,6 +159,7 @@ export class ENSRainbowDB {
    * Closes the database connection.
    */
   public async close(): Promise<void> {
+    logger.info(`Closing database at ${this.dataDir}`);
     await this.db.close();
   }
 
@@ -166,12 +170,12 @@ export class ENSRainbowDB {
   public async getRainbowRecordCount(): Promise<number> {
     const countStr = await this.get(LABELHASH_COUNT_KEY);
     if (countStr === null) {
-      throw new Error("No count found in database");
+      throw new Error(`No count found in database at ${this.dataDir}`);
     }
 
     const count = parseNonNegativeInteger(countStr);
     if (count === null) {
-      throw new Error(`Invalid count value in database: ${countStr}`);
+      throw new Error(`Invalid count value in database at ${this.dataDir}: ${countStr}`);
     }
 
     return count;
@@ -308,6 +312,11 @@ export class ENSRainbowDB {
 
     logger.info(`Total number of keys (excluding count key): ${count}`);
     logger.info(`Updated count in database under LABELHASH_COUNT_KEY`);
+  }
+
+  public async addRainbowRecord(label: string) {
+    const key = labelHashToBytes(labelhash(label));
+    await this.db.put(key, label);
   }
 }
 
