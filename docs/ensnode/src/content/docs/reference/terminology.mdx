@@ -2,11 +2,11 @@
 title: Terminology
 ---
 
-New terminology (beyond the [official ENS glossary](https://docs.ens.domains/terminology)) has been needed in the course of building the ENS Multichain Indexer. The following should be understood as a draft that is open to community feedback. Each definition below aims to maximize alignment with the official ENS glossary where possible.
+New terminology (beyond the [official ENS glossary](https://docs.ens.domains/terminology)) has been needed in the course of building ENSNoe. The following should be understood as a draft that is open to community feedback. Each definition below aims to maximize alignment with the official ENS glossary where possible, and reduce instances where a piece of terminology may have multiple meanings in the context of the protocol.
 
 # Subregistry
 
-Any data structure outside of the [Registry](https://docs.ens.domains/terminology#registry) that manages supplemental state for a set of [subnames](https://docs.ens.domains/terminology#subname-subdomain). Each [name](https://docs.ens.domains/terminology#name) is associated with at least 1 subregistry (through the [Name Wrapper](https://docs.ens.domains/terminology#name-wrapper)) and may optionally be associated with multiple subregistries. When a name is associated with multiple subregistries, this means that the full state of a name must be combined across the Registry and each associated subregistry. For example, the state of all direct subnames of .eth is distributed across the Registry and two subregistries: the BaseRegistrar and the Name Wrapper. The ENS protocol does not currently define standards for subregistries. Subregistries currently exist outside the scope of the ENS protocol. For example, subregistries could live on L1, on L2s, or offchain (in a database or even in a Google Sheet). The ENS protocol currently provides no standardized mechanism to discover subregistries or to interact with subregistries.
+A **Subregistry** is any data structure outside of the [Registry](https://docs.ens.domains/terminology#registry) that manages supplemental state for a set of [subnames](https://docs.ens.domains/terminology#subname-subdomain). Each [name](https://docs.ens.domains/terminology#name) is associated with at least 1 subregistry (through the [Name Wrapper](https://docs.ens.domains/terminology#name-wrapper)) and may optionally be associated with multiple subregistries. When a name is associated with multiple subregistries, this means that the full state of a name must be combined across the Registry and each associated subregistry. For example, the state of all direct subnames of .eth is distributed across the Registry and two subregistries: the BaseRegistrar and the Name Wrapper. The ENS protocol does not currently define standards for subregistries: subregistries currently exist outside the scope of the ENS protocol. For example, subregistries could live on L1, on L2s, or offchain (in a database or even in a Google Sheet). The ENS protocol currently provides no standardized mechanism to discover subregistries or to interact with subregistries.
 
 Some specific implementations of subregistries include:
 
@@ -22,7 +22,7 @@ Some specific implementations of subregistries include:
 
 # Subregistrar
 
-Any system that is a [Registrar](https://docs.ens.domains/terminology#registrar) or that writes to a subregistry.
+A **Subregistrar** is any system that is a [Registrar](https://docs.ens.domains/terminology#registrar) or that writes to a subregistry.
 
 This definition expands the definition of Registrar to include cases such as:
 
@@ -34,9 +34,48 @@ This definition expands the definition of Registrar to include cases such as:
 
 # Shadow Registry
 
-A Subregistry meeting ALL of the following constraints:
+A **Shadow Registry** is a Subregistry meeting ALL of the following constraints:
 1. Not the Registry;
 2. Implemented as a smart contract exposing the same interface as the Registry;
 3. Used as part of the source of truth for a CCIP-Read Gateway Server for ENSIP-10 (wildcard resolution) powered subnames.
 
 A specific implementation of a Shadow Registry can be found in [this contract](https://github.com/base-org/basenames/blob/v1.0.4/src/L2/Registry.sol) storing a subset of the state of base.eth subnames on Base.
+
+# name, node, namehash
+
+A **name** is a human-readable string like `"vitalik.eth"`. A **name** may or may not be _normalized_. It is composed of many labels, and those lables may or may not be: _normalized_, _healed_, or _encoded_.
+
+The [`namehash`](https://docs.ens.domains/resolution/names#namehash) function computes a UUID 32-byte hash of a given **name**. If the name provided to `namehash` is not _normalized_ then the resulting **node** is considered _invalid_.
+
+> The node is a hex-encoded 32-byte value that is derived from the name using the namehash algorithm defined in ENSIP-1. [source](https://docs.ens.domains/resolution/names#namehash)
+
+For the _normalized_ name composed of _healed_ labels `vitalik.eth`, the **node** is `0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835`.
+
+https://docs.ens.domains/resolution/names#namehash
+
+# normalization
+
+> **Normalization** is process of canonicalizing a name before running it through the Namehash algorithm. [source](https://docs.ens.domains/resolution/names#normalize)
+
+# labelhash, label, healed label
+
+A **label** is a human-readable segment of a **name** — i.e. `vitalik` and `eth` are the **labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_, _healed_, or _encoded_.
+
+In the ENS protocol there is no guarantee that a registered name is _normalized_ and by default the **labels** that make up a **name** are entirely unknown (_un-healed_). In a **name** composed of some _un-healed_ labels—in order to differentiate between a _healed_ **label** potentially composed of hex characters and an _un-healed_ label's **labelhash**—the _un-healed_ **label**'s **labelhash** is _encoded_ in the **name**. Examples are likely helpful:
+
+- `vitalik.eth` — a _normalized_ **name** w/ _normalized_ & _healed_ labels
+- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth` — a **name** (of unknown _normalization_) w/ an _un-healed_ _encoded_ label (of unknown _normalization_).
+- `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22.eth` — a _normalized_ **name** w/ _normalized_ & _healed_ labels (that just so happens to be a set of 64 literal hex characters)
+
+In this terminology reference, we say that the **labelhash** of a **label** is the 32-byte hashed result of calling the **labelhash function** with that **label** as input.
+
+That is, `0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc` is the **labelhash** of `vitalik`, which is the result of calling the **labelhash function** like so:
+
+```ts
+import { labelhash as _labelhash } from 'viem';
+const labelhash = _labelhash("vitalik");
+```
+
+:::caution[Labelhash Terminology Outside of this Reference]
+Outside of this terminology reference & ENSNode, the word 'labelhash' may refer to either the function or the result of the function.
+:::
