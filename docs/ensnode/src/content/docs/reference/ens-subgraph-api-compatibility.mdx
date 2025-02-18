@@ -46,14 +46,12 @@ The following features of the subgraph graphql api are explicitly unsupported an
 ## Well-Known Queries
 
 ### from ensjs
-
 - [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — Gets the full name for a name with unknown labels from the subgraph
-  - Attempts to heal any encoded labels in a provided name using the subgraph
-  - If name is fully decoded, returns
+  - Heals encoded labels using the subgraph
+  - Returns if name is fully decoded
   - Splits name into labels
-  - For encoded labels, finds domains by id
+  - Finds domains by id for encoded labels
   - Queries domain by namehash
-  - In an ideal implementation, this would be a single domain query that handles healing internally
 - [`getNameHistory`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getNameHistory.ts)
   - Retrieves all events associated with a name
 - [`getNamesForAddress`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts)
