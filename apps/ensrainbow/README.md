@@ -222,7 +222,7 @@ pnpm get-legacy-data
 This command will:
 - Download the required files (rainbow tables, checksum, and license)
 - Automatically verify the checksum
-- Place the files in the correct location for ingestion
+- Place the files in a convenient directory for subsequent use of the ingest command
 
 ### Method 2: Manual Download
 
