@@ -211,7 +211,22 @@ All commands support these options:
 
 Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket.
 
-1. Download the original ENS rainbow tables:
+You can download the rainbow tables using either of these methods:
+
+### Method 1: Using the CLI Command (Recommended)
+
+```bash
+pnpm get-legacy-data
+```
+
+This command will:
+- Download the required files (rainbow tables, checksum, and license)
+- Automatically verify the checksum
+- Place the files in a convenient directory for subsequent use of the ingest command
+
+### Method 2: Manual Download
+
+If you prefer to download the files manually:
 
 ```bash
 # Download files
@@ -220,7 +235,7 @@ wget https://bucket.ensrainbow.io/ens_names.sql.gz.sha256sum
 wget https://bucket.ensrainbow.io/THE_GRAPH_LICENSE.txt
 ```
 
-2. Verify the checksum:
+Then verify the checksum:
 
 ```bash
 # Verify checksum
