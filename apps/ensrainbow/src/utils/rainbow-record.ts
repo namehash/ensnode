@@ -1,4 +1,4 @@
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
+import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import type { Labelhash } from "@ensnode/utils/types";
 import { ByteArray } from "viem";
 

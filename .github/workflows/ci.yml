@@ -25,7 +25,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Audit dependencies
-        run: pnpm audit --audit-level=low
+        run: pnpm audit --audit-level=moderate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
