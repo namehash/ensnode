@@ -43,7 +43,7 @@ jobs:
                 echo "SVC_ID="${{ secrets.SUBGRAPH_SVC_ID }} >> "$GITHUB_ENV"
                 ;;
               "feat/railway-ensnode-deployments")
-                echo "TAG=subgraph" >> $GITHUB_ENV
+                echo "TAG=alpha" >> $GITHUB_ENV
                 echo "SVC_ID="${{ secrets.SUBGRAPH_SVC_ID }} >> "$GITHUB_ENV"
                 ;;
               *)
