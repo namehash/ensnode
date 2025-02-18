@@ -92,8 +92,14 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.CountServerError;
       }
 
-      const count = parseNonNegativeInteger(countStr);
-      if (count === null) {
+      try {
+        const count = parseNonNegativeInteger(countStr);
+        return {
+          status: StatusCode.Success,
+          count,
+          timestamp: new Date().toISOString(),
+        } satisfies EnsRainbow.CountSuccess;
+      } catch (error) {
         logger.error(`Invalid label count value in database: ${countStr}`);
         return {
           status: StatusCode.Error,
@@ -101,12 +107,6 @@ export class ENSRainbowServer {
           errorCode: ErrorCode.ServerError,
         } satisfies EnsRainbow.CountServerError;
       }
-
-      return {
-        status: StatusCode.Success,
-        count,
-        timestamp: new Date().toISOString(),
-      } satisfies EnsRainbow.CountSuccess;
     } catch (error) {
       logger.error("Failed to retrieve label count:", error);
       return {

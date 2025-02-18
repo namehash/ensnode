@@ -13,13 +13,9 @@ export function getEnvPort(): number {
 
   try {
     const port = parseNonNegativeInteger(envPort);
-    if (port === null) {
-      throw new Error(`Invalid port number "${envPort}". Port must be a non-negative integer.`);
-    }
-
     return port;
   } catch (error: unknown) {
-    const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
+    const errorMessage = `Invalid PORT value "${envPort}": must be a non-negative integer`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }

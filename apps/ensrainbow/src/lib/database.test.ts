@@ -174,22 +174,24 @@ describe("parseNonNegativeInteger", () => {
     expect(parseNonNegativeInteger("1000000")).toBe(1000000);
   });
 
-  it("invalid inputs return null", () => {
+  it("invalid inputs throw errors", () => {
     // Non-integer numbers
-    expect(parseNonNegativeInteger("3.14")).toBeNull();
-    expect(parseNonNegativeInteger("0.5")).toBeNull();
+    expect(() => parseNonNegativeInteger("3.14")).toThrow("is not an integer");
+    expect(() => parseNonNegativeInteger("0.5")).toThrow("is not an integer");
 
     // Negative numbers
-    expect(parseNonNegativeInteger("-5")).toBeNull();
-    expect(parseNonNegativeInteger("-0")).toBeNull();
+    expect(() => parseNonNegativeInteger("-5")).toThrow("is not a non-negative integer");
+    expect(() => parseNonNegativeInteger("-0")).toThrow(
+      "Negative zero is not a valid non-negative integer",
+    );
 
     // Non-numeric strings
-    expect(parseNonNegativeInteger("abc")).toBeNull();
-    expect(parseNonNegativeInteger("")).toBeNull();
-    expect(parseNonNegativeInteger(" ")).toBeNull();
+    expect(() => parseNonNegativeInteger("abc")).toThrow("is not a valid number");
+    expect(() => parseNonNegativeInteger("")).toThrow("Input cannot be empty");
+    expect(() => parseNonNegativeInteger(" ")).toThrow("Input cannot be empty");
 
     // Mixed content
-    expect(parseNonNegativeInteger("42abc")).toBeNull();
-    expect(parseNonNegativeInteger("abc42")).toBeNull();
+    expect(() => parseNonNegativeInteger("42abc")).toThrow("is not a valid number");
+    expect(() => parseNonNegativeInteger("abc42")).toThrow("is not a valid number");
   });
 });

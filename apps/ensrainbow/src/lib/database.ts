@@ -117,13 +117,7 @@ export class ENSRainbowDB {
    * Clear the ingestion in progress marker
    */
   public async clearIngestionMarker(): Promise<void> {
-    try {
-      await this.db.del(INGESTION_IN_PROGRESS_KEY);
-    } catch (error) {
-      if ((error as any).code !== "LEVEL_NOT_FOUND") {
-        throw error;
-      }
-    }
+    await this.del(INGESTION_IN_PROGRESS_KEY);
   }
 
   /**
@@ -156,6 +150,27 @@ export class ENSRainbowDB {
   }
 
   /**
+   * Helper function to delete a key from the database.
+   * Returns true if the key existed and was deleted, false if the key did not exist.
+   * Throws an error for any database error other than key not found.
+   *
+   * @param key The ByteArray key to delete
+   * @returns boolean indicating if the key was deleted (true) or didn't exist (false)
+   * @throws Error if any database error occurs other than key not found
+   */
+  public async del(key: ByteArray): Promise<boolean> {
+    try {
+      await this.db.del(key);
+      return true;
+    } catch (error) {
+      if ((error as any).code === "LEVEL_NOT_FOUND") {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Closes the database connection.
    */
   public async close(): Promise<void> {
@@ -173,12 +188,12 @@ export class ENSRainbowDB {
       throw new Error(`No count found in database at ${this.dataDir}`);
     }
 
-    const count = parseNonNegativeInteger(countStr);
-    if (count === null) {
+    try {
+      const count = parseNonNegativeInteger(countStr);
+      return count;
+    } catch (error) {
       throw new Error(`Invalid count value in database at ${this.dataDir}: ${countStr}`);
     }
-
-    return count;
   }
 
   /**
@@ -327,22 +342,43 @@ export function byteArraysEqual(a: ByteArray, b: ByteArray): boolean {
 /**
  * Parses a string into a non-negative integer.
  * @param input The string to parse
- * @returns The parsed non-negative integer, or null if invalid
+ * @returns The parsed non-negative integer
+ * @throws Error if the input is not a valid non-negative integer
  */
-export function parseNonNegativeInteger(maybeNumber: string): number | null {
+export function parseNonNegativeInteger(maybeNumber: string): number {
   const trimmed = maybeNumber.trim();
 
-  // Early return for empty strings or -0
-  if (!trimmed || trimmed === "-0") {
-    return null;
+  // Check for empty strings
+  if (!trimmed) {
+    throw new Error("Input cannot be empty");
+  }
+
+  // Check for -0
+  if (trimmed === "-0") {
+    throw new Error("Negative zero is not a valid non-negative integer");
   }
 
   const num = Number(maybeNumber);
 
-  // Ensure it's a finite number, an integer, and non-negative
-  if (Number.isFinite(num) && Number.isInteger(num) && num >= 0) {
-    return num;
+  // Check if it's not a number
+  if (Number.isNaN(num)) {
+    throw new Error(`"${maybeNumber}" is not a valid number`);
   }
 
-  return null; // Return null if invalid
+  // Check if it's not finite
+  if (!Number.isFinite(num)) {
+    throw new Error(`"${maybeNumber}" is not a finite number`);
+  }
+
+  // Check if it's not an integer
+  if (!Number.isInteger(num)) {
+    throw new Error(`"${maybeNumber}" is not an integer`);
+  }
+
+  // Check if it's negative
+  if (num < 0) {
+    throw new Error(`"${maybeNumber}" is not a non-negative integer`);
+  }
+
+  return num;
 }
