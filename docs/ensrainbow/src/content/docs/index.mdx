@@ -17,7 +17,8 @@ hero:
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import BarChart from "../../components/BarChart.tsx";
 
-<BarChart
+
+<BarChart client:load
     data={[
         {
             label: 'ENS Subgraph',
@@ -26,7 +27,7 @@ import BarChart from "../../components/BarChart.tsx";
         },
         {
             label: 'ENSRainbow & ENSNode',
-            value: 70,
+            value: 68,
             color: '#ec4899', // Pink color
         },
         {

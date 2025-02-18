@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+// import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
 interface BarChartData {
     label: string;
@@ -14,18 +15,39 @@ interface BarChartProps {
 }
 
 export default function BarChart({
-                                     data,
-                                     title,
-                                     subtitle,
-                                     footnote,
-                                 }: BarChartProps) {
-    const maxValue = Math.max(...data.map((item: BarChartData) => item.value));
+                                           data,
+                                           title,
+                                           subtitle,
+                                           footnote,
+                                       }: BarChartProps) {
+
+    const [maxValue, setMaxValue] = useState(Math.max(...data.map((item: BarChartData) => item.value)));
+
+    // useEffect(() => {
+    //     // React advises to declare the async function directly inside useEffect
+    //     async function getCount() {
+    //         const client = new EnsRainbowApiClient(); //TODO: figure out CORS problems with using the ensrainbow-sdk
+    //         const response = await client.count();
+    //
+    //         return response.count;
+    //     }
+    //         getCount().then((result) => {
+    //             data.push({
+    //                 label: "True Client",
+    //                 value: result,
+    //                 color: "#32a852"
+    //             } as BarChartData);
+    //
+    //             console.log(result);
+    //
+    //             setMaxValue(Math.max(...data.map((item: BarChartData) => item.value)));
+    //         });
+    // }, []);
 
     return (
         <div
             style={{
                 padding: '1.5rem',
-                backgroundColor: 'white',
                 borderRadius: '0.5rem',
             }}
         >
@@ -41,14 +63,14 @@ export default function BarChart({
                 </h2>
             )}
             {subtitle && (
-                <p style={{ color: '#666', marginBottom: '1.5rem' }}>{subtitle}</p>
+                <p style={{color: '#666', marginBottom: '1.5rem'}}>{subtitle}</p>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '1.5rem'}}>
                 {data.map((item: BarChartData, index: number) => (
                     <div
                         key={index}
-                        style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                        style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}
                     >
                         <div
                             style={{
@@ -57,7 +79,7 @@ export default function BarChart({
                                 alignItems: 'center',
                             }}
                         >
-                            <span style={{ fontWeight: '500' }}>{item.label}</span>
+                            <span style={{fontWeight: '500'}}>{item.label}</span>
                         </div>
                         <div
                             style={{
