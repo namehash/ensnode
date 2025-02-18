@@ -89,12 +89,16 @@ jobs:
       #TODO FOR NOW JUST REPLACE github.sha. EXTEND LOGIC IN FUTURE
       - name: Update Railway schema variable
         # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
-        if: env.RAILWAY_SCHEMA !== ${{ github.sha }}
+        if:  !== 
         run: |
           # Sending Railway API request to update specifc shared variable
+          if[[ ${{env.RAILWAY_SCHEMA}} != ${{ github.sha }}]]; then
           curl --request POST \
               --silent \
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
               --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ github.sha }}\" }) }"}'
+          else
+          echo "Skipping deployment since schema did not changed"
+          fi
