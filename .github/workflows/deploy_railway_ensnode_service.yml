@@ -89,7 +89,7 @@ jobs:
       #TODO FOR NOW JUST REPLACE github.sha. EXTEND LOGIC IN FUTURE
       - name: Update Railway schema variable
         # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
-        if: env.RAILWAY_SCHEMA != ${{ github.sha }}
+        if: env.RAILWAY_SCHEMA !== ${{ github.sha }}
         run: |
           # Sending Railway API request to update specifc shared variable
           curl --request POST \
