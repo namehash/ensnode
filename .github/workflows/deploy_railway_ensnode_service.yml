@@ -58,9 +58,6 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker build -f apps/ensnode/Dockerfile -t $IMAGE_NAME:$TAG .
           docker push $IMAGE_NAME:$TAG
-          DOCKER_IMAGE_ID=`docker inspect --format={{.ID}} $IMAGE_NAME:$TAG`
-          echo "DOCKER_IMAGE_ID=$DOCKER_IMAGE_ID" >> "$GITHUB_ENV"
-
 
       - name: Determine Railway variable to be updated
         run: |
@@ -89,10 +86,10 @@ jobs:
           echo "RAILWAY_SCHEMA=$RAILWAY_SCHEMA" >> "$GITHUB_ENV"
           
 
-      #TODO FOR NOW JUST REPLACE DOCKER IMAGE ID. EXTEND LOGIC IN FUTURE
+      #TODO FOR NOW JUST REPLACE github.sha. EXTEND LOGIC IN FUTURE
       - name: Update Railway schema variable
         # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
-        if: env.RAILWAY_SCHEMA != env.DOCKER_IMAGE_ID
+        if: env.RAILWAY_SCHEMA != ${{ github.sha }}
         run: |
           # Sending Railway API request to update specifc shared variable
           curl --request POST \
@@ -100,4 +97,4 @@ jobs:
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ env.DOCKER_IMAGE_ID }}\" }) }"}'
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ github.sha }}\" }) }"}'
