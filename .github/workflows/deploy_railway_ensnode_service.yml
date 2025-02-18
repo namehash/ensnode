@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      # Token for redeploy. Seems lika a bug in Railway ..
+      RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
     steps:
@@ -104,9 +106,9 @@ jobs:
           curl --request POST \
               --silent \
               --url https://backboard.railway.app/graphql/v2 \
-              --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TEAM_TOKEN }}\
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation deploymentRestart  { deploymentRestart (id: \"'${{ env.SVC_ID }}'\") }"}'
+              --data '{"query":"mutation serviceInstanceDeploy($serviceId: String!, $environmentId: String!) { serviceInstanceDeploy(serviceId: $serviceId, environmentId: $environmentId) }","variables":{"environmentId":"'${{ env.RAILWAY_ENVIRONMENT_ID }}'","serviceId":"'${{ env.SVC_ID }}'"}}'
           else
           echo "Skipping deployment since schema did not changed"
           fi
