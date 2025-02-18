@@ -106,7 +106,7 @@ jobs:
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation deploymentRestart  { deploymentRestart (input: { id: \"'${{ env.SVC_ID }}'\" }) }"}'
+              --data '{"query": "mutation deploymentRestart  { deploymentRestart (id: \"'${{ env.SVC_ID }}'\") }"}'
           else
           echo "Skipping deployment since schema did not changed"
           fi
