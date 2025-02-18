@@ -14,6 +14,10 @@ on:
 jobs:
   image-build-and-push:
     runs-on: ubuntu-latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,7 +28,7 @@ jobs:
       # We need to recognize which branch had an incoming push
       # Based on that create Docker image with corresponding label - use TAG variable for this
       # For alpha/subgraph TAG we need also to specify corresponding Railway SVC_ID which is used for service redeployment
-      - id: determine_tag
+      - name: Determine Docker image tag
         run: |
             case "$BRANCH" in
               "main")
@@ -57,12 +61,15 @@ jobs:
           DOCKER_IMAGE_ID=`docker inspect --format={{.ID}} $IMAGE_NAME:$TAG`
           echo "DOCKER_IMAGE_ID=$DOCKER_IMAGE_ID" >> "$GITHUB_ENV"
 
-      - name: Deploy if necessary
-        if:   env.SVC_ID != '' 
-        env:
-            RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-            RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-            RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
+
+      - name: Determine Railway variable to be updated
+        run: |
+          TAG=${{ env.TAG }}
+          VARIABLE_NAME=${TAG^^}_DATABASE_SCHEMA
+          echo "Looking for: ${VARIABLE_NAME} environment variable"
+          echo "VARIABLE_NAME=$VARIABLE_NAME" >> "$GITHUB_ENV"
+      
+      - name: Get current Railway schema
         run: |
           # Send Railway API request to get all shared variables. We need those to check if we really need to redeploy.
           API_RESPONSE=`curl --request POST \
@@ -77,14 +84,16 @@ jobs:
                 "environmentId": "'${{ env.RAILWAY_ENVIRONMENT_ID }}'"
               }
           }'`
-          TAG=${{ env.TAG }}
-          VARIABLE_NAME=${TAG^^}_DATABASE_SCHEMA
-          echo "Looking for: ${VARIABLE_NAME} environment variable"
           # Filter all env variables from response except one that is defining schema for specific deployment.
-          CURRENT_SCHEMA=`${API_RESPONSE} | jq '.data.variables.'${VARIABLE_NAME}`
-          #TODO FOR NOW JUST REPLACE DOCKER IMAGE ID. EXTEND LOGIC IN FUTURE
-          # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
-          if [[ "$CURRENT_SCHEMA" != "${{ env.DOCKER_IMAGE_ID }}" ]]; then
+          RAILWAY_SCHEMA=`${API_RESPONSE} | jq '.data.variables.'${VARIABLE_NAME}`
+          echo "RAILWAY_SCHEMA=$RAILWAY_SCHEMA" >> "$GITHUB_ENV"
+          
+
+      #TODO FOR NOW JUST REPLACE DOCKER IMAGE ID. EXTEND LOGIC IN FUTURE
+      - name: Get current schema from Railway
+        # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
+        if: env.RAILWAY_SCHEMA != env.DOCKER_IMAGE_ID
+        run: |
           # Sending Railway API request to update specifc shared variable
           curl --request POST \
               --silent \
@@ -92,9 +101,3 @@ jobs:
               --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
               --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ env.DOCKER_IMAGE_ID }}\" }) }"}'
-          else
-              echo "Skipping environment variable update. No new deployment needed"
-          fi
-
-          
-            
