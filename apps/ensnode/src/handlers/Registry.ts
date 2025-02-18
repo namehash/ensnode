@@ -11,33 +11,22 @@ import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
 
 /**
- * Initialize the ENS root node with the zeroAddress as the owner.
- * Any permutation of plugins might be activated (except no plugins activated)
- * and multiple plugins expect the ENS root to exist. This behavior is
- * consistent with the ens-subgraph, which initializes the ENS root node in
- * the same way. However, the ens-subgraph does not have independent plugins.
- * In our case, we have multiple plugins that might be activated independently.
- * Regardless of the permutation of active plugins, they all expect
- * the ENS root to exist.
+ * Initializes the ENS root node with the zeroAddress as the owner.
  *
- * This function should be used as the setup event handler for registry
- * (or shadow registry) contracts.
+ * NOTE: Any permutation of plugins might be activated (except no plugins activated) and multiple
+ * (i.e. every) plugin expects the ENS root to exist. To ensure that the ENS root domain exists
+ * in every possible permutation of plugin activation, this function should be used as the setup
+ * event handler for registry (or shadow registry) contracts. In the case there are multiple plugins
+ * activated, this means `setupRootNode` will be executed multiple times and should therefore be
+ * entirely idempotent (i.e. with `.onConflictDoNothing()`).
  * https://ponder.sh/docs/api-reference/indexing-functions#setup-event
- * In case there are multiple plugins activated, `setupRootNode` will be
- * executed multiple times. The order of execution of `setupRootNode` is
- * deterministic based on the reverse order of the network names of the given
- * contracts associated with the activated plugins. For example,
- * if the network names were: `base`, `linea`, `mainnet`, the order of execution
- * will be: `mainnet`, `linea`, `base`.
- * And if the network names were: `base`, `ethereum`, `linea`, the order of
- * execution will be: `linea`, `ethereum`, `base`.
  */
 export async function setupRootNode({ context }: { context: Context }) {
   // Each domain must reference an account of its owner,
   // so we ensure the account exists before inserting the domain
   await upsertAccount(context, zeroAddress);
 
-  // initialize the ENS root to be owned by the zeroAddress and not migrated
+  // create the ENS root domain (if not exists)
   await context.db
     .insert(schema.domain)
     .values({
@@ -51,17 +40,18 @@ export async function setupRootNode({ context }: { context: Context }) {
       //    is a reasonable behavior
       isMigrated: true,
     })
-    // only insert the domain entity into the database if it doesn't already exist
     .onConflictDoNothing();
 }
 
+// a domain is 'empty' if it has no resolver, no owner, and no subdomains
+// via https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L65
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
   return (
     domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
   );
 }
 
-// a more accurate name for the following function
+// a more accurate name for 'recurseDomainDelete'
 // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64
 async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
@@ -78,6 +68,11 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
   }
 }
 
+/**
+ * makes a set of shared handlers for a Registry contract that manages `ownedName`
+ *
+ * @param ownedName the name that the Registry contract manages subnames of
+ */
 export const makeRegistryHandlers = (ownedName: OwnedName) => {
   const sharedEventValues = createSharedEventValues(ownedName);
 
@@ -148,7 +143,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         }
 
         // garbage collect newly 'empty' domain iff necessary
-        // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
+        // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
           await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
         }
@@ -174,8 +169,6 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
     }) {
       const { node, owner } = event.args;
 
-      // Each domain must reference an account of its owner,
-      // so we ensure the account exists before inserting the domain
       await upsertAccount(context, owner);
 
       // ensure domain & update owner
@@ -209,9 +202,10 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
     }) {
       const { node, ttl } = event.args;
 
-      // TODO: handle the edge case in which the domain no longer exists?
-      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L215
-      // NOTE: i'm not sure this needs to be here, as domains are never deleted (??)
+      // NOTE: the subgraph handles the case where the domain no longer exists, but domains are
+      // never deleted, so we avoid implementing that check here
+      // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L215
+
       await context.db.update(schema.domain, { id: node }).set({ ttl });
 
       // log DomainEvent
@@ -237,7 +231,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       const resolverId = makeResolverId(resolverAddress, node);
 
       // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
-      // NOTE: old resolver resources are kept for event logs
+      // NOTE: Resolver records are never deleted
       if (resolverAddress === zeroAddress) {
         await context.db
           .update(schema.domain, { id: node })
@@ -255,7 +249,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
         // update the domain to point to it, and denormalize the eth addr
         // NOTE: this implements the logic as documented here
-        // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
+        // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
         await context.db
           .update(schema.domain, { id: node })
           .set({ resolverId, resolvedAddressId: resolver.addrId });
