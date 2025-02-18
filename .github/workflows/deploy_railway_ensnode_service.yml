@@ -103,7 +103,6 @@ jobs:
           # Sending Railway API request to redeploy service
           curl --request POST \
               --silent \
-              --fail \
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
