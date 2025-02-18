@@ -132,7 +132,7 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Helper function to safely get a value from the database.
+   * Helper function to get a value from the database.
    * Returns null if the key is not found.
    * Throws an error for any other database error.
    *
@@ -140,7 +140,7 @@ export class ENSRainbowDB {
    * @returns The value as a string if found, null if not found
    * @throws Error if any database error occurs other than key not found
    */
-  public async safeGet(key: ByteArray): Promise<string | null> {
+  public async get(key: ByteArray): Promise<string | null> {
     try {
       const value = await this.db.get(key);
       return value;
@@ -291,7 +291,7 @@ export function byteArraysEqual(a: ByteArray, b: ByteArray): boolean {
  * @param input The string to parse
  * @returns The parsed non-negative integer, or null if invalid
  */
-export function parseNonNegativeInteger(input: string): number | null {
+export function parseNonNegativeInteger(maybeNumber: string): number | null {
   const trimmed = input.trim();
 
   // Early return for empty strings or -0

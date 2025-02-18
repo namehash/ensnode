@@ -2,7 +2,7 @@ import { join } from "path";
 import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "./database";
 
-export const getDataDir = () => join(process.cwd(), "data");
+export const getDefaultDataSubDir = () => join(process.cwd(), "data");
 
 export const DEFAULT_PORT = 3223;
 export function getEnvPort(): number {
