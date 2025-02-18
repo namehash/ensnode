@@ -164,10 +164,6 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
             ownerId: owner,
           })
           .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
-
-        // forcibly flushes the ponder cache
-        // TODO: remove this after confirmation from ponder team re: cache behavior
-        await context.db.sql.execute("SELECT 1");
       },
     async handleTransfer({
       context,
