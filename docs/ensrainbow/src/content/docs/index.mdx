@@ -15,10 +15,35 @@ hero:
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+import BarChart from "../../components/BarChart.tsx";
+
+<BarChart
+    data={[
+        {
+            label: 'ENS Subgraph',
+            value: 30,
+            color: '#f87171', // Red color
+        },
+        {
+            label: 'ENSRainbow & ENSNode',
+            value: 70,
+            color: '#ec4899', // Pink color
+        },
+        {
+            label: 'Total unknown labels',
+            value: 100,
+            color: '#818cf8', // Purple color
+        },
+    ]}
+    title="Benchmarks"
+    subtitle="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    footnote="*In the ENS Registry on Ethereum Mainnet as of 13 Feb, 2025."
+/>
 
 ## Next steps
 
 <CardGrid stagger>
+    <Card title="testing">testing</Card>
 	<Card title="Update content" icon="pencil">
 		Edit `src/content/docs/index.mdx` to see this page change.
 	</Card>
