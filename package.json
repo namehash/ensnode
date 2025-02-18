@@ -4,8 +4,8 @@
   "private": true,
   "packageManager": "pnpm@9.12.0",
   "scripts": {
-    "lint": "biome check --write .",
-    "lint:ci": "biome ci",
+    "lint": "pnpm -r lint",
+    "lint:ci": "pnpm -r lint:ci",
     "changeset": "changeset",
     "release": "changeset publish",
     "packages:build": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/shared-configs\" build"
@@ -21,7 +21,10 @@
   },
   "pnpm": {
     "overrides": {
-      "ponder>vite": "5.4.14"
+      "ponder>vite": "5.4.14",
+      "astro>esbuild": "0.25.0",
+      "tsx>esbuild": "0.25.0",
+      "vite>esbuild": "0.25.0"
     }
   }
 }

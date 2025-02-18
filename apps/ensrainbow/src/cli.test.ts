@@ -123,7 +123,7 @@ describe("CLI", () => {
       });
 
       it("should respect PORT environment variable", async () => {
-        const customPort = 5000;
+        const customPort = 5115;
         process.env.PORT = customPort.toString();
 
         // First ingest some test data

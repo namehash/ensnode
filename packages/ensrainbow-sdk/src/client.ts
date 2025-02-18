@@ -24,60 +24,83 @@ export namespace EnsRainbow {
     status: "ok";
   }
 
-  interface BaseHealResponse<Status extends StatusCode> {
+  export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
     status: Status;
-    label?: string | undefined;
-    error?: string | undefined;
-    errorCode?: ErrorCode | undefined;
+    label?: string | never;
+    error?: string | never;
+    errorCode?: Error | never;
   }
 
-  export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success> {
+  export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success, never> {
     status: typeof StatusCode.Success;
     label: string;
-    error?: undefined;
-    errorCode?: undefined;
+    error?: never;
+    errorCode?: never;
   }
 
-  export interface HealError extends BaseHealResponse<typeof StatusCode.Error> {
+  export interface HealNotFoundError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.NotFound> {
     status: typeof StatusCode.Error;
-    label?: undefined;
+    label?: never;
     error: string;
-    errorCode: ErrorCode;
+    errorCode: typeof ErrorCode.NotFound;
   }
 
-  export type HealResponse = HealSuccess | HealError;
-
-  interface BaseCountResponse<Status extends StatusCode> {
-    status: Status;
-    count?: number | undefined;
-    timestamp?: string | undefined;
-    error?: string | undefined;
-    errorCode?: ErrorCode | undefined;
-  }
-
-  export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success> {
-    status: typeof StatusCode.Success;
-    /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
-    count: number;
-    timestamp: string;
-    error?: undefined;
-    errorCode?: undefined;
-  }
-
-  export interface CountError extends BaseCountResponse<typeof StatusCode.Error> {
+  export interface HealServerError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
     status: typeof StatusCode.Error;
-    count?: undefined;
-    timestamp?: undefined;
+    label?: never;
     error: string;
-    errorCode: ErrorCode;
+    errorCode: typeof ErrorCode.ServerError;
   }
 
-  export type CountResponse = CountSuccess | CountError;
+  export interface HealBadRequestError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.BadRequest> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.BadRequest;
+  }
+
+  export type HealResponse =
+    | HealSuccess
+    | HealNotFoundError
+    | HealServerError
+    | HealBadRequestError;
+  export type HealError = Exclude<HealResponse, HealSuccess>;
 
   /**
    * Server errors should not be cached.
    */
-  export type CacheableHealResponse = Exclude<HealResponse, HealError>;
+  export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
+
+  export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
+    status: Status;
+    count?: number | never;
+    timestamp?: string | never;
+    error?: string | never;
+    errorCode?: Error | never;
+  }
+
+  export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success, never> {
+    status: typeof StatusCode.Success;
+    /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
+    count: number;
+    timestamp: string;
+    error?: never;
+    errorCode?: never;
+  }
+
+  export interface CountServerError
+    extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.ServerError> {
+    status: typeof StatusCode.Error;
+    count?: never;
+    timestamp?: never;
+    error: string;
+    errorCode: typeof ErrorCode.ServerError;
+  }
+
+  export type CountResponse = CountSuccess | CountServerError;
 }
 
 export interface EnsRainbowApiClientOptions {
@@ -195,12 +218,46 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return healResponse;
   }
 
+  /**
+   * Get Count of Healable Labels
+   *
+   * @returns a `CountResponse` indicating the result and the timestamp of the request and the number of healable labels if successful
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
+   *
+   * @example
+   *
+   * const response = await client.count();
+   *
+   * console.log(response);
+   *
+   * // {
+   * //   "status": "success",
+   * //   "count": 133856894,
+   * //   "timestamp": "2024-01-30T11:18:56Z"
+   * // }
+   *
+   */
   async count(): Promise<EnsRainbow.CountResponse> {
     const response = await fetch(new URL("/v1/labels/count", this.options.endpointUrl));
 
     return response.json() as Promise<EnsRainbow.CountResponse>;
   }
 
+  /**
+   *
+   * Simple verification that the service is running, either in your local setup or for the provided hosted instance
+   *
+   * @returns a status of ENS Rainbow service
+   * @example
+   *
+   * const response = await client.health();
+   *
+   * console.log(response);
+   *
+   * // {
+   * //   "status": "ok",
+   * // }
+   */
   async health(): Promise<EnsRainbow.HealthResponse> {
     const response = await fetch(new URL("/health", this.options.endpointUrl));
 

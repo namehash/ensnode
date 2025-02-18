@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { EnsRainbow, EnsRainbowApiClient, EnsRainbowApiClientOptions } from "./client";
+import {
+  type EnsRainbow,
+  EnsRainbowApiClient,
+  EnsRainbowApiClientOptions,
+  isCacheableHealResponse,
+  isHealError,
+} from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
 describe("EnsRainbowApiClient", () => {
@@ -49,7 +55,7 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Error,
       error: "Label not found",
       errorCode: ErrorCode.NotFound,
-    } satisfies EnsRainbow.HealError);
+    } satisfies EnsRainbow.HealNotFoundError);
   });
 
   it("should return a bad request error for an invalid labelhash", async () => {
@@ -59,6 +65,105 @@ describe("EnsRainbowApiClient", () => {
       status: StatusCode.Error,
       error: "Invalid labelhash length 9 characters (expected 66)",
       errorCode: ErrorCode.BadRequest,
-    } satisfies EnsRainbow.HealError);
+    } satisfies EnsRainbow.HealBadRequestError);
+  });
+
+  it("should return a count of healable labels", async () => {
+    const response = await client.count();
+
+    expect(response satisfies EnsRainbow.CountResponse).toBeTruthy();
+    expect(response.status).toEqual(StatusCode.Success);
+    expect(typeof response.count === "number").toBeTruthy();
+    expect(typeof response.timestamp === "string").toBeTruthy();
+  });
+
+  it("should return a positive health check", async () => {
+    const response = await client.health();
+
+    expect(response).toEqual({
+      status: "ok",
+    } satisfies EnsRainbow.HealthResponse);
+  });
+});
+
+describe("HealResponse error detection", () => {
+  it("should not consider HealSuccess responses to be errors", async () => {
+    const response: EnsRainbow.HealSuccess = {
+      status: StatusCode.Success,
+      label: "vitalik",
+    };
+
+    expect(isHealError(response)).toBe(false);
+  });
+
+  it("should consider HealNotFoundError responses to be errors", async () => {
+    const response: EnsRainbow.HealNotFoundError = {
+      status: StatusCode.Error,
+      error: "Not found",
+      errorCode: ErrorCode.NotFound,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+
+  it("should consider HealBadRequestError responses to be errors", async () => {
+    const response: EnsRainbow.HealBadRequestError = {
+      status: StatusCode.Error,
+      error: "Bad request",
+      errorCode: ErrorCode.BadRequest,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+
+  it("should consider HealServerError responses to be errors", async () => {
+    const response: EnsRainbow.HealServerError = {
+      status: StatusCode.Error,
+      error: "Server error",
+      errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+});
+
+describe("HealResponse cacheability", () => {
+  it("should consider HealSuccess responses cacheable", async () => {
+    const response: EnsRainbow.HealSuccess = {
+      status: StatusCode.Success,
+      label: "vitalik",
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(true);
+  });
+
+  it("should consider HealNotFoundError responses cacheable", async () => {
+    const response: EnsRainbow.HealNotFoundError = {
+      status: StatusCode.Error,
+      error: "Not found",
+      errorCode: ErrorCode.NotFound,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(true);
+  });
+
+  it("should consider HealBadRequestError responses cacheable", async () => {
+    const response: EnsRainbow.HealBadRequestError = {
+      status: StatusCode.Error,
+      error: "Bad request",
+      errorCode: ErrorCode.BadRequest,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(true);
+  });
+
+  it("should consider HealServerError responses not cacheable", async () => {
+    const response: EnsRainbow.HealServerError = {
+      status: StatusCode.Error,
+      error: "Server error",
+      errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
   });
 });

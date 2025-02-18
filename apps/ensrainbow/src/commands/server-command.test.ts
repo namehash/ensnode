@@ -127,7 +127,7 @@ describe("Server Command Tests", () => {
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
       expect(response.status).toBe(500);
       const data = (await response.json()) as EnsRainbow.CountResponse;
-      const expectedData: EnsRainbow.CountError = {
+      const expectedData: EnsRainbow.CountServerError = {
         status: StatusCode.Error,
         error: "Label count not initialized. Check that the ingest command has been run.",
         errorCode: ErrorCode.ServerError,
@@ -149,6 +149,37 @@ describe("Server Command Tests", () => {
       };
       expect(data).toEqual(expectedData);
       expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
+    });
+  });
+
+  describe("CORS headers for /v1/* routes", () => {
+    it("should return CORS headers for /v1/* routes", async () => {
+      const validLabel = "test-label";
+      const validLabelhash = labelhash(validLabel);
+
+      // Add test data
+      const labelHashBytes = labelHashToBytes(validLabelhash);
+      await db.put(labelHashBytes, validLabel);
+
+      const responses = await Promise.all([
+        fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelhash}`, {
+          method: "OPTIONS",
+        }),
+        fetch(`http://localhost:${nonDefaultPort}/v1/heal/0xinvalidlabelhash`, {
+          method: "OPTIONS",
+        }),
+        fetch(`http://localhost:${nonDefaultPort}/v1/not-found`, {
+          method: "OPTIONS",
+        }),
+        fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`, {
+          method: "OPTIONS",
+        }),
+      ]);
+
+      for (const response of responses) {
+        expect(response.headers.get("access-control-allow-origin")).toBe("*");
+        expect(response.headers.get("access-control-allow-methods")).toBe("HEAD,GET,OPTIONS");
+      }
     });
   });
 });
