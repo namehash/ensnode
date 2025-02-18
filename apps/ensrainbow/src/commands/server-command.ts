@@ -2,7 +2,8 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
-import { ENSRainbowDB, ensureIngestionNotIncomplete, openDatabase } from "../lib/database";
+import { cors } from "hono/cors";
+import { ENSRainbowDB, openDatabase } from "../lib/database";
 import { ENSRainbowServer } from "../lib/server";
 import { logger } from "../utils/logger";
 
@@ -19,6 +20,17 @@ export const DEFAULT_PORT = 3223;
 export async function createServer(db: ENSRainbowDB): Promise<Hono> {
   const app = new Hono();
   const rainbow = await ENSRainbowServer.init(db);
+
+  // Enable CORS for all versioned API routes
+  app.use(
+    "/v1/*",
+    cors({
+      // Allow all origins
+      origin: "*",
+      // ENSRainbow API is read-only, so only allow read methods
+      allowMethods: ["HEAD", "GET", "OPTIONS"],
+    }),
+  );
 
   app.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     const labelhash = c.req.param("labelhash") as `0x${string}`;
