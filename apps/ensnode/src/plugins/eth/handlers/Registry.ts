@@ -5,7 +5,12 @@ import { type Hex } from "viem";
 import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
-// a domain is migrated iff it exists and isMigrated is set to true, otherwise it is not
+// NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
+// contract. When indexing events, the indexer ignores any events on the old regsitry for domains
+// that have been interacted with on the new registry. We encode this logic here, ignoring
+// RegistryOld events when the domain in question has already been registered in the Registry.
+
+// a domain is migrated if it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
   return domain?.isMigrated ?? false;

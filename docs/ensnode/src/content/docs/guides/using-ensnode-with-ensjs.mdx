@@ -1,0 +1,32 @@
+---
+title: Using ENSNode with ensjs
+sidebar:
+  order: 2
+---
+
+To use ENSNode with `ensjs`, follow the [ensjs documentation for custom subgraph URIs](https://github.com/ensdomains/ensjs/blob/main/docs/basics/custom-subgraph-uris.md), replacing the subgraph uri with your ENSNode's subgraph-compatible api endpoint.
+
+```ts
+import { http, createClient } from 'viem'
+import { mainnet } from 'viem/chains'
+import { addEnsContracts } from '@ensdomains/ensjs'
+import { getSubgraphRecords } from '@ensdomains/ensjs/subgraph'
+
+const mainnetWithEns = addEnsContracts(mainnet)
+
+const chain = {
+  ...mainnetWithEns,
+  subgraphs: {
+    ens: {
+      url: 'http://localhost:42069/subgraph',
+    },
+  },
+}
+
+const client = createClient({
+  chain,
+  transport: http(),
+})
+
+const subgraphRecords = await getSubgraphRecords(client, { name: 'ens.eth' })
+```

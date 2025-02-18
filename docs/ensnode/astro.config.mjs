@@ -12,13 +12,7 @@ export default defineConfig({
       sidebar: [
         {
           label: "Guides",
-          items: [
-            // Each item here is one entry in the navigation menu.
-            {
-              label: "Querying best practices",
-              slug: "guides/querying-best-practices",
-            },
-          ],
+          autogenerate: { directory: "guides" },
         },
         {
           label: "Reference",

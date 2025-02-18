@@ -91,3 +91,13 @@ It should also filter out any labels that are not indexable
 - or other invalid characters (see `isLabelIndexable`)
 
 In theory (and likely in practice) any normalized name will never become invalid, so once added to the set of healed labels it can live there forever.
+
+# ENSIP Ideas
+
+- unable to automatically identify subname registries via onchain event, CCIP standard dosn't include any info about data source, so we'll need to encode manually for now
+- ENSIP - shared interface for subdomain registrars
+- ENSIP — standard for how a resolver on L1 can (optionally) emit an event specifying contract on an L2 that it proxies records from
+  - optional, in the popular case of L2-managed subnames
+  - removes centralized dependency on the CCIP Gateway
+  - flaky test experience with .cb.id name gateway
+  - also helps indexer discovery
