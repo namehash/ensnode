@@ -70,6 +70,7 @@ jobs:
         run: |
           # Send Railway API request to get all shared variables. We need those to check if we really need to redeploy.
           API_RESPONSE=`curl --request POST \
+          --fail \
           --silent \
           --url https://backboard.railway.app/graphql/v2 \
           --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
@@ -93,11 +94,20 @@ jobs:
           # Sending Railway API request to update specifc shared variable
           if [[ ${{env.RAILWAY_SCHEMA}} != ${{ github.sha }} ]]; then
           curl --request POST \
+              --silent \
               --fail \
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
               --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ github.sha }}\" }) }"}'
+          # Sending Railway API request to redeploy service
+          curl --request POST \
+              --silent \
+              --fail \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+              --data '{"query": "mutation deploymentRestart  { deploymentRestart (input: { id: \"'${{ env.SVC_ID }}'\" }) }"}'
           else
           echo "Skipping deployment since schema did not changed"
           fi
