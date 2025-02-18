@@ -91,7 +91,7 @@ jobs:
         # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
         run: |
           # Sending Railway API request to update specifc shared variable
-          if[[ ${{env.RAILWAY_SCHEMA}} != ${{ github.sha }}]]; then
+          if[[ ${{env.RAILWAY_SCHEMA}} != ${{ github.sha }} ]]; then
           curl --request POST \
               --silent \
               --url https://backboard.railway.app/graphql/v2 \
