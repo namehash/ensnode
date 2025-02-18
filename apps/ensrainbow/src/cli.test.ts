@@ -57,7 +57,9 @@ describe("CLI", () => {
 
     it("should throw error for invalid port number", () => {
       process.env.PORT = "invalid";
-      expect(() => getEnvPort()).toThrow('Invalid PORT value "invalid": must be a non-negative integer');
+      expect(() => getEnvPort()).toThrow(
+        'Invalid PORT value "invalid": must be a non-negative integer',
+      );
     });
 
     it("should throw error for negative port number", () => {
