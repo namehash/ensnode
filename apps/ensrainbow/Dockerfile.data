@@ -10,6 +10,7 @@ WORKDIR /app
 
 FROM base AS db-data
 COPY apps/ensrainbow/package.json ./apps/ensrainbow/package.json
+COPY apps/ensrainbow/download-rainbow-tables.sh ./apps/ensrainbow/download-rainbow-tables.sh
 
 WORKDIR /app/apps/ensrainbow
 RUN pnpm get-legacy-data

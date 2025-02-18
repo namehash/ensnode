@@ -24,13 +24,11 @@ download_with_progress() {
 # Check if files exist and verify checksum
 if [ -f "$DATA_DIR/$DATA_FILE" ] && [ -f "$DATA_DIR/$CHECKSUM_FILE" ]; then
     echo "Found existing files, verifying checksum..."
-    cd "$DATA_DIR"
-    if sha256sum -c "$CHECKSUM_FILE" > /dev/null 2>&1; then
+    if sha256sum -c "$DATA_DIR/$CHECKSUM_FILE" > /dev/null 2>&1; then
         echo "✓ Existing files are valid!"
         exit 0
     fi
     echo "⚠ Checksum verification failed, will download fresh files"
-    cd - > /dev/null
 fi
 
 # Download files
