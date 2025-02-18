@@ -32,9 +32,9 @@ if [ -f "$DATA_DIR/$DATA_FILE" ] && [ -f "$DATA_DIR/$CHECKSUM_FILE" ]; then
 fi
 
 # Download files
-download_with_progress "$BASE_URL/$DATA_FILE" "$DATA_DIR/$DATA_FILE" "ENS names database"
 download_with_progress "$BASE_URL/$CHECKSUM_FILE" "$DATA_DIR/$CHECKSUM_FILE" "checksum file"
 download_with_progress "$BASE_URL/$LICENSE_FILE" "$DATA_DIR/$LICENSE_FILE" "license file"
+download_with_progress "$BASE_URL/$DATA_FILE" "$DATA_DIR/$DATA_FILE" "ENS names database"
 
 # Verify downloaded files
 echo "Verifying downloaded files..."
