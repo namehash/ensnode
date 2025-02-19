@@ -210,11 +210,8 @@ export function networksConfigForChain(chain: Chain) {
         chainId: chain.id,
         transport: http(rpcEndpointUrl(chain.id)),
         maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
-        // NOTE: cache is temporarily _enabled_ on Anvil chains so that ens-test-env is happy
-        //   (cache isn't an issue there because ens-test-env starts with an ephemeral postgres)
-        //   https://github.com/ponder-sh/ponder/issues/1513
-        // TODO: disable rpc caching for anvil node
-        // ...(chain.name === "Anvil" && { disableCache: true }),
+        // NOTE: disable cache on 'Anvil' chains
+        ...(chain.name === "Anvil" && { disableCache: true }),
       } satisfies NetworkConfig;
     },
   };
