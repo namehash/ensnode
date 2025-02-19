@@ -41,4 +41,4 @@ export const DEPLOYMENT_CONFIG = {
  * TODO: allow runtime configuration, in particular for setting END_BLOCK on eth plugin
  */
 export const START_BLOCK: number | undefined = undefined;
-export const END_BLOCK: number | undefined = 21_000_000;
+export const END_BLOCK: number | undefined = undefined;
