@@ -19,6 +19,8 @@ jobs:
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
+      # For now just use github.sha. Should be extended in the future
+      DATABASE_SCHEMA: ${{ github.sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -84,19 +86,18 @@ jobs:
           echo "RAILWAY_SCHEMA=$RAILWAY_SCHEMA" >> "$GITHUB_ENV"
           
 
-      #TODO FOR NOW JUST REPLACE github.sha. EXTEND LOGIC IN FUTURE
       - name: Update Railway schema variable
         # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
         run: |
           # Sending Railway API request to update specifc shared variable
-          if [[ ${{env.RAILWAY_SCHEMA}} != ${{ github.sha }} ]]; then
+          if [[ ${{env.RAILWAY_SCHEMA}} != ${{ env.DATABASE_SCHEMA }} ]]; then
           curl --request POST \
               --silent \
               --fail \
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ github.sha }}\" }) }"}'
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${{ env.RAILWAY_ENVIRONMENT_ID }}'\", name: \"'${VARIABLE_NAME}'\", value: \"${{ env.DATABASE_SCHEMA }}\" }) }"}'
           # Sending Railway API request to redeploy service
           curl --request POST \
               --silent \
