@@ -255,7 +255,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           address: resolverAddress,
         });
 
-        // update the domain to point to it, and denormalize the eth addr
+        // update the domain to point to it, and materialize the eth addr
         // NOTE: this implements the logic as documented here
         // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
         await context.db.update(schema.domain, { id: node }).set({
