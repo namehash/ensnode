@@ -49,7 +49,12 @@ export const graphql = (
 
       return { drizzle: db, getDataLoader };
     },
-    maskedErrors: process.env.NODE_ENV === "production",
+    maskedErrors: {
+      maskError(error: any) {
+        console.error(error.originalError);
+        return error;
+      },
+    },
     logging: false,
     graphiql: true,
     parserAndValidationCache: false,

@@ -233,8 +233,9 @@ export function buildGraphQLSchema(
       fields: () => {
         const filterFields: GraphQLInputFieldConfigMap = {
           // Logical operators
-          AND: { type: new GraphQLList(filterType) },
-          OR: { type: new GraphQLList(filterType) },
+          // NOTE: lower case and/or
+          and: { type: new GraphQLList(filterType) },
+          or: { type: new GraphQLList(filterType) },
         };
 
         for (const [columnName, column] of Object.entries(table.columns)) {
@@ -729,7 +730,7 @@ function buildWhereConditions(
 
   for (const [whereKey, rawValue] of Object.entries(where)) {
     // Handle the `AND` and `OR` operators
-    if (whereKey === "AND" || whereKey === "OR") {
+    if (whereKey === "and" || whereKey === "or") {
       if (!Array.isArray(rawValue)) {
         throw new Error(
           `Invalid query: Expected an array for the ${whereKey} operator. Got: ${rawValue}`,
@@ -741,7 +742,7 @@ function buildWhereConditions(
       );
 
       if (nestedConditions.length > 0) {
-        conditions.push(whereKey === "AND" ? and(...nestedConditions) : or(...nestedConditions));
+        conditions.push(whereKey === "and" ? and(...nestedConditions) : or(...nestedConditions));
       }
       continue;
     }
