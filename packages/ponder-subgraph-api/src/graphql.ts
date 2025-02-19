@@ -1,9 +1,11 @@
 /**
- * This is graphql schema generated from a drizzle schema, initially based on ponder's.
+ * This is a graphql schema generated from a drizzle (sql) schema, initially based on ponder's.
+ * https://github.com/ponder-sh/ponder/blob/main/packages/core/src/graphql/index.ts
+ *
  * Its goal is to mimic the subgraph graphql api for queries we've deemed relevant (see docs).
  *
  * 1. inlines some ponder internal types
- * 2. implement subgraph's simpler pagination style with first & skip w/out Page types
+ * 2. implement subgraph's simpler offset pagination with first & skip w/out Page types
  * 3. PascalCase entity names
  * 4. Polymorphic Interfaces
  * 5. lower-case and/or filters
