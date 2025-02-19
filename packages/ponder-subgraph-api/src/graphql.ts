@@ -280,6 +280,12 @@ export function buildGraphQLSchema(
                   type: type,
                 };
               });
+              // NOTE: support lexigraphical gt/lt filters for string ids
+              conditionSuffixes.numeric.forEach((suffix) => {
+                filterFields[`${columnName}${suffix}`] = {
+                  type: type,
+                };
+              });
             }
 
             if (["Int", "Float", "BigInt"].includes(type.name)) {
@@ -289,6 +295,19 @@ export function buildGraphQLSchema(
                 };
               });
             }
+          }
+        }
+
+        // NOTE: add support for relational filters like Domain_filter's { owner_not: String }
+        for (const [relationName, relation] of Object.entries(table.relations)) {
+          if (is(relation, One)) {
+            // TODO: get the type of the relation's reference column & make this like above
+            // NOTE: for now, hardcode that singular relation filters are string ids
+            conditionSuffixes.universal.forEach((suffix) => {
+              filterFields[`${relation.fieldName}${suffix}`] = {
+                type: GraphQLString,
+              };
+            });
           }
         }
 
@@ -675,7 +694,7 @@ async function executePluralQuery(
     return direction === "asc" ? asc(column) : desc(column);
   });
 
-  const whereConditions = buildWhereConditions(args.where, table.columns);
+  const whereConditions = buildWhereConditions(args.where, table);
 
   const query = drizzle
     .select()
@@ -722,7 +741,7 @@ const conditionSuffixesByLengthDesc = Object.values(conditionSuffixes)
 
 function buildWhereConditions(
   where: Record<string, any> | undefined,
-  columns: Record<string, Column>,
+  table: TableRelationalConfig,
 ): (SQL | undefined)[] {
   const conditions: (SQL | undefined)[] = [];
 
@@ -738,7 +757,7 @@ function buildWhereConditions(
       }
 
       const nestedConditions = rawValue.flatMap((subWhere) =>
-        buildWhereConditions(subWhere, columns),
+        buildWhereConditions(subWhere, table),
       );
 
       if (nestedConditions.length > 0) {
@@ -757,8 +776,13 @@ function buildWhereConditions(
     // Remove the condition suffix and use the remaining string as the column name.
     const columnName = whereKey.slice(0, whereKey.length - conditionSuffix.length);
 
-    // Validate that the column name is present in the table.
-    const column = columns[columnName];
+    const column =
+      columnName in table.relations
+        ? // if the referenced name is a relation, the relevant column is this table's `${relationName}Id`
+          table.columns[`${columnName}Id`]
+        : // otherwise validate that the column name is present in the table
+          table.columns[columnName];
+
     if (column === undefined) {
       throw new Error(`Invalid query: Where clause contains unknown column ${columnName}`);
     }
@@ -860,7 +884,7 @@ export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) 
           // The decoded row fragments should be valid `where` objects
           // which use the `eq` object shorthand for each primary key column.
           const idConditions = decodedRowFragments.map((decodedRowFragment) =>
-            and(...buildWhereConditions(decodedRowFragment, table.columns)),
+            and(...buildWhereConditions(decodedRowFragment, table)),
           );
 
           const rows = await baseQuery.findMany({
