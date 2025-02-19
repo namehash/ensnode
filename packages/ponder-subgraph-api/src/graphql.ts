@@ -53,6 +53,8 @@ import {
   gte,
   inArray,
   is,
+  isNotNull,
+  isNull,
   like,
   lt,
   lte,
@@ -280,6 +282,7 @@ export function buildGraphQLSchema(
                   type: type,
                 };
               });
+
               // NOTE: support lexigraphical gt/lt filters for string ids
               conditionSuffixes.numeric.forEach((suffix) => {
                 filterFields[`${columnName}${suffix}`] = {
@@ -691,6 +694,13 @@ async function executePluralQuery(
     if (column === undefined) {
       throw new Error(`Unknown column "${columnName}" used in orderBy argument`);
     }
+
+    // if the column is a string, enforce 'natural' sort order
+    if (column.dataType === "string") {
+      // https://github.com/graphprotocol/graph-node/blob/5bf91591f49d62ed378d5a400eb1f27856f1c2e8/store/postgres/src/catalog.rs#L151
+      return direction === "asc" ? sql`${column} COLLATE "C" ASC` : sql`${column} COLLATE "C" DESC`;
+    }
+
     return direction === "asc" ? asc(column) : desc(column);
   });
 
@@ -792,7 +802,11 @@ function buildWhereConditions(
         if (column.columnType === "PgArray") {
           conditions.push(and(arrayContains(column, rawValue), arrayContained(column, rawValue)));
         } else {
-          conditions.push(eq(column, rawValue));
+          if (rawValue === null) {
+            conditions.push(isNull(column));
+          } else {
+            conditions.push(eq(column, rawValue));
+          }
         }
         break;
       case "_not":
@@ -801,7 +815,11 @@ function buildWhereConditions(
             not(and(arrayContains(column, rawValue), arrayContained(column, rawValue))!),
           );
         } else {
-          conditions.push(ne(column, rawValue));
+          if (rawValue === null) {
+            conditions.push(isNotNull(column));
+          } else {
+            conditions.push(ne(column, rawValue));
+          }
         }
         break;
       case "_in":
