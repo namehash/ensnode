@@ -15,6 +15,9 @@
     "ENSNode"
   ],
   "exports": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {

@@ -17,6 +17,9 @@
   "exports": {
     "./middleware": "./src/middleware.ts"
   },
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {

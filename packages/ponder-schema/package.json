@@ -10,7 +10,17 @@
     "directory": "packages/ponder-schema"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-schema",
-  "keywords": ["ENS", "ENSNode", "Ponder"],
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "Ponder"
+  ],
+  "exports": {
+    "default": "./src/ponder.schema.ts"
+  },
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {
@@ -25,9 +35,6 @@
     "prepublish": "tsup",
     "lint": "biome check --write",
     "lint:ci": "biome ci"
-  },
-  "exports": {
-    "default": "./src/ponder.schema.ts"
   },
   "dependencies": {
     "ponder": "catalog:",

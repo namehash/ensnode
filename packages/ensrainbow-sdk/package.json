@@ -10,13 +10,20 @@
     "directory": "packages/ensrainbow-sdk"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk",
-  "keywords": ["ENS", "ENSNode", "ENSRainbow"],
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "ENSRainbow"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
     "./consts": "./src/consts.ts",
     "./label-utils": "./src/label-utils.ts"
   },
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {
