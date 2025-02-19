@@ -4,6 +4,7 @@
  * 1. removed ponder's GraphiQL, enabled graphql-yoga's GraphiQL.
  * 2. builds our custom subgraph-compatible schema instead of ponder's
  * 3. removes schema.graphql generation
+ * 4. emits stack traces to console.log
  */
 
 import { maxAliasesPlugin } from "@escape.tech/graphql-armor-max-aliases";
@@ -49,12 +50,15 @@ export const graphql = (
 
       return { drizzle: db, getDataLoader };
     },
-    maskedErrors: {
-      maskError(error: any) {
-        console.error(error.originalError);
-        return error;
-      },
-    },
+    maskedErrors:
+      process.env.NODE_ENV === "production"
+        ? true
+        : {
+            maskError(error: any) {
+              console.error(error.originalError);
+              return error;
+            },
+          },
     logging: false,
     graphiql: true,
     parserAndValidationCache: false,
