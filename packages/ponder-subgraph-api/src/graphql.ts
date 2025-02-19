@@ -3,9 +3,9 @@
  * the subgraph graphql api for queries we've deemed relevant (see docs).
  *
  * 1. inlines some ponder internal types
- * 2. removes ponder's encoded id params in favor of literal ids
- * 3. implement subgraph's simpler pagination style with first & skip w/out Page types
- * 4. PascalCase entity names
+ * 2. implement subgraph's simpler pagination style with first & skip w/out Page types
+ * 3. PascalCase entity names
+ * 4. Polymorphic Interfaces
  */
 
 // here we inline the following types from this original import
@@ -101,6 +101,7 @@ import {
 } from "graphql";
 import { GraphQLJSON } from "graphql-scalars";
 import { capitalize, intersectionOf } from "./helpers";
+import { deserialize, serialize } from "./serialize";
 
 type Parent = Record<string, any>;
 type Context = {
@@ -108,6 +109,7 @@ type Context = {
   drizzle: Drizzle<{ [key: string]: OnchainTable }>;
 };
 
+// NOTE: subgraph-style pagination
 type PluralArgs = {
   where?: { [key: string]: number | string };
   first?: number;
@@ -118,8 +120,10 @@ type PluralArgs = {
 
 // NOTE: subgraph defaults to 100 entities in a plural
 const DEFAULT_LIMIT = 100 as const;
+// NOTE: subgraph also has a max of 1000 entities in a plural
 const MAX_LIMIT = 1000 as const;
 
+// subgraph uses an OrderDirection Enum rather than string union
 const OrderDirectionEnum = new GraphQLEnumType({
   name: "OrderDirection",
   values: {
@@ -213,7 +217,8 @@ export function buildGraphQLSchema(
       {},
     );
 
-    // TODO: relationships i.e. parent__labelName iff necessary
+    // NOTE: if implementing single-level nested OrderBy relationships i.e. orderBy: parent__labelName
+    // here is where you'd do it
 
     entityOrderByEnums[table.tsName] = new GraphQLEnumType({
       name: `${getSubgraphEntityName(table.tsName)}_orderBy`,
@@ -383,9 +388,7 @@ export function buildGraphQLSchema(
               // key constraints, all `one` relations must be nullable.
               type: referencedEntityType,
               resolve: (parent, _args, context) => {
-                const loader = context.getDataLoader({
-                  table: referencedTable,
-                });
+                const loader = context.getDataLoader({ table: referencedTable });
 
                 const rowFragment: Record<string, unknown> = {};
                 for (let i = 0; i < references.length; i++) {
@@ -398,9 +401,7 @@ export function buildGraphQLSchema(
                   rowFragment[referenceColumnTsName] = parent[fieldColumnTsName];
                 }
 
-                const encodedId = rowFragment.id as string;
-                if (!encodedId) return null;
-
+                const encodedId = encodeRowFragment(rowFragment);
                 return loader.load(encodedId);
               },
             };
@@ -510,8 +511,10 @@ export function buildGraphQLSchema(
       resolve: async (_parent, args, context) => {
         const loader = context.getDataLoader({ table });
 
-        // NOTE(subgraph-compat): subgraph api requires an `id` string value on all records
-        return loader.load(args.id as string);
+        // The `args` object here should be a valid `where` argument that
+        // uses the `eq` shorthand for each primary key column.
+        const encodedId = encodeRowFragment(args);
+        return loader.load(encodedId);
       },
     };
 
@@ -850,16 +853,49 @@ export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) 
     let dataLoader = dataLoaderMap.get(table);
     if (dataLoader === undefined) {
       dataLoader = new DataLoader(
-        async (ids) => {
-          // NOTE: use literal ids against id column
-          const idConditions = ids.map((id) => eq(table.columns["id"]!, id));
+        async (encodedIds) => {
+          const decodedRowFragments = encodedIds.map(decodeRowFragment);
+
+          // The decoded row fragments should be valid `where` objects
+          // which use the `eq` object shorthand for each primary key column.
+          const idConditions = decodedRowFragments.map((decodedRowFragment) =>
+            and(...buildWhereConditions(decodedRowFragment, table.columns)),
+          );
 
           const rows = await baseQuery.findMany({
             where: or(...idConditions),
-            limit: ids.length,
+            limit: encodedIds.length,
           });
 
-          return ids.map((id) => rows.find((row) => row.id === id));
+          // Now, we need to order the rows coming out of the database to match
+          // the order of the IDs passed in. To accomplish this, we need to do
+          // a comparison of the decoded row PK fragments with the database rows.
+          // This is tricky because the decoded row PK fragments are not normalized,
+          // so some comparisons will fail (eg for our PgHex column type).
+          // To fix this, we need to normalize the values before doing the comparison.
+          return (
+            decodedRowFragments
+              // Normalize the decoded row fragments
+              // .map((fragment) =>
+              //   Object.fromEntries(
+              //     Object.entries(fragment).map(([col, val]) => {
+              //       const column = table.columns[col];
+              //       if (column === undefined) {
+              //         throw new Error(
+              //           `Unknown column '${table.tsName}.${col}' used in dataloader row ID fragment`,
+              //         );
+              //       }
+              //       return [col, normalizeColumn(column, val, false)];
+              //     }),
+              //   ),
+              // )
+              // Find the database row corresponding to each normalized row fragment
+              .map((fragment) =>
+                rows.find((row) =>
+                  Object.entries(fragment).every(([col, val]) => row[col] === val),
+                ),
+              )
+          );
         },
         { maxBatchSize: 1_000 },
       );
@@ -873,6 +909,16 @@ export function buildDataLoaderCache({ drizzle }: { drizzle: Drizzle<Schema> }) 
 function getColumnTsName(column: Column) {
   const tableColumns = getTableColumns(column.table);
   return Object.entries(tableColumns).find(([_, c]) => c.name === column.name)![0];
+}
+
+function encodeRowFragment(rowFragment: { [k: string]: unknown }): string {
+  return Buffer.from(serialize(rowFragment)).toString("base64");
+}
+
+function decodeRowFragment(encodedRowFragment: string): {
+  [k: string]: unknown;
+} {
+  return deserialize(Buffer.from(encodedRowFragment, "base64").toString());
 }
 
 // the subgraph's GraphQL types are just the capitalized version of ponder's tsName
