@@ -1,9 +1,9 @@
 import js from "@eslint/js";
+import importPlugin from "eslint-plugin-import";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
   {
@@ -27,10 +27,7 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       // Match Biome's formatting rules
       quotes: ["error", "double"],
       indent: ["error", 2, { SwitchCase: 1 }],
@@ -49,14 +46,7 @@ export default tseslint.config(
       "import/order": [
         "error",
         {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-          ],
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
           "newlines-between": "always",
           alphabetize: {
             order: "asc",
@@ -65,5 +55,5 @@ export default tseslint.config(
         },
       ],
     },
-  }
+  },
 );
