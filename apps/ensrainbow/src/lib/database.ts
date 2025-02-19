@@ -48,7 +48,9 @@ export class ENSRainbowDB {
       });
       logger.info("Opening database...");
       await db.open();
-      return new ENSRainbowDB(db, dataDir);
+      const dbInstance = new ENSRainbowDB(db, dataDir);
+      await dbInstance.setDatabaseSchemaVersion(SCHEMA_VERSION);
+      return dbInstance;
     } catch (error) {
       if (
         (error as any).code === "LEVEL_DATABASE_NOT_OPEN" &&
@@ -252,9 +254,17 @@ export class ENSRainbowDB {
       return false;
     }
 
+    const schemaVersion = await this.getDatabaseSchemaVersion();
+    if (schemaVersion !== SCHEMA_VERSION) {
+      logger.error(
+        `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`,
+      );
+      return false;
+    }
+
     //TODO should we validate if the count is TOTAL_EXPECTED_RECORDS?
 
-    let totalKeys = 0;
+    let rainbowRecordCount = 0;
     let validHashes = 0;
     let invalidHashes = 0;
     let hashMismatches = 0;
@@ -272,16 +282,15 @@ export class ENSRainbowDB {
     } else {
       // Full validation of each key-value pair
       for await (const [key, value] of this.db.iterator()) {
-        totalKeys++;
-
         // Skip keys not associated with rainbow records
         if (
           byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
-          byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+          byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY) ||
+          byteArraysEqual(key, SCHEMA_VERSION_KEY)
         ) {
           continue;
         }
-
+        rainbowRecordCount++;
         // Verify key is a valid labelhash by converting it to hex string
         const keyHex = `0x${Buffer.from(key).toString("hex")}` as `0x${string}`;
         try {
@@ -305,11 +314,9 @@ export class ENSRainbowDB {
         }
       }
 
-      let rainbowRecordCount = totalKeys;
       // Verify count
       try {
         const storedCount = await this.getRainbowRecordCount();
-        rainbowRecordCount = rainbowRecordCount - 1; // Subtract 1 for the count key
 
         if (storedCount !== rainbowRecordCount) {
           logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
@@ -324,7 +331,7 @@ export class ENSRainbowDB {
 
       // Report results
       logger.info("\nValidation Results:");
-      logger.info(`Total keys: ${totalKeys}`);
+      logger.info(`Total keys: ${rainbowRecordCount}`);
       logger.info(`Valid rainbow records: ${validHashes}`);
       logger.info(`Invalid rainbow records: ${invalidHashes}`);
       logger.info(`labelhash mismatches: ${hashMismatches}`);
@@ -363,7 +370,8 @@ export class ENSRainbowDB {
       // Skip keys not associated with rainbow records
       if (
         !byteArraysEqual(key, LABELHASH_COUNT_KEY) &&
-        !byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+        !byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY) &&
+        !byteArraysEqual(key, SCHEMA_VERSION_KEY)
       ) {
         count++;
       }

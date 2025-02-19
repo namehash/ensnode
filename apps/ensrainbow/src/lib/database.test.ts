@@ -3,13 +3,8 @@ import { join } from "path";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import {
-  ENSRainbowDB,
-  INGESTION_IN_PROGRESS_KEY,
-  LABELHASH_COUNT_KEY,
-  parseNonNegativeInteger,
-} from "./database";
+import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
+import { ENSRainbowDB, SCHEMA_VERSION, parseNonNegativeInteger } from "./database";
 
 describe("Database", () => {
   let tempDir: string;
@@ -235,5 +230,66 @@ describe("parseNonNegativeInteger", () => {
     // Mixed content
     expect(() => parseNonNegativeInteger("42abc")).toThrow("is not a valid number");
     expect(() => parseNonNegativeInteger("abc42")).toThrow("is not a valid number");
+  });
+});
+
+const TEST_DB_PATH = "test-db";
+
+describe("schema version", () => {
+  test("new database has correct schema version", async () => {
+    const db = await ENSRainbowDB.create(TEST_DB_PATH);
+    try {
+      const version = await db.getDatabaseSchemaVersion();
+      expect(version).toBe(SCHEMA_VERSION);
+    } finally {
+      await db.close();
+      await rm(TEST_DB_PATH, { recursive: true, force: true });
+    }
+  });
+
+  test("can set and get schema version", async () => {
+    const db = await ENSRainbowDB.create(TEST_DB_PATH);
+    try {
+      // Test setting a new version
+      const newVersion = SCHEMA_VERSION + 1;
+      await db.setDatabaseSchemaVersion(newVersion);
+      const version = await db.getDatabaseSchemaVersion();
+      expect(version).toBe(newVersion);
+    } finally {
+      await db.close();
+      await rm(TEST_DB_PATH, { recursive: true, force: true });
+    }
+  });
+
+  test("rejects invalid schema versions", async () => {
+    const db = await ENSRainbowDB.create(TEST_DB_PATH);
+    try {
+      // Test negative version
+      await expect(db.setDatabaseSchemaVersion(-1)).rejects.toThrow("Invalid schema version");
+
+      // Test non-integer version
+      await expect(db.setDatabaseSchemaVersion(1.5)).rejects.toThrow("Invalid schema version");
+    } finally {
+      await db.close();
+      await rm(TEST_DB_PATH, { recursive: true, force: true });
+    }
+  });
+
+  test("validate fails if schema version doesn't match", async () => {
+    const db = await ENSRainbowDB.create(TEST_DB_PATH);
+    try {
+      // Set a different schema version
+      await db.setDatabaseSchemaVersion(SCHEMA_VERSION + 1);
+
+      // Validation should fail due to version mismatch
+      const isValid = await db.validate();
+      expect(isValid).toBe(false);
+
+      const isValidLite = await db.validate({ lite: true });
+      expect(isValidLite).toBe(false);
+    } finally {
+      await db.close();
+      await rm(TEST_DB_PATH, { recursive: true, force: true });
+    }
   });
 });

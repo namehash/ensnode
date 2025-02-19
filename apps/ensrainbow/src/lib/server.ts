@@ -19,6 +19,7 @@ export class ENSRainbowServer {
   public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
     const server = new ENSRainbowServer(db);
 
+    //TODO maybe we should call validate lite here instead?
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
     if (await db.isIngestionInProgress()) {
       const errorMessage =
