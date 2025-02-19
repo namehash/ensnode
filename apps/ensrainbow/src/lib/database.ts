@@ -6,6 +6,8 @@ import { logger } from "../utils/logger";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
 export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
+export const SCHEMA_VERSION_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
+export const SCHEMA_VERSION = 1;
 
 /**
  * Type representing the ENSRainbow LevelDB database.
@@ -207,89 +209,134 @@ export class ENSRainbowDB {
   }
 
   /**
+   * Gets the current database schema version.
+   * @returns The current schema version as a number, or null if not set
+   * @throws Error if schema version is not a valid non-negative integer
+   */
+  public async getDatabaseSchemaVersion(): Promise<number | null> {
+    const versionStr = await this.get(SCHEMA_VERSION_KEY);
+    if (versionStr === null) {
+      return null;
+    }
+
+    try {
+      return parseNonNegativeInteger(versionStr);
+    } catch (error) {
+      throw new Error(`Invalid schema version in database: ${versionStr}`);
+    }
+  }
+
+  /**
+   * Sets the database schema version.
+   * @param version The schema version to set
+   * @throws Error if version is not a valid non-negative integer
+   */
+  public async setDatabaseSchemaVersion(version: number): Promise<void> {
+    if (!Number.isInteger(version) || version < 0) {
+      throw new Error(`Invalid schema version: ${version}`);
+    }
+    await this.db.put(SCHEMA_VERSION_KEY, version.toString());
+  }
+
+  /**
    * Validates the database contents.
+   * @param options Optional validation options
+   * @param options.lite If true, performs a faster validation by skipping labelhash verification
    * @returns boolean indicating if validation passed
    */
-  public async validate(): Promise<boolean> {
-    let totalKeys = 0;
-    let validHashes = 0;
-    let invalidHashes = 0;
-    let hashMismatches = 0;
-
-    logger.info("Starting database validation...");
-
+  public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
+    logger.info(`Starting database validation${options.lite ? " (lite mode)" : ""}...`);
     // Check if ingestion is in progress
     if (await this.isIngestionInProgress()) {
       logger.error("Database is in an invalid state: ingestion in progress flag is set");
       return false;
     }
 
-    // Validate each key-value pair
-    for await (const [key, value] of this.db.iterator()) {
-      totalKeys++;
+    //TODO should we validate if the count is TOTAL_EXPECTED_RECORDS?
 
-      // Skip keys not associated with rainbow records
-      if (
-        byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
-        byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
-      ) {
-        continue;
-      }
+    let totalKeys = 0;
+    let validHashes = 0;
+    let invalidHashes = 0;
+    let hashMismatches = 0;
 
-      // Verify key is a valid labelhash by converting it to hex string
-      const keyHex = `0x${Buffer.from(key).toString("hex")}` as `0x${string}`;
+    // In lite mode, just check the count
+    if (options.lite) {
       try {
-        labelHashToBytes(keyHex);
-        validHashes++;
-      } catch (e) {
-        logger.error(`Invalid labelhash key format: ${keyHex}`);
-        invalidHashes++;
-        continue;
+        const count = await this.getRainbowRecordCount();
+        logger.info(`Total keys: ${count}`);
+        return true;
+      } catch (error) {
+        logger.error("Error verifying count:", error);
+        return false;
+      }
+    } else {
+      // Full validation of each key-value pair
+      for await (const [key, value] of this.db.iterator()) {
+        totalKeys++;
+
+        // Skip keys not associated with rainbow records
+        if (
+          byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
+          byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY)
+        ) {
+          continue;
+        }
+
+        // Verify key is a valid labelhash by converting it to hex string
+        const keyHex = `0x${Buffer.from(key).toString("hex")}` as `0x${string}`;
+        try {
+          labelHashToBytes(keyHex);
+          validHashes++;
+        } catch (e) {
+          logger.error(`Invalid labelhash key format: ${keyHex}`);
+          invalidHashes++;
+          continue;
+        }
+
+        // Verify hash matches label
+        const computedHash = labelHashToBytes(labelhash(value));
+        if (!byteArraysEqual(computedHash, key)) {
+          logger.error(
+            `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
+              computedHash,
+            ).toString("hex")}`,
+          );
+          hashMismatches++;
+        }
       }
 
-      // Verify hash matches label
-      const computedHash = labelHashToBytes(labelhash(value));
-      if (!byteArraysEqual(computedHash, key)) {
-        logger.error(
-          `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
-            computedHash,
-          ).toString("hex")}`,
-        );
-        hashMismatches++;
+      let rainbowRecordCount = totalKeys;
+      // Verify count
+      try {
+        const storedCount = await this.getRainbowRecordCount();
+        rainbowRecordCount = rainbowRecordCount - 1; // Subtract 1 for the count key
+
+        if (storedCount !== rainbowRecordCount) {
+          logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
+          return false;
+        } else {
+          logger.info(`Count verified: ${rainbowRecordCount} rainbow records`);
+        }
+      } catch (error) {
+        logger.error("Error verifying count:", error);
+        return false;
       }
-    }
 
-    let rainbowRecordCount = totalKeys;
-    // Verify count
-    try {
-      const storedCount = await this.getRainbowRecordCount();
-      rainbowRecordCount = rainbowRecordCount - 1; // Subtract 1 for the count key
+      // Report results
+      logger.info("\nValidation Results:");
+      logger.info(`Total keys: ${totalKeys}`);
+      logger.info(`Valid rainbow records: ${validHashes}`);
+      logger.info(`Invalid rainbow records: ${invalidHashes}`);
+      logger.info(`labelhash mismatches: ${hashMismatches}`);
 
-      if (storedCount !== rainbowRecordCount) {
-        logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
+      const hasErrors = invalidHashes > 0 || hashMismatches > 0;
+      if (hasErrors) {
+        logger.error("\nValidation failed! See errors above.");
         return false;
       } else {
-        logger.info(`Count verified: ${rainbowRecordCount} rainbow records`);
+        logger.info("\nValidation successful! No errors found.");
+        return true;
       }
-    } catch (error) {
-      logger.error("Error verifying count:", error);
-      return false;
-    }
-
-    // Report results
-    logger.info("\nValidation Results:");
-    logger.info(`Total keys: ${totalKeys}`);
-    logger.info(`Valid rainbow records: ${validHashes}`);
-    logger.info(`Invalid rainbow records: ${invalidHashes}`);
-    logger.info(`labelhash mismatches: ${hashMismatches}`);
-
-    const hasErrors = invalidHashes > 0 || hashMismatches > 0;
-    if (hasErrors) {
-      logger.error("\nValidation failed! See errors above.");
-      return false;
-    } else {
-      logger.info("\nValidation successful! No errors found.");
-      return true;
     }
   }
 

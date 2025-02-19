@@ -29,6 +29,7 @@ interface ServeArgs {
 
 interface ValidateArgs {
   "data-dir": string;
+  lite: boolean;
 }
 
 export interface CLIOptions {
@@ -92,15 +93,22 @@ export function createCLI(options: CLIOptions = {}) {
       "validate",
       "Validate the integrity of the LevelDB database",
       (yargs: Argv) => {
-        return yargs.option("data-dir", {
-          type: "string",
-          description: "Directory containing LevelDB data",
-          default: getDefaultDataSubDir(),
-        });
+        return yargs
+          .option("data-dir", {
+            type: "string",
+            description: "Directory containing LevelDB data",
+            default: getDefaultDataSubDir(),
+          })
+          .option("lite", {
+            type: "boolean",
+            description: "Perform a faster, less thorough validation by skipping hash verification",
+            default: false,
+          });
       },
       async (argv: ArgumentsCamelCase<ValidateArgs>) => {
         await validateCommand({
           dataDir: argv["data-dir"],
+          lite: argv.lite,
         });
       },
     )

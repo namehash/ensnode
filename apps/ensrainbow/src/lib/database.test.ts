@@ -145,6 +145,48 @@ describe("Database", () => {
         await db.close();
       }
     });
+
+    it("should skip labelhash verification in lite mode", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        // Add record with mismatched labelhash (would fail in full validation)
+        const label = "vitalik";
+        const wrongLabelhash = labelhash("ethereum");
+        const batch = db.batch();
+        batch.put(labelHashToBytes(wrongLabelhash), label);
+        await batch.write();
+        await db.setRainbowRecordCount(1);
+
+        // Should pass in lite mode despite hash mismatch
+        const isValidLite = await db.validate({ lite: true });
+        expect(isValidLite).toBe(true);
+
+        // Should fail in full validation mode
+        const isValidFull = await db.validate();
+        expect(isValidFull).toBe(false);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should detect absence of count key", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        await db.addRainbowRecord("test");
+
+        // Should fail in lite mode due to invalid format
+        const isValid = await db.validate({ lite: true });
+        expect(isValid).toBe(false);
+
+        // Should fail in full validation mode
+        const isValidFull = await db.validate();
+        expect(isValidFull).toBe(false);
+      } finally {
+        await db.close();
+      }
+    });
   });
 
   describe("LevelDB operations", () => {
