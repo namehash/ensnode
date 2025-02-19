@@ -93,24 +93,21 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       }) => {
         const { label: labelhash, node, owner } = event.args;
 
-        // Each domain must reference an account of its owner,
-        // so we ensure the account exists before inserting the domain
         await upsertAccount(context, owner);
 
-        // get database entity for the domain and the parent
+        // the domain in question is a subdomain of `node` with label `labelhash`
         const subnode = makeSubnodeNamehash(node, labelhash);
-        const parent = await context.db.find(schema.domain, { id: node });
         let domain = await context.db.find(schema.domain, { id: subnode });
 
-        // note that we set isMigrated so that if this domain is being
+        // note that we set isMigrated in each branch such that if this domain is being
         // interacted with on the new registry, its migration status is set here
         if (domain) {
           // if the domain already exists, this is just an update of the owner record (& isMigrated)
-          await context.db
-            .update(schema.domain, { id: domain.id })
+          domain = await context.db
+            .update(schema.domain, { id: subnode })
             .set({ ownerId: owner, isMigrated });
         } else {
-          // otherwise create the domain
+          // otherwise create the domain (w/ isMigrated)
           domain = await context.db.insert(schema.domain).values({
             id: subnode,
             ownerId: owner,
@@ -128,6 +125,8 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
         // if the domain doesn't yet have a name, construct it here
         if (!domain.name) {
+          const parent = await context.db.find(schema.domain, { id: node });
+
           // attempt to heal the label associated with labelhash via ENSRainbow
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
           const healedLabel = await labelByHash(labelhash);
@@ -140,7 +139,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
           // akin to domain.save()
           // via https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
-          await context.db.update(schema.domain, { id: domain.id }).set({
+          await context.db.update(schema.domain, { id: subnode }).set({
             name,
             // NOTE: only update Domain.labelName iff label is healed and valid
             // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
@@ -151,7 +150,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // garbage collect newly 'empty' domain iff necessary
         // akin to https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
-          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
+          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, subnode);
         }
 
         // log DomainEvent
@@ -237,9 +236,11 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
       const resolverId = makeResolverId(resolverAddress, node);
 
+      const isZeroResolver = resolverAddress === zeroAddress;
+
       // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
       // NOTE: old resolver resources are kept for event logs
-      if (resolverAddress === zeroAddress) {
+      if (isZeroResolver) {
         await context.db
           .update(schema.domain, { id: node })
           .set({ resolverId: null, resolvedAddressId: null });
@@ -257,9 +258,10 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // update the domain to point to it, and denormalize the eth addr
         // NOTE: this implements the logic as documented here
         // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
-        await context.db
-          .update(schema.domain, { id: node })
-          .set({ resolverId, resolvedAddressId: resolver.addrId });
+        await context.db.update(schema.domain, { id: node }).set({
+          resolverId,
+          resolvedAddressId: resolver.addrId,
+        });
       }
 
       // log DomainEvent
@@ -274,7 +276,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           // ex: newResolver(id: "3745840-2") { id resolver {id} }
           // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
           // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
-          resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
+          resolverId: isZeroResolver ? zeroAddress : resolverId,
         })
         .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },

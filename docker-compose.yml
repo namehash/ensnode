@@ -7,7 +7,7 @@ services:
     ports:
       - "42069:42069"
     env_file:
-    - ./apps/ensnode/.env.local
+      - ./apps/ensnode/.env.local
     environment:
       # Override DATABASE_URL to point to docker compose postgres
       DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
@@ -27,6 +27,20 @@ services:
     ports:
       - "3223:3223"
     restart: unless-stopped
+
+  ensadmin:
+    build:
+      dockerfile: ./apps/ensadmin/Dockerfile
+    image: namehash/ensadmin
+    ports:
+      - "4173:4173"
+    env_file:
+      - ./apps/ensadmin/.env.local
+    environment:
+      # override VITE_ENSNODE_URL from .env.local to refer to docker compose ensnode instance
+      VITE_ENSNODE_URL: http://ensnode:42069
+    depends_on:
+      - ensnode
 
   postgres:
     container_name: postgres

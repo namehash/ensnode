@@ -54,14 +54,16 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
     await upsertAccount(context, to);
     const node = tokenIdToNode(tokenId);
 
-    // TODO: remove this if it never fires: subgraph upserts domain but shouldn't be necessary
+    // NOTE: subgraph technically upserts domain with `createOrLoadDomain()` here, but domain
+    // is guaranteed to exist. we encode this stricter logic here to illustrate that fact.
+    // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/nameWrapper.ts#L197C18-L197C36
     const domain = await context.db.find(schema.domain, { id: node });
     if (!domain) {
-      console.log("NameWrapper:handleTransfer called before domain existed");
       console.table({ ...event.args, node });
+      throw new Error(`NameWrapper:handleTransfer called before domain '${node}' exists.`);
     }
 
-    // upsert the WrappedDomain, only changing owner iff exists
+    // upsert the WrappedDomain
     await context.db
       .insert(schema.wrappedDomain)
       .values({
@@ -73,9 +75,11 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         expiryDate: 0n,
         fuses: 0,
       })
-      .onConflictDoUpdate({
-        ownerId: to,
-      });
+      // if exists, only update owner
+      .onConflictDoUpdate({ ownerId: to });
+
+    // materialize `Domain.wrappedOwner`
+    await context.db.update(schema.domain, { id: node }).set({ wrappedOwnerId: to });
 
     // log DomainEvent
     await context.db
@@ -110,8 +114,16 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       // decode the name emitted by NameWrapper
       const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
 
-      // upsert the healed name iff valid
-      if (label) {
+      const domain = await context.db.find(schema.domain, { id: node });
+      if (!domain) throw new Error("domain is guaranteed to already exist");
+
+      // upsert the healed name iff !domain.labelName && label
+      // NOTE: this means that future wraps of a domain with encoded label hashes in the name
+      //   will _not_ use the newly healed label emitted by the NameWrapper contract, and will
+      //   continue to have an un-healed labelhash in its name field
+      // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
+      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
+      if (!domain.labelName && label) {
         await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 

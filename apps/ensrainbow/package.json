@@ -14,11 +14,11 @@
   "scripts": {
     "serve": "bun src/cli.ts serve",
     "ingest": "bun src/cli.ts ingest",
-    "count": "bun src/cli.ts count",
     "validate": "bun src/cli.ts validate",
-    "test": "DATA_DIR=test-data vitest run",
-    "test:watch": "DATA_DIR=test-data vitest",
-    "test:coverage": "DATA_DIR=test-data vitest run --coverage",
+    "get-legacy-data": "./download-rainbow-tables.sh",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit"
@@ -32,7 +32,9 @@
     "hono": "catalog:",
     "progress": "^2.0.3",
     "viem": "catalog:",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "pino": "^8.19.0",
+    "pino-pretty": "^10.3.1"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
@@ -40,9 +42,9 @@
     "@types/progress": "^2.0.7",
     "@types/supertest": "^6.0.2",
     "@types/yargs": "^17.0.32",
-    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/coverage-v8": "catalog:",
     "supertest": "^6.3.4",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.0"
+    "vitest": "catalog:"
   }
 }
