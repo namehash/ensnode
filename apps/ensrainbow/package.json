@@ -16,6 +16,7 @@
     "ingest": "bun src/cli.ts ingest",
     "validate": "bun src/cli.ts validate",
     "validate:lite": "bun src/cli.ts validate --lite",
+    "purge": "bun src/cli.ts purge",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
