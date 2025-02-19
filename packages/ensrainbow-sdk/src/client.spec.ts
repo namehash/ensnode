@@ -67,6 +67,23 @@ describe("EnsRainbowApiClient", () => {
       errorCode: ErrorCode.BadRequest,
     } satisfies EnsRainbow.HealBadRequestError);
   });
+
+  it("should return a count of healable labels", async () => {
+    const response = await client.count();
+
+    expect(response satisfies EnsRainbow.CountResponse).toBeTruthy();
+    expect(response.status).toEqual(StatusCode.Success);
+    expect(typeof response.count === "number").toBeTruthy();
+    expect(typeof response.timestamp === "string").toBeTruthy();
+  });
+
+  it("should return a positive health check", async () => {
+    const response = await client.health();
+
+    expect(response).toEqual({
+      status: "ok",
+    } satisfies EnsRainbow.HealthResponse);
+  });
 });
 
 describe("HealResponse error detection", () => {
