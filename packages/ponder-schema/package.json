@@ -22,7 +22,7 @@
     "types": "./dist/ponder.schema.d.ts"
   },
   "scripts": {
-    "build": "tsup",
+    "prepublish": "tsup",
     "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
