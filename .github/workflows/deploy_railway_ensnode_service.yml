@@ -3,7 +3,6 @@ name: Build and deploy to Railway ENSNode service
 on:
   push:
     branches:
-      - feat/railway-ensnode-deployments
       # Build and push'latest' Docker image. Skip deployments
       - main
       # Build and push 'alpha' Docker image. Update 'alpha' Railway shared environment variables.
@@ -41,10 +40,6 @@ jobs:
                 echo "SVC_ID="${{ secrets.ALPHA_SVC_ID }} >> "$GITHUB_ENV"
                 ;;
               "subgraph")
-                echo "TAG=subgraph" >> $GITHUB_ENV
-                echo "SVC_ID="${{ secrets.SUBGRAPH_SVC_ID }} >> "$GITHUB_ENV"
-                ;;
-              "feat/railway-ensnode-deployments")
                 echo "TAG=subgraph" >> $GITHUB_ENV
                 echo "SVC_ID="${{ secrets.SUBGRAPH_SVC_ID }} >> "$GITHUB_ENV"
                 ;;
