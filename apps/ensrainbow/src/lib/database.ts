@@ -321,9 +321,8 @@ export class ENSRainbowDB {
         if (storedCount !== rainbowRecordCount) {
           logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
           return false;
-        } else {
-          logger.info(`Count verified: ${rainbowRecordCount} rainbow records`);
         }
+        logger.info(`Count verified: ${rainbowRecordCount} rainbow records`);
       } catch (error) {
         logger.error("Error verifying count:", error);
         return false;
@@ -336,14 +335,14 @@ export class ENSRainbowDB {
       logger.info(`Invalid rainbow records: ${invalidHashes}`);
       logger.info(`labelhash mismatches: ${hashMismatches}`);
 
-      const hasErrors = invalidHashes > 0 || hashMismatches > 0;
-      if (hasErrors) {
+      // Return false if any validation errors were found
+      if (invalidHashes > 0 || hashMismatches > 0) {
         logger.error("\nValidation failed! See errors above.");
         return false;
-      } else {
-        logger.info("\nValidation successful! No errors found.");
-        return true;
       }
+
+      logger.info("\nValidation successful! No errors found.");
+      return true;
     }
   }
 
