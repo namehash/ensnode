@@ -52,7 +52,7 @@ jobs:
 
       - name: Build packages
         if: needs.changed-packages.outputs.packages == 'true'
-        run: pnpm packages:build
+        run: pnpm packages:prepublish
 
       # This will run the dev command in background, wait for
       # RUNTIME_CHECK_TIMEOUT_SECONDS seconds, and then kill the process if it
