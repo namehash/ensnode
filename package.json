@@ -8,7 +8,7 @@
     "lint:ci": "pnpm -r lint:ci",
     "changeset": "changeset",
     "release": "changeset publish",
-    "packages:build": "pnpm -r --filter=\"@ensnode/*\" --filter=\"!@ensnode/shared-configs\" build"
+    "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
