@@ -1,0 +1,73 @@
+---
+title: Hosted deployments
+---
+
+## Hosted Instances
+- There are available hosted instances ready to use for end clients. These instances are maintained by the ENSNode team.
+- **Reliability:** The ENSNode team makes sure the service is always available, so you can access it whenever you need.
+- **Maintenance-Free:** Clients do not need to manage infrastructure or updates.
+- **Scalability:** Easily scale usage without worrying about underlying resources.
+- **Support:** Access to dedicated support from the ENSNode team for any issues.
+
+## ENSNode instances
+
+There are two ENSNode deployments which are serving indexed ENS data. Both are separate deployment which may run on different versions and configurations.
+Main difference from client perspective is list of plugins which each instance handlers. Here is the table listing differences between those two.
+
+
+| Feature                     | ENSNode Alpha         | ENSNode Subgraph      |
+|-----------------------------|-----------------------|-----------------------|
+| **Active plugins**          | eth, base.eth, linea.eth | eth                   |
+| **Connected branch for auto deployments** | [alpha branch](https://github.com/namehash/ensnode/tree/alpha) | [subgraph branch](https://github.com/namehash/ensnode/tree/subgraph) |
+| **URL**                     | [alpha.ensnode.io](https://alpha.ensnode.io)      | [subgraph.ensnode.io](https://subgraph.ensnode.io)   |
+
+
+## Endpoints
+
+ENSNode exposes GraphQL APIs which can be consumed by end user
+
+### Ponder Endpoint - main endpoint
+
+- Available under `/` path
+- Dedicated endpoint to retrieve indexed data
+
+Example: [alpha.ensnode.io](https://alpha.ensnode.io)
+
+### Subgraph Compatible Endpoint
+
+- Available under `/subgraph` path
+- Fully compatible with Graphnode ens-subgraph queries
+
+Example: [alpha.ensnode.io/subgraph](https://alpha.ensnode.io/subgraph)
+
+## ENSRainbow instance
+ENSRainbow is deployed as single instance and is available under [https://api.ensrainbow.io/](https://api.ensrainbow.io/)
+
+### ENSRainbow API endpoints
+#### GET /v1/heal/:labelhash
+- **Description**: Handles healing requests for a specific label hash. Rreturns the result of the healing operation.
+- **Request Type**: GET
+- **Parameters**: 
+  - `labelhash`: The label hash to heal (URL parameter).
+- **Example**: 
+  ```
+  GET https://api.ensrainbow.io/v1/heal/exampleLabelHash
+  ```
+
+#### GET /health
+- **Description**: Performs a health check on the server. It returns a simple JSON response indicating the server status.
+- **Request Type**: GET
+- **Example**: 
+  ```
+  GET https://api.ensrainbow.io/health
+  ```
+
+#### GET /v1/labels/count
+- **Description**: Retrieves the count of labels. Returns the count result.
+- **Request Type**: GET
+- **Example**: 
+  ```
+  GET https://api.ensrainbow.io/v1/labels/count
+  ```
+
+
