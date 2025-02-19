@@ -15,6 +15,7 @@
     "serve": "bun src/cli.ts serve",
     "ingest": "bun src/cli.ts ingest",
     "validate": "bun src/cli.ts validate",
+    "get-legacy-data": "./download-rainbow-tables.sh",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
