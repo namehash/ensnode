@@ -12,10 +12,10 @@
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk",
   "keywords": ["ENS", "ENSNode", "ENSRainbow"],
   "exports": {
+    ".": "./src/index.ts",
     "./client": "./src/client.ts",
     "./consts": "./src/consts.ts",
-    "./label-utils": "./src/label-utils.ts",
-    "./types": "./src/types.ts"
+    "./label-utils": "./src/label-utils.ts"
   },
   "scripts": {
     "test": "vitest",

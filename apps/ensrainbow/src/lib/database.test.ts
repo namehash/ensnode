@@ -1,10 +1,9 @@
 import { tmpdir } from "os";
 import { join } from "path";
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
+import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createLogger } from "../utils/logger";
 import {
   INGESTION_IN_PROGRESS_KEY,
   LABELHASH_COUNT_KEY,
@@ -14,7 +13,6 @@ import {
 
 describe("Database", () => {
   let tempDir: string;
-  let log = createLogger("error");
 
   beforeEach(async () => {
     tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-database"));
@@ -28,7 +26,7 @@ describe("Database", () => {
     it("should detect an empty database", async () => {
       const db = await createDatabase(tempDir);
       try {
-        const isValid = await validate(db, log);
+        const isValid = await validate(db);
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -52,7 +50,7 @@ describe("Database", () => {
         // Add count
         await db.put(LABELHASH_COUNT_KEY, testData.length.toString());
 
-        const isValid = await validate(db, log);
+        const isValid = await validate(db);
         expect(isValid).toBe(true);
       } finally {
         await db.close();
@@ -70,7 +68,7 @@ describe("Database", () => {
         const invalidLabelhash = new Uint8Array([1, 2, 3]); // Too short
         await db.put(invalidLabelhash, "test");
 
-        const isValid = await validate(db, log);
+        const isValid = await validate(db);
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -89,7 +87,7 @@ describe("Database", () => {
         const wrongLabelhash = labelhash("ethereum");
         await db.put(labelHashToBytes(wrongLabelhash), label);
 
-        const isValid = await validate(db, log);
+        const isValid = await validate(db);
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -105,7 +103,7 @@ describe("Database", () => {
         const vitalikLabelhash = labelhash(label);
         await db.put(labelHashToBytes(vitalikLabelhash), label);
 
-        const isValid = await validate(db, log);
+        const isValid = await validate(db);
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -124,7 +122,7 @@ describe("Database", () => {
         // Add incorrect count
         await db.put(LABELHASH_COUNT_KEY, "2");
 
-        const isValid = await validate(db, log);
+        const isValid = await validate(db);
         expect(isValid).toBe(false);
       } finally {
         await db.close();
@@ -146,7 +144,7 @@ describe("Database", () => {
         // Set ingestion in progress flag
         await db.put(INGESTION_IN_PROGRESS_KEY, "true");
 
-        const isValid = await validate(db, log);
+        const isValid = await validate(db);
         expect(isValid).toBe(false);
       } finally {
         await db.close();

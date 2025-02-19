@@ -1,17 +1,14 @@
 import { openDatabase, validate } from "../lib/database";
-import { LogLevel, createLogger } from "../utils/logger";
 
 export interface ValidateCommandOptions {
   dataDir: string;
-  logLevel?: LogLevel;
 }
 
 export async function validateCommand(options: ValidateCommandOptions): Promise<void> {
-  const log = createLogger(options.logLevel);
-  const db = await openDatabase(options.dataDir, options.logLevel);
+  const db = await openDatabase(options.dataDir);
 
   try {
-    const isValid = await validate(db, log);
+    const isValid = await validate(db);
     if (!isValid) {
       // Throw error to ensure process exits with non-zero status code for CI/CD and scripts
       throw new Error("Validation failed");

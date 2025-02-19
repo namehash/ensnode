@@ -49,9 +49,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     }
 
     await context.db
-      .update(schema.registration, {
-        id: makeRegistrationId(ownedName, labelhash, node),
-      })
+      .update(schema.registration, { id: makeRegistrationId(ownedName, labelhash, node) })
       .set({ labelName: name, cost });
   }
 
@@ -81,32 +79,33 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
       const healedLabel = await labelByHash(labelhash);
 
-      // only update the label if it is indexable
+      // only update the label if it is healed & indexable
       // undefined value means no change to the label
-      const label = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+      const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
-      // only update the name if the label is indexable
+      // only update the name if the label is healed & indexable
       // undefined value means no change to the name
-      const name = isLabelIndexable(healedLabel) ? `${label}.${ownedName}` : undefined;
+      const name = validLabel ? `${validLabel}.${ownedName}` : undefined;
 
       // akin to domain.save() at
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
       await context.db.update(schema.domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName: label,
+        labelName: validLabel,
         name,
       });
 
       // akin to registration.save() at
       //https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
-      const registration = await upsertRegistration(context, {
-        id: makeRegistrationId(ownedName, labelhash, node),
+      const registrationId = makeRegistrationId(ownedName, labelhash, node);
+      await upsertRegistration(context, {
+        id: registrationId,
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-        labelName: label,
+        labelName: validLabel,
       });
 
       // log RegistrationEvent
@@ -114,7 +113,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         .insert(schema.nameRegistered)
         .values({
           ...sharedEventValues(event),
-          registrationId: registration.id,
+          registrationId,
           registrantId: owner,
           expiryDate: expires,
         })

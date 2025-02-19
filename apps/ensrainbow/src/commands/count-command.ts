@@ -5,29 +5,26 @@ import {
   safeGet,
 } from "../lib/database";
 import { byteArraysEqual } from "../utils/byte-utils";
-import { LogLevel, createLogger } from "../utils/logger";
+import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
 
 export interface CountCommandOptions {
   dataDir: string;
-  logLevel?: LogLevel;
 }
 
-export async function countCommand(db: ENSRainbowDB, options: CountCommandOptions): Promise<void> {
-  const log = createLogger(options.logLevel);
-
+export async function countCommand(db: ENSRainbowDB): Promise<void> {
   // Try to read existing count
   const existingCountStr = await safeGet(db, LABELHASH_COUNT_KEY);
   if (existingCountStr === null) {
-    log.info("No existing count found in database");
+    logger.info("No existing count found in database");
   } else {
     const existingCount = parseNonNegativeInteger(existingCountStr);
     existingCount !== null
-      ? log.warn(`Existing count in database: ${existingCount}`)
-      : log.warn(`Invalid count value in database: ${existingCountStr}`);
+      ? logger.warn(`Existing count in database: ${existingCount}`)
+      : logger.warn(`Invalid count value in database: ${existingCountStr}`);
   }
 
-  log.info("Counting keys in database...");
+  logger.info("Counting keys in database...");
 
   let count = 0;
   for await (const [key] of db.iterator()) {
@@ -43,6 +40,6 @@ export async function countCommand(db: ENSRainbowDB, options: CountCommandOption
   // Store the count
   await db.put(LABELHASH_COUNT_KEY, count.toString());
 
-  log.info(`Total number of keys (excluding count key): ${count}`);
-  log.info(`Updated count in database under LABELHASH_COUNT_KEY`);
+  logger.info(`Total number of keys (excluding count key): ${count}`);
+  logger.info(`Updated count in database under LABELHASH_COUNT_KEY`);
 }

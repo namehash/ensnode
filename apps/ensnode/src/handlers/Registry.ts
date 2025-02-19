@@ -93,16 +93,13 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       }) => {
         const { label: labelhash, node, owner } = event.args;
 
-        // Each domain must reference an account of its owner,
-        // so we ensure the account exists before inserting the domain
         await upsertAccount(context, owner);
 
-        // get database entity for the domain and the parent
+        // the domain in question is a subdomain of `node` with label `labelhash`
         const subnode = makeSubnodeNamehash(node, labelhash);
-        const parent = await context.db.find(schema.domain, { id: node });
         let domain = await context.db.find(schema.domain, { id: subnode });
 
-        // note that we set isMigrated so that if this domain is being
+        // note that we set isMigrated in each branch such that if this domain is being
         // interacted with on the new registry, its migration status is set here
         if (domain) {
           // if the domain already exists, this is just an update of the owner record (& isMigrated)
@@ -110,7 +107,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
             .update(schema.domain, { id: domain.id })
             .set({ ownerId: owner, isMigrated });
         } else {
-          // otherwise create the domain
+          // otherwise create the domain (w/ isMigrated)
           domain = await context.db.insert(schema.domain).values({
             id: subnode,
             ownerId: owner,
@@ -128,6 +125,8 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
         // if the domain doesn't yet have a name, construct it here
         if (!domain.name) {
+          const parent = await context.db.find(schema.domain, { id: node });
+
           // attempt to heal the label associated with labelhash via ENSRainbow
           // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
           const healedLabel = await labelByHash(labelhash);
