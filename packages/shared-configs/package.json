@@ -1,14 +1,17 @@
 {
   "name": "@ensnode/shared-configs",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "description": "Shared configs for the ENSNode project.",
   "license": "MIT",
   "scripts": {
     "lint:ci": "biome ci"
   },
-  "files": ["./tsconfig.ponder.json", "./tsconfig.lib.json"],
+  "files": [
+    "./tsconfig.ponder.json",
+    "./tsconfig.lib.json"
+  ],
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "typescript": "catalog:"

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ens-deployments",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "description": "Catalog of ENS deployments, including key contract addresses and other attributes.",
   "license": "MIT",
@@ -10,9 +10,14 @@
     "directory": "packages/ens-deployments"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ens-deployments",
-  "keywords": ["ENS", "ENSNode"],
+  "keywords": [
+    "ENS",
+    "ENSNode"
+  ],
   "exports": "./src/index.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {
