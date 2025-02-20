@@ -60,7 +60,7 @@ export class PrometheusMetrics {
       if (line.startsWith("#")) continue;
 
       const match = line.match(
-        /^([a-zA-Z_:][a-zA-Z0-9_:]*?)({(.+?)})??\s+(-?\d+\.?\d*(?:e[-+]\d+)?)\s*$/
+        /^([a-zA-Z_:][a-zA-Z0-9_:]*?)({(.+?)})??\s+(-?\d+\.?\d*(?:e[-+]\d+)?)\s*$/,
       );
       if (!match) continue;
 
@@ -102,19 +102,14 @@ export class PrometheusMetrics {
    * metrics.getValue('http_requests_total', { method: 'GET' }) // Returns: 1234
    * ```
    */
-  getValue(
-    name: string,
-    labelFilter?: Record<string, string>
-  ): number | undefined {
+  getValue(name: string, labelFilter?: Record<string, string>): number | undefined {
     const metric = this.metrics.get(name);
     if (!metric) return undefined;
 
     if (!labelFilter) return metric.value;
 
     if (metric.labels) {
-      const matches = Object.entries(labelFilter).every(
-        ([k, v]) => metric.labels?.[k] === v
-      );
+      const matches = Object.entries(labelFilter).every(([k, v]) => metric.labels?.[k] === v);
       return matches ? metric.value : undefined;
     }
 
@@ -150,12 +145,9 @@ export class PrometheusMetrics {
    * // Returns: { avg: 123.45, p95: 200, max: 500 }
    * ```
    */
-  getHistogramStats(
-    name: string
-  ): { avg: number; p95: number; max: number } | undefined {
+  getHistogramStats(name: string): { avg: number; p95: number; max: number } | undefined {
     const metric = this.metrics.get(name) as HistogramValue;
-    if (!metric || metric.type !== "histogram" || metric.count === 0)
-      return undefined;
+    if (!metric || metric.type !== "histogram" || metric.count === 0) return undefined;
 
     const bucketEntries = Object.entries(metric.buckets);
     if (bucketEntries.length === 0) return undefined;
@@ -188,7 +180,7 @@ export class PrometheusMetrics {
   private calculatePercentile(
     buckets: Array<{ le: number; count: number }>,
     totalCount: number,
-    p: number
+    p: number,
   ): number {
     if (buckets.length === 0 || totalCount === 0) return 0;
 
@@ -210,11 +202,7 @@ export class PrometheusMetrics {
    * @param value Metric value
    * @private
    */
-  private processMetric(
-    name: string,
-    labelString: string | undefined,
-    value: number
-  ): void {
+  private processMetric(name: string, labelString: string | undefined, value: number): void {
     const getBaseName = (name: string, suffix: string): string => {
       const parts = name.split(suffix);
       return parts[0] || name;
@@ -255,9 +243,7 @@ export class PrometheusMetrics {
    * // Returns: { method: "GET", status: "200" }
    * ```
    */
-  private parseLabels(
-    labelString?: string
-  ): Record<string, string> | undefined {
+  private parseLabels(labelString?: string): Record<string, string> | undefined {
     if (!labelString) return undefined;
 
     const labels: Record<string, string> = {};

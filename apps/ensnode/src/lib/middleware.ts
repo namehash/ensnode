@@ -1,7 +1,7 @@
 import { MiddlewareHandler } from "hono";
 import { PublicClient } from "viem";
-import { PrometheusMetrics } from "./prometheus-metrics";
 import { getEnsDeploymentChain } from "./ponder-helpers";
+import { PrometheusMetrics } from "./prometheus-metrics";
 
 interface BlockMetadata {
   height: number;
@@ -62,13 +62,9 @@ export function ensNodeMetadata({
   publicClients: Record<number, PublicClient>;
 }): MiddlewareHandler {
   return async function ensNodeMetadataMiddleware(ctx) {
-    const packageJson = await import("../../package.json").then(
-      (m) => m.default
-    );
+    const packageJson = await import("../../package.json").then((m) => m.default);
 
-    const metricsResponse = await fetch(
-      `http://localhost:${process.env.PORT}/metrics`
-    );
+    const metricsResponse = await fetch(`http://localhost:${process.env.PORT}/metrics`);
 
     const metrics = new PrometheusMetrics();
 
@@ -93,12 +89,9 @@ export function ensNodeMetadata({
       });
       const lastSyncedBlockTimestamp = 0;
 
-      const lastIndexedBlockTimestamp = metrics.getValue(
-        "ponder_indexing_timestamp",
-        {
-          network,
-        }
-      );
+      const lastIndexedBlockTimestamp = metrics.getValue("ponder_indexing_timestamp", {
+        network,
+      });
       const lastIndexedBlockHeight = 0;
 
       const networkStatus = {
@@ -123,15 +116,9 @@ export function ensNodeMetadata({
           timestamp: Number(latestSafeBlock.timestamp),
           utc: new Date(Number(latestSafeBlock.timestamp) * 1000).toISOString(),
         },
-        isRealtime: Boolean(
-          metrics.getValue("ponder_sync_is_realtime", { network })
-        ),
-        isComplete: Boolean(
-          metrics.getValue("ponder_sync_is_complete", { network })
-        ),
-        isQueued:
-          typeof metrics.getValue("ponder_sync_block", { network }) ===
-          "undefined",
+        isRealtime: Boolean(metrics.getValue("ponder_sync_is_realtime", { network })),
+        isComplete: Boolean(metrics.getValue("ponder_sync_is_complete", { network })),
+        isQueued: typeof metrics.getValue("ponder_sync_block", { network }) === "undefined",
         status: "",
       } satisfies NetworkIndexingStatus;
 
