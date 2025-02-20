@@ -8,7 +8,7 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains
 // that have been migrated to the new registry. We encode this logic here, ignoring
-// RegistryOld events when the domain in question has already been registered in the Registry.
+// RegistryOld events when the domain in question has already been registered in or migrated to the (new) Registry.
 
 // a domain is migrated if it exists and isMigrated is set to true, otherwise it is not
 async function isDomainMigrated(context: Context, node: Hex) {
