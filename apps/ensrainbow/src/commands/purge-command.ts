@@ -13,11 +13,9 @@ export async function purgeCommand(options: PurgeCommandOptions): Promise<void> 
     await rm(dataDir, { recursive: true, force: true });
     logger.info("Database directory removed successfully.");
   } catch (error) {
-    if (error instanceof Error) {
-      logger.error(`Failed to remove database directory: ${error.message}`);
-    } else {
-      logger.error("Failed to remove database directory: Unknown error");
-    }
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    logger.error(`Failed to remove database directory: ${errorMessage}`);
     throw error;
   }
 }
