@@ -248,7 +248,10 @@ const domainEvent = (t: any) => ({
 });
 
 const domainEventIndex = (t: any) => ({
-  idx: index().on(t.domainId, t.id),
+  // primary reverse lookup
+  idx: index().on(t.domainId),
+  // sorting index
+  idx_compound: index().on(t.domainId, t.id),
 });
 
 // Domain Event Entities
@@ -346,7 +349,10 @@ const registrationEvent = (t: any) => ({
 });
 
 const registrationEventIndex = (t: any) => ({
-  idx: index().on(t.registrationId, t.id),
+  // primary reverse lookup
+  idx: index().on(t.registrationId),
+  // sorting index
+  idx_compound: index().on(t.registrationId, t.id),
 });
 
 export const nameRegistered = onchainTable(
@@ -385,7 +391,10 @@ const resolverEvent = (t: any) => ({
 });
 
 const resolverEventIndex = (t: any) => ({
-  idx: index().on(t.resolverId, t.id),
+  // primary reverse lookup
+  idx: index().on(t.resolverId),
+  // sorting index
+  idx_compound: index().on(t.resolverId, t.id),
 });
 
 export const addrChanged = onchainTable(
