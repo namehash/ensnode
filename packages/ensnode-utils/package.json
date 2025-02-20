@@ -15,9 +15,7 @@
     "./subname-helpers": "./src/subname-helpers.ts",
     "./types": "./src/types.ts"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public",
     "exports": {
