@@ -3,26 +3,37 @@ import { PublicClient } from "viem";
 import { PrometheusMetrics } from "./prometheus-metrics";
 import { getEnsDeploymentChain } from "./ponder-helpers";
 
+interface BlockMetadata {
+  height: number;
+  timestamp: number;
+  utc: string;
+}
+
 interface NetworkIndexingStatus {
   /**
    * Number of blocks required for the historical sync.
    */
-  totalBlocks: number | undefined;
+  totalBlocksCount: number | undefined;
 
   /**
    *  Number of blocks that were found in the cache for the historical sync.
    */
-  cachedBlocks: number | undefined;
+  cachedBlocksCount: number | undefined;
 
   /**
    * Closest-to-tip synced block number.
    */
-  syncBlock: number | undefined;
+  lastSyncedBlock: BlockMetadata | undefined;
 
   /**
-   * Latest block number.
+   * Last block processed & indexed by the indexer.
    */
-  latestBlock: number;
+  lastIndexedBlock: BlockMetadata | undefined;
+
+  /**
+   * Latest safe block available on the chain.
+   */
+  latestSafeBlock: BlockMetadata | undefined;
 
   /**
    * Indicating if the sync is realtime mode.
@@ -65,17 +76,53 @@ export function ensNodeMetadata({
 
     const chainIds = Object.keys(publicClients).map(Number);
 
-    const networkIndexingStatus = chainIds.reduce((acc, chainId) => {
+    let networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
+
+    for (const chainId of chainIds) {
       const network = chainId.toString();
+      const publicClient = publicClients[chainId];
+
+      if (!publicClient) {
+        throw new Error(`No public client found for chainId ${chainId}`);
+      }
+
+      const latestSafeBlock = await publicClient.getBlock();
+
+      const lastSyncedBlockHeight = metrics.getValue("ponder_sync_block", {
+        network,
+      });
+      const lastSyncedBlockTimestamp = 0;
+
+      const lastIndexedBlockTimestamp = metrics.getValue(
+        "ponder_indexing_timestamp",
+        {
+          network,
+        }
+      );
+      const lastIndexedBlockHeight = 0;
+
       const networkStatus = {
-        totalBlocks: metrics.getValue("ponder_historical_total_blocks", {
+        totalBlocksCount: metrics.getValue("ponder_historical_total_blocks", {
           network,
         }),
-        cachedBlocks: metrics.getValue("ponder_historical_cached_blocks", {
+        cachedBlocksCount: metrics.getValue("ponder_historical_cached_blocks", {
           network,
         }),
-        syncBlock: metrics.getValue("ponder_sync_block", { network }),
-        latestBlock: 0,
+        lastSyncedBlock: {
+          height: lastSyncedBlockHeight ?? 0,
+          timestamp: lastSyncedBlockTimestamp ?? 0,
+          utc: "",
+        },
+        lastIndexedBlock: {
+          height: 0,
+          timestamp: lastIndexedBlockTimestamp ?? 0,
+          utc: "",
+        },
+        latestSafeBlock: {
+          height: Number(latestSafeBlock.number),
+          timestamp: Number(latestSafeBlock.timestamp),
+          utc: new Date(Number(latestSafeBlock.timestamp) * 1000).toISOString(),
+        },
         isRealtime: Boolean(
           metrics.getValue("ponder_sync_is_realtime", { network })
         ),
@@ -90,14 +137,11 @@ export function ensNodeMetadata({
 
       if (Object.values(networkStatus).every((v) => typeof v === "undefined")) {
         // no data for this network
-        return acc;
+        continue;
       }
 
-      networkStatus.status = getHumanFriendlyIndexingStatus(networkStatus);
-      acc[network] = networkStatus;
-
-      return acc;
-    }, {} as Record<string, NetworkIndexingStatus>);
+      networkIndexingStatus[network] = networkStatus;
+    }
 
     return ctx.json({
       name: packageJson.name,
@@ -115,43 +159,4 @@ export function ensNodeMetadata({
       },
     });
   };
-}
-
-/**
- * Generates a human-friendly status message for network indexing state
- */
-function getHumanFriendlyIndexingStatus(status: NetworkIndexingStatus): string {
-  // Chain not yet indexed
-  if (status.isQueued) {
-    return "Waiting to start indexing";
-  }
-
-  // Missing core metrics
-  if (typeof status.totalBlocks === "undefined") {
-    return "Initializing indexer";
-  }
-
-  const blocksBehind = status.latestBlock - (status.syncBlock ?? 0);
-  const blocksProgress =
-    status.cachedBlocks && status.totalBlocks
-      ? ((status.cachedBlocks / status.totalBlocks) * 100).toFixed(1)
-      : "0";
-
-  // Fully synced state
-  if (status.isComplete) {
-    if (status.isRealtime) {
-      if (blocksBehind > 100) {
-        return `Catching up: ${blocksBehind.toLocaleString()} blocks behind tip`;
-      }
-      return "Synced and processing new blocks in real-time";
-    }
-    return "Fully synced to historical block range";
-  }
-
-  // Actively syncing state
-  if (status.isRealtime) {
-    return `Processing historical blocks: ${blocksProgress}% complete (${status.cachedBlocks?.toLocaleString()} / ${status.totalBlocks?.toLocaleString()} blocks, ${blocksBehind.toLocaleString()} behind tip)`;
-  }
-
-  return `Indexing historical blocks: ${blocksProgress}% complete (${status.cachedBlocks?.toLocaleString()} / ${status.totalBlocks?.toLocaleString()} blocks)`;
 }
