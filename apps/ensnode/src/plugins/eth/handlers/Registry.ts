@@ -8,10 +8,12 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains
 // that have been migrated to the new registry. We encode this logic here, ignoring
-// RegistryOld events when the domain in question has already been registered in or migrated to the (new) Registry.
+// RegistryOld events when the domain in question has already been registered in or migrated to the
+// (new) Registry.
 
-// a domain is migrated if it exists and isMigrated is set to true, otherwise it is not
-async function isDomainMigrated(context: Context, node: Hex) {
+// these handlers should ignore 'RegistryOld' events for a given domain it has been migrated to the
+// (new) Registry, which is tracked in the `Domain.isMigrated` field
+async function shouldIgnoreRegistryOldEvents(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
   return domain?.isMigrated ?? false;
 }
@@ -30,25 +32,28 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
   // iff the domain has not yet been migrated
   ponder.on(namespace("RegistryOld:NewOwner"), async ({ context, event }) => {
     const node = makeSubnodeNamehash(event.args.node, event.args.label);
-    const isMigrated = await isDomainMigrated(context, node);
-    if (isMigrated) return;
+    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, node);
+    if (shouldIgnoreEvent) return;
+
     return handleNewOwner(false)({ context, event });
   });
 
   ponder.on(namespace("RegistryOld:NewResolver"), async ({ context, event }) => {
-    const isMigrated = await isDomainMigrated(context, event.args.node);
+    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
     const isRootNode = event.args.node === ROOT_NODE;
 
     // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L246
     // NOTE: the subgraph must include an exception here for the root node because it starts out
-    // isMigrated: true, but we definitely still want to handle NewResolver events for it.
-    if (isMigrated && !isRootNode) return;
+    // shouldIgnoreEvent: true, but we definitely still want to handle NewResolver events for it.
+    if (shouldIgnoreEvent && !isRootNode) return;
+
     return handleNewResolver({ context, event });
   });
 
   ponder.on(namespace("RegistryOld:NewTTL"), async ({ context, event }) => {
-    const isMigrated = await isDomainMigrated(context, event.args.node);
-    if (isMigrated) return;
+    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
+    if (shouldIgnoreEvent) return;
+
     return handleNewTTL({ context, event });
   });
 
@@ -59,8 +64,9 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     // Registry events are picked up. for backwards compatibility this beahvior is re-implemented
     // here.
 
-    const isMigrated = await isDomainMigrated(context, event.args.node);
-    if (isMigrated) return;
+    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
+    if (shouldIgnoreEvent) return;
+
     return handleTransfer({ context, event });
   });
 

@@ -4,7 +4,7 @@ sidebar:
   order: 2
 ---
 
-To use ENSNode with `ensjs`, follow the [ensjs documentation for custom subgraph URIs](https://github.com/ensdomains/ensjs/blob/main/docs/basics/custom-subgraph-uris.md), replacing the subgraph uri with your ENSNode's subgraph-compatible api endpoint.
+To use ENSNode with `ensjs`, follow the [ensjs documentation for custom subgraph URIs](https://github.com/ensdomains/ensjs/blob/main/docs/basics/custom-subgraph-uris.md), replacing the subgraph URI with your ENSNode's subgraph-compatible api endpoint.
 
 ```ts
 import { http, createClient } from 'viem'
@@ -18,7 +18,10 @@ const chain = {
   ...mainnetWithEns,
   subgraphs: {
     ens: {
-      url: 'http://localhost:42069/subgraph',
+      // use the NameHash-hosted 'alpha' instance
+      url: 'https://alpha.ensnode.io/subgraph',
+      // or use your own local instance
+      // url: 'http://localhost:42069/subgraph',
     },
   },
 }
