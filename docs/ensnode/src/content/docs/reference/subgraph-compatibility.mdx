@@ -4,8 +4,6 @@ sidebar:
   order: 2
 ---
 
-# Background
-
 ENSNode v1 provides an ENS Subgraph-Compatible GraphQL endpoint for the purposes of:
 
 1. Demonstrating 1:1 reproduction of the ENS Subgraph's logic & data
@@ -18,20 +16,20 @@ ENSNode v1 provides an ENS Subgraph-Compatible GraphQL endpoint for the purposes
     - the built-in Ponder GraphQL api provides more efficient querying (esp. pagination) semantics
     - the built-in `@ponder/client` provides a smoother devx for retrieving data within a client app
 
-# Subgraph-Compatible GraphQL API Reference
+## Subgraph-Compatible GraphQL API Reference
 
-## Supported Features
+### Supported Features
 
 The feature set used by `ensjs` and `ens-app-v3` is fully supported: see the [well-known queries](#well-known-queries) section  below.
 
 There exists a [fork of ens-test-env](https://github.com/namehash/ens-test-env/) that uses ENSNode instead of the ENS Subgraph. It's this fork of `ens-test-env` that is used to run the [ensjs](https://github.com/namehash/ensjs) test suite against ENSNode.
 
-## Planned Features
+### Planned Features
 
 - any open [issues](https://github.com/namehash/ensnode/issues) regarding Subgraph-Compatibility
 - [subgraph `_Meta_` object](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#subgraph-metadata)
 
-## Unplanned Features
+### Unplanned Features
 
 The following features of the subgraph graphql api are explicitly unsupported and are not planned to be supported.
 
@@ -40,9 +38,9 @@ The following features of the subgraph graphql api are explicitly unsupported an
 - [time travel queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#time-travel-queries)
 - [_change_block filtering](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-block-filtering)
 
-## Well-Known Queries
+### Well-Known Queries
 
-### from ensjs
+#### from ensjs
 - [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — Gets the full name for a name with unknown labels from the subgraph
   - Heals encoded labels using the subgraph
   - Returns if name is fully decoded
@@ -67,7 +65,7 @@ The following features of the subgraph graphql api are explicitly unsupported an
   - Supports ordering by expiry date, name, labelName, createdAt
   - Supports pagination by excluding previous results
 
-### from ens-app-v3
+#### from ens-app-v3
 
 - [`useResolverExists`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useResolverExists.ts#L27) — Checks if a resolver exists
 - [`useRegistrationData`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useRegistrationData.ts#L31) — Gets registration by id and nameRegistered events

@@ -4,33 +4,33 @@ title: What is the ENS Subgraph?
 
 The following serves as background information regarding the ENS Subgraph. It is not necessary for running ENSNode but may be helpful in descriing the ecosystem & context in which ENSNode was developed.
 
-# Graph Node
+## The Graph & Graph Node
 
 [The Graph](https://thegraph.com/) leads development of [Graph Node](https://thegraph.com/docs/en/indexing/tooling/graph-node/), an [open source software application](https://github.com/graphprotocol/graph-node) for indexing blockchain data.
 
-# Subgraphs
+## Subgraphs
 
 Each Graph Node server can run any number of "subgraphs". Each subgraph is essentially a plugin describing:
 1. A strategy for how the Graph Node should index blockchain data.
 2. A schema for a GraphQL API providing access to the indexed data.
 
-# ENS Subgraph
+## ENS Subgraph
 
 [ENS Labs](https://www.enslabs.org/) has led development of the [ENS Subgraph](https://github.com/ensdomains/ens-subgraph). So far this has been the "official" strategy for indexing ENS data. Additional background info is available in [official ENS docs](https://docs.ens.domains/web/subgraph).
 
-# Graph Network
+## Graph Network
 
 Operating your own Graph Node server instance can be complex, expensive, and time consuming. An alternative is to use The Graph's semi-decentralized network of indexers operating Graph Node instances.
 
 This network provides access to a [semi-decentralized ENS Subgraph](https://thegraph.com/explorer/subgraphs/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH?view=Query&chain=arbitrum-one). Developers are welcome to use this rate limited API endpoint above for testing, but are highly encouraged to sign up for an account with The Graph to get their own (paid) API key.
 
-# NameHash Labs Hosted Graph Node Instance
+## NameHash Labs Hosted Graph Node Instance
 
 As an alternative to the Graph Network, [NameHash Labs](https://namehashlabs.org/) operates an independent Graph Node instance. This is currently being freely offered to the ENS community without need for API keys or rate limiting. It can be found at https://graphnode.namehashlabs.org:8030. An [interactive GraphQL Playground](https://graphnode.namehashlabs.org:8030/graphql/playground) is also available.
 
 This server is running [Graph Node version 0.33.0](https://github.com/graphprotocol/graph-node/releases/tag/v0.33.0). The latest Graph Node release (as of this writing) is [version 0.36.0](https://github.com/graphprotocol/graph-node/releases), however it is understood that this version update has no impact on the data being indexed.
 
-# NameHash Labs Hosted ENS Subgraphs
+## NameHash Labs Hosted ENS Subgraphs
 
 Our Graph Node instance indexes the ENS Subgraph. The live status can be monitored with [the indexing status API endpoint](https://graphnode.namehashlabs.org:8030/graphql/playground?query=%7B%0A%20%20indexingStatuses%20%7B%0A%20%20%20%20subgraph%0A%20%20%20%20health%0A%20%20%20%20historyBlocks%0A%20%20%20%20paused%0A%20%20%20%20synced%0A%20%20%20%20chains%20%7B%0A%20%20%20%20%20%20network%0A%20%20%20%20%20%20chainHeadBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20latestBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D).
 Subgraph Id: QmVsj1tYQ84DZH3NHAbZKjQ5agQ5Gt6VusUBf67CU32FWP
