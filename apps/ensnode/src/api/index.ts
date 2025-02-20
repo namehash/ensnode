@@ -1,16 +1,40 @@
-import { db } from "ponder:api";
+import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
+import { ensNodeMetadata } from "../lib/middleware";
 
 const app = new Hono();
+
+// use CORS middleware
+app.use(
+  cors({
+    origin: "*",
+  })
+);
+
+// use ENSNode middleware at /metadata
+app.get(
+  "/metadata",
+  ensNodeMetadata({
+    publicClients,
+  })
+);
 
 // use ponder client support
 app.use("/sql/*", client({ db, schema }));
 
 // use ponder middleware at root
-app.use("/", ponderGraphQL({ db, schema }));
+app.use("/ponder", ponderGraphQL({ db, schema }));
+
+// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+app.use("/", async (ctx) =>
+  ctx.redirect(
+    `https://admin.ensnode.io/about?ensnode=${process.env.SERVER_URL}`
+  )
+);
 
 // use our custom graphql middleware at /subgraph
 app.use(
@@ -33,7 +57,11 @@ app.use(
           schema.fusesSet,
           schema.expiryExtended,
         ],
-        RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+        RegistrationEvent: [
+          schema.nameRegistered,
+          schema.nameRenewed,
+          schema.nameTransferred,
+        ],
         ResolverEvent: [
           schema.addrChanged,
           schema.multicoinAddrChanged,
@@ -53,7 +81,7 @@ app.use(
         "Resolver.events": "ResolverEvent",
       },
     },
-  }),
+  })
 );
 
 export default app;
