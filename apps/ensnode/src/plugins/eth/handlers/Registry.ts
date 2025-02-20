@@ -42,7 +42,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
     const isRootNode = event.args.node === ROOT_NODE;
 
-    // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L246
+    // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L246
     // NOTE: the subgraph must include an exception here for the root node because it starts out
     // shouldIgnoreEvent: true, but we definitely still want to handle NewResolver events for it.
     if (shouldIgnoreEvent && !isRootNode) return;

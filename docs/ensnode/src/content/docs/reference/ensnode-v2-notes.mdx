@@ -47,7 +47,7 @@ the 'empty' domains should be handled more accurately, depending on how importan
 
 domain createdAt should not update on re-registration, should be original createdAt
 
-various resources use both null and zeroAddress to indicate emptiness, this is horrible and creates numerous checks like [this](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts#L255) where they check for `!== NULL && !== zeroAddress`
+various resources use both null and zeroAddress to indicate emptiness, this is horrible and creates numerous checks like [this](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts#L255) where they check for `!== NULL && !== zeroAddress`
 
 wrappedOwnerId should not be materialized onto domain, should just be resolved through wrappedDomain.owner
 

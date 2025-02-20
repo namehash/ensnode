@@ -41,25 +41,25 @@ The following features of the subgraph graphql api are explicitly unsupported an
 ### Well-Known Queries
 
 #### from ensjs
-- [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — Gets the full name for a name with unknown labels from the subgraph
+- [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — Gets the full name for a name with unknown labels from the subgraph
   - Heals encoded labels using the subgraph
   - Returns if name is fully decoded
   - Splits name into labels
   - Finds domains by id for encoded labels
   - Queries domain by namehash
-- [`getNameHistory`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getNameHistory.ts)
+- [`getNameHistory`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNameHistory.ts)
   - Retrieves all events associated with a name
-- [`getNamesForAddress`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts)
+- [`getNamesForAddress`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts)
   - Gets all names related to an address via registrant, owner, wrappedOwner, resolvedAddress
   - Supports searchString
   - Supports filtering by expiry, reverse records, empty domains
   - Supports ordering by expiry date, name, labelName, createdAt
   - Supports pagination by excluding previous results
-- [`getSubgraphRecords`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getSubgraphRecords.ts) — Gets the records for a name from the subgraph
+- [`getSubgraphRecords`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRecords.ts) — Gets the records for a name from the subgraph
   - Allows querying by specific resolver id
-- [`getSubgraphRegistrant`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getSubgraphRegistrant.ts) — Gets the name registrant from the subgraph
+- [`getSubgraphRegistrant`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRegistrant.ts) — Gets the name registrant from the subgraph
   - Supports .eth second-level domains only
-- [`getSubnames`](https://github.com/ensdomains/ensjs/blob/main/packages/ensjs/src/functions/subgraph/getSubnames.ts) — Gets the subnames for a name
+- [`getSubnames`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubnames.ts) — Gets the subnames for a name
   - Supports searchString
   - Supports filtering by expiry, empty domains
   - Supports ordering by expiry date, name, labelName, createdAt

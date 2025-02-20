@@ -44,7 +44,7 @@ export async function setupRootNode({ context }: { context: Context }) {
 }
 
 // a domain is 'empty' if it has no resolver, no owner, and no subdomains
-// via https://github.com/ensdomains/ens-subgraph/blob/master/src/ensRegistry.ts#L65
+// via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L65
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
   return (
     domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
