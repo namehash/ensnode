@@ -119,8 +119,16 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       // decode the name emitted by NameWrapper
       const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
 
-      // upsert the healed name iff valid
-      if (label) {
+      const domain = await context.db.find(schema.domain, { id: node });
+      if (!domain) throw new Error("domain is guaranteed to already exist");
+
+      // upsert the healed name iff !domain.labelName && label
+      // NOTE: this means that future wraps of a domain with encoded label hashes in the name
+      //   will _not_ use the newly healed label emitted by the NameWrapper contract, and will
+      //   continue to have an un-healed labelhash in its name field
+      // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
+      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
+      if (!domain.labelName && label) {
         await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 

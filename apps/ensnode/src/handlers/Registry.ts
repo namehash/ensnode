@@ -98,8 +98,8 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // interacted with on the new registry, its migration status is set here
         if (domain) {
           // if the domain already exists, this is just an update of the owner record (& isMigrated)
-          await context.db
-            .update(schema.domain, { id: domain.id })
+          domain = await context.db
+            .update(schema.domain, { id: subnode })
             .set({ ownerId: owner, isMigrated });
         } else {
           // otherwise create the domain (w/ isMigrated)
@@ -134,7 +134,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
           // akin to domain.save()
           // via https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
-          await context.db.update(schema.domain, { id: domain.id }).set({
+          await context.db.update(schema.domain, { id: subnode }).set({
             name,
             // NOTE: only update Domain.labelName iff label is healed and valid
             // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
@@ -145,7 +145,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // garbage collect newly 'empty' domain iff necessary
         // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
-          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, domain.id);
+          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, subnode);
         }
 
         // log DomainEvent
@@ -230,9 +230,11 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
       const resolverId = makeResolverId(resolverAddress, node);
 
+      const isZeroResolver = resolverAddress === zeroAddress;
+
       // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
       // NOTE: Resolver records are never deleted
-      if (resolverAddress === zeroAddress) {
+      if (isZeroResolver) {
         await context.db
           .update(schema.domain, { id: node })
           .set({ resolverId: null, resolvedAddressId: null });
@@ -247,12 +249,13 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           address: resolverAddress,
         });
 
-        // update the domain to point to it, and denormalize the eth addr
+        // update the domain to point to it, and materialize the eth addr
         // NOTE: this implements the logic as documented here
         // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
-        await context.db
-          .update(schema.domain, { id: node })
-          .set({ resolverId, resolvedAddressId: resolver.addrId });
+        await context.db.update(schema.domain, { id: node }).set({
+          resolverId,
+          resolvedAddressId: resolver.addrId,
+        });
       }
 
       // log DomainEvent
@@ -267,7 +270,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
           // ex: newResolver(id: "3745840-2") { id resolver {id} }
           // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
           // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
-          resolverId: resolverAddress === zeroAddress ? zeroAddress : resolverId,
+          resolverId: isZeroResolver ? zeroAddress : resolverId,
         })
         .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
     },

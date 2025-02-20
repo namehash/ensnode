@@ -2,11 +2,7 @@ import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensno
 import { ByteArray } from "viem";
 import { logger } from "../utils/logger";
 import { parseNonNegativeInteger } from "../utils/number-utils";
-import {
-  LABELHASH_COUNT_KEY,
-  ensureIngestionNotIncomplete,
-  isIngestionInProgress,
-} from "./database";
+import { LABELHASH_COUNT_KEY, ensureIngestionNotIncomplete } from "./database";
 import { ENSRainbowDB, safeGet } from "./database";
 
 export class ENSRainbowServer {

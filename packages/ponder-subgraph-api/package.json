@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-subgraph",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "description": "A Hono middleware for generating Subgraph-compatible GraphQL schema.",
   "license": "MIT",
@@ -14,7 +14,21 @@
   "exports": {
     "./middleware": "./src/middleware.ts"
   },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "./middleware": {
+        "types": "./dist/middleware.d.ts",
+        "default": "./dist/middleware.js"
+      }
+    },
+    "main": "./dist/middleware.js",
+    "module": "./dist/middleware.mjs",
+    "types": "./dist/middleware.d.ts"
+  },
   "scripts": {
+    "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
     "lint:ci": "biome ci"
   },
@@ -33,12 +47,10 @@
     "@ensnode/shared-configs": "workspace:",
     "@types/node": "catalog:",
     "hono": "catalog:",
+    "tsup": "catalog:",
     "typescript": "catalog:"
   },
   "peerDependencies": {
     "hono": "catalog:"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -8,9 +8,9 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
+    "ensadmin",
     "ensnode",
     "@ensnode/ensrainbow",
-    "@ensnode/utils",
     "@docs/ensnode",
     "@docs/ensrainbow"
   ]
