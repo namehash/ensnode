@@ -10,16 +10,11 @@
     "directory": "packages/ponder-subgraph-api"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-subgraph-api",
-  "keywords": [
-    "Ponder",
-    "Subgraph"
-  ],
+  "keywords": ["Ponder", "Subgraph"],
   "exports": {
     "./middleware": "./src/middleware.ts"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public",
     "exports": {
