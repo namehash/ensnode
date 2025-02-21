@@ -211,8 +211,8 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Gets the current database schema version.
-   * @returns The current schema version as a number, or null if not set
+   * Gets the database schema version.
+   * @returns The current schema version as a non-negative integer, or null if not set
    * @throws Error if schema version is not a valid non-negative integer
    */
   public async getDatabaseSchemaVersion(): Promise<number | null> {

@@ -2,7 +2,7 @@ import { ENSRainbowDB } from "../lib/database";
 
 export interface ValidateCommandOptions {
   dataDir: string;
-  lite?: boolean;
+  lite?: boolean; // defaults to false
 }
 
 export async function validateCommand(options: ValidateCommandOptions): Promise<void> {
