@@ -84,6 +84,29 @@ describe("CLI", () => {
     });
   });
 
+  describe("purge command", () => {
+    it("should remove the database directory", async () => {
+      // Create test directory
+      await mkdtemp(testDataDir);
+
+      // Run purge command
+      await cli.parse(["purge", "--data-dir", testDataDir]);
+
+      // Verify directory was removed
+      await expect(rm(testDataDir)).rejects.toThrow();
+    });
+
+    it("should handle errors gracefully", async () => {
+      const nonExistentDir = join(tempDir, "non-existent");
+
+      // Run purge command on non-existent directory
+      await cli.parse(["purge", "--data-dir", nonExistentDir]);
+
+      // Verify directory still doesn't exist
+      await expect(rm(nonExistentDir)).rejects.toThrow();
+    });
+  });
+
   describe("CLI Interface", () => {
     describe("ingest command", () => {
       it("should execute ingest command with custom data directory", async () => {

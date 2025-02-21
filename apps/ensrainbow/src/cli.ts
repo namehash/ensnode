@@ -3,6 +3,7 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 import { ingestCommand } from "./commands/ingest-command";
+import { purgeCommand } from "./commands/purge-command";
 import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
 import { getDefaultDataSubDir, getEnvPort } from "./lib/env";
@@ -30,6 +31,10 @@ interface ServeArgs {
 interface ValidateArgs {
   "data-dir": string;
   lite: boolean;
+}
+
+interface PurgeArgs {
+  "data-dir": string;
 }
 
 export interface CLIOptions {
@@ -109,6 +114,22 @@ export function createCLI(options: CLIOptions = {}) {
         await validateCommand({
           dataDir: argv["data-dir"],
           lite: argv.lite,
+        });
+      },
+    )
+    .command(
+      "purge",
+      "Completely wipe all files from the specified data directory",
+      (yargs: Argv) => {
+        return yargs.option("data-dir", {
+          type: "string",
+          description: "Directory containing LevelDB data",
+          default: getDefaultDataSubDir(),
+        });
+      },
+      async (argv: ArgumentsCamelCase<PurgeArgs>) => {
+        await purgeCommand({
+          dataDir: argv["data-dir"],
         });
       },
     )
