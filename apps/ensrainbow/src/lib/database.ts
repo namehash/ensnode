@@ -106,7 +106,7 @@ export class ENSRainbowDB {
    * @returns true if an ingestion is unfinished, false otherwise
    */
   public async isIngestionUnfinished(): Promise<boolean> {
-    const value = await this.get(INGESTION_IN_PROGRESS_KEY);
+    const value = await this.get(INGESTION_UNFINISHED_KEY);
     return value !== null;
   }
 
@@ -114,14 +114,14 @@ export class ENSRainbowDB {
    * Mark that an ingestion has started and is unfinished
    */
   public async markIngestionStarted(): Promise<void> {
-    await this.db.put(INGESTION_IN_PROGRESS_KEY, "true");
+    await this.db.put(INGESTION_UNFINISHED_KEY, "true");
   }
 
   /**
    * Mark that ingestion is finished
    */
   public async markIngestionFinished(): Promise<void> {
-    await this.del(INGESTION_IN_PROGRESS_KEY);
+    await this.del(INGESTION_UNFINISHED_KEY);
   }
 
   /**
@@ -196,7 +196,9 @@ export class ENSRainbowDB {
       const count = parseNonNegativeInteger(countStr);
       return count;
     } catch (error) {
-      throw new Error(`Invalid precalculated count value in database at ${this.dataDir}: ${countStr}`);
+      throw new Error(
+        `Invalid precalculated count value in database at ${this.dataDir}: ${countStr}`,
+      );
     }
   }
 
@@ -249,7 +251,7 @@ export class ENSRainbowDB {
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
     logger.info(`Starting database validation${options.lite ? " (lite mode)" : ""}...`);
     // Check if ingestion is unfinished
-    if (await this.isIngestionInProgress()) {
+    if (await this.isIngestionUnfinished()) {
       logger.error("Database is in an invalid state: ingestion unfinished flag is set");
       return false;
     }
@@ -272,7 +274,7 @@ export class ENSRainbowDB {
     // In lite mode, just check the count
     if (options.lite) {
       try {
-        const count = await this.getRainbowRecordCount();
+        const count = await this.getPrecalculatedRainbowRecordCount();
         logger.info(`Total keys: ${count}`);
         return true;
       } catch (error) {
@@ -285,7 +287,7 @@ export class ENSRainbowDB {
         // Skip keys not associated with rainbow records
         if (
           byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
-          byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY) ||
+          byteArraysEqual(key, INGESTION_UNFINISHED_KEY) ||
           byteArraysEqual(key, SCHEMA_VERSION_KEY)
         ) {
           continue;
@@ -316,7 +318,7 @@ export class ENSRainbowDB {
 
       // Verify count
       try {
-        const storedCount = await this.getRainbowRecordCount();
+        const storedCount = await this.getPrecalculatedRainbowRecordCount();
 
         if (storedCount !== rainbowRecordCount) {
           logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
@@ -356,7 +358,7 @@ export class ENSRainbowDB {
   public async countRainbowRecords(): Promise<void> {
     // Try to read existing count
     try {
-      const existingCount = await this.getRainbowRecordCount();
+      const existingCount = await this.getPrecalculatedRainbowRecordCount();
       logger.warn(`Existing count in database: ${existingCount}`);
     } catch (error) {
       logger.info("No existing count found in database");
@@ -369,7 +371,7 @@ export class ENSRainbowDB {
       // Skip keys not associated with rainbow records
       if (
         !byteArraysEqual(key, LABELHASH_COUNT_KEY) &&
-        !byteArraysEqual(key, INGESTION_IN_PROGRESS_KEY) &&
+        !byteArraysEqual(key, INGESTION_UNFINISHED_KEY) &&
         !byteArraysEqual(key, SCHEMA_VERSION_KEY)
       ) {
         count++;
@@ -377,7 +379,7 @@ export class ENSRainbowDB {
     }
 
     // Store the count
-    await this.setRainbowRecordCount(count);
+    await this.setPrecalculatedRainbowRecordCount(count);
 
     logger.info(`Total number of rainbow records: ${count}`);
     logger.info(`Updated count in database under LABELHASH_COUNT_KEY`);

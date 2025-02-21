@@ -38,7 +38,7 @@ describe("Database", () => {
           await db.addRainbowRecord(label);
         }
 
-        await db.setRainbowRecordCount(testDataLabels.length);
+        await db.setPrecalculatedRainbowRecordCount(testDataLabels.length);
 
         const isValid = await db.validate();
         expect(isValid).toBe(true);
@@ -51,8 +51,8 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
-        // Set labelhash count key
-        db.setRainbowRecordCount(1);
+        // Set precalculated rainbow record count key
+        db.setPrecalculatedRainbowRecordCount(1);
 
         // Add records using batch
         const batch = db.batch();
@@ -72,8 +72,8 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
-        // Set labelhash count key
-        db.setRainbowRecordCount(1);
+        // Set precalculated rainbow record count key
+        db.setPrecalculatedRainbowRecordCount(1);
 
         // Add records using batch
         const batch = db.batch();
@@ -112,8 +112,8 @@ describe("Database", () => {
         // Add record
         const label = "vitalik";
         await db.addRainbowRecord(label);
-        // Add incorrect count
-        db.setRainbowRecordCount(2);
+        // Add incorrect precalculated rainbow record count
+        db.setPrecalculatedRainbowRecordCount(2);
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -129,8 +129,8 @@ describe("Database", () => {
         // Add a valid record
         const label = "vitalik";
         await db.addRainbowRecord(label);
-        // Set labelhash count key
-        db.setRainbowRecordCount(1);
+        // Set precalculated rainbow record count key
+        db.setPrecalculatedRainbowRecordCount(1);
         // Set ingestion unfinished flag
         await db.markIngestionStarted();
 
@@ -151,7 +151,7 @@ describe("Database", () => {
         const batch = db.batch();
         batch.put(labelHashToBytes(wrongLabelhash), label);
         await batch.write();
-        await db.setRainbowRecordCount(1);
+        await db.setPrecalculatedRainbowRecordCount(1);
 
         // Should pass in lite mode despite hash mismatch
         const isValidLite = await db.validate({ lite: true });

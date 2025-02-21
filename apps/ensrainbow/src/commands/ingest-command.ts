@@ -27,8 +27,8 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   const db = await ENSRainbowDB.create(options.dataDir);
 
   try {
-    // Check if there's an incomplete ingestion
-    if (await db.isIngestionInProgress()) {
+    // Check if there's an unfinished ingestion
+    if (await db.isIngestionUnfinished()) {
       const errorMessage =
         "Database is in an incomplete state! " +
         "An ingestion was started but not completed successfully.\n" +
@@ -137,8 +137,8 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     logger.info("\nStarting rainbow record counting phase...");
     await db.countRainbowRecords();
 
-    // Clear the ingestion marker since we completed successfully
-    await db.clearIngestionMarker();
+    // Mark ingestion as finished since we completed successfully
+    await db.markIngestionFinished();
 
     logger.info("Data ingestion and count verification complete!");
   } finally {

@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { ENSRainbowDB } from "../lib/database";
-import { createRoutes } from "../lib/routes";
+import { createApi } from "../lib/routes";
 import { logger } from "../utils/logger";
 
 export interface ServerCommandOptions {
@@ -12,7 +12,7 @@ export interface ServerCommandOptions {
  * Creates and configures the ENS Rainbow server application
  */
 export async function createServer(db: ENSRainbowDB) {
-  return createRoutes(db);
+  return createApi(db);
 }
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {

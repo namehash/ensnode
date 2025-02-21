@@ -21,8 +21,8 @@ describe("Server Command Tests", () => {
     try {
       db = await ENSRainbowDB.create(TEST_DB_DIR);
 
-      // Initialize label count to be able to start server
-      await db.setRainbowRecordCount(0);
+      // Initialize precalculated rainbow record count to be able to start server
+      await db.setPrecalculatedRainbowRecordCount(0);
 
       app = await createServer(db);
 
@@ -131,8 +131,8 @@ describe("Server Command Tests", () => {
     });
 
     it("should return correct count from LABEL_COUNT_KEY", async () => {
-      // Set a specific count in the database
-      await db.setRainbowRecordCount(42);
+      // Set a specific precalculated rainbow record count in the database
+      await db.setPrecalculatedRainbowRecordCount(42);
 
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
       expect(response.status).toBe(200);

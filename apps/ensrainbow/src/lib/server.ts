@@ -21,7 +21,7 @@ export class ENSRainbowServer {
 
     //TODO maybe we should call validate lite here instead?
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
-    if (await db.isIngestionInProgress()) {
+    if (await db.isIngestionUnfinished()) {
       const errorMessage =
         "Database is in an incomplete state! " +
         "An ingestion was started but not completed successfully.\n" +

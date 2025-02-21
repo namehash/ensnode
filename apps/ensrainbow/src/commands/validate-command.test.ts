@@ -1,8 +1,6 @@
 import { tmpdir } from "os";
 import { join } from "path";
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { mkdtemp, rm } from "fs/promises";
-import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { ENSRainbowDB } from "../lib/database";
 import { validateCommand } from "./validate-command";
@@ -29,7 +27,7 @@ describe("Validate Command", () => {
       // Add a valid record
       const label = "vitalik";
       await db.addRainbowRecord(label);
-      await db.setRainbowRecordCount(1);
+      await db.setPrecalculatedRainbowRecordCount(1);
       await db.close();
 
       await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
