@@ -1,5 +1,6 @@
 import { index, onchainTable, relations } from "ponder";
 import type { Address } from "viem";
+import { monkeypatchCollate } from "./collate";
 
 /**
  * Domain
@@ -44,6 +45,11 @@ export const domain = onchainTable("domains", (t) => ({
   // The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned
   expiryDate: t.bigint("expiry_date"),
 }));
+
+// monkeypatch drizzle's column (necessary to match graph-node default collation "C")
+// https://github.com/drizzle-team/drizzle-orm/issues/638
+monkeypatchCollate(domain.name, '"C"');
+monkeypatchCollate(domain.labelName, '"C"');
 
 export const domainRelations = relations(domain, ({ one, many }) => ({
   resolvedAddress: one(account, {
@@ -104,25 +110,31 @@ export const accountRelations = relations(account, ({ many }) => ({
  * Resolver
  */
 
-export const resolver = onchainTable("resolvers", (t) => ({
-  // The unique identifier for this resolver, which is a concatenation of the domain namehash and the resolver address
-  id: t.text().primaryKey(),
-  // The domain that this resolver is associated with
-  domainId: t.hex("domain_id").notNull(),
-  // The address of the resolver contract
-  address: t.hex().notNull().$type<Address>(),
+export const resolver = onchainTable(
+  "resolvers",
+  (t) => ({
+    // The unique identifier for this resolver, which is a concatenation of the domain namehash and the resolver address
+    id: t.text().primaryKey(),
+    // The domain that this resolver is associated with
+    domainId: t.hex("domain_id").notNull(),
+    // The address of the resolver contract
+    address: t.hex().notNull().$type<Address>(),
 
-  // The current value of the 'addr' record for this resolver, as determined by the associated events
-  addrId: t.hex("addr_id"),
-  // The content hash for this resolver, in binary format
-  contentHash: t.text("content_hash"),
-  // The set of observed text record keys for this resolver
-  // NOTE: we avoid .notNull.default([]) to match subgraph behavior
-  texts: t.text().array(),
-  // The set of observed SLIP-44 coin types for this resolver
-  // NOTE: we avoid .notNull.default([]) to match subgraph behavior
-  coinTypes: t.bigint().array(),
-}));
+    // The current value of the 'addr' record for this resolver, as determined by the associated events
+    addrId: t.hex("addr_id"),
+    // The content hash for this resolver, in binary format
+    contentHash: t.text("content_hash"),
+    // The set of observed text record keys for this resolver
+    // NOTE: we avoid .notNull.default([]) to match subgraph behavior
+    texts: t.text().array(),
+    // The set of observed SLIP-44 coin types for this resolver
+    // NOTE: we avoid .notNull.default([]) to match subgraph behavior
+    coinTypes: t.bigint().array(),
+  }),
+  (t) => ({
+    idx: index().on(t.domainId),
+  }),
+);
 
 export const resolverRelations = relations(resolver, ({ one, many }) => ({
   addr: one(account, { fields: [resolver.addrId], references: [account.id] }),
@@ -145,22 +157,28 @@ export const resolverRelations = relations(resolver, ({ one, many }) => ({
  * Registration
  */
 
-export const registration = onchainTable("registrations", (t) => ({
-  // The unique identifier of the registration
-  id: t.hex().primaryKey(),
-  // The domain name associated with the registration
-  domainId: t.hex("domain_id").notNull(),
-  // The registration date of the domain
-  registrationDate: t.bigint("registration_date").notNull(),
-  // The expiry date of the domain
-  expiryDate: t.bigint("expiry_date").notNull(),
-  // The cost associated with the domain registration
-  cost: t.bigint(),
-  // The account that registered the domain
-  registrantId: t.hex("registrant_id").notNull(),
-  // The human-readable label name associated with the domain registration
-  labelName: t.text(),
-}));
+export const registration = onchainTable(
+  "registrations",
+  (t) => ({
+    // The unique identifier of the registration
+    id: t.hex().primaryKey(),
+    // The domain name associated with the registration
+    domainId: t.hex("domain_id").notNull(),
+    // The registration date of the domain
+    registrationDate: t.bigint("registration_date").notNull(),
+    // The expiry date of the domain
+    expiryDate: t.bigint("expiry_date").notNull(),
+    // The cost associated with the domain registration
+    cost: t.bigint(),
+    // The account that registered the domain
+    registrantId: t.hex("registrant_id").notNull(),
+    // The human-readable label name associated with the domain registration
+    labelName: t.text(),
+  }),
+  (t) => ({
+    idx: index().on(t.domainId),
+  }),
+);
 
 export const registrationRelations = relations(registration, ({ one, many }) => ({
   domain: one(domain, {
@@ -182,20 +200,26 @@ export const registrationRelations = relations(registration, ({ one, many }) => 
  * Wrapped Domain
  */
 
-export const wrappedDomain = onchainTable("wrapped_domains", (t) => ({
-  // The unique identifier for each instance of the WrappedDomain entity
-  id: t.hex().primaryKey(),
-  // The domain that is wrapped by this WrappedDomain
-  domainId: t.hex("domain_id").notNull(),
-  // The expiry date of the wrapped domain
-  expiryDate: t.bigint("expiry_date").notNull(),
-  // The number of fuses remaining on the wrapped domain
-  fuses: t.integer().notNull(),
-  // The account that owns this WrappedDomain
-  ownerId: t.hex("owner_id").notNull(),
-  // The name of the wrapped domain
-  name: t.text(),
-}));
+export const wrappedDomain = onchainTable(
+  "wrapped_domains",
+  (t) => ({
+    // The unique identifier for each instance of the WrappedDomain entity
+    id: t.hex().primaryKey(),
+    // The domain that is wrapped by this WrappedDomain
+    domainId: t.hex("domain_id").notNull(),
+    // The expiry date of the wrapped domain
+    expiryDate: t.bigint("expiry_date").notNull(),
+    // The number of fuses remaining on the wrapped domain
+    fuses: t.integer().notNull(),
+    // The account that owns this WrappedDomain
+    ownerId: t.hex("owner_id").notNull(),
+    // The name of the wrapped domain
+    name: t.text(),
+  }),
+  (t) => ({
+    idx: index().on(t.domainId),
+  }),
+);
 
 export const wrappedDomainRelations = relations(wrappedDomain, ({ one }) => ({
   domain: one(domain, {
@@ -224,7 +248,10 @@ const domainEvent = (t: any) => ({
 });
 
 const domainEventIndex = (t: any) => ({
-  idx: index().on(t.domainId, t.id),
+  // primary reverse lookup
+  idx: index().on(t.domainId),
+  // sorting index
+  idx_compound: index().on(t.domainId, t.id),
 });
 
 // Domain Event Entities
@@ -322,7 +349,10 @@ const registrationEvent = (t: any) => ({
 });
 
 const registrationEventIndex = (t: any) => ({
-  idx: index().on(t.registrationId, t.id),
+  // primary reverse lookup
+  idx: index().on(t.registrationId),
+  // sorting index
+  idx_compound: index().on(t.registrationId, t.id),
 });
 
 export const nameRegistered = onchainTable(
@@ -361,7 +391,10 @@ const resolverEvent = (t: any) => ({
 });
 
 const resolverEventIndex = (t: any) => ({
-  idx: index().on(t.resolverId, t.id),
+  // primary reverse lookup
+  idx: index().on(t.resolverId),
+  // sorting index
+  idx_compound: index().on(t.resolverId, t.id),
 });
 
 export const addrChanged = onchainTable(

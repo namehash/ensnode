@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensrainbow-sdk",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
   "license": "MIT",
@@ -17,7 +17,33 @@
     "./consts": "./src/consts.ts",
     "./label-utils": "./src/label-utils.ts"
   },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./client": {
+        "types": "./dist/client.d.ts",
+        "default": "./dist/client.js"
+      },
+      "./consts": {
+        "types": "./dist/consts.d.ts",
+        "default": "./dist/consts.js"
+      },
+      "./label-utils": {
+        "types": "./dist/label-utils.d.ts",
+        "default": "./dist/label-utils.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
+  },
   "scripts": {
+    "prepublish": "tsup",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "biome check --write",
@@ -27,13 +53,11 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
+    "@ensnode/shared-configs": "workspace:",
     "@ensnode/utils": "workspace:",
+    "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

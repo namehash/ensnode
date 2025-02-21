@@ -36,7 +36,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         addrId: address,
       });
 
-      // materialize the resolved addr to the domain iff this resolver is active
+      // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
       const domain = await context.db.find(schema.domain, { id: node });
       if (domain?.resolverId === id) {
         await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: address });
@@ -203,7 +203,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           ...sharedEventValues(event),
           resolverId: id,
           key,
-          // ponder's (viem's) event parsing produces empty string for some TextChange events
+          // ponder's (viem's) event parsing produces empty string for some TextChanged events
           // (which is correct) but the subgraph records null for these instances, so we coalesce
           // falsy strings to null for compatibility
           // ex: last TextChanged in 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
