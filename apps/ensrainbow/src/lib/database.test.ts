@@ -122,7 +122,7 @@ describe("Database", () => {
       }
     });
 
-    it("should detect when ingestion is in progress", async () => {
+    it("should detect when ingestion is unfinished", async () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
@@ -131,7 +131,7 @@ describe("Database", () => {
         await db.addRainbowRecord(label);
         // Set labelhash count key
         db.setRainbowRecordCount(1);
-        // Set ingestion in progress flag
+        // Set ingestion unfinished flag
         await db.markIngestionStarted();
 
         const isValid = await db.validate();

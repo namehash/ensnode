@@ -5,7 +5,7 @@ import { ByteArray, labelhash } from "viem";
 import { logger } from "../utils/logger";
 
 export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
-export const INGESTION_IN_PROGRESS_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
+export const INGESTION_UNFINISHED_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SCHEMA_VERSION_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
 export const SCHEMA_VERSION = 1;
 
@@ -23,7 +23,7 @@ export const SCHEMA_VERSION = 1;
  *     - May or may not be ENS-normalized
  *     - Can contain any valid string, including dots and null bytes
  *     - Can be empty strings
- *   - For count entries: The non-negative integer count of labelhash entries formatted as a string.
+ *   - For the precalculated count: The precalculated non-negative integer count of labelhash entries formatted as a string.
  */
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
 
@@ -34,7 +34,7 @@ export class ENSRainbowDB {
   ) {}
 
   /**
-   * Creates a new ENSRainbowDB instance with a fresh database.
+   * Creates and opens a new ENSRainbowDB instance with a fresh database.
    */
   public static async create(dataDir: string): Promise<ENSRainbowDB> {
     logger.info(`Creating new database in directory: ${dataDir}`);
@@ -102,25 +102,25 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Check if an ingestion is in progress
-   * @returns true if an ingestion is in progress, false otherwise
+   * Check if an ingestion is unfinished
+   * @returns true if an ingestion is unfinished, false otherwise
    */
-  public async isIngestionInProgress(): Promise<boolean> {
+  public async isIngestionUnfinished(): Promise<boolean> {
     const value = await this.get(INGESTION_IN_PROGRESS_KEY);
     return value !== null;
   }
 
   /**
-   * Mark that an ingestion has started
+   * Mark that an ingestion has started and is unfinished
    */
   public async markIngestionStarted(): Promise<void> {
     await this.db.put(INGESTION_IN_PROGRESS_KEY, "true");
   }
 
   /**
-   * Clear the ingestion in progress marker
+   * Mark that ingestion is finished
    */
-  public async clearIngestionMarker(): Promise<void> {
+  public async markIngestionFinished(): Promise<void> {
     await this.del(INGESTION_IN_PROGRESS_KEY);
   }
 
@@ -183,29 +183,29 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Gets the current count of rainbow records in the database.
-   * @throws Error if count is not found or is improperly formatted
+   * Gets the precalculated count of rainbow records in the database. The accuracy of the returned value is dependent on setting the precalculated count correctly.
+   * @throws Error if the precalculated count is not found or is improperly formatted
    */
-  public async getRainbowRecordCount(): Promise<number> {
+  public async getPrecalculatedRainbowRecordCount(): Promise<number> {
     const countStr = await this.get(LABELHASH_COUNT_KEY);
     if (countStr === null) {
-      throw new Error(`No count found in database at ${this.dataDir}`);
+      throw new Error(`No precalculated count found in database at ${this.dataDir}`);
     }
 
     try {
       const count = parseNonNegativeInteger(countStr);
       return count;
     } catch (error) {
-      throw new Error(`Invalid count value in database at ${this.dataDir}: ${countStr}`);
+      throw new Error(`Invalid precalculated count value in database at ${this.dataDir}: ${countStr}`);
     }
   }
 
   /**
-   * Sets the count of rainbow records in the database.
+   * Sets the precalculated count of rainbow records in the database.
    */
-  public async setRainbowRecordCount(count: number): Promise<void> {
+  public async setPrecalculatedRainbowRecordCount(count: number): Promise<void> {
     if (!Number.isInteger(count) || count < 0) {
-      throw new Error(`Invalid count value: ${count}`);
+      throw new Error(`Invalid precalculated count value: ${count}`);
     }
     await this.db.put(LABELHASH_COUNT_KEY, count.toString());
   }
@@ -248,9 +248,9 @@ export class ENSRainbowDB {
    */
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
     logger.info(`Starting database validation${options.lite ? " (lite mode)" : ""}...`);
-    // Check if ingestion is in progress
+    // Check if ingestion is unfinished
     if (await this.isIngestionInProgress()) {
-      logger.error("Database is in an invalid state: ingestion in progress flag is set");
+      logger.error("Database is in an invalid state: ingestion unfinished flag is set");
       return false;
     }
 
@@ -322,7 +322,7 @@ export class ENSRainbowDB {
           logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
           return false;
         }
-        logger.info(`Count verified: ${rainbowRecordCount} rainbow records`);
+        logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
       } catch (error) {
         logger.error("Error verifying count:", error);
         return false;
@@ -362,7 +362,7 @@ export class ENSRainbowDB {
       logger.info("No existing count found in database");
     }
 
-    logger.info("Counting keys in database...");
+    logger.info("Counting rainbow records in database...");
 
     let count = 0;
     for await (const [key] of this.db.iterator()) {
@@ -379,7 +379,7 @@ export class ENSRainbowDB {
     // Store the count
     await this.setRainbowRecordCount(count);
 
-    logger.info(`Total number of keys (excluding count key): ${count}`);
+    logger.info(`Total number of rainbow records: ${count}`);
     logger.info(`Updated count in database under LABELHASH_COUNT_KEY`);
   }
 

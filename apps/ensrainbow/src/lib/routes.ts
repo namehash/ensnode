@@ -6,11 +6,11 @@ import { ENSRainbowDB } from "./database";
 import { ENSRainbowServer } from "./server";
 
 /**
- * Creates and configures the ENS Rainbow server routes
+ * Creates and configures an ENS Rainbow api
  */
-export async function createRoutes(db: ENSRainbowDB): Promise<Hono> {
-  const app = new Hono();
-  const rainbow = await ENSRainbowServer.init(db);
+export async function createApi(db: ENSRainbowDB): Promise<Hono> {
+  const api = new Hono();
+  const server = await ENSRainbowServer.init(db);
 
   app.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     const labelhash = c.req.param("labelhash") as `0x${string}`;
