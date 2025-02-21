@@ -22,7 +22,7 @@ const chain = {
   ...mainnetWithEns,
   subgraphs: {
     ens: {
-      // use the NameHash-hosted 'alpha' instance
+      // use the NameHash-hosted 'alpha' instance subgraph-compatible responses with (mainnet, Base, and Linea) names
       url: 'https://alpha.ensnode.io/subgraph',
       // or use your own local instance
       // url: 'http://localhost:42069/subgraph',
@@ -35,6 +35,6 @@ const client = createClient({
   transport: http(),
 })
 
-const subgraphRecords = await getSubgraphRecords(client, { name: 'ens.eth' })
+const names = await getNamesForAddress(client, { name: 'validator.eth' })
 ```
 
