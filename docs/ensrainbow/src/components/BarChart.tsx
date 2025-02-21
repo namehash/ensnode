@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
-// import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import { EnsRainbowApiClient } from "../../../../packages/ensrainbow-sdk/src/client.ts";
 
+
+//TODO: remove props data in favour of hard-coded / API obtained real values
 interface BarChartData {
     label: string;
     value: number;
@@ -23,26 +25,24 @@ export default function BarChart({
 
     const [maxValue, setMaxValue] = useState(Math.max(...data.map((item: BarChartData) => item.value)));
 
-    // useEffect(() => {
-    //     // React advises to declare the async function directly inside useEffect
-    //     async function getCount() {
-    //         const client = new EnsRainbowApiClient(); //TODO: figure out CORS problems with using the ensrainbow-sdk
-    //         const response = await client.count();
-    //
-    //         return response.count;
-    //     }
-    //         getCount().then((result) => {
-    //             data.push({
-    //                 label: "True Client",
-    //                 value: result,
-    //                 color: "#32a852"
-    //             } as BarChartData);
-    //
-    //             console.log(result);
-    //
-    //             setMaxValue(Math.max(...data.map((item: BarChartData) => item.value)));
-    //         });
-    // }, []);
+    useEffect(() => {
+        // React advises to declare the async function directly inside useEffect
+        async function getCount() {
+            const client = new EnsRainbowApiClient();
+            const response = await client.count();
+
+            return response.count;
+        }
+            getCount().then((result) => {
+                data.push({
+                    label: "Total count of healable labels from ENS Node",
+                    value: result / 1000000,
+                    color: "#32a852"
+                } as BarChartData);
+
+                setMaxValue(Math.max(...data.map((item: BarChartData) => item.value)));
+            });
+    }, []);
 
     return (
         <div

@@ -15,8 +15,14 @@ hero:
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
-import BarChart from "../../components/BarChart.tsx";
+import BarChart from "../../components/BarChart";
+import HomepageSlider from "../../components/HomepageSlider";
+import RainbowTest from "../../components/RainbowTest";
 
+<HomepageSlider client:only/>
+
+[//]: # ('line' animation shown in bigger scale)
+[//]: # (<RainbowTest />)
 
 <BarChart client:load
     data={[
