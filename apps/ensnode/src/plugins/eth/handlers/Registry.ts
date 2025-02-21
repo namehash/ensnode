@@ -11,7 +11,7 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 // RegistryOld events when the domain in question has already been registered in or migrated to the
 // (new) Registry.
 
-// these handlers should ignore 'RegistryOld' events for a given domain it has been migrated to the
+// these handlers should ignore 'RegistryOld' events for a given domain if it has been migrated to the
 // (new) Registry, which is tracked in the `Domain.isMigrated` field
 async function shouldIgnoreRegistryOldEvents(context: Context, node: Hex) {
   const domain = await context.db.find(schema.domain, { id: node });
