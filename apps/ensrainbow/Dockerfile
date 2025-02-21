@@ -29,7 +29,7 @@ FROM app-deps AS app
 WORKDIR /app/apps/ensrainbow
 
 # copy data dir from ensrainbow-data
-COPY --from=ensrainbow-data /data ./data
+COPY --from=ensrainbow-data /app/data ./data
 
 # validate the database
 RUN pnpm run validate:lite
