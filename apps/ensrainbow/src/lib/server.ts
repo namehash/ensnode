@@ -1,7 +1,12 @@
 import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 import { logger } from "../utils/logger";
-import { ENSRainbowDB, LABELHASH_COUNT_KEY, parseNonNegativeInteger } from "./database";
+import {
+  ENSRainbowDB,
+  LABELHASH_COUNT_KEY,
+  generatePurgeErrorMessage,
+  parseNonNegativeInteger,
+} from "./database";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
@@ -22,12 +27,9 @@ export class ENSRainbowServer {
     //TODO maybe we should call validate lite here instead?
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
     if (await db.isIngestionUnfinished()) {
-      const errorMessage =
-        "Database is in an incomplete state! " +
-        "An ingestion was started but not completed successfully.\n" +
-        "To fix this:\n" +
-        "1. Delete the data directory\n" +
-        "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+      const errorMessage = generatePurgeErrorMessage(
+        "Database is in an incomplete state! An ingestion was started but not completed successfully.",
+      );
       logger.error(errorMessage);
       throw new Error(errorMessage);
     }
@@ -35,9 +37,10 @@ export class ENSRainbowServer {
     // Verify we can get the rainbow record count
     const countResponse = await server.labelCount();
     if (countResponse.status === StatusCode.Error) {
-      throw new Error(
+      const errorMessage = generatePurgeErrorMessage(
         `Database is in an invalid state: failed to get rainbow record count: ${countResponse.error}`,
       );
+      throw new Error(errorMessage);
     }
 
     return server;
