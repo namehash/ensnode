@@ -233,7 +233,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       const isZeroResolver = resolverAddress === zeroAddress;
 
       // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
-      // NOTE: Resolver records are never deleted
+      // NOTE: Resolver records are not deleted
       if (isZeroResolver) {
         await context.db
           .update(schema.domain, { id: node })
