@@ -71,7 +71,7 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  * Check if any characters in `label` are "unindexable".
  *
  * Related logic in ENS Subgraph:
- * https://github.com/ensdomains/ens-subgraph/blob/master/src/utils.ts#L68
+ * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/utils.ts#L68
  *
  * @param label - The label to check. Note:
  * A `null` value for `label` represents an unhealable labelhash.
@@ -101,7 +101,7 @@ export const isLabelIndexable = (label: string | null): label is string => {
  * when ensjs#bytesToPacket sees these bytes, it returns a name of `8436.eth.eth`, which is incorrect.
  *
  * The original subgraph logic handled this case correctly, it seems, and so we re-implement it here.
- * https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L30
+ * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L30
  *
  * More information about this discussion can be found in this thread:
  * https://github.com/namehash/ensnode/issues/36

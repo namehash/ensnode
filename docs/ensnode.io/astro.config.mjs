@@ -18,22 +18,40 @@ export default defineConfig({
               slug: "ensnode/quickstart",
             },
             {
+              label: "Guides",
+              autogenerate: { directory: "ensnode/guides" },
+              collapsed: true,
+            },
+            {
               label: "Reference",
               autogenerate: { directory: "ensnode/reference" },
               collapsed: true,
             },
           ],
         },
-
         {
           label: "ENSRainbow",
-          collapsed: true,
           items: [
             {
               label: "Quickstart",
               slug: "ensrainbow/quickstart",
             },
+            {
+              label: "Guides",
+              autogenerate: { directory: "ensrainbow/guides" },
+              collapsed: true,
+            },
+            {
+              label: "Reference",
+              autogenerate: { directory: "ensrainbow/reference" },
+              collapsed: true,
+            },
           ],
+        },
+        {
+          label: "General",
+          autogenerate: { directory: "general" },
+          collapsed: false,
         },
       ],
     }),

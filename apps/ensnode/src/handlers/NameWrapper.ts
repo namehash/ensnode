@@ -14,7 +14,7 @@ import type { OwnedName } from "../lib/types";
  * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
  * ownership of the name. The minted token will be assigned a unique tokenId represented as
  * uint256(namehash(name)) where name is the fully qualified ENS name being wrapped.
- * https://github.com/ensdomains/ens-contracts/blob/mainnet/contracts/wrapper/ERC1155Fuse.sol#L262
+ * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/wrapper/ERC1155Fuse.sol#L262
  */
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
@@ -25,10 +25,10 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
   });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
-  // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L63)
+  // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63)
   // which is the exact INVERSE of the ensjs util of the same name. the subgraph's name is _incorrect_
   // because it returns true if the PCC is SET _not_ burned
-  // make sure to remember that if you compare the logic in this function to the original subgraph logic [here](https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L87)
+  // make sure to remember that if you compare the logic in this function to the original subgraph logic [here](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L87)
   // related GitHub issue: https://github.com/ensdomains/ens-subgraph/issues/88
 
   // if PCC is burned (not set), we do not update expiry
@@ -40,6 +40,11 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
   }));
 }
 
+/**
+ * makes a set of shared handlers for the NameWrapper contract for a given registry's `ownedName`
+ *
+ * @param ownedName the name that the Registry that NameWrapper interacts with manages
+ */
 export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
   const ownedSubnameNode = namehash(ownedName);
   const sharedEventValues = createSharedEventValues(ownedName);
@@ -56,7 +61,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
 
     // NOTE: subgraph technically upserts domain with `createOrLoadDomain()` here, but domain
     // is guaranteed to exist. we encode this stricter logic here to illustrate that fact.
-    // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/nameWrapper.ts#L197C18-L197C36
+    // via https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/nameWrapper.ts#L197C18-L197C36
     const domain = await context.db.find(schema.domain, { id: node });
     if (!domain) {
       console.table({ ...event.args, node });
@@ -166,8 +171,8 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await upsertAccount(context, owner);
 
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
-        // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L123
         // null expiry date if the domain is not a direct child of .eth
+        // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L123
         expiryDate: domain.parentId !== ownedSubnameNode ? null : domain.expiryDate,
         wrappedOwnerId: null,
       }));
@@ -196,10 +201,8 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       const { node, fuses } = event.args;
 
       // NOTE: subgraph no-ops this event if there's not a wrappedDomain already in the db.
-      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L144
-      const wrappedDomain = await context.db.find(schema.wrappedDomain, {
-        id: node,
-      });
+      // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L144
+      const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
       if (wrappedDomain) {
         // set fuses
         await context.db.update(schema.wrappedDomain, { id: node }).set({ fuses });
@@ -228,10 +231,8 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       const { node, expiry } = event.args;
 
       // NOTE: subgraph no-ops this event if there's not a wrappedDomain already in the db.
-      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L169
-      const wrappedDomain = await context.db.find(schema.wrappedDomain, {
-        id: node,
-      });
+      // https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L169
+      const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
       if (wrappedDomain) {
         // update expiryDate
         await context.db.update(schema.wrappedDomain, { id: node }).set({ expiryDate: expiry });

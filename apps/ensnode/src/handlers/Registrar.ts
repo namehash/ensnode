@@ -12,7 +12,9 @@ import type { OwnedName } from "../lib/types";
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
 /**
- * A factory function that returns Ponder indexing handlers for a specified subname.
+ * makes a set of shared handlers for a Registrar contract that manages `ownedName`
+ *
+ * @param ownedName the name that the Registrar contract manages subnames of
  */
 export const makeRegistrarHandlers = (ownedName: OwnedName) => {
   const ownedNameNode = namehash(ownedName);
@@ -33,7 +35,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     const didHaveNullBytes = _labelhash(name) !== labelhash;
     if (didHaveNullBytes) return;
 
-    // if the label is otherwise un-indexable, ignore it (see isLabelIndexable comment for context)
+    // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
     if (!isLabelIndexable(name)) return;
 
     const node = makeSubnodeNamehash(ownedNameNode, labelhash);
@@ -54,6 +56,8 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
   }
 
   return {
+    // NOTE: provide the ownedSubnameNode back to the plugin constructing these handlers in order
+    // to facilitate easier access to the event's `node` value (see plugin handlers for usage)
     get ownedSubnameNode() {
       return ownedNameNode;
     },
@@ -87,8 +91,8 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       // undefined value means no change to the name
       const name = validLabel ? `${validLabel}.${ownedName}` : undefined;
 
-      // akin to domain.save() at
-      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
+      // update domain's registrant & expiryDate
+      // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
       await context.db.update(schema.domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
@@ -96,8 +100,8 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         name,
       });
 
-      // akin to registration.save() at
-      //https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
+      // update registration
+      // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
       const registrationId = makeRegistrationId(ownedName, labelhash, node);
       await upsertRegistration(context, {
         id: registrationId,
@@ -158,14 +162,15 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
       const id = makeRegistrationId(ownedName, labelhash, node);
 
+      // update Registration expiry
       await context.db.update(schema.registration, { id }).set({ expiryDate: expires });
 
+      // update Domain expiry
       await context.db
         .update(schema.domain, { id: node })
         .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
 
       // log RegistrationEvent
-
       await context.db
         .insert(schema.nameRenewed)
         .values({
@@ -192,6 +197,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       const registration = await context.db.find(schema.registration, { id });
       if (!registration) return;
 
+      // update registrants
       await context.db.update(schema.registration, { id }).set({ registrantId: to });
       await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
 

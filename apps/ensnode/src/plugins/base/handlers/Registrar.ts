@@ -12,7 +12,7 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  * on Base a NFT is minted that tokenizes ownership of the registration. The minted NFT will be
  * assigned a unique tokenId represented as uint256(labelhash(label)) where label is the direct
  * subname of base.eth that was registered.
- * https://github.com/base-org/basenames/blob/main/src/L2/RegistrarController.sol#L488
+ * https://github.com/base/basenames/blob/1b5c1ad/src/L2/RegistrarController.sol#L488
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 

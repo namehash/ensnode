@@ -1,14 +1,19 @@
 ---
-title: Indexing ENS‐compatible on‐chain names
+title: Indexing ENS‐Compatible On‐Chain Names
 ---
 
-# Accessing on-chain data
+:::caution[Work in Progress]
+This documentation is under active development. Some sections may be incomplete or out of date.
+:::
 
-Fetching data about on-chain activity can be either done via direct RPC calls to a blockchain node, or via an API service that has previously indexed the on-chain data. The first approach is about loading data directly from a source of truth, but it's also more complex and require the client to know how to use the data. Using the API service is more flexible, because it abstracts away the data transformation process, and allows the clients to query a set of prepared aggregates.
 
-# ENS and the `eth` top-level domain
+## Accessing on-chain data
 
-## Indexing on-chain data
+Fetching data about on-chain activity can be either done via direct RPC calls to a blockchain node, or via an API service that has previously indexed the on-chain data. Using direct RPC calls loads data directly from the source of truth, but it's also more complex and the data may not be in the caller's preferred format or structure. Using an API service is more flexible, because it abstracts away the data transformation process and allows the clients to query a set of prepared aggregates.
+
+## ENS and the `eth` top-level domain
+
+### Indexing on-chain data
 
 The ENS community has adopted the Graph Protocol and built [the ENS Subgraph](https://github.com/ensdomains/ens-subgraph) to index on-chain data about ENS and the `eth` subnames. The indexing engine sources data from an RPC node, and aggregates it into a set of collections. The main collections describe following data entities:
 - Account
@@ -17,11 +22,11 @@ The ENS community has adopted the Graph Protocol and built [the ENS Subgraph](ht
 - Resolver
 - WrappedDomain
 
-## Serving aggregate data
+### Serving aggregate data
 
-Web Clients which want to access the ENS Subgraph can easily do it with [the ensjs client library](https://github.com/ensdomains/ensjs). The ensjs lib queries data from [the ENS Subgraph deployment](https://api.thegraph.com/subgraphs/name/ensdomains/ens). This deployment has [a GraphiQL interface](https://api.thegraph.com/subgraphs/name/ensdomains/ens/graphql?query=%7B%0A++account%28id%3A+%220xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401%22%29+%7B%0A++++domains%28orderBy%3A+createdAt%2C+orderDirection%3A+desc%2C+first%3A+3%29+%7B%0A++++++name%0A++++++createdAt%0A++++++resolver+%7B%0A++++++++addr+%7B%0A++++++++++id%0A++++++++%7D%0A++++++++contentHash%0A++++++++texts%0A++++++%7D%0A++++%7D%0A++%7D%0A++registrations%28orderBy%3A+registrationDate%2C+orderDirection%3A+desc%2C+first%3A+3%29+%7B%0A++++registrationDate%0A++++domain+%7B%0A++++++name%0A++++%7D%0A++++registrant+%7B%0A++++++id%0A++++%7D%0A++%7D%0A%7D) if you'd like to interact with it and check out the data model it offers.
+Clients that want to access ENS data can easily do so with [the ensjs client library](https://github.com/ensdomains/ensjs). The ensjs lib queries both an RPC endpoint and, for more complex functions, the [the ENS Subgraph deployment](https://api.thegraph.com/subgraphs/name/ensdomains/ens). This deployment has [a GraphiQL interface](https://api.thegraph.com/subgraphs/name/ensdomains/ens/graphql?query=%7B%0A++account%28id%3A+%220xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401%22%29+%7B%0A++++domains%28orderBy%3A+createdAt%2C+orderDirection%3A+desc%2C+first%3A+3%29+%7B%0A++++++name%0A++++++createdAt%0A++++++resolver+%7B%0A++++++++addr+%7B%0A++++++++++id%0A++++++++%7D%0A++++++++contentHash%0A++++++++texts%0A++++++%7D%0A++++%7D%0A++%7D%0A++registrations%28orderBy%3A+registrationDate%2C+orderDirection%3A+desc%2C+first%3A+3%29+%7B%0A++++registrationDate%0A++++domain+%7B%0A++++++name%0A++++%7D%0A++++registrant+%7B%0A++++++id%0A++++%7D%0A++%7D%0A%7D) if you'd like to interact with it and check out the data model it offers.
 
-# Other ENS-compatible protocols
+## Other ENS-compatible protocols
 
 The canonical ENS protocol has been originally deployed on the Ethereum Mainnet. [There are plans](https://x.com/ensdomains/status/1869020192388616497) to scale the protocol with its own layer-2 chain, called Namechain.
 
@@ -29,9 +34,9 @@ Some members of the ENS community have started building their own [ENS subname s
 - [Basenames](https://www.base.org/names) from coinbase.com ([source](https://github.com/base-org/basenames))
 - [Linea ENS](https://names.linea.build/) from consensys.io ([source](https://github.com/Consensys/linea-ens))
 
-These L2 systems run their own copy of ENS-compatible contracts. And that's where the NameHash ENS Multi-chain Indexer wants to fill a gap.
+These L2 systems run their own copy of ENS-compatible contracts and represent a multi-chain extension of the unified ENS namespace. A core design goal of ENSNode is to index ENS names whever they live, whether that's on-chain (on mainnet or L2s like Base, Linea, and Namechain) or off-chain (ex. `.cb.id`, `.uni.eth`).
 
-## Indexing L2 subnames
+### Indexing L2 subnames
 
 TBD
 
