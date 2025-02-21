@@ -62,6 +62,16 @@ The process will exit with:
 - Code 0: Validation successful
 - Code 1: Validation failed or errors encountered
 
+#### Database Purge
+```bash
+pnpm run purge [--data-dir path/to/db]
+```
+Completely removes all files from the specified data directory. This is useful when you need to start fresh with a clean database.
+
+The process will exit with:
+- Code 0: Successful purge
+- Code 1: Error during purge operation
+
 #### API Server
 ```bash
 pnpm run serve [--port 3223] [--data-dir path/to/db]

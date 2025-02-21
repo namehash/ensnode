@@ -27,6 +27,21 @@ export const SCHEMA_VERSION = 1;
  */
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
 
+/**
+ * Generates a consistent error message for database issues that require purging and re-ingesting.
+ * @param errorDescription The specific error description
+ * @returns Formatted error message with purge warning and instructions
+ */
+export function generatePurgeErrorMessage(errorDescription: string): string {
+  return (
+    `${errorDescription}\n\nTo fix this:\n` +
+    "1. Run the purge command to start fresh: pnpm run purge --data-dir <your-data-dir>\n" +
+    "2. Run the ingestion command again: pnpm run ingest <input-file>\n\n" +
+    "⚠️ WARNING: The purge command will COMPLETELY REMOVE ALL FILES in the specified directory!\n" +
+    "Make sure you specify the correct directory and have backups if needed."
+  );
+}
+
 export class ENSRainbowDB {
   private constructor(
     private readonly db: ENSRainbowLevelDB,
@@ -252,15 +267,19 @@ export class ENSRainbowDB {
     logger.info(`Starting database validation${options.lite ? " (lite mode)" : ""}...`);
     // Check if ingestion is unfinished
     if (await this.isIngestionUnfinished()) {
-      logger.error("Database is in an invalid state: ingestion unfinished flag is set");
+      const errorMsg = generatePurgeErrorMessage(
+        "Database is in an invalid state: ingestion unfinished flag is set",
+      );
+      logger.error(errorMsg);
       return false;
     }
 
     const schemaVersion = await this.getDatabaseSchemaVersion();
     if (schemaVersion !== SCHEMA_VERSION) {
-      logger.error(
+      const errorMsg = generatePurgeErrorMessage(
         `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`,
       );
+      logger.error(errorMsg);
       return false;
     }
 
@@ -278,7 +297,8 @@ export class ENSRainbowDB {
         logger.info(`Total keys: ${count}`);
         return true;
       } catch (error) {
-        logger.error("Error verifying count:", error);
+        const errorMsg = generatePurgeErrorMessage(`Error verifying count: ${error}`);
+        logger.error(errorMsg);
         return false;
       }
     } else {
@@ -321,12 +341,16 @@ export class ENSRainbowDB {
         const storedCount = await this.getPrecalculatedRainbowRecordCount();
 
         if (storedCount !== rainbowRecordCount) {
-          logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
+          const errorMsg = generatePurgeErrorMessage(
+            `Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`,
+          );
+          logger.error(errorMsg);
           return false;
         }
         logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
       } catch (error) {
-        logger.error("Error verifying count:", error);
+        const errorMsg = generatePurgeErrorMessage(`Error verifying count: ${error}`);
+        logger.error(errorMsg);
         return false;
       }
 
@@ -339,7 +363,8 @@ export class ENSRainbowDB {
 
       // Return false if any validation errors were found
       if (invalidHashes > 0 || hashMismatches > 0) {
-        logger.error("\nValidation failed! See errors above.");
+        const errorMsg = generatePurgeErrorMessage("Validation failed! See errors above.");
+        logger.error(errorMsg);
         return false;
       }
 
