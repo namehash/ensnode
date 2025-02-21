@@ -1,0 +1,92 @@
+---
+title: Terminology
+sidebar:
+  order: 1
+---
+
+New terminology (beyond the [official ENS glossary](https://docs.ens.domains/terminology)) has been needed in the course of building ENSNode. The following should be understood as a draft that is open to community feedback. Each definition below aims to maximize alignment with the official ENS glossary where possible, and reduce instances where a piece of terminology may have multiple meanings in the context of the protocol.
+
+## Subregistry
+
+A **Subregistry** is any data structure outside of the [Registry](https://docs.ens.domains/terminology#registry) that manages supplemental state for a set of [subnames](https://docs.ens.domains/terminology#subname-subdomain). Each [name](https://docs.ens.domains/terminology#name) has the potential for association with at least 1 subregistry (through the [Name Wrapper](https://docs.ens.domains/terminology#name-wrapper)) and may optionally be associated with multiple subregistries. When a name is associated with multiple subregistries, this means that the full state of a name must be combined across the Registry and each associated subregistry. For example, the state of all direct subnames of .eth is distributed across the Registry and two subregistries: the BaseRegistrar and the Name Wrapper. The ENS protocol does not currently define standards for subregistries: subregistries currently exist outside the scope of ENS protocol standards. For example, subregistries could live on L1, on L2s, or offchain (in a database or even in a Google Sheet). The ENS protocol currently provides no standardized mechanism to discover subregistries or to interact with subregistries.
+
+Some specific implementations of subregistries include:
+
+* The [BaseRegistrar](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/BaseRegistrarImplementation.sol) that holds supplemental state for direct subnames of .eth. This includes state for ERC721 NFTs and expiry times.
+* The [NameWrapper](https://docs.ens.domains/terminology#name-wrapper), which serves as a subregistry for the entire ENS root (all ENS names).  This includes state for ERC1155 NFTs, expiry times, and fuses.
+  * Note how direct subnames of .eth are an example of multiple subregistries potentially holding supplemental state for a name outside the Registry.
+* The contracts on Base that manage supplemental state for direct subnames of [base.eth](https://www.base.org/names).
+* The contracts on Linea that manage supplemental state for direct subnames of [linea.eth](https://names.linea.build/).
+* The contracts on Base / Optimism that manage supplemental state for DNS names managed by [3DNS](https://3dns.box/).
+* The offchain databases that manage supplemental state for direct subnames of [uni.eth](https://blog.uniswap.org/introducing-uni-eth-your-unique-web3-username).
+* The offchain databases that manage supplemental state for direct subnames of [cb.id](https://help.coinbase.com/en/wallet/managing-account/coinbase-ens-support).
+* DNS nameservers for (essentially) all DNS names. Since ENS is a superset of DNS, (essentially) any DNS name is an ENS name. Therefore, whenever supplemental state associated with a DNS name is updated in a DNS nameserver, a subregistry is being updated.
+
+## Subregistrar
+
+A **Subregistrar** is any system that is a [Registrar](https://docs.ens.domains/terminology#registrar) or that writes to a subregistry.
+
+This definition expands the definition of Registrar to include cases such as:
+
+* The [ETHRegistrarController](https://github.com/ensdomains/ens-contracts/blob/staging/contracts/ethregistrar/ETHRegistrarController.sol) that writes to BaseRegistrar (the owner of the "eth" TLD). Note how the definition of "Registrar" in the official ENS glossary only includes contracts that are pointed to by the owner field of the Registry. Therefore, the BaseRegistrar is a Registrar (and a Subregistry), while the ETHRegistrarController is a Subregistrar.
+* The contracts on Base that write to the Subregistry for direct subnames of base.eth. These contracts live on Base, therefore they cannot meet the definition of Registrar because they can't be set as the owner in the Registry on Ethereum mainnet.
+* The offchain systems that write to the offchain databases associated with direct subnames of uni.eth and cb.id.
+* Any NFT marketplace that supports the exchange of an NFT representing ownership of an ENS name. Each time a NFT is exchanged, state about that NFT must be updated within a related subregistry. Therefore the marketplace enabling that trade is a Subregistrar.
+* Any DNS registrar, as ENS is a superset of DNS.
+
+## Shadow Registry
+
+A **Shadow Registry** is a Subregistry meeting ALL of the following constraints:
+1. Not the Registry;
+2. Implemented as a smart contract exposing the same interface as the Registry;
+3. Used as part of the source of truth for a CCIP-Read Gateway Server for ENSIP-10 (wildcard resolution) powered subnames.
+
+A specific implementation of a Shadow Registry can be found in [this contract](https://github.com/base-org/basenames/blob/v1.0.4/src/L2/Registry.sol) storing a subset of the state of base.eth subnames on Base.
+
+## name, node, namehash
+
+A **name** is a human-readable string like `"vitalik.eth"` composed of **labels**. A **name** may or may not be _normalized_.
+
+> **Normalization** is process of canonicalizing a name before running it through the Namehash algorithm. [source](https://docs.ens.domains/resolution/names#normalize)
+
+The [`namehash`](https://docs.ens.domains/resolution/names#namehash) function computes a UUID 32-byte hash of a given **name**. If the name provided to `namehash` is not _normalized_ then the resulting **node** is considered _invalid_.
+
+> The node is a hex-encoded 32-byte value that is derived from the name using the namehash algorithm defined in ENSIP-1. [source](https://docs.ens.domains/resolution/names#namehash)
+
+For the _normalized_ name `vitalik.eth`, its **node** is `0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835`.
+
+https://docs.ens.domains/resolution/names#namehash
+
+
+## labels, labelhash, labelhash function
+
+A **label** is a human-readable string used as a segment of a **name** — i.e. `vitalik` and `eth` are the **labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_ or _unnormalized_, _known_ or _unknown_.
+
+In the ENS `Registry` contract, only the **name**'s **node** is registered on-chain. Because of this there is no guarantee that a registered **node** is composed of _normalized_ labels or that those labels are _known_. That is, when observing the `Registry` in isolation, the human-readable **labels** that make up a **name** are not available (either on-chain or off-chain). That said, in many cases the **labels** that make up a name can be made **known**: human-readable **labels** can be emitted by contracts (i.e. the `ETHRegistrarController` or the `NameWrapper`), and in other cases the human-readable **label** for a given **labelhash** can be determined via rainbow table lookups and other strategies.
+
+### Rendering _Unknown_ Labels
+
+When rendering a **name**, one must take care to differentiate between an _unknown_ **label** (only identifiable by its 32-byte **labelhash**) and a _known_ **label** potentially composed of hex characters. To do so, the _known_ **label**'s **labelhash** is _encoded_ as `[{labelhash}]`. Examples are likely helpful:
+
+- `vitalik.eth` — a _normalized_ **name** w/ _normalized_ & _known_ labels
+- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth` — a **name** composed of two labels
+  1. an _unknown_ label (of unknown _normalization_): `0x731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
+  2. a _normalized_, _known_ label: `eth`
+- `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22.eth` — a _normalized_ **name** composed of two labels
+  1. a _normalized_, _known_ label (that just so happens to be a set of 64 literal hex characters): `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
+  2. a _normalized_, _known_ label: `eth`
+
+## labelhash, labelhash function
+
+In this terminology reference, we say that the **labelhash** of a **label** is the 32-byte hashed result of calling the **labelhash function** with that **label** as input.
+
+That is, `0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc` is the **labelhash** of `vitalik`, which is the result of calling the **labelhash function** like so:
+
+```ts
+import { labelhash as _labelhash } from 'viem';
+const labelhash = _labelhash("vitalik");
+```
+
+:::caution[Labelhash Terminology Outside of this Reference]
+Outside of this terminology reference & ENSNode, the word 'labelhash' may refer to either the function or the result of the function.
+:::
