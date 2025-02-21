@@ -9,6 +9,7 @@ WORKDIR /app
 ###################
 
 FROM base AS db-data
+RUN apt-get install -y wget
 COPY apps/ensrainbow/package.json ./apps/ensrainbow/package.json
 COPY apps/ensrainbow/download-rainbow-tables.sh ./apps/ensrainbow/download-rainbow-tables.sh
 
