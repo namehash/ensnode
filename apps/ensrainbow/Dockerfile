@@ -17,6 +17,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps ./apps
 RUN pnpm install --frozen-lockfile
+RUN cd apps/ensrainbow && pnpm run validate:lite
 
 ###################
 ## App Server — runs server w/ data dir
