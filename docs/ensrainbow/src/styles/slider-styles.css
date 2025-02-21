@@ -1,0 +1,165 @@
+.image1, .image2 {
+    max-width: 100%;
+    width: 350px;
+    height: 350px;
+    user-select: none;
+    pointer-events: none;
+}
+
+.image1 {
+    position: relative;
+}
+
+.image2 {
+    position: absolute;
+    top: -1rem;
+    /*Temporary <- this is die to the fact that astro has some inbuilt styling
+    that I don't yet know how to turn off*/
+}
+
+.wrapper {
+    position: relative;
+    width: fit-content;
+}
+
+.wrapper:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 35px 2px #ffffff;
+}
+
+/*.wrapper:hover {*/
+/*    animation-play-state: paused;*/
+/*}*/
+
+.wrapper:hover .controllerButton {
+    opacity: 1.0;
+}
+
+.outerController {
+    position: absolute;
+    inset: 0;
+    top: -1rem; /*Temporary*/
+
+    z-index: 2;
+}
+
+.innerController {
+    position: relative;
+    height: 100%;
+    /*margin-top: -1rem;*/
+}
+
+.controllerButton {
+    height: 20px;
+    width: 20px;
+    /*margin-left: -10px;*/
+    border: none;
+    border-radius: 50%;
+    background-color: white;
+    --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+
+    position: absolute;
+    top: calc(50% - 10px);
+    left: -10px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+
+    opacity: 0;
+    transition: all 0.5s ease-in-out;
+}
+
+.lineBackground {
+    position: absolute;
+    inset: 0;
+    border: none;
+
+    background-color: white;
+    opacity: 0.7;
+    width: 50px;
+}
+
+.posRight {
+    mask-image: linear-gradient(to right, black 5%, transparent);
+}
+
+.posLeft {
+    top: -1rem;
+    left: -50px;
+    mask-image: linear-gradient(to left, black 5%, transparent);
+}
+
+
+.line {
+    position: absolute;
+    inset: 0 0;
+
+    width: 4px;
+    /*top: -1rem; this is die to the fact that astro has some inbuilt styling that I don't yet know how to turn off*/
+    left: -2px;
+
+    box-shadow: 0 0 8px 10px rgba(255, 255, 255, 0.49);
+    /*rgba(170, 11, 23, 0.49); <- the red from the example, decide on the color*/
+
+    background-image: linear-gradient(0deg, #00C0FF 0%, #FFCF00 49%, #FC4F4F 80%, #00C0FF 100%);
+
+    animation:slideLine 3.5s linear infinite;
+
+    /* Animation won't really work in our case cause we have to affect clip-path and
+    controllers position as well - would have to be js-controlled probably
+     */
+    /*animation-name: scan;*/
+    /*animation-duration: 4s;*/
+    /*animation-timing-function: linear;*/
+    /*animation-iteration-count: infinite;*/
+    /*animation-play-state: running;*/
+}
+
+@keyframes slideLine {
+    to {
+        background-position: 0 350px;
+        /*if the animation is to be 'fluent' the transition has to equal elem height*/
+    }
+}
+
+@keyframes scan {
+    0% {
+        box-shadow: 0px 0px 8px 10px rgba(170, 11, 23, 0.49);
+        left: 0;
+    }
+    50% {
+        box-shadow: 0px 6px 8px 10px rgba(170, 11, 23, 0.49);
+        left: 50%;
+    }
+    98% {
+        box-shadow: 0px -6px 8px 10px rgba(170, 11, 23, 0.49);
+        left: 98%;
+    }
+}
+
+.rainbowTest {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    width: 100px;
+    height:200px;
+    background-image: linear-gradient(0deg, #00C0FF 0%, #FFCF00 49%, #FC4F4F 80%, #00C0FF 100%);
+    animation:slidebg 3.5s linear infinite;
+}
+
+@keyframes slidebg {
+    to {
+        background-position: 0 200px;
+    }
+}
+
