@@ -11,7 +11,7 @@ ENSNode is the new multichain indexer for ENS and ENSv2. It provides enhanced EN
   - [use ENSNode with ensjs](https://www.ensnode.io/guides/using-ensnode-with-ensjs/)
   - see the [Subgraph-Compatibility Reference](https://www.ensnode.io/reference/subgraph-compatibility/) for more info
 - true multichain indexing (mainnet, base, linea, etc)
-  - flattened, unified, multichain namespace via optional plugins
+  - flattened, unified, multichain and multiregistrar namespace via optional plugins
 
 ### `eth` plugin performance
 
