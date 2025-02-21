@@ -119,7 +119,7 @@ export function createCLI(options: CLIOptions = {}) {
     )
     .command(
       "purge",
-      "Completely wipe the specified LevelDB database",
+      "Completely wipe all files from the specified data directory",
       (yargs: Argv) => {
         return yargs.option("data-dir", {
           type: "string",
