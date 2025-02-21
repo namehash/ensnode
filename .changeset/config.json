@@ -9,6 +9,7 @@
   "updateInternalDependencies": "patch",
   "prettier": false,
   "ignore": [
+    "ensadmin",
     "ensnode",
     "@ensnode/ensrainbow",
     "@docs/ensnode",
