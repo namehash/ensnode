@@ -37,8 +37,8 @@ FROM ingest-deps AS ingest
 
 WORKDIR /app/apps/ensrainbow
 # copy ens_names.sql.gz from db-data
-COPY --from=db-data /app/ens_names.sql.gz .
-COPY --from=db-data /app/THE_GRAPH_LICENSE.txt .
+COPY --from=db-data /app/apps/ensrainbow/ens_names.sql.gz .
+COPY --from=db-data /app/apps/ensrainbow/THE_GRAPH_LICENSE.txt .
 
 # produce the data dir artifact
 RUN pnpm run ingest
