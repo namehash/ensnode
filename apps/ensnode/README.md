@@ -4,7 +4,7 @@
 
 ## Overview
 
-ENSNode is a faster, more efficient, easier to use, and simpler to deploy ENS indexer. It can index mainnet, Basenames, and Linea, providing a unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
+ENSNode is the new multichain indexer for ENS and ENSv2. It provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a more unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
 
 - 1:1 equivalency of results for most queries
   - 100% ensjs, ens-app-v3 test suites passing, via [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools)
