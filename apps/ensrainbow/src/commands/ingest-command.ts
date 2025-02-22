@@ -3,15 +3,9 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
-import {
-  clearIngestionMarker,
-  createDatabase,
-  ensureIngestionNotIncomplete,
-  markIngestionStarted,
-} from "../lib/database";
+import { ENSRainbowDB } from "../lib/database";
 import { logger } from "../utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
-import { countCommand } from "./count-command";
 
 export interface IngestCommandOptions {
   inputFile: string;
@@ -30,14 +24,23 @@ export interface IngestCommandOptions {
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
-  const db = await createDatabase(options.dataDir);
+  const db = await ENSRainbowDB.create(options.dataDir);
 
   try {
-    // Check if there's an incomplete ingestion
-    await ensureIngestionNotIncomplete(db);
+    // Check if there's an unfinished ingestion
+    if (await db.isIngestionUnfinished()) {
+      const errorMessage =
+        "Database is in an incomplete state! " +
+        "An ingestion was started but not completed successfully.\n" +
+        "To fix this:\n" +
+        "1. Delete the data directory\n" +
+        "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
 
     // Mark ingestion as started
-    await markIngestionStarted(db);
+    await db.markIngestionStarted();
 
     const bar = new ProgressBar(
       "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",
@@ -132,10 +135,10 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     // the actual database entries to confirm how many unique label-labelhash pairs exist,
     // as the input data could potentially contain duplicates.
     logger.info("\nStarting rainbow record counting phase...");
-    await countCommand(db);
+    await db.countRainbowRecords();
 
-    // Clear the ingestion marker since we completed successfully
-    await clearIngestionMarker(db);
+    // Mark ingestion as finished since we completed successfully
+    await db.markIngestionFinished();
 
     logger.info("Data ingestion and count verification complete!");
   } finally {

@@ -1,4 +1,4 @@
-import { createConfig, mergeAbis } from "ponder";
+import { createConfig } from "ponder";
 import { DEPLOYMENT_CONFIG } from "../../lib/globals";
 import {
   activateHandlers,

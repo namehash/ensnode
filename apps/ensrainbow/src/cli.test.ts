@@ -2,8 +2,8 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { mkdtemp, rm } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createCLI, getEnvPort, validatePortConfiguration } from "./cli";
-import { DEFAULT_PORT } from "./commands/server-command";
+import { createCLI, validatePortConfiguration } from "./cli";
+import { DEFAULT_PORT, getEnvPort } from "./lib/env";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");
@@ -57,12 +57,14 @@ describe("CLI", () => {
 
     it("should throw error for invalid port number", () => {
       process.env.PORT = "invalid";
-      expect(() => getEnvPort()).toThrow('Invalid port number "invalid"');
+      expect(() => getEnvPort()).toThrow(
+        'Invalid PORT value "invalid": must be a non-negative integer',
+      );
     });
 
     it("should throw error for negative port number", () => {
       process.env.PORT = "-1";
-      expect(() => getEnvPort()).toThrow('Invalid port number "-1"');
+      expect(() => getEnvPort()).toThrow('Invalid PORT value "-1": must be a non-negative integer');
     });
   });
 
@@ -79,6 +81,29 @@ describe("CLI", () => {
     it("should throw when PORT conflicts with CLI port", () => {
       process.env.PORT = "3000";
       expect(() => validatePortConfiguration(4000)).toThrow("Port conflict");
+    });
+  });
+
+  describe("purge command", () => {
+    it("should remove the database directory", async () => {
+      // Create test directory
+      await mkdtemp(testDataDir);
+
+      // Run purge command
+      await cli.parse(["purge", "--data-dir", testDataDir]);
+
+      // Verify directory was removed
+      await expect(rm(testDataDir)).rejects.toThrow();
+    });
+
+    it("should handle errors gracefully", async () => {
+      const nonExistentDir = join(tempDir, "non-existent");
+
+      // Run purge command on non-existent directory
+      await cli.parse(["purge", "--data-dir", nonExistentDir]);
+
+      // Verify directory still doesn't exist
+      await expect(rm(nonExistentDir)).rejects.toThrow();
     });
   });
 

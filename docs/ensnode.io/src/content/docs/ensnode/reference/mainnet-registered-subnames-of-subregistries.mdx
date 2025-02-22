@@ -1,12 +1,22 @@
 ---
 title: Mainnet-Registered Subnames of Subregistries
+sidebar:
+  order: 4
 ---
+
+:::caution[Work in Progress]
+This documentation is under active development. Some sections may be incomplete or out of date.
+:::
+
+This reference discusses the situation in which a name is registered on multiple chains (ex. `example.base.eth` being registered on both the mainnet Regsitry and Basenames [**Shadow Registry**](/reference/terminology/#shadow-registry)).
+
+## ENSNode Architecture Background
 
 The current architecture ('v1') of ENSNode derives from that of the ENS Subgraph which was not architected with multi-chain multi-registry use in mind. When running ENSNode with a single-plugin enabled, only the subnames registered in the plugin's indexed subregistry are included in the index, as designed.
 
-When running ENSNode **with multiple plugins enabled**, however, the behavior of mainnet-registered subnames of subregistries managed by the additional plugins should be considered undefined. The specific names that are registered on mainnet for these subregistries are listed below.
+When running ENSNode **with multiple plugins enabled**, however, the behavior of mainnet-registered subnames of subregistries managed by the additional plugins should be considered undefined. The specific names that are registered on mainnet for these subregistries as of a given date are listed below.
 
-## Context
+## ENS Protocol Context
 
 Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of subregistries (i.e. `.base.eth`, `.linea.eth`) that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward resolution of their data delegated to the subregistry defined below. Instead their forward resolution will be managed according to the state defined in the ENS Registry.
 
