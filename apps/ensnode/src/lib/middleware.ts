@@ -1,5 +1,13 @@
+import { Block } from "@ponder/core";
 import { MiddlewareHandler } from "hono";
+import { ReadonlyDrizzle, eq } from "ponder";
 import { PublicClient } from "viem";
+import {
+  GetPonderMetaType,
+  GetPonderStatusType,
+  getPonderMeta,
+  getPonderStatus,
+} from "./db-helpers";
 import { getEnsDeploymentChain } from "./ponder-helpers";
 import { PrometheusMetrics } from "./prometheus-metrics";
 
@@ -13,27 +21,27 @@ interface NetworkIndexingStatus {
   /**
    * Number of blocks required for the historical sync.
    */
-  totalBlocksCount: number | undefined;
+  totalBlocksCount: number | null;
 
   /**
    *  Number of blocks that were found in the cache for the historical sync.
    */
-  cachedBlocksCount: number | undefined;
+  cachedBlocksCount: number | null;
 
   /**
    * Closest-to-tip synced block number.
    */
-  lastSyncedBlock: BlockMetadata | undefined;
+  lastSyncedBlock: BlockMetadata | null;
 
   /**
    * Last block processed & indexed by the indexer.
    */
-  lastIndexedBlock: BlockMetadata | undefined;
+  lastIndexedBlock: BlockMetadata | null;
 
   /**
    * Latest safe block available on the chain.
    */
-  latestSafeBlock: BlockMetadata | undefined;
+  latestSafeBlock: BlockMetadata | null;
 
   /**
    * Indicating if the sync is realtime mode.
@@ -57,29 +65,57 @@ interface NetworkIndexingStatus {
 }
 
 export function ensNodeMetadata({
+  db,
   publicClients,
 }: {
+  // TODO: apply correct type for db to include the ponder meta and status tables
+  db: ReadonlyDrizzle<Record<string, unknown>>;
   publicClients: Record<number, PublicClient>;
 }): MiddlewareHandler {
   return async function ensNodeMetadataMiddleware(ctx) {
     const packageJson = await import("../../package.json").then((m) => m.default);
 
-    const metricsResponse = await fetch(`http://localhost:${process.env.PORT}/metrics`);
+    const indexedChainIds = Object.keys(publicClients).map(Number);
+
+    const ponderMetricsResponse = await fetch(`http://localhost:${process.env.PORT}/metrics`);
+
+    const dbSchema = process.env.DATABASE_SCHEMA || "public";
+    // TODO: drop ts ignore after fixing the types
+    // @ts-ignore
+    const PONDER_META = getPonderMeta(dbSchema);
+    const PONDER_STATUS = getPonderStatus(dbSchema);
+
+    const meta = (await db
+      // @ts-ignore
+      .select({ value: PONDER_META.value })
+      // @ts-ignore
+      .from(PONDER_META)
+      // @ts-ignore
+      .where(eq(PONDER_META.key, "app"))
+      .limit(1)
+      .then((result) => result[0]?.value)) as GetPonderMetaType["$inferSelect"]["value"];
+
+    const status = (await db
+      .select()
+      // TODO: drop ts ignore after fixing the types
+      // @ts-ignore
+      .from(PONDER_STATUS)) as unknown as Array<GetPonderStatusType["$inferSelect"]>;
+
+    console.log("meta", meta, status);
 
     const metrics = new PrometheusMetrics();
 
-    metrics.parseText(await metricsResponse.text());
-
-    const chainIds = Object.keys(publicClients).map(Number);
+    metrics.parseText(await ponderMetricsResponse.text());
 
     let networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
 
-    for (const chainId of chainIds) {
-      const network = chainId.toString();
-      const publicClient = publicClients[chainId];
+    for (const indexedChainId of indexedChainIds) {
+      const network = indexedChainId.toString();
+      const publicClient = publicClients[indexedChainId];
+      const ponderNetworkStatus = status.find((s) => s.network_name === network);
 
       if (!publicClient) {
-        throw new Error(`No public client found for chainId ${chainId}`);
+        throw new Error(`No public client found for chainId ${indexedChainId}`);
       }
 
       const latestSafeBlock = await publicClient.getBlock();
@@ -89,28 +125,37 @@ export function ensNodeMetadata({
       });
       const lastSyncedBlockTimestamp = 0;
 
-      const lastIndexedBlockTimestamp = metrics.getValue("ponder_indexing_timestamp", {
-        network,
-      });
-      const lastIndexedBlockHeight = 0;
+      const lastSyncedBlock: BlockMetadata | null = lastSyncedBlockHeight
+        ? {
+            height: lastSyncedBlockHeight ?? 0,
+            timestamp: lastSyncedBlockTimestamp ?? 0,
+            utc: lastSyncedBlockTimestamp
+              ? new Date(Number(lastSyncedBlockTimestamp) * 1000).toISOString()
+              : "",
+          }
+        : null;
+
+      const lastIndexedBlock = ponderNetworkStatus?.block_number
+        ? {
+            height: ponderNetworkStatus.block_number ?? 0,
+            timestamp: ponderNetworkStatus.block_timestamp ?? 0,
+            utc: ponderNetworkStatus.block_timestamp
+              ? new Date(Number(ponderNetworkStatus.block_timestamp) * 1000).toISOString()
+              : "",
+          }
+        : null;
 
       const networkStatus = {
-        totalBlocksCount: metrics.getValue("ponder_historical_total_blocks", {
-          network,
-        }),
-        cachedBlocksCount: metrics.getValue("ponder_historical_cached_blocks", {
-          network,
-        }),
-        lastSyncedBlock: {
-          height: lastSyncedBlockHeight ?? 0,
-          timestamp: lastSyncedBlockTimestamp ?? 0,
-          utc: "",
-        },
-        lastIndexedBlock: {
-          height: 0,
-          timestamp: lastIndexedBlockTimestamp ?? 0,
-          utc: "",
-        },
+        totalBlocksCount:
+          metrics.getValue("ponder_historical_total_blocks", {
+            network,
+          }) ?? null,
+        cachedBlocksCount:
+          metrics.getValue("ponder_historical_cached_blocks", {
+            network,
+          }) ?? null,
+        lastSyncedBlock,
+        lastIndexedBlock,
         latestSafeBlock: {
           height: Number(latestSafeBlock.number),
           timestamp: Number(latestSafeBlock.timestamp),
@@ -118,7 +163,7 @@ export function ensNodeMetadata({
         },
         isRealtime: Boolean(metrics.getValue("ponder_sync_is_realtime", { network })),
         isComplete: Boolean(metrics.getValue("ponder_sync_is_complete", { network })),
-        isQueued: typeof metrics.getValue("ponder_sync_block", { network }) === "undefined",
+        isQueued: lastIndexedBlock === null,
         status: "",
       } satisfies NetworkIndexingStatus;
 
@@ -131,17 +176,27 @@ export function ensNodeMetadata({
     }
 
     return ctx.json({
+      // application name
       name: packageJson.name,
+      // application version
       version: packageJson.version,
+      // application dependencies version
       deps: {
         ponder: metrics.getLabel("ponder_version_info", "version"),
+        nodejs: metrics.getLabel("nodejs_version_info", "version"),
       },
+      // application environment variables
       env: {
         ACTIVE_PLUGINS: process.env.ACTIVE_PLUGINS,
         DATABASE_SCHEMA: process.env.DATABASE_SCHEMA,
         ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
       },
+      // application runtime information
       runtime: {
+        // application build id
+        // https://github.com/ponder-sh/ponder/blob/626e524/packages/core/src/build/index.ts#L425-L431
+        codebaseBuildId: meta?.build_id,
+        // tableNames: meta?.table_names,
         networkIndexingStatus,
       },
     });

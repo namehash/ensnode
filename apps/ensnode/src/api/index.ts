@@ -1,14 +1,14 @@
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
+import { swaggerUI } from "@hono/swagger-ui";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { describeRoute, openAPISpecs } from "hono-openapi";
 import { resolver, validator as zValidator } from "hono-openapi/zod";
+import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
-import { swaggerUI } from "@hono/swagger-ui";
-import { ensNodeMetadata } from "../lib/middleware";
 import { z } from "zod";
+import { ensNodeMetadata } from "../lib/middleware";
 // For extending the Zod schema with OpenAPI properties
 import "zod-openapi/extend";
 
@@ -18,7 +18,7 @@ const app = new Hono();
 app.use(
   cors({
     origin: "*",
-  })
+  }),
 );
 
 const packageJson = await import("../../package.json").then((m) => m.default);
@@ -38,7 +38,7 @@ app.get(
         },
       ],
     },
-  })
+  }),
 );
 
 // Use the middleware to serve Swagger UI at /ui
@@ -57,7 +57,7 @@ app.get(
             schema: resolver(
               z.any().openapi({
                 type: "object",
-              })
+              }),
             ),
           },
         },
@@ -65,8 +65,9 @@ app.get(
     },
   }),
   ensNodeMetadata({
+    db,
     publicClients,
-  })
+  }),
 );
 
 // use ponder client support
@@ -78,7 +79,7 @@ app.get(
   describeRoute({
     description: "GraphiQL UI for the ENSNode service instance",
   }),
-  ponderGraphQL({ db, schema })
+  ponderGraphQL({ db, schema }),
 );
 app.post(
   "/ponder",
@@ -86,12 +87,10 @@ app.post(
     description: "GraphQL API for the ENSNode service instance",
   }),
   ponderGraphQL({ db, schema }),
-
   zValidator(
     "json",
     z.object({
-      query: z.string().default(`
-      {
+      query: z.string().default(`query GetLatestDomains {
   domains(orderBy: "createdAt", orderDirection: "desc") {
     items {
       name
@@ -100,18 +99,15 @@ app.post(
       expiryDate
     }
   }
-  
 }`),
       variables: z.object({}).optional(),
-    })
-  )
+    }),
+  ),
 );
 
 // use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
 app.use("/", async (ctx) =>
-  ctx.redirect(
-    `https://admin.ensnode.io/about?ensnode=${process.env.PUBLIC_SERVICE_URL}`
-  )
+  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${process.env.PUBLIC_SERVICE_URL}`),
 );
 
 // use our custom graphql middleware at /subgraph
@@ -135,11 +131,7 @@ app.use(
           schema.fusesSet,
           schema.expiryExtended,
         ],
-        RegistrationEvent: [
-          schema.nameRegistered,
-          schema.nameRenewed,
-          schema.nameTransferred,
-        ],
+        RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
         ResolverEvent: [
           schema.addrChanged,
           schema.multicoinAddrChanged,
@@ -159,7 +151,7 @@ app.use(
         "Resolver.events": "ResolverEvent",
       },
     },
-  })
+  }),
 );
 
 export default app;

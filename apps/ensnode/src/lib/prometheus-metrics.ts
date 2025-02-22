@@ -14,7 +14,7 @@ interface HistogramValue extends MetricValue {
 }
 
 export class PrometheusMetrics {
-  private metrics: Map<string, MetricValue | HistogramValue>;
+  private metrics: Map<string, (MetricValue | HistogramValue)[]>;
   private help: Map<string, string>;
   private types: Map<string, MetricType>;
 
@@ -75,16 +75,16 @@ export class PrometheusMetrics {
   }
 
   /**
-   * Gets raw metric value including all metadata
+   * Gets raw metric values including all metadata
    * @param name Metric name
-   * @returns Full metric object or undefined if not found
+   * @returns Array of metric objects or undefined if not found
    * @example
    * ```ts
-   * const metric = metrics.get('http_requests_total');
-   * // Returns: { value: 1234, labels: { method: "GET" }, type: "counter" }
+   * const metrics = metrics.get('http_requests_total');
+   * // Returns: [{ value: 1234, labels: { method: "GET" }, type: "counter" }]
    * ```
    */
-  get(name: string): MetricValue | HistogramValue | undefined {
+  get(name: string): (MetricValue | HistogramValue)[] | undefined {
     return this.metrics.get(name);
   }
 
@@ -103,17 +103,24 @@ export class PrometheusMetrics {
    * ```
    */
   getValue(name: string, labelFilter?: Record<string, string>): number | undefined {
-    const metric = this.metrics.get(name);
-    if (!metric) return undefined;
+    const metrics = this.metrics.get(name);
+    if (!metrics?.length) return undefined;
 
-    if (!labelFilter) return metric.value;
-
-    if (metric.labels) {
-      const matches = Object.entries(labelFilter).every(([k, v]) => metric.labels?.[k] === v);
-      return matches ? metric.value : undefined;
+    // If no label filter, return first metric value
+    if (!labelFilter || Object.keys(labelFilter).length === 0) {
+      const firstMetric = metrics[0];
+      return firstMetric?.value;
     }
 
-    return undefined;
+    // Find metric matching all label criteria
+    const matchingMetric = metrics.find((metric) => {
+      if (typeof metric.labels === "object") {
+        return Object.entries(labelFilter).every(([k, v]) => metric.labels?.[k] === v);
+      }
+      return false;
+    });
+
+    return matchingMetric?.value;
   }
 
   /**
@@ -131,8 +138,30 @@ export class PrometheusMetrics {
    * ```
    */
   getLabel(name: string, label: string): string | undefined {
-    const metric = this.metrics.get(name);
-    return metric?.labels?.[label];
+    const metrics = this.metrics.get(name);
+    if (!metrics?.length) return undefined;
+    return metrics[0]?.labels?.[label];
+  }
+
+  /**
+   * Gets all metrics matching a specific name and returns their label values
+   * @param name Metric name
+   * @param label Label name to retrieve
+   * @returns Array of label values or empty array if none found
+   * @example
+   * ```ts
+   * // Get all network IDs
+   * metrics.getLabels('ponder_historical_total_blocks', 'network')
+   * // Returns: ['1', '8453']
+   * ```
+   */
+  getLabels(name: string, label: string): string[] {
+    const metrics = this.metrics.get(name);
+    if (!metrics?.length) return [];
+
+    return metrics
+      .map((metric) => metric.labels?.[label])
+      .filter((value): value is string => value !== undefined);
   }
 
   /**
@@ -145,38 +174,46 @@ export class PrometheusMetrics {
    * // Returns: { avg: 123.45, p95: 200, max: 500 }
    * ```
    */
-  getHistogramStats(name: string): { avg: number; p95: number; max: number } | undefined {
-    const metric = this.metrics.get(name) as HistogramValue;
-    if (!metric || metric.type !== "histogram" || metric.count === 0) return undefined;
+  getHistogramStats(
+    name: string,
+    labelFilter?: Record<string, string>,
+  ): { avg: number; p95: number; max: number } | undefined {
+    // Find matching metrics with the given labels
+    const baseName = name.replace(/_bucket$/, "");
+    const metrics = this.metrics.get(`${baseName}_bucket`);
+    if (!metrics?.length) return undefined;
 
-    const bucketEntries = Object.entries(metric.buckets);
-    if (bucketEntries.length === 0) return undefined;
+    // Filter metrics by labels
+    const matchingMetrics = metrics.filter((metric) => {
+      if (!metric.labels || !labelFilter) return true;
+      return Object.entries(labelFilter).every(([k, v]) => metric.labels?.[k] === v);
+    });
 
-    const buckets = bucketEntries
-      .map(([le, count]) => ({
-        le: le === "+Inf" ? Infinity : parseFloat(le),
-        count,
+    if (!matchingMetrics.length) return undefined;
+
+    // Get sum and count with matching labels
+    const sum = this.getValue(`${baseName}_sum`, labelFilter) ?? 0;
+    const count = this.getValue(`${baseName}_count`, labelFilter) ?? 0;
+
+    if (count === 0) return undefined;
+
+    // Collect buckets with matching labels
+    const buckets = matchingMetrics
+      .map((metric) => ({
+        le: metric.labels?.le === "+Inf" ? Infinity : parseFloat(metric.labels?.le ?? "0"),
+        count: metric.value,
       }))
       .sort((a, b) => a.le - b.le);
 
-    const lastBucket = buckets[buckets.length - 1];
-    if (!lastBucket) return undefined;
+    if (buckets.length === 0) return undefined;
 
     return {
-      avg: metric.sum / metric.count,
-      p95: this.calculatePercentile(buckets, lastBucket.count, 0.95),
-      max: lastBucket.le,
+      avg: sum / count,
+      p95: this.calculatePercentile(buckets, count, 0.95),
+      max: buckets[buckets.length - 1]?.le ?? 0,
     };
   }
 
-  /**
-   * Calculates percentile value from histogram buckets
-   * @param buckets Sorted bucket array with le and count
-   * @param totalCount Total count across all buckets
-   * @param p Percentile value (0-1)
-   * @returns Calculated percentile value
-   * @private
-   */
   private calculatePercentile(
     buckets: Array<{ le: number; count: number }>,
     totalCount: number,
@@ -191,17 +228,9 @@ export class PrometheusMetrics {
       }
     }
 
-    // If no bucket meets the target, return the highest bucket's upper bound
     return buckets[buckets.length - 1]?.le ?? 0;
   }
 
-  /**
-   * Processes a single metric line and updates the corresponding metric value
-   * @param name Metric name
-   * @param labelString Optional label string in Prometheus format
-   * @param value Metric value
-   * @private
-   */
   private processMetric(name: string, labelString: string | undefined, value: number): void {
     const getBaseName = (name: string, suffix: string): string => {
       const parts = name.split(suffix);
@@ -223,26 +252,37 @@ export class PrometheusMetrics {
       const metric = this.getOrCreateHistogram(baseName);
       metric.count = value;
     } else {
-      this.metrics.set(name, {
+      const newMetric: MetricValue = {
         value,
         labels: this.parseLabels(labelString),
         help: this.help.get(name),
         type: this.types.get(name),
-      });
+      };
+
+      const existing = this.metrics.get(name) || [];
+      this.metrics.set(name, [...existing, newMetric]);
     }
   }
 
-  /**
-   * Parses Prometheus label string into an object
-   * @param labelString Label string in format 'label1="value1",label2="value2"'
-   * @returns Object with label key-value pairs or undefined if no valid labels
-   * @private
-   * @example
-   * ```ts
-   * parseLabels('method="GET",status="200"')
-   * // Returns: { method: "GET", status: "200" }
-   * ```
-   */
+  private getOrCreateHistogram(name: string): HistogramValue {
+    const metrics = this.metrics.get(name) || [];
+    let metric = metrics[0] as HistogramValue;
+
+    if (!metric) {
+      metric = {
+        value: 0,
+        buckets: {},
+        sum: 0,
+        count: 0,
+        help: this.help.get(name),
+        type: "histogram",
+      };
+      this.metrics.set(name, [metric]);
+    }
+
+    return metric;
+  }
+
   private parseLabels(labelString?: string): Record<string, string> | undefined {
     if (!labelString) return undefined;
 
@@ -259,34 +299,6 @@ export class PrometheusMetrics {
     return Object.keys(labels).length > 0 ? labels : undefined;
   }
 
-  /**
-   * Gets or creates a histogram metric
-   * @param name Metric name
-   * @returns Histogram metric object
-   * @private
-   */
-  private getOrCreateHistogram(name: string): HistogramValue {
-    let metric = this.metrics.get(name) as HistogramValue;
-    if (!metric) {
-      metric = {
-        value: 0,
-        buckets: {},
-        sum: 0,
-        count: 0,
-        help: this.help.get(name),
-        type: "histogram",
-      };
-      this.metrics.set(name, metric);
-    }
-    return metric;
-  }
-
-  /**
-   * Type guard for metric types
-   * @param type String to check
-   * @returns True if valid metric type
-   * @private
-   */
   private isValidMetricType(type: string): type is MetricType {
     return ["counter", "gauge", "histogram"].includes(type);
   }
