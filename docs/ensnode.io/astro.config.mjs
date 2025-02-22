@@ -5,7 +5,7 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   integrations: [
     starlight({
-      title: "ENSNode Docs",
+      title: "ENSNode",
       social: {
         github: "https://github.com/namehash/ensnode",
       },
