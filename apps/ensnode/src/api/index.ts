@@ -1,10 +1,12 @@
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
+import { ponderMetadata } from "@ensnode/ponder-metadata/middleware";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
-import { ensNodeMetadata } from "../lib/middleware";
+import packageJson from "../../package.json";
+import { getEnsDeploymentChain } from "../lib/ponder-helpers";
 
 const app = new Hono();
 
@@ -23,8 +25,21 @@ app.use("/", async (ctx) =>
 // use ENSNode middleware at /metadata
 app.get(
   "/metadata",
-  ensNodeMetadata({
+  ponderMetadata({
+    app: {
+      name: packageJson.name,
+      version: packageJson.version,
+    },
+    env: {
+      ACTIVE_PLUGINS: process.env.ACTIVE_PLUGINS,
+      DATABASE_SCHEMA: process.env.DATABASE_SCHEMA,
+      ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
+    },
     db,
+    fetchPrometheusMetrics: () =>
+      fetch(`http://localhost:${process.env.PORT}/metrics`).then((res) => res.text()),
+    // TODO: fix the types
+    // @ts-ignore
     publicClients,
   }),
 );

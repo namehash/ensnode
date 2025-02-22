@@ -187,6 +187,9 @@ importers:
       '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
         version: link:../../packages/ensrainbow-sdk
+      '@ensnode/ponder-metadata':
+        specifier: workspace:*
+        version: link:../../packages/ponder-metadata-api
       '@ensnode/ponder-schema':
         specifier: workspace:*
         version: link:../../packages/ponder-schema
@@ -389,6 +392,34 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.0.5(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)
+
+  packages/ponder-metadata-api:
+    dependencies:
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 1.9.4
+      '@ensnode/shared-configs':
+        specifier: 'workspace:'
+        version: link:../shared-configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.17.14
+      hono:
+        specifier: 'catalog:'
+        version: 4.6.17
+      ponder:
+        specifier: 'catalog:'
+        version: 0.9.18(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+      tsup:
+        specifier: 'catalog:'
+        version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
 
   packages/ponder-schema:
     dependencies:
@@ -12211,10 +12242,6 @@ snapshots:
   yoctocolors@2.1.1: {}
 
   yoga-wasm-web@0.3.3: {}
-
-  zod-to-json-schema@3.24.1(zod@3.24.2):
-    dependencies:
-      zod: 3.24.2
 
   zod-to-json-schema@3.24.1(zod@3.24.2):
     dependencies:
