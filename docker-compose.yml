@@ -31,6 +31,8 @@ services:
   ensadmin:
     build:
       dockerfile: ./apps/ensadmin/Dockerfile
+      args:
+        - VITE_ENSNODE_URL
     image: namehash/ensadmin
     ports:
       - "4173:4173"
