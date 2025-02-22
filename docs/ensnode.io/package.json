@@ -8,7 +8,8 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "biome check --write"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.31.1",

@@ -48,8 +48,10 @@ export default defineConfig({
             },
           ],
         },
-
       ],
+      editLink: {
+        baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
+      },
     }),
   ],
 });
