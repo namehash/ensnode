@@ -26,6 +26,7 @@
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/ens-deployments": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
+    "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
     "@ensnode/utils": "workspace:*",

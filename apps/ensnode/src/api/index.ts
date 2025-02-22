@@ -1,5 +1,6 @@
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
+import { ponderMetadata } from "@ensnode/ponder-metadata/middleware";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 import { swaggerUI } from "@hono/swagger-ui";
 import { Hono } from "hono";
@@ -8,9 +9,9 @@ import { resolver, validator as zValidator } from "hono-openapi/zod";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import { z } from "zod";
-import { ensNodeMetadata } from "../lib/middleware";
 // For extending the Zod schema with OpenAPI properties
 import "zod-openapi/extend";
+import { getEnsDeploymentChain } from "../lib/ponder-helpers";
 
 const app = new Hono();
 
@@ -23,6 +24,7 @@ app.use(
 
 const packageJson = await import("../../package.json").then((m) => m.default);
 const OPEN_API_MANIFEST_PATH = "/api/openapi.json";
+
 app.get(
   OPEN_API_MANIFEST_PATH,
   openAPISpecs(app, {
@@ -64,8 +66,22 @@ app.get(
       },
     },
   }),
-  ensNodeMetadata({
+
+  ponderMetadata({
+    app: {
+      name: packageJson.name,
+      version: packageJson.version,
+    },
+    env: {
+      ACTIVE_PLUGINS: process.env.ACTIVE_PLUGINS,
+      DATABASE_SCHEMA: process.env.DATABASE_SCHEMA,
+      ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
+    },
     db,
+    fetchPrometheusMetrics: () =>
+      fetch(`http://localhost:${process.env.PORT}/metrics`).then((res) => res.text()),
+    // TODO: fix the types
+    // @ts-ignore
     publicClients,
   }),
 );

@@ -1,4 +1,3 @@
-import { Block } from "@ponder/core";
 import { MiddlewareHandler } from "hono";
 import { ReadonlyDrizzle, eq } from "ponder";
 import { PublicClient } from "viem";
@@ -8,7 +7,6 @@ import {
   getPonderMeta,
   getPonderStatus,
 } from "./db-helpers";
-import { getEnsDeploymentChain } from "./ponder-helpers";
 import { PrometheusMetrics } from "./prometheus-metrics";
 
 interface BlockMetadata {
@@ -64,21 +62,25 @@ interface NetworkIndexingStatus {
   status: string;
 }
 
-export function ensNodeMetadata({
+export function ponderMetadata({
+  app,
   db,
+  env,
+  fetchPrometheusMetrics,
   publicClients,
 }: {
   // TODO: apply correct type for db to include the ponder meta and status tables
   db: ReadonlyDrizzle<Record<string, unknown>>;
+  app: {
+    name: string;
+    version: string;
+  };
+  env: Record<string, string | undefined>;
+  fetchPrometheusMetrics: () => Promise<string>;
   publicClients: Record<number, PublicClient>;
 }): MiddlewareHandler {
-  return async function ensNodeMetadataMiddleware(ctx) {
-    const packageJson = await import("../../package.json").then((m) => m.default);
-
+  return async function ponderMetadataMiddleware(ctx) {
     const indexedChainIds = Object.keys(publicClients).map(Number);
-
-    const ponderMetricsResponse = await fetch(`http://localhost:${process.env.PORT}/metrics`);
-
     const dbSchema = process.env.DATABASE_SCHEMA || "public";
     // TODO: drop ts ignore after fixing the types
     // @ts-ignore
@@ -93,26 +95,32 @@ export function ensNodeMetadata({
       // @ts-ignore
       .where(eq(PONDER_META.key, "app"))
       .limit(1)
-      .then((result) => result[0]?.value)) as GetPonderMetaType["$inferSelect"]["value"];
+      .then(
+        (result: any) => result[0]?.value
+      )) as GetPonderMetaType["$inferSelect"]["value"];
 
     const status = (await db
       .select()
       // TODO: drop ts ignore after fixing the types
       // @ts-ignore
-      .from(PONDER_STATUS)) as unknown as Array<GetPonderStatusType["$inferSelect"]>;
+      .from(PONDER_STATUS)) as unknown as Array<
+      GetPonderStatusType["$inferSelect"]
+    >;
 
     console.log("meta", meta, status);
 
     const metrics = new PrometheusMetrics();
 
-    metrics.parseText(await ponderMetricsResponse.text());
+    metrics.parseText(await fetchPrometheusMetrics());
 
     let networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
 
     for (const indexedChainId of indexedChainIds) {
       const network = indexedChainId.toString();
       const publicClient = publicClients[indexedChainId];
-      const ponderNetworkStatus = status.find((s) => s.network_name === network);
+      const ponderNetworkStatus = status.find(
+        (s) => s.network_name === network
+      );
 
       if (!publicClient) {
         throw new Error(`No public client found for chainId ${indexedChainId}`);
@@ -140,7 +148,9 @@ export function ensNodeMetadata({
             height: ponderNetworkStatus.block_number ?? 0,
             timestamp: ponderNetworkStatus.block_timestamp ?? 0,
             utc: ponderNetworkStatus.block_timestamp
-              ? new Date(Number(ponderNetworkStatus.block_timestamp) * 1000).toISOString()
+              ? new Date(
+                  Number(ponderNetworkStatus.block_timestamp) * 1000
+                ).toISOString()
               : "",
           }
         : null;
@@ -161,8 +171,12 @@ export function ensNodeMetadata({
           timestamp: Number(latestSafeBlock.timestamp),
           utc: new Date(Number(latestSafeBlock.timestamp) * 1000).toISOString(),
         },
-        isRealtime: Boolean(metrics.getValue("ponder_sync_is_realtime", { network })),
-        isComplete: Boolean(metrics.getValue("ponder_sync_is_complete", { network })),
+        isRealtime: Boolean(
+          metrics.getValue("ponder_sync_is_realtime", { network })
+        ),
+        isComplete: Boolean(
+          metrics.getValue("ponder_sync_is_complete", { network })
+        ),
         isQueued: lastIndexedBlock === null,
         status: "",
       } satisfies NetworkIndexingStatus;
@@ -176,21 +190,14 @@ export function ensNodeMetadata({
     }
 
     return ctx.json({
-      // application name
-      name: packageJson.name,
-      // application version
-      version: packageJson.version,
+      app,
       // application dependencies version
       deps: {
         ponder: metrics.getLabel("ponder_version_info", "version"),
         nodejs: metrics.getLabel("nodejs_version_info", "version"),
       },
       // application environment variables
-      env: {
-        ACTIVE_PLUGINS: process.env.ACTIVE_PLUGINS,
-        DATABASE_SCHEMA: process.env.DATABASE_SCHEMA,
-        ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
-      },
+      env,
       // application runtime information
       runtime: {
         // application build id
