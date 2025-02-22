@@ -17,7 +17,7 @@ app.use(
 
 // use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
 app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${process.env.SERVER_URL}`),
+  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${process.env.PUBLIC_SERVICE_URL}`),
 );
 
 // use ENSNode middleware at /metadata
@@ -32,7 +32,7 @@ app.get(
 // use ponder client support
 app.use("/sql/*", client({ db, schema }));
 
-// use ponder middleware at root
+// use ponder middleware at `/ponder`
 app.use("/ponder", ponderGraphQL({ db, schema }));
 
 // use our custom graphql middleware at /subgraph
