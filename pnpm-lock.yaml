@@ -292,14 +292,17 @@ importers:
   docs/ensnode.io:
     dependencies:
       '@astrojs/starlight':
-        specifier: ^0.31.1
-        version: 0.31.1(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))
+        specifier: ^0.32.1
+        version: 0.32.1(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))
       astro:
         specifier: ^5.2.3
         version: 5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
+      starlight-theme-rapide:
+        specifier: ^0.4.0
+        version: 0.4.0(@astrojs/starlight@0.32.1(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)))
 
   docs/ensrainbow:
     dependencies:
@@ -501,6 +504,11 @@ packages:
 
   '@astrojs/starlight@0.31.1':
     resolution: {integrity: sha512-VIVkHugwgtEqJPiRH8+ouP0UqUfdmpBO9C64R+6QaQ2qmADNkI/BA3/YAJHTBZYlMQQGEEuLJwD9qpaUovi52Q==}
+    peerDependencies:
+      astro: ^5.1.5
+
+  '@astrojs/starlight@0.32.1':
+    resolution: {integrity: sha512-+GPtDzi7wkbooHnMZqGjCoV0qwkYZAFSg3FhRm8jSXXSkLJcw4rgT6vnee/LuJhbVq9kvHVcevtgK8tTxy3Xeg==}
     peerDependencies:
       astro: ^5.1.5
 
@@ -3847,6 +3855,10 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
+  klona@2.0.6:
+    resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==}
+    engines: {node: '>= 8'}
+
   kysely@0.26.3:
     resolution: {integrity: sha512-yWSgGi9bY13b/W06DD2OCDDHQmq1kwTGYlQ4wpZkMOJqMGCstVCFIvxCCVG4KfY1/3G0MhDAcZsip/Lw8/vJWw==}
     engines: {node: '>=14.0.0'}
@@ -5125,6 +5137,12 @@ packages:
     resolution: {integrity: sha512-KJP1OCML99+8fhOHxwwzyWrlUuVX5GQ0ZpJTd1DFXhdkrvg1szxfHhawXUZ3g9TkXORQd4/WG68jMlQZ2p8wlg==}
     engines: {node: '>=6'}
 
+  starlight-theme-rapide@0.4.0:
+    resolution: {integrity: sha512-go2JEA3p1CNo3zqhS1pDkhCXAJNG8O7sX7KdIebae+ogaAndFRKXFtXhmw+9O/CWM785Vje6mGIXlwLer0faLQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@astrojs/starlight': '>=0.32.0'
+
   std-env@3.8.0:
     resolution: {integrity: sha512-Bc3YwwCB+OzldMxOXJIIvC6cPRWr/LxOp48CdQTOkPyk/t4JWWJbrilwBd7RJzKV8QW7tJkcgAmeuLLJugl5/w==}
 
@@ -5971,6 +5989,37 @@ snapshots:
       hastscript: 9.0.0
       i18next: 23.16.8
       js-yaml: 4.1.0
+      mdast-util-directive: 3.1.0
+      mdast-util-to-markdown: 2.1.2
+      mdast-util-to-string: 4.0.0
+      pagefind: 1.3.0
+      rehype: 13.0.2
+      rehype-format: 5.0.1
+      remark-directive: 3.0.1
+      unified: 11.0.5
+      unist-util-visit: 5.0.0
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@astrojs/starlight@0.32.1(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))':
+    dependencies:
+      '@astrojs/mdx': 4.0.8(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))
+      '@astrojs/sitemap': 3.2.1
+      '@pagefind/default-ui': 1.3.0
+      '@types/hast': 3.0.4
+      '@types/js-yaml': 4.0.9
+      '@types/mdast': 4.0.4
+      astro: 5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)
+      astro-expressive-code: 0.40.1(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))
+      bcp-47: 2.1.0
+      hast-util-from-html: 2.0.3
+      hast-util-select: 6.0.3
+      hast-util-to-string: 3.0.1
+      hastscript: 9.0.0
+      i18next: 23.16.8
+      js-yaml: 4.1.0
+      klona: 2.0.6
       mdast-util-directive: 3.1.0
       mdast-util-to-markdown: 2.1.2
       mdast-util-to-string: 4.0.0
@@ -9687,6 +9736,8 @@ snapshots:
 
   kleur@4.1.5: {}
 
+  klona@2.0.6: {}
+
   kysely@0.26.3: {}
 
   level-supports@4.0.1: {}
@@ -11408,6 +11459,10 @@ snapshots:
   stacktrace-parser@0.1.10:
     dependencies:
       type-fest: 0.7.1
+
+  starlight-theme-rapide@0.4.0(@astrojs/starlight@0.32.1(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))):
+    dependencies:
+      '@astrojs/starlight': 0.32.1(astro@5.2.3(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3))
 
   std-env@3.8.0: {}
 

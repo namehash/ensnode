@@ -1,10 +1,13 @@
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import starlightThemeRapide from 'starlight-theme-rapide'
+
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [
     starlight({
+      plugins: [starlightThemeRapide()],
       title: "ENSNode",
       social: {
         github: "https://github.com/namehash/ensnode",
@@ -52,6 +55,7 @@ export default defineConfig({
       editLink: {
         baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
       },
+
     }),
   ],
 });
