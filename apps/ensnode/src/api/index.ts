@@ -15,10 +15,16 @@ app.use(
   }),
 );
 
+// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+app.use("/", async (ctx) =>
+  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${process.env.SERVER_URL}`),
+);
+
 // use ENSNode middleware at /metadata
 app.get(
   "/metadata",
   ensNodeMetadata({
+    db,
     publicClients,
   }),
 );
@@ -28,11 +34,6 @@ app.use("/sql/*", client({ db, schema }));
 
 // use ponder middleware at root
 app.use("/ponder", ponderGraphQL({ db, schema }));
-
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
-app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${process.env.SERVER_URL}`),
-);
 
 // use our custom graphql middleware at /subgraph
 app.use(
