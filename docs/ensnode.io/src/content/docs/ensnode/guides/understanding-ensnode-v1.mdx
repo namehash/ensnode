@@ -1,11 +1,7 @@
 ---
 title: Understanding ENSNode V1
 sidebar:
-<<<<<<< HEAD:docs/ensnode.io/src/content/docs/ensnode/guides/understanding-ensnode-v1.mdx
   order: 3
-=======
-  order: 1
->>>>>>> main:docs/ensnode/src/content/docs/guides/understanding-ensnode-v1.mdx
 ---
 
 :::note
@@ -17,24 +13,27 @@ ENSNode is the new multichain indexer for ENS and ENSv2. It is built on [Ponder]
 ## Core Design Principles
 
 1. **Full Backwards Compatibility w/ ENS Subgraph**
-    - Full support for existing ENS Subgraph queries used by [`ensjs`](https://github.com/ensdomains/ensjs/) and [`ens-app-v3`](https://github.com/ensdomains/ens-app-v3)
-    - Drop-in replacement for applications using the ENS Subgraph
-    - Verified compatibility through extensive testing with [`ens-test-env`](https://github.com/namehash/ens-test-env/) and [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) (see [Subgraph Compatibility](/reference/subgraph-compatibility))
+
+   - Full support for existing ENS Subgraph queries used by [`ensjs`](https://github.com/ensdomains/ensjs/) and [`ens-app-v3`](https://github.com/ensdomains/ens-app-v3)
+   - Drop-in replacement for applications using the ENS Subgraph
+   - Verified compatibility through extensive testing with [`ens-test-env`](https://github.com/namehash/ens-test-env/) and [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) (see [Subgraph Compatibility](/reference/subgraph-compatibility))
 
 2. **Multi-Registry Plugin Architecture**
-    - Support for indexing ENS data across multiple chains & subregistries (i.e. mainnet, Base, Linea)
-    - Plugins can be activated independently or in combination
+
+   - Support for indexing ENS data across multiple chains & subregistries (i.e. mainnet, Base, Linea)
+   - Plugins can be activated independently or in combination
 
 3. **Built on Ponder**
-    - Improved indexing speed (>10x faster than ENS Subgraph)
-    - Isolated indexing schemas (supporting branches, staging environments)
-    - Access your indexed data directly from Postgres
-    - `@ponder/client` for efficent client-side live queries
+
+   - Improved indexing speed (>10x faster than ENS Subgraph)
+   - Isolated indexing schemas (supporting branches, staging environments)
+   - Access your indexed data directly from Postgres
+   - `@ponder/client` for efficent client-side live queries
 
 4. **Self-hostable Decentralization Approach**
-    - Self-hostable infrastructure
-    - Bring-your-own Postgres
-    - Bring-your-own ENSRainbow
+   - Self-hostable infrastructure
+   - Bring-your-own Postgres
+   - Bring-your-own ENSRainbow
 
 ## Plugins
 
@@ -47,7 +46,6 @@ Each plugin is an isolated ponder indexing configuration that uses the shared ha
 Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin, id-generating code was abstracted to be plugin-specific. See the helpers in `apps/ensnode/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
 
 This scoping also applies to the concept of an `OwnedName` (see `apps/ensnode/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensnode/src/handlers/Registrar.ts`) — each plugin exists in the context of a name whos subnames they manage, and the shared handlers reference that name instead of a hardcoded constant (`"eth"`, in the subgraph implementation).
-
 
 ### Plugin Definition
 
@@ -92,19 +90,21 @@ In general, however, each handler is written in a more ponder-native way, using 
 ENSNode exposes three distinct API endpoints:
 
 1. **Subgraph-Compatible GraphQL** (`/subgraph`)
-    - Implements the ENS Subgraph schema and query patterns
-    - Enables gradual migration from existing Subgraph implementations
-    - Maintains compatibility with `ensjs` client library — just replace
+
+   - Implements the ENS Subgraph schema and query patterns
+   - Enables gradual migration from existing Subgraph implementations
+   - Maintains compatibility with `ensjs` client library — just replace
 
 2. **Native Ponder GraphQL** (`/`)
-    - Auto-generated GraphQL API from Ponder schema
-    - More efficient query patterns than Subgraph API, particularly for pagination
+
+   - Auto-generated GraphQL API from Ponder schema
+   - More efficient query patterns than Subgraph API, particularly for pagination
 
 3. **Ponder Client API**
-    - SQL-based alternative to GraphQL
-    - End-to-end type inference
-    - Support for live updates
-    - Optimized for client application integration
+   - SQL-based alternative to GraphQL
+   - End-to-end type inference
+   - Support for live updates
+   - Optimized for client application integration
 
 ## Label Healing with ENSRainbow
 

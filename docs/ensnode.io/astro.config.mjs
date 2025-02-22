@@ -48,11 +48,7 @@ export default defineConfig({
             },
           ],
         },
-        {
-          label: "General",
-          autogenerate: { directory: "general" },
-          collapsed: false,
-        },
+
       ],
     }),
   ],
