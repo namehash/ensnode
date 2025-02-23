@@ -12,6 +12,7 @@
     "lint": "biome check --write"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.2.1",
     "@astrojs/starlight": "^0.32.1",
     "astro": "^5.2.3",
     "sharp": "^0.33.5",
