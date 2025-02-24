@@ -184,7 +184,7 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
  * @returns the ENS Node public URL
  */
 export const ensNodePublicUrl = (): string => {
-  const envVarName = "ENS_NODE_PUBLIC_URL";
+  const envVarName = "ENSNODE_PUBLIC_URL";
   const envVarValue = process.env[envVarName];
 
   try {
