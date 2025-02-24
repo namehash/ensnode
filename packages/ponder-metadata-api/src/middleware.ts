@@ -3,59 +3,7 @@ import { ReadonlyDrizzle } from "ponder";
 import { PublicClient } from "viem";
 import { queryPonderMeta, queryPonderStatus } from "./db-helpers";
 import { PrometheusMetrics } from "./prometheus-metrics";
-
-interface BlockMetadata {
-  height: number;
-  timestamp: number;
-  utc: string;
-}
-
-interface NetworkIndexingStatus {
-  /**
-   * Number of blocks required for the historical sync.
-   */
-  totalBlocksCount: number | null;
-
-  /**
-   *  Number of blocks that were found in the cache for the historical sync.
-   */
-  cachedBlocksCount: number | null;
-
-  /**
-   * Closest-to-tip synced block number.
-   */
-  lastSyncedBlock: BlockMetadata | null;
-
-  /**
-   * Last block processed & indexed by the indexer.
-   */
-  lastIndexedBlock: BlockMetadata | null;
-
-  /**
-   * Latest safe block available on the chain.
-   */
-  latestSafeBlock: BlockMetadata | null;
-
-  /**
-   * Indicating if the sync is realtime mode.
-   */
-  isRealtime: boolean;
-
-  /**
-   * Indicating if the sync has synced all blocks up to the tip.
-   */
-  isComplete: boolean;
-
-  /**
-   * Indicating if the sync is queued.
-   */
-  isQueued: boolean;
-
-  /**
-   * Human-readable description of the current indexing state
-   */
-  status: string;
-}
+import type { BlockMetadata, NetworkIndexingStatus } from "./types/common";
 
 export function ponderMetadata({
   app,
@@ -121,7 +69,6 @@ export function ponderMetadata({
         isRealtime: Boolean(metrics.getValue("ponder_sync_is_realtime", { network })),
         isComplete: Boolean(metrics.getValue("ponder_sync_is_complete", { network })),
         isQueued: lastIndexedBlock === null,
-        status: "",
       } satisfies NetworkIndexingStatus;
     }
 
