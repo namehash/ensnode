@@ -20,6 +20,11 @@
 .wrapper {
     position: relative;
     width: fit-content;
+
+    /*border: 1px solid red;*/
+    border-radius: 22px; /*TODO: change from hard-coded px after moving to homepage */
+
+    overflow: hidden;
 }
 
 .wrapper:after {
@@ -106,7 +111,7 @@
     /*top: -1rem; this is die to the fact that astro has some inbuilt styling that I don't yet know how to turn off*/
     left: -2px;
 
-    box-shadow: 0 0 8px 10px rgba(255, 255, 255, 0.49);
+    /*box-shadow: 0 0 8px 10px rgba(255, 255, 255, 0.25);*/
     /*rgba(170, 11, 23, 0.49); <- the red from the example, decide on the color*/
 
     background-image: linear-gradient(0deg, #00C0FF 0%, #FFCF00 49%, #FC4F4F 80%, #00C0FF 100%);
@@ -121,6 +126,19 @@
     /*animation-timing-function: linear;*/
     /*animation-iteration-count: infinite;*/
     /*animation-play-state: running;*/
+    transform-style: preserve-3d;
+}
+
+.line::before {
+    content: "";
+    position: absolute;
+    inset: -10px; /* Exact values can always be adjusted */
+    background: linear-gradient(0deg, #00C0FF 0%, #FFCF00 49%, #FC4F4F 80%, #00C0FF 100%);
+    filter: blur(22px);
+    transform: translate3d(0px,0px,-1px);
+    border-radius: inherit;
+    pointer-events: none;
+    animation:slideLine 3.5s linear infinite;
 }
 
 @keyframes slideLine {
