@@ -1,8 +1,8 @@
 import { MiddlewareHandler } from "hono";
-import { ReadonlyDrizzle, eq } from "ponder";
+import { ReadonlyDrizzle } from "ponder";
 import { PublicClient } from "viem";
 import { queryPonderMeta, queryPonderStatus } from "./db-helpers";
-import { MetricsParser, parsePrometheusText } from "./prometheus-metrics";
+import { PrometheusMetrics } from "./prometheus-metrics";
 
 interface BlockMetadata {
   height: number;
@@ -70,10 +70,8 @@ export function ponderMetadata({
     version: string;
   };
   env: {
-    ACTIVE_PLUGINS: string;
     DATABASE_SCHEMA: string;
-    ENS_DEPLOYMENT_CHAIN: string;
-  };
+  } & Record<string, unknown>;
   fetchPrometheusMetrics: () => Promise<string>;
   publicClients: Record<number, PublicClient>;
 }): MiddlewareHandler {
@@ -82,7 +80,7 @@ export function ponderMetadata({
 
     const ponderStatus = await queryPonderStatus(env.DATABASE_SCHEMA, db);
     const ponderMeta = await queryPonderMeta(env.DATABASE_SCHEMA, db);
-    const metrics = new MetricsParser(parsePrometheusText(await fetchPrometheusMetrics()));
+    const metrics = PrometheusMetrics.parse(await fetchPrometheusMetrics());
 
     const networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
 

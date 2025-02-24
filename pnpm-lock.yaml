@@ -401,6 +401,9 @@ importers:
       parse-prometheus-text-format:
         specifier: ^1.1.1
         version: 1.1.1
+      viem:
+        specifier: 'catalog:'
+        version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'

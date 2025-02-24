@@ -1,15 +1,15 @@
 declare module "parse-prometheus-text-format" {
-  interface PrometheusMetric {
+  export interface PrometheusMetric {
     name: string;
     help: string;
     type: string;
     metrics: Array<{
-      value: number;
-      labels: Record<string, string>;
+      value: string;
+      labels?: Record<string, string>;
     }>;
   }
 
-  function parsePrometheusTextFormat(text: string): PrometheusMetric[];
+  function parsePrometheusTextFormat(text: string): Array<PrometheusMetric>;
 
   export default parsePrometheusTextFormat;
 }

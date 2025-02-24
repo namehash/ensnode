@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MetricsParser, flattenMetrics, parsePrometheusText } from "./prometheus-metrics";
+import { PrometheusMetrics, parsePrometheusText } from "./prometheus-metrics";
 
 describe("prom-parser", () => {
   const testMetrics = `
@@ -66,8 +66,8 @@ ponder_historical_total_indexing_seconds{network="8453"} 251224935
     });
   });
 
-  describe("MetricsParser", () => {
-    const parser = new MetricsParser(parsePrometheusText(testMetrics));
+  describe("PrometheusMetrics", () => {
+    const parser = PrometheusMetrics.parse(testMetrics);
 
     it("should get version information", () => {
       expect(parser.getLabel("ponder_version_info", "version")).toBe("0.9.18");

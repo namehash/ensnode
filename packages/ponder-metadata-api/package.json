@@ -36,7 +36,8 @@
   },
   "dependencies": {
     "drizzle-orm": "catalog:",
-    "parse-prometheus-text-format": "^1.1.1"
+    "parse-prometheus-text-format": "^1.1.1",
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

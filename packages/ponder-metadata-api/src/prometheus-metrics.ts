@@ -1,21 +1,11 @@
 import parsePrometheusTextFormat from "parse-prometheus-text-format";
+import type { PrometheusMetric } from "parse-prometheus-text-format";
 
-interface Metric {
-  name: string;
-  help: string;
-  type: string;
+interface ParsedPrometheusMetric extends Omit<PrometheusMetric, "metrics"> {
   metrics: Array<{
     value: number;
     labels?: Record<string, string>;
   }>;
-}
-
-interface PrometheusMetric {
-  name: string;
-  help: string;
-  type: string;
-  value?: number;
-  labels?: Record<string, string>;
 }
 
 /**
@@ -41,10 +31,8 @@ interface PrometheusMetric {
  * // }]
  * ```
  */
-export function parsePrometheusText(text: string): Array<Metric> {
-  const parsed = parsePrometheusTextFormat(text);
-
-  return parsed.map((metric) => ({
+export function parsePrometheusText(text: string): Array<ParsedPrometheusMetric> {
+  return parsePrometheusTextFormat(text).map((metric) => ({
     name: metric.name,
     help: metric.help || "",
     type: metric.type.toLowerCase(),
@@ -55,37 +43,12 @@ export function parsePrometheusText(text: string): Array<Metric> {
   }));
 }
 
-/**
- * Flattens metrics array into individual metric objects
- * @param metrics Array of metrics from parsePrometheusText
- * @returns Array of flattened metric objects
- * @example
- * ```ts
- * const metrics = flattenMetrics([{
- *   name: "ponder_historical_total_indexing_seconds",
- *   help: "Total number of seconds that are required",
- *   type: "gauge",
- *   metrics: [
- *     { value: 251224935, labels: { network: "1" } },
- *     { value: 251224935, labels: { network: "8453" } }
- *   ]
- * }]);
- * ```
- */
-export function flattenMetrics(metrics: Metric[]): Array<PrometheusMetric> {
-  return metrics.flatMap((metric) =>
-    metric.metrics.map((m) => ({
-      name: metric.name,
-      help: metric.help,
-      type: metric.type,
-      value: m.value,
-      ...(m.labels ? { labels: m.labels } : {}),
-    })),
-  );
-}
+export class PrometheusMetrics {
+  private constructor(private readonly metrics: Array<ParsedPrometheusMetric>) {}
 
-export class MetricsParser {
-  constructor(private readonly metrics: Array<Metric>) {}
+  static parse(maybePrometheusMetricsText: string): PrometheusMetrics {
+    return new PrometheusMetrics(parsePrometheusText(maybePrometheusMetricsText));
+  }
 
   /**
    * Gets all metrics of a specific name
