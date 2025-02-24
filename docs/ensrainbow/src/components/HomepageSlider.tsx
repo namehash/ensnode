@@ -4,6 +4,10 @@ import unknown_name from "../assets/unknown-name.png";
 import known_name from "../assets/known-name.png";
 
 export default function HomepageSlider() {
+
+    // All this code is for the interactive version - left for now
+    // Summing up - the only interactive and only animated versions are both easy to implement, but
+    // combining them may prove really challenging
     const [imageRevealFraction, setImageRevealFraction] = useState(0.5);
     const imageContainer = useRef<HTMLDivElement>();
 
