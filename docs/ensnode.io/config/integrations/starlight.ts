@@ -9,6 +9,7 @@ export function starlight(): AstroIntegration {
     logo: {
       light: "./src/assets/light-logo.svg",
       dark: "./src/assets/dark-logo.svg",
+      replacesTitle: true,
     },
     social: {
       github: "https://github.com/namehash/ensnode",
