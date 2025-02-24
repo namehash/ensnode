@@ -6,7 +6,12 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import packageJson from "../../package.json";
-import { getEnsDeploymentChain } from "../lib/ponder-helpers";
+import {
+  ensNodePublicUrl,
+  getEnsDeploymentChain,
+  ponderDatabaseSchema,
+  requestedPluginNames,
+} from "../lib/ponder-helpers";
 
 const app = new Hono();
 
@@ -19,7 +24,7 @@ app.use(
 
 // use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
 app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${process.env.PUBLIC_SERVICE_URL}`),
+  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
 );
 
 // use ENSNode middleware at /metadata
@@ -31,8 +36,8 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: process.env.ACTIVE_PLUGINS,
-      DATABASE_SCHEMA: process.env.DATABASE_SCHEMA,
+      ACTIVE_PLUGINS: requestedPluginNames().join(","),
+      DATABASE_SCHEMA: ponderDatabaseSchema(),
       ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
     },
     db,

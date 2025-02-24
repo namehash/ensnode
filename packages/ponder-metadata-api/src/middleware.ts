@@ -64,29 +64,30 @@ export function ponderMetadata({
   fetchPrometheusMetrics,
   publicClients,
 }: {
-  // TODO: apply correct type for db to include the ponder meta and status tables
   db: ReadonlyDrizzle<Record<string, unknown>>;
   app: {
     name: string;
     version: string;
   };
-  env: Record<string, string | undefined>;
+  env: {
+    ACTIVE_PLUGINS: string;
+    DATABASE_SCHEMA: string;
+    ENS_DEPLOYMENT_CHAIN: string;
+  };
   fetchPrometheusMetrics: () => Promise<string>;
   publicClients: Record<number, PublicClient>;
 }): MiddlewareHandler {
   return async function ponderMetadataMiddleware(ctx) {
     const indexedChainIds = Object.keys(publicClients).map(Number);
-    const dbSchema = env.DATABASE_SCHEMA ?? "public";
-    const ponderStatus = await queryPonderStatus(dbSchema, db);
-    const ponderMeta = await queryPonderMeta(dbSchema, db);
+
+    const ponderStatus = await queryPonderStatus(env.DATABASE_SCHEMA, db);
+    const ponderMeta = await queryPonderMeta(env.DATABASE_SCHEMA, db);
     const metrics = new MetricsParser(parsePrometheusText(await fetchPrometheusMetrics()));
 
-    let networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
+    const networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
 
     for (const indexedChainId of indexedChainIds) {
-      const network = indexedChainId.toString();
       const publicClient = publicClients[indexedChainId];
-      const ponderNetworkStatus = ponderStatus.find((s) => s.network_name === network);
 
       if (!publicClient) {
         throw new Error(`No public client found for chainId ${indexedChainId}`);
@@ -94,9 +95,11 @@ export function ponderMetadata({
 
       const latestSafeBlock = await publicClient.getBlock();
 
-      const lastIndexedBlock = mapPonderStatusBlockToBlockMetadata(ponderNetworkStatus);
+      const network = indexedChainId.toString();
+      const ponderStatusForNetwork = ponderStatus.find((s) => s.network_name === network);
+      const lastIndexedBlock = mapPonderStatusBlockToBlockMetadata(ponderStatusForNetwork);
 
-      const networkStatus = {
+      networkIndexingStatus[network] = {
         totalBlocksCount:
           metrics.getValue("ponder_historical_total_blocks", {
             network,
@@ -122,13 +125,6 @@ export function ponderMetadata({
         isQueued: lastIndexedBlock === null,
         status: "",
       } satisfies NetworkIndexingStatus;
-
-      if (Object.values(networkStatus).every((v) => typeof v === "undefined")) {
-        // no data for this network
-        continue;
-      }
-
-      networkIndexingStatus[network] = networkStatus;
     }
 
     return ctx.json({

@@ -177,3 +177,71 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
 
   return value as ENSDeploymentChain;
 };
+
+/**
+ * Get the ENSRainbow public URL.
+ *
+ * @returns the ENS Node public URL
+ */
+export const ensNodePublicUrl = (): string => {
+  const envVarName = "ENS_NODE_PUBLIC_URL";
+  const envVarValue = process.env[envVarName];
+
+  try {
+    return parseEnsNodePublicUrl(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
+  }
+};
+
+export const parseEnsNodePublicUrl = (rawValue?: string): string => {
+  if (!rawValue) {
+    throw new Error(`Expected value not set`);
+  }
+
+  try {
+    return new URL(rawValue).toString();
+  } catch (e) {
+    throw new Error(`'${rawValue}' is not a valid URL`);
+  }
+};
+
+const DEFAULT_DATABASE_SCHEMA = "public";
+
+/**
+ * Get the database schema name used by Ponder indexer.
+ *
+ * @returns the database schema name used by Ponder indexer
+ */
+export const ponderDatabaseSchema = (): string => {
+  const envVarName = "DATABASE_SCHEMA";
+  const envVarValue = process.env[envVarName];
+
+  return parsePonderDatabaseSchema(envVarValue);
+};
+
+export const parsePonderDatabaseSchema = (rawValue?: string): string => {
+  if (!rawValue) {
+    return DEFAULT_DATABASE_SCHEMA;
+  }
+  return rawValue;
+};
+
+export const requestedPluginNames = (): Array<string> => {
+  const envVarName = "ACTIVE_PLUGINS";
+  const envVarValue = process.env[envVarName];
+
+  try {
+    return parseRequestedPluginNames(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
+  }
+};
+
+export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
+  if (!rawValue) {
+    throw new Error("Expected value not set");
+  }
+
+  return rawValue.split(",");
+};
