@@ -8,11 +8,14 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "biome check --write"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.31.1",
+    "@astrojs/sitemap": "^3.2.1",
+    "@astrojs/starlight": "^0.32.1",
     "astro": "^5.2.3",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "starlight-theme-rapide": "^0.4.0"
   }
 }
