@@ -3,31 +3,10 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 import { ingestCommand } from "./commands/ingest-command";
-import { DEFAULT_PORT, serverCommand } from "./commands/server-command";
+import { purgeCommand } from "./commands/purge-command";
+import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
-import { getDataDir } from "./lib/database";
-import { logger } from "./utils/logger";
-import { parseNonNegativeInteger } from "./utils/number-utils";
-
-export function getEnvPort(): number {
-  const envPort = process.env.PORT;
-  if (!envPort) {
-    return DEFAULT_PORT;
-  }
-
-  try {
-    const port = parseNonNegativeInteger(envPort);
-    if (port === null) {
-      throw new Error(`Invalid port number "${envPort}". Port must be a non-negative integer.`);
-    }
-
-    return port;
-  } catch (error: unknown) {
-    const errorMessage = `Environment variable error: (PORT): ${error instanceof Error ? error.message : String(error)}`;
-    logger.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-}
+import { getDefaultDataSubDir, getEnvPort } from "./lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
@@ -50,6 +29,11 @@ interface ServeArgs {
 }
 
 interface ValidateArgs {
+  "data-dir": string;
+  lite: boolean;
+}
+
+interface PurgeArgs {
   "data-dir": string;
 }
 
@@ -76,7 +60,7 @@ export function createCLI(options: CLIOptions = {}) {
           .option("data-dir", {
             type: "string",
             description: "Directory to store LevelDB data",
-            default: getDataDir(),
+            default: getDefaultDataSubDir(),
           });
       },
       async (argv: ArgumentsCamelCase<IngestArgs>) => {
@@ -99,7 +83,7 @@ export function createCLI(options: CLIOptions = {}) {
           .option("data-dir", {
             type: "string",
             description: "Directory containing LevelDB data",
-            default: getDataDir(),
+            default: getDefaultDataSubDir(),
           });
       },
       async (argv: ArgumentsCamelCase<ServeArgs>) => {
@@ -114,14 +98,37 @@ export function createCLI(options: CLIOptions = {}) {
       "validate",
       "Validate the integrity of the LevelDB database",
       (yargs: Argv) => {
-        return yargs.option("data-dir", {
-          type: "string",
-          description: "Directory containing LevelDB data",
-          default: getDataDir(),
-        });
+        return yargs
+          .option("data-dir", {
+            type: "string",
+            description: "Directory containing LevelDB data",
+            default: getDefaultDataSubDir(),
+          })
+          .option("lite", {
+            type: "boolean",
+            description: "Perform a faster, less thorough validation by skipping hash verification",
+            default: false,
+          });
       },
       async (argv: ArgumentsCamelCase<ValidateArgs>) => {
         await validateCommand({
+          dataDir: argv["data-dir"],
+          lite: argv.lite,
+        });
+      },
+    )
+    .command(
+      "purge",
+      "Completely wipe all files from the specified data directory",
+      (yargs: Argv) => {
+        return yargs.option("data-dir", {
+          type: "string",
+          description: "Directory containing LevelDB data",
+          default: getDefaultDataSubDir(),
+        });
+      },
+      async (argv: ArgumentsCamelCase<PurgeArgs>) => {
+        await purgeCommand({
           dataDir: argv["data-dir"],
         });
       },

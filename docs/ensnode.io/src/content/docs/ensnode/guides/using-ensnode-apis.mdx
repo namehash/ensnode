@@ -1,0 +1,96 @@
+---
+title: Using ENSNode's APIs
+sidebar:
+  order: 1
+---
+
+ENSNode exposes two GraphQL endpoints to query:
+
+- `/` uses a Ponder-native GraphQL schema
+- `/subgraph` uses a subgraph-compatible GraphQL schema
+
+### Examples
+
+Fetch data about the three most recently-created domains.
+
+<details>
+  <summary>Ponder-native query</summary>
+
+```gql
+{
+  domains(orderBy: "createdAt", orderDirection: "desc", limit: 3) {
+    items {
+      name
+      expiryDate
+    }
+  }
+}
+```
+
+  <details>
+    <summary>Ponder-native response</summary>
+
+    ```json
+    {
+      "data": {
+        "domains": {
+          "items": [
+            {
+              "name": "ensanguo.eth",
+              "expiryDate": "1758170255"
+            },
+            {
+              "name": "fiffer.eth",
+              "expiryDate": "2041994243"
+            },
+            {
+              "name": "rifaisicilia.eth",
+              "expiryDate": "1758170039"
+            }
+          ]
+        }
+      }
+    }
+    ```
+
+  </details>
+</details>
+
+<details>
+  <summary>Subgraph-compatible query</summary>
+
+```gql
+{
+  domains(orderBy: "createdAt", orderDirection: "desc", first: 3) {
+    name
+    expiryDate
+  }
+}
+```
+
+  <details>
+    <summary>Subgraph-native response</summary>
+
+    ```json
+    {
+      "data": {
+        "domains": [
+          {
+            "name": "ensanguo.eth",
+            "expiryDate": "1758170255"
+          },
+          {
+            "name": "fiffer.eth",
+            "expiryDate": "2041994243"
+          },
+          {
+            "name": "rifaisicilia.eth",
+            "expiryDate": "1758170039"
+          }
+        ]
+      }
+    }
+    ```
+
+  </details>
+</details>

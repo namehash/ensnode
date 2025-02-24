@@ -19,7 +19,7 @@ if (
 /**
  * Attempt to heal a labelhash to its original label.
  * It mirrors the `ens.nameByHash` function implemented in GraphNode:
- * https://github.com/graphprotocol/graph-node/blob/master/runtime/test/wasm_test/api_version_0_0_4/ens_name_by_hash.ts#L9-L11
+ * https://github.com/graphprotocol/graph-node/blob/3c448de/runtime/test/wasm_test/api_version_0_0_4/ens_name_by_hash.ts#L9-L11
  *
  * @returns the original label if found, or null if not found for the labelhash.
  * @throws if the labelhash is not correctly formatted, or server error occurs, or connection error occurs.

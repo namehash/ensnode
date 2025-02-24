@@ -9,11 +9,16 @@ import { EventWithArgs } from "../lib/ponder-helpers";
 import { OwnedName } from "../lib/types";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
-// contract on the chain that emits an event with this signature, which may or may not actually be
-// a contract intended for use with ENS as a Resolver. because of this, each event could be the
-// first event the indexer has seen for this contract (and its Resolver id) and therefore needs not
-// assume a Resolver entity already exists
+// contract on the chain that emits an event with the relevant signatures, which may or may not
+// actually be a contract intended for use with ENS as a Resolver. because of this as well, each
+// event could be the first event the indexer has seen for this contract (and its Resolver id) and
+// therefore needs not assume a Resolver entity already exists
 
+/**
+ * makes a set of shared handlers for Resolver contracts related to a plugin managing `ownedName`
+ *
+ * @param ownedName the name that the plugin manages subnames of
+ */
 export const makeResolverHandlers = (ownedName: OwnedName) => {
   const sharedEventValues = createSharedEventValues(ownedName);
 
@@ -36,7 +41,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         addrId: address,
       });
 
-      // materialize the resolved addr to the domain iff this resolver is active
+      // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
       const domain = await context.db.find(schema.domain, { id: node });
       if (domain?.resolverId === id) {
         await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: address });
@@ -203,10 +208,10 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
           ...sharedEventValues(event),
           resolverId: id,
           key,
-          // ponder's (viem's) event parsing produces empty string for some TextChange events
+          // ponder's (viem's) event parsing produces empty string for some TextChanged events
           // (which is correct) but the subgraph records null for these instances, so we coalesce
           // falsy strings to null for compatibility
-          // ex: last TextChanged in 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
+          // ex: last TextChanged in tx 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
           value: value || null,
         })
         .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
@@ -280,6 +285,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }) {
       const { node, owner, target, isAuthorised } = event.args;
       const id = makeResolverId(event.log.address, node);
+
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -307,13 +313,12 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{ node: Node; newVersion: bigint }>;
     }) {
-      // a version change nulls out the resolver
       const { node, newVersion } = event.args;
       const id = makeResolverId(event.log.address, node);
-      const domain = await context.db.find(schema.domain, { id: node });
 
       // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
-      if (domain && domain.resolverId === id) {
+      const domain = await context.db.find(schema.domain, { id: node });
+      if (domain?.resolverId === id) {
         await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: null });
       }
 
@@ -322,7 +327,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         domainId: node,
         address: event.log.address,
 
-        // clear out the resolver's info
+        // clear out the resolver's info on VersionChanged
         addrId: null,
         contentHash: null,
         coinTypes: null,

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-schema",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "description": "The ponder schema for ENSNode",
   "license": "MIT",
@@ -11,23 +11,33 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-schema",
   "keywords": ["ENS", "ENSNode", "Ponder"],
-  "scripts": {
-    "lint": "biome check --write",
-    "lint:ci": "biome ci"
-  },
   "exports": {
     "default": "./src/ponder.schema.ts"
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "types": "./dist/ponder.schema.d.ts",
+      "default": "./dist/ponder.schema.js"
+    },
+    "main": "./dist/ponder.schema.js",
+    "module": "./dist/ponder.schema.mjs",
+    "types": "./dist/ponder.schema.d.ts"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "lint": "biome check --write",
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "ponder": "catalog:",
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@ensnode/shared-configs": "workspace:",
     "@biomejs/biome": "catalog:",
+    "@ensnode/shared-configs": "workspace:",
+    "tsup": "catalog:",
     "typescript": "catalog:"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

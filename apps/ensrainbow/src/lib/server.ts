@@ -1,13 +1,7 @@
 import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 import { logger } from "../utils/logger";
-import { parseNonNegativeInteger } from "../utils/number-utils";
-import {
-  LABELHASH_COUNT_KEY,
-  ensureIngestionNotIncomplete,
-  isIngestionInProgress,
-} from "./database";
-import { ENSRainbowDB, safeGet } from "./database";
+import { ENSRainbowDB, LABELHASH_COUNT_KEY, parseNonNegativeInteger } from "./database";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
@@ -25,8 +19,18 @@ export class ENSRainbowServer {
   public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
     const server = new ENSRainbowServer(db);
 
+    //TODO maybe we should call validate lite here instead?
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
-    await ensureIngestionNotIncomplete(db);
+    if (await db.isIngestionUnfinished()) {
+      const errorMessage =
+        "Database is in an incomplete state! " +
+        "An ingestion was started but not completed successfully.\n" +
+        "To fix this:\n" +
+        "1. Delete the data directory\n" +
+        "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
 
     // Verify we can get the rainbow record count
     const countResponse = await server.labelCount();
@@ -53,7 +57,7 @@ export class ENSRainbowServer {
     }
 
     try {
-      const label = await safeGet(this.db, labelHashBytes);
+      const label = await this.db.get(labelHashBytes);
       if (label === null) {
         logger.info(`Unhealable labelhash request: ${labelhash}`);
         return {
@@ -80,7 +84,7 @@ export class ENSRainbowServer {
 
   async labelCount(): Promise<EnsRainbow.CountResponse> {
     try {
-      const countStr = await safeGet(this.db, LABELHASH_COUNT_KEY);
+      const countStr = await this.db.get(LABELHASH_COUNT_KEY);
       if (countStr === null) {
         return {
           status: StatusCode.Error,
@@ -89,8 +93,14 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.CountServerError;
       }
 
-      const count = parseNonNegativeInteger(countStr);
-      if (count === null) {
+      try {
+        const count = parseNonNegativeInteger(countStr);
+        return {
+          status: StatusCode.Success,
+          count,
+          timestamp: new Date().toISOString(),
+        } satisfies EnsRainbow.CountSuccess;
+      } catch (error) {
         logger.error(`Invalid label count value in database: ${countStr}`);
         return {
           status: StatusCode.Error,
@@ -98,12 +108,6 @@ export class ENSRainbowServer {
           errorCode: ErrorCode.ServerError,
         } satisfies EnsRainbow.CountServerError;
       }
-
-      return {
-        status: StatusCode.Success,
-        count,
-        timestamp: new Date().toISOString(),
-      } satisfies EnsRainbow.CountSuccess;
     } catch (error) {
       logger.error("Failed to retrieve label count:", error);
       return {
