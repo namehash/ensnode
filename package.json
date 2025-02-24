@@ -6,11 +6,14 @@
   "scripts": {
     "lint": "pnpm -r lint",
     "lint:ci": "pnpm -r lint:ci",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "release": "changeset publish",
+    "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@changesets/cli": "^2.27.12",
+    "@changesets/cli": "^2.28.1",
+    "tsup": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
@@ -20,6 +23,7 @@
     "overrides": {
       "ponder>vite": "5.4.14",
       "astro>esbuild": "0.25.0",
+      "tsup>esbuild": "0.25.0",
       "tsx>esbuild": "0.25.0",
       "vite>esbuild": "0.25.0"
     }
