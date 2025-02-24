@@ -37,6 +37,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./apps/ensrainbow/Dockerfile.data
           push: true
           platforms: linux/${{ matrix.arch }}
           tags: ghcr.io/${{ github.repository }}/ensrainbow-data:${{ matrix.arch }}
