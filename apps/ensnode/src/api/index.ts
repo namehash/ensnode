@@ -43,8 +43,6 @@ app.get(
     db,
     fetchPrometheusMetrics: () =>
       fetch(`http://localhost:${process.env.PORT}/metrics`).then((res) => res.text()),
-    // TODO: fix the types
-    // @ts-ignore
     publicClients,
   }),
 );
