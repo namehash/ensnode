@@ -1,17 +1,29 @@
 ---
 title: Using ENSNode's APIs
 sidebar:
+  label: ENSNode's APIs
   order: 3
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
 
 ENSNode exposes two GraphQL endpoints:
-- `/ponder` uses a Ponder-native GraphQL schema
-- `/subgraph` uses a subgraph-compatible GraphQL schema
+- `/ponder` — uses a Ponder-native GraphQL schema
+- `/subgraph` — uses a subgraph-compatible GraphQL schema
 
-ENSNode also exposes Ponder's `@ponder/client` endpoint
-- `/sql/*` serves `@ponder/client` queries
+:::note[Subgraph API Compatibility Reference]
+For details on subgraph compatibility, see the Subgraph Compatibility documentation.
+
+<LinkCard href="/ensnode/reference/subgraph-compatibility" title="Subgraph Compatibility" />
+:::
+
+ENSNode also exposes Ponder's `@ponder/client` endpoint at `/sql/*`.
+
+:::note[Note on `@ponder/client`]
+The `@ponder/client` package provides an SQL client for querying a Ponder app over HTTP, with end-to-end type inference and live updates. It's an alternative to the GraphQL API, suitable for client applications.
+
+<LinkCard href="https://ponder.sh/docs/query/client" title="@ponder/client Documentation" target="_blank_" />
+:::
 
 ## GraphiQL Playground
 
@@ -21,17 +33,12 @@ To observe the full schema and play with each API, use the provided GraphiQL Pla
 
 <LinkCard href="https://alpha.ensnode.io/subgraph" title="Subgraph-compatible GraphiQL Playground" />
 
-## `@ponder/client`
-
-The `@ponder/client` package provides an SQL client for querying a Ponder app over HTTP, with end-to-end type inference and live updates. It's an alternative to the GraphQL API, suitable for client applications.
-
-<LinkCard href="https://ponder.sh/docs/query/client" title="@ponder/client Documentation" />
 
 ## GraphQL Examples
 
 Fetch data about the three most recently-created domains.
 
-### Ponder-native (`/ponder`)
+### Ponder-native API (`/ponder`)
 
 ```gql
 {
@@ -67,7 +74,7 @@ Fetch data about the three most recently-created domains.
 }
 ```
 
-### Subgraph-compatible (`/subgraph`)
+### Subgraph-compatible API (`/subgraph`)
 
 
 ```gql
