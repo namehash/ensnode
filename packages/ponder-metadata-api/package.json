@@ -30,10 +30,13 @@
   "scripts": {
     "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
   "dependencies": {
-    "drizzle-orm": "catalog:"
+    "drizzle-orm": "catalog:",
+    "parse-prometheus-text-format": "^1.1.1"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
@@ -42,7 +45,8 @@
     "hono": "catalog:",
     "ponder": "catalog:",
     "tsup": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "hono": "catalog:",

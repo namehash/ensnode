@@ -1,4 +1,5 @@
 import { pgSchema, pgTable } from "drizzle-orm/pg-core";
+import { type ReadonlyDrizzle, eq } from "ponder";
 
 type NamespaceBuild = string;
 
@@ -12,7 +13,7 @@ type PonderApp = {
   version: string;
 };
 
-export const getPonderMeta = (namespace: NamespaceBuild) => {
+const getPonderMeta = (namespace: NamespaceBuild) => {
   if (namespace === "public") {
     return pgTable("_ponder_meta", (t) => ({
       key: t.text().primaryKey().$type<"app">(),
@@ -26,9 +27,7 @@ export const getPonderMeta = (namespace: NamespaceBuild) => {
   }));
 };
 
-export type GetPonderMetaType = ReturnType<typeof getPonderMeta>;
-
-export const getPonderStatus = (namespace: NamespaceBuild) => {
+const getPonderStatus = (namespace: NamespaceBuild) => {
   if (namespace === "public") {
     return pgTable("_ponder_status", (t) => ({
       network_name: t.text().primaryKey(),
@@ -46,4 +45,25 @@ export const getPonderStatus = (namespace: NamespaceBuild) => {
   }));
 };
 
-export type GetPonderStatusType = ReturnType<typeof getPonderStatus>;
+export async function queryPonderStatus(
+  namespace: string,
+  db: ReadonlyDrizzle<Record<string, unknown>>,
+) {
+  const PONDER_STATUS = getPonderStatus(namespace);
+
+  return db.select().from(PONDER_STATUS);
+}
+
+export async function queryPonderMeta(
+  namespace: string,
+  db: ReadonlyDrizzle<Record<string, unknown>>,
+) {
+  const PONDER_META = getPonderMeta(namespace);
+
+  return db
+    .select({ value: PONDER_META.value })
+    .from(PONDER_META)
+    .where(eq(PONDER_META.key, "app"))
+    .limit(1)
+    .then((result: any) => result[0]?.value);
+}
