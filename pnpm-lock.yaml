@@ -22,8 +22,8 @@ catalogs:
       specifier: ^4.6.14
       version: 4.6.17
     ponder:
-      specifier: ^0.9.18
-      version: 0.9.18
+      specifier: ^0.9.20
+      version: 0.9.20
     tsup:
       specifier: ^8.3.6
       version: 8.3.6
@@ -201,7 +201,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.18(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+        version: 0.9.20(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -394,7 +394,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.18(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
+        version: 0.9.20(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1)
       viem:
         specifier: 'catalog:'
         version: 2.22.13(typescript@5.7.3)(zod@3.24.1)
@@ -2422,7 +2422,6 @@ packages:
 
   bun@1.2.2:
     resolution: {integrity: sha512-RUc8uVVTw8WoASUzXaEQJR1s7mnwoHm3P871qBUIqSaoOpuwcU+bSVX151/xoqDwnyv38SjOX7yQ3oO0IeT73g==}
-    cpu: [arm64, x64, aarch64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -4357,6 +4356,9 @@ packages:
     resolution: {integrity: sha512-gXah6aZrcUxjWg2zR2MwouP2eHlCBzdV4pygudehaKXSGW4v2AsRQUK+lwwXhii6KFZcunEnmSUoYp5CXibxtA==}
     engines: {node: '>= 0.4'}
 
+  obuf@1.1.2:
+    resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
+
   ofetch@1.4.1:
     resolution: {integrity: sha512-QZj2DfGplQAr2oj9KzceK9Hwz6Whxazmn85yYeVuS3u9XTMOGMRx0kO95MQ+vLsj/S/NwBDMMLU5hpxvI6Tklw==}
 
@@ -4520,6 +4522,9 @@ packages:
   pg-connection-string@2.7.0:
     resolution: {integrity: sha512-PI2W9mv53rXJQEOb8xNR8lH7Hr+EKa6oJa38zsK0S/ky2er16ios1wLKhZyxzD7jUReiWokc9WK5nxSnC7W1TA==}
 
+  pg-copy-streams@6.0.6:
+    resolution: {integrity: sha512-Z+Dd2C2NIDTsjyFKmc6a9QLlpM8tjpERx+43RSx0WmL7j3uNChERi3xSvZUL0hWJ1oRUn4S3fhyt3apdSrTyKQ==}
+
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
@@ -4588,8 +4593,8 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  ponder@0.9.18:
-    resolution: {integrity: sha512-nrI2unJNINI4iQ3STd3KVIYSCcTORUInqgcZd9I/UZ5zFGl3obGng8uKTpRm0BD4pNjTaLepQ5qy7bopsYqB0A==}
+  ponder@0.9.20:
+    resolution: {integrity: sha512-GOsPyWtY+KJWh4uMixPCmVFZpgmy0LxeT76XZHTStJD6lCcnh/trhGC9Jh+Sg76WcDAF0CpZoNaud+MGCM3pXw==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -10468,6 +10473,8 @@ snapshots:
       define-properties: 1.2.1
       es-object-atoms: 1.1.1
 
+  obuf@1.1.2: {}
+
   ofetch@1.4.1:
     dependencies:
       destr: 2.0.3
@@ -10639,6 +10646,10 @@ snapshots:
 
   pg-connection-string@2.7.0: {}
 
+  pg-copy-streams@6.0.6:
+    dependencies:
+      obuf: 1.1.2
+
   pg-int8@1.0.1: {}
 
   pg-pool@3.7.0(pg@8.11.3):
@@ -10725,7 +10736,7 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  ponder@0.9.18(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1):
+  ponder@0.9.20(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@18.3.18)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.1))(zod@3.24.1):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -10751,6 +10762,7 @@ snapshots:
       kysely: 0.26.3
       pg: 8.11.3
       pg-connection-string: 2.7.0
+      pg-copy-streams: 6.0.6
       pg-query-emscripten: 5.1.0
       picocolors: 1.1.1
       pino: 8.21.0
