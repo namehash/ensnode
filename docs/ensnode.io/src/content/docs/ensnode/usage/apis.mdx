@@ -1,0 +1,101 @@
+---
+title: Using ENSNode's APIs
+sidebar:
+  order: 3
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+ENSNode exposes two GraphQL endpoints:
+- `/ponder` uses a Ponder-native GraphQL schema
+- `/subgraph` uses a subgraph-compatible GraphQL schema
+
+ENSNode also exposes Ponder's `@ponder/client` endpoint
+- `/sql/*` serves `@ponder/client` queries
+
+## GraphiQL Playground
+
+To observe the full schema and play with each API, use the provided GraphiQL Playground for each.
+
+<LinkCard href="https://alpha.ensnode.io/ponder" title="Ponder-native GraphiQL Playground" />
+
+<LinkCard href="https://alpha.ensnode.io/subgraph" title="Subgraph-compatible GraphiQL Playground" />
+
+## `@ponder/client`
+
+The `@ponder/client` package provides an SQL client for querying a Ponder app over HTTP, with end-to-end type inference and live updates. It's an alternative to the GraphQL API, suitable for client applications.
+
+<LinkCard href="https://ponder.sh/docs/query/client" title="@ponder/client Documentation" />
+
+## GraphQL Examples
+
+Fetch data about the three most recently-created domains.
+
+### Ponder-native (`/ponder`)
+
+```gql
+{
+  domains(orderBy: "createdAt", orderDirection: "desc", limit: 3) {
+    items {
+      name
+      expiryDate
+    }
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "domains": {
+      "items": [
+        {
+          "name": "ensanguo.eth",
+          "expiryDate": "1758170255"
+        },
+        {
+          "name": "fiffer.eth",
+          "expiryDate": "2041994243"
+        },
+        {
+          "name": "rifaisicilia.eth",
+          "expiryDate": "1758170039"
+        }
+      ]
+    }
+  }
+}
+```
+
+### Subgraph-compatible (`/subgraph`)
+
+
+```gql
+{
+  domains(orderBy: "createdAt", orderDirection: "desc", first: 3) {
+    name
+    expiryDate
+  }
+}
+```
+
+```json
+{
+  "data": {
+    "domains": [
+      {
+        "name": "ensanguo.eth",
+        "expiryDate": "1758170255"
+      },
+      {
+        "name": "fiffer.eth",
+        "expiryDate": "2041994243"
+      },
+      {
+        "name": "rifaisicilia.eth",
+        "expiryDate": "1758170039"
+      }
+    ]
+  }
+}
+```

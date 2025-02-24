@@ -16,39 +16,56 @@ export function starlight(): AstroIntegration {
     sidebar: [
       {
         label: "ENSNode",
+        collapsed: false,
         items: [
           {
             label: "Quickstart",
-            slug: "ensnode/quickstart",
+            slug: "ensnode",
           },
           {
-            label: "Guides",
-            autogenerate: { directory: "ensnode/guides" },
+            label: "Using ENSNode",
+            collapsed: false,
+            autogenerate: { directory: "ensnode/usage" },
+          },
+          {
+            label: "Running ENSNode",
             collapsed: true,
+            autogenerate: { directory: "ensnode/running" },
           },
           {
-            label: "Reference",
+            label: "Understanding ENSNode",
+            collapsed: true,
+            autogenerate: { directory: "ensnode/understanding" },
+          },
+          {
+            label: "ENSNode Reference",
+            collapsed: true,
             autogenerate: { directory: "ensnode/reference" },
-            collapsed: true,
           },
         ],
       },
       {
         label: "ENSRainbow",
+        collapsed: false,
         items: [
           {
             label: "Quickstart",
             slug: "ensrainbow/quickstart",
           },
           {
-            label: "Guides",
-            autogenerate: { directory: "ensrainbow/guides" },
-            collapsed: true,
+            label: "Using ENSRainbow",
+            collapsed: false,
+            autogenerate: { directory: "ensrainbow/usage" },
           },
           {
-            label: "Reference",
-            autogenerate: { directory: "ensrainbow/reference" },
+            label: "Running ENSRainbow",
             collapsed: true,
+            autogenerate: { directory: "ensrainbow/running" },
+          },
+          {
+            label: "ENSRainbow Reference",
+            collapsed: true,
+            autogenerate: { directory: "ensrainbow/reference" },
           },
         ],
       },

@@ -1,0 +1,64 @@
+---
+title: ENSNode Quickstart
+description: Get started building ENS applications with your own ENSNode.
+sidebar:
+  order: 1
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+The fastest way to query ENSNode is to use the NameHash Labs hosted instances of ENSNode. The **alpha** instance provides support for mainnet, `base.eth`, and `linea.eth` ENS names.
+
+```
+https://alpha.ensnode.io
+```
+
+For more information about the hosted instances, refer to the following documentation.
+
+<LinkCard title="Hosted ENSNode Instances" href="/ensnode/usage/hosted-ensnode-instances/" />
+
+## Using ENSNode with ensjs
+
+You can use ENSNode with ensjs by providing an ENSNode url in place of the subgraph url in viem's `Chain` object.
+
+```ts
+import { http, createClient } from 'viem'
+import { mainnet } from 'viem/chains'
+import { addEnsContracts } from '@ensdomains/ensjs'
+import { getSubgraphRecords } from '@ensdomains/ensjs/subgraph'
+
+const client = createClient({
+  chain: {
+    ...addEnsContracts(mainnet),
+    subgraphs: { ens: { url: 'https://alpha.ensnode.io/subgraph' } },
+  },
+  transport: http(),
+})
+
+const names = await getNamesForAddress(client, { name: 'validator.eth' })
+```
+
+See the following documentation for examples of how to query ENSNode from ensjs.
+
+<LinkCard title="Using ENSNode with ensjs" href="/ensnode/usage/with-ensjs/" />
+
+## Using ENSNode's APIs
+
+For querying ENSNode via its **GraphQL** or `@ponder/client` apis, refer to the following documentation.
+
+<LinkCard title="Using ENSNode's APIs" href="/ensnode/usage/apis/" />
+
+## Using ENSNode with Viem
+
+Many libraries use the viem `Chain` object to identify the Subgraph url for ENS queries. If you're integrating with a library that expects a url in the `subgraph` key for your chain, you can update the `Chain` spec to use ENSNode like so:
+
+```ts
+import { mainnet } from 'viem/chains';
+
+const mainnetWith = {
+  ...mainnet,
+  subgraphs: { ens: { url: 'https://alpha.ensnode.io/subgraph' } },
+}
+```
+
+<LinkCard title="Using ENSNode with Viem" href="/ensnode/usage/with-viem/" />
