@@ -5,6 +5,7 @@ import { END_BLOCK, START_BLOCK } from "./globals";
 import {
   constrainBlockrange,
   getEnsDeploymentChain,
+  requestedPluginNames as getRequestedPluginNames,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "./ponder-helpers";
@@ -105,9 +106,8 @@ export function getActivePlugins<T extends { pluginName: PluginName }>(
   allPlugins: readonly T[],
   availablePluginNames: PluginName[],
 ): T[] {
-  /** @var comma separated list of the requested plugin names (see `src/plugins` for available plugins) */
-  const requestedPluginsEnvVar = process.env.ACTIVE_PLUGINS;
-  const requestedPluginNames = requestedPluginsEnvVar ? requestedPluginsEnvVar.split(",") : [];
+  /** @var a list of the requested plugin names (see `src/plugins` for available plugins) */
+  const requestedPluginNames = getRequestedPluginNames();
 
   if (!requestedPluginNames.length) {
     throw new Error("Set the ACTIVE_PLUGINS environment variable to activate one or more plugins.");
