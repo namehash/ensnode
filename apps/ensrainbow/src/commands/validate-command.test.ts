@@ -1,10 +1,8 @@
 import { tmpdir } from "os";
 import { join } from "path";
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { mkdtemp, rm } from "fs/promises";
-import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { LABELHASH_COUNT_KEY, createDatabase } from "../lib/database";
+import { ENSRainbowDB } from "../lib/database";
 import { validateCommand } from "./validate-command";
 
 describe("Validate Command", () => {
@@ -23,14 +21,13 @@ describe("Validate Command", () => {
   });
 
   it("should succeed for valid database", async () => {
-    const db = await createDatabase(tempDir);
+    const db = await ENSRainbowDB.create(tempDir);
 
     try {
       // Add a valid record
       const label = "vitalik";
-      const vitalikLabelhash = labelhash(label);
-      await db.put(labelHashToBytes(vitalikLabelhash), label);
-      await db.put(LABELHASH_COUNT_KEY, "1");
+      await db.addRainbowRecord(label);
+      await db.setPrecalculatedRainbowRecordCount(1);
       await db.close();
 
       await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
