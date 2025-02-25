@@ -31,10 +31,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download ensrainbow sql
-        run: |
-          ./apps/ensrainbow/download-rainbow-tables.sh
-
       - name: Build and push ENSRainbow-data Docker image for amd64
         uses: docker/build-push-action@v5
         with:
@@ -44,8 +40,6 @@ jobs:
           platforms: linux/amd64
           tags: ghcr.io/${{ github.repository }}/ensrainbow-data:amd64
 
-    
-    
       - name: Build and push ENSRainbow-data Docker image for arm64
         uses: docker/build-push-action@v5
         with:
