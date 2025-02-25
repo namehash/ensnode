@@ -1,0 +1,39 @@
+---
+title: Deploying ENSNode
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+
+:::note
+Follow these guides to deploy an ENSNode instance to the cloud.
+:::
+
+Running your own ENSNode instance is helpful for those that wish to
+- Maintain control over their own infrastructure
+- Ensure control over their own availability and uptime guarantees
+- Customize ENSNode's behavior
+- Own the resulting Postgres index for custom queries or `JOIN`s
+
+### Deploying on Railway
+
+Railway is a convenient platform for hosting an ENSNode instance.
+
+<LinkCard
+  title="Deploy on Railway"
+  description="Deploy ENSNode to Railway with one click."
+  href="/ensnode/deploying/railway"
+/>
+
+
+### Deploying with Docker
+The Docker deployment option provides the easiest way to run the full ENSNode suite of services both locally and in the cloud.
+
+<LinkCard
+  title="Deploy with Docker"
+  description="Deploy ENSNode using the Docker images."
+  href="/ensnode/deploying/docker"
+/>

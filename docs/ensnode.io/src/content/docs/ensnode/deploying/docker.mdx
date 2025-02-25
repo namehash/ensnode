@@ -1,0 +1,70 @@
+---
+title: Deploying ENSNode with Docker
+sidebar:
+  label: Docker
+  order: 3
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+The Docker images are the easiest way to run or deploy the ENSNode suite of services, both locally and in the cloud.
+
+<LinkCard
+  title="Example Environment Variables"
+  description="See the example .env.local file for required environment variables."
+  href="https://github.com/namehash/ensnode/blob/main/apps/ensindexer/.env.local.example"
+/>
+
+
+Below is a sample [Docker Compose](https://docs.docker.com/compose/) file linking the various services together.
+
+
+```yml
+services:
+  ensindex:
+    container_name: ensindexer
+    image: ghcr.io/namehash/ensnode/ensindexer:latest
+    ports:
+      - "42069:42069"
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
+      ENSRAINBOW_URL: http://ensrainbow:3223
+    depends_on:
+      - ensrainbow
+      - postgres
+
+  ensrainbow:
+    container_name: ensrainbow
+    image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    ports:
+      - "3223:3223"
+    restart: unless-stopped
+
+  ensadmin:
+    container_name: ensadmin
+    image: ghcr.io/namehash/ensnode/ensadmin:latest
+    ports:
+      - "4173:4173"
+    env_file:
+      - ./apps/ensadmin/.env.local
+    environment:
+      VITE_ENSNODE_URL: http://ensnode:42069
+    depends_on:
+      - ensnode
+
+  postgres:
+    container_name: postgres
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ponder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local
+```

@@ -19,18 +19,9 @@ export function starlight(): AstroIntegration {
         collapsed: false,
         items: [
           {
-            label: "Quickstart",
-            slug: "ensnode",
-          },
-          {
             label: "Using ENSNode",
             collapsed: false,
             autogenerate: { directory: "ensnode/usage" },
-          },
-          {
-            label: "Running ENSNode",
-            collapsed: true,
-            autogenerate: { directory: "ensnode/running" },
           },
           {
             label: "Understanding ENSNode",
@@ -38,7 +29,17 @@ export function starlight(): AstroIntegration {
             autogenerate: { directory: "ensnode/understanding" },
           },
           {
-            label: "ENSNode Reference",
+            label: "Deploying ENSNode",
+            collapsed: true,
+            autogenerate: { directory: "ensnode/deploying" },
+          },
+          {
+            label: "Local ENSNode",
+            collapsed: true,
+            autogenerate: { directory: "ensnode/running" },
+          },
+          {
+            label: "Reference",
             collapsed: true,
             autogenerate: { directory: "ensnode/reference" },
           },
