@@ -5,6 +5,8 @@ sidebar:
   order: 1
 ---
 
+import { LinkCard } from '@astrojs/starlight/components';
+
 To use ENSNode with `@ensdomains/ensjs`, follow the [ENSjs documentation for custom subgraph URIs](https://github.com/ensdomains/ensjs/blob/17ab314/docs/basics/custom-subgraph-uris.md), replacing the subgraph URI with your ENSNode's subgraph-compatible api endpoint.
 
 :::note
@@ -38,4 +40,10 @@ const client = createClient({
 
 const names = await getNamesForAddress(client, { name: 'validator.eth' })
 ```
+
+## ENSjs Documentation
+
+Refer to the ENSjs documentation for futher usage.
+
+<LinkCard href="https://github.com/ensdomains/ensjs/" title="ENSjs Documentation" />
 

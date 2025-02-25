@@ -49,17 +49,8 @@ For querying ENSNode via its **GraphQL** or `@ponder/client` apis, refer to the 
 
 <LinkCard title="Using ENSNode's APIs" href="/ensnode/usage/apis/" />
 
-## Using ENSNode with Viem
+## Using ENSNode with `viem/chain`
 
-Many libraries use the viem `Chain` object to identify the Subgraph url for ENS queries. If you're integrating with a library that expects a url in the `subgraph` key for your chain, you can update the `Chain` spec to use ENSNode like so:
+If you're integrating with a library that retrieves the url for the ENS Subgraph in a provided `viem/chain` object, see the following documentation for integration.
 
-```ts
-import { mainnet } from 'viem/chains';
-
-const mainnetWith = {
-  ...mainnet,
-  subgraphs: { ens: { url: 'https://alpha.ensnode.io/subgraph' } },
-}
-```
-
-<LinkCard title="Using ENSNode with Viem" href="/ensnode/usage/with-viem/" />
+<LinkCard title="Using ENSNode with viem/chain" href="/ensnode/usage/with-viem/" />

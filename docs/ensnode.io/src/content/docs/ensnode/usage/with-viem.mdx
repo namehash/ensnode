@@ -1,11 +1,11 @@
 ---
-title: Using ENSNode with Viem
+title: Using ENSNode with `viem/chain`
 sidebar:
-  label: Using with Viem
+  label: Using with viem/chain
   order: 4
 ---
 
-Many libraries use the viem `Chain` object to identify the Subgraph url for ENS queries. If you're integrating with a library that expects a url in the `subgraph` key for your chain, you can update the `Chain` spec to use ENSNode like so:
+Some libraries (for example, `ENSjs`) use a `viem/chain` object to identify the ENS Subgraph url. If you're integrating with a library that expects a url in the `subgraph` key for your chain, you can update the `Chain` spec to use ENSNode like so:
 
 ```ts
 import { mainnet } from 'viem/chains';
@@ -15,3 +15,13 @@ const mainnetWith = {
   subgraphs: { ens: { url: 'https://alpha.ensnode.io/subgraph' } },
 }
 ```
+
+## Relevant Libraries
+
+Libraries that use this pattern are:
+- [`@ensdomain/ensjs`](https://github.com/ensdomains/ensjs)
+- ...
+
+:::tip[Contribute]
+Know other libraries that use this pattern? Contribute to this documentation by [opening a Pull Request](https://github.com/namehash/ensnode).
+:::
