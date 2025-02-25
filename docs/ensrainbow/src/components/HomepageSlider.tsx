@@ -1,7 +1,7 @@
 import "../styles/slider-styles.css";
 import React, {useState, useRef } from 'react';
-import unknown_name from "../assets/unknown-name.png";
-import known_name from "../assets/known-name.png";
+import unknown_name from "../assets/unknown-name-wider.png";
+import known_name from "../assets/known-name-wider.png";
 
 export default function HomepageSlider() {
 
@@ -40,7 +40,7 @@ export default function HomepageSlider() {
     };
 
     return (
-        <div className="wrapper" ref={imageContainer}>
+        <div className="wrapper not-content" ref={imageContainer}>
             <img className="image1" alt="unknown-name" src={unknown_name.src}/>
             <img className="image2" alt="known-name" src={known_name.src}
             //      style={{
