@@ -12,11 +12,7 @@ interface GraphiQLWrapperProps {
 
 export function GraphiQLWrapper({ endpoint }: GraphiQLWrapperProps) {
   const { ensnodeUrl } = useOutletContext<AppContext>();
-  const url =
-    endpoint === "subgraph"
-      ? new URL("/subgraph", ensnodeUrl)
-      : // TODO: update to `/ponder` when available
-      new URL("/", ensnodeUrl);
+  const url = new URL(`/${endpoint}`, ensnodeUrl);
 
   const fetcher = createGraphiQLFetcher({ url: url.toString() });
 
