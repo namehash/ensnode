@@ -2,6 +2,8 @@
 
 ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a simple API endpoint to heal ENS labelhashes back to their original labels.
 
+ [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/Ddy-Qg?referralCode=HxmgeB)
+
 ## Architecture Overview
 
 For backwards compatibility with the ENS Subgraph, the current rainbow tables (6.37 GB) are exactly the same as those published by [The Graph](https://github.com/graphprotocol/ens-rainbow) which are [MIT licensed](https://bucket.ensrainbow.io/THE_GRAPH_LICENSE.txt).
