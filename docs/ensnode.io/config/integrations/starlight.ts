@@ -50,21 +50,17 @@ export function starlight(): AstroIntegration {
         collapsed: false,
         items: [
           {
-            label: "Quickstart",
-            slug: "ensrainbow/quickstart",
-          },
-          {
             label: "Using ENSRainbow",
             collapsed: false,
             autogenerate: { directory: "ensrainbow/usage" },
           },
           {
-            label: "Running ENSRainbow",
+            label: "Deploying ENSRainbow",
             collapsed: true,
-            autogenerate: { directory: "ensrainbow/running" },
+            autogenerate: { directory: "ensrainbow/deploying" },
           },
           {
-            label: "ENSRainbow Reference",
+            label: "Reference",
             collapsed: true,
             autogenerate: { directory: "ensrainbow/reference" },
           },
