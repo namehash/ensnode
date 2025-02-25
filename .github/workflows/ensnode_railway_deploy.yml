@@ -1,21 +1,22 @@
-name: Build and deploy to Railway ENSNode service
+name: ENSNode - Build & push ENSNode Docker image (and conditionally deploy to Railway)
 
 on:
   push:
     branches:
-      # Build and push'latest' Docker image. Skip deployments
+      # Build and push 'latest' Docker image. Skip deployments
       - main
       # Build and push 'alpha' Docker image. Update 'alpha' Railway shared environment variables.
       - alpha
       # Build and push 'subgraph' Docker image. Update 'subgraph' Railway shared environment variables.
       - subgraph
+      # More about `Railway shared variables': https://docs.railway.com/guides/variables#shared-variables
 
 jobs:
   image-build-and-push:
     runs-on: ubuntu-latest
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      # Token for redeploy. Seems lika a bug in Railway ..
+      # Token for redeploy. Redeploy needs a separate team token. 
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
@@ -29,8 +30,8 @@ jobs:
         run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
     
       # We need to recognize which branch had an incoming push
-      # Based on that create Docker image with corresponding label - use TAG variable for this
-      # For alpha/subgraph TAG we need also to specify corresponding Railway SVC_ID which is used for service redeployment
+      # Based on that build a Docker image with corresponding tag - use the TAG variable for this
+      # For the alpha/subgraph TAG we also need to specify the corresponding Railway SVC_ID which is used for service redeployment
       - name: Determine Docker image tag
         run: |
             case "$BRANCH" in
@@ -87,7 +88,7 @@ jobs:
           
 
       - name: Update Railway schema variable
-        # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deploymen.
+        # Check if newly calculated schema matches old one, if not replace env variable and force deployment. Otherwise skip deployment.
         run: |
           # Sending Railway API request to update specifc shared variable
           if [[ ${{env.RAILWAY_SCHEMA}} != ${{ env.DATABASE_SCHEMA }} ]]; then
@@ -106,5 +107,5 @@ jobs:
               --header 'Content-Type: application/json' \
               --data '{"query":"mutation serviceInstanceDeploy($serviceId: String!, $environmentId: String!) { serviceInstanceDeploy(serviceId: $serviceId, environmentId: $environmentId) }","variables":{"environmentId":"'${{ env.RAILWAY_ENVIRONMENT_ID }}'","serviceId":"'${{ env.SVC_ID }}'"}}'
           else
-          echo "Skipping deployment since schema did not changed"
+          echo "Skipping deployment since schema did not change"
           fi
