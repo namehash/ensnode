@@ -15,7 +15,7 @@ ENSNode is the new multichain indexer for ENS and ENSv2. It provides enhanced EN
 
 ### `eth` plugin performance
 
-Mainnet-only backfill time @ 500rps = **11.5-15 hours** on M1 Macbook (>10x speedup vs subgraph)
+Mainnet-only backfill time @ 500rps = **7 hours** on M1 Macbook (>10x speedup vs subgraph)
 
 ## Dockerfile
 

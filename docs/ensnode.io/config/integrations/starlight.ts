@@ -39,6 +39,11 @@ export function starlight(): AstroIntegration {
             autogenerate: { directory: "ensnode/running" },
           },
           {
+            label: "Contributing",
+            collapsed: true,
+            autogenerate: { directory: "ensnode/contributing" },
+          },
+          {
             label: "Reference",
             collapsed: true,
             autogenerate: { directory: "ensnode/reference" },
@@ -58,6 +63,11 @@ export function starlight(): AstroIntegration {
             label: "Deploying ENSRainbow",
             collapsed: true,
             autogenerate: { directory: "ensrainbow/deploying" },
+          },
+          {
+            label: "Contributing",
+            collapsed: true,
+            autogenerate: { directory: "ensrainbow/contributing" },
           },
           {
             label: "Reference",
