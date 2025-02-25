@@ -15,10 +15,11 @@ jobs:
 
       - name: Make disk space ( remove unnecessary libs )
         run: |
-            # Remove Android libs
-            sudo rm -rf /usr/local/lib/android || true
-            # Remove dotnet libs
-            sudo rm -rf /usr/share/dotnet || true
+            # Remove dotnet, android, ghc, codeq directories
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQ
+            # Prune docker images
+            sudo docker image prune --all --force
+            sudo docker builder prune -a
 
       - name: Set up QEMU (for cross-architecture builds)
         uses: docker/setup-qemu-action@v3
