@@ -14,6 +14,7 @@
   "scripts": {
     "dev": "ponder dev",
     "start": "ponder start",
+    "serve": "ponder serve",
     "db": "ponder db",
     "codegen": "ponder codegen",
     "test": "vitest",
@@ -26,10 +27,11 @@
     "@ensnode/ens-deployments": "workspace:*",
     "@ensnode/utils": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
-    "hono": "catalog:",
-    "ponder": "catalog:",
+    "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
+    "hono": "catalog:",
+    "ponder": "catalog:",
     "ts-deepmerge": "^7.0.2",
     "viem": "catalog:"
   },
