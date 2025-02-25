@@ -1,6 +1,6 @@
 .image1, .image2 {
     max-width: 100%;
-    width: 405px;
+    width: 440px;
     height: 350px;
     user-select: none;
     pointer-events: none;
@@ -19,14 +19,14 @@
 
 @keyframes lrtest {
     0% {
-        clip-path: polygon(0 0, 5% 0, 5% 100%, 0 100%);
+        clip-path: polygon(0 0, 8% 0, 8% 100%, 0 100%);
     }
     50% {
-        clip-path: polygon(0 0, 95% 0, 95% 100%, 0 100%);
+        clip-path: polygon(0 0, 92% 0, 92% 100%, 0 100%);
     }
 
     100% {
-        clip-path: polygon(0 0, 5% 0, 5% 100%, 0 100%);
+        clip-path: polygon(0 0, 8% 0, 8% 100%, 0 100%);
     }
 }
 
@@ -74,14 +74,14 @@
 
 @keyframes lrController {
     0% {
-        left: 5%;
+        left: 8%;
     }
     50% {
-        left: 95%;
+        left: 92%;
     }
 
     100% {
-        left: 5%;
+        left: 8%;
     }
 }
 

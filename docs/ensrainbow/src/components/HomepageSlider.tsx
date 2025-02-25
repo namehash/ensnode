@@ -1,7 +1,7 @@
 import "../styles/slider-styles.css";
 import React, {useState, useRef } from 'react';
-import unknown_name from "../assets/unknown-name-wider.png";
-import known_name from "../assets/known-name-wider.png";
+import unknown_name from "../assets/Name.svg";
+import known_name from "../assets/Name-healed.svg";
 
 export default function HomepageSlider() {
 
