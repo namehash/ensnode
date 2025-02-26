@@ -57,13 +57,9 @@ cd apps/ensnode
 cp .env.local.example .env.local
 ```
 
-Review the docs inside `.env.local` file for configuration instructions, or see the `.env.local.example` on GitHub.
-
 <LinkCard
-  title="View .env.local.example on GitHub"
-  description="See the example environment configuration file"
-  href="https://github.com/namehash/ensnode/blob/main/apps/ensnode/.env.local.example"
-  target="_blank"
+  title="Environment Variable Configuration Options"
+  href="/ensnode/usage/configuration"
 />
 
 :::note
@@ -116,6 +112,10 @@ pnpm run -F ensadmin dev
 pnpm run dev
 ```
 
+:::note
+ENSAdmins's `.env.local` should be placed at `apps/ensadmin/.env.local`, not at the monorepo root.
+:::
+
 ## Using Docker Compose
 
 You can use Docker Compose to set up the ENSNode suite, along with its dependencies.
@@ -139,9 +139,10 @@ To start the ENSNode application and its dependencies using Docker Compose, foll
 docker compose up
 ```
 
-- **ENSNode**: Open [http://localhost:42069](http://localhost:42069) to access the ENSNode indexer.
-- **ENSRainbow**: Open [http://localhost:3223](http://localhost:3223) to access the ENSRainbow service.
-- **ENSAdmin**: Open [http://localhost:4173](http://localhost:4173) to access the ENSAdmin service.
+- **ENSNode**: Available at [http://localhost:42069](http://localhost:42069)
+- **ENSRainbow**: Available at [http://localhost:3223](http://localhost:3223)
+- **ENSAdmin**: Available at [http://localhost:4173](http://localhost:4173)
+- **PostgreSQL**: Available on port `5432`
 
 ### Stopping the Applications
 

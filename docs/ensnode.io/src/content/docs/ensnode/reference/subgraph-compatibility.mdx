@@ -29,16 +29,35 @@ There exists a [fork of ens-test-env](https://github.com/namehash/ens-test-env/)
 - any open [issues](https://github.com/namehash/ensnode/issues) regarding Subgraph-Compatibility
 - [subgraph `_Meta_` object](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#subgraph-metadata)
 
+:::note[Contributions]
+If you'd like to contribute to these features, please [open a Pull Request on GitHub](https://github.com/namehash/ensnode).
+:::
+
+## Possible Features
+
+The following features could be implemented, but are not yet planned.
+
+- [fulltext search queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#fulltext-search-queries)
+
+:::note[Contributions]
+If you'd like to contribute to these features, please [open a Pull Request on GitHub](https://github.com/namehash/ensnode).
+:::
+
 ### Unplanned Features
 
 The following features of the subgraph graphql api are explicitly unsupported and are not planned.
 
-- [fulltext search queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#fulltext-search-queries)
 - [1-level-nested Entity `_orderBy` param](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-nested-entity-sorting)
 - [time travel queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#time-travel-queries)
 - [_change_block filtering](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-block-filtering)
 
+:::note[Contributions]
+If you'd like to discuss these features, please [open an Issue on GitHub](https://github.com/namehash/ensnode/issues).
+:::
+
 ### Well-Known Queries
+
+These are the popular queries we've seen in the wild (namely via ENSjs and ens-app-v3)—the Subgraph-compatible GraphQL API strives to be fully compatible with these specific use-cases.
 
 #### from ensjs
 - [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — Gets the full name for a name with unknown labels from the subgraph

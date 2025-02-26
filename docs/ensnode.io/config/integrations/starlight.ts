@@ -69,11 +69,6 @@ export function starlight(): AstroIntegration {
             collapsed: true,
             autogenerate: { directory: "ensrainbow/contributing" },
           },
-          {
-            label: "Reference",
-            collapsed: true,
-            autogenerate: { directory: "ensrainbow/reference" },
-          },
         ],
       },
     ],
