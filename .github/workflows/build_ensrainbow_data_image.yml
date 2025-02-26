@@ -15,17 +15,11 @@ jobs:
             # Show disk usage
             echo "Before cleanup"
             df -h
-            du -sh /* 2>/dev/null | sort -hr | head -10
             # Remove dotnet, android, ghc, codeq directories, boost
-            sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQ /usr/local/share/boost
-            # Prune Docker images
-            docker system prune -af
-            # Clear runner work directory
-            rm -rf "${GITHUB_WORKSPACE}"/*
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/hostedtoolcache/CodeQ /usr/local/share/boost
             # Show disk usage
             echo "After cleanup"
             df -h
-            du -sh /* 2>/dev/null | sort -hr | head -10
 
       - name: Set up QEMU (for cross-architecture builds)
         uses: docker/setup-qemu-action@v3
