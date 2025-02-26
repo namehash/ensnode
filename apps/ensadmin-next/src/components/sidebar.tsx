@@ -5,11 +5,9 @@ import { cn } from "@/lib/utils";
 import { Activity, Code2, Database, PanelLeft, PanelLeftClose } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { PropsWithChildren, createContext, useContext, useEffect, useState } from "react";
+import { PropsWithChildren, createContext, useContext, useState } from "react";
 import { ConnectionSelector } from "./connections/connection-selector";
 import { Provider as QueryClientProvider } from "./query-client/provider";
-
-const SIDEBAR_STORAGE_KEY = "ensadmin:sidebar:open";
 
 const tabs = [
   {
@@ -34,30 +32,17 @@ const tabs = [
   },
 ];
 
-const SidebarContext = createContext<{
-  isOpen: boolean;
-  toggleSidebar: () => void;
-}>({
-  isOpen: true,
-  toggleSidebar: () => {},
-});
+const SidebarContext = createContext<
+  | {
+      isOpen: boolean;
+      toggleSidebar: () => void;
+    }
+  | undefined
+>(undefined);
 
 export const SidebarProvider = function SidebarProvider({ children }: PropsWithChildren) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  // Load sidebar state from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-    if (saved !== null) {
-      setIsSidebarOpen(saved === "true");
-    }
-  }, []);
-
-  // Save sidebar state to localStorage
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-    localStorage.setItem(SIDEBAR_STORAGE_KEY, (!isSidebarOpen).toString());
-  };
+  const toggleSidebar = () => setIsSidebarOpen((isOpen) => !isOpen);
 
   return (
     <SidebarContext.Provider value={{ isOpen: isSidebarOpen, toggleSidebar }}>
@@ -70,8 +55,13 @@ export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const ensnodeUrl = selectedEnsNodeUrl(searchParams);
+  const sidebarContext = useContext(SidebarContext);
 
-  const { isOpen } = useContext(SidebarContext);
+  if (!sidebarContext) {
+    throw new Error("Sidebar context is missing");
+  }
+
+  const { isOpen } = sidebarContext;
 
   return (
     <nav
@@ -118,12 +108,19 @@ export function Sidebar() {
 }
 
 export function SidebarToggle() {
-  const { isOpen, toggleSidebar } = useContext(SidebarContext);
+  const sidebarContext = useContext(SidebarContext);
+
+  if (!sidebarContext) {
+    throw new Error("Sidebar context is missing");
+  }
+
+  const { isOpen, toggleSidebar } = sidebarContext;
+
+  console.log("is sidebar open", isOpen);
   return (
     <button
       onClick={() => toggleSidebar()}
       className={cn(
-        "absolute top-4 right-4",
         "w-8 h-8 flex items-center justify-center rounded-md",
         "text-muted-foreground hover:text-foreground",
         "hover:bg-muted transition-colors",

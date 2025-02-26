@@ -1,5 +1,5 @@
 import { type PropsWithChildren, Suspense } from "react";
-import { Sidebar, SidebarToggle } from "./sidebar";
+import { Sidebar, SidebarProvider, SidebarToggle } from "./sidebar";
 import { Toolbar } from "./toolbar";
 
 export function PageShell({ children }: PropsWithChildren) {
@@ -11,23 +11,25 @@ export function PageShell({ children }: PropsWithChildren) {
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar Navigation */}
-        <Suspense>
-          <Sidebar />
-        </Suspense>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-background">
-          {/* Toolbar */}
-          <Toolbar>
-            <Suspense>
-              <SidebarToggle />
-            </Suspense>
-          </Toolbar>
+        <SidebarProvider>
+          {/* Sidebar Navigation */}
+          <Suspense>
+            <Sidebar />
+          </Suspense>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-auto">{children}</main>
-        </div>
+          <div className="flex-1 flex flex-col overflow-hidden bg-background">
+            {/* Toolbar */}
+            <Toolbar>
+              <Suspense>
+                <SidebarToggle />
+              </Suspense>
+            </Toolbar>
+
+            {/* Main Content */}
+            <main className="flex-1 overflow-auto">{children}</main>
+          </div>
+        </SidebarProvider>
       </div>
     </div>
   );
