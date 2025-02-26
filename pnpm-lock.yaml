@@ -22,8 +22,8 @@ catalogs:
       specifier: ^4.6.14
       version: 4.6.17
     ponder:
-      specifier: ^0.9.20
-      version: 0.9.20
+      specifier: ^0.9.22
+      version: 0.9.22
     tsup:
       specifier: ^8.3.6
       version: 8.3.6
@@ -204,7 +204,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.20(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.22(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -425,7 +425,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.20(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.22(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -440,7 +440,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.20(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.22(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       viem:
         specifier: 'catalog:'
         version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
@@ -4650,8 +4650,8 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  ponder@0.9.20:
-    resolution: {integrity: sha512-GOsPyWtY+KJWh4uMixPCmVFZpgmy0LxeT76XZHTStJD6lCcnh/trhGC9Jh+Sg76WcDAF0CpZoNaud+MGCM3pXw==}
+  ponder@0.9.22:
+    resolution: {integrity: sha512-+2UvzHP6EmzFf5MI2Aus3v65SeKXtl75ixBE0exfZFrHg23j2yAHe9p00Y9pQ1Xq10yAkDRPb6SHfYPOLpFkMQ==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -5348,10 +5348,6 @@ packages:
 
   tinyexec@0.3.2:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
-
-  tinyglobby@0.2.11:
-    resolution: {integrity: sha512-32TmKeeKUahv0Go8WmQgiEp9Y21NuxjwjqiRC1nrUB51YacfSwuB44xgXD+HdIppmMRgjQNPdrHyA6vIybYZ+g==}
-    engines: {node: '>=12.0.0'}
 
   tinyglobby@0.2.12:
     resolution: {integrity: sha512-qkf4trmKSIiMTs/E63cxH+ojC2unam7rJ0WrauAzpT3ECNTxGRMlaXxVbfxMUC/w0LaYk6jQ4y/nGR9uBO3tww==}
@@ -10835,7 +10831,7 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  ponder@0.9.20(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.22(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -10917,7 +10913,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  ponder@0.9.20(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.22(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -11834,11 +11830,6 @@ snapshots:
 
   tinyexec@0.3.2: {}
 
-  tinyglobby@0.2.11:
-    dependencies:
-      fdir: 6.4.3(picomatch@4.0.2)
-      picomatch: 4.0.2
-
   tinyglobby@0.2.12:
     dependencies:
       fdir: 6.4.3(picomatch@4.0.2)
@@ -11911,7 +11902,7 @@ snapshots:
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tinyexec: 0.3.2
-      tinyglobby: 0.2.11
+      tinyglobby: 0.2.12
       tree-kill: 1.2.2
     optionalDependencies:
       postcss: 8.5.3
