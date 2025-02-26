@@ -17,6 +17,10 @@ Running your own ENSNode instance is helpful for those that wish to:
 - Customize ENSNode's behavior
 - Own the resulting Postgres index for custom queries or `JOIN`s
 
+:::note[Private Networking]
+Note that because ENSNode makes many label healing requests to ENSRainbow while indexing, it's _imperative_ that they be on the same local network to minimize request time.
+:::
+
 ### Deploying on Railway
 
 Railway is a convenient platform for hosting an ENSNode instance.

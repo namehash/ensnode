@@ -1,25 +1,56 @@
 # ENSNode
 
-> a multichain ENS indexer, powered by Ponder
+> a multichain ENS indexer for the ENS community
 
-ENSNode is the new multichain indexer for ENS and ENSv2. It provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
+Documentation ➡︎ [ensnode.io](https://ensnode.io)
 
-- 1:1 Subgraph equivalency of results for known queries
-  - ✅ 100% data equivalency via [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools)
-  - ✅ 100% ensjs test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
-  - ✅ [use ENSNode with ENSjs](https://www.ensnode.io/ensnode/usage/with-ensjs/)
-  - 🚧 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
-  - see the [Subgraph-Compatibility Reference](https://www.ensnode.io/ensnode/reference/subgraph-compatibility/) for more info
-- true multichain ENS namespace
+ENSNode is the new multichain indexer for [ENS](https://ens.domains/) and [ENSv2](https://roadmap.ens.domains/roadmap/). It provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
+
+- Multichain ENS Namespace
   - flattened, unified, multichain and multiregistrar namespace via optional plugins
   - ✅ Mainnet ENS Names
   - ✅ Basenames (`.base.eth`)
   - ✅ Linea Names (`.linea.eth`)
-- Rapid Indexing
-  - ✅ Mainnet ETH backfill time **7 hours** on M1 Macbook, **13 hours** on standard VPS
+  - 🚧 + more
+- Built on Ponder
+  - ✅ Rapid Indexing & Backfill
+    - 10x faster than ENS Subgraph
+    - Mainnet Backfill: **7 hours** on M1 Macbook
+  - ✅ More efficient than ENS Subgraph
+    - 35x less disk space and 35% fewer RPC credits [[source]](https://ponder.sh/docs/why-ponder)
+  - ✅ End-to-end type safety
+  - ✅ Automatically reconciles chain reorganizations
+  - ✅ Deploy anywhere with Node.js & Docker
+- Designed for web developers
+  - ✅ [use ENSNode with ENSjs](https://www.ensnode.io/ensnode/usage/with-ensjs/)
+  - ✅ [GraphQL APIs](https://ensnode.io/ensnode/usage/apis/)
+  - ✅ [Live Queries & React Hooks](https://ponder.sh/docs/query/client)
+  - ✅ Custom APIs for your app
+- [1:1 Subgraph Compatibility](https://www.ensnode.io/ensnode/reference/subgraph-compatibility/)
+  - ✅ [100% data equivalency](https://github.com/namehash/ens-subgraph-transition-tools) as compared to Subgraph
+  - ✅ 100% ensjs test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
+  - 🚧 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
 - Own your ENSNode index
-  - Run ENSNode in your own cloud for customized uptime guarantees and private queries
-  - See the [ENSNode Deployment Guide](https://ensnode.io/ensnode/deploying/) for more info
+  - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/ensnode/deploying/) for customized uptime guarantees and private queries
+
+## Why Index ENS? Why ENSNode?
+
+The ENS protocol manages the state of names across multiple chains and even off-chain databases. Querying this data from an RPC endpoint—not to mention querying multiple chains—quickly becomes difficult and inefficient and results in a poor user experience. For example, if you wanted to list all of a user's owned names, you'd have to make a request to ETH Mainnet, Base, Linea, `.cb.id`, `.uni.eth`, etc.
+
+An indexer aggregates and reorganizes the state of ENS to make queries like that efficient and convenient:
+
+```graphql
+# get all of a user's domains by address
+query Domains($adress: String!) {
+  domains(where: { owner: $address }) {
+    id
+    name
+    ...
+  }
+}
+```
+
+Historically the ENS Subgraph has served this purpose, but its limitations have become clear as the ENS protocol grows. ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatible Subgraph queries and sets the stage for supporting [ENSv2](https://roadmap.ens.domains/roadmap/), in particular Namechain and the growing set of off-chain ENS names (like `.cb.id` and `.uni.eth`).
 
 ## Documentation
 
@@ -28,6 +59,29 @@ Documentation for the ENSNode suite of apps is available at [ensnode.io](https:/
 ## Contributions
 
 We welcome community contributions and feedback—please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+
+## Sponsors
+
+NameHash and ENSNode has received generous support from [ENS DAO](https://ensdao.org/) and [Gitcoin](https://www.gitcoin.co/).
+
+<p align="middle">
+  <a href="https://ensdao.org/" target="_blank" width="100">
+    <img src="./docs/ensnode.io/public/ensdao.png">
+  </a>
+  <a href="https://www.gitcoin.co/" target="_blank" width="100">
+    <img src="./docs/ensnode.io/public/gitcoin.png">
+  </a>
+</p>
+
+## Contact Us
+
+Visit our [website](https://namehashlabs.org/) to get in contact.
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.
 
 ## Repo Overview
 

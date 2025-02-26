@@ -152,6 +152,10 @@ To stop the running applications, you can press `Ctrl + C` in the terminal where
 docker compose down
 ```
 
+:::note
+`docker compoe down` will _not_ delete the Postgres data volume defined here, as it is a named volume. To fully delete the Postgres data volume, use `docker compose down -v`.
+:::
+
 ## Building Docker Images
 
 For detailed instructions on building Docker images for ENSNode components, see the [Building Docker Images](/ensnode/contributing/building) guide.
