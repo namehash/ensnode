@@ -44,11 +44,7 @@ export interface IndexingStatus {
 }
 
 async function fetchIndexingStatus(baseUrl: string): Promise<IndexingStatus> {
-  const requestUrl = new URL(`/metadata`, baseUrl);
-
-  console.log("fetching indexing status from", requestUrl.toString());
-
-  const response = await fetch(requestUrl);
+  const response = await fetch(new URL(`/metadata`, baseUrl));
 
   if (!response.ok) {
     throw new Error("Failed to fetch indexing status");

@@ -116,7 +116,6 @@ export function SidebarToggle() {
 
   const { isOpen, toggleSidebar } = sidebarContext;
 
-  console.log("is sidebar open", isOpen);
   return (
     <button
       onClick={() => toggleSidebar()}
