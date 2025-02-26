@@ -4,7 +4,10 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainBlockrange,
   deepMergeRecursive,
+  ensRainbowEndpointUrl,
+  parseEnsNodePublicUrl,
   parseEnsRainbowEndpointUrl,
+  parseRequestedPluginNames,
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
 } from "../src/lib/ponder-helpers";
@@ -72,6 +75,34 @@ describe("ponder helpers", () => {
 
     it("should return the default URL if the URL is missing", () => {
       expect(parseEnsRainbowEndpointUrl()).toBe(DEFAULT_ENSRAINBOW_URL);
+    });
+  });
+
+  describe("parseEnsNodePublicUrl", () => {
+    it("should parse the public URL", () => {
+      expect(parseEnsNodePublicUrl("https://public.ensnode.io")).toBe("https://public.ensnode.io/");
+    });
+
+    it("should throw an error if the URL is invalid", () => {
+      expect(() => parseEnsNodePublicUrl("https//public.ensnode.io")).toThrowError(
+        "'https//public.ensnode.io' is not a valid URL",
+      );
+    });
+
+    it("should throw an error if the URL is missing", () => {
+      expect(() => parseEnsNodePublicUrl()).toThrowError("Expected value not set");
+    });
+  });
+
+  describe("parseRequestedPluginNames", () => {
+    it("should parse a list of comma-separated values", () => {
+      expect(parseRequestedPluginNames("abc")).toEqual(["abc"]);
+
+      expect(parseRequestedPluginNames("def,ghi")).toEqual(["def", "ghi"]);
+    });
+
+    it("should throw an error if the list is not set", () => {
+      expect(() => parseRequestedPluginNames()).toThrowError("Expected value not set");
     });
   });
 

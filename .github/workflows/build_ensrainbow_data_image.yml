@@ -10,6 +10,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Make disk space ( remove unnecessary libs )
+        run: |
+            # Remove Android libs
+            sudo rm -rf /usr/local/lib/android || true
+            # Remove dotnet libs
+            sudo rm -rf /usr/share/dotnet || true
+
       - name: Build & Push Docker image for the ENSRainbow-data
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow-data

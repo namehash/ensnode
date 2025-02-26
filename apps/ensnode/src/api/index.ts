@@ -1,16 +1,57 @@
-import { db } from "ponder:api";
+import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
+import { ponderMetadata } from "@ensnode/ponder-metadata/middleware";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
+import packageJson from "../../package.json";
+import {
+  ensNodePublicUrl,
+  getEnsDeploymentChain,
+  ponderDatabaseSchema,
+  requestedPluginNames,
+} from "../lib/ponder-helpers";
 
 const app = new Hono();
+
+// use CORS middleware
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
+
+// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+app.use("/", async (ctx) =>
+  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
+);
+
+// use ENSNode middleware at /metadata
+app.get(
+  "/metadata",
+  ponderMetadata({
+    app: {
+      name: packageJson.name,
+      version: packageJson.version,
+    },
+    env: {
+      ACTIVE_PLUGINS: requestedPluginNames().join(","),
+      DATABASE_SCHEMA: ponderDatabaseSchema(),
+      ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
+    },
+    db,
+    fetchPrometheusMetrics: () =>
+      fetch(`http://localhost:${process.env.PORT}/metrics`).then((res) => res.text()),
+    publicClients,
+  }),
+);
 
 // use ponder client support
 app.use("/sql/*", client({ db, schema }));
 
-// use ponder middleware at root
-app.use("/", ponderGraphQL({ db, schema }));
+// use ponder middleware at `/ponder`
+app.use("/ponder", ponderGraphQL({ db, schema }));
 
 // use our custom graphql middleware at /subgraph
 app.use(
