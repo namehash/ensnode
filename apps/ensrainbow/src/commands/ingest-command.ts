@@ -106,7 +106,6 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
         await batch.write();
         batch = db.batch();
         batchSize = 0;
-        logger.info(`Processed: ${processedRecords}`)
       }
       bar.tick();
     }
