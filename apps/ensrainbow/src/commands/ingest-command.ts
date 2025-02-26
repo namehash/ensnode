@@ -65,7 +65,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     let batchSize = 0;
     let processedRecords = 0;
     let invalidRecords = 0;
-    const MAX_BATCH_SIZE = 10000;
+    const MAX_BATCH_SIZE = 100_000;
 
     logger.info("Ingesting data into LevelDB...");
 
@@ -106,6 +106,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
         await batch.write();
         batch = db.batch();
         batchSize = 0;
+        logger.info(`Processed: ${processedRecords}`)
       }
       bar.tick();
     }

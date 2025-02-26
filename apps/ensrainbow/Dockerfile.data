@@ -1,55 +1,37 @@
 # Base working stage
 FROM node:18-slim AS base
+
+FROM base as working-stage
 RUN apt-get update && \
     npm install -g pnpm
-WORKDIR /app
-
-###################
-## Data Stage — download ENS Subgraph rainbow table archive & checksum
-###################
-
-FROM base AS db-data
-RUN apt-get install -y wget
-COPY apps/ensrainbow/package.json ./apps/ensrainbow/package.json
-COPY apps/ensrainbow/download-rainbow-tables.sh ./apps/ensrainbow/download-rainbow-tables.sh
-
-WORKDIR /app/apps/ensrainbow
-RUN pnpm get-legacy-data
-
 ###################
 ## Dependencies Stage — standard monorepo pnpm install from base
 ###################
-
-FROM base AS ingest-deps
+WORKDIR /app
 
 COPY pnpm-workspace.yaml ./
 COPY package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps ./apps
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --silent
+###################
+## Data Stage — download ENS Subgraph rainbow table archive & checksum
+###################
+RUN apt-get install -y wget
+COPY apps/ensrainbow/package.json apps/ensrainbow/download-rainbow-tables.sh ens_names.sql.gz* ./apps/ensrainbow/
 
+WORKDIR /app/apps/ensrainbow
+RUN pnpm get-legacy-data
 ###################
 ## Runtime Stage — ingest to produce data dir artifact
 ###################
-
-FROM ingest-deps AS ingest
-
-WORKDIR /app/apps/ensrainbow
-# copy ens_names.sql.gz from db-data
-COPY --from=db-data /app/apps/ensrainbow/ens_names.sql.gz .
-COPY --from=db-data /app/apps/ensrainbow/THE_GRAPH_LICENSE.txt .
-
 # produce the data dir artifact
 RUN pnpm run ingest
-
-# cleanup input file to reduce image size
-RUN rm ens_names.sql.gz
 
 ###################
 ## Output Image — just the data dir
 ###################
-
 FROM base AS ensrainbow-data
 
-COPY --from=ingest /app/apps/ensrainbow/data ./data
+COPY --from=working-stage /app/apps/ensrainbow/data ./data
