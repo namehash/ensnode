@@ -16,8 +16,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check --write .",
-    "lint:ci": "biome ci",
-    "typecheck": "tsc --noEmit"
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "@ensnode/ponder-schema": "workspace:",
