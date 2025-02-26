@@ -1,15 +1,15 @@
 export const DEFAULT_BASE_URL = "https://subgraph.ensnode.io";
 
 /**
- * Creates ENSNode URL.
+ * Creates ENSIndexer URL.
  *
  * @param params search params
- * @returns ENSNode URL if provided URL is valid, or DEFAULT_BASE_URL
+ * @returns ENSIndexer URL if provided URL is valid, or DEFAULT_BASE_URL
  * @throws Error if the URL provided in the env vars or the search param is invalid
  */
-export function ensNodeUrl(params: URLSearchParams): URL {
-  const envVarName = "VITE_ENSNODE_URL";
-  const urlSearchParamName = "ensnode";
+export function ensIndexerUrl(params: URLSearchParams): URL {
+  const envVarName = "VITE_ENSINDEXER_URL";
+  const urlSearchParamName = "ensindexer";
 
   try {
     const rawUrlSearchParamName = params.get(urlSearchParamName);

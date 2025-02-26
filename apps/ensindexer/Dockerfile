@@ -14,7 +14,7 @@ COPY packages ./packages
 # Install dependencies for the entire monorepo
 RUN pnpm install --frozen-lockfile
 # Change to the specific app directory
-WORKDIR /app/apps/ensnode
+WORKDIR /app/apps/ensindexer
 
 EXPOSE 42069
 CMD ["pnpm", "exec", "ponder", "start"]

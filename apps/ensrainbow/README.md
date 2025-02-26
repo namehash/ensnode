@@ -1,6 +1,6 @@
 # ENSRainbow
 
-ENSRainbow is an ENSNode sidecar service for healing ENS labels. It provides a simple API endpoint to heal ENS labelhashes back to their original labels.
+ENSRainbow is an ENSIndexer sidecar service for healing ENS labels. It provides a simple API endpoint to heal ENS labelhashes back to their original labels.
 
  [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/Ddy-Qg?referralCode=HxmgeB)
 
@@ -13,7 +13,7 @@ For backwards compatibility with the ENS Subgraph, the current rainbow tables (6
 - **Data Ingestion**: Processes a pre-computed rainbow table (SQL dump) to populate the LevelDB store
 - **Performance**: Provides fast, constant-time lookups for known ENS labels through LevelDB's efficient indexing
 
-The service is designed to be run as a sidecar alongside ENSNode, helping to "heal" the labelhashes of unknown labels by finding their original labels when available.
+The service is designed to be run as a sidecar alongside ENSIndexer, helping to "heal" the labelhashes of unknown labels by finding their original labels when available.
 
 ### Current Release & Future Direction
 

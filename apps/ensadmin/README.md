@@ -1,6 +1,6 @@
 # ENSAdmin
 
-ENSAdmin provides a convenient dashboard for navigating the state of ENS as indexed by a connected ENSNode instance.
+ENSAdmin provides a convenient dashboard for navigating the state of ENS as indexed by a connected ENSIndexer instance.
 
 ## Quick start
 
@@ -16,7 +16,7 @@ pnpm install
 cp .env.local.example .env.local
 ```
 
-You can update `VITE_ENSNODE_URL` environment variable if you wish ENSAdmin to start with a custom ENSNode URL.
+You can update `VITE_ENSINDEXER_URL` environment variable if you wish ENSAdmin to start with a custom ENSIndexer URL.
 
 ### Run development server
 

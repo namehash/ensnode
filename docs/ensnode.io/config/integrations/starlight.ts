@@ -15,20 +15,20 @@ export function starlight(): AstroIntegration {
     },
     sidebar: [
       {
-        label: "ENSNode",
+        label: "ENSIndexer",
         items: [
           {
             label: "Quickstart",
-            slug: "ensnode/quickstart",
+            slug: "ensindexer/quickstart",
           },
           {
             label: "Guides",
-            autogenerate: { directory: "ensnode/guides" },
+            autogenerate: { directory: "ensindexer/guides" },
             collapsed: true,
           },
           {
             label: "Reference",
-            autogenerate: { directory: "ensnode/reference" },
+            autogenerate: { directory: "ensindexer/reference" },
             collapsed: true,
           },
         ],

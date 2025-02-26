@@ -4,23 +4,23 @@ import { About } from "./components/About";
 import { GraphiQLWrapper } from "./components/GraphiQLWrapper";
 import { Layout } from "./components/Layout";
 import { PonderClient } from "./components/PonderClient";
-import { ensNodeUrl } from "./utils/url";
+import { ensIndexerUrl } from "./utils/url";
 
 function AppRoutes() {
   const [searchParams] = useSearchParams();
-  const ensnodeUrl = ensNodeUrl(searchParams);
+  const url = ensIndexerUrl(searchParams);
 
   return (
-    <Layout ensnodeUrl={ensnodeUrl}>
-      <Outlet context={{ ensnodeUrl }} />
+    <Layout ensIndexerUrl={url}>
+      <Outlet context={{ ensIndexerUrl: url }} />
     </Layout>
   );
 }
 
 function RedirectToDefault() {
   const [searchParams] = useSearchParams();
-  const ensnodeUrl = ensNodeUrl(searchParams);
-  const to = ensnodeUrl ? `/about?ensnode=${ensnodeUrl}` : "/about";
+  const url = ensIndexerUrl(searchParams);
+  const to = url ? `/about?ensindexer=${url}` : "/about";
 
   return <Navigate to={to} replace />;
 }

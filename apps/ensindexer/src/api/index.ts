@@ -7,7 +7,7 @@ import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import packageJson from "../../package.json";
 import {
-  ensNodePublicUrl,
+  ensIndexerPublicUrl,
   getEnsDeploymentChain,
   ponderDatabaseSchema,
   requestedPluginNames,
@@ -22,12 +22,12 @@ app.use(
   }),
 );
 
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+// use root to redirect to the ENSAdmin website with the current server URL as ensindexer parameter
 app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
+  ctx.redirect(`https://admin.ensnode.io/about?ensindexer=${ensIndexerPublicUrl()}`),
 );
 
-// use ENSNode middleware at /metadata
+// use ENSIndexer middleware at /metadata
 app.get(
   "/metadata",
   ponderMetadata({
