@@ -40,16 +40,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push ENSRainbow-data Docker image for amd64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./apps/ensrainbow/Dockerfile.data
-          push: true
-          platforms: linux/amd64
-          tags: ghcr.io/${{ github.repository }}/ensrainbow-data:amd64
-
-      - name: Build and push ENSRainbow-data Docker image for arm64
+      - name: Build and push ENSRainbow-data Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
