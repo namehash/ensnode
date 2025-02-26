@@ -1,0 +1,46 @@
+---
+import Header from "../components/organisms/Header";
+import Footer from "../components/organisms/Footer";
+import "../styles/global.css";
+import {AstroFont} from "astro-font";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+	<AstroFont
+		config={[
+			{
+				src: [],
+				name: "Inter",
+				// Google Fonts URL
+                googleFontsURL: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+				preload: true,
+				display: "swap",
+				selector: "body",
+				fallback: "sans-serif",
+			},
+		]}
+	/>
+    <meta name="viewport" content="width=device-width"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <meta name="generator" content={Astro.generator}/>
+    <!-- TODO: figure out whatever this is and adjust if necessary -->
+    <title>ENS Rainbow</title>
+</head>
+<body>
+<Header/>
+<slot/>
+<Footer/>
+</body>
+</html>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
