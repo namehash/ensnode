@@ -10,6 +10,7 @@ import { buildRainbowRecord } from "../utils/rainbow-record";
 export interface IngestCommandOptions {
   inputFile: string;
   dataDir: string;
+  concurrency?: number; // Added concurrency option
 }
 
 // Total number of expected records in the ENS rainbow table SQL dump
@@ -24,6 +25,9 @@ export interface IngestCommandOptions {
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
 
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
+  // Set default concurrency if not provided
+  const concurrency = options.concurrency || 4;
+  
   const db = await ENSRainbowDB.create(options.dataDir);
 
   try {
@@ -61,13 +65,27 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     });
 
     let isCopySection = false;
-    let batch = db.batch();
-    let batchSize = 0;
+    const batches = Array(concurrency).fill(null).map(() => db.batch());
+    const batchSizes = Array(concurrency).fill(0);
+    let batchIndex = 0;
     let processedRecords = 0;
     let invalidRecords = 0;
-    const MAX_BATCH_SIZE = 100_000;
+    const MAX_BATCH_SIZE = 30_000;
+    
+    // Array to hold pending write promises
+    const pendingWrites = [];
 
-    logger.info("Ingesting data into LevelDB...");
+    logger.info(`Ingesting data into LevelDB with ${concurrency} parallel writers...`);
+
+    // Function to write a batch and return a new one
+    const writeBatch = async (index) => {
+      const batchToWrite = batches[index];
+      batches[index] = db.batch();
+      batchSizes[index] = 0;
+      
+      // Return the write promise
+      return batchToWrite.write();
+    };
 
     for await (const line of rl) {
       if (line.startsWith("COPY public.ens_names")) {
@@ -98,22 +116,37 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
         continue;
       }
 
-      batch.put(record.labelHash, record.label);
-      batchSize++;
+      // Add record to current batch
+      batches[batchIndex].put(record.labelHash, record.label);
+      batchSizes[batchIndex]++;
       processedRecords++;
 
-      if (batchSize >= MAX_BATCH_SIZE) {
-        await batch.write();
-        batch = db.batch();
-        batchSize = 0;
+      // If current batch is full, write it asynchronously
+      if (batchSizes[batchIndex] >= MAX_BATCH_SIZE) {
+        const writePromise = writeBatch(batchIndex);
+        pendingWrites.push(writePromise);
+        
+        // Clean up completed writes to prevent memory issues
+        if (pendingWrites.length > concurrency * 2) {
+          await Promise.all(pendingWrites.splice(0, concurrency));
+        }
       }
+      
+      // Move to next batch for round-robin distribution
+      batchIndex = (batchIndex + 1) % concurrency;
+      
       bar.tick();
     }
 
-    // Write any remaining entries
-    if (batchSize > 0) {
-      await batch.write();
+    // Write any remaining entries in all batches
+    for (let i = 0; i < concurrency; i++) {
+      if (batchSizes[i] > 0) {
+        pendingWrites.push(writeBatch(i));
+      }
     }
+
+    // Wait for all pending writes to complete
+    await Promise.all(pendingWrites);
 
     logger.info("\nData ingestion complete!");
 

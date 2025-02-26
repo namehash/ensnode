@@ -5,5 +5,4 @@
 .dockerignore
 
 # ignore ensrainbow artifacts on host machine
-ens_names.sql.gz*
 apps/ensrainbow/data/
