@@ -1,0 +1,148 @@
+---
+title: Quick Start
+---
+
+## Quick Start with Railway
+
+You can easily deploy ENSRainbow instance using predefined Railway template. Please refer to Railway template description for further details.
+
+ [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/Ddy-Qg?referralCode=HxmgeB)
+
+## Quick Start with Docker
+
+1. Build the Docker image (includes data download & ingestion):
+
+```bash
+# while in the monorepo root directory
+docker build -t ensnode/ensrainbow -f apps/ensrainbow/Dockerfile .
+```
+
+2. Run the container:
+
+```bash
+docker run -d -p 3223:3223 ensnode/ensrainbow
+```
+
+The service will be available at `http://localhost:3223`.
+
+## NameHash Labs Hosted Instance
+
+NameHash Labs operates a freely available instance of ENSRainbow for the ENS community at https://api.ensrainbow.io. This service:
+
+- Is provided free of charge with no API key required
+- Has no rate limiting
+- Is maintained and monitored by the NameHash Labs team
+- Runs the latest version of ENSRainbow
+
+### Using the Hosted Instance
+
+Simply replace `localhost:3223` with `api.ensrainbow.io` in the API examples:
+
+```bash
+# Health check
+curl https://api.ensrainbow.io/health
+
+# Heal a label
+curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
+
+# Get count of healable labels
+curl https://api.ensrainbow.io/v1/labels/count
+```
+
+While we aim for high availability, if you need guaranteed uptime or want to keep your requests private, we recommend running your own instance using the instructions above.
+
+## API Endpoints
+
+### Health Check
+
+```bash
+curl http://localhost:3223/health
+```
+
+Response: `{"status":"ok"}`
+
+### Heal Label
+
+```bash
+curl http://localhost:3223/v1/heal/0x[labelhash]
+```
+
+Example:
+
+```bash
+curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+```
+
+Response:
+```json
+{
+  "status": "success",
+  "label": "vitalik"
+}
+```
+
+Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
+
+- Labels may or may not be ENS-normalized
+- Labels can contain any valid string, including dots, null bytes, or be empty
+- Clients should handle all possible string values appropriately
+
+Error Responses:
+
+- `400 Bad Request`: When the labelhash parameter is missing or invalid
+  ```json
+  {
+    "status": "error",
+    "error": "Invalid labelhash - must be a valid hex string",
+    "errorCode": 400
+  }
+  ```
+
+- `404 Not Found`: When no label is found for the given labelhash
+  ```json
+  {
+    "status": "error",
+    "error": "Label not found",
+    "errorCode": 404
+  }
+  ```
+
+- `500 Internal Server Error`: When an unexpected error occurs or database is not initialized
+  ```json
+  {
+    "status": "error",
+    "error": "Internal server error",
+    "errorCode": 500
+  }
+  ```
+
+### Get Count of Healable Labels
+
+```bash
+curl http://localhost:3223/v1/labels/count
+```
+
+Success Response:
+```json
+{
+  "status": "success",
+  "count": 133856894,
+  "timestamp": "2024-01-30T11:18:56Z"
+}
+```
+
+Error Response (if database not initialized):
+```json
+{
+  "status": "error",
+  "error": "Label count not initialized. Check that the ingest command has been run.",
+  "errorCode": 500
+}
+```
+
+## Environment Variables
+
+### Server Variables
+- `PORT`: Server port (default: 3223)
+- `DATA_DIR`: Directory for LevelDB data (default: './data')
+- `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
