@@ -34,11 +34,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Build and push ENSRainbow-data Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./apps/ensrainbow/Dockerfile.data
-          push: true
-          platforms: linux/arm64
-          tags: ghcr.io/${{ github.repository }}/ensrainbow-data:latest
+      - name: Build & Push Docker image for the ENSRainbow-data
+        env:
+          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow-data
+          TAG: latest
+        run: |
+          docker build -f apps/ensrainbow/Dockerfile.data -t $IMAGE_NAME:$TAG .
+          docker push $IMAGE_NAME:$TAG
