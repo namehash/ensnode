@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { selectedEnsNodeUrl } from '@/lib/env';
+import { selectedEnsNodeUrl } from "@/lib/env";
+import { useQuery } from "@tanstack/react-query";
 
 export interface NetworkIndexingStatus {
   totalBlocksCount: number;
@@ -46,12 +46,12 @@ export interface IndexingStatus {
 async function fetchIndexingStatus(baseUrl: string): Promise<IndexingStatus> {
   const requestUrl = new URL(`/metadata`, baseUrl);
 
-  console.log('fetching indexing status from', requestUrl.toString());
+  console.log("fetching indexing status from", requestUrl.toString());
 
   const response = await fetch(requestUrl);
 
   if (!response.ok) {
-    throw new Error('Failed to fetch indexing status');
+    throw new Error("Failed to fetch indexing status");
   }
 
   return response.json();
@@ -61,7 +61,7 @@ export function useIndexingStatus(searchParams: URLSearchParams) {
   const ensnodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
-    queryKey: ['indexing-status', ensnodeUrl],
+    queryKey: ["indexing-status", ensnodeUrl],
     queryFn: () => fetchIndexingStatus(ensnodeUrl),
   });
 }

@@ -1,17 +1,19 @@
-'use client';
+"use client";
 
-import { Provider as QueryClientProvider } from '@/components/query-client/provider';
-import { PonderProvider } from '@ponder/react';
-import { createClient } from '@ponder/client';
-import * as ponderSchema from '@ensnode/ponder-schema';
+import { Provider as QueryClientProvider } from "@/components/query-client/provider";
+import * as ponderSchema from "@ensnode/ponder-schema";
+import { createClient } from "@ponder/client";
+import { PonderProvider } from "@ponder/react";
 
-import { useState, type PropsWithChildren } from 'react';
-import { selectedEnsNodeUrl } from '@/lib/env';
-import { useSearchParams } from 'next/navigation';
+import { selectedEnsNodeUrl } from "@/lib/env";
+import { useSearchParams } from "next/navigation";
+import { type PropsWithChildren, useState } from "react";
 
 export function Provider({ children }: PropsWithChildren) {
   const searchParams = useSearchParams();
-  const [ponderClient] = useState(() => createPonderClient(selectedEnsNodeUrl(searchParams), schema));
+  const [ponderClient] = useState(() =>
+    createPonderClient(selectedEnsNodeUrl(searchParams), schema),
+  );
 
   return (
     <PonderProvider client={ponderClient}>
@@ -20,10 +22,7 @@ export function Provider({ children }: PropsWithChildren) {
   );
 }
 
-function createPonderClient(
-  ensNodeUrl: string,
-  schema: Record<string, unknown>
-) {
-  return createClient(new URL('/sql', ensNodeUrl).toString(), { schema });
+function createPonderClient(ensNodeUrl: string, schema: Record<string, unknown>) {
+  return createClient(new URL("/sql", ensNodeUrl).toString(), { schema });
 }
 export const schema = ponderSchema;

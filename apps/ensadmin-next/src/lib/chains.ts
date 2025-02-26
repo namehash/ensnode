@@ -1,4 +1,4 @@
-import { mainnet, sepolia, base, holesky, linea } from 'viem/chains';
+import { base, holesky, linea, mainnet, sepolia } from "viem/chains";
 
 const chains = {
   [mainnet.id]: mainnet,

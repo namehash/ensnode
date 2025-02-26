@@ -1,5 +1,10 @@
-import { PonderClient } from '@/components/ponder-client/examples';
+import { PageShell } from "@/components/page-shell";
+import { ExamplesPage } from "@/components/ponder-client/examples-page";
 
 export default function PonderClientPage() {
-  return <PonderClient />;
+  return (
+    <PageShell>
+      <ExamplesPage />
+    </PageShell>
+  );
 }

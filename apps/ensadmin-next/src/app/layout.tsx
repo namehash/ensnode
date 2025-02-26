@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { PageShell } from "@/components/page-shell";
+import { PropsWithChildren } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,15 +18,10 @@ export const metadata: Metadata = {
   description: "Control ENSNode via ENSAdmin Dashboard Interface",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <PageShell>{children}</PageShell></body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
   );
 }

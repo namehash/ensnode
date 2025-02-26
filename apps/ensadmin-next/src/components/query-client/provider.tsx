@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, type PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { type PropsWithChildren, useState } from "react";
 
 export function Provider({ children }: PropsWithChildren) {
   const [queryClient] = useState(
@@ -13,7 +13,7 @@ export function Provider({ children }: PropsWithChildren) {
             refetchInterval: 10 * 1000, // 10 seconds
           },
         },
-      })
+      }),
   );
-  return (<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>)
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

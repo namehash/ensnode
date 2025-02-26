@@ -6,12 +6,12 @@ export class BasicEnsNodeValidator implements EnsNodeValidator {
   async validate(url: string): Promise<{ isValid: boolean; error?: string }> {
     try {
       const parsedUrl = new URL(url);
-      
+
       // Basic URL validation
-      if (!parsedUrl.protocol.startsWith('http')) {
+      if (!parsedUrl.protocol.startsWith("http")) {
         return {
           isValid: false,
-          error: 'URL must use HTTP or HTTPS protocol'
+          error: "URL must use HTTP or HTTPS protocol",
         };
       }
 
@@ -19,7 +19,7 @@ export class BasicEnsNodeValidator implements EnsNodeValidator {
     } catch {
       return {
         isValid: false,
-        error: 'Please enter a valid URL'
+        error: "Please enter a valid URL",
       };
     }
   }

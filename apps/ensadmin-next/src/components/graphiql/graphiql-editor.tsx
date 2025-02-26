@@ -1,14 +1,15 @@
-'use client';
+"use client";
 
-import { createGraphiQLFetcher } from '@graphiql/toolkit';
-import { GraphiQL } from 'graphiql';
-import 'graphiql/graphiql.css';
+import { selectedEnsNodeUrl } from "@/lib/env";
+import { createGraphiQLFetcher } from "@graphiql/toolkit";
+import { GraphiQL } from "graphiql";
+import "graphiql/graphiql.css";
+import { useSearchParams } from "next/navigation";
 
-interface GraphiQLWrapperProps {
-  endpointUrl: string
-}
+export function GraphiQLEditor({ target }: { target: "ponder" | "subgraph" }) {
+  const searchParams = useSearchParams();
+  const endpointUrl = new URL(`/${target}`, selectedEnsNodeUrl(searchParams)).toString();
 
-export function GraphiQLWrapper({ endpointUrl }: GraphiQLWrapperProps) {
   const fetcher = createGraphiQLFetcher({
     url: endpointUrl,
     // Disable subscriptions for now since we don't have a WebSocket server
@@ -41,8 +42,7 @@ export function GraphiQLWrapper({ endpointUrl }: GraphiQLWrapperProps) {
       <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
           <p className="text-sm text-gray-600">
-            Endpoint:{' '}
-            <code className="bg-gray-100 px-2 py-1 rounded">{endpointUrl}</code>
+            Endpoint: <code className="bg-gray-100 px-2 py-1 rounded">{endpointUrl}</code>
           </p>
         </div>
       </div>

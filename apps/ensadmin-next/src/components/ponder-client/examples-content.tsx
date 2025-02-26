@@ -1,22 +1,13 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Check, Code2, RefreshCw, Copy, CheckCircle2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { replaceBigInts } from '@ponder/core';
-import { useCodeSnippets } from './hooks';
-
-
-export function PonderClient() {
-  return (
-    <PonderClientShell>
-      <PonderClientContent />
-    </PonderClientShell>
-  );
-}
-
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { replaceBigInts } from "@ponder/utils";
+import { Check, CheckCircle2, Code2, Copy, RefreshCw } from "lucide-react";
+import { PropsWithChildren, Suspense, useState } from "react";
+import { useCodeSnippets } from "./hooks";
+import { Provider as PonderClientProvider } from "./provider";
 
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
@@ -32,38 +23,41 @@ function CopyButton({ content }: { content: string }) {
       variant="ghost"
       size="sm"
       onClick={copy}
-      className={cn(
-        'h-8 w-8 p-0',
-        copied && 'text-green-500 hover:text-green-600'
-      )}
+      className={cn("h-8 w-8 p-0", copied && "text-green-500 hover:text-green-600")}
     >
-      {copied ? (
-        <CheckCircle2 className="h-4 w-4" />
-      ) : (
-        <Copy className="h-4 w-4" />
-      )}
+      {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
       <span className="sr-only">Copy code</span>
     </Button>
   );
 }
 
-function PonderClientShell({ children }: { children: React.ReactNode }) {
+export function PonderClientShell({ children }: PropsWithChildren) {
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold">Ponder Client Examples</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Explore how to query ENS data using the Ponder Client
-          </p>
+    <Suspense>
+      <PonderClientProvider>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-semibold">Ponder Client Examples</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Explore how to query ENS data using the Ponder Client
+              </p>
+            </div>
+          </div>
+          {children}
         </div>
-      </div>
-      {children}
-    </div>
+      </PonderClientProvider>
+    </Suspense>
   );
 }
 
-function QueryResult({ data, isLoading, isRefetching, refetch, error }: {
+function QueryResult({
+  data,
+  isLoading,
+  isRefetching,
+  refetch,
+  error,
+}: {
   data: unknown;
   isLoading: boolean;
   isRefetching: boolean;
@@ -81,9 +75,7 @@ function QueryResult({ data, isLoading, isRefetching, refetch, error }: {
           disabled={isRefetching}
           className="hover:border-primary/50"
         >
-          <RefreshCw
-            className={cn('h-4 w-4 mr-2', isRefetching && 'animate-spin')}
-          />
+          <RefreshCw className={cn("h-4 w-4 mr-2", isRefetching && "animate-spin")} />
           Run Query
         </Button>
       </CardHeader>
@@ -100,7 +92,11 @@ function QueryResult({ data, isLoading, isRefetching, refetch, error }: {
               </div>
             )}
             <pre className="p-4 rounded-lg bg-muted font-mono text-xs overflow-auto max-h-[500px]">
-              {JSON.stringify(replaceBigInts(data, (v) => String(v)), null, 2)}
+              {JSON.stringify(
+                replaceBigInts(data, (v) => String(v)),
+                null,
+                2,
+              )}
             </pre>
           </div>
         )}
@@ -109,14 +105,9 @@ function QueryResult({ data, isLoading, isRefetching, refetch, error }: {
   );
 }
 
-function PonderClientContent() {
-  const {
-    ponderQuery,
-    allSnippets,
-    selectSnippet,
-    selectedSnippetIndex,
-    selectedSnippet,
-  } = useCodeSnippets();
+export function PonderClientContent() {
+  const { ponderQuery, allSnippets, selectSnippet, selectedSnippetIndex, selectedSnippet } =
+    useCodeSnippets();
   const { data, isLoading, isError, error, refetch, isRefetching } = ponderQuery;
 
   return (
@@ -126,12 +117,12 @@ function PonderClientContent() {
           {allSnippets.map((snippet, idx) => (
             <Button
               key={snippet.code}
-              variant={selectedSnippetIndex === idx ? 'default' : 'outline'}
+              variant={selectedSnippetIndex === idx ? "default" : "outline"}
               className={cn(
-                'justify-start h-auto py-3 px-4',
+                "justify-start h-auto py-3 px-4",
                 selectedSnippetIndex === idx
-                  ? 'bg-primary ring-2 ring-primary/20'
-                  : 'hover:bg-muted'
+                  ? "bg-primary ring-2 ring-primary/20"
+                  : "hover:bg-muted",
               )}
               onClick={() => selectSnippet(idx)}
             >
@@ -145,10 +136,10 @@ function PonderClientContent() {
                   <div className="font-medium">{snippet.name}</div>
                   <div
                     className={cn(
-                      'text-xs',
+                      "text-xs",
                       selectedSnippetIndex === idx
-                        ? 'text-primary-foreground/80'
-                        : 'text-muted-foreground'
+                        ? "text-primary-foreground/80"
+                        : "text-muted-foreground",
                     )}
                   >
                     {snippet.description}
