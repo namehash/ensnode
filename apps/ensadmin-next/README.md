@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ENSAdmin
 
-## Getting Started
+ENSAdmin provides a convenient dashboard for navigating the state of ENS as indexed by a connected ENSNode instance.
 
-First, run the development server:
+## Quick start
+
+### Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Set configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.local.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+You can update `PREFERRED_ENSNODE_URL` environment variable if you wish ENSAdmin to include a given URL as an initial connection option.
 
-## Learn More
+### Run development server
 
-To learn more about Next.js, take a look at the following resources:
+Following [Next.js docs](https://nextjs.org/docs/pages/api-reference/cli/next#next-dev-options):
+> Starts the application in development mode with Hot Module Reloading (HMR), error reporting, and more.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Preview production website
 
-## Deploy on Vercel
+Following [Next.js docs](https://nextjs.org/docs/pages/api-reference/cli/next#next-build-options):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> Creates an optimized production build of your application.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm build
+```
+
+> Starts the application in production mode.
+
+```bash
+pnpm start
+```

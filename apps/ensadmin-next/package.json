@@ -1,7 +1,16 @@
 {
   "name": "ensadmin-next",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
+  "type": "module",
+  "description": "Control ENSNode via ENSAdmin Dashboard Interface",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/ensadmin-next"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensadmin-next",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
