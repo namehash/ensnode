@@ -1,7 +1,7 @@
 # Base working stage
 FROM node:18-slim AS base
 RUN apt-get update && \
-    npm install -g pnpm
+    npm install -g pnpm@9.12.0
 WORKDIR /app
 
 ###################
@@ -27,7 +27,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps ./apps
 
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 ###################
 ## Runtime Stage — ingest to produce data dir artifact
