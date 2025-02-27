@@ -39,6 +39,6 @@ jobs:
         with:
           context: .
           file: apps/ensrainbow/Dockerfile.data
-          platforms: linux/amd64
+          platforms: linux/arm64
           push: true
           tags: ghcr.io/${{ github.repository }}/ensrainbow-data:latest
