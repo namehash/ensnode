@@ -37,7 +37,7 @@ ENSNode is the new multichain indexer for [ENS](https://ens.domains/) and [ENSv2
 
 The ENS protocol enables resolution of names across multiple chains and even off-chain data sources. ENS smart contracts optimize for some operations, but not others. For example, if you wanted to list all of a user's owned names, there's no practical way to do this through ENS contracts.
 
-An indexer aggregates and reorganizes the state of ENS to make queries like that efficient and convenient:
+An indexer aggregates and reorganizes the representation of ENS's state to make many important queries like that possible, efficient, and convenient:
 
 ```graphql
 # get all of a user's domains by address
