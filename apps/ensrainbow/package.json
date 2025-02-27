@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "ENSRainbow is an ENSIndexer sidecar service for healing ENS labels",
+  "description": "ENSRainbow is an ENSNode service for healing ENS labels",
   "license": "MIT",
   "repository": {
     "type": "git",

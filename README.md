@@ -1,6 +1,6 @@
 # ENSNode
 
-ENSNode is a suite of applications and libraries powering ENS ecosystem.
+ENSNode is the multichain indexer for ENSv2, powered by Ponder.
 
 The ENSNode monorepo contains multiple modules in the following subdirectories:
 
@@ -170,7 +170,7 @@ To start the ENSNode application and its dependencies using Docker Compose, foll
    - Start the ENSAdmin application, which will be accessible on port `4173`.
 
 3. **Access the Applications**: Once the containers are running, you can access the applications in your web browser:
-   - **ENSIndexer**: Open [http://localhost:42069](http://localhost:42069) to access the ENSIndexer.
+   - **ENSIndexer**: Open [http://localhost:42069](http://localhost:42069) to access the ENSIndexer service.
    - **ENSRainbow**: Open [http://localhost:3223](http://localhost:3223) to access the ENSRainbow service.
    - **ENSAdmin**: Open [http://localhost:4173](http://localhost:4173) to access the ENSAdmin service.
 
