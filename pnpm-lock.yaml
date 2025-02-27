@@ -239,6 +239,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
+      viem:
+        specifier: 'catalog:'
+        version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
