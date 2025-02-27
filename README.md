@@ -50,7 +50,9 @@ query Domains($adress: String!) {
 }
 ```
 
-Historically the ENS Subgraph has served this purpose, but its limitations have become clear as the ENS protocol grows. ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatible Subgraph queries and sets the stage for supporting [ENSv2](https://roadmap.ens.domains/roadmap/), in particular Namechain and the growing set of off-chain ENS names (like `.cb.id` and `.uni.eth`).
+Historically the ENS Subgraph has served this purpose, but the Subgraph's limitations are increasingly severe as the ENS protocol grows. For example: The ENS Subgraph can only index a single chain at a time (ex: mainnet). Given how the majority of ENS names are now issued off of mainnet, only a small percentage of ENS names can be indexed by the ENS Subgraph. This issue will only grow more severe with the launch of ENSv2 and Namechain.
+
+ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatible Subgraph queries and sets the stage for supporting [ENSv2](https://roadmap.ens.domains/roadmap/), in particular Namechain and the growing set of off-chain ENS names (like `.uni.eth` and `.cb.id`).
 
 ## Documentation
 
