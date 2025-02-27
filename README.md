@@ -1,6 +1,6 @@
 # ENSNode
 
-ENSNode is the multichain indexer for ENSv2, powered by Ponder.
+ENSNode is a multichain indexer for ENS, powered by Ponder.
 
 The ENSNode monorepo contains multiple modules in the following subdirectories:
 
@@ -9,7 +9,7 @@ The ENSNode monorepo contains multiple modules in the following subdirectories:
 
 ## Applications
 
-### [`apps/ensindexer`](apps/ensindexer)
+### [`apps/ensnode`](apps/ensnode)
 
 The main ENSNode indexer application enabling multichain indexing for ENS.
 
@@ -87,10 +87,10 @@ pnpm install
 
 #### Prepare application environment
 
-Go into the ENSIndexer application root directory:
+Go into the main ENSNode application root directory:
 
 ```
-cd apps/ensindexer
+cd apps/ensnode
 ```
 
 Configure for your local application environment:
@@ -142,10 +142,10 @@ Before you can use Docker Compose, ensure you have the following installed on yo
    cd ensnode
    ```
 
-2. **Prepare the Environment**: Ensure you have a `.env.local` file in the `apps/ensindexer` directory. This file contains environment variables needed for the application. You can create it by copying the example file:
+2. **Prepare the Environment**: Ensure you have a `.env.local` file in the `apps/ensnode` directory. This file contains environment variables needed for the application. You can create it by copying the example file:
 
    ```bash
-   cp apps/ensindexer/.env.local.example apps/ensindexer/.env.local
+   cp apps/ensnode/.env.local.example apps/ensnode/.env.local
    ```
 
    Then, edit the `.env.local` file to configure your local settings as needed.
@@ -163,14 +163,14 @@ To start the ENSNode application and its dependencies using Docker Compose, foll
    ```
 
    This command will:
-   - Build the Docker images for the ENSIndexer, ENSRainbow, and ENSAdmin applications.
+   - Build the Docker images for the ENSNode, ENSRainbow, and ENSAdmin applications.
    - Start the PostgreSQL database container.
-   - Start the ENSIndexer application, which will be accessible on port `42069`.
+   - Start the ENSNode application, which will be accessible on port `42069`.
    - Start the ENSRainbow application, which will be accessible on port `3223`.
    - Start the ENSAdmin application, which will be accessible on port `4173`.
 
 3. **Access the Applications**: Once the containers are running, you can access the applications in your web browser:
-   - **ENSIndexer**: Open [http://localhost:42069](http://localhost:42069) to access the ENSIndexer service.
+   - **ENSNode**: Open [http://localhost:42069](http://localhost:42069) to access the ENSNode indexer.
    - **ENSRainbow**: Open [http://localhost:3223](http://localhost:3223) to access the ENSRainbow service.
    - **ENSAdmin**: Open [http://localhost:4173](http://localhost:4173) to access the ENSAdmin service.
 

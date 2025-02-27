@@ -54,10 +54,10 @@ async function fetchIndexingStatus(baseUrl: string): Promise<IndexingStatus> {
 }
 
 export function useIndexingStatus(searchParams: URLSearchParams) {
-  const ensnodeUrl = selectedEnsNodeUrl(searchParams);
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
-    queryKey: ["indexing-status", ensnodeUrl],
-    queryFn: () => fetchIndexingStatus(ensnodeUrl),
+    queryKey: ["indexing-status", ensNodeUrl],
+    queryFn: () => fetchIndexingStatus(ensNodeUrl),
   });
 }

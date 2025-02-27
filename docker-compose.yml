@@ -32,14 +32,14 @@ services:
     build:
       dockerfile: ./apps/ensadmin/Dockerfile
       args:
-        - VITE_ENSINDEXER_URL
+        - VITE_ENSNODE_URL
     image: namehash/ensadmin
     ports:
       - "4173:4173"
     env_file:
       - ./apps/ensadmin/.env.local
     environment:
-      # override VITE_ENSINDEXER_URL from .env.local to refer to docker compose ENSIndexer instance
+      # override VITE_ENSNODE_URL from .env.local to refer to docker compose ENSIndexer instance
       VITE_ENSNODE_URL: http://ensindexer:42069
     depends_on:
       - ensindexer

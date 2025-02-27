@@ -4,8 +4,7 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainBlockrange,
   deepMergeRecursive,
-  ensRainbowEndpointUrl,
-  parseEnsIndexerPublicUrl,
+  parseEnsNodePublicUrl,
   parseEnsRainbowEndpointUrl,
   parseRequestedPluginNames,
   parseRpcEndpointUrl,
@@ -78,21 +77,19 @@ describe("ponder helpers", () => {
     });
   });
 
-  describe("parseEnsIndexerPublicUrl", () => {
+  describe("parseEnsNodePublicUrl", () => {
     it("should parse the public URL", () => {
-      expect(parseEnsIndexerPublicUrl("https://public.ensnode.io")).toBe(
-        "https://public.ensnode.io/",
-      );
+      expect(parseEnsNodePublicUrl("https://public.ensnode.io")).toBe("https://public.ensnode.io/");
     });
 
     it("should throw an error if the URL is invalid", () => {
-      expect(() => parseEnsIndexerPublicUrl("https//public.ensnode.io")).toThrowError(
+      expect(() => parseEnsNodePublicUrl("https//public.ensnode.io")).toThrowError(
         "'https//public.ensnode.io' is not a valid URL",
       );
     });
 
     it("should throw an error if the URL is missing", () => {
-      expect(() => parseEnsIndexerPublicUrl()).toThrowError("Expected value not set");
+      expect(() => parseEnsNodePublicUrl()).toThrowError("Expected value not set");
     });
   });
 

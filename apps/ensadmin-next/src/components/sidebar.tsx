@@ -54,7 +54,7 @@ export const SidebarProvider = function SidebarProvider({ children }: PropsWithC
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const ensnodeUrl = selectedEnsNodeUrl(searchParams);
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
   const sidebarContext = useContext(SidebarContext);
 
   if (!sidebarContext) {
@@ -80,7 +80,7 @@ export function Sidebar() {
         </QueryClientProvider>
         <div className="p-4 space-y-2">
           {tabs.map(({ path, label, icon: Icon }) => {
-            const to = ensnodeUrl ? `${path}?ensnode=${ensnodeUrl}` : path;
+            const to = ensNodeUrl ? `${path}?ensnode=${ensNodeUrl}` : path;
             const isActive = pathname === path;
 
             return (

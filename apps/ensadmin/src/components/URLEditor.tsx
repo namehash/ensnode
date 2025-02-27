@@ -48,7 +48,7 @@ export function URLEditor({ currentUrl, className }: URLEditorProps) {
 
     setError(null);
     const newParams = new URLSearchParams(searchParams);
-    newParams.set("ensindexer", inputValue);
+    newParams.set("ensnode", inputValue);
     navigate({ search: newParams.toString() });
     setIsEditing(false);
   };
@@ -86,7 +86,7 @@ export function URLEditor({ currentUrl, className }: URLEditorProps) {
           <input
             ref={inputRef}
             type="text"
-            list="ensindexer-urls"
+            list="ensnode-urls"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -95,9 +95,9 @@ export function URLEditor({ currentUrl, className }: URLEditorProps) {
               "focus:outline-none focus:ring-2 focus:ring-ring",
               error ? "border-destructive" : "border-input",
             )}
-            placeholder="Enter ENSIndexer URL"
+            placeholder="Enter ENSNode URL"
           />
-          <datalist id="ensindexer-urls">
+          <datalist id="ensnode-urls">
             <option value={currentUrl.toString()} />
           </datalist>
         </div>

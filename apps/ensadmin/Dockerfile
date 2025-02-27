@@ -5,8 +5,8 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Define the environment variables during the build process
-ARG VITE_ENSINDEXER_URL
-ENV VITE_ENSINDEXER_URL=${VITE_ENSINDEXER_URL}
+ARG VITE_ENSNODE_URL
+ENV VITE_ENSNODE_URL=${VITE_ENSNODE_URL}
 
 # Copy pnpm workspace configuration files from the root directory
 COPY pnpm-workspace.yaml ./

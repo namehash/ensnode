@@ -179,22 +179,22 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
 };
 
 /**
- * Get the ENSIndexer public URL.
+ * Get the ENSNode public URL.
  *
- * @returns the ENSIndexer public URL
+ * @returns the ENSNode public URL
  */
-export const ensIndexerPublicUrl = (): string => {
-  const envVarName = "ENSINDEXER_PUBLIC_URL";
+export const ensNodePublicUrl = (): string => {
+  const envVarName = "ENSNODE_PUBLIC_URL";
   const envVarValue = process.env[envVarName];
 
   try {
-    return parseEnsIndexerPublicUrl(envVarValue);
+    return parseEnsNodePublicUrl(envVarValue);
   } catch (e: any) {
     throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
-export const parseEnsIndexerPublicUrl = (rawValue?: string): string => {
+export const parseEnsNodePublicUrl = (rawValue?: string): string => {
   if (!rawValue) {
     throw new Error(`Expected value not set`);
   }
