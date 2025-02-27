@@ -14,7 +14,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps ./apps
 
-RUN pnpm install --frozen-lockfile --silent
+RUN pnpm install --silent
 ###################
 ## Data Stage — download ENS Subgraph rainbow table archive & checksum
 ###################

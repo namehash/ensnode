@@ -10,19 +10,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # - name: Make disk space ( remove unnecessary libs )
-      #   run: |
-      #       # Show disk usage
-      #       echo "Before cleanup"
-      #       df -h
-      #       # Remove dotnet and android directories
-      #       sudo rm -rf /usr/share/dotnet /usr/local/lib/android  
-      #       # Show disk usage
-      #       echo "After cleanup"
-      #       df -h
+      - name: Make disk space ( remove unnecessary libs )
+        run: |
+            # Show disk usage
+            echo "Before cleanup"
+            df -h
+            # Remove dotnet and android directories
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android  
+            # Show disk usage
+            echo "After cleanup"
+            df -h
 
-      # - name: Set up QEMU (for cross-architecture builds)
-      #   uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU (for cross-architecture builds)
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
