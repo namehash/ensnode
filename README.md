@@ -35,7 +35,7 @@ ENSNode is the new multichain indexer for [ENS](https://ens.domains/) and [ENSv2
 
 ## Why Index ENS? Why ENSNode?
 
-The ENS protocol manages the state of names across multiple chains and even off-chain databases. Querying this data from an RPC endpoint—not to mention querying multiple chains—quickly becomes difficult and inefficient and results in a poor user experience. For example, if you wanted to list all of a user's owned names, you'd have to make a request to ETH Mainnet, Base, Linea, `.cb.id`, `.uni.eth`, etc.
+The ENS protocol enables resolution of names across multiple chains and even off-chain data sources. ENS smart contracts optimize for some operations, but not others. For example, if you wanted to list all of a user's owned names, there's no practical way to do this through ENS contracts.
 
 An indexer aggregates and reorganizes the state of ENS to make queries like that efficient and convenient:
 
