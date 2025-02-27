@@ -7,18 +7,9 @@ import { getChainName } from "@/lib/chains";
 import { cn } from "@/lib/utils";
 import { Clock, Info, RefreshCw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { useIndexingStatus } from "./hooks";
 
 export function IndexingStatus() {
-  return (
-    <Suspense fallback={<LoadingState />}>
-      <IndexingStatusContent />
-    </Suspense>
-  );
-}
-
-function IndexingStatusContent() {
   const searchParams = useSearchParams();
   const { data, error, isLoading, isRefetching, refetch } = useIndexingStatus(searchParams);
 

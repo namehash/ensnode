@@ -1,8 +1,8 @@
-import { type PropsWithChildren, Suspense } from "react";
+import { Suspense } from "react";
 import { Sidebar, SidebarProvider, SidebarToggle } from "./sidebar";
 import { Toolbar } from "./toolbar";
 
-export function PageShell({ children }: PropsWithChildren) {
+export function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}

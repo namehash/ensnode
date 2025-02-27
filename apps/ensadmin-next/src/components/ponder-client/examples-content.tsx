@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { replaceBigInts } from "@ponder/utils";
 import { Check, CheckCircle2, Code2, Copy, RefreshCw } from "lucide-react";
-import { PropsWithChildren, Suspense, useState } from "react";
+import React, { useState } from "react";
 import { useCodeSnippets } from "./hooks";
 import { Provider as PonderClientProvider } from "./provider";
 
@@ -31,23 +31,21 @@ function CopyButton({ content }: { content: string }) {
   );
 }
 
-export function PonderClientShell({ children }: PropsWithChildren) {
+export function PonderClientShell({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense>
-      <PonderClientProvider>
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-semibold">Ponder Client Examples</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Explore how to query ENS data using the Ponder Client
-              </p>
-            </div>
+    <PonderClientProvider>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold">Ponder Client Examples</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Explore how to query ENS data using the Ponder Client
+            </p>
           </div>
-          {children}
         </div>
-      </PonderClientProvider>
-    </Suspense>
+        {children}
+      </div>
+    </PonderClientProvider>
   );
 }
 

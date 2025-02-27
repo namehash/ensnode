@@ -7,7 +7,7 @@ export default function Status() {
   return (
     <PageShell>
       <QueryProvider>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense>
           <IndexingStatus />
         </Suspense>
       </QueryProvider>
