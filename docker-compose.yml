@@ -40,7 +40,7 @@ services:
       - ./apps/ensadmin/.env.local
     environment:
       # override VITE_ENSINDEXER_URL from .env.local to refer to docker compose ENSIndexer instance
-      VITE_ENSINDEXER_URL: http://ensindexer:42069
+      VITE_ENSNODE_URL: http://ensindexer:42069
     depends_on:
       - ensindexer
 

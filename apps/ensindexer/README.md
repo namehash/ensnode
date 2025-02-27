@@ -1,6 +1,6 @@
 # ENSIndexer
 
-> a multichain ENSIndexer, powered by Ponder
+> a multichain ENS indexer, powered by Ponder
 
 ## Overview
 
@@ -8,7 +8,7 @@ ENSIndexer is the new multichain indexer for ENS and ENSv2. It provides enhanced
 
 - 1:1 Subgraph equivalency of results for most queries
   - 100% ensjs, ens-app-v3 test suites passing, via [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools)
-  - [use ENSIndexer with ensjs](https://www.ensnode.io/guides/using-ensindexer-with-ensjs/)
+  - [use ENSNode with ensjs](https://www.ensnode.io/guides/using-ensnode-with-ensjs/)
   - see the [Subgraph-Compatibility Reference](https://www.ensnode.io/reference/subgraph-compatibility/) for more info
 - true multichain indexing (mainnet, base, linea, etc)
   - flattened, unified, multichain and multiregistrar namespace via optional plugins
