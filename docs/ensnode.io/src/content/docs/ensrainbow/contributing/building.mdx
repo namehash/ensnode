@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-ENSRainbow is split into two Docker images to minimize long-running rebuilds of the data directory that embeds the rainbow tables for lookups. The `namehash/ensnode/ensrainbow-data` image hosts the computed directory at `/app/data` and `namehash/ensnode/ensrainbow` imports that directory after building the `apps/ensrainbow` project.
+ENSRainbow is split into two Docker images to minimize long-running rebuilds of the LevelDB data directory used for rainbow table lookups. The `namehash/ensnode/ensrainbow-data` image hosts the prebuilt LevelDB data at `/app/data` and `namehash/ensnode/ensrainbow` imports that directory after building the `apps/ensrainbow` project.
 
 ## ENSRainbow-data (`namehash/ensnode/ensrainbow-data`)
 
