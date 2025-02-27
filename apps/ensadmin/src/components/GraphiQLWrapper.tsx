@@ -3,7 +3,7 @@ import { GraphiQL } from "graphiql";
 import { useOutletContext } from "react-router-dom";
 
 interface AppContext {
-  ensIndexerUrl: URL;
+  ensnodeUrl: URL;
 }
 
 interface GraphiQLWrapperProps {
@@ -11,12 +11,8 @@ interface GraphiQLWrapperProps {
 }
 
 export function GraphiQLWrapper({ endpoint }: GraphiQLWrapperProps) {
-  const { ensIndexerUrl } = useOutletContext<AppContext>();
-  const url =
-    endpoint === "subgraph"
-      ? new URL("/subgraph", ensIndexerUrl)
-      : // TODO: update to `/ponder` when available
-      new URL("/", ensIndexerUrl);
+  const { ensnodeUrl } = useOutletContext<AppContext>();
+  const url = new URL(`/${endpoint}`, ensnodeUrl);
 
   const fetcher = createGraphiQLFetcher({ url: url.toString() });
 

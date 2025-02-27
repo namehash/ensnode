@@ -109,7 +109,7 @@ then review the docs inside your .env.local file for configuration instructions.
 - `DATABASE_SCHEMA` is arbitrary, with the limitations mentioned in the linked documentation
 - `DATABASE_URL` is your postgres database connection string
 - `ENSRAINBOW_URL` is the URL pointing to your deployment of [ENSRainbow](apps/ensrainbow/) for healing unknown labels
-- `ENSINDEXER_PUBLIC_URL` is used to generate self-referential URLs in the API responses
+- `ENSNODE_PUBLIC_URL` is the public URL of ENSNode used to generate self-referential URLs in the API responses
 
 Once your `.env.local` is configured, launch the indexer by running:
 
