@@ -64,7 +64,7 @@ We welcome community contributions and feedback—please see [CONTRIBUTING.md](C
 
 ## Sponsors
 
-NameHash and ENSNode has received generous support from [ENS DAO](https://ensdao.org/) and [Gitcoin](https://www.gitcoin.co/).
+NameHash has received generous support from the [ENS DAO](https://ensdao.org/) and [Gitcoin](https://www.gitcoin.co/).
 
 <p align="middle">
   <a href="https://ensdao.org/" target="_blank" width="100">
