@@ -1,8 +1,8 @@
 # ENSNode
 
-> a multichain ENS indexer for the ENS community
+> ENSNode is the multichain indexer for ENSv2.
 
-Documentation ➡︎ [ensnode.io](https://ensnode.io)
+Full Documentation ➡︎ [ensnode.io](https://ensnode.io)
 
 ENSNode is the new multichain indexer for [ENS](https://ens.domains/) and [ENSv2](https://roadmap.ens.domains/roadmap/). It provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
 
@@ -23,7 +23,7 @@ ENSNode is the new multichain indexer for [ENS](https://ens.domains/) and [ENSv2
   - ✅ Deploy anywhere with Node.js & Docker
 - Designed for web developers
   - ✅ [use ENSNode with ENSjs](https://www.ensnode.io/ensnode/usage/with-ensjs/)
-  - ✅ [GraphQL APIs](https://ensnode.io/ensnode/usage/apis/)
+  - ✅ [GraphQL APIs](https://ensnode.io/ensnode/usage/api/)
   - ✅ [Live Queries & React Hooks](https://ponder.sh/docs/query/client)
   - ✅ Custom APIs for your app
 - [1:1 Subgraph Compatibility](https://www.ensnode.io/ensnode/reference/subgraph-compatibility/)
@@ -31,7 +31,7 @@ ENSNode is the new multichain indexer for [ENS](https://ens.domains/) and [ENSv2
   - ✅ 100% ensjs test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
   - 🚧 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
 - Own your ENSNode index
-  - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/ensnode/deploying/) for customized uptime guarantees and private queries
+  - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/ensnode/deploying/) for controlling your own uptime guarantees and private queries
 
 ## Why Index ENS? Why ENSNode?
 
