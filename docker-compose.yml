@@ -1,13 +1,13 @@
 services:
-  ensnode:
-    container_name: ensnode
-    image: namehash/ensnode
+  ensindexer:
+    container_name: ensindexer
+    image: namehash/ensindexer
     build:
-      dockerfile: ./apps/ensnode/Dockerfile
+      dockerfile: ./apps/ensindexer/Dockerfile
     ports:
       - "42069:42069"
     env_file:
-      - ./apps/ensnode/.env.local
+      - ./apps/ensindexer/.env.local
     environment:
       # Override DATABASE_URL to point to docker compose postgres
       DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
@@ -37,10 +37,10 @@ services:
     env_file:
       - ./apps/ensadmin/.env.local
     environment:
-      # override VITE_ENSNODE_URL from .env.local to refer to docker compose ensnode instance
-      VITE_ENSNODE_URL: http://ensnode:42069
+      # override VITE_ENSNODE_URL from .env.local to refer to docker compose ENSIndexer instance
+      VITE_ENSNODE_URL: http://ensindexer:42069
     depends_on:
-      - ensnode
+      - ensindexer
 
   postgres:
     container_name: postgres

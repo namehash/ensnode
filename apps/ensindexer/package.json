@@ -1,5 +1,5 @@
 {
-  "name": "ensnode",
+  "name": "@ensnode/ensindexer",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -8,9 +8,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "apps/ensnode"
+    "directory": "apps/ensindexer"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensnode",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensindexer",
   "scripts": {
     "dev": "ponder dev",
     "start": "ponder start",

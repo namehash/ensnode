@@ -1,11 +1,11 @@
 import { useOutletContext } from "react-router-dom";
 
 interface AppContext {
-  ensnodeUrl: URL;
+  ensNodeUrl: URL;
 }
 
 export function PonderClient() {
-  const { ensnodeUrl } = useOutletContext<AppContext>();
+  const { ensNodeUrl } = useOutletContext<AppContext>();
 
   // Encode the ENSNode URL for safe usage in the iframe src
   const encodedEnsNodeUrl = encodeURIComponent(ensnodeUrl.toString());
@@ -18,7 +18,7 @@ export function PonderClient() {
           <p className="text-sm text-gray-600">
             Endpoint:{" "}
             <code className="bg-gray-100 px-2 py-1 rounded">
-              {new URL("/sql", ensnodeUrl).toString()}
+              {new URL("/sql", ensNodeUrl).toString()}
             </code>
           </p>
         </div>

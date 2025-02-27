@@ -12,7 +12,7 @@ if (
   console.warn(
     `Using default public ENSRainbow server which may cause increased network latency.
     For production, use your own ENSRainbow server that runs on the same network
-    as ENSNode server.`,
+    as the ENSIndexer server.`,
   );
 }
 

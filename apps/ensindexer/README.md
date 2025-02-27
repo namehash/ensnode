@@ -1,4 +1,4 @@
-# ENSNode
+# ENSIndexer
 
 Indexes EVM chains for ENSNode.
 

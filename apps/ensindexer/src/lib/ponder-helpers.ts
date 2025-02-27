@@ -179,9 +179,9 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
 };
 
 /**
- * Get the ENSRainbow public URL.
+ * Get the ENSNode public URL.
  *
- * @returns the ENS Node public URL
+ * @returns the ENSNode public URL
  */
 export const ensNodePublicUrl = (): string => {
   const envVarName = "ENSNODE_PUBLIC_URL";

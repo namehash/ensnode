@@ -1,0 +1,53 @@
+{
+  "name": "@ensnode/ensadmin-next",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Control ENSNode via ENSAdmin Dashboard Interface",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/ensadmin-next"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensadmin-next",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci"
+  },
+  "dependencies": {
+    "@ensnode/ponder-schema": "workspace:",
+    "@graphiql/toolkit": "^0.11.1",
+    "@ponder/client": "catalog:",
+    "@ponder/react": "catalog:",
+    "@ponder/utils": "catalog:",
+    "@radix-ui/react-slot": "^1.1.2",
+    "@tanstack/react-query": "^5.66.9",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "graphiql": "^3.8.3",
+    "lucide-react": "^0.476.0",
+    "next": "15.1.7",
+    "react": "^18",
+    "react-dom": "^18",
+    "tailwind-merge": "^3.0.2",
+    "tailwindcss-animate": "^1.0.7",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^22",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.7",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5"
+  }
+}
