@@ -8,9 +8,9 @@ export default function Hero() {
     const healedLabelsArray = Array.from(String(healedLabels), num => Number(num));
     const counterNumberStyles = "flex flex-col justify-center items-center w-[52px] h-[72px] rounded-lg border border-gray-200 text-2xl leading-7 font-bold bg-white";
 
-    return <div className="bg-gradient-to-b from-white to-[#F9FAFB]">
+    return <div className="box-border bg-gradient-to-b from-white to-[#F9FAFB] max-h-[1018px]">
         <section
-            className="md:min-h-[800px] xl:min-h-[960px] box-border relative z-10 w-full h-full py-[61px] sm:py-24 px-5 flex flex-row items-center justify-center md:px-10 md:pb-5">
+            className="md:min-h-[624px] box-border relative z-10 w-full h-full py-[61px] sm:py-24 px-5 flex flex-row items-center justify-center md:px-10 md:py-5">
             <div className="inline-flex flex-col items-start gap-5 w-1/2 h-fit relative z-20">
                 <div className="flex flex-col items-start gap-2 w-fit h-fit">
                     <div className="w-[84px] h-[84px] rounded-xl p-3 border border-gray-200 bg-white">
@@ -27,7 +27,7 @@ export default function Hero() {
                 <p className="not-italic font-normal text-gray-500 text-lg leading-7 sm:text-base sm:leading-6 sm:font-light">
                     Heal millions of unknown ENS names with this <a
                     className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
-                    href=""
+                    href="https://ensnode.io/"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -38,7 +38,7 @@ export default function Hero() {
 
                 <div className="hidden lg:block relative z-10">
                     <Button variant="primary" size="large" asChild>
-                        <Link href="https://api.nameguard.io/docs">View the docs</Link>
+                        <Link href="https://ensnode.io/ensrainbow/quickstart">View the docs</Link>
                     </Button>
                 </div>
             </div>
