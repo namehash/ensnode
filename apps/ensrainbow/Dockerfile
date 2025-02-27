@@ -4,7 +4,7 @@ FROM ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
 
 FROM node:18-slim AS base
 RUN apt-get update && \
-    npm install -g pnpm
+    npm install -g pnpm@9.12.0
 WORKDIR /app
 
 ###################

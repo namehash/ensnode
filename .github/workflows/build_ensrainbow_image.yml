@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/312-add-arm64-docker-image-build-for-ensrainbow
 
 jobs:
   image-build-and-push:
@@ -13,12 +14,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up QEMU (for cross-architecture builds)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build & Push Docker image for the ENSRainbow app
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow
           TAG: latest
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker build -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG -t $IMAGE_NAME:${{ github.sha }} .
-          docker push $IMAGE_NAME:$TAG
-          docker push $IMAGE_NAME:${{ github.sha }}
+          docker buildx build --push -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG  .
