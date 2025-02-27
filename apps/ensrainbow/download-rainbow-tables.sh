@@ -18,7 +18,7 @@ download_with_progress() {
     local description="$3"
     
     echo "Downloading $description..."
-    wget -nv -O "$output" "$url"
+    wget --progress=bar:force --show-progress -O "$output" "$url"
 }
 
 # Check if files exist and verify checksum
