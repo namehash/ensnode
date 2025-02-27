@@ -8,7 +8,7 @@ export const makeResolverId = (address: Address, node: Hex) =>
 /**
  * Makes a cross-registrar unique event ID.
  *
- * The ENS Subgraph indexes events from a single registrar. However, ENSNode
+ * The ENS Subgraph indexes events from a single registrar. However, ENSIndexer
  * enables indexing of events from multiple registrars, which can lead to event
  * ID collisions. This function allows keeping Subgraph-compatible event IDs
  * (produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`)
@@ -47,7 +47,7 @@ export const makeEventId = (
  * registered. (i.e. for the registration of "test.eth", the Registration's id
  * is `labelhash('test'))`.
  *
- * ENSNode (with multiple plugins activated) indexes Registration records from
+ * ENSIndexer (with multiple plugins activated) indexes Registration records from
  * multiple Registrars (like the base.eth and linea.eth Registrars). Therefore,
  * we use this function to avoid Registration id collisions that would otherwise
  * occur. (i.e. this function provides unique registration ids for "test.eth",
@@ -61,7 +61,7 @@ export const makeEventId = (
  */
 export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) => {
   if (registrarName === "eth") {
-    // For the "v1" of ENSNode (at a minimum) we want to preserve backwards
+    // For the "v1" of ENSIndexer (at a minimum) we want to preserve backwards
     // compatibility with Registration id's issued by the ENS Subgraph.
     // In the future we'll explore more fundamental solutions to avoiding
     // Registration id collissions. For now are consciously mixing `labelHash`

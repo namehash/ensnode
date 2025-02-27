@@ -4,7 +4,6 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainBlockrange,
   deepMergeRecursive,
-  ensRainbowEndpointUrl,
   parseEnsNodePublicUrl,
   parseEnsRainbowEndpointUrl,
   parseRequestedPluginNames,
