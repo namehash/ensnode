@@ -27,7 +27,7 @@ const TOTAL_EXPECTED_RECORDS = 133_856_894;
 export async function ingestCommand(options: IngestCommandOptions): Promise<void> {
   // Set default concurrency if not provided
   const concurrency = options.concurrency || 4;
-  
+
   const db = await ENSRainbowDB.create(options.dataDir);
 
   try {
@@ -65,13 +65,15 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     });
 
     let isCopySection = false;
-    const batches = Array(concurrency).fill(null).map(() => db.batch());
+    const batches = Array(concurrency)
+      .fill(null)
+      .map(() => db.batch());
     const batchSizes = Array(concurrency).fill(0);
     let batchIndex = 0;
     let processedRecords = 0;
     let invalidRecords = 0;
     const MAX_BATCH_SIZE = 30_000;
-    
+
     // Array to hold pending write promises
     const pendingWrites = [];
 
@@ -82,7 +84,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       const batchToWrite = batches[index];
       batches[index] = db.batch();
       batchSizes[index] = 0;
-      
+
       // Return the write promise
       return batchToWrite.write();
     };
@@ -125,16 +127,16 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       if (batchSizes[batchIndex] >= MAX_BATCH_SIZE) {
         const writePromise = writeBatch(batchIndex);
         pendingWrites.push(writePromise);
-        
+
         // Clean up completed writes to prevent memory issues
         if (pendingWrites.length > concurrency * 2) {
           await Promise.all(pendingWrites.splice(0, concurrency));
         }
       }
-      
+
       // Move to next batch for round-robin distribution
       batchIndex = (batchIndex + 1) % concurrency;
-      
+
       bar.tick();
     }
 
