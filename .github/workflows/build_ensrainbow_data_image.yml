@@ -24,7 +24,6 @@ jobs:
             sudo rm -rf /usr/local/graalvm
             sudo rm -rf /usr/local/.ghcup
             sudo rm -rf /usr/lib/jvm
-            sudo apt-get autoremove -y
             # Show disk usage
             echo "After cleanup"
             docker system prune -af
