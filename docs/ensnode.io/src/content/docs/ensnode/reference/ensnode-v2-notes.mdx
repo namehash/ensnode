@@ -34,9 +34,9 @@ At the top level, an API server that stitches the various datasources together a
 
 Each datasource persists its data to postgres, either a separate postgres instance or a separate schema in a shared postgres. No native joins are used to power queries, as that likely gets a little too far into the weeds of syncing ponder state with other tables in the same db between re-indexes, etc.
 
-## Ponder
+## Ponder Indexer (currently ENSIndexer)
 
-ponder multichain-indexes all on-chain state and shoves it into the postgres database. our ensnode api server talks to ponder's postgres tables via shared drizzle schema.
+ponder multichain-indexes all on-chain state and shoves it into the postgres database. our ensnode api server talks to ponder's postgres tables via shared drizzle schema. api server maintains some internal state to persist which ponder schema is 'active' and then talks to that specific schema.
 
 ### Indexer Schema & Logic Improvements
 
