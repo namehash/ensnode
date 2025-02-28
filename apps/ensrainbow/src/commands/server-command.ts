@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
+import { createApi } from "../lib/api";
 import { ENSRainbowDB } from "../lib/database";
-import { createApi } from "../lib/routes";
 import { logger } from "../utils/logger";
 
 export interface ServerCommandOptions {

@@ -72,8 +72,8 @@ export class ENSRainbowServer {
 
   async labelCount(): Promise<EnsRainbow.CountResponse> {
     try {
-      const countStr = await this.db.get(LABELHASH_COUNT_KEY);
-      if (countStr === null) {
+      const count = await this.db.getPrecalculatedRainbowRecordCount();
+      if (count === null) {
         return {
           status: StatusCode.Error,
           error: "Label count not initialized. Check that the ingest command has been run.",
@@ -81,21 +81,11 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.CountServerError;
       }
 
-      try {
-        const count = parseNonNegativeInteger(countStr);
-        return {
-          status: StatusCode.Success,
-          count,
-          timestamp: new Date().toISOString(),
-        } satisfies EnsRainbow.CountSuccess;
-      } catch (error) {
-        logger.error(`Invalid label count value in database: ${countStr}`);
-        return {
-          status: StatusCode.Error,
-          error: "Internal server error: Invalid label count format",
-          errorCode: ErrorCode.ServerError,
-        } satisfies EnsRainbow.CountServerError;
-      }
+      return {
+        status: StatusCode.Success,
+        count,
+        timestamp: new Date().toISOString(),
+      } satisfies EnsRainbow.CountSuccess;
     } catch (error) {
       logger.error("Failed to retrieve label count:", error);
       return {
