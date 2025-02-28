@@ -26,7 +26,6 @@ jobs:
             sudo rm -rf /usr/lib/jvm
             # Show disk usage
             echo "After cleanup"
-            docker system prune -af
             df -h
 
       - name: Set up QEMU (for cross-architecture builds)
