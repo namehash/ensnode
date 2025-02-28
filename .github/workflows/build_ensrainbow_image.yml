@@ -37,15 +37,13 @@ jobs:
           # Remove JVMs
           sudo rm -rf /Library/Java/JavaVirtualMachines/
           # Clean up Docker
-          echo "Cleaning up Docker..."
-          docker system prune -af
           # Show disk usage
           echo "After cleanup"
           df -h
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Build & Push Docker image for the ENSRainbow app arm64
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow
@@ -88,4 +86,4 @@ jobs:
           TAG: latest
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker buildx build --push --platform linux/amd64 -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG  .
+          docker buildx build --push -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG  .
