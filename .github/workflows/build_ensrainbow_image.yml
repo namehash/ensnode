@@ -36,10 +36,14 @@ jobs:
           sudo rm -rf /Library/Java/JavaVirtualMachines/graalvm*
           # Remove JVMs
           sudo rm -rf /Library/Java/JavaVirtualMachines/
-          # Clean up Docker
           # Show disk usage
           echo "After cleanup"
           df -h
+
+      - name: Setup docker (missing on MacOS)
+        run: |
+          brew install docker
+          colima start
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
