@@ -24,23 +24,8 @@ export class ENSRainbowServer {
   public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
     const server = new ENSRainbowServer(db);
 
-    //TODO maybe we should call validate lite here instead?
-    // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
-    if (await db.isIngestionUnfinished()) {
-      const errorMessage = generatePurgeErrorMessage(
-        "Database is in an incomplete state! An ingestion was started but not completed successfully.",
-      );
-      logger.error(errorMessage);
-      throw new Error(errorMessage);
-    }
-
-    // Verify we can get the rainbow record count
-    const countResponse = await server.labelCount();
-    if (countResponse.status === StatusCode.Error) {
-      const errorMessage = generatePurgeErrorMessage(
-        `Database is in an invalid state: failed to get rainbow record count: ${countResponse.error}`,
-      );
-      throw new Error(errorMessage);
+    if (!(await db.validate({ lite: true }))) {
+      throw new Error("Database is in an invalid state");
     }
 
     return server;

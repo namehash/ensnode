@@ -265,10 +265,10 @@ export class ENSRainbowDB {
    */
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
     logger.info(`Starting database validation${options.lite ? " (lite mode)" : ""}...`);
-    // Check if ingestion is unfinished
+    // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
     if (await this.isIngestionUnfinished()) {
       const errorMsg = generatePurgeErrorMessage(
-        "Database is in an invalid state: ingestion unfinished flag is set",
+        "Database is in an incomplete state! An ingestion was started but not completed successfully.",
       );
       logger.error(errorMsg);
       return false;
@@ -290,14 +290,16 @@ export class ENSRainbowDB {
     let invalidHashes = 0;
     let hashMismatches = 0;
 
-    // In lite mode, just check the count
+    // In lite mode, just verify we can get the rainbow record count
     if (options.lite) {
       try {
         const count = await this.getPrecalculatedRainbowRecordCount();
         logger.info(`Total keys: ${count}`);
         return true;
       } catch (error) {
-        const errorMsg = generatePurgeErrorMessage(`Error verifying count: ${error}`);
+        const errorMsg = generatePurgeErrorMessage(
+          `Database is in an invalid state: failed to get rainbow record count: ${error}`,
+        );
         logger.error(errorMsg);
         return false;
       }
