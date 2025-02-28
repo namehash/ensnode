@@ -225,7 +225,7 @@ export class ENSRainbowDB {
    * @returns boolean indicating if the key was deleted (true) or didn't exist (false)
    * @throws Error if any database error occurs other than key not found
    */
-  public async del(key: ByteArray): Promise<boolean> {
+  private async del(key: ByteArray): Promise<boolean> {
     try {
       await this.db.del(key);
       return true;
@@ -281,6 +281,7 @@ export class ENSRainbowDB {
       throw new Error(`Invalid precalculated count value: ${count}`);
     }
     await this.db.put(PRECALCULATED_RAINBOW_RECORD_COUNT_KEY, count.toString());
+    logger.info(`Updated count in database under PRECALCULATED_RAINBOW_RECORD_COUNT_KEY`);
   }
 
   /**
@@ -362,15 +363,15 @@ export class ENSRainbowDB {
     let invalidHashes = 0;
     let hashMismatches = 0;
 
-    // In lite mode, just verify we can get the rainbow record count
+    // In lite mode, just verify we can get the precalculated rainbow record count
     if (isLiteMode) {
       try {
-        const count = await this.getPrecalculatedRainbowRecordCount();
-        logger.info(`Total keys: ${count}`);
+        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+        logger.info(`Total keys: ${precalculatedCount}`);
         return true;
       } catch (error) {
         const errorMsg = generatePurgeErrorMessage(
-          `Database is in an invalid state: failed to get rainbow record count: ${error}`,
+          `Database is in an invalid state: failed to get precalculated rainbow record count: ${error}`,
         );
         logger.error(errorMsg);
         return false;
@@ -406,20 +407,22 @@ export class ENSRainbowDB {
         }
       }
 
-      // Verify count
+      // Verify precalculated rainbow record count
       try {
-        const storedCount = await this.getPrecalculatedRainbowRecordCount();
+        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
 
-        if (storedCount !== rainbowRecordCount) {
+        if (precalculatedCount !== rainbowRecordCount) {
           const errorMsg = generatePurgeErrorMessage(
-            `Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`,
+            `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
           );
           logger.error(errorMsg);
           return false;
         }
         logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
       } catch (error) {
-        const errorMsg = generatePurgeErrorMessage(`Error verifying count: ${error}`);
+        const errorMsg = generatePurgeErrorMessage(
+          `Error verifying precalculated rainbow record count: ${error}`,
+        );
         logger.error(errorMsg);
         return false;
       }
@@ -450,11 +453,24 @@ export class ENSRainbowDB {
     await this.db.clear();
   }
 
-  public async countRainbowRecords(): Promise<void> {
-    // Try to read existing count
+  /**
+   * Counts the actual number of rainbow records in the database by iterating through all records.
+   *
+   * Unlike getPrecalculatedRainbowRecordCount(), this method determines the TRUE count
+   * by scanning the entire database, rather than using the stored precalculated count.
+   *
+   * @warning This function iterates through every record in the database and may take
+   * a significant amount of time to complete for large databases. It is primarily intended
+   * for use during data ingestion or database maintenance operations, not during normal
+   * application runtime.
+   *
+   * @returns The actual number of rainbow records in the database
+   */
+  public async countRainbowRecords(): Promise<number> {
+    // Try to read existing precalculated count
     try {
-      const existingCount = await this.getPrecalculatedRainbowRecordCount();
-      logger.warn(`Existing count in database: ${existingCount}`);
+      const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+      logger.warn(`Existing count in database: ${precalculatedCount}`);
     } catch (error) {
       logger.info("No existing count found in database");
     }
@@ -470,11 +486,9 @@ export class ENSRainbowDB {
       count++;
     }
 
-    // Store the count
-    await this.setPrecalculatedRainbowRecordCount(count);
-
     logger.info(`Total number of rainbow records: ${count}`);
-    logger.info(`Updated count in database under LABELHASH_COUNT_KEY`);
+
+    return count;
   }
 
   public async addRainbowRecord(label: string) {

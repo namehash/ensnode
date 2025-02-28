@@ -67,22 +67,23 @@ export class ENSRainbowServer {
 
   async labelCount(): Promise<EnsRainbow.CountResponse> {
     try {
-      const count = await this.db.getPrecalculatedRainbowRecordCount();
-      if (count === null) {
+      const precalculatedCount = await this.db.getPrecalculatedRainbowRecordCount();
+      if (precalculatedCount === null) {
         return {
           status: StatusCode.Error,
-          error: "Label count not initialized. Check that the ingest command has been run.",
+          error:
+            "Precalculated rainbow record count not initialized. Check that the ingest command has been run.",
           errorCode: ErrorCode.ServerError,
         } satisfies EnsRainbow.CountServerError;
       }
 
       return {
         status: StatusCode.Success,
-        count,
+        count: precalculatedCount,
         timestamp: new Date().toISOString(),
       } satisfies EnsRainbow.CountSuccess;
     } catch (error) {
-      logger.error("Failed to retrieve label count:", error);
+      logger.error("Failed to retrieve precalculated rainbow record count:", error);
       return {
         status: StatusCode.Error,
         error: "Internal server error",
