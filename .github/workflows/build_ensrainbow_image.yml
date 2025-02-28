@@ -42,7 +42,9 @@ jobs:
 
       - name: Setup docker (missing on MacOS)
         run: |
-          brew install --cask docker
+          sudo brew install --cask docker colima
+          sudo colima start
+
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
