@@ -8,7 +8,7 @@ export default function Hero() {
     const healedLabelsArray = Array.from(String(healedLabels), num => Number(num));
     const counterNumberStyles = "flex flex-col justify-center items-center w-[52px] h-[72px] rounded-lg border border-gray-200 text-2xl leading-7 font-bold bg-white";
 
-    return <div className="box-border bg-gradient-to-b from-white to-[#F9FAFB] max-h-[1018px]">
+    return <div className="box-border bg-gradient-to-b from-white to-[#F9FAFB] max-h-screen">
         <section
             className="md:min-h-[624px] box-border relative z-10 w-full h-full py-[61px] sm:py-24 px-5 flex flex-row items-center justify-center md:px-10 md:py-5">
             <div className="inline-flex flex-col items-start gap-5 w-1/2 h-fit relative z-20">

@@ -31,7 +31,7 @@ export default function Header() {
                             </Button>
 
                             <Button variant="ghost" asChild>
-                                <Link href="http://t.me/ensnode"><TelegramIcon /></Link>
+                                <Link href="http://t.me/ensnode"><TelegramIcon fillColor="#1F2937"/></Link>
                             </Button>
                         </div>
                     </div>
