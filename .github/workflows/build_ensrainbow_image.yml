@@ -4,11 +4,10 @@ on:
   push:
     branches:
       - main
-      # - feat/312-add-arm64-docker-image-build-for-ensrainbow
 
 jobs:
 
-  image-build-and-push-amd64:
+  image-build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,7 +38,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
     
-      - name: Build & Push Docker image for the ENSRainbow app amd64
+      - name: Build & Push Docker image for the ENSRainbow app
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow
           TAG: latest
