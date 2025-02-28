@@ -143,7 +143,7 @@ describe("CLI", () => {
         expect(response.status).toBe(200);
 
         // Cleanup - send SIGINT to stop server
-        process.emit("SIGINT", "SIGINT");
+        // process.emit("SIGINT", "SIGINT");
         await serverPromise;
       });
 
@@ -199,7 +199,7 @@ describe("CLI", () => {
         expect(invalidHealData.error).toBe("Invalid labelhash length 12 characters (expected 66)");
 
         // Cleanup - send SIGINT to stop server
-        process.emit("SIGINT", "SIGINT");
+        // process.emit("SIGINT", "SIGINT");
         await serverPromise;
       });
 
