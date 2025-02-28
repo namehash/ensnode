@@ -42,7 +42,7 @@ jobs:
 
       - name: Setup docker (missing on MacOS)
         run: |
-          brew install –cask docker
+          brew install docker
           open -a Docker
 
       - name: Build & Push Docker image for the ENSRainbow app arm64
