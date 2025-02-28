@@ -195,7 +195,7 @@ describe("Database", () => {
         // Add record
         await db.addRainbowRecord(labelWithNull);
 
-        const retrieved = await db.get(labelHashBytes);
+        const retrieved = await db.getLabel(labelHashBytes);
         expect(retrieved).toBe(labelWithNull);
       } finally {
         await db.close();
@@ -218,12 +218,14 @@ describe("parseNonNegativeInteger", () => {
 
     // Negative numbers
     expect(() => parseNonNegativeInteger("-5")).toThrow("is not a non-negative integer");
+
     expect(() => parseNonNegativeInteger("-0")).toThrow(
       "Negative zero is not a valid non-negative integer",
     );
 
     // Non-numeric strings
     expect(() => parseNonNegativeInteger("abc")).toThrow("is not a valid number");
+
     expect(() => parseNonNegativeInteger("")).toThrow("Input cannot be empty");
     expect(() => parseNonNegativeInteger(" ")).toThrow("Input cannot be empty");
 

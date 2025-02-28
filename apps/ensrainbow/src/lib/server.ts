@@ -40,7 +40,7 @@ export class ENSRainbowServer {
     }
 
     try {
-      const label = await this.db.get(labelHashBytes);
+      const label = await this.db.getLabel(labelHashBytes);
       if (label === null) {
         logger.info(`Unhealable labelhash request: ${labelhash}`);
         return {

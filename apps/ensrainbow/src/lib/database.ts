@@ -204,7 +204,7 @@ export class ENSRainbowDB {
    * @returns The value as a string if found, null if not found
    * @throws Error if any database error occurs other than key not found
    */
-  public async get(key: ByteArray): Promise<string | null> {
+  private async get(key: ByteArray): Promise<string | null> {
     try {
       const value = await this.db.get(key);
       return value;
@@ -214,6 +214,22 @@ export class ENSRainbowDB {
       }
       throw error;
     }
+  }
+
+  /**
+   * Retrieves a label from the database by its labelhash.
+   *
+   * @param labelhash The ByteArray labelhash to look up
+   * @returns The label as a string if found, null if not found
+   * @throws Error if the provided key is a system key or if any database error occurs
+   */
+  public async getLabel(labelhash: ByteArray): Promise<string | null> {
+    // Verify that the key has the correct length for a labelhash (32 bytes) which means it is not a system key
+    if (labelhash.length !== 32) {
+      throw new Error(`Invalid labelhash length: expected 32 bytes, got ${labelhash.length} bytes`);
+    }
+
+    return this.get(labelhash);
   }
 
   /**
