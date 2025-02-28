@@ -10,6 +10,19 @@ export const SCHEMA_VERSION_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as By
 export const SCHEMA_VERSION = 1;
 
 /**
+ * Checks if a key is a system key (one of the special keys used for database metadata).
+ * @param key The ByteArray key to check
+ * @returns true if the key is a system key, false otherwise
+ */
+export function isSystemKey(key: ByteArray): boolean {
+  return (
+    byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
+    byteArraysEqual(key, INGESTION_UNFINISHED_KEY) ||
+    byteArraysEqual(key, SCHEMA_VERSION_KEY)
+  );
+}
+
+/**
  * Type representing the ENSRainbow LevelDB database.
  *
  * Schema:
@@ -116,14 +129,7 @@ export class ENSRainbowDB {
       const dbInstance = new ENSRainbowDB(db, dataDir);
 
       // Verify schema version
-      const schemaVersion = await dbInstance.getDatabaseSchemaVersion();
-      if (schemaVersion !== SCHEMA_VERSION) {
-        const schemaVersionMismatchError = `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`;
-        const errorMsg = generatePurgeErrorMessage(schemaVersionMismatchError);
-        logger.error(errorMsg);
-        await dbInstance.close();
-        throw new Error(schemaVersionMismatchError);
-      }
+      await dbInstance.validateSchemaVersion();
 
       return dbInstance;
     } catch (error) {
@@ -272,6 +278,21 @@ export class ENSRainbowDB {
   }
 
   /**
+   * Validates that the database schema version matches the expected version.
+   * @throws Error if schema version doesn't match the expected version
+   */
+  public async validateSchemaVersion(): Promise<void> {
+    const schemaVersion = await this.getDatabaseSchemaVersion();
+    if (schemaVersion !== SCHEMA_VERSION) {
+      const schemaVersionMismatchError = `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`;
+      const errorMsg = generatePurgeErrorMessage(schemaVersionMismatchError);
+      logger.error(errorMsg);
+      // await this.close();
+      throw new Error(schemaVersionMismatchError);
+    }
+  }
+
+  /**
    * Sets the database schema version.
    * @param version The schema version to set
    * @throws Error if version is not a valid non-negative integer
@@ -290,7 +311,10 @@ export class ENSRainbowDB {
    * @returns boolean indicating if validation passed
    */
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
-    logger.info(`Starting database validation${options.lite ? " (lite mode)" : ""}...`);
+    // Fully materialize the lite option into an explicit boolean value
+    const isLiteMode = options.lite === true;
+
+    logger.info(`Starting database validation${isLiteMode ? " (lite mode)" : ""}...`);
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
     if (await this.isIngestionUnfinished()) {
       const errorMsg = generatePurgeErrorMessage(
@@ -300,12 +324,10 @@ export class ENSRainbowDB {
       return false;
     }
 
-    const schemaVersion = await this.getDatabaseSchemaVersion();
-    if (schemaVersion !== SCHEMA_VERSION) {
-      const errorMsg = generatePurgeErrorMessage(
-        `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`,
-      );
-      logger.error(errorMsg);
+    try {
+      await this.validateSchemaVersion();
+    } catch (error) {
+      // We already logged the error in validateSchemaVersion
       return false;
     }
 
@@ -317,7 +339,7 @@ export class ENSRainbowDB {
     let hashMismatches = 0;
 
     // In lite mode, just verify we can get the rainbow record count
-    if (options.lite) {
+    if (isLiteMode) {
       try {
         const count = await this.getPrecalculatedRainbowRecordCount();
         logger.info(`Total keys: ${count}`);
@@ -333,11 +355,7 @@ export class ENSRainbowDB {
       // Full validation of each key-value pair
       for await (const [key, value] of this.db.iterator()) {
         // Skip keys not associated with rainbow records
-        if (
-          byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
-          byteArraysEqual(key, INGESTION_UNFINISHED_KEY) ||
-          byteArraysEqual(key, SCHEMA_VERSION_KEY)
-        ) {
+        if (isSystemKey(key)) {
           continue;
         }
         rainbowRecordCount++;
@@ -422,13 +440,10 @@ export class ENSRainbowDB {
     let count = 0;
     for await (const [key] of this.db.iterator()) {
       // Skip keys not associated with rainbow records
-      if (
-        !byteArraysEqual(key, LABELHASH_COUNT_KEY) &&
-        !byteArraysEqual(key, INGESTION_UNFINISHED_KEY) &&
-        !byteArraysEqual(key, SCHEMA_VERSION_KEY)
-      ) {
-        count++;
+      if (isSystemKey(key)) {
+        continue;
       }
+      count++;
     }
 
     // Store the count
