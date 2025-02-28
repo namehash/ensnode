@@ -340,6 +340,9 @@ importers:
       bun:
         specifier: ^1.2.2
         version: 1.2.2
+      bun-types:
+        specifier: ^1.2.3
+        version: 1.2.3
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
@@ -566,7 +569,7 @@ importers:
         version: 2.2.3
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)
       graphql:
         specifier: ^16.10.0
         version: 16.10.0
@@ -2334,6 +2337,9 @@ packages:
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
+  '@types/ws@8.5.14':
+    resolution: {integrity: sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw==}
+
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
 
@@ -2717,8 +2723,12 @@ packages:
   buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
 
+  bun-types@1.2.3:
+    resolution: {integrity: sha512-P7AeyTseLKAvgaZqQrvp3RqFM3yN9PlcLuSTe7SoJOfZkER73mLdT2vEQi8U64S1YvM/ldcNiQjn0Sn7H9lGgg==}
+
   bun@1.2.2:
     resolution: {integrity: sha512-RUc8uVVTw8WoASUzXaEQJR1s7mnwoHm3P871qBUIqSaoOpuwcU+bSVX151/xoqDwnyv38SjOX7yQ3oO0IeT73g==}
+    cpu: [arm64, x64, aarch64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -8359,6 +8369,10 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
+  '@types/ws@8.5.14':
+    dependencies:
+      '@types/node': 20.17.14
+
   '@types/yargs-parser@21.0.3': {}
 
   '@types/yargs@17.0.33':
@@ -8906,6 +8920,11 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
+  bun-types@1.2.3:
+    dependencies:
+      '@types/node': 20.17.14
+      '@types/ws': 8.5.14
+
   bun@1.2.2:
     optionalDependencies:
       '@oven/bun-darwin-aarch64': 1.2.2
@@ -9275,10 +9294,11 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  drizzle-orm@0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3):
+  drizzle-orm@0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3):
     optionalDependencies:
       '@electric-sql/pglite': 0.2.13
       '@opentelemetry/api': 1.7.0
+      bun-types: 1.2.3
       kysely: 0.26.3
       pg: 8.11.3
 
@@ -11707,7 +11727,7 @@ snapshots:
       dataloader: 2.2.3
       detect-package-manager: 3.0.2
       dotenv: 16.4.7
-      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)
       glob: 10.4.5
       graphql: 16.10.0
       graphql-yoga: 5.10.10(graphql@16.10.0)
