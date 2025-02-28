@@ -43,7 +43,6 @@ jobs:
       - name: Setup docker (missing on MacOS)
         run: |
           brew install docker
-          docker –version
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
