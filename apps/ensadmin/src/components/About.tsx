@@ -9,7 +9,7 @@ import { cn } from "../utils/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface AppContext {
-  ensnodeUrl: URL;
+  ensNodeUrl: URL;
 }
 
 interface BlockInfo {
@@ -46,7 +46,7 @@ function isValidChainStatus(status: unknown): status is ChainStatus {
 }
 
 export function About() {
-  const { ensnodeUrl } = useOutletContext<AppContext>();
+  const { ensNodeUrl } = useOutletContext<AppContext>();
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +55,7 @@ export function About() {
     const fetchStatus = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(new URL("/status", ensnodeUrl));
+        const response = await fetch(new URL("/status", ensNodeUrl));
         if (!response.ok) {
           throw new Error("Failed to fetch status");
         }
@@ -86,10 +86,10 @@ export function About() {
       }
     };
 
-    if (ensnodeUrl) {
+    if (ensNodeUrl) {
       fetchStatus();
     }
-  }, [ensnodeUrl]);
+  }, [ensNodeUrl]);
 
   if (error) {
     return (

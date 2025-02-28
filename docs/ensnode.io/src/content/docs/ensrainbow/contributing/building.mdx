@@ -1,0 +1,24 @@
+---
+title: Building the Docker Images
+sidebar:
+  label: Building Docker Images
+  order: 2
+---
+
+ENSRainbow is split into two Docker images to minimize long-running rebuilds of the LevelDB data directory used for rainbow table lookups. The `namehash/ensnode/ensrainbow-data` image hosts the prebuilt LevelDB data at `/app/data` and `namehash/ensnode/ensrainbow` imports that directory after building the `apps/ensrainbow` project.
+
+## ENSRainbow-data (`namehash/ensnode/ensrainbow-data`)
+
+This image downloads the source `ens_names.sql.gz` and ingests them to produce the output `/app/data` directory.
+
+```bash
+# from the monorepo root
+docker build -f apps/ensrainbow/Dockerfile.data -t namehash/ensnode/ensrainbow-data .
+```
+
+## ENSRainbow (`namehash/ensnode/ensrainbow`)
+
+```bash
+# from the monorepo root
+docker build -f apps/ensrainbow/Dockerfile -t namehash/ensnode/ensrainbow .
+```

@@ -1,0 +1,102 @@
+---
+title: ENS Subgraph API Compatibility
+sidebar:
+  order: 2
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+ENSNode v1 provides an ENS Subgraph-Compatible GraphQL endpoint for the purposes of:
+
+1. Demonstrating 1:1 reproduction of the ENS Subgraph's logic & data
+    - the ENS Subgraph has been adopted by the community as an important resource for ENS protocol data, and confidence in ENSNode's implementation is demanded
+2. Plug-and-Play compatibility for those that wish to host their own ENS indexer
+    - deploying ENSNode is faster and easier than running an ENS Subgraph instance
+    - 100% compatibility with `ensjs` eases community adoption of ENSNode
+3. Gradual migration from the subgraph
+    - users may wish to gradually migrate from the subgraph & its api to ENSNode's api
+    - the built-in Ponder GraphQL api provides more efficient querying (esp. pagination) semantics
+    - the built-in `@ponder/client` provides a smoother devx for retrieving data within a client app
+
+## Compatibility Tooling
+
+ENSNode has developed tooling to verify subgraph compatibility and ease migration from the ENS Subgraph.
+
+<LinkCard title="Subgraph Compatibility Tooling" href="../subgraph-compatibility-tooling" />
+
+## Subgraph-Compatible GraphQL API Reference
+
+### Supported Features
+
+The feature set used by `ensjs` and `ens-app-v3` is fully supported: see the [well-known queries](#well-known-queries) section below.
+
+There exists a [fork of ens-test-env](https://github.com/namehash/ens-test-env/) that uses ENSNode instead of the ENS Subgraph. It's this fork of `ens-test-env` that is used to run the [ensjs](https://github.com/namehash/ensjs) test suite against ENSNode.
+
+### Planned Features
+
+- any open [issues](https://github.com/namehash/ensnode/issues) regarding Subgraph-Compatibility
+- [subgraph `_Meta_` object](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#subgraph-metadata)
+
+:::note[Contributions]
+If you'd like to contribute to these features, please [open a Pull Request on GitHub](https://github.com/namehash/ensnode).
+:::
+
+## Possible Features
+
+The following features could be implemented, but are not yet planned.
+
+- [fulltext search queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#fulltext-search-queries)
+
+:::note[Contributions]
+If you'd like to contribute to these features, please [open a Pull Request on GitHub](https://github.com/namehash/ensnode).
+:::
+
+### Unplanned Features
+
+The following features of the subgraph graphql api are explicitly unsupported and are not planned.
+
+- [1-level-nested Entity `_orderBy` param](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-nested-entity-sorting)
+- [time travel queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#time-travel-queries)
+- [_change_block filtering](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-block-filtering)
+
+:::note[Contributions]
+If you'd like to discuss these features, please [open an Issue on GitHub](https://github.com/namehash/ensnode/issues).
+:::
+
+### Well-Known Queries
+
+These are some of the popular queries we've seen in the wild (namely via ENSjs and ens-app-v3)—the Subgraph-compatible GraphQL API includes full compatibility with these use-cases (and all other possible queries with the exceptions listed above).
+
+:::note[Contributions]
+If you'd like to highlight additional query patterns of the ENS Subgraph GraphQL, please [contribute to this documentation](https://github.com/namehash/ensnode/issues).
+:::
+
+#### from ensjs
+- [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — Gets the full name for a name with unknown labels from the subgraph
+  - Heals encoded labels using the subgraph
+  - Returns if name is fully decoded
+  - Splits name into labels
+  - Finds domains by id for encoded labels
+  - Queries domain by namehash
+- [`getNameHistory`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNameHistory.ts)
+  - Retrieves all events associated with a name
+- [`getNamesForAddress`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getNamesForAddress.ts)
+  - Gets all names related to an address via registrant, owner, wrappedOwner, resolvedAddress
+  - Supports searchString
+  - Supports filtering by expiry, reverse records, empty domains
+  - Supports ordering by expiry date, name, labelName, createdAt
+  - Supports pagination by excluding previous results
+- [`getSubgraphRecords`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRecords.ts) — Gets the records for a name from the subgraph
+  - Allows querying by specific resolver id
+- [`getSubgraphRegistrant`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubgraphRegistrant.ts) — Gets the name registrant from the subgraph
+  - Supports .eth second-level domains only
+- [`getSubnames`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getSubnames.ts) — Gets the subnames for a name
+  - Supports searchString
+  - Supports filtering by expiry, empty domains
+  - Supports ordering by expiry date, name, labelName, createdAt
+  - Supports pagination by excluding previous results
+
+#### from ens-app-v3
+
+- [`useResolverExists`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useResolverExists.ts#L27) — Checks if a resolver exists
+- [`useRegistrationData`](https://github.com/ensdomains/ens-app-v3/blob/328692ae832618f8143916c143b7e4cb9e520811/src/hooks/useRegistrationData.ts#L31) — Gets registration by id and nameRegistered events

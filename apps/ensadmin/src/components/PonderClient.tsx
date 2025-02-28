@@ -1,14 +1,14 @@
 import { useOutletContext } from "react-router-dom";
 
 interface AppContext {
-  ensnodeUrl: URL;
+  ensNodeUrl: URL;
 }
 
 export function PonderClient() {
-  const { ensnodeUrl } = useOutletContext<AppContext>();
+  const { ensNodeUrl } = useOutletContext<AppContext>();
 
   // Encode the ENSNode URL for safe usage in the iframe src
-  const encodedEnsNodeUrl = encodeURIComponent(ensnodeUrl.toString());
+  const encodedEnsNodeUrl = encodeURIComponent(ensNodeUrl.toString());
   const stackblitzUrl = `https://stackblitz.com/edit/vitejs-vite-ppgr4why?embed=1&file=src%2FApp.tsx&hideExplorer=1&initialPath=%2F%3Fensnode%3D${encodedEnsNodeUrl}`;
 
   return (
@@ -18,7 +18,7 @@ export function PonderClient() {
           <p className="text-sm text-gray-600">
             Endpoint:{" "}
             <code className="bg-gray-100 px-2 py-1 rounded">
-              {new URL("/sql", ensnodeUrl).toString()}
+              {new URL("/sql", ensNodeUrl).toString()}
             </code>
           </p>
         </div>

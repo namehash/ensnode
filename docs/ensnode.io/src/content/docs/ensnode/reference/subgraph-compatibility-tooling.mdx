@@ -1,0 +1,88 @@
+---
+title: Subgraph Compatibility Tooling
+sidebar:
+  order: 3
+---
+
+The tools in the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) repository help users verify ENSNode's subgraph-compatibility.
+
+1. `snapshot-eq` — verify subgraph-equivalant data via snapshots at specific blockheights
+2. `proxy-eq` — verify live query compatibility & easing migrations from the Subgraph to ENSNode by identifying any response discrepancies while using an app in real-time
+
+See the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) README for additional context and usage instructions.
+
+## `snapshot-eq` — `CLUSTER`ing
+
+When running the `snapshot` tool, extremely inefficient `OFFSET` (`skip`) based queries are executed to paginate through every resource in the database. The duration of these queries increases as `OFFSET` grows, quickly becoming untenable.
+
+A stop-gap solution is to `CLUSTER` all of the tables before taking a snapshot, which re-orders the rows on-disk by their id, which is how the queries are ordered and executed. This drastically improves query times for large `OFFSET`s by 5x or 10x.
+
+### Ponder-compatible `CLUSTER` function
+
+The following is a helper to cluster every table in a ponder index schema (i.e. `DATABASE_SCHEMA=public`) by its primary key index. Run this before performing a snapshot against ENSNode.
+
+```sql
+-- Function to generate and execute CLUSTER commands for public tables
+CREATE OR REPLACE FUNCTION cluster_all_tables() RETURNS void AS $$
+DECLARE
+    table_record record;
+    table_name text;
+    primary_index text;
+    cluster_command text;
+BEGIN
+    -- Loop through tables in public schema only
+    FOR table_record IN
+        SELECT
+            c.relname as table_name,
+            (SELECT ci.relname
+             FROM pg_class ci
+             WHERE ci.oid = i.indexrelid) as index_name
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        -- Join with pg_index to get primary key indexes
+        JOIN pg_index i ON i.indrelid = c.oid
+        WHERE
+            -- Regular tables only
+            c.relkind = 'r'
+            -- Only public schema
+            AND n.nspname = 'public'
+            -- Exclude tables starting with underscore
+            AND c.relname NOT LIKE '\_%'
+            -- Primary key indexes only
+            AND i.indisprimary
+        ORDER BY c.relname
+    LOOP
+        table_name := table_record.table_name;
+        primary_index := table_record.index_name;
+
+        IF primary_index IS NOT NULL AND primary_index != '' THEN
+            -- Build and execute CLUSTER command
+            cluster_command := format('CLUSTER %I USING %I',
+                                    table_name,
+                                    primary_index);
+
+            RAISE NOTICE 'Executing: %', cluster_command;
+
+            -- Execute the CLUSTER command
+            EXECUTE cluster_command;
+
+            -- Log completion
+            RAISE NOTICE 'Clustered table % using index %',
+                        table_name,
+                        primary_index;
+        ELSE
+            RAISE NOTICE 'Skipping table % - no valid primary key index found',
+                        table_name;
+        END IF;
+    END LOOP;
+
+    RAISE NOTICE 'All public tables have been clustered successfully.';
+END;
+$$ LANGUAGE plpgsql;
+
+-- Execute the function to cluster all tables
+SELECT cluster_all_tables();
+```
+
+
+

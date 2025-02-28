@@ -17,7 +17,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps ./apps
 RUN pnpm install --frozen-lockfile
-RUN cd apps/ensrainbow && pnpm run validate:lite
+
 
 ###################
 ## App Server — runs server w/ data dir
@@ -29,7 +29,10 @@ FROM app-deps AS app
 WORKDIR /app/apps/ensrainbow
 
 # copy data dir from ensrainbow-data
-COPY --from=ensrainbow-data /app/apps/ensrainbow/data ./data
+COPY --from=ensrainbow-data /app/data ./data
+
+# validate the database
+RUN pnpm run validate:lite
 
 # Set environment variables
 ENV NODE_ENV=production
