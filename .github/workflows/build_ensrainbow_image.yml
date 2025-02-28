@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feat/312-add-arm64-docker-image-build-for-ensrainbow
+      # - feat/312-add-arm64-docker-image-build-for-ensrainbow
 
 jobs:
 
