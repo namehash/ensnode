@@ -42,7 +42,7 @@ jobs:
 
       - name: Setup docker (missing on MacOS)
         run: |
-          sudo brew install --cask docker colima
+          brew install --cask docker colima
           sudo colima start
 
       
