@@ -196,10 +196,10 @@ importers:
         version: 0.11.1(@types/node@22.13.5)(graphql-ws@5.16.2(graphql@16.10.0))(graphql@16.10.0)
       '@ponder/client':
         specifier: 'catalog:'
-        version: 0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+        version: 0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@ponder/react':
         specifier: 'catalog:'
-        version: 0.9.23(@ponder/client@0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
+        version: 0.9.23(@ponder/client@0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
       '@ponder/utils':
         specifier: 'catalog:'
         version: 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
@@ -302,7 +302,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.23(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.23(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(bun-types@1.2.3)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -392,6 +392,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.0.5(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)
+      vitest-in-process-pool:
+        specifier: ^2.0.0
+        version: 2.0.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0))
 
   docs/ensnode.io:
     dependencies:
@@ -498,7 +501,7 @@ importers:
     dependencies:
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)
       parse-prometheus-text-format:
         specifier: ^1.1.1
         version: 1.1.1
@@ -520,7 +523,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.23(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.23(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(bun-types@1.2.3)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -535,7 +538,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.23(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.23(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(bun-types@1.2.3)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       viem:
         specifier: 'catalog:'
         version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
@@ -6249,6 +6252,11 @@ packages:
       vite:
         optional: true
 
+  vitest-in-process-pool@2.0.0:
+    resolution: {integrity: sha512-pPHWYUt4+EDHczQdRrYmxSW/urMY7maaSX73+m221E4PxlODbsPy2ySsHiUnFxavZXRLOWcf7g4XpqQ0YiU+Dw==}
+    peerDependencies:
+      vitest: '>=3.0.0'
+
   vitest@3.0.5:
     resolution: {integrity: sha512-4dof+HvqONw9bvsYxtkfUp2uHsTN9bV2CZIi1pWgoFpL1Lld8LA1ka9q/ONSsoScAKG7NVGf2stJTI7XRkXb2Q==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
@@ -7639,9 +7647,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@ponder/client@0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
+  '@ponder/client@0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
     dependencies:
-      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)
       eventsource: 3.0.5
       superjson: 2.2.2
     optionalDependencies:
@@ -7675,9 +7683,9 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@ponder/react@0.9.23(@ponder/client@0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
+  '@ponder/react@0.9.23(@ponder/client@0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
     dependencies:
-      '@ponder/client': 0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+      '@ponder/client': 0.9.23(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@tanstack/react-query': 5.66.9(react@18.3.1)
       react: 18.3.1
       superjson: 2.2.2
@@ -9502,7 +9510,7 @@ snapshots:
       '@typescript-eslint/parser': 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-react: 7.37.4(eslint@9.20.1(jiti@2.4.2))
@@ -9522,7 +9530,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.0
@@ -9537,14 +9545,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
@@ -9559,7 +9567,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -11711,7 +11719,7 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  ponder@0.9.23(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.23(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(bun-types@1.2.3)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -11793,7 +11801,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  ponder@0.9.23(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.23(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(@types/react@19.0.10)(bun-types@1.2.3)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -11809,7 +11817,7 @@ snapshots:
       dataloader: 2.2.3
       detect-package-manager: 3.0.2
       dotenv: 16.4.7
-      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.3)(kysely@0.26.3)(pg@8.11.3)
       glob: 10.4.5
       graphql: 16.10.0
       graphql-yoga: 5.10.10(graphql@16.10.0)
@@ -13285,6 +13293,11 @@ snapshots:
   vitefu@1.0.5(vite@6.1.0(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)):
     optionalDependencies:
       vite: 6.1.0(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)
+
+  vitest-in-process-pool@2.0.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)):
+    dependencies:
+      micromatch: 4.0.8
+      vitest: 3.0.5(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)
 
   vitest@3.0.5(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0):
     dependencies:
