@@ -56,7 +56,7 @@ describe("Database", () => {
 
         // Add records using batch
         const batch = db.batch();
-        // Add record with invalid labelhash format
+        // Add rainbow record with invalid labelhash format
         const invalidLabelhash = new Uint8Array([1, 2, 3]); // Too short
         batch.put(invalidLabelhash, "test");
         await batch.write();
@@ -77,7 +77,7 @@ describe("Database", () => {
 
         // Add records using batch
         const batch = db.batch();
-        // Add record with mismatched labelhash
+        // Add rainbow record with mismatched labelhash
         const label = "vitalik";
         const wrongLabelhash = labelhash("ethereum");
         batch.put(labelHashToBytes(wrongLabelhash), label);
@@ -145,7 +145,7 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
-        // Add record with mismatched labelhash (would fail in full validation)
+        // Add rainbow record with mismatched labelhash (would fail in full validation)
         const label = "vitalik";
         const wrongLabelhash = labelhash("ethereum");
         const batch = db.batch();

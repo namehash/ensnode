@@ -1,5 +1,5 @@
 import { promises as fs } from "fs";
-import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensnode/ensrainbow-sdk";
+import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { labelhash } from "viem";
@@ -124,7 +124,7 @@ describe("Server Command Tests", () => {
       const data = (await response.json()) as EnsRainbow.CountResponse;
       const expectedData: EnsRainbow.CountServerError = {
         status: StatusCode.Error,
-        error: "Label count not initialized. Check that the ingest command has been run.",
+        error: "Internal server error",
         errorCode: ErrorCode.ServerError,
       };
       expect(data).toEqual(expectedData);

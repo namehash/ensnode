@@ -4,9 +4,11 @@ import { ByteArray, labelhash } from "viem";
 
 import { logger } from "../utils/logger";
 
-export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
-export const INGESTION_UNFINISHED_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
-export const SCHEMA_VERSION_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
+const PRECALCULATED_RAINBOW_RECORD_COUNT_KEY = new Uint8Array([
+  0xff, 0xff, 0xff, 0xff,
+]) as ByteArray;
+const INGESTION_UNFINISHED_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
+const SCHEMA_VERSION_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
 export const SCHEMA_VERSION = 1;
 
 /**
@@ -16,7 +18,7 @@ export const SCHEMA_VERSION = 1;
  */
 export function isSystemKey(key: ByteArray): boolean {
   return (
-    byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
+    byteArraysEqual(key, PRECALCULATED_RAINBOW_RECORD_COUNT_KEY) ||
     byteArraysEqual(key, INGESTION_UNFINISHED_KEY) ||
     byteArraysEqual(key, SCHEMA_VERSION_KEY)
   );
@@ -27,16 +29,19 @@ export function isSystemKey(key: ByteArray): boolean {
  *
  * Schema:
  * - Keys are binary encoded and represent:
- *   - For labelhash entries: The raw bytes of the ENS labelhash
- *   - For count entries: A special key format for storing label counts
+ *   - For rainbow records: The raw bytes of the ENS labelhash
+ *   - For metadata: A special key format for storing metadata
  *
  * - Values are UTF-8 strings and represent:
- *   - For labelhash entries: the label that was hashed to create the labelhash.
+ *   - For rainbow records: the label that was hashed to create the labelhash.
  *     Labels are stored exactly as they appear in source data and:
  *     - May or may not be ENS-normalized
  *     - Can contain any valid string, including dots and null bytes
  *     - Can be empty strings
- *   - For the precalculated count: The precalculated non-negative integer count of labelhash entries formatted as a string.
+ *   - For metadata: string values storing database metadata like:
+ *     - Schema version number
+ *     - Precalculated rainbow record count
+ *     - Ingestion status flags
  */
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
 
@@ -70,6 +75,11 @@ export class ENSRainbowDB {
    * 4. Sets the database schema version to the current expected version
    *
    * The schema version is set to ensure compatibility with future database operations.
+   *
+   * @throws Error in the following cases:
+   * - If a database already exists at the specified directory
+   * - If there are insufficient permissions to write to the directory
+   * - If the directory is not accessible
    */
   public static async create(dataDir: string): Promise<ENSRainbowDB> {
     logger.info(`Creating new database in directory: ${dataDir}`);
@@ -114,6 +124,12 @@ export class ENSRainbowDB {
    *
    * If the schema version doesn't match the expected version, an error is thrown
    * to prevent operations on an incompatible database.
+   *
+   * @throws Error in the following cases:
+   * - If the database directory does not exist
+   * - If the database is locked by another process
+   * - If the schema version doesn't match the expected version
+   * - If there are insufficient permissions to read the database
    */
   public static async open(dataDir: string): Promise<ENSRainbowDB> {
     logger.info(`Opening existing database in directory: ${dataDir}`);
@@ -222,7 +238,15 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Closes the database connection.
+   * Closes the database.
+   *
+   * This method:
+   * 1. Waits for any pending operations to complete
+   * 2. Flushes any pending writes to disk
+   * 3. Releases resources associated with the database
+   *
+   * It's important to call this method before exiting the application
+   * to ensure all data is properly persisted.
    */
   public async close(): Promise<void> {
     logger.info(`Closing database at ${this.dataDir}`);
@@ -234,7 +258,7 @@ export class ENSRainbowDB {
    * @throws Error if the precalculated count is not found or is improperly formatted
    */
   public async getPrecalculatedRainbowRecordCount(): Promise<number> {
-    const countStr = await this.get(LABELHASH_COUNT_KEY);
+    const countStr = await this.get(PRECALCULATED_RAINBOW_RECORD_COUNT_KEY);
     if (countStr === null) {
       throw new Error(`No precalculated count found in database at ${this.dataDir}`);
     }
@@ -256,7 +280,7 @@ export class ENSRainbowDB {
     if (!Number.isInteger(count) || count < 0) {
       throw new Error(`Invalid precalculated count value: ${count}`);
     }
-    await this.db.put(LABELHASH_COUNT_KEY, count.toString());
+    await this.db.put(PRECALCULATED_RAINBOW_RECORD_COUNT_KEY, count.toString());
   }
 
   /**
