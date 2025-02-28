@@ -50,6 +50,13 @@ export class ENSRainbowDB {
 
   /**
    * Creates and opens a new ENSRainbowDB instance with a fresh database.
+   * This function:
+   * 1. Creates a new LevelDB database at the specified directory
+   * 2. Opens the database connection
+   * 3. Initializes a new ENSRainbowDB instance with the database
+   * 4. Sets the database schema version to the current expected version
+   *
+   * The schema version is set to ensure compatibility with future database operations.
    */
   public static async create(dataDir: string): Promise<ENSRainbowDB> {
     logger.info(`Creating new database in directory: ${dataDir}`);
@@ -87,6 +94,13 @@ export class ENSRainbowDB {
 
   /**
    * Opens an existing ENSRainbowDB instance.
+   * This function:
+   * 1. Opens an existing LevelDB database at the specified directory
+   * 2. Initializes an ENSRainbowDB instance with the database
+   * 3. Verifies the database schema version matches the expected version
+   *
+   * If the schema version doesn't match the expected version, an error is thrown
+   * to prevent operations on an incompatible database.
    */
   public static async open(dataDir: string): Promise<ENSRainbowDB> {
     logger.info(`Opening existing database in directory: ${dataDir}`);
@@ -99,7 +113,19 @@ export class ENSRainbowDB {
         errorIfExists: false,
       });
       await db.open();
-      return new ENSRainbowDB(db, dataDir);
+      const dbInstance = new ENSRainbowDB(db, dataDir);
+
+      // Verify schema version
+      const schemaVersion = await dbInstance.getDatabaseSchemaVersion();
+      if (schemaVersion !== SCHEMA_VERSION) {
+        const schemaVersionMismatchError = `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`;
+        const errorMsg = generatePurgeErrorMessage(schemaVersionMismatchError);
+        logger.error(errorMsg);
+        await dbInstance.close();
+        throw new Error(schemaVersionMismatchError);
+      }
+
+      return dbInstance;
     } catch (error) {
       if (error instanceof Error && error.message.includes("does not exist")) {
         logger.error(`No database found at ${dataDir}`);

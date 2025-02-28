@@ -114,7 +114,7 @@ pnpm run ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
 ### Database Validation
 
 ```bash
-pnpm run validate [--data-dir path/to/db]
+pnpm run validate [--data-dir path/to/db] [--lite]
 ```
 
 Validates database integrity by:
@@ -122,6 +122,11 @@ Validates database integrity by:
 - Ensuring stored labels match their corresponding labelhashes
 - Validating the total rainbow record count
 - Verifying no ingestion was interrupted before successful completion
+
+The `--lite` option performs a faster, less thorough validation by skipping hash verification and record count validation. It only checks that:
+- The ingestion was completed successfully
+- The schema version is correct
+- The precalculated count exists and can be retrieved
 
 The process will exit with:
 - Code 0: Validation successful
