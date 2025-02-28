@@ -43,7 +43,10 @@ jobs:
       - name: Setup docker (missing on MacOS)
         run: |
           brew install docker
-          open -a Docker
+          docker –version
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build & Push Docker image for the ENSRainbow app arm64
         env:
@@ -78,6 +81,7 @@ jobs:
             echo "After cleanup"
             docker system prune -af
             df -h
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
     
