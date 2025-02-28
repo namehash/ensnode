@@ -44,7 +44,8 @@ jobs:
         run: |
           brew install --cask docker
           brew install colima 
-          colima start -f
+          colima start -f || true
+          cat "/Users/runner/.colima/_lima/colima/ha.stderr.log"
 
       
       - name: Set up Docker Buildx
