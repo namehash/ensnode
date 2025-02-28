@@ -44,7 +44,7 @@ jobs:
         run: |
           brew install --cask docker
           brew install colima 
-          sudo colima start
+          colima start -f
 
       
       - name: Set up Docker Buildx
