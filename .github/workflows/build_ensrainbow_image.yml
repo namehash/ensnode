@@ -8,57 +8,6 @@ on:
 
 jobs:
 
-  image-build-and-push-arm64:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      # - name: Make disk space ( remove unnecessary libs )
-      #   run: |
-      #     # Show disk usage
-      #     echo "Before cleanup"
-      #     df -h
-      #     # Remove equivalent directories on macOS
-      #     # Remove dotnet
-      #     sudo rm -rf /usr/local/share/dotnet
-      #     # Remove Android SDK if installed
-      #     sudo rm -rf ~/Library/Android/sdk
-      #     sudo rm -rf /usr/local/lib/android
-      #     # Remove GHC/Haskell
-      #     sudo rm -rf /usr/local/bin/ghc
-      #     sudo rm -rf ~/.ghcup
-      #     # Remove PowerShell
-      #     sudo rm -rf /usr/local/microsoft/powershell
-      #     # Remove GraalVM
-      #     sudo rm -rf /Library/Java/JavaVirtualMachines/graalvm*
-      #     # Remove JVMs
-      #     sudo rm -rf /Library/Java/JavaVirtualMachines/
-      #     # Show disk usage
-      #     echo "After cleanup"
-      #     df -h
-
-      - name: Setup docker (missing on MacOS)
-        run: |
-          brew install --cask docker
-          brew install colima 
-          colima start -f || true
-          cat "/Users/runner/.colima/_lima/colima/ha.stderr.log"
-
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build & Push Docker image for the ENSRainbow app arm64
-        env:
-          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow
-          TAG: latest
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker buildx build --push --platform linux/arm64 -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG  .
-
   image-build-and-push-amd64:
     runs-on: ubuntu-latest
 
@@ -82,8 +31,10 @@ jobs:
             sudo rm -rf /usr/lib/jvm
             # Show disk usage
             echo "After cleanup"
-            docker system prune -af
             df -h
+
+      - name: Set up QEMU (for cross-architecture builds)
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -94,4 +45,4 @@ jobs:
           TAG: latest
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker buildx build --push -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG  .
+          docker buildx build --push --platform linux/amd64,linux/arm64 -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG  .
