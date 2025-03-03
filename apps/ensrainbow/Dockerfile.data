@@ -1,4 +1,4 @@
-ARG PNPM_VERSION=9.12.0
+ARG PNPM_VERSION=10.5.2
 # Base working stage
 FROM node:18-slim AS base
 RUN apt-get update && \
