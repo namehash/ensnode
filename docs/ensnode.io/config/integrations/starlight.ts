@@ -48,7 +48,7 @@ export function starlight(): AstroIntegration {
         {
           label: "ENSRainbow",
           link: "/ensrainbow/",
-          icon: "rainbow",
+          icon: "seti:javascript",
           items: [
             {
               label: "Using ENSRainbow",
@@ -59,6 +59,23 @@ export function starlight(): AstroIntegration {
               label: "Deploying ENSRainbow",
               collapsed: true,
               autogenerate: { directory: "ensrainbow/deploying" },
+            },
+            {
+              label: "Contributing",
+              collapsed: true,
+              autogenerate: { directory: "ensrainbow/contributing" },
+            },
+          ],
+        },
+        {
+          label: "ENSAdmin",
+          link: "/ensadmin/",
+          icon: "list-format",
+          items: [
+            {
+              label: "Using ENSAdmin",
+              collapsed: false,
+              autogenerate: { directory: "ensadmin/usage" },
             },
             {
               label: "Contributing",
