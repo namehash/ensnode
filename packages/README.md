@@ -11,5 +11,5 @@ We use [changesets](https://github.com/changesets/changesets) to manage our NPM 
    - Link to any existing issues that may exist
 6. Once a PR is merged, a new or existing `Version Packages` PR will be created, or updated
    - This will also update the `CHANGELOG.md` for each package
-7. Merge the `Version Packages` when you're ready to release a new version (of all packages) to NPM
+7. Merge the `Version Packages` when you're ready to publish a new version (of all packages) to NPM
    - The GitHub Action will publish the packages to NPM automatically
