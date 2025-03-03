@@ -28,7 +28,7 @@ COPY package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps ./apps
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 ###################
 ## Runtime Stage — ingest to produce data dir artifact
