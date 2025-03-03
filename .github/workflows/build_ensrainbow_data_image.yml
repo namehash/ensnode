@@ -46,4 +46,4 @@ jobs:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow-data
           TAG: latest
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 --push -f apps/ensrainbow/Dockerfile.data -t $IMAGE_NAME:$TAG .
+          docker buildx build --platform linux/amd64--push -f apps/ensrainbow/Dockerfile.data -t $IMAGE_NAME:$TAG .
