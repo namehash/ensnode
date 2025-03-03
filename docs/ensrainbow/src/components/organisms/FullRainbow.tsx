@@ -37,13 +37,13 @@ export default function FullRainbow() {
 
     return (
         <section
-            className="w-full flex flex-col xl:flex-row items-center justify-center h-screen py-10 px-5 bg-[#FEFEFF] sm:h-1/2 md:py-20 xl:gap-20">
+            className="box-border w-full h-full flex flex-col xl:flex-row items-center justify-center gap-[120px] py-10 px-5 bg-[#FEFEFF] md:py-20 lg:px-28 lg:py-[120px]">
             <div
                 className="relative hidden xl:flex flex-row justify-center items-center w-full max-w-2xl xl:w-[60%] rounded-none bg-origin-border flex-shrink-0 box-border">
                 {barChart()}
             </div>
             <div
-                className="flex flex-col gap-5 h-fit w-full max-w-3xl items-center xl:items-start xl:w-[40%] md:px-[72px] xl:px-0"
+                className="flex flex-col gap-4 h-fit w-full max-w-3xl items-center xl:items-start xl:w-[40%] md:px-[72px] xl:px-0"
             >
                 <h1 className="hidden sm:block text-black font-bold not-italic z-10 text-center xl:text-left text-4xl leading-10">
                     {sectionHeader}
@@ -53,7 +53,7 @@ export default function FullRainbow() {
                         {sectionHeader}
                     </h1>
                 </div>
-                <p className="text-gray-500 not-italic font-normal z-10 text-center text-lg leading-7 xl:text-left sm:text-lg sm:w-4/5 sm:leading-7 sm:font-light">
+                <p className="text-gray-500 not-italic font-light z-10 text-center text-lg leading-7 xl:text-left sm:text-lg sm:leading-8 sm:font-normal">
                     {sectionDescription}
                 </p>
             </div>

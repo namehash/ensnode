@@ -1,9 +1,10 @@
 .image1, .image2 {
-    max-width: 100%;
-    width: 500px;
-    height: 350px;
+    width: 490px;
+    height: 340px;
     user-select: none;
     pointer-events: none;
+
+    flex-shrink: 0;
 }
 
 .image1 {
@@ -34,6 +35,9 @@
     position: relative;
     width: fit-content;
     height: 410px;
+
+    max-width: 550px;
+    max-height: 447px;
 
     /*border: 1px solid red;*/
 

@@ -14,7 +14,7 @@ import {DockerIcon} from "../atoms/DockerIcon.tsx";
 export default function DevelopersSection() {
     return (
         <section
-            className="relative z-10 w-full h-screen box-border flex flex-col py-10 px-5 items-center justify-center self-stretch gap-[32px] bg-gradient-to-b to-white from-[#F9FAFB] max-h-screen">
+            className="box-border w-full h-fit xl:h-full flex flex-col py-10 px-5 items-center justify-center self-stretch gap-[32px] bg-gradient-to-b to-white from-[#F9FAFB] xl:max-h-screen">
             <div className="flex flex-col justify-center items-center gap-5 max-w-[608px]">
                 <div className="inline-flex px-4 py-2 bg-[rgba(0,0,0,0.05)] rounded-3xl gap-2 justify-center items-center z-10">
                     <GithubIconSmall/>
@@ -25,11 +25,11 @@ export default function DevelopersSection() {
                 <h1 className="text-black text-center not-italic z-10 text-2xl leading-8 font-bold md:text-4xl md:leading-10">
                     ENSRainbow for Devs
                 </h1>
-                <p className="text-center not-italic text-gray-500 text-lg leading-7 font-normal sm:font-light">
+                <p className="text-center not-italic text-gray-500 text-lg leading-7 sm:font-normal font-light">
                     All resources are open sourced and MIT licensed for the ENS community.
                 </p>
             </div>
-            <div className="w-fit h-fit flex flex-col md:flex-row md:flex-wrap max-w-[1220px] items-center justify-start content-between gap-4">
+            <div className="w-fit h-fit flex flex-col md:flex-row md:flex-wrap max-w-[1220px] items-center justify-center xl:justify-start content-between gap-4">
                 {devElements.map((elem, idx) => {
                     return <DeveloperResourceItem key={idx} elem={elem}/>;
                 })}

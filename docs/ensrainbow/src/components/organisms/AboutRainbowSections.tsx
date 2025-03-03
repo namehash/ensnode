@@ -3,8 +3,8 @@ import AboutRainbow, {AboutRainbowProps} from "./AboutRainbow.tsx";
 import ensProfile from "../../assets/ens-profile.svg";
 import ensNode from "../../assets/Illustration.svg";
 import FullRainbow from "./FullRainbow.tsx";
-import {ExternalLinkIcon} from "../atoms/ExternalLinkIcon.tsx";
-import {Link} from "@namehash/namekit-react";
+import {LearnMoreButton} from "../atoms/LearnMoreButton.tsx";
+import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
 
 export default function AboutRainbowSections() {
     return (
@@ -28,7 +28,7 @@ const rainbowSections: AboutRainbowProps[] = [
         sectionHeader: (<>What the heck is a<br className="hidden md:block"/>&quot;[428...b0b]&quot;?</>),
         sectionDescription: (<>
             These are encoded labelhashes used to represent an unknown label in an ENS name. Without name healing,
-            millions of names in the ENS manager app (and other ENS apps) don’t appear properly.
+            millions of names in the ENS manager app (and&nbsp;other&nbsp;ENS&nbsp;apps) don’t appear properly.
             <br className="hidden md:block"/>
             <a
                 className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
@@ -49,14 +49,13 @@ const rainbowSections: AboutRainbowProps[] = [
         }
     },
     {
-        sectionHeader: (<>
-            <div className="w-[84px] h-[84px] rounded-xl p-3 border border-gray-200 bg-white mb-6">
-                <div className="bg-red-600 w-full h-full"></div>
+        sectionHeader: (<div className="h-fit flex flex-col flex-nowrap justify-center items-center xl:items-start gap-6">
+            <div className="w-[84px] h-[84px] rounded-xl p-3 border border-gray-200 bg-white">
+                <img src={RainbowLogo.src} alt="ENSRainbow logo"/>
             </div>
-            ENSRainbow is a part of<br className="hidden md:block"/>ENSNode</>),
+            ENSRainbow is a part of{" "}<br className="hidden md:block"/>ENSNode</div>),
         sectionDescription: <>ENSRainbow is a sidecar service for ENSNode, the new multichain indexer for ENSv2.
-            <button className="flex flex-nowrap flex-row justify-center items-center gap-3 bg-white rounded-lg border border-gray-300 mt-6 pl-[17px] py-[9px] pr-[15px] shadow-sm hover:shadow-lg text-base leading-6 font-medium text-black">
-                <Link className="flex flex-row flex-nowrap items-center gap-3" href="https://ensnode.io/">Learn more about ENSNode <ExternalLinkIcon /></Link></button>
+            <LearnMoreButton source="https://ensnode.io/" styles="mt-6" text="Learn more about ENS Node"/>
         </>,
         sectionBackgroundName: "",
         isTextOnTheLeft: true,

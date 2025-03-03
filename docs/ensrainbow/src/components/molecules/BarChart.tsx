@@ -38,6 +38,7 @@ export default function BarChart({
 
                 <div className="w-full flex flex-col gap-6">
                     {data.map((item: BarChartData, index: number) => (
+                        <>
                         <div
                             key={index}
                             className="flex flex-col gap-2"
@@ -74,6 +75,8 @@ export default function BarChart({
                                 />
                             </div>
                         </div>
+                        {index < data.length - 1 && <div className="bg-gray-200 h-[1px] self-stretch" />}
+                        </>
                     ))}
                 </div>
             </div>
