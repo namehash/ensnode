@@ -1,4 +1,4 @@
-ARG PNPM_VERSION=9.11.0
+ARG PNPM_VERSION=9.12.0
 # ensrainbow-data contains an already ingested DB that will be served by the ENSRainbow app
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
 FROM --platform=linux/arm64 ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
