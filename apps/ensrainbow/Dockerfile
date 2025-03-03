@@ -3,7 +3,7 @@ ARG PNPM_VERSION=9.12.0
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
 FROM --platform=linux/arm64 ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
 
-FROM node:18-slim AS base
+FROM node:18.20.5-slim AS base
 RUN apt-get update && \
     npm install -g pnpm@${PNPM_VERSION}
 WORKDIR /app
