@@ -6,7 +6,7 @@ import { cn } from "../utils/ui";
 
 import { URLEditor } from "./URLEditor";
 
-export function Layout({ children, ensnodeUrl }: PropsWithChildren<{ ensnodeUrl: URL }>) {
+export function Layout({ children, ensNodeUrl }: PropsWithChildren<{ ensNodeUrl: URL }>) {
   const location = useLocation();
 
   const tabs = [
@@ -39,7 +39,7 @@ export function Layout({ children, ensnodeUrl }: PropsWithChildren<{ ensnodeUrl:
         <h1 className="text-2xl font-semibold text-card-foreground">ENSAdmin</h1>
         <div className="flex items-center gap-2 mt-2">
           <span className="text-sm font-medium text-muted-foreground">ENSNode at</span>
-          <URLEditor currentUrl={ensnodeUrl} className="min-w-96" />
+          <URLEditor currentUrl={ensNodeUrl} className="min-w-96" />
         </div>
       </header>
 
@@ -47,7 +47,7 @@ export function Layout({ children, ensnodeUrl }: PropsWithChildren<{ ensnodeUrl:
       <div className="bg-muted/40 border-b px-6 py-4">
         <nav className="flex space-x-2" aria-label="Tabs">
           {tabs.map(({ path, label, icon: Icon }) => {
-            const to = ensnodeUrl ? `${path}?ensnode=${ensnodeUrl}` : path;
+            const to = ensNodeUrl ? `${path}?ensnode=${ensNodeUrl}` : path;
             const isActive = location.pathname === path;
 
             return (

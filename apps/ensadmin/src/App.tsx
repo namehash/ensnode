@@ -8,19 +8,19 @@ import { ensNodeUrl } from "./utils/url";
 
 function AppRoutes() {
   const [searchParams] = useSearchParams();
-  const ensnodeUrl = ensNodeUrl(searchParams);
+  const url = ensNodeUrl(searchParams);
 
   return (
-    <Layout ensnodeUrl={ensnodeUrl}>
-      <Outlet context={{ ensnodeUrl }} />
+    <Layout ensNodeUrl={url}>
+      <Outlet context={{ ensNodeUrl: url }} />
     </Layout>
   );
 }
 
 function RedirectToDefault() {
   const [searchParams] = useSearchParams();
-  const ensnodeUrl = ensNodeUrl(searchParams);
-  const to = ensnodeUrl ? `/about?ensnode=${ensnodeUrl}` : "/about";
+  const url = ensNodeUrl(searchParams);
+  const to = url ? `/about?ensnode=${url}` : "/about";
 
   return <Navigate to={to} replace />;
 }

@@ -1,0 +1,138 @@
+---
+title: ENSRainbow Development and Contributions
+description: Learn how to run ENSRainbow locally for development and contributions.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+:::note
+This guide covers running ENSRainbow locally for development and contributions.
+:::
+
+## Local Development
+
+:::caution[Follow ENSNode's Contribution Guide First]
+Follow ENSNode's [contribution guide](/ensnode/contributing/) to prepare your workspace environment & install dependencies.
+:::
+
+### Get the Rainbow Tables
+
+Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket.
+
+```bash
+pnpm run get-legacy-data
+```
+
+This command will:
+- Download the required files (rainbow tables, checksum, and MIT license)
+- Automatically verify the checksum
+- Place the files in a convenient directory for subsequent use of the ingest command
+
+### Produce Data Directory
+
+Run data ingestion and verify the number of unique label-labelhash pairs in the database:
+
+```bash
+pnpm run ingest
+```
+
+### Start ENSRainbow
+
+```bash
+pnpm run serve
+```
+
+You can verify the service is running by checking the health endpoint or retrieving the label count:
+
+```bash
+# Health check
+curl http://localhost:3223/health
+
+# Get count of healable labels
+curl http://localhost:3223/v1/labels/count
+```
+
+Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
+
+## Building the Docker Image
+
+For instructions on building the ENSRainbow Docker image, see the [Building Docker Images](/ensrainbow/contributing/building) guide.
+
+<LinkCard
+  title="Building ENSRainbow Docker Images"
+  description="Learn how to build the ENSRainbow Docker image"
+  href="/ensrainbow/contributing/building"
+/>
+
+## Service Management
+
+### Graceful Shutdown
+
+The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when receiving Ctrl+C or Docker stop commands).
+
+### Database Management
+
+If you need to start fresh with the database:
+1. Stop any running ENSRainbow processes
+2. Delete the LevelDB data directory (default: './data')
+3. Run the ingest command again
+
+## System Requirements
+
+### Data Ingestion Requirements (`ingest` command)
+
+- **Storage**:
+  - At least 15 GB of free disk space:
+    - 6.37 GB for the compressed rainbow tables download
+    - ~7 GB for the LevelDB database after ingestion
+    - Additional temporary space during build/ingestion
+- **Memory**: At least 4 GB RAM recommended
+
+### API Server Requirements (`serve` command)
+
+- **Storage**: 7.61 GB for the Docker image (pre-built with LevelDB database)
+- **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
+- **CPU**: Minimal requirements - operates well with low CPU resources
+
+
+## Command Line Interface
+
+ENSRainbow provides a command-line interface (CLI) for managing the service. You can view detailed help for any command by adding `--help` after the command:
+
+### Data Ingestion
+
+```bash
+pnpm run ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
+```
+
+- `input-file`: Path to the gzipped [SQL dump file containing ENS rainbow tables](#getting-the-rainbow-tables) (default: './ens_names.sql.gz'). Only used during data ingestion.
+- `data-dir`: Directory for the LevelDB database. If not provided, defaults to `data/`
+
+### Database Validation
+
+```bash
+pnpm run validate [--data-dir path/to/db]
+```
+
+Validates database integrity by:
+- Verifying the keys for all rainbow records are valid labelhashes
+- Ensuring stored labels match their corresponding labelhashes
+- Validating the total rainbow record count
+- Verifying no ingestion was interrupted before successful completion
+
+The process will exit with:
+- Code 0: Validation successful
+- Code 1: Validation failed or errors encountered
+
+### API Server
+
+```bash
+pnpm run serve [--port 3223] [--data-dir path/to/db]
+```
+
+Starts the API server. The process will exit with:
+- Code 0: Clean shutdown
+- Code 1: Error during operation

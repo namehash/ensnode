@@ -1,0 +1,31 @@
+---
+title: Deploying ENSNode with Docker
+sidebar:
+  label: Docker
+  order: 3
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+import dockercompose from '@workspace/examples/example-docker-compose/docker-compose.yml?raw';
+
+The Docker images are the easiest way to run or deploy the ENSNode suite of services, both locally and in the cloud.
+
+<LinkCard
+  title="Configure Environment Variables"
+  href="/ensnode/usage/configuration"
+/>
+
+Below is a sample [Docker Compose](https://docs.docker.com/compose/) file linking the various services together.
+
+<Code code={dockercompose} lang="yaml" title="docker-compose.yml" />
+
+<LinkCard
+  title="Example Docker Compose"
+  description="View the complete Docker Compose example on GitHub."
+  href="https://github.com/namehash/ensnode/tree/main/examples/example-docker-compose"
+/>
+
+:::note[Port Mappings]
+Note that while this example `docker-compose.yml` exposes each container's port to the host machine, you may only wish to expose ENSIndexer's `42069` (perhaps mapping it to ports `80/443`) and avoid exposing services like ENSRainbow, ENSAdmin, and your Postgres to the wider internet.
+:::
