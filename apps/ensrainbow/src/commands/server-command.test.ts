@@ -124,7 +124,7 @@ describe("Server Command Tests", () => {
       const data = (await response.json()) as EnsRainbow.CountResponse;
       const expectedData: EnsRainbow.CountServerError = {
         status: StatusCode.Error,
-        error: "Internal server error",
+        error: "Label count not initialized. Check the validate command.",
         errorCode: ErrorCode.ServerError,
       };
       expect(data).toEqual(expectedData);

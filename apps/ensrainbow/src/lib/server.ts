@@ -86,7 +86,7 @@ export class ENSRainbowServer {
       logger.error("Failed to retrieve precalculated rainbow record count:", error);
       return {
         status: StatusCode.Error,
-        error: "Internal server error",
+        error: "Label count not initialized. Check the validate command.",
         errorCode: ErrorCode.ServerError,
       } satisfies EnsRainbow.CountServerError;
     }

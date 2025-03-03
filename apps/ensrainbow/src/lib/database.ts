@@ -4,11 +4,14 @@ import { ByteArray, labelhash } from "viem";
 
 import { logger } from "../utils/logger";
 
-const PRECALCULATED_RAINBOW_RECORD_COUNT_KEY = new Uint8Array([
+// System keys must have a byte length different from 32 to avoid collisions with labelhashes
+export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
   0xff, 0xff, 0xff, 0xff,
 ]) as ByteArray;
-const INGESTION_UNFINISHED_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
-const SCHEMA_VERSION_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
+export const SYSTEM_KEY_INGESTION_UNFINISHED = new Uint8Array([
+  0xff, 0xff, 0xff, 0xfe,
+]) as ByteArray;
+export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
 export const SCHEMA_VERSION = 1;
 
 /**
@@ -18,10 +21,20 @@ export const SCHEMA_VERSION = 1;
  */
 export function isSystemKey(key: ByteArray): boolean {
   return (
-    byteArraysEqual(key, PRECALCULATED_RAINBOW_RECORD_COUNT_KEY) ||
-    byteArraysEqual(key, INGESTION_UNFINISHED_KEY) ||
-    byteArraysEqual(key, SCHEMA_VERSION_KEY)
+    !isRainbowRecordKey(key) &&
+    (byteArraysEqual(key, SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT) ||
+      byteArraysEqual(key, SYSTEM_KEY_INGESTION_UNFINISHED) ||
+      byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION))
   );
+}
+
+/**
+ * Checks if a key is a valid rainbow record key (a 32-byte ByteArray representing an ENS labelhash).
+ * @param key The ByteArray key to check
+ * @returns true if the key is a valid rainbow record key (32 bytes long), false otherwise
+ */
+export function isRainbowRecordKey(key: ByteArray): boolean {
+  return key.length === 32;
 }
 
 /**
@@ -41,7 +54,7 @@ export function isSystemKey(key: ByteArray): boolean {
  *   - For metadata: string values storing database metadata like:
  *     - Schema version number (string formatted as a non-negative integer)
  *     - Precalculated rainbow record count (string formatted as a non-negative integer)
- *     - Ingestion status flags
+ *     - Ingestion status flag ("true" string)
  */
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
 
@@ -50,7 +63,7 @@ type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
  * @param errorDescription The specific error description
  * @returns Formatted error message with purge warning and instructions
  */
-export function generatePurgeErrorMessage(errorDescription: string): string {
+function generatePurgeErrorMessage(errorDescription: string): string {
   return (
     `${errorDescription}\n\nTo fix this:\n` +
     "1. Run the purge command to start fresh: pnpm run purge --data-dir <your-data-dir>\n" +
@@ -169,7 +182,7 @@ export class ENSRainbowDB {
    * @returns true if an ingestion is unfinished, false otherwise
    */
   public async isIngestionUnfinished(): Promise<boolean> {
-    const value = await this.get(INGESTION_UNFINISHED_KEY);
+    const value = await this.get(SYSTEM_KEY_INGESTION_UNFINISHED);
     return value !== null;
   }
 
@@ -177,14 +190,14 @@ export class ENSRainbowDB {
    * Mark that an ingestion has started and is unfinished
    */
   public async markIngestionStarted(): Promise<void> {
-    await this.db.put(INGESTION_UNFINISHED_KEY, "true");
+    await this.db.put(SYSTEM_KEY_INGESTION_UNFINISHED, "true");
   }
 
   /**
    * Mark that ingestion is finished
    */
   public async markIngestionFinished(): Promise<void> {
-    await this.del(INGESTION_UNFINISHED_KEY);
+    await this.del(SYSTEM_KEY_INGESTION_UNFINISHED);
   }
 
   /**
@@ -225,7 +238,7 @@ export class ENSRainbowDB {
    */
   public async getLabel(labelhash: ByteArray): Promise<string | null> {
     // Verify that the key has the correct length for a labelhash (32 bytes) which means it is not a system key
-    if (labelhash.length !== 32) {
+    if (!isRainbowRecordKey(labelhash)) {
       throw new Error(`Invalid labelhash length: expected 32 bytes, got ${labelhash.length} bytes`);
     }
 
@@ -274,7 +287,7 @@ export class ENSRainbowDB {
    * @throws Error if the precalculated count is not found or is improperly formatted
    */
   public async getPrecalculatedRainbowRecordCount(): Promise<number> {
-    const countStr = await this.get(PRECALCULATED_RAINBOW_RECORD_COUNT_KEY);
+    const countStr = await this.get(SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT);
     if (countStr === null) {
       throw new Error(`No precalculated count found in database at ${this.dataDir}`);
     }
@@ -296,8 +309,8 @@ export class ENSRainbowDB {
     if (!Number.isInteger(count) || count < 0) {
       throw new Error(`Invalid precalculated count value: ${count}`);
     }
-    await this.db.put(PRECALCULATED_RAINBOW_RECORD_COUNT_KEY, count.toString());
-    logger.info(`Updated precalculated rainbow record count in database to: ${count}`);
+    await this.db.put(SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT, count.toString());
+    logger.info(`Updated count in database under PRECALCULATED_RAINBOW_RECORD_COUNT_KEY`);
   }
 
   /**
@@ -306,7 +319,7 @@ export class ENSRainbowDB {
    * @throws Error if schema version is not a valid non-negative integer
    */
   public async getDatabaseSchemaVersion(): Promise<number | null> {
-    const versionStr = await this.get(SCHEMA_VERSION_KEY);
+    const versionStr = await this.get(SYSTEM_KEY_SCHEMA_VERSION);
     if (versionStr === null) {
       return null;
     }
@@ -342,7 +355,7 @@ export class ENSRainbowDB {
     if (!Number.isInteger(version) || version < 0) {
       throw new Error(`Invalid schema version: ${version}`);
     }
-    await this.db.put(SCHEMA_VERSION_KEY, version.toString());
+    await this.db.put(SYSTEM_KEY_SCHEMA_VERSION, version.toString());
   }
 
   /**
