@@ -29,18 +29,18 @@ export function isSystemKey(key: ByteArray): boolean {
  *
  * Schema:
  * - Keys are binary encoded and represent:
- *   - For rainbow records: The raw bytes of the ENS labelhash
- *   - For metadata: A special key format for storing metadata
+ *   - For rainbow records: The raw bytes of the ENS labelhash. Always a byte length of 32.
+ *   - For metadata: A special key format for storing metadata. Always a byte length other than 32.
  *
  * - Values are UTF-8 strings and represent:
  *   - For rainbow records: the label that was hashed to create the labelhash.
  *     Labels are stored exactly as they appear in source data and:
  *     - May or may not be ENS-normalized
- *     - Can contain any valid string, including dots and null bytes
+ *     - Can contain any valid string, including '.' (dot / period / full stop) and null bytes
  *     - Can be empty strings
  *   - For metadata: string values storing database metadata like:
- *     - Schema version number
- *     - Precalculated rainbow record count
+ *     - Schema version number (string formatted as a non-negative integer)
+ *     - Precalculated rainbow record count (string formatted as a non-negative integer)
  *     - Ingestion status flags
  */
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
@@ -74,7 +74,7 @@ export class ENSRainbowDB {
    * 3. Initializes a new ENSRainbowDB instance with the database
    * 4. Sets the database schema version to the current expected version
    *
-   * The schema version is set to ensure compatibility with future database operations.
+   * The schema version is set to guard against potential incompatibility with future database upgrades.
    *
    * @throws Error in the following cases:
    * - If a database already exists at the specified directory
@@ -297,7 +297,7 @@ export class ENSRainbowDB {
       throw new Error(`Invalid precalculated count value: ${count}`);
     }
     await this.db.put(PRECALCULATED_RAINBOW_RECORD_COUNT_KEY, count.toString());
-    logger.info(`Updated count in database under PRECALCULATED_RAINBOW_RECORD_COUNT_KEY`);
+    logger.info(`Updated precalculated rainbow record count in database to: ${count}`);
   }
 
   /**
@@ -383,7 +383,7 @@ export class ENSRainbowDB {
     if (isLiteMode) {
       try {
         const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
-        logger.info(`Total keys: ${precalculatedCount}`);
+        logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
         return true;
       } catch (error) {
         const errorMsg = generatePurgeErrorMessage(
@@ -486,9 +486,9 @@ export class ENSRainbowDB {
     // Try to read existing precalculated count
     try {
       const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
-      logger.warn(`Existing count in database: ${precalculatedCount}`);
+      logger.warn(`Existing precalculated count in database: ${precalculatedCount}`);
     } catch (error) {
-      logger.info("No existing count found in database");
+      logger.info("No existing precalculated count found in database");
     }
 
     logger.info("Counting rainbow records in database...");
