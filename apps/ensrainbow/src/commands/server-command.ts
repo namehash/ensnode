@@ -1,7 +1,8 @@
-import { serve } from "@hono/node-server";
+/// <reference types="bun-types" />
 import { ENSRainbowDB } from "../lib/database";
 import { createApi } from "../lib/routes";
 import { logger } from "../utils/logger";
+import type { Server } from "bun";
 
 export interface ServerCommandOptions {
   dataDir: string;
@@ -20,19 +21,17 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
 
   const db = await ENSRainbowDB.open(options.dataDir);
 
+  let server: Server | undefined;
   try {
     const app = await createServer(db);
-
-    const server = serve({
-      fetch: app.fetch,
-      port: options.port,
-    });
 
     // Handle graceful shutdown
     const shutdown = async () => {
       logger.info("Shutting down server...");
       try {
-        await server.close();
+        if (server) {
+          server.stop();
+        }
         await db.close();
         logger.info("Server shutdown complete");
       } catch (error) {
@@ -43,6 +42,13 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
 
     process.on("SIGTERM", shutdown);
     process.on("SIGINT", shutdown);
+
+    // Start the server using Bun
+    server = Bun.serve({
+      port: options.port,
+      fetch: app.fetch,
+    });
+
   } catch (error) {
     await db.close();
     throw error;
