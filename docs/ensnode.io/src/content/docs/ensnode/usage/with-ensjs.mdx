@@ -1,10 +1,13 @@
 ---
-title: Using ENSNode with ensjs
+title: Using ENSNode with ENSjs
 sidebar:
-  order: 2
+  label: Using with ENSjs
+  order: 1
 ---
 
-To use ENSNode with `ensjs`, follow the [ensjs documentation for custom subgraph URIs](https://github.com/ensdomains/ensjs/blob/17ab314/docs/basics/custom-subgraph-uris.md), replacing the subgraph URI with your ENSNode's subgraph-compatible api endpoint.
+import { LinkCard } from '@astrojs/starlight/components';
+
+To use ENSNode with `@ensdomains/ensjs`, follow the [ENSjs documentation for custom subgraph URIs](https://github.com/ensdomains/ensjs/blob/17ab314/docs/basics/custom-subgraph-uris.md), replacing the subgraph URI with your ENSNode's subgraph-compatible api endpoint.
 
 :::note
 You may use the public [NameHash Labs hosted instances](/reference/hosted-ensnode-instances).
@@ -37,4 +40,10 @@ const client = createClient({
 
 const names = await getNamesForAddress(client, { name: 'validator.eth' })
 ```
+
+## ENSjs Documentation
+
+Refer to the ENSjs documentation for futher usage.
+
+<LinkCard href="https://github.com/ensdomains/ensjs/" title="ENSjs Documentation" />
 

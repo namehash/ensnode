@@ -1,14 +1,20 @@
 ---
 title: Understanding ENSNode V1
 sidebar:
-  order: 3
+  order: 2
 ---
 
 :::note
 This document assumes general knowledge of the ENS protocol and the ENS Subgraph.
 :::
 
+### What is ENSNode
+
 ENSNode is the new multichain indexer for ENS and ENSv2. It is built on [Ponder](https://ponder.sh/) and provides enhanced capabilities over the ENS Subgraph, as well as being more efficient, flexible, and maintainable. ENSNode's enhanced capabilities include multichain and multiregistrar indexing while maintaining backwards compatibility with existing ENS Subgraph APIs.
+
+### ENSNode Version 1
+
+ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS Subgraph](/ensnode/understanding/the-ens-subgraph/), which drove many architectural decisions.
 
 ## Core Design Principles
 
@@ -37,19 +43,19 @@ ENSNode is the new multichain indexer for ENS and ENSv2. It is built on [Ponder]
 
 ## Plugins
 
-ENSNode implements the core subgraph indexing logic within **shared handler functions** that mirror their subgraph counterpart. These shared handlers functions are in `apps/ensnode/src/handlers/*.ts`. The `eth` plugin then implements subgraph-compatible logic 1:1, primarily relying on the shared handlers, and its implementation can be found in `apps/ensnode/src/plugins/eth/ponder.plugin.ts`.
+ENSIndexer implements the core subgraph indexing logic within **shared handler functions** that mirror their subgraph counterpart. These shared handlers functions are in `apps/ensindexer/src/handlers/*.ts`. The `eth` plugin then implements subgraph-compatible logic 1:1, primarily relying on the shared handlers, and its implementation can be found in `apps/ensindexer/src/plugins/eth/ponder.plugin.ts`.
 
-Each plugin is an isolated ponder indexing configuration that uses the shared handlers (plus any necessary plugin-specific logic) to index its respective subregistry. See `apps/ensnode/src/plugins/base/ponder.plugin.ts` and `apps/ensnode/src/plugins/linea/ponder.plugin.ts` for examples.
+Each plugin is an isolated ponder indexing configuration that uses the shared handlers (plus any necessary plugin-specific logic) to index its respective subregistry. See `apps/ensindexer/src/plugins/base/ponder.plugin.ts` and `apps/ensindexer/src/plugins/linea/ponder.plugin.ts` for examples.
 
 ### Plugin-Scoping
 
-Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin, id-generating code was abstracted to be plugin-specific. See the helpers in `apps/ensnode/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
+Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin, id-generating code was abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
 
-This scoping also applies to the concept of an `OwnedName` (see `apps/ensnode/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensnode/src/handlers/Registrar.ts`) — each plugin exists in the context of a name whos subnames they manage, and the shared handlers reference that name instead of a hardcoded constant (`"eth"`, in the subgraph implementation).
+This scoping also applies to the concept of an `OwnedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — each plugin exists in the context of a name whos subnames they manage, and the shared handlers reference that name instead of a hardcoded constant (`"eth"`, in the subgraph implementation).
 
 ### Plugin Definition
 
-An ENSNode plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function).
+An ENSIndexer plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function).
 
 Each plugin handler file is executed in the context of the plugin's `namespace` and `ownedName` which helps the plugin customize its logic to avoid clobbering other plugins' entities.
 
@@ -57,17 +63,17 @@ Each plugin handler file is executed in the context of the plugin's `namespace` 
 
 #### Contract Namespace
 
-Ponder, by default, does not have the concept of plugins — it assumes that a config is static and that all contract names are known at compile-time. In ENSNode, multiple plugins reference contracts of the same name, and further namespacing is required. We namespace each contract by the Registry's `Subname` to avoid collisions (see `apps/ensnode/src/lib/plugin-helpers.ts` for reference).
+Ponder, by default, does not have the concept of plugins — it assumes that a config is static and that all contract names are known at compile-time. In ENSIndexer, multiple plugins reference contracts of the same name, and further namespacing is required. We namespace each contract by the Registry's `Subname` to avoid collisions (see `apps/ensindexer/src/lib/plugin-helpers.ts` for reference).
 
 #### Contract & Event Typing
 
 Ponder uses the type information of contracts and their abis in the provided config to power the `ponder.on('MyContract:MyEvent', ...)` api, including inferred types for contract names, event names, and event arguments.
 
-In order to replicate this experience with plugins selected at runtime, we use some creative typing in `apps/ensnode/ponder.config.ts` to merge the possible plugin types for Ponder. With this approach we have full type inference for contract and event names/args across the app regardless of which plugins are activated at runtime.
+In order to replicate this experience with plugins selected at runtime, we use some creative typing in `apps/ensindexer/ponder.config.ts` to merge the possible plugin types for Ponder. With this approach we have full type inference for contract and event names/args across the app regardless of which plugins are activated at runtime.
 
 #### Plugin Execution
 
-When ENSNode is run, the configs for all of the active plugins (those selected by the user) are merged and ponder runs in `omnichain` (soon: `multichain`) mode to produce the resulting index.
+When ENSIndexer is run, the configs for all of the active plugins (those selected by the user) are merged and ponder runs in `omnichain` (soon: `multichain`) mode to produce the resulting index.
 
 ## @namehash/ens-deployments
 
@@ -75,7 +81,7 @@ This package provides configurations for each known "ENS deployment". An ENS dep
 
 Each deployment is independent - for instance, the Sepolia and Holesky testnet deployments are separate from the canonical mainnet deployment. This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each deployment.
 
-ENSNode uses `@namehash/ens-deployments` to configure its plugins and determine which are available for a given target deployment.
+ENSIndexer uses `@namehash/ens-deployments` to configure its plugins and determine which are available for a given target deployment.
 
 See the [`@namehash/ens-deployments` README](https://github.com/namehash/ensnode/blob/main/packages/ens-deployments/README.md) for more context on this package & its responsibilities.
 
@@ -87,7 +93,7 @@ In general, however, each handler is written in a more ponder-native way, using 
 
 ## API Layer
 
-ENSNode exposes three distinct API endpoints:
+ENSIndexer exposes three distinct API endpoints:
 
 1. **Subgraph-Compatible GraphQL** (`/subgraph`)
 
@@ -100,7 +106,7 @@ ENSNode exposes three distinct API endpoints:
    - Auto-generated GraphQL API from Ponder schema
    - More efficient query patterns than Subgraph API, particularly for pagination
 
-3. **Ponder Client API**
+3. **Ponder Client API** (`/sql/*`)
    - SQL-based alternative to GraphQL
    - End-to-end type inference
    - Support for live updates
@@ -108,7 +114,7 @@ ENSNode exposes three distinct API endpoints:
 
 ## Label Healing with ENSRainbow
 
-ENSNode depends on ENSRainbow to handle the healing of unknown labels. This parallels the ENS Subgraph's reliance on the graph-node's `ens.nameByHash` function.
+ENSIndexer depends on ENSRainbow at runtime to handle the healing of unknown labels. This parallels the ENS Subgraph's reliance on the graph-node's `ens.nameByHash` function.
 
 ## Additional Notes in Comments
 

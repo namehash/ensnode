@@ -1,0 +1,45 @@
+services:
+  ensindex:
+    container_name: ensindexer
+    image: ghcr.io/namehash/ensnode/ensindexer:latest
+    ports:
+      - "42069:42069"
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/ensnode
+      ENSRAINBOW_URL: http://ensrainbow:3223
+    depends_on:
+      - ensrainbow
+      - postgres
+
+  ensrainbow:
+    container_name: ensrainbow
+    image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    ports:
+      - "3223:3223"
+    restart: unless-stopped
+
+  ensadmin:
+    container_name: ensadmin
+    image: ghcr.io/namehash/ensnode/ensadmin:latest
+    ports:
+      - "4173:4173"
+    environment:
+      VITE_ENSNODE_URL: http://ensnode:42069
+    depends_on:
+      - ensnode
+
+  postgres:
+    container_name: postgres
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ensnode
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local

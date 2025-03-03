@@ -2,37 +2,12 @@
 
 ENSAdmin provides a convenient dashboard for navigating the state of ENS as indexed by a connected ENSNode instance.
 
-## Quick start
+## Documentation
 
-### Install dependencies
+For detailed documentation and guides, see the [ENSAdmin Documentation](https://ensnode.io/ensadmin).
 
-```bash
-pnpm install
-```
+## License
 
-### Set configuration
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
 
-```bash
-cp .env.local.example .env.local
-```
-
-You can update `VITE_ENSNODE_URL` environment variable if you wish ENSAdmin to start with a custom ENSNode URL.
-
-### Run development server
-
-Following [Vite docs](https://vite.dev/guide/cli.html#dev-server):
-> Start Vite dev server in the current directory.
-
-```bash
-pnpm dev
-```
-
-### Preview production website
-
-Following [Vite docs](https://vite.dev/guide/cli.html#vite-preview):
-
-> Locally preview the production build. Do not use this as a production server as it's not designed for it.
-
-```bash
-pnpm build && pnpm preview
-```
+See [LICENSE](./LICENSE) for more information.

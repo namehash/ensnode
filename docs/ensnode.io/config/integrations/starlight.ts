@@ -9,6 +9,7 @@ export function starlight(): AstroIntegration {
     logo: {
       light: "./src/assets/light-logo.svg",
       dark: "./src/assets/dark-logo.svg",
+      replacesTitle: true,
     },
     social: {
       github: "https://github.com/namehash/ensnode",
@@ -16,39 +17,58 @@ export function starlight(): AstroIntegration {
     sidebar: [
       {
         label: "ENSNode",
+        collapsed: false,
         items: [
           {
-            label: "Quickstart",
-            slug: "ensnode/quickstart",
+            label: "Using ENSNode",
+            collapsed: false,
+            autogenerate: { directory: "ensnode/usage" },
           },
           {
-            label: "Guides",
-            autogenerate: { directory: "ensnode/guides" },
+            label: "Understanding ENSNode",
             collapsed: true,
+            autogenerate: { directory: "ensnode/understanding" },
+          },
+          {
+            label: "Deploying ENSNode",
+            collapsed: true,
+            autogenerate: { directory: "ensnode/deploying" },
+          },
+          {
+            label: "Local ENSNode",
+            collapsed: true,
+            autogenerate: { directory: "ensnode/running" },
+          },
+          {
+            label: "Contributing",
+            collapsed: true,
+            autogenerate: { directory: "ensnode/contributing" },
           },
           {
             label: "Reference",
-            autogenerate: { directory: "ensnode/reference" },
             collapsed: true,
+            autogenerate: { directory: "ensnode/reference" },
           },
         ],
       },
       {
         label: "ENSRainbow",
+        collapsed: false,
         items: [
           {
-            label: "Quickstart",
-            slug: "ensrainbow/quickstart",
+            label: "Using ENSRainbow",
+            collapsed: false,
+            autogenerate: { directory: "ensrainbow/usage" },
           },
           {
-            label: "Guides",
-            autogenerate: { directory: "ensrainbow/guides" },
+            label: "Deploying ENSRainbow",
             collapsed: true,
+            autogenerate: { directory: "ensrainbow/deploying" },
           },
           {
-            label: "Reference",
-            autogenerate: { directory: "ensrainbow/reference" },
+            label: "Contributing",
             collapsed: true,
+            autogenerate: { directory: "ensrainbow/contributing" },
           },
         ],
       },

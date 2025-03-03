@@ -8,7 +8,7 @@ export function PonderClient() {
   const { ensNodeUrl } = useOutletContext<AppContext>();
 
   // Encode the ENSNode URL for safe usage in the iframe src
-  const encodedEnsNodeUrl = encodeURIComponent(ensnodeUrl.toString());
+  const encodedEnsNodeUrl = encodeURIComponent(ensNodeUrl.toString());
   const stackblitzUrl = `https://stackblitz.com/edit/vitejs-vite-ppgr4why?embed=1&file=src%2FApp.tsx&hideExplorer=1&initialPath=%2F%3Fensnode%3D${encodedEnsNodeUrl}`;
 
   return (

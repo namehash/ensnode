@@ -15,11 +15,11 @@ See the [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph
 
 When running the `snapshot` tool, extremely inefficient `OFFSET` (`skip`) based queries are executed to paginate through every resource in the database. The duration of these queries increases as `OFFSET` grows, quickly becoming untenable.
 
-A stop-gap solution is to `CLUSTER` all of the tables before taking a snapshot, which re-orders the rows on-disk by their id, which is how the queries are ordered and executed. This drastically improves query times for large `OFFSET`s.
+A stop-gap solution is to `CLUSTER` all of the tables before taking a snapshot, which re-orders the rows on-disk by their id, which is how the queries are ordered and executed. This drastically improves query times for large `OFFSET`s by 5x or 10x.
 
 ### Ponder-compatible `CLUSTER` function
 
-The following is a helper to cluster every table in a ponder index (called `public`) by its primary key index. Run this before performing a snapshot against ENSNode.
+The following is a helper to cluster every table in a ponder index schema (i.e. `DATABASE_SCHEMA=public`) by its primary key index. Run this before performing a snapshot against ENSNode.
 
 ```sql
 -- Function to generate and execute CLUSTER commands for public tables

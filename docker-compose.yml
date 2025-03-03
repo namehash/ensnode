@@ -22,8 +22,6 @@ services:
     image: namehash/ensrainbow
     build:
       dockerfile: ./apps/ensrainbow/Dockerfile
-    environment:
-      PORT: 3223
     ports:
       - "3223:3223"
     restart: unless-stopped

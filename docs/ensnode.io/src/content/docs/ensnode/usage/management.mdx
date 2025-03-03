@@ -1,0 +1,32 @@
+---
+title: Managing ENSNode Instances
+sidebar:
+  label: Management
+  order: 8
+---
+
+:::caution[Work in Progress]
+TODO
+:::
+
+## Indexing Schemas
+
+:::caution[Work in Progress]
+TODO
+:::
+
+### Dropping Orphaned Indexing Schemas
+
+When re-deploying any Ponder indexer, including ENSNode a new schema is created (via the `DATABASE_SCHEMA` env variable) and the previous schemas are abandoned. They remain available for rollbacks, but take up database space—dropping these schemas once no longer available is useful for reclaiming space in your Postgres instance.
+
+```sql
+DROP SCHEMA <schema name> CASCADE;
+```
+
+### `ponder_sync` Schema
+
+Ponder internal state schema, notably holds the RPC Cache. If you'd like to drop your RPC cache and any internal Ponder state, you can:
+
+```sql
+DROP SCHEMA ponder_sync CASCADE;
+```
