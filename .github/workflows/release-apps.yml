@@ -1,11 +1,11 @@
-name: Release Packages
+name: Release apps
 
 on:
   push:
     branches:
       - main
     paths:
-      - "packages/**"
+      - "apps/**"
       - ".changeset/**"
   workflow_dispatch:
 
@@ -17,8 +17,9 @@ permissions:
   pull-requests: write
 
 jobs:
-  release:
-    name: Release Packages
+  version-apps:
+    name: Version apps
+    if: github.repository == 'namehash/ensnode'
     runs-on: ubuntu-latest
 
     steps:
@@ -36,13 +37,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release PR or Publish to NPM
+      - name: Create Release PR
         id: changesets
         uses: changesets/action@v1
         with:
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
-          publish: pnpm release
+          commit: "chore(release): version apps"
+          title: "chore(release): version apps"
+          version: pnpm version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
