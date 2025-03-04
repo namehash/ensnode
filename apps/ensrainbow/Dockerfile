@@ -18,7 +18,7 @@ COPY pnpm-workspace.yaml ./
 COPY package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps ./apps
-RUN pnpm install 
+RUN pnpm install --frozen-lockfile
 
 
 ###################
