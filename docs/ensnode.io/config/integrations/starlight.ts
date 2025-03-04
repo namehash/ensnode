@@ -80,7 +80,7 @@ export function starlight(): AstroIntegration {
             {
               label: "Contributing",
               collapsed: true,
-              autogenerate: { directory: "ensrainbow/contributing" },
+              autogenerate: { directory: "ensadmin/contributing" },
             },
           ],
         },
