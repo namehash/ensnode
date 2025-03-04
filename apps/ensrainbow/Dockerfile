@@ -2,7 +2,7 @@
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
 # ensrainbow-data image is only supporting amd64 arch hence define platform at the FROM statement
 ARG DATA_IMAGE_PLATFORM=linux/amd64
-# FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
+FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
 
 FROM --platform=${BUILDPLATFORM} node:18-slim AS base
 ARG PNPM_VERSION=9.12.0
