@@ -26,32 +26,30 @@ import { SEO } from "astro-seo";
 	/>
     <meta name="viewport" content="width=device-width"/>
     <meta name="generator" content={Astro.generator}/>
-    <!-- TODO: figure out whatever this is and adjust if necessary -->
 	<SEO
 		title="ENSRainbow - Making the unknown, known"
 		description="Heal millions of unknown ENS names with this ENSNode sidecar service."
 		openGraph={{
 			basic: {
-				title: "ENSRainbow OG image",
+				title: "ENSRainbow - making the unknown, known",
 				type: "image/png",
 				image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
+			},
+			optional: {
+				description: "Install the SDK and leverage publicly deployed service",
+				siteName: "ENSNode"
 			}
 		}}
 		twitter={{
-			creator: "@lightwalker.eth"
+			creator: "@lightwalker.eth",
+			title: "ENSRainbow - making the unknown, known",
+			image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
+			description: "ENSRainbow is a sidecar service for ENSNode, the new multichain indexer for ENSv2.",
+			card: "app"
 		}}
 		extend={{
 			// extending the default link tags
         link: [{ rel: "icon", href: "/favicon.svg" }],
-			// extending the default meta tags
-		meta: [
-				{
-					name: "twitter:image",
-					content: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
-				},
-				{ name: "twitter:title", content: "Tinker Tailor Soldier Spy" },
-				{ name: "twitter:description", content: "Agent" },
-			],
 		}}
 	/>
 </head>
