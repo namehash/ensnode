@@ -1,0 +1,69 @@
+services:
+  ensindexer:
+    container_name: ensindexer
+    image: namehash/ensindexer
+    build:
+      dockerfile: ./apps/ensindexer/Dockerfile
+    command: [ "pnpm", "exec", "ponder", "dev" ]
+    ports:
+      - "42069:42069"
+    env_file:
+      - ./apps/ensindexer/.env.local
+    environment:
+      # Override DATABASE_URL to point to docker compose postgres
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
+      # Override ENSRAINBOW_URL to point to docker compose ensrainbow
+      ENSRAINBOW_URL: http://ensrainbow:3223
+    depends_on:
+      - ensrainbow
+      - postgres
+    volumes:
+      - ./apps/:/app/apps
+      - ./packages:/app/packages
+
+  ensrainbow:
+    container_name: ensrainbow
+    image: namehash/ensrainbow
+    build:
+      dockerfile: ./apps/ensrainbow/Dockerfile
+    ports:
+      - "3223:3223"
+    restart: unless-stopped
+    volumes:
+      - ./apps/:/app/apps
+      - ./packages:/app/packages
+
+  ensadmin:
+    build:
+      dockerfile: ./apps/ensadmin/Dockerfile
+      args:
+        - VITE_ENSNODE_URL
+    image: namehash/ensadmin
+    ports:
+      - "4173:4173"
+    env_file:
+      - ./apps/ensadmin/.env.local
+    environment:
+      # override VITE_ENSNODE_URL from .env.local to refer to docker compose ENSIndexer instance
+      VITE_ENSNODE_URL: http://ensindexer:42069
+    depends_on:
+      - ensindexer
+    volumes:
+      - ./apps/:/app/apps
+      - ./packages:/app/packages
+
+  postgres:
+    container_name: postgres
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ponder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local

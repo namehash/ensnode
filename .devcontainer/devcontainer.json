@@ -1,0 +1,28 @@
+{
+  "name": "ENSNode Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/ensnode",
+  "forwardPorts": [42069, 3223, 5432, 3000, 4173],
+  "remoteUser": "node",
+  "postCreateCommand": "pnpm install && mkdir -p /workspaces/ensnode/apps/ensrainbow/data",
+  "postStartCommand": "bash .devcontainer/scripts/start-ensrainbow.sh || true",
+  "postAttachCommand": "bash .devcontainer/scripts/welcome.sh",
+  "shutdownAction": "stopCompose", 
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "files.insertFinalNewline": true,
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspaces/ensnode:cached
+    command: sleep infinity
+    depends_on:
+      - postgres
+    network_mode: service:postgres
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@localhost:5432/ponder
+
+  postgres:
+    image: postgres:17
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=ponder
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
