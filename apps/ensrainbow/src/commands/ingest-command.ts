@@ -135,7 +135,8 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     // the actual database entries to confirm how many unique label-labelhash pairs exist,
     // as the input data could potentially contain duplicates.
     logger.info("\nStarting rainbow record counting phase...");
-    await db.countRainbowRecords();
+    const count = await db.countRainbowRecords();
+    await db.setPrecalculatedRainbowRecordCount(count);
 
     // Mark ingestion as finished since we completed successfully
     await db.markIngestionFinished();

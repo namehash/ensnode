@@ -106,7 +106,8 @@ export function createCLI(options: CLIOptions = {}) {
           })
           .option("lite", {
             type: "boolean",
-            description: "Perform a faster, less thorough validation by skipping hash verification",
+            description:
+              "Perform a faster, less thorough validation by skipping hash verification and record count validation",
             default: false,
           });
       },

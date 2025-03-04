@@ -4,7 +4,16 @@ import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
-import { ENSRainbowDB, SCHEMA_VERSION, parseNonNegativeInteger } from "./database";
+import {
+  ENSRainbowDB,
+  SCHEMA_VERSION,
+  SYSTEM_KEY_INGESTION_UNFINISHED,
+  SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
+  SYSTEM_KEY_SCHEMA_VERSION,
+  isRainbowRecordKey,
+  isSystemKey,
+  parseNonNegativeInteger,
+} from "./database";
 
 describe("Database", () => {
   let tempDir: string;
@@ -56,7 +65,7 @@ describe("Database", () => {
 
         // Add records using batch
         const batch = db.batch();
-        // Add record with invalid labelhash format
+        // Add rainbow record with invalid labelhash format
         const invalidLabelhash = new Uint8Array([1, 2, 3]); // Too short
         batch.put(invalidLabelhash, "test");
         await batch.write();
@@ -77,7 +86,7 @@ describe("Database", () => {
 
         // Add records using batch
         const batch = db.batch();
-        // Add record with mismatched labelhash
+        // Add rainbow record with mismatched labelhash
         const label = "vitalik";
         const wrongLabelhash = labelhash("ethereum");
         batch.put(labelHashToBytes(wrongLabelhash), label);
@@ -145,7 +154,7 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
-        // Add record with mismatched labelhash (would fail in full validation)
+        // Add rainbow record with mismatched labelhash (would fail in full validation)
         const label = "vitalik";
         const wrongLabelhash = labelhash("ethereum");
         const batch = db.batch();
@@ -195,7 +204,7 @@ describe("Database", () => {
         // Add record
         await db.addRainbowRecord(labelWithNull);
 
-        const retrieved = await db.get(labelHashBytes);
+        const retrieved = await db.getLabel(labelHashBytes);
         expect(retrieved).toBe(labelWithNull);
       } finally {
         await db.close();
@@ -218,12 +227,14 @@ describe("parseNonNegativeInteger", () => {
 
     // Negative numbers
     expect(() => parseNonNegativeInteger("-5")).toThrow("is not a non-negative integer");
+
     expect(() => parseNonNegativeInteger("-0")).toThrow(
       "Negative zero is not a valid non-negative integer",
     );
 
     // Non-numeric strings
     expect(() => parseNonNegativeInteger("abc")).toThrow("is not a valid number");
+
     expect(() => parseNonNegativeInteger("")).toThrow("Input cannot be empty");
     expect(() => parseNonNegativeInteger(" ")).toThrow("Input cannot be empty");
 
@@ -291,5 +302,42 @@ describe("schema version", () => {
       await db.close();
       await rm(TEST_DB_PATH, { recursive: true, force: true });
     }
+  });
+});
+
+describe("isRainbowRecordKey", () => {
+  test("returns true for 32-byte ByteArray", () => {
+    const thirtyTwoByteArray = new Uint8Array(32).fill(1);
+    expect(isRainbowRecordKey(thirtyTwoByteArray)).toBe(true);
+  });
+
+  test("returns false for ByteArray with length other than 32", () => {
+    const thirtyOneByteArray = new Uint8Array(31).fill(1);
+    const thirtyThreeByteArray = new Uint8Array(33).fill(1);
+    const emptyByteArray = new Uint8Array(0);
+
+    expect(isRainbowRecordKey(thirtyOneByteArray)).toBe(false);
+    expect(isRainbowRecordKey(thirtyThreeByteArray)).toBe(false);
+    expect(isRainbowRecordKey(emptyByteArray)).toBe(false);
+  });
+});
+
+describe("isSystemKey", () => {
+  test("returns true for all system keys", () => {
+    // Use the exported system keys
+    expect(isSystemKey(SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT)).toBe(true);
+    expect(isSystemKey(SYSTEM_KEY_INGESTION_UNFINISHED)).toBe(true);
+    expect(isSystemKey(SYSTEM_KEY_SCHEMA_VERSION)).toBe(true);
+  });
+
+  test("returns false for rainbow record keys (32-byte ByteArray)", () => {
+    const rainbowRecordKey = new Uint8Array(32).fill(1);
+    expect(isSystemKey(rainbowRecordKey)).toBe(false);
+  });
+
+  test("returns false for non-system keys with length other than 32", () => {
+    // Create a non-system key with length other than 32
+    const nonSystemKey = new Uint8Array([0x01, 0x02, 0x03, 0x04]);
+    expect(isSystemKey(nonSystemKey)).toBe(false);
   });
 });

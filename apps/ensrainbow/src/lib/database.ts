@@ -4,28 +4,74 @@ import { ByteArray, labelhash } from "viem";
 
 import { logger } from "../utils/logger";
 
-export const LABELHASH_COUNT_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xff]) as ByteArray;
-export const INGESTION_UNFINISHED_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
-export const SCHEMA_VERSION_KEY = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
+// System keys must have a byte length different from 32 to avoid collisions with labelhashes
+export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
+  0xff, 0xff, 0xff, 0xff,
+]) as ByteArray;
+export const SYSTEM_KEY_INGESTION_UNFINISHED = new Uint8Array([
+  0xff, 0xff, 0xff, 0xfe,
+]) as ByteArray;
+export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
 export const SCHEMA_VERSION = 1;
+
+/**
+ * Checks if a key is a system key (one of the special keys used for database metadata).
+ * @param key The ByteArray key to check
+ * @returns true if the key is a system key, false otherwise
+ */
+export function isSystemKey(key: ByteArray): boolean {
+  return (
+    !isRainbowRecordKey(key) &&
+    (byteArraysEqual(key, SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT) ||
+      byteArraysEqual(key, SYSTEM_KEY_INGESTION_UNFINISHED) ||
+      byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION))
+  );
+}
+
+/**
+ * Checks if a key is a valid rainbow record key (a 32-byte ByteArray representing an ENS labelhash).
+ * @param key The ByteArray key to check
+ * @returns true if the key is a valid rainbow record key (32 bytes long), false otherwise
+ */
+export function isRainbowRecordKey(key: ByteArray): boolean {
+  return key.length === 32;
+}
 
 /**
  * Type representing the ENSRainbow LevelDB database.
  *
  * Schema:
  * - Keys are binary encoded and represent:
- *   - For labelhash entries: The raw bytes of the ENS labelhash
- *   - For count entries: A special key format for storing label counts
+ *   - For rainbow records: The raw bytes of the ENS labelhash. Always a byte length of 32.
+ *   - For metadata: A special key format for storing metadata. Always a byte length other than 32.
  *
  * - Values are UTF-8 strings and represent:
- *   - For labelhash entries: the label that was hashed to create the labelhash.
+ *   - For rainbow records: the label that was hashed to create the labelhash.
  *     Labels are stored exactly as they appear in source data and:
  *     - May or may not be ENS-normalized
- *     - Can contain any valid string, including dots and null bytes
+ *     - Can contain any valid string, including '.' (dot / period / full stop) and null bytes
  *     - Can be empty strings
- *   - For the precalculated count: The precalculated non-negative integer count of labelhash entries formatted as a string.
+ *   - For metadata: string values storing database metadata like:
+ *     - Schema version number (string formatted as a non-negative integer)
+ *     - Precalculated rainbow record count (string formatted as a non-negative integer)
+ *     - Ingestion status flag ("true" string)
  */
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
+
+/**
+ * Generates a consistent error message for database issues that require purging and re-ingesting.
+ * @param errorDescription The specific error description
+ * @returns Formatted error message with purge warning and instructions
+ */
+function generatePurgeErrorMessage(errorDescription: string): string {
+  return (
+    `${errorDescription}\n\nTo fix this:\n` +
+    "1. Run the purge command to start fresh: pnpm run purge --data-dir <your-data-dir>\n" +
+    "2. Run the ingestion command again: pnpm run ingest <input-file>\n\n" +
+    "⚠️ WARNING: The purge command will COMPLETELY REMOVE ALL FILES in the specified directory!\n" +
+    "Make sure you specify the correct directory and have backups if needed."
+  );
+}
 
 export class ENSRainbowDB {
   private constructor(
@@ -35,6 +81,18 @@ export class ENSRainbowDB {
 
   /**
    * Creates and opens a new ENSRainbowDB instance with a fresh database.
+   * This function:
+   * 1. Creates a new LevelDB database at the specified directory
+   * 2. Opens the database connection
+   * 3. Initializes a new ENSRainbowDB instance with the database
+   * 4. Sets the database schema version to the current expected version
+   *
+   * The schema version is set to guard against potential incompatibility with future database upgrades.
+   *
+   * @throws Error in the following cases:
+   * - If a database already exists at the specified directory
+   * - If there are insufficient permissions to write to the directory
+   * - If the directory is not accessible
    */
   public static async create(dataDir: string): Promise<ENSRainbowDB> {
     logger.info(`Creating new database in directory: ${dataDir}`);
@@ -72,6 +130,19 @@ export class ENSRainbowDB {
 
   /**
    * Opens an existing ENSRainbowDB instance.
+   * This function:
+   * 1. Opens an existing LevelDB database at the specified directory
+   * 2. Initializes an ENSRainbowDB instance with the database
+   * 3. Verifies the database schema version matches the expected version
+   *
+   * If the schema version doesn't match the expected version, an error is thrown
+   * to prevent operations on an incompatible database.
+   *
+   * @throws Error in the following cases:
+   * - If the database directory does not exist
+   * - If the database is locked by another process
+   * - If the schema version doesn't match the expected version
+   * - If there are insufficient permissions to read the database
    */
   public static async open(dataDir: string): Promise<ENSRainbowDB> {
     logger.info(`Opening existing database in directory: ${dataDir}`);
@@ -84,7 +155,12 @@ export class ENSRainbowDB {
         errorIfExists: false,
       });
       await db.open();
-      return new ENSRainbowDB(db, dataDir);
+      const dbInstance = new ENSRainbowDB(db, dataDir);
+
+      // Verify schema version
+      await dbInstance.validateSchemaVersion();
+
+      return dbInstance;
     } catch (error) {
       if (error instanceof Error && error.message.includes("does not exist")) {
         logger.error(`No database found at ${dataDir}`);
@@ -106,7 +182,7 @@ export class ENSRainbowDB {
    * @returns true if an ingestion is unfinished, false otherwise
    */
   public async isIngestionUnfinished(): Promise<boolean> {
-    const value = await this.get(INGESTION_UNFINISHED_KEY);
+    const value = await this.get(SYSTEM_KEY_INGESTION_UNFINISHED);
     return value !== null;
   }
 
@@ -114,14 +190,14 @@ export class ENSRainbowDB {
    * Mark that an ingestion has started and is unfinished
    */
   public async markIngestionStarted(): Promise<void> {
-    await this.db.put(INGESTION_UNFINISHED_KEY, "true");
+    await this.db.put(SYSTEM_KEY_INGESTION_UNFINISHED, "true");
   }
 
   /**
    * Mark that ingestion is finished
    */
   public async markIngestionFinished(): Promise<void> {
-    await this.del(INGESTION_UNFINISHED_KEY);
+    await this.del(SYSTEM_KEY_INGESTION_UNFINISHED);
   }
 
   /**
@@ -141,7 +217,7 @@ export class ENSRainbowDB {
    * @returns The value as a string if found, null if not found
    * @throws Error if any database error occurs other than key not found
    */
-  public async get(key: ByteArray): Promise<string | null> {
+  private async get(key: ByteArray): Promise<string | null> {
     try {
       const value = await this.db.get(key);
       return value;
@@ -154,6 +230,22 @@ export class ENSRainbowDB {
   }
 
   /**
+   * Retrieves a label from the database by its labelhash.
+   *
+   * @param labelhash The ByteArray labelhash to look up
+   * @returns The label as a string if found, null if not found
+   * @throws Error if the provided key is a system key or if any database error occurs
+   */
+  public async getLabel(labelhash: ByteArray): Promise<string | null> {
+    // Verify that the key has the correct length for a labelhash (32 bytes) which means it is not a system key
+    if (!isRainbowRecordKey(labelhash)) {
+      throw new Error(`Invalid labelhash length: expected 32 bytes, got ${labelhash.length} bytes`);
+    }
+
+    return this.get(labelhash);
+  }
+
+  /**
    * Helper function to delete a key from the database.
    * Returns true if the key existed and was deleted, false if the key did not exist.
    * Throws an error for any database error other than key not found.
@@ -162,7 +254,7 @@ export class ENSRainbowDB {
    * @returns boolean indicating if the key was deleted (true) or didn't exist (false)
    * @throws Error if any database error occurs other than key not found
    */
-  public async del(key: ByteArray): Promise<boolean> {
+  private async del(key: ByteArray): Promise<boolean> {
     try {
       await this.db.del(key);
       return true;
@@ -175,7 +267,15 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Closes the database connection.
+   * Closes the database.
+   *
+   * This method:
+   * 1. Waits for any pending operations to complete
+   * 2. Flushes any pending writes to disk
+   * 3. Releases resources associated with the database
+   *
+   * It's important to call this method before exiting the application
+   * to ensure all data is properly persisted.
    */
   public async close(): Promise<void> {
     logger.info(`Closing database at ${this.dataDir}`);
@@ -187,7 +287,7 @@ export class ENSRainbowDB {
    * @throws Error if the precalculated count is not found or is improperly formatted
    */
   public async getPrecalculatedRainbowRecordCount(): Promise<number> {
-    const countStr = await this.get(LABELHASH_COUNT_KEY);
+    const countStr = await this.get(SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT);
     if (countStr === null) {
       throw new Error(`No precalculated count found in database at ${this.dataDir}`);
     }
@@ -209,7 +309,8 @@ export class ENSRainbowDB {
     if (!Number.isInteger(count) || count < 0) {
       throw new Error(`Invalid precalculated count value: ${count}`);
     }
-    await this.db.put(LABELHASH_COUNT_KEY, count.toString());
+    await this.db.put(SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT, count.toString());
+    logger.info(`Updated count in database under PRECALCULATED_RAINBOW_RECORD_COUNT_KEY`);
   }
 
   /**
@@ -218,7 +319,7 @@ export class ENSRainbowDB {
    * @throws Error if schema version is not a valid non-negative integer
    */
   public async getDatabaseSchemaVersion(): Promise<number | null> {
-    const versionStr = await this.get(SCHEMA_VERSION_KEY);
+    const versionStr = await this.get(SYSTEM_KEY_SCHEMA_VERSION);
     if (versionStr === null) {
       return null;
     }
@@ -231,6 +332,21 @@ export class ENSRainbowDB {
   }
 
   /**
+   * Validates that the database schema version matches the expected version.
+   * @throws Error if schema version doesn't match the expected version
+   */
+  public async validateSchemaVersion(): Promise<void> {
+    const schemaVersion = await this.getDatabaseSchemaVersion();
+    if (schemaVersion !== SCHEMA_VERSION) {
+      const schemaVersionMismatchError = `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`;
+      const errorMsg = generatePurgeErrorMessage(schemaVersionMismatchError);
+      logger.error(errorMsg);
+      // await this.close();
+      throw new Error(schemaVersionMismatchError);
+    }
+  }
+
+  /**
    * Sets the database schema version.
    * @param version The schema version to set
    * @throws Error if version is not a valid non-negative integer
@@ -239,7 +355,7 @@ export class ENSRainbowDB {
     if (!Number.isInteger(version) || version < 0) {
       throw new Error(`Invalid schema version: ${version}`);
     }
-    await this.db.put(SCHEMA_VERSION_KEY, version.toString());
+    await this.db.put(SYSTEM_KEY_SCHEMA_VERSION, version.toString());
   }
 
   /**
@@ -249,18 +365,23 @@ export class ENSRainbowDB {
    * @returns boolean indicating if validation passed
    */
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
-    logger.info(`Starting database validation${options.lite ? " (lite mode)" : ""}...`);
-    // Check if ingestion is unfinished
+    // Fully materialize the lite option into an explicit boolean value
+    const isLiteMode = options.lite === true;
+
+    logger.info(`Starting database validation${isLiteMode ? " (lite mode)" : ""}...`);
+    // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
     if (await this.isIngestionUnfinished()) {
-      logger.error("Database is in an invalid state: ingestion unfinished flag is set");
+      const errorMsg = generatePurgeErrorMessage(
+        "Database is in an incomplete state! An ingestion was started but not completed successfully.",
+      );
+      logger.error(errorMsg);
       return false;
     }
 
-    const schemaVersion = await this.getDatabaseSchemaVersion();
-    if (schemaVersion !== SCHEMA_VERSION) {
-      logger.error(
-        `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`,
-      );
+    try {
+      await this.validateSchemaVersion();
+    } catch (error) {
+      // We already logged the error in validateSchemaVersion
       return false;
     }
 
@@ -271,25 +392,24 @@ export class ENSRainbowDB {
     let invalidHashes = 0;
     let hashMismatches = 0;
 
-    // In lite mode, just check the count
-    if (options.lite) {
+    // In lite mode, just verify we can get the precalculated rainbow record count
+    if (isLiteMode) {
       try {
-        const count = await this.getPrecalculatedRainbowRecordCount();
-        logger.info(`Total keys: ${count}`);
+        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+        logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
         return true;
       } catch (error) {
-        logger.error("Error verifying count:", error);
+        const errorMsg = generatePurgeErrorMessage(
+          `Database is in an invalid state: failed to get precalculated rainbow record count: ${error}`,
+        );
+        logger.error(errorMsg);
         return false;
       }
     } else {
       // Full validation of each key-value pair
       for await (const [key, value] of this.db.iterator()) {
         // Skip keys not associated with rainbow records
-        if (
-          byteArraysEqual(key, LABELHASH_COUNT_KEY) ||
-          byteArraysEqual(key, INGESTION_UNFINISHED_KEY) ||
-          byteArraysEqual(key, SCHEMA_VERSION_KEY)
-        ) {
+        if (isSystemKey(key)) {
           continue;
         }
         rainbowRecordCount++;
@@ -316,17 +436,23 @@ export class ENSRainbowDB {
         }
       }
 
-      // Verify count
+      // Verify precalculated rainbow record count
       try {
-        const storedCount = await this.getPrecalculatedRainbowRecordCount();
+        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
 
-        if (storedCount !== rainbowRecordCount) {
-          logger.error(`Count mismatch: stored=${storedCount}, actual=${rainbowRecordCount}`);
+        if (precalculatedCount !== rainbowRecordCount) {
+          const errorMsg = generatePurgeErrorMessage(
+            `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
+          );
+          logger.error(errorMsg);
           return false;
         }
         logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
       } catch (error) {
-        logger.error("Error verifying count:", error);
+        const errorMsg = generatePurgeErrorMessage(
+          `Error verifying precalculated rainbow record count: ${error}`,
+        );
+        logger.error(errorMsg);
         return false;
       }
 
@@ -339,7 +465,8 @@ export class ENSRainbowDB {
 
       // Return false if any validation errors were found
       if (invalidHashes > 0 || hashMismatches > 0) {
-        logger.error("\nValidation failed! See errors above.");
+        const errorMsg = generatePurgeErrorMessage("Validation failed! See errors above.");
+        logger.error(errorMsg);
         return false;
       }
 
@@ -355,13 +482,26 @@ export class ENSRainbowDB {
     await this.db.clear();
   }
 
-  public async countRainbowRecords(): Promise<void> {
-    // Try to read existing count
+  /**
+   * Counts the actual number of rainbow records in the database by iterating through all records.
+   *
+   * Unlike getPrecalculatedRainbowRecordCount(), this method determines the TRUE count
+   * by scanning the entire database, rather than using the stored precalculated count.
+   *
+   * @warning This function iterates through every record in the database and may take
+   * a significant amount of time to complete for large databases. It is primarily intended
+   * for use during data ingestion or database maintenance operations, not during normal
+   * application runtime.
+   *
+   * @returns The actual number of rainbow records in the database
+   */
+  public async countRainbowRecords(): Promise<number> {
+    // Try to read existing precalculated count
     try {
-      const existingCount = await this.getPrecalculatedRainbowRecordCount();
-      logger.warn(`Existing count in database: ${existingCount}`);
+      const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+      logger.warn(`Existing precalculated count in database: ${precalculatedCount}`);
     } catch (error) {
-      logger.info("No existing count found in database");
+      logger.info("No existing precalculated count found in database");
     }
 
     logger.info("Counting rainbow records in database...");
@@ -369,20 +509,15 @@ export class ENSRainbowDB {
     let count = 0;
     for await (const [key] of this.db.iterator()) {
       // Skip keys not associated with rainbow records
-      if (
-        !byteArraysEqual(key, LABELHASH_COUNT_KEY) &&
-        !byteArraysEqual(key, INGESTION_UNFINISHED_KEY) &&
-        !byteArraysEqual(key, SCHEMA_VERSION_KEY)
-      ) {
-        count++;
+      if (isSystemKey(key)) {
+        continue;
       }
+      count++;
     }
 
-    // Store the count
-    await this.setPrecalculatedRainbowRecordCount(count);
-
     logger.info(`Total number of rainbow records: ${count}`);
-    logger.info(`Updated count in database under LABELHASH_COUNT_KEY`);
+
+    return count;
   }
 
   public async addRainbowRecord(label: string) {

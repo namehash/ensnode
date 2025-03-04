@@ -33,7 +33,9 @@ WORKDIR /app/apps/ensrainbow
 # copy data dir from ensrainbow-data
 COPY --from=ensrainbow-data /app/data ./data
 
-# validate the database
+# Run a lightweight database validation to ensure the pre-built database is intact and compatible
+# This validation checks critical database integrity without performing a full validation,
+# which helps reduce container build time while still ensuring the application can start properly
 RUN pnpm run validate:lite
 
 # Set environment variables
