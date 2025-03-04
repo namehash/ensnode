@@ -39,43 +39,43 @@ export default function BarChart({
                 <div className="w-full flex flex-col gap-6">
                     {data.map((item: BarChartData, index: number) => (
                         <>
-                        <div
-                            key={index}
-                            className="flex flex-col gap-2"
-                        >
                             <div
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                }}
+                                key={index}
+                                className="flex flex-col gap-2"
                             >
-                                <span className="text-base leading-7 font-semibold">{item.label}</span>
-                            </div>
-                            <div
-                                style={{
-                                    position: 'relative',
-                                    height: '28px',
-                                    backgroundColor: '#F0F0F0',
-                                    borderRadius: '8px',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <p className="absolute right-0 top-[calc(50%-8px)] text-xs leading-4 font-semibold px-2">{(item.value / maxValue) * 100}%</p>
                                 <div
                                     style={{
-                                        position: 'absolute',
-                                        height: '100%',
-                                        width: `${(item.value / maxValue) * 95}%`,
-                                        background: item.color,
-                                        backgroundSize: 'cover',
-                                        borderRadius: '8px',
-                                        transition: 'all 500ms ease-out',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
                                     }}
-                                />
+                                >
+                                    <span className="text-base leading-7 font-semibold">{item.label}</span>
+                                </div>
+                                <div
+                                    style={{
+                                        position: 'relative',
+                                        height: '28px',
+                                        backgroundColor: '#F0F0F0',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <p className="absolute right-0 top-[calc(50%-8px)] text-xs leading-4 font-semibold px-2">{(item.value / maxValue) * 100}%{index === data.length - 1 && "+"}</p>
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            height: '100%',
+                                            width: `${(item.value / maxValue) * 95}%`,
+                                            background: item.color,
+                                            backgroundSize: 'cover',
+                                            borderRadius: '8px',
+                                            transition: 'all 500ms ease-out',
+                                        }}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        {index < data.length - 1 && <div className="bg-gray-200 h-[1px] self-stretch" />}
+                            {index < data.length - 1 && <div className="bg-gray-200 h-[1px] self-stretch"/>}
                         </>
                     ))}
                 </div>

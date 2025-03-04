@@ -32,7 +32,7 @@ export default function FullRainbow() {
         ]
     }
                                      title="Name Healing Coverage"
-                                     footnote="Coverage as indexed through the ENS Subgraph with no rainbow tables as of 13 Feb, 2025."
+                                     footnote="Coverage vs. indexing the ENS Subgraph with no rainbow tables as of 13 Feb, 2025."
     />;
 
     return (

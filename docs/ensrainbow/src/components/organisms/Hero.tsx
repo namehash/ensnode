@@ -8,10 +8,10 @@ export default function Hero() {
     const healedLabelsArray = Array.from(String(healedLabels), num => Number(num));
     const counterNumberStyles = "flex flex-col justify-center items-center w-6 sm:w-[52px] h-9 sm:h-[72px] rounded sm:rounded-lg border border-gray-200 text-lg sm:text-2xl leading-7 font-bold bg-white";
 
-    return <div className="box-border py-[61px] sm:py-24 lg:py-5 lg:pt-24 px-5 md:px-10 bg-gradient-to-b from-white to-[#F9FAFB] h-fit lg:h-full lg:flex flex-col flex-nowrap justify-center items-center lg:max-h-screen">
+    return <div className="box-border py-[61px] sm:py-24 lg:py-5 lg:pt-24 px-5 md:px-10 bg-gradient-to-b from-white to-[#F9FAFB] h-fit lg:h-full lg:flex flex-col flex-nowrap justify-center items-center gap-5 lg:max-h-screen">
         <section
-            className="box-border relative z-10 w-full h-fit flex flex-col lg:flex-row items-center justify-center">
-            <div className="inline-flex flex-col items-start justify-end gap-6 w-1/2 h-fit relative z-20">
+            className="box-border relative z-10 w-full h-fit flex flex-col lg:flex-row items-center justify-center gap-5">
+            <div className="inline-flex flex-col items-center lg:items-start justify-end gap-6 w-full lg:w-1/2 h-fit relative z-20">
                 <div className="flex flex-col items-center lg:items-start justify-center gap-5 w-fit h-fit">
                     <div className="w-[84px] h-[84px] rounded-xl p-3 border border-gray-200 bg-white">
                         <img src={RainbowLogo.src} alt="ENSRainbow logo"/>
@@ -39,13 +39,13 @@ export default function Hero() {
 
                 <div className="hidden lg:block relative z-10">
                     <Button variant="primary" size="large" asChild>
-                        <Link href="https://ensnode.io/ensrainbow/quickstart">View the docs</Link>
+                        <Link href="https://www.ensnode.io/ensrainbow/usage/">View the docs</Link>
                     </Button>
                 </div>
             </div>
-            <div>
+            <div className="w-full lg:w-1/3 box-border flex flex-col flex-nowrap justify-start items-center">
                 <BeforeAfterSlider/>
-                <div className="sliderShadow w-full h-[58px] shrink-0 rounded-[550px] opacity-10"></div>
+                <div className="sliderShadow w-4/5 h-[58px] shrink-0 rounded-[550px] opacity-10"></div>
             </div>
         </section>
         <div className="max-w-6xl mx-auto py-6 flex flex-col flex-nowrap justify-start items-center gap-5">

@@ -1,8 +1,9 @@
 ---
 import Header from "../components/organisms/Header";
 import Footer from "../components/organisms/Footer";
-import "../styles/global.css";
 import {AstroFont} from "astro-font";
+import "@namehash/namekit-react/styles.css";
+import { SEO } from "astro-seo";
 ---
 
 <!doctype html>
@@ -24,10 +25,27 @@ import {AstroFont} from "astro-font";
 		]}
 	/>
     <meta name="viewport" content="width=device-width"/>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
     <meta name="generator" content={Astro.generator}/>
     <!-- TODO: figure out whatever this is and adjust if necessary -->
-    <title>ENS Rainbow</title>
+	<SEO
+		title="ENSRainbow - Making the unknown, known"
+		description="Heal millions of unknown ENS names with this ENSNode sidecar service."
+		openGraph={{
+			basic: {
+				title: "ENSRainbow OG image",
+				type: "png",
+				image: "../../public/temporary-og-image.png",
+			}
+		}}
+		twitter={{
+			creator: "@lightwalker.eth"
+		}}
+		extend={{
+			// extending the default link tags
+        link: [{ rel: "icon", href: "/favicon.svg" }],
+			// extending the default meta tags
+		}}
+	/>
 </head>
 <body>
 <Header client:only="react"/>

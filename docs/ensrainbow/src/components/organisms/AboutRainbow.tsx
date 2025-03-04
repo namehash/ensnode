@@ -54,7 +54,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
             </div>
 
             <div
-                className="relative hidden sm:flex flex-row justify-center items-center w-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0 ">
+                className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0 ">
                 <img
                     className={cc([
                         "relative z-10 w-full h-full",

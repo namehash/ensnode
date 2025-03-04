@@ -10,19 +10,19 @@ export default function Header() {
                 <div className="flex flex-row lg:gap-2 xl:gap-7 justify-between items-center">
                     <div className="flex flex-row justify-between items-center gap-1 cursor-pointer flex-shrink-0 pr-2">
                         <div className="w-[35px] h-[35px] shrink-0"><img src={RainbowLogo.src} alt="ENSRainbow logo"/></div>
-                        <Link
+                        <a
                             href="/"
                             className="text-black not-italic font-bold text-[22.683px] leading-[22.683px] tracking-[-0.907px] sm:text-[27.816px] sm:leading-[27.816px] sm:tracking-[-1.113px]"
                         >
                             ENSRainbow
-                        </Link>
+                        </a>
                     </div>
                 </div>
                 <div className="flex flex-row items-center justify-between md:gap-5 h-[40px]">
                     <div className="flex items-center justify-center gap-2">
                         <div className="flex items-center justify-center gap-2">
                             <Button variant="ghost" asChild>
-                                <Link href="https://ensnode.io/ensrainbow/quickstart">Docs</Link>
+                                <Link href="https://www.ensnode.io/ensrainbow/usage/">Docs</Link>
                             </Button>
 
                             <Button variant="ghost" asChild>

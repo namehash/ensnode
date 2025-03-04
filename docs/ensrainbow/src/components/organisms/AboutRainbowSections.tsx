@@ -36,7 +36,7 @@ const rainbowSections: AboutRainbowProps[] = [
                 target="_blank"
                 rel="noopener noreferrer"
             >
-                See an example for yourself ↗
+                See an example of the problem ↗
             </a>
         </>),
         sectionBackgroundName: "",
@@ -54,7 +54,15 @@ const rainbowSections: AboutRainbowProps[] = [
                 <img src={RainbowLogo.src} alt="ENSRainbow logo"/>
             </div>
             ENSRainbow is a part of{" "}<br className="hidden md:block"/>ENSNode</div>),
-        sectionDescription: <>ENSRainbow is a sidecar service for ENSNode, the new multichain indexer for ENSv2.
+        sectionDescription: <>ENSRainbow is a sidecar service for{" "}
+            <a
+                className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
+                href="https://ensnode.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                ENSNode
+            </a>, the new multichain indexer for ENSv2.
             <LearnMoreButton source="https://ensnode.io/" styles="mt-6" text="Learn more about ENS Node"/>
         </>,
         sectionBackgroundName: "",
