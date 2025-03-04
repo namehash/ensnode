@@ -19,6 +19,7 @@
     "lint:ci": "biome ci"
   },
   "dependencies": {
+    "@codemirror/language": "6.0.0",
     "@ensnode/ponder-schema": "workspace:",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",

@@ -33,8 +33,8 @@ import { SEO } from "astro-seo";
 		openGraph={{
 			basic: {
 				title: "ENSRainbow OG image",
-				type: "png",
-				image: "../../public/temporary-og-image.png",
+				type: "image/png",
+				image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
 			}
 		}}
 		twitter={{
@@ -44,6 +44,14 @@ import { SEO } from "astro-seo";
 			// extending the default link tags
         link: [{ rel: "icon", href: "/favicon.svg" }],
 			// extending the default meta tags
+		meta: [
+				{
+					name: "twitter:image",
+					content: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
+				},
+				{ name: "twitter:title", content: "Tinker Tailor Soldier Spy" },
+				{ name: "twitter:description", content: "Agent" },
+			],
 		}}
 	/>
 </head>

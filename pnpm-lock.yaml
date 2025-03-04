@@ -191,6 +191,9 @@ importers:
 
   apps/ensadmin-next:
     dependencies:
+      '@codemirror/language':
+        specifier: 6.0.0
+        version: 6.0.0
       '@ensnode/ponder-schema':
         specifier: 'workspace:'
         version: link:../../packages/ponder-schema
@@ -223,7 +226,7 @@ importers:
         version: 4.1.0
       graphiql:
         specifier: ^3.8.3
-        version: 3.8.3(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 3.8.3(@codemirror/language@6.0.0)(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lucide-react:
         specifier: ^0.476.0
         version: 0.476.0(react@18.3.1)
@@ -306,58 +309,6 @@ importers:
       ponder:
         specifier: 'catalog:'
         version: 0.9.24(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
-      ts-deepmerge:
-        specifier: ^7.0.2
-        version: 7.0.2
-      viem:
-        specifier: 'catalog:'
-        version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 'catalog:'
-        version: 1.9.4
-      '@ensnode/shared-configs':
-        specifier: 'workspace:'
-        version: link:../../packages/shared-configs
-      '@types/node':
-        specifier: 'catalog:'
-        version: 20.17.14
-      typescript:
-        specifier: 'catalog:'
-        version: 5.7.3
-      vitest:
-        specifier: 'catalog:'
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)
-
-  apps/ensnode:
-    dependencies:
-      '@ensdomains/ensjs':
-        specifier: ^4.0.2
-        version: 4.0.2(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
-      '@ensnode/ens-deployments':
-        specifier: workspace:*
-        version: link:../../packages/ens-deployments
-      '@ensnode/ensrainbow-sdk':
-        specifier: workspace:*
-        version: link:../../packages/ensrainbow-sdk
-      '@ensnode/ponder-metadata':
-        specifier: workspace:*
-        version: link:../../packages/ponder-metadata-api
-      '@ensnode/ponder-schema':
-        specifier: workspace:*
-        version: link:../../packages/ponder-schema
-      '@ensnode/ponder-subgraph':
-        specifier: workspace:*
-        version: link:../../packages/ponder-subgraph-api
-      '@ensnode/utils':
-        specifier: workspace:*
-        version: link:../../packages/ensnode-utils
-      hono:
-        specifier: 'catalog:'
-        version: 4.6.17
-      ponder:
-        specifier: 'catalog:'
-        version: 0.9.22(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(@types/react@19.0.10)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -7751,7 +7702,7 @@ snapshots:
       - '@types/react-dom'
       - graphql-ws
 
-  '@graphiql/react@0.28.2(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@graphiql/toolkit': 0.11.1(@types/node@22.13.9)(graphql@16.10.0)
       '@headlessui/react': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -10832,9 +10783,9 @@ snapshots:
       - '@types/react-dom'
       - graphql-ws
 
-  graphiql@3.8.3(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  graphiql@3.8.3(@codemirror/language@6.0.0)(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@graphiql/react': 0.28.2(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql: 16.10.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
