@@ -1,9 +1,10 @@
+ARG DATA_IMAGE_PLATFORM=linux/amd64
 ARG PNPM_VERSION=9.12.0
 # ensrainbow-data contains an already ingested DB that will be served by the ENSRainbow app
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
-FROM --platform=linux/amd64 ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
+FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
 
-FROM --platform=$BUILDPLATFORM node:18.20.5-slim AS base
+FROM --platform=${BUILDPLATFORM} node:18.20.5-slim AS base
 RUN apt-get update && \
     npm install -g pnpm@${PNPM_VERSION}
 WORKDIR /app
