@@ -1,7 +1,8 @@
 # Base working stage
 FROM node:18-slim AS builder
+ARG PNPM_VERSION=9.12.0
 RUN apt-get update && \
-    npm install -g pnpm 
+    npm install -g pnpm@${PNPM_VERSION}
 WORKDIR /app
 
 # Define the environment variables during the build process

@@ -1,7 +1,8 @@
 # Base working stage
 FROM node:18-slim
+ARG PNPM_VERSION=9.12.0
 RUN apt-get update && \
-    npm install -g pnpm
+    npm install -g pnpm@${PNPM_VERSION}
 WORKDIR /app
 
 # Copy pnpm workspace configuration files from the root directory
