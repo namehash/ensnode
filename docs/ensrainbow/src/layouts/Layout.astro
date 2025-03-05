@@ -1,0 +1,73 @@
+---
+import Header from "../components/organisms/Header";
+import Footer from "../components/organisms/Footer";
+import {AstroFont} from "astro-font";
+import "@namehash/namekit-react/styles.css";
+import { SEO } from "astro-seo";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+	<AstroFont
+		config={[
+			{
+				src: [],
+				name: "Inter",
+				// Google Fonts URL
+                googleFontsURL: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+				preload: true,
+				display: "swap",
+				selector: "body",
+				fallback: "sans-serif",
+			},
+		]}
+	/>
+    <meta name="viewport" content="width=device-width"/>
+    <meta name="generator" content={Astro.generator}/>
+	<SEO
+		title="ENSRainbow - Making the unknown, known"
+		description="Heal millions of unknown ENS names with this ENSNode sidecar service."
+		openGraph={{
+			basic: {
+				title: "ENSRainbow - making the unknown, known",
+				type: "image/png",
+				image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
+			},
+			optional: {
+				description: "Install the SDK and leverage publicly deployed service",
+				siteName: "ENSNode"
+			}
+		}}
+		twitter={{
+			creator: "@lightwalker.eth",
+			title: "ENSRainbow - making the unknown, known",
+			image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
+			description: "ENSRainbow is a sidecar service for ENSNode, the new multichain indexer for ENSv2.",
+			card: "summary"
+		}}
+		extend={{
+        link: [
+			{ rel: "icon", href: "/favicon.svg" },
+			{rel: "apple-touch-icon", href: "/public/apple-touch-icon.png"},
+			{rel:"manifest", href:"/public/site.webmanifest"}
+			],
+		}}
+	/>
+</head>
+<body>
+<Header client:only="react"/>
+<slot/>
+<!--<Footer/>-->
+</body>
+</html>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
