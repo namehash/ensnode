@@ -3,7 +3,7 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
-import { ENSRainbowDB } from "../lib/database";
+import { ENSRainbowDB, INGESTION_STATUS_DONE, INGESTION_STATUS_UNFINISHED } from "../lib/database";
 import { logger } from "../utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
 
@@ -27,12 +27,24 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
   const db = await ENSRainbowDB.create(options.dataDir);
 
   try {
-    // Check if there's an unfinished ingestion
-    if (await db.isIngestionUnfinished()) {
+    // Check the current ingestion status
+    const ingestionStatus = await db.getIngestionStatus();
+
+    if (ingestionStatus === INGESTION_STATUS_UNFINISHED) {
       const errorMessage =
         "Database is in an incomplete state! " +
         "An ingestion was started but not completed successfully.\n" +
         "To fix this:\n" +
+        "1. Delete the data directory\n" +
+        "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    if (ingestionStatus === INGESTION_STATUS_DONE) {
+      const errorMessage =
+        "Database already has a completed ingestion.\n" +
+        "If you want to re-ingest data:\n" +
         "1. Delete the data directory\n" +
         "2. Run the ingestion command again: ensrainbow ingest <input-file>";
       logger.error(errorMessage);

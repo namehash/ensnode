@@ -28,6 +28,7 @@ describe("Validate Command", () => {
       const label = "vitalik";
       await db.addRainbowRecord(label);
       await db.setPrecalculatedRainbowRecordCount(1);
+      await db.markIngestionFinished();
       await db.close();
 
       await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();
