@@ -45,11 +45,14 @@ import { SEO } from "astro-seo";
 			title: "ENSRainbow - making the unknown, known",
 			image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
 			description: "ENSRainbow is a sidecar service for ENSNode, the new multichain indexer for ENSv2.",
-			card: "app"
+			card: "summary"
 		}}
 		extend={{
-			// extending the default link tags
-        link: [{ rel: "icon", href: "/favicon.svg" }],
+        link: [
+			{ rel: "icon", href: "/public/favicon.ico" },
+			{rel: "apple-touch-icon", href: "/public/apple-touch-icon.png"},
+			{rel:"manifest", href:"/public/site.webmanifest"}
+			],
 		}}
 	/>
 </head>

@@ -9,10 +9,10 @@ export default function Appreciation() {
     const verticalDividerStyles = "hidden lg:block w-[1px] shrink-0 self-stretch bg-gray-200";
     const horizontalDividerStyles = "block lg:hidden h-[1px] shrink-0 self-stretch bg-gray-200";
     const smallerHeaderStyles = "text-black text-lg leading-6 font-semibold";
-    const iconWrapperStyles = "w-[52px] h-[52px] flex flex-col justify-center items-center bg-white border-1 border-gray-200 rounded-[40px]";
+    const iconWrapperStyles = "w-[52px] h-[52px] flex flex-col justify-center items-center bg-white border border-gray-200 rounded-[40px]";
 
     return <section
-        className="w-full box-border flex flex-col lg:flex-row justify-center items-center gap-10 py-10 px-5 lg:py-[100px] lg:px-[110px]">
+        className="w-full box-border flex flex-col lg:flex-row justify-center items-center gap-10 py-[60px] px-5 lg:py-[100px] lg:px-[110px]">
         <div
             className={cc([subsectionStyles, "gap-4"])}>
             <p className="text-3xl leading-9 font-bold">💗</p>

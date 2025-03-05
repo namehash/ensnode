@@ -5,13 +5,17 @@ import cc from "classcat";
 export type AboutRainbowProps = {
     sectionHeader: React.ReactNode;
     sectionDescription: React.ReactNode;
+    descriptionExternalElems?: React.ReactNode
     sectionBackgroundName: string;
     isTextOnTheLeft: boolean;
+    mobileImageOnTop: boolean;
     imageSpecifics: ImageCharacteristics;
+    designatedMobileImage?: ImageCharacteristics;
 };
 export default function AboutRainbow(props: AboutRainbowProps) {
     return (
-        <section className="box-border h-full w-full flex flex-col xl:flex-row items-center justify-center py-10 px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
+        <section
+            className="box-border h-full w-full flex flex-col xl:flex-row items-center justify-center gap-5 sm:gap-0 py-[60px] px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
             {!props.isTextOnTheLeft && (
                 <div
                     className={cc([
@@ -38,8 +42,39 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                     />
                 </div>
             )}
+            {props.mobileImageOnTop &&
+                <div
+                    className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
+                    {props.designatedMobileImage ?
+                        <img
+                            className={cc([
+                                "relative z-10 w-full h-full",
+                                props.designatedMobileImage.styles,
+                            ])}
+                            src={props.designatedMobileImage.source}
+                            alt="chat image"
+                            width={props.designatedMobileImage.tagWidth}
+                            height={props.designatedMobileImage.tagHeight}
+                            decoding="async"
+                            loading="lazy"
+                        />
+                        :
+                        <img
+                            className={cc([
+                                "relative z-10 w-full h-full",
+                                props.imageSpecifics.styles,
+                            ])}
+                            src={props.imageSpecifics.source}
+                            alt="chat image"
+                            width={props.imageSpecifics.tagWidth}
+                            height={props.imageSpecifics.tagHeight}
+                            decoding="async"
+                            loading="lazy"
+                        />}
+                </div>
+            }
             <div
-                className="flex flex-col gap-5 h-fit w-full max-w-3xl items-center xl:items-start xl:w-1/2 md:px-[72px] xl:px-0" >
+                className="flex flex-col gap-5 h-fit w-full max-w-3xl items-center xl:items-start xl:w-1/2 md:px-[72px] xl:px-0">
                 <h1 className="hidden sm:block text-black font-bold not-italic z-10 text-center xl:text-left text-4xl leading-10">
                     {props.sectionHeader}
                 </h1>
@@ -48,9 +83,10 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                         {props.sectionHeader}
                     </h1>
                 </div>
-                <p className="text-gray-500 not-italic font-light sm:font-normal z-10 text-center text-lg leading-7 xl:text-left sm:leading-7 flex flex-col items-center xl:block">
+                <p className="text-gray-500 not-italic font-normal z-10 text-center text-lg leading-8 xl:text-left">
                     {props.sectionDescription}
                 </p>
+                {props.descriptionExternalElems && props.descriptionExternalElems}
             </div>
 
             <div
@@ -68,21 +104,37 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                     loading="lazy"
                 />
             </div>
-            <div
-                className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none py-5 bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
-                <img
-                    className={cc([
-                        "relative z-10 w-full h-full",
-                        props.imageSpecifics.styles,
-                    ])}
-                    src={props.imageSpecifics.source}
-                    alt="chat image"
-                    width={props.imageSpecifics.tagWidth}
-                    height={props.imageSpecifics.tagHeight}
-                    decoding="async"
-                    loading="lazy"
-                />
-            </div>
+            {!props.mobileImageOnTop &&
+                <div
+                    className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none py-5 bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
+                    {props.designatedMobileImage ?
+                        <img
+                            className={cc([
+                                "relative z-10 w-full h-full",
+                                props.designatedMobileImage.styles,
+                            ])}
+                            src={props.designatedMobileImage.source}
+                            alt="chat image"
+                            width={props.designatedMobileImage.tagWidth}
+                            height={props.designatedMobileImage.tagHeight}
+                            decoding="async"
+                            loading="lazy"
+                        />
+                        :
+                        <img
+                            className={cc([
+                                "relative z-10 w-full h-full",
+                                props.imageSpecifics.styles,
+                            ])}
+                            src={props.imageSpecifics.source}
+                            alt="chat image"
+                            width={props.imageSpecifics.tagWidth}
+                            height={props.imageSpecifics.tagHeight}
+                            decoding="async"
+                            loading="lazy"
+                        />}
+                </div>
+            }
         </section>
     );
 }

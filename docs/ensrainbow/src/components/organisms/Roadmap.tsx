@@ -151,7 +151,7 @@ export default function RoadMap() {
 
     return (
         <section
-            className="bg-gradient-to-b to-white from-[#F9FAFB] w-full h-fit px-5 md:pt-24 md:pb-12 md:px-10 flex flex-row items-center justify-center z-10 gap-10">
+            className="bg-gradient-to-b to-white from-[#F9FAFB] w-full h-fit px-5 pt-[60px] pb-5 md:pt-24 md:pb-12 md:px-10 flex flex-row items-center justify-center z-10 gap-10">
             <div
                 className="hidden w-1/5 h-full relative -top-20 md:flex flex-col justify-start items-center gap-[10.5rem]">
                 {leftSideRainbows.map((rainbow, idx) => (
@@ -173,7 +173,7 @@ export default function RoadMap() {
                 ))}
             </div>
             <div
-                className="w-full sm:w-4/6 h-full flex flex-col items-center justify-center pt-10 sm:pt-0 pb-5 sm:pb-0 gap-5 sm:gap-20">
+                className="w-full sm:w-4/6 h-full flex flex-col items-center justify-center gap-8 sm:gap-20">
                 <div className="inline-flex h-fit w-full flex-col items-center gap-5 sm:gap-2 z-10">
                     <div
                         className="inline-flex px-4 py-2 bg-[rgba(0,0,0,0.05)] rounded-3xl gap-2 justify-center items-center z-10">
@@ -185,7 +185,7 @@ export default function RoadMap() {
                     <h1 className="text-black text-center not-italic font-bold text-2xl leading-8 sm:text-4xl sm:leading-[52px]">
                         ENSRainbow roadmap
                     </h1>
-                    <p className="text-center text-gray-500 text-lg leading-7 font-normal not-italic sm:text-base sm:font-light">
+                    <p className="text-center text-gray-500 text-base leading-7 font-normal not-italic sm:text-base">
                         ENSRainbow aims to minimize unknown labels and make every ENS name known.
                     </p>
                 </div>

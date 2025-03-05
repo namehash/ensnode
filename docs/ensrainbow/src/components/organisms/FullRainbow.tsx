@@ -37,9 +37,9 @@ export default function FullRainbow() {
 
     return (
         <section
-            className="box-border w-full h-full flex flex-col xl:flex-row items-center justify-center gap-[120px] py-10 px-5 bg-[#FEFEFF] md:py-20 lg:px-28 lg:py-[120px]">
+            className="box-border w-full h-fit xl:h-full xl:max-h-screen flex flex-col xl:flex-row items-center justify-center gap-8 xl:gap-[120px] py-[60px] px-5 bg-[#FEFEFF] md:py-20 lg:px-28 lg:py-[120px]">
             <div
-                className="relative hidden xl:flex flex-row justify-center items-center w-full max-w-2xl xl:w-[60%] rounded-none bg-origin-border flex-shrink-0 box-border">
+                className="relative flex flex-row justify-center items-center w-full max-w-2xl xl:w-[60%] rounded-none bg-origin-border flex-shrink-0 box-border">
                 {barChart()}
             </div>
             <div
@@ -56,10 +56,6 @@ export default function FullRainbow() {
                 <p className="text-gray-500 not-italic font-light z-10 text-center text-lg leading-7 xl:text-left sm:text-lg sm:leading-8 sm:font-normal">
                     {sectionDescription}
                 </p>
-            </div>
-            <div
-                className="relative flex xl:hidden flex-row justify-center items-center w-full max-w-2xl rounded-none bg-origin-border flex-shrink-0 box-border">
-                {barChart()}
             </div>
         </section>
     );

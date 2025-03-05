@@ -14,7 +14,7 @@ import {DockerIcon} from "../atoms/DockerIcon.tsx";
 export default function DevelopersSection() {
     return (
         <section
-            className="box-border w-full h-fit xl:h-full flex flex-col py-10 px-5 items-center justify-center self-stretch gap-[32px] bg-gradient-to-b to-white from-[#F9FAFB] xl:max-h-screen">
+            className="box-border w-full h-fit xl:h-full flex flex-col py-[60px] px-5 lg:py-[100px] items-center justify-center self-stretch gap-8 xl:gap-12 bg-gradient-to-b to-white from-[#F9FAFB] xl:max-h-screen">
             <div className="flex flex-col justify-center items-center gap-5 max-w-[608px]">
                 <div className="inline-flex px-4 py-2 bg-[rgba(0,0,0,0.05)] rounded-3xl gap-2 justify-center items-center z-10">
                     <GithubIconSmall/>

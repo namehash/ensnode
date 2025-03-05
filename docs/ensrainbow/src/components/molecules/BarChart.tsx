@@ -21,13 +21,13 @@ export default function BarChart({
     const maxValue = 100;
 
     return (
-        <div className="flex flex-col flex-nowrap gap-6">
+        <div className="flex flex-col flex-nowrap gap-5">
             <div
                 className="p-6 bg-[#F9FAFB] rounded-2xl flex flex-col flex-nowrap justify-start items-start gap-6"
             >
                 {title && (
                     <h2
-                        className="text-2xl leading-8 font-semibold"
+                        className="text-lg md:text-2xl leading-8 font-semibold"
                     >
                         {title}
                     </h2>
@@ -36,7 +36,7 @@ export default function BarChart({
                     <p style={{color: '#666', marginBottom: '1.5rem'}}>{subtitle}</p>
                 )}
 
-                <div className="w-full flex flex-col gap-6">
+                <div className="w-full flex flex-col gap-4 md:gap-6">
                     {data.map((item: BarChartData, index: number) => (
                         <>
                             <div
@@ -50,7 +50,7 @@ export default function BarChart({
                                         alignItems: 'center',
                                     }}
                                 >
-                                    <span className="text-base leading-7 font-semibold">{item.label}</span>
+                                    <span className="text-sm md:text-base leading-7 font-semibold">{item.label}</span>
                                 </div>
                                 <div
                                     style={{
@@ -66,7 +66,7 @@ export default function BarChart({
                                         style={{
                                             position: 'absolute',
                                             height: '100%',
-                                            width: `${(item.value / maxValue) * 95}%`,
+                                            width: `calc(${(item.value / maxValue) * 100}% - ${index == data.length - 1 ? '30': '0'}px)`,
                                             background: item.color,
                                             backgroundSize: 'cover',
                                             borderRadius: '8px',
