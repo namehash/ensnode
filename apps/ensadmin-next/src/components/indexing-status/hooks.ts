@@ -4,6 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 export interface NetworkIndexingStatus {
   totalBlocksCount: number;
   cachedBlocksCount: number;
+  firstBlockToIndex: {
+    height: number;
+    timestamp: number;
+    utc: string;
+  } | null;
   lastSyncedBlock: {
     height: number;
     timestamp: number;
@@ -26,8 +31,10 @@ export interface NetworkIndexingStatus {
 }
 
 export interface IndexingStatus {
-  name: string;
-  version: string;
+  app: {
+    name: string;
+    version: string;
+  };
   deps: {
     ponder: string;
     nodejs: string;
@@ -39,6 +46,7 @@ export interface IndexingStatus {
   };
   runtime: {
     codebaseBuildId: string;
+    indexingStartedAt: number;
     networkIndexingStatus: Record<string, NetworkIndexingStatus>;
   };
 }

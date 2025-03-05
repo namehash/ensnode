@@ -232,3 +232,32 @@ export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryCont
     },
   };
 }
+
+/**
+ * Get the global start block number for each chain ID.
+ *
+ * @returns the global start block number for each chain ID.
+ */
+export async function getIndexingStartBlockNumbersByChainId() {
+  return Object.values((await import("../../ponder.config")).default.contracts)
+    .map((contractsConfig) =>
+      Object.entries(contractsConfig.network).flatMap(([chainId, c]) => {
+        return [chainId, c.startBlock];
+      }),
+    )
+    .reduce(
+      (acc, [chainId, startBlock]) => {
+        if (!acc[chainId]) {
+          acc[chainId] = startBlock;
+          return acc;
+        }
+
+        if (startBlock < acc[chainId]) {
+          acc[chainId] = startBlock;
+        }
+
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+}

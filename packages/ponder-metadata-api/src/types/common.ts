@@ -15,6 +15,8 @@ export interface NetworkIndexingStatus {
    */
   cachedBlocksCount: number | null;
 
+  firstBlockToIndex: BlockMetadata | null;
+
   /**
    * Closest-to-tip synced block number.
    */
