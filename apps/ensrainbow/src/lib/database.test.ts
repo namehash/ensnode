@@ -6,8 +6,10 @@ import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
 import {
   ENSRainbowDB,
+  INGESTION_STATUS_DONE,
+  INGESTION_STATUS_UNFINISHED,
   SCHEMA_VERSION,
-  SYSTEM_KEY_INGESTION_UNFINISHED,
+  SYSTEM_KEY_INGESTION_STATUS,
   SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
   SYSTEM_KEY_SCHEMA_VERSION,
   isRainbowRecordKey,
@@ -48,6 +50,8 @@ describe("Database", () => {
         }
 
         await db.setPrecalculatedRainbowRecordCount(testDataLabels.length);
+
+        await db.markIngestionFinished();
 
         const isValid = await db.validate();
         expect(isValid).toBe(true);
@@ -150,6 +154,43 @@ describe("Database", () => {
       }
     });
 
+    it("should detect when ingestion has never been started", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        // Add a valid record
+        const label = "vitalik";
+        await db.addRainbowRecord(label);
+        // Set precalculated rainbow record count key
+        db.setPrecalculatedRainbowRecordCount(1);
+        // Don't set any ingestion status
+
+        const isValid = await db.validate();
+        expect(isValid).toBe(false);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should validate successfully when ingestion is marked as done", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        // Add a valid record
+        const label = "vitalik";
+        await db.addRainbowRecord(label);
+        // Set precalculated rainbow record count key
+        db.setPrecalculatedRainbowRecordCount(1);
+        // Mark ingestion as done
+        await db.markIngestionFinished();
+
+        const isValid = await db.validate();
+        expect(isValid).toBe(true);
+      } finally {
+        await db.close();
+      }
+    });
+
     it("should skip labelhash verification in lite mode", async () => {
       const db = await ENSRainbowDB.create(tempDir);
 
@@ -161,6 +202,7 @@ describe("Database", () => {
         batch.put(labelHashToBytes(wrongLabelhash), label);
         await batch.write();
         await db.setPrecalculatedRainbowRecordCount(1);
+        await db.markIngestionFinished();
 
         // Should pass in lite mode despite hash mismatch
         const isValidLite = await db.validate({ lite: true });
@@ -326,7 +368,7 @@ describe("isSystemKey", () => {
   test("returns true for all system keys", () => {
     // Use the exported system keys
     expect(isSystemKey(SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT)).toBe(true);
-    expect(isSystemKey(SYSTEM_KEY_INGESTION_UNFINISHED)).toBe(true);
+    expect(isSystemKey(SYSTEM_KEY_INGESTION_STATUS)).toBe(true);
     expect(isSystemKey(SYSTEM_KEY_SCHEMA_VERSION)).toBe(true);
   });
 

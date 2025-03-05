@@ -23,7 +23,7 @@ describe("Server Command Tests", () => {
 
       // Initialize precalculated rainbow record count to be able to start server
       await db.setPrecalculatedRainbowRecordCount(0);
-
+      await db.markIngestionFinished();
       app = await createServer(db);
 
       // Start the server on a different port than what ENSRainbow defaults to
