@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   type EnsRainbow,
   EnsRainbowApiClient,
@@ -83,6 +83,75 @@ describe("EnsRainbowApiClient", () => {
     expect(response).toEqual({
       status: "ok",
     } satisfies EnsRainbow.HealthResponse);
+  });
+
+  it("should normalize and heal a valid labelhash", async () => {
+    // Using a known labelhash for "vitalik"
+    const response = await client.heal(
+      "AF2CAA1C2CA1D027F1AC823B529D0A67CD144264B2789FA2EA4D63A67C7103CC",
+    );
+
+    expect(response.status).toBe(StatusCode.Success);
+    if (response.status === StatusCode.Success) {
+      expect(response.label).toBe("vitalik");
+    }
+  });
+
+  it("should normalize and heal a valid encoded labelhash", async () => {
+    // Using a known labelhash for "vitalik" in encoded format
+    const response = await client.heal(
+      "[AF2CAA1C2CA1D027F1AC823B529D0A67CD144264B2789FA2EA4D63A67C7103CC]",
+    );
+
+    expect(response.status).toBe(StatusCode.Success);
+    if (response.status === StatusCode.Success) {
+      expect(response.label).toBe("vitalik");
+    }
+  });
+
+  it("should return error response for invalid labelhash", async () => {
+    const response = await client.heal("invalid-labelhash");
+
+    expect(response).toEqual({
+      status: "error",
+      error:
+        "Invalid labelhash format: Invalid labelhash: contains non-hex characters: invalid-labelhash",
+      errorCode: 400,
+    });
+  });
+
+  it("should use cache for repeated requests", async () => {
+    // First request to the real API
+    const response1 = await client.heal(
+      "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+    );
+
+    // Create a spy to track if the fetch is called again
+    const fetchSpy = vi.spyOn(global, "fetch");
+    const fetchCallCount = fetchSpy.mock.calls.length;
+
+    // Second request with same labelhash should use cache
+    const response2 = await client.heal(
+      "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+    );
+
+    // Verify fetch wasn't called again
+    expect(fetchSpy.mock.calls.length).toBe(fetchCallCount);
+
+    // Both responses should be identical
+    expect(response1).toEqual(response2);
+  });
+
+  it("should return not found for unknown labelhash", async () => {
+    // Using a random labelhash that's unlikely to be in the database
+    const response = await client.heal(
+      "0x1234567890123456789012345678901234567890123456789012345678901234",
+    );
+
+    expect(response.status).toBe(StatusCode.Error);
+    if (response.status === StatusCode.Error) {
+      expect(response.errorCode).toBe(ErrorCode.NotFound);
+    }
   });
 });
 
