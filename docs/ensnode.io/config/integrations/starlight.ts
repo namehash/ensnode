@@ -1,7 +1,7 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
-import starlightThemeRapide from "starlight-theme-rapide";
 import starlightSidebarTopics from "starlight-sidebar-topics";
+import starlightThemeRapide from "starlight-theme-rapide";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
@@ -11,17 +11,29 @@ export function starlight(): AstroIntegration {
         {
           label: "ENSNode",
           link: "/ensnode/",
-          icon: "seti:db",
+          icon: "star",
           items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "Quickstart",
+                  link: "/ensnode",
+                },
+                {
+                  label: "What is ENSNode?",
+                  link: "/ensnode/concepts/what-is-ensnode",
+                },
+                {
+                  label: "What is ENS Subgraph?",
+                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                },
+              ],
+            },
             {
               label: "Using ENSNode",
               collapsed: false,
               autogenerate: { directory: "ensnode/usage" },
-            },
-            {
-              label: "Understanding ENSNode",
-              collapsed: true,
-              autogenerate: { directory: "ensnode/understanding" },
             },
             {
               label: "Deploying ENSNode",
@@ -48,8 +60,17 @@ export function starlight(): AstroIntegration {
         {
           label: "ENSRainbow",
           link: "/ensrainbow/",
-          icon: "seti:javascript",
+          icon: "star",
           items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "Quickstart",
+                  link: "/ensrainbow",
+                },
+              ],
+            },
             {
               label: "Using ENSRainbow",
               collapsed: false,
@@ -70,12 +91,16 @@ export function starlight(): AstroIntegration {
         {
           label: "ENSAdmin",
           link: "/ensadmin/",
-          icon: "list-format",
+          icon: "star",
           items: [
             {
-              label: "Using ENSAdmin",
-              collapsed: false,
-              autogenerate: { directory: "ensadmin/usage" },
+              label: "Overview",
+              items: [
+                {
+                  label: "Quickstart",
+                  link: "/ensadmin",
+                },
+              ],
             },
             {
               label: "Contributing",
