@@ -16,9 +16,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check --write .",
-    "lint:ci": "biome ci"
+    "lint:ci": "biome ci",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ensnode/ponder-metadata": "workspace:",
     "@ensnode/ponder-schema": "workspace:",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",

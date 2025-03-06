@@ -237,8 +237,16 @@ export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryCont
  * Get the global start block number for each chain ID.
  *
  * @returns the global start block number for each chain ID.
+ * @example
+ * ```ts
+ * {
+ *    1: 333742
+ *    8453: 1799433
+ * }
+ * ```
+ *
  */
-export async function getIndexingStartBlockNumbersByChainId() {
+async function getIndexingStartBlockNumbersByChainId() {
   return Object.values((await import("../../ponder.config")).default.contracts)
     .map((contractsConfig) =>
       Object.entries(contractsConfig.network).flatMap(([chainId, c]) => {
@@ -247,17 +255,37 @@ export async function getIndexingStartBlockNumbersByChainId() {
     )
     .reduce(
       (acc, [chainId, startBlock]) => {
+        // no start block for this chain yet
         if (!acc[chainId]) {
+          // set the start block
           acc[chainId] = startBlock;
           return acc;
         }
 
+        // update the start block if the current one is lower
         if (startBlock < acc[chainId]) {
           acc[chainId] = startBlock;
         }
 
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<number, number>,
     );
+}
+
+/**
+ * Get the start block number for a specific chain ID.
+ *
+ * @param chainId
+ * @returns indexing start block number
+ * @throws if no start block number is found for the chain ID
+ */
+export async function getIndexingStartBlockNumberForChainId(chainId: number): Promise<number> {
+  const startBlockNumbers = await getIndexingStartBlockNumbersByChainId();
+
+  if (!startBlockNumbers[chainId]) {
+    throw new Error(`No start block number found for chain ID ${chainId}`);
+  }
+
+  return startBlockNumbers[chainId];
 }

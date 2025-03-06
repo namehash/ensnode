@@ -1,144 +1,150 @@
 import { MiddlewareHandler } from "hono";
-import { ReadonlyDrizzle } from "ponder";
-import { PublicClient } from "viem";
+import { HTTPException } from "hono/http-exception";
 import { queryPonderMeta, queryPonderStatus } from "./db-helpers";
 import { PrometheusMetrics } from "./prometheus-metrics";
-import type { BlockMetadata, NetworkIndexingStatus } from "./types/common";
+import { PonderMetadataMiddlewareOptions, PonderMetadataMiddlewareResponse } from "./types/api";
+import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "./types/common";
 
 export function ponderMetadata({
   app,
   db,
   env,
-  fetchIndexingStartBlockNumbersByChainId,
-  fetchPrometheusMetrics,
+  query,
   publicClients,
-}: {
-  db: ReadonlyDrizzle<Record<string, unknown>>;
-  app: {
-    name: string;
-    version: string;
-  };
-  env: {
-    DATABASE_SCHEMA: string;
-  } & Record<string, unknown>;
-  fetchPrometheusMetrics: () => Promise<string>;
-  fetchIndexingStartBlockNumbersByChainId: (chainId: number) => Promise<{
-    number: number | null;
-    timestamp: number | null;
-  } | null>;
-  publicClients: Record<number, PublicClient>;
-}): MiddlewareHandler {
+}: PonderMetadataMiddlewareOptions): MiddlewareHandler {
   return async function ponderMetadataMiddleware(ctx) {
     const indexedChainIds = Object.keys(publicClients).map(Number);
 
     const ponderStatus = await queryPonderStatus(env.DATABASE_SCHEMA, db);
     const ponderMeta = await queryPonderMeta(env.DATABASE_SCHEMA, db);
-    const metrics = PrometheusMetrics.parse(await fetchPrometheusMetrics());
+    const metrics = PrometheusMetrics.parse(await query.prometheusMetrics());
 
-    const networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
+    const networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus> = {};
 
     for (const indexedChainId of indexedChainIds) {
       const publicClient = publicClients[indexedChainId];
 
       if (!publicClient) {
-        throw new Error(`No public client found for chainId ${indexedChainId}`);
+        throw new HTTPException(500, {
+          message: `No public client found for chainId ${indexedChainId}`,
+        });
       }
 
-      const latestSafeBlock = await publicClient.getBlock();
+      const fetchBlockMetadata = async (blockNumber: number): Promise<BlockInfo | null> => {
+        const block = await publicClient.getBlock({
+          blockNumber: BigInt(blockNumber),
+        });
 
+        if (!block) {
+          return null;
+        }
+
+        return {
+          number: Number(block.number),
+          timestamp: Number(block.timestamp),
+        } satisfies BlockInfo;
+      };
+
+      const latestSafeBlockData = await publicClient.getBlock();
+
+      if (!latestSafeBlockData) {
+        throw new HTTPException(500, {
+          message: `Failed to fetch latest safe block for chainId ${indexedChainId}`,
+        });
+      }
+
+      // mapping latest safe block
+      const latestSafeBlock = {
+        number: Number(latestSafeBlockData.number),
+        timestamp: Number(latestSafeBlockData.timestamp),
+      } satisfies BlockInfo;
+
+      // mapping chain id to its string representation for metric queries
       const network = indexedChainId.toString();
+
+      // mapping last synced block if available
+      const lastSyncedBlockHeight = metrics.getValue("ponder_sync_block", {
+        network,
+      });
+      let lastSyncedBlock: BlockInfo | null = null;
+      if (lastSyncedBlockHeight) {
+        lastSyncedBlock = await fetchBlockMetadata(lastSyncedBlockHeight);
+      }
+
+      // mapping last indexed block if available
       const ponderStatusForNetwork = ponderStatus.find((s) => s.network_name === network);
+      let lastIndexedBlock: BlockInfo | null = null;
+      if (ponderStatusForNetwork) {
+        lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForNetwork);
+      }
 
-      const lastSyncedBlockHeight =
-        metrics.getValue("ponder_sync_block", {
-          network,
-        }) ?? null;
-
-      const lastSyncedBlock = lastSyncedBlockHeight
-        ? await publicClient.getBlock({
-            blockNumber: BigInt(lastSyncedBlockHeight),
-          })
-        : null;
-
-      const firstIndexedBlock = await fetchIndexingStartBlockNumbersByChainId(indexedChainId);
-      const lastIndexedBlock = mapPonderStatusBlockToBlockMetadata(ponderStatusForNetwork);
-
-      networkIndexingStatus[network] = {
-        totalBlocksCount:
-          metrics.getValue("ponder_historical_total_blocks", {
-            network,
-          }) ?? null,
-        cachedBlocksCount:
-          metrics.getValue("ponder_historical_cached_blocks", {
-            network,
-          }) ?? null,
-        firstBlockToIndex: firstIndexedBlock ? blockInfo(firstIndexedBlock) : null,
-        lastSyncedBlock: lastSyncedBlock
-          ? blockInfo({
-              number: Number(lastSyncedBlock.number),
-              timestamp: Number(lastSyncedBlock.timestamp),
-            })
-          : null,
-        latestSafeBlock: blockInfo({
-          number: Number(latestSafeBlock.number),
-          timestamp: Number(latestSafeBlock.timestamp),
-        }),
+      networkIndexingStatusByChainId[indexedChainId] = {
+        lastSyncedBlock,
         lastIndexedBlock,
-        isRealtime: Boolean(metrics.getValue("ponder_sync_is_realtime", { network })),
-        isComplete: Boolean(metrics.getValue("ponder_sync_is_complete", { network })),
-        isQueued: lastIndexedBlock === null,
+        latestSafeBlock,
+        firstBlockToIndex: await query.firstBlockToIndexByChainId(indexedChainId, publicClient),
       } satisfies NetworkIndexingStatus;
     }
 
-    return ctx.json({
+    const response = {
       app,
-      // application dependencies version
       deps: {
-        ponder: metrics.getLabel("ponder_version_info", "version"),
-        nodejs: metrics.getLabel("nodejs_version_info", "version"),
+        ponder: formatTextMetricValue(metrics.getLabel("ponder_version_info", "version")),
+        nodejs: formatTextMetricValue(metrics.getLabel("nodejs_version_info", "version")),
       },
-      // application environment variables
       env,
-      // application runtime information
       runtime: {
-        // application build id
-        // https://github.com/ponder-sh/ponder/blob/626e524/packages/core/src/build/index.ts#L425-L431
-        codebaseBuildId: ponderMeta?.build_id,
-        networkIndexingStatus,
+        codebaseBuildId: formatTextMetricValue(ponderMeta.build_id),
+        networkIndexingStatusByChainId,
       },
-    });
+    } satisfies PonderMetadataMiddlewareResponse;
+
+    // validate if response is in correct state
+    validateResponse(response);
+
+    return ctx.json(response);
   };
 }
 
-function blockInfo(block: {
-  number: number | null;
-  timestamp: number | null;
-}): BlockMetadata | null {
-  if (!block.number) {
+function validateResponse(response: PonderMetadataMiddlewareResponse) {
+  const { networkIndexingStatusByChainId } = response.runtime;
+
+  if (Object.keys(networkIndexingStatusByChainId).length === 0) {
+    throw new HTTPException(500, {
+      message: "No network indexing status found",
+    });
+  }
+
+  if (Object.values(networkIndexingStatusByChainId).some((n) => n.firstBlockToIndex === null)) {
+    throw new HTTPException(500, {
+      message: "Failed to fetch first block to index for some networks",
+    });
+  }
+}
+
+/**
+ * Formats a text metric value.
+ * @param value
+ * @returns
+ */
+function formatTextMetricValue(value?: string): string {
+  return value ?? "unknown";
+}
+
+/**
+ * Converts a Ponder block status to a block info object.
+ **/
+function ponderBlockInfoToBlockMetadata(block: PonderBlockStatus | undefined): BlockInfo | null {
+  if (!block) {
+    return null;
+  }
+
+  if (!block.block_number || !block.block_timestamp) {
     return null;
   }
 
   return {
-    height: block.number,
-    timestamp: block.timestamp ?? 0,
-    utc: block.timestamp ? new Date(block.timestamp * 1000).toISOString() : "",
-  };
-}
-
-function mapPonderStatusBlockToBlockMetadata(
-  block:
-    | {
-        block_number: number | null;
-        block_timestamp: number | null;
-      }
-    | undefined,
-): BlockMetadata | null {
-  if (!block?.block_number) {
-    return null;
-  }
-
-  return blockInfo({
     number: block.block_number,
     timestamp: block.block_timestamp,
-  });
+  };
 }

@@ -1,57 +1,13 @@
 import { selectedEnsNodeUrl } from "@/lib/env";
+import type { PonderMetadataMiddlewareResponse } from "@ensnode/ponder-metadata";
 import { useQuery } from "@tanstack/react-query";
 
-export interface NetworkIndexingStatus {
-  totalBlocksCount: number;
-  cachedBlocksCount: number;
-  firstBlockToIndex: {
-    height: number;
-    timestamp: number;
-    utc: string;
-  } | null;
-  lastSyncedBlock: {
-    height: number;
-    timestamp: number;
-    utc: string;
-  };
-  lastIndexedBlock: {
-    height: number;
-    timestamp: number;
-    utc: string;
-  } | null;
-  latestSafeBlock: {
-    height: number;
-    timestamp: number;
-    utc: string;
-  };
-  isRealtime: boolean;
-  isComplete: boolean;
-  isQueued: boolean;
-  status: string;
-}
+/**
+ * The status of the ENS node.
+ */
+export interface EnsNodeMetadata extends PonderMetadataMiddlewareResponse {}
 
-export interface IndexingStatus {
-  app: {
-    name: string;
-    version: string;
-  };
-  deps: {
-    ponder: string;
-    nodejs: string;
-  };
-  env: {
-    ACTIVE_PLUGINS: string;
-    DATABASE_SCHEMA: string;
-    ENS_DEPLOYMENT_CHAIN: string;
-  };
-  runtime: {
-    codebaseBuildId: string;
-    indexingStartedAt: number;
-    networkIndexingStatus: Record<string, NetworkIndexingStatus>;
-  };
-}
-
-async function fetchIndexingStatus(baseUrl: string): Promise<IndexingStatus> {
+async function fetchEnsNodeStatus(baseUrl: string): Promise<EnsNodeMetadata> {
   const response = await fetch(new URL(`/metadata`, baseUrl));
 
   if (!response.ok) {
@@ -66,6 +22,28 @@ export function useIndexingStatus(searchParams: URLSearchParams) {
 
   return useQuery({
     queryKey: ["indexing-status", ensNodeUrl],
-    queryFn: () => fetchIndexingStatus(ensNodeUrl),
+    queryFn: () => fetchEnsNodeStatus(ensNodeUrl),
+    select(data) {
+      validateResponse(data);
+
+      return data;
+    },
   });
+}
+
+function validateResponse(response: EnsNodeMetadata) {
+  const logPrefix = `[${response.app.name}@${response.app.version}]:`;
+  const { networkIndexingStatusByChainId } = response.runtime;
+
+  if (typeof networkIndexingStatusByChainId === "undefined") {
+    throw new Error(`${logPrefix} Network indexing status not found`);
+  }
+
+  if (Object.keys(networkIndexingStatusByChainId).length === 0) {
+    throw new Error(`${logPrefix} No network indexing status found`);
+  }
+
+  if (Object.values(networkIndexingStatusByChainId).some((n) => n.firstBlockToIndex === null)) {
+    throw new Error(`${logPrefix} Failed to fetch first block to index for some networks`);
+  }
 }

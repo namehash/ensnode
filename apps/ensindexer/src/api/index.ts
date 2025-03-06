@@ -1,16 +1,18 @@
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { ponderMetadata } from "@ensnode/ponder-metadata/middleware";
+import { ponderMetadata } from "@ensnode/ponder-metadata";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import packageJson from "../../package.json";
-import { getIndexingStartBlockNumbersByChainId } from "../lib/plugin-helpers";
 import {
   ensNodePublicUrl,
+  fetchFirstBlockToIndexByChainId,
+  fetchPrometheusMetrics,
   getEnsDeploymentChain,
   ponderDatabaseSchema,
+  ponderPort,
   requestedPluginNames,
 } from "../lib/ponder-helpers";
 
@@ -49,32 +51,12 @@ app.get(
       ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
     },
     db,
-    fetchIndexingStartBlockNumbersByChainId: async (chainId: number) => {
-      const startBlocksByChainId = await getIndexingStartBlockNumbersByChainId();
-      const startBlockHeight = startBlocksByChainId[`${chainId}`] ?? null;
-
-      if (!startBlockHeight) {
-        return null;
-      }
-
-      if (publicClients[chainId] && startBlockHeight) {
-        const block = await publicClients[chainId].getBlock({
-          blockNumber: BigInt(startBlockHeight),
-        });
-
-        return {
-          number: Number(block.number),
-          timestamp: Number(block.timestamp),
-        };
-      }
-
-      return {
-        number: startBlockHeight,
-        timestamp: null,
-      };
+    query: {
+      // setup block indexing status fetching
+      firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
+      // setup prometheus metrics fetching
+      prometheusMetrics: () => fetchPrometheusMetrics(ponderPort()),
     },
-    fetchPrometheusMetrics: () =>
-      fetch(`http://localhost:${process.env.PORT}/metrics`).then((res) => res.text()),
     publicClients,
   }),
 );

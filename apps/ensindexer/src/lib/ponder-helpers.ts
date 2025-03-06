@@ -1,7 +1,10 @@
 import type { Event } from "ponder:registry";
 import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
+import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { merge as tsDeepMerge } from "ts-deepmerge";
+import { PublicClient } from "viem";
+import { getIndexingStartBlockNumberForChainId } from "./plugin-helpers";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -245,3 +248,69 @@ export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
 
   return rawValue.split(",");
 };
+
+/** Get the Ponder application port */
+export const ponderPort = (): number => {
+  const envVarName = "PORT";
+  const envVarValue = process.env[envVarName];
+
+  try {
+    return parsePonderPort(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
+  }
+};
+
+export const parsePonderPort = (rawValue?: string): number => {
+  if (!rawValue) {
+    throw new Error("Expected value not set");
+  }
+
+  const parsedValue = parseInt(rawValue, 10);
+
+  if (Number.isNaN(parsedValue)) {
+    throw new Error(`'${rawValue}' is not a number`);
+  }
+
+  if (parsedValue <= 0) {
+    throw new Error(`'${rawValue}' is not a natural number`);
+  }
+
+  return parsedValue;
+};
+
+/**
+ * Fetches the Prometheus metrics from the Ponder application endpoint.
+ * @param {number} ponderApplicationPort
+ * @returns Prometheus metrics as a text string
+ */
+export async function fetchPrometheusMetrics(ponderApplicationPort: number): Promise<string> {
+  const response = await fetch(`http://localhost:${ponderApplicationPort}/metrics`);
+
+  return response.text();
+}
+
+/**
+ *
+ * @param chainId
+ * @param publicClient {PublicCli}
+ * @returns
+ */
+export async function fetchFirstBlockToIndexByChainId(
+  chainId: number,
+  publicClient: PublicClient,
+): Promise<BlockInfo> {
+  const startBlockHeight = await getIndexingStartBlockNumberForChainId(chainId);
+  const block = await publicClient.getBlock({
+    blockNumber: BigInt(startBlockHeight),
+  });
+
+  if (!block) {
+    throw Error(`Failed to fetch block ${startBlockHeight} for chainId ${chainId}`);
+  }
+
+  return {
+    number: Number(block.number),
+    timestamp: Number(block.timestamp),
+  };
+}

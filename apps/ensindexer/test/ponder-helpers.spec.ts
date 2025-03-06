@@ -6,6 +6,7 @@ import {
   deepMergeRecursive,
   parseEnsNodePublicUrl,
   parseEnsRainbowEndpointUrl,
+  parsePonderPort,
   parseRequestedPluginNames,
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
@@ -102,6 +103,24 @@ describe("ponder helpers", () => {
 
     it("should throw an error if the list is not set", () => {
       expect(() => parseRequestedPluginNames()).toThrowError("Expected value not set");
+    });
+  });
+
+  describe("parsePonderPort", () => {
+    it("should return the port if the environment variable is set correctly", () => {
+      expect(parsePonderPort("3000")).toBe(3000);
+    });
+
+    it("should throw an error if the port is not a number", () => {
+      expect(() => parsePonderPort("abc")).toThrowError("'abc' is not a number");
+    });
+
+    it("should throw an error if the port is not a natural number", () => {
+      expect(() => parsePonderPort("-1")).toThrowError("'-1' is not a natural number");
+    });
+
+    it("should throw an error if the port is missing", () => {
+      expect(() => parsePonderPort()).toThrowError("Expected value not set");
     });
   });
 

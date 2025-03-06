@@ -1,49 +1,43 @@
-export interface BlockMetadata {
-  height: number;
+/**
+ * Basic information about a block in the Ponder status.
+ */
+export interface PonderBlockStatus {
+  /** block number if available */
+  block_number: number | null;
+
+  /** block timestamp if available */
+  block_timestamp: number | null;
+}
+
+/**
+ * Basic information about a block.
+ */
+export interface BlockInfo {
+  /** block number */
+  number: number;
+
+  /** block unix timestamp */
   timestamp: number;
-  utc: string;
 }
 
 export interface NetworkIndexingStatus {
   /**
-   * Number of blocks required for the historical sync.
+   * First block required to be indexed for the historical sync.
    */
-  totalBlocksCount: number | null;
-
-  /**
-   *  Number of blocks that were found in the cache for the historical sync.
-   */
-  cachedBlocksCount: number | null;
-
-  firstBlockToIndex: BlockMetadata | null;
+  firstBlockToIndex: BlockInfo;
 
   /**
    * Closest-to-tip synced block number.
    */
-  lastSyncedBlock: BlockMetadata | null;
+  lastSyncedBlock: BlockInfo | null;
 
   /**
    * Last block processed & indexed by the indexer.
    */
-  lastIndexedBlock: BlockMetadata | null;
+  lastIndexedBlock: BlockInfo | null;
 
   /**
    * Latest safe block available on the chain.
    */
-  latestSafeBlock: BlockMetadata | null;
-
-  /**
-   * Indicating if the sync is realtime mode.
-   */
-  isRealtime: boolean;
-
-  /**
-   * Indicating if the sync has synced all blocks up to the tip.
-   */
-  isComplete: boolean;
-
-  /**
-   * Indicating if the sync is queued.
-   */
-  isQueued: boolean;
+  latestSafeBlock: BlockInfo;
 }

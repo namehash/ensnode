@@ -27,6 +27,13 @@ const getPonderMeta = (namespace: NamespaceBuild) => {
   }));
 };
 
+type PonderStatus = {
+  network_name: string;
+  block_number: number;
+  block_timestamp: number;
+  ready: boolean;
+};
+
 const getPonderStatus = (namespace: NamespaceBuild) => {
   if (namespace === "public") {
     return pgTable("_ponder_status", (t) => ({
@@ -51,7 +58,7 @@ export async function queryPonderStatus(
 ) {
   const PONDER_STATUS = getPonderStatus(namespace);
 
-  return db.select().from(PONDER_STATUS);
+  return db.select().from(PONDER_STATUS) as unknown as Array<typeof PONDER_STATUS.$inferSelect>;
 }
 
 export async function queryPonderMeta(
@@ -65,5 +72,5 @@ export async function queryPonderMeta(
     .from(PONDER_META)
     .where(eq(PONDER_META.key, "app"))
     .limit(1)
-    .then((result: any) => result[0]?.value);
+    .then((result: any) => result[0]?.value) as unknown as typeof PONDER_META.$inferSelect.value;
 }

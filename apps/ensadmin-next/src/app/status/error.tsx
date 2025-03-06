@@ -1,6 +1,7 @@
 "use client";
 
 import { PageShell } from "@/components/page-shell";
+import { useEffect } from "react";
 
 export default function Error({
   error,
@@ -8,6 +9,11 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // log the error to the console for operators
+    console.error(error);
+  }, [error]);
+
   return (
     <PageShell>
       <div className="p-6">
