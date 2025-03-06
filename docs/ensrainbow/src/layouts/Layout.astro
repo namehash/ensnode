@@ -4,7 +4,7 @@ import Footer from "../components/organisms/Footer";
 import {AstroFont} from "astro-font";
 import "@namehash/namekit-react/styles.css";
 import { SEO } from "astro-seo";
-// {rel:"manifest", href:"/public/site.webmanifest"} - remove and see if it affects OG
+// {rel: "apple-touch-icon", href: "/public/apple-touch-icon.png"} - remove and see if it affects OG
 ---
 
 <!doctype html>
@@ -52,7 +52,7 @@ import { SEO } from "astro-seo";
 		extend={{
         link: [
 			{ rel: "icon", href: "/favicon.svg" },
-			{rel: "apple-touch-icon", href: "/public/apple-touch-icon.png"}
+			{rel:"manifest", href:"/site.webmanifest"}
 			],
 		}}
 	/>
