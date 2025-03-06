@@ -14,8 +14,8 @@ import { getEnsDeploymentChain } from "./ponder-helpers";
 export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChain()];
 
 /**
- * Note that here, we define the global DEPLOYMENT_CONFIG as the _merge_ of mainnet (which fully
- * specifies all plugin configs), overrided with the SELECTED_DEPLOYMENT_CONFIG.
+ * Note that here, we define the global DEPLOYMENT_CONFIG as the _merge_ of all possible deployments
+ * (therefore fully specifying all plugin configs), overrided with the SELECTED_DEPLOYMENT_CONFIG.
  *
  * This ensures that at type-check-time and in `ALL_PLUGINS` every plugin's `config` has valid values
  * (and therefore its type can continue to be inferred). This means that initially upon building the
@@ -26,6 +26,9 @@ export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChai
  */
 export const DEPLOYMENT_CONFIG = {
   ...DeploymentConfigs.mainnet,
+  ...DeploymentConfigs.sepolia,
+  ...DeploymentConfigs.holesky,
+  ...DeploymentConfigs["ens-test-env"],
   ...SELECTED_DEPLOYMENT_CONFIG,
 };
 

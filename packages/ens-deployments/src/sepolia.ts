@@ -1,4 +1,5 @@
 import { mergeAbis } from "@ponder/utils";
+import { parseAbiItem } from "viem";
 import { sepolia } from "viem/chains";
 
 import { ETHResolverFilter } from "./filters";
@@ -12,6 +13,12 @@ import { LegacyPublicResolver as eth_LegacyPublicResolver } from "./abis/eth/Leg
 import { NameWrapper as eth_NameWrapper } from "./abis/eth/NameWrapper";
 import { Registry as eth_Registry } from "./abis/eth/Registry";
 import { Resolver as eth_Resolver } from "./abis/eth/Resolver";
+
+// ENS v2 ABIs
+import { ETHRegistry as ensv2_ETHRegistry } from "./abis/ensv2/ETHRegistry";
+import { OwnedResolver as ensv2_OwnedResolver } from "./abis/ensv2/OwnedResolver";
+import { RegistryDatastore as ensv2_RegistryDatastore } from "./abis/ensv2/RegistryDatastore";
+import { RootRegistry as ensv2_RootRegistry } from "./abis/ensv2/RootRegistry";
 
 /**
  * The "ENS deployment" configuration for 'sepolia'.
@@ -60,6 +67,40 @@ export default {
         abi: eth_NameWrapper,
         address: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
         startBlock: 3790153,
+      },
+    },
+  },
+  "ens-v2": {
+    chain: sepolia,
+
+    // Addresses and Start Blocks from ens-ponder
+    // https://github.com/ensdomains/ens-ponder
+    contracts: {
+      EthRegistry: {
+        abi: ensv2_ETHRegistry,
+        address: "0xFd8562F0B884b5f8d137ff50D25fc26b34868172",
+        startBlock: 7699319,
+      },
+      RegistryDatastore: {
+        abi: ensv2_RegistryDatastore,
+        address: "0x73308B430b61958e3d8C4a6db08153372d5eb125",
+        startBlock: 7699319,
+      },
+      RootRegistry: {
+        abi: ensv2_RootRegistry,
+        address: "0xc44D7201065190B290Aaaf6efaDFD49d530547A3",
+        startBlock: 7699319,
+      },
+      OwnedResolver: {
+        abi: ensv2_OwnedResolver,
+        factory: {
+          address: "0x33d438bb85B76C9211c4F259109D94Fe83F5A5eC",
+          event: parseAbiItem(
+            "event ProxyDeployed(address indexed sender, address indexed proxyAddress, uint256 salt, address implementation)",
+          ),
+          parameter: "proxyAddress",
+        },
+        startBlock: 7699319,
       },
     },
   },

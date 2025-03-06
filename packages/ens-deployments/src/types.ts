@@ -1,3 +1,4 @@
+import type { factory } from "ponder";
 import type { Abi, Address, Chain } from "viem";
 
 /**
@@ -16,7 +17,7 @@ export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-e
 /**
  * Encodes a set of known subregistries.
  */
-export type SubregistryName = "eth" | "base" | "linea";
+export type SubregistryName = "eth" | "base" | "linea" | "ens-v2";
 
 /**
  * EventFilter specifies a given event's name and arguments to filter that event by.
@@ -42,12 +43,21 @@ export type SubregistryContractConfig =
       readonly abi: Abi;
       readonly address: Address;
       readonly filter?: never;
+      readonly factory?: never;
       readonly startBlock: number;
     }
   | {
       readonly abi: Abi;
       readonly address?: never;
       readonly filter: EventFilter[];
+      readonly factory?: never;
+      readonly startBlock: number;
+    }
+  | {
+      readonly abi: Abi;
+      readonly address?: never;
+      readonly filter?: never;
+      readonly factory: Parameters<typeof factory>[0];
       readonly startBlock: number;
     };
 
@@ -83,4 +93,11 @@ export type ENSDeploymentConfig = {
    * Optional for each "ENS deployment".
    */
   linea?: SubregistryDeploymentConfig;
+
+  /**
+   * ENS v2 Contracts
+   * TODO: the naming in this package is no longer accurate — perhaps this should be 'AddressBook'
+   * or something like that.
+   */
+  "ens-v2"?: SubregistryDeploymentConfig;
 };

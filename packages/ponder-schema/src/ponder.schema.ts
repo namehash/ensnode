@@ -678,3 +678,106 @@ export const versionChangedRelations = relations(versionChanged, ({ one }) => ({
     references: [resolver.id],
   }),
 }));
+
+/**
+ * ENS v2 Isolated Schema
+ *
+ * NOTE: These entities kept namespaced for rapid prototyping—see v2 plans for additional context.
+ * https://www.ensnode.io/ensnode/reference/ensnode-v2-notes/
+ *
+ * Original Schema from https://github.com/ensdomains/ens-ponder
+ */
+
+export const v2_domain = onchainTable("v2_domain", (t) => ({
+  id: t.text().primaryKey(),
+  label: t.text(),
+  name: t.text().array(), // Will store serialized array as JSON string
+  labelHash: t.text(),
+  owner: t.text(),
+  registry: t.text(),
+  isTld: t.boolean(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const v2_domainRelations = relations(v2_domain, ({ one }) => ({
+  registry: one(v2_registry, {
+    fields: [v2_domain.registry],
+    references: [v2_registry.id],
+  }),
+}));
+
+export const v2_registry = onchainTable("v2_registry", (t) => ({
+  id: t.text().primaryKey(),
+  labelHash: t.text(),
+  label: t.text(),
+  subregistryId: t.text(),
+  resolver: t.text(),
+  flags: t.bigint(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const v2_subregistryUpdateEvent = onchainTable("v2_subregistryUpdateEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  labelHash: t.text(),
+  subregistryId: t.text(),
+  flags: t.bigint(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const v2_resolverUpdateEvent = onchainTable("v2_resolverUpdateEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  labelHash: t.text(),
+  resolverId: t.text(),
+  flags: t.bigint(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const v2_newSubnameEvent = onchainTable("v2_newSubnameEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  label: t.text(),
+  labelHash: t.text(),
+  source: t.text(), // "EthRegistry" or "RootRegistry"
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const v2_registryRelations = relations(v2_registry, ({ one }) => ({
+  subregistry: one(v2_registry, {
+    fields: [v2_registry.subregistryId],
+    references: [v2_registry.id],
+  }),
+}));
+
+export const v2_resolver = onchainTable("v2_resolver", (t) => ({
+  id: t.text().primaryKey(),
+  address: t.text(),
+  node: t.text(),
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
+
+export const v2_registryResolverRelations = relations(v2_registry, ({ one }) => ({
+  resolver: one(v2_resolver, {
+    fields: [v2_registry.resolver],
+    references: [v2_resolver.id],
+  }),
+}));
+
+export const v2_transferSingleEvent = onchainTable("v2_transferSingleEvent", (t) => ({
+  id: t.text().primaryKey(),
+  registryId: t.text(),
+  tokenId: t.text(),
+  from: t.text(),
+  to: t.text(),
+  value: t.bigint(),
+  source: t.text(), // "EthRegistry" or "RootRegistry"
+  createdAt: t.bigint("createdAt").notNull(),
+  updatedAt: t.bigint("updatedAt").notNull(),
+}));
