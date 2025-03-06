@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   type EnsRainbow,
   EnsRainbowApiClient,
@@ -13,6 +13,8 @@ describe("EnsRainbowApiClient", () => {
 
   beforeEach(() => {
     client = new EnsRainbowApiClient();
+    // Reset any mocks between tests
+    vi.restoreAllMocks();
   });
 
   it("should apply default options when no options provided", () => {
@@ -83,6 +85,44 @@ describe("EnsRainbowApiClient", () => {
     expect(response).toEqual({
       status: "ok",
     } satisfies EnsRainbow.HealthResponse);
+  });
+
+  describe("Network exceptions", () => {
+    it("should let connection lost exceptions flow through in heal method", async () => {
+      // Mock fetch to simulate a connection lost error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
+
+      // The heal method should not catch the error
+      await expect(client.heal("0x1234567890abcdef")).rejects.toThrow("Connection lost");
+    });
+
+    it("should let connection lost exceptions flow through in count method", async () => {
+      // Mock fetch to simulate a connection lost error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
+
+      // The count method should not catch the error
+      await expect(client.count()).rejects.toThrow("Connection lost");
+    });
+
+    it("should let connection lost exceptions flow through in health method", async () => {
+      // Mock fetch to simulate a connection lost error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
+
+      // The health method should not catch the error
+      await expect(client.health()).rejects.toThrow("Connection lost");
+    });
+  });
+
+  describe("Real network exceptions (no mocking)", () => {
+    it("should let network errors flow through when connecting to non-existent endpoint", async () => {
+      // Create a client with a non-existent endpoint
+      const nonExistentClient = new EnsRainbowApiClient({
+        endpointUrl: new URL("http://non-existent-domain-that-will-fail.example"),
+      });
+
+      // The API call should fail with a network error and not be caught by the client
+      await expect(nonExistentClient.health()).rejects.toThrow();
+    });
   });
 });
 
