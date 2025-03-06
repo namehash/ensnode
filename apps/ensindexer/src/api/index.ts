@@ -23,6 +23,13 @@ app.use(
   }),
 );
 
+app.onError((err, ctx) => {
+  // log the error for operators
+  console.error(err);
+
+  return ctx.text("Internal server error", 500);
+});
+
 // use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
 app.use("/", async (ctx) =>
   ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
