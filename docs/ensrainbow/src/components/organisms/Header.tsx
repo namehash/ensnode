@@ -26,7 +26,7 @@ export default function Header() {
                     </Button>
 
                     <Button variant="ghost" asChild>
-                        <Link href="https://github.com/namehash/ensnode/tree/main/apps/ensrainbow">
+                        <Link href="https://github.com/namehash/ensnode">
                             <GithubIcon className="fill-current"/>
                         </Link>
                     </Button>
@@ -42,7 +42,7 @@ export default function Header() {
                     </button>
 
                     <button className="p-[7px]">
-                        <Link href="https://github.com/namehash/ensnode/tree/main/apps/ensrainbow">
+                        <Link href="https://github.com/namehash/ensnode">
                             <GithubIcon className="fill-current"/>
                         </Link>
                     </button>

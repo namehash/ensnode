@@ -57,7 +57,7 @@ const devElements: ListSectionElement[] = [
                 <GithubIconDevelopers/>
             </div>
         ),
-        link: "https://github.com/namehash/ensnode/tree/main/apps/ensrainbow",
+        link: "https://github.com/namehash/ensnode",
     },
     {
         header: (

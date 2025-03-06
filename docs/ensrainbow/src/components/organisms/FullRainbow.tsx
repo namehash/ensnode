@@ -6,7 +6,7 @@ export default function FullRainbow() {
     const sectionDescription = "Our goal is to heal as many ENS names as possible. The ENS community has better things to do than learn about technical complexities like unknown names or encoded labelhashes.";
 
     const badge = (text: string) => <span
-        className="relative inline-flex items-center justify-center rounded-[10px] sm:rounded-xl bg-black px-[10px] sm:px-3 py-0.5 text-center font-medium text-white not-italic text-xs leading-4 sm:text-sm sm:leading-5">
+        className="relative inline-flex items-center justify-center rounded-[10px] sm:rounded-xl bg-black px-[10px] sm:px-3 py-0.5 text-center font-normal text-white not-italic text-xs leading-4">
       {text}
     </span>;
 

@@ -4,6 +4,7 @@ import Footer from "../components/organisms/Footer";
 import {AstroFont} from "astro-font";
 import "@namehash/namekit-react/styles.css";
 import { SEO } from "astro-seo";
+// {rel:"manifest", href:"/public/site.webmanifest"} - remove and see if it affects OG
 ---
 
 <!doctype html>
@@ -33,25 +34,25 @@ import { SEO } from "astro-seo";
 			basic: {
 				title: "ENSRainbow - making the unknown, known",
 				type: "image/png",
-				image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
+				image: "/og-image.png",
+				url: "https://ensrainbow.io/",
 			},
 			optional: {
-				description: "Install the SDK and leverage publicly deployed service",
-				siteName: "ENSNode"
+				description: "Heal millions of unknown ENS names with this ENSNode sidecar service.",
+				siteName: "ENSRainbow"
 			}
 		}}
 		twitter={{
-			creator: "@lightwalker.eth",
+			creator: "@NameHashLabs",
 			title: "ENSRainbow - making the unknown, known",
-			image: "https://raw.githubusercontent.com/namehash/ensnode/refs/heads/y3drk/ensrainbow-docs-dynamic-bar-chart/docs/ensrainbow/public/temporary-og-image.png",
-			description: "ENSRainbow is a sidecar service for ENSNode, the new multichain indexer for ENSv2.",
+			image: "/twitter-og-image.png",
+			description: "Heal millions of unknown ENS names with this ENSNode sidecar service.",
 			card: "summary"
 		}}
 		extend={{
         link: [
 			{ rel: "icon", href: "/favicon.svg" },
-			{rel: "apple-touch-icon", href: "/public/apple-touch-icon.png"},
-			{rel:"manifest", href:"/public/site.webmanifest"}
+			{rel: "apple-touch-icon", href: "/public/apple-touch-icon.png"}
 			],
 		}}
 	/>

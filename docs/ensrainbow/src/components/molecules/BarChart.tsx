@@ -61,7 +61,7 @@ export default function BarChart({
                                         overflow: 'hidden',
                                     }}
                                 >
-                                    <p className="absolute right-0 top-[calc(50%-8px)] text-xs leading-4 font-semibold px-2">{(item.value / maxValue) * 100}%{index === data.length - 1 && "+"}</p>
+                                    <p className="absolute right-0 top-[calc(50%-8px)] text-xs leading-4 font-semibold px-2">{index === data.length - 1 && "+"}{(item.value / maxValue) * 100}%</p>
                                     <div
                                         style={{
                                             position: 'absolute',
