@@ -4,7 +4,6 @@ import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
-import { getIndexingStartBlockNumberForChainId } from "./plugin-helpers";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -300,17 +299,80 @@ export async function fetchFirstBlockToIndexByChainId(
   chainId: number,
   publicClient: PublicClient,
 ): Promise<BlockInfo> {
-  const startBlockHeight = await getIndexingStartBlockNumberForChainId(chainId);
+  const startBlockNumbers = await getIndexingStartBlockNumbersByChainId();
+  const startBlockNumberForChainId = startBlockNumbers[chainId];
+
+  if (!startBlockNumberForChainId) {
+    throw new Error(`No start block number found for chain ID ${chainId}`);
+  }
+
   const block = await publicClient.getBlock({
-    blockNumber: BigInt(startBlockHeight),
+    blockNumber: BigInt(startBlockNumberForChainId),
   });
 
   if (!block) {
-    throw Error(`Failed to fetch block ${startBlockHeight} for chainId ${chainId}`);
+    throw Error(`Failed to fetch block ${startBlockNumberForChainId} for chainId ${chainId}`);
   }
 
   return {
     number: Number(block.number),
     timestamp: Number(block.timestamp),
   };
+}
+
+/**
+ * Get the global start block number for each chain ID.
+ *
+ * @returns the global start block number for each chain ID.
+ * @example
+ * ```ts
+ * {
+ *    1: 333742
+ *    8453: 1799433
+ * }
+ * ```
+ *
+ */
+async function getIndexingStartBlockNumbersByChainId() {
+  return Object.values((await import("../../ponder.config")).default.contracts)
+    .map((contractsConfig) =>
+      Object.entries(contractsConfig.network).flatMap(([chainId, c]) => {
+        return [chainId, c.startBlock];
+      }),
+    )
+    .reduce(
+      (acc, [chainId, startBlock]) => {
+        // no start block for this chain yet
+        if (!acc[chainId]) {
+          // set the start block
+          acc[chainId] = startBlock;
+          return acc;
+        }
+
+        // update the start block if the current one is lower
+        if (startBlock < acc[chainId]) {
+          acc[chainId] = startBlock;
+        }
+
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+}
+
+/**
+ * Get the start block number for a specific chain ID.
+ *
+ * @param chainId
+ * @returns indexing start block number
+ * @throws if no start block number is found for the chain ID
+ */
+async function getIndexingStartBlockNumberForChainId(chainId: number): Promise<number> {
+  const startBlockNumbers = await getIndexingStartBlockNumbersByChainId();
+
+  if (!startBlockNumbers[chainId]) {
+    throw new Error(`No start block number found for chain ID ${chainId}`);
+  }
+
+  return startBlockNumbers[chainId];
 }
