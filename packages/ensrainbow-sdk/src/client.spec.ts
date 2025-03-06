@@ -114,8 +114,7 @@ describe("EnsRainbowApiClient", () => {
 
     expect(response).toEqual({
       status: "error",
-      error:
-        "Invalid labelhash: contains non-hex characters: invalid-labelhash",
+      error: "Invalid labelhash: contains non-hex characters: invalid-labelhash",
       errorCode: 400,
     });
   });
