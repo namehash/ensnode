@@ -8,11 +8,25 @@ import { logger } from "../utils/logger";
 export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
   0xff, 0xff, 0xff, 0xff,
 ]) as ByteArray;
-export const SYSTEM_KEY_INGESTION_UNFINISHED = new Uint8Array([
-  0xff, 0xff, 0xff, 0xfe,
-]) as ByteArray;
+/**
+ * Key for storing the ingestion status
+ * Possible values:
+ * - unstarted: Ingestion has never been started
+ * - unfinished: Ingestion was started but hasn't finished
+ * - finished: Ingestion has finished successfully
+ */
+export const SYSTEM_KEY_INGESTION_STATUS = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
+
+// Ingestion status values
+export const IngestionStatus = {
+  Unstarted: "unstarted",
+  Unfinished: "unfinished",
+  Finished: "finished",
+} as const;
+
+export type IngestionStatus = (typeof IngestionStatus)[keyof typeof IngestionStatus];
 
 /**
  * Checks if a key is a system key (one of the special keys used for database metadata).
@@ -23,7 +37,7 @@ export function isSystemKey(key: ByteArray): boolean {
   return (
     !isRainbowRecordKey(key) &&
     (byteArraysEqual(key, SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT) ||
-      byteArraysEqual(key, SYSTEM_KEY_INGESTION_UNFINISHED) ||
+      byteArraysEqual(key, SYSTEM_KEY_INGESTION_STATUS) ||
       byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION))
   );
 }
@@ -178,26 +192,55 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Check if an ingestion is unfinished
-   * @returns true if an ingestion is unfinished, false otherwise
+   * Get the current ingestion status
+   * @returns The current ingestion status:
+   * - IngestionStatus.Unstarted: Ingestion has never been started
+   * - IngestionStatus.Unfinished: Ingestion was started but hasn't finished
+   * - IngestionStatus.Finished: Ingestion has finished successfully
+   * @throws Error if the value in the database is not a recognized enum value
    */
-  public async isIngestionUnfinished(): Promise<boolean> {
-    const value = await this.get(SYSTEM_KEY_INGESTION_UNFINISHED);
-    return value !== null;
+  public async getIngestionStatus(): Promise<IngestionStatus> {
+    const status = await this.get(SYSTEM_KEY_INGESTION_STATUS);
+    if (status === null) {
+      return IngestionStatus.Unstarted;
+    }
+
+    return ENSRainbowDB.validateIngestionStatus(status);
+  }
+
+  /**
+   * Validates if a string is a valid IngestionStatus value
+   * @param maybeIngestionStatus - The string to validate
+   * @returns The validated IngestionStatus
+   * @throws Error if the string is not a valid IngestionStatus
+   */
+  private static validateIngestionStatus(maybeIngestionStatus: string): IngestionStatus {
+    // Check if the provided string exists as a value in the IngestionStatus object
+    if (Object.values(IngestionStatus).includes(maybeIngestionStatus as any)) {
+      return maybeIngestionStatus as IngestionStatus;
+    }
+
+    // If not valid, throw an error with helpful message
+    throw new Error(
+      `Invalid ingestion status: "${maybeIngestionStatus}". ` +
+        `Valid values are: ${Object.values(IngestionStatus).join(", ")}`,
+    );
   }
 
   /**
    * Mark that an ingestion has started and is unfinished
+   * Sets the ingestion status to IngestionStatus.Unfinished
    */
-  public async markIngestionStarted(): Promise<void> {
-    await this.db.put(SYSTEM_KEY_INGESTION_UNFINISHED, "true");
+  public async markIngestionUnfinished(): Promise<void> {
+    await this.db.put(SYSTEM_KEY_INGESTION_STATUS, IngestionStatus.Unfinished);
   }
 
   /**
    * Mark that ingestion is finished
+   * Sets the ingestion status to IngestionStatus.Finished
    */
   public async markIngestionFinished(): Promise<void> {
-    await this.del(SYSTEM_KEY_INGESTION_UNFINISHED);
+    await this.db.put(SYSTEM_KEY_INGESTION_STATUS, IngestionStatus.Finished);
   }
 
   /**
@@ -359,9 +402,16 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Validates the database contents.
-   * @param options Optional validation options
-   * @param options.lite If true, performs a faster validation by skipping labelhash verification
+   * Validates the database to ensure it's in a consistent state.
+   *
+   * Validation includes:
+   * 1. Checking the ingestion status (must be "finished" for a valid database)
+   * 2. Verifying the schema version matches the expected version
+   * 3. In full validation mode: Verifying the keys for all rainbow records are valid labelhashes and match their related labels
+   * 4. In full validation mode: Verifying the precalculated rainbow record count matches the actual count
+   *
+   * @param options Validation options
+   * @param options.lite If true, performs a faster validation by skipping labelhash verification and precalculated record count validation
    * @returns boolean indicating if validation passed
    */
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
@@ -370,7 +420,26 @@ export class ENSRainbowDB {
 
     logger.info(`Starting database validation${isLiteMode ? " (lite mode)" : ""}...`);
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
-    if (await this.isIngestionUnfinished()) {
+
+    let ingestionStatus: IngestionStatus;
+    try {
+      ingestionStatus = await this.getIngestionStatus();
+    } catch (e) {
+      const errorMsg = generatePurgeErrorMessage(
+        `Database has an unknown ingestion status: ${e instanceof Error ? e.message : String(e)}`,
+      );
+      logger.error(errorMsg);
+      return false;
+    }
+
+    if (ingestionStatus === IngestionStatus.Unstarted) {
+      const errorMsg =
+        "Database has never been initialized with an ingestion process. Please run an ingestion first: pnpm run ingest <input-file>";
+      logger.error(errorMsg);
+      return false;
+    }
+
+    if (ingestionStatus === IngestionStatus.Unfinished) {
       const errorMsg = generatePurgeErrorMessage(
         "Database is in an incomplete state! An ingestion was started but not completed successfully.",
       );
