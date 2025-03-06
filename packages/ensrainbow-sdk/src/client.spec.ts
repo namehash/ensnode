@@ -63,7 +63,7 @@ describe("EnsRainbowApiClient", () => {
 
     expect(response).toEqual({
       status: StatusCode.Error,
-      error: "Invalid labelhash length 9 characters (expected 66)",
+      error: "Invalid labelhash format: Invalid labelhash: contains non-hex characters: 0xinvalid",
       errorCode: ErrorCode.BadRequest,
     } satisfies EnsRainbow.HealBadRequestError);
   });

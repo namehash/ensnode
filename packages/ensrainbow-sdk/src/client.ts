@@ -2,6 +2,7 @@ import type { Cache } from "@ensnode/utils/cache";
 import { LruCache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
+import { InvalidLabelhashError, parseEncodedLabelhash, parseLabelhash } from "./utils";
 
 export namespace EnsRainbow {
   export type ApiClientOptions = EnsRainbowApiClientOptions;
@@ -9,7 +10,7 @@ export namespace EnsRainbow {
   export interface ApiClient {
     count(): Promise<CountResponse>;
 
-    heal(labelhash: Labelhash): Promise<HealResponse>;
+    heal(labelhash: Labelhash | string): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
 
@@ -169,8 +170,9 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * - Labels can contain any valid string, including dots, null bytes, or be empty
    * - Clients should handle all possible string values appropriately
    *
-   * @param labelhash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
+   * @param labelhash - A labelhash to heal, either as a normalized Labelhash or as a string that can be normalized
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
+   * @throws {InvalidLabelhashError} If the provided labelhash cannot be normalized to a valid format
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
    *
    * @example
@@ -201,18 +203,56 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash): Promise<EnsRainbow.HealResponse> {
-    const cachedResult = this.cache.get(labelhash);
+  async heal(labelhash: Labelhash | string): Promise<EnsRainbow.HealResponse> {
+    // Normalize the labelhash if it's a string
+    let normalizedLabelhash: Labelhash;
+
+    if (typeof labelhash === "string") {
+      // Check if it's an encoded labelhash
+      if (labelhash.startsWith("[") && labelhash.endsWith("]")) {
+        try {
+          normalizedLabelhash = parseEncodedLabelhash(labelhash);
+        } catch (error) {
+          if (error instanceof InvalidLabelhashError) {
+            return {
+              status: StatusCode.Error,
+              error: `Invalid encoded labelhash format: ${error.message}`,
+              errorCode: ErrorCode.BadRequest,
+            } as EnsRainbow.HealBadRequestError;
+          }
+          throw error; // Re-throw unexpected errors
+        }
+      } else {
+        try {
+          normalizedLabelhash = parseLabelhash(labelhash);
+        } catch (error) {
+          if (error instanceof InvalidLabelhashError) {
+            return {
+              status: StatusCode.Error,
+              error: `Invalid labelhash format: ${error.message}`,
+              errorCode: ErrorCode.BadRequest,
+            } as EnsRainbow.HealBadRequestError;
+          }
+          throw error; // Re-throw unexpected errors
+        }
+      }
+    } else {
+      normalizedLabelhash = labelhash;
+    }
+
+    const cachedResult = this.cache.get(normalizedLabelhash);
 
     if (cachedResult) {
       return cachedResult;
     }
 
-    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    const response = await fetch(
+      new URL(`/v1/heal/${normalizedLabelhash}`, this.options.endpointUrl),
+    );
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
-      this.cache.set(labelhash, healResponse);
+      this.cache.set(normalizedLabelhash, healResponse);
     }
 
     return healResponse;
