@@ -33,7 +33,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     if (ingestionStatus === INGESTION_STATUS_UNFINISHED) {
       const errorMessage =
         "Database is in an incomplete state! " +
-        "An ingestion was started but not completed successfully.\n" +
+        "An ingestion was started but not finished successfully.\n" +
         "To fix this:\n" +
         "1. Delete the data directory\n" +
         "2. Run the ingestion command again: ensrainbow ingest <input-file>";
@@ -43,7 +43,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
 
     if (ingestionStatus === INGESTION_STATUS_DONE) {
       const errorMessage =
-        "Database already has a completed ingestion.\n" +
+        "ENSRainbow currently only supports a single ingestion. We're working to enhance this soon!\n" +
         "If you want to re-ingest data:\n" +
         "1. Delete the data directory\n" +
         "2. Run the ingestion command again: ensrainbow ingest <input-file>";

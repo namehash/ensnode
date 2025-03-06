@@ -13,7 +13,7 @@ export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
  * Possible values:
  * - null: Ingestion has never been started
  * - "unfinished": Ingestion was started but hasn't finished
- * - "done": Ingestion has completed successfully
+ * - "finished": Ingestion has finished successfully
  */
 export const SYSTEM_KEY_INGESTION_STATUS = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
@@ -25,7 +25,7 @@ export const SCHEMA_VERSION = 2;
  */
 export const INGESTION_STATUS_UNFINISHED = "unfinished";
 /**
- * Indicates that an ingestion has completed successfully
+ * Indicates that an ingestion has finished successfully
  */
 export const INGESTION_STATUS_DONE = "done";
 
@@ -197,7 +197,7 @@ export class ENSRainbowDB {
    * @returns The current ingestion status:
    * - null: Ingestion has never been started
    * - "unfinished": Ingestion was started but hasn't finished
-   * - "done": Ingestion has completed successfully
+   * - "finished": Ingestion has finished successfully
    */
   public async getIngestionStatus(): Promise<string | null> {
     return await this.get(SYSTEM_KEY_INGESTION_STATUS);
@@ -207,13 +207,13 @@ export class ENSRainbowDB {
    * Mark that an ingestion has started and is unfinished
    * Sets the ingestion status to "unfinished"
    */
-  public async markIngestionStarted(): Promise<void> {
+  public async markIngestionUnfinished(): Promise<void> {
     await this.db.put(SYSTEM_KEY_INGESTION_STATUS, INGESTION_STATUS_UNFINISHED);
   }
 
   /**
    * Mark that ingestion is finished
-   * Sets the ingestion status to "done"
+   * Sets the ingestion status to "finished"
    */
   public async markIngestionFinished(): Promise<void> {
     await this.db.put(SYSTEM_KEY_INGESTION_STATUS, INGESTION_STATUS_DONE);
@@ -381,9 +381,9 @@ export class ENSRainbowDB {
    * Validates the database to ensure it's in a consistent state.
    *
    * Validation includes:
-   * 1. Checking the ingestion status (must be "done" for a valid database)
+   * 1. Checking the ingestion status (must be "finished" for a valid database)
    * 2. Verifying the schema version matches the expected version
-   * 3. In full validation mode: Verifying all keys are valid labelhashes and match their labels
+   * 3. In full validation mode: Verifying the keys for all rainbow records are valid labelhashes and match their related labels
    * 4. Verifying the precalculated rainbow record count matches the actual count
    *
    * @param options Validation options
