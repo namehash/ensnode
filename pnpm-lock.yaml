@@ -439,8 +439,8 @@ importers:
         specifier: 'workspace:'
         version: link:../shared-configs
       ponder:
-        specifier: ^0.9.27
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        specifier: 'catalog:'
+        version: 0.9.26(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -2723,7 +2723,6 @@ packages:
 
   bun@1.2.2:
     resolution: {integrity: sha512-RUc8uVVTw8WoASUzXaEQJR1s7mnwoHm3P871qBUIqSaoOpuwcU+bSVX151/xoqDwnyv38SjOX7yQ3oO0IeT73g==}
-    cpu: [arm64, x64, aarch64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -4979,18 +4978,6 @@ packages:
 
   ponder@0.9.26:
     resolution: {integrity: sha512-iKbe1Ykre+Ky+dU8UQeKTBLrPduSXE5h/b5Dawot56YMx/MYrUj5CCvQzzWMd5LCJvdGt7gNJfmsvhFPQi30zg==}
-    engines: {node: '>=18.14'}
-    hasBin: true
-    peerDependencies:
-      hono: '>=4.5'
-      typescript: '>=5.0.4'
-      viem: '>=2'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
-  ponder@0.9.27:
-    resolution: {integrity: sha512-2lP1TqTrISyvdqPj+8HM5Ykxd4EzoYoEAyav+ImYTZrKv+o9ltZ32c3gg4SA569BGqxvPYroduoG/SvSwvJmbw==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -9423,7 +9410,7 @@ snapshots:
       '@typescript-eslint/parser': 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-react: 7.37.4(eslint@9.20.1(jiti@2.4.2))
@@ -9443,7 +9430,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)):
+  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.0
@@ -9458,14 +9445,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
@@ -9480,7 +9467,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -11657,84 +11644,6 @@ snapshots:
       - zod
 
   ponder@0.9.26(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
-    dependencies:
-      '@babel/code-frame': 7.26.2
-      '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
-      '@electric-sql/pglite': 0.2.13
-      '@escape.tech/graphql-armor-max-aliases': 2.6.0
-      '@escape.tech/graphql-armor-max-depth': 2.4.0
-      '@escape.tech/graphql-armor-max-tokens': 2.5.0
-      '@hono/node-server': 1.13.3(hono@4.6.17)
-      '@ponder/utils': 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
-      abitype: 0.10.3(typescript@5.7.3)(zod@3.24.2)
-      ansi-escapes: 7.0.0
-      commander: 12.1.0
-      conf: 12.0.0
-      dataloader: 2.2.3
-      detect-package-manager: 3.0.2
-      dotenv: 16.4.7
-      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
-      glob: 10.4.5
-      graphql: 16.10.0
-      graphql-yoga: 5.10.10(graphql@16.10.0)
-      hono: 4.6.17
-      http-terminator: 3.2.0
-      kysely: 0.26.3
-      pg: 8.11.3
-      pg-connection-string: 2.7.0
-      pg-copy-streams: 6.0.6
-      pg-query-emscripten: 5.1.0
-      picocolors: 1.1.1
-      pino: 8.21.0
-      prom-client: 15.1.3
-      semver: 7.7.1
-      stacktrace-parser: 0.1.10
-      superjson: 2.2.2
-      terminal-size: 4.0.0
-      viem: 2.22.13(typescript@5.7.3)(zod@3.24.2)
-      vite: 5.4.14(@types/node@22.13.5)(lightningcss@1.29.1)
-      vite-node: 1.0.2(@types/node@22.13.5)(lightningcss@1.29.1)
-      vite-tsconfig-paths: 4.3.1(typescript@5.7.3)(vite@5.4.14(@types/node@22.13.5)(lightningcss@1.29.1))
-    optionalDependencies:
-      typescript: 5.7.3
-    transitivePeerDependencies:
-      - '@aws-sdk/client-rds-data'
-      - '@cloudflare/workers-types'
-      - '@libsql/client'
-      - '@libsql/client-wasm'
-      - '@neondatabase/serverless'
-      - '@op-engineering/op-sqlite'
-      - '@opentelemetry/api'
-      - '@planetscale/database'
-      - '@prisma/client'
-      - '@tidbcloud/serverless'
-      - '@types/better-sqlite3'
-      - '@types/node'
-      - '@types/pg'
-      - '@types/sql.js'
-      - '@vercel/postgres'
-      - '@xata.io/client'
-      - better-sqlite3
-      - bun-types
-      - expo-sqlite
-      - knex
-      - less
-      - lightningcss
-      - mysql2
-      - pg-native
-      - postgres
-      - prisma
-      - sass
-      - sass-embedded
-      - sql.js
-      - sqlite3
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - zod
-
-  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)

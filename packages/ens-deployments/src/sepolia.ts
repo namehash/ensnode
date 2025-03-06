@@ -15,10 +15,10 @@ import { Registry as eth_Registry } from "./abis/eth/Registry";
 import { Resolver as eth_Resolver } from "./abis/eth/Resolver";
 
 // ENS v2 ABIs
-import { ETHRegistry as ensv2_ETHRegistry } from "./abis/ensv2/ETHRegistry";
-import { OwnedResolver as ensv2_OwnedResolver } from "./abis/ensv2/OwnedResolver";
-import { RegistryDatastore as ensv2_RegistryDatastore } from "./abis/ensv2/RegistryDatastore";
-import { RootRegistry as ensv2_RootRegistry } from "./abis/ensv2/RootRegistry";
+import { ETHRegistry as ensV2_ETHRegistry } from "./abis/ens-v2/ETHRegistry";
+import { OwnedResolver as ensV2_OwnedResolver } from "./abis/ens-v2/OwnedResolver";
+import { RegistryDatastore as ensV2_RegistryDatastore } from "./abis/ens-v2/RegistryDatastore";
+import { RootRegistry as ensV2_RootRegistry } from "./abis/ens-v2/RootRegistry";
 
 /**
  * The "ENS deployment" configuration for 'sepolia'.
@@ -77,22 +77,22 @@ export default {
     // https://github.com/ensdomains/ens-ponder
     contracts: {
       EthRegistry: {
-        abi: ensv2_ETHRegistry,
+        abi: ensV2_ETHRegistry,
         address: "0xFd8562F0B884b5f8d137ff50D25fc26b34868172",
         startBlock: 7699319,
       },
       RegistryDatastore: {
-        abi: ensv2_RegistryDatastore,
+        abi: ensV2_RegistryDatastore,
         address: "0x73308B430b61958e3d8C4a6db08153372d5eb125",
         startBlock: 7699319,
       },
       RootRegistry: {
-        abi: ensv2_RootRegistry,
+        abi: ensV2_RootRegistry,
         address: "0xc44D7201065190B290Aaaf6efaDFD49d530547A3",
         startBlock: 7699319,
       },
       OwnedResolver: {
-        abi: ensv2_OwnedResolver,
+        abi: ensV2_OwnedResolver,
         factory: {
           address: "0x33d438bb85B76C9211c4F259109D94Fe83F5A5eC",
           event: parseAbiItem(
