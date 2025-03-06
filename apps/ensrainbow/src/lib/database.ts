@@ -205,15 +205,25 @@ export class ENSRainbowDB {
       return IngestionStatus.Unstarted;
     }
 
+    return ENSRainbowDB.validateIngestionStatus(status);
+  }
+
+  /**
+   * Validates if a string is a valid IngestionStatus value
+   * @param maybeIngestionStatus - The string to validate
+   * @returns The validated IngestionStatus
+   * @throws Error if the string is not a valid IngestionStatus
+   */
+  private static validateIngestionStatus(maybeIngestionStatus: string): IngestionStatus {
     // Check if the provided string exists as a value in the IngestionStatus object
-    if (Object.values(IngestionStatus).includes(status as any)) {
-      return status as IngestionStatus;
+    if (Object.values(IngestionStatus).includes(maybeIngestionStatus as any)) {
+      return maybeIngestionStatus as IngestionStatus;
     }
-    
+
     // If not valid, throw an error with helpful message
     throw new Error(
-      `Invalid ingestion status: "${status}". ` +
-      `Valid values are: ${Object.values(IngestionStatus).join(', ')}`
+      `Invalid ingestion status: "${maybeIngestionStatus}". ` +
+        `Valid values are: ${Object.values(IngestionStatus).join(", ")}`,
     );
   }
 

@@ -303,7 +303,9 @@ describe("Database", () => {
         await batch.write();
 
         // The method should throw an error
-        await expect(ensDb.getIngestionStatus()).rejects.toThrow("Invalid ingestion status value");
+        await expect(ensDb.getIngestionStatus()).rejects.toThrow(
+          'Invalid ingestion status: "invalid_status". Valid values are: unstarted, unfinished, finished',
+        );
       } finally {
         // Close the database if it was opened
         if (ensDb) {
