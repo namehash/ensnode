@@ -216,7 +216,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
           if (error instanceof InvalidLabelhashError) {
             return {
               status: StatusCode.Error,
-              error: `Invalid encoded labelhash format: ${error.message}`,
+              error: error.message,
               errorCode: ErrorCode.BadRequest,
             } as EnsRainbow.HealBadRequestError;
           }
@@ -229,7 +229,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
           if (error instanceof InvalidLabelhashError) {
             return {
               status: StatusCode.Error,
-              error: `Invalid labelhash format: ${error.message}`,
+              error: error.message,
               errorCode: ErrorCode.BadRequest,
             } as EnsRainbow.HealBadRequestError;
           }

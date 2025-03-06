@@ -63,7 +63,7 @@ describe("EnsRainbowApiClient", () => {
 
     expect(response).toEqual({
       status: StatusCode.Error,
-      error: "Invalid labelhash format: Invalid labelhash: contains non-hex characters: 0xinvalid",
+      error: "Invalid labelhash: contains non-hex characters: 0xinvalid",
       errorCode: ErrorCode.BadRequest,
     } satisfies EnsRainbow.HealBadRequestError);
   });
@@ -115,7 +115,7 @@ describe("EnsRainbowApiClient", () => {
     expect(response).toEqual({
       status: "error",
       error:
-        "Invalid labelhash format: Invalid labelhash: contains non-hex characters: invalid-labelhash",
+        "Invalid labelhash: contains non-hex characters: invalid-labelhash",
       errorCode: 400,
     });
   });
