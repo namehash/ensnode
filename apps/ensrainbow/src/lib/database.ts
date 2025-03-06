@@ -11,23 +11,22 @@ export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
 /**
  * Key for storing the ingestion status
  * Possible values:
- * - null: Ingestion has never been started
- * - "unfinished": Ingestion was started but hasn't finished
- * - "finished": Ingestion has finished successfully
+ * - IngestionStatus.Unstarted: Ingestion has never been started
+ * - IngestionStatus.Unfinished: Ingestion was started but hasn't finished
+ * - IngestionStatus.Finished: Ingestion has finished successfully
  */
 export const SYSTEM_KEY_INGESTION_STATUS = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
 export const SCHEMA_VERSION = 2;
 
 // Ingestion status values
-/**
- * Indicates that an ingestion was started but hasn't finished
- */
-export const INGESTION_STATUS_UNFINISHED = "unfinished";
-/**
- * Indicates that an ingestion has finished successfully
- */
-export const INGESTION_STATUS_DONE = "done";
+export const IngestionStatus = {
+  Unstarted: "unstarted",
+  Unfinished: "unfinished",
+  Finished: "finished",
+} as const;
+
+export type IngestionStatus = (typeof IngestionStatus)[keyof typeof IngestionStatus];
 
 /**
  * Checks if a key is a system key (one of the special keys used for database metadata).
@@ -195,28 +194,40 @@ export class ENSRainbowDB {
   /**
    * Get the current ingestion status
    * @returns The current ingestion status:
-   * - null: Ingestion has never been started
-   * - "unfinished": Ingestion was started but hasn't finished
-   * - "finished": Ingestion has finished successfully
+   * - IngestionStatus.Unstarted: Ingestion has never been started
+   * - IngestionStatus.Unfinished: Ingestion was started but hasn't finished
+   * - IngestionStatus.Finished: Ingestion has finished successfully
+   * @throws Error if the value in the database is not a recognized enum value
    */
-  public async getIngestionStatus(): Promise<string | null> {
-    return await this.get(SYSTEM_KEY_INGESTION_STATUS);
+  public async getIngestionStatus(): Promise<IngestionStatus> {
+    const status = await this.get(SYSTEM_KEY_INGESTION_STATUS);
+    if (status === null) {
+      return IngestionStatus.Unstarted;
+    }
+
+    // Validate that the status is a recognized enum value
+    const validValues = Object.values(IngestionStatus) as string[];
+    if (!validValues.includes(status)) {
+      throw new Error(`Invalid ingestion status value found in database: ${status}`);
+    }
+
+    return status as IngestionStatus;
   }
 
   /**
    * Mark that an ingestion has started and is unfinished
-   * Sets the ingestion status to "unfinished"
+   * Sets the ingestion status to IngestionStatus.Unfinished
    */
   public async markIngestionUnfinished(): Promise<void> {
-    await this.db.put(SYSTEM_KEY_INGESTION_STATUS, INGESTION_STATUS_UNFINISHED);
+    await this.db.put(SYSTEM_KEY_INGESTION_STATUS, IngestionStatus.Unfinished);
   }
 
   /**
    * Mark that ingestion is finished
-   * Sets the ingestion status to "finished"
+   * Sets the ingestion status to IngestionStatus.Finished
    */
   public async markIngestionFinished(): Promise<void> {
-    await this.db.put(SYSTEM_KEY_INGESTION_STATUS, INGESTION_STATUS_DONE);
+    await this.db.put(SYSTEM_KEY_INGESTION_STATUS, IngestionStatus.Finished);
   }
 
   /**
@@ -384,10 +395,10 @@ export class ENSRainbowDB {
    * 1. Checking the ingestion status (must be "finished" for a valid database)
    * 2. Verifying the schema version matches the expected version
    * 3. In full validation mode: Verifying the keys for all rainbow records are valid labelhashes and match their related labels
-   * 4. Verifying the precalculated rainbow record count matches the actual count
+   * 4. In full validation mode: Verifying the precalculated rainbow record count matches the actual count
    *
    * @param options Validation options
-   * @param options.lite If true, performs a faster validation by skipping labelhash verification
+   * @param options.lite If true, performs a faster validation by skipping labelhash verification and precalculated record count validation
    * @returns boolean indicating if validation passed
    */
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
@@ -396,27 +407,28 @@ export class ENSRainbowDB {
 
     logger.info(`Starting database validation${isLiteMode ? " (lite mode)" : ""}...`);
     // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
-    const ingestionStatus = await this.getIngestionStatus();
 
-    if (ingestionStatus === null) {
+    let ingestionStatus: IngestionStatus;
+    try {
+      ingestionStatus = await this.getIngestionStatus();
+    } catch (e) {
       const errorMsg = generatePurgeErrorMessage(
-        "Database has never been initialized with an ingestion process.",
+        `Database has an unknown ingestion status: ${e instanceof Error ? e.message : String(e)}`,
       );
       logger.error(errorMsg);
       return false;
     }
 
-    if (ingestionStatus === INGESTION_STATUS_UNFINISHED) {
+    if (ingestionStatus === IngestionStatus.Unstarted) {
+      const errorMsg =
+        "Database has never been initialized with an ingestion process. Please run an ingestion first: pnpm run ingest <input-file>";
+      logger.error(errorMsg);
+      return false;
+    }
+
+    if (ingestionStatus === IngestionStatus.Unfinished) {
       const errorMsg = generatePurgeErrorMessage(
         "Database is in an incomplete state! An ingestion was started but not completed successfully.",
-      );
-      logger.error(errorMsg);
-      return false;
-    }
-
-    if (ingestionStatus !== INGESTION_STATUS_DONE) {
-      const errorMsg = generatePurgeErrorMessage(
-        `Database has an unknown ingestion status: ${ingestionStatus}`,
       );
       logger.error(errorMsg);
       return false;

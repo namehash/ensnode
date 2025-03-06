@@ -3,7 +3,7 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
-import { ENSRainbowDB, INGESTION_STATUS_DONE, INGESTION_STATUS_UNFINISHED } from "../lib/database";
+import { ENSRainbowDB, IngestionStatus } from "../lib/database";
 import { logger } from "../utils/logger";
 import { buildRainbowRecord } from "../utils/rainbow-record";
 
@@ -28,9 +28,20 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
 
   try {
     // Check the current ingestion status
-    const ingestionStatus = await db.getIngestionStatus();
+    let ingestionStatus: IngestionStatus;
+    try {
+      ingestionStatus = await db.getIngestionStatus();
+    } catch (e) {
+      const errorMessage =
+        "Database is in an unknown state!\n" +
+        "To fix this:\n" +
+        "1. Delete the data directory\n" +
+        "2. Run the ingestion command again: ensrainbow ingest <input-file>";
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
 
-    if (ingestionStatus === INGESTION_STATUS_UNFINISHED) {
+    if (ingestionStatus === IngestionStatus.Unfinished) {
       const errorMessage =
         "Database is in an incomplete state! " +
         "An ingestion was started but not finished successfully.\n" +
@@ -41,7 +52,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
       throw new Error(errorMessage);
     }
 
-    if (ingestionStatus === INGESTION_STATUS_DONE) {
+    if (ingestionStatus === IngestionStatus.Finished) {
       const errorMessage =
         "ENSRainbow currently only supports a single ingestion. We're working to enhance this soon!\n" +
         "If you want to re-ingest data:\n" +
@@ -52,7 +63,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
     }
 
     // Mark ingestion as started
-    await db.markIngestionStarted();
+    await db.markIngestionUnfinished();
 
     const bar = new ProgressBar(
       "Processing [:bar] :current/:total lines (:percent) - :rate lines/sec - :etas remaining",

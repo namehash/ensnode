@@ -1,13 +1,13 @@
 import { tmpdir } from "os";
 import { join } from "path";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
+import { ClassicLevel } from "classic-level";
 import { mkdtemp, rm } from "fs/promises";
-import { labelhash } from "viem";
+import { ByteArray, labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
 import {
   ENSRainbowDB,
-  INGESTION_STATUS_DONE,
-  INGESTION_STATUS_UNFINISHED,
+  IngestionStatus,
   SCHEMA_VERSION,
   SYSTEM_KEY_INGESTION_STATUS,
   SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
@@ -145,7 +145,7 @@ describe("Database", () => {
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
         // Set ingestion unfinished flag
-        await db.markIngestionStarted();
+        await db.markIngestionUnfinished();
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -250,6 +250,65 @@ describe("Database", () => {
         expect(retrieved).toBe(labelWithNull);
       } finally {
         await db.close();
+      }
+    });
+  });
+
+  describe("getIngestionStatus", () => {
+    it("should return Unstarted when no status is set", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        const status = await db.getIngestionStatus();
+        expect(status).toBe(IngestionStatus.Unstarted);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should return Unfinished when status is set to Unfinished", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        await db.markIngestionUnfinished();
+        const status = await db.getIngestionStatus();
+        expect(status).toBe(IngestionStatus.Unfinished);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should return Finished when status is set to Finished", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        await db.markIngestionFinished();
+        const status = await db.getIngestionStatus();
+        expect(status).toBe(IngestionStatus.Finished);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should throw an error when an invalid status is found in the database", async () => {
+      let ensDb: ENSRainbowDB | null = null;
+
+      try {
+        // Create an ENSRainbowDB instance
+        ensDb = await ENSRainbowDB.create(tempDir);
+
+        // Use batch to write an invalid status to the database
+        const batch = ensDb.batch();
+        batch.put(SYSTEM_KEY_INGESTION_STATUS, "invalid_status");
+        await batch.write();
+
+        // The method should throw an error
+        await expect(ensDb.getIngestionStatus()).rejects.toThrow("Invalid ingestion status value");
+      } finally {
+        // Close the database if it was opened
+        if (ensDb) {
+          await ensDb.close();
+        }
       }
     });
   });
