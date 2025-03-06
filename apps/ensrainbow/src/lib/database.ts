@@ -11,9 +11,9 @@ export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
 /**
  * Key for storing the ingestion status
  * Possible values:
- * - IngestionStatus.Unstarted: Ingestion has never been started
- * - IngestionStatus.Unfinished: Ingestion was started but hasn't finished
- * - IngestionStatus.Finished: Ingestion has finished successfully
+ * - unstarted: Ingestion has never been started
+ * - unfinished: Ingestion was started but hasn't finished
+ * - finished: Ingestion has finished successfully
  */
 export const SYSTEM_KEY_INGESTION_STATUS = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
@@ -205,13 +205,16 @@ export class ENSRainbowDB {
       return IngestionStatus.Unstarted;
     }
 
-    // Validate that the status is a recognized enum value
-    const validValues = Object.values(IngestionStatus) as string[];
-    if (!validValues.includes(status)) {
-      throw new Error(`Invalid ingestion status value found in database: ${status}`);
+    // Check if the provided string exists as a value in the IngestionStatus object
+    if (Object.values(IngestionStatus).includes(status as any)) {
+      return status as IngestionStatus;
     }
-
-    return status as IngestionStatus;
+    
+    // If not valid, throw an error with helpful message
+    throw new Error(
+      `Invalid ingestion status: "${status}". ` +
+      `Valid values are: ${Object.values(IngestionStatus).join(', ')}`
+    );
   }
 
   /**
