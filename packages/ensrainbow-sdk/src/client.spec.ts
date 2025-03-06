@@ -5,6 +5,7 @@ import {
   EnsRainbowApiClientOptions,
   isCacheableHealResponse,
   isHealError,
+  isRetryableHealError,
 } from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
@@ -21,6 +22,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      requestTimeout: EnsRainbowApiClient.DEFAULT_REQUEST_TIMEOUT,
     } satisfies EnsRainbowApiClientOptions);
   });
 
@@ -29,11 +31,13 @@ describe("EnsRainbowApiClient", () => {
     client = new EnsRainbowApiClient({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
+      requestTimeout: 5000,
     });
 
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
+      requestTimeout: 5000,
     } satisfies EnsRainbowApiClientOptions);
   });
 
@@ -87,41 +91,156 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealthResponse);
   });
 
-  describe("Network exceptions", () => {
-    it("should let connection lost exceptions flow through in heal method", async () => {
-      // Mock fetch to simulate a connection lost error
-      global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
+  describe("Network error handling", () => {
+    it("should handle timeout errors in heal method", async () => {
+      // Mock fetch to simulate a timeout error
+      const abortError = new Error("The operation was aborted");
+      abortError.name = "AbortError";
+      global.fetch = vi.fn().mockRejectedValue(abortError);
 
-      // The heal method should not catch the error
-      await expect(client.heal("0x1234567890abcdef")).rejects.toThrow("Connection lost");
+      const response = await client.heal(
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      );
+
+      expect(response).toEqual({
+        status: StatusCode.Error,
+        error: "Request timed out",
+        errorCode: ErrorCode.TIMEOUT,
+      } satisfies EnsRainbow.HealTimeoutError);
     });
 
-    it("should let connection lost exceptions flow through in count method", async () => {
-      // Mock fetch to simulate a connection lost error
-      global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
+    it("should handle network offline errors in heal method", async () => {
+      // Mock fetch to simulate a network offline error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Failed to fetch"));
 
-      // The count method should not catch the error
-      await expect(client.count()).rejects.toThrow("Connection lost");
+      const response = await client.heal(
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      );
+
+      expect(response).toEqual({
+        status: StatusCode.Error,
+        error: "Network connection lost or unavailable",
+        errorCode: ErrorCode.NETWORK_OFFLINE,
+      } satisfies EnsRainbow.HealNetworkOfflineError);
     });
 
-    it("should let connection lost exceptions flow through in health method", async () => {
+    it("should handle general network errors in heal method", async () => {
+      // Mock fetch to simulate a general network error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Some other error"));
+
+      const response = await client.heal(
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      );
+
+      expect(response).toEqual({
+        status: StatusCode.Error,
+        error: "Some other error",
+        errorCode: ErrorCode.GENERAL_NETWORK_ERROR,
+      } satisfies EnsRainbow.HealGeneralNetworkError);
+    });
+
+    it("should handle timeout errors in count method", async () => {
+      // Mock fetch to simulate a timeout error
+      const abortError = new Error("The operation was aborted");
+      abortError.name = "AbortError";
+      global.fetch = vi.fn().mockRejectedValue(abortError);
+
+      const response = await client.count();
+
+      expect(response).toEqual({
+        status: StatusCode.Error,
+        error: "Request timed out",
+        errorCode: ErrorCode.TIMEOUT,
+      } satisfies EnsRainbow.CountTimeoutError);
+    });
+
+    it("should handle network offline errors in count method", async () => {
+      // Mock fetch to simulate a network offline error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Failed to fetch"));
+
+      const response = await client.count();
+
+      expect(response).toEqual({
+        status: StatusCode.Error,
+        error: "Network connection lost or unavailable",
+        errorCode: ErrorCode.NETWORK_OFFLINE,
+      } satisfies EnsRainbow.CountNetworkOfflineError);
+    });
+
+    it("should handle general network errors in count method", async () => {
+      // Mock fetch to simulate a general network error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Some other error"));
+
+      const response = await client.count();
+
+      expect(response).toEqual({
+        status: StatusCode.Error,
+        error: "Some other error",
+        errorCode: ErrorCode.GENERAL_NETWORK_ERROR,
+      } satisfies EnsRainbow.CountNetworkError);
+    });
+
+    it("should handle network errors in health method", async () => {
+      // Mock fetch to simulate a network error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+
+      const response = await client.health();
+
+      expect(response).toEqual({
+        status: "error",
+        error: "Network error",
+      } satisfies EnsRainbow.HealthResponse);
+    });
+  });
+
+  describe("Deprecated Network exceptions tests", () => {
+    it("should handle connection lost exceptions in heal method", async () => {
       // Mock fetch to simulate a connection lost error
       global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
 
-      // The health method should not catch the error
-      await expect(client.health()).rejects.toThrow("Connection lost");
+      // The heal method should return a network error response
+      const response = await client.heal(
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      );
+
+      expect(response.status).toEqual(StatusCode.Error);
+      expect(response.errorCode).toEqual(ErrorCode.GENERAL_NETWORK_ERROR);
+    });
+
+    it("should handle connection lost exceptions in count method", async () => {
+      // Mock fetch to simulate a connection lost error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
+
+      // The count method should return a network error response
+      const response = await client.count();
+
+      expect(response.status).toEqual(StatusCode.Error);
+      expect(response.errorCode).toEqual(ErrorCode.GENERAL_NETWORK_ERROR);
+    });
+
+    it("should handle connection lost exceptions in health method", async () => {
+      // Mock fetch to simulate a connection lost error
+      global.fetch = vi.fn().mockRejectedValue(new Error("Connection lost"));
+
+      // The health method should return an error response
+      const response = await client.health();
+
+      expect(response.status).toEqual("error");
+      expect(response.error).toEqual("Connection lost");
     });
   });
 
   describe("Real network exceptions (no mocking)", () => {
-    it("should let network errors flow through when connecting to non-existent endpoint", async () => {
+    it("should handle network errors when connecting to non-existent endpoint", async () => {
       // Create a client with a non-existent endpoint
       const nonExistentClient = new EnsRainbowApiClient({
         endpointUrl: new URL("http://non-existent-domain-that-will-fail.example"),
       });
 
-      // The API call should fail with a network error and not be caught by the client
-      await expect(nonExistentClient.health()).rejects.toThrow();
+      // The API call should return a network error response
+      const response = await nonExistentClient.health();
+      expect(response.status).toEqual("error");
+      expect(response.error).toBeTruthy();
     });
   });
 });
@@ -161,6 +280,36 @@ describe("HealResponse error detection", () => {
       status: StatusCode.Error,
       error: "Server error",
       errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+
+  it("should consider HealTimeoutError responses to be errors", async () => {
+    const response: EnsRainbow.HealTimeoutError = {
+      status: StatusCode.Error,
+      error: "Request timed out",
+      errorCode: ErrorCode.TIMEOUT,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+
+  it("should consider HealNetworkOfflineError responses to be errors", async () => {
+    const response: EnsRainbow.HealNetworkOfflineError = {
+      status: StatusCode.Error,
+      error: "Network connection lost or unavailable",
+      errorCode: ErrorCode.NETWORK_OFFLINE,
+    };
+
+    expect(isHealError(response)).toBe(true);
+  });
+
+  it("should consider HealGeneralNetworkError responses to be errors", async () => {
+    const response: EnsRainbow.HealGeneralNetworkError = {
+      status: StatusCode.Error,
+      error: "Some network error",
+      errorCode: ErrorCode.GENERAL_NETWORK_ERROR,
     };
 
     expect(isHealError(response)).toBe(true);
@@ -205,5 +354,97 @@ describe("HealResponse cacheability", () => {
     };
 
     expect(isCacheableHealResponse(response)).toBe(false);
+  });
+
+  it("should consider HealTimeoutError responses not cacheable", async () => {
+    const response: EnsRainbow.HealTimeoutError = {
+      status: StatusCode.Error,
+      error: "Request timed out",
+      errorCode: ErrorCode.TIMEOUT,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
+  });
+
+  it("should consider HealNetworkOfflineError responses not cacheable", async () => {
+    const response: EnsRainbow.HealNetworkOfflineError = {
+      status: StatusCode.Error,
+      error: "Network connection lost or unavailable",
+      errorCode: ErrorCode.NETWORK_OFFLINE,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
+  });
+
+  it("should consider HealGeneralNetworkError responses not cacheable", async () => {
+    const response: EnsRainbow.HealGeneralNetworkError = {
+      status: StatusCode.Error,
+      error: "Some network error",
+      errorCode: ErrorCode.GENERAL_NETWORK_ERROR,
+    };
+
+    expect(isCacheableHealResponse(response)).toBe(false);
+  });
+});
+
+describe("RetryableHealError detection", () => {
+  it("should consider HealTimeoutError responses retryable", async () => {
+    const response: EnsRainbow.HealTimeoutError = {
+      status: StatusCode.Error,
+      error: "Request timed out",
+      errorCode: ErrorCode.TIMEOUT,
+    };
+
+    expect(isRetryableHealError(response)).toBe(true);
+  });
+
+  it("should consider HealNetworkOfflineError responses retryable", async () => {
+    const response: EnsRainbow.HealNetworkOfflineError = {
+      status: StatusCode.Error,
+      error: "Network connection lost or unavailable",
+      errorCode: ErrorCode.NETWORK_OFFLINE,
+    };
+
+    expect(isRetryableHealError(response)).toBe(true);
+  });
+
+  it("should consider HealGeneralNetworkError responses retryable", async () => {
+    const response: EnsRainbow.HealGeneralNetworkError = {
+      status: StatusCode.Error,
+      error: "Some network error",
+      errorCode: ErrorCode.GENERAL_NETWORK_ERROR,
+    };
+
+    expect(isRetryableHealError(response)).toBe(true);
+  });
+
+  it("should not consider HealNotFoundError responses retryable", async () => {
+    const response: EnsRainbow.HealNotFoundError = {
+      status: StatusCode.Error,
+      error: "Not found",
+      errorCode: ErrorCode.NotFound,
+    };
+
+    expect(isRetryableHealError(response)).toBe(false);
+  });
+
+  it("should not consider HealBadRequestError responses retryable", async () => {
+    const response: EnsRainbow.HealBadRequestError = {
+      status: StatusCode.Error,
+      error: "Bad request",
+      errorCode: ErrorCode.BadRequest,
+    };
+
+    expect(isRetryableHealError(response)).toBe(false);
+  });
+
+  it("should not consider HealServerError responses retryable", async () => {
+    const response: EnsRainbow.HealServerError = {
+      status: StatusCode.Error,
+      error: "Server error",
+      errorCode: ErrorCode.ServerError,
+    };
+
+    expect(isRetryableHealError(response)).toBe(false);
   });
 });
