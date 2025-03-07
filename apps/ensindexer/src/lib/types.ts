@@ -9,10 +9,18 @@
 export type OwnedName = string;
 
 /**
- * In this project we use the notion of 'plugins' to describe which registries and subregistries
- * of a given ENS deployment are being indexed by ponder. In this project, a plugin's name is the
- * name of the subregistry it indexes. Note that this type definition is 1:1 with that of
- * @ensnode/ens-deployments SubregistryName, simplifying the relationship between an ENSDeploymentConfig
- * and the plugins in this project.
+ * In ENSIndexer we use the notion of 'plugins' to describe a relationship between a set of contracts
+ * and the handler logic that indexes their events. For ENSv1, a plugin's name is the
+ * name of the subregistry it indexes ('eth', 'base', 'linea').
+ *
+ * The ENSv2 plugin ('ens-v2') represents the configuration and indexing logic associated with
+ * indexing ENSv2.
+ *
+ * The PluginName type is necessary for uniquely identifying each plugin's config and filtering
+ * which are 'activated' at runtime.
+ *
+ * Note that this type is an exact equivalent of `keyof ENSDeploymentConfig`, which we over-specify
+ * to illustrate the connection between a ENSIndexer plugin and the AddressBook that it is configured
+ * with.
  */
 export type PluginName = "eth" | "base" | "linea" | "ens-v2";

@@ -1,4 +1,4 @@
-import { SubregistryContractConfig } from "./types";
+import { ContractConfig } from "./types";
 
 export const ETHResolverFilter = [
   { event: "AddrChanged", args: {} },
@@ -21,7 +21,7 @@ export const ETHResolverFilter = [
   { event: "DNSRecordChanged", args: {} },
   { event: "DNSRecordDeleted", args: {} },
   { event: "DNSZonehashChanged", args: {} },
-] as const satisfies SubregistryContractConfig["filter"];
+] as const satisfies ContractConfig["filter"];
 
 export const BaseResolverFilter = [
   { event: "AddrChanged", args: {} },
@@ -36,7 +36,7 @@ export const BaseResolverFilter = [
   { event: "DNSRecordChanged", args: {} },
   { event: "DNSRecordDeleted", args: {} },
   { event: "DNSZonehashChanged", args: {} },
-] as const satisfies SubregistryContractConfig["filter"];
+] as const satisfies ContractConfig["filter"];
 
 export const LineaResolverFilter = [
   { event: "AddrChanged", args: {} },
@@ -51,4 +51,4 @@ export const LineaResolverFilter = [
   { event: "DNSRecordChanged", args: {} },
   { event: "DNSRecordDeleted", args: {} },
   { event: "DNSZonehashChanged", args: {} },
-] as const satisfies SubregistryContractConfig["filter"];
+] as const satisfies ContractConfig["filter"];

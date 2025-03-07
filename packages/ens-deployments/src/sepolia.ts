@@ -93,7 +93,7 @@ export default {
       },
       OwnedResolver: {
         abi: ensV2_OwnedResolver,
-        factory: {
+        address: {
           address: "0x33d438bb85B76C9211c4F259109D94Fe83F5A5eC",
           event: parseAbiItem(
             "event ProxyDeployed(address indexed sender, address indexed proxyAddress, uint256 salt, address implementation)",
