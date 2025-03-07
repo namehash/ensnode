@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostgreSQL Schema Transfer</title>
+  <link href="/styles/tailwind.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 text-gray-900">
+  <div class="container mx-auto px-4 py-6 max-w-5xl">
+    <header class="mb-6">
+      <h1 class="text-2xl font-bold">PostgreSQL Schema Transfer</h1>
+      <p class="text-gray-600">Migrate database schemas between PostgreSQL servers</p>
+    </header>
+
+    <main>
+      <!-- Setup Form -->
+      <div id="setup-form" class="block">
+        <div class="bg-white rounded shadow p-4 mb-6">
+          <h2 class="text-lg font-medium mb-4">Connection Settings</h2>
+
+          <div class="space-y-6">
+            <!-- Source Connection -->
+            <div>
+              <label for="sourceConnection" class="block text-sm font-medium text-gray-700 mb-1">
+                Source Database Connection String
+              </label>
+              <div class="flex">
+                <textarea type="text" id="sourceConnection"
+                  class="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="postgres://username:password@hostname:5432/database">postgresql://dbuser:abcd1234@host.docker.internal:54320/my_database</textarea>
+                <button type="button" id="testSourceBtn"
+                  class="bg-gray-100 border border-gray-300 border-l-0 rounded-r px-3 py-2 hover:bg-gray-200">
+                  Test
+                </button>
+              </div>
+              <div id="sourceConnectionResult" class="mt-1 text-sm"></div>
+              <div class="mt-1 text-xs text-gray-500">Example:
+                postgres://user:pass@host:5432/dbname?search_path=schema_name</div>
+            </div>
+
+            <!-- Target Connection -->
+            <div>
+              <label for="targetConnection" class="block text-sm font-medium text-gray-700 mb-1">
+                Target Database Connection String
+              </label>
+              <div class="flex">
+                <textarea type="text" id="targetConnection"
+                  class="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="postgres://username:password@hostname:5432/database">postgresql://greenuser:abcd1234@host.docker.internal:54321/ensindexer</textarea>
+                <button type="button" id="testTargetBtn"
+                  class="bg-gray-100 border border-gray-300 border-l-0 rounded-r px-3 py-2 hover:bg-gray-200">
+                  Test
+                </button>
+              </div>
+              <div id="targetConnectionResult" class="mt-1 text-sm"></div>
+            </div>
+
+            <!-- Schema Name -->
+            <div>
+              <label for="schemaName" class="block text-sm font-medium text-gray-700 mb-1">
+                Schema Name
+              </label>
+              <input type="text" id="schemaName"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="public" required value="ponder_sync">
+            </div>
+
+            <hr class="my-4">
+
+            <h3 class="text-lg font-medium mb-3">Migration Options</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div class="flex items-center">
+                  <input type="checkbox" id="cleanFirst" class="mr-2">
+                  <label for="cleanFirst" class="text-sm">
+                    Clean (drop) objects before creating them
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <button id="startMigrationBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Start Migration
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Migration Progress -->
+        <div id="migration-progress" class="hidden">
+          <div class="bg-white rounded shadow p-4 mb-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-medium">Migration Progress</h2>
+              <div>
+                <button id="refreshStatusBtn" class="text-sm bg-blue-100 px-3 py-1 rounded mr-2 hover:bg-blue-200">
+                  Refresh Status
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="flex justify-between text-sm mb-1">
+                <span>Status: <span id="jobStatus" class="font-medium">Initializing...</span></span>
+                <span>Job ID: <span id="jobId" class="text-gray-500"></span></span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4">
+                <div id="progressBar" class="bg-blue-600 h-4 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Simple phase display -->
+            <div class="grid grid-cols-4 gap-2 mb-4 text-center text-sm">
+              <div id="phase-preparation" class="border rounded py-2 bg-gray-100">Preparation</div>
+              <div id="phase-schema_migration" class="border rounded py-2 bg-gray-100">Schema Migration</div>
+              <div id="phase-data_migration" class="border rounded py-2 bg-gray-100">Data Migration</div>
+              <div id="phase-completion" class="border rounded py-2 bg-gray-100">Completion</div>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium mb-2">Log Output:</h3>
+              <pre id="logOutput" class="h-64 overflow-y-auto bg-gray-50 border rounded p-2 font-mono text-xs"></pre>
+            </div>
+          </div>
+        </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // DOM elements
+      const setupForm = document.getElementById('setup-form');
+      const migrationProgress = document.getElementById('migration-progress');
+      const startMigrationBtn = document.getElementById('startMigrationBtn');
+      const refreshStatusBtn = document.getElementById('refreshStatusBtn');
+      const testSourceBtn = document.getElementById('testSourceBtn');
+      const testTargetBtn = document.getElementById('testTargetBtn');
+      const sourceConnectionResult = document.getElementById('sourceConnectionResult');
+      const targetConnectionResult = document.getElementById('targetConnectionResult');
+
+      // Form inputs
+      const sourceConnection = document.getElementById('sourceConnection');
+      const targetConnection = document.getElementById('targetConnection');
+      const schemaName = document.getElementById('schemaName');
+      const cleanFirst = document.getElementById('cleanFirst');
+
+      // Progress elements
+      const jobStatus = document.getElementById('jobStatus');
+      const jobId = document.getElementById('jobId');
+      const progressBar = document.getElementById('progressBar');
+      const logOutput = document.getElementById('logOutput');
+
+      // Phase indicators
+      const phases = {
+        preparation: document.getElementById('phase-preparation'),
+        schema_migration: document.getElementById('phase-schema_migration'),
+        data_migration: document.getElementById('phase-data_migration'),
+        completion: document.getElementById('phase-completion')
+      };
+
+      // Current job ID
+      let currentJobId = null;
+
+      // Test connection function
+      async function testConnection(connectionString, resultElement) {
+        resultElement.innerHTML = '<span class="text-blue-500">Testing connection...</span>';
+
+        try {
+          const response = await fetch('/api/validate-connection', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ connectionString })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            resultElement.innerHTML = '<span class="text-green-600">✓ Connection successful</span>';
+          } else {
+            resultElement.innerHTML = `<span class="text-red-600">✗ Connection failed: ${result.error}</span>`;
+          }
+        } catch (error) {
+          resultElement.innerHTML = `<span class="text-red-600">✗ Error: ${error.message}</span>`;
+        }
+      }
+
+      // Start migration
+      async function startMigration() {
+        const sourceConnStr = sourceConnection.value.trim();
+        const targetConnStr = targetConnection.value.trim();
+
+        if (!sourceConnStr || !targetConnStr) {
+          alert('Please provide both source and target connection strings');
+          return;
+        }
+
+        // Prepare request data
+        const requestData = {
+          sourceConnection: sourceConnStr,
+          targetConnection: targetConnStr,
+          schemaName: schemaName.value.trim() || null,
+          options: {
+            cleanFirst: cleanFirst.checked,
+          }
+        };
+
+        try {
+          const response = await fetch('/api/transfer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+          });
+
+          const result = await response.json();
+
+          if (result.jobId) {
+            currentJobId = result.jobId;
+            window.location.hash = currentJobId;
+            jobId.textContent = currentJobId;
+
+            // Switch to progress view
+            setupForm.classList.add('hidden');
+            migrationProgress.classList.remove('hidden');
+
+            // Load initial status
+            await fetchJobStatus();
+          } else {
+            alert('Failed to start migration');
+          }
+        } catch (error) {
+          alert(`Error: ${error.message}`);
+        }
+      }
+
+      // Fetch job status
+      async function fetchJobStatus() {
+        if (!currentJobId) {
+          currentJobId = window.location.hash.slice(1);
+
+          if (currentJobId) {
+            jobId.textContent = currentJobId;
+          }
+        }
+
+        if (!currentJobId) return;
+
+        try {
+          const response = await fetch(`/api/job/${currentJobId}`);
+
+          if (response.ok) {
+            const data = await response.json();
+            updateJobStatus(data);
+
+            // Auto refresh if job is still running
+            if (data.status === 'running' || data.status === 'initializing') {
+              setTimeout(fetchJobStatus, 3000); // Refresh every 3 seconds
+            }
+          } else {
+            console.error('Failed to fetch job status');
+          }
+        } catch (error) {
+          console.error('Error fetching job status:', error);
+        }
+      }
+
+      // Update job status from data
+      function updateJobStatus(data) {
+        // Update status text
+        jobStatus.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+
+        // Update progress bar
+        progressBar.style.width = `${data.progress}%`;
+
+        // Update phase indicators
+        Object.keys(phases).forEach(phase => {
+          phases[phase].classList.remove('bg-blue-100', 'bg-green-100', 'font-medium');
+          phases[phase].classList.add('bg-gray-100');
+        });
+
+        if (data.status === 'completed') {
+          Object.keys(phases).forEach(phase => {
+            phases[phase].classList.remove('bg-gray-100');
+            phases[phase].classList.add('bg-green-100', 'font-medium');
+          });
+          progressBar.classList.remove('bg-blue-600');
+          progressBar.classList.add('bg-green-600');
+        } else if (data.status === 'failed') {
+          progressBar.classList.remove('bg-blue-600');
+          progressBar.classList.add('bg-red-600');
+        } else {
+          // Mark current phase as active and previous phases as completed
+          const phaseOrder = ['preparation', 'schema_migration', 'data_migration', 'completion'];
+          const currentPhaseIndex = phaseOrder.indexOf(data.currentPhase);
+
+          for (let i = 0; i < phaseOrder.length; i++) {
+            if (i < currentPhaseIndex) {
+              phases[phaseOrder[i]].classList.remove('bg-gray-100');
+              phases[phaseOrder[i]].classList.add('bg-green-100');
+            } else if (i === currentPhaseIndex) {
+              phases[phaseOrder[i]].classList.remove('bg-gray-100');
+              phases[phaseOrder[i]].classList.add('bg-blue-100', 'font-medium');
+            }
+          }
+        }
+
+        // Update log
+        logOutput.innerHTML = '';
+        data.log.forEach(line => {
+          const logLine = document.createElement('div');
+
+          // Add specific styling based on content
+          if (line.includes('ERROR') || line.includes('failed')) {
+            logLine.classList.add('text-red-600');
+          } else if (line.includes('PHASE') || line.includes('MIGRATION COMPLETE')) {
+            logLine.classList.add('font-medium');
+          } else if (line.includes('[Schema') || line.includes('[Data')) {
+            logLine.classList.add('text-gray-500');
+          }
+
+          logLine.textContent = line;
+          logOutput.appendChild(logLine);
+        });
+
+        // Auto-scroll to bottom of log
+        logOutput.scrollTop = logOutput.scrollHeight;
+      }
+
+      // Event listeners
+      startMigrationBtn.addEventListener('click', startMigration);
+
+      refreshStatusBtn.addEventListener('click', fetchJobStatus);
+
+      testSourceBtn.addEventListener('click', function () {
+        testConnection(sourceConnection.value.trim(), sourceConnectionResult);
+      });
+
+      testTargetBtn.addEventListener('click', function () {
+        testConnection(targetConnection.value.trim(), targetConnectionResult);
+      });
+    });
+  </script>
+</body>
+
+</html>

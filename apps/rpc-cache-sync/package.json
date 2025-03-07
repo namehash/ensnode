@@ -1,0 +1,32 @@
+{
+  "name": "@ensnode/rpc-cache-sync",
+  "version": "1.0.0",
+  "description": "PostgreSQL Schema Transfer Tool with Bun and TypeScript for ENSNode RPC Cache transfer between databases",
+  "scripts": {
+    "dev": "bun run --watch src/server.ts",
+    "build": "bun build src/server.ts --outdir ./dist --target bun",
+    "start": "bun run dist/server.js",
+    "tailwind:build": "tailwindcss -i ./src/styles/input.css -o ./public/styles/tailwind.css",
+    "tailwind:watch": "tailwindcss -i ./src/styles/input.css -o ./public/styles/tailwind.css --watch"
+  },
+  "dependencies": {
+    "pg": "^8.13.3",
+    "pg-connection-string": "^2.7.0",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.9",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.4.16",
+    "bun-types": "latest",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.2"
+  },
+  "module": "src/server.ts",
+  "type": "module",
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+services:
+  rpc-cache-sync:
+    build:
+      context: .
+      target: base # Use the base stage for development
+    command: bun run dev # Assumes you have a dev script in package.json
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - HOST_MACHINE_URL=host.docker.internal
+    volumes:
+      - .:/app
+      - /app/node_modules # Volume to preserve node_modules
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

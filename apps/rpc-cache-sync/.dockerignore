@@ -1,0 +1,44 @@
+# Version control
+.git
+.github
+.gitignore
+
+# Dependencies
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build artifacts
+dist
+build
+*.tsbuildinfo
+
+# Development files
+.env
+.env.*
+!.env.example
+*.local
+.vscode
+.idea
+.DS_Store
+
+# Test files
+coverage
+*.test.ts
+*.spec.ts
+test
+tests
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Misc
+README.md
+LICENSE
+*.log
+*.md
+.eslintrc*
+.prettierrc*
