@@ -10,11 +10,11 @@ catalogs:
       specifier: ^1.9.4
       version: 1.9.4
     '@ponder/client':
-      specifier: ^0.9.26
-      version: 0.9.26
+      specifier: ^0.9.27
+      version: 0.9.27
     '@ponder/react':
-      specifier: ^0.9.26
-      version: 0.9.26
+      specifier: ^0.9.27
+      version: 0.9.27
     '@ponder/utils':
       specifier: ^0.2.3
       version: 0.2.3
@@ -31,8 +31,8 @@ catalogs:
       specifier: ^4.6.14
       version: 4.6.17
     ponder:
-      specifier: ^0.9.26
-      version: 0.9.26
+      specifier: ^0.9.27
+      version: 0.9.27
     tsup:
       specifier: ^8.3.6
       version: 8.3.6
@@ -202,10 +202,10 @@ importers:
         version: 0.11.1(@types/node@22.13.5)(graphql-ws@5.16.2(graphql@16.10.0))(graphql@16.10.0)
       '@ponder/client':
         specifier: 'catalog:'
-        version: 0.9.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+        version: 0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@ponder/react':
         specifier: 'catalog:'
-        version: 0.9.26(@ponder/client@0.9.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
+        version: 0.9.27(@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
       '@ponder/utils':
         specifier: 'catalog:'
         version: 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
@@ -308,7 +308,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.26(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -410,6 +410,9 @@ importers:
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
+      starlight-sidebar-topics:
+        specifier: ^0.4.1
+        version: 0.4.1(@astrojs/starlight@0.32.1(astro@5.2.3(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)))
       starlight-theme-rapide:
         specifier: ^0.4.0
         version: 0.4.0(@astrojs/starlight@0.32.1(astro@5.2.3(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)))
@@ -523,7 +526,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.26(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -538,7 +541,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.26(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       viem:
         specifier: 'catalog:'
         version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
@@ -1604,18 +1607,18 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@ponder/client@0.9.26':
-    resolution: {integrity: sha512-6MA+jDgQySgvE1c4IJh/tnneqtMVDbnOfZobsJFuEteVdsJw1f8PJXoA1jbQ+Lp8r0/8O6e9z1uBcSjVUUstHw==}
+  '@ponder/client@0.9.27':
+    resolution: {integrity: sha512-R26iNfwpNZnzdfKyQxq8No6Hhe+o++yGD+F0s6wfx/4AWf90XMm1DrmZlc1HEEfRAIuCf9eZt27k6n6KN8wg3w==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  '@ponder/react@0.9.26':
-    resolution: {integrity: sha512-cYjGX7YJjNYZeHLPPeQWT+UzIgGSRH4SJydBU7f6q2r8rczAb08Gftq1D/IYDoiJ1H3uuCL64PaeWsG2Zz7KPw==}
+  '@ponder/react@0.9.27':
+    resolution: {integrity: sha512-2MJBRjXfd1RByyBe92ZkQkFmyc0DPL1qlfdO3r7m3Bk1Lz8X3Nn4efa+75o6n9vsax6ibLlN6LT4GgberPq6hg==}
     peerDependencies:
-      '@ponder/client': '>=0.9.26'
+      '@ponder/client': '>=0.9.27'
       '@tanstack/react-query': '>=5.0.0'
       react: '>=18'
       typescript: '>=5.0.4'
@@ -4973,8 +4976,8 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  ponder@0.9.26:
-    resolution: {integrity: sha512-iKbe1Ykre+Ky+dU8UQeKTBLrPduSXE5h/b5Dawot56YMx/MYrUj5CCvQzzWMd5LCJvdGt7gNJfmsvhFPQi30zg==}
+  ponder@0.9.27:
+    resolution: {integrity: sha512-2lP1TqTrISyvdqPj+8HM5Ykxd4EzoYoEAyav+ImYTZrKv+o9ltZ32c3gg4SA569BGqxvPYroduoG/SvSwvJmbw==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -5550,6 +5553,12 @@ packages:
   stacktrace-parser@0.1.10:
     resolution: {integrity: sha512-KJP1OCML99+8fhOHxwwzyWrlUuVX5GQ0ZpJTd1DFXhdkrvg1szxfHhawXUZ3g9TkXORQd4/WG68jMlQZ2p8wlg==}
     engines: {node: '>=6'}
+
+  starlight-sidebar-topics@0.4.1:
+    resolution: {integrity: sha512-fzYVgccxUDBjdxgGXPDQzNI/GghEMhcdaxlDkkOFXzKvZQVX71/LAB/ZffGAB+EKkS3n9bF5YggYYBMuO6wKAw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@astrojs/starlight': '>=0.32.0'
 
   starlight-theme-rapide@0.4.0:
     resolution: {integrity: sha512-go2JEA3p1CNo3zqhS1pDkhCXAJNG8O7sX7KdIebae+ogaAndFRKXFtXhmw+9O/CWM785Vje6mGIXlwLer0faLQ==}
@@ -7564,7 +7573,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@ponder/client@0.9.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
+  '@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
     dependencies:
       drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
       eventsource: 3.0.5
@@ -7600,9 +7609,9 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@ponder/react@0.9.26(@ponder/client@0.9.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
+  '@ponder/react@0.9.27(@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
     dependencies:
-      '@ponder/client': 0.9.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+      '@ponder/client': 0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@tanstack/react-query': 5.66.9(react@18.3.1)
       react: 18.3.1
       superjson: 2.2.2
@@ -11556,7 +11565,7 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  ponder@0.9.26(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -11634,7 +11643,7 @@ snapshots:
       - terser
       - zod
 
-  ponder@0.9.26(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -12391,6 +12400,10 @@ snapshots:
   stacktrace-parser@0.1.10:
     dependencies:
       type-fest: 0.7.1
+
+  starlight-sidebar-topics@0.4.1(@astrojs/starlight@0.32.1(astro@5.2.3(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))):
+    dependencies:
+      '@astrojs/starlight': 0.32.1(astro@5.2.3(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))
 
   starlight-theme-rapide@0.4.0(@astrojs/starlight@0.32.1(astro@5.2.3(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))):
     dependencies:
