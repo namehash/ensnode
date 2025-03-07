@@ -4,8 +4,16 @@ set -euo pipefail
 # Configuration
 DATA_DIR="."
 BASE_URL="https://bucket.ensrainbow.io"
-DATA_FILE="ens_names.sql.gz"
-CHECKSUM_FILE="ens_names.sql.gz.sha256sum"
+
+# Check for v2 argument
+if [ "${1:-}" = "v2" ]; then
+    DATA_FILE="ensrainbow_v2.sql.gz"
+    CHECKSUM_FILE="ensrainbow_v2.sql.gz.sha256sum"
+else
+    DATA_FILE="ens_names.sql.gz"
+    CHECKSUM_FILE="ens_names.sql.gz.sha256sum"
+fi
+
 LICENSE_FILE="THE_GRAPH_LICENSE.txt"
 
 # Create data directory if it doesn't exist
@@ -32,14 +40,14 @@ if [ -f "$DATA_DIR/$DATA_FILE" ] && [ -f "$DATA_DIR/$CHECKSUM_FILE" ]; then
 fi
 
 # Download files
-download_with_progress "$BASE_URL/$CHECKSUM_FILE" "$DATA_DIR/$CHECKSUM_FILE" "checksum file"
+download_with_progress "$BASE_URL/$CHECKSUM_FILE" "$DATA_DIR/ens_names.sql.gz.sha256sum" "checksum file"
 download_with_progress "$BASE_URL/$LICENSE_FILE" "$DATA_DIR/$LICENSE_FILE" "license file"
-download_with_progress "$BASE_URL/$DATA_FILE" "$DATA_DIR/$DATA_FILE" "ENS names database"
+download_with_progress "$BASE_URL/$DATA_FILE" "$DATA_DIR/ens_names.sql.gz" "ENS names database"
 
 # Verify downloaded files
 echo "Verifying downloaded files..."
 cd "$DATA_DIR"
-if sha256sum -c "$CHECKSUM_FILE"; then
+if sha256sum -c "ens_names.sql.gz.sha256sum"; then
     echo "✓ Download successful and verified!"
 else
     echo "❌ Checksum verification failed after download"
