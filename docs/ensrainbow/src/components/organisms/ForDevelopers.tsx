@@ -137,7 +137,7 @@ const devElements: ListSectionElement[] = [
             </div>
         ),
         text: (
-            <Fragment>Join the ENSRainbow developer community.</Fragment>
+            <Fragment>Join the ENSNode developer community.</Fragment>
         ),
         icon: (
             <div className={DeveloperSectionIconWrapperStyles}>

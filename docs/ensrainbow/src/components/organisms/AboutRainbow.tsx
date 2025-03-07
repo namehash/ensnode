@@ -15,7 +15,7 @@ export type AboutRainbowProps = {
 export default function AboutRainbow(props: AboutRainbowProps) {
     return (
         <section
-            className="box-border h-full w-full flex flex-col xl:flex-row items-center justify-center gap-5 sm:gap-0 py-[60px] px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
+            className="box-border h-fit w-full flex flex-col xl:flex-row items-center justify-center gap-5 sm:gap-0 py-[60px] px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
             {!props.isTextOnTheLeft && (
                 <div
                     className={cc([
@@ -37,8 +37,6 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                         alt="chat image"
                         width={props.imageSpecifics.tagWidth}
                         height={props.imageSpecifics.tagHeight}
-                        decoding="async"
-                        loading="lazy"
                     />
                 </div>
             )}
@@ -55,8 +53,6 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                             alt="chat image"
                             width={props.designatedMobileImage.tagWidth}
                             height={props.designatedMobileImage.tagHeight}
-                            decoding="async"
-                            loading="lazy"
                         />
                         :
                         <img
@@ -68,8 +64,6 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                             alt="chat image"
                             width={props.imageSpecifics.tagWidth}
                             height={props.imageSpecifics.tagHeight}
-                            decoding="async"
-                            loading="lazy"
                         />}
                 </div>
             }
@@ -100,8 +94,6 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                     alt="chat image"
                     width={props.imageSpecifics.tagWidth}
                     height={props.imageSpecifics.tagHeight}
-                    decoding="async"
-                    loading="lazy"
                 />
             </div>
             {!props.mobileImageOnTop &&
@@ -117,8 +109,6 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                             alt="chat image"
                             width={props.designatedMobileImage.tagWidth}
                             height={props.designatedMobileImage.tagHeight}
-                            decoding="async"
-                            loading="lazy"
                         />
                         :
                         <img
@@ -130,8 +120,6 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                             alt="chat image"
                             width={props.imageSpecifics.tagWidth}
                             height={props.imageSpecifics.tagHeight}
-                            decoding="async"
-                            loading="lazy"
                         />}
                 </div>
             }

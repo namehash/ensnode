@@ -8,9 +8,13 @@ export default function Hero() {
     const healedLabelsArray = Array.from(String(healedLabels), num => Number(num));
     const counterNumberStyles = "flex flex-col justify-center items-center w-6 sm:w-[52px] h-9 sm:h-[72px] rounded sm:rounded-lg border border-gray-200 text-lg sm:text-2xl leading-7 font-bold bg-white";
 
-    return <div className="box-border py-[60px] pt-[120px] sm:py-24 lg:py-5 lg:pt-24 px-5 md:px-10 bg-gradient-to-b from-white to-[#F9FAFB] h-fit lg:h-full lg:flex flex-col flex-nowrap justify-center items-center gap-5 lg:max-h-screen">
+    return <div className="box-border py-[60px] pt-[100px] sm:py-24 lg:py-5 lg:pt-24 px-5 md:px-10 bg-gradient-to-b from-white to-[#F9FAFB] h-fit lg:h-full lg:flex flex-col flex-nowrap justify-center items-center xl:gap-5 lg:max-h-screen">
         <section
             className="box-border relative z-10 w-full h-fit flex flex-col lg:flex-row items-center justify-center gap-5 pb-14 sm:pb-0">
+            <div className="w-full lg:w-1/3 box-border sm:hidden flex flex-col flex-nowrap justify-start items-center pb-[49px]">
+                <BeforeAfterSlider/>
+                <div className="sliderShadow w-1/2 sm:w-2/3 h-6 sm:h-[58px] shrink-0 rounded-[550px] opacity-10"></div>
+            </div>
             <div
                 className="inline-flex flex-col items-center lg:items-start justify-end gap-5 sm:gap-6 w-full lg:w-1/2 h-fit relative z-20">
                 <div className="flex flex-col items-center lg:items-start justify-center gap-2 sm:gap-5 w-fit h-fit">
@@ -27,20 +31,21 @@ export default function Hero() {
                     </h1>
                 </div>
                 <p className="not-italic font-normal text-gray-500 text-lg leading-7 sm:text-base sm:leading-6 text-center lg:text-left">
-                    Heal millions of unknown ENS names with this <a
-                    className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
-                    href="https://ensnode.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    ENSNode
-                </a> sidecar service.
+                    Heal millions of unknown ENS names with this <Link
+                        href="https://ensnode.io/"
+                        target="_blank"
+                        className="!text-black"
+                        variant="underline"
+                        size="medium"
+                    >
+                        ENSNode
+                    </Link> sidecar service.
                 </p>
 
                 <HeroInstallCommand/>
 
                 <div className="block relative z-10 pt-3 sm:hidden">
-                    <Button variant="primary" size="medium" asChild>
+                    <Button asChild>
                         <Link href="https://www.ensnode.io/ensrainbow/usage/">View the docs</Link>
                     </Button>
                 </div>
@@ -50,7 +55,7 @@ export default function Hero() {
                     </Button>
                 </div>
             </div>
-            <div className="w-full lg:w-1/3 box-border flex flex-col flex-nowrap justify-start items-center">
+            <div className="w-full lg:w-1/3 box-border hidden sm:flex flex-col flex-nowrap justify-start items-center">
                 <BeforeAfterSlider/>
                 <div className="sliderShadow w-1/2 sm:w-2/3 h-6 sm:h-[58px] shrink-0 rounded-[550px] opacity-10"></div>
             </div>

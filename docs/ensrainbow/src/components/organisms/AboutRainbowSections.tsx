@@ -6,20 +6,21 @@ import ensNode from "../../assets/Illustration.svg";
 import FullRainbow from "./FullRainbow.tsx";
 import {LearnMoreButton} from "../atoms/LearnMoreButton.tsx";
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
-import {MobileSectionDivider} from "../atoms/MobileSectionDivider.tsx";
+import {SectionDivider} from "../atoms/SectionDivider.tsx";
+import {Link} from "@namehash/namekit-react";
 
 export default function AboutRainbowSections() {
     return (
         <>
             <Fragment key="What-the-heck-is-section">
                 <AboutRainbow {...rainbowSections[0]} />
-                <MobileSectionDivider />
+                <SectionDivider />
             </Fragment>
             <FullRainbow/>
-            <MobileSectionDivider />
+            <SectionDivider />
             <Fragment key="ENSRainbow-is-a-part-of-ENSNode">
                 <AboutRainbow {...rainbowSections[1]} />
-                <MobileSectionDivider />
+                <SectionDivider additionalStyles="sm:hidden"/>
             </Fragment>
         </>
     );
@@ -33,14 +34,15 @@ const rainbowSections: AboutRainbowProps[] = [
             These are encoded labelhashes used to represent an unknown label in an ENS name. Without name healing,
             millions of names in the ENS manager app (and&nbsp;other&nbsp;ENS&nbsp;apps) don’t appear properly.
             <br/>
-            <a
-                className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
+            <Link
                 href="https://app.ens.domains/0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5"
                 target="_blank"
-                rel="noopener noreferrer"
+                className="!text-black"
+                variant="underline"
+                size="large"
             >
                 See an example of the problem ↗
-            </a>
+            </Link>
         </>),
         sectionBackgroundName: "",
         isTextOnTheLeft: true,
@@ -66,14 +68,15 @@ const rainbowSections: AboutRainbowProps[] = [
             </div>
             ENSRainbow is a part of{" "}<br className="hidden md:block"/>ENSNode</div>),
         sectionDescription: <>ENSRainbow is a sidecar service for{" "}
-            <a
-                className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
+            <Link
                 href="https://ensnode.io/"
                 target="_blank"
-                rel="noopener noreferrer"
+                className="!text-black"
+                variant="underline"
+                size="large"
             >
                 ENSNode
-            </a>, the new multichain indexer for ENSv2.
+            </Link>, the new multichain indexer for ENSv2.
         </>,
         descriptionExternalElems: <LearnMoreButton source="https://ensnode.io/" text="Learn more about ENS Node"/>,
         sectionBackgroundName: "",

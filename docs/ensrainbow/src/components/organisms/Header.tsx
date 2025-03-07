@@ -1,4 +1,4 @@
-import {Button, Link} from "@namehash/namekit-react";
+import {Button, IconButton, Link} from "@namehash/namekit-react";
 import {GithubIcon} from "../atoms/GithubIcon.tsx";
 import {TelegramIcon} from "../atoms/TelegramIcon.tsx";
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
@@ -36,20 +36,26 @@ export default function Header() {
                     </Button>
                 </div>
                 <div className="sm:hidden flex items-center justify-center gap-1">
-                    <button className="px-[10px] py-[9px]">
-                        <a className="text-sm leading-5 font-medium" href="https://www.ensnode.io/ensrainbow/usage/" target="_blank"
-                           rel="noopener noreferrer">Docs</a>
-                    </button>
+                    <IconButton asChild variant="ghost">
+                        <Link
+                            href="https://www.ensnode.io/ensrainbow/usage/"
+                            target="_blank"
+                            size="small"
+                            className="hover:no-underline"
+                        >
+                           Docs
+                        </Link>
+                    </IconButton>
 
-                    <button className="p-[7px]">
+                    <IconButton asChild variant="ghost" className="p-[7px]">
                         <Link href="https://github.com/namehash/ensnode">
                             <GithubIcon className="fill-current"/>
                         </Link>
-                    </button>
+                    </IconButton>
 
-                    <button className="p-[7px]">
+                    <IconButton asChild variant="ghost" className="p-[7px]">
                         <Link href="http://t.me/ensnode"><TelegramIcon fillColor="#1F2937"/></Link>
-                    </button>
+                    </IconButton>
                 </div>
             </div>
         </header>

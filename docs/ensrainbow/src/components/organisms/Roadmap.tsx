@@ -2,6 +2,7 @@ import {CheckCircleIcon} from "@heroicons/react/24/solid";
 import cc from "classcat";
 import {RainbowIcon} from "../atoms/RainbowIcon.tsx";
 import {RocketIcon} from "../atoms/RocketIcon.tsx";
+import {Link} from "@namehash/namekit-react";
 
 type RoadMapElement = {
     stageOfCompletion: "launched" | "in progress" | "planned";
@@ -83,14 +84,15 @@ export default function RoadMap() {
             commentSentences: [
                 <span key="AutoHealReverseLookupFragment">
           Description with a{" "}
-                    <a
-                        className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
+                    <Link
                         href=""
                         target="_blank"
-                        rel="noopener noreferrer"
+                        className="!text-black"
+                        variant="underline"
+                        size="small"
                     >
-            hyperlink
-          </a>
+                        hyperlink
+                    </Link>
         </span>,
             ],
         },
@@ -100,14 +102,15 @@ export default function RoadMap() {
             commentSentences: [
                 <span key="BulkLabelHealingFragment">
           Description with a{" "}
-                    <a
-                        className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
+                    <Link
                         href=""
                         target="_blank"
-                        rel="noopener noreferrer"
+                        className="!text-black"
+                        variant="underline"
+                        size="small"
                     >
-            hyperlink
-          </a>
+                        hyperlink
+                    </Link>
         </span>,
             ],
         },
@@ -117,14 +120,15 @@ export default function RoadMap() {
             commentSentences: [
                 <span key="AutomatedLabelCrackingFragment">
           Description with a{" "}
-                    <a
-                        className="text-black underline sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
+                    <Link
                         href=""
                         target="_blank"
-                        rel="noopener noreferrer"
+                        className="!text-black"
+                        variant="underline"
+                        size="small"
                     >
-            hyperlink
-          </a>
+                        hyperlink
+                    </Link>
         </span>,
             ],
         },

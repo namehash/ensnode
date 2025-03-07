@@ -11,7 +11,7 @@ export const DeveloperResourceItem = ({ elem }: DeveloperResourceItemProps) => {
     const content = (
         <div
             className={`group w-full md:w-[602px] h-full sm:min-w-[602px] max-w-[602px] box-border flex flex-row items-start justify-start bg-white p-5 gap-4 rounded-xl border border-gray-200
-         ${elementLink && "sm:hover:cursor-pointer sm:hover:border-gray-300 sm:hover:shadow-sm transition relative"}`}
+         ${elementLink && "hover:cursor-pointer hover:border-gray-300 hover:shadow-sm transition relative"}`}
         >
             {elementLink && (
                 <RedirectIcon
