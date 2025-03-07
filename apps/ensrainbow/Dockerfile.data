@@ -15,8 +15,13 @@ COPY apps/ensrainbow/package.json ./apps/ensrainbow/package.json
 COPY apps/ensrainbow/download-rainbow-tables.sh ./apps/ensrainbow/download-rainbow-tables.sh
 
 WORKDIR /app/apps/ensrainbow
-RUN pnpm get-legacy-data
-
+# Allow parametrization of which data version to download
+ARG DATA_VERSION=""
+RUN if [ -z "$DATA_VERSION" ]; then \
+        pnpm get-legacy-data; \
+    else \
+        pnpm get-v2-data; \
+    fi
 ###################
 ## Dependencies Stage — standard monorepo pnpm install from base
 ###################
@@ -52,5 +57,8 @@ RUN rm ens_names.sql.gz
 ###################
 
 FROM base AS ensrainbow-data
+ARG DATA_VERSION=""
+# Set a label to identify the data version
+LABEL org.ensnode.data-version=${DATA_VERSION:-legacy}
 
 COPY --from=ingest /app/apps/ensrainbow/data ./data

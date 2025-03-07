@@ -16,6 +16,7 @@
     "ingest": "bun src/cli.ts ingest",
     "validate": "bun src/cli.ts validate",
     "get-legacy-data": "./download-rainbow-tables.sh",
+    "get-v2-data": "./download-rainbow-tables.sh v2",
     "validate:lite": "bun src/cli.ts validate --lite",
     "purge": "bun src/cli.ts purge",
     "test": "vitest run",
