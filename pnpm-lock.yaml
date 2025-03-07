@@ -440,7 +440,7 @@ importers:
         version: link:../shared-configs
       ponder:
         specifier: 'catalog:'
-        version: 0.9.26(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
