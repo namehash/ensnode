@@ -5,13 +5,24 @@ import { useEffect } from "react";
 
 export default function Error({
   error,
+  reset,
 }: {
-  error: Error & { digest?: string };
+  error: Error;
   reset: () => void;
 }) {
   useEffect(() => {
     // log the error to the console for operators
     console.error(error);
+
+    const handleResetError = () => reset();
+
+    // Add event listener
+    window.addEventListener('ensnode/connection/set', handleResetError);
+    
+    // Clean up event listener on unmount
+    return () => {
+      window.removeEventListener('ensnode/connection/set', handleResetError);
+    };
   }, [error]);
 
   return (
