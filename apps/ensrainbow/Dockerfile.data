@@ -57,5 +57,8 @@ RUN rm ens_names.sql.gz
 ###################
 
 FROM base AS ensrainbow-data
+ARG DATA_VERSION=""
+# Set a label to identify the data version
+LABEL org.ensnode.data-version=${DATA_VERSION:-legacy}
 
 COPY --from=ingest /app/apps/ensrainbow/data ./data
