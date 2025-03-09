@@ -20,14 +20,17 @@ export interface BlockInfo {
   timestamp: number;
 }
 
+/**
+ * Network indexing status for a chain.
+ */
 export interface NetworkIndexingStatus {
   /**
-   * First block required to be indexed for the historical sync.
+   * First block required to be indexed during the historical sync.
    */
   firstBlockToIndex: BlockInfo;
 
   /**
-   * Closest-to-tip synced block number.
+   * Latest block synced into indexer's RPC cache.
    */
   lastSyncedBlock: BlockInfo | null;
 

@@ -2,16 +2,60 @@ import { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { queryPonderMeta, queryPonderStatus } from "./db-helpers";
 import { PrometheusMetrics } from "./prometheus-metrics";
-import { PonderMetadataMiddlewareOptions, PonderMetadataMiddlewareResponse } from "./types/api";
+import type {
+  PonderEnvVarsInfo,
+  PonderMetadataMiddlewareOptions,
+  PonderMetadataMiddlewareResponse,
+} from "./types/api";
 import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "./types/common";
 
-export function ponderMetadata({
+/**
+ * Ponder Metadata types definition.
+ */
+interface PonderMetadataModule {
+  /** Application info */
+  AppInfo: {
+    /** Application name */
+    name: string;
+    /** Application version */
+    version: string;
+  };
+
+  /** Environment Variables info */
+  EnvVars: {
+    /** Database schema */
+    DATABASE_SCHEMA: string;
+  } & PonderEnvVarsInfo;
+
+  /** Runtime info */
+  RuntimeInfo: {
+    /**
+     * Application build id
+     * https://github.com/ponder-sh/ponder/blob/626e524/packages/core/src/build/index.ts#L425-L431
+     **/
+    codebaseBuildId: string;
+
+    /** Network indexing status by chain ID */
+    networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
+  };
+}
+
+export type MetadataMiddlewareResponse = PonderMetadataMiddlewareResponse<
+  PonderMetadataModule["AppInfo"],
+  PonderMetadataModule["EnvVars"],
+  PonderMetadataModule["RuntimeInfo"]
+>;
+
+export function ponderMetadata<
+  AppInfo extends PonderMetadataModule["AppInfo"],
+  EnvVars extends PonderMetadataModule["EnvVars"],
+>({
   app,
   db,
   env,
   query,
   publicClients,
-}: PonderMetadataMiddlewareOptions): MiddlewareHandler {
+}: PonderMetadataMiddlewareOptions<AppInfo, EnvVars>): MiddlewareHandler {
   return async function ponderMetadataMiddleware(ctx) {
     const indexedChainIds = Object.keys(publicClients).map(Number);
 
@@ -97,7 +141,7 @@ export function ponderMetadata({
         codebaseBuildId: formatTextMetricValue(ponderMeta.build_id),
         networkIndexingStatusByChainId,
       },
-    } satisfies PonderMetadataMiddlewareResponse;
+    } satisfies MetadataMiddlewareResponse;
 
     // validate if response is in correct state
     validateResponse(response);
@@ -106,7 +150,13 @@ export function ponderMetadata({
   };
 }
 
-function validateResponse(response: PonderMetadataMiddlewareResponse) {
+/**
+ * Validates the metadata middleware response to ensure correct state.
+ *
+ * @param response The response to validate
+ * @throws {HTTPException} if the response is in an invalid state
+ */
+function validateResponse(response: MetadataMiddlewareResponse): void {
   const { networkIndexingStatusByChainId } = response.runtime;
 
   if (Object.keys(networkIndexingStatusByChainId).length === 0) {
