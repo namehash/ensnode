@@ -191,6 +191,9 @@ importers:
 
   apps/ensadmin-next:
     dependencies:
+      '@ensnode/ponder-metadata':
+        specifier: 'workspace:'
+        version: link:../../packages/ponder-metadata-api
       '@ensnode/ponder-schema':
         specifier: 'workspace:'
         version: link:../../packages/ponder-schema
