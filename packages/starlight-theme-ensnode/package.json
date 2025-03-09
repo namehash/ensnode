@@ -1,0 +1,21 @@
+{
+  "name": "starlight-theme-ensnode",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Starlight theme for ENSNode inspired by the official ENS branding",
+  "author": "Jamie Barton <jamie@notrab.dev>",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./styles": "./styles.css",
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@astrojs/starlight": ">=0.32.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.0.4",
+  "sideEffects": false
+}
