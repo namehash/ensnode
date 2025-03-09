@@ -31,22 +31,32 @@ export function useIndexingStatus(searchParams: URLSearchParams) {
 
       return data;
     },
+    throwOnError(error) {
+      throw new Error(`ENSNode request error at '${ensNodeUrl}'. Cause: ${error.message}`);
+    },
   });
 }
 
 function validateResponse(response: EnsNodeMetadata) {
-  const logPrefix = `[${response.app.name}@${response.app.version}]:`;
   const { networkIndexingStatusByChainId } = response.runtime;
 
   if (typeof networkIndexingStatusByChainId === "undefined") {
-    throw new Error(`${logPrefix} Network indexing status not found`);
+    throw new Error(`Network indexing status not found in the response.`);
   }
 
   if (Object.keys(networkIndexingStatusByChainId).length === 0) {
-    throw new Error(`${logPrefix} No network indexing status found`);
+    throw new Error(`No network indexing status found response.`);
   }
 
-  if (Object.values(networkIndexingStatusByChainId).some((n) => n.firstBlockToIndex === null)) {
-    throw new Error(`${logPrefix} Failed to fetch first block to index for some networks`);
+  const networksWithoutFirstBlockToIndex = Object.entries(networkIndexingStatusByChainId).filter(
+    ([, network]) => network.firstBlockToIndex === null,
+  );
+
+  if (networksWithoutFirstBlockToIndex.length > 0) {
+    throw new Error(
+      `Missing first block to index for some networks with the following chain IDs: ${networksWithoutFirstBlockToIndex
+        .map(([chainId]) => chainId)
+        .join(", ")}`,
+    );
   }
 }
