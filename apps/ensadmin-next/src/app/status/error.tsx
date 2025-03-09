@@ -17,11 +17,11 @@ export default function Error({
     const handleResetError = () => reset();
 
     // Add event listener
-    window.addEventListener('ensnode/connection/set', handleResetError);
-    
+    window.addEventListener("ensnode/connection/set", handleResetError);
+
     // Clean up event listener on unmount
     return () => {
-      window.removeEventListener('ensnode/connection/set', handleResetError);
+      window.removeEventListener("ensnode/connection/set", handleResetError);
     };
   }, [error]);
 

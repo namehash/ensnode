@@ -11,7 +11,7 @@ import {
   Server,
   Trash2,
 } from "lucide-react";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useConnections } from "./use-connections";
 
@@ -31,7 +31,7 @@ export function ConnectionSelector() {
     const params = new URLSearchParams(searchParams);
     params.set("ensnode", url);
 
-    router.push(`${pathname}?${params.toString()}`)
+    router.push(`${pathname}?${params.toString()}`);
 
     window.dispatchEvent(new CustomEvent("ensnode/connection/set", { detail: { url } }));
   };

@@ -2,8 +2,9 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn, formatDate } from "@/lib/utils";
-import { BlockInfo } from "@ensnode/ponder-metadata";
+import { cn } from "@/lib/utils";
+import type { BlockInfo } from "@ensnode/ponder-metadata";
+import { fromUnixTime, intlFormat } from "date-fns";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useIndexingStatus } from "./hooks";
@@ -128,7 +129,7 @@ function BlockStats({ label, block }: BlockSatsProps) {
       <div className="text-sm text-muted-foreground">{label}</div>
       <div className="text-lg font-semibold">{block.number ? `#${block.number}` : "N/A"}</div>
       <div className="text-sm text-muted-foreground">
-        {block.timestamp ? formatDate(new Date(block.timestamp * 1000)) : "N/A"}
+        {block.timestamp ? intlFormat(fromUnixTime(block.timestamp)) : "N/A"}
       </div>
     </div>
   );
@@ -243,13 +244,14 @@ function InlineSummary(props: InlineSummaryProps) {
 
 interface InlineSummaryItemProps {
   label: string;
-  value?: string;
+  value?: string | unknown;
 }
 
 function InlineSummaryItem(props: InlineSummaryItemProps) {
   return (
     <li>
-      <strong>{props.label}</strong> <pre className="inline-block">{props.value}</pre>
+      <strong>{props.label}</strong>{" "}
+      <pre className="inline-block">{props.value ? props.value.toString() : "unknown"}</pre>
     </li>
   );
 }
@@ -323,7 +325,7 @@ export function IndexingTimeline({
           <div className="flex items-center gap-1.5">
             <Clock size={16} className="text-blue-600" />
             <span className="text-sm font-medium">
-              Last indexed block on {formatDate(currentIndexingDate)}
+              Last indexed block on {intlFormat(currentIndexingDate)}
             </span>
           </div>
         </CardTitle>
@@ -441,7 +443,7 @@ export function IndexingTimeline({
                   >
                     <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
                       <span className="text-xs text-gray-600">
-                        {formatDate(networkStatus.firstBlockToIndex.date)}
+                        {intlFormat(networkStatus.firstBlockToIndex.date)}
                       </span>
                     </div>
                   </div>

@@ -1,11 +1,14 @@
 import { selectedEnsNodeUrl } from "@/lib/env";
-import type { PonderMetadataMiddlewareResponse } from "@ensnode/ponder-metadata";
+import type { MetadataMiddlewareResponse } from "@ensnode/ponder-metadata";
 import { useQuery } from "@tanstack/react-query";
 
+// TODO: make `EnsNodeMetadata` interface to extend from
+// `MetadataMiddlewareResponse` of ENSNode SDK package (once it's available)
+// as it will include precise types for currently unknown-type fields (i.e. `env.ENS_DEPLOYMENT_CHAIN`)
 /**
  * The status of the ENS node.
  */
-export interface EnsNodeMetadata extends PonderMetadataMiddlewareResponse {}
+export interface EnsNodeMetadata extends MetadataMiddlewareResponse {}
 
 async function fetchEnsNodeStatus(baseUrl: string): Promise<EnsNodeMetadata> {
   const response = await fetch(new URL(`/metadata`, baseUrl));

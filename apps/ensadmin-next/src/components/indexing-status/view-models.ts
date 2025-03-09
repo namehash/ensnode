@@ -1,9 +1,10 @@
 import { getChainName } from "@/lib/chains";
 import type {
   BlockInfo,
+  MetadataMiddlewareResponse,
   NetworkIndexingStatus,
-  PonderMetadataMiddlewareResponse,
 } from "@ensnode/ponder-metadata";
+import { fromUnixTime } from "date-fns";
 
 export type { NetworkIndexingStatus } from "@ensnode/ponder-metadata";
 
@@ -78,8 +79,8 @@ export function globalIndexingStatusViewModel(
 
   return {
     networkStatuses: networkStatusesViewModel,
-    currentIndexingDate: timestampToDate(currentIndexingDate),
-    indexingStartsAt: timestampToDate(firstBlockToIndexGloballyTimestamp),
+    currentIndexingDate: fromUnixTime(currentIndexingDate),
+    indexingStartsAt: fromUnixTime(firstBlockToIndexGloballyTimestamp),
   };
 }
 
@@ -102,15 +103,15 @@ export function networkIndexingStatusViewModel(
   if (firstBlockToIndex.timestamp > firstBlockToIndexGloballyTimestamp) {
     phases.push({
       state: "queued" as const,
-      startDate: timestampToDate(firstBlockToIndexGloballyTimestamp),
-      endDate: timestampToDate(firstBlockToIndex.timestamp),
+      startDate: fromUnixTime(firstBlockToIndexGloballyTimestamp),
+      endDate: fromUnixTime(firstBlockToIndex.timestamp),
     });
   }
 
   phases.push({
     state: "indexing" as const,
-    startDate: timestampToDate(firstBlockToIndex.timestamp),
-    endDate: timestampToDate(latestSafeBlock.timestamp),
+    startDate: fromUnixTime(firstBlockToIndex.timestamp),
+    endDate: fromUnixTime(latestSafeBlock.timestamp),
   });
 
   return {
@@ -133,32 +134,22 @@ function blockViewModel(block: BlockInfo): BlockInfoViewModel {
   return {
     ...block,
     get date(): Date {
-      return timestampToDate(block.timestamp);
+      return fromUnixTime(block.timestamp);
     },
   };
 }
 
-export function ensNodeDepsViewModel(deps: PonderMetadataMiddlewareResponse["deps"]) {
+export function ensNodeDepsViewModel(deps: MetadataMiddlewareResponse["deps"]) {
   return [
     { label: "Ponder", value: deps.ponder },
     { label: "Node.js", value: deps.nodejs },
   ] as const;
 }
 
-export function ensNodeEnvViewModel(env: PonderMetadataMiddlewareResponse["env"]) {
+export function ensNodeEnvViewModel(env: MetadataMiddlewareResponse["env"]) {
   return [
     { label: "Active Plugins", value: env.ACTIVE_PLUGINS },
     { label: "ENS Deployment Chain", value: env.ENS_DEPLOYMENT_CHAIN },
     { label: "Database Schema", value: env.DATABASE_SCHEMA },
   ] as const;
-}
-
-/**
- * Converts a timestamp to a date object.
- *
- * @param timestamp
- * @returns
- */
-export function timestampToDate(timestamp: number): Date {
-  return new Date(timestamp * 1000);
 }
