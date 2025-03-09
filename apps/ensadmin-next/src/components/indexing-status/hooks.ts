@@ -10,6 +10,12 @@ import { useQuery } from "@tanstack/react-query";
  */
 export interface EnsNodeMetadata extends MetadataMiddlewareResponse {}
 
+/**
+ * Fetches the ENSNode status.
+ *
+ * @param baseUrl ENSNode URL
+ * @returns Information about the ENSNode runtime, environment, dependencies, and more.
+ */
 async function fetchEnsNodeStatus(baseUrl: string): Promise<EnsNodeMetadata> {
   const response = await fetch(new URL(`/metadata`, baseUrl), {
     headers: {
@@ -26,6 +32,11 @@ async function fetchEnsNodeStatus(baseUrl: string): Promise<EnsNodeMetadata> {
   return response.json();
 }
 
+/**
+ * Hook to fetch the indexing status of the ENS node.
+ * @param searchParams The URL search params including the selected ENS node URL.
+ * @returns React Query hook result.
+ */
 export function useIndexingStatus(searchParams: URLSearchParams) {
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
@@ -43,6 +54,11 @@ export function useIndexingStatus(searchParams: URLSearchParams) {
   });
 }
 
+/**
+ * Checks if the response has the expected structure.
+ * @param response
+ * @throws Error if the response is invalid
+ */
 function validateResponse(response: EnsNodeMetadata) {
   const { networkIndexingStatusByChainId } = response.runtime;
 

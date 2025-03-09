@@ -11,6 +11,7 @@ import { useIndexingStatus } from "./hooks";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
   GlobalIndexingStatusViewModel,
+  NetworkIndexingPhaseViewModel,
   NetworkStatusViewModel,
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
@@ -47,6 +48,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
   }
 
   if (!data) {
+    // propagate error to error boundary
     throw new Error("No data available for network indexing stats");
   }
 
@@ -180,6 +182,7 @@ function NetworkIndexingStatsPlaceholder() {
 }
 
 interface NetworkIndexingTimelineProps {
+  /** ENSNode status query result */
   indexingStatus: ReturnType<typeof useIndexingStatus>;
 }
 
@@ -199,7 +202,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   }
 
   if (!indexingStatus.data) {
-    // this should never happen due to previous assertion
+    // propagate error to error boundary
     throw new Error("No data available for network indexing timeline");
   }
 
@@ -375,78 +378,15 @@ export function IndexingTimeline({
 
         {/* Network bars */}
         <div className="space-y-6">
-          {networkStatuses.map((networkStatus) => {
-            const currentIndexingPhase = currentPhase(currentIndexingDate, networkStatus);
-
-            return (
-              <div key={networkStatus.name} className="flex items-center">
-                {/* Network label */}
-                <div className="w-24 pr-3 text-sm font-medium flex flex-col">
-                  <span>{networkStatus.name}</span>
-                </div>
-
-                {/* Network timeline bar */}
-                <div className="relative flex-1 h-6">
-                  {networkStatus.phases.map((phase) => {
-                    const isActive = phase.state === currentIndexingPhase.state;
-                    const isQueued = phase.state === "queued";
-                    const isIndexing = phase.state === "indexing";
-
-                    const startPos = getTimelinePosition(
-                      phase.startDate,
-                      timelineStart,
-                      timelineEnd,
-                    );
-                    const endPos = phase.endDate
-                      ? getTimelinePosition(phase.endDate, timelineStart, timelineEnd)
-                      : 100;
-
-                    const width = endPos - startPos;
-
-                    // Skip rendering if width is zero or negative
-                    if (width <= 0) return null;
-
-                    return (
-                      <div
-                        key={`${networkStatus.name}-${phase.state}`}
-                        className={cn("absolute h-5 rounded-sm z-10", {
-                          "bg-gray-400": isQueued,
-                          "bg-blue-500": isIndexing,
-                        })}
-                        style={{
-                          left: `${startPos}%`,
-                          width: `${width}%`,
-                          opacity: isActive ? 1 : 0.7,
-                          boxShadow: isActive ? "0 1px 3px rgba(0,0,0,0.2)" : "none",
-                          transition: "width 0.3s ease",
-                        }}
-                      >
-                        {width > 10 && (
-                          <span className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium capitalize">
-                            {phase.state}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {/* Network start indicator */}
-                  <div
-                    className="absolute w-0.5 h-5 bg-gray-800 z-10"
-                    style={{
-                      left: `${getTimelinePosition(networkStatus.firstBlockToIndex.date, timelineStart, timelineEnd)}%`,
-                    }}
-                  >
-                    <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
-                      <span className="text-xs text-gray-600">
-                        {intlFormat(networkStatus.firstBlockToIndex.date)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {networkStatuses.map((networkStatus) => (
+            <NetworkIndexingStatus
+              key={networkStatus.name}
+              currentIndexingDate={currentIndexingDate}
+              networkStatus={networkStatus}
+              timelineStart={timelineStart}
+              timelineEnd={timelineEnd}
+            />
+          ))}
         </div>
 
         {/* Legend */}
@@ -466,6 +406,110 @@ export function IndexingTimeline({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+interface NetworkIndexingStatusProps {
+  currentIndexingDate: Date;
+  timelineStart: Date;
+  timelineEnd: Date;
+  networkStatus: NetworkStatusViewModel;
+}
+
+/**
+ * Component to display network indexing status for a single network.
+ * Includes a timeline bar for each indexing phase.
+ */
+function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
+  const { currentIndexingDate, networkStatus, timelineStart, timelineEnd } = props;
+  const currentIndexingPhase = currentPhase(currentIndexingDate, networkStatus);
+
+  return (
+    <div key={networkStatus.name} className="flex items-center">
+      {/* Network label */}
+      <div className="w-24 pr-3 text-sm font-medium flex flex-col">
+        <span>{networkStatus.name}</span>
+      </div>
+
+      {/* Network timeline bar */}
+      <div className="relative flex-1 h-6">
+        {networkStatus.phases.map((phase) => (
+          <NetworkIndexingPhase
+            key={`${networkStatus.name}-${phase.state}`}
+            phase={phase}
+            isActive={phase === currentIndexingPhase}
+            timelineStart={timelineStart}
+            timelineEnd={timelineEnd}
+          />
+        ))}
+
+        {/* Network start indicator */}
+        <div
+          className="absolute w-0.5 h-5 bg-gray-800 z-10"
+          style={{
+            left: `${getTimelinePosition(networkStatus.firstBlockToIndex.date, timelineStart, timelineEnd)}%`,
+          }}
+        >
+          <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
+            <span className="text-xs text-gray-600">
+              {intlFormat(networkStatus.firstBlockToIndex.date)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface NetworkIndexingPhaseProps {
+  phase: NetworkIndexingPhaseViewModel;
+  isActive: boolean;
+  timelineStart: Date;
+  timelineEnd: Date;
+}
+
+/**
+ * Component to display a single indexing phase on the network indexing timeline.
+ */
+function NetworkIndexingPhase({
+  phase,
+  isActive,
+  timelineStart,
+  timelineEnd,
+}: NetworkIndexingPhaseProps) {
+  const isQueued = phase.state === "queued";
+  const isIndexing = phase.state === "indexing";
+
+  const startPos = getTimelinePosition(phase.startDate, timelineStart, timelineEnd);
+  const endPos = phase.endDate
+    ? getTimelinePosition(phase.endDate, timelineStart, timelineEnd)
+    : 100;
+
+  const width = endPos - startPos;
+
+  // Skip rendering if width is zero or negative
+  if (width <= 0) return null;
+
+  return (
+    <div
+      className={cn("absolute h-5 rounded-sm z-10", {
+        "bg-gray-400": isQueued,
+        "bg-blue-500": isIndexing,
+      })}
+      style={{
+        left: `${startPos}%`,
+        width: `${width}%`,
+        opacity: isActive ? 1 : 0.7,
+        boxShadow: isActive ? "0 1px 3px rgba(0,0,0,0.2)" : "none",
+        transition: "width 0.3s ease",
+      }}
+    >
+      {width > 10 && (
+        <span className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium capitalize">
+          {phase.state}
+        </span>
+      )}
+    </div>
   );
 }
 
