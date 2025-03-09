@@ -20,27 +20,31 @@ describe("labelByHash", () => {
 
   it("throws an error for an invalid too short labelhash", async () => {
     await expect(
-      labelByHash("0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da0"),
-    ).rejects.toThrow("Invalid labelhash length 65 characters (expected 66)");
+      labelByHash("0x0ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da0"),
+    ).rejects.toThrow(
+      'Error healing labelhash: "0x0ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da0". Error (400): Invalid labelhash length: expected 32 bytes (64 hex chars), got 31 bytes: 0x0ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da0.',
+    );
   });
 
   it("throws an error for an invalid too long labelhash", async () => {
     await expect(
       labelByHash("0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da067"),
-    ).rejects.toThrow("Invalid labelhash length 67 characters (expected 66)");
+    ).rejects.toThrow(
+      'Error healing labelhash: "0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da067". Error (400): Invalid labelhash length: expected 32 bytes (64 hex chars), got 33 bytes: 0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da067.',
+    );
   });
 
-  it("throws an error for an invalid labelhash not in lower-case", async () => {
-    await expect(
-      labelByHash("0x00Ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da06"),
-    ).rejects.toThrow("Labelhash must be in lowercase");
+  it("heals a labelhash not in lower-case", async () => {
+    expect(
+      await labelByHash("0xAf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"),
+    ).toEqual("vitalik");
   });
 
-  it("throws an error for an invalid labelhash missing 0x prefix", async () => {
-    await expect(
-      labelByHash(
-        "12ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da0600" as Labelhash,
+  it("heals a labelhash missing 0x prefix", async () => {
+    expect(
+      await labelByHash(
+        "af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc" as `0x${string}`,
       ),
-    ).rejects.toThrow("Labelhash must be 0x-prefixed");
+    ).toEqual("vitalik");
   });
 });
