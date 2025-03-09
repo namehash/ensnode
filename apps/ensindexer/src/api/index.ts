@@ -46,6 +46,17 @@ app.use("/", async (ctx) =>
   ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
 );
 
+// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+app.use("/", async (ctx) => {
+  try {
+    ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`);
+  } catch (error) {
+    console.error(error);
+
+    return ctx.text("Internal server error", 500);
+  }
+});
+
 // setup block indexing status fetching
 const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
   import("../../ponder.config").then((m) => m.default),
