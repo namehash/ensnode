@@ -405,7 +405,7 @@ interface PonderNetworkConfig {
  *   }
  * };
  *
- * const startBlockNumbers = await getIndexingStartBlockNumbersByChainId(ponderConfig);
+ * const startBlockNumbers = await createStartBlockByChainIdMap(ponderConfig);
  *
  * console.log(startBlockNumbers);
  *

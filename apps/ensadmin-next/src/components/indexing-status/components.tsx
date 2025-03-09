@@ -135,15 +135,15 @@ function BlockStats({ label, block }: BlockSatsProps) {
   );
 }
 
-interface NetworkIndexingStatsFallbackProps {
-  /** Number of network placeholders to display. */
+interface FallbackViewProps {
+  /** Number of placeholders to display. */
   placeholderCount?: number;
 }
 
 /**
  * Component to display loading state for network indexing stats.
  */
-function NetworkIndexingStatsFallback(props: NetworkIndexingStatsFallbackProps) {
+function NetworkIndexingStatsFallback(props: FallbackViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -194,6 +194,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   }
 
   if (indexingStatus.error) {
+    // propagate error to error boundary
     throw indexingStatus.error;
   }
 
@@ -256,15 +257,10 @@ function InlineSummaryItem(props: InlineSummaryItemProps) {
   );
 }
 
-interface NetworkIndexingTimelineFallbackProps {
-  /** Number of network placeholders to display. */
-  placeholderCount?: number;
-}
-
 /**
  * Component to display loading state for the network indexing timeline.
  */
-function NetworkIndexingTimelineFallback(props: NetworkIndexingTimelineFallbackProps) {
+function NetworkIndexingTimelineFallback(props: FallbackViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -308,7 +304,7 @@ export function IndexingTimeline({
   indexingStartsAt,
 }: TimelineProps) {
   if (!currentIndexingDate) {
-    return <LoadingState />;
+    return <IndexingTimelineFallback />;
   }
 
   // Timeline boundaries
@@ -473,27 +469,41 @@ export function IndexingTimeline({
   );
 }
 
-function LoadingState() {
+/**
+ * Component to display loading state for the indexing timeline.
+ */
+function IndexingTimelineFallback(props: FallbackViewProps) {
+  const { placeholderCount = 3 } = props;
+
   return (
     <div className="p-6">
       <div className="space-y-4">
         <div className="h-8 bg-muted animate-pulse rounded-md w-48" />
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-muted rounded w-1/3" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-1/2" />
-                  <div className="h-4 bg-muted rounded w-2/3" />
-                </div>
-              </CardContent>
-            </Card>
+          {Array.from(Array(placeholderCount).keys()).map((i) => (
+            <IndexingTimelinePlaceholder key={i} />
           ))}
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Component to display a placeholder for the indexing timeline.
+ */
+function IndexingTimelinePlaceholder() {
+  return (
+    <Card className="animate-pulse">
+      <CardHeader>
+        <div className="h-6 bg-muted rounded w-1/3" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <div className="h-4 bg-muted rounded w-1/2" />
+          <div className="h-4 bg-muted rounded w-2/3" />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

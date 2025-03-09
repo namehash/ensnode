@@ -1,4 +1,4 @@
-import { selectedEnsNodeUrl } from "@/lib/env";
+import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import type { MetadataMiddlewareResponse } from "@ensnode/ponder-metadata";
 import { useQuery } from "@tanstack/react-query";
 
@@ -11,10 +11,16 @@ import { useQuery } from "@tanstack/react-query";
 export interface EnsNodeMetadata extends MetadataMiddlewareResponse {}
 
 async function fetchEnsNodeStatus(baseUrl: string): Promise<EnsNodeMetadata> {
-  const response = await fetch(new URL(`/metadata`, baseUrl));
+  const response = await fetch(new URL(`/metadata`, baseUrl), {
+    headers: {
+      "content-type": "application/json",
+      "x-ensadmin-version": await ensAdminVersion(),
+    },
+  });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch indexing status");
+    console.error("Failed to fetch ENSNode status", response);
+    throw new Error("Failed to fetch ENSNode status");
   }
 
   return response.json();

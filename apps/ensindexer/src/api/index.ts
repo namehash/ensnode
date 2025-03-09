@@ -2,7 +2,7 @@ import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
-import { Hono } from "hono";
+import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import packageJson from "../../package.json";
@@ -18,8 +18,17 @@ import {
 
 const app = new Hono();
 
-// use CORS middleware
+const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
+  ctx.header("x-ensnode-version", packageJson.version);
+
+  return next();
+};
+
 app.use(
+  // set the X-ENSNode-Version header to the current version
+  ensNodeVersionResponseHeader,
+
+  // use CORS middleware
   cors({
     origin: "*",
   }),
