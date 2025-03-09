@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainBlockrange,
+  createStartBlockByChainIdMap,
   deepMergeRecursive,
   parseEnsNodePublicUrl,
   parseEnsRainbowEndpointUrl,
@@ -121,6 +122,40 @@ describe("ponder helpers", () => {
 
     it("should throw an error if the port is missing", () => {
       expect(() => parsePonderPort()).toThrowError("Expected value not set");
+    });
+  });
+
+  describe("createStartBlockByChainIdMap", () => {
+    it("should return a map of start blocks by chain ID", async () => {
+      const partialPonderConfig = {
+        contracts: {
+          "/eth/Registrar": {
+            network: {
+              "1": { startBlock: 444_444_444 },
+            },
+          },
+          "/eth/Registry": {
+            network: {
+              "1": { startBlock: 444_444_333 },
+            },
+          },
+          "/eth/base/Registrar": {
+            network: {
+              "8453": { startBlock: 1_799_433 },
+            },
+          },
+          "/eth/base/Registry": {
+            network: {
+              "8453": { startBlock: 1_799_430 },
+            },
+          },
+        },
+      };
+
+      expect(await createStartBlockByChainIdMap(Promise.resolve(partialPonderConfig))).toEqual({
+        1: 444_444_333,
+        8453: 1_799_430,
+      });
     });
   });
 

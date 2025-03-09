@@ -7,9 +7,9 @@ import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import packageJson from "../../package.json";
 import {
+  createFirstBlockToIndexByChainIdFetcher,
+  createPrometheusMetricsFetcher,
   ensNodePublicUrl,
-  fetchFirstBlockToIndexByChainId,
-  fetchPrometheusMetrics,
   getEnsDeploymentChain,
   ponderDatabaseSchema,
   ponderPort,
@@ -37,6 +37,14 @@ app.use("/", async (ctx) =>
   ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
 );
 
+// setup block indexing status fetching
+const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
+  import("../../ponder.config").then((m) => m.default),
+);
+
+// setup prometheus metrics fetching
+const fetchPrometheusMetrics = createPrometheusMetricsFetcher(ponderPort());
+
 // use ENSNode middleware at /metadata
 app.get(
   "/metadata",
@@ -52,10 +60,8 @@ app.get(
     },
     db,
     query: {
-      // setup block indexing status fetching
       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
-      // setup prometheus metrics fetching
-      prometheusMetrics: () => fetchPrometheusMetrics(ponderPort()),
+      prometheusMetrics: fetchPrometheusMetrics,
     },
     publicClients,
   }),

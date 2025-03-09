@@ -260,6 +260,7 @@ export const ponderPort = (): number => {
   }
 };
 
+/** Parse the Ponder application port */
 export const parsePonderPort = (rawValue?: string): number => {
   if (!rawValue) {
     throw new Error("Expected value not set");
@@ -279,100 +280,169 @@ export const parsePonderPort = (rawValue?: string): number => {
 };
 
 /**
- * Fetches the Prometheus metrics from the Ponder application endpoint.
- * @param {number} ponderApplicationPort
- * @returns Prometheus metrics as a text string
- */
-export async function fetchPrometheusMetrics(ponderApplicationPort: number): Promise<string> {
-  const response = await fetch(`http://localhost:${ponderApplicationPort}/metrics`);
-
-  return response.text();
-}
-
-/**
+ * Creates a Prometheus metrics fetcher for the Ponder application.
  *
- * @param chainId
- * @param publicClient {PublicCli}
- * @returns
+ * It's a workaround for the lack of an internal API allowing to access
+ * Prometheus metrics for the Ponder application.
+ *
+ * @param ponderApplicationPort the port the Ponder application is served at
+ * @returns fetcher function
  */
-export async function fetchFirstBlockToIndexByChainId(
-  chainId: number,
-  publicClient: PublicClient,
-): Promise<BlockInfo> {
-  const startBlockNumbers = await getIndexingStartBlockNumbersByChainId();
-  const startBlockNumberForChainId = startBlockNumbers[chainId];
+export function createPrometheusMetricsFetcher(
+  ponderApplicationPort: number,
+): () => Promise<string> {
+  /**
+   * Fetches the Prometheus metrics from the Ponder application endpoint.
+   * @param {number} ponderApplicationPort
+   * @returns Prometheus metrics as a text string
+   */
+  return async function fetchPrometheusMetrics(): Promise<string> {
+    const response = await fetch(`http://localhost:${ponderApplicationPort}/metrics`);
 
-  if (!startBlockNumberForChainId) {
-    throw new Error(`No start block number found for chain ID ${chainId}`);
-  }
-
-  const block = await publicClient.getBlock({
-    blockNumber: BigInt(startBlockNumberForChainId),
-  });
-
-  if (!block) {
-    throw Error(`Failed to fetch block ${startBlockNumberForChainId} for chainId ${chainId}`);
-  }
-
-  return {
-    number: Number(block.number),
-    timestamp: Number(block.timestamp),
+    return response.text();
   };
 }
 
 /**
- * Get the global start block number for each chain ID.
- *
- * @returns the global start block number for each chain ID.
- * @example
- * ```ts
- * {
- *    1: 333742
- *    8453: 1799433
- * }
- * ```
- *
+ * Creates a first block to index fetcher for the given ponder configuration.
  */
-async function getIndexingStartBlockNumbersByChainId() {
-  return Object.values((await import("../../ponder.config")).default.contracts)
-    .map((contractsConfig) =>
-      Object.entries(contractsConfig.network).flatMap(([chainId, c]) => {
-        return [chainId, c.startBlock];
-      }),
-    )
-    .reduce(
-      (acc, [chainId, startBlock]) => {
-        // no start block for this chain yet
-        if (!acc[chainId]) {
-          // set the start block
-          acc[chainId] = startBlock;
-          return acc;
-        }
+export function createFirstBlockToIndexByChainIdFetcher(
+  ponderConfig: Promise<PartialPonderConfig>,
+) {
+  /**
+   * Fetches the first block to index for the requested chain ID.
+   *
+   * @param chainId the chain ID to get the first block to index for
+   * @param publicClient the public client to fetch the block from
+   *
+   * @returns {Promise<BlockInfo>} the first block to index for the requested chain ID
+   * @throws if the start block number is not found for the chain ID
+   * @throws if the block is not available on the network
+   */
+  return async function fetchFirstBlockToIndexByChainId(
+    chainId: number,
+    publicClient: PublicClient,
+  ): Promise<BlockInfo> {
+    const startBlockNumbers: Record<number, number> =
+      await createStartBlockByChainIdMap(ponderConfig);
+    const startBlockNumberForChainId = startBlockNumbers[chainId];
 
-        // update the start block if the current one is lower
-        if (startBlock < acc[chainId]) {
-          acc[chainId] = startBlock;
-        }
+    // each chain should have a start block number
+    if (!startBlockNumberForChainId) {
+      // throw an error if the start block number is not found for the chain ID
+      throw new Error(`No start block number found for chain ID ${chainId}`);
+    }
 
-        return acc;
-      },
-      {} as Record<number, number>,
-    );
+    const block = await publicClient.getBlock({
+      blockNumber: BigInt(startBlockNumberForChainId),
+    });
+
+    // the decided start block number should be available on the network
+    if (!block) {
+      // throw an error if the block is not available
+      throw Error(`Failed to fetch block ${startBlockNumberForChainId} for chainId ${chainId}`);
+    }
+
+    // otherwise, return the start block info
+    return {
+      number: Number(block.number),
+      timestamp: Number(block.timestamp),
+    };
+  };
 }
 
 /**
- * Get the start block number for a specific chain ID.
- *
- * @param chainId
- * @returns indexing start block number
- * @throws if no start block number is found for the chain ID
+ * Partial configuration for the Ponder app including contracts configuration.
  */
-async function getIndexingStartBlockNumberForChainId(chainId: number): Promise<number> {
-  const startBlockNumbers = await getIndexingStartBlockNumbersByChainId();
+interface PartialPonderConfig {
+  // contracts configuration
+  contracts: Record<string, PartialPonderContractConfig>;
+}
 
-  if (!startBlockNumbers[chainId]) {
-    throw new Error(`No start block number found for chain ID ${chainId}`);
+/**
+ * Partial configuration for the Ponder app including specific contract's networks configuration.
+ */
+interface PartialPonderContractConfig<ChainId extends number = number> {
+  // network configuration for each chain ID
+  network: Record<ChainId, PonderNetworkConfig>;
+}
+
+/**
+ * Partial network configuration for a contract configuration.
+ */
+interface PonderNetworkConfig {
+  // start block number for the network
+  startBlock?: number;
+}
+
+/**
+ * Get start block number for each chain ID.
+ *
+ * @returns start block number for each chain ID.
+ * @example
+ * ```ts
+ * const ponderConfig = {
+ *  contracts: {
+ *   "/eth/Registrar": {
+ *     network: {
+ *       "1": { startBlock: 444_444_444 }
+ *      }
+ *   },
+ *   "/eth/Registry": {
+ *     network: {
+ *       "1": { startBlock: 444_444_333 }
+ *      }
+ *   },
+ *   "/eth/base/Registrar": {
+ *     network: {
+ *       "8453": { startBlock: 1_799_433 }
+ *     }
+ *   },
+ *   "/eth/base/Registry": {
+ *     network: {
+ *       "8453": { startBlock: 1_799_430 }
+ *     }
+ *   }
+ * };
+ *
+ * const startBlockNumbers = await getIndexingStartBlockNumbersByChainId(ponderConfig);
+ *
+ * console.log(startBlockNumbers);
+ *
+ * // Output:
+ * // {
+ * //   1: 444_444_333,
+ * //   8453: 1_799_430
+ * // }
+ * ```
+ */
+export async function createStartBlockByChainIdMap(
+  ponderConfig: Promise<PartialPonderConfig>,
+): Promise<Record<number, number>> {
+  const config = Object.values((await ponderConfig).contracts);
+
+  const startBlockNumbers: Record<number, number> = {};
+
+  // go through each contract configuration
+  for (const contractConfig of config) {
+    // and then through each network configuration for the contract
+    for (const contractNetworkConfig of Object.entries(contractConfig.network)) {
+      // map string to number
+      const chainId = Number(contractNetworkConfig[0]);
+      const startBlock = contractNetworkConfig[1].startBlock;
+
+      // fail if no start block number found for the chain ID
+      // (we don't want to index any contract from the genesis block)
+      if (!startBlock) {
+        throw new Error(`No start block number found for chain ID ${chainId}`);
+      }
+
+      // update the start block number for the chain ID if it's lower than the current one
+      if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {
+        startBlockNumbers[chainId] = startBlock;
+      }
+    }
   }
 
-  return startBlockNumbers[chainId];
+  return startBlockNumbers;
 }
