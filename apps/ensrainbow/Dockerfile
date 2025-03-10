@@ -5,9 +5,8 @@ ARG DATA_IMAGE_PLATFORM=linux/amd64
 # DATA_IMAGE_NAME is set to either "ensrainbow-data" or "ensrainbow-v2-data" based on the build context.
 # It can be set using the --build-arg flag when building the Docker image.
 ARG DATA_IMAGE_NAME="ensrainbow-data"
-ARG DATA_IMAGE_REPO=ghcr.io/namehash/ensnode
 
-FROM --platform=${DATA_IMAGE_PLATFORM} ${DATA_IMAGE_REPO}/${DATA_IMAGE_NAME} AS ensrainbow-data
+FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/${DATA_IMAGE_NAME} AS ensrainbow-data
 
 FROM --platform=${BUILDPLATFORM} node:18-slim AS base
 ARG PNPM_VERSION=9.12.0
