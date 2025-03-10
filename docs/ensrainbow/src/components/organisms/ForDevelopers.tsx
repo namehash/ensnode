@@ -75,7 +75,7 @@ const devElements: ListSectionElement[] = [
                 <FileOutlineIcon/>
             </div>
         ),
-        link: "https://www.ensnode.io/ensrainbow/usage/"
+        link: "https://www.ensnode.io/ensrainbow/"
     },
     {
         header: (

@@ -4,7 +4,7 @@ export const HealedNameImage = (props: SVGImageProps) => (
     <svg className={props.styles ? props.styles : ""} width="340" height="340" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g filter="url(#filter0_i_313_829)">
             <rect width="340" height="340" rx="24" fill="url(#paint0_linear_313_829)"/>
-            <rect width="340" height="340" rx="24" fill="black" fill-opacity="0.05"/>
+            <rect width="340" height="340" rx="24" fill="black" fillOpacity="0.05"/>
             <path
                 d="M292.601 287.629V296.143H288.517V276.506H292.486V284.014H292.659C292.991 283.144 293.528 282.464 294.27 281.972C295.011 281.473 295.941 281.224 297.06 281.224C298.082 281.224 298.974 281.447 299.735 281.895C300.502 282.336 301.096 282.972 301.518 283.803C301.946 284.627 302.157 285.615 302.151 286.766V296.143H298.066V287.494C298.073 286.587 297.843 285.88 297.376 285.375C296.916 284.87 296.27 284.618 295.439 284.618C294.883 284.618 294.391 284.736 293.963 284.973C293.541 285.209 293.208 285.554 292.966 286.008C292.729 286.456 292.608 286.996 292.601 287.629Z"
                 fill="white"/>
@@ -63,8 +63,8 @@ export const HealedNameImage = (props: SVGImageProps) => (
         </g>
         <defs>
             <filter id="filter0_i_313_829" x="0" y="-2.42857" width="340" height="342.429" filterUnits="userSpaceOnUse"
-                    color-interpolation-filters="sRGB">
-                <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                    colorInterpolationFilters="sRGB">
+                <feFlood floodOpacity="0" result="BackgroundImageFix"/>
                 <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
                 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
                                result="hardAlpha"/>
@@ -76,9 +76,9 @@ export const HealedNameImage = (props: SVGImageProps) => (
             </filter>
             <linearGradient id="paint0_linear_313_829" x1="239.889" y1="380.296" x2="-80.5926" y2="-217.222"
                             gradientUnits="userSpaceOnUse">
-                <stop stop-color="#44BCF0"/>
-                <stop offset="0.428185" stop-color="#628BF3"/>
-                <stop offset="1" stop-color="#A099FF"/>
+                <stop stopColor="#44BCF0"/>
+                <stop offset="0.428185" stopColor="#628BF3"/>
+                <stop offset="1" stopColor="#A099FF"/>
             </linearGradient>
         </defs>
     </svg>

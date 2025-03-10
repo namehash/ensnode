@@ -40,10 +40,11 @@ export default function BarChart({
                     {data.map((item: BarChartData, index: number) => (
                         <>
                             <div
-                                key={index}
+                                key={`barChartFull#${index}`}
                                 className="flex flex-col gap-2"
                             >
                                 <div
+                                    key={`barChartLabel#${index}`}
                                     style={{
                                         display: 'flex',
                                         justifyContent: 'space-between',
@@ -53,6 +54,7 @@ export default function BarChart({
                                     <span className="text-sm md:text-base leading-7 font-semibold">{item.label}</span>
                                 </div>
                                 <div
+                                    key={`barChartBar#${index}`}
                                     style={{
                                         position: 'relative',
                                         height: '28px',
@@ -63,6 +65,7 @@ export default function BarChart({
                                 >
                                     <p className="absolute right-0 top-[calc(50%-8px)] text-xs leading-4 font-semibold px-2">{index === data.length - 1 && "+"}{(item.value / maxValue) * 100}%</p>
                                     <div
+                                        key={`barChartRainbowBar#${index}`}
                                         style={{
                                             position: 'absolute',
                                             height: '100%',
