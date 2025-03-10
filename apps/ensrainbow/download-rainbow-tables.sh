@@ -5,6 +5,20 @@ set -euo pipefail
 DATA_DIR="."
 BASE_URL="https://bucket.ensrainbow.io"
 
+# Check for wrong number of arguments
+if [ "$#" -gt 1 ]; then
+    echo "Error: Too many arguments provided."
+    echo "Usage: $0 [v2]"
+    exit 1
+fi
+
+# Check for wrong value of the first argument
+if [ "$#" -eq 1 ] && [ "$1" != "v2" ]; then
+    echo "Error: Invalid argument '$1'."
+    echo "Usage: $0 [v2]"
+    exit 1
+fi
+
 # Check for v2 argument
 if [ "${1:-}" = "v2" ]; then
     echo "Downloading v2 rainbow tables..."
