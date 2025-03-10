@@ -1,5 +1,5 @@
-import type {IconProps} from "./TelegramIcon.tsx";
 import cc from "classcat";
+import type {IconProps} from "../../types/IconTypes.ts";
 
 export const ExternalLinkIcon = (props: IconProps) => (
     <svg

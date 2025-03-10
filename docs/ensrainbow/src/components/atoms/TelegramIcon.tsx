@@ -1,6 +1,4 @@
-export type IconProps = {
-    fillColor: string;
-}
+import type {IconProps} from "../../types/IconTypes.ts";
 
 export const TelegramIcon = (props: IconProps) => {
     return (

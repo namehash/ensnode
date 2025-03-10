@@ -1,17 +1,16 @@
-import type {ImageCharacteristics} from "../../types/imageTypes.ts";
 import cc from "classcat";
-
+import type {ImageCharacteristics} from "../../types/imageTypes.ts";
 
 export type AboutRainbowProps = {
     sectionHeader: React.ReactNode;
     sectionDescription: React.ReactNode;
-    descriptionExternalElems?: React.ReactNode
+    descriptionExternalElements?: React.ReactNode
     sectionBackgroundName: string;
     isTextOnTheLeft: boolean;
+    svgImage: React.ReactNode;
+    normalImage?: ImageCharacteristics;
+    designatedMobileImage?: React.ReactNode;
     mobileImageOnTop: boolean;
-    imageSpecifics: ImageCharacteristics;
-    designatedMobileImage?: ImageCharacteristics;
-    svgImage?: React.ReactNode;
 };
 export default function AboutRainbow(props: AboutRainbowProps) {
     return (
@@ -23,53 +22,24 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                         "relative hidden xl:flex flex-row justify-center items-center w-full max-w-2xl xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 box-border pr-20",
                     ])}
                 >
-                    <div
-                        className={cc([
-                            "absolute z-0 h-[195%] w-full lg:w-[115%] bg-center bg-no-repeat bg-cover [opacity:0.3]",
-                            props.sectionBackgroundName,
-                        ])}
-                    />
-                    {props.svgImage ? props.svgImage :
+                    {props.normalImage ?
                         <img
                             className={cc([
                                 "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                                props.imageSpecifics.styles,
+                                props.normalImage.styles,
                             ])}
-                            src={props.imageSpecifics.source}
-                            alt="chat image"
-                            width={props.imageSpecifics.tagWidth}
-                            height={props.imageSpecifics.tagHeight}
+                            src={props.normalImage.source}
+                            alt="section image"
+                            width={props.normalImage.tagWidth}
+                            height={props.normalImage.tagHeight}
                         />
-                    }
+                        : props.svgImage}
                 </div>
             )}
             {props.mobileImageOnTop &&
                 <div
                     className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
-                    {props.svgImage ? props.svgImage :
-                        (props.designatedMobileImage ?
-                            <img
-                                className={cc([
-                                    "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                                    props.designatedMobileImage.styles,
-                                ])}
-                                src={props.designatedMobileImage.source}
-                                alt="chat image"
-                                width={props.designatedMobileImage.tagWidth}
-                                height={props.designatedMobileImage.tagHeight}
-                            />
-                            :
-                            <img
-                                className={cc([
-                                    "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                                    props.imageSpecifics.styles,
-                                ])}
-                                src={props.imageSpecifics.source}
-                                alt="chat image"
-                                width={props.imageSpecifics.tagWidth}
-                                height={props.imageSpecifics.tagHeight}
-                            />)
-                    }
+                    {props.designatedMobileImage ? props.designatedMobileImage : props.svgImage}
                 </div>
             }
             <div
@@ -85,51 +55,29 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                 <p className="text-gray-500 not-italic font-normal z-10 text-center text-lg leading-8 xl:text-left">
                     {props.sectionDescription}
                 </p>
-                {props.descriptionExternalElems && props.descriptionExternalElems}
+                {props.descriptionExternalElements && props.descriptionExternalElements}
             </div>
 
             <div
-                className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0 ">
-                {props.svgImage ? props.svgImage :
+                className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0">
+                {props.normalImage ?
                     <img
                         className={cc([
                             "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                            props.imageSpecifics.styles,
+                            props.normalImage.styles,
                         ])}
-                        src={props.imageSpecifics.source}
-                        alt="chat image"
-                        width={props.imageSpecifics.tagWidth}
-                        height={props.imageSpecifics.tagHeight}
+                        src={props.normalImage.source}
+                        alt="section image"
+                        width={props.normalImage.tagWidth}
+                        height={props.normalImage.tagHeight}
                     />
-                }
+                    : props.svgImage}
             </div>
+
             {!props.mobileImageOnTop &&
                 <div
                     className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none py-5 bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
-                    {props.svgImage ? props.svgImage :
-                        (props.designatedMobileImage ?
-                            <img
-                                className={cc([
-                                    "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                                    props.designatedMobileImage.styles,
-                                ])}
-                                src={props.designatedMobileImage.source}
-                                alt="chat image"
-                                width={props.designatedMobileImage.tagWidth}
-                                height={props.designatedMobileImage.tagHeight}
-                            />
-                            :
-                            <img
-                                className={cc([
-                                    "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                                    props.imageSpecifics.styles,
-                                ])}
-                                src={props.imageSpecifics.source}
-                                alt="chat image"
-                                width={props.imageSpecifics.tagWidth}
-                                height={props.imageSpecifics.tagHeight}
-                            />)
-                    }
+                    {props.designatedMobileImage ? props.designatedMobileImage : props.svgImage}
                 </div>
             }
         </section>

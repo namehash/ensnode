@@ -1,7 +1,5 @@
 import {Fragment} from "react";
 import AboutRainbow, {AboutRainbowProps} from "./AboutRainbow.tsx";
-import ensProfile from "../../assets/ens-profile.svg";
-import ensProfileMobile from "../../assets/ens-profile 2.svg";
 import ensNode from "../../assets/Illustration.svg";
 import FullRainbow from "./FullRainbow.tsx";
 import {LearnMoreButton} from "../atoms/LearnMoreButton.tsx";
@@ -9,6 +7,9 @@ import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
 import {SectionDivider} from "../atoms/SectionDivider.tsx";
 import {Link} from "@namehash/namekit-react";
 import {ENSNodeSchema} from "../atoms/ENSNodeSchema.tsx";
+import {ENSProfile} from "../atoms/ENSProfile.tsx";
+import {ENSProfileMobile} from "../atoms/ENSProfileMobile.tsx";
+import {NameImage} from "../atoms/NameImage.tsx";
 
 export default function AboutRainbowSections() {
     return (
@@ -30,7 +31,7 @@ export default function AboutRainbowSections() {
 
 const rainbowSections: AboutRainbowProps[] = [
     {
-        sectionHeader: (<>What the heck is a<br className="hidden md:block"/>&quot;[428...b0b]&quot;?</>),
+        sectionHeader: (<>What the heck is a <br className="hidden md:block"/><p className="whitespace-nowrap">&quot;[428...b0b]&quot;?</p></>),
         sectionDescription: (<>
             These are encoded labelhashes used to represent an unknown label in an ENS name. Without name healing,
             millions of names in the ENS manager app (and&nbsp;other&nbsp;ENS&nbsp;apps) don’t appear properly.
@@ -48,19 +49,8 @@ const rainbowSections: AboutRainbowProps[] = [
         sectionBackgroundName: "",
         isTextOnTheLeft: true,
         mobileImageOnTop: false,
-        imageSpecifics: {
-            source: ensProfile.src,
-            tagWidth: 640,
-            tagHeight: 400,
-            alt: "ens profile"
-        },
-        designatedMobileImage: {
-            source: ensProfileMobile.src,
-            tagWidth: 375,
-            tagHeight: 360,
-            alt: "ens profile",
-            styles: "-right-5 shadow-[inset_50px_0px_8px_0px_white]"
-        }
+        svgImage: <ENSProfile styles="relative z-10 w-full h-full"/>,
+        designatedMobileImage: <ENSProfileMobile  styles="relative z-10 w-full h-full -right-5 shadow-[inset_50px_0px_8px_0px_white]"/>,
     },
     {
         sectionHeader: (<div className="h-fit flex flex-col flex-nowrap justify-center items-center xl:items-start gap-6">
@@ -79,11 +69,11 @@ const rainbowSections: AboutRainbowProps[] = [
                 ENSNode
             </Link>, the new multichain indexer for ENSv2.
         </>,
-        descriptionExternalElems: <LearnMoreButton source="https://ensnode.io/" text="Learn more about ENS Node"/>,
+        descriptionExternalElements: <LearnMoreButton source="https://ensnode.io/" text="Learn more about ENS Node"/>,
         sectionBackgroundName: "",
         isTextOnTheLeft: true,
         mobileImageOnTop: true,
-        imageSpecifics: {
+        normalImage: {
             source: ensNode.src,
             tagWidth: 640,
             tagHeight: 340,
