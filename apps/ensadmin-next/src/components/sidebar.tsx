@@ -26,8 +26,8 @@ const tabs = [
     icon: Database,
   },
   {
-    path: "/ponder-client",
-    label: "Ponder Client",
+    path: "/ponder-client-api",
+    label: "Ponder Client API",
     icon: Code2,
   },
 ];
