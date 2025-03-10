@@ -65,7 +65,7 @@ export function parseEncodedLabelhash(maybeEncodedLabelhash: EncodedLabelhash): 
 }
 
 /**
- * Parses a labelhash string and normalizes it to the format expected by the ENSRainbow API.
+ * Parses a labelhash or encoded labelhash string and normalizes it to the format expected by the ENSRainbow API.
  *
  * @param maybeLabelhash - The string to parse as a labelhash
  * @returns A normalized labelhash (a 0x-prefixed, lowercased, 64-character hex string)
