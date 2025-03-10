@@ -9,6 +9,7 @@ BASE_URL="https://bucket.ensrainbow.io"
 if [ "$#" -gt 1 ]; then
     echo "Error: Too many arguments provided."
     echo "Usage: $0 [v2]"
+    echo "If you want to download the v2 rainbow tables, use the 'v2' argument."
     exit 1
 fi
 
@@ -16,6 +17,7 @@ fi
 if [ "$#" -eq 1 ] && [ "$1" != "v2" ]; then
     echo "Error: Invalid argument '$1'."
     echo "Usage: $0 [v2]"
+    echo "If you want to download the v2 rainbow tables, use the 'v2' argument."
     exit 1
 fi
 
