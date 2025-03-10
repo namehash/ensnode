@@ -32,6 +32,9 @@ fi
 
 LICENSE_FILE="THE_GRAPH_LICENSE.txt"
 
+TARGET_FILE="$DATA_DIR/ens_names.sql.gz"
+TARGET_CHECKSUM_FILE="$DATA_DIR/ens_names.sql.gz.sha256sum"
+
 # Create data directory if it doesn't exist
 mkdir -p "$DATA_DIR"
 
@@ -45,10 +48,13 @@ download_with_progress() {
     wget -nv -O "$output" "$url"
 }
 
+# Download checksum of the chosen ENS names database
+download_with_progress "$BASE_URL/$CHECKSUM_FILE" "$TARGET_CHECKSUM_FILE" "checksum file"
+
 # Check if files exist and verify checksum
-if [ -f "$DATA_DIR/$DATA_FILE" ] && [ -f "$DATA_DIR/$CHECKSUM_FILE" ]; then
+if [ -f "$TARGET_FILE" ] && [ -f "$TARGET_CHECKSUM_FILE" ]; then
     echo "Found existing files, verifying checksum..."
-    if sha256sum -c "$DATA_DIR/$CHECKSUM_FILE" > /dev/null 2>&1; then
+    if sha256sum -c "$TARGET_CHECKSUM_FILE" > /dev/null 2>&1; then
         echo "✓ Existing files are valid!"
         exit 0
     fi
@@ -56,9 +62,8 @@ if [ -f "$DATA_DIR/$DATA_FILE" ] && [ -f "$DATA_DIR/$CHECKSUM_FILE" ]; then
 fi
 
 # Download files
-download_with_progress "$BASE_URL/$CHECKSUM_FILE" "$DATA_DIR/ens_names.sql.gz.sha256sum" "checksum file"
 download_with_progress "$BASE_URL/$LICENSE_FILE" "$DATA_DIR/$LICENSE_FILE" "license file"
-download_with_progress "$BASE_URL/$DATA_FILE" "$DATA_DIR/ens_names.sql.gz" "ENS names database"
+download_with_progress "$BASE_URL/$DATA_FILE" "$TARGET_FILE" "ENS names database"
 
 # Verify downloaded files
 echo "Verifying downloaded files..."
