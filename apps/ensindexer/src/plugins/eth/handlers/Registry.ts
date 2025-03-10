@@ -24,7 +24,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     handleNewResolver,
     handleNewTTL,
     handleTransfer,
-  } = makeRegistryHandlers(ownedName);
+  } = makeRegistryHandlers({ ownedName });
 
   ponder.on(namespace("RegistryOld:setup"), setupRootNode);
 

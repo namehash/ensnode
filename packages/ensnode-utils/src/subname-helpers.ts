@@ -3,11 +3,16 @@ import {
   bytesToHex,
   bytesToString,
   concat,
+  isAddress,
+  isHex,
   keccak256,
   namehash,
   stringToBytes,
   toHex,
 } from "viem";
+
+import { labelhash } from "viem/ens";
+import type { Labelhash, Node } from "./types";
 
 // NOTE: most of these utils could/should be pulled in from some (future) ens helper lib, as they
 // implement standard and reusable logic for typescript ens libs bu aren't necessarily implemented
@@ -16,6 +21,102 @@ import {
 export const ROOT_NODE = namehash("");
 
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
+
+export interface LabelhashByReverseAddressArgs {
+  /** The address of transaction sender changing the domain's ownership */
+  senderAddress: Hex;
+
+  /** The domain's parent node */
+  parentNode: Node;
+
+  /** The domain's labelhash */
+  labelhash: Labelhash;
+
+  /** (optional) The root node of the reverse registrar, e.g. `namehash("addr.reverse")` for `eth` plugin */
+  reverseRootNode?: Node;
+}
+
+/**
+ * Attempt to heal a labelhash to its original label using sender address
+ * when a domain's parent node is the reverse root node.
+ *
+ * @throws if sender address is not a valid hex address
+ * @throws if labelhash is not a valid hash
+ * @throws if parent node is not a valid hash
+ * @throws if reverse root node is provided and is not a valid hash
+ *
+ * @returns the original label if healed, otherwise the provided labelhash
+ */
+export const labelByReverseAddress = (args: LabelhashByReverseAddressArgs) => {
+  // check if required arguments are valid
+  validateLabelByReverseAddressArgs(args);
+
+  // reverse root node will not be provided if reverse address healing
+  // is not supported by the given plugin
+  if (!args.reverseRootNode) {
+    // no original label found for the labelhash
+    return null;
+  }
+
+  // if domain's parent node is not the reverse root node
+  if (args.parentNode !== args.reverseRootNode) {
+    // no original label found for the labelhash
+    return null;
+  }
+
+  // normalize address to match the reverse address format
+  // as per https://docs.ens.domains/resolution/names#reverse-nodes
+  const normalizedAddressDigits = (address: Hex): string => address.slice(2).toLowerCase();
+
+  // derive the assumed label from the normalized address
+  const assumedLabel = normalizedAddressDigits(args.senderAddress);
+
+  // if the labelhash does not match the normalized address
+  if (labelhash(assumedLabel) !== args.labelhash) {
+    // no original label found for the labelhash
+    return null;
+  }
+
+  // original label found for the labelhash
+  return assumedLabel;
+};
+
+/**
+ * Validate the arguments for `labelByReverseAddress` function.
+ *
+ * @throws if sender address is not a valid hex address
+ * @throws if labelhash is not a valid hash
+ * @throws if parent node is not a valid hash
+ * @throws if reverse root node is provided and is not a valid hash
+ */
+const validateLabelByReverseAddressArgs = (args: LabelhashByReverseAddressArgs) => {
+  if (!isAddress(args.senderAddress)) {
+    throw new Error(
+      `Invalid sender address: ${args.senderAddress}. Must start with '0x' and be 42 characters long.`,
+    );
+  }
+
+  if (!isHex(args.labelhash) || args.labelhash.length !== 66) {
+    throw new Error(
+      `Invalid labelhash: ${args.labelhash}. Must start with '0x' be 66 characters long.`,
+    );
+  }
+
+  if (!isHex(args.parentNode) || args.parentNode.length !== 66) {
+    throw new Error(
+      `Invalid parent node: ${args.parentNode}. Must start with '0x' be 66 characters long.`,
+    );
+  }
+
+  // only validate reverse root node if provided
+  if (args.reverseRootNode) {
+    if (!isHex(args.reverseRootNode) || args.reverseRootNode.length !== 66) {
+      throw new Error(
+        `Invalid reverse root node: ${args.reverseRootNode}. If provided, it must start with '0x' be 66 characters long.`,
+      );
+    }
+  }
+};
 
 /**
  * Encodes a uint256 bigint as hex string sized to 32 bytes.

@@ -8,7 +8,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"l
     handleNewResolver,
     handleNewTTL,
     handleTransfer,
-  } = makeRegistryHandlers(ownedName);
+  } = makeRegistryHandlers({ ownedName });
 
   ponder.on(namespace("Registry:setup"), setupRootNode);
   ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));

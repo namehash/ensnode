@@ -1,3 +1,5 @@
+import type { Node } from "@ensnode/utils/types";
+
 /**
  * An owned name for a plugin. Must end with `eth`.
  *
@@ -7,6 +9,14 @@
  * have an owned name of `base.eth`.
  */
 export type OwnedName = string;
+
+/**
+ * A root node for Reverse registrar. Used to distinguish between plugins that
+ * handle different reverse registrar root nodes. For example `eth` plugin will
+ * have a reverse root node of `namehash("addr.reverse")`, while other plugins
+ * might have different reverse root nodes or none at all.
+ */
+export type ReverseRootNode = Node;
 
 /**
  * In this project we use the notion of 'plugins' to describe which registries and subregistries

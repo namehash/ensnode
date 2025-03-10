@@ -1,8 +1,10 @@
 import { IntegerOutOfRangeError, hexToBytes, labelhash, namehash, toBytes, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
 import {
+  type LabelhashByReverseAddressArgs,
   decodeDNSPacketBytes,
   isLabelIndexable,
+  labelByReverseAddress,
   makeSubnodeNamehash,
   uint256ToHex32,
 } from "./subname-helpers";
@@ -73,5 +75,86 @@ describe("makeSubnodeNamehash", () => {
     expect(makeSubnodeNamehash(namehash("base.eth"), labelhash("test🚀"))).toBe(
       namehash("test🚀.base.eth"),
     );
+  });
+});
+
+describe("labelByReverseAddress", () => {
+  const vitalikEthResolvedAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+  const vitalikEthNormalizedAddress = "d8da6bf26964af9d7eed9e03e53415d37aa96045";
+  // `namehash('addr.reverse')`
+  const addReverseRootNode = "0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2";
+
+  const validArgs = {
+    // labelhash for `d8da6bf26964af9d7eed9e03e53415d37aa96045`
+    labelhash: "0x535bdae9bb214b3cc583b53384464999f2f7f48625f160728c63e73e766ff71e",
+    senderAddress: vitalikEthResolvedAddress,
+    parentNode: addReverseRootNode,
+    reverseRootNode: addReverseRootNode,
+  } satisfies LabelhashByReverseAddressArgs;
+
+  describe("arguments validation", () => {
+    it("should throw if sender address is not a valid EVM address", () => {
+      expect(() =>
+        labelByReverseAddress({
+          ...validArgs,
+          senderAddress: "0x123",
+        }),
+      ).toThrowError(
+        "Invalid sender address: 0x123. Must start with '0x' and be 42 characters long.",
+      );
+    });
+
+    it("should throw if labelhash is not a valid hash", () => {
+      expect(() =>
+        labelByReverseAddress({
+          ...validArgs,
+          labelhash: "0x123",
+        }),
+      ).toThrowError("Invalid labelhash: 0x123. Must start with '0x' be 66 characters long.");
+    });
+
+    it("should throw if parent node is not a valid namehash", () => {
+      expect(() =>
+        labelByReverseAddress({
+          ...validArgs,
+          parentNode: "0x123",
+        }),
+      ).toThrowError("Invalid parent node: 0x123. Must start with '0x' be 66 characters long.");
+    });
+
+    it("should throw if reverse root node is provided and is not a valid namehash", () => {
+      expect(() =>
+        labelByReverseAddress({
+          ...validArgs,
+          reverseRootNode: "0x123",
+        }),
+      ).toThrowError(
+        "Invalid reverse root node: 0x123. If provided, it must start with '0x' be 66 characters long.",
+      );
+    });
+
+    it("should not throw if reverse root node is not provided", () => {
+      expect(() =>
+        labelByReverseAddress({
+          ...validArgs,
+          reverseRootNode: undefined,
+        }),
+      ).not.toThrow();
+    });
+  });
+
+  describe("label healing", () => {
+    it("should return null if the label cannot be healed", () => {
+      expect(
+        labelByReverseAddress({
+          ...validArgs,
+          labelhash: labelhash("test.eth"),
+        }),
+      ).toBe(null);
+    });
+
+    it("should return the label if the label can be healed", () => {
+      expect(labelByReverseAddress(validArgs)).toBe(vitalikEthNormalizedAddress);
+    });
   });
 });

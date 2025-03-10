@@ -1,11 +1,13 @@
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_RPC_RATE_LIMIT,
   constrainBlockrange,
   deepMergeRecursive,
   parseEnsNodePublicUrl,
   parseEnsRainbowEndpointUrl,
+  parseHealReverseAddresses,
   parseRequestedPluginNames,
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
@@ -102,6 +104,35 @@ describe("ponder helpers", () => {
 
     it("should throw an error if the list is not set", () => {
       expect(() => parseRequestedPluginNames()).toThrowError("Expected value not set");
+    });
+  });
+
+  describe("parseHealReverseAddresses", () => {
+    it("should parse the heal reverse addresses flag", () => {
+      expect(parseHealReverseAddresses("true")).toBe(true);
+      expect(parseHealReverseAddresses("false")).toBe(false);
+    });
+
+    it("should return default if the flag is missing", () => {
+      expect(parseHealReverseAddresses()).toBe(DEFAULT_HEAL_REVERSE_ADDRESSES);
+    });
+
+    it("should throw an error if the flag is invalid", () => {
+      expect(() => parseHealReverseAddresses("1")).toThrowError(
+        "'1' is not a valid value. Expected 'true' or 'false'.",
+      );
+
+      expect(() => parseHealReverseAddresses("0")).toThrowError(
+        "'0' is not a valid value. Expected 'true' or 'false'.",
+      );
+
+      expect(() => parseHealReverseAddresses("on")).toThrowError(
+        "'on' is not a valid value. Expected 'true' or 'false'.",
+      );
+
+      expect(() => parseHealReverseAddresses("off")).toThrowError(
+        "'off' is not a valid value. Expected 'true' or 'false'.",
+      );
     });
   });
 

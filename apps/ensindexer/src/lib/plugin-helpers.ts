@@ -1,4 +1,5 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
+import type { Node } from "@ensnode/utils/types";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
@@ -168,11 +169,21 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
 }
 
 /**
- * An ENS Plugin's handlers are configured with ownedName and namespace.
+ * An ENS Plugin's handlers are configured with ownedName, reverse node, and namespace.
  */
 export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   ownedName: OwnedName;
+
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
+
+  /**
+   * Tells if the plugin determines the provided node is a reverse root node.
+   * Note: This is optional as not all plugins need to handle reverse root nodes.
+   *
+   * @param node The node to check for being a reverse root node
+   * @returns true if the node is a reverse root node
+   */
+  isReverseRootNode?(node: Node): boolean;
 };
 
 /**
