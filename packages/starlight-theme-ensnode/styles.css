@@ -223,7 +223,16 @@
   --sl-color-code-border: var(--ens-gray-3);
 
   /* Text styles */
-  --sl-color-white: var(--ens-midnight-blue);
+   */
+}
+
+.sl-link-button.primary {
+  color: var(--ens-white);
+}
+.sl-link-button.primary:hover {
+  background-color: var(--ens-midnight-blue);
+  border-color: var(--ens-midnight-blue);
+  color: var(--sl-color-white);
 }
 
 /* Header */
@@ -336,6 +345,11 @@ site-search dialog {
   box-shadow: none;
   min-height: auto;
   border: 1px solid var(--sl-color-hairline);
+}
+
+site-search button {
+  margin-left: auto;
+  background-color: var(--ens-white);
 }
 
 [data-theme="light"] site-search dialog {

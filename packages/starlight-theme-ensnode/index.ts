@@ -1,6 +1,6 @@
 import type { StarlightPlugin } from "@astrojs/starlight/types";
 
-import { overrideComponents } from "./libs/starlight";
+import { overrideComponents } from "./starlight";
 
 export default function starlightThemeEnsnodePlugin(): StarlightPlugin {
   return {
@@ -8,20 +8,11 @@ export default function starlightThemeEnsnodePlugin(): StarlightPlugin {
     hooks: {
       "config:setup"({ config, logger, updateConfig }) {
         updateConfig({
-          // components: overrideComponents(
-          //   config,
-          //   [
-          //     'Pagination',
-          //     'Banner',
-          //     {
-          //       name: 'PageTitle',
-          //       fallback: 'Banner',
-          //     },
-          //     'ThemeSelect',
-          //     'LanguageSelect',
-          //   ],
-          //   logger,
-          // ),
+          components: overrideComponents(
+            config,
+            [], // ["ThemeSelect"]
+            logger
+          ),
           customCss: [
             ...(config.customCss ?? []),
             "starlight-theme-ensnode/styles",
