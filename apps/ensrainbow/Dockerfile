@@ -2,7 +2,7 @@
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
 # ensrainbow-data image is only supporting amd64 arch hence define platform at the FROM statement
 ARG DATA_IMAGE_PLATFORM=linux/amd64
-# DATA_IMAGE_NAME is set to either "ensrainbow-data" or "ensrainbow-v2-data" based on the build context.
+# DATA_IMAGE_NAME is set to either "ensrainbow-data" (default) or "ensrainbow-v2-data" based on the build context.
 # It can be set using the --build-arg flag when building the Docker image.
 ARG DATA_IMAGE_NAME="ensrainbow-data"
 
