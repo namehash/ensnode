@@ -7,9 +7,11 @@ BASE_URL="https://bucket.ensrainbow.io"
 
 # Check for v2 argument
 if [ "${1:-}" = "v2" ]; then
+    echo "Downloading v2 rainbow tables..."
     DATA_FILE="ensrainbow_v2.sql.gz"
     CHECKSUM_FILE="ensrainbow_v2.sql.gz.sha256sum"
 else
+    echo "Downloading v1 rainbow tables..."
     DATA_FILE="ens_names.sql.gz"
     CHECKSUM_FILE="ens_names.sql.gz.sha256sum"
 fi

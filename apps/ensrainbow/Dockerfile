@@ -2,10 +2,12 @@
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
 # ensrainbow-data image is only supporting amd64 arch hence define platform at the FROM statement
 ARG DATA_IMAGE_PLATFORM=linux/amd64
-ARG DATA_VERSION=""
+# DATA_IMAGE_NAME is set to either "ensrainbow-data" or "ensrainbow-v2-data" based on the build context.
+# It can be set using the --build-arg flag when building the Docker image.
+ARG DATA_IMAGE_NAME="ensrainbow-data"
 ARG DATA_IMAGE_REPO=ghcr.io/namehash/ensnode
-# Use the appropriate image name based on DATA_VERSION
-FROM --platform=${DATA_IMAGE_PLATFORM} ${DATA_IMAGE_REPO}/ensrainbow${DATA_VERSION:+-v2}-data AS ensrainbow-data
+
+FROM --platform=${DATA_IMAGE_PLATFORM} ${DATA_IMAGE_REPO}/${DATA_IMAGE_NAME} AS ensrainbow-data
 
 FROM --platform=${BUILDPLATFORM} node:18-slim AS base
 ARG PNPM_VERSION=9.12.0
