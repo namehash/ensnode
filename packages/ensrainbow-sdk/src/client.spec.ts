@@ -1,3 +1,4 @@
+import { Labelhash } from "@ensnode/utils/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   type EnsRainbow,
@@ -38,6 +39,17 @@ describe("EnsRainbowApiClient", () => {
   it("should heal a known labelhash", async () => {
     const response = await client.heal(
       "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+    );
+
+    expect(response).toEqual({
+      status: StatusCode.Success,
+      label: "vitalik",
+    } satisfies EnsRainbow.HealSuccess);
+  });
+
+  it("should heal a known labelhash passed as Labelhash", async () => {
+    const response = await client.heal(
+      "0xAf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc" as Labelhash,
     );
 
     expect(response).toEqual({

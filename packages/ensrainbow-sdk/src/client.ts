@@ -2,7 +2,7 @@ import type { Cache } from "@ensnode/utils/cache";
 import { LruCache } from "@ensnode/utils/cache";
 import type { Labelhash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-import { InvalidLabelhashError, parseEncodedLabelhash, parseLabelhash } from "./utils";
+import { EncodedLabelhash, InvalidLabelhashError, parseLabelhashOrEncodedLabelhash } from "./utils";
 
 export namespace EnsRainbow {
   export type ApiClientOptions = EnsRainbowApiClientOptions;
@@ -10,7 +10,7 @@ export namespace EnsRainbow {
   export interface ApiClient {
     count(): Promise<CountResponse>;
 
-    heal(labelhash: Labelhash | string): Promise<HealResponse>;
+    heal(labelhash: Labelhash | EncodedLabelhash | string): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
 
@@ -170,9 +170,9 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * - Labels can contain any valid string, including dots, null bytes, or be empty
    * - Clients should handle all possible string values appropriately
    *
-   * @param labelhash - A labelhash to heal, either as a normalized Labelhash or as a string that can be normalized
+   * @param labelhash - A labelhash to heal, either as a `Labelhash`, an `EncodedLabelhash`, or as a string that can be normalized to a 0x-prefixed, lowercased, 64-character hex string
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
-   * @throws {InvalidLabelhashError} If the provided labelhash cannot be normalized to a valid format
+   * @throws {InvalidLabelhashError} If the provided labelhash is not valid.
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
    *
    * @example
@@ -203,41 +203,20 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash | string): Promise<EnsRainbow.HealResponse> {
-    // Normalize the labelhash if it's a string
+  async heal(labelhash: Labelhash | EncodedLabelhash | string): Promise<EnsRainbow.HealResponse> {
     let normalizedLabelhash: Labelhash;
 
-    if (typeof labelhash === "string") {
-      // Check if it's an encoded labelhash
-      if (labelhash.startsWith("[") && labelhash.endsWith("]")) {
-        try {
-          normalizedLabelhash = parseEncodedLabelhash(labelhash);
-        } catch (error) {
-          if (error instanceof InvalidLabelhashError) {
-            return {
-              status: StatusCode.Error,
-              error: error.message,
-              errorCode: ErrorCode.BadRequest,
-            } as EnsRainbow.HealBadRequestError;
-          }
-          throw error; // Re-throw unexpected errors
-        }
-      } else {
-        try {
-          normalizedLabelhash = parseLabelhash(labelhash);
-        } catch (error) {
-          if (error instanceof InvalidLabelhashError) {
-            return {
-              status: StatusCode.Error,
-              error: error.message,
-              errorCode: ErrorCode.BadRequest,
-            } as EnsRainbow.HealBadRequestError;
-          }
-          throw error; // Re-throw unexpected errors
-        }
+    try {
+      normalizedLabelhash = parseLabelhashOrEncodedLabelhash(labelhash);
+    } catch (error) {
+      if (error instanceof InvalidLabelhashError) {
+        return {
+          status: StatusCode.Error,
+          error: error.message,
+          errorCode: ErrorCode.BadRequest,
+        } as EnsRainbow.HealBadRequestError;
       }
-    } else {
-      normalizedLabelhash = labelhash;
+      throw error; // Re-throw unexpected errors
     }
 
     const cachedResult = this.cache.get(normalizedLabelhash);

@@ -38,6 +38,6 @@ export async function labelByHash(labelhash: Labelhash): Promise<string | null> 
   }
 
   throw new Error(
-    `Error healing labelhash: "${labelhash}". Error (${healResponse.errorCode}): ${healResponse.error}.`,
+    `Error (${healResponse.errorCode}): ${healResponse.error}.`,
   );
 }

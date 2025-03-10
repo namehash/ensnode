@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { InvalidLabelhashError, parseEncodedLabelhash, parseLabelhash } from "./utils";
+import {
+  EncodedLabelhash,
+  InvalidLabelhashError,
+  parseEncodedLabelhash,
+  parseLabelhash,
+} from "./utils";
 
 describe("parseLabelhash", () => {
   it("should normalize a valid labelhash", () => {
@@ -74,13 +79,19 @@ describe("parseEncodedLabelhash", () => {
   it("should throw for invalid encoded labelhash", () => {
     // Not enclosed in brackets
     expect(() =>
-      parseEncodedLabelhash("0000000000000000000000000000000000000000000000000000000000000000"),
+      parseEncodedLabelhash(
+        "0000000000000000000000000000000000000000000000000000000000000000" as EncodedLabelhash,
+      ),
     ).toThrow(InvalidLabelhashError);
     expect(() =>
-      parseEncodedLabelhash("[0000000000000000000000000000000000000000000000000000000000000000"),
+      parseEncodedLabelhash(
+        "[0000000000000000000000000000000000000000000000000000000000000000" as EncodedLabelhash,
+      ),
     ).toThrow(InvalidLabelhashError);
     expect(() =>
-      parseEncodedLabelhash("0000000000000000000000000000000000000000000000000000000000000000]"),
+      parseEncodedLabelhash(
+        "0000000000000000000000000000000000000000000000000000000000000000]" as EncodedLabelhash,
+      ),
     ).toThrow(InvalidLabelhashError);
 
     expect(() =>
