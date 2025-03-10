@@ -1,12 +1,12 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
 import starlightSidebarTopics from "starlight-sidebar-topics";
-import starlightThemeRapide from "starlight-theme-rapide";
+import starlightThemeEnsnode from "starlight-theme-ensnode";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
     plugins: [
-      starlightThemeRapide(),
+      starlightThemeEnsnode(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
