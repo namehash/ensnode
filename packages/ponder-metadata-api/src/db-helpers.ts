@@ -87,6 +87,7 @@ type PonderMetaTableSchema = ReturnType<typeof getPonderMetaTableSchema>;
  * @param namespace A namespace for the database (e.g. "public").
  * @param db Drizzle DB Client instance.
  * @returns ponder metadata for the app.
+ * @throws Error if ponder metadata not found.
  */
 export async function queryPonderMeta(
   namespace: string,

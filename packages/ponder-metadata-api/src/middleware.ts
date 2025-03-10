@@ -60,7 +60,6 @@ export function ponderMetadata<
     const indexedChainIds = Object.keys(publicClients).map(Number);
 
     const ponderStatus = await queryPonderStatus(env.DATABASE_SCHEMA, db);
-    const ponderMeta = await queryPonderMeta(env.DATABASE_SCHEMA, db);
     const metrics = PrometheusMetrics.parse(await query.prometheusMetrics());
 
     const networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus> = {};
@@ -74,13 +73,19 @@ export function ponderMetadata<
         });
       }
 
-      const fetchBlockMetadata = async (blockNumber: number): Promise<BlockInfo | null> => {
+      /**
+       * Fetches block metadata from blockchain network for a given block number.
+       * @param blockNumber 
+       * @returns block metadata
+       * @throws {Error} if failed to fetch block metadata from blockchain network
+       */
+      const fetchBlockMetadata = async (blockNumber: number): Promise<BlockInfo> => {
         const block = await publicClient.getBlock({
           blockNumber: BigInt(blockNumber),
         });
 
         if (!block) {
-          return null;
+          throw new Error(`Failed to fetch block metadata for block number ${blockNumber} with chain ID ${indexedChainId}`);
         }
 
         return {
@@ -112,11 +117,17 @@ export function ponderMetadata<
       });
       let lastSyncedBlock: BlockInfo | null = null;
       if (lastSyncedBlockHeight) {
-        lastSyncedBlock = await fetchBlockMetadata(lastSyncedBlockHeight);
+        try {
+          lastSyncedBlock = await fetchBlockMetadata(lastSyncedBlockHeight);
+        } catch (error) {
+          console.error("Failed to fetch block metadata for last synced block", error);
+        }
       }
 
+      // mapping ponder status for current network
+      const ponderStatusForNetwork = ponderStatus.find((ponderStatusEntry) => ponderStatusEntry.network_name === network);
+
       // mapping last indexed block if available
-      const ponderStatusForNetwork = ponderStatus.find((s) => s.network_name === network);
       let lastIndexedBlock: BlockInfo | null = null;
       if (ponderStatusForNetwork) {
         lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForNetwork);
@@ -130,6 +141,14 @@ export function ponderMetadata<
       } satisfies NetworkIndexingStatus;
     }
 
+    // mapping ponder app build id if available
+    let ponderAppBuildId: string | undefined;
+    try {
+      ponderAppBuildId = (await queryPonderMeta(env.DATABASE_SCHEMA, db)).build_id;
+    } catch (error) {
+      console.error("Failed to fetch ponder metadata", error);
+    }
+
     const response = {
       app,
       deps: {
@@ -138,7 +157,7 @@ export function ponderMetadata<
       },
       env,
       runtime: {
-        codebaseBuildId: formatTextMetricValue(ponderMeta.build_id),
+        codebaseBuildId: formatTextMetricValue(ponderAppBuildId),
         networkIndexingStatusByChainId,
       },
     } satisfies MetadataMiddlewareResponse;
