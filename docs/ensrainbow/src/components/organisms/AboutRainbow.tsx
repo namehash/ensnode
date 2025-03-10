@@ -11,6 +11,7 @@ export type AboutRainbowProps = {
     mobileImageOnTop: boolean;
     imageSpecifics: ImageCharacteristics;
     designatedMobileImage?: ImageCharacteristics;
+    svgImage?: React.ReactNode;
 };
 export default function AboutRainbow(props: AboutRainbowProps) {
     return (
@@ -85,16 +86,18 @@ export default function AboutRainbow(props: AboutRainbowProps) {
 
             <div
                 className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0 ">
-                <img
-                    className={cc([
-                        "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
-                        props.imageSpecifics.styles,
-                    ])}
-                    src={props.imageSpecifics.source}
-                    alt="chat image"
-                    width={props.imageSpecifics.tagWidth}
-                    height={props.imageSpecifics.tagHeight}
-                />
+                {props.svgImage ? props.svgImage :
+                    <img
+                        className={cc([
+                            "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
+                            props.imageSpecifics.styles,
+                        ])}
+                        src={props.imageSpecifics.source}
+                        alt="chat image"
+                        width={props.imageSpecifics.tagWidth}
+                        height={props.imageSpecifics.tagHeight}
+                    />
+                }
             </div>
             {!props.mobileImageOnTop &&
                 <div

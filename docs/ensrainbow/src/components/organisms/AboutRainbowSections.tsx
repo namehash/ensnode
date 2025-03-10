@@ -8,6 +8,7 @@ import {LearnMoreButton} from "../atoms/LearnMoreButton.tsx";
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
 import {SectionDivider} from "../atoms/SectionDivider.tsx";
 import {Link} from "@namehash/namekit-react";
+import {ENSNodeSchema} from "../atoms/ENSNodeSchema.tsx";
 
 export default function AboutRainbowSections() {
     return (
@@ -87,6 +88,7 @@ const rainbowSections: AboutRainbowProps[] = [
             tagWidth: 640,
             tagHeight: 340,
             alt: "ENSNode sidecar service ENSRainbow"
-        }
+        },
+        svgImage: <><ENSNodeSchema /></>
     }
 ];
