@@ -14,6 +14,7 @@ export class InvalidLabelhashError extends Error {
 
 /**
  * Parses a labelhash string and normalizes it to the format expected by the ENSRainbow API.
+ * If the input labelhash is 63 characters long, a leading zero will be added to make it 64 characters.
  *
  * @param maybeLabelhash - The string to parse as a labelhash
  * @returns A normalized labelhash (a 0x-prefixed, lowercased, 64-character hex string)
