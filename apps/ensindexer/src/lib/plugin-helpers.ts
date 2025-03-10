@@ -10,7 +10,7 @@ import {
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "./ponder-helpers";
-import type { OwnedName, PluginName } from "./types";
+import type { OwnedName, PluginName, ReverseRootNode } from "./types";
 
 /**
  * A factory function that returns a function to create a namespaced contract
@@ -169,21 +169,16 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
 }
 
 /**
- * An ENS Plugin's handlers are configured with ownedName, reverse node, and namespace.
+ * An ENS Plugin's handlers are configured with ownedName and namespace.
  */
 export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   ownedName: OwnedName;
 
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
 
-  /**
-   * Tells if the plugin determines the provided node is a reverse root node.
-   * Note: This is optional as not all plugins need to handle reverse root nodes.
-   *
-   * @param node The node to check for being a reverse root node
-   * @returns true if the node is a reverse root node
-   */
-  isReverseRootNode?(node: Node): boolean;
+  // Optional, defines the reverse registrar root node.
+  // Some plugins might not need it at the moment.
+  reverseRootNode?: OWNED_NAME extends "eth" ? ReverseRootNode : undefined;
 };
 
 /**

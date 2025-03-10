@@ -13,14 +13,21 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({
+  ownedName,
+  namespace,
+  reverseRootNode,
+}: PonderENSPluginHandlerArgs<"eth">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-  } = makeRegistrarHandlers({ ownedName });
+  } = makeRegistrarHandlers({
+    ownedName,
+    reverseRootNode,
+  });
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
