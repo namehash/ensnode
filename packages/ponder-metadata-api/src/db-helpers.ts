@@ -1,41 +1,50 @@
 import { pgSchema, pgTable } from "drizzle-orm/pg-core";
 import { type ReadonlyDrizzle, eq } from "ponder";
 
-type NamespaceBuild = string;
-
-type PonderApp = {
+/**
+ * Internal ponder metadata type.
+ * Copied from https://github.com/ponder-sh/ponder/blob/32634897bf65e92a85dc4cccdaba70c9425d90f3/packages/core/src/database/index.ts#L94-L102
+ */
+type PonderAppMeta = {
   is_locked: 0 | 1;
   is_dev: 0 | 1;
   heartbeat_at: number;
   build_id: string;
   checkpoint: string;
-  table_names: string[];
+  table_names: Array<string>;
   version: string;
 };
 
-const getPonderMeta = (namespace: NamespaceBuild) => {
-  if (namespace === "public") {
+/**
+ * Get DB schema for _ponder_meta table.
+ * Akin to https://github.com/ponder-sh/ponder/blob/32634897bf65e92a85dc4cccdaba70c9425d90f3/packages/core/src/database/index.ts#L129-L141
+ *
+ * @param databaseNamespace A namespace for the database.
+ * @returns A table schema for _ponder_meta table.
+ * */
+const getPonderMetaTableSchema = (databaseNamespace: string) => {
+  if (databaseNamespace === "public") {
     return pgTable("_ponder_meta", (t) => ({
       key: t.text().primaryKey().$type<"app">(),
-      value: t.jsonb().$type<PonderApp>().notNull(),
+      value: t.jsonb().$type<PonderAppMeta>().notNull(),
     }));
   }
 
-  return pgSchema(namespace).table("_ponder_meta", (t) => ({
+  return pgSchema(databaseNamespace).table("_ponder_meta", (t) => ({
     key: t.text().primaryKey().$type<"app">(),
-    value: t.jsonb().$type<PonderApp>().notNull(),
+    value: t.jsonb().$type<PonderAppMeta>().notNull(),
   }));
 };
 
-type PonderStatus = {
-  network_name: string;
-  block_number: number;
-  block_timestamp: number;
-  ready: boolean;
-};
-
-const getPonderStatus = (namespace: NamespaceBuild) => {
-  if (namespace === "public") {
+/**
+ * Get DB schema for _ponder_status table.
+ * Akin to https://github.com/ponder-sh/ponder/blob/32634897bf65e92a85dc4cccdaba70c9425d90f3/packages/core/src/database/index.ts#L143-L159
+ *
+ * @param databaseNamespace A namespace for the database.
+ * @returns A table schema for _ponder_status table.
+ */
+const getPonderStatusTableSchema = (databaseNamespace: string) => {
+  if (databaseNamespace === "public") {
     return pgTable("_ponder_status", (t) => ({
       network_name: t.text().primaryKey(),
       block_number: t.bigint({ mode: "number" }),
@@ -44,7 +53,7 @@ const getPonderStatus = (namespace: NamespaceBuild) => {
     }));
   }
 
-  return pgSchema(namespace).table("_ponder_status", (t) => ({
+  return pgSchema(databaseNamespace).table("_ponder_status", (t) => ({
     network_name: t.text().primaryKey(),
     block_number: t.bigint({ mode: "number" }),
     block_timestamp: t.bigint({ mode: "number" }),
@@ -52,25 +61,48 @@ const getPonderStatus = (namespace: NamespaceBuild) => {
   }));
 };
 
+type PonderStatusTableSchema = ReturnType<typeof getPonderStatusTableSchema>;
+
+/**
+ * Get a list of ponder status entries for each network.
+ *
+ * @param namespace A namespace for the database (e.g. "public").
+ * @param db Drizzle DB Client instance.
+ * @returns a list of ponder status entries for each network.
+ */
 export async function queryPonderStatus(
   namespace: string,
   db: ReadonlyDrizzle<Record<string, unknown>>,
-) {
-  const PONDER_STATUS = getPonderStatus(namespace);
+): Promise<Array<PonderStatusTableSchema["$inferSelect"]>> {
+  const PONDER_STATUS = getPonderStatusTableSchema(namespace);
 
-  return db.select().from(PONDER_STATUS) as unknown as Array<typeof PONDER_STATUS.$inferSelect>;
+  return db.select().from(PONDER_STATUS);
 }
 
+type PonderMetaTableSchema = ReturnType<typeof getPonderMetaTableSchema>;
+
+/**
+ * Get ponder metadata for the app.
+ *
+ * @param namespace A namespace for the database (e.g. "public").
+ * @param db Drizzle DB Client instance.
+ * @returns ponder metadata for the app.
+ */
 export async function queryPonderMeta(
   namespace: string,
   db: ReadonlyDrizzle<Record<string, unknown>>,
-) {
-  const PONDER_META = getPonderMeta(namespace);
+): Promise<PonderMetaTableSchema["$inferSelect"]["value"]> {
+  const PONDER_META = getPonderMetaTableSchema(namespace);
 
-  return db
+  const [ponderAppMeta] = await db
     .select({ value: PONDER_META.value })
     .from(PONDER_META)
     .where(eq(PONDER_META.key, "app"))
-    .limit(1)
-    .then((result: any) => result[0]?.value) as unknown as typeof PONDER_META.$inferSelect.value;
+    .limit(1);
+
+  if (!ponderAppMeta) {
+    throw new Error("Ponder metadata not found");
+  }
+
+  return ponderAppMeta.value;
 }
