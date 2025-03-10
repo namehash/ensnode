@@ -9,7 +9,6 @@ import {Link} from "@namehash/namekit-react";
 import {ENSNodeSchema} from "../atoms/ENSNodeSchema.tsx";
 import {ENSProfile} from "../atoms/ENSProfile.tsx";
 import {ENSProfileMobile} from "../atoms/ENSProfileMobile.tsx";
-import {NameImage} from "../atoms/NameImage.tsx";
 
 export default function AboutRainbowSections() {
     return (
@@ -79,6 +78,6 @@ const rainbowSections: AboutRainbowProps[] = [
             tagHeight: 340,
             alt: "ENSNode sidecar service ENSRainbow"
         },
-        svgImage: <><ENSNodeSchema /></>
+        svgImage: <><ENSNodeSchema styles="relative z-10 w-full h-full"/></>
     }
 ];

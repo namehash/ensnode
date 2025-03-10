@@ -53,8 +53,8 @@ export default function BeforeAfterSlider() {
             </div>
 
             <div className="flex sm:hidden">
-                <NameImage styles="image1 w-full h-full"/>
-                <HealedNameImage styles="image2 w-full h-full"/>
+                <NameImage styles="image1"/>
+                <HealedNameImage styles="image2"/>
             </div>
             <div
                 //     style={{
