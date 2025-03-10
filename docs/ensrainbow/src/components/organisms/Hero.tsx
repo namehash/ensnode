@@ -24,7 +24,7 @@ export default function Hero() {
                     <p className="text-center not-italic uppercase text-gray-500 text-xs tracking-wide font-medium leading-4">
                         An open source public good
                     </p>
-                    <h1 className="text-black not-italic font-bold text-4xl leading-10 sm:text-6xl sm:leading-[64px] text-center lg:text-left">
+                    <h1 className="text-black not-italic font-bold text-4xl leading-10 sm:text-5xl sm:leading-[52px] xl:text-6xl xl:leading-[64px] text-center lg:text-left">
                         Making the{" "}
                         <br className="hidden xl:block"/>
                         unknown, known
@@ -44,12 +44,12 @@ export default function Hero() {
 
                 <HeroInstallCommand/>
 
-                <div className="block relative z-10 pt-3 sm:hidden">
+                <div className="block relative z-10 pt-3 lg:hidden">
                     <Button asChild>
                         <Link href="https://www.ensnode.io/ensrainbow/usage/">View the docs</Link>
                     </Button>
                 </div>
-                <div className="hidden sm:block relative z-10">
+                <div className="hidden lg:block relative z-10">
                     <Button variant="primary" size="large" asChild>
                         <Link href="https://www.ensnode.io/ensrainbow/usage/">View the docs</Link>
                     </Button>

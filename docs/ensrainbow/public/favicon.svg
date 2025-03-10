@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="32" height="32"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="2" y="2" width="28" height="28" rx="2" stroke="black" stroke-width="4"></rect>
-<path d="M4 4H28V8H4V4Z" fill="#FF311C"></path>
-<path d="M4 16H28V20H4V16Z" fill="#97FF2E"></path>
-<path d="M4 8H28V12H4V8Z" fill="#FEC401"></path>
-<path d="M4 20H28V24H4V20Z" fill="#3FE8FF"></path>
-<path d="M4 12H28V16H4V12Z" fill="#FEFB24"></path>
-<path d="M4 24H28V28H4V24Z" fill="#9E49FF"></path>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="28" height="28"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 2H26V6H2V2Z" fill="#FF311C"></path>
+<path d="M2 14H26V18H2V14Z" fill="#97FF2E"></path>
+<path d="M2 6H26V10H2V6Z" fill="#FEC401"></path>
+<path d="M2 18H26V22H2V18Z" fill="#3FE8FF"></path>
+<path d="M2 10H26V14H2V10Z" fill="#FEFB24"></path>
+<path d="M2 22H26V26H2V22Z" fill="#9E49FF"></path>
+<rect x="1" y="1" width="26" height="26" rx="3" stroke="black" stroke-width="2"></rect>
 </svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
 @media (prefers-color-scheme: dark) { :root { filter: none; } }
 </style></svg>

@@ -157,7 +157,6 @@
 }
 
 .line::before {
-    /*TODO: media queries for 'glow' ~ make it smaller as the image gets smaller*/
     content: "";
     position: absolute;
 

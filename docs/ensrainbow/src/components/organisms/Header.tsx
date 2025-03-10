@@ -41,7 +41,7 @@ export default function Header() {
                             href="https://www.ensnode.io/ensrainbow/usage/"
                             target="_blank"
                             size="small"
-                            className="hover:no-underline"
+                            className="hover:no-underline nk-underline-none"
                         >
                            Docs
                         </Link>
