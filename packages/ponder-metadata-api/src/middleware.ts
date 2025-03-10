@@ -75,7 +75,7 @@ export function ponderMetadata<
 
       /**
        * Fetches block metadata from blockchain network for a given block number.
-       * @param blockNumber 
+       * @param blockNumber
        * @returns block metadata
        * @throws {Error} if failed to fetch block metadata from blockchain network
        */
@@ -85,7 +85,9 @@ export function ponderMetadata<
         });
 
         if (!block) {
-          throw new Error(`Failed to fetch block metadata for block number ${blockNumber} with chain ID ${indexedChainId}`);
+          throw new Error(
+            `Failed to fetch block metadata for block number ${blockNumber} with chain ID ${indexedChainId}`,
+          );
         }
 
         return {
@@ -125,7 +127,9 @@ export function ponderMetadata<
       }
 
       // mapping ponder status for current network
-      const ponderStatusForNetwork = ponderStatus.find((ponderStatusEntry) => ponderStatusEntry.network_name === network);
+      const ponderStatusForNetwork = ponderStatus.find(
+        (ponderStatusEntry) => ponderStatusEntry.network_name === network,
+      );
 
       // mapping last indexed block if available
       let lastIndexedBlock: BlockInfo | null = null;

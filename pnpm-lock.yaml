@@ -252,6 +252,9 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
+      '@ensnode/ens-deployments':
+        specifier: 'workspace:'
+        version: link:../../packages/ens-deployments
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.2.0
@@ -279,6 +282,9 @@ importers:
       typescript:
         specifier: ^5
         version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)
 
   apps/ensindexer:
     dependencies:

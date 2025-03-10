@@ -1,17 +1,11 @@
 import { getChainName } from "@/lib/chains";
-import type {
-  BlockInfo,
-  MetadataMiddlewareResponse,
-  NetworkIndexingStatus,
-} from "@ensnode/ponder-metadata";
 import { fromUnixTime } from "date-fns";
-
-export type { NetworkIndexingStatus } from "@ensnode/ponder-metadata";
+import type { EnsNode } from "./types";
 
 /**
  * Basic information about a block and its date.
  */
-export interface BlockInfoViewModel extends BlockInfo {
+export interface BlockInfoViewModel extends EnsNode.BlockInfo {
   get date(): Date;
 }
 
@@ -24,7 +18,7 @@ export interface NetworkIndexingPhaseViewModel {
 /**
  * Network status view model, includes indexing phases.
  */
-export interface NetworkStatusViewModel extends NetworkIndexingStatus {
+export interface NetworkStatusViewModel {
   name: string;
   firstBlockToIndex: BlockInfoViewModel;
   lastIndexedBlock: BlockInfoViewModel | null;
@@ -54,7 +48,7 @@ export interface GlobalIndexingStatusViewModel {
  * @returns
  */
 export function globalIndexingStatusViewModel(
-  networkIndexingStatus: Record<number, NetworkIndexingStatus>,
+  networkIndexingStatus: Record<number, EnsNode.NetworkIndexingStatus>,
 ): GlobalIndexingStatusViewModel {
   const indexingStartDatesAcrossNetworks = Object.values(networkIndexingStatus).map(
     (status) => status.firstBlockToIndex.timestamp,
@@ -93,7 +87,7 @@ export function globalIndexingStatusViewModel(
  */
 export function networkIndexingStatusViewModel(
   chainId: string,
-  networkStatus: NetworkIndexingStatus,
+  networkStatus: EnsNode.NetworkIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
 ): NetworkStatusViewModel {
   const phases: NetworkStatusViewModel["phases"] = [];
@@ -130,7 +124,7 @@ export function networkIndexingStatusViewModel(
  * @param block
  * @returns
  */
-function blockViewModel(block: BlockInfo): BlockInfoViewModel {
+export function blockViewModel(block: EnsNode.BlockInfo): BlockInfoViewModel {
   return {
     ...block,
     get date(): Date {
@@ -139,14 +133,14 @@ function blockViewModel(block: BlockInfo): BlockInfoViewModel {
   };
 }
 
-export function ensNodeDepsViewModel(deps: MetadataMiddlewareResponse["deps"]) {
+export function ensNodeDepsViewModel(deps: EnsNode.Metadata["deps"]) {
   return [
     { label: "Ponder", value: deps.ponder },
     { label: "Node.js", value: deps.nodejs },
   ] as const;
 }
 
-export function ensNodeEnvViewModel(env: MetadataMiddlewareResponse["env"]) {
+export function ensNodeEnvViewModel(env: EnsNode.Metadata["env"]) {
   return [
     { label: "Active Plugins", value: env.ACTIVE_PLUGINS },
     { label: "ENS Deployment Chain", value: env.ENS_DEPLOYMENT_CHAIN },
