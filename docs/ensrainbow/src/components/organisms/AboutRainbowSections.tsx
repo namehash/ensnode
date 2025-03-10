@@ -49,14 +49,14 @@ const rainbowSections: AboutRainbowProps[] = [
         mobileImageOnTop: false,
         imageSpecifics: {
             source: ensProfile.src,
-            tagWidth: 640*4,
-            tagHeight: 400*4,
+            tagWidth: 640,
+            tagHeight: 400,
             alt: "ens profile"
         },
         designatedMobileImage: {
             source: ensProfileMobile.src,
-            tagWidth: 375*4,
-            tagHeight: 360*4,
+            tagWidth: 375,
+            tagHeight: 360,
             alt: "ens profile",
             styles: "-right-5 shadow-[inset_50px_0px_8px_0px_white]"
         }
@@ -84,8 +84,8 @@ const rainbowSections: AboutRainbowProps[] = [
         mobileImageOnTop: true,
         imageSpecifics: {
             source: ensNode.src,
-            tagWidth: 640*4,
-            tagHeight: 340*4,
+            tagWidth: 640,
+            tagHeight: 340,
             alt: "ENSNode sidecar service ENSRainbow"
         }
     }

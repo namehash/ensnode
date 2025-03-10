@@ -30,7 +30,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                     />
                     <img
                         className={cc([
-                            "relative z-10 w-full h-full",
+                            "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                             props.imageSpecifics.styles,
                         ])}
                         src={props.imageSpecifics.source}
@@ -46,7 +46,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                     {props.designatedMobileImage ?
                         <img
                             className={cc([
-                                "relative z-10 w-full h-full",
+                                "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                                 props.designatedMobileImage.styles,
                             ])}
                             src={props.designatedMobileImage.source}
@@ -57,7 +57,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                         :
                         <img
                             className={cc([
-                                "relative z-10 w-full h-full",
+                                "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                                 props.imageSpecifics.styles,
                             ])}
                             src={props.imageSpecifics.source}
@@ -87,7 +87,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                 className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0 ">
                 <img
                     className={cc([
-                        "relative z-10 w-full h-full",
+                        "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                         props.imageSpecifics.styles,
                     ])}
                     src={props.imageSpecifics.source}
@@ -102,7 +102,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                     {props.designatedMobileImage ?
                         <img
                             className={cc([
-                                "relative z-10 w-full h-full",
+                                "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                                 props.designatedMobileImage.styles,
                             ])}
                             src={props.designatedMobileImage.source}
@@ -113,7 +113,7 @@ export default function AboutRainbow(props: AboutRainbowProps) {
                         :
                         <img
                             className={cc([
-                                "relative z-10 w-full h-full",
+                                "relative z-10 w-[400%] h-[400%] sm:w-full sm:h-full",
                                 props.imageSpecifics.styles,
                             ])}
                             src={props.imageSpecifics.source}
