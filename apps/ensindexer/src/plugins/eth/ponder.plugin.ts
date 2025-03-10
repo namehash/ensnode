@@ -1,3 +1,4 @@
+import type { Node } from "@ensnode/utils/types";
 import { createConfig } from "ponder";
 import { DEPLOYMENT_CONFIG } from "../../lib/globals";
 import {
@@ -12,6 +13,9 @@ export const pluginName = "eth" as const;
 
 // the Registry/Registrar handlers in this plugin manage subdomains of '.eth'
 const ownedName = "eth" as const;
+
+// namehash('addr.reverse')
+const reverseRootNode: Node = "0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2";
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
@@ -55,6 +59,7 @@ export const config = createConfig({
 export const activate = activateHandlers({
   ownedName,
   namespace,
+  reverseRootNode,
   handlers: [
     import("./handlers/Registry"),
     import("./handlers/EthRegistrar"),

@@ -1,4 +1,5 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
+import type { Node } from "@ensnode/utils/types";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
@@ -9,7 +10,7 @@ import {
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "./ponder-helpers";
-import type { OwnedName, PluginName } from "./types";
+import type { OwnedName, PluginName, ReverseRootNode } from "./types";
 
 /**
  * A factory function that returns a function to create a namespaced contract
@@ -172,7 +173,12 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
  */
 export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   ownedName: OwnedName;
+
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
+
+  // Optional, defines the reverse registrar root node.
+  // Some plugins might not need it at the moment.
+  reverseRootNode?: OWNED_NAME extends "eth" ? ReverseRootNode : undefined;
 };
 
 /**

@@ -1,22 +1,39 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
+import {
+  isLabelIndexable,
+  labelByReverseAddress,
+  makeSubnodeNamehash,
+} from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";
 import { makeRegistrationId } from "../lib/ids";
-import { EventWithArgs } from "../lib/ponder-helpers";
-import type { OwnedName } from "../lib/types";
+import { EventWithArgs, canHealReverseAddresses } from "../lib/ponder-helpers";
+import type { OwnedName, ReverseRootNode } from "../lib/types";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
+
+interface MakeRegistrarHandlersArgs {
+  ownedName: OwnedName;
+
+  /**
+   * Optional, defines the reverse registrar root node.
+   * Some plugins might not need it at the moment.
+   **/
+  reverseRootNode?: ReverseRootNode;
+}
 
 /**
  * makes a set of shared handlers for a Registrar contract that manages `ownedName`
  *
  * @param ownedName the name that the Registrar contract manages subnames of
  */
-export const makeRegistrarHandlers = (ownedName: OwnedName) => {
+export const makeRegistrarHandlers = ({
+  ownedName,
+  reverseRootNode,
+}: MakeRegistrarHandlersArgs) => {
   const ownedNameNode = namehash(ownedName);
   const sharedEventValues = createSharedEventValues(ownedName);
 
@@ -81,7 +98,18 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
 
       // attempt to heal the label associated with labelhash via ENSRainbow
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
-      const healedLabel = await labelByHash(labelhash);
+      let healedLabel = await labelByHash(labelhash);
+
+      // if the label has not healed with ENSRainbow query
+      // and healing label from reverse addresses is enabled, give it a go
+      if (!healedLabel && canHealReverseAddresses()) {
+        healedLabel = labelByReverseAddress({
+          senderAddress: owner,
+          parentNode: node,
+          labelhash,
+          reverseRootNode,
+        });
+      }
 
       // only update the label if it is healed & indexable
       // undefined value means no change to the label

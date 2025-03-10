@@ -24,7 +24,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"l
     handleNameRenewed,
     handleNameTransferred,
     ownedSubnameNode,
-  } = makeRegistrarHandlers(ownedName);
+  } = makeRegistrarHandlers({ ownedName });
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
