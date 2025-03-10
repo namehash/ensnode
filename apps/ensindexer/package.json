@@ -25,11 +25,12 @@
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/ens-deployments": "workspace:*",
-    "@ensnode/utils": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
+    "@ensnode/utils": "workspace:*",
+    "caip": "^1.1.1",
     "hono": "catalog:",
     "ponder": "catalog:",
     "ts-deepmerge": "^7.0.2",

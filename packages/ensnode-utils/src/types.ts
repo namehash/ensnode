@@ -14,8 +14,8 @@ export type Node = Hex;
 
 /**
  * A hash value that identifies only a single part or "label" of an ENS name.
- * The labelhash is just the Keccak-256 output for the label.
+ * The labelHash is just the Keccak-256 output for the label.
  *
  * @link https://docs.ens.domains/ensip/1#labelhash-algorithm
  */
-export type Labelhash = Hex;
+export type LabelHash = Hex;

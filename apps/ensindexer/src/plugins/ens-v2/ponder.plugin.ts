@@ -15,21 +15,21 @@ const namespace = createPluginNamespace(pluginName);
 export const config = createConfig({
   networks: networksConfigForChain(chain),
   contracts: {
-    [namespace("EthRegistry")]: {
-      network: networkConfigForContract(chain, contracts.EthRegistry),
-      abi: contracts.EthRegistry.abi,
-    },
     [namespace("RegistryDatastore")]: {
       network: networkConfigForContract(chain, contracts.RegistryDatastore),
       abi: contracts.RegistryDatastore.abi,
+    },
+    [namespace("Resolver")]: {
+      network: networkConfigForContract(chain, contracts.Resolver),
+      abi: contracts.Resolver.abi,
     },
     [namespace("RootRegistry")]: {
       network: networkConfigForContract(chain, contracts.RootRegistry),
       abi: contracts.RootRegistry.abi,
     },
-    [namespace("OwnedResolver")]: {
-      network: networkConfigForContract(chain, contracts.OwnedResolver),
-      abi: contracts.OwnedResolver.abi,
+    [namespace("EthRegistry")]: {
+      network: networkConfigForContract(chain, contracts.EthRegistry),
+      abi: contracts.EthRegistry.abi,
     },
   },
 });
@@ -41,6 +41,6 @@ export const activate = activateHandlers({
     import("./handlers/EthRegistry"),
     import("./handlers/RegistryDatastore"),
     import("./handlers/RootRegistry"),
-    import("./handlers/OwnedResolver"),
+    import("./handlers/Resolver"),
   ],
 });

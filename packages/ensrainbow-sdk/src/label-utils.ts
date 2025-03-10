@@ -1,4 +1,4 @@
-import type { Labelhash } from "@ensnode/utils/types";
+import type { LabelHash } from "@ensnode/utils/types";
 import { ByteArray, hexToBytes } from "viem";
 
 /**
@@ -7,7 +7,7 @@ import { ByteArray, hexToBytes } from "viem";
  * @returns A ByteArray containing the bytes
  * @throws Error if `labelHash` is not a valid 32-byte hex string
  */
-export function labelHashToBytes(labelHash: Labelhash): ByteArray {
+export function labelHashToBytes(labelHash: LabelHash): ByteArray {
   try {
     if (labelHash.length !== 66) {
       throw new Error(`Invalid labelhash length ${labelHash.length} characters (expected 66)`);

@@ -2,122 +2,96 @@
  * This file temporarily located here for prototyping—should be moved to ensnode-utils.
  */
 
-import { Context, Event } from "ponder:registry";
+import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { eq } from "ponder";
-import { keccak256, toBytes } from "viem";
+import { LabelHash, Node } from "@ensnode/utils/types";
+import { AccountId } from "caip";
+import { Address, getAddress, hexToBigInt, namehash } from "viem";
 
 const LABEL_HASH_MASK = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000n;
 
-// Utility functions
-export function createEventId(event: Event): string {
-  return [event.block.number, event.log.logIndex].join("-");
-}
+///
+/// UPSERTS
+///
 
-export function generateTokenId(label: string): string {
-  const hash = keccak256(toBytes(label));
-
-  // Convert the hash to BigInt and perform the bitwise operation
-  const hashBigInt = BigInt(hash);
-  const mask = BigInt(0x7);
-  const tokenId = hashBigInt & ~mask; // Equivalent to & ~0x7
-  console.log("generateTokenId", label, hash, tokenId);
-  return tokenId.toString();
-}
-
-export function createDomainId(registryId: string | undefined, tokenId: string): string {
-  return `${registryId}-${tokenId}`;
-}
-
-export async function updateDomainLabel(
+export async function upsertRegistry(
   context: Context,
-  domainId: string,
-  label: string,
-  tokenId: string,
-  timestamp: bigint,
-  event: any,
-  source: string,
+  values: typeof schema.v2_registry.$inferInsert,
 ) {
-  const domainRecord = await context.db.find(schema.v2_domain, { id: domainId });
-  if (!domainRecord) {
-    console.log("Domain not found:", domainId);
-    return;
+  return await context.db.insert(schema.v2_registry).values(values).onConflictDoUpdate(values);
+}
+
+export async function upsertResolverRecords(
+  context: Context,
+  values: typeof schema.v2_resolverRecords.$inferInsert,
+) {
+  // ensure Resolver entity
+  await context.db
+    .insert(schema.v2_resolver)
+    .values({ id: values.resolverId })
+    .onConflictDoNothing();
+
+  // ensure ResolverRecords entity
+  return context.db //
+    .insert(schema.v2_resolverRecords)
+    .values(values)
+    .onConflictDoUpdate(values);
+}
+
+///
+/// IDS
+///
+
+/**
+ * Encodes a contract's cross-chain unique address using a CAIP-10 AccountId.
+ *
+ * @param chainId source chain id
+ * @param address contract address
+ * @returns
+ */
+export const makeContractId = (chainId: number, address: Address) => {
+  // ensure checksummed
+  if (address !== getAddress(address)) {
+    throw new Error(`makeContractId: "${address}" is not checksummed`);
   }
 
-  console.log("Updating domain label:", domainRecord);
+  return new AccountId({
+    chainId: {
+      namespace: "eip155", // ENSIndexer only ever indexes EVM chains namespaced by eip155
+      reference: chainId.toString(),
+    },
+    address,
+  }).toString();
+};
 
-  // Update registry database if exists
-  const labelHash = BigInt(tokenId) & LABEL_HASH_MASK;
-  const registryRecord = await context.db.sql.query.v2_registry.findFirst({
-    where: eq(schema.v2_registry.labelHash, labelHash.toString()),
-  });
+export const makeResolverRecordsId = (resolverId: string, node: Node) =>
+  [resolverId, node].join("-");
 
-  if (registryRecord) {
-    console.log("Registry record found:", registryRecord);
-    await context.db
-      .update(schema.v2_registry, { id: registryRecord.id })
-      .set({ ...registryRecord, label: label });
-  }
-  let name = label;
-  if (source != "RootRegistry") {
-    let currentRegistryId = registryRecord!.id;
-    let currentName = name;
+export const makeLabelId = (registryId: string, tokenId: bigint) => [registryId, tokenId].join("-");
 
-    while (true) {
-      const parentRegistryRecord = await context.db.sql.query.v2_registry.findFirst({
-        where: eq(schema.v2_registry.subregistryId, currentRegistryId),
-      });
+export const makeResolverRecordsAddressId = (resolverRecordsId: string, coinType: bigint) =>
+  [resolverRecordsId, coinType].join("-");
 
-      if (!parentRegistryRecord) {
-        break; // We've reached the top level
-      }
+///
+/// UTILS
+///
 
-      console.log("Parent registry record found:", parentRegistryRecord);
-      let parentDomainRecord = await context.db.sql.query.v2_domain.findFirst({
-        where: eq(schema.v2_domain.registry, parentRegistryRecord.id),
-      });
+/**
+ * masks a given tokenId
+ */
 
-      if (!parentDomainRecord) break;
+export const maskTokenId = (tokenId: bigint) => tokenId & LABEL_HASH_MASK;
 
-      console.log("Parent domain record found:", parentDomainRecord);
+/**
+ * encodes a hex labelHash as bigint, masking the lower 32 bits
+ */
+export const labelHashToTokenId = (labelHash: LabelHash) =>
+  maskTokenId(hexToBigInt(labelHash, { size: 32 }));
 
-      if (parentDomainRecord.isTld) {
-        currentName = currentName + "." + parentDomainRecord.label;
-        console.log("Reached TLD. Final name:", currentName);
-        break;
-      }
+///
+/// Helpers
+///
 
-      currentName = currentName + "." + parentDomainRecord.label;
-      currentRegistryId = parentRegistryRecord.id;
-      console.log("Current name:", currentName);
-    }
-
-    name = currentName;
-  }
-  // Update the domain record
-  const nameArray = domainRecord.name ? [...domainRecord.name, name] : [name];
-  const newDomainRecord = {
-    ...domainRecord,
-    label: label,
-    name: nameArray,
-    labelHash: tokenId,
-    isTld: source === "RootRegistry" ? true : false,
-    updatedAt: timestamp,
-  };
-
-  await context.db.update(schema.v2_domain, { id: domainId }).set(newDomainRecord);
-
-  // Store the event data
-  const eventId = createEventId(event);
-  await context.db.insert(schema.v2_newSubnameEvent).values({
-    id: eventId,
-    registryId: domainRecord.registry,
-    label: label,
-    labelHash: tokenId,
-    source: source,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  });
-
-  console.log("Domain updated:", domainId);
+export async function materializeLabelName(context: Context, labelId: string) {
+  // TODO: implement Label name materialization by traversing tree
 }
