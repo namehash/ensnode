@@ -47,6 +47,7 @@ catalogs:
       version: 3.0.5
 
 overrides:
+  '@astrojs/prism>prismjs': 1.30.0
   '@graphiql/react>@headlessui/react': 2.2.0
   ponder>vite: 5.4.14
   astro>esbuild: 0.25.0
@@ -5084,8 +5085,8 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  prismjs@1.29.0:
-    resolution: {integrity: sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==}
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
     engines: {node: '>=6'}
 
   process-warning@3.0.0:
@@ -6421,7 +6422,7 @@ snapshots:
 
   '@astrojs/prism@3.2.0':
     dependencies:
-      prismjs: 1.29.0
+      prismjs: 1.30.0
 
   '@astrojs/sitemap@3.2.1':
     dependencies:
@@ -11799,7 +11800,7 @@ snapshots:
 
   prettier@2.8.8: {}
 
-  prismjs@1.29.0: {}
+  prismjs@1.30.0: {}
 
   process-warning@3.0.0: {}
 
