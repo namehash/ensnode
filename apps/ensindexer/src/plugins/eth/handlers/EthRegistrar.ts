@@ -14,6 +14,7 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
 export default function ({
+  canHealReverseAddresses,
   ownedName,
   namespace,
   reverseRootNode,
@@ -25,6 +26,7 @@ export default function ({
     handleNameRenewed,
     handleNameTransferred,
   } = makeRegistrarHandlers({
+    canHealReverseAddresses,
     ownedName,
     reverseRootNode,
   });

@@ -77,6 +77,12 @@ interface MakeRegistryHandlersArgs {
   ownedName: OwnedName;
 
   /**
+   * Determines whether the plugin can heal reverse addresses.
+   * Some plugins might not need it at the moment.
+   **/
+  canHealReverseAddresses(): boolean;
+
+  /**
    * Optional, defines the reverse registrar root node.
    * Some plugins might not need it at the moment.
    **/
@@ -137,19 +143,23 @@ export const makeRegistryHandlers = ({ ownedName, reverseRootNode }: MakeRegistr
         if (!domain.name) {
           const parent = await context.db.find(schema.domain, { id: node });
 
-          // attempt to heal the label associated with labelhash via ENSRainbow
-          // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
-          let healedLabel = await labelByHash(labelhash);
+          let healedLabel = null;
 
-          // if the label has not healed with ENSRainbow query
-          // and healing label from reverse addresses is enabled, give it a go
-          if (!healedLabel && canHealReverseAddresses()) {
+          // if healing label from reverse addresses is enabled, give it a go
+          if (canHealReverseAddresses()) {
             healedLabel = labelByReverseAddress({
-              senderAddress: event.transaction.from,
+              senderAddress: owner,
               parentNode: node,
               labelhash,
               reverseRootNode,
             });
+          }
+
+          // if label hasn't been healed yet
+          if (!healedLabel) {
+            // attempt to heal the label associated with labelhash via ENSRainbow
+            // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
+            healedLabel = await labelByHash(labelhash);
           }
 
           const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;

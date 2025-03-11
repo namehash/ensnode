@@ -16,6 +16,9 @@ const ownedName = "base.eth" as const;
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
+// The `base` plugin does not support healing reverse addresses
+const canHealReverseAddresses = () => false;
+
 export const config = createConfig({
   networks: networksConfigForChain(chain),
   contracts: {
@@ -45,6 +48,7 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
+  canHealReverseAddresses,
   ownedName,
   namespace,
   handlers: [

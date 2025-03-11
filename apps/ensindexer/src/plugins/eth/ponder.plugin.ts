@@ -7,6 +7,7 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "../../lib/plugin-helpers";
+import { canHealReverseAddresses as canHealReverseAddresses_ } from "../../lib/ponder-helpers";
 
 // uses the 'eth' plugin config for deployments
 export const pluginName = "eth" as const;
@@ -19,6 +20,10 @@ const reverseRootNode: Node = "0x91d1777781884d03a6757a803996e38de2a42967fb37eea
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
+
+// The `eth` plugin supports healing reverse addresses,
+// depending on feature flag value
+const canHealReverseAddresses = canHealReverseAddresses_;
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -57,6 +62,7 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
+  canHealReverseAddresses,
   ownedName,
   namespace,
   reverseRootNode,

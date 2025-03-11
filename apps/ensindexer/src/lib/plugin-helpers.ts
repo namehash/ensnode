@@ -1,5 +1,4 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils/types";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
@@ -176,9 +175,17 @@ export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
 
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
 
+  /**
+   * Determines whether the plugin can heal reverse addresses.
+   * Some plugins might not need it at the moment.
+   *
+   * @returns true if the plugin can heal reverse addresses
+   */
+  canHealReverseAddresses(): boolean;
+
   // Optional, defines the reverse registrar root node.
   // Some plugins might not need it at the moment.
-  reverseRootNode?: OWNED_NAME extends "eth" ? ReverseRootNode : undefined;
+  reverseRootNode?: ReverseRootNode;
 };
 
 /**

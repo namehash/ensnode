@@ -19,11 +19,13 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Hex) {
 }
 
 export default function ({
+  canHealReverseAddresses,
   ownedName,
   namespace,
   reverseRootNode,
 }: PonderENSPluginHandlerArgs<"eth">) {
   const { handleNewOwner, handleNewResolver, handleNewTTL, handleTransfer } = makeRegistryHandlers({
+    canHealReverseAddresses,
     ownedName,
     reverseRootNode,
   });

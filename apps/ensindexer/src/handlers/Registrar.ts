@@ -10,13 +10,19 @@ import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";
 import { makeRegistrationId } from "../lib/ids";
-import { EventWithArgs, canHealReverseAddresses } from "../lib/ponder-helpers";
+import { EventWithArgs } from "../lib/ponder-helpers";
 import type { OwnedName, ReverseRootNode } from "../lib/types";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
 interface MakeRegistrarHandlersArgs {
   ownedName: OwnedName;
+
+  /**
+   * Determines whether the plugin can heal reverse addresses.
+   * Some plugins might not need it at the moment.
+   **/
+  canHealReverseAddresses(): boolean;
 
   /**
    * Optional, defines the reverse registrar root node.
@@ -32,6 +38,7 @@ interface MakeRegistrarHandlersArgs {
  */
 export const makeRegistrarHandlers = ({
   ownedName,
+  canHealReverseAddresses,
   reverseRootNode,
 }: MakeRegistrarHandlersArgs) => {
   const ownedNameNode = namehash(ownedName);
@@ -96,19 +103,23 @@ export const makeRegistrarHandlers = ({
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
-      // attempt to heal the label associated with labelhash via ENSRainbow
-      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
-      let healedLabel = await labelByHash(labelhash);
+      let healedLabel = null;
 
-      // if the label has not healed with ENSRainbow query
-      // and healing label from reverse addresses is enabled, give it a go
-      if (!healedLabel && canHealReverseAddresses()) {
+      // if healing label from reverse addresses is enabled, give it a go
+      if (canHealReverseAddresses()) {
         healedLabel = labelByReverseAddress({
           senderAddress: owner,
           parentNode: node,
           labelhash,
           reverseRootNode,
         });
+      }
+
+      // if label hasn't been healed yet
+      if (!healedLabel) {
+        // attempt to heal the label associated with labelhash via ENSRainbow
+        // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
+        healedLabel = await labelByHash(labelhash);
       }
 
       // only update the label if it is healed & indexable
