@@ -1,3 +1,4 @@
+import { CAIP10AccountId } from "@ensnode/utils/types";
 import { index, onchainTable, relations, uniqueIndex } from "ponder";
 import { type Address, zeroAddress } from "viem";
 import { monkeypatchCollate } from "./collate";
@@ -686,52 +687,63 @@ export const versionChangedRelations = relations(versionChanged, ({ one }) => ({
  * https://www.ensnode.io/ensnode/reference/ensnode-v2-notes/
  *
  * The core design principle here is that a Registry references many Labels which each reference a
- * (sub)Registry which references many Labels... etc. This correctly represents the nature of the
+ * (sub)Registry which references many Labels... etc. This accurately represents the nature of the
  * on-chain contracts and supports the dynamic re-arrangement of the hierarchical namespace as
  * proposed by ENSv2.
  *
+ * For example, when a subregistry is updated for a given Label, the tree now represent's that
+ * subregistry's Labels, without and bulk creation/deletion being necessary.
+ *
  * open questions:
  * - how do v1 subregistries other than .eth handle the migration?
- * - what does v2.eth registry `reliquishing` accomplish, from an indexing perspective?
+ * - what does v2's .eth registry `reliquishing` accomplish, from an indexing perspective?
  * - a 'registry' is... any contract tht implements ERC1155 and NewSubname()? may mean that we need to
  *   index every instance of those events... not very good at all... would be nice if a Registry contract
  *   emitted an event like NewRegistry() in constructor that indicated whether it was an ENS registry.
- *   otherwise we'll need to track all of these. ponder doesn't handle dynamic address indexing for
- *   efficiency reasons.
+ *   or if it were required to announce itself against some singleton address and we could use the
+ *   factory pattern to index those addresses. otherwise we'll need to track every ERC1155 contract.
+ *   (ponder doesn't handle dynamic address indexing for efficiency reasons)
  * - could multiple tokenIds in the ENSv2 system have the same subregistry address? seems yes because
  *   datastore does not enforce uniqueness, but this results in a many-many mapping between labels
- *   and subregistries which seems very annoying to work with, in particular for traversals. the
- *   indexer could enforce uniqueness and if a name sets a registry address that's already assigned
+ *   and subregistries which seems very annoying to work with, in particular for upward traversals.
+ *   the indexer could enforce uniqueness and if a name sets a registry address that's already assigned
  *   we could ignore that subtree? not ideal. since ENSv2 is on L2 we can likely include uniqueness
  *   check without too much of a penalty?
+ *   search TODO(registry-label-uniq): in codebase to see locations where this is noted
  * - event order guarantees would be really nice as part of the v2 spec
  *   - i.e. registries must emit NewSubname before any ERC1155 events, must emit NewSubname before
- *     calling datastore, etc.
+ *     calling datastore, etc. indexers love an event that's guaranteed to be first in order to setup entity
  * - should token ids within registry contracts not be masked? what happens if registry mints
- *   multiple tokens with conflicting tokenIds?
+ *   multiple tokens with conflicting tokenIds? they'll have the same state in datastore but there will
+ *   be multiple tokens in the 1155 contract with different owners, etc. how should the indexer represent this?
  * - we _need_ to be able to configure ponder's handling of null values in order to correctly index ENSv2
  *   because ENSv2 doesn't emit the namehash/labelhash, only human-readable args, which may contain null bytes
  *   https://github.com/ponder-sh/ponder/issues/1456
  *
  * todo in schema:
  * - events & event relations
- * - CAIP typing, @ensnode/utils/types typing
  * - store node on label in order to set up resolver record references?
  * - createdAt and updatedAt values across the board
  * - could use composite schemas more frequently instead of concatenated ids
  */
 
+/**
+ * A Registry represents a Registry _contract_ on-chain, and is keyed by its chain-specific address.
+ */
 export const v2_registry = onchainTable(
   "v2_registries",
   (t) => ({
     /**
      * Registry is keyed by [CAIP-10](https://chainagnostic.org/CAIPs/caip-10)
-     * i.e. chainId:address
-     *
-     * TODO: introducing CAIP-10 for chain-scoping, may or may not be strictly necessary
-     * TODO: type as CAIP-10
      */
-    id: t.text().primaryKey(),
+    id: t.text().primaryKey().$type<CAIP10AccountId>(),
+
+    /**
+     * A Registry can be the subregistry of exactly one Label.
+     * NOTE: we duplicate this reference in order to make cachable traversals trivial.
+     * TODO(registry-label-uniq): see above
+     */
+    labelId: t.text(),
 
     // TODO: reference registry-specific logic entities here (i.e. .eth registry expiries)
   }),
@@ -742,15 +754,18 @@ export const v2_registryRelations = relations(v2_registry, ({ one, many }) => ({
   /**
    * a registry has one label (i.e is that label's subregistry)
    *
-   * TODO: this invariant seems incorrect — see above open questions
+   * TODO(registry-label-uniq): see above
    */
   label: one(v2_label, {
-    fields: [v2_registry.id],
-    references: [v2_label.subregistryId],
+    fields: [v2_registry.labelId],
+    references: [v2_label.id],
+    relationName: "isSubregistryOf",
   }),
 
   // a registry has many labels by label.registryId
-  labels: many(v2_label),
+  labels: many(v2_label, {
+    relationName: "managedLabels",
+  }),
 }));
 
 /**
@@ -769,16 +784,18 @@ export const v2_label = onchainTable(
     id: t.text().primaryKey(),
 
     /**
-     * A Label belogs to a Registry.
+     * A Label belongs to a Registry.
      */
     registryId: t.text().notNull(),
 
     /**
      * A Label entity represents a given labelHash value i.e. the result of `labelhash()`, encoded as a bigint 'tokenId'.
      *
-     * This is _not_ a UUID value, and collisions are expected (i.e. there will be a Label entity representing
-     * the `hello` in `hello.example.eth` and a Label representing the `hello` in `hello.eth` that
-     * have identical labelHash values).
+     * tokenId alone is _not_ a UUID value, and collisions are expected (i.e. there will be a Label
+     * entity representing the `hello` in `hello.example.eth` and a Label representing the `hello`
+     * in `hello.eth` that have identical tokenId values).
+     *
+     * Label entities are unique by (registryId, tokenId), enforced by ERC1155.
      *
      * Note that in ENSv2, labelHashes (and tokenIds) have the lower 32 bits masked.
      */
@@ -786,17 +803,16 @@ export const v2_label = onchainTable(
 
     /**
      * The human-readable representation of a given Label. In ENSv2, this `label` is always known,
-     * but in ENSv1, labels may or may not be known, hence this field is optional. When rendering
-     * and unknown label, an 'encoded' labelHash is used.
+     * but in ENSv1, labels may or may not be known, hence this field is optional.
      */
     label: t.text(),
 
     /**
      * A Label stores a materialized `name`, representing its place in the label hierarchy. In the
-     * event that a Label within the hierarchy is unknown, this name will contain encoded labelHash
+     * event that a Label within the hierarchy is unknown, this name will contain 'encoded' labelHash
      * segments.
      *
-     * NOTE: in the future, name construction will be done dynamically instead of materialized at
+     * NOTE: in the future, name construction will be done a request-time instead of materialized at
      * index-time.
      *
      * ex. sub.example.eth
@@ -809,7 +825,7 @@ export const v2_label = onchainTable(
      * A Label stores a materialized `node`, representing the result of `namehash()`. This is useful
      * for relating to ResolverRecords
      */
-    // node: t.hex(),
+    node: t.hex(),
 
     /**
      * A Label may have an URI.
@@ -823,6 +839,7 @@ export const v2_label = onchainTable(
 
     /**
      * A Label can be assigned a (sub)Registry with flags.
+     * NOTE: we duplicate this reference in order to make cachable traversals trivial.
      */
     subregistryId: t.text(),
     subregistryFlags: t.bigint().notNull().default(0n),
@@ -859,10 +876,10 @@ export const v2_labelRelations = relations(v2_label, ({ one, many }) => ({
   }),
 
   // label references one records by pairwise composite key
-  // records: one(v2_resolverRecords, {
-  //   fields: [v2_label.resolverId, v2_label.node],
-  //   references: [v2_resolverRecords.resolverId, v2_resolverRecords.node],
-  // }),
+  records: one(v2_resolverRecords, {
+    fields: [v2_label.resolverId, v2_label.node],
+    references: [v2_resolverRecords.resolverId, v2_resolverRecords.node],
+  }),
 }));
 
 /**
@@ -872,13 +889,9 @@ export const v2_resolver = onchainTable(
   "v2_resolvers",
   (t) => ({
     /**
-     * Resolver are keyed by [CAIP-10](https://chainagnostic.org/CAIPs/caip-10)
-     * i.e. chainId:address
-     *
-     * TODO: introducing CAIP-10 for chain-scoping, may or may not be strictly necessary
-     * TODO: type as CAIP-10
+     * Resolver are keyed by [CAIP-10](https://chainagnostic.org/CAIPs/caip-10).
      */
-    id: t.text().primaryKey(),
+    id: t.text().primaryKey().$type<CAIP10AccountId>(),
   }),
   (t) => ({}),
 );

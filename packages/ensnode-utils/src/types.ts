@@ -19,3 +19,10 @@ export type Node = Hex;
  * @link https://docs.ens.domains/ensip/1#labelhash-algorithm
  */
 export type LabelHash = Hex;
+
+/**
+ * Represents a CAIP-10 AccountId
+ *
+ * @link https://chainagnostic.org/CAIPs/caip-10
+ */
+export type CAIP10AccountId = string;

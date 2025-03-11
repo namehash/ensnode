@@ -5,7 +5,7 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { isLabelIndexable } from "@ensnode/utils/subname-helpers";
-import { Address, getAddress, labelhash } from "viem";
+import { Address, getAddress, labelhash, zeroAddress } from "viem";
 import { EventWithArgs } from "../../../../lib/ponder-helpers";
 import {
   labelHashToTokenId,
@@ -23,12 +23,13 @@ export async function handleNewSubname({
   context: Context;
   event: EventWithArgs<{ label: string }>;
 }) {
-  console.table({ on: "NewSubname", ...event.args });
   const { label } = event.args;
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
   const tokenId = labelHashToTokenId(labelhash(label));
   const labelId = makeLabelId(registryId, tokenId);
+
+  console.table({ on: "NewSubname", registryId, tokenId, labelId });
 
   // ensure that this registry exists
   await context.db.insert(schema.v2_registry).values({ id: registryId }).onConflictDoNothing();
@@ -61,13 +62,13 @@ export async function handleURI({
     value: string;
   }>;
 }) {
-  console.table({ on: "URI", ...event.args });
-
   const { id, value: uri } = event.args;
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
   const tokenId = maskTokenId(id); // NOTE: ensure token id is masked
   const labelId = makeLabelId(registryId, tokenId);
+
+  console.table({ on: "URI", registryId, tokenId, labelId, uri });
 
   await context.db
     .insert(schema.v2_label)
@@ -83,13 +84,10 @@ export async function handleURI({
 }
 
 // ERC1155 Transfer events may arrive in any order
-// TODO: correctly burn tokens
 async function handleTransfer({
   context,
   event,
 }: { context: Context; event: EventWithArgs<{ id: bigint; to: Address }> }) {
-  console.table({ on: "handleTransfer", ...event.args });
-
   const { id, to } = event.args;
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
@@ -97,17 +95,35 @@ async function handleTransfer({
   const labelId = makeLabelId(registryId, tokenId);
   const owner = getAddress(to); // NOTE: ensures that owner is checksummed
 
-  await context.db
-    .insert(schema.v2_label)
-    // insert new Label with owner
-    .values({
-      id: labelId,
-      registryId,
-      tokenId,
-      owner,
-    })
-    // or update owner of existing Label
-    .onConflictDoUpdate({ owner });
+  console.table({ on: "handleTransfer", registryId, tokenId, labelId, owner });
+
+  const isBurn = owner === zeroAddress;
+  if (isBurn) {
+    const label = await context.db.find(schema.v2_label, { id: labelId });
+
+    // NOTE(registry-label-uniq): we must also remove the reverse relationship on its subregistry
+    if (label?.subregistryId) {
+      await context.db
+        .update(schema.v2_registry, { id: label.subregistryId })
+        .set({ labelId: null });
+    }
+
+    // to delete a token, we need only delete the label
+    await context.db.delete(schema.v2_label, { id: labelId });
+  } else {
+    // mint or update
+    await context.db
+      .insert(schema.v2_label)
+      // insert new Label with owner
+      .values({
+        id: labelId,
+        registryId,
+        tokenId,
+        owner,
+      })
+      // or update owner of existing Label
+      .onConflictDoUpdate({ owner });
+  }
 }
 
 export async function handleTransferSingle({
