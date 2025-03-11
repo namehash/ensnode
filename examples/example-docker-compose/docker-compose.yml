@@ -24,9 +24,9 @@ services:
     ports:
       - "4173:4173"
     environment:
-      VITE_ENSNODE_URL: http://ensnode:42069
+      VITE_ENSNODE_URL: http://ensindexer:42069
     depends_on:
-      - ensnode
+      - ensindexer
 
   postgres:
     container_name: postgres
