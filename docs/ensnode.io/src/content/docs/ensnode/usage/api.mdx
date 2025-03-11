@@ -78,7 +78,7 @@ Fetch data about the three most recently-created domains.
 
 ```gql
 {
-  domains(orderBy: "createdAt", orderDirection: "desc", first: 3) {
+  domains(orderBy: createdAt, orderDirection: desc, first: 3) {
     name
     expiryDate
   }
