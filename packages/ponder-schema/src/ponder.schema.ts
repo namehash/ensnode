@@ -710,7 +710,7 @@ export const versionChangedRelations = relations(versionChanged, ({ one }) => ({
  *   we could ignore that subtree? not ideal. since ENSv2 is on L2 we can likely include uniqueness
  *   check without too much of a penalty?
  *   search TODO(registry-label-uniq): in codebase to see locations where this is noted
- * - event order guarantees would be really nice as part of the v2 spec
+ * - event order guarantees would be really nice as part of the v2 spec, but technically not needed
  *   - i.e. registries must emit NewSubname before any ERC1155 events, must emit NewSubname before
  *     calling datastore, etc. indexers love an event that's guaranteed to be first in order to setup entity
  * - should token ids within registry contracts not be masked? what happens if registry mints
@@ -772,6 +772,7 @@ export const v2_registryRelations = relations(v2_registry, ({ one, many }) => ({
  * A Label entity represents a label in the hierarchical namespace.
  *
  * TODO: pehaps should rename to `Name`/`Domain` or `Token`?
+ * TODO: perhaps key by node instead of (registryId, tokenId)?
  *
  * In ENSv2 this maps 1:1 with a Registry contract's tokenId
  */
@@ -822,10 +823,13 @@ export const v2_label = onchainTable(
     name: t.text(),
 
     /**
-     * A Label stores a materialized `node`, representing the result of `namehash()`. This is useful
-     * for relating to ResolverRecords
+     * A Label stores a materialized `node`, the result of `namehash(name)`, helpful for
+     * - referencing labels by `node`
+     * - referencing this label's resolver records, if any
      */
     node: t.hex(),
+
+    /** */
 
     /**
      * A Label may have an URI.
@@ -853,6 +857,8 @@ export const v2_label = onchainTable(
   (t) => ({
     // a Label is unique by (registryId, tokenId)
     registryLabelHashIndex: uniqueIndex().on(t.registryId, t.tokenId),
+    // a Label is unique by node
+    idxNode: uniqueIndex().on(t.node),
   }),
 );
 
@@ -875,7 +881,7 @@ export const v2_labelRelations = relations(v2_label, ({ one, many }) => ({
     references: [v2_resolver.id],
   }),
 
-  // label references one records by pairwise composite key
+  // label references one records by materialized id
   records: one(v2_resolverRecords, {
     fields: [v2_label.resolverId, v2_label.node],
     references: [v2_resolverRecords.resolverId, v2_resolverRecords.node],

@@ -63,7 +63,7 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
         args: {
           node: event.args.node,
           newAddress: event.args.a,
-          coinType: 60n, // TODO: make sure this is correct ETH cointype
+          coinType: 60n, // TODO: move to utils/constants
         },
       },
     });
