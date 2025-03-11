@@ -1,7 +1,7 @@
 import {LearnMoreButton} from "../atoms/LearnMoreButton.tsx";
 import cc from "classcat";
-import {GraphProtocolIcon} from "../atoms/GraphProtocolIcon.tsx";
-import {ENSLabsLogo} from "../atoms/ENSLabsLogo.tsx";
+import {GraphProtocolIcon} from "../atoms/icons/GraphProtocolIcon.tsx";
+import {ENSLabsLogo} from "../atoms/logos/ENSLabsLogo.tsx";
 
 export default function Appreciation() {
     const subsectionStyles = "h-fit lg:w-1/3 flex flex-col flex-nowrap items-center lg:items-start justify-start self-stretch"

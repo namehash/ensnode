@@ -1,5 +1,5 @@
 import cc from "classcat";
-import type {IconProps} from "../../types/IconTypes.ts";
+import type {IconProps} from "../../../types/IconTypes.ts";
 
 export const ExternalLinkIcon = (props: IconProps) => (
     <svg

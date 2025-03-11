@@ -1,7 +1,7 @@
 import {CheckCircleIcon} from "@heroicons/react/24/solid";
 import cc from "classcat";
-import {RainbowIcon} from "../atoms/RainbowIcon.tsx";
-import {RocketIcon} from "../atoms/RocketIcon.tsx";
+import {RainbowIcon} from "../atoms/icons/RainbowIcon.tsx";
+import {RocketIcon} from "../atoms/icons/RocketIcon.tsx";
 import {Link} from "@namehash/namekit-react";
 
 type RoadMapElement = {

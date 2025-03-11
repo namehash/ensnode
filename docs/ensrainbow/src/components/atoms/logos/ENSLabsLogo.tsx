@@ -1,6 +1,6 @@
 export const ENSLabsLogo = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-         xmlns:xlink="http://www.w3.org/1999/xlink">
+         xmlnsXlink="http://www.w3.org/1999/xlink">
         <rect width="24" height="24" fill="#1E1E1E"/>
         <path
             d="M-1091 -7377C-1091 -7378.1 -1090.1 -7379 -1089 -7379H1010C1011.1 -7379 1012 -7378.1 1012 -7377V915C1012 916.104 1011.1 917 1010 917H-1089C-1090.1 917 -1091 916.104 -1091 915V-7377Z"

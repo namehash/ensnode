@@ -1,15 +1,15 @@
 import {Fragment} from "react";
 import {ListSectionElement} from "../../types/listSectionTypes.ts";
 import {DeveloperResourceItem} from "../molecules/DeveloperResourceItem.tsx";
-import {CloudOutlineIcon} from "../atoms/CloudOutlineIcon.tsx";
-import {FileOutlineIcon} from "../atoms/FileOutlineIcon.tsx";
-import {GithubIconDevelopers} from "../atoms/GithubIconDevelopers.tsx";
+import {CloudOutlineIcon} from "../atoms/icons/CloudOutlineIcon.tsx";
+import {FileOutlineIcon} from "../atoms/icons/FileOutlineIcon.tsx";
+import {GithubIconDevelopers} from "../atoms/icons/GithubIconDevelopers.tsx";
 import {ListSectionBadge} from "../atoms/ListSectionBadge.tsx";
-import {GithubIconSmall} from "../atoms/GithubIconSmall.tsx";
-import {NpmIcon} from "../atoms/NpmIcon.tsx";
-import {TelegramIcon} from "../atoms/TelegramIcon.tsx";
-import {RailwayIcon} from "../atoms/RailwayIcon.tsx";
-import {DockerIcon} from "../atoms/DockerIcon.tsx";
+import {GithubIconSmall} from "../atoms/icons/GithubIconSmall.tsx";
+import {NpmIcon} from "../atoms/icons/NpmIcon.tsx";
+import {TelegramIcon} from "../atoms/icons/TelegramIcon.tsx";
+import {RailwayIcon} from "../atoms/icons/RailwayIcon.tsx";
+import {DockerIcon} from "../atoms/icons/DockerIcon.tsx";
 
 export default function DevelopersSection() {
     return (
@@ -141,7 +141,7 @@ const devElements: ListSectionElement[] = [
         ),
         icon: (
             <div className={DeveloperSectionIconWrapperStyles}>
-                <TelegramIcon fillColor="white"/>
+                <TelegramIcon className="text-white"/>
             </div>
         ),
         link: "http://t.me/ensnode",
