@@ -1,0 +1,21 @@
+{
+  "name": "@ensnode/api",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "@ensnode/ponder-schema": "workspace:*",
+    "@ensnode/utils": "workspace:*",
+    "@ponder/client": "catalog:",
+    "@ponder/utils": "catalog:",
+    "drizzle-orm": "catalog:",
+    "hono": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/bun": "latest"
+  }
+}
