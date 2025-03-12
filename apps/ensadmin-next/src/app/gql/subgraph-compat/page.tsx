@@ -1,5 +1,11 @@
+import { Suspense } from "react";
+
 import { GraphiQLPage } from "@/components/graphiql/graphiql-page";
 
 export default function SubgraphGraphQLPage() {
-  return <GraphiQLPage target="subgraph" />;
+  return (
+    <Suspense>
+      <GraphiQLPage target="subgraph" />
+    </Suspense>
+  );
 }
