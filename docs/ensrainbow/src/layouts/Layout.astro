@@ -1,9 +1,10 @@
 ---
 import { AstroFont } from "astro-font";
+import { SEO } from "astro-seo";
 import Footer from "../components/organisms/Footer";
 import Header from "../components/organisms/Header";
+import "../styles/global.css";
 import "@namehash/namekit-react/styles.css";
-import { SEO } from "astro-seo";
 ---
 
 <!doctype html>
@@ -46,7 +47,7 @@ import { SEO } from "astro-seo";
 			title: "ENSRainbow - making the unknown, known",
 			image: "/twitter-og-image.png",
 			description: "Heal millions of unknown ENS names with this ENSNode sidecar service.",
-			card: "summary"
+			card: "summary_large_image"
 		}}
 		extend={{
         link: [

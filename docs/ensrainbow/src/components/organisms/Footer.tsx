@@ -135,7 +135,6 @@ export default function Footer({ ...props }: FooterProps) {
 
             <Link href="https://t.me/namehash" target="_blank" aria-label="Telegram">
               <TelegramIcon
-                fillColor="#9CA3AF"
                 className="hover:text-black text-[#AFAFAF] transition-all duration-200"
               />
             </Link>

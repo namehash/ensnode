@@ -46,6 +46,6 @@ export const ENSRainbowLogo2D = () => (
     <path d="M2 20H26V24H2V20Z" fill="#3FE8FF" />
     <path d="M2 12H26V16H2V12Z" fill="#FEFB24" />
     <path d="M2 24H26V28H2V24Z" fill="#9E49FF" />
-    <rect x="1" y="3" width="26" height="26" rx="3" stroke="black" stroke-width="2" />
+    <rect x="1" y="3" width="26" height="26" rx="3" stroke="black" strokeWidth="2" />
   </svg>
 );
