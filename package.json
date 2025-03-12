@@ -24,6 +24,8 @@
   "pnpm": {
     "overrides": {
       "@astrojs/prism>prismjs": "1.30.0",
+      "@babel/runtime": "7.26.10",
+      "@babel/helpers": "7.26.10",
       "@graphiql/react>@headlessui/react": "2.2.0",
       "ponder>vite": "5.4.14",
       "astro>esbuild": "0.25.0",
