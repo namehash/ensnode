@@ -1,5 +1,3 @@
-import type { Node } from "@ensnode/utils/types";
-
 /**
  * An owned name for a plugin. Must end with `eth`.
  *
