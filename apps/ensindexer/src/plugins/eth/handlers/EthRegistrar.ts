@@ -13,23 +13,15 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({
-  canHealReverseAddresses,
-  ownedName,
-  namespace,
-  reverseRootNode,
-}: PonderENSPluginHandlerArgs<"eth">) {
+export default function (args: PonderENSPluginHandlerArgs<"eth">) {
+  const { namespace } = args;
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-  } = makeRegistrarHandlers({
-    canHealReverseAddresses,
-    ownedName,
-    reverseRootNode,
-  });
+  } = makeRegistrarHandlers(args);
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({

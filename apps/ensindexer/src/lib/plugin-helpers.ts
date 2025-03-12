@@ -1,4 +1,5 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
+import type { Node } from "@ensnode/utils/types";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 import { END_BLOCK, START_BLOCK } from "./globals";
@@ -9,7 +10,7 @@ import {
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "./ponder-helpers";
-import type { OwnedName, PluginName, ReverseRootNode } from "./types";
+import type { OwnedName, PluginName } from "./types";
 
 /**
  * A factory function that returns a function to create a namespaced contract
@@ -183,9 +184,13 @@ export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
    */
   canHealReverseAddresses(): boolean;
 
-  // Optional, defines the reverse registrar root node.
-  // Some plugins might not need it at the moment.
-  reverseRootNode?: ReverseRootNode;
+  /**
+   * Determines whether the plugin supports checking a node against its reverse root node.
+   *
+   * @param node the node to check
+   * @returns true if the node is a reverse root node
+   */
+  isReverseRootNode(node: Node): boolean;
 };
 
 /**

@@ -21,6 +21,9 @@ const reverseRootNode: Node = "0x91d1777781884d03a6757a803996e38de2a42967fb37eea
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
+// The `eth` plugin supports node checking against its own reverse root node
+const isReverseRootNode = (node: Node): boolean => node === reverseRootNode;
+
 // The `eth` plugin supports healing reverse addresses,
 // depending on feature flag value
 const canHealReverseAddresses = canHealReverseAddresses_;
@@ -63,9 +66,9 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   canHealReverseAddresses,
+  isReverseRootNode,
   ownedName,
   namespace,
-  reverseRootNode,
   handlers: [
     import("./handlers/Registry"),
     import("./handlers/EthRegistrar"),

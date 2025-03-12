@@ -1,3 +1,4 @@
+import type { Node } from "@ensnode/utils/types";
 import { createConfig } from "ponder";
 import { DEPLOYMENT_CONFIG } from "../../lib/globals";
 import {
@@ -18,6 +19,11 @@ const namespace = createPluginNamespace(ownedName);
 
 // The `linea` plugin does not support healing reverse addresses
 const canHealReverseAddresses = () => false;
+
+// The `linea` plugin does not support reverse root node checking
+const isReverseRootNode = (node: Node): boolean => {
+  throw new Error(`Cannot check if '${node} is a reverse root node for 'linea' plugin`);
+};
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -49,6 +55,7 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   canHealReverseAddresses,
+  isReverseRootNode,
   ownedName,
   namespace,
   handlers: [

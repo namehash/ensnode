@@ -10,37 +10,22 @@ import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";
 import { makeRegistrationId } from "../lib/ids";
-import { EventWithArgs } from "../lib/ponder-helpers";
-import type { OwnedName, ReverseRootNode } from "../lib/types";
+import type { PonderENSPluginHandlerArgs } from "../lib/plugin-helpers";
+import type { EventWithArgs } from "../lib/ponder-helpers";
+import type { OwnedName } from "../lib/types";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
-
-interface MakeRegistrarHandlersArgs {
-  ownedName: OwnedName;
-
-  /**
-   * Determines whether the plugin can heal reverse addresses.
-   * Some plugins might not need it at the moment.
-   **/
-  canHealReverseAddresses(): boolean;
-
-  /**
-   * Optional, defines the reverse registrar root node.
-   * Some plugins might not need it at the moment.
-   **/
-  reverseRootNode?: ReverseRootNode;
-}
 
 /**
  * makes a set of shared handlers for a Registrar contract that manages `ownedName`
  *
  * @param ownedName the name that the Registrar contract manages subnames of
  */
-export const makeRegistrarHandlers = ({
-  ownedName,
+export const makeRegistrarHandlers = <OWNED_NAME extends OwnedName>({
   canHealReverseAddresses,
-  reverseRootNode,
-}: MakeRegistrarHandlersArgs) => {
+  isReverseRootNode,
+  ownedName,
+}: PonderENSPluginHandlerArgs<OWNED_NAME>) => {
   const ownedNameNode = namehash(ownedName);
   const sharedEventValues = createSharedEventValues(ownedName);
 
@@ -105,14 +90,18 @@ export const makeRegistrarHandlers = ({
 
       let healedLabel = null;
 
-      // if healing label from reverse addresses is enabled, give it a go
-      if (canHealReverseAddresses()) {
-        healedLabel = labelByReverseAddress({
-          senderAddress: owner,
-          parentNode: node,
-          labelhash,
-          reverseRootNode,
-        });
+      // if healing label from reverse addresses is enabled,
+      // and the parent node is the reverse root node, give it a go
+      if (canHealReverseAddresses() && isReverseRootNode(node)) {
+        try {
+          healedLabel = labelByReverseAddress({
+            reverseAddress: owner,
+            labelhash,
+          });
+        } catch (e) {
+          // log the error and continue
+          console.error(e);
+        }
       }
 
       // if label hasn't been healed yet

@@ -288,7 +288,7 @@ export const parseHealReverseAddresses = (rawValue?: string): boolean => {
   const isValueValid = (v: string): boolean => v === "true" || v === "false";
 
   if (!isValueValid(rawValue)) {
-    throw new Error(`'${rawValue}' is not a valid value. Expected 'true' or 'false'.`);
+    throw new Error(`'${rawValue}' is not a valid value. Expected 'true' or 'false'`);
   }
 
   return rawValue === "true";
