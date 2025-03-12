@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { fromUnixTime, intlFormat } from "date-fns";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useRecentDomains } from "./hooks";
 
 // Helper function to safely format dates
@@ -27,14 +28,33 @@ const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
   }
 };
 
+// Client-only date formatter component
+function FormattedDate({
+  timestamp,
+  options,
+}: { timestamp: string; options: Intl.DateTimeFormatOptions }) {
+  const [formattedDate, setFormattedDate] = useState<string>("");
+
+  useEffect(() => {
+    setFormattedDate(formatDate(timestamp, options));
+  }, [timestamp, options]);
+
+  return <>{formattedDate}</>;
+}
+
 export function RecentDomains() {
   const searchParams = useSearchParams();
   const recentDomainsQuery = useRecentDomains(searchParams);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Recently Registered Domains</CardTitle>
+        <CardTitle>Latest .eth registrations</CardTitle>
       </CardHeader>
       <CardContent>
         {recentDomainsQuery.isLoading ? (
@@ -54,28 +74,37 @@ export function RecentDomains() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentDomainsQuery.data?.domains.map((domain) => (
-                <TableRow key={domain.id}>
-                  <TableCell className="font-medium">{domain.name}</TableCell>
-                  <TableCell>
-                    {formatDate(domain.createdAt, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    {formatDate(domain.expiryDate, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">{domain.owner.id}</TableCell>
-                </TableRow>
-              ))}
+              {isClient &&
+                recentDomainsQuery.data?.registrations.map((registration) => (
+                  <TableRow key={registration.domain.id}>
+                    <TableCell className="font-medium">{registration.domain.name}</TableCell>
+                    <TableCell>
+                      <FormattedDate
+                        timestamp={registration.registrationDate}
+                        options={{
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormattedDate
+                        timestamp={registration.expiryDate}
+                        options={{
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {registration.domain.owner.id}
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         )}

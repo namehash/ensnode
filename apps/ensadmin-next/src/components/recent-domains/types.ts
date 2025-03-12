@@ -1,7 +1,7 @@
 /**
  * Types for the recent domains component
  */
-export interface RecentDomain {
+export interface Domain {
   id: string;
   name: string;
   labelName: string;
@@ -12,6 +12,12 @@ export interface RecentDomain {
   };
 }
 
+export interface Registration {
+  registrationDate: string;
+  expiryDate: string;
+  domain: Domain;
+}
+
 export interface RecentDomainsResponse {
-  domains: RecentDomain[];
+  registrations: Registration[];
 }

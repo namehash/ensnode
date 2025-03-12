@@ -10,19 +10,19 @@ import { RecentDomainsResponse } from "./types";
  */
 async function fetchRecentDomains(baseUrl: string): Promise<RecentDomainsResponse> {
   const query = `
-    query GetRecentDomains {
-      domains(
-        first: 5,
-        orderBy: createdAt,
-        orderDirection: desc
-      ) {
-        id
-        name
-        labelName
-        createdAt
+    query RecentRegistrationsQuery {
+      registrations(first: 5, orderBy: registrationDate, orderDirection: desc) {
+        registrationDate
         expiryDate
-        owner {
+        domain {
           id
+          name
+          labelName
+          createdAt
+          expiryDate
+          owner {
+            id
+          }
         }
       }
     }
