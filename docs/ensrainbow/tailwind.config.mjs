@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       screens: {
-        hero: "1440px"
-      }
+        hero: "1440px",
+      },
     },
   },
   plugins: [],

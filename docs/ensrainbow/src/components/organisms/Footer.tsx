@@ -134,9 +134,7 @@ export default function Footer({ ...props }: FooterProps) {
             </Link>
 
             <Link href="https://t.me/namehash" target="_blank" aria-label="Telegram">
-              <TelegramIcon
-                className="hover:text-black text-[#AFAFAF] transition-all duration-200"
-              />
+              <TelegramIcon className="hover:text-black text-[#AFAFAF] transition-all duration-200" />
             </Link>
 
             <Link href="mailto:hello@namehashlabs.org" aria-label="Email">
