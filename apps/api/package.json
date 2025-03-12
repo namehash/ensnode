@@ -10,6 +10,7 @@
     "@ensnode/utils": "workspace:*",
     "@ponder/client": "catalog:",
     "@ponder/utils": "catalog:",
+    "bun": "^1.2.2",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",
     "viem": "catalog:"
