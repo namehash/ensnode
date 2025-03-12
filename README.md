@@ -1,6 +1,30 @@
-# ENSNode
+<!-- VERTICAL WHITESPACE -->
 
-> ENSNode is the multichain indexer for ENSv2.
+<br>
+<br>
+
+<!-- BANNER IMAGE -->
+
+<p align="center">
+  <a href="https://ensnode.io">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/banner.png">
+      <img alt="ENSNode" src=".github/banner.png" width="auto" height="200">
+    </picture>
+  </a>
+</p>
+
+<!-- TAGLINE -->
+<h3 align="center">
+  the multichain indexer for ENSv2
+</h3>
+
+<!-- VERTICAL WHITESPACE -->
+
+<br>
+<br>
+
+# ENSNode
 
 Full Documentation ➡︎ [ensnode.io](https://ensnode.io)
 
