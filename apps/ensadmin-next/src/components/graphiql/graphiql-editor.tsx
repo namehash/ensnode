@@ -8,7 +8,10 @@ import { useSearchParams } from "next/navigation";
 
 export function GraphiQLEditor({ target }: { target: "ponder" | "subgraph" }) {
   const searchParams = useSearchParams();
-  const endpointUrl = new URL(`/${target}`, selectedEnsNodeUrl(searchParams)).toString();
+  const endpointUrl = new URL(
+    `/${target}`,
+    selectedEnsNodeUrl(searchParams)
+  ).toString();
 
   const fetcher = createGraphiQLFetcher({
     url: endpointUrl,
@@ -42,7 +45,8 @@ export function GraphiQLEditor({ target }: { target: "ponder" | "subgraph" }) {
       <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
           <p className="text-sm text-gray-600">
-            Endpoint: <code className="bg-gray-100 px-2 py-1 rounded">{endpointUrl}</code>
+            Endpoint:{" "}
+            <code className="bg-gray-100 px-2 py-1 rounded">{endpointUrl}</code>
           </p>
         </div>
       </div>
@@ -54,6 +58,7 @@ export function GraphiQLEditor({ target }: { target: "ponder" | "subgraph" }) {
           defaultEditorToolsVisibility={true}
           shouldPersistHeaders={true}
           storage={storage}
+          forcedTheme="light"
         />
       </div>
     </>
