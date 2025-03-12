@@ -1,5 +1,5 @@
 {
-  "name": "ensrainbow",
+  "name": "@docs/ensrainbow",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -7,7 +7,9 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "@astrojs/react": "^4.2.0",
