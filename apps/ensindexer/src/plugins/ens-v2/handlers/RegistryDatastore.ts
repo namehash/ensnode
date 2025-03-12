@@ -2,28 +2,27 @@ import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 
 import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
-import { makeContractId, makeLabelId, maskTokenId } from "../v2-lib";
+import { makeContractId, makeDomainId } from "../v2-lib";
 
 export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
   // NOTE: can arrive in any order, must upsert all relevant entities
   ponder.on(namespace("RegistryDatastore:SubregistryUpdate"), async ({ context, event }) => {
     const {
       registry: registryAddress,
-      labelHash,
+      labelHash: tokenId, // NOTE: this variable is called labelHash but is actually masked tokenId
       subregistry: subregistryAddress,
       flags,
     } = event.args;
 
     const registryId = makeContractId(context.network.chainId, registryAddress);
-    const tokenId = maskTokenId(labelHash); // NOTE: ensure tokenId is masked correctly
-    const labelId = makeLabelId(registryId, tokenId);
+    const domainId = makeDomainId(registryId, tokenId);
     const subregistryId = makeContractId(context.network.chainId, subregistryAddress);
 
     console.table({
       on: "RegistryDatastore:SubregistryUpdate",
       registryId,
       tokenId,
-      labelId,
+      domainId,
       subregistryId,
       hash: event.transaction.hash,
     });
@@ -31,45 +30,49 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
     // ensure registry entity
     await context.db.insert(schema.v2_registry).values({ id: registryId }).onConflictDoNothing();
 
-    // NOTE(registry-label-uniq): if subregistry is already linked to a label, must ignore this update
-    // NOTE: implements first-write-wins for registry-label relations
+    // NOTE(registry-domain-uniq): if subregistry is already linked to a domain, must ignore this update
+    // NOTE: implements first-write-wins for registry-domain relations
     const existingSubregistry = await context.db.find(schema.v2_registry, { id: subregistryId });
-    if (existingSubregistry?.labelId) {
+    if (existingSubregistry?.domainId) {
       console.log(
-        `tx ${event.transaction.hash} wanted to set the subregistry for ${labelId} to ${subregistryId} but that registry is already linked to another label (${existingSubregistry.labelId}) — ignoring.`,
+        `tx ${event.transaction.hash} wanted to set the subregistry for ${domainId} to ${subregistryId} but that registry is already linked to another domain (${existingSubregistry.domainId}) — ignoring.`,
       );
       return;
     }
 
     // ensure subregistry entity
-    // TODO(registry-label-uniq): also update the reverse-mapping on the subregistry to point to this label
+    // TODO(registry-domain-uniq): also update the reverse-mapping on the subregistry to point to this domain
     await context.db
       .insert(schema.v2_registry)
-      .values({ id: subregistryId, labelId })
-      .onConflictDoUpdate({ labelId });
+      .values({ id: subregistryId, domainId })
+      .onConflictDoUpdate({ domainId });
 
     await context.db
-      .insert(schema.v2_label)
-      // insert label with subregistry info
-      .values({ id: labelId, registryId, tokenId, subregistryId, subregistryFlags: flags })
-      // or update existing label with subregistry info
+      .insert(schema.v2_domain)
+      // insert domain with subregistry info
+      .values({ id: domainId, registryId, tokenId, subregistryId, subregistryFlags: flags })
+      // or update existing domain with subregistry info
       .onConflictDoUpdate({ subregistryId, subregistryFlags: flags });
   });
 
   // NOTE: can arrive in any order, must upsert all relevant entities
   ponder.on(namespace("RegistryDatastore:ResolverUpdate"), async ({ context, event }) => {
-    const { registry: registryAddress, labelHash, resolver: resolverAddress, flags } = event.args;
+    const {
+      registry: registryAddress,
+      labelHash: tokenId, // NOTE: this variable is called labelHash but is actually masked tokenId
+      resolver: resolverAddress,
+      flags,
+    } = event.args;
 
     const registryId = makeContractId(context.network.chainId, registryAddress);
-    const tokenId = maskTokenId(labelHash); // NOTE: ensure tokenId is masked correctly
-    const labelId = makeLabelId(registryId, tokenId);
+    const domainId = makeDomainId(registryId, tokenId);
     const resolverId = makeContractId(context.network.chainId, resolverAddress);
 
     console.table({
       on: "RegistryDatastore:ResolverUpdate",
       registryId,
       tokenId,
-      labelId,
+      domainId,
       resolverId,
     });
 
@@ -80,10 +83,10 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
     await context.db.insert(schema.v2_resolver).values({ id: resolverId }).onConflictDoNothing();
 
     await context.db
-      .insert(schema.v2_label)
-      // insert label with resolver info
-      .values({ id: labelId, registryId, tokenId, resolverId, resolverFlags: flags })
-      // or update existing label with resolver info
+      .insert(schema.v2_domain)
+      // insert domain with resolver info
+      .values({ id: domainId, registryId, tokenId, resolverId, resolverFlags: flags })
+      // or update existing domain with resolver info
       .onConflictDoUpdate({ resolverId, resolverFlags: flags });
   });
 }

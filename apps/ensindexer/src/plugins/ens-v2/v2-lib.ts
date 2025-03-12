@@ -68,7 +68,8 @@ export const makeContractId = (chainId: number, address: Address) => {
 export const makeResolverRecordsId = (resolverId: string, node: Node) =>
   [resolverId, node].join("-");
 
-export const makeLabelId = (registryId: string, tokenId: bigint) => [registryId, tokenId].join("-");
+export const makeDomainId = (registryId: string, tokenId: bigint) =>
+  [registryId, tokenId].join("-");
 
 export const makeResolverRecordsAddressId = (resolverRecordsId: string, coinType: bigint) =>
   [resolverRecordsId, coinType].join("-");
@@ -99,37 +100,38 @@ export const tokenIdToLabelHash = (tokenId: bigint): LabelHash => toHex(tokenId,
 ///
 
 /**
- * constructs a label's name by traversing the hierarchical namespace upwards.
+ * constructs a Domain's name by traversing the hierarchical namespace upwards.
  * NOTE: likely more efficient than custom sql due to in-memory cache-ability
  */
-async function constructLabelName(context: Context, labelId: string): Promise<string> {
-  const label = await context.db.find(schema.v2_label, { id: labelId });
-  if (!label) {
-    throw new Error(`constructLabelName expected labelId "${labelId}" to exist, it does not`);
+async function constructDomainName(context: Context, domainId: string): Promise<string> {
+  const domain = await context.db.find(schema.v2_domain, { id: domainId });
+  if (!domain) {
+    throw new Error(`constructDomainName: expected domainId "${domainId}" to exist, it does not`);
   }
 
-  const parentRegistry = await context.db.find(schema.v2_registry, { id: label.registryId });
+  const parentRegistry = await context.db.find(schema.v2_registry, { id: domain.registryId });
   if (!parentRegistry) {
     throw new Error(
-      `constructLabelName expected registryId "${label.registryId}" to exist, it does not`,
+      `constructDomainName: expected registryId "${domain.registryId}" to exist, it does not`,
     );
   }
 
   // human-readable label or encoded labelHash
-  const segment = label.label ?? encodeLabelhash(tokenIdToLabelHash(label.tokenId));
+  const label = domain.label ?? encodeLabelhash(tokenIdToLabelHash(domain.tokenId));
 
-  console.log("constructLabelName", { segment, parentId: parentRegistry.labelId });
+  console.log("constructDomainName", { segment: label, parentId: parentRegistry.domainId });
 
-  // this is the root Registry
-  if (!parentRegistry.labelId) return segment;
+  // this is the root Registry, which does not have an associated Domain
+  if (!parentRegistry.domainId) return label;
 
   // otherwise, recurse
-  return [segment, await constructLabelName(context, parentRegistry.labelId)].join(".");
+  return [label, await constructDomainName(context, parentRegistry.domainId)].join(".");
 }
 
-export async function materializeLabelName(context: Context, labelId: string) {
-  const name = await constructLabelName(context, labelId);
+// updates a Domain's `name` and `node` by materializing its location in the hierarchical name tree
+export async function materializeDomainName(context: Context, domainId: string) {
+  const name = await constructDomainName(context, domainId);
   const node = namehash(name);
 
-  await context.db.update(schema.v2_label, { id: labelId }).set({ name, node });
+  await context.db.update(schema.v2_domain, { id: domainId }).set({ name, node });
 }

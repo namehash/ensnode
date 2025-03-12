@@ -686,13 +686,13 @@ export const versionChangedRelations = relations(versionChanged, ({ one }) => ({
  * NOTE: These entities kept namespaced for rapid prototyping—see v2 plans for additional context.
  * https://www.ensnode.io/ensnode/reference/ensnode-v2-notes/
  *
- * The core design principle here is that a Registry references many Labels which each reference a
- * (sub)Registry which references many Labels... etc. This accurately represents the nature of the
+ * The core design principle here is that a Registry references many Domains which each reference a
+ * (sub)Registry which references many Domains... etc. This accurately represents the nature of the
  * on-chain contracts and supports the dynamic re-arrangement of the hierarchical namespace as
  * proposed by ENSv2.
  *
- * For example, when a subregistry is updated for a given Label, the tree now represent's that
- * subregistry's Labels, without and bulk creation/deletion being necessary.
+ * For example, when a subregistry is updated for a given Domain, the tree now represent's that
+ * subregistry's Domains, without and bulk creation/deletion being necessary.
  *
  * open questions:
  * - how do v1 subregistries other than .eth handle the migration?
@@ -709,7 +709,7 @@ export const versionChangedRelations = relations(versionChanged, ({ one }) => ({
  *   the indexer could enforce uniqueness and if a name sets a registry address that's already assigned
  *   we could ignore that subtree? not ideal. since ENSv2 is on L2 we can likely include uniqueness
  *   check without too much of a penalty?
- *   search TODO(registry-label-uniq): in codebase to see locations where this is noted
+ *   search TODO(registry-domain-uniq): in codebase to see locations where this is noted
  * - event order guarantees would be really nice as part of the v2 spec, but technically not needed
  *   - i.e. registries must emit NewSubname before any ERC1155 events, must emit NewSubname before
  *     calling datastore, etc. indexers love an event that's guaranteed to be first in order to setup entity
@@ -739,11 +739,11 @@ export const v2_registry = onchainTable(
     id: t.text().primaryKey().$type<CAIP10AccountId>(),
 
     /**
-     * A Registry can be the subregistry of exactly one Label.
+     * A Registry can be the subregistry of exactly one Domain.
      * NOTE: we duplicate this reference in order to make cachable traversals trivial.
-     * TODO(registry-label-uniq): see above
+     * TODO(registry-domain-uniq): see above
      */
-    labelId: t.text(),
+    domainId: t.text(),
 
     // TODO: reference registry-specific logic entities here (i.e. .eth registry expiries)
   }),
@@ -752,144 +752,145 @@ export const v2_registry = onchainTable(
 
 export const v2_registryRelations = relations(v2_registry, ({ one, many }) => ({
   /**
-   * a registry has one label (i.e is that label's subregistry)
+   * a registry has one domain (i.e is that domain's subregistry)
    *
-   * TODO(registry-label-uniq): see above
+   * TODO(registry-domain-uniq): see above
    */
-  label: one(v2_label, {
-    fields: [v2_registry.labelId],
-    references: [v2_label.id],
-    relationName: "isSubregistryOf",
+  domain: one(v2_domain, {
+    fields: [v2_registry.domainId],
+    references: [v2_domain.id],
+    relationName: "isSubregistryOfDomain",
   }),
 
   // a registry has many labels by label.registryId
-  labels: many(v2_label, {
-    relationName: "managedLabels",
+  domains: many(v2_domain, {
+    relationName: "managedDomains",
   }),
 }));
 
 /**
- * A Label entity represents a label in the hierarchical namespace.
+ * A Domain entity represents a subname in the hierarchical namespace.
  *
- * TODO: pehaps should rename to `Name`/`Domain` or `Token`?
  * TODO: perhaps key by node instead of (registryId, tokenId)?
  *
- * In ENSv2 this maps 1:1 with a Registry contract's tokenId
+ * In ENSv2 this maps 1:1 with a Registry contract's tokens.
  */
-export const v2_label = onchainTable(
-  "v2_labels",
+export const v2_domain = onchainTable(
+  "v2_domains",
   (t) => ({
     /**
-     * Labels are unique by (registryId, tokenId), encoded as `${registryId}-${tokenId}`
+     * Domains are unique by (registryId, tokenId), encoded as `${registryId}-${tokenId}`
      */
     id: t.text().primaryKey(),
 
     /**
-     * A Label belongs to a Registry.
+     * A Domain belongs to a Registry.
      */
     registryId: t.text().notNull(),
 
     /**
-     * A Label entity represents a given labelHash value i.e. the result of `labelhash()`, encoded as a bigint 'tokenId'.
+     * A Domain entity represents a given labelHash value i.e. the result of `labelhash()`, encoded as a bigint 'tokenId'.
      *
-     * tokenId alone is _not_ a UUID value, and collisions are expected (i.e. there will be a Label
-     * entity representing the `hello` in `hello.example.eth` and a Label representing the `hello`
+     * tokenId alone is _not_ a UUID value, and collisions are expected (i.e. there will be a Domain
+     * entity representing the `hello` in `hello.example.eth` and a Domain representing the `hello`
      * in `hello.eth` that have identical tokenId values).
      *
-     * Label entities are unique by (registryId, tokenId), enforced by ERC1155.
+     * Domain entities are unique by (registryId, tokenId), enforced by ERC1155.
      *
      * Note that in ENSv2, labelHashes (and tokenIds) have the lower 32 bits masked.
      */
     tokenId: t.bigint().notNull(),
 
     /**
-     * The human-readable representation of a given Label. In ENSv2, this `label` is always known,
-     * but in ENSv1, labels may or may not be known, hence this field is optional.
+     * The human-readable representation of a given name segment.
+     *
+     * In ENSv1, labels may or may not be known, hence this field is optional.
+     * In ENSv2, this `label` is always known.
      */
     label: t.text(),
 
     /**
-     * A Label stores a materialized `name`, representing its place in the label hierarchy. In the
-     * event that a Label within the hierarchy is unknown, this name will contain 'encoded' labelHash
+     * A Domain stores a materialized `name`, representing its place in the label hierarchy. In the
+     * event that a label within the hierarchy is unknown, this name will contain 'encoded' labelHash
      * segments.
      *
      * NOTE: in the future, name construction will be done a request-time instead of materialized at
      * index-time.
      *
      * ex. sub.example.eth
-     * ex. [0xabcd].example.eth
-     * ex. known.[0xabcd].example.eth
+     * ex. [abcd].example.eth
+     * ex. known.[abcd].example.eth
      */
     name: t.text(),
 
     /**
-     * A Label stores a materialized `node`, the result of `namehash(name)`, helpful for
-     * - referencing labels by `node`
-     * - referencing this label's resolver records, if any
+     * A Domain stores a materialized `node`, the result of `namehash(name)`, helpful for
+     * - referencing Domains by `node`
+     * - referencing this Domain's resolver records, if any
      */
     node: t.hex(),
 
     /** */
 
     /**
-     * A Label may have an URI.
+     * A Domain may have an URI.
      */
     uri: t.text(),
 
     /**
-     * A Label has an `owner` address, potentially zeroAddress.
+     * A Domain has an `owner` address, potentially zeroAddress.
      */
     owner: t.hex().notNull().default(zeroAddress),
 
     /**
-     * A Label can be assigned a (sub)Registry with flags.
-     * NOTE: we duplicate this reference in order to make cachable traversals trivial.
+     * A Domain can be assigned a (sub)Registry with flags.
+     * NOTE: we include bi-directonal references in order to make cachable traversals trivial.
      */
     subregistryId: t.text(),
     subregistryFlags: t.bigint().notNull().default(0n),
 
     /**
-     * A Label can be configured with a given Resolver with flags.
+     * A Domain can be configured with a given Resolver with flags.
      */
     resolverId: t.text(),
     resolverFlags: t.bigint().notNull().default(0n),
   }),
   (t) => ({
-    // a Label is unique by (registryId, tokenId)
-    registryLabelHashIndex: uniqueIndex().on(t.registryId, t.tokenId),
-    // a Label is unique by node
+    // a Domain is unique by (registryId, tokenId)
+    registryDomainHashIndex: uniqueIndex().on(t.registryId, t.tokenId),
+    // a Domain is unique by node
     idxNode: uniqueIndex().on(t.node),
   }),
 );
 
-export const v2_labelRelations = relations(v2_label, ({ one, many }) => ({
-  // label belongs to one (parent)registry
+export const v2_domainRelations = relations(v2_domain, ({ one, many }) => ({
+  // domain belongs to one (parent)registry
   registry: one(v2_registry, {
-    fields: [v2_label.registryId],
+    fields: [v2_domain.registryId],
     references: [v2_registry.id],
   }),
 
-  // label references one (sub)registry
+  // domain references one (sub)registry
   subregistry: one(v2_registry, {
-    fields: [v2_label.subregistryId],
+    fields: [v2_domain.subregistryId],
     references: [v2_registry.id],
   }),
 
-  // label references one resolver
+  // domain references one resolver
   resolver: one(v2_resolver, {
-    fields: [v2_label.resolverId],
+    fields: [v2_domain.resolverId],
     references: [v2_resolver.id],
   }),
 
-  // label references one records by materialized id
+  // domain references one ResolverRecords by (resolverId, node)
   records: one(v2_resolverRecords, {
-    fields: [v2_label.resolverId, v2_label.node],
+    fields: [v2_domain.resolverId, v2_domain.node],
     references: [v2_resolverRecords.resolverId, v2_resolverRecords.node],
   }),
 }));
 
 /**
- * A Resolver represents a given Resolver _contract_ on-chain, keyed by CAIP-10 address.
+ * A Resolver represents a given Resolver _contract_ on-chain.
  */
 export const v2_resolver = onchainTable(
   "v2_resolvers",
@@ -903,10 +904,10 @@ export const v2_resolver = onchainTable(
 );
 
 export const v2_resolverRelations = relations(v2_resolver, ({ one, many }) => ({
-  // any number of labels can reference a given Resolver
-  label: many(v2_label),
+  // any number of domains can reference a given Resolver
+  domains: many(v2_domain),
 
-  // resolver has many records
+  // resolver has many ResolverRecords
   records: many(v2_resolverRecords),
 }));
 
@@ -918,12 +919,12 @@ export const v2_resolverRecords = onchainTable(
   "v2_resolver_records",
   (t) => ({
     /**
-     * A ResolverRecords is keyed as `${resolverId}-${node}`.
+     * A ResolverRecords is keyed by (resolverId, node), encoded as `${resolverId}-${node}`.
      */
     id: t.text().primaryKey(),
 
     /**
-     * A ResolverRecords maintains references to the Resolver contract and which label it stores
+     * A ResolverRecords maintains references to the Resolver contract and which node it stores
      * records for.
      */
     resolverId: t.text().notNull(),

@@ -10,9 +10,9 @@ import { EventWithArgs } from "../../../../lib/ponder-helpers";
 import {
   labelHashToTokenId,
   makeContractId,
-  makeLabelId,
+  makeDomainId,
   maskTokenId,
-  materializeLabelName,
+  materializeDomainName,
 } from "../../v2-lib";
 
 // NewSubname and DataStore events may arrive in any order
@@ -27,9 +27,9 @@ export async function handleNewSubname({
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
   const tokenId = labelHashToTokenId(labelhash(label));
-  const labelId = makeLabelId(registryId, tokenId);
+  const domainId = makeDomainId(registryId, tokenId);
 
-  console.table({ on: "NewSubname", registryId, tokenId, labelId });
+  console.table({ on: "NewSubname", registryId, tokenId, domainId });
 
   // ensure that this registry exists
   await context.db.insert(schema.v2_registry).values({ id: registryId }).onConflictDoNothing();
@@ -37,19 +37,19 @@ export async function handleNewSubname({
   const indexableLabel = isLabelIndexable(label) ? label : null;
 
   await context.db
-    .insert(schema.v2_label)
-    // insert new Label with `label` value
+    .insert(schema.v2_domain)
+    // insert new Domain with `label` value
     .values({
-      id: labelId,
+      id: domainId,
       registryId,
       tokenId,
       label: indexableLabel,
     })
-    // or upsert existing Label's `label` value
+    // or upsert existing Domain's `label` value
     .onConflictDoUpdate({ label: indexableLabel });
 
   // materialize name field
-  await materializeLabelName(context, labelId);
+  await materializeDomainName(context, domainId);
 }
 
 export async function handleURI({
@@ -66,20 +66,20 @@ export async function handleURI({
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
   const tokenId = maskTokenId(id); // NOTE: ensure token id is masked
-  const labelId = makeLabelId(registryId, tokenId);
+  const domainId = makeDomainId(registryId, tokenId);
 
-  console.table({ on: "URI", registryId, tokenId, labelId, uri });
+  console.table({ on: "URI", registryId, tokenId, domainId, uri });
 
   await context.db
-    .insert(schema.v2_label)
-    // insert new Label with uri
+    .insert(schema.v2_domain)
+    // insert new Domain with uri
     .values({
-      id: labelId,
+      id: domainId,
       registryId,
       tokenId,
       uri,
     })
-    // or update uri of existing Label
+    // or update uri of existing Domain
     .onConflictDoUpdate({ uri });
 }
 
@@ -92,36 +92,37 @@ async function handleTransfer({
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
   const tokenId = maskTokenId(id); // NOTE: ensures that the tokenId emitted is masked
-  const labelId = makeLabelId(registryId, tokenId);
+  const domainId = makeDomainId(registryId, tokenId);
   const owner = getAddress(to); // NOTE: ensures that owner is checksummed
 
-  console.table({ on: "handleTransfer", registryId, tokenId, labelId, owner });
+  console.table({ on: "handleTransfer", registryId, tokenId, domainId, owner });
 
   const isBurn = owner === zeroAddress;
   if (isBurn) {
-    const label = await context.db.find(schema.v2_label, { id: labelId });
-
-    // NOTE(registry-label-uniq): we must also remove the reverse relationship on its subregistry
-    if (label?.subregistryId) {
+    // to remove a Domain from the tree, we need only delete the Domain entity
+    // NOTE(registry-domain-uniq): we must also remove the reverse relationship on its subregistry
+    //  because we store that information bi-directionally
+    const domain = await context.db.find(schema.v2_domain, { id: domainId });
+    if (domain?.subregistryId) {
       await context.db
-        .update(schema.v2_registry, { id: label.subregistryId })
-        .set({ labelId: null });
+        .update(schema.v2_registry, { id: domain.subregistryId })
+        .set({ domainId: null });
     }
 
-    // to delete a token, we need only delete the label
-    await context.db.delete(schema.v2_label, { id: labelId });
+    // delete the relevant Domain entity, removing it and its subtree from the namespace
+    await context.db.delete(schema.v2_domain, { id: domainId });
   } else {
-    // mint or update
+    // this is a mint or update event
     await context.db
-      .insert(schema.v2_label)
-      // insert new Label with owner
+      .insert(schema.v2_domain)
+      // insert new Domain with owner
       .values({
-        id: labelId,
+        id: domainId,
         registryId,
         tokenId,
         owner,
       })
-      // or update owner of existing Label
+      // or update owner of existing Domain
       .onConflictDoUpdate({ owner });
   }
 }

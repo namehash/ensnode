@@ -13,8 +13,8 @@ app.get("/node/:node", async (c) => {
 
   const labels = await db
     .select()
-    .from(schema.v2_label)
-    .where(eq(schema.v2_label.node, node))
+    .from(schema.v2_domain)
+    .where(eq(schema.v2_domain.node, node))
     .limit(1);
 
   if (labels.length === 0) return c.notFound();
