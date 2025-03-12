@@ -98,9 +98,8 @@ export const makeRegistrarHandlers = <OWNED_NAME extends OwnedName>({
             reverseAddress: owner,
             labelhash,
           });
-        } catch (e) {
-          // log the error and continue
-          console.error(e);
+        } catch {
+          // TODO: store event args for analysis and debugging
         }
       }
 

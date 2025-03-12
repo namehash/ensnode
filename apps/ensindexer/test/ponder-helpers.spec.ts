@@ -121,19 +121,19 @@ describe("ponder helpers", () => {
 
     it("should throw an error if the flag is invalid", () => {
       expect(() => parseHealReverseAddresses("1")).toThrowError(
-        "'1' is not a valid value. Expected 'true' or 'false'.",
+        "'1' is not a valid value. Expected 'true' or 'false'",
       );
 
       expect(() => parseHealReverseAddresses("0")).toThrowError(
-        "'0' is not a valid value. Expected 'true' or 'false'.",
+        "'0' is not a valid value. Expected 'true' or 'false'",
       );
 
       expect(() => parseHealReverseAddresses("on")).toThrowError(
-        "'on' is not a valid value. Expected 'true' or 'false'.",
+        "'on' is not a valid value. Expected 'true' or 'false'",
       );
 
       expect(() => parseHealReverseAddresses("off")).toThrowError(
-        "'off' is not a valid value. Expected 'true' or 'false'.",
+        "'off' is not a valid value. Expected 'true' or 'false'",
       );
     });
   });

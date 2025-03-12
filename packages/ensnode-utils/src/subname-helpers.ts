@@ -55,7 +55,9 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
   }
 
   // otherwise, healing did not succeed
-  throw new Error(`Failed to heal label for by '${args.reverseAddress}' reverse address for labelhash: '${args.labelhash}'`);
+  throw new Error(
+    `Failed to heal label for by '${args.reverseAddress}' reverse address for labelhash: '${args.labelhash}'`,
+  );
 };
 
 /**

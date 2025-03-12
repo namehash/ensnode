@@ -113,12 +113,15 @@ describe("labelByReverseAddress", () => {
 
   describe("label healing", () => {
     it("should return null if the label cannot be healed", () => {
-      expect(
+      const notMatchingLabelhash = labelhash("test.eth");
+      expect(() =>
         labelByReverseAddress({
           ...validArgs,
-          labelhash: labelhash("test.eth"),
+          labelhash: notMatchingLabelhash,
         }),
-      ).toBe(null);
+      ).toThrowError(
+        `Failed to heal label for by '${validArgs.reverseAddress}' reverse address for labelhash: '${notMatchingLabelhash}'`,
+      );
     });
 
     it("should return the label if the label can be healed", () => {
