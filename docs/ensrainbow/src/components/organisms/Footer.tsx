@@ -66,10 +66,10 @@ export default function Footer({...props}: FooterProps) {
         >
             <div className="pt-8 pb-5 flex flex-col gap-10 items-start justify-between w-full max-w-[1216px]">
                 <div className="w-full gap-5 flex flex-col lg:flex-row lg:justify-between">
-                    <div className="flex flex-col gap-5 items-center lg:items-start">
+                    <div className="flex flex-col gap-5">
                         <NameHashLabsLogo/>
 
-                        <p className="text-sm font-light text-gray-500 max-w-[339px] leading-6 text-center lg:text-left">
+                        <p className="text-sm font-light text-gray-500 max-w-[339px] leading-6">
                             Founded in 2022, Namehash Labs is a technology organization
                             dedicated to infrastructure-level solutions that helps the
                             Ethereum Name Service (ENS) Protocol grow.
@@ -78,13 +78,13 @@ export default function Footer({...props}: FooterProps) {
                         <ENSServiceProviderBadge/>
                     </div>
 
-                    <div className="flex justify-center lg:justify-start gap-5 lg:gap-0">
-                        <div className="flex flex-col items-center lg:items-start w-[228px] pr-5">
+                    <div className="flex justify-start">
+                        <div className="flex flex-col w-[228px] pr-5">
                             <span className="mb-2 text-sm font-semibold">Products</span>
-                            <ul className="flex flex-col items-center lg:items-start">
+                            <ul className="flex flex-col">
                                 {footerProducts.map((product) => {
                                     return (
-                                        <li key={product.name} className="my-2 text-center lg:text-left">
+                                        <li key={product.name} className="my-2">
                                             <Link variant="secondary" size="small" href={product.href}>
                                                 {product.name}
                                             </Link>
@@ -93,12 +93,12 @@ export default function Footer({...props}: FooterProps) {
                                 })}
                             </ul>
                         </div>
-                        <div className="flex flex-col items-center lg:items-start w-[228px]">
+                        <div className="flex flex-col w-[228px]">
                             <span className="mb-2 text-sm font-semibold">Resources</span>
-                            <ul className="flex flex-col items-center lg:items-start">
+                            <ul className="flex flex-col">
                                 {footerResources.map((resource) => {
                                     return (
-                                        <li key={resource.name} className="my-2 text-center lg:text-left">
+                                        <li key={resource.name} className="my-2">
                                             <Link
                                                 key={resource.name}
                                                 variant="secondary"
@@ -116,7 +116,7 @@ export default function Footer({...props}: FooterProps) {
                 </div>
 
                 <div
-                    className="lg:border-t lg:border-gray-200 w-full flex flex-col items-center lg:flex-row lg:justify-between gap-5 pt-5">
+                    className="lg:border-t lg:border-gray-200 w-full flex flex-col lg:flex-row lg:justify-between gap-5 pt-5">
                     <p className="text-gray-500 text-sm leading-5 font-normal">
                         © NameHash Labs. All Rights Reserved
                     </p>

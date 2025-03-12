@@ -69,7 +69,7 @@ export default function BarChart({
                                         style={{
                                             position: 'absolute',
                                             height: '100%',
-                                            width: `calc(${(item.value / maxValue) * 100}% - ${index == data.length - 1 ? '30': '0'}px)`,
+                                            width: `calc(${(item.value / maxValue) * 100}% - ${index == data.length - 1 ? '30': '25'}px)`,
                                             background: item.color,
                                             backgroundSize: 'cover',
                                             borderRadius: '8px',

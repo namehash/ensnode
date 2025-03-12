@@ -20,7 +20,7 @@ export default function FullRainbow() {
             {
                 label: <div className="flex flex-row flex-nowrap justify-start items-center gap-2">ENSRainbow +
                     ENSNode {badge('Current')}</div>,
-                value: 62,
+                value: 90,
                 color: 'linear-gradient(270deg, #CA01FD -30.44%, #0B10FE -7.38%, #1EFDFF 16.33%, #93E223 38.07%, #FAE000 59.16%, #F09C0A 79.58%, #EA2F86 100%)',
             },
             {
