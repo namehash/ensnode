@@ -16,5 +16,5 @@ const setDatabaseSchema = <T extends { [name: string]: unknown }>(
   return schema;
 };
 
-export const schema = setDatabaseSchema(_schema, Bun.env.DATABASE_SCHEMA || 'public');
-export const db = drizzle(Bun.env.DATABASE_URL, { schema, casing: "snake_case" });
+export const schema = setDatabaseSchema(_schema, Bun.env.DATABASE_SCHEMA || "public");
+export const db = drizzle(Bun.env.DATABASE_URL, { schema, casing: "snake_case", logger: true });

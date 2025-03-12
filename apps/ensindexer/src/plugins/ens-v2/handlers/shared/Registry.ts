@@ -7,13 +7,7 @@ import schema from "ponder:schema";
 import { isLabelIndexable } from "@ensnode/utils/subname-helpers";
 import { Address, getAddress, labelhash, zeroAddress } from "viem";
 import { EventWithArgs } from "../../../../lib/ponder-helpers";
-import {
-  labelHashToTokenId,
-  makeContractId,
-  makeDomainId,
-  maskTokenId,
-  materializeDomainName,
-} from "../../v2-lib";
+import { labelHashToTokenId, makeContractId, makeDomainId, maskTokenId } from "../../v2-lib";
 
 // NewSubname and DataStore events may arrive in any order
 export async function handleNewSubname({
@@ -47,9 +41,6 @@ export async function handleNewSubname({
     })
     // or upsert existing Domain's `label` value
     .onConflictDoUpdate({ label: indexableLabel });
-
-  // materialize name field
-  await materializeDomainName(context, domainId);
 }
 
 export async function handleURI({

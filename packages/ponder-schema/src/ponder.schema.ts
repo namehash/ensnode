@@ -810,29 +810,6 @@ export const v2_domain = onchainTable(
     label: t.text(),
 
     /**
-     * A Domain stores a materialized `name`, representing its place in the label hierarchy. In the
-     * event that a label within the hierarchy is unknown, this name will contain 'encoded' labelHash
-     * segments.
-     *
-     * NOTE: in the future, name construction will be done a request-time instead of materialized at
-     * index-time.
-     *
-     * ex. sub.example.eth
-     * ex. [abcd].example.eth
-     * ex. known.[abcd].example.eth
-     */
-    name: t.text(),
-
-    /**
-     * A Domain stores a materialized `node`, the result of `namehash(name)`, helpful for
-     * - referencing Domains by `node`
-     * - referencing this Domain's resolver records, if any
-     */
-    node: t.hex(),
-
-    /** */
-
-    /**
      * A Domain may have an URI.
      */
     uri: t.text(),
@@ -858,8 +835,6 @@ export const v2_domain = onchainTable(
   (t) => ({
     // a Domain is unique by (registryId, tokenId)
     registryDomainHashIndex: uniqueIndex().on(t.registryId, t.tokenId),
-    // a Domain is unique by node
-    idxNode: uniqueIndex().on(t.node),
   }),
 );
 
@@ -880,12 +855,6 @@ export const v2_domainRelations = relations(v2_domain, ({ one, many }) => ({
   resolver: one(v2_resolver, {
     fields: [v2_domain.resolverId],
     references: [v2_resolver.id],
-  }),
-
-  // domain references one ResolverRecords by (resolverId, node)
-  records: one(v2_resolverRecords, {
-    fields: [v2_domain.resolverId, v2_domain.node],
-    references: [v2_resolverRecords.resolverId, v2_resolverRecords.node],
   }),
 }));
 
