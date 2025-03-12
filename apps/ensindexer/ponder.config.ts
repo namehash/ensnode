@@ -1,6 +1,6 @@
 import { SELECTED_DEPLOYMENT_CONFIG } from "./src/lib/globals";
 import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
-import { deepMergeRecursive } from "./src/lib/ponder-helpers";
+import { deepMergeRecursive, healReverseAddresses } from "./src/lib/ponder-helpers";
 import type { PluginName } from "./src/lib/types";
 
 import * as baseEthPlugin from "./src/plugins/base/ponder.plugin";
@@ -14,7 +14,19 @@ import * as lineaEthPlugin from "./src/plugins/linea/ponder.plugin";
 
 const ALL_PLUGINS = [ethPlugin, baseEthPlugin, lineaEthPlugin] as const;
 
-type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]>;
+type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
+  /**
+   * The environment variables that change the behavior of the indexer.
+   * It's important to include all environment variables that change the behavior
+   * of the indexer to ensure Ponder app build ID is updated when any of them change.
+   **/
+  indexingBehaviorDependencies: {
+    /**
+     * Breaking change for ens-subgraph compatibility.
+     */
+    HEAL_REVERSE_ADDRESSES: boolean;
+  };
+};
 
 ////////
 // Next, filter ALL_PLUGINS by those that are available and that the user has activated.
@@ -34,6 +46,11 @@ const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);
 const activePluginsMergedConfig = activePlugins
   .map((plugin) => plugin.config)
   .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as AllPluginConfigs;
+
+// set the indexing behavior dependencies
+activePluginsMergedConfig.indexingBehaviorDependencies = {
+  HEAL_REVERSE_ADDRESSES: healReverseAddresses(),
+};
 
 // load indexing handlers from the active plugins into the runtime
 activePlugins.forEach((plugin) => plugin.activate());

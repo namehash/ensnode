@@ -254,7 +254,7 @@ export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
  *
  * @returns decision whether to heal reverse addresses
  */
-export const canHealReverseAddresses = (): boolean => {
+export const healReverseAddresses = (): boolean => {
   const envVarName = "HEAL_REVERSE_ADDRESSES";
   const envVarValue = process.env[envVarName];
 
