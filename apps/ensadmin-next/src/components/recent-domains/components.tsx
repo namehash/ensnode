@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
-import { Clock } from "lucide-react";
+import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRecentDomains } from "./hooks";
@@ -66,6 +66,16 @@ const formatRelativeTime = (timestamp: string) => {
     console.error("Error formatting relative time:", error);
     return "Unknown";
   }
+};
+
+// Helper function to generate ENS app URL for a domain
+const getEnsAppUrl = (name: string) => {
+  return `https://app.ens.domains/${name}`;
+};
+
+// Helper function to generate ENS app URL for an address
+const getEnsAddressUrl = (address: string) => {
+  return `https://app.ens.domains/${address}`;
 };
 
 // Client-only date formatter component
@@ -167,7 +177,17 @@ export function RecentDomains() {
               {isClient &&
                 recentDomainsQuery.data?.registrations.map((registration) => (
                   <TableRow key={registration.domain.id}>
-                    <TableCell className="font-medium">{registration.domain.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <a
+                        href={getEnsAppUrl(registration.domain.name)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-blue-600 hover:underline"
+                      >
+                        {registration.domain.name}
+                        <ExternalLink size={14} className="inline-block" />
+                      </a>
+                    </TableCell>
                     <TableCell>
                       <RelativeTime timestamp={registration.registrationDate} />
                     </TableCell>
@@ -178,7 +198,15 @@ export function RecentDomains() {
                       />
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {registration.domain.owner.id}
+                      <a
+                        href={getEnsAddressUrl(registration.domain.owner.id)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-blue-600 hover:underline"
+                      >
+                        {registration.domain.owner.id}
+                        <ExternalLink size={14} className="inline-block" />
+                      </a>
                     </TableCell>
                   </TableRow>
                 ))}
