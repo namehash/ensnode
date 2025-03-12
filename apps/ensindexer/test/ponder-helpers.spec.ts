@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainBlockrange,
+  createStartBlockByChainIdMap,
   deepMergeRecursive,
   parseEnsNodePublicUrl,
   parseEnsRainbowEndpointUrl,
+  parsePonderPort,
   parseRequestedPluginNames,
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
@@ -102,6 +104,58 @@ describe("ponder helpers", () => {
 
     it("should throw an error if the list is not set", () => {
       expect(() => parseRequestedPluginNames()).toThrowError("Expected value not set");
+    });
+  });
+
+  describe("parsePonderPort", () => {
+    it("should return the port if the environment variable is set correctly", () => {
+      expect(parsePonderPort("3000")).toBe(3000);
+    });
+
+    it("should throw an error if the port is not a number", () => {
+      expect(() => parsePonderPort("abc")).toThrowError("'abc' is not a number");
+    });
+
+    it("should throw an error if the port is not a natural number", () => {
+      expect(() => parsePonderPort("-1")).toThrowError("'-1' is not a natural number");
+    });
+
+    it("should throw an error if the port is missing", () => {
+      expect(() => parsePonderPort()).toThrowError("Expected value not set");
+    });
+  });
+
+  describe("createStartBlockByChainIdMap", () => {
+    it("should return a map of start blocks by chain ID", async () => {
+      const partialPonderConfig = {
+        contracts: {
+          "/eth/Registrar": {
+            network: {
+              "1": { startBlock: 444_444_444 },
+            },
+          },
+          "/eth/Registry": {
+            network: {
+              "1": { startBlock: 444_444_333 },
+            },
+          },
+          "/eth/base/Registrar": {
+            network: {
+              "8453": { startBlock: 1_799_433 },
+            },
+          },
+          "/eth/base/Registry": {
+            network: {
+              "8453": { startBlock: 1_799_430 },
+            },
+          },
+        },
+      };
+
+      expect(await createStartBlockByChainIdMap(Promise.resolve(partialPonderConfig))).toEqual({
+        1: 444_444_333,
+        8453: 1_799_430,
+      });
     });
   });
 

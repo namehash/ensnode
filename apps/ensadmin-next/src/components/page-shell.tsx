@@ -7,7 +7,10 @@ export function PageShell({ children }: { children: React.ReactNode }) {
     <div className="h-screen flex flex-col">
       {/* Header */}
       <header className="bg-card border-b px-6 py-4">
-        <h1 className="text-2xl font-semibold text-card-foreground">ENSAdmin</h1>
+        <h1 className="text-2xl font-semibold text-card-foreground flex items-center gap-2">
+          <img src="/ensadmin-logo.svg" alt="ENSAdmin Logo" className="h-8 w-auto inline-block" />
+          ENSAdmin
+        </h1>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
