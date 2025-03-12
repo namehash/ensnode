@@ -25,7 +25,6 @@
     "overrides": {
       "@astrojs/prism>prismjs": "1.30.0",
       "@graphiql/react>@headlessui/react": "2.2.0",
-      "@astrojs/prism>prismjs": "1.30.0",
       "ponder>vite": "5.4.14",
       "astro>esbuild": "0.25.0",
       "tsup>esbuild": "0.25.0",
