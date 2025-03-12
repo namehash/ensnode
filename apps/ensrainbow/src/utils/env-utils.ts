@@ -1,14 +1,18 @@
-import { constants, accessSync, existsSync } from "fs";
 import { join } from "path";
-
-// default port for the ENSRainbow server
-export const DEFAULT_PORT = 3223;
-
-// default data directory relative to the current working directory
-export const DEFAULT_DATA_DIR = "data";
-
-// default input file name for ingestion
-export const DEFAULT_INPUT_FILE = "ens_names.sql.gz";
+import {
+  DEFAULT_DATA_DIR,
+  DEFAULT_INPUT_FILE,
+  DEFAULT_LOG_LEVEL,
+  DEFAULT_PORT,
+  LogLevel,
+} from "./config";
+import {
+  parseDirPath,
+  parseFilePath,
+  parseLogLevel,
+  parseNonNegativeInteger,
+  parsePort,
+} from "./parsing-utils";
 
 /**
  * Gets the default data directory path
@@ -19,6 +23,34 @@ export const getDefaultDataDir = (): string => join(process.cwd(), DEFAULT_DATA_
  * Gets the default input file path
  */
 export const getDefaultInputFile = (): string => join(process.cwd(), DEFAULT_INPUT_FILE);
+
+/**
+ * Checks if an error message already has the environment variable error prefix
+ *
+ * @param error The error to check
+ * @returns True if the error already has the environment variable error prefix
+ */
+function isEnvVarError(error: unknown): boolean {
+  if (error instanceof Error) {
+    return error.message.startsWith("Environment variable error:");
+  }
+  return false;
+}
+
+/**
+ * Formats an error message with the environment variable error prefix
+ *
+ * @param envVarName The name of the environment variable
+ * @param error The error to format
+ * @returns The formatted error message
+ */
+function formatEnvVarError(envVarName: string, error: unknown): string {
+  if (isEnvVarError(error)) {
+    // Don't add another prefix if it's already an environment variable error
+    return error instanceof Error ? error.message : String(error);
+  }
+  return `Environment variable error: (${envVarName}): ${error instanceof Error ? error.message : String(error)}`;
+}
 
 /**
  * Parses a string value from an environment variable
@@ -37,31 +69,36 @@ export const getEnvString = (
   defaultValue?: string,
   validator?: (value: string) => boolean | string,
 ): string => {
-  const rawValue = process.env[envVarName];
+  try {
+    const rawValue = process.env[envVarName];
 
-  // if no value is provided, return the default or throw an error
-  if (rawValue === undefined) {
-    if (defaultValue !== undefined) {
-      return defaultValue;
+    // if no value is provided, return the default or throw an error
+    if (rawValue === undefined) {
+      if (defaultValue !== undefined) {
+        return defaultValue;
+      }
+      throw new Error(
+        `Environment variable '${envVarName}' is not set and no default value was provided.`,
+      );
     }
-    throw new Error(
-      `Environment variable '${envVarName}' is not set and no default value was provided.`,
-    );
-  }
 
-  // if a validator is provided, run it
-  if (validator) {
-    const validationResult = validator(rawValue);
-    if (validationResult !== true) {
-      const errorMessage =
-        typeof validationResult === "string"
-          ? validationResult
-          : `Invalid value '${rawValue}' for environment variable '${envVarName}'.`;
-      throw new Error(errorMessage);
+    // if a validator is provided, run it
+    if (validator) {
+      const validationResult = validator(rawValue);
+      if (validationResult !== true) {
+        const errorMessage =
+          typeof validationResult === "string"
+            ? validationResult
+            : `Invalid value '${rawValue}' for environment variable '${envVarName}'.`;
+        throw new Error(errorMessage);
+      }
     }
-  }
 
-  return rawValue;
+    return rawValue;
+  } catch (error) {
+    const errorMessage = formatEnvVarError(envVarName, error);
+    throw new Error(errorMessage);
+  }
 };
 
 /**
@@ -72,26 +109,31 @@ export const getEnvString = (
  * @returns The parsed non-negative integer
  * @throws Error if the value is not a valid non-negative integer
  */
-export const getEnvNonNegativeNumber = (envVarName: string, defaultValue?: number): number => {
-  const rawValue = process.env[envVarName];
-
-  // if no value is provided, return the default or throw an error
-  if (rawValue === undefined) {
-    if (defaultValue !== undefined) {
-      return defaultValue;
-    }
-    throw new Error(
-      `Environment variable '${envVarName}' is not set and no default value was provided.`,
-    );
-  }
-
+export const getEnvNonNegativeInteger = (envVarName: string, defaultValue?: number): number => {
   try {
-    return parseNonNegativeInteger(rawValue);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(`Invalid value for environment variable '${envVarName}': ${error.message}`);
+    const rawValue = process.env[envVarName];
+
+    // if no value is provided, return the default or throw an error
+    if (rawValue === undefined) {
+      if (defaultValue !== undefined) {
+        return defaultValue;
+      }
+      throw new Error(
+        `Environment variable '${envVarName}' is not set and no default value was provided.`,
+      );
     }
-    throw error;
+
+    try {
+      return parseNonNegativeInteger(rawValue);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Invalid value for environment variable '${envVarName}': ${error.message}`);
+      }
+      throw error;
+    }
+  } catch (error) {
+    const errorMessage = formatEnvVarError(envVarName, error);
+    throw new Error(errorMessage);
   }
 };
 
@@ -111,38 +153,26 @@ export const getEnvFilePath = (
   should_exist: boolean = true,
   should_be_readable: boolean = true,
 ): string => {
-  const filePath = getEnvString(envVarName, defaultValue);
+  try {
+    const filePath = getEnvString(envVarName, defaultValue);
 
-  // Always check if the file exists (for test verification), but only throw if should_exist is true
-  const fileExists = existsSync(filePath);
-  if (should_exist && !fileExists) {
-    throw new Error(
-      `File specified by environment variable '${envVarName}' does not exist: '${filePath}'. ` +
-        `Please check that the file exists and the path is correct.`,
-    );
-  }
-
-  // Check if the file is readable only if it exists and should_be_readable is true
-  if (fileExists && should_exist && should_be_readable) {
     try {
-      accessSync(filePath, constants.R_OK);
+      return parseFilePath(filePath, should_exist, should_be_readable);
     } catch (error) {
-      throw new Error(
-        `File specified by environment variable '${envVarName}' is not readable: '${filePath}'. ` +
-          `Please check file permissions.`,
-      );
+      throw new Error(`${error instanceof Error ? error.message : String(error)}`);
     }
+  } catch (error) {
+    const errorMessage = formatEnvVarError(envVarName, error);
+    throw new Error(errorMessage);
   }
-
-  return filePath;
 };
 
 /**
- * Parses a directory path from an environment variable and validates that the directory exists
+ * Parses a directory path from an environment variable and optionally validates that the directory exists
  *
  * @param envVarName The name of the environment variable
  * @param defaultValue Optional default value if the environment variable is not set
- * @param allowNonExistent Whether to allow the directory to not exist
+ * @param allowNonExistent Whether to allow the directory to not exist (default: false)
  * @returns The parsed directory path
  * @throws Error if the directory does not exist and allowNonExistent is false
  */
@@ -151,22 +181,18 @@ export const getEnvDirPath = (
   defaultValue?: string,
   allowNonExistent: boolean = false,
 ): string => {
-  const dirPath = getEnvString(envVarName, defaultValue);
+  try {
+    const dirPath = getEnvString(envVarName, defaultValue);
 
-  // check if the directory exists
-  if (!existsSync(dirPath)) {
-    if (allowNonExistent) {
-      // directory will be created when needed
-      return dirPath;
+    try {
+      return parseDirPath(dirPath, allowNonExistent);
+    } catch (error) {
+      throw new Error(`${error instanceof Error ? error.message : String(error)}`);
     }
-
-    throw new Error(
-      `Directory specified by environment variable '${envVarName}' does not exist: '${dirPath}'. ` +
-        `Please check that the directory exists and the path is correct.`,
-    );
+  } catch (error) {
+    const errorMessage = formatEnvVarError(envVarName, error);
+    throw new Error(errorMessage);
   }
-
-  return dirPath;
 };
 
 /**
@@ -175,27 +201,28 @@ export const getEnvDirPath = (
  * @param envVarName The name of the environment variable
  * @param defaultValue Optional default value if the environment variable is not set
  * @returns The parsed port number
- * @throws Error if the value is not a valid port number
+ * @throws Error if the port is not a valid port number
  */
 export const getEnvPort = (
   envVarName: string = "PORT",
   defaultValue: number = DEFAULT_PORT,
 ): number => {
-  const port = getEnvNonNegativeNumber(envVarName, defaultValue);
+  try {
+    const port = getEnvNonNegativeInteger(envVarName, defaultValue);
 
-  // check if the port is in a valid range
-  if (port < 0 || port > 65535) {
-    throw new Error(
-      `Invalid port number '${port}' specified by environment variable '${envVarName}'. ` +
-        `Port must be between 0 and 65535.`,
-    );
+    try {
+      return parsePort(port);
+    } catch (error) {
+      throw new Error(`${error instanceof Error ? error.message : String(error)}`);
+    }
+  } catch (error) {
+    const errorMessage = formatEnvVarError(envVarName, error);
+    throw new Error(errorMessage);
   }
-
-  return port;
 };
 
 /**
- * Gets the data directory path from the DATA_DIR environment variable
+ * Gets the data directory path from the DATA_DIR environment variable, falling back to the default data directory path
  *
  * @returns The data directory path
  */
@@ -204,7 +231,7 @@ export const getDataDir = (): string => {
 };
 
 /**
- * Gets the input file path from the INPUT_FILE environment variable
+ * Gets the input file path from the INPUT_FILE environment variable, falling back to the default input file path
  *
  * @param should_exist Whether to check if the file exists (default: true)
  * @param should_be_readable Whether to check if the file is readable (default: true)
@@ -227,46 +254,45 @@ export const getPort = (): number => {
 };
 
 /**
- * Parses a non-negative integer from a string
- *
- * @param maybeNumber The string to parse
- * @returns The parsed non-negative integer
- * @throws Error if the value is not a valid non-negative integer
+ * Gets the log level from the LOG_LEVEL environment variable
  */
-export function parseNonNegativeInteger(maybeNumber: string): number {
-  const trimmed = maybeNumber.trim();
-
-  // check for empty strings
-  if (!trimmed) {
-    throw new Error("Input cannot be empty");
+export const getLogLevel = (): LogLevel => {
+  const rawValue = process.env.LOG_LEVEL;
+  if (!rawValue) {
+    return DEFAULT_LOG_LEVEL;
   }
 
-  // check for -0
-  if (trimmed === "-0") {
-    throw new Error("Negative zero is not a valid non-negative integer");
+  try {
+    return parseLogLevel(rawValue);
+  } catch (error) {
+    const errorMessage = formatEnvVarError("LOG_LEVEL", error);
+    throw new Error(errorMessage);
   }
+};
 
-  const num = Number(maybeNumber);
+/**
+ * Checks if the current environment is production
+ *
+ * @returns True if the environment is production, false otherwise
+ */
+export const isProduction = (): boolean => {
+  return process.env.NODE_ENV === "production";
+};
 
-  // check if it's not a number
-  if (Number.isNaN(num)) {
-    throw new Error(`"${maybeNumber}" is not a valid number`);
+/**
+ * Validates that there is no conflict between the port specified in the environment
+ * variable and the port specified in the command-line arguments
+ *
+ * @param cliPort The port specified in the command-line arguments
+ * @throws Error if there is a conflict between the environment variable and command-line argument
+ */
+export function validatePortConfiguration(cliPort: number): void {
+  const envPort = getPort();
+
+  if (envPort !== DEFAULT_PORT && cliPort !== envPort) {
+    throw new Error(
+      `Port conflict: Command line argument (${cliPort}) differs from PORT environment variable (${envPort}). ` +
+        `Please use only one method to specify the port.`,
+    );
   }
-
-  // check if it's not finite
-  if (!Number.isFinite(num)) {
-    throw new Error(`"${maybeNumber}" is not a finite number`);
-  }
-
-  // check if it's not an integer
-  if (!Number.isInteger(num)) {
-    throw new Error(`"${maybeNumber}" is not an integer`);
-  }
-
-  // check if it's negative
-  if (num < 0) {
-    throw new Error(`"${maybeNumber}" is not a non-negative integer`);
-  }
-
-  return num;
 }

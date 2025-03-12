@@ -2,8 +2,10 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { mkdtemp, rm } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createCLI, validatePortConfiguration } from "./cli";
-import { DEFAULT_PORT, getEnvPort } from "./lib/env";
+import { createCLI } from "./cli";
+import { DEFAULT_PORT } from "./utils/config";
+import { getPort, validatePortConfiguration } from "./utils/env-utils";
+import * as envUtils from "./utils/env-utils";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");
@@ -26,6 +28,15 @@ describe("CLI", () => {
 
     // Create CLI instance with process.exit disabled
     cli = createCLI({ exitProcess: false });
+
+    // Mock getInputFile
+    vi.mock("./utils/env-utils", async () => {
+      const actual = await vi.importActual("./utils/env-utils");
+      return {
+        ...actual,
+        getInputFile: vi.fn().mockImplementation((actual as any).getInputFile),
+      };
+    });
   });
 
   afterEach(async () => {
@@ -46,25 +57,27 @@ describe("CLI", () => {
 
   describe("getEnvPort", () => {
     it("should return DEFAULT_PORT when PORT is not set", () => {
-      expect(getEnvPort()).toBe(DEFAULT_PORT);
+      expect(getPort()).toBe(DEFAULT_PORT);
     });
 
     it("should return port from environment variable", () => {
       const customPort = 4000;
       process.env.PORT = customPort.toString();
-      expect(getEnvPort()).toBe(customPort);
+      expect(getPort()).toBe(customPort);
     });
 
     it("should throw error for invalid port number", () => {
       process.env.PORT = "invalid";
-      expect(() => getEnvPort()).toThrow(
-        'Invalid PORT value "invalid": must be a non-negative integer',
+      expect(() => getPort()).toThrow(
+        "Environment variable error: (PORT): Invalid value for environment variable 'PORT': \"invalid\" is not a valid number",
       );
     });
 
     it("should throw error for negative port number", () => {
       process.env.PORT = "-1";
-      expect(() => getEnvPort()).toThrow('Invalid PORT value "-1": must be a non-negative integer');
+      expect(() => getPort()).toThrow(
+        "Environment variable error: (PORT): Invalid value for environment variable 'PORT': \"-1\" is not a non-negative integer",
+      );
     });
   });
 
@@ -116,6 +129,24 @@ describe("CLI", () => {
 
         // Verify database was created by trying to validate it
         await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
+      });
+
+      it("should execute ingest command with default input file path", async () => {
+        // Mock getInputFile to return a test file path
+        const originalGetInputFile = envUtils.getInputFile;
+        vi.mocked(envUtils.getInputFile).mockReturnValue(
+          join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz"),
+        );
+
+        try {
+          await cli.parse(["ingest", "--data-dir", testDataDir]);
+
+          // Verify database was created by trying to validate it
+          await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
+        } finally {
+          // Restore the original function
+          vi.mocked(envUtils.getInputFile).mockImplementation(originalGetInputFile);
+        }
       });
     });
 

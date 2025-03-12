@@ -1,19 +1,21 @@
 import { accessSync, existsSync } from "fs";
 import * as path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_LOG_LEVEL, DEFAULT_PORT, VALID_LOG_LEVELS } from "./config";
 import {
-  DEFAULT_PORT,
   getDataDir,
   getDefaultDataDir,
   getDefaultInputFile,
   getEnvDirPath,
   getEnvFilePath,
-  getEnvNonNegativeNumber,
+  getEnvNonNegativeInteger,
   getEnvPort,
   getEnvString,
   getInputFile,
+  getLogLevel,
   getPort,
-  parseNonNegativeInteger,
+  isProduction,
+  validatePortConfiguration,
 } from "./env-utils";
 
 // mock fs functions
@@ -63,7 +65,7 @@ describe("env-utils", () => {
 
     it("should throw an error if the environment variable is not set and no default is provided", () => {
       expect(() => getEnvString("NONEXISTENT_VAR")).toThrow(
-        "Environment variable 'NONEXISTENT_VAR' is not set and no default value was provided.",
+        "Environment variable error: (NONEXISTENT_VAR): Environment variable 'NONEXISTENT_VAR' is not set and no default value was provided.",
       );
     });
 
@@ -77,58 +79,60 @@ describe("env-utils", () => {
       process.env.TEST_VAR = "invalid";
       const validator = (value: string) => value === "valid";
       expect(() => getEnvString("TEST_VAR", undefined, validator)).toThrow(
-        "Invalid value 'invalid' for environment variable 'TEST_VAR'.",
+        "Environment variable error: (TEST_VAR): Invalid value 'invalid' for environment variable 'TEST_VAR'.",
       );
     });
 
     it("should throw an error with custom message if validation fails with string result", () => {
       process.env.TEST_VAR = "invalid";
       const validator = (value: string) => (value === "valid" ? true : "Custom error message");
-      expect(() => getEnvString("TEST_VAR", undefined, validator)).toThrow("Custom error message");
+      expect(() => getEnvString("TEST_VAR", undefined, validator)).toThrow(
+        "Environment variable error: (TEST_VAR): Custom error message",
+      );
     });
   });
 
-  describe("getEnvNonNegativeNumber", () => {
+  describe("getEnvNonNegativeInteger", () => {
     it("should return the parsed number if the environment variable is a valid non-negative integer", () => {
       process.env.TEST_NUM = "42";
-      expect(getEnvNonNegativeNumber("TEST_NUM")).toBe(42);
+      expect(getEnvNonNegativeInteger("TEST_NUM")).toBe(42);
     });
 
     it("should return the default value if the environment variable is not set", () => {
-      expect(getEnvNonNegativeNumber("NONEXISTENT_NUM", 42)).toBe(42);
+      expect(getEnvNonNegativeInteger("NONEXISTENT_NUM", 42)).toBe(42);
     });
 
     it("should throw an error if the environment variable is not set and no default is provided", () => {
-      expect(() => getEnvNonNegativeNumber("NONEXISTENT_NUM")).toThrow(
-        "Environment variable 'NONEXISTENT_NUM' is not set and no default value was provided.",
+      expect(() => getEnvNonNegativeInteger("NONEXISTENT_NUM")).toThrow(
+        "Environment variable error: (NONEXISTENT_NUM): Environment variable 'NONEXISTENT_NUM' is not set and no default value was provided.",
       );
     });
 
     it("should throw an error if the environment variable is not a valid number", () => {
       process.env.TEST_NUM = "not-a-number";
-      expect(() => getEnvNonNegativeNumber("TEST_NUM")).toThrow(
-        "Invalid value for environment variable 'TEST_NUM': \"not-a-number\" is not a valid number",
+      expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
+        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': \"not-a-number\" is not a valid number",
       );
     });
 
     it("should throw an error if the environment variable is a negative number", () => {
       process.env.TEST_NUM = "-42";
-      expect(() => getEnvNonNegativeNumber("TEST_NUM")).toThrow(
-        "Invalid value for environment variable 'TEST_NUM': \"-42\" is not a non-negative integer",
+      expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
+        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': \"-42\" is not a non-negative integer",
       );
     });
 
     it("should throw an error if the environment variable is negative zero", () => {
       process.env.TEST_NUM = "-0";
-      expect(() => getEnvNonNegativeNumber("TEST_NUM")).toThrow(
-        "Invalid value for environment variable 'TEST_NUM': Negative zero is not a valid non-negative integer",
+      expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
+        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': Negative zero is not a valid non-negative integer",
       );
     });
 
     it("should throw an error if the environment variable is a floating-point number", () => {
       process.env.TEST_NUM = "42.5";
-      expect(() => getEnvNonNegativeNumber("TEST_NUM")).toThrow(
-        "Invalid value for environment variable 'TEST_NUM': \"42.5\" is not an integer",
+      expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
+        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': \"42.5\" is not an integer",
       );
     });
   });
@@ -157,8 +161,7 @@ describe("env-utils", () => {
       vi.mocked(existsSync).mockReturnValue(false);
 
       expect(() => getEnvFilePath("TEST_FILE")).toThrow(
-        "File specified by environment variable 'TEST_FILE' does not exist: '/path/to/nonexistent/file'. " +
-          "Please check that the file exists and the path is correct.",
+        "Environment variable error: (TEST_FILE): File '/path/to/nonexistent/file' does not exist.",
       );
     });
 
@@ -179,8 +182,7 @@ describe("env-utils", () => {
       });
 
       expect(() => getEnvFilePath("TEST_FILE")).toThrow(
-        "File specified by environment variable 'TEST_FILE' is not readable: '/path/to/unreadable/file'. " +
-          "Please check file permissions.",
+        "Environment variable error: (TEST_FILE): File '/path/to/unreadable/file' is not readable.",
       );
     });
 
@@ -218,8 +220,7 @@ describe("env-utils", () => {
       vi.mocked(existsSync).mockReturnValue(false);
 
       expect(() => getEnvDirPath("TEST_DIR")).toThrow(
-        "Directory specified by environment variable 'TEST_DIR' does not exist: '/path/to/nonexistent/dir'. " +
-          "Please check that the directory exists and the path is correct.",
+        "Environment variable error: (TEST_DIR): Directory '/path/to/nonexistent/dir' does not exist.",
       );
     });
 
@@ -244,15 +245,14 @@ describe("env-utils", () => {
     it("should throw an error if the port is out of range (negative)", () => {
       process.env.TEST_PORT = "-1";
       expect(() => getEnvPort("TEST_PORT")).toThrow(
-        "Invalid value for environment variable 'TEST_PORT': \"-1\" is not a non-negative integer",
+        "Environment variable error: (TEST_PORT): Invalid value for environment variable 'TEST_PORT': \"-1\" is not a non-negative integer",
       );
     });
 
     it("should throw an error if the port is out of range (too large)", () => {
       process.env.TEST_PORT = "70000";
       expect(() => getEnvPort("TEST_PORT")).toThrow(
-        "Invalid port number '70000' specified by environment variable 'TEST_PORT'. " +
-          "Port must be between 0 and 65535.",
+        "Environment variable error: (TEST_PORT): Port number 70000 is out of range. Port must be between 0 and 65535.",
       );
     });
   });
@@ -323,46 +323,6 @@ describe("env-utils", () => {
     });
   });
 
-  describe("parseNonNegativeInteger", () => {
-    it("should parse a valid non-negative integer", () => {
-      expect(parseNonNegativeInteger("42")).toBe(42);
-    });
-
-    it("should parse zero", () => {
-      expect(parseNonNegativeInteger("0")).toBe(0);
-    });
-
-    it("should throw an error for empty strings", () => {
-      expect(() => parseNonNegativeInteger("")).toThrow("Input cannot be empty");
-    });
-
-    it("should throw an error for negative zero", () => {
-      expect(() => parseNonNegativeInteger("-0")).toThrow(
-        "Negative zero is not a valid non-negative integer",
-      );
-    });
-
-    it("should throw an error for non-numeric strings", () => {
-      expect(() => parseNonNegativeInteger("not-a-number")).toThrow(
-        '"not-a-number" is not a valid number',
-      );
-    });
-
-    it("should throw an error for non-finite numbers", () => {
-      expect(() => parseNonNegativeInteger("Infinity")).toThrow(
-        '"Infinity" is not a finite number',
-      );
-    });
-
-    it("should throw an error for non-integer numbers", () => {
-      expect(() => parseNonNegativeInteger("42.5")).toThrow('"42.5" is not an integer');
-    });
-
-    it("should throw an error for negative numbers", () => {
-      expect(() => parseNonNegativeInteger("-42")).toThrow('"-42" is not a non-negative integer');
-    });
-  });
-
   describe("default values", () => {
     it("should return the correct default data directory", () => {
       expect(getDefaultDataDir()).toBe("/mock/cwd/data");
@@ -370,6 +330,157 @@ describe("env-utils", () => {
 
     it("should return the correct default input file", () => {
       expect(getDefaultInputFile()).toBe("/mock/cwd/ens_names.sql.gz");
+    });
+  });
+
+  describe("validatePortConfiguration", () => {
+    it("should not throw an error if the CLI port matches the environment variable port", () => {
+      process.env.PORT = "8080";
+      expect(() => validatePortConfiguration(8080)).not.toThrow();
+    });
+
+    it("should not throw an error if the environment variable is not set", () => {
+      delete process.env.PORT;
+      expect(() => validatePortConfiguration(3000)).not.toThrow();
+    });
+
+    it("should not throw an error if the environment variable is the default port", () => {
+      process.env.PORT = DEFAULT_PORT.toString();
+      expect(() => validatePortConfiguration(3000)).not.toThrow();
+    });
+
+    it("should throw an error if the CLI port does not match the environment variable port", () => {
+      process.env.PORT = "8080";
+      expect(() => validatePortConfiguration(3000)).toThrow(
+        "Port conflict: Command line argument (3000) differs from PORT environment variable (8080). " +
+          "Please use only one method to specify the port.",
+      );
+    });
+  });
+
+  describe("getLogLevel", () => {
+    const originalEnv = process.env.LOG_LEVEL;
+
+    beforeEach(() => {
+      // Clear LOG_LEVEL before each test
+      delete process.env.LOG_LEVEL;
+    });
+
+    afterEach(() => {
+      // Restore original LOG_LEVEL after each test
+      if (originalEnv) {
+        process.env.LOG_LEVEL = originalEnv;
+      } else {
+        delete process.env.LOG_LEVEL;
+      }
+    });
+
+    it("should return DEFAULT_LOG_LEVEL when LOG_LEVEL is not set", () => {
+      expect(getLogLevel()).toBe(DEFAULT_LOG_LEVEL);
+    });
+
+    it("should return log level from environment variable", () => {
+      process.env.LOG_LEVEL = "debug";
+      expect(getLogLevel()).toBe("debug");
+    });
+
+    it("should error when invalid log level in environment", () => {
+      process.env.LOG_LEVEL = "invalid";
+      expect(() => getLogLevel()).toThrow(
+        'Environment variable error: (LOG_LEVEL): Invalid log level "invalid". Valid levels are: fatal, error, warn, info, debug, trace, silent.',
+      );
+    });
+  });
+
+  describe("isProduction", () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+
+    afterEach(() => {
+      // Restore original NODE_ENV after each test
+      if (originalNodeEnv) {
+        process.env.NODE_ENV = originalNodeEnv;
+      } else {
+        delete process.env.NODE_ENV;
+      }
+    });
+
+    it("should return true when NODE_ENV is 'production'", () => {
+      process.env.NODE_ENV = "production";
+      expect(isProduction()).toBe(true);
+    });
+
+    it("should return false when NODE_ENV is not 'production'", () => {
+      process.env.NODE_ENV = "development";
+      expect(isProduction()).toBe(false);
+    });
+
+    it("should return false when NODE_ENV is not set", () => {
+      delete process.env.NODE_ENV;
+      expect(isProduction()).toBe(false);
+    });
+  });
+
+  describe("nested environment variable error handling", () => {
+    it("should not duplicate error prefixes when getEnvFilePath calls getEnvString", () => {
+      // This test verifies that when getEnvFilePath calls getEnvString and getEnvString throws an error,
+      // the error message doesn't have duplicate "Environment variable error:" prefixes
+
+      delete process.env.TEST_FILE;
+
+      expect(() => getEnvFilePath("TEST_FILE")).toThrow();
+
+      try {
+        getEnvFilePath("TEST_FILE");
+      } catch (error) {
+        if (error instanceof Error) {
+          const errorMessage = error.message;
+          // Count occurrences of the prefix
+          const prefixCount = (errorMessage.match(/Environment variable error:/g) || []).length;
+          expect(prefixCount).toBe(1);
+          expect(errorMessage).toBe(
+            "Environment variable error: (TEST_FILE): Environment variable 'TEST_FILE' is not set and no default value was provided.",
+          );
+        }
+      }
+    });
+
+    it("should not duplicate error prefixes when getEnvDirPath calls getEnvString", () => {
+      delete process.env.TEST_DIR;
+
+      expect(() => getEnvDirPath("TEST_DIR")).toThrow();
+
+      try {
+        getEnvDirPath("TEST_DIR");
+      } catch (error) {
+        if (error instanceof Error) {
+          const errorMessage = error.message;
+          const prefixCount = (errorMessage.match(/Environment variable error:/g) || []).length;
+          expect(prefixCount).toBe(1);
+          expect(errorMessage).toBe(
+            "Environment variable error: (TEST_DIR): Environment variable 'TEST_DIR' is not set and no default value was provided.",
+          );
+        }
+      }
+    });
+
+    it("should not duplicate error prefixes when getEnvPort calls getEnvNonNegativeNumber", () => {
+      process.env.TEST_PORT = "invalid";
+
+      expect(() => getEnvPort("TEST_PORT")).toThrow();
+
+      try {
+        getEnvPort("TEST_PORT");
+      } catch (error) {
+        if (error instanceof Error) {
+          const errorMessage = error.message;
+          const prefixCount = (errorMessage.match(/Environment variable error:/g) || []).length;
+          expect(prefixCount).toBe(1);
+          expect(errorMessage).toContain("Environment variable error: (TEST_PORT):");
+          expect(errorMessage).not.toContain(
+            "Environment variable error: (TEST_PORT): Environment variable error: (TEST_PORT):",
+          );
+        }
+      }
     });
   });
 });
