@@ -8,16 +8,11 @@
 <p align="center">
   <a href="https://ensnode.io">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/banner.png">
-      <img alt="ENSNode" src=".github/banner.png" width="auto" height="200">
+      <source media="(prefers-color-scheme: dark)" srcset=".github/banner-dark.svg">
+      <img alt="ENSNode" src=".github/banner-light.svg" width="auto" height="80">
     </picture>
   </a>
 </p>
-
-<!-- TAGLINE -->
-<h3 align="center">
-  the multichain indexer for ENSv2
-</h3>
 
 <!-- VERTICAL WHITESPACE -->
 
