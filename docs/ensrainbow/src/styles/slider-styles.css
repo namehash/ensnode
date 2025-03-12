@@ -1,0 +1,209 @@
+.image1,
+.image2 {
+  width: 50vw;
+  height: 34.7vw;
+
+  @media screen and (min-width: 1024px) {
+    width: 490px;
+    height: 340px;
+  }
+
+  user-select: none;
+  pointer-events: none;
+
+  flex-shrink: 0;
+}
+
+.image1 {
+  position: relative;
+}
+
+.image2 {
+  position: absolute;
+
+  animation: ScannerClipPath 8s ease-in-out infinite;
+}
+
+@keyframes ScannerClipPath {
+  0% {
+    clip-path: polygon(0 0, 12% 0, 12% 100%, 0 100%);
+  }
+  50% {
+    clip-path: polygon(0 0, 88% 0, 88% 100%, 0 100%);
+  }
+
+  100% {
+    clip-path: polygon(0 0, 12% 0, 12% 100%, 0 100%);
+  }
+}
+
+.wrapper {
+  position: relative;
+  width: 50vw;
+  height: calc(34.7vw + 40px);
+
+  @media screen and (min-width: 556px) {
+    height: calc(34.7vw + 70px);
+  }
+
+  @media screen and (min-width: 1024px) {
+    width: 490px;
+    height: 410px;
+  }
+
+  overflow-y: hidden;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.wrapper:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 18px 12px -5px white, inset 0 -18px 12px -5px rgba(250, 251, 252, 1);
+
+  z-index: 2;
+}
+
+.wrapper:hover .controllerButton {
+  opacity: 1.0;
+}
+
+.outerController {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  animation: ScannerLine 8s ease-in-out infinite;
+}
+
+@keyframes ScannerLine {
+  0% {
+    left: 12%;
+  }
+  50% {
+    left: 88%;
+  }
+
+  100% {
+    left: 12%;
+  }
+}
+
+.innerController {
+  position: relative;
+  height: 100%;
+}
+
+.controllerButton {
+  height: 20px;
+  width: 20px;
+  border: none;
+  border-radius: 50%;
+  background-color: white;
+  --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow);
+
+  position: absolute;
+  top: calc(50% - 10px);
+  left: -10px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+
+  opacity: 0;
+  transition: all 0.5s ease-in-out;
+}
+
+.lineBackground {
+  position: absolute;
+  inset: 0;
+  border: none;
+
+  background-color: white;
+  opacity: 0.7;
+  width: 50px;
+}
+
+.line {
+  position: absolute;
+  inset: 0 0;
+
+  width: 4px;
+  left: -2px;
+
+  background-image: linear-gradient(0deg, #00c0ff 0%, #ffcf00 49%, #fc4f4f 80%, #00c0ff 100%);
+
+  animation: slideLine 3.5s linear infinite;
+  /* Animation probably won't work if we would like to have both the inactive animation
+     and the user interactivity
+    - most probably would have to be js-controlled */
+
+  transform-style: preserve-3d;
+}
+
+.line::before {
+  content: "";
+  position: absolute;
+
+  inset: -2px; /* Exact values can always be adjusted */
+  background: linear-gradient(0deg, #00c0ff 0%, #ffcf00 49%, #fc4f4f 80%, #00c0ff 100%);
+  filter: blur(7px);
+  transform: translate3d(5px, -3px, -1px);
+
+  @media screen and (min-width: 556px) {
+    inset: -3px; /* Exact values can always be adjusted */
+    background: linear-gradient(0deg, #00c0ff 0%, #ffcf00 49%, #fc4f4f 80%, #00c0ff 100%);
+    filter: blur(10px);
+    transform: translate3d(8px, -3px, -1px);
+  }
+
+  @media screen and (min-width: 1024px) {
+    inset: -5px; /* Exact values can always be adjusted */
+    background: linear-gradient(0deg, #00c0ff 0%, #ffcf00 49%, #fc4f4f 80%, #00c0ff 100%);
+    filter: blur(15px);
+    transform: translate3d(13px, -3px, -1px);
+  }
+
+  border-radius: inherit;
+  pointer-events: none;
+  animation: slideLine 3.5s linear infinite;
+}
+
+@keyframes slideLine {
+  to {
+    background-position: 0 calc(34.7vw + 40px);
+    /*if the animation is to be 'fluent' the transition has to equal elem height*/
+  }
+}
+
+@media screen and (min-width: 556px) {
+  to {
+    background-position: 0 calc(34.7vw + 70px);
+    /*if the animation is to be 'fluent' the transition has to equal elem height*/
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  @keyframes slideLine {
+    to {
+      background-position: 0 410px;
+      /*if the animation is to be 'fluent' the transition has to equal elem height*/
+    }
+  }
+}
+
+.sliderShadow {
+  background-image: radial-gradient(50% 50% at 50% 50%, #012945 0%, rgba(255, 255, 255, 0.0) 100%);
+}
