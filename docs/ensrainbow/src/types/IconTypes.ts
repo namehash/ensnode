@@ -1,7 +1,7 @@
 export type IconProps = {
-    fillColor: string;
+  fillColor: string;
 };
 
 export type SVGImageProps = {
-    styles?: string;
-}
+  styles?: string;
+};
