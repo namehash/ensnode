@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { fromUnixTime, intlFormat } from "date-fns";
 import { useSearchParams } from "next/navigation";
 import { useRecentDomains } from "./hooks";
@@ -52,23 +59,21 @@ export function RecentDomains() {
                   <TableCell className="font-medium">{domain.name}</TableCell>
                   <TableCell>
                     {formatDate(domain.createdAt, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </TableCell>
                   <TableCell>
                     {formatDate(domain.expiryDate, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
                     })}
                   </TableCell>
-                  <TableCell className="font-mono text-xs">
-                    {domain.owner.id}
-                  </TableCell>
+                  <TableCell className="font-mono text-xs">{domain.owner.id}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -89,4 +94,4 @@ function RecentDomainsFallback() {
       <div className="h-10 bg-muted rounded w-full"></div>
     </div>
   );
-} 
+}

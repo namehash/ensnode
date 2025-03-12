@@ -14,4 +14,4 @@ export interface RecentDomain {
 
 export interface RecentDomainsResponse {
   domains: RecentDomain[];
-} 
+}

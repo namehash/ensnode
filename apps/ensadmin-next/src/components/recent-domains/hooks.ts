@@ -29,7 +29,7 @@ async function fetchRecentDomains(baseUrl: string): Promise<RecentDomainsRespons
   `;
 
   const response = await fetch(new URL(`/subgraph`, baseUrl), {
-    method: 'POST',
+    method: "POST",
     headers: {
       "content-type": "application/json",
       "x-ensadmin-version": await ensAdminVersion(),
