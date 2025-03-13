@@ -47,7 +47,7 @@ const rainbowSections: AboutRainbowProps[] = [
           variant="underline"
           size="large"
         >
-          Example 1<span className="text-sm align-text-top">&#129133;</span>
+          Example 1
         </Link>{" "}
         and{" "}
         <Link
@@ -57,7 +57,9 @@ const rainbowSections: AboutRainbowProps[] = [
           variant="underline"
           size="large"
         >
-          Example 2<span className="text-sm align-text-top">&#129133;</span>
+          Example 2
+            {/*<span className="text-sm align-text-top">&#129133;</span>*/}
+            {/*TODO: Explore issue with arrows in the link*/}
         </Link>
       </>
     ),
