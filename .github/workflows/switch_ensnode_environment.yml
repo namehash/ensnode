@@ -18,7 +18,7 @@ jobs:
   switch-environment:
     runs-on: ubuntu-latest
     env:
-      TARGET_ENVIRONMENT: "green"
+      TARGET_ENVIRONMENT: "blue"
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
     
     steps:
