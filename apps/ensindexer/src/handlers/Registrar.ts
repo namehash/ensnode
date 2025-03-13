@@ -22,8 +22,6 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
  * @param ownedName the name that the Registrar contract manages subnames of
  */
 export const makeRegistrarHandlers = <OWNED_NAME extends OwnedName>({
-  canHealReverseAddresses,
-  isReverseRootNode,
   ownedName,
 }: PonderENSPluginHandlerArgs<OWNED_NAME>) => {
   const ownedNameNode = namehash(ownedName);
@@ -88,27 +86,9 @@ export const makeRegistrarHandlers = <OWNED_NAME extends OwnedName>({
 
       const node = makeSubnodeNamehash(ownedNameNode, labelhash);
 
-      let healedLabel = null;
-
-      // if healing label from reverse addresses is enabled,
-      // and the parent node is the reverse root node, give it a go
-      if (canHealReverseAddresses() && isReverseRootNode(node)) {
-        try {
-          healedLabel = labelByReverseAddress({
-            reverseAddress: owner,
-            labelhash,
-          });
-        } catch {
-          // TODO: store event args for analysis and debugging
-        }
-      }
-
-      // if label hasn't been healed yet
-      if (!healedLabel) {
-        // attempt to heal the label associated with labelhash via ENSRainbow
-        // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
-        healedLabel = await labelByHash(labelhash);
-      }
+      // attempt to heal the label associated with labelhash via ENSRainbow
+      // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
+      const healedLabel = await labelByHash(labelhash);
 
       // only update the label if it is healed & indexable
       // undefined value means no change to the label
