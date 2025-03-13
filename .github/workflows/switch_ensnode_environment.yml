@@ -1,0 +1,47 @@
+name: Switch ENSNode main environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'New main environment (green or blue)'
+        required: true
+        type: choice
+        options:
+          - green
+          - blue
+  push:
+    branches:
+        - feat/382-create-bluegreen-environments
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENVIRONMENT: "green"
+      REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
+    
+    steps:
+      - name: Print switch target
+        run: | 
+            echo "Switching to: $TARGET_ENVIRONMENT"
+      
+      - name: Switch Traefik routers
+        run: |
+            # SEPOLIA
+            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVRIONMENT}-sepolia-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVRIONMENT}-sepolia-indexer"
+
+            # ALPHA
+            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-api-router/service "${TARGET_ENVRIONMENT}-alpha-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-indexer-router/service "${TARGET_ENVRIONMENT}-alpha-indexer"
+
+            # MAINNET
+            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-api-router/service "${TARGET_ENVRIONMENT}-mainnet-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-indexer-router/service "${TARGET_ENVRIONMENT}-mainnet-indexer"
+
+            # HOLESKY
+            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVRIONMENT}-holesky-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVRIONMENT}-holesky-indexer"
+
+          
