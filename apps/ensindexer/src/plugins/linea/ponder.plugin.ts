@@ -18,12 +18,7 @@ const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
 // Support for healing addr.reverse subnames on Linea will be added later
-const canHealReverseAddresses = () => false;
-
-// Support for healing addr.reverse subnames on Linea will be added later
-const isReverseRootNode = (node: Node): boolean => {
-  throw new Error(`Cannot check if '${node} is a reverse root node on Linea`);
-};
+const canHealReverseAddressFromParentNode = () => false;
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -54,8 +49,7 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
-  canHealReverseAddresses,
-  isReverseRootNode,
+  canHealReverseAddressFromParentNode,
   ownedName,
   namespace,
   handlers: [

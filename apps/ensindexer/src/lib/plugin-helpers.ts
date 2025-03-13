@@ -177,20 +177,12 @@ export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
 
   /**
-   * Determines whether the plugin can heal subnames of addr.reverse.
-   * Some plugins might not support it at the moment.
+   * Determines whether a reverse address can be healed for given parent node.
+   * @param {Node} parentNode a node that might be a reverse root node
    *
-   * @returns true if the plugin can heal addr.reverse subnames
+   * @returns true if the reverse address can be healed from the parent node
    */
-  canHealReverseAddresses(): boolean;
-
-  /**
-   * Determines whether the plugin supports checking a node against its reverse root node.
-   *
-   * @param node the node to check
-   * @returns true if the node is a reverse root node
-   */
-  isReverseRootNode(node: Node): boolean;
+  canHealReverseAddressFromParentNode(parentNode: Node): boolean;
 };
 
 /**

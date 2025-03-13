@@ -80,8 +80,7 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
  * @param ownedName the name that the Registry contract manages subnames of
  */
 export const makeRegistryHandlers = <OWNED_NAME extends OwnedName>({
-  canHealReverseAddresses,
-  isReverseRootNode,
+  canHealReverseAddressFromParentNode,
   ownedName,
 }: PonderENSPluginHandlerArgs<OWNED_NAME>) => {
   const sharedEventValues = createSharedEventValues(ownedName);
@@ -134,9 +133,8 @@ export const makeRegistryHandlers = <OWNED_NAME extends OwnedName>({
 
           let healedLabel = null;
 
-          // if healing label from reverse addresses is enabled,
-          // and the parent node is the reverse root node, give it a go
-          if (canHealReverseAddresses() && isReverseRootNode(node)) {
+          // if healing label from reverse addresses is possible, give it a go
+          if (canHealReverseAddressFromParentNode(node)) {
             // TODO: if healing failed, log the event args for analysis and debugging
             healedLabel = labelByReverseAddress({
               maybeReverseAddress: owner,
