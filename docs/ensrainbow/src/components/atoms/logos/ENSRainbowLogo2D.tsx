@@ -1,12 +1,15 @@
-export const ENSRainbowLogo2D = () => (
-  <svg width="151" height="28" viewBox="0 0 151 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+import React from "react";
+
+
+export const ENSRainbowLogo2D = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg width="151" height="28" viewBox="0 0 151 28" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path d="M2 2H26V6H2V2Z" fill="#FF311C" />
     <path d="M2 14H26V18H2V14Z" fill="#97FF2E" />
     <path d="M2 6H26V10H2V6Z" fill="#FEC401" />
     <path d="M2 18H26V22H2V18Z" fill="#3FE8FF" />
     <path d="M2 10H26V14H2V10Z" fill="#FEFB24" />
     <path d="M2 22H26V26H2V22Z" fill="#9E49FF" />
-    <rect x="1" y="1" width="26" height="26" rx="3" stroke="black" stroke-width="2" />
+    <rect x="1" y="1" width="26" height="26" rx="3" stroke="black" strokeWidth="2" />
     <path
       d="M138.69 19.9998L136.019 10.1816H138.774L140.295 16.7782H140.384L141.97 10.1816H144.673L146.284 16.7399H146.367L147.863 10.1816H150.612L147.946 19.9998H145.063L143.376 13.8251H143.254L141.567 19.9998H138.69Z"
       fill="black"

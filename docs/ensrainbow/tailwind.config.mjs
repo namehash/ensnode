@@ -5,6 +5,7 @@ export default {
     extend: {
       screens: {
         hero: "1440px",
+        headerLogoMatch: "800px"
       },
     },
   },

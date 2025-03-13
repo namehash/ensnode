@@ -1,8 +1,8 @@
 import { Button, IconButton, Link } from "@namehash/namekit-react";
-import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
 import { GithubIcon } from "../atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "../atoms/icons/TelegramIcon.tsx";
 import { ENSRainbowLogo2D } from "../atoms/logos/ENSRainbowLogo2D.tsx";
+import ENSRainbow2D from "../../assets/ENSRainbow2D.svg";
 
 export default function Header() {
   return (
@@ -14,7 +14,8 @@ export default function Header() {
               href="/"
               className="text-black not-italic font-bold text-[21.539px] leading-[26.51px] tracking-[-0.907px] sm:text-[26px] sm:leading-8 sm:tracking-[-1.113px]"
             >
-              <ENSRainbowLogo2D />
+              {/*<ENSRainbowLogo2D className="h-8 sm:h-10"/>*/}
+              <img src={ENSRainbow2D.src} className="h-8 headerLogoMatch:h-10" alt="ENSRainbow logo"/>
             </a>
           </div>
         </div>
