@@ -15,7 +15,7 @@ on:
         - feat/382-create-bluegreen-environments
 
 jobs:
-  deploy:
+  switch-environment:
     runs-on: ubuntu-latest
     env:
       TARGET_ENVIRONMENT: "green"
@@ -33,19 +33,19 @@ jobs:
       - name: Switch Traefik routers
         run: |
             # SEPOLIA
-            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVRIONMENT}-sepolia-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVRIONMENT}-sepolia-indexer"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
 
             # ALPHA
-            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-api-router/service "${TARGET_ENVRIONMENT}-alpha-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-indexer-router/service "${TARGET_ENVRIONMENT}-alpha-indexer"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-api-router/service "${TARGET_ENVIRONMENT}-alpha-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-indexer-router/service "${TARGET_ENVIRONMENT}-alpha-indexer"
 
             # MAINNET
-            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-api-router/service "${TARGET_ENVRIONMENT}-mainnet-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-indexer-router/service "${TARGET_ENVRIONMENT}-mainnet-indexer"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-api-router/service "${TARGET_ENVIRONMENT}-mainnet-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-indexer-router/service "${TARGET_ENVIRONMENT}-mainnet-indexer"
 
             # HOLESKY
-            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVRIONMENT}-holesky-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVRIONMENT}-holesky-indexer"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVIRONMENT}-holesky-api"
+            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVIRONMENT}-holesky-indexer"
 
           
