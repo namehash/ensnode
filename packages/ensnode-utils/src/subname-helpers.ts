@@ -21,20 +21,20 @@ export const ROOT_NODE = namehash("");
 
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
 
-// normalize address to match the reverse address format
+// normalize address to match the format used for addr.reverse subnames
 // as per https://docs.ens.domains/resolution/names#reverse-nodes
 const normalizedAddressDigits = (address: Hex): string => address.slice(2).toLowerCase();
 
 export interface LabelByReverseAddressArgs {
-  /** The reverse address */
+  /** The address that is possibly associated with the addr.reverse subname */
   reverseAddress: Hex;
 
-  /** The domain's labelhash */
+  /** The labelhash of the addr.reverse subname */
   labelhash: Labelhash;
 }
 
 /**
- * Attempt to heal a labelhash to its original label using reverse address.
+ * Attempt to heal the labelhash of an addr.reverse subname using an address that might be related to the subname.
  *
  * @throws if reverse address is not a valid hex address
  * @throws if labelhash is not a valid hash
@@ -50,7 +50,7 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
 
   // if labelhash of the assumed label matches the provided labelhash
   if (labelhash(assumedLabel) === args.labelhash) {
-    // return original label found for the labelhash
+    // the assumedLabel successfully heals the labelhash
     return assumedLabel;
   }
 
@@ -63,8 +63,8 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
 /**
  * Validate the arguments for `labelByReverseAddress` function.
  *
- * @throws if reverse node subname is not derived from a valid hex address
- * @throws if labelhash is not a valid hash
+ * @throws if maybeReverseAddress is not a valid Address
+ * @throws if labelhash is not a valid Labelhash
  */
 const validateLabelByReverseAddressArgs = (args: LabelByReverseAddressArgs) => {
   if (!isHex(args.reverseAddress) || args.reverseAddress.length !== 42) {

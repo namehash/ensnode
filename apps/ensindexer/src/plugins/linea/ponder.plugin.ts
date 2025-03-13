@@ -17,12 +17,12 @@ const ownedName = "linea.eth" as const;
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
-// The `linea` plugin does not support healing reverse addresses
+// Support for healing addr.reverse subnames on Linea will be added later
 const canHealReverseAddresses = () => false;
 
-// The `linea` plugin does not support reverse root node checking
+// Support for healing addr.reverse subnames on Linea will be added later
 const isReverseRootNode = (node: Node): boolean => {
-  throw new Error(`Cannot check if '${node} is a reverse root node for 'linea' plugin`);
+  throw new Error(`Cannot check if '${node} is a reverse root node on Linea`);
 };
 
 export const config = createConfig({
