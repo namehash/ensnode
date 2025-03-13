@@ -20,7 +20,7 @@ export default function Header() {
         </div>
         <div className="hidden sm:flex items-center justify-center gap-1">
           <Button variant="ghost" asChild>
-            <Link href="https://www.ensnode.io/ensrainbow/">Docs</Link>
+            <Link href="https://ensnode.io/ensrainbow/">Docs</Link>
           </Button>
 
           <Button variant="ghost" asChild>
@@ -38,7 +38,7 @@ export default function Header() {
         <div className="sm:hidden flex items-center justify-center gap-1">
           <IconButton asChild variant="ghost">
             <Link
-              href="https://www.ensnode.io/ensrainbow/"
+              href="https://ensnode.io/ensrainbow/"
               target="_blank"
               size="small"
               className="hover:no-underline nk-underline-none"

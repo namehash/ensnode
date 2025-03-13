@@ -25,6 +25,7 @@
     "classcat": "5.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-wrap-balancer": "^1.1.1",
     "tailwindcss": "3.4.13"
   }
 }
