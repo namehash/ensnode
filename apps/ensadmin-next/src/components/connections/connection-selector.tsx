@@ -3,8 +3,6 @@
 import { preferredEnsNodeUrl, selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import {
-  ChevronDown,
-  ChevronRight,
   ChevronsUpDown,
   ExternalLink,
   Loader2,
@@ -21,7 +19,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -42,7 +39,8 @@ export function ConnectionSelector() {
   const [newUrl, setNewUrl] = useState("");
   const [isAdding, setIsAdding] = useState(false);
 
-  const { connections, isLoading, addConnection, removeConnection } = useConnections();
+  const { connections, isLoading, addConnection, removeConnection } =
+    useConnections();
 
   const handleSelect = (url: string) => {
     const params = new URLSearchParams(searchParams);
@@ -50,7 +48,9 @@ export function ConnectionSelector() {
 
     router.push(`${pathname}?${params.toString()}`);
 
-    window.dispatchEvent(new CustomEvent("ensnode/connection/set", { detail: { url } }));
+    window.dispatchEvent(
+      new CustomEvent("ensnode/connection/set", { detail: { url } })
+    );
   };
 
   const handleAdd = async () => {
@@ -63,7 +63,7 @@ export function ConnectionSelector() {
           setNewUrl("");
           setIsAdding(false);
         },
-      },
+      }
     );
   };
 
@@ -86,7 +86,9 @@ export function ConnectionSelector() {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">ENSAdmin</span>
-                <span className="truncate text-xs font-mono">{selectedUrl}</span>
+                <span className="truncate text-xs font-mono">
+                  {selectedUrl}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -112,7 +114,7 @@ export function ConnectionSelector() {
                   onClick={() => handleSelect(url)}
                   className={cn(
                     "group gap-2 p-2 font-mono text-xs justify-between",
-                    url === selectedUrl ? "bg-primary/10 text-primary" : "",
+                    url === selectedUrl ? "bg-primary/10 text-primary" : ""
                   )}
                 >
                   <span className="truncate flex-1">{url}</span>
@@ -137,10 +139,11 @@ export function ConnectionSelector() {
                           "p-1 rounded",
                           removeConnection.isPending
                             ? "text-muted-foreground cursor-not-allowed"
-                            : "hover:text-destructive",
+                            : "hover:text-destructive"
                         )}
                       >
-                        {removeConnection.isPending && removeConnection.variables?.url === url ? (
+                        {removeConnection.isPending &&
+                        removeConnection.variables?.url === url ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
                         ) : (
                           <Trash2 className="w-3 h-3" />
@@ -164,8 +167,10 @@ export function ConnectionSelector() {
                   disabled={addConnection.isPending}
                   className={cn(
                     "w-full px-2 py-1 text-sm font-mono rounded border bg-background",
-                    addConnection.isError ? "border-destructive" : "border-input",
-                    addConnection.isPending && "opacity-50",
+                    addConnection.isError
+                      ? "border-destructive"
+                      : "border-input",
+                    addConnection.isPending && "opacity-50"
                   )}
                   autoFocus
                 />
@@ -198,7 +203,7 @@ export function ConnectionSelector() {
                     className={cn(
                       "px-2 py-1 text-xs rounded inline-flex items-center gap-1",
                       "bg-primary text-primary-foreground",
-                      "hover:bg-primary/90 disabled:opacity-50",
+                      "hover:bg-primary/90 disabled:opacity-50"
                     )}
                   >
                     {addConnection.isPending ? (
@@ -223,7 +228,9 @@ export function ConnectionSelector() {
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Plus className="size-4" />
                 </div>
-                <div className="font-medium text-muted-foreground">Add connection</div>
+                <div className="font-medium text-muted-foreground">
+                  Add connection
+                </div>
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

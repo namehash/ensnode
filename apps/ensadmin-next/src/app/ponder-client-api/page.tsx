@@ -2,11 +2,28 @@ import { Suspense } from "react";
 
 import { PonderClientContent } from "./examples-content";
 import { Provider as PonderClientProvider } from "./provider";
+import { preferredEnsNodeUrl } from "@/lib/env";
 
-export default function PonderClientPage() {
+type PageProps = {
+  searchParams: Promise<{
+    [key: string]: string | string[] | undefined;
+  }>;
+};
+
+export default async function PonderClientPage({ searchParams }: PageProps) {
+  const { ensnode = preferredEnsNodeUrl() } = await searchParams;
+
+  const baseUrl = Array.isArray(ensnode)
+    ? ensnode[0]
+    : typeof ensnode === "string"
+    ? ensnode
+    : preferredEnsNodeUrl();
+
+  const url = new URL(`/subgraph`, baseUrl).toString();
+
   return (
     <Suspense fallback={<Loading />}>
-      <PonderClientProvider>
+      <PonderClientProvider url={url}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
