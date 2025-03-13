@@ -1,5 +1,6 @@
 "use client";
 
+import { ENSName } from "@/components/ens-name";
 import { useIndexingStatus } from "@/components/indexing-status/hooks";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,11 +72,6 @@ const formatRelativeTime = (timestamp: string) => {
 // Helper function to generate ENS app URL for a domain
 const getEnsAppUrl = (name: string) => {
   return `https://app.ens.domains/${name}`;
-};
-
-// Helper function to generate ENS app URL for an address
-const getEnsAddressUrl = (address: string) => {
-  return `https://app.ens.domains/${address}`;
 };
 
 // Client-only date formatter component
@@ -197,16 +193,8 @@ export function RecentDomains() {
                         expiryDate={registration.expiryDate}
                       />
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      <a
-                        href={getEnsAddressUrl(registration.domain.owner.id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline"
-                      >
-                        {registration.domain.owner.id}
-                        <ExternalLink size={14} className="inline-block" />
-                      </a>
+                    <TableCell>
+                      <ENSName address={registration.domain.owner.id} showAvatar={true} />
                     </TableCell>
                   </TableRow>
                 ))}
