@@ -79,14 +79,12 @@ describe("makeSubnodeNamehash", () => {
 });
 
 describe("labelByReverseAddress", () => {
-  const vitalikEthResolvedAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-  const vitalikEthNormalizedAddress = "d8da6bf26964af9d7eed9e03e53415d37aa96045";
-  // `namehash('addr.reverse')`
+  const address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+  const reverseAddressSubname = "d8da6bf26964af9d7eed9e03e53415d37aa96045";
 
   const validArgs = {
-    // labelhash for `d8da6bf26964af9d7eed9e03e53415d37aa96045`
-    labelhash: "0x535bdae9bb214b3cc583b53384464999f2f7f48625f160728c63e73e766ff71e",
-    reverseAddress: vitalikEthResolvedAddress,
+    labelhash: labelhash(reverseAddressSubname),
+    maybeReverseAddress: address,
   } satisfies LabelByReverseAddressArgs;
 
   describe("arguments validation", () => {
@@ -94,14 +92,14 @@ describe("labelByReverseAddress", () => {
       expect(() =>
         labelByReverseAddress({
           ...validArgs,
-          reverseAddress: "0x123",
+          maybeReverseAddress: "0x123",
         }),
       ).toThrowError(
         "Invalid reverse address: '0x123'. Must a valid EVM address, start with '0x' and be 42 characters long",
       );
     });
 
-    it("should throw if labelhash is not a valid hash", () => {
+    it("should throw if labelhash is not a valid Labelhash", () => {
       expect(() =>
         labelByReverseAddress({
           ...validArgs,
@@ -114,18 +112,16 @@ describe("labelByReverseAddress", () => {
   describe("label healing", () => {
     it("should return null if the label cannot be healed", () => {
       const notMatchingLabelhash = labelhash("test.eth");
-      expect(() =>
+      expect(
         labelByReverseAddress({
           ...validArgs,
           labelhash: notMatchingLabelhash,
         }),
-      ).toThrowError(
-        `Failed to heal label for by '${validArgs.reverseAddress}' reverse address for labelhash: '${notMatchingLabelhash}'`,
-      );
+      ).toBe(null);
     });
 
     it("should return the label if the label can be healed", () => {
-      expect(labelByReverseAddress(validArgs)).toBe(vitalikEthNormalizedAddress);
+      expect(labelByReverseAddress(validArgs)).toBe(reverseAddressSubname);
     });
   });
 });

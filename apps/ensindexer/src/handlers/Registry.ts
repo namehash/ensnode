@@ -137,14 +137,11 @@ export const makeRegistryHandlers = <OWNED_NAME extends OwnedName>({
           // if healing label from reverse addresses is enabled,
           // and the parent node is the reverse root node, give it a go
           if (canHealReverseAddresses() && isReverseRootNode(node)) {
-            try {
-              healedLabel = labelByReverseAddress({
-                reverseAddress: owner,
-                labelhash,
-              });
-            } catch {
-              // TODO: store event args for analysis and debugging
-            }
+            // TODO: if healing failed, log the event args for analysis and debugging
+            healedLabel = labelByReverseAddress({
+              maybeReverseAddress: owner,
+              labelhash,
+            });
           }
 
           // if label hasn't been healed yet

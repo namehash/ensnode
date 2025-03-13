@@ -27,7 +27,7 @@ const normalizedAddressDigits = (address: Hex): string => address.slice(2).toLow
 
 export interface LabelByReverseAddressArgs {
   /** The address that is possibly associated with the addr.reverse subname */
-  reverseAddress: Hex;
+  maybeReverseAddress: Hex;
 
   /** The labelhash of the addr.reverse subname */
   labelhash: Labelhash;
@@ -46,7 +46,7 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
   validateLabelByReverseAddressArgs(args);
 
   // derive the assumed label from the normalized address
-  const assumedLabel = normalizedAddressDigits(args.reverseAddress);
+  const assumedLabel = normalizedAddressDigits(args.maybeReverseAddress);
 
   // if labelhash of the assumed label matches the provided labelhash
   if (labelhash(assumedLabel) === args.labelhash) {
@@ -55,9 +55,7 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
   }
 
   // otherwise, healing did not succeed
-  throw new Error(
-    `Failed to heal label for by '${args.reverseAddress}' reverse address for labelhash: '${args.labelhash}'`,
-  );
+  return null;
 };
 
 /**
@@ -67,9 +65,9 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
  * @throws if labelhash is not a valid Labelhash
  */
 const validateLabelByReverseAddressArgs = (args: LabelByReverseAddressArgs) => {
-  if (!isHex(args.reverseAddress) || args.reverseAddress.length !== 42) {
+  if (!isHex(args.maybeReverseAddress) || args.maybeReverseAddress.length !== 42) {
     throw new Error(
-      `Invalid reverse address: '${args.reverseAddress}'. Must a valid EVM address, start with '0x' and be 42 characters long.`,
+      `Invalid reverse address: '${args.maybeReverseAddress}'. Must a valid EVM address, start with '0x' and be 42 characters long.`,
     );
   }
 
