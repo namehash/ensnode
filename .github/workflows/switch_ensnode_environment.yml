@@ -10,15 +10,12 @@ on:
         options:
           - green
           - blue
-  push:
-    branches:
-        - feat/382-create-bluegreen-environments
 
 jobs:
   switch-environment:
     runs-on: ubuntu-latest
     env:
-      TARGET_ENVIRONMENT: "green"
+      TARGET_ENVIRONMENT: ${{ inputs.target }}
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
     
     steps:
