@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import type { Labelhash } from "@ensnode/utils/types";
+import type { LabelHash } from "@ensnode/utils/types";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
 
@@ -11,7 +11,7 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  * direct subname of .eth that was registered.
  * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/ethregistrar/ETHRegistrarController.sol#L215
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelhash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
 export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
   const {

@@ -1,6 +1,6 @@
 import type { Cache } from "@ensnode/utils/cache";
 import { LruCache } from "@ensnode/utils/cache";
-import type { Labelhash } from "@ensnode/utils/types";
+import type { LabelHash } from "@ensnode/utils/types";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
 export namespace EnsRainbow {
@@ -9,7 +9,7 @@ export namespace EnsRainbow {
   export interface ApiClient {
     count(): Promise<CountResponse>;
 
-    heal(labelhash: Labelhash): Promise<HealResponse>;
+    heal(labelhash: LabelHash): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
 
@@ -132,7 +132,7 @@ export interface EnsRainbowApiClientOptions {
  */
 export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
-  private readonly cache: Cache<Labelhash, EnsRainbow.CacheableHealResponse>;
+  private readonly cache: Cache<LabelHash, EnsRainbow.CacheableHealResponse>;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -154,7 +154,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
       ...options,
     };
 
-    this.cache = new LruCache<Labelhash, EnsRainbow.CacheableHealResponse>(
+    this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
       this.options.cacheCapacity,
     );
   }
@@ -201,7 +201,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash): Promise<EnsRainbow.HealResponse> {
+  async heal(labelhash: LabelHash): Promise<EnsRainbow.HealResponse> {
     const cachedResult = this.cache.get(labelhash);
 
     if (cachedResult) {

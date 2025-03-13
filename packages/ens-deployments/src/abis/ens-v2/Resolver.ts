@@ -1,4 +1,4 @@
-export const OwnedResolver = [
+export const Resolver = [
   {
     inputs: [
       {

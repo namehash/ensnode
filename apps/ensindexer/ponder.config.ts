@@ -9,7 +9,7 @@ import * as ethPlugin from "./src/plugins/eth/ponder.plugin";
 import * as lineaEthPlugin from "./src/plugins/linea/ponder.plugin";
 
 ////////
-// First, generate AllPluginConfigs type representing the merged types of each plugin's `config`,
+// Generate AllPluginConfigs type representing the merged types of each plugin's `config`,
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 
@@ -18,31 +18,33 @@ const ALL_PLUGINS = [ethPlugin, baseEthPlugin, lineaEthPlugin, ensV2Plugin] as c
 type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]>;
 
 ////////
-// Next, filter ALL_PLUGINS by those that are available and that the user has activated.
+// Filter ALL_PLUGINS by those that are 'available' (i.e. defined by the SELECTED_DEPLOYMENT_CONFIG)
 ////////
 
-// the available PluginNames are those that the selected ENS Deployment defines as available
 const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as PluginName[];
 
-// filter the set of available plugins by those that are 'active' in the env
+////////
+// Filter ALL_PLUGINS by those that are 'active' in the env (i.e. via ACTIVE_PLUGINS)
+////////
+
 const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);
 
 ////////
-// Next, merge the plugins' configs into a single ponder config and activate their handlers.
+// Merge the plugins' configs into a single ponder config.
 ////////
 
-// merge the resulting configs
 const activePluginsMergedConfig = activePlugins
   .map((plugin) => plugin.config)
   .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as AllPluginConfigs;
 
-// load indexing handlers from the active plugins into the runtime
+////////
+// 'activate' each plugin, registering its indexing handlers with ponder
+////////
+
 activePlugins.forEach((plugin) => plugin.activate());
 
 ////////
-// Finally, return the merged config for ponder to use for type inference and runtime behavior.
+// Finally, return the merged config (typed as AllPluginConfigs) for ponder.
 ////////
 
-// The type of the default export is a merge of all active plugin configs
-// configs so that each plugin can be correctly typechecked
 export default activePluginsMergedConfig;

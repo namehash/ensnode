@@ -14,21 +14,28 @@ import { getEnsDeploymentChain } from "./ponder-helpers";
 export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChain()];
 
 /**
- * Note that here, we define the global DEPLOYMENT_CONFIG as the _merge_ of all possible deployments
- * (therefore fully specifying all plugin configs), overrided with the SELECTED_DEPLOYMENT_CONFIG.
- *
- * This ensures that at type-check-time and in `ALL_PLUGINS` every plugin's `config` has valid values
- * (and therefore its type can continue to be inferred). This means that initially upon building the
- * plugin configs, if the user is selecting a deployment that does not fully specify every available
- * plugin, the plugins that are not in that deployment's specification are technically pointing at
- * the mainnet deployment. This is never an issue, however, as those plugin are filtered out
- * (see ponder.config.ts and `getActivePlugins`) and never activated.
+ * Here, we define the global MERGED_DEPLOYMENT_CONIG as the merge of all possible deployment configs
+ * (therefore fully specifying all possible AddressBooks).
  */
-export const DEPLOYMENT_CONFIG = {
+const MERGED_DEPLOYMENT_CONIG = {
   ...DeploymentConfigs.mainnet,
   ...DeploymentConfigs.sepolia,
   ...DeploymentConfigs.holesky,
   ...DeploymentConfigs["ens-test-env"],
+};
+
+/**
+ * Here we override the MERGED_DEPLOYMENT_CONIG object with the SELECTED_DEPLOYMENT_CONFIG.
+ *
+ * This ensures that at type-check-time every plugin's `config` has valid values (and therefore its
+ * type can be inferred). This means that initially upon building the plugin configs, if the user is
+ * selecting a deployment that does not fully specify every available plugin, the plugins that are
+ * not in that deployment's specification are technically referencing an AddressBook from another
+ * deployment. This is never an issue, however, as those plugin are filtered out at runtime
+ * and never activated (see ponder.config.ts and `getActivePlugins`).
+ */
+export const DEPLOYMENT_CONFIG = {
+  ...MERGED_DEPLOYMENT_CONIG,
   ...SELECTED_DEPLOYMENT_CONFIG,
 };
 

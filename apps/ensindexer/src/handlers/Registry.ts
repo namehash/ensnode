@@ -2,7 +2,7 @@ import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
-import type { Labelhash, Node } from "@ensnode/utils/types";
+import type { LabelHash, Node } from "@ensnode/utils/types";
 import { type Hex, zeroAddress } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";
@@ -84,7 +84,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         event,
       }: {
         context: Context;
-        event: EventWithArgs<{ node: Node; label: Labelhash; owner: Hex }>;
+        event: EventWithArgs<{ node: Node; label: LabelHash; owner: Hex }>;
       }) => {
         const { label: labelhash, node, owner } = event.args;
 

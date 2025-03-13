@@ -1,5 +1,6 @@
-import { index, onchainTable, relations } from "ponder";
-import type { Address } from "viem";
+import { CAIP10AccountId } from "@ensnode/utils/types";
+import { index, onchainTable, relations, uniqueIndex } from "ponder";
+import { type Address, zeroAddress } from "viem";
 import { monkeypatchCollate } from "./collate";
 
 /**
@@ -685,99 +686,266 @@ export const versionChangedRelations = relations(versionChanged, ({ one }) => ({
  * NOTE: These entities kept namespaced for rapid prototyping—see v2 plans for additional context.
  * https://www.ensnode.io/ensnode/reference/ensnode-v2-notes/
  *
- * Original Schema from https://github.com/ensdomains/ens-ponder
+ * The core design principle here is that a Registry references many Domains which each reference a
+ * (sub)Registry which references many Domains... etc. This accurately represents the nature of the
+ * on-chain contracts and supports the dynamic re-arrangement of the hierarchical namespace as
+ * proposed by ENSv2.
+ *
+ * For example, when a subregistry is updated for a given Domain, the tree now represent's that
+ * subregistry's Domains, without and bulk creation/deletion being necessary.
+ *
+ * open questions:
+ * - how do v1 subregistries other than .eth handle the migration?
+ * - what does v2's .eth registry `reliquishing` accomplish, from an indexing perspective?
+ * - a 'registry' is... any contract tht implements ERC1155 and NewSubname()? may mean that we need to
+ *   index every instance of those events... not very good at all... would be nice if a Registry contract
+ *   emitted an event like NewRegistry() in constructor that indicated whether it was an ENS registry.
+ *   or if it were required to announce itself against some singleton address and we could use the
+ *   factory pattern to index those addresses. otherwise we'll need to track every ERC1155 contract.
+ *   (ponder doesn't handle dynamic address indexing for efficiency reasons)
+ * - could multiple tokenIds in the ENSv2 system have the same subregistry address? seems yes because
+ *   datastore does not enforce uniqueness, but this results in a many-many mapping between labels
+ *   and subregistries which seems very annoying to work with, in particular for upward traversals.
+ *   the indexer could enforce uniqueness and if a name sets a registry address that's already assigned
+ *   we could ignore that subtree? not ideal. since ENSv2 is on L2 we can likely include uniqueness
+ *   check without too much of a penalty?
+ *   search TODO(registry-domain-uniq): in codebase to see locations where this is noted
+ * - event order guarantees would be really nice as part of the v2 spec, but technically not needed
+ *   - i.e. registries must emit NewSubname before any ERC1155 events, must emit NewSubname before
+ *     calling datastore, etc. indexers love an event that's guaranteed to be first in order to setup entity
+ * - should token ids within registry contracts not be masked? what happens if registry mints
+ *   multiple tokens with conflicting tokenIds? they'll have the same state in datastore but there will
+ *   be multiple tokens in the 1155 contract with different owners, etc. how should the indexer represent this?
+ * - we _need_ to be able to configure ponder's handling of null values in order to correctly index ENSv2
+ *   because ENSv2 doesn't emit the namehash/labelhash, only human-readable args, which may contain null bytes
+ *   https://github.com/ponder-sh/ponder/issues/1456
+ *
+ * todo in schema:
+ * - events & event relations
+ * - store node on label in order to set up resolver record references?
+ * - createdAt and updatedAt values across the board
+ * - could use composite schemas more frequently instead of concatenated ids
  */
 
-export const v2_domain = onchainTable("v2_domain", (t) => ({
-  id: t.text().primaryKey(),
-  label: t.text(),
-  name: t.text().array(), // Will store serialized array as JSON string
-  labelHash: t.text(),
-  owner: t.text(),
-  registry: t.text(),
-  isTld: t.boolean(),
-  createdAt: t.bigint("createdAt").notNull(),
-  updatedAt: t.bigint("updatedAt").notNull(),
+/**
+ * A Registry represents a Registry _contract_ on-chain, and is keyed by its chain-specific address.
+ */
+export const v2_registry = onchainTable(
+  "v2_registries",
+  (t) => ({
+    /**
+     * Registry is keyed by [CAIP-10](https://chainagnostic.org/CAIPs/caip-10)
+     */
+    id: t.text().primaryKey().$type<CAIP10AccountId>(),
+
+    /**
+     * A Registry can be the subregistry of exactly one Domain.
+     * NOTE: we duplicate this reference in order to make cachable traversals trivial.
+     * TODO(registry-domain-uniq): see above
+     */
+    domainId: t.text(),
+
+    // TODO: reference registry-specific logic entities here (i.e. .eth registry expiries)
+  }),
+  (t) => ({}),
+);
+
+export const v2_registryRelations = relations(v2_registry, ({ one, many }) => ({
+  /**
+   * a registry has one domain (i.e is that domain's subregistry)
+   *
+   * TODO(registry-domain-uniq): see above
+   */
+  domain: one(v2_domain, {
+    fields: [v2_registry.domainId],
+    references: [v2_domain.id],
+    relationName: "isSubregistryOfDomain",
+  }),
+
+  // a registry has many labels by label.registryId
+  domains: many(v2_domain, {
+    relationName: "managedDomains",
+  }),
 }));
 
-export const v2_domainRelations = relations(v2_domain, ({ one }) => ({
+/**
+ * A Domain entity represents a subname in the hierarchical namespace.
+ *
+ * In ENSv2 this maps 1:1 with a Registry contract's tokens.
+ * NOTE: we key Domain by maskedTokenId to avoid collisions.
+ */
+export const v2_domain = onchainTable(
+  "v2_domains",
+  (t) => ({
+    /**
+     * Domains are unique by (registryId, maskedTokenId), encoded as `${registryId}-${maskedTokenId}`
+     */
+    id: t.text().primaryKey(),
+
+    /**
+     * A Domain belongs to a Registry.
+     */
+    registryId: t.text().notNull(),
+
+    /**
+     * A Domain entity represents a given labelHash value i.e. the result of `labelhash()`, encoded
+     * as a bigint 'tokenId', within a given Registry, with the lower 32 bits masked.
+     */
+    maskedTokenId: t.bigint().notNull(),
+
+    /**
+     * A Domain stores its un-masked tokenId for calculating `node`.
+     *
+     * tokenId alone is _not_ a UUID value, and collisions are expected (i.e. there will be a Domain
+     * entity representing the `hello` in `hello.example.eth` and a Domain representing the `hello`
+     * in `hello.eth` that have identical tokenId values).
+     *
+     * Domain entities are unique by (registryId, tokenId), enforced by ERC1155. Note that this tokenId
+     * value is _not_ masked.
+     */
+    tokenId: t.bigint().notNull(),
+
+    /**
+     * The human-readable representation of a given name segment.
+     *
+     * In ENSv1, labels may or may not be known, hence this field is optional.
+     * In ENSv2, this `label` is always known.
+     */
+    label: t.text(),
+
+    /**
+     * A Domain may have an URI.
+     */
+    uri: t.text(),
+
+    /**
+     * A Domain has an `owner` address, potentially zeroAddress.
+     *
+     * NOTE: stored as text with type Address to ensure checksumming is persisted
+     */
+    owner: t.text().notNull().default(zeroAddress).$type<Address>(),
+
+    /**
+     * A Domain can be assigned a (sub)Registry with flags.
+     * NOTE: we include bi-directonal references in order to make cachable traversals trivial.
+     */
+    subregistryId: t.text(),
+    subregistryFlags: t.bigint().notNull().default(0n),
+
+    /**
+     * A Domain can be configured with a given Resolver with flags.
+     */
+    resolverId: t.text(),
+    resolverFlags: t.bigint().notNull().default(0n),
+  }),
+  (t) => ({
+    // a Domain is unique by (registryId, maskedTokenId) (indexer-invariant)
+    registryTokenIdIndex: uniqueIndex().on(t.registryId, t.maskedTokenId),
+    // a Domain is unique by (registryId, tokenId) (ERC1155-invariant)
+    registryMaskedTokenIdIndex: uniqueIndex().on(t.registryId, t.tokenId),
+  }),
+);
+
+export const v2_domainRelations = relations(v2_domain, ({ one, many }) => ({
+  // domain belongs to one (parent)registry
   registry: one(v2_registry, {
-    fields: [v2_domain.registry],
+    fields: [v2_domain.registryId],
     references: [v2_registry.id],
   }),
-}));
 
-export const v2_registry = onchainTable("v2_registry", (t) => ({
-  id: t.text().primaryKey(),
-  labelHash: t.text(),
-  label: t.text(),
-  subregistryId: t.text(),
-  resolver: t.text(),
-  flags: t.bigint(),
-  createdAt: t.bigint("createdAt").notNull(),
-  updatedAt: t.bigint("updatedAt").notNull(),
-}));
-
-export const v2_subregistryUpdateEvent = onchainTable("v2_subregistryUpdateEvent", (t) => ({
-  id: t.text().primaryKey(),
-  registryId: t.text(),
-  labelHash: t.text(),
-  subregistryId: t.text(),
-  flags: t.bigint(),
-  createdAt: t.bigint("createdAt").notNull(),
-  updatedAt: t.bigint("updatedAt").notNull(),
-}));
-
-export const v2_resolverUpdateEvent = onchainTable("v2_resolverUpdateEvent", (t) => ({
-  id: t.text().primaryKey(),
-  registryId: t.text(),
-  labelHash: t.text(),
-  resolverId: t.text(),
-  flags: t.bigint(),
-  createdAt: t.bigint("createdAt").notNull(),
-  updatedAt: t.bigint("updatedAt").notNull(),
-}));
-
-export const v2_newSubnameEvent = onchainTable("v2_newSubnameEvent", (t) => ({
-  id: t.text().primaryKey(),
-  registryId: t.text(),
-  label: t.text(),
-  labelHash: t.text(),
-  source: t.text(), // "EthRegistry" or "RootRegistry"
-  createdAt: t.bigint("createdAt").notNull(),
-  updatedAt: t.bigint("updatedAt").notNull(),
-}));
-
-export const v2_registryRelations = relations(v2_registry, ({ one }) => ({
+  // domain references one (sub)registry
   subregistry: one(v2_registry, {
-    fields: [v2_registry.subregistryId],
+    fields: [v2_domain.subregistryId],
     references: [v2_registry.id],
   }),
-}));
 
-export const v2_resolver = onchainTable("v2_resolver", (t) => ({
-  id: t.text().primaryKey(),
-  address: t.text(),
-  node: t.text(),
-  createdAt: t.bigint("createdAt").notNull(),
-  updatedAt: t.bigint("updatedAt").notNull(),
-}));
-
-export const v2_registryResolverRelations = relations(v2_registry, ({ one }) => ({
+  // domain references one resolver
   resolver: one(v2_resolver, {
-    fields: [v2_registry.resolver],
+    fields: [v2_domain.resolverId],
     references: [v2_resolver.id],
   }),
 }));
 
-export const v2_transferSingleEvent = onchainTable("v2_transferSingleEvent", (t) => ({
-  id: t.text().primaryKey(),
-  registryId: t.text(),
-  tokenId: t.text(),
-  from: t.text(),
-  to: t.text(),
-  value: t.bigint(),
-  source: t.text(), // "EthRegistry" or "RootRegistry"
-  createdAt: t.bigint("createdAt").notNull(),
-  updatedAt: t.bigint("updatedAt").notNull(),
+/**
+ * A Resolver represents a given Resolver _contract_ on-chain.
+ */
+export const v2_resolver = onchainTable(
+  "v2_resolvers",
+  (t) => ({
+    /**
+     * Resolver are keyed by [CAIP-10](https://chainagnostic.org/CAIPs/caip-10).
+     */
+    id: t.text().primaryKey().$type<CAIP10AccountId>(),
+  }),
+  (t) => ({}),
+);
+
+export const v2_resolverRelations = relations(v2_resolver, ({ one, many }) => ({
+  // any number of domains can reference a given Resolver
+  domains: many(v2_domain),
+
+  // resolver has many ResolverRecords
+  records: many(v2_resolverRecords),
 }));
+
+/**
+ * A ResolverRecords represents a pairwise relationship between a Resolver entity/contract
+ * and a given `node`.
+ */
+export const v2_resolverRecords = onchainTable(
+  "v2_resolver_records",
+  (t) => ({
+    /**
+     * A ResolverRecords is keyed by (resolverId, node), encoded as `${resolverId}-${node}`.
+     */
+    id: t.text().primaryKey(),
+
+    /**
+     * A ResolverRecords maintains references to the Resolver contract and which node it stores
+     * records for.
+     */
+    resolverId: t.text().notNull(),
+    node: t.hex().notNull(),
+
+    // TODO: implement all record storage here
+  }),
+  (t) => ({
+    // uniquely index against the composite key
+    idxResolverNode: uniqueIndex().on(t.resolverId, t.node),
+  }),
+);
+
+export const v2_resolverRecordRelations = relations(v2_resolverRecords, ({ one, many }) => ({
+  // records belongs to Resolver
+  resolver: one(v2_resolver, {
+    fields: [v2_resolverRecords.resolverId],
+    references: [v2_resolver.id],
+  }),
+
+  // records has many addresses
+  addresses: many(v2_resolverRecordsAddress),
+}));
+
+export const v2_resolverRecordsAddress = onchainTable(
+  "v2_resolver_records_addresses",
+  (t) => ({
+    id: t.text().primaryKey(),
+    resolverRecordsId: t.text().notNull(),
+    coinType: t.bigint().notNull(),
+    address: t.text().notNull(),
+  }),
+  (t) => ({
+    byCoinType: index().on(t.id, t.coinType),
+  }),
+);
+
+export const v2_resolverRecordsAddressRelations = relations(
+  v2_resolverRecordsAddress,
+  ({ one, many }) => ({
+    // resolverrecordsaddress belongs to resolver records
+    records: one(v2_resolverRecords, {
+      fields: [v2_resolverRecordsAddress.resolverRecordsId],
+      references: [v2_resolverRecords.id],
+    }),
+  }),
+);

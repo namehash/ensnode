@@ -1,4 +1,4 @@
-import type { Labelhash, Node } from "@ensnode/utils/types";
+import type { LabelHash, Node } from "@ensnode/utils/types";
 import type { Address, Hex } from "viem";
 
 // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
@@ -59,7 +59,7 @@ export const makeEventId = (
  * @param node the node of the full name that was registered
  * @returns a unique registration id
  */
-export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) => {
+export const makeRegistrationId = (registrarName: string, labelHash: LabelHash, node: Node) => {
   if (registrarName === "eth") {
     // For the "v1" of ENSIndexer (at a minimum) we want to preserve backwards
     // compatibility with Registration id's issued by the ENS Subgraph.

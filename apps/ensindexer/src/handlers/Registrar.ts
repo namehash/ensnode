@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
-import type { Labelhash } from "@ensnode/utils/types";
+import type { LabelHash } from "@ensnode/utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
 import { labelByHash } from "../lib/graphnode-helpers";
@@ -23,7 +23,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
   async function setNamePreimage(
     context: Context,
     name: string,
-    labelhash: Labelhash,
+    labelhash: LabelHash,
     cost: bigint,
   ) {
     // NOTE: ponder intentionally removes null bytes to spare users the footgun of
@@ -68,7 +68,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     }: {
       context: Context;
       event: EventWithArgs<{
-        labelhash: Labelhash;
+        labelhash: LabelHash;
         owner: Hex;
         expires: bigint;
       }>;
@@ -131,7 +131,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{
         name: string;
-        label: Labelhash;
+        label: LabelHash;
         cost: bigint;
       }>;
     }) {
@@ -144,7 +144,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ name: string; label: Labelhash; cost: bigint }>;
+      event: EventWithArgs<{ name: string; label: LabelHash; cost: bigint }>;
     }) {
       const { name, label, cost } = event.args;
       await setNamePreimage(context, name, label, cost);
@@ -155,7 +155,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ labelhash: Labelhash; expires: bigint }>;
+      event: EventWithArgs<{ labelhash: LabelHash; expires: bigint }>;
     }) {
       const { labelhash, expires } = event.args;
 
@@ -186,7 +186,7 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ labelhash: Labelhash; from: Hex; to: Hex }>;
+      event: EventWithArgs<{ labelhash: LabelHash; from: Hex; to: Hex }>;
     }) {
       const { labelhash, to } = event.args;
       await upsertAccount(context, to);

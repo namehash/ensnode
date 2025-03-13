@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Labelhash } from "@ensnode/utils/types";
+import type { LabelHash } from "@ensnode/utils/types";
 import { labelByHash } from "../src/lib/graphnode-helpers";
 
 describe("labelByHash", () => {
@@ -39,7 +39,7 @@ describe("labelByHash", () => {
   it("throws an error for an invalid labelhash missing 0x prefix", async () => {
     await expect(
       labelByHash(
-        "12ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da0600" as Labelhash,
+        "12ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da0600" as LabelHash,
       ),
     ).rejects.toThrow("Labelhash must be 0x-prefixed");
   });

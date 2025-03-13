@@ -28,8 +28,8 @@ catalogs:
       specifier: ^0.39.3
       version: 0.39.3
     hono:
-      specifier: ^4.6.14
-      version: 4.6.17
+      specifier: ^4.7.4
+      version: 4.7.4
     ponder:
       specifier: ^0.9.27
       version: 0.9.27
@@ -73,6 +73,43 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.7.3
+
+  apps/api:
+    dependencies:
+      '@ensdomains/ensjs':
+        specifier: ^4.0.2
+        version: 4.0.2(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+      '@ensnode/ponder-schema':
+        specifier: workspace:*
+        version: link:../../packages/ponder-schema
+      '@ensnode/utils':
+        specifier: workspace:*
+        version: link:../../packages/ensnode-utils
+      '@ponder/client':
+        specifier: 'catalog:'
+        version: 0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+      '@ponder/utils':
+        specifier: 'catalog:'
+        version: 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
+      bun:
+        specifier: ^1.2.2
+        version: 1.2.2
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)
+      hono:
+        specifier: 'catalog:'
+        version: 4.7.4
+      viem:
+        specifier: 'catalog:'
+        version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
+    devDependencies:
+      '@ensnode/shared-configs':
+        specifier: workspace:*
+        version: link:../../packages/shared-configs
+      '@types/bun':
+        specifier: latest
+        version: 1.2.5
 
   apps/ensadmin:
     dependencies:
@@ -199,10 +236,10 @@ importers:
         version: 0.11.1(@types/node@22.13.5)(graphql-ws@5.16.2(graphql@16.10.0))(graphql@16.10.0)
       '@ponder/client':
         specifier: 'catalog:'
-        version: 0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+        version: 0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@ponder/react':
         specifier: 'catalog:'
-        version: 0.9.27(@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
+        version: 0.9.27(@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
       '@ponder/utils':
         specifier: 'catalog:'
         version: 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
@@ -300,12 +337,15 @@ importers:
       '@ensnode/utils':
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
+      caip:
+        specifier: ^1.1.1
+        version: 1.1.1
       hono:
         specifier: 'catalog:'
-        version: 4.6.17
+        version: 4.7.4
       ponder:
         specifier: 'catalog:'
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(bun-types@1.2.5)(hono@4.7.4)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -339,7 +379,7 @@ importers:
         version: link:../../packages/ensnode-utils
       '@hono/node-server':
         specifier: ^1.4.1
-        version: 1.13.3(hono@4.6.17)
+        version: 1.13.3(hono@4.7.4)
       bun:
         specifier: ^1.2.2
         version: 1.2.2
@@ -348,7 +388,7 @@ importers:
         version: 1.4.1
       hono:
         specifier: 'catalog:'
-        version: 4.6.17
+        version: 4.7.4
       pino:
         specifier: ^8.19.0
         version: 8.21.0
@@ -429,7 +469,7 @@ importers:
   packages/ens-deployments:
     dependencies:
       '@ponder/utils':
-        specifier: ^0.2.3
+        specifier: 'catalog:'
         version: 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
     devDependencies:
       '@biomejs/biome':
@@ -440,7 +480,7 @@ importers:
         version: link:../shared-configs
       ponder:
         specifier: 'catalog:'
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(bun-types@1.2.5)(hono@4.7.4)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -504,7 +544,7 @@ importers:
     dependencies:
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)
       parse-prometheus-text-format:
         specifier: ^1.1.1
         version: 1.1.1
@@ -523,10 +563,10 @@ importers:
         version: 20.17.14
       hono:
         specifier: 'catalog:'
-        version: 4.6.17
+        version: 4.7.4
       ponder:
         specifier: 'catalog:'
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(bun-types@1.2.5)(hono@4.7.4)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -541,7 +581,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(bun-types@1.2.5)(hono@4.7.4)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2)
       viem:
         specifier: 'catalog:'
         version: 2.22.13(typescript@5.7.3)(zod@3.24.2)
@@ -552,6 +592,9 @@ importers:
       '@ensnode/shared-configs':
         specifier: 'workspace:'
         version: link:../shared-configs
+      '@ensnode/utils':
+        specifier: 'workspace:'
+        version: link:../ensnode-utils
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -575,7 +618,7 @@ importers:
         version: 2.2.3
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)
       graphql:
         specifier: ^16.10.0
         version: 16.10.0
@@ -597,7 +640,7 @@ importers:
         version: 20.17.14
       hono:
         specifier: 'catalog:'
-        version: 4.6.17
+        version: 4.7.4
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -2250,6 +2293,9 @@ packages:
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
 
+  '@types/bun@1.2.5':
+    resolution: {integrity: sha512-w2OZTzrZTVtbnJew1pdFmgV99H0/L+Pvw+z1P67HaR18MHOzYnTYOi6qzErhK8HyT+DB782ADVPPE92Xu2/Opg==}
+
   '@types/codemirror@0.0.90':
     resolution: {integrity: sha512-8Z9+tSg27NPRGubbUPUCrt5DDG/OWzLph5BvcDykwR5D7RyZh5mhHG0uS1ePKV1YFCA+/cwc4Ey2AJAEFfV3IA==}
 
@@ -2341,6 +2387,9 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/ws@8.5.14':
+    resolution: {integrity: sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -2721,8 +2770,12 @@ packages:
   buffer@6.0.3:
     resolution: {integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==}
 
+  bun-types@1.2.5:
+    resolution: {integrity: sha512-3oO6LVGGRRKI4kHINx5PIdIgnLRb7l/SprhzqXapmoYkFl5m4j6EvALvbDVuuBFaamB46Ap6HCUxIXNLCGy+tg==}
+
   bun@1.2.2:
     resolution: {integrity: sha512-RUc8uVVTw8WoASUzXaEQJR1s7mnwoHm3P871qBUIqSaoOpuwcU+bSVX151/xoqDwnyv38SjOX7yQ3oO0IeT73g==}
+    cpu: [arm64, x64, aarch64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -2739,6 +2792,9 @@ packages:
   cac@6.7.14:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
     engines: {node: '>=8'}
+
+  caip@1.1.1:
+    resolution: {integrity: sha512-a3v5lteUUOoyRI0U6qe5ayCCGkF2mCmJ5zQMDnOD2vRjgRg6sm9p8TsRC2h4D4beyqRN9RYniphAPnj/+jQC6g==}
 
   call-bind-apply-helpers@1.0.1:
     resolution: {integrity: sha512-BhYE+WDaywFg2TBWYNXAE+8B1ATnThNBqXHP5nQu0jWJdVvY2hvkpyB3qOmtmDePiS5/BDQ8wASEWGMWRG148g==}
@@ -3858,8 +3914,8 @@ packages:
   hey-listen@1.0.8:
     resolution: {integrity: sha512-COpmrF2NOg4TBWUJ5UVyaCU2A88wEMkUPK4hNqyCkqHbxT92BbvfjoSozkAIIm6XhicGlJHhFdullInrdhwU8Q==}
 
-  hono@4.6.17:
-    resolution: {integrity: sha512-Kbh4M0so2RzLiIg6iP33DoTU68TdvP2O/kb1Hhhdwa37fazuf402ig8ZRfjkz2dqXwiWl2dAgh0f++TuKAdOtQ==}
+  hono@4.7.4:
+    resolution: {integrity: sha512-Pst8FuGqz3L7tFF+u9Pu70eI0xa5S3LPUmrNd5Jm8nTHze9FxLTK9Kaj5g/k4UcwuJSXTP65SyHOPLrffpcAJg==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -7249,9 +7305,9 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@hono/node-server@1.13.3(hono@4.6.17)':
+  '@hono/node-server@1.13.3(hono@4.7.4)':
     dependencies:
-      hono: 4.6.17
+      hono: 4.7.4
 
   '@humanfs/core@0.19.1': {}
 
@@ -7573,9 +7629,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
+  '@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
     dependencies:
-      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)
       eventsource: 3.0.5
       superjson: 2.2.2
     optionalDependencies:
@@ -7609,9 +7665,9 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@ponder/react@0.9.27(@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
+  '@ponder/react@0.9.27(@ponder/client@0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.66.9(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
     dependencies:
-      '@ponder/client': 0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+      '@ponder/client': 0.9.27(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@tanstack/react-query': 5.66.9(react@18.3.1)
       react: 18.3.1
       superjson: 2.2.2
@@ -8201,6 +8257,10 @@ snapshots:
     dependencies:
       '@babel/types': 7.26.9
 
+  '@types/bun@1.2.5':
+    dependencies:
+      bun-types: 1.2.5
+
   '@types/codemirror@0.0.90':
     dependencies:
       '@types/tern': 0.23.9
@@ -8297,6 +8357,10 @@ snapshots:
   '@types/unist@2.0.11': {}
 
   '@types/unist@3.0.3': {}
+
+  '@types/ws@8.5.14':
+    dependencies:
+      '@types/node': 22.13.5
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -8845,6 +8909,11 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
+  bun-types@1.2.5:
+    dependencies:
+      '@types/node': 22.13.5
+      '@types/ws': 8.5.14
+
   bun@1.2.2:
     optionalDependencies:
       '@oven/bun-darwin-aarch64': 1.2.2
@@ -8869,6 +8938,8 @@ snapshots:
       streamsearch: 1.1.0
 
   cac@6.7.14: {}
+
+  caip@1.1.1: {}
 
   call-bind-apply-helpers@1.0.1:
     dependencies:
@@ -9203,10 +9274,11 @@ snapshots:
 
   dotenv@8.6.0: {}
 
-  drizzle-orm@0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3):
+  drizzle-orm@0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3):
     optionalDependencies:
       '@electric-sql/pglite': 0.2.13
       '@opentelemetry/api': 1.7.0
+      bun-types: 1.2.5
       kysely: 0.26.3
       pg: 8.11.3
 
@@ -9410,7 +9482,7 @@ snapshots:
       '@typescript-eslint/parser': 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-react: 7.37.4(eslint@9.20.1(jiti@2.4.2))
@@ -9430,7 +9502,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.0
@@ -9445,14 +9517,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
@@ -9467,7 +9539,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -10212,7 +10284,7 @@ snapshots:
 
   hey-listen@1.0.8: {}
 
-  hono@4.6.17: {}
+  hono@4.7.4: {}
 
   html-escaper@2.0.2: {}
 
@@ -11565,7 +11637,7 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(bun-types@1.2.5)(hono@4.7.4)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -11573,7 +11645,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.0
       '@escape.tech/graphql-armor-max-depth': 2.4.0
       '@escape.tech/graphql-armor-max-tokens': 2.5.0
-      '@hono/node-server': 1.13.3(hono@4.6.17)
+      '@hono/node-server': 1.13.3(hono@4.7.4)
       '@ponder/utils': 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
       abitype: 0.10.3(typescript@5.7.3)(zod@3.24.2)
       ansi-escapes: 7.0.0
@@ -11582,11 +11654,11 @@ snapshots:
       dataloader: 2.2.3
       detect-package-manager: 3.0.2
       dotenv: 16.4.7
-      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)
       glob: 10.4.5
       graphql: 16.10.0
       graphql-yoga: 5.10.10(graphql@16.10.0)
-      hono: 4.6.17
+      hono: 4.7.4
       http-terminator: 3.2.0
       kysely: 0.26.3
       pg: 8.11.3
@@ -11643,7 +11715,7 @@ snapshots:
       - terser
       - zod
 
-  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.5)(bun-types@1.2.5)(hono@4.7.4)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -11651,7 +11723,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.0
       '@escape.tech/graphql-armor-max-depth': 2.4.0
       '@escape.tech/graphql-armor-max-tokens': 2.5.0
-      '@hono/node-server': 1.13.3(hono@4.6.17)
+      '@hono/node-server': 1.13.3(hono@4.7.4)
       '@ponder/utils': 0.2.3(typescript@5.7.3)(viem@2.22.13(typescript@5.7.3)(zod@3.24.2))
       abitype: 0.10.3(typescript@5.7.3)(zod@3.24.2)
       ansi-escapes: 7.0.0
@@ -11660,11 +11732,11 @@ snapshots:
       dataloader: 2.2.3
       detect-package-manager: 3.0.2
       dotenv: 16.4.7
-      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+      drizzle-orm: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(bun-types@1.2.5)(kysely@0.26.3)(pg@8.11.3)
       glob: 10.4.5
       graphql: 16.10.0
       graphql-yoga: 5.10.10(graphql@16.10.0)
-      hono: 4.6.17
+      hono: 4.7.4
       http-terminator: 3.2.0
       kysely: 0.26.3
       pg: 8.11.3

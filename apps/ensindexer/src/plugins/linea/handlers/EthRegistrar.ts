@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import type { Labelhash } from "@ensnode/utils/types";
+import type { LabelHash } from "@ensnode/utils/types";
 import { zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "../../../handlers/Registrar";
 import { upsertAccount } from "../../../lib/db-helpers";
@@ -14,7 +14,7 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  * direct subname of linea.eth that was registered.
  * https://github.com/Consensys/linea-ens/blob/3a4f02f/packages/linea-ens-contracts/contracts/ethregistrar/ETHRegistrarController.sol#L447
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelhash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
 export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
   const {
