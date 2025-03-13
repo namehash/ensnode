@@ -39,10 +39,7 @@ const rainbowSections: AboutRainbowProps[] = [
       <>
         These are encoded labelhashes used to represent an unknown label in an ENS name. Without
         name healing, millions of names in the ENS manager app (and other ENS apps) don’t appear
-        properly.
-        <br />
-        See the problem for yourself:
-        <br />
+        properly. See the problem for yourself:{" "}
         <Link
           href="https://app.ens.domains/0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5"
           target="_blank"
@@ -50,22 +47,22 @@ const rainbowSections: AboutRainbowProps[] = [
           variant="underline"
           size="large"
         >
-          Example 1↗
+            Example 1<span className="text-sm align-text-top">&#129133;</span>
         </Link>{" "}
         and{" "}
-        <Link
-          href="https://app.ens.domains/[4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b].makoto.eth"
-          target="_blank"
-          className="!text-black"
-          variant="underline"
-          size="large"
-        >
-          Example 2↗
-        </Link>
+          <Link
+              href="https://app.ens.domains/[4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b].makoto.eth"
+              target="_blank"
+              className="!text-black"
+              variant="underline"
+              size="large"
+          >
+              Example 2<span className="text-sm align-text-top">&#129133;</span>
+          </Link>
       </>
     ),
-    sectionBackgroundName: "",
-    isTextOnTheLeft: true,
+      sectionBackgroundName: "",
+      isTextOnTheLeft: true,
     mobileImageOnTop: false,
     svgImage: <ENSProfile styles="relative z-10 w-full h-full" />,
     designatedMobileImage: (
