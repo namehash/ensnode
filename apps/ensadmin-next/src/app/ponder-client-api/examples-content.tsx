@@ -7,7 +7,6 @@ import { replaceBigInts } from "@ponder/utils";
 import { Check, CheckCircle2, Code2, Copy, RefreshCw } from "lucide-react";
 import React, { useState } from "react";
 import { useCodeSnippets } from "./hooks";
-import { Provider as PonderClientProvider } from "./provider";
 
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
@@ -28,24 +27,6 @@ function CopyButton({ content }: { content: string }) {
       {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
       <span className="sr-only">Copy code</span>
     </Button>
-  );
-}
-
-export function PonderClientShell({ children }: { children: React.ReactNode }) {
-  return (
-    <PonderClientProvider>
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-semibold">Ponder Client Examples</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Explore how to query ENS data using the Ponder Client
-            </p>
-          </div>
-        </div>
-        {children}
-      </div>
-    </PonderClientProvider>
   );
 }
 

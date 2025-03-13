@@ -1,9 +1,9 @@
 import { BreadcrumbItem, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
-export default function BreadcrumbsStatusPage() {
+export default function BreadcrumbsPonderPage() {
   return (
     <BreadcrumbItem>
-      <BreadcrumbPage>Ponder Client</BreadcrumbPage>
+      <BreadcrumbPage>GraphQL</BreadcrumbPage>
     </BreadcrumbItem>
   );
 }
