@@ -57,9 +57,8 @@ const rainbowSections: AboutRainbowProps[] = [
           variant="underline"
           size="large"
         >
-          Example 2
-            {/*<span className="text-sm align-text-top">&#129133;</span>*/}
-            {/*TODO: Explore issue with arrows in the link*/}
+          Example 2{/*<span className="text-sm align-text-top">&#129133;</span>*/}
+          {/*TODO: Explore issue with arrows in the link*/}
         </Link>
       </>
     ),
