@@ -820,8 +820,10 @@ export const v2_domain = onchainTable(
 
     /**
      * A Domain has an `owner` address, potentially zeroAddress.
+     *
+     * NOTE: stored as text with type Address to ensure checksumming is persisted
      */
-    owner: t.hex().notNull().default(zeroAddress),
+    owner: t.text().notNull().default(zeroAddress).$type<Address>(),
 
     /**
      * A Domain can be assigned a (sub)Registry with flags.

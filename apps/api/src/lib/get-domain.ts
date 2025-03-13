@@ -38,6 +38,8 @@ export async function getDomain(name: string) {
         r.id AS "registry_id",
         NULL::text AS "domain_id",
         NULL::numeric(78,0) AS "masked_token_id",
+        NULL::numeric(78,0) AS "token_id",
+        NULL::text AS "label",
         0 AS depth
         -- ARRAY[]::numeric[] AS traversed_path
       FROM
@@ -52,6 +54,8 @@ export async function getDomain(name: string) {
         d."subregistry_id" AS "registry_id",
         d.id AS "domain_id",
         d."masked_token_id",
+        d."token_id",
+        d.label,
         pt.depth + 1 AS depth
         -- pt.traversed_path || d."masked_token_id":  :numeric AS traversed_path
       FROM
@@ -78,6 +82,8 @@ export async function getDomain(name: string) {
 
   const lastRow = rows[rows.length - 1];
   if (lastRow.domain_id === null) throw new Error(`Expected domain_id`);
+
+  // construct the domain's name and node
 
   // the last element is the node and it exists in the tree
   return await db.query.v2_domain.findFirst({
