@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 
-import { LabelHash } from "@ensnode/utils/types";
+import { CAIP10AccountId, LabelHash } from "@ensnode/utils/types";
 import { HTTPException } from "hono/http-exception";
 import { hexToBigInt } from "viem";
 import { db, schema } from "./db";
@@ -17,10 +17,14 @@ const labelHashToTokenId = (labelHash: LabelHash) => hexToBigInt(labelHash, { si
 /**
  * gets a Domain from the tree if it exists using recursive CTE, traversing from RootRegistry
  */
-export async function getDomain(name: string) {
+export async function getDomainAndPath(name: string) {
   const tokenIds = parseName(name) // given a set of labelhashes
-    .reverse() // reverse for path
+    .toReversed() // reverse for path
     .map((labelHash) => maskTokenId(labelHashToTokenId(labelHash))); // convert to masked bigint tokenId
+
+  if (tokenIds.length === 0) {
+    throw new Error(`getDomainAndPath: name "${name}" did not contain any segments?`);
+  }
 
   console.log({
     name,
@@ -72,21 +76,28 @@ export async function getDomain(name: string) {
     ORDER BY depth
   `);
 
-  const rows = result.rows;
-
-  console.log(rows);
+  // TODO: idk type this correctly
+  const rows = result.rows as {
+    registry_id: CAIP10AccountId;
+    domain_id: string;
+    masked_token_id: string;
+    token_id: string;
+    label: string;
+    depth: number;
+  }[];
 
   // the domain in question was found iff the path has exactly the correct number of nodes
-  const exists = result.rows.length === tokenIds.length;
+  const exists = rows.length > 0 && rows.length === tokenIds.length;
   if (!exists) throw new HTTPException(404, { message: "Domain not found." });
 
-  const lastRow = rows[rows.length - 1];
+  const lastRow = rows[rows.length - 1]!; // NOTE: must exist given length check above
   if (lastRow.domain_id === null) throw new Error(`Expected domain_id`);
 
-  // construct the domain's name and node
-
   // the last element is the node and it exists in the tree
-  return await db.query.v2_domain.findFirst({
-    where: (t, { eq }) => eq(t.id, lastRow.domain_id),
-  });
+  return {
+    path: rows,
+    domain: await db.query.v2_domain.findFirst({
+      where: (t, { eq }) => eq(t.id, lastRow.domain_id),
+    }),
+  };
 }

@@ -1,6 +1,6 @@
 import { LabelHash } from "@ensnode/utils/types";
 import { Hex, isHex } from "viem";
-import { labelhash, normalize } from "viem/ens";
+import { labelhash } from "viem/ens";
 
 // https://github.com/wevm/viem/blob/main/src/utils/ens/encodedLabelToLabelhash.ts
 export function encodedLabelToLabelhash(label: string): Hex | null {
@@ -16,8 +16,6 @@ export function encodedLabelToLabelhash(label: string): Hex | null {
  * parses a name into labelHash segments. name may contain encoded labelHashes
  */
 export function parseName(name: string): LabelHash[] {
-  if (name !== normalize(name)) throw new Error(`parseName: "${name}" is not normalized.`);
-
   return name.split(".").map((segment) => {
     const labelHash = segment.startsWith("[")
       ? encodedLabelToLabelhash(segment)
