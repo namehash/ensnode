@@ -1,0 +1,23 @@
+---
+import AboutRainbowSections from "../components/organisms/AboutRainbowSections";
+import Appreciation from "../components/organisms/Appreciation";
+import ArchitectureOverview from "../components/organisms/ArchitectureOverview";
+import ForDevelopers from "../components/organisms/ForDevelopers";
+import HealUnknownName from "../components/organisms/HealUnknownName";
+import Hero from "../components/organisms/Hero";
+import Roadmap from "../components/organisms/Roadmap";
+import Layout from "../layouts/Layout.astro";
+
+// Welcome to Astro! Check out the Astro documentation at https://docs.astro.build
+// TODO: come back to roadmap after its content is ready, same for other unknown sections
+---
+
+<Layout>
+	<Hero client:load/>
+	<AboutRainbowSections />
+	<ForDevelopers />
+	<!--<HealUnknownName />-->
+	<!--<Roadmap />-->
+	<!--<ArchitectureOverview />-->
+	<Appreciation />
+</Layout>

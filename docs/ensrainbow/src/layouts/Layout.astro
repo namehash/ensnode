@@ -1,0 +1,75 @@
+---
+import { AstroFont } from "astro-font";
+import { SEO } from "astro-seo";
+import Footer from "../components/organisms/Footer";
+import Header from "../components/organisms/Header";
+import "../styles/global.css";
+import "@namehash/namekit-react/styles.css";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+	<AstroFont
+		config={[
+			{
+				src: [],
+				name: "Inter",
+				// Google Fonts URL
+                googleFontsURL: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+				preload: true,
+				display: "swap",
+				selector: "body",
+				fallback: "sans-serif",
+			},
+		]}
+	/>
+    <meta name="viewport" content="width=device-width"/>
+    <meta name="generator" content={Astro.generator}/>
+	<SEO
+		title="ENSRainbow - Making the unknown, known"
+		description="Heal millions of unknown ENS names with this ENSNode sidecar service."
+		openGraph={{
+			basic: {
+				title: "ENSRainbow - making the unknown, known",
+				type: "image/png",
+				image: "/og-image.png",
+				url: "https://ensrainbow.io/",
+			},
+			optional: {
+				description: "Heal millions of unknown ENS names with this ENSNode sidecar service.",
+				siteName: "ENSRainbow"
+			}
+		}}
+		twitter={{
+			creator: "@NameHashLabs",
+			title: "ENSRainbow - making the unknown, known",
+			image: "/twitter-og-image.png",
+			description: "Heal millions of unknown ENS names with this ENSNode sidecar service.",
+			card: "summary_large_image"
+		}}
+		extend={{
+        link: [
+			{ rel: "icon", href: "/favicon.svg" },
+			{ rel:"manifest", href:"/site.webmanifest"},
+			{ rel: "apple-touch-icon", href: "/apple-touch-icon.png"}
+			],
+		}}
+	/>
+</head>
+<body>
+<Header client:only="react"/>
+<slot/>
+<Footer client:load/>
+</body>
+</html>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>

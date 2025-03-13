@@ -1,5 +1,18 @@
-# ENSRainbow Documentation
+# ENSRainbow Landing Page
 
-> A documentation website, powered by [Starlight](https://starlight.astro.build)
+## 🧞 Commands
 
-Visit [ensrainbow.io](https://www.ensrainbow.io) for documentation, guides, and the API reference.
+All commands are run from the root of the project, from a terminal:
+
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `pnpm install`             | Installs dependencies                            |
+| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
+| `pnpm build`           | Build your production site to `./dist/`          |
+| `pnpm preview`         | Preview your build locally, before deploying     |
+| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+
+## 👀 Want to learn more about Astro?
+
+Feel free to check the [Astro documentation](https://docs.astro.build).
