@@ -1,8 +1,14 @@
 import React from "react";
 
-
 export const ENSRainbowLogo2D = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg width="151" height="28" viewBox="0 0 151 28" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+  <svg
+    width="151"
+    height="28"
+    viewBox="0 0 151 28"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
     <path d="M2 2H26V6H2V2Z" fill="#FF311C" />
     <path d="M2 14H26V18H2V14Z" fill="#97FF2E" />
     <path d="M2 6H26V10H2V6Z" fill="#FEC401" />
