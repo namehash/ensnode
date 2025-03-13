@@ -17,12 +17,12 @@ const ownedName = "base.eth" as const;
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
-// The `base` plugin does not support healing reverse addresses
+// Support for healing addr.reverse subnames on Base will be added later
 const canHealReverseAddresses = () => false;
 
-// The `base` plugin does not support reverse root node checking
+// Support for healing addr.reverse subnames on Base will be added later
 const isReverseRootNode = (node: Node): boolean => {
-  throw new Error(`Cannot check if '${node} is a reverse root node for 'base' plugin`);
+  throw new Error(`Cannot check if '${node} is a reverse root node on Base`);
 };
 
 export const config = createConfig({

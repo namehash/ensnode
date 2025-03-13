@@ -177,10 +177,10 @@ export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
 
   /**
-   * Determines whether the plugin can heal reverse addresses.
-   * Some plugins might not need it at the moment.
+   * Determines whether the plugin can heal subnames of addr.reverse.
+   * Some plugins might not support it at the moment.
    *
-   * @returns true if the plugin can heal reverse addresses
+   * @returns true if the plugin can heal addr.reverse subnames
    */
   canHealReverseAddresses(): boolean;
 

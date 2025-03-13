@@ -22,7 +22,7 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
    **/
   indexingBehaviorDependencies: {
     /**
-     * Breaking change for ens-subgraph compatibility.
+     * If set to `false` then indexed data will no longer be backwards compatible with the ENS Subgraph.
      */
     HEAL_REVERSE_ADDRESSES: boolean;
   };
