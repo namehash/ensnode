@@ -47,22 +47,22 @@ const rainbowSections: AboutRainbowProps[] = [
           variant="underline"
           size="large"
         >
-            Example 1<span className="text-sm align-text-top">&#129133;</span>
+          Example 1<span className="text-sm align-text-top">&#129133;</span>
         </Link>{" "}
         and{" "}
-          <Link
-              href="https://app.ens.domains/[4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b].makoto.eth"
-              target="_blank"
-              className="!text-black"
-              variant="underline"
-              size="large"
-          >
-              Example 2<span className="text-sm align-text-top">&#129133;</span>
-          </Link>
+        <Link
+          href="https://app.ens.domains/[4283f2583432677d3dac6d2c021cdd7ef6855349ea584813ad5811c0e497eb0b].makoto.eth"
+          target="_blank"
+          className="!text-black"
+          variant="underline"
+          size="large"
+        >
+          Example 2<span className="text-sm align-text-top">&#129133;</span>
+        </Link>
       </>
     ),
-      sectionBackgroundName: "",
-      isTextOnTheLeft: true,
+    sectionBackgroundName: "",
+    isTextOnTheLeft: true,
     mobileImageOnTop: false,
     svgImage: <ENSProfile styles="relative z-10 w-full h-full" />,
     designatedMobileImage: (

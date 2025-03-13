@@ -28,7 +28,7 @@ export default function FullRainbow() {
           ),
           value: 90,
           color:
-            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.5%, #1EFDFF 36.5%, #93E223 53%, #FAE000 72.5%, #F09C0A 87.5%, #EA2F86 105%)",
+            "linear-gradient(90deg, #EA2F86 0%, #CA01FD 0.5%, #0B10FE 18.5%, #1EFDFF 36.5%, #93E223 53%, #FAE000 71%, #F09C0A 87.5%, #EA2F86 105%)",
         },
         {
           label: (
