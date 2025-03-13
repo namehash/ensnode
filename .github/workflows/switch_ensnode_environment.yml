@@ -25,7 +25,11 @@ jobs:
       - name: Print switch target
         run: | 
             echo "Switching to: $TARGET_ENVIRONMENT"
-      
+
+      - name: Install redis-cli
+        run: | 
+            sudo apt install redis-tools
+
       - name: Switch Traefik routers
         run: |
             # SEPOLIA
