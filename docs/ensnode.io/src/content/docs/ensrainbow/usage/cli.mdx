@@ -1,0 +1,230 @@
+---
+title: CLI
+description: Comprehensive guide to using the ENSRainbow command-line interface
+---
+
+# ENSRainbow CLI
+
+The ENSRainbow command-line interface (CLI) allows you to manage and interact with the ENSRainbow service for healing ENS labels. This document covers all available commands, their options, and common usage patterns.
+
+## Installation
+
+ENSRainbow CLI is included with the ENSRainbow package. If you've installed ENSRainbow, you already have access to the CLI.
+
+```bash
+# Navigate to the ENSRainbow directory
+cd apps/ensrainbow
+
+# Run the CLI
+pnpm run serve
+```
+
+## Global Options
+
+These options apply to all ENSRainbow CLI commands:
+
+- `--help`: Display help information for any command
+
+## Commands
+
+The ENSRainbow CLI provides the following commands:
+
+- [`ingest`](#ingest): Load labels from a SQL dump into the database
+- [`serve`](#serve): Start the ENSRainbow API server
+- [`validate`](#validate): Verify the integrity of the database
+- [`purge`](#purge): Delete the database directory
+
+### Ingest
+
+The `ingest` command imports labels from an ENS rainbow table SQL dump into a LevelDB database.
+
+```bash
+pnpm run ingest [options]
+```
+
+#### Options
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `--input-file` | Path to the gzipped SQL dump file | `./ens_names.sql.gz` |
+| `--data-dir` | Directory to store LevelDB data | `./data` |
+
+#### Example
+
+```bash
+# Basic usage with default options
+pnpm run ingest
+
+# Specify custom input file and data directory
+pnpm run ingest --input-file=./custom_dump.sql.gz --data-dir=./custom_data
+```
+
+#### Notes
+
+- The ingest process creates a database if one doesn't exist yet
+- Attempting to ingest data into an existing database will fail with an error
+- The process validates data integrity and verifies record counts automatically
+- ENSRainbow currently only supports a single ingestion; to re-ingest data, purge the existing database first
+
+### Serve
+
+The `serve` command starts the ENSRainbow API server, making the label healing service available via HTTP endpoints.
+
+```bash
+pnpm run serve [options]
+```
+
+#### Options
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `--port` | Port to listen on | `3223` (or from PORT env variable) |
+| `--data-dir` | Directory containing LevelDB data | `./data` |
+
+#### Example
+
+```bash
+# Start server with default options
+pnpm run serve
+
+# Start server on a custom port and data directory
+pnpm run serve --port=4000 --data-dir=./custom_data
+```
+
+#### Environment Variables
+
+- `PORT`: Set the server port (alternative to `--port` option)
+- `LOG_LEVEL`: Control logging verbosity (values: `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `silent`)
+
+:::note
+If `PORT` environment variable and `--port` flag are both set with different values, the server will throw an error. Use only one method to specify the port.
+:::
+
+### Validate
+
+The `validate` command verifies the integrity of the ENSRainbow database.
+
+```bash
+pnpm run validate [options]
+```
+
+#### Options
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `--data-dir` | Directory containing LevelDB data | `./data` |
+| `--lite` | Perform a faster, less thorough validation by skipping hash verification and record count validation | `false` |
+
+#### Example
+
+```bash
+# Run full validation with default data directory
+pnpm run validate
+
+# Run lite validation with custom data directory
+pnpm run validate --lite --data-dir=./custom_data
+```
+
+#### Validation Checks
+
+The validate command performs the following checks:
+
+In all modes:
+- Verifies the database exists and can be opened
+- Confirms the database schema version matches the expected version
+- Checks that the ingestion status is marked as "finished"
+
+In standard (non-lite) mode, it also:
+- Verifies that every key is a valid labelhash
+- Confirms that each label correctly hashes to its corresponding labelhash
+- Validates that the number of records matches the precalculated count
+
+### Purge
+
+The `purge` command completely removes the database directory and all its contents.
+
+```bash
+pnpm run purge [options]
+```
+
+#### Options
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `--data-dir` | Directory containing LevelDB data | `./data` |
+
+#### Example
+
+```bash
+# Purge the default data directory
+pnpm run purge
+
+# Purge a custom data directory
+pnpm run purge --data-dir=./custom_data
+```
+
+:::warning
+This command will permanently delete the entire data directory and all its contents. Use with caution.
+:::
+
+## Workflow Examples
+
+### Complete Workflow: Download, Ingest, and Serve
+
+```bash
+# 1. Download the rainbow table
+pnpm run get-legacy-data
+
+# 2. Ingest the data
+pnpm run ingest
+
+# 3. Validate the database
+pnpm run validate
+
+# 4. Start the API server
+pnpm run serve
+```
+
+### Reinitialize the Database
+
+```bash
+# 1. Purge the existing database
+pnpm run purge
+
+# 2. Download and ingest fresh data
+pnpm run get-legacy-data
+pnpm run ingest
+```
+
+### Production Deployment
+
+```bash
+# Set production environment variables
+export NODE_ENV=production
+export PORT=3223
+
+# Start the server
+pnpm run serve
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Error: "Database already exists"**
+
+This occurs when trying to ingest data into an existing database. To resolve:
+1. If you want to keep the existing database, skip the ingest step and just run `serve`
+2. If you want to recreate the database, first run `purge` then run `ingest`
+
+**Error: "Port conflict"**
+
+This happens when the `PORT` environment variable and `--port` flag specify different values. To resolve:
+1. Use only one method to set the port
+2. If both are needed, ensure they specify the same value
+
+**Error: "Database is in an incomplete state"**
+
+This means a previous ingestion was interrupted. To resolve:
+1. Run `purge` to remove the corrupted database
+2. Run `ingest` again to create a fresh Database
