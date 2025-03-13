@@ -771,15 +771,14 @@ export const v2_registryRelations = relations(v2_registry, ({ one, many }) => ({
 /**
  * A Domain entity represents a subname in the hierarchical namespace.
  *
- * TODO: perhaps key by node instead of (registryId, tokenId)?
- *
  * In ENSv2 this maps 1:1 with a Registry contract's tokens.
+ * NOTE: we key Domain by maskedTokenId to avoid collisions.
  */
 export const v2_domain = onchainTable(
   "v2_domains",
   (t) => ({
     /**
-     * Domains are unique by (registryId, tokenId), encoded as `${registryId}-${tokenId}`
+     * Domains are unique by (registryId, maskedTokenId), encoded as `${registryId}-${maskedTokenId}`
      */
     id: t.text().primaryKey(),
 
@@ -789,15 +788,20 @@ export const v2_domain = onchainTable(
     registryId: t.text().notNull(),
 
     /**
-     * A Domain entity represents a given labelHash value i.e. the result of `labelhash()`, encoded as a bigint 'tokenId'.
+     * A Domain entity represents a given labelHash value i.e. the result of `labelhash()`, encoded
+     * as a bigint 'tokenId', within a given Registry, with the lower 32 bits masked.
+     */
+    maskedTokenId: t.bigint().notNull(),
+
+    /**
+     * A Domain stores its un-masked tokenId for calculating `node`.
      *
      * tokenId alone is _not_ a UUID value, and collisions are expected (i.e. there will be a Domain
      * entity representing the `hello` in `hello.example.eth` and a Domain representing the `hello`
      * in `hello.eth` that have identical tokenId values).
      *
-     * Domain entities are unique by (registryId, tokenId), enforced by ERC1155.
-     *
-     * Note that in ENSv2, labelHashes (and tokenIds) have the lower 32 bits masked.
+     * Domain entities are unique by (registryId, tokenId), enforced by ERC1155. Note that this tokenId
+     * value is _not_ masked.
      */
     tokenId: t.bigint().notNull(),
 
@@ -833,8 +837,10 @@ export const v2_domain = onchainTable(
     resolverFlags: t.bigint().notNull().default(0n),
   }),
   (t) => ({
-    // a Domain is unique by (registryId, tokenId)
-    registryDomainHashIndex: uniqueIndex().on(t.registryId, t.tokenId),
+    // a Domain is unique by (registryId, maskedTokenId) (indexer-invariant)
+    registryTokenIdIndex: uniqueIndex().on(t.registryId, t.maskedTokenId),
+    // a Domain is unique by (registryId, tokenId) (ERC1155-invariant)
+    registryMaskedTokenIdIndex: uniqueIndex().on(t.registryId, t.tokenId),
   }),
 );
 

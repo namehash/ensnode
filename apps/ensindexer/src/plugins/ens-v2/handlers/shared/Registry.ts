@@ -21,7 +21,8 @@ export async function handleNewSubname({
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
   const tokenId = labelHashToTokenId(labelhash(label));
-  const domainId = makeDomainId(registryId, tokenId);
+  const maskedTokenId = maskTokenId(tokenId);
+  const domainId = makeDomainId(registryId, maskedTokenId);
 
   console.table({ on: "NewSubname", registryId, tokenId, domainId });
 
@@ -37,10 +38,15 @@ export async function handleNewSubname({
       id: domainId,
       registryId,
       tokenId,
+      maskedTokenId,
       label: indexableLabel,
     })
     // or upsert existing Domain's `label` value
-    .onConflictDoUpdate({ label: indexableLabel });
+    .onConflictDoUpdate({
+      label: indexableLabel,
+      // NOTE: we enforce that tokenId is set here to avoid event-order issues specified in RegistryDatastore
+      tokenId,
+    });
 }
 
 export async function handleURI({
@@ -53,11 +59,11 @@ export async function handleURI({
     value: string;
   }>;
 }) {
-  const { id, value: uri } = event.args;
+  const { id: tokenId, value: uri } = event.args;
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
-  const tokenId = maskTokenId(id); // NOTE: ensure token id is masked
-  const domainId = makeDomainId(registryId, tokenId);
+  const maskedTokenId = maskTokenId(tokenId);
+  const domainId = makeDomainId(registryId, maskedTokenId);
 
   console.table({ on: "URI", registryId, tokenId, domainId, uri });
 
@@ -68,10 +74,15 @@ export async function handleURI({
       id: domainId,
       registryId,
       tokenId,
+      maskedTokenId,
       uri,
     })
     // or update uri of existing Domain
-    .onConflictDoUpdate({ uri });
+    .onConflictDoUpdate({
+      uri,
+      // NOTE: we enforce that tokenId is set here to avoid event-order issues specified in RegistryDatastore
+      tokenId,
+    });
 }
 
 // ERC1155 Transfer events may arrive in any order
@@ -79,11 +90,11 @@ async function handleTransfer({
   context,
   event,
 }: { context: Context; event: EventWithArgs<{ id: bigint; to: Address }> }) {
-  const { id, to } = event.args;
+  const { id: tokenId, to } = event.args;
 
   const registryId = makeContractId(context.network.chainId, event.log.address);
-  const tokenId = maskTokenId(id); // NOTE: ensures that the tokenId emitted is masked
-  const domainId = makeDomainId(registryId, tokenId);
+  const maskedTokenId = maskTokenId(tokenId);
+  const domainId = makeDomainId(registryId, maskedTokenId);
   const owner = getAddress(to); // NOTE: ensures that owner is checksummed
 
   console.table({ on: "handleTransfer", registryId, tokenId, domainId, owner });
@@ -111,10 +122,15 @@ async function handleTransfer({
         id: domainId,
         registryId,
         tokenId,
+        maskedTokenId,
         owner,
       })
       // or update owner of existing Domain
-      .onConflictDoUpdate({ owner });
+      .onConflictDoUpdate({
+        owner,
+        // NOTE: we enforce that tokenId is set here to avoid event-order issues specified in RegistryDatastore
+        tokenId,
+      });
   }
 }
 

@@ -67,8 +67,8 @@ export const makeContractId = (chainId: number, address: Address) => {
 export const makeResolverRecordsId = (resolverId: string, node: Node) =>
   [resolverId, node].join("-");
 
-export const makeDomainId = (registryId: string, tokenId: bigint) =>
-  [registryId, tokenId].join("-");
+export const makeDomainId = (registryId: string, maskedTokenId: bigint) =>
+  [registryId, maskedTokenId].join("-");
 
 export const makeResolverRecordsAddressId = (resolverRecordsId: string, coinType: bigint) =>
   [resolverRecordsId, coinType].join("-");
@@ -86,8 +86,7 @@ export const maskTokenId = (tokenId: bigint) => tokenId & LABEL_HASH_MASK;
 /**
  * encodes a hex labelHash as bigint, masking the lower 32 bits
  */
-export const labelHashToTokenId = (labelHash: LabelHash) =>
-  maskTokenId(hexToBigInt(labelHash, { size: 32 }));
+export const labelHashToTokenId = (labelHash: LabelHash) => hexToBigInt(labelHash, { size: 32 });
 
 /**
  * decodes a bigint tokenId into a hex labelHash

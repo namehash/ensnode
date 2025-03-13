@@ -9,29 +9,26 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
   ponder.on(namespace("RegistryDatastore:SubregistryUpdate"), async ({ context, event }) => {
     const {
       registry: registryAddress,
-      labelHash: tokenId, // NOTE: this variable is called labelHash but is actually masked tokenId
+      labelHash: maskedTokenId, // NOTE: this variable is called labelHash but is actually masked tokenId
       subregistry: subregistryAddress,
       flags,
     } = event.args;
 
     const registryId = makeContractId(context.network.chainId, registryAddress);
-    const domainId = makeDomainId(registryId, tokenId);
+    const domainId = makeDomainId(registryId, maskedTokenId);
     const subregistryId = makeContractId(context.network.chainId, subregistryAddress);
 
     console.table({
       on: "RegistryDatastore:SubregistryUpdate",
       registryId,
-      tokenId,
+      tokenId: maskedTokenId,
       domainId,
       subregistryId,
       hash: event.transaction.hash,
     });
 
-    // ensure registry entity
-    await context.db.insert(schema.v2_registry).values({ id: registryId }).onConflictDoNothing();
-
-    // NOTE(registry-domain-uniq): if subregistry is already linked to a domain, must ignore this update
-    // NOTE: implements first-write-wins for registry-domain relations
+    // NOTE(registry-domain-uniq): if subregistry is already linked to a domain, ignore this update
+    //   (implements first-write-wins for registry-domain relations)
     const existingSubregistry = await context.db.find(schema.v2_registry, { id: subregistryId });
     if (existingSubregistry?.domainId) {
       console.log(
@@ -39,6 +36,9 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
       );
       return;
     }
+
+    // ensure registry entity
+    await context.db.insert(schema.v2_registry).values({ id: registryId }).onConflictDoNothing();
 
     // ensure subregistry entity
     // TODO(registry-domain-uniq): also update the reverse-mapping on the subregistry to point to this domain
@@ -50,7 +50,22 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
     await context.db
       .insert(schema.v2_domain)
       // insert domain with subregistry info
-      .values({ id: domainId, registryId, tokenId, subregistryId, subregistryFlags: flags })
+      .values({
+        id: domainId,
+        registryId,
+        maskedTokenId,
+        // NOTE: this is technically incorrect but this event does not have access to the token's unmasked
+        // tokenId. in the event that the Domain already exists, this create will not occur so this isn't an issue.
+        // in the event that the Domain does not exist, it is created with an incorrect tokenId BUT
+        // according to IRegistry, NewSubname will follow, which ensures that the correct tokenId
+        // is always set. solutions to this issue include:
+        // 1. event-order guarantees (NewSubname then RegistryDatastore events)
+        // 2. RegistryDatastore events emitting the un-masked tokenId and expecting clients to do the
+        //    subsequent masking
+        tokenId: maskedTokenId,
+        subregistryId,
+        subregistryFlags: flags,
+      })
       // or update existing domain with subregistry info
       .onConflictDoUpdate({ subregistryId, subregistryFlags: flags });
   });
@@ -59,19 +74,19 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
   ponder.on(namespace("RegistryDatastore:ResolverUpdate"), async ({ context, event }) => {
     const {
       registry: registryAddress,
-      labelHash: tokenId, // NOTE: this variable is called labelHash but is actually masked tokenId
+      labelHash: maskedTokenId, // NOTE: this variable is called labelHash but is actually masked tokenId
       resolver: resolverAddress,
       flags,
     } = event.args;
 
     const registryId = makeContractId(context.network.chainId, registryAddress);
-    const domainId = makeDomainId(registryId, tokenId);
+    const domainId = makeDomainId(registryId, maskedTokenId);
     const resolverId = makeContractId(context.network.chainId, resolverAddress);
 
     console.table({
       on: "RegistryDatastore:ResolverUpdate",
       registryId,
-      tokenId,
+      tokenId: maskedTokenId,
       domainId,
       resolverId,
     });
@@ -85,7 +100,22 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"ens-v2">) {
     await context.db
       .insert(schema.v2_domain)
       // insert domain with resolver info
-      .values({ id: domainId, registryId, tokenId, resolverId, resolverFlags: flags })
+      .values({
+        id: domainId,
+        registryId,
+        maskedTokenId,
+        // NOTE: this is technically incorrect but this event does not have access to the token's unmasked
+        // tokenId. in the event that the Domain already exists, this create will not occur so this isn't an issue.
+        // in the event that the Domain does not exist, it is created with an incorrect tokenId BUT
+        // according to IRegistry, NewSubname will follow, which ensures that the correct tokenId
+        // is always set. solutions to this issue include:
+        // 1. event-order guarantees (NewSubname then RegistryDatastore events)
+        // 2. RegistryDatastore events emitting the un-masked tokenId and expecting clients to do the
+        //    subsequent masking
+        tokenId: maskedTokenId,
+        resolverId,
+        resolverFlags: flags,
+      })
       // or update existing domain with resolver info
       .onConflictDoUpdate({ resolverId, resolverFlags: flags });
   });

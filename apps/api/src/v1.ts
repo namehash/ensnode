@@ -11,9 +11,9 @@ const app = new Hono();
 app.get("/domain/:name", async (c) => {
   const name = c.req.param("name");
 
-  const domainTree = await getDomain(name);
+  const domain = await getDomain(name);
 
-  return c.json(replaceBigInts(domainTree, (v) => String(v)));
+  return c.json(replaceBigInts(domain, (v) => String(v)));
 });
 
 export default app;
