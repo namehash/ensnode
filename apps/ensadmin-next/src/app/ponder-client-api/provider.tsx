@@ -21,10 +21,7 @@ export function Provider({ url, children }: ProviderProps) {
   );
 }
 
-function createPonderClient(
-  ensNodeUrl: string,
-  schema: Record<string, unknown>
-) {
+function createPonderClient(ensNodeUrl: string, schema: Record<string, unknown>) {
   return createClient(new URL("/sql", ensNodeUrl).toString(), { schema });
 }
 export const schema = ponderSchema;

@@ -6,11 +6,7 @@ import { Inter } from "next/font/google";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Provider as QueryProvider } from "@/components/query-client/provider";
 import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Suspense } from "react";
 
 const inter = Inter({
