@@ -1,7 +1,7 @@
 "use client";
 
 import { ENSName } from "@/components/ens-name";
-import { useIndexingStatus } from "@/components/indexing-status/hooks";
+import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,6 +16,7 @@ import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getAddress } from "viem/utils";
 import { useRecentDomains } from "./hooks";
 
 // Helper function to safely format dates
@@ -116,7 +117,8 @@ function Duration({
 export function RecentDomains() {
   const searchParams = useSearchParams();
   const recentDomainsQuery = useRecentDomains(searchParams);
-  const indexingStatus = useIndexingStatus(searchParams);
+  const indexingStatus = useIndexingStatusQuery(searchParams);
+  const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -194,7 +196,15 @@ export function RecentDomains() {
                       />
                     </TableCell>
                     <TableCell>
-                      <ENSName address={registration.domain.owner.id} showAvatar={true} />
+                      {indexedChainId ? (
+                        <ENSName
+                          address={getAddress(registration.domain.owner.id)}
+                          chainId={indexedChainId}
+                          showAvatar={true}
+                        />
+                      ) : (
+                        <ENSName.Placeholder showAvatar={true} />
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
