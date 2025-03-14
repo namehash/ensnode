@@ -129,7 +129,7 @@ export function starlight(): AstroIntegration {
         attrs: {
           property: 'og:image',
           // The absolute URL of the image to use.
-          content: 'https://user-images.githubusercontent.com/5182256/131216951-8f74f425-f775-463d-a11b-0e01ad9fce8d.png',
+          content: '/og-image.png',
         },
       },
       {
@@ -137,8 +137,22 @@ export function starlight(): AstroIntegration {
         attrs: {
           property: 'twitter:image',
           // The absolute URL of the image to use.
-          content: 'https://user-images.githubusercontent.com/5182256/131216951-8f74f425-f775-463d-a11b-0e01ad9fce8d.png',
+          content: '../../public/og-image.png',
         },
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          property: "twitter:title",
+          content: "The new indexer for ENSv2",
+        }
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          property: "twitter:description",
+          content: "Get started building ENS applications with your own ENSNode.",
+        }
       },
     ],
   });
