@@ -1,14 +1,14 @@
+import { Hex } from "viem";
+
 /**
- * Types for the recent domains component
+ * Types for the recent registrations component
  */
 export interface Domain {
-  id: string;
   name: string;
-  labelName: string;
   createdAt: string;
   expiryDate: string;
   owner: {
-    id: string;
+    id: Hex;
   };
 }
 
@@ -18,6 +18,6 @@ export interface Registration {
   domain: Domain;
 }
 
-export interface RecentDomainsResponse {
+export interface RecentRegistrationsResponse {
   registrations: Registration[];
 }

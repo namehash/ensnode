@@ -17,7 +17,7 @@ import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAddress } from "viem/utils";
-import { useRecentDomains } from "./hooks";
+import { useRecentRegistrations } from "./hooks";
 
 // Helper function to safely format dates
 const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
@@ -70,8 +70,8 @@ const formatRelativeTime = (timestamp: string) => {
   }
 };
 
-// Helper function to generate ENS app URL for a domain
-const getEnsAppUrl = (name: string) => {
+// Helper function to generate ENS app URL for a name
+const getEnsAppUrlForName = (name: string) => {
   return `https://app.ens.domains/${name}`;
 };
 
@@ -114,9 +114,9 @@ function Duration({
   return <>{duration}</>;
 }
 
-export function RecentDomains() {
+export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const recentDomainsQuery = useRecentDomains(searchParams);
+  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
   const indexingStatus = useIndexingStatusQuery(searchParams);
   const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
@@ -155,11 +155,11 @@ export function RecentDomains() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {recentDomainsQuery.isLoading ? (
-          <RecentDomainsFallback />
-        ) : recentDomainsQuery.error ? (
+        {recentRegistrationsQuery.isLoading ? (
+          <RecentRegistrationsFallback />
+        ) : recentRegistrationsQuery.error ? (
           <div className="text-destructive">
-            Error loading recent domains: {(recentDomainsQuery.error as Error).message}
+            Error loading recent registrations: {(recentRegistrationsQuery.error as Error).message}
           </div>
         ) : (
           <Table>
@@ -173,11 +173,11 @@ export function RecentDomains() {
             </TableHeader>
             <TableBody>
               {isClient &&
-                recentDomainsQuery.data?.registrations.map((registration) => (
-                  <TableRow key={registration.domain.id}>
+                recentRegistrationsQuery.data?.registrations.map((registration) => (
+                  <TableRow key={registration.domain.name}>
                     <TableCell className="font-medium">
                       <a
-                        href={getEnsAppUrl(registration.domain.name)}
+                        href={getEnsAppUrlForName(registration.domain.name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-blue-600 hover:underline"
@@ -216,7 +216,7 @@ export function RecentDomains() {
   );
 }
 
-function RecentDomainsFallback() {
+function RecentRegistrationsFallback() {
   return (
     <div className="animate-pulse space-y-4">
       <div className="h-10 bg-muted rounded w-full"></div>

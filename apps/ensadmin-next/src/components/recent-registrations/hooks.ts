@@ -1,14 +1,14 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
-import { RecentDomainsResponse } from "./types";
+import { RecentRegistrationsResponse } from "./types";
 
 /**
- * Fetches the last 5 newly registered domains.
+ * Fetches info about the 5 most recently registered .eth domains that have been indexed.
  *
  * @param baseUrl ENSNode URL
- * @returns Information about the last 5 newly registered domains.
+ * @returns Info about the 5 most recently registered .eth domains that have been indexed.
  */
-async function fetchRecentDomains(baseUrl: string): Promise<RecentDomainsResponse> {
+async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistrationsResponse> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: 5, orderBy: registrationDate, orderDirection: desc) {
@@ -38,8 +38,8 @@ async function fetchRecentDomains(baseUrl: string): Promise<RecentDomainsRespons
   });
 
   if (!response.ok) {
-    console.error("Failed to fetch recent domains", response);
-    throw new Error("Failed to fetch recent domains");
+    console.error("Failed to fetch recent registrations", response);
+    throw new Error("Failed to fetch recent registrations");
   }
 
   const data = await response.json();
@@ -47,16 +47,16 @@ async function fetchRecentDomains(baseUrl: string): Promise<RecentDomainsRespons
 }
 
 /**
- * Hook to fetch the last 5 newly registered domains.
+ * Hook to fetch info about the 5 most recently registered .eth domains that have been indexed.
  * @param searchParams The URL search params including the selected ENS node URL.
  * @returns React Query hook result.
  */
-export function useRecentDomains(searchParams: URLSearchParams) {
+export function useRecentRegistrations(searchParams: URLSearchParams) {
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
-    queryKey: ["recent-domains", ensNodeUrl],
-    queryFn: () => fetchRecentDomains(ensNodeUrl),
+    queryKey: ["recent-registrations", ensNodeUrl],
+    queryFn: () => fetchRecentRegistrations(ensNodeUrl),
     throwOnError(error) {
       throw new Error(`ENSNode request error at '${ensNodeUrl}'. Cause: ${error.message}`);
     },

@@ -1,7 +1,7 @@
 import { IndexingStatus } from "@/components/indexing-status/components";
 import { PageShell } from "@/components/page-shell";
 import { Provider as QueryProvider } from "@/components/query-client/provider";
-import { RecentDomains } from "@/components/recent-domains";
+import { RecentRegistrations } from "@/components/recent-registrations";
 import { Suspense } from "react";
 
 export default function Status() {
@@ -13,7 +13,7 @@ export default function Status() {
         </Suspense>
         <Suspense>
           <div className="px-6 pb-6">
-            <RecentDomains />
+            <RecentRegistrations />
           </div>
         </Suspense>
       </QueryProvider>
