@@ -211,4 +211,18 @@ docker build -f apps/ensrainbow/Dockerfile \
 docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
 ```
 
+### Using Pre-built Docker Images
+
+Instead of building the Docker images yourself, you can also download the pre-built images directly from the GitHub Container Registry:
+
+```bash
+# Pull the pre-built ENSRainbow image with test data
+docker pull ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
+
+# Run the ENSRainbow container with the pulled image
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
+```
+
+This approach is faster and more convenient as it doesn't require building the images locally.
+
 This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
