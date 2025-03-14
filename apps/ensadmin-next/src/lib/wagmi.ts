@@ -1,4 +1,5 @@
 import { http } from "viem";
+import type { ValueOf } from "viem";
 import { holesky, mainnet, sepolia } from "viem/chains";
 import { createConfig } from "wagmi";
 
@@ -31,9 +32,24 @@ export const config = createConfig({
   },
 });
 
-// Export chain IDs for convenience
-export const CHAIN_IDS = {
-  MAINNET: mainnet.id,
-  SEPOLIA: sepolia.id,
-  HOLESKY: holesky.id,
-};
+/**
+ * Supported chain ID type.
+ */
+export type SupportedChainId = (typeof config.chains)[number]["id"];
+/**
+ * Get the supported chain ID by chain name.
+ * @param name
+ * @returns
+ */
+export function parseSupportedChainIdByName(name: string): SupportedChainId {
+  switch (name.toLowerCase()) {
+    case "mainnet":
+      return mainnet.id;
+    case "sepolia":
+      return sepolia.id;
+    case "holesky":
+      return holesky.id;
+    default:
+      throw new Error(`Unsupported chain name: ${name}`);
+  }
+}

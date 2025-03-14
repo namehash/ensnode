@@ -2,13 +2,16 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CHAIN_IDS } from "@/lib/wagmi";
+import type { SupportedChainId } from "@/lib/wagmi";
+import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { Hex } from "viem";
 import { useEnsName } from "wagmi";
 
 interface ENSNameProps {
-  address: string;
+  address: Hex;
+  chainId: SupportedChainId;
   showAvatar?: boolean;
   showExternalLink?: boolean;
   className?: string;
@@ -20,6 +23,7 @@ interface ENSNameProps {
  */
 export function ENSName({
   address,
+  chainId,
   showAvatar = false,
   showExternalLink = true,
   className = "",
@@ -28,8 +32,8 @@ export function ENSName({
 
   // Use the ENS name hook from wagmi
   const { data: ensName, isLoading } = useEnsName({
-    address: address as `0x${string}`,
-    chainId: CHAIN_IDS.MAINNET,
+    address,
+    chainId,
   });
 
   // Handle client-side rendering
@@ -48,16 +52,11 @@ export function ENSName({
 
   // If not mounted yet (server-side), show a skeleton
   if (!mounted) {
-    return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        {showAvatar && <Skeleton className="h-6 w-6 rounded-full" />}
-        <Skeleton className="h-4 w-24" />
-      </div>
-    );
+    return <EnsNamePlaceholder showAvatar={showAvatar} className={className} />;
   }
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && (
         <Avatar className="h-6 w-6">
           {ensName && (
@@ -84,6 +83,18 @@ export function ENSName({
         </span>
         {showExternalLink && <ExternalLink size={14} className="inline-block" />}
       </a>
+    </div>
+  );
+}
+ENSName.Placeholder = EnsNamePlaceholder;
+
+interface ENSNamePlaceholderProps extends Pick<ENSNameProps, "showAvatar" | "className"> {}
+
+function EnsNamePlaceholder({ showAvatar = false, className = "" }: ENSNamePlaceholderProps) {
+  return (
+    <div className={cx("flex items-center gap-2", className)}>
+      {showAvatar && <Skeleton className="h-6 w-6 rounded-full" />}
+      <Skeleton className="h-4 w-24" />
     </div>
   );
 }
