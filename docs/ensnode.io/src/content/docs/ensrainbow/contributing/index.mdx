@@ -156,3 +156,61 @@ pnpm run serve [--port 3223] [--data-dir path/to/db]
 Starts the API server. The process will exit with:
 - Code 0: Clean shutdown
 - Code 1: Error during operation
+
+
+## Using ENSRainbow with ens-test-env
+
+The ens-test-env project provides a test environment for ENS development. It includes a small dataset of ENS names in the `ens_test_env_names.sql.gz` file that can be used with ENSRainbow for testing purposes.
+
+### Ingesting ens_test_env_names.sql.gz
+
+To ingest the test data into ENSRainbow:
+
+```bash
+# Navigate to the ENSRainbow directory
+cd apps/ensrainbow
+
+# Ingest the test data
+pnpm ingest --input-file test/fixtures/ens_test_env_names.sql.gz --data-dir data_ens_test_env
+```
+
+### Validating the test data
+
+You can validate the ingested test data to ensure it was properly loaded:
+
+```bash
+# Validate the test data
+pnpm validate --data-dir data_ens_test_env
+```
+
+### Running ENSRainbow with the test data
+
+After ingesting the test data, you can run ENSRainbow with the test data:
+
+```bash
+# Start the ENSRainbow server with the test data
+pnpm serve --data-dir data_ens_test_env --port 3223
+```
+
+### Using with Docker
+
+You can also build a Docker image with the test data:
+
+```bash
+# Build a Docker image with the test data
+docker build -f apps/ensrainbow/Dockerfile.data \
+  --build-arg DATA_VERSION=test \
+  -t namehash/ensnode/ensrainbow-ens-test-env-data .
+
+# Build the ENSRainbow image with the test data
+docker build -f apps/ensrainbow/Dockerfile \
+  --build-arg DATA_IMAGE_NAME=namehash/ensnode/ensrainbow-ens-test-env-data \
+  -t namehash/ensnode/ensrainbow-ens-test-env .
+
+# Run the ENSRainbow container with the test data
+docker run -p 3223:3223 namehash/ensnode/ensrainbow-ens-test-env
+```
+
+
+
+This test environment setup is particularly useful for running ENS tests that require label healing capabilities without needing the full production dataset.
