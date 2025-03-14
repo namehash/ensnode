@@ -1,10 +1,31 @@
+<!-- VERTICAL WHITESPACE -->
+
+<br>
+
+<!-- BANNER IMAGE -->
+
+<p align="center">
+  <a href="https://ensnode.io">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/banner-dark.svg">
+      <img alt="ENSNode" src=".github/banner-light.svg" width="auto" height="80">
+    </picture>
+  </a>
+</p>
+
+<!-- VERTICAL WHITESPACE -->
+
+<br>
+
 # ENSNode
 
-> ENSNode is the multichain indexer for ENSv2.
+[ENSNode](https://ensnode.io) is the new multichain indexer for [ENSv2](https://roadmap.ens.domains/roadmap/).
 
 Full Documentation ➡︎ [ensnode.io](https://ensnode.io)
 
-ENSNode is the new multichain indexer for [ENS](https://ens.domains/) and [ENSv2](https://roadmap.ens.domains/roadmap/). It provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
+## The future of ENS indexing
+
+ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
 
 - Multichain ENS Namespace
   - flattened, unified, multichain and multiregistrar namespace via optional plugins
