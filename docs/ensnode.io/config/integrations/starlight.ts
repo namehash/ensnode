@@ -142,14 +142,14 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           property: "twitter:title",
-          content: "The new indexer for ENSv2",
+          content: "The new multichain indexer for ENSv2",
         },
       },
       {
         tag: "meta",
         attrs: {
           property: "twitter:description",
-          content: "Get started building ENS applications with your own ENSNode.",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
     ],
