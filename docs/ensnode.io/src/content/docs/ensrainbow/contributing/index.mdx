@@ -200,12 +200,12 @@ You can also build a Docker image with the test data:
 # Build a Docker image with the test data
 docker build -f apps/ensrainbow/Dockerfile.data \
   --build-arg DATA_VERSION=test \
-  -t ghcr.io/namehash/ensnode/ensrainbow-ens-test-env-data .
+  -t ghcr.io/namehash/ensnode/ensrainbow-test-data .
 
 # Build the ENSRainbow image with the test data
 docker build -f apps/ensrainbow/Dockerfile \
   --build-arg DATA_IMAGE_NAME=ensrainbow-ens-test-env-data \
-  -t ghcr.io/namehash/ensnode/ensrainbow-ens-test-env .
+  -t ghcr.io/namehash/ensnode/ensrainbow-test .
 
 # Run the ENSRainbow container with the test data
 docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
@@ -217,10 +217,10 @@ Instead of building the Docker images yourself, you can also download the pre-bu
 
 ```bash
 # Pull the pre-built ENSRainbow image with test data
-docker pull ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
+docker pull ghcr.io/namehash/ensnode/ensrainbow-test
 
 # Run the ENSRainbow container with the pulled image
-docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test
 ```
 
 This approach is faster and more convenient as it doesn't require building the images locally.
