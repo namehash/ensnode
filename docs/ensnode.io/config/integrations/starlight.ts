@@ -123,5 +123,23 @@ export function starlight(): AstroIntegration {
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
     },
+    head: [
+      {
+        tag: 'meta',
+        attrs: {
+          property: 'og:image',
+          // The absolute URL of the image to use.
+          content: 'https://user-images.githubusercontent.com/5182256/131216951-8f74f425-f775-463d-a11b-0e01ad9fce8d.png',
+        },
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          property: 'twitter:image',
+          // The absolute URL of the image to use.
+          content: 'https://user-images.githubusercontent.com/5182256/131216951-8f74f425-f775-463d-a11b-0e01ad9fce8d.png',
+        },
+      },
+    ],
   });
 }
