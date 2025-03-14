@@ -1,5 +1,6 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
-import { useQuery } from "@tanstack/react-query";
+import { SupportedChainId, parseSupportedChainIdByName } from "@/lib/wagmi";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { EnsNode } from "./types";
 
 /**
@@ -24,12 +25,16 @@ async function fetchEnsNodeStatus(baseUrl: string): Promise<EnsNode.Metadata> {
   return response.json();
 }
 
+type UseIndexingStatusQueryResult = UseQueryResult<EnsNode.Metadata, Error>;
+
 /**
  * Hook to fetch the indexing status of the ENS node.
  * @param searchParams The URL search params including the selected ENS node URL.
  * @returns React Query hook result.
  */
-export function useIndexingStatus(searchParams: URLSearchParams) {
+export function useIndexingStatusQuery(
+  searchParams: URLSearchParams,
+): UseIndexingStatusQueryResult {
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
@@ -73,4 +78,22 @@ function validateResponse(response: EnsNode.Metadata) {
         .join(", ")}`,
     );
   }
+}
+
+/**
+ * Selects the indexed chain ID from the indexing status.
+ *
+ * @param indexingStatus The ENSNode indexing status.
+ * @returns The indexed chain ID or null if the status is not available.
+ * @throws Error if the ENS Deployment Chain is not a supported chain.
+ */
+export function useIndexedChainId(
+  indexingStatus: UseIndexingStatusQueryResult["data"],
+): SupportedChainId | undefined {
+  // If the status is not available, return undefined
+  if (!indexingStatus) {
+    return undefined;
+  }
+
+  return parseSupportedChainIdByName(indexingStatus.env.ENS_DEPLOYMENT_CHAIN);
 }

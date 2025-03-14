@@ -1,6 +1,7 @@
 "use client";
 
-import { useIndexingStatus } from "@/components/indexing-status/hooks";
+import { ENSName } from "@/components/ens-name";
+import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,6 +16,7 @@ import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getAddress } from "viem/utils";
 import { useRecentDomains } from "./hooks";
 
 // Helper function to safely format dates
@@ -73,11 +75,6 @@ const getEnsAppUrl = (name: string) => {
   return `https://app.ens.domains/${name}`;
 };
 
-// Helper function to generate ENS app URL for an address
-const getEnsAddressUrl = (address: string) => {
-  return `https://app.ens.domains/${address}`;
-};
-
 // Client-only date formatter component
 function FormattedDate({
   timestamp,
@@ -120,7 +117,8 @@ function Duration({
 export function RecentDomains() {
   const searchParams = useSearchParams();
   const recentDomainsQuery = useRecentDomains(searchParams);
-  const indexingStatus = useIndexingStatus(searchParams);
+  const indexingStatus = useIndexingStatusQuery(searchParams);
+  const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -197,16 +195,16 @@ export function RecentDomains() {
                         expiryDate={registration.expiryDate}
                       />
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      <a
-                        href={getEnsAddressUrl(registration.domain.owner.id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline"
-                      >
-                        {registration.domain.owner.id}
-                        <ExternalLink size={14} className="inline-block" />
-                      </a>
+                    <TableCell>
+                      {indexedChainId ? (
+                        <ENSName
+                          address={getAddress(registration.domain.owner.id)}
+                          chainId={indexedChainId}
+                          showAvatar={true}
+                        />
+                      ) : (
+                        <ENSName.Placeholder showAvatar={true} />
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useIndexingStatusQuery } from "@/components/ensnode";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -7,7 +8,6 @@ import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { fromUnixTime, intlFormat } from "date-fns";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useIndexingStatus } from "./hooks";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
   GlobalIndexingStatusViewModel,
@@ -20,7 +20,7 @@ import {
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
-  const indexingStatus = useIndexingStatus(searchParams);
+  const indexingStatus = useIndexingStatusQuery(searchParams);
 
   return (
     <section className="flex flex-col gap-6 py-6">
@@ -32,7 +32,7 @@ export function IndexingStatus() {
 }
 
 interface NetworkIndexingStatsProps {
-  indexingStatus: ReturnType<typeof useIndexingStatus>;
+  indexingStatus: ReturnType<typeof useIndexingStatusQuery>;
 }
 
 /**
@@ -183,7 +183,7 @@ function NetworkIndexingStatsPlaceholder() {
 
 interface NetworkIndexingTimelineProps {
   /** ENSNode status query result */
-  indexingStatus: ReturnType<typeof useIndexingStatus>;
+  indexingStatus: ReturnType<typeof useIndexingStatusQuery>;
 }
 
 /**
