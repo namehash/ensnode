@@ -128,14 +128,21 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           property: "og:image",
-          content: "/OG_image.png",
+          content: "https://ensnode.io/OG_image.png",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:card",
+          content: "summary_large_image",
         },
       },
       {
         tag: "meta",
         attrs: {
           property: "twitter:image",
-          content: "/Twitter_OG_image.png",
+          content: "https://ensnode.io/Twitter_OG_image.png",
         },
       },
       {
