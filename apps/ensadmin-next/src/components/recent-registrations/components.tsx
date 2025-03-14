@@ -47,6 +47,14 @@ const calculateDurationYears = (registrationDate: string, expiryDate: string) =>
     const expiryDate_ = fromUnixTime(expiryTimestamp);
     const years = differenceInYears(expiryDate_, registrationDate_);
 
+    // If less than a year, show months instead
+    if (years === 0) {
+      // Calculate months by getting the difference in milliseconds and converting to months
+      const diffInMs = expiryDate_.getTime() - registrationDate_.getTime();
+      const months = Math.floor(diffInMs / (1000 * 60 * 60 * 24 * 30));
+      return `${months} month${months !== 1 ? "s" : ""}`;
+    }
+
     return `${years} year${years !== 1 ? "s" : ""}`;
   } catch (error) {
     console.error("Error calculating duration:", error);
