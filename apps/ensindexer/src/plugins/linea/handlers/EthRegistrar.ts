@@ -16,7 +16,8 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
+export default function (args: PonderENSPluginHandlerArgs<"linea.eth">) {
+  const { namespace } = args;
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -24,7 +25,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"l
     handleNameRenewed,
     handleNameTransferred,
     ownedSubnameNode,
-  } = makeRegistrarHandlers(ownedName);
+  } = makeRegistrarHandlers(args);
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
