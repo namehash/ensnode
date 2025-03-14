@@ -200,17 +200,17 @@ You can also build a Docker image with the test data:
 # Build a Docker image with the test data
 docker build -f apps/ensrainbow/Dockerfile.data \
   --build-arg DATA_VERSION=test \
-  -t namehash/ensnode/ensrainbow-ens-test-env-data .
+  -t ghcr.io/namehash/ensnode/ensrainbow-ens-test-env-data .
 
 # Build the ENSRainbow image with the test data
 docker build -f apps/ensrainbow/Dockerfile \
-  --build-arg DATA_IMAGE_NAME=namehash/ensnode/ensrainbow-ens-test-env-data \
-  -t namehash/ensnode/ensrainbow-ens-test-env .
+  --build-arg DATA_IMAGE_NAME=ensrainbow-ens-test-env-data \
+  -t ghcr.io/namehash/ensnode/ensrainbow-ens-test-env .
 
 # Run the ENSRainbow container with the test data
-docker run -p 3223:3223 namehash/ensnode/ensrainbow-ens-test-env
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
 ```
 
 
 
-This test environment setup is particularly useful for running ENS tests that require label healing capabilities without needing the full production dataset.
+This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
