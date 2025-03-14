@@ -18,9 +18,9 @@ cp .env.local.example .env.local
 
 You can update `PREFERRED_ENSNODE_URL` environment variable if you wish ENSAdmin to include a given URL as an initial connection option.
 
-#### RPC URLs for ENS Name Resolution
+#### RPC URLs
 
-ENSAdmin uses [wagmi](https://wagmi.sh/) to resolve primary ENS names for Ethereum addresses. You need to provide RPC URLs for each chain where ENS is deployed:
+ENSAdmin may use RPC URLs for each chain with a "root" ENS Deployment:
 
 - `RPC_URL_1` - Ethereum Mainnet (Chain ID: 1)
 - `RPC_URL_11155111` - Sepolia Testnet (Chain ID: 11155111)
