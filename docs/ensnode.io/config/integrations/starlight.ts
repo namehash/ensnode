@@ -128,14 +128,14 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           property: "og:image",
-          content: "/og-image.png",
+          content: "/OG_image.png",
         },
       },
       {
         tag: "meta",
         attrs: {
           property: "twitter:image",
-          content: "/og-image.png",
+          content: "/Twitter_OG_image.png",
         },
       },
       {
