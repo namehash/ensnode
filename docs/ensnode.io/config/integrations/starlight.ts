@@ -128,7 +128,6 @@ export function starlight(): AstroIntegration {
         tag: 'meta',
         attrs: {
           property: 'og:image',
-          // The absolute URL of the image to use.
           content: '/og-image.png',
         },
       },
@@ -136,8 +135,7 @@ export function starlight(): AstroIntegration {
         tag: 'meta',
         attrs: {
           property: 'twitter:image',
-          // The absolute URL of the image to use.
-          content: '../../public/og-image.png',
+          content: '/og-image.png',
         },
       },
       {
