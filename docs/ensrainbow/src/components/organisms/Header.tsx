@@ -18,7 +18,7 @@ export default function Header() {
               <img
                 src={ENSRainbow2D.src}
                 className="h-8 headerLogoMatch:h-10"
-                alt="ENSRainbow logo"
+                alt="ENSRainbow"
               />
             </a>
           </div>

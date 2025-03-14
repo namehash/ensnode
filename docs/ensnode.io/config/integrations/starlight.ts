@@ -125,32 +125,32 @@ export function starlight(): AstroIntegration {
     },
     head: [
       {
-        tag: 'meta',
+        tag: "meta",
         attrs: {
-          property: 'og:image',
-          content: '/og-image.png',
+          property: "og:image",
+          content: "/og-image.png",
         },
       },
       {
-        tag: 'meta',
+        tag: "meta",
         attrs: {
-          property: 'twitter:image',
-          content: '/og-image.png',
+          property: "twitter:image",
+          content: "/og-image.png",
         },
       },
       {
-        tag: 'meta',
+        tag: "meta",
         attrs: {
           property: "twitter:title",
           content: "The new indexer for ENSv2",
-        }
+        },
       },
       {
-        tag: 'meta',
+        tag: "meta",
         attrs: {
           property: "twitter:description",
           content: "Get started building ENS applications with your own ENSNode.",
-        }
+        },
       },
     ],
   });
