@@ -23,6 +23,9 @@ async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistra
           owner {
             id
           }
+          wrappedOwner {
+            id
+          }
         }
       }
     }

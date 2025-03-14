@@ -10,6 +10,9 @@ export interface Domain {
   owner: {
     id: Hex;
   };
+  wrappedOwner?: {
+    id: Hex;
+  };
 }
 
 export interface Registration {
