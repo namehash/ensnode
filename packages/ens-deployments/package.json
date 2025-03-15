@@ -33,6 +33,7 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:",
+    "ponder": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "viem": "catalog:"
