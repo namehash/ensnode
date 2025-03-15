@@ -8,19 +8,19 @@ import { IndexingStatus } from "@/components/indexing-status/components";
 
 export default function Status() {
   return (
-<>
-    <Suspense fallback={<Loading />}>
-      <IndexingStatus />
-    </Suspense>
-        <Suspense>
-          <IndexingStatus />
-        </Suspense>
-        <Suspense>
-          <div className="px-6 pb-6">
-            <RecentRegistrations />
-          </div>
-        </Suspense>
-        </>
+    <>
+      <Suspense fallback={<Loading />}>
+        <IndexingStatus />
+      </Suspense>
+      <Suspense>
+        <IndexingStatus />
+      </Suspense>
+      <Suspense>
+        <div className="px-6 pb-6">
+          <RecentRegistrations />
+        </div>
+      </Suspense>
+    </>
   );
 }
 
