@@ -22,3 +22,21 @@ docker build -f apps/ensrainbow/Dockerfile.data -t namehash/ensnode/ensrainbow-d
 # from the monorepo root
 docker build -f apps/ensrainbow/Dockerfile -t namehash/ensnode/ensrainbow .
 ```
+
+## ENSRainbow-v2-data (`ghcr.io/<your-repo>/ensrainbow-v2-data`)
+
+This image includes the latest LevelDB data for rainbow table lookups. It uses the `DATA_VERSION=v2` build argument to ensure the correct version is built.
+
+```bash
+# from the monorepo root
+docker build -f apps/ensrainbow/Dockerfile.data --build-arg DATA_VERSION=v2 -t namehash/ensnode/ensrainbow-v2-data .
+```
+
+## ENSRainbow v2 (`ghcr.io/<your-repo>/ensrainbow-v2`)
+
+This image builds the ENSRainbow v2 app and uses the `ensrainbow-v2-data` image for its data.
+
+```bash
+# from the monorepo root
+docker build -f apps/ensrainbow/Dockerfile --build-arg DATA_IMAGE_NAME=ensrainbow-v2-data -t namehash/ensnode/ensrainbow-v2 .
+```

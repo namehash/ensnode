@@ -20,13 +20,17 @@ Follow ENSNode's [contribution guide](/ensnode/contributing/) to prepare your wo
 
 ### Get the Rainbow Tables
 
-Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket.
+Our copies of the ENS rainbow tables are stored in a public bucket. You can download either the legacy (original) or v2 (extended) dataset using the following commands:
 
 ```bash
+# For legacy data
 pnpm run get-legacy-data
+
+# For v2 data
+pnpm run get-v2-data
 ```
 
-This command will:
+These commands will:
 - Download the required files (rainbow tables, checksum, and MIT license)
 - Automatically verify the checksum
 - Place the files in a convenient directory for subsequent use of the ingest command
@@ -152,3 +156,73 @@ pnpm run serve [--port 3223] [--data-dir path/to/db]
 Starts the API server. The process will exit with:
 - Code 0: Clean shutdown
 - Code 1: Error during operation
+
+
+## Using ENSRainbow with ens-test-env
+
+The ens-test-env project provides a test environment for ENS development. It includes a small dataset of ENS names in the `ens_test_env_names.sql.gz` file that can be used with ENSRainbow for testing purposes.
+
+### Ingesting ens_test_env_names.sql.gz
+
+To ingest the test data into ENSRainbow:
+
+```bash
+# Navigate to the ENSRainbow directory
+cd apps/ensrainbow
+
+# Ingest the test data
+pnpm ingest --input-file test/fixtures/ens_test_env_names.sql.gz --data-dir data_ens_test_env
+```
+
+### Validating the test data
+
+You can validate the ingested test data to ensure it was properly loaded:
+
+```bash
+# Validate the test data
+pnpm validate --data-dir data_ens_test_env
+```
+
+### Running ENSRainbow with the test data
+
+After ingesting the test data, you can run ENSRainbow with the test data:
+
+```bash
+# Start the ENSRainbow server with the test data
+pnpm serve --data-dir data_ens_test_env --port 3223
+```
+
+### Using with Docker
+
+You can also build a Docker image with the test data:
+
+```bash
+# Build a Docker image with the test data
+docker build -f apps/ensrainbow/Dockerfile.data \
+  --build-arg DATA_VERSION=test \
+  -t ghcr.io/namehash/ensnode/ensrainbow-ens-test-env-data .
+
+# Build the ENSRainbow image with the test data
+docker build -f apps/ensrainbow/Dockerfile \
+  --build-arg DATA_IMAGE_NAME=ensrainbow-ens-test-env-data \
+  -t ghcr.io/namehash/ensnode/ensrainbow-ens-test-env .
+
+# Run the ENSRainbow container with the test data
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
+```
+
+### Using Pre-built Docker Images
+
+Instead of building the Docker images yourself, you can also download the pre-built images directly from the GitHub Container Registry:
+
+```bash
+# Pull the pre-built ENSRainbow image with test data
+docker pull ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
+
+# Run the ENSRainbow container with the pulled image
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-ens-test-env
+```
+
+This approach is faster and more convenient as it doesn't require building the images locally.
+
+This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.

@@ -1,3 +1,7 @@
+import { WagmiProvider } from "@/components/providers/wagmi-provider";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import type { PropsWithChildren } from "react";
 import "./globals.css";
 
 import type { Metadata } from "next";
@@ -31,7 +35,8 @@ export default function Layout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-        <QueryProvider>
+        <WagmiProvider>
+          <QueryProvider>
           <SidebarProvider>
             <Suspense>
               <AppSidebar />
@@ -49,7 +54,7 @@ export default function Layout({
             </SidebarInset>
           </SidebarProvider>
         </QueryProvider>
-      </body>
+      </WagmiProvider>
     </html>
   );
 }

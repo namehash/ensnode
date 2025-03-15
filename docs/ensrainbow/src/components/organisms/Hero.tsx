@@ -44,12 +44,12 @@ export default function Hero() {
 
           <div className="block relative z-10 pt-3 lg:hidden">
             <Button asChild>
-              <Link href="https://www.ensnode.io/ensrainbow/">View the docs</Link>
+              <Link href="https://ensnode.io/ensrainbow/">View the docs</Link>
             </Button>
           </div>
           <div className="hidden lg:block relative z-10">
             <Button variant="primary" size="large" asChild>
-              <Link href="https://www.ensnode.io/ensrainbow/">View the docs</Link>
+              <Link href="https://ensnode.io/ensrainbow/">View the docs</Link>
             </Button>
           </div>
         </div>
