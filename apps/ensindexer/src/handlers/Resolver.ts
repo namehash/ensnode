@@ -1,7 +1,8 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
+import { DeploymentConfigs } from "@ensnode/ens-deployments";
 import type { Node } from "@ensnode/utils/types";
-import { Hex, namehash } from "viem";
+import { Hex, decodeEventLog } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
 import { hasNullByte, uniq } from "../lib/lib-helpers";
@@ -98,9 +99,17 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{ node: Node; name: string }>;
     }) {
-      const { node, name } = event.args;
+      // NOTE(name-null-bytes): manually decode args that may contain null bytes
+      const {
+        args: { node, name },
+      } = decodeEventLog({
+        eventName: "NameChanged",
+        abi: DeploymentConfigs.mainnet.eth.contracts.Resolver.abi,
+        topics: event.log.topics,
+        data: event.log.data,
+      });
+
       if (hasNullByte(name)) return;
-      if (namehash(name) !== node) return; // also check to make sure ponder didn't strip our null bytes
 
       const id = makeResolverId(event.log.address, node);
       await upsertResolver(context, {
