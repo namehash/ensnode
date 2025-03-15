@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Node } from "@ensnode/utils/types";
-import { Hex } from "viem";
+import { Hex, namehash } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
 import { makeResolverId } from "../lib/ids";
 import { hasNullByte, uniq } from "../lib/lib-helpers";
@@ -100,6 +100,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }) {
       const { node, name } = event.args;
       if (hasNullByte(name)) return;
+      if (namehash(name) !== node) return; // also check to make sure ponder didn't strip our null bytes
 
       const id = makeResolverId(event.log.address, node);
       await upsertResolver(context, {
