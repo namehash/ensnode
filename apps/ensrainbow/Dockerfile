@@ -27,10 +27,16 @@ WORKDIR /app
 FROM base AS app-deps
 COPY pnpm-workspace.yaml ./
 COPY package.json pnpm-lock.yaml ./
+
+# Create a custom .npmrc to skip optional dependencies (including Bun)
+RUN echo "optional=false" > .npmrc
+
+# Copy packages and apps directories
 COPY packages ./packages
 COPY apps ./apps
-RUN pnpm install --frozen-lockfile
 
+# Install dependencies without optional dependencies (including Bun)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 ###################
 ## App Server — runs server w/ data dir

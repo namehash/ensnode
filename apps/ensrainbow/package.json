@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.4.1",
-    "bun": "^1.2.2",
     "classic-level": "^1.4.1",
     "@ensnode/utils": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
@@ -39,6 +38,9 @@
     "yargs": "^17.7.2",
     "pino": "^8.19.0",
     "pino-pretty": "^10.3.1"
+  },
+  "optionalDependencies": {
+    "bun": "^1.2.2"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
