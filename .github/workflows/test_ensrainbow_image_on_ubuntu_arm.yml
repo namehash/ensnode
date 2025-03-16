@@ -1,6 +1,8 @@
 name: Test ENSRainbow Test Image on Ubuntu ARM
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 jobs:
