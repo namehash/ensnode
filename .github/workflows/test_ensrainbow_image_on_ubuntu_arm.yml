@@ -1,23 +1,17 @@
-name: Test ENSRainbow Test Image on macOS
+name: Test ENSRainbow Test Image on Ubuntu ARM
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-image-on-mac:
-    runs-on: macos-latest
+  test-image-on-ubuntu-arm:
+    runs-on: ubuntu-24.04-arm
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      
-      - name: Set up Docker
-        uses: docker-practice/actions-setup-docker@master
-        with:
-          docker_channel: stable
-          docker_buildx: true
       
       - name: Verify Docker installation
         run: |

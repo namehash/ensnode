@@ -200,15 +200,15 @@ You can also build a Docker image with the test data:
 # Build a Docker image with the test data
 docker build -f apps/ensrainbow/Dockerfile.data \
   --build-arg DATA_VERSION=test \
-  -t ghcr.io/namehash/ensnode/ensrainbow-test-data .
+  -t ghcr.io/namehash/ensnode/ensrainbow-test-data:latest .
 
 # Build the ENSRainbow image with the test data
 docker build -f apps/ensrainbow/Dockerfile \
   --build-arg DATA_IMAGE_NAME=ensrainbow-test-data \
-  -t ghcr.io/namehash/ensnode/ensrainbow-test .
+  -t ghcr.io/namehash/ensnode/ensrainbow-test:latest .
 
 # Run the ENSRainbow container with the test data
-docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest
 ```
 
 ### Using Pre-built Docker Images
