@@ -8,7 +8,7 @@ ARG DATA_IMAGE_NAME="ensrainbow-data"
 
 FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/${DATA_IMAGE_NAME} AS ensrainbow-data
 
-FROM --platform=${BUILDPLATFORM} oven/bun:1-slim AS base
+FROM --platform=${TARGETPLATFORM} oven/bun:1-slim AS base
 ARG PNPM_VERSION=9.12.0
 RUN apt-get update && \
     apt-get install -y curl gnupg && \

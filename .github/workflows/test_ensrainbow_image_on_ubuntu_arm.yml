@@ -29,12 +29,12 @@ jobs:
       
       - name: Pull ENSRainbow test image
         run: |
-          docker pull ghcr.io/namehash/ensnode/ensrainbow-test:latest
+          docker pull --platform linux/arm64 ghcr.io/namehash/ensnode/ensrainbow-test:latest
       
       - name: Run ENSRainbow test container
         run: |
-          # Run the container in detached mode
-          CONTAINER_ID=$(docker run -d -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest)
+          # Run the container in detached mode with explicit platform
+          CONTAINER_ID=$(docker run --platform linux/arm64 -d -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest)
           echo "Container ID: $CONTAINER_ID"
           
           # Wait for container to start up
