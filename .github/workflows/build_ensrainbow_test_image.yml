@@ -1,8 +1,6 @@
 name: Build ENSRainbow test image
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
   push:
     branches:
       - main
