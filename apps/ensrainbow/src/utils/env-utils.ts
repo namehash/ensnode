@@ -123,14 +123,7 @@ export const getEnvNonNegativeInteger = (envVarName: string, defaultValue?: numb
       );
     }
 
-    try {
-      return parseNonNegativeInteger(rawValue);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`Invalid value for environment variable '${envVarName}': ${error.message}`);
-      }
-      throw error;
-    }
+    return parseNonNegativeInteger(rawValue);
   } catch (error) {
     const errorMessage = formatEnvVarError(envVarName, error);
     throw new Error(errorMessage);
@@ -156,11 +149,7 @@ export const getEnvFilePath = (
   try {
     const filePath = getEnvString(envVarName, defaultValue);
 
-    try {
-      return parseFilePath(filePath, should_exist, should_be_readable);
-    } catch (error) {
-      throw new Error(`${error instanceof Error ? error.message : String(error)}`);
-    }
+    return parseFilePath(filePath, should_exist, should_be_readable);
   } catch (error) {
     const errorMessage = formatEnvVarError(envVarName, error);
     throw new Error(errorMessage);
@@ -184,11 +173,7 @@ export const getEnvDirPath = (
   try {
     const dirPath = getEnvString(envVarName, defaultValue);
 
-    try {
-      return parseDirPath(dirPath, allowNonExistent);
-    } catch (error) {
-      throw new Error(`${error instanceof Error ? error.message : String(error)}`);
-    }
+    return parseDirPath(dirPath, allowNonExistent);
   } catch (error) {
     const errorMessage = formatEnvVarError(envVarName, error);
     throw new Error(errorMessage);
@@ -210,11 +195,7 @@ export const getEnvPort = (
   try {
     const port = getEnvNonNegativeInteger(envVarName, defaultValue);
 
-    try {
-      return parsePort(port);
-    } catch (error) {
-      throw new Error(`${error instanceof Error ? error.message : String(error)}`);
-    }
+    return parsePort(port);
   } catch (error) {
     const errorMessage = formatEnvVarError(envVarName, error);
     throw new Error(errorMessage);
