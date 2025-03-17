@@ -1,5 +1,5 @@
 {
-  "name": "@ensnode/ensadmin-next",
+  "name": "@ensnode/ensadmin",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,9 +8,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "apps/ensadmin-next"
+    "directory": "apps/ensadmin"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensadmin-next",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensadmin",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

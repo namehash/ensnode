@@ -1,7 +1,7 @@
 services:
   ensindexer:
     container_name: ensindexer
-    image: namehash/ensindexer
+    image: ghcr.io/namehash/ensnode/ensindexer
     build:
       dockerfile: ./apps/ensindexer/Dockerfile
     ports:
@@ -19,7 +19,7 @@ services:
 
   ensrainbow:
     container_name: ensrainbow
-    image: namehash/ensrainbow
+    image: ghcr.io/namehash/ensnode/ensrainbow
     build:
       dockerfile: ./apps/ensrainbow/Dockerfile
     ports:
@@ -27,18 +27,18 @@ services:
     restart: unless-stopped
 
   ensadmin:
+    container_name: ensadmin
     build:
       dockerfile: ./apps/ensadmin/Dockerfile
       args:
-        - VITE_ENSNODE_URL
-    image: namehash/ensadmin
+        # Override NEXT_PUBLIC_PREFERRED_ENSNODE_URL from .env.local to
+        # refer to docker compose ENSIndexer instance
+        NEXT_PUBLIC_PREFERRED_ENSNODE_URL: http://localhost:42069
+    image: ghcr.io/namehash/ensnode/ensadmin
     ports:
       - "4173:4173"
     env_file:
       - ./apps/ensadmin/.env.local
-    environment:
-      # override VITE_ENSNODE_URL from .env.local to refer to docker compose ENSIndexer instance
-      VITE_ENSNODE_URL: http://ensindexer:42069
     depends_on:
       - ensindexer
 

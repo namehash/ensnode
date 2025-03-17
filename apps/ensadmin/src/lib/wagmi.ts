@@ -1,5 +1,4 @@
 import { http } from "viem";
-import type { ValueOf } from "viem";
 import { holesky, mainnet, sepolia } from "viem/chains";
 import { createConfig } from "wagmi";
 
