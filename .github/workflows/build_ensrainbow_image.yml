@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main
-      - feat/more-disk-space-for-runner
-
+      
 jobs:
 
   image-build-and-push:
