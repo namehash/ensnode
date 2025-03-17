@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Control ENSNode via ENSAdmin Dashboard Interface",
+  "description": "Explore the ENS Protocol like never before",
   "license": "MIT",
   "repository": {
     "type": "git",
