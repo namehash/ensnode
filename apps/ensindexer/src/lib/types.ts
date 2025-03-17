@@ -15,4 +15,4 @@ export type OwnedName = string;
  * @ensnode/ens-deployments SubregistryName, simplifying the relationship between an ENSDeploymentConfig
  * and the plugins in this project.
  */
-export type PluginName = "eth" | "base" | "linea";
+export type PluginName = "eth" | "base" | "linea" | "ens-v2";

@@ -4,6 +4,7 @@ import { deepMergeRecursive } from "./src/lib/ponder-helpers";
 import type { PluginName } from "./src/lib/types";
 
 import * as baseEthPlugin from "./src/plugins/base/ponder.plugin";
+import * as ensV2Plugin from "./src/plugins/ens-v2/ponder.plugin";
 import * as ethPlugin from "./src/plugins/eth/ponder.plugin";
 import * as lineaEthPlugin from "./src/plugins/linea/ponder.plugin";
 
@@ -12,7 +13,7 @@ import * as lineaEthPlugin from "./src/plugins/linea/ponder.plugin";
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 
-const ALL_PLUGINS = [ethPlugin, baseEthPlugin, lineaEthPlugin] as const;
+const ALL_PLUGINS = [ethPlugin, baseEthPlugin, lineaEthPlugin, ensV2Plugin] as const;
 
 type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]>;
 
