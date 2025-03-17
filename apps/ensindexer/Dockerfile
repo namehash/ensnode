@@ -2,6 +2,12 @@
 FROM node:18-slim
 ARG PNPM_VERSION=9.12.0
 RUN apt-get update && \
+    apt-get install -y \
+        curl \
+        gnupg \
+        python3 \
+        make \
+        g++ && \
     npm install -g pnpm@${PNPM_VERSION}
 WORKDIR /app
 
