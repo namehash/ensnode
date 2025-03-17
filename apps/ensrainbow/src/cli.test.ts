@@ -69,14 +69,14 @@ describe("CLI", () => {
     it("should throw error for invalid port number", () => {
       process.env.PORT = "invalid";
       expect(() => getPort()).toThrow(
-        "Environment variable error: (PORT): Invalid value for environment variable 'PORT': \"invalid\" is not a valid number",
+        'Environment variable error: (PORT): "invalid" is not a valid number',
       );
     });
 
     it("should throw error for negative port number", () => {
       process.env.PORT = "-1";
       expect(() => getPort()).toThrow(
-        "Environment variable error: (PORT): Invalid value for environment variable 'PORT': \"-1\" is not a non-negative integer",
+        'Environment variable error: (PORT): "-1" is not a non-negative integer',
       );
     });
   });

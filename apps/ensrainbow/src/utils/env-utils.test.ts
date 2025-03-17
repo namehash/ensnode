@@ -111,28 +111,28 @@ describe("env-utils", () => {
     it("should throw an error if the environment variable is not a valid number", () => {
       process.env.TEST_NUM = "not-a-number";
       expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
-        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': \"not-a-number\" is not a valid number",
+        'Environment variable error: (TEST_NUM): "not-a-number" is not a valid number',
       );
     });
 
     it("should throw an error if the environment variable is a negative number", () => {
       process.env.TEST_NUM = "-42";
       expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
-        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': \"-42\" is not a non-negative integer",
+        'Environment variable error: (TEST_NUM): "-42" is not a non-negative integer',
       );
     });
 
     it("should throw an error if the environment variable is negative zero", () => {
       process.env.TEST_NUM = "-0";
       expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
-        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': Negative zero is not a valid non-negative integer",
+        "Environment variable error: (TEST_NUM): Negative zero is not a valid non-negative integer",
       );
     });
 
     it("should throw an error if the environment variable is a floating-point number", () => {
       process.env.TEST_NUM = "42.5";
       expect(() => getEnvNonNegativeInteger("TEST_NUM")).toThrow(
-        "Environment variable error: (TEST_NUM): Invalid value for environment variable 'TEST_NUM': \"42.5\" is not an integer",
+        'Environment variable error: (TEST_NUM): "42.5" is not an integer',
       );
     });
   });
@@ -245,7 +245,7 @@ describe("env-utils", () => {
     it("should throw an error if the port is out of range (negative)", () => {
       process.env.TEST_PORT = "-1";
       expect(() => getEnvPort("TEST_PORT")).toThrow(
-        "Environment variable error: (TEST_PORT): Invalid value for environment variable 'TEST_PORT': \"-1\" is not a non-negative integer",
+        'Environment variable error: (TEST_PORT): "-1" is not a non-negative integer',
       );
     });
 
