@@ -8,10 +8,15 @@ ARG DATA_IMAGE_NAME="ensrainbow-data"
 
 FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/${DATA_IMAGE_NAME} AS ensrainbow-data
 
-FROM --platform=${BUILDPLATFORM} oven/bun:1-slim AS base
+FROM --platform=${TARGETPLATFORM} oven/bun:1-slim AS base
 ARG PNPM_VERSION=9.12.0
 RUN apt-get update && \
-    apt-get install -y curl gnupg && \
+    apt-get install -y \
+        curl \
+        gnupg \
+        python3 \
+        make \
+        g++ && \
     mkdir -p /etc/apt/keyrings && \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list && \
