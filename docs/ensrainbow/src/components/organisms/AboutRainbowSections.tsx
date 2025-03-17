@@ -39,10 +39,7 @@ const rainbowSections: AboutRainbowProps[] = [
       <>
         These are encoded labelhashes used to represent an unknown label in an ENS name. Without
         name healing, millions of names in the ENS manager app (and other ENS apps) don’t appear
-        properly.
-        <br />
-        See the problem for yourself:
-        <br />
+        properly. See the problem for yourself:{" "}
         <Link
           href="https://app.ens.domains/0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5"
           target="_blank"
@@ -50,7 +47,7 @@ const rainbowSections: AboutRainbowProps[] = [
           variant="underline"
           size="large"
         >
-          Example 1↗
+          Example 1
         </Link>{" "}
         and{" "}
         <Link
@@ -60,7 +57,8 @@ const rainbowSections: AboutRainbowProps[] = [
           variant="underline"
           size="large"
         >
-          Example 2↗
+          Example 2{/*<span className="text-sm align-text-top">&#129133;</span>*/}
+          {/*TODO: Explore issue with arrows in the link*/}
         </Link>
       </>
     ),

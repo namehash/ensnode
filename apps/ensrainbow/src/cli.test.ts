@@ -119,6 +119,18 @@ describe("CLI", () => {
       });
     });
 
+    describe("ingest command with environment-specific data", () => {
+      it("should successfully ingest environment-specific test data", async () => {
+        // Use ens-test-env test data for specialized testing
+        const customInputFile = join(TEST_FIXTURES_DIR, "ens_test_env_names.sql.gz");
+
+        await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
+
+        // Verify database was created and can be validated
+        await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
+      });
+    });
+
     describe("serve command", () => {
       it("should execute serve command with custom options", async () => {
         const customPort = 4000;

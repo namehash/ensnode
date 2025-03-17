@@ -8,9 +8,20 @@ ARG DATA_IMAGE_NAME="ensrainbow-data"
 
 FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/${DATA_IMAGE_NAME} AS ensrainbow-data
 
-FROM --platform=${BUILDPLATFORM} node:18-slim AS base
+FROM --platform=${TARGETPLATFORM} oven/bun:1-slim AS base
 ARG PNPM_VERSION=9.12.0
 RUN apt-get update && \
+    apt-get install -y \
+        curl \
+        gnupg \
+        python3 \
+        make \
+        g++ && \
+    mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list && \
+    apt-get update && \
+    apt-get install -y nodejs && \
     npm install -g pnpm@${PNPM_VERSION}
 WORKDIR /app
 
@@ -21,10 +32,16 @@ WORKDIR /app
 FROM base AS app-deps
 COPY pnpm-workspace.yaml ./
 COPY package.json pnpm-lock.yaml ./
+
+# Create a custom .npmrc to skip optional dependencies (including Bun)
+RUN echo "optional=false" > .npmrc
+
+# Copy packages and apps directories
 COPY packages ./packages
 COPY apps ./apps
-RUN pnpm install --frozen-lockfile
 
+# Install dependencies without optional dependencies (including Bun)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 ###################
 ## App Server — runs server w/ data dir

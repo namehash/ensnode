@@ -8,16 +8,18 @@ BASE_URL="https://bucket.ensrainbow.io"
 # Check for wrong number of arguments
 if [ "$#" -gt 1 ]; then
     echo "Error: Too many arguments provided."
-    echo "Usage: $0 [v2]"
+    echo "Usage: $0 [v2|test]"
     echo "If you want to download the v2 rainbow tables, use the 'v2' argument."
+    echo "If you want to download the test environment data, use the 'test' argument."
     exit 1
 fi
 
 # Check for wrong value of the first argument
-if [ "$#" -eq 1 ] && [ "$1" != "v2" ]; then
+if [ "$#" -eq 1 ] && [ "$1" != "v2" ] && [ "$1" != "test" ]; then
     echo "Error: Invalid argument '$1'."
-    echo "Usage: $0 [v2]"
+    echo "Usage: $0 [v2|test]"
     echo "If you want to download the v2 rainbow tables, use the 'v2' argument."
+    echo "If you want to download the test environment data, use the 'test' argument."
     exit 1
 fi
 
@@ -26,6 +28,11 @@ if [ "${1:-}" = "v2" ]; then
     echo "Downloading v2 rainbow tables..."
     DATA_FILE="ensrainbow_v2.sql.gz"
     CHECKSUM_FILE="ensrainbow_v2.sql.gz.sha256sum"
+# Check for test environment argument
+elif [ "${1:-}" = "test" ]; then
+    echo "Downloading test environment data..."
+    DATA_FILE="ens_test_env_names.sql.gz"
+    CHECKSUM_FILE="ens_test_env_names.sql.gz.sha256sum"
 else
     echo "Downloading v1 rainbow tables..."
     DATA_FILE="ens_names.sql.gz"

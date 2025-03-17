@@ -16,14 +16,16 @@ COPY apps/ensrainbow/download-rainbow-tables.sh ./apps/ensrainbow/download-rainb
 
 WORKDIR /app/apps/ensrainbow
 # Allow parametrization of which data version to download
-# Possible values: "v1" (default) or "v2"
+# Possible values: "v1" (default) or "v2" or "test"
 # This ARG is used to determine which data fetching command to run during the build process.
 # It can be set using the --build-arg flag when building the Docker image.
 ARG DATA_VERSION="v1"
 RUN if [ "$DATA_VERSION" = "v1" ]; then \
         pnpm get-legacy-data; \
-    else \
+    elif [ "$DATA_VERSION" = "v2" ]; then \
         pnpm get-v2-data; \
+    elif [ "$DATA_VERSION" = "test" ]; then \
+        pnpm get-test-data; \
     fi
 ###################
 ## Dependencies Stage — standard monorepo pnpm install from base

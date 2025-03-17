@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { Balancer } from "react-wrap-balancer";
 import { ListSectionElement } from "../../types/listSectionTypes.ts";
 import { ListSectionBadge } from "../atoms/ListSectionBadge.tsx";
 import { CloudOutlineIcon } from "../atoms/icons/CloudOutlineIcon.tsx";
@@ -14,7 +15,7 @@ import { DeveloperResourceItem } from "../molecules/DeveloperResourceItem.tsx";
 export default function DevelopersSection() {
   return (
     <section className="box-border w-full h-fit flex flex-col py-[60px] px-5 lg:py-[100px] items-center justify-center self-stretch gap-8 xl:gap-12 bg-gradient-to-b to-white from-[#F9FAFB] xl:max-h-screen">
-      <div className="flex flex-col justify-center items-center gap-5 max-w-[608px]">
+      <div className="flex flex-col justify-center items-center gap-5 max-w-[720px]">
         <div className="inline-flex px-4 py-2 bg-[rgba(0,0,0,0.05)] rounded-3xl gap-2 justify-center items-center z-10">
           <GithubIconSmall />
           <span className="text-black text-center text-sm leading-5 not-italic font-medium z-10">
@@ -24,9 +25,9 @@ export default function DevelopersSection() {
         <h1 className="text-black text-center not-italic z-10 text-2xl leading-8 font-bold md:text-4xl md:leading-10">
           ENSRainbow for Devs
         </h1>
-        <p className="text-center not-italic text-gray-500 text-lg leading-7 sm:font-normal font-light">
+        <Balancer className="text-center not-italic text-gray-500 text-lg leading-7 sm:font-normal font-light">
           All resources are open sourced and MIT licensed for the ENS community.
-        </p>
+        </Balancer>
       </div>
       <div className="w-fit h-fit flex flex-col md:flex-row md:flex-wrap max-w-[1220px] items-center justify-center xl:justify-start content-between gap-4">
         {devElements.map((elem, idx) => {
@@ -73,7 +74,7 @@ const devElements: ListSectionElement[] = [
         <FileOutlineIcon />
       </div>
     ),
-    link: "https://www.ensnode.io/ensrainbow/",
+    link: "https://ensnode.io/ensrainbow/",
   },
   {
     header: (

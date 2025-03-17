@@ -123,5 +123,42 @@ export function starlight(): AstroIntegration {
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
     },
+    head: [
+      {
+        tag: "meta",
+        attrs: {
+          property: "og:image",
+          content: "https://ensnode.io/OG_image.png",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:card",
+          content: "summary_large_image",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          property: "twitter:image",
+          content: "https://ensnode.io/Twitter_OG_image.png",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          property: "twitter:title",
+          content: "The new multichain indexer for ENSv2",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          property: "twitter:description",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+        },
+      },
+    ],
   });
 }

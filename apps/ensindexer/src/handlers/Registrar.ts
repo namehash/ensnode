@@ -33,15 +33,6 @@ export const makeRegistrarHandlers = <OWNED_NAME extends OwnedName>({
     labelhash: Labelhash,
     cost: bigint,
   ) {
-    // NOTE: ponder intentionally removes null bytes to spare users the footgun of
-    // inserting null bytes into postgres. We don't like this behavior, though, because it's
-    // important that 'vitalik\x00'.eth and vitalik.eth are differentiable.
-    // https://github.com/ponder-sh/ponder/issues/1456
-    // So here we use the labelhash fn to determine whether ponder modified our `name` argument,
-    // in which case we know that it used to have null bytes in it, and we should ignore it.
-    const didHaveNullBytes = _labelhash(name) !== labelhash;
-    if (didHaveNullBytes) return;
-
     // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
     if (!isLabelIndexable(name)) return;
 
