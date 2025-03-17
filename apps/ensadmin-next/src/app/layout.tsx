@@ -16,19 +16,19 @@ const geistMono = Geist_Mono({
 
 const siteName = "ENSAdmin";
 const title = "ENSAdmin";
+const description = "Explore the ENS Protocol like never before";
 
 //TODO: adapt all metadata content accordingly to instructions
 export const metadata: Metadata = {
   title: title,
-  description: "Control ENSNode via ENSAdmin Dashboard Interface",
-  keywords: ["ENSNode", "admin"],
-  metadataBase: new URL("https://ensadmin-next.io"),
+  description: description,
+  metadataBase: new URL("https://admin.ensnode.io/"),
   openGraph: {
     title: {
       template: `${siteName} - %s`,
       default: title,
     },
-    description: "Supervise ENSNode indexer (temp)",
+    description: description,
     url: "/",
     type: "website",
     siteName: siteName,
