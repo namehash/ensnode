@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteName = "ENSAdmin"
-const title = "ENSAdmin"
+const siteName = "ENSAdmin";
+const title = "ENSAdmin";
 
 //TODO: adapt all metadata content accordingly to instructions
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     description: "Supervise ENSNode indexer (temp)",
     url: "/",
     type: "website",
-    siteName: siteName
+    siteName: siteName,
   },
   twitter: {
     title: {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@NamehashLabs",
     creator: "@NamehashLabs",
-  }
+  },
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {
