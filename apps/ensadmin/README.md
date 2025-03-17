@@ -16,7 +16,7 @@ pnpm install
 cp .env.local.example .env.local
 ```
 
-You can update `PREFERRED_ENSNODE_URL` environment variable if you wish ENSAdmin to include a given URL as an initial connection option.
+You can update `NEXT_PUBLIC_PREFERRED_ENSNODE_URL` environment variable if you wish ENSAdmin to include a given URL as an initial connection option.
 
 #### RPC URLs
 
@@ -52,3 +52,13 @@ pnpm build
 ```bash
 pnpm start
 ```
+
+## Documentation
+
+For detailed documentation and guides, see the [ENSAdmin Documentation](https://ensnode.io/ensadmin).
+
+## License
+
+Licensed under the MIT License, Copyright © 2025-present [NameHash Labs](https://namehashlabs.org).
+
+See [LICENSE](./LICENSE) for more information.
