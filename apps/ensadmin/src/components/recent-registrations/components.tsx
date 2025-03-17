@@ -19,6 +19,18 @@ import { useEffect, useState } from "react";
 import { Hex, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
 
+// Date constants
+const REGISTRATIONS_STARTING_DATE = new Date(2020, 0, 30); // January 30, 2020
+
+// Helper function to get formatted date for display
+const getFormattedDateString = (date: Date): string => {
+  return intlFormat(date, {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+};
+
 // Helper function to safely format dates
 const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
   try {
@@ -160,6 +172,14 @@ export function RecentRegistrations() {
         .currentIndexingDate
     : null;
 
+  // Check if the current indexing date is before the registrations starting date
+  const isBeforeRegistrationsStartingDate = currentIndexingDate 
+    ? currentIndexingDate < REGISTRATIONS_STARTING_DATE
+    : false;
+
+  // Format the starting date for display
+  const formattedStartingDate = getFormattedDateString(REGISTRATIONS_STARTING_DATE);
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -184,7 +204,16 @@ export function RecentRegistrations() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {recentRegistrationsQuery.isLoading ? (
+        {isBeforeRegistrationsStartingDate ? (
+          <div className="py-4 text-center">
+            <p className="text-muted-foreground mb-2">
+              This component displays registrations starting from {formattedStartingDate}.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              The indexed data available is from before this date.
+            </p>
+          </div>
+        ) : recentRegistrationsQuery.isLoading ? (
           <RecentRegistrationsFallback />
         ) : recentRegistrationsQuery.error ? (
           <div className="text-destructive">
