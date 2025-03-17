@@ -14,9 +14,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteName = "ENSAdmin"
+const title = "ENSAdmin"
+
+//TODO: adapt all metadata content accordingly to instructions
 export const metadata: Metadata = {
-  title: "ENSAdmin",
+  title: title,
   description: "Control ENSNode via ENSAdmin Dashboard Interface",
+  keywords: ["ENSNode", "admin"],
+  metadataBase: new URL("https://ensadmin-next.io"),
+  openGraph: {
+    title: {
+      template: `${siteName} - %s`,
+      default: title,
+    },
+    description: "Supervise ENSNode indexer (temp)",
+    url: "/",
+    type: "website",
+    siteName: siteName
+  },
+  twitter: {
+    title: {
+      template: `${siteName} - %s`,
+      default: title,
+    },
+    card: "summary_large_image",
+    site: "@NamehashLabs",
+    creator: "@NamehashLabs",
+  }
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {
