@@ -20,14 +20,14 @@ import { Hex, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
 
 // Date constants
-const REGISTRATIONS_STARTING_DATE = new Date(2020, 0, 30); // January 30, 2020
+const REGISTRATIONS_STARTING_DATE = new Date(2020, 0, 30); // the first registration being indexed is from January 30, 2020
 
 // Helper function to get formatted date for display
 const getFormattedDateString = (date: Date): string => {
   return intlFormat(date, {
     year: "numeric",
     month: "long",
-    day: "numeric"
+    day: "numeric",
   });
 };
 
@@ -173,7 +173,7 @@ export function RecentRegistrations() {
     : null;
 
   // Check if the current indexing date is before the registrations starting date
-  const isBeforeRegistrationsStartingDate = currentIndexingDate 
+  const isBeforeRegistrationsStartingDate = currentIndexingDate
     ? currentIndexingDate < REGISTRATIONS_STARTING_DATE
     : false;
 
