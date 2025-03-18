@@ -196,6 +196,8 @@ export const ensNodePublicUrl = (): string => {
   }
 };
 
+const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
+
 /**
  * Get the ENSAdmin URL.
  *
@@ -204,6 +206,10 @@ export const ensNodePublicUrl = (): string => {
 export const ensAdminUrl = (): string => {
   const envVarName = "ENSADMIN_URL";
   const envVarValue = process.env[envVarName];
+
+  if (!envVarValue) {
+    return DEFAULT_ENSADMIN_URL;
+  }
 
   try {
     return parseUrl(envVarValue);
