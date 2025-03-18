@@ -112,35 +112,39 @@ function useDomainCounts() {
       !ethDomainsQuery.isLoading && !baseDomainsQuery.isLoading && !lineaDomainsQuery.isLoading;
 
     if (isAllLoaded) {
-      const newStats = [...stats];
+      // Using a functional update to avoid dependency on stats
+      setStats((prevStats) => {
+        const newStats = [...prevStats];
 
-      // Update eth count if available and make subgraphCount match ensNodeCount
-      if (ethDomainsQuery.data && ethDomainsQuery.data[0]?.totalCount !== undefined) {
-        const ethCount = Number(ethDomainsQuery.data[0].totalCount);
-        newStats[0] = {
-          ...newStats[0],
-          ensNodeCount: ethCount,
-          subgraphCount: ethCount, // ENS Subgraph also indexes .eth domains, so use the same count
-        };
-      }
+        // Update eth count if available and make subgraphCount match ensNodeCount
+        if (ethDomainsQuery.data && ethDomainsQuery.data[0]?.totalCount !== undefined) {
+          const ethCount = Number(ethDomainsQuery.data[0].totalCount);
+          newStats[0] = {
+            ...newStats[0],
+            ensNodeCount: ethCount,
+            subgraphCount: ethCount, // ENS Subgraph also indexes .eth domains, so use the same count
+          };
+        }
 
-      // Update base.eth count if available
-      if (baseDomainsQuery.data && baseDomainsQuery.data[0]?.totalCount !== undefined) {
-        newStats[1] = {
-          ...newStats[1],
-          ensNodeCount: Number(baseDomainsQuery.data[0].totalCount),
-        };
-      }
+        // Update base.eth count if available
+        if (baseDomainsQuery.data && baseDomainsQuery.data[0]?.totalCount !== undefined) {
+          newStats[1] = {
+            ...newStats[1],
+            ensNodeCount: Number(baseDomainsQuery.data[0].totalCount),
+          };
+        }
 
-      // Update linea.eth count if available
-      if (lineaDomainsQuery.data && lineaDomainsQuery.data[0]?.totalCount !== undefined) {
-        newStats[2] = {
-          ...newStats[2],
-          ensNodeCount: Number(lineaDomainsQuery.data[0].totalCount),
-        };
-      }
+        // Update linea.eth count if available
+        if (lineaDomainsQuery.data && lineaDomainsQuery.data[0]?.totalCount !== undefined) {
+          newStats[2] = {
+            ...newStats[2],
+            ensNodeCount: Number(lineaDomainsQuery.data[0].totalCount),
+          };
+        }
 
-      setStats(newStats);
+        return newStats;
+      });
+
       setIsLoading(false);
     }
   }, [
@@ -150,7 +154,7 @@ function useDomainCounts() {
     ethDomainsQuery.isLoading,
     baseDomainsQuery.isLoading,
     lineaDomainsQuery.isLoading,
-    stats,
+    // stats removed from dependency array to avoid infinite render loop
   ]);
 
   // Handle error state - use fallback values
