@@ -1,9 +1,17 @@
-import { BreadcrumbItem, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import {
+  BreadcrumbItem,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function BreadcrumbsPonderPage() {
   return (
-    <BreadcrumbItem>
-      <BreadcrumbPage>GraphQL</BreadcrumbPage>
-    </BreadcrumbItem>
+    <>
+      <BreadcrumbItem>GraphQL</BreadcrumbItem>
+      <BreadcrumbSeparator className="hidden md:block" />
+      <BreadcrumbItem>
+        <BreadcrumbPage>Ponder-style</BreadcrumbPage>
+      </BreadcrumbItem>
+    </>
   );
 }
