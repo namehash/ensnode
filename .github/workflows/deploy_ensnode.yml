@@ -23,7 +23,7 @@ jobs:
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
-      TEST_SVC_ID: $${{ secrets.TEST_SVC_ID }}
+      TEST_SVC_ID: ${{ secrets.TEST_SVC_ID }}
     
     steps:
       - name: Print switch target
