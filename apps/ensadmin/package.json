@@ -12,9 +12,9 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensadmin",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 4173",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 4173",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit",

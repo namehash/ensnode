@@ -9,6 +9,7 @@ import packageJson from "../../package.json";
 import {
   createFirstBlockToIndexByChainIdFetcher,
   createPrometheusMetricsFetcher,
+  ensAdminUrl,
   ensNodePublicUrl,
   getEnsDeploymentChain,
   ponderDatabaseSchema,
@@ -34,26 +35,23 @@ app.use(
   }),
 );
 
-app.onError((err, ctx) => {
+app.onError((error, ctx) => {
   // log the error for operators
-  console.error(err);
+  console.error(error);
 
   return ctx.text("Internal server error", 500);
 });
-
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
-app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
-);
-
 // use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
 app.use("/", async (ctx) => {
   try {
-    ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`);
-  } catch (error) {
-    console.error(error);
+    const ensAdminRedirectUrl = new URL(ensAdminUrl());
+    ensAdminRedirectUrl.searchParams.set("ensnode", ensNodePublicUrl());
 
-    return ctx.text("Internal server error", 500);
+    return ctx.redirect(ensAdminRedirectUrl);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
   }
 });
 
