@@ -17,7 +17,8 @@ import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
+export default function (args: PonderENSPluginHandlerArgs<"base.eth">) {
+  const { namespace } = args;
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -25,7 +26,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
     handleNameRenewed,
     handleNameTransferred,
     ownedSubnameNode,
-  } = makeRegistrarHandlers(ownedName);
+  } = makeRegistrarHandlers(args);
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
