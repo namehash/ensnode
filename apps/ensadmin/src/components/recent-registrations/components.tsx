@@ -159,18 +159,20 @@ export function RecentRegistrations() {
   const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
 
-  console.log("registrationsStartBlock", registrationsStartBlock);
-
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   // Get the current indexing block from the indexing status
-  const mainnetStatuses = indexingStatus.data?.runtime.networkIndexingStatusByChainId;
-  const mainnetStatus = mainnetStatuses ? mainnetStatuses[1] : null; // mainnet chainId is 1
-  const lastIndexedBlock = mainnetStatus?.lastIndexedBlock?.number || 0;
-  const lastIndexedBlockDate = mainnetStatus?.lastIndexedBlock?.timestamp
-    ? new Date(mainnetStatus.lastIndexedBlock.timestamp * 1000)
+  const networkStatuses = indexingStatus.data?.runtime.networkIndexingStatusByChainId;
+  // Use the correct chain ID from the indexedChainId hook instead of hardcoding to 1 (mainnet)
+  const currentNetworkStatus =
+    networkStatuses && indexedChainId ? networkStatuses[indexedChainId] : null;
+  console.log("currentNetworkStatus", currentNetworkStatus);
+
+  const lastIndexedBlock = currentNetworkStatus?.lastIndexedBlock?.number || 0;
+  const lastIndexedBlockDate = currentNetworkStatus?.lastIndexedBlock?.timestamp
+    ? new Date(currentNetworkStatus.lastIndexedBlock.timestamp * 1000)
     : null;
 
   // If possible, check if the current indexing block is before the BaseRegistrar start block
@@ -204,14 +206,16 @@ export function RecentRegistrations() {
             <p className="mb-2">
               Latest indexed .eth registrations will be displayed here after blocks from{" "}
               <pre className="inline">{registrationsStartBlock.number}</pre> are indexed
-              <time className="ml-1" dateTime={registrationsStartBlock.date.toISOString()} title={registrationsStartBlock.date.toISOString()}>
+              <time
+                className="ml-1"
+                dateTime={registrationsStartBlock.date.toISOString()}
+                title={registrationsStartBlock.date.toISOString()}
+              >
                 ({getFormattedDateString(registrationsStartBlock.date)})
               </time>
               .
             </p>
-            <p>
-              While .eth domains are indexed before this date, .eth registrations are not.
-            </p>
+            <p>While .eth domains are indexed before this date, .eth registrations are not.</p>
           </div>
         ) : recentRegistrationsQuery.isLoading ? (
           <RecentRegistrationsFallback />
