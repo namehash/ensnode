@@ -41,7 +41,7 @@ app.onError((error, ctx) => {
 
   return ctx.text("Internal server error", 500);
 });
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+// use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
   try {
     const ensAdminRedirectUrl = new URL(ensAdminUrl());
