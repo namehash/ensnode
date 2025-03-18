@@ -6,6 +6,7 @@ import { ChevronsUpDown, ExternalLink, Loader2, Plus, Server, Trash2 } from "luc
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { ENSAdminIcon } from "@/components/ensadmin-icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,7 +73,7 @@ export function ConnectionSelector() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Server className="size-4" />
+                <ENSAdminIcon className="size-8" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">ENSAdmin</span>
