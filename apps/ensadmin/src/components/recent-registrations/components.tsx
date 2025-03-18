@@ -18,9 +18,12 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Hex, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
+import { DeploymentConfigs } from "@ensnode/ens-deployments";
 
-// Date constants
-const REGISTRATIONS_STARTING_DATE = new Date(2020, 0, 30); // the first registration being indexed is from January 30, 2020
+// Block constants
+const BASE_REGISTRAR_START_BLOCK = DeploymentConfigs.mainnet.eth.contracts.BaseRegistrar.startBlock; // Start block of BaseRegistrar on mainnet
+// Source: Block 9380410 was mined on January 30, 2020
+const BASE_REGISTRAR_DEPLOYMENT_DATE = new Date(2020, 0, 30);
 
 // Helper function to get formatted date for display
 const getFormattedDateString = (date: Date): string => {
@@ -166,51 +169,50 @@ export function RecentRegistrations() {
     setIsClient(true);
   }, []);
 
-  // Get the current indexing date from the indexing status
-  const currentIndexingDate = indexingStatus.data
-    ? globalIndexingStatusViewModel(indexingStatus.data.runtime.networkIndexingStatusByChainId)
-        .currentIndexingDate
+  // Get the current indexing block from the indexing status
+  const mainnetStatuses = indexingStatus.data?.runtime.networkIndexingStatusByChainId;
+  const mainnetStatus = mainnetStatuses ? mainnetStatuses[1] : null; // mainnet chainId is 1
+  const lastIndexedBlock = mainnetStatus?.lastIndexedBlock?.number || 0;
+  const lastIndexedBlockDate = mainnetStatus?.lastIndexedBlock?.timestamp 
+    ? new Date(mainnetStatus.lastIndexedBlock.timestamp * 1000) 
     : null;
 
-  // Check if the current indexing date is before the registrations starting date
-  const isBeforeRegistrationsStartingDate = currentIndexingDate
-    ? currentIndexingDate < REGISTRATIONS_STARTING_DATE
-    : false;
+  // Check if the current indexing block is before the BaseRegistrar start block
+  const isBeforeBaseRegistrarBlock = lastIndexedBlock < BASE_REGISTRAR_START_BLOCK;
 
-  // Format the starting date for display
-  const formattedStartingDate = getFormattedDateString(REGISTRATIONS_STARTING_DATE);
+
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Latest .eth registrations</span>
-          {currentIndexingDate && (
+          {lastIndexedBlock > 0 && (
             <div className="flex items-center gap-1.5">
               <Clock size={16} className="text-blue-600" />
               <span className="text-sm font-medium">
-                Last indexed block on{" "}
-                <FormattedDate
-                  timestamp={(currentIndexingDate.getTime() / 1000).toString()}
-                  options={{
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  }}
-                />
+                Last indexed block: {lastIndexedBlock}
+                {lastIndexedBlockDate && (
+                  <span className="ml-1 text-muted-foreground">
+                    ({getFormattedDateString(lastIndexedBlockDate)})
+                  </span>
+                )}
               </span>
             </div>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isBeforeRegistrationsStartingDate ? (
+        {isBeforeBaseRegistrarBlock ? (
           <div className="py-4 text-center">
             <p className="text-muted-foreground mb-2">
-              This component displays registrations starting from {formattedStartingDate}.
+              Latest indexed .eth registrations will be displayed here after blocks from {BASE_REGISTRAR_START_BLOCK} are indexed
+              <span className="ml-1">
+                ({getFormattedDateString(BASE_REGISTRAR_DEPLOYMENT_DATE)})
+              </span>.
             </p>
             <p className="text-sm text-muted-foreground">
-              The indexed data available is from before this date.
+              While .eth domains are indexed before this date, .eth registrations are not.
             </p>
           </div>
         ) : recentRegistrationsQuery.isLoading ? (
