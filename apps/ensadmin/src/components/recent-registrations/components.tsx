@@ -12,13 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DeploymentConfigs } from "@ensnode/ens-deployments";
 import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Hex, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
-import { DeploymentConfigs } from "@ensnode/ens-deployments";
 
 // Block constants
 const BASE_REGISTRAR_START_BLOCK = DeploymentConfigs.mainnet.eth.contracts.BaseRegistrar.startBlock; // Start block of BaseRegistrar on mainnet
@@ -173,14 +173,12 @@ export function RecentRegistrations() {
   const mainnetStatuses = indexingStatus.data?.runtime.networkIndexingStatusByChainId;
   const mainnetStatus = mainnetStatuses ? mainnetStatuses[1] : null; // mainnet chainId is 1
   const lastIndexedBlock = mainnetStatus?.lastIndexedBlock?.number || 0;
-  const lastIndexedBlockDate = mainnetStatus?.lastIndexedBlock?.timestamp 
-    ? new Date(mainnetStatus.lastIndexedBlock.timestamp * 1000) 
+  const lastIndexedBlockDate = mainnetStatus?.lastIndexedBlock?.timestamp
+    ? new Date(mainnetStatus.lastIndexedBlock.timestamp * 1000)
     : null;
 
   // Check if the current indexing block is before the BaseRegistrar start block
   const isBeforeBaseRegistrarBlock = lastIndexedBlock < BASE_REGISTRAR_START_BLOCK;
-
-
 
   return (
     <Card className="w-full">
@@ -206,10 +204,12 @@ export function RecentRegistrations() {
         {isBeforeBaseRegistrarBlock ? (
           <div className="py-4 text-center">
             <p className="text-muted-foreground mb-2">
-              Latest indexed .eth registrations will be displayed here after blocks from {BASE_REGISTRAR_START_BLOCK} are indexed
+              Latest indexed .eth registrations will be displayed here after blocks from{" "}
+              {BASE_REGISTRAR_START_BLOCK} are indexed
               <span className="ml-1">
                 ({getFormattedDateString(BASE_REGISTRAR_DEPLOYMENT_DATE)})
-              </span>.
+              </span>
+              .
             </p>
             <p className="text-sm text-muted-foreground">
               While .eth domains are indexed before this date, .eth registrations are not.
