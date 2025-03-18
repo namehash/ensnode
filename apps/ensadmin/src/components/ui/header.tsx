@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+import * as React from "react";
 
 const HeaderContext = React.createContext<{ className?: string } | null>(null);
 
@@ -23,7 +23,7 @@ const Header = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
           ref={ref}
           className={cn(
             "flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b",
-            className
+            className,
           )}
           {...props}
         >
@@ -31,48 +31,41 @@ const Header = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
         </header>
       </HeaderContext.Provider>
     );
-  }
+  },
 );
 Header.displayName = "Header";
 
-const HeaderNav = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, children, ...props }, ref) => {
-  return (
-    <div
-      ref={ref}
-      className={cn("flex items-center gap-2 px-4 flex-1", className)}
-      {...props}
-    >
-      <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-2 h-4" />
-      {children}
-    </div>
-  );
-});
+const HeaderNav = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <div ref={ref} className={cn("flex items-center gap-2 px-4 flex-1", className)} {...props}>
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        {children}
+      </div>
+    );
+  },
+);
 HeaderNav.displayName = "HeaderNav";
 
-const HeaderBreadcrumbs = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  return <div ref={ref} className={cn("flex-1", className)} {...props} />;
-});
+const HeaderBreadcrumbs = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => {
+    return <div ref={ref} className={cn("flex-1", className)} {...props} />;
+  },
+);
 HeaderBreadcrumbs.displayName = "HeaderBreadcrumbs";
 
-const HeaderActions = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  return (
-    <div
-      ref={ref}
-      className={cn("flex shrink-0 items-center gap-2 px-4", className)}
-      {...props}
-    />
-  );
-});
+const HeaderActions = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn("flex shrink-0 items-center gap-2 px-4", className)}
+        {...props}
+      />
+    );
+  },
+);
 HeaderActions.displayName = "HeaderActions";
 
 export { Header, HeaderNav, HeaderBreadcrumbs, HeaderActions };

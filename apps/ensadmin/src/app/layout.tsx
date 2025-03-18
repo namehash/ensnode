@@ -1,19 +1,14 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 
 import { Inter } from "next/font/google";
 
-import { WagmiProvider } from "@/components/providers/wagmi-provider";
 import { AppSidebar } from "@/components/app-sidebar";
+import { WagmiProvider } from "@/components/providers/wagmi-provider";
 import { Provider as QueryProvider } from "@/components/query-client/provider";
+import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import {
-  Header,
-  HeaderNav,
-  HeaderBreadcrumbs,
-  HeaderActions,
-} from "@/components/ui/header";
 
 const inter = Inter({
   variable: "--font-inter",
