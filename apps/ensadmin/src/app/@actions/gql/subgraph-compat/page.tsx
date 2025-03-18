@@ -7,16 +7,14 @@ type ActionProps = {
   }>;
 };
 
-export default async function ActionsSubgraphCompatPage({
-  searchParams,
-}: ActionProps) {
+export default async function ActionsSubgraphCompatPage({ searchParams }: ActionProps) {
   const { ensnode = preferredEnsNodeUrl() } = await searchParams;
 
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
-    ? ensnode
-    : preferredEnsNodeUrl();
+      ? ensnode
+      : preferredEnsNodeUrl();
 
   const url = new URL(`/subgraph`, baseUrl).toString();
 

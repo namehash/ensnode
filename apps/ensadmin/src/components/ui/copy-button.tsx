@@ -1,10 +1,10 @@
 "use client";
 
-import * as React from "react";
-import { CheckIcon, ClipboardIcon } from "lucide-react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { Button, ButtonProps } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { CheckIcon, ClipboardIcon } from "lucide-react";
+import * as React from "react";
+import { toast } from "sonner";
 
 export interface CopyButtonProps extends Omit<ButtonProps, "onClick"> {
   value: string;

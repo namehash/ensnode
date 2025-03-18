@@ -13,8 +13,8 @@ export default async function ActionsPonderPage({ searchParams }: ActionProps) {
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
-    ? ensnode
-    : preferredEnsNodeUrl();
+      ? ensnode
+      : preferredEnsNodeUrl();
 
   const url = new URL(`/ponder`, baseUrl).toString();
 
