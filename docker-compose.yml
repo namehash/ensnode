@@ -15,7 +15,7 @@ services:
       ENSRAINBOW_URL: http://ensrainbow:3223
       # Override ENSADMIN_URL to point to docker compose ensadmin
       ENSADMIN_URL: http://localhost:4321
-      # Override ENSADMIN_URL to point to docker compose ensadmin
+      # Override ENSNODE_PUBLIC_URL to point to docker compose ensadmin
       ENSNODE_PUBLIC_URL: http://localhost:42069
     depends_on:
       - ensrainbow
