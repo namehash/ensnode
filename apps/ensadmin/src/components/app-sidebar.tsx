@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, DatabaseIcon } from "lucide-react";
+import { Activity, RadioTower } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
@@ -17,19 +17,19 @@ const navItems = [
   {
     title: "APIs",
     url: "#",
-    icon: DatabaseIcon,
+    icon: RadioTower,
     isActive: true,
     items: [
       {
-        title: "GraphQL",
+        title: "GraphQL (Ponder-style)",
         url: "/gql/ponder",
       },
       {
-        title: "Subgraph",
+        title: "GraphQL (Subgraph-style)",
         url: "/gql/subgraph-compat",
       },
       {
-        title: "Ponder",
+        title: "Ponder Client",
         url: "/ponder-client-api",
       },
     ],
