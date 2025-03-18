@@ -15,7 +15,7 @@ on:
           - blue
 
 jobs:
-  switch-environment:
+  deploy-environment:
     runs-on: ubuntu-latest
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
@@ -82,7 +82,7 @@ jobs:
               --silent \
               --fail \
               --url https://backboard.railway.app/graphql/v2 \
-              --header 'Project-Access-Token: '${{ env.RAILWAY_TOKEN }} \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
               --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}'
             echo "Finished setting $variable_name"
