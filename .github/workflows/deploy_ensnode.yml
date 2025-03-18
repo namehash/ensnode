@@ -1,0 +1,56 @@
+name: Deploy ENSNode on given environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target environment (green or blue)'
+        required: true
+        type: choice
+        options:
+          - green
+          - blue
+
+jobs:
+  switch-environment:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENVIRONMENT: ${{ inputs.target }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
+    
+    steps:
+      - name: Print switch target
+        run: | 
+            echo "Deploying on: $TARGET_ENVIRONMENT"
+    
+      - name: Install dependencies
+        run: | 
+            #Railway CLI
+            npm i -g @railway/cli
+    
+      - name: Calculate env variables
+        run: |
+            case "$TARGET_ENVIRONMENT" in
+              "green")
+                echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+                echo "SVC_ID="${{ secrets.ALPHA_SVC_ID }} >> "$GITHUB_ENV"
+                ;;
+              "blue")
+                echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+                echo "SVC_ID="${{ secrets.ALPHA_SVC_ID }} >> "$GITHUB_ENV"
+                ;;
+              *)
+                echo "Environment not recognized, skipping workflow"
+                exit 1
+            esac
+
+      - name: Update shared environment variable
+        run: |
+
+      - name: Redeploy ENSIndexer instances
+        run: |
+           
+
+          
