@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { ENSNodeBenchmarkComparison } from "@/components/ensnode";
 import { IndexingStatus } from "@/components/indexing-status/components";
 import { RecentRegistrations } from "@/components/recent-registrations";
 
@@ -10,8 +11,9 @@ export default function Status() {
         <IndexingStatus />
       </Suspense>
       <Suspense>
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 space-y-8">
           <RecentRegistrations />
+          <ENSNodeBenchmarkComparison />
         </div>
       </Suspense>
     </>
