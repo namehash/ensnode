@@ -1,5 +1,5 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
-import { type SupportedChainId, parseSupportedChainIdByName } from "@/lib/wagmi";
+import { type SupportedEnsDeploymentChainId, parseEnsDeploymentChain } from "@/lib/wagmi";
 import DeploymentConfigs, {
   type SubregistryDeploymentConfig,
   type SubregistryName,
@@ -7,7 +7,6 @@ import DeploymentConfigs, {
 import { BlockInfo, NetworkIndexingStatus } from "@ensnode/ponder-metadata";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import type { Block } from "viem";
 import { usePublicClient } from "wagmi";
 import type { EnsNode } from "./types";
 
@@ -89,21 +88,20 @@ function validateResponse(response: EnsNode.Metadata) {
 }
 
 /**
- * Selects the indexed chain ID from the indexing status.
+ * Selects the chain ID of selected ENS Deployment Chain from the indexing status.
  *
  * @param indexingStatus The ENSNode indexing status.
  * @returns The indexed chain ID or null if the status is not available.
- * @throws Error if the ENS Deployment Chain is not a supported chain.
  */
-export function useIndexedChainId(
+export function useEnsDeploymentChain(
   indexingStatus: UseIndexingStatusQueryResult["data"],
-): SupportedChainId | undefined {
+): SupportedEnsDeploymentChainId | undefined {
   // If the status is not available, return undefined
   if (!indexingStatus) {
     return undefined;
   }
 
-  return parseSupportedChainIdByName(indexingStatus.env.ENS_DEPLOYMENT_CHAIN);
+  return parseEnsDeploymentChain(indexingStatus.env.ENS_DEPLOYMENT_CHAIN);
 }
 
 /**

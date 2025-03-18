@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SupportedChainId } from "@/lib/wagmi";
+import type { SupportedEnsDeploymentChainId } from "@/lib/wagmi";
 import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -12,7 +12,7 @@ import { getEnsAppUrl, getEnsAvatarUrl } from "./helpers";
 
 interface ENSNameProps {
   address: Hex;
-  chainId: SupportedChainId;
+  chainId: SupportedEnsDeploymentChainId;
   showAvatar?: boolean;
   showExternalLink?: boolean;
   className?: string;

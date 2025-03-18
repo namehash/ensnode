@@ -3,8 +3,8 @@
 import { ENSName } from "@/components/ens-name/components";
 import {
   useBlockInfo,
+  useEnsDeploymentChain,
   useEnsSubregistryConfig,
-  useIndexedChainId,
   useIndexedNetworkBlock,
   useIndexingStatusQuery,
 } from "@/components/ensnode";
@@ -17,14 +17,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Hex, getAddress, isAddressEqual } from "viem";
+import { Hex, checksumAddress, getAddress, isAddressEqual } from "viem";
+import { holesky, mainnet, sepolia } from "viem/chains";
 import { getEnsAppUrl } from "../ens-name";
 import { blockViewModel } from "../indexing-status/view-models";
-import { useRecentRegistrations } from "./hooks";
+import { useRecentRegistrationsViaPonder } from "./hooks";
+
+import { Provider as PonderClientProvider } from "@/components/providers/ponder-client-provider";
 
 // Helper function to get formatted date for display
 const getFormattedDateString = (date: Date): string => {
@@ -109,7 +113,10 @@ function RelativeTime({ timestamp }: { timestamp: string }) {
 function Duration({
   registrationDate,
   expiryDate,
-}: { registrationDate: string; expiryDate: string }) {
+}: {
+  registrationDate: string;
+  expiryDate: string;
+}) {
   const [duration, setDuration] = useState<string>("");
 
   useEffect(() => {
@@ -133,32 +140,78 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
 function getTrueOwner(owner: { id: Hex }, wrappedOwner?: { id: Hex }) {
   // Only use wrapped owner if the owner is the NameWrapper contract
   if (wrappedOwner?.id && isAddressEqual(owner.id, NAME_WRAPPER_ADDRESS)) {
-    return getAddress(wrappedOwner.id);
+    return getAddress(checksumAddress(wrappedOwner.id));
   }
 
   // Otherwise, use the regular owner
-  return getAddress(owner.id);
+  return getAddress(checksumAddress(owner.id));
+}
+
+const supportedChainIds = [mainnet.id, sepolia.id, holesky.id] as const;
+
+type SupportedChainIds = (typeof supportedChainIds)[number];
+
+function isSupportedChainId(chainId: number): chainId is SupportedChainIds {
+  return supportedChainIds.filter((id) => id === chainId).length > 0;
 }
 
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const [isClient, setIsClient] = useState(false);
-
-  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
 
   const indexingStatus = useIndexingStatusQuery(searchParams);
-  const indexedChainId = useIndexedChainId(indexingStatus.data);
+  const ensDeploymentChainId = useEnsDeploymentChain(indexingStatus.data);
 
-  const ensSubregistryConfig = useEnsSubregistryConfig(indexingStatus.data, "eth");
+  if (indexingStatus.isLoading) {
+    return <p>Loading recent registrations.</p>;
+  }
+
+  if (!ensDeploymentChainId) {
+    return null;
+  }
+
+  if (!indexingStatus.data) {
+    throw new Error(`Could not fetch indexing status from selected ENSNode`);
+  }
+
+  const indexedChainIds = Object.keys(
+    indexingStatus.data.runtime.networkIndexingStatusByChainId,
+  ).map((id) => parseInt(id));
+  const indexedSupportedChainIds = indexedChainIds.filter((id) => isSupportedChainId(id));
+
+  if (indexedSupportedChainIds.length === 0) {
+    // no indexed chains was supported
+    return null;
+  }
+
+  return (
+    <PonderClientProvider url={selectedEnsNodeUrl(searchParams)}>
+      <RecentRegistrationsList
+        chainId={ensDeploymentChainId}
+        ensNodeMetadata={indexingStatus.data}
+      />
+    </PonderClientProvider>
+  );
+}
+
+type RecentRegistrationsListSupportedChains = NonNullable<ReturnType<typeof useEnsDeploymentChain>>;
+
+interface RecentRegistrationsListProps {
+  ensNodeMetadata: NonNullable<ReturnType<typeof useIndexingStatusQuery>["data"]>;
+  chainId: RecentRegistrationsListSupportedChains;
+}
+
+function RecentRegistrationsList({ ensNodeMetadata, chainId }: RecentRegistrationsListProps) {
+  const recentRegistrationsQuery = useRecentRegistrationsViaPonder();
+  const ensSubregistryConfig = useEnsSubregistryConfig(ensNodeMetadata, "eth");
   const lastIndexedBlockInfo = useIndexedNetworkBlock({
     blockName: "lastIndexedBlock",
-    chainId: indexedChainId,
-    ensNodeMetadata: indexingStatus.data,
+    chainId,
+    ensNodeMetadata,
   });
 
   const registrationsStartBlockInfo = useBlockInfo({
     blockNumber: ensSubregistryConfig?.contracts.BaseRegistrar.startBlock,
-    chainId: indexedChainId,
+    chainId,
   });
 
   const lastIndexedBlock = lastIndexedBlockInfo ? blockViewModel(lastIndexedBlockInfo) : null;
@@ -166,15 +219,17 @@ export function RecentRegistrations() {
     ? blockViewModel(registrationsStartBlockInfo)
     : null;
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   // If possible, check if the current indexing block is before the block where registrations started to be tracked
   const isBeforeBaseRegistrarBlock =
     lastIndexedBlock && registrationsStartBlock
       ? lastIndexedBlock.date < registrationsStartBlock.date
       : false;
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <Card className="w-full">
@@ -233,7 +288,7 @@ export function RecentRegistrations() {
                   <TableRow key={registration.domain.name}>
                     <TableCell className="font-medium">
                       <a
-                        href={getEnsAppUrl(indexedChainId, registration.domain.name)}
+                        href={getEnsAppUrl(chainId, registration.domain.name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-blue-600 hover:underline"
@@ -252,13 +307,13 @@ export function RecentRegistrations() {
                       />
                     </TableCell>
                     <TableCell>
-                      {indexedChainId ? (
+                      {chainId ? (
                         <ENSName
                           address={getTrueOwner(
                             registration.domain.owner,
                             registration.domain.wrappedOwner,
                           )}
-                          chainId={indexedChainId}
+                          chainId={chainId}
                           showAvatar={true}
                         />
                       ) : (
