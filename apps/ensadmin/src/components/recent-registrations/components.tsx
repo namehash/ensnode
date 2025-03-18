@@ -1,7 +1,13 @@
 "use client";
 
-import { ENSName } from "@/components/ens-name";
-import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
+import { ENSName } from "@/components/ens-name/components";
+import {
+  useBlockInfo,
+  useEnsSubregistryConfig,
+  useIndexedChainId,
+  useIndexedNetworkBlock,
+  useIndexingStatusQuery,
+} from "@/components/ensnode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -16,7 +22,9 @@ import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Hex, getAddress, isAddressEqual } from "viem";
-import { useRecentRegistrations, useRegistrationsStartBlock } from "./hooks";
+import { getEnsAppUrl } from "../ens-name";
+import { blockViewModel } from "../indexing-status/view-models";
+import { useRecentRegistrations } from "./hooks";
 
 // Helper function to get formatted date for display
 const getFormattedDateString = (date: Date): string => {
@@ -86,25 +94,6 @@ const formatRelativeTime = (timestamp: string) => {
   }
 };
 
-// Helper function to generate ENS app URL for a name
-const getEnsAppUrlForName = (name: string) => {
-  return `https://app.ens.domains/${name}`;
-};
-
-// Client-only date formatter component
-function FormattedDate({
-  timestamp,
-  options,
-}: { timestamp: string; options: Intl.DateTimeFormatOptions }) {
-  const [formattedDate, setFormattedDate] = useState<string>("");
-
-  useEffect(() => {
-    setFormattedDate(formatDate(timestamp, options));
-  }, [timestamp, options]);
-
-  return <>{formattedDate}</>;
-}
-
 // Client-only relative time component
 function RelativeTime({ timestamp }: { timestamp: string }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
@@ -153,48 +142,53 @@ function getTrueOwner(owner: { id: Hex }, wrappedOwner?: { id: Hex }) {
 
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
-  const indexingStatus = useIndexingStatusQuery(searchParams);
-  const registrationsStartBlock = useRegistrationsStartBlock(indexingStatus.data);
-  const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
+
+  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
+
+  const indexingStatus = useIndexingStatusQuery(searchParams);
+  const indexedChainId = useIndexedChainId(indexingStatus.data);
+
+  const ensSubregistryConfig = useEnsSubregistryConfig(indexingStatus.data, "eth");
+  const lastIndexedBlockInfo = useIndexedNetworkBlock({
+    blockName: "lastIndexedBlock",
+    chainId: indexedChainId,
+    ensNodeMetadata: indexingStatus.data,
+  });
+
+  const registrationsStartBlockInfo = useBlockInfo({
+    blockNumber: ensSubregistryConfig?.contracts.BaseRegistrar.startBlock,
+    chainId: indexedChainId,
+  });
+
+  const lastIndexedBlock = lastIndexedBlockInfo ? blockViewModel(lastIndexedBlockInfo) : null;
+  const registrationsStartBlock = registrationsStartBlockInfo
+    ? blockViewModel(registrationsStartBlockInfo)
+    : null;
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Get the current indexing block from the indexing status
-  const networkStatuses = indexingStatus.data?.runtime.networkIndexingStatusByChainId;
-  // Use the correct chain ID from the indexedChainId hook instead of hardcoding to 1 (mainnet)
-  const currentNetworkStatus =
-    networkStatuses && indexedChainId ? networkStatuses[indexedChainId] : null;
-  console.log("currentNetworkStatus", currentNetworkStatus);
-
-  const lastIndexedBlock = currentNetworkStatus?.lastIndexedBlock?.number || 0;
-  const lastIndexedBlockDate = currentNetworkStatus?.lastIndexedBlock?.timestamp
-    ? new Date(currentNetworkStatus.lastIndexedBlock.timestamp * 1000)
-    : null;
-
-  // If possible, check if the current indexing block is before the BaseRegistrar start block
-  const isBeforeBaseRegistrarBlock = registrationsStartBlock?.number
-    ? lastIndexedBlock < registrationsStartBlock.number
-    : false;
+  // If possible, check if the current indexing block is before the block where registrations started to be tracked
+  const isBeforeBaseRegistrarBlock =
+    lastIndexedBlock && registrationsStartBlock
+      ? lastIndexedBlock.date < registrationsStartBlock.date
+      : false;
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Latest .eth registrations</span>
-          {lastIndexedBlock > 0 && (
+          {lastIndexedBlock && (
             <div className="flex items-center gap-1.5">
               <Clock size={16} className="text-blue-600" />
               <span className="text-sm font-medium">
-                Last indexed block: {lastIndexedBlock}
-                {lastIndexedBlockDate && (
-                  <span className="ml-1 text-muted-foreground">
-                    ({getFormattedDateString(lastIndexedBlockDate)})
-                  </span>
-                )}
+                Last indexed block: {lastIndexedBlock.number}
+                <span className="ml-1 text-muted-foreground">
+                  ({getFormattedDateString(lastIndexedBlock.date)})
+                </span>
               </span>
             </div>
           )}
@@ -239,7 +233,7 @@ export function RecentRegistrations() {
                   <TableRow key={registration.domain.name}>
                     <TableCell className="font-medium">
                       <a
-                        href={getEnsAppUrlForName(registration.domain.name)}
+                        href={getEnsAppUrl(indexedChainId, registration.domain.name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-blue-600 hover:underline"
