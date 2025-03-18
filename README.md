@@ -150,10 +150,10 @@ Shared configuration files
 
 ## Docs
 
-### [`docs/ensnode`](docs/ensnode.io/)
+### [`docs/ensnode.io`](docs/ensnode.io/)
 
-Astro/Starlight documentation app for ENSNode and ENSRainbow.
+Astro/Starlight documentation app for ENSNode, ENSIndexer, ENSAdmin, and ENSRainbow.
 
-### [`docs/ensrainbow`](docs/ensrainbow.io/)
+### [`docs/ensrainbow.io`](docs/ensrainbow.io/)
 
 Landing page for ENSRainbow.
