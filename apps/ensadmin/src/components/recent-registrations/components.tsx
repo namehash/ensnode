@@ -2,7 +2,6 @@
 
 import { ENSName } from "@/components/ens-name";
 import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
-import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -12,18 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DeploymentConfigs } from "@ensnode/ens-deployments";
 import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Hex, getAddress, isAddressEqual } from "viem";
-import { useRecentRegistrations } from "./hooks";
-
-// Block constants
-const BASE_REGISTRAR_START_BLOCK = DeploymentConfigs.mainnet.eth.contracts.BaseRegistrar.startBlock; // Start block of BaseRegistrar on mainnet
-// Source: Block 9380410 was mined on January 30, 2020
-const BASE_REGISTRAR_DEPLOYMENT_DATE = new Date(2020, 0, 30);
+import { useRecentRegistrations, useRegistrationsStartBlock } from "./hooks";
 
 // Helper function to get formatted date for display
 const getFormattedDateString = (date: Date): string => {
@@ -162,8 +155,11 @@ export function RecentRegistrations() {
   const searchParams = useSearchParams();
   const recentRegistrationsQuery = useRecentRegistrations(searchParams);
   const indexingStatus = useIndexingStatusQuery(searchParams);
+  const registrationsStartBlock = useRegistrationsStartBlock(indexingStatus.data);
   const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
+
+  console.log("registrationsStartBlock", registrationsStartBlock);
 
   useEffect(() => {
     setIsClient(true);
@@ -177,8 +173,10 @@ export function RecentRegistrations() {
     ? new Date(mainnetStatus.lastIndexedBlock.timestamp * 1000)
     : null;
 
-  // Check if the current indexing block is before the BaseRegistrar start block
-  const isBeforeBaseRegistrarBlock = lastIndexedBlock < BASE_REGISTRAR_START_BLOCK;
+  // If possible, check if the current indexing block is before the BaseRegistrar start block
+  const isBeforeBaseRegistrarBlock = registrationsStartBlock?.number
+    ? lastIndexedBlock < registrationsStartBlock.number
+    : false;
 
   return (
     <Card className="w-full">
@@ -201,17 +199,17 @@ export function RecentRegistrations() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isBeforeBaseRegistrarBlock ? (
-          <div className="py-4 text-center">
-            <p className="text-muted-foreground mb-2">
+        {isBeforeBaseRegistrarBlock && registrationsStartBlock ? (
+          <div className="py-4 text-left text-sm text-muted-foreground">
+            <p className="mb-2">
               Latest indexed .eth registrations will be displayed here after blocks from{" "}
-              {BASE_REGISTRAR_START_BLOCK} are indexed
-              <span className="ml-1">
-                ({getFormattedDateString(BASE_REGISTRAR_DEPLOYMENT_DATE)})
-              </span>
+              <pre className="inline">{registrationsStartBlock.number}</pre> are indexed
+              <time className="ml-1" dateTime={registrationsStartBlock.date.toISOString()} title={registrationsStartBlock.date.toISOString()}>
+                ({getFormattedDateString(registrationsStartBlock.date)})
+              </time>
               .
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p>
               While .eth domains are indexed before this date, .eth registrations are not.
             </p>
           </div>
