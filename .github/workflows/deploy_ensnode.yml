@@ -1,9 +1,6 @@
 name: Deploy ENSNode on given environment
 
 on:
-  push:
-    branches: 
-      - feat/ensnode-deployments-per-env
   workflow_dispatch:
     inputs:
       target:
@@ -13,12 +10,17 @@ on:
         options:
           - green
           - blue
+      tag:
+        description: 'Unique tag for deployment. Used for schema name generation'
+        required: true
+        type: string
 
 jobs:
   deploy-environment:
     runs-on: ubuntu-latest
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
+      TAG: ${{ inputs.tag }}
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
@@ -71,6 +73,7 @@ jobs:
                 exit 1
             esac
 
+      # Update DATABASE_SCHEMA for each indexer based on input tag
       - name: Update shared environment variable
         run: |
           set_shared_variable() {
@@ -88,7 +91,10 @@ jobs:
             echo "Finished setting $variable_name"
           }
 
-          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "TEST" "SAMPLE"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_DATABASE_SCHEMA" "alphaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_DATABASE_SCHEMA" "mainnetSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_DATABASE_SCHEMA" "sepoliaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "HOLESKY_DATABASE_SCHEMA" "holeskySchema${TAG}"
 
       - name: Redeploy ENSIndexer instances
         run: |
@@ -105,4 +111,16 @@ jobs:
             echo "Finished redeploying $service_id"
             }
 
-            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${{ env.TEST_SVC_ID }}
+            #ALPHA
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}
+            #MAINNET
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}
+            #SEPOLIA
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}
+            #HOLESKY
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
+
