@@ -50,8 +50,7 @@
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "viem": "catalog:",
-    "wagmi": "^2.14.13",
-    "zod": "^3.24.2"
+    "wagmi": "^2.14.13"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

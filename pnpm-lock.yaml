@@ -18,27 +18,6 @@ catalogs:
     '@ponder/utils':
       specifier: ^0.2.3
       version: 0.2.3
-    '@types/node':
-      specifier: ^20.10.0
-      version: 20.17.14
-    '@vitest/coverage-v8':
-      specifier: ^3.0.5
-      version: 3.0.5
-    drizzle-orm:
-      specifier: ^0.39.3
-      version: 0.39.3
-    hono:
-      specifier: ^4.6.14
-      version: 4.6.17
-    ponder:
-      specifier: ^0.9.27
-      version: 0.9.27
-    tsup:
-      specifier: ^8.3.6
-      version: 8.3.6
-    typescript:
-      specifier: ^5.7.3
-      version: 5.7.3
     viem:
       specifier: ^2.22.13
       version: 2.22.13
@@ -169,9 +148,6 @@ importers:
       wagmi:
         specifier: ^2.14.13
         version: 2.14.13(@tanstack/query-core@5.67.1)(@tanstack/react-query@5.67.1(react@18.3.1))(@types/react@18.3.18)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.22.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
-      zod:
-        specifier: ^3.24.2
-        version: 3.24.2
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
