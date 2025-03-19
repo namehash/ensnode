@@ -2,32 +2,12 @@
 
 import { preferredEnsNodeUrl, selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
-import {
-  ChevronsUpDown,
-  ExternalLink,
-  Loader2,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { ChevronsUpDown, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { ENSAdminIcon } from "@/components/ensadmin-icon";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { useConnections } from "./use-connections";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -37,9 +17,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { useConnections } from "./use-connections";
 
 const validateUrl = (url: string) => {
   if (!url) return null;
@@ -66,8 +60,7 @@ export function ConnectionSelector() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { connections, isLoading, addConnection, removeConnection } =
-    useConnections();
+  const { connections, isLoading, addConnection, removeConnection } = useConnections();
 
   const handleSelect = (url: string) => {
     const params = new URLSearchParams(searchParams);
@@ -75,9 +68,7 @@ export function ConnectionSelector() {
 
     router.push(`${pathname}?${params.toString()}`);
 
-    window.dispatchEvent(
-      new CustomEvent("ensnode/connection/set", { detail: { url } })
-    );
+    window.dispatchEvent(new CustomEvent("ensnode/connection/set", { detail: { url } }));
   };
 
   const handleAdd = async () => {
@@ -97,7 +88,7 @@ export function ConnectionSelector() {
           setUrlError(null);
           setDialogOpen(false);
         },
-      }
+      },
     );
   };
 
@@ -121,9 +112,7 @@ export function ConnectionSelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">
-                    {selectedUrl}
-                  </span>
+                  <span className="truncate text-xs font-mono">{selectedUrl}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
@@ -149,7 +138,7 @@ export function ConnectionSelector() {
                     onClick={() => handleSelect(url)}
                     className={cn(
                       "group gap-2 p-2 font-mono text-xs justify-between",
-                      url === selectedUrl ? "bg-primary/10 text-primary" : ""
+                      url === selectedUrl ? "bg-primary/10 text-primary" : "",
                     )}
                   >
                     <span className="truncate flex-1">{url}</span>
@@ -174,11 +163,10 @@ export function ConnectionSelector() {
                             "p-1 rounded",
                             removeConnection.isPending
                               ? "text-muted-foreground cursor-not-allowed"
-                              : "hover:text-destructive"
+                              : "hover:text-destructive",
                           )}
                         >
-                          {removeConnection.isPending &&
-                          removeConnection.variables?.url === url ? (
+                          {removeConnection.isPending && removeConnection.variables?.url === url ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
                           ) : (
                             <Trash2 className="w-3 h-3" />
@@ -197,9 +185,7 @@ export function ConnectionSelector() {
                   <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                     <Plus className="size-4" />
                   </div>
-                  <div className="font-medium text-muted-foreground">
-                    Add connection
-                  </div>
+                  <div className="font-medium text-muted-foreground">Add connection</div>
                 </DropdownMenuItem>
               </DialogTrigger>
             </DropdownMenuContent>
@@ -224,9 +210,7 @@ export function ConnectionSelector() {
           <div className="grid gap-4">
             <div className="flex items-center justify-between">
               <Label htmlFor="url">URL</Label>
-              <span className="text-xs text-muted-foreground">
-                Include http:// or https://
-              </span>
+              <span className="text-xs text-muted-foreground">Include http:// or https://</span>
             </div>
             <Input
               id="url"
@@ -239,7 +223,7 @@ export function ConnectionSelector() {
               }}
               className={cn(
                 "font-mono",
-                urlError || addConnection.isError ? "border-destructive" : ""
+                urlError || addConnection.isError ? "border-destructive" : "",
               )}
             />
             {urlError && <p className="text-xs text-destructive">{urlError}</p>}
@@ -264,11 +248,7 @@ export function ConnectionSelector() {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            onClick={handleAdd}
-            disabled={addConnection.isPending || !newUrl}
-          >
+          <Button type="submit" onClick={handleAdd} disabled={addConnection.isPending || !newUrl}>
             {addConnection.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
