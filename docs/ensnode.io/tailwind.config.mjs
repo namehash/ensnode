@@ -10,8 +10,8 @@ export default {
           "linear-gradient(180deg, rgba(16,18,223,1) 0%, rgba(18,19,115,1) 75%, rgba(0,0,0,1) 100%)",
       },
       boxShadow: {
-        hero_button_shd: "inset 0px 0px 12px 0px rgba(255,255,255,1)"
-      }
+        hero_button_shd: "inset 0px 0px 12px 0px rgba(255,255,255,1)",
+      },
     },
   },
   plugins: [],

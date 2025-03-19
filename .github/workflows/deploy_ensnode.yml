@@ -1,0 +1,126 @@
+name: Deploy ENSNode on given environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target environment (green or blue)'
+        required: true
+        type: choice
+        options:
+          - green
+          - blue
+      tag:
+        description: 'Unique tag for deployment. Used for schema name generation'
+        required: true
+        type: string
+
+jobs:
+  deploy-environment:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENVIRONMENT: ${{ inputs.target }}
+      TAG: ${{ inputs.tag }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
+      RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
+      TEST_SVC_ID: ${{ secrets.TEST_SVC_ID }}
+    
+    steps:
+      - name: Print switch target
+        run: | 
+            echo "Deploying on: $TARGET_ENVIRONMENT"
+        
+      - name: Calculate env variables
+        run: |
+            TARGET_ENVIRONMENT="green"
+            case "$TARGET_ENVIRONMENT" in
+              "green")
+                #ENVIRONMENT
+                echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.GREEN_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+                #ALPHA
+                echo "ALPHA_API_SVC_ID="${{ secrets.GREEN_ALPHA_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "ALPHA_INDEXER_SVC_ID="${{ secrets.GREEN_ALPHA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #MAINNET
+                echo "MAINNET_API_SVC_ID="${{ secrets.GREEN_MAINNET_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "MAINNET_INDEXER_SVC_ID="${{ secrets.GREEN_MAINNET_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #SEPOLIA
+                echo "SEPOLIA_API_SVC_ID="${{ secrets.GREEN_SEPOLIA_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "SEPOLIA_INDEXER_SVC_ID="${{ secrets.GREEN_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #HOLESKY
+                echo "HOLESKY_API_SVC_ID="${{ secrets.GREEN_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.GREEN_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                ;;
+              "blue")
+                #ENVIRONMENT
+                echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+                #ALPHA
+                echo "ALPHA_API_SVC_ID="${{ secrets.BLUE_ALPHA_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "ALPHA_INDEXER_SVC_ID="${{ secrets.BLUE_ALPHA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #MAINNET
+                echo "MAINNET_API_SVC_ID="${{ secrets.BLUE_MAINNET_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "MAINNET_INDEXER_SVC_ID="${{ secrets.BLUE_MAINNET_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #SEPOLIA
+                echo "SEPOLIA_API_SVC_ID="${{ secrets.BLUE_SEPOLIA_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "SEPOLIA_INDEXER_SVC_ID="${{ secrets.BLUE_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #HOLESKY
+                echo "HOLESKY_API_SVC_ID="${{ secrets.BLUE_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
+                echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.BLUE_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                ;;
+              *)
+                echo "Environment not recognized, skipping workflow"
+                exit 1
+            esac
+
+      # Update DATABASE_SCHEMA for each indexer based on input tag
+      - name: Update shared environment variable
+        run: |
+          set_shared_variable() {
+            local environment_id=$1
+            local variable_name=$2
+            local variable_value=$3
+            echo "Setting $variable_name"
+            curl --request POST \
+              --silent \
+              --fail \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"'${variable_name}'\", value: \"'${variable_value}'\" }) }"}'
+            echo "Finished setting $variable_name"
+          }
+
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_DATABASE_SCHEMA" "alphaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_DATABASE_SCHEMA" "mainnetSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_DATABASE_SCHEMA" "sepoliaSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "HOLESKY_DATABASE_SCHEMA" "holeskySchema${TAG}"
+
+      - name: Redeploy ENSIndexer instances
+        run: |
+            redeploy_service() {
+            local environment_id=$1
+            local service_id=$2
+            echo "Redeploying $service_id"
+            curl --request POST \
+            --silent \
+            --url https://backboard.railway.app/graphql/v2 \
+            --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+            --header 'Content-Type: application/json' \
+            --data "{\"query\":\"mutation serviceInstanceDeploy(\$serviceId: String!, \$environmentId: String!) { serviceInstanceDeploy(serviceId: \$serviceId, environmentId: \$environmentId) }\",\"variables\":{\"environmentId\":\"${environment_id}\",\"serviceId\":\"${service_id}\"}}"
+            echo "Finished redeploying $service_id"
+            }
+
+            #ALPHA
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}
+            #MAINNET
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}
+            #SEPOLIA
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}
+            #HOLESKY
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
+
