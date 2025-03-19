@@ -3,6 +3,7 @@ import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { and, desc, eq, like, notLike } from "@ponder/client";
 import { usePonderQuery } from "@ponder/react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { type RecentRegistrationsResponse } from "./types";
 
 /**
@@ -70,9 +71,11 @@ export function useRecentRegistrations(searchParams: URLSearchParams) {
 }
 
 export function useRecentRegistrationsViaPonder(skipChildrenOfDomains: Array<string> = []) {
-  return usePonderQuery({
-    queryFn: (db) => {
-      const q = db
+  const ponderQuery = usePonderQuery({
+    // we need this query to fetch in a very specific way driven by manual triggers
+    enabled: false,
+    queryFn: (db) =>
+      db
         .select({
           registrationDate: schema.registration.registrationDate,
           expiryDate: schema.registration.expiryDate,
@@ -97,34 +100,55 @@ export function useRecentRegistrationsViaPonder(skipChildrenOfDomains: Array<str
           ),
         )
         .orderBy(desc(schema.registration.registrationDate))
-        .limit(5);
-
-      console.log(q.toSQL());
-
-      return q;
-    },
-    // @ts-ignore
-    select(data) {
-      console.table(data);
-      const mappedData = data.map((row) => ({
-        registrationDate: row.registrationDate,
-        expiryDate: row.expiryDate,
-        domain: {
-          id: row.domainId,
-          name: row.domainName,
-          labelName: row.domainLabelName,
-          createdAt: row.domainCreatedAt,
-          expiryDate: row.domainExpiryDate,
-          owner: {
-            id: row.domainOwnerId,
-          },
-          wrappedOwner: {
-            id: row.domainWrappedOwnerId,
-          },
-        },
-      }));
-
-      return { registrations: mappedData };
-    },
+        .limit(5),
   });
+
+  useEffect(() => {
+    // manually refetch this expensive query
+    ponderQuery.refetch();
+
+    const intervalId = setInterval(ponderQuery.refetch, 15000);
+
+    return () => clearInterval(intervalId);
+  }, [ponderQuery]);
+
+  const mappedData = ponderQuery.data?.map((row) => {
+    if (!row.domainName) {
+      throw new Error(`Registration is missing its linked domain name for node '${row.domainId}'`);
+    }
+
+    if (!row.domainOwnerId) {
+      throw new Error(
+        `Registration is missing its linked domain owner ID for node '${row.domainId}'`,
+      );
+    }
+
+    return {
+      registrationDate: row.registrationDate.toString(),
+      expiryDate: row.expiryDate.toString(),
+      domain: {
+        id: row.domainId,
+        name: row.domainName,
+        labelName: row.domainLabelName,
+        createdAt: row.domainCreatedAt.toString(),
+        expiryDate: row.domainExpiryDate?.toString(),
+        // FIXME: for some reason owner ID is always null (it should never be like that)
+        owner: {
+          id: row.domainOwnerId,
+        },
+        wrappedOwner: row.domainWrappedOwnerId
+          ? {
+              id: row.domainWrappedOwnerId,
+            }
+          : undefined,
+      },
+    };
+  });
+
+  return {
+    ...ponderQuery,
+    data: {
+      registrations: mappedData ?? [],
+    },
+  };
 }
