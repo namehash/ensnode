@@ -2,6 +2,7 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { logger } from "../utils/logger";
 import { ENSRainbowDB } from "./database";
 import { ENSRainbowServer } from "./server";
@@ -29,7 +30,11 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     logger.debug(`Healing request for labelhash: ${labelhash}`);
     const result = await server.heal(labelhash);
     logger.debug(`Heal result:`, result);
-    return c.json(result, result.errorCode);
+
+    // Map error codes > 1000 to 500, otherwise use the original code
+    const statusCode = result.errorCode && result.errorCode >= 1000 ? 500 : result.errorCode;
+
+    return c.json(result, statusCode as ContentfulStatusCode);
   });
 
   api.get("/health", (c: HonoContext) => {
@@ -42,7 +47,11 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     logger.debug("Label count request");
     const result = await server.labelCount();
     logger.debug(`Count result:`, result);
-    return c.json(result, result.errorCode);
+
+    // Map error codes > 1000 to 500, otherwise use the original code
+    const statusCode = result.errorCode && result.errorCode >= 1000 ? 500 : result.errorCode;
+
+    return c.json(result, statusCode as ContentfulStatusCode);
   });
 
   return api;
