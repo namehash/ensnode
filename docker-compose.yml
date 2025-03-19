@@ -13,6 +13,10 @@ services:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
       # Override ENSRAINBOW_URL to point to docker compose ensrainbow
       ENSRAINBOW_URL: http://ensrainbow:3223
+      # Override ENSADMIN_URL to point to docker compose ensadmin
+      ENSADMIN_URL: http://localhost:4321
+      # Override ENSNODE_PUBLIC_URL to point to docker compose ensadmin
+      ENSNODE_PUBLIC_URL: http://localhost:42069
     depends_on:
       - ensrainbow
       - postgres

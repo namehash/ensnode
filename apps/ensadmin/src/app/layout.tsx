@@ -9,6 +9,7 @@ import { WagmiProvider } from "@/components/providers/wagmi-provider";
 import { Provider as QueryProvider } from "@/components/query-client/provider";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -50,6 +51,7 @@ export default function Layout({
             </SidebarProvider>
           </QueryProvider>
         </WagmiProvider>
+        <Toaster />
       </body>
     </html>
   );

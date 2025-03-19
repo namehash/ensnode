@@ -1,7 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CopyButton } from "@/components/ui/copy-button";
 import { preferredEnsNodeUrl } from "@/lib/env";
-import { ClipboardIcon } from "lucide-react";
 
 type ActionProps = {
   searchParams: Promise<{
@@ -22,10 +20,8 @@ export default async function ActionsSubgraphCompatPage({ searchParams }: Action
 
   return (
     <div className="flex w-full max-w-md items-center space-x-2">
-      <Input type="url" placeholder="URL" disabled value={url} />
-      <Button type="button" variant="ghost">
-        <ClipboardIcon />
-      </Button>
+      <span className="font-mono text-xs select-none text-gray-500">{url}</span>
+      <CopyButton value={url} message="URL copied to clipboard!" />
     </div>
   );
 }

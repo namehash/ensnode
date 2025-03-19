@@ -11,7 +11,7 @@ import { LinkCard } from '@astrojs/starlight/components';
 The fastest way to query ENSNode is to use the NameHash Labs hosted instances of ENSNode. The **alpha** instance provides support for mainnet, `base.eth`, and `linea.eth` ENS names.
 
 ```
-https://alpha.ensnode.io
+https://api.alpha.ensnode.io
 ```
 
 For more information about the hosted instances, refer to the following documentation.
@@ -31,7 +31,7 @@ import { getSubgraphRecords } from '@ensdomains/ensjs/subgraph'
 const client = createClient({
   chain: {
     ...addEnsContracts(mainnet),
-    subgraphs: { ens: { url: 'https://alpha.ensnode.io/subgraph' } },
+    subgraphs: { ens: { url: 'https://api.alpha.ensnode.io/subgraph' } },
   },
   transport: http(),
 })
