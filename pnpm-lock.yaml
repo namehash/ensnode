@@ -15,6 +15,9 @@ catalogs:
     '@biomejs/biome':
       specifier: ^1.9.4
       version: 1.9.4
+    '@namehash/namekit-react':
+      specifier: 0.12.0
+      version: 0.12.0
     '@ponder/client':
       specifier: ^0.9.27
       version: 0.9.27
@@ -30,6 +33,12 @@ catalogs:
     '@vitest/coverage-v8':
       specifier: ^3.0.5
       version: 3.0.5
+    astro-font:
+      specifier: ^1.0.0
+      version: 1.0.0
+    astro-seo:
+      specifier: ^0.8.4
+      version: 0.8.4
     drizzle-orm:
       specifier: ^0.39.3
       version: 0.39.3
@@ -338,6 +347,9 @@ importers:
       '@astrojs/tailwind':
         specifier: 'catalog:'
         version: 6.0.0(astro@5.2.3(@types/node@22.13.9)(idb-keyval@6.2.1)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0))(tailwindcss@3.4.13)
+      '@namehash/namekit-react':
+        specifier: 'catalog:'
+        version: 0.12.0(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       '@types/react':
         specifier: ^18.3.5
         version: 18.3.18
@@ -347,6 +359,12 @@ importers:
       astro:
         specifier: ^5.2.3
         version: 5.2.3(@types/node@22.13.9)(idb-keyval@6.2.1)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+      astro-font:
+        specifier: 'catalog:'
+        version: 1.0.0
+      astro-seo:
+        specifier: 'catalog:'
+        version: 0.8.4(typescript@5.7.3)
       classcat:
         specifier: 5.0.5
         version: 5.0.5
@@ -384,7 +402,7 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
       '@namehash/namekit-react':
-        specifier: 0.12.0
+        specifier: 'catalog:'
         version: 0.12.0(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       '@types/react':
         specifier: ^18.3.5
@@ -396,10 +414,10 @@ importers:
         specifier: ^5.3.1
         version: 5.4.3(@types/node@22.13.9)(idb-keyval@6.2.1)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
       astro-font:
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0
       astro-seo:
-        specifier: ^0.8.4
+        specifier: 'catalog:'
         version: 0.8.4(typescript@5.7.3)
       classcat:
         specifier: 5.0.5
