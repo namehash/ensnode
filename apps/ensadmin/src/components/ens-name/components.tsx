@@ -2,16 +2,17 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SupportedChainId } from "@/lib/wagmi";
+import type { SupportedEnsDeploymentChainId } from "@/lib/wagmi";
 import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Hex } from "viem";
 import { useEnsName } from "wagmi";
+import { getEnsAppUrl, getEnsAvatarUrl } from "./helpers";
 
 interface ENSNameProps {
   address: Hex;
-  chainId: SupportedChainId;
+  chainId: SupportedEnsDeploymentChainId;
   showAvatar?: boolean;
   showExternalLink?: boolean;
   className?: string;
@@ -42,13 +43,15 @@ export function ENSName({
   }, []);
 
   // Generate ENS app URL
-  const ensAppUrl = `https://app.ens.domains/${address}`;
+  const ensAppUrl = getEnsAppUrl(chainId, address);
 
   // Truncate address for display
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   // Display name (ENS name or truncated address)
   const displayName = ensName || truncatedAddress;
+
+  const avatarUrl = getEnsAvatarUrl(chainId, ensName ?? undefined);
 
   // If not mounted yet (server-side), show a skeleton
   if (!mounted) {
@@ -59,30 +62,31 @@ export function ENSName({
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && (
         <Avatar className="h-6 w-6">
-          {ensName && (
-            <AvatarImage
-              src={`https://metadata.ens.domains/mainnet/avatar/${ensName}`}
-              alt={ensName}
-            />
-          )}
+          {avatarUrl && ensName && <AvatarImage src={avatarUrl} alt={ensName} />}
           <AvatarFallback className="text-xs">
             {displayName.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       )}
 
-      <a
-        href={ensAppUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1 text-blue-600 hover:underline"
-        title={address}
-      >
+      {ensAppUrl ? (
+        <a
+          href={ensAppUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-blue-600 hover:underline"
+          title={address}
+        >
+          <span className={ensName ? "font-medium" : "font-mono text-xs"}>
+            {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
+          </span>
+          {showExternalLink && <ExternalLink size={14} className="inline-block" />}
+        </a>
+      ) : (
         <span className={ensName ? "font-medium" : "font-mono text-xs"}>
           {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
         </span>
-        {showExternalLink && <ExternalLink size={14} className="inline-block" />}
-      </a>
+      )}
     </div>
   );
 }
