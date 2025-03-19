@@ -320,7 +320,7 @@ export function IndexingTimeline({
     <Card className="w-full">
       <CardHeader className="pb-2">
         <CardTitle className="flex justify-between items-center">
-          <span>Indexing Timeline</span>
+          <span>Indexing Status</span>
           <div className="flex items-center gap-1.5">
             <Clock size={16} className="text-blue-600" />
             <span className="text-sm font-medium">
@@ -447,7 +447,11 @@ function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
         <div
           className="absolute w-0.5 h-5 bg-gray-800 z-10"
           style={{
-            left: `${getTimelinePosition(networkStatus.firstBlockToIndex.date, timelineStart, timelineEnd)}%`,
+            left: `${getTimelinePosition(
+              networkStatus.firstBlockToIndex.date,
+              timelineStart,
+              timelineEnd,
+            )}%`,
           }}
         >
           <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
