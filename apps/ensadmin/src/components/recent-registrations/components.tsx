@@ -26,7 +26,7 @@ import { Hex, checksumAddress, getAddress, isAddressEqual } from "viem";
 import { holesky, mainnet, sepolia } from "viem/chains";
 import { getEnsAppUrl } from "../ens-name";
 import { blockViewModel } from "../indexing-status/view-models";
-import { useRecentRegistrationsViaPonder } from "./hooks";
+import { useRecentRegistrations } from "./hooks";
 
 import { Provider as PonderClientProvider } from "@/components/providers/ponder-client-provider";
 
@@ -201,7 +201,8 @@ interface RecentRegistrationsListProps {
 }
 
 function RecentRegistrationsList({ ensNodeMetadata, chainId }: RecentRegistrationsListProps) {
-  const recentRegistrationsQuery = useRecentRegistrationsViaPonder();
+  const searchParams = useSearchParams();
+  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
   const ensSubregistryConfig = useEnsSubregistryConfig(ensNodeMetadata, "eth");
   const lastIndexedBlockInfo = useIndexedNetworkBlock({
     blockName: "lastIndexedBlock",
