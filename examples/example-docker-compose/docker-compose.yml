@@ -1,12 +1,22 @@
 services:
-  ensindex:
+  ensindexer:
     container_name: ensindexer
-    image: ghcr.io/namehash/ensnode/ensindexer:latest
+    image: ghcr.io/namehash/ensnode/ensindexer:stable
+    pull_policy: always
     ports:
       - "42069:42069"
     environment:
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/ensnode
+      # Override DATABASE_URL to point to docker compose postgres
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      # Override ENSRAINBOW_URL to point to docker compose ensrainbow
       ENSRAINBOW_URL: http://ensrainbow:3223
+      # Override ENSADMIN_URL to point to docker compose ensadmin
+      ENSADMIN_URL: http://localhost:4321
+      # Override ENSNODE_PUBLIC_URL to point to docker compose ensadmin
+      ENSNODE_PUBLIC_URL: http://localhost:42069
+      # NOTE: must define indexing behavior in .env.local (see .env.local.example)
+    env_file:
+      - ./.env.local
     depends_on:
       - ensrainbow
       - postgres
@@ -14,17 +24,23 @@ services:
   ensrainbow:
     container_name: ensrainbow
     image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    pull_policy: always
     ports:
       - "3223:3223"
+    env_file:
+      - ./.env.local
     restart: unless-stopped
 
   ensadmin:
     container_name: ensadmin
     image: ghcr.io/namehash/ensnode/ensadmin:latest
+    pull_policy: always
     ports:
       - "4173:4173"
     environment:
       VITE_ENSNODE_URL: http://ensindexer:42069
+    env_file:
+      - ./.env.local
     depends_on:
       - ensindexer
 
@@ -34,7 +50,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: ensnode
     ports:
       - "5432:5432"
     volumes:

@@ -1,48 +1,45 @@
 services:
   ensindexer:
     container_name: ensindexer
-    image: ghcr.io/namehash/ensnode/ensindexer
-    build:
-      dockerfile: ./apps/ensindexer/Dockerfile
+    image: namehash/ensnode/ensindexer
     ports:
       - "42069:42069"
-    env_file:
-      - ./apps/ensindexer/.env.local
     environment:
       # Override DATABASE_URL to point to docker compose postgres
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/ponder
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
       # Override ENSRAINBOW_URL to point to docker compose ensrainbow
       ENSRAINBOW_URL: http://ensrainbow:3223
       # Override ENSADMIN_URL to point to docker compose ensadmin
       ENSADMIN_URL: http://localhost:4321
       # Override ENSNODE_PUBLIC_URL to point to docker compose ensadmin
       ENSNODE_PUBLIC_URL: http://localhost:42069
+    env_file:
+      - path: ./apps/ensindexer/.env.local
+        required: true
     depends_on:
       - ensrainbow
       - postgres
 
   ensrainbow:
     container_name: ensrainbow
-    image: ghcr.io/namehash/ensnode/ensrainbow
-    build:
-      dockerfile: ./apps/ensrainbow/Dockerfile
+    image: namehash/ensnode/ensrainbow
     ports:
       - "3223:3223"
+    env_file:
+      - path: ./apps/ensrainbow/.env.local
+        required: false
     restart: unless-stopped
 
   ensadmin:
     container_name: ensadmin
-    build:
-      dockerfile: ./apps/ensadmin/Dockerfile
-      args:
-        # Override NEXT_PUBLIC_PREFERRED_ENSNODE_URL from .env.local to
-        # refer to docker compose ENSIndexer instance
-        NEXT_PUBLIC_PREFERRED_ENSNODE_URL: http://localhost:42069
-    image: ghcr.io/namehash/ensnode/ensadmin
+    image: namehash/ensnode/ensadmin
     ports:
       - "4173:4173"
+    environment:
+      VITE_ENSNODE_URL: http://ensindexer:42069
     env_file:
-      - ./apps/ensadmin/.env.local
+      - path: ./apps/ensadmin/.env.local
+        required: false
     depends_on:
       - ensindexer
 
@@ -52,7 +49,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: ponder
     ports:
       - "5432:5432"
     volumes:
