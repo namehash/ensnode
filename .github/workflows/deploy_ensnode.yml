@@ -94,7 +94,14 @@ jobs:
               --url https://backboard.railway.app/graphql/v2 \
               --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
               --header 'Content-Type: application/json' \
-              --data '{"query": "mutation serviceInstanceUpdate { serviceInstanceUpdate(input: { environmentId: \"'${environment_id}'\", serviceId: \"'${service_id}'\", input: { \"source\": { \"image\": \"'${{ env.DOCKER_IMAGE }}'\"} } }} }) }"}'
+                            --data '{
+                        "query": "mutation serviceInstanceUpdate($environmentId: String, $input: ServiceInstanceUpdateInput!, $serviceId: String!) { serviceInstanceUpdate(environmentId: $environmentId input: $input serviceId: $serviceId) }",
+                        "variables": {
+                          "environmentId": "'$environment_id'",
+                          "input": {"source": {"image": "${{ env.DOCKER_IMAGE }}"}},
+                          "serviceId": "'$service_id'"
+                        }
+                      }' 
             echo "Finished updating $service_id"
           }
 
