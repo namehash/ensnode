@@ -1,11 +1,16 @@
 "use client";
 
-import { Activity, RadioTower } from "lucide-react";
+import { Activity, RadioTower, Rss } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
 
-import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
 import { ConnectionSelector } from "./connections/connection-selector";
 
 const navItems = [
@@ -31,6 +36,18 @@ const navItems = [
       {
         title: "Ponder Client",
         url: "/ponder-client-api",
+      },
+    ],
+  },
+  {
+    title: "Live Feeds",
+    url: "#",
+    icon: Rss,
+    isActive: true,
+    items: [
+      {
+        title: ".eth Registrations",
+        url: "/live/eth",
       },
     ],
   },
