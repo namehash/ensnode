@@ -17,7 +17,7 @@ on:
 
 jobs:
   deploy-environment:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       TAG: ${{ inputs.tag }}
