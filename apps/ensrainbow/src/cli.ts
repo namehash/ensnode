@@ -1,4 +1,3 @@
-import { join } from "path";
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
@@ -6,35 +5,27 @@ import { ingestCommand } from "./commands/ingest-command";
 import { purgeCommand } from "./commands/purge-command";
 import { serverCommand } from "./commands/server-command";
 import { validateCommand } from "./commands/validate-command";
-import { getDefaultDataSubDir, getEnvPort } from "./lib/env";
-
-export function validatePortConfiguration(cliPort: number): void {
-  const envPort = process.env.PORT;
-  if (envPort !== undefined && cliPort !== getEnvPort()) {
-    throw new Error(
-      `Port conflict: Command line argument (${cliPort}) differs from PORT environment variable (${envPort}). ` +
-        `Please use only one method to specify the port.`,
-    );
-  }
-}
+import { resolveDirPath, resolveFilePath, resolvePort } from "./utils/command-utils";
+import { DEFAULT_PORT } from "./utils/config";
+import { getDataDir, getInputFile, validatePortConfiguration } from "./utils/env-utils";
 
 interface IngestArgs {
-  "input-file": string;
-  "data-dir": string;
+  "input-file": string | undefined;
+  "data-dir": string | undefined;
 }
 
 interface ServeArgs {
-  port: number;
-  "data-dir": string;
+  port: number | undefined;
+  "data-dir": string | undefined;
 }
 
 interface ValidateArgs {
-  "data-dir": string;
+  "data-dir": string | undefined;
   lite: boolean;
 }
 
 interface PurgeArgs {
-  "data-dir": string;
+  "data-dir": string | undefined;
 }
 
 export interface CLIOptions {
@@ -54,19 +45,22 @@ export function createCLI(options: CLIOptions = {}) {
         return yargs
           .option("input-file", {
             type: "string",
-            description: "Path to the gzipped SQL dump file",
-            default: join(process.cwd(), "ens_names.sql.gz"),
+            description:
+              "Path to the gzipped SQL dump file (default: from INPUT_FILE env var or config)",
           })
           .option("data-dir", {
             type: "string",
-            description: "Directory to store LevelDB data",
-            default: getDefaultDataSubDir(),
+            description:
+              "Directory to store LevelDB data (default: from DATA_DIR env var or config)",
           });
       },
       async (argv: ArgumentsCamelCase<IngestArgs>) => {
+        const inputFile = resolveFilePath(argv["input-file"], "INPUT_FILE", getInputFile());
+        const dataDir = resolveDirPath(argv["data-dir"], "DATA_DIR", getDataDir(), true);
+
         await ingestCommand({
-          inputFile: argv["input-file"],
-          dataDir: argv["data-dir"],
+          inputFile,
+          dataDir,
         });
       },
     )
@@ -77,20 +71,26 @@ export function createCLI(options: CLIOptions = {}) {
         return yargs
           .option("port", {
             type: "number",
-            description: "Port to listen on",
-            default: getEnvPort(),
+            description: "Port to listen on (default: from PORT env var or config)",
           })
           .option("data-dir", {
             type: "string",
-            description: "Directory containing LevelDB data",
-            default: getDefaultDataSubDir(),
+            description:
+              "Directory containing LevelDB data (default: from DATA_DIR env var or config)",
           });
       },
       async (argv: ArgumentsCamelCase<ServeArgs>) => {
-        validatePortConfiguration(argv.port);
+        // validate port configuration if CLI argument is provided
+        if (argv.port !== undefined) {
+          validatePortConfiguration(argv.port);
+        }
+
+        const port = resolvePort(argv.port, "PORT", DEFAULT_PORT);
+        const dataDir = resolveDirPath(argv["data-dir"], "DATA_DIR", getDataDir());
+
         await serverCommand({
-          port: argv.port,
-          dataDir: argv["data-dir"],
+          port,
+          dataDir,
         });
       },
     )
@@ -101,8 +101,8 @@ export function createCLI(options: CLIOptions = {}) {
         return yargs
           .option("data-dir", {
             type: "string",
-            description: "Directory containing LevelDB data",
-            default: getDefaultDataSubDir(),
+            description:
+              "Directory containing LevelDB data (default: from DATA_DIR env var or config)",
           })
           .option("lite", {
             type: "boolean",
@@ -112,8 +112,10 @@ export function createCLI(options: CLIOptions = {}) {
           });
       },
       async (argv: ArgumentsCamelCase<ValidateArgs>) => {
+        const dataDir = resolveDirPath(argv["data-dir"], "DATA_DIR", getDataDir());
+
         await validateCommand({
-          dataDir: argv["data-dir"],
+          dataDir,
           lite: argv.lite,
         });
       },
@@ -124,14 +126,13 @@ export function createCLI(options: CLIOptions = {}) {
       (yargs: Argv) => {
         return yargs.option("data-dir", {
           type: "string",
-          description: "Directory containing LevelDB data",
-          default: getDefaultDataSubDir(),
+          description:
+            "Directory containing LevelDB data (default: from DATA_DIR env var or config)",
         });
       },
       async (argv: ArgumentsCamelCase<PurgeArgs>) => {
-        await purgeCommand({
-          dataDir: argv["data-dir"],
-        });
+        const dataDir = resolveDirPath(argv["data-dir"], "DATA_DIR", getDataDir(), true);
+        await purgeCommand({ dataDir });
       },
     )
     .demandCommand(1, "You must specify a command")
