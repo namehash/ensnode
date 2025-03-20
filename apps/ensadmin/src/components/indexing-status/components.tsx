@@ -8,11 +8,7 @@ import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { fromUnixTime, intlFormat } from "date-fns";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import {
-  currentPhase,
-  generateYearMarkers,
-  getTimelinePosition,
-} from "./utils";
+import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
   GlobalIndexingStatusViewModel,
   NetworkIndexingPhaseViewModel,
@@ -68,14 +64,11 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-8">
-          {globalIndexingStatusViewModel(
-            networkIndexingStatusByChainId
-          ).networkStatuses.map((networkStatus) => (
-            <NetworkIndexingStatsCard
-              key={networkStatus.name}
-              network={networkStatus}
-            />
-          ))}
+          {globalIndexingStatusViewModel(networkIndexingStatusByChainId).networkStatuses.map(
+            (networkStatus) => (
+              <NetworkIndexingStatsCard key={networkStatus.name} network={networkStatus} />
+            ),
+          )}
         </CardContent>
       </Card>
     </div>
@@ -106,18 +99,9 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
 
       <CardContent>
         <div className="grid grid-cols-3 gap-4">
-          <BlockStats
-            label="Last indexed block"
-            block={network.lastIndexedBlock}
-          />
-          <BlockStats
-            label="Last synced block"
-            block={network.lastSyncedBlock}
-          />
-          <BlockStats
-            label="Latest safe block"
-            block={network.latestSafeBlock}
-          />
+          <BlockStats label="Last indexed block" block={network.lastIndexedBlock} />
+          <BlockStats label="Last synced block" block={network.lastSyncedBlock} />
+          <BlockStats label="Latest safe block" block={network.latestSafeBlock} />
         </div>
       </CardContent>
     </Card>
@@ -145,9 +129,7 @@ function BlockStats({ label, block }: BlockSatsProps) {
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="text-lg font-semibold">
-        {block.number ? `#${block.number}` : "N/A"}
-      </div>
+      <div className="text-lg font-semibold">{block.number ? `#${block.number}` : "N/A"}</div>
       <div className="text-sm text-muted-foreground">
         {block.timestamp ? intlFormat(fromUnixTime(block.timestamp)) : "N/A"}
       </div>
@@ -243,9 +225,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
 
       <main className="grid gap-4">
         <IndexingTimeline
-          {...globalIndexingStatusViewModel(
-            data.runtime.networkIndexingStatusByChainId
-          )}
+          {...globalIndexingStatusViewModel(data.runtime.networkIndexingStatusByChainId)}
         />
       </main>
     </section>
@@ -260,11 +240,7 @@ function InlineSummary(props: InlineSummaryProps) {
   return (
     <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
       {props.items.map((item) => (
-        <InlineSummaryItem
-          key={item.label}
-          label={item.label}
-          value={item.value}
-        />
+        <InlineSummaryItem key={item.label} label={item.label} value={item.value} />
       ))}
     </ul>
   );
@@ -279,9 +255,7 @@ function InlineSummaryItem(props: InlineSummaryItemProps) {
   return (
     <li>
       <strong>{props.label}</strong>{" "}
-      <pre className="inline-block">
-        {props.value ? props.value.toString() : "unknown"}
-      </pre>
+      <pre className="inline-block">{props.value ? props.value.toString() : "unknown"}</pre>
     </li>
   );
 }
@@ -373,11 +347,7 @@ export function IndexingTimeline({
             <div
               className="absolute h-full w-0.5 bg-green-800 z-20"
               style={{
-                left: `${getTimelinePosition(
-                  currentIndexingDate,
-                  timelineStart,
-                  timelineEnd
-                )}%`,
+                left: `${getTimelinePosition(currentIndexingDate, timelineStart, timelineEnd)}%`,
                 top: "0",
                 bottom: "0",
                 height: `${networkStatuses.length * 60}px`,
@@ -385,8 +355,7 @@ export function IndexingTimeline({
             >
               <div className="absolute -bottom-8 -translate-x-1/2 whitespace-nowrap">
                 <Badge className="text-xs bg-green-800 text-white flex flex-col">
-                  <span>Indexed through</span>{" "}
-                  <span>{intlFormat(currentIndexingDate)}</span>
+                  <span>Indexed through</span> <span>{intlFormat(currentIndexingDate)}</span>
                 </Badge>
               </div>
             </div>
@@ -438,8 +407,7 @@ interface NetworkIndexingStatusProps {
  * Includes a timeline bar for each indexing phase.
  */
 function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
-  const { currentIndexingDate, networkStatus, timelineStart, timelineEnd } =
-    props;
+  const { currentIndexingDate, networkStatus, timelineStart, timelineEnd } = props;
   const currentIndexingPhase = currentPhase(currentIndexingDate, networkStatus);
 
   return (
@@ -468,7 +436,7 @@ function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
             left: `${getTimelinePosition(
               networkStatus.firstBlockToIndex.date,
               timelineStart,
-              timelineEnd
+              timelineEnd,
             )}%`,
           }}
         >
@@ -504,11 +472,7 @@ function NetworkIndexingPhase({
   const isQueued = phase.state === "queued";
   const isIndexing = phase.state === "indexing";
 
-  const startPos = getTimelinePosition(
-    phase.startDate,
-    timelineStart,
-    timelineEnd
-  );
+  const startPos = getTimelinePosition(phase.startDate, timelineStart, timelineEnd);
   const endPos = phase.endDate
     ? getTimelinePosition(phase.endDate, timelineStart, timelineEnd)
     : 100;

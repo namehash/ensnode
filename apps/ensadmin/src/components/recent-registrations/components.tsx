@@ -18,12 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import {
-  differenceInYears,
-  formatDistanceToNow,
-  fromUnixTime,
-  intlFormat,
-} from "date-fns";
+import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -59,10 +54,7 @@ const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
 };
 
 // Helper function to calculate duration in years
-const calculateDurationYears = (
-  registrationDate: string,
-  expiryDate: string
-) => {
+const calculateDurationYears = (registrationDate: string, expiryDate: string) => {
   try {
     const registrationTimestamp = parseInt(registrationDate);
     const expiryTimestamp = parseInt(expiryDate);
@@ -182,11 +174,9 @@ export function RecentRegistrations() {
   }
 
   const indexedChainIds = Object.keys(
-    indexingStatus.data.runtime.networkIndexingStatusByChainId
+    indexingStatus.data.runtime.networkIndexingStatusByChainId,
   ).map((id) => parseInt(id));
-  const indexedSupportedChainIds = indexedChainIds.filter((id) =>
-    isSupportedChainId(id)
-  );
+  const indexedSupportedChainIds = indexedChainIds.filter((id) => isSupportedChainId(id));
 
   if (indexedSupportedChainIds.length === 0) {
     // no indexed chains was supported
@@ -203,21 +193,14 @@ export function RecentRegistrations() {
   );
 }
 
-type RecentRegistrationsListSupportedChains = NonNullable<
-  ReturnType<typeof useEnsDeploymentChain>
->;
+type RecentRegistrationsListSupportedChains = NonNullable<ReturnType<typeof useEnsDeploymentChain>>;
 
 interface RecentRegistrationsListProps {
-  ensNodeMetadata: NonNullable<
-    ReturnType<typeof useIndexingStatusQuery>["data"]
-  >;
+  ensNodeMetadata: NonNullable<ReturnType<typeof useIndexingStatusQuery>["data"]>;
   chainId: RecentRegistrationsListSupportedChains;
 }
 
-function RecentRegistrationsList({
-  ensNodeMetadata,
-  chainId,
-}: RecentRegistrationsListProps) {
+function RecentRegistrationsList({ ensNodeMetadata, chainId }: RecentRegistrationsListProps) {
   const searchParams = useSearchParams();
   const recentRegistrationsQuery = useRecentRegistrations(searchParams);
   const ensSubregistryConfig = useEnsSubregistryConfig(ensNodeMetadata, "eth");
@@ -232,9 +215,7 @@ function RecentRegistrationsList({
     chainId,
   });
 
-  const lastIndexedBlock = lastIndexedBlockInfo
-    ? blockViewModel(lastIndexedBlockInfo)
-    : null;
+  const lastIndexedBlock = lastIndexedBlockInfo ? blockViewModel(lastIndexedBlockInfo) : null;
   const registrationsStartBlock = registrationsStartBlockInfo
     ? blockViewModel(registrationsStartBlockInfo)
     : null;
@@ -272,10 +253,8 @@ function RecentRegistrationsList({
         {isBeforeBaseRegistrarBlock && registrationsStartBlock ? (
           <div className="py-4 text-left text-sm text-muted-foreground">
             <p className="mb-2">
-              Latest indexed .eth registrations will be displayed here after
-              blocks from{" "}
-              <pre className="inline">{registrationsStartBlock.number}</pre> are
-              indexed
+              Latest indexed .eth registrations will be displayed here after blocks from{" "}
+              <pre className="inline">{registrationsStartBlock.number}</pre> are indexed
               <time
                 className="ml-1"
                 dateTime={registrationsStartBlock.date.toISOString()}
@@ -285,17 +264,13 @@ function RecentRegistrationsList({
               </time>
               .
             </p>
-            <p>
-              While .eth domains are indexed before this date, .eth
-              registrations are not.
-            </p>
+            <p>While .eth domains are indexed before this date, .eth registrations are not.</p>
           </div>
         ) : recentRegistrationsQuery.isLoading ? (
           <RecentRegistrationsFallback />
         ) : recentRegistrationsQuery.error ? (
           <div className="text-destructive">
-            Error loading recent registrations:{" "}
-            {(recentRegistrationsQuery.error as Error).message}
+            Error loading recent registrations: {(recentRegistrationsQuery.error as Error).message}
           </div>
         ) : (
           <Table>
@@ -309,48 +284,44 @@ function RecentRegistrationsList({
             </TableHeader>
             <TableBody>
               {isClient &&
-                recentRegistrationsQuery.data?.registrations.map(
-                  (registration) => (
-                    <TableRow key={registration.domain.name}>
-                      <TableCell className="font-medium">
-                        <a
-                          href={getEnsAppUrl(chainId, registration.domain.name)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-blue-600 hover:underline"
-                        >
-                          {registration.domain.name}
-                          <ExternalLink size={14} className="inline-block" />
-                        </a>
-                      </TableCell>
-                      <TableCell>
-                        <RelativeTime
-                          timestamp={registration.registrationDate}
+                recentRegistrationsQuery.data?.registrations.map((registration) => (
+                  <TableRow key={registration.domain.name}>
+                    <TableCell className="font-medium">
+                      <a
+                        href={getEnsAppUrl(chainId, registration.domain.name)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-blue-600 hover:underline"
+                      >
+                        {registration.domain.name}
+                        <ExternalLink size={14} className="inline-block" />
+                      </a>
+                    </TableCell>
+                    <TableCell>
+                      <RelativeTime timestamp={registration.registrationDate} />
+                    </TableCell>
+                    <TableCell>
+                      <Duration
+                        registrationDate={registration.registrationDate}
+                        expiryDate={registration.expiryDate}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {chainId ? (
+                        <ENSName
+                          address={getTrueOwner(
+                            registration.domain.owner,
+                            registration.domain.wrappedOwner,
+                          )}
+                          chainId={chainId}
+                          showAvatar={true}
                         />
-                      </TableCell>
-                      <TableCell>
-                        <Duration
-                          registrationDate={registration.registrationDate}
-                          expiryDate={registration.expiryDate}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {chainId ? (
-                          <ENSName
-                            address={getTrueOwner(
-                              registration.domain.owner,
-                              registration.domain.wrappedOwner
-                            )}
-                            chainId={chainId}
-                            showAvatar={true}
-                          />
-                        ) : (
-                          <ENSName.Placeholder showAvatar={true} />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  )
-                )}
+                      ) : (
+                        <ENSName.Placeholder showAvatar={true} />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         )}
