@@ -17,3 +17,8 @@ catalog:
   vitest: ^3.0.5
   ponder: ^0.9.27
   tsup: ^8.3.6
+  "@astrojs/react": ^4.2.0
+  "@astrojs/tailwind": ^6.0.0
+  "astro-font": ^1.0.0
+  "astro-seo": ^0.8.4
+  "@namehash/namekit-react": 0.12.0
