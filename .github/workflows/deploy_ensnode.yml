@@ -1,6 +1,9 @@
 name: Deploy ENSNode on given environment
 
 on:
+  push:
+    branches:
+      - feat/create-versioning-for-ensindexer-image
   workflow_dispatch:
     inputs:
       target:
@@ -19,9 +22,9 @@ jobs:
   deploy-environment:
     runs-on: ubuntu-latest
     env:
-      TARGET_ENVIRONMENT: ${{ inputs.target }}
+      TARGET_ENVIRONMENT: "green"
       TAG: ${{ inputs.tag }}
-      DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
+      DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:stable"
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
