@@ -236,7 +236,6 @@ function RecentRegistrationsList({ ensNodeMetadata, chainId }: RecentRegistratio
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          <span>Latest .eth registrations</span>
           {lastIndexedBlock && (
             <div className="flex items-center gap-1.5">
               <Clock size={16} className="text-blue-600" />
