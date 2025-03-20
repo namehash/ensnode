@@ -8,10 +8,10 @@ import {ENSAdminLogo} from "@workspace/docs/ensnode.io/src/components/atoms/ENSA
 export default function Hero() {
     return (
         <section
-            className="box-border not-content h-screen w-screen flex flex-col flex-nowrap justify-center items-center gap-5 px-5 sm:px-0">
-            <div className="flex flex-row flex-nowrap justify-between items-center w-full">
+            className="box-border not-content h-screen w-screen flex flex-col flex-nowrap justify-center sm:justify-between items-center gap-5 px-5 sm:px-0 bg-center bg-[radial-gradient(#DEDEDEB2_1px,transparent_1px)] [background-size:24px_24px]">
+            <div className="flex flex-row flex-nowrap justify-between items-center w-full px-10 py-3 border-b border-gray-400 bg-white z-10">
                 <img
-                    className="w-[100px]"
+                    className="h-10"
                     src={ensnode_with_name.src}
                     alt="ENSNode"
                 />
@@ -30,7 +30,7 @@ export default function Hero() {
             </div>
             <HeroImage/>
             <div
-                className="relative z-10 flex flex-col flex-nowrap justify-center items-center gap-8 w-full h-1/3 py-5 sm:py-0">
+                className="relative z-10 flex flex-col flex-nowrap justify-center items-center gap-8 w-full h-1/4 py-5 sm:py-0">
                 <h1 className="text-center font-semibold text-2xl sm:text-5xl">
                     The new multichain indexer for ENSv2
                 </h1>

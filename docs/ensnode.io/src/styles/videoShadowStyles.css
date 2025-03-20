@@ -1,0 +1,10 @@
+.videoContainer::before {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    background: linear-gradient(270deg, rgba(16,18,223,1) 0%, rgba(18,19,117,1) 66%, rgba(0,0,0,1) 100%);
+    filter: blur(25px);
+    transform: translate3d(0px,0px,-1px);
+    border-radius: inherit;
+    pointer-events: none;
+}
