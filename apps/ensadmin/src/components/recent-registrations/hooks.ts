@@ -6,16 +6,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { type RecentRegistrationsResponse } from "./types";
 
+const RECENT_REGISTRATIONS_LIMIT = 10;
+
 /**
- * Fetches info about the 5 most recently registered .eth domains that have been indexed.
+ * Fetches info about the most recently registered .eth domains that have been indexed.
  *
  * @param baseUrl ENSNode URL
- * @returns Info about the 5 most recently registered .eth domains that have been indexed.
+ * @returns Info about the most recently registered .eth domains that have been indexed.
  */
 async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistrationsResponse> {
   const query = `
     query RecentRegistrationsQuery {
-      registrations(first: 5, orderBy: registrationDate, orderDirection: desc) {
+      registrations(first: ${RECENT_REGISTRATIONS_LIMIT}, orderBy: registrationDate, orderDirection: desc) {
         registrationDate
         expiryDate
         domain {
@@ -54,7 +56,7 @@ async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistra
 }
 
 /**
- * Hook to fetch info about the 5 most recently registered .eth domains that have been indexed.
+ * Hook to fetch info about the most recently registered .eth domains that have been indexed.
  * @param searchParams The URL search params including the selected ENSNode URL.
  * @returns React Query hook result.
  */
@@ -100,7 +102,7 @@ export function useRecentRegistrationsViaPonder(skipChildrenOfDomains: Array<str
           ),
         )
         .orderBy(desc(schema.registration.registrationDate))
-        .limit(5),
+        .limit(RECENT_REGISTRATIONS_LIMIT),
   });
 
   useEffect(() => {

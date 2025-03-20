@@ -338,6 +338,11 @@ function RecentRegistrationsFallback() {
       <div className="h-10 bg-muted rounded w-full"></div>
       <div className="h-10 bg-muted rounded w-full"></div>
       <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
     </div>
   );
 }
