@@ -13,6 +13,18 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async redirects() {
+    return [
+      {
+        // Provide backward compatibility for ENSNode services.
+        // The older ones would redirect their homepage to ENSAdmin `/about`
+        // which was discontinued in the application router.
+        source: "/about",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,0 +1,39 @@
+---
+title: ENSIndexer Development and Contributions
+description: Learn how to run ENSIndexer locally for development and contributions.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+:::note
+This guide covers running ENSIndexer locally for development and contributions.
+:::
+
+## Configure Environment Variables
+
+```bash
+cd apps/ensindexer
+cp .env.local.example .env.local
+```
+
+:::note
+ENSIndexer's `.env.local` should be placed at `apps/ensindexer/.env.local`, _not_ at the monorepo root.
+:::
+
+<LinkCard
+  title="ENSIndexer Configuration Options"
+  href="/ensindexer/usage/configuration"
+/>
+
+## Running ENSIndexer
+
+```bash
+# from monorepo root
+pnpm run -F @ensnode/ensindexer dev
+
+# from apps/ensindexer
+pnpm run dev
+```

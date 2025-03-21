@@ -10,7 +10,7 @@ export function starlight(): AstroIntegration {
       starlightSidebarTopics([
         {
           label: "ENSNode",
-          link: "/ensnode/",
+          link: "/ensnode",
           icon: "star",
           items: [
             {
@@ -58,8 +58,34 @@ export function starlight(): AstroIntegration {
           ],
         },
         {
+          label: "ENSIndexer",
+          link: "/ensindexer",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "What is ENSIndexer?",
+                  link: "/ensindexer",
+                },
+              ],
+            },
+            {
+              label: "Using ENSIndexer",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/usage" },
+            },
+            {
+              label: "Contributing",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/contributing" },
+            },
+          ],
+        },
+        {
           label: "ENSRainbow",
-          link: "/ensrainbow/",
+          link: "/ensrainbow",
           icon: "star",
           items: [
             {
@@ -90,7 +116,7 @@ export function starlight(): AstroIntegration {
         },
         {
           label: "ENSAdmin",
-          link: "/ensadmin/",
+          link: "/ensadmin",
           icon: "star",
           items: [
             {

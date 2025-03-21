@@ -12,19 +12,39 @@ NameHash Labs provides freely available hosted instances for ENS developers look
 These instances are provided free of charge with no API key required, have no rate limiting, and are maintained and monitored by the NameHash Labs team.
 
 :::caution[No Uptime / Performance Guarantees]
-These hosted instances are provided free of charge to the ENS community, and while we strive for strong uptime and performance, neither of these can be guaranteed. By using these instances you accept the possibility of downtime, degraded performance, or other unforseen events. If you'd like to run ENSNode in production, consider [hosting your own ENSNode instance](/ensnode/deploying/).
+These hosted instances are provided free of charge to the ENS community, and while we strive for strong uptime and performance, neither of these can be guaranteed. By using these instances you accept the possibility of downtime, degraded performance, or other unforeseen events. If you'd like to run ENSNode in production, consider [hosting your own ENSNode instance](/ensnode/deploying/).
 :::
 
 ## Available ENSNode Instances
 
-There are two ENSNode deployments which are serving indexed ENS data. Both are separate deployment which may run on different versions and configurations.
-Main difference from client perspective is list of plugins which each instance handlers. Here is the table listing differences between those two.
+The key differences between these hosted deployments is the ENS deployment being indexed (mainnet vs a testnet) and the list of ENSNode plugins that are activated. See the table below for details.
+Main difference from client perspective is chain being indexed and list of plugins being handled. Here is the table listing differences between those.
 
-|                | **ENSNode 'Alpha'**                          | **ENSNode 'Subgraph'**                             |
-| -------------- | -------------------------------------------- | -------------------------------------------------- |
-| URL            | [alpha.ensnode.io](https://alpha.ensnode.io) | [subgraph.ensnode.io](https://subgraph.ensnode.io) |
-| Active Plugins | eth, base.eth, linea.eth                     | eth                                                |
-| Purpose        | Superset of ENS Subgraph names               | 1:1 Subgraph-Compatible Data                       |
+|                | **ENSNode 'Alpha'**                                |
+| -------------- | --------------------------------------------       |
+| URL            | [api.alpha.ensnode.io](https://api.alpha.ensnode.io) | 
+| Active Plugins | eth, base.eth, linea.eth                     |
+| Purpose        | Demonstration of ENSNode's multichain ENS indexing capability. Provides a superset of the data indexed by the ENS Subgraph     |                 |
+
+
+|                | **ENSNode 'Mainnet'**                              |
+| -------------- | --------------------------------------------       |
+| URL            | [api.mainnet.ensnode.io](https://api.mainnet.ensnode.io) |
+| Active Plugins | eth                        |
+| Purpose        | 1:1 Subgraph compatible data                       |
+
+|                | **ENSNode 'Sepolia'**                              |
+| -------------- | --------------------------------------------       |
+| URL            | [api.sepolia.ensnode.io](https://api.sepolia.ensnode.io) |
+| Active Plugins | eth                        |
+| Purpose        | Sepolia chain data                    |
+
+|                | **ENSNode 'Holesky'**                              |
+| -------------- | --------------------------------------------       |
+| URL            | [api.holesky.ensnode.io](https://api.holesky.ensnode.io) |
+| Active Plugins | eth                                                |
+| Purpose        | Holesky chain data                   |
+
 
 ## Endpoints
 

@@ -190,13 +190,35 @@ export const ensNodePublicUrl = (): string => {
   const envVarValue = process.env[envVarName];
 
   try {
-    return parseEnsNodePublicUrl(envVarValue);
+    return parseUrl(envVarValue);
   } catch (e: any) {
     throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
-export const parseEnsNodePublicUrl = (rawValue?: string): string => {
+const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
+
+/**
+ * Get the ENSAdmin URL.
+ *
+ * @returns the ENSAdmin URL
+ */
+export const ensAdminUrl = (): string => {
+  const envVarName = "ENSADMIN_URL";
+  const envVarValue = process.env[envVarName];
+
+  if (!envVarValue) {
+    return DEFAULT_ENSADMIN_URL;
+  }
+
+  try {
+    return parseUrl(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
+  }
+};
+
+export const parseUrl = (rawValue?: string): string => {
   if (!rawValue) {
     throw new Error(`Expected value not set`);
   }
