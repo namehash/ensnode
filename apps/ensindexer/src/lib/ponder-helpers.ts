@@ -338,7 +338,6 @@ export function createFirstBlockToIndexByChainIdFetcher(
    * @param publicClient the public client to fetch the block from
    *
    * @returns {Promise<BlockInfo>} the first block to index for the requested chain ID
-   * @throws if the start block number is not found for the chain ID
    * @throws if the block is not available on the network
    */
   return async function fetchFirstBlockToIndexByChainId(
@@ -347,13 +346,7 @@ export function createFirstBlockToIndexByChainIdFetcher(
   ): Promise<BlockInfo> {
     const startBlockNumbers: Record<number, number> =
       await createStartBlockByChainIdMap(ponderConfig);
-    const startBlockNumberForChainId = startBlockNumbers[chainId];
-
-    // each chain should have a start block number
-    if (!startBlockNumberForChainId) {
-      // throw an error if the start block number is not found for the chain ID
-      throw new Error(`No start block number found for chain ID ${chainId}`);
-    }
+    const startBlockNumberForChainId = startBlockNumbers[chainId] || 0;
 
     const block = await publicClient.getBlock({
       blockNumber: BigInt(startBlockNumberForChainId),
