@@ -1,8 +1,13 @@
 "use client";
 
-import { ENSName } from "@/components/ens-name";
-import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
-import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
+import { ENSName } from "@/components/ens-name/components";
+import {
+  useBlockInfo,
+  useEnsDeploymentChain,
+  useEnsSubregistryConfig,
+  useIndexedNetworkBlock,
+  useIndexingStatusQuery,
+} from "@/components/ensnode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -12,12 +17,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Hex, getAddress, isAddressEqual } from "viem";
+import { Hex, checksumAddress, getAddress, isAddressEqual } from "viem";
+import { holesky, mainnet, sepolia } from "viem/chains";
+import { getEnsAppUrl } from "../ens-name";
+import { blockViewModel } from "../indexing-status/view-models";
 import { useRecentRegistrations } from "./hooks";
+
+import { Provider as PonderClientProvider } from "@/components/providers/ponder-client-provider";
+
+// Helper function to get formatted date for display
+const getFormattedDateString = (date: Date): string => {
+  return intlFormat(date, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
 // Helper function to safely format dates
 const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
@@ -78,25 +98,6 @@ const formatRelativeTime = (timestamp: string) => {
   }
 };
 
-// Helper function to generate ENS app URL for a name
-const getEnsAppUrlForName = (name: string) => {
-  return `https://app.ens.domains/${name}`;
-};
-
-// Client-only date formatter component
-function FormattedDate({
-  timestamp,
-  options,
-}: { timestamp: string; options: Intl.DateTimeFormatOptions }) {
-  const [formattedDate, setFormattedDate] = useState<string>("");
-
-  useEffect(() => {
-    setFormattedDate(formatDate(timestamp, options));
-  }, [timestamp, options]);
-
-  return <>{formattedDate}</>;
-}
-
 // Client-only relative time component
 function RelativeTime({ timestamp }: { timestamp: string }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
@@ -112,7 +113,10 @@ function RelativeTime({ timestamp }: { timestamp: string }) {
 function Duration({
   registrationDate,
   expiryDate,
-}: { registrationDate: string; expiryDate: string }) {
+}: {
+  registrationDate: string;
+  expiryDate: string;
+}) {
   const [duration, setDuration] = useState<string>("");
 
   useEffect(() => {
@@ -136,55 +140,133 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
 function getTrueOwner(owner: { id: Hex }, wrappedOwner?: { id: Hex }) {
   // Only use wrapped owner if the owner is the NameWrapper contract
   if (wrappedOwner?.id && isAddressEqual(owner.id, NAME_WRAPPER_ADDRESS)) {
-    return getAddress(wrappedOwner.id);
+    return getAddress(checksumAddress(wrappedOwner.id));
   }
 
   // Otherwise, use the regular owner
-  return getAddress(owner.id);
+  return getAddress(checksumAddress(owner.id));
+}
+
+const supportedChainIds = [mainnet.id, sepolia.id, holesky.id] as const;
+
+type SupportedChainIds = (typeof supportedChainIds)[number];
+
+function isSupportedChainId(chainId: number): chainId is SupportedChainIds {
+  return supportedChainIds.filter((id) => id === chainId).length > 0;
 }
 
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
+
   const indexingStatus = useIndexingStatusQuery(searchParams);
-  const indexedChainId = useIndexedChainId(indexingStatus.data);
+  const ensDeploymentChainId = useEnsDeploymentChain(indexingStatus.data);
+
+  if (indexingStatus.isLoading) {
+    return <p>Loading recent registrations.</p>;
+  }
+
+  if (!ensDeploymentChainId) {
+    return null;
+  }
+
+  if (!indexingStatus.data) {
+    throw new Error(`Could not fetch indexing status from selected ENSNode`);
+  }
+
+  const indexedChainIds = Object.keys(
+    indexingStatus.data.runtime.networkIndexingStatusByChainId,
+  ).map((id) => parseInt(id));
+  const indexedSupportedChainIds = indexedChainIds.filter((id) => isSupportedChainId(id));
+
+  if (indexedSupportedChainIds.length === 0) {
+    // no indexed chains was supported
+    return null;
+  }
+
+  return (
+    <PonderClientProvider url={selectedEnsNodeUrl(searchParams)}>
+      <RecentRegistrationsList
+        chainId={ensDeploymentChainId}
+        ensNodeMetadata={indexingStatus.data}
+      />
+    </PonderClientProvider>
+  );
+}
+
+type RecentRegistrationsListSupportedChains = NonNullable<ReturnType<typeof useEnsDeploymentChain>>;
+
+interface RecentRegistrationsListProps {
+  ensNodeMetadata: NonNullable<ReturnType<typeof useIndexingStatusQuery>["data"]>;
+  chainId: RecentRegistrationsListSupportedChains;
+}
+
+function RecentRegistrationsList({ ensNodeMetadata, chainId }: RecentRegistrationsListProps) {
+  const searchParams = useSearchParams();
+  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
+  const ensSubregistryConfig = useEnsSubregistryConfig(ensNodeMetadata, "eth");
+  const lastIndexedBlockInfo = useIndexedNetworkBlock({
+    blockName: "lastIndexedBlock",
+    chainId,
+    ensNodeMetadata,
+  });
+
+  const registrationsStartBlockInfo = useBlockInfo({
+    blockNumber: ensSubregistryConfig?.contracts.BaseRegistrar.startBlock,
+    chainId,
+  });
+
+  const lastIndexedBlock = lastIndexedBlockInfo ? blockViewModel(lastIndexedBlockInfo) : null;
+  const registrationsStartBlock = registrationsStartBlockInfo
+    ? blockViewModel(registrationsStartBlockInfo)
+    : null;
+
+  // If possible, check if the current indexing block is before the block where registrations started to be tracked
+  const isBeforeBaseRegistrarBlock =
+    lastIndexedBlock && registrationsStartBlock
+      ? lastIndexedBlock.date < registrationsStartBlock.date
+      : false;
+
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Get the current indexing date from the indexing status
-  const currentIndexingDate = indexingStatus.data
-    ? globalIndexingStatusViewModel(indexingStatus.data.runtime.networkIndexingStatusByChainId)
-        .currentIndexingDate
-    : null;
-
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          <span>Latest .eth registrations</span>
-          {currentIndexingDate && (
+          {lastIndexedBlock && (
             <div className="flex items-center gap-1.5">
               <Clock size={16} className="text-blue-600" />
               <span className="text-sm font-medium">
-                Last indexed block on{" "}
-                <FormattedDate
-                  timestamp={(currentIndexingDate.getTime() / 1000).toString()}
-                  options={{
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  }}
-                />
+                Last indexed block: {lastIndexedBlock.number}
+                <span className="ml-1 text-muted-foreground">
+                  ({getFormattedDateString(lastIndexedBlock.date)})
+                </span>
               </span>
             </div>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {recentRegistrationsQuery.isLoading ? (
+        {isBeforeBaseRegistrarBlock && registrationsStartBlock ? (
+          <div className="py-4 text-left text-sm text-muted-foreground">
+            <p className="mb-2">
+              Latest indexed .eth registrations will be displayed here after blocks from{" "}
+              <pre className="inline">{registrationsStartBlock.number}</pre> are indexed
+              <time
+                className="ml-1"
+                dateTime={registrationsStartBlock.date.toISOString()}
+                title={registrationsStartBlock.date.toISOString()}
+              >
+                ({getFormattedDateString(registrationsStartBlock.date)})
+              </time>
+              .
+            </p>
+            <p>While .eth domains are indexed before this date, .eth registrations are not.</p>
+          </div>
+        ) : recentRegistrationsQuery.isLoading ? (
           <RecentRegistrationsFallback />
         ) : recentRegistrationsQuery.error ? (
           <div className="text-destructive">
@@ -206,7 +288,7 @@ export function RecentRegistrations() {
                   <TableRow key={registration.domain.name}>
                     <TableCell className="font-medium">
                       <a
-                        href={getEnsAppUrlForName(registration.domain.name)}
+                        href={getEnsAppUrl(chainId, registration.domain.name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-blue-600 hover:underline"
@@ -225,13 +307,13 @@ export function RecentRegistrations() {
                       />
                     </TableCell>
                     <TableCell>
-                      {indexedChainId ? (
+                      {chainId ? (
                         <ENSName
                           address={getTrueOwner(
                             registration.domain.owner,
                             registration.domain.wrappedOwner,
                           )}
-                          chainId={indexedChainId}
+                          chainId={chainId}
                           showAvatar={true}
                         />
                       ) : (
@@ -251,6 +333,11 @@ export function RecentRegistrations() {
 function RecentRegistrationsFallback() {
   return (
     <div className="animate-pulse space-y-4">
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
+      <div className="h-10 bg-muted rounded w-full"></div>
       <div className="h-10 bg-muted rounded w-full"></div>
       <div className="h-10 bg-muted rounded w-full"></div>
       <div className="h-10 bg-muted rounded w-full"></div>
