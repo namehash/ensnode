@@ -10,7 +10,7 @@ Some libraries (for example, `ENSjs`) use a `viem/chain` object to identify the 
 ```ts
 import { mainnet } from 'viem/chains';
 
-const mainnetWith = {
+const mainnetWithENSNode = {
   ...mainnet,
   subgraphs: { ens: { url: 'https://api.alpha.ensnode.io/subgraph' } },
 }

@@ -17,17 +17,21 @@ on:
 
 jobs:
   deploy-environment:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       TAG: ${{ inputs.tag }}
+      DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
-      TEST_SVC_ID: ${{ secrets.TEST_SVC_ID }}
     
     steps:
+      - name: Check if Docker image exists
+        run: | 
+            docker manifest inspect ${{ env.DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.DOCKER_IMAGE }}"; exit 1; } 
+
       - name: Print switch target
         run: | 
             echo "Deploying on: $TARGET_ENVIRONMENT"
@@ -72,6 +76,43 @@ jobs:
                 echo "Environment not recognized, skipping workflow"
                 exit 1
             esac
+
+      # Update indexer source docker image
+      - name: Update shared environment variable
+        run: |
+          update_service_image() {
+            local environment_id=$1
+            local service_id=$2
+            echo "Updating service $service_id"
+            curl --request POST \
+              --silent \
+              --fail \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+                            --data '{
+                        "query": "mutation serviceInstanceUpdate($environmentId: String, $input: ServiceInstanceUpdateInput!, $serviceId: String!) { serviceInstanceUpdate(environmentId: $environmentId input: $input serviceId: $serviceId) }",
+                        "variables": {
+                          "environmentId": "'$environment_id'",
+                          "input": {"source": {"image": "${{ env.DOCKER_IMAGE }}"}},
+                          "serviceId": "'$service_id'"
+                        }
+                      }' 
+            echo "Finished updating $service_id"
+          }
+
+          #ALPHA
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}
+          #MAINNET
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}
+          #SEPOLIA
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}
+          #HOLESKY
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
 
       # Update DATABASE_SCHEMA for each indexer based on input tag
       - name: Update shared environment variable
@@ -123,4 +164,3 @@ jobs:
             #HOLESKY
             redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}
             redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
-
