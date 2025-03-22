@@ -350,9 +350,16 @@ export function createFirstBlockToIndexByChainIdFetcher(
     const startBlockNumberForChainId = startBlockNumbers[chainId];
 
     // each chain should have a start block number
-    if (!startBlockNumberForChainId) {
+    if (typeof startBlockNumberForChainId !== "number") {
       // throw an error if the start block number is not found for the chain ID
       throw new Error(`No start block number found for chain ID ${chainId}`);
+    }
+
+    if (startBlockNumberForChainId < 0) {
+      // throw an error if the start block number is invalid block number
+      throw new Error(
+        `Start block number "${startBlockNumberForChainId}" for chain ID ${chainId} must be a non-negative integer`,
+      );
     }
 
     const block = await publicClient.getBlock({
