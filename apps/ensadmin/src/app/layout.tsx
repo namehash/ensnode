@@ -10,6 +10,7 @@ import { Provider as QueryProvider } from "@/components/query-client/provider";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { ensAdminPublicUrl } from "@/lib/env";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,7 +24,7 @@ const description = "Explore the ENS Protocol like never before";
 export const metadata: Metadata = {
   title: title,
   description: description,
-  metadataBase: new URL("https://admin.ensnode.io/"),
+  metadataBase: new URL(ensAdminPublicUrl()),
   openGraph: {
     title: {
       template: `${siteName} - %s`,
@@ -33,6 +34,9 @@ export const metadata: Metadata = {
     url: "/",
     type: "website",
     siteName: siteName,
+    images: [
+      '/opengraph-image.png'
+    ]
   },
   twitter: {
     title: {
@@ -42,6 +46,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@NamehashLabs",
     creator: "@NamehashLabs",
+    images: [
+      '/twitter-image.png'
+    ]
   },
 };
 
