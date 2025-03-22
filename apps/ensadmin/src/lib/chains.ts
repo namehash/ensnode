@@ -1,4 +1,4 @@
-import { base, holesky, linea, mainnet, sepolia, anvil } from "viem/chains";
+import { anvil, base, holesky, linea, mainnet, sepolia } from "viem/chains";
 
 export const ensTestEnv = {
   ...anvil,

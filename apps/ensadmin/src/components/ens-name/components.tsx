@@ -3,12 +3,25 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { SupportedEnsDeploymentChainId } from "@/lib/wagmi";
+import { config } from "@/lib/wagmi";
 import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Hex } from "viem";
 import { useEnsName } from "wagmi";
 import { getEnsAppUrl, getEnsAvatarUrl } from "./helpers";
+
+// Utility function to check if a chain is configured with an RPC endpoint in wagmi config
+export function isConfiguredChain(chainId: SupportedEnsDeploymentChainId): boolean {
+  try {
+    // Check if the chainId is in the supported and configured chains
+    return config.chains.some((chain) => chain.id === chainId);
+  } catch (e) {
+    // If there's any error checking, assume it's not configured
+    console.error("error checking chain configuration:", e);
+    return false;
+  }
+}
 
 interface ENSNameProps {
   address: Hex;
@@ -30,12 +43,15 @@ export function ENSName({
   className = "",
 }: ENSNameProps) {
   const [mounted, setMounted] = useState(false);
+  const isChainConfigured = isConfiguredChain(chainId);
 
-  // Use the ENS name hook from wagmi
-  const { data: ensName, isLoading } = useEnsName({
-    address,
-    chainId,
-  });
+  // Use the ENS name hook from wagmi only if the chain is configured with an RPC endpoint
+  const { data: ensName, isLoading } = !isChainConfigured
+    ? { data: null, isLoading: false }
+    : useEnsName({
+        address,
+        chainId,
+      });
 
   // Handle client-side rendering
   useEffect(() => {
@@ -49,9 +65,9 @@ export function ENSName({
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   // Display name (ENS name or truncated address)
-  const displayName = ensName || truncatedAddress;
+  const displayName = (isChainConfigured && ensName) || truncatedAddress;
 
-  const avatarUrl = getEnsAvatarUrl(chainId, ensName ?? undefined);
+  const avatarUrl = isChainConfigured ? getEnsAvatarUrl(chainId, ensName ?? undefined) : undefined;
 
   // If not mounted yet (server-side), show a skeleton
   if (!mounted) {
@@ -78,13 +94,13 @@ export function ENSName({
           title={address}
         >
           <span className={ensName ? "font-medium" : "font-mono text-xs"}>
-            {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
+            {isLoading && isChainConfigured ? <Skeleton className="h-4 w-24" /> : displayName}
           </span>
           {showExternalLink && <ExternalLink size={14} className="inline-block" />}
         </a>
       ) : (
         <span className={ensName ? "font-medium" : "font-mono text-xs"}>
-          {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
+          {isLoading && isChainConfigured ? <Skeleton className="h-4 w-24" /> : displayName}
         </span>
       )}
     </div>

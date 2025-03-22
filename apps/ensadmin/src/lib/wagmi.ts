@@ -3,7 +3,6 @@ import { holesky, mainnet, sepolia } from "viem/chains";
 import { createConfig } from "wagmi";
 import { ensTestEnv } from "./chains";
 
-
 // Get RPC URLs from environment variables
 const getRpcUrl = (chainId: number): string => {
   const envVar = `RPC_URL_${chainId}`;
@@ -25,12 +24,11 @@ const getRpcUrl = (chainId: number): string => {
 
 // Create wagmi config with supported chains
 export const config = createConfig({
-  chains: [mainnet, sepolia, holesky, ensTestEnv],
+  chains: [mainnet, sepolia, holesky],
   transports: {
     [mainnet.id]: http(getRpcUrl(mainnet.id)),
     [sepolia.id]: http(getRpcUrl(sepolia.id)),
     [holesky.id]: http(getRpcUrl(holesky.id)),
-    [ensTestEnv.id]: http(''),
   },
 });
 
@@ -45,7 +43,7 @@ export type SupportedEnsDeploymentChainId = (typeof config.chains)[number]["id"]
  */
 export function parseEnsDeploymentChain(
   chainName: string,
-): SupportedEnsDeploymentChainId | undefined {
+): SupportedEnsDeploymentChainId | typeof ensTestEnv.id | undefined {
   switch (chainName.toLowerCase()) {
     case "mainnet":
       return mainnet.id;
