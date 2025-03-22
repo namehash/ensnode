@@ -29,6 +29,7 @@ import { blockViewModel } from "../indexing-status/view-models";
 import { useRecentRegistrations } from "./hooks";
 
 import { Provider as PonderClientProvider } from "@/components/providers/ponder-client-provider";
+import { ensTestEnv } from "@/lib/chains";
 
 // Helper function to get formatted date for display
 const getFormattedDateString = (date: Date): string => {
@@ -147,7 +148,7 @@ function getTrueOwner(owner: { id: Hex }, wrappedOwner?: { id: Hex }) {
   return getAddress(checksumAddress(owner.id));
 }
 
-const supportedChainIds = [mainnet.id, sepolia.id, holesky.id] as const;
+const supportedChainIds = [mainnet.id, sepolia.id, holesky.id, ensTestEnv.id] as const;
 
 type SupportedChainIds = (typeof supportedChainIds)[number];
 

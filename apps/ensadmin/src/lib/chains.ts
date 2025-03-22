@@ -1,4 +1,9 @@
-import { base, holesky, linea, mainnet, sepolia } from "viem/chains";
+import { base, holesky, linea, mainnet, sepolia, anvil } from "viem/chains";
+
+export const ensTestEnv = {
+  ...anvil,
+  id: 1337,
+};
 
 const chains = {
   [mainnet.id]: mainnet,
@@ -6,6 +11,7 @@ const chains = {
   [holesky.id]: holesky,
   [base.id]: base,
   [linea.id]: linea,
+  [ensTestEnv.id]: ensTestEnv,
 } as const;
 
 export function getChainName(chainId: number): string {
