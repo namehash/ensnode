@@ -1,6 +1,7 @@
 import { http } from "viem";
 import { holesky, mainnet, sepolia } from "viem/chains";
 import { createConfig } from "wagmi";
+import { ensTestEnv } from "./chains";
 
 // Get RPC URLs from environment variables
 const getRpcUrl = (chainId: number): string => {
@@ -14,7 +15,7 @@ const getRpcUrl = (chainId: number): string => {
     if (chainId === mainnet.id) return "https://eth.drpc.org";
     if (chainId === sepolia.id) return "https://sepolia.drpc.org";
     if (chainId === holesky.id) return "https://holesky.drpc.org";
-
+    // if (chainId === ensTestEnv.id) return "";
     throw new Error(`No fallback RPC URL available for chain ID ${chainId}`);
   }
 
@@ -42,7 +43,7 @@ export type SupportedEnsDeploymentChainId = (typeof config.chains)[number]["id"]
  */
 export function parseEnsDeploymentChain(
   chainName: string,
-): SupportedEnsDeploymentChainId | undefined {
+): SupportedEnsDeploymentChainId | typeof ensTestEnv.id | undefined {
   switch (chainName.toLowerCase()) {
     case "mainnet":
       return mainnet.id;
@@ -50,6 +51,8 @@ export function parseEnsDeploymentChain(
       return sepolia.id;
     case "holesky":
       return holesky.id;
+    case "ens-test-env":
+      return ensTestEnv.id;
     default:
       return undefined;
   }
