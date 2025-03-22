@@ -15,6 +15,7 @@ services:
       # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
       ENSNODE_PUBLIC_URL: http://localhost:42069
     env_file:
+      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
       - path: ./apps/ensindexer/.env.local
         required: true
     depends_on:
@@ -27,6 +28,7 @@ services:
     ports:
       - "3223:3223"
     env_file:
+      # NOTE: can define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
       - path: ./apps/ensrainbow/.env.local
         required: false
     restart: unless-stopped
@@ -44,6 +46,7 @@ services:
       # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
       NEXT_PUBLIC_PREFERRED_ENSNODE_URL: http://localhost:42069
     env_file:
+      # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
       - path: ./apps/ensadmin/.env.local
         required: false
     depends_on:
