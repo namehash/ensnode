@@ -4,7 +4,7 @@
 export function ensAdminPublicUrl() {
   const envVarName = "ENSADMIN_PUBLIC_URL";
   const envVarValue = process.env[envVarName];
-  
+
   if (!envVarValue) {
     throw new Error(`Required "${envVarName}" value was not set`);
   }

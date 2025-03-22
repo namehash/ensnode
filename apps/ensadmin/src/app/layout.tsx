@@ -34,9 +34,7 @@ export const metadata: Metadata = {
     url: "/",
     type: "website",
     siteName: siteName,
-    images: [
-      '/opengraph-image.png'
-    ]
+    images: ["/opengraph-image.png"],
   },
   twitter: {
     title: {
@@ -46,9 +44,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@NamehashLabs",
     creator: "@NamehashLabs",
-    images: [
-      '/twitter-image.png'
-    ]
+    images: ["/twitter-image.png"],
   },
 };
 
