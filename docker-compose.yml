@@ -1,7 +1,7 @@
 services:
   ensindexer:
     container_name: ensindexer
-    image: namehash/ensnode/ensindexer
+    image: ghcr.io/namehash/ensnode/ensindexer:latest
     ports:
       - "42069:42069"
     environment:
@@ -11,9 +11,11 @@ services:
       ENSRAINBOW_URL: http://ensrainbow:3223
       # Override ENSADMIN_URL to point to docker compose ensadmin
       ENSADMIN_URL: http://localhost:4321
-      # Override ENSNODE_PUBLIC_URL to point to docker compose ensadmin
+      # Override ENSNODE_PUBLIC_URL to point to docker compose ensindexer
+      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
       ENSNODE_PUBLIC_URL: http://localhost:42069
     env_file:
+      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
       - path: ./apps/ensindexer/.env.local
         required: true
     depends_on:
@@ -22,22 +24,29 @@ services:
 
   ensrainbow:
     container_name: ensrainbow
-    image: namehash/ensnode/ensrainbow
+    image: ghcr.io/namehash/ensnode/ensrainbow:latest
     ports:
       - "3223:3223"
     env_file:
+      # NOTE: can define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
       - path: ./apps/ensrainbow/.env.local
         required: false
     restart: unless-stopped
 
   ensadmin:
     container_name: ensadmin
-    image: namehash/ensnode/ensadmin
+    image: ghcr.io/namehash/ensnode/ensadmin:latest
     ports:
       - "4173:4173"
     environment:
-      VITE_ENSNODE_URL: http://ensindexer:42069
+      # Override ENSNODE_PUBLIC_URL to point to docker compose ensindexer
+      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
+      ENSNODE_PUBLIC_URL: http://localhost:4173
+      # Override NEXT_PUBLIC_PREFERRED_ENSNODE_URL to docker compose ensindexer
+      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
+      NEXT_PUBLIC_PREFERRED_ENSNODE_URL: http://localhost:42069
     env_file:
+      # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
       - path: ./apps/ensadmin/.env.local
         required: false
     depends_on:

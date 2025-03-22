@@ -11,9 +11,9 @@
     "version": "changeset version",
     "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish",
     "docker:build:ensnode": "pnpm run docker:build:ensindexer && pnpm run docker:build:ensrainbow && pnpm run docker:build:ensadmin",
-    "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t namehash/ensnode/ensindexer:latest .",
-    "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t namehash/ensnode/ensrainbow:latest .",
-    "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t namehash/ensnode/ensadmin:latest ."
+    "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
+    "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
+    "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

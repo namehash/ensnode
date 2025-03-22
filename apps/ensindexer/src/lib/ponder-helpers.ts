@@ -451,13 +451,7 @@ export async function createStartBlockByChainIdMap(
     for (const contractNetworkConfig of Object.entries(contractConfig.network)) {
       // map string to number
       const chainId = Number(contractNetworkConfig[0]);
-      const startBlock = contractNetworkConfig[1].startBlock;
-
-      // fail if no start block number found for the chain ID
-      // (we don't want to index any contract from the genesis block)
-      if (!startBlock) {
-        throw new Error(`No start block number found for chain ID ${chainId}`);
-      }
+      const startBlock = contractNetworkConfig[1].startBlock || 0;
 
       // update the start block number for the chain ID if it's lower than the current one
       if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {
