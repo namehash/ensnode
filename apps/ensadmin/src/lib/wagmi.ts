@@ -35,7 +35,9 @@ export const config = createConfig({
 /**
  * Supported chain ID for requested ENS Deployment Chain.
  */
-export type SupportedEnsDeploymentChainId = (typeof config.chains)[number]["id"];
+export type SupportedEnsDeploymentChainId =
+  | (typeof config.chains)[number]["id"]
+  | typeof ensTestEnv.id;
 /**
  * Get the supported chain ID by chain name.
  * @param chainName
@@ -43,7 +45,7 @@ export type SupportedEnsDeploymentChainId = (typeof config.chains)[number]["id"]
  */
 export function parseEnsDeploymentChain(
   chainName: string,
-): SupportedEnsDeploymentChainId | typeof ensTestEnv.id | undefined {
+): SupportedEnsDeploymentChainId | undefined {
   switch (chainName.toLowerCase()) {
     case "mainnet":
       return mainnet.id;
