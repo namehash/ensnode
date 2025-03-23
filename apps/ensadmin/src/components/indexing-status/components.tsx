@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { fromUnixTime, intlFormat } from "date-fns";
-import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
