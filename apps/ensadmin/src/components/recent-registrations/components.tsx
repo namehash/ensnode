@@ -29,6 +29,7 @@ import { blockViewModel } from "../indexing-status/view-models";
 import { useRecentRegistrations } from "./hooks";
 
 import { Provider as PonderClientProvider } from "@/components/providers/ponder-client-provider";
+import { ensTestEnv } from "@/lib/chains";
 
 // Helper function to get formatted date for display
 const getFormattedDateString = (date: Date): string => {
@@ -147,7 +148,7 @@ function getTrueOwner(owner: { id: Hex }, wrappedOwner?: { id: Hex }) {
   return getAddress(checksumAddress(owner.id));
 }
 
-const supportedChainIds = [mainnet.id, sepolia.id, holesky.id] as const;
+const supportedChainIds = [mainnet.id, sepolia.id, holesky.id, ensTestEnv.id] as const;
 
 type SupportedChainIds = (typeof supportedChainIds)[number];
 
@@ -287,15 +288,22 @@ function RecentRegistrationsList({ ensNodeMetadata, chainId }: RecentRegistratio
                 recentRegistrationsQuery.data?.registrations.map((registration) => (
                   <TableRow key={registration.domain.name}>
                     <TableCell className="font-medium">
-                      <a
-                        href={getEnsAppUrl(chainId, registration.domain.name)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline"
-                      >
-                        {registration.domain.name}
-                        <ExternalLink size={14} className="inline-block" />
-                      </a>
+                      {(() => {
+                        const ensAppUrl = getEnsAppUrl(chainId, registration.domain.name);
+                        return ensAppUrl ? (
+                          <a
+                            href={ensAppUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-blue-600 hover:underline"
+                          >
+                            {registration.domain.name}
+                            <ExternalLink size={14} className="inline-block" />
+                          </a>
+                        ) : (
+                          <span>{registration.domain.name}</span>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <RelativeTime timestamp={registration.registrationDate} />
