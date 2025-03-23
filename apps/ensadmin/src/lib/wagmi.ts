@@ -15,7 +15,8 @@ const getRpcUrl = (chainId: number): string => {
     if (chainId === mainnet.id) return "https://eth.drpc.org";
     if (chainId === sepolia.id) return "https://sepolia.drpc.org";
     if (chainId === holesky.id) return "https://holesky.drpc.org";
-    // if (chainId === ensTestEnv.id) return "";
+    if (chainId === ensTestEnv.id) return "http://localhost:8545";
+
     throw new Error(`No fallback RPC URL available for chain ID ${chainId}`);
   }
 
@@ -24,20 +25,19 @@ const getRpcUrl = (chainId: number): string => {
 
 // Create wagmi config with supported chains
 export const config = createConfig({
-  chains: [mainnet, sepolia, holesky],
+  chains: [mainnet, sepolia, holesky, ensTestEnv],
   transports: {
     [mainnet.id]: http(getRpcUrl(mainnet.id)),
     [sepolia.id]: http(getRpcUrl(sepolia.id)),
     [holesky.id]: http(getRpcUrl(holesky.id)),
+    [ensTestEnv.id]: http(getRpcUrl(ensTestEnv.id)),
   },
 });
 
 /**
  * Supported chain ID for requested ENS Deployment Chain.
  */
-export type SupportedEnsDeploymentChainId =
-  | (typeof config.chains)[number]["id"]
-  | typeof ensTestEnv.id;
+export type SupportedEnsDeploymentChainId = (typeof config.chains)[number]["id"];
 /**
  * Get the supported chain ID by chain name.
  * @param chainName

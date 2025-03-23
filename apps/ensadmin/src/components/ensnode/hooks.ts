@@ -101,11 +101,7 @@ export function useEnsDeploymentChain(
     return undefined;
   }
 
-  const chainId = parseEnsDeploymentChain(indexingStatus.env.ENS_DEPLOYMENT_CHAIN);
-
-  // Only return chainId if it's one of the supported deployment chain IDs
-  // This handles the case where chainId might be ensTestEnv.id which is not part of SupportedEnsDeploymentChainId
-  return chainId as SupportedEnsDeploymentChainId | undefined;
+  return parseEnsDeploymentChain(indexingStatus.env.ENS_DEPLOYMENT_CHAIN);
 }
 
 /**
