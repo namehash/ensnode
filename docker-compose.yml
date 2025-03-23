@@ -39,9 +39,9 @@ services:
     ports:
       - "4173:4173"
     environment:
-      # Override ENSNODE_PUBLIC_URL to point to docker compose ensindexer
+      # Override ENSADMIN_PUBLIC_URL to point to docker compose ensindexer
       # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
-      ENSNODE_PUBLIC_URL: http://localhost:4173
+      ENSADMIN_PUBLIC_URL: http://localhost:4173
       # Override NEXT_PUBLIC_PREFERRED_ENSNODE_URL to docker compose ensindexer
       # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
       NEXT_PUBLIC_PREFERRED_ENSNODE_URL: http://localhost:42069

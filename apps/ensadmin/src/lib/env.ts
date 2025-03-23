@@ -1,3 +1,27 @@
+/**
+ * Get ENSAdmin service public URL.
+ *
+ * Note: using Vercel platform for ENSAdmin deployments works best when
+ * this function returns undefined and lets default values to be applied.
+ * Read more: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#default-value
+ */
+export function ensAdminPublicUrl(): string | undefined {
+  const envVarName = "ENSADMIN_PUBLIC_URL";
+  const envVarValue = process.env.ENSADMIN_PUBLIC_URL;
+
+  if (!envVarValue) {
+    return undefined;
+  }
+
+  try {
+    return parseUrl(envVarValue).toString();
+  } catch (error) {
+    console.error(error);
+
+    throw new Error(`Invalid ${envVarName} value "${envVarValue}". It should be a valid URL.`);
+  }
+}
+
 export function selectedEnsNodeUrl(params: URLSearchParams): string {
   return new URL(params.get("ensnode") || preferredEnsNodeUrl()).toString();
 }

@@ -10,6 +10,7 @@ import { Provider as QueryProvider } from "@/components/query-client/provider";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { ensAdminPublicUrl } from "@/lib/env";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,31 +21,41 @@ const siteName = "ENSAdmin";
 const title = "ENSAdmin";
 const description = "Explore the ENS Protocol like never before";
 
-export const metadata = {
-  title: title,
-  description: description,
-  openGraph: {
-    title: {
-      template: `${siteName} - %s`,
-      default: title,
-    },
+export async function generateMetadata(): Promise<Metadata> {
+  const metadataBaseUrl = ensAdminPublicUrl();
+
+  return {
+    title: title,
     description: description,
-    url: "/",
-    type: "website",
-    siteName: siteName,
-    images: ["/opengraph-image.png"],
-  },
-  twitter: {
-    title: {
-      template: `${siteName} - %s`,
-      default: title,
+    /**
+     * Note: using Vercel platform for ENSAdmin deployments works best when
+     * this function returns undefined and lets default values to be applied.
+     * Read more: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#default-value
+     */
+    metadataBase: metadataBaseUrl ? new URL(metadataBaseUrl) : undefined,
+    openGraph: {
+      title: {
+        template: `${siteName} - %s`,
+        default: title,
+      },
+      description: description,
+      url: "/",
+      type: "website",
+      siteName: siteName,
+      images: ["/opengraph-image.png"],
     },
-    card: "summary_large_image",
-    site: "@NamehashLabs",
-    creator: "@NamehashLabs",
-    images: ["/twitter-image.png"],
-  },
-} satisfies Metadata;
+    twitter: {
+      title: {
+        template: `${siteName} - %s`,
+        default: title,
+      },
+      card: "summary_large_image",
+      site: "@NamehashLabs",
+      creator: "@NamehashLabs",
+      images: ["/twitter-image.png"],
+    },
+  };
+}
 
 export default function Layout({
   children,
