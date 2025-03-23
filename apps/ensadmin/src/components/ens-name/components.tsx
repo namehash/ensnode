@@ -2,19 +2,19 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SupportedEnsDeploymentChainId } from "@/lib/wagmi";
+import { DeploymentConfigs, type ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Hex } from "viem";
 import { useEnsName } from "wagmi";
-import { getEnsAppUrl, getEnsAvatarUrl } from "./helpers";
+import { useEnsAppUrlQuery, useEnsAvatarUrlQuery } from "./hooks";
+import { formatEnsAccountName, nullToUndefined } from "./utils";
 
 interface ENSNameProps {
   address: Hex;
-  chainId: SupportedEnsDeploymentChainId;
+  ensDeploymentChain: ENSDeploymentChain;
   showAvatar?: boolean;
-  showExternalLink?: boolean;
   className?: string;
 }
 
@@ -22,83 +22,144 @@ interface ENSNameProps {
  * Component to display an ENS name for an Ethereum address.
  * Falls back to a truncated address if no ENS name is found.
  */
-export function ENSName({
-  address,
-  chainId,
-  showAvatar = false,
-  showExternalLink = true,
-  className = "",
-}: ENSNameProps) {
+export function ENSName({ address, ensDeploymentChain, showAvatar = false }: ENSNameProps) {
   const [mounted, setMounted] = useState(false);
-
-  // Use the ENS name hook from wagmi
-  const { data: ensName, isLoading } = useEnsName({
-    address,
-    chainId,
-  });
-
   // Handle client-side rendering
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Generate ENS app URL
-  const ensAppUrl = getEnsAppUrl(chainId, address);
+  const ensNameQuery = useEnsName({
+    address,
+    // get canonical chain ID from ENS Deployment Chain configuration
+    chainId: DeploymentConfigs[ensDeploymentChain].eth.chain.id,
+    query: {
+      // narrow down the result type
+      select: nullToUndefined,
+    },
+  });
 
-  // Truncate address for display
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const ensAvatarUrlQuery = useEnsAvatarUrlQuery({
+    ensDeploymentChain,
+    ensName: ensNameQuery.data,
+    showAvatar,
+  });
 
-  // Display name (ENS name or truncated address)
-  const displayName = ensName || truncatedAddress;
+  const ensAppUrlQuery = useEnsAppUrlQuery(ensDeploymentChain);
 
-  const avatarUrl = getEnsAvatarUrl(chainId, ensName ?? undefined);
+  const ensDisplayName = formatEnsAccountName(address, ensNameQuery.data);
 
   // If not mounted yet (server-side), show a skeleton
   if (!mounted) {
-    return <EnsNamePlaceholder showAvatar={showAvatar} className={className} />;
+    return <ENSNamePlaceholder showAvatar={showAvatar} />;
   }
 
   return (
-    <div className={cx("flex items-center gap-2", className)}>
+    <>
       {showAvatar && (
-        <Avatar className="h-6 w-6">
-          {avatarUrl && ensName && <AvatarImage src={avatarUrl} alt={ensName} />}
-          <AvatarFallback className="text-xs">
-            {displayName.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <ENSNameAvatar ensAvatarUrlQuery={ensAvatarUrlQuery} ensDisplayName={ensDisplayName} />
       )}
 
-      {ensAppUrl ? (
-        <a
-          href={ensAppUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 text-blue-600 hover:underline"
-          title={address}
-        >
-          <span className={ensName ? "font-medium" : "font-mono text-xs"}>
-            {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
-          </span>
-          {showExternalLink && <ExternalLink size={14} className="inline-block" />}
-        </a>
-      ) : (
-        <span className={ensName ? "font-medium" : "font-mono text-xs"}>
-          {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
-        </span>
-      )}
-    </div>
+      <ENSDisplayName
+        ensAppPath={address}
+        ensAppUrlQuery={ensAppUrlQuery}
+        ensDisplayName={ensDisplayName}
+        ensNameQuery={ensNameQuery}
+      />
+    </>
   );
 }
-ENSName.Placeholder = EnsNamePlaceholder;
+ENSName.Placeholder = ENSNamePlaceholder;
 
 interface ENSNamePlaceholderProps extends Pick<ENSNameProps, "showAvatar" | "className"> {}
 
-function EnsNamePlaceholder({ showAvatar = false, className = "" }: ENSNamePlaceholderProps) {
+/**
+ * Placeholder component for ENS Name
+ */
+function ENSNamePlaceholder({ showAvatar = false, className = "" }: ENSNamePlaceholderProps) {
   return (
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && <Skeleton className="h-6 w-6 rounded-full" />}
       <Skeleton className="h-4 w-24" />
     </div>
+  );
+}
+
+interface ENSNameAvatarProps {
+  ensAvatarUrlQuery: ReturnType<typeof useEnsAvatarUrlQuery>;
+  ensDisplayName: string;
+}
+
+/**
+ * Avatar component for ENS Name.
+ * Displays avatar if its URL is available, otherwise displays a placeholder.
+ */
+function ENSNameAvatar({ ensDisplayName, ensAvatarUrlQuery }: ENSNameAvatarProps) {
+  if (ensAvatarUrlQuery.isLoading || ensAvatarUrlQuery.isPending || ensAvatarUrlQuery.isError) {
+    if (ensAvatarUrlQuery.error) {
+      console.error(
+        `ENS Name Avatar URL could not be determined: ${ensAvatarUrlQuery.error.message}`,
+      );
+    }
+
+    return (
+      <Avatar className="h-6 w-6">
+        <AvatarFallback className="text-xs">{ensDisplayName}</AvatarFallback>
+      </Avatar>
+    );
+  }
+
+  return (
+    <Avatar className="h-6 w-6">
+      <AvatarImage src={ensAvatarUrlQuery.data.toString()} alt={ensDisplayName} />
+      <AvatarFallback className="text-xs">{ensDisplayName}</AvatarFallback>
+    </Avatar>
+  );
+}
+
+interface ENSDisplayNameProps {
+  /** either wallet address or domain name  */
+  ensAppPath: string;
+  /**  */
+  ensDisplayName: string;
+  ensAppUrlQuery: ReturnType<typeof useEnsAppUrlQuery>;
+  ensNameQuery: ReturnType<typeof useEnsName>;
+}
+
+/**
+ * Presents ENS Name (or formatted address)
+ */
+export function ENSDisplayName({
+  ensAppPath,
+  ensAppUrlQuery,
+  ensDisplayName,
+  ensNameQuery,
+}: ENSDisplayNameProps) {
+  const textClassName = ensNameQuery.isSuccess ? "font-medium" : "font-mono text-xs";
+
+  if (ensAppUrlQuery.isLoading || ensAppUrlQuery.isPending || ensAppUrlQuery.isError) {
+    if (ensAppUrlQuery.error) {
+      console.error(
+        `Could not include ENS App link for "${ensDisplayName}". Error: ${ensAppUrlQuery.error.message}`,
+      );
+    }
+
+    return <span className={textClassName}>{ensDisplayName}</span>;
+  }
+
+  const ensAppAddressUrl = new URL(ensAppPath, ensAppUrlQuery.data);
+
+  return (
+    <a
+      href={ensAppAddressUrl.toString()}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-1 text-blue-600 hover:underline"
+      title={ensAppPath}
+    >
+      <span className={textClassName}>{ensDisplayName}</span>
+
+      <ExternalLink size={14} className="inline-block" />
+    </a>
   );
 }

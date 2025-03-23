@@ -1,4 +1,5 @@
-import { base, holesky, linea, mainnet, sepolia } from "viem/chains";
+import { type ENSDeploymentChain } from "@ensnode/ens-deployments";
+import { anvil, base, holesky, linea, mainnet, sepolia } from "viem/chains";
 
 const chains = {
   [mainnet.id]: mainnet,
@@ -16,4 +17,20 @@ export function getBlockExplorerUrl(chainId: number, blockNumber: number): strin
   const chain = chains[chainId as keyof typeof chains];
   if (!chain?.blockExplorers?.default?.url) return null;
   return `${chain.blockExplorers.default.url}/block/${blockNumber}`;
+}
+
+/**
+ * Parse ENS Deployment Chain into Chain ID.
+ */
+export function parseEnsDeploymentChainIntoChainId(ensDeploymentChain: ENSDeploymentChain): number {
+  switch (ensDeploymentChain) {
+    case "mainnet":
+      return mainnet.id;
+    case "sepolia":
+      return sepolia.id;
+    case "holesky":
+      return holesky.id;
+    case "ens-test-env":
+      return anvil.id;
+  }
 }

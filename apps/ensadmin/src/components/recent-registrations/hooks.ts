@@ -1,8 +1,9 @@
 import { schema } from "@/components/providers/ponder-client-provider";
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
+import { type BlockInfo } from "@ensnode/ponder-metadata";
 import { and, desc, eq, like, notLike } from "@ponder/client";
 import { usePonderQuery } from "@ponder/react";
-import { useQuery } from "@tanstack/react-query";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { type RecentRegistrationsResponse } from "./types";
 
@@ -14,7 +15,9 @@ const RECENT_REGISTRATIONS_LIMIT = 10;
  * @param baseUrl ENSNode URL
  * @returns Info about the most recently registered .eth domains that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistrationsResponse> {
+async function fetchRecentRegistrations(
+  baseUrl: string
+): Promise<RecentRegistrationsResponse> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${RECENT_REGISTRATIONS_LIMIT}, orderBy: registrationDate, orderDirection: desc) {
@@ -55,24 +58,51 @@ async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistra
   return data.data;
 }
 
+interface UseRecentRegistrationsProps {
+  searchParams: URLSearchParams;
+  lastIndexedBlockInfo: UseQueryResult<BlockInfo, Error>;
+  registrationsStartBlockInfo: UseQueryResult<BlockInfo, Error>;
+}
+
 /**
  * Hook to fetch info about the most recently registered .eth domains that have been indexed.
  * @param searchParams The URL search params including the selected ENSNode URL.
  * @returns React Query hook result.
  */
-export function useRecentRegistrations(searchParams: URLSearchParams) {
+export function useRecentRegistrations({
+  searchParams,
+  lastIndexedBlockInfo,
+  registrationsStartBlockInfo,
+}: UseRecentRegistrationsProps): UseQueryResult<
+  RecentRegistrationsResponse,
+  Error
+> {
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
-    queryKey: ["recent-registrations", ensNodeUrl],
-    queryFn: () => fetchRecentRegistrations(ensNodeUrl),
-    throwOnError(error) {
-      throw new Error(`ENSNode request error at '${ensNodeUrl}'. Cause: ${error.message}`);
+    enabled() {
+      // this query will only fetch registrations if last indexed block timestamp on or after the registrations start block timestamp
+      if (
+        lastIndexedBlockInfo.isSuccess &&
+        registrationsStartBlockInfo.isSuccess
+      ) {
+        return (
+          lastIndexedBlockInfo.data.timestamp >=
+          registrationsStartBlockInfo.data.timestamp
+        );
+      }
+
+      // otherwise, there's no point to fetch registrations
+      return false;
     },
+    queryKey: ["ensnode", ensNodeUrl, "recent-registrations"],
+    queryFn: () => fetchRecentRegistrations(ensNodeUrl),
   });
 }
 
-export function useRecentRegistrationsViaPonder(skipChildrenOfDomains: Array<string> = []) {
+export function useRecentRegistrationsViaPonder(
+  skipChildrenOfDomains: Array<string> = []
+) {
   const ponderQuery = usePonderQuery({
     // we need this query to fetch in a very specific way driven by manual triggers
     enabled: false,
@@ -90,16 +120,19 @@ export function useRecentRegistrationsViaPonder(skipChildrenOfDomains: Array<str
           domainWrappedOwnerId: schema.domain.wrappedOwnerId,
         })
         .from(schema.registration)
-        .innerJoin(schema.domain, eq(schema.registration.domainId, schema.domain.id))
+        .innerJoin(
+          schema.domain,
+          eq(schema.registration.domainId, schema.domain.id)
+        )
         .where(
           and(
             // exclude domains with unhealed labels
             notLike(schema.domain.name, "[%"),
             // exclude domains with name that ends with any element of skipChildrenOfDomains
             ...skipChildrenOfDomains.map((skipChildrenOfDomain) =>
-              notLike(schema.domain.name, `%${skipChildrenOfDomain}`),
-            ),
-          ),
+              notLike(schema.domain.name, `%${skipChildrenOfDomain}`)
+            )
+          )
         )
         .orderBy(desc(schema.registration.registrationDate))
         .limit(RECENT_REGISTRATIONS_LIMIT),
@@ -116,12 +149,14 @@ export function useRecentRegistrationsViaPonder(skipChildrenOfDomains: Array<str
 
   const mappedData = ponderQuery.data?.map((row) => {
     if (!row.domainName) {
-      throw new Error(`Registration is missing its linked domain name for node '${row.domainId}'`);
+      throw new Error(
+        `Registration is missing its linked domain name for node '${row.domainId}'`
+      );
     }
 
     if (!row.domainOwnerId) {
       throw new Error(
-        `Registration is missing its linked domain owner ID for node '${row.domainId}'`,
+        `Registration is missing its linked domain owner ID for node '${row.domainId}'`
       );
     }
 
