@@ -1,13 +1,13 @@
 ---
 title: Applications Dependent on ENS Subgraph
-description: A comprehensive list of applications and services that rely on the ENS Subgraph for their functionality, demonstrating its critical importance in the ecosystem.
+description: A partial list of applications and services that rely on the ENS Subgraph for their functionality, demonstrating the critical importance of indexed data in the ENS ecosystem.
 ---
 
-# Applications Dependent on ENS Subgraph
+# Applications Dependent on the ENS Subgraph (partial list)
 
 ## Overview
 
-The ENS Subgraph serves as a critical infrastructure component in the Ethereum Name Service ecosystem, providing indexed data that powers a wide range of applications and services. This page documents the extensive ecosystem that has been built around and depends on the ENS Subgraph, demonstrating why a robust replacement (ENSNode) is necessary for ENSv2.
+The ENS Subgraph serves as a critical infrastructure component in the Ethereum Name Service ecosystem, providing indexed data that powers a wide range of applications and services. This page documents some examples of the extensive ecosystem that has been built around and depends on the ENS Subgraph, demonstrating why it will be critical that indexed ENS data maintains availability remains available for ENSv2 through ENSNode.
 
 ## ENS Subgraph Usage Metrics
 
@@ -21,11 +21,11 @@ The ENS Subgraph is a cornerstone of the current ENS architecture (ENSv1), handl
   <figcaption>ENS Subgraph daily query volume following the transition to Graph Network hosting (June 20, 2024 onward)</figcaption>
 </figure>
 
-This massive query volume underscores the central importance of the ENS Subgraph in the current ecosystem and demonstrates the scale at which any replacement solution must operate.
+This massive query volume underscores the central importance of the indexed ENS data and demonstrates the minimum scale at which any replacement solution must operate.
 
 ## Ecosystem Impact
 
-The ENS Subgraph's influence extends across multiple categories of Web3 applications, from core infrastructure to end-user applications. Below is a categorized list of projects and applications that depend on the ENS Subgraph for their functionality.
+The ENS Subgraph's influence extends across multiple categories of Web3 applications, from core infrastructure to end-user applications. Below is a partial list of projects and applications that depend on the ENS Subgraph for their functionality.
 
 ### Critical ENS Apps & Infrastructure
 
@@ -47,7 +47,7 @@ The ENS Subgraph's influence extends across multiple categories of Web3 applicat
   Testing framework for ENS development.
 
 - **[Linea Names](https://github.com/Consensys/linea-ens)**  
-  Public ENS integration for Linea.
+  Primary management interface for linea.eth subnames on Linea.
 
 ### ENS Marketplaces
 
@@ -61,7 +61,7 @@ The ENS Subgraph's influence extends across multiple categories of Web3 applicat
   - Browser Extension Wallet
 
 - **[MyEtherWallet](https://www.myetherwallet.com/)**  
-  Web-based Ethereum wallet.
+  Ethereum wallet.
 
 ### Chain Explorers
 
@@ -76,12 +76,12 @@ The ENS Subgraph's influence extends across multiple categories of Web3 applicat
 ### DeFi Applications
 
 - **[Rotki](https://rotki.com/)**  
-  Portfolio tracking and tax reporting tool.
+  Privacy preserving portfolio tracking.
 
 ### Social Applications
 
 - **[Ethereum Follow Protocol](https://efp.app/)**  
-  Social follow protocol based on ENS.
+  Onchain social graph protocol.
 
 ### Other Key Applications
 
@@ -93,18 +93,18 @@ The ENS Subgraph's influence extends across multiple categories of Web3 applicat
 
 - **[ENS Tools](https://github.com/ensdomains/ens-misctools)** (by Serenae)
 
-- **[ENS Data](https://ensdata.net/)**
+- **[ENS Data](https://ensdata.net/)** (by Pugson)
 
-- **[ENS Ideas](https://github.com/frolic/ens-ideas)**
+- **[ENS Ideas](https://github.com/frolic/ens-ideas)** (by Frolic)
 
 - **[Next.ID](https://next.id/)**  
   Which also powers:
-  - [Web3.bio](http://web3.bio/)
-  - [Eth.cd](https://eth.cd/)
+  - [Web3.bio](http://web3.bio/) (by Yan Zhu)
+  - [Eth.cd](https://eth.cd/) (by Webhash / Hid)
 
 ## Implications for ENSNode
 
-The breadth and depth of applications dependent on the ENS Subgraph highlight the critical need for ENSNode as a robust, scalable replacement that can support the growing ecosystem while addressing the limitations of the current implementation.
+The breadth and depth of applications dependent on indexed ENS data highlight the critical need for ENSNode. The growing ENS ecosystem requires a robust, scalable replacement of the ENS Subgraph that overcomes the ENS Subgraph's limitations while simultaneously supporting ENSv2 and multichain ENS indexing (including Namechain).
 
 ## Help Us Expand This List
 
