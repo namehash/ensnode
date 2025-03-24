@@ -22,17 +22,10 @@ const title = "ENSAdmin";
 const description = "Explore the ENS Protocol like never before";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const metadataBaseUrl = ensAdminPublicUrl();
-
   return {
     title: title,
     description: description,
-    /**
-     * Note: using Vercel platform for ENSAdmin deployments works best when
-     * this function returns undefined and lets default values to be applied.
-     * Read more: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#default-value
-     */
-    metadataBase: metadataBaseUrl ? new URL(metadataBaseUrl) : undefined,
+    metadataBase: ensAdminPublicUrl(),
     openGraph: {
       title: {
         template: `${siteName} - %s`,
