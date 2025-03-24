@@ -24,7 +24,7 @@ export default function HeroImage() {
                 <LineaLogo className="w-16 sm:w-[86px] lg:w-[100px] h-auto"/>
             </div>
             <EtherumLogo className="w-16 sm:w-[86px] lg:w-[100px] h-auto"/>
-            <ENSNodeLogo className="relative w-1/5 sm:w-[100px] lg:w-[148px] h-auto left-[25px]"/>
+            <ENSNodeLogo className="relative w-1/5 sm:w-[100px] lg:w-[148px] h-auto top-6 sm:top-0 sm:left-[25px]"/>
         </div>
         <VideoBackground/>
     </div>

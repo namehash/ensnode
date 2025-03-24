@@ -8,24 +8,45 @@ import {ENSAdminLogo} from "@workspace/docs/ensnode.io/src/components/atoms/ENSA
 export default function Hero() {
     return (
         <section
-            className="box-border not-content h-screen w-screen flex flex-col flex-nowrap justify-center sm:justify-between items-center gap-5 px-5 sm:px-0 bg-center bg-[radial-gradient(#DEDEDEB2_1px,transparent_1px)] [background-size:24px_24px]">
-            <div className="flex flex-row flex-nowrap justify-between items-center w-full px-10 py-3 border-b border-gray-400 bg-white z-10">
-                <img
-                    className="h-10"
-                    src={ensnode_with_name.src}
-                    alt="ENSNode"
-                />
-                <div className="flex flex-row flex-nowrap justify-end items-center gap-8">
-                    <Button variant="primary" size="medium" asChild>
-                        <Link href="/ensnode/">
-                            Docs
-                        </Link>
-                    </Button>
-                    <Button variant="primary" size="medium" asChild>
-                        <Link href="https://github.com/namehash/ensnode">
-                            <GithubIcon /> GitHub
-                        </Link>
-                    </Button>
+            className="box-border not-content h-screen w-screen flex flex-col flex-nowrap justify-end items-center gap-10 px-5 sm:px-0 pt-[45px] sm:pt-14 pb-5 bg-center bg-[radial-gradient(#DEDEDEB2_1px,transparent_1px)] [background-size:24px_24px]">
+            <div
+                className="absolute top-0 box-border flex flex-row flex-nowrap justify-center items-center w-full px-5 sm:px-10 py-3 border-b border-gray-300 bg-white z-10">
+                <div className="w-full max-w-7xl items-center justify-between flex flex-row">
+                    <a href="/">
+                        <img
+                        className="hidden sm:block h-10"
+                        src={ensnode_with_name.src}
+                        alt="ENSNode"
+                    />
+                        <img
+                            className="block sm:hidden h-8"
+                            src={ensnode_with_name.src}
+                            alt="ENSNode"
+                        /></a>
+                    <div className="hidden sm:flex flex-row flex-nowrap justify-end items-center gap-8">
+                        <Button variant="primary" size="medium" asChild>
+                            <Link href="/ensnode/">
+                                Docs
+                            </Link>
+                        </Button>
+                        <Button variant="primary" size="medium" asChild>
+                            <Link href="https://github.com/namehash/ensnode">
+                                <GithubIcon/> GitHub
+                            </Link>
+                        </Button>
+                    </div>
+                    <div className="sm:hidden flex flex-row flex-nowrap justify-end items-center gap-2">
+                        <Button variant="primary" size="small" asChild>
+                            <Link href="/ensnode/" className="h-8">
+                                Docs
+                            </Link>
+                        </Button>
+                        <Button variant="primary" size="small" asChild>
+                            <Link href="https://github.com/namehash/ensnode">
+                                <GithubIcon/>
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
             <HeroImage/>
@@ -44,14 +65,15 @@ export default function Hero() {
                             </div>
                         </Link>
                     </Button>
-                    <Button variant="primary" size="medium" asChild className="h-[56px] w-[89px] flex flex-col justify-center items-center">
+                    <Button variant="primary" size="medium" asChild
+                            className="h-[56px] w-[89px] flex flex-col justify-center items-center">
                         <Link href="/ensnode/">
                             Docs
                         </Link>
                     </Button>
                 </div>
             </div>
-</section>
-)
-    ;
+        </section>
+    )
+        ;
 }
