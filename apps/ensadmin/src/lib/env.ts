@@ -12,7 +12,6 @@ export function ensAdminPublicUrl(): URL {
   const envVarValue = process.env[envVarName];
 
   if (!envVarValue) {
-    // if public URL was provided and the application runs on Vercel platform
     if (isAppOnVercelPlatform()) {
       // build public URL using the Vercel-specific way
       return getVercelAppPublicUrl();
@@ -31,7 +30,7 @@ export function ensAdminPublicUrl(): URL {
   }
 }
 
-/** Build a default URL for ENSAdmin application */
+/** Build a default public URL for ENSAdmin */
 function defaultEnsAdminPublicUrl(): URL {
   let applicationPort: number;
 
@@ -40,7 +39,7 @@ function defaultEnsAdminPublicUrl(): URL {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-    console.error(`Could not build default URL for ENSAdmin application due to: ${errorMessage}`);
+    console.error(`Error building default public URL for ENSAdmin: ${errorMessage}`);
 
     applicationPort = 4173;
   }
@@ -67,14 +66,14 @@ function parseApplicationPort(rawValue?: string): number {
 }
 
 /**
- * Tells if application runs on Vercel platform.
+ * Tells if the application runs on Vercel.
  */
 function isAppOnVercelPlatform(): boolean {
   return process.env.VERCEL === "1";
 }
 
 /**
- * Builds a public URL of an application running on Vercel platform.
+ * Builds a public URL of the app assuming it runs on Vercel.
  * @returns public URL
  * @throws when application hostname could not be determined based on `VERCEL_*` env vars
  */
