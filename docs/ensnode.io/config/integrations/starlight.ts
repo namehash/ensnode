@@ -185,6 +185,13 @@ export function starlight(): AstroIntegration {
           content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:creator",
+          content: "@NameHashLabs",
+        },
+      },
     ],
   });
 }
