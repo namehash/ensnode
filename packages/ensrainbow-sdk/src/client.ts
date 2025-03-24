@@ -101,6 +101,15 @@ export namespace EnsRainbow {
   }
 
   export type CountResponse = CountSuccess | CountServerError;
+
+  /**
+   * Interface for the version endpoint response
+   */
+  export interface VersionResponse {
+    status: typeof StatusCode.Success;
+    version: string;
+    schema_version: number;
+  }
 }
 
 export interface EnsRainbowApiClientOptions {
