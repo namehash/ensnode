@@ -1,6 +1,6 @@
 "use client";
 
-import { defaultEnsNodeUrl, selectedEnsNodeUrl } from "@/lib/env";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDown, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -60,7 +60,9 @@ export function ConnectionSelector() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { connections, isLoading, addConnection, removeConnection } = useConnections();
+  const { connections, isLoading, addConnection, removeConnection } = useConnections({
+    selectedEnsNodeUrl: selectedUrl,
+  });
 
   const handleSelect = (url: string) => {
     const params = new URLSearchParams(searchParams);
@@ -93,8 +95,11 @@ export function ConnectionSelector() {
   };
 
   const handleRemove = (url: string) => {
-    if (url === defaultEnsNodeUrl()) return;
-    removeConnection.mutate({ url });
+    const connectionToBeRemoved = connections.find((c) => c.isDefault === false && c.url === url);
+
+    if (connectionToBeRemoved) {
+      removeConnection.mutate(connectionToBeRemoved);
+    }
   };
 
   return (
@@ -112,7 +117,7 @@ export function ConnectionSelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">{selectedUrl}</span>
+                  <span className="truncate text-xs font-mono">{selectedUrl.toString()}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
@@ -138,7 +143,7 @@ export function ConnectionSelector() {
                     onClick={() => handleSelect(url)}
                     className={cn(
                       "group gap-2 p-2 font-mono text-xs justify-between",
-                      url === selectedUrl ? "bg-primary/10 text-primary" : "",
+                      url === selectedUrl.toString() ? "bg-primary/10 text-primary" : "",
                     )}
                   >
                     <span className="truncate flex-1">{url}</span>

@@ -96,31 +96,61 @@ function getVercelAppPublicUrl(): URL {
   return new URL(`https://${vercelAppHostname}`);
 }
 
-export function selectedEnsNodeUrl(params: URLSearchParams): string {
-  return new URL(params.get("ensnode") || defaultEnsNodeUrl()).toString();
+/**
+ * Get URL of currently selected ENSNode instance.
+ * @param params
+ * @returns URL from `ensnode` search param or the first URL from default URLs list
+ */
+export function selectedEnsNodeUrl(params: URLSearchParams): URL {
+  const ensnode = params.get("ensnode");
+
+  if (!ensnode) {
+    return defaultEnsNodeUrls()[0];
+  }
+
+  return new URL(ensnode);
 }
 
 const DEFAULT_ENSNODE_URL = "https://api.alpha.ensnode.io";
 
-export function defaultEnsNodeUrl(): string {
-  const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URL";
-  const envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URL;
+/**
+ * Get list of URLs for default ENSNode instances.
+ *
+ * @returns a list (with at least one element) of URLs for default ENSNode instances
+ */
+export function defaultEnsNodeUrls(): Array<URL> {
+  const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URLS";
+  const envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URLS;
 
   if (!envVarValue) {
     console.warn(
       `No default ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
     );
 
-    return DEFAULT_ENSNODE_URL;
+    return [new URL(DEFAULT_ENSNODE_URL)];
   }
 
   try {
-    return parseUrl(envVarValue).toString();
+    const urlList = envVarValue.split(",").map((maybeUrl) => parseUrl(maybeUrl));
+
+    if (urlList.length === 0) {
+      throw new Error(`At least one valid URL must be set to "${envVarName}"`);
+    }
+
+    return urlList;
   } catch (error) {
     console.error(error);
 
     throw new Error(`Invalid ${envVarName} value "${envVarValue}". It should be a valid URL.`);
   }
+}
+
+/**
+ * Get the first URL from a list of URLs for default ENSNode instances.
+ * @returns URL for default ENSNode instance
+ */
+export function defaultEnsNodeUrl(): URL {
+  return defaultEnsNodeUrls()[0];
 }
 
 function parseUrl(maybeUrl: string): URL {

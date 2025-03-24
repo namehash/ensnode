@@ -1,5 +1,6 @@
-import { defaultEnsNodeUrl } from "@/lib/env";
+import { defaultEnsNodeUrls } from "@/lib/env";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { BasicEnsNodeValidator } from "./ensnode-url-validator";
 
 interface Connection {
@@ -17,38 +18,57 @@ interface RemoveConnectionVariables {
 
 const STORAGE_KEY = "ensadmin:connections:urls";
 
-// Helper to load connections from localStorage
+// TODO: replace with a more advanced validator in the future
+// For now, we only check if the URL is valid
+// In the future, we may want to check if the URL points to
+// a compatible ENSNode service
+const ensNodeValidator = new BasicEnsNodeValidator();
+
+const defaultConnections: Array<Connection> = defaultEnsNodeUrls().map((defaultEnsNodeUrl) => ({
+  url: defaultEnsNodeUrl.toString(),
+  isDefault: true,
+}));
+
+/**
+ * Load connections list.
+ * Uses application configuration (default connections) and localStorage (saved connections).
+ **/
 function loadConnections(): Array<Connection> {
+  let connections: Array<Connection>;
+
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const urls = saved ? (JSON.parse(saved) as Array<string>) : [defaultEnsNodeUrl()];
-
-    if (!urls.includes(defaultEnsNodeUrl())) {
-      urls.unshift(defaultEnsNodeUrl());
-    }
-
-    return urls.map((url) => ({
+    const savedUrlsRaw = localStorage.getItem(STORAGE_KEY);
+    const savedUrls = savedUrlsRaw ? JSON.parse(savedUrlsRaw) : [];
+    const savedConnections: Array<Connection> = savedUrls.map((url: string) => ({
       url,
-      isDefault: url === defaultEnsNodeUrl(),
+      isDefault: false,
     }));
+
+    connections = [...defaultConnections, ...savedConnections];
   } catch {
-    return [{ url: defaultEnsNodeUrl(), isDefault: true }];
+    connections = defaultConnections;
   }
+
+  return connections;
 }
 
-// Helper to save connections to localStorage
+/**
+ * Stores saved connections.
+ *
+ * @param connections
+ */
 function saveConnections(connections: Connection[]) {
-  const urls = connections.map((c) => c.url);
+  const urls = connections.filter((c) => c.isDefault === false).map((c) => c.url);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(urls));
 }
 
-export function useConnections() {
+interface UseConnectionsProps {
+  //
+  selectedEnsNodeUrl: URL;
+}
+
+export function useConnections({ selectedEnsNodeUrl }: UseConnectionsProps) {
   const queryClient = useQueryClient();
-  // TODO: replace with a more advanced validator in the future
-  // For now, we only check if the URL is valid
-  // In the future, we may want to check if the URL points to
-  // a compatible ENSNode service
-  const validator = new BasicEnsNodeValidator();
 
   const { data: connections = [], isLoading } = useQuery({
     queryKey: ["connections"],
@@ -60,7 +80,7 @@ export function useConnections() {
   const addConnection = useMutation({
     mutationFn: async ({ url }: AddConnectionVariables) => {
       // Validate the URL
-      const validationResult = await validator.validate(url);
+      const validationResult = await ensNodeValidator.validate(url);
       if (!validationResult.isValid) {
         throw new Error(validationResult.error || "Invalid URL");
       }
@@ -102,6 +122,17 @@ export function useConnections() {
       queryClient.invalidateQueries({ queryKey: ["connections"] });
     },
   });
+
+  // attempt adding `selectedEnsNodeUrl` to connections list
+  useEffect(() => {
+    const url = selectedEnsNodeUrl.toString();
+
+    if (connections.find((c) => c.url === url)) {
+      return;
+    }
+
+    addConnection.mutate({ url });
+  }, [selectedEnsNodeUrl, addConnection]);
 
   return {
     connections,
