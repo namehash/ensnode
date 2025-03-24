@@ -7,7 +7,12 @@ import type {
   PonderMetadataMiddlewareOptions,
   PonderMetadataMiddlewareResponse,
 } from "./types/api";
-import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "./types/common";
+import type {
+  BlockInfo,
+  EnsRainbowVersionInfo,
+  NetworkIndexingStatus,
+  PonderBlockStatus,
+} from "./types/common";
 
 /**
  * Ponder Metadata types definition.
@@ -39,10 +44,7 @@ interface PonderMetadataModule {
     networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
 
     /** ENSRainbow version info */
-    ensRainbow?: {
-      version: string;
-      schema_version: number;
-    };
+    ensRainbow?: EnsRainbowVersionInfo;
   };
 }
 

@@ -1,6 +1,6 @@
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
-import type { BlockInfo } from "./common";
+import type { BlockInfo, EnsRainbowVersionInfo } from "./common";
 
 export type PonderEnvVarsInfo = Record<string, unknown>;
 export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends PonderEnvVarsInfo> {
@@ -22,7 +22,7 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
     firstBlockToIndexByChainId(chainId: number, publicClient: PublicClient): Promise<BlockInfo>;
 
     /** Fetches ENSRainbow version information */
-    ensRainbowVersion?(): Promise<{ version: string; schema_version: number }>;
+    ensRainbowVersion?(): Promise<EnsRainbowVersionInfo>;
   };
 
   /** Public clients for each blockchain network fetching data */

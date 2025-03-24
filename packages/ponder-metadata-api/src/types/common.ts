@@ -44,3 +44,18 @@ export interface NetworkIndexingStatus {
    */
   latestSafeBlock: BlockInfo;
 }
+
+/**
+ * ENSRainbow version information.
+ */
+export interface EnsRainbowVersionInfo {
+  /**
+   * ENSRainbow version.
+   */
+  version: string;
+
+  /**
+   * ENSRainbow schema version.
+   */
+  schema_version: number;
+}
