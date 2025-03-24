@@ -152,10 +152,10 @@ describe("Server Command Tests", () => {
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/version`);
       expect(response.status).toBe(200);
       const data = await response.json();
-      
+
       expect(data.status).toEqual(StatusCode.Success);
-      expect(typeof data.version).toBe('string');
-      expect(typeof data.schema_version).toBe('number');
+      expect(typeof data.version).toBe("string");
+      expect(typeof data.schema_version).toBe("number");
     });
   });
 

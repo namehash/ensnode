@@ -277,16 +277,16 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
 
   /**
    * Get the version information of the ENSRainbow service
-   * 
+   *
    * @returns the version information of the ENSRainbow service
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   * 
+   *
    * @example
    * ```typescript
    * const response = await client.version();
-   * 
+   *
    * console.log(response);
-   * 
+   *
    * // {
    * //   "status": "success",
    * //   "version": "0.1.0",
@@ -296,7 +296,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    */
   async version(): Promise<EnsRainbow.VersionResponse> {
     const response = await fetch(new URL("/v1/version", this.options.endpointUrl));
-    
+
     return response.json() as Promise<EnsRainbow.VersionResponse>;
   }
 
