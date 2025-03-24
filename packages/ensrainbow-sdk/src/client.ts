@@ -13,6 +13,8 @@ export namespace EnsRainbow {
 
     health(): Promise<HealthResponse>;
 
+    version(): Promise<VersionResponse>;
+
     getOptions(): Readonly<EnsRainbowApiClientOptions>;
   }
 
@@ -271,6 +273,31 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const response = await fetch(new URL("/health", this.options.endpointUrl));
 
     return response.json() as Promise<EnsRainbow.HealthResponse>;
+  }
+
+  /**
+   * Get the version information of the ENSRainbow service
+   * 
+   * @returns the version information of the ENSRainbow service
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
+   * 
+   * @example
+   * ```typescript
+   * const response = await client.version();
+   * 
+   * console.log(response);
+   * 
+   * // {
+   * //   "status": "success",
+   * //   "version": "0.1.0",
+   * //   "schema_version": 2
+   * // }
+   * ```
+   */
+  async version(): Promise<EnsRainbow.VersionResponse> {
+    const response = await fetch(new URL("/v1/version", this.options.endpointUrl));
+    
+    return response.json() as Promise<EnsRainbow.VersionResponse>;
   }
 
   /**
