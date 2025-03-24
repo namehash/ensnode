@@ -350,9 +350,16 @@ export function createFirstBlockToIndexByChainIdFetcher(
     const startBlockNumberForChainId = startBlockNumbers[chainId];
 
     // each chain should have a start block number
-    if (!startBlockNumberForChainId) {
+    if (typeof startBlockNumberForChainId !== "number") {
       // throw an error if the start block number is not found for the chain ID
       throw new Error(`No start block number found for chain ID ${chainId}`);
+    }
+
+    if (startBlockNumberForChainId < 0) {
+      // throw an error if the start block number is invalid block number
+      throw new Error(
+        `Start block number "${startBlockNumberForChainId}" for chain ID ${chainId} must be a non-negative integer`,
+      );
     }
 
     const block = await publicClient.getBlock({
@@ -451,13 +458,7 @@ export async function createStartBlockByChainIdMap(
     for (const contractNetworkConfig of Object.entries(contractConfig.network)) {
       // map string to number
       const chainId = Number(contractNetworkConfig[0]);
-      const startBlock = contractNetworkConfig[1].startBlock;
-
-      // fail if no start block number found for the chain ID
-      // (we don't want to index any contract from the genesis block)
-      if (!startBlock) {
-        throw new Error(`No start block number found for chain ID ${chainId}`);
-      }
+      const startBlock = contractNetworkConfig[1].startBlock || 0;
 
       // update the start block number for the chain ID if it's lower than the current one
       if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {

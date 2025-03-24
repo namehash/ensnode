@@ -10,7 +10,7 @@ export function starlight(): AstroIntegration {
       starlightSidebarTopics([
         {
           label: "ENSNode",
-          link: "/ensnode/",
+          link: "/ensnode",
           icon: "star",
           items: [
             {
@@ -58,8 +58,34 @@ export function starlight(): AstroIntegration {
           ],
         },
         {
+          label: "ENSIndexer",
+          link: "/ensindexer",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "What is ENSIndexer?",
+                  link: "/ensindexer",
+                },
+              ],
+            },
+            {
+              label: "Using ENSIndexer",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/usage" },
+            },
+            {
+              label: "Contributing",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/contributing" },
+            },
+          ],
+        },
+        {
           label: "ENSRainbow",
-          link: "/ensrainbow/",
+          link: "/ensrainbow",
           icon: "star",
           items: [
             {
@@ -90,7 +116,7 @@ export function starlight(): AstroIntegration {
         },
         {
           label: "ENSAdmin",
-          link: "/ensadmin/",
+          link: "/ensadmin",
           icon: "star",
           items: [
             {
@@ -141,22 +167,29 @@ export function starlight(): AstroIntegration {
       {
         tag: "meta",
         attrs: {
-          property: "twitter:image",
+          name: "twitter:image",
           content: "https://ensnode.io/Twitter_OG_image.png",
         },
       },
       {
         tag: "meta",
         attrs: {
-          property: "twitter:title",
+          name: "twitter:title",
           content: "The new multichain indexer for ENSv2",
         },
       },
       {
         tag: "meta",
         attrs: {
-          property: "twitter:description",
+          name: "twitter:description",
           content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:creator",
+          content: "@NameHashLabs",
         },
       },
     ],
