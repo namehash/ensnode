@@ -167,22 +167,29 @@ export function starlight(): AstroIntegration {
       {
         tag: "meta",
         attrs: {
-          property: "twitter:image",
+          name: "twitter:image",
           content: "https://ensnode.io/Twitter_OG_image.png",
         },
       },
       {
         tag: "meta",
         attrs: {
-          property: "twitter:title",
+          name: "twitter:title",
           content: "The new multichain indexer for ENSv2",
         },
       },
       {
         tag: "meta",
         attrs: {
-          property: "twitter:description",
+          name: "twitter:description",
           content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:creator",
+          content: "@NameHashLabs",
         },
       },
     ],

@@ -105,7 +105,7 @@ export function selectedEnsNodeUrl(params: URLSearchParams): URL {
   const ensnode = params.get("ensnode");
 
   if (!ensnode) {
-    return defaultEnsNodeUrls()[0];
+    return defaultEnsNodeUrl();
   }
 
   return new URL(ensnode);

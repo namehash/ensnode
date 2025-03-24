@@ -63,7 +63,6 @@ function saveConnections(connections: Connection[]) {
 }
 
 interface UseConnectionsProps {
-  //
   selectedEnsNodeUrl: URL;
 }
 
