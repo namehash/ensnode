@@ -32,16 +32,18 @@ export const config = createConfig({
 });
 
 /**
- * Supported chain ID type.
+ * Supported chain ID for requested ENS Deployment Chain.
  */
-export type SupportedChainId = (typeof config.chains)[number]["id"];
+export type SupportedEnsDeploymentChainId = (typeof config.chains)[number]["id"];
 /**
  * Get the supported chain ID by chain name.
- * @param name
- * @returns
+ * @param chainName
+ * @returns chain ID or undefined if chain name could not be parsed
  */
-export function parseSupportedChainIdByName(name: string): SupportedChainId {
-  switch (name.toLowerCase()) {
+export function parseEnsDeploymentChain(
+  chainName: string,
+): SupportedEnsDeploymentChainId | undefined {
+  switch (chainName.toLowerCase()) {
     case "mainnet":
       return mainnet.id;
     case "sepolia":
@@ -49,6 +51,6 @@ export function parseSupportedChainIdByName(name: string): SupportedChainId {
     case "holesky":
       return holesky.id;
     default:
-      throw new Error(`Unsupported chain name: ${name}`);
+      return undefined;
   }
 }

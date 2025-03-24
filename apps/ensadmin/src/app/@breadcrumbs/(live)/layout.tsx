@@ -5,7 +5,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export default function BreadcrumbsLayout({
+export default function BreadcrumbsLiveFeedsLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ export default function BreadcrumbsLayout({
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbItem className="hidden md:block">Platform</BreadcrumbItem>
+        <BreadcrumbItem className="hidden md:block">Live Feeds</BreadcrumbItem>
         <BreadcrumbSeparator className="hidden md:block" />
         {children}
       </BreadcrumbList>

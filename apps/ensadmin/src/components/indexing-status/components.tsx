@@ -318,16 +318,8 @@ export function IndexingTimeline({
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex justify-between items-center">
-          <span>Indexing Status</span>
-          <div className="flex items-center gap-1.5">
-            <Clock size={16} className="text-blue-600" />
-            <span className="text-sm font-medium">
-              Last indexed block on {intlFormat(currentIndexingDate)}
-            </span>
-          </div>
-        </CardTitle>
+      <CardHeader className="pb-6">
+        <CardTitle>Indexing Status</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -363,13 +355,7 @@ export function IndexingTimeline({
             >
               <div className="absolute -bottom-8 -translate-x-1/2 whitespace-nowrap">
                 <Badge className="text-xs bg-green-800 text-white flex flex-col">
-                  <span>Processing data</span>{" "}
-                  <span>
-                    {getTimelinePosition(currentIndexingDate, timelineStart, timelineEnd).toFixed(
-                      4,
-                    )}
-                    %
-                  </span>
+                  <span>Indexed through</span> <span>{intlFormat(currentIndexingDate)}</span>
                 </Badge>
               </div>
             </div>
@@ -454,11 +440,13 @@ function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
             )}%`,
           }}
         >
-          <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
-            <span className="text-xs text-gray-600">
-              {intlFormat(networkStatus.firstBlockToIndex.date)}
-            </span>
-          </div>
+          {networkStatus?.lastIndexedBlock?.number ? (
+            <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
+              <span className="text-xs text-gray-600">
+                #{networkStatus.lastIndexedBlock.number}
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
