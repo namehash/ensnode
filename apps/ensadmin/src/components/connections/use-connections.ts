@@ -1,10 +1,10 @@
-import { preferredEnsNodeUrl } from "@/lib/env";
+import { defaultEnsNodeUrl } from "@/lib/env";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BasicEnsNodeValidator } from "./ensnode-url-validator";
 
 interface Connection {
   url: string;
-  isPreferred: boolean;
+  isDefault: boolean;
 }
 
 interface AddConnectionVariables {
@@ -21,18 +21,18 @@ const STORAGE_KEY = "ensadmin:connections:urls";
 function loadConnections(): Array<Connection> {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    const urls = saved ? (JSON.parse(saved) as Array<string>) : [preferredEnsNodeUrl()];
+    const urls = saved ? (JSON.parse(saved) as Array<string>) : [defaultEnsNodeUrl()];
 
-    if (!urls.includes(preferredEnsNodeUrl())) {
-      urls.unshift(preferredEnsNodeUrl());
+    if (!urls.includes(defaultEnsNodeUrl())) {
+      urls.unshift(defaultEnsNodeUrl());
     }
 
     return urls.map((url) => ({
       url,
-      isPreferred: url === preferredEnsNodeUrl(),
+      isDefault: url === defaultEnsNodeUrl(),
     }));
   } catch {
-    return [{ url: preferredEnsNodeUrl(), isPreferred: true }];
+    return [{ url: defaultEnsNodeUrl(), isDefault: true }];
   }
 }
 
@@ -71,7 +71,7 @@ export function useConnections() {
       }
 
       // Add new connection
-      const newConnections = [...connections, { url, isPreferred: false }];
+      const newConnections = [...connections, { url, isDefault: false }];
       saveConnections(newConnections);
 
       return { url };
@@ -88,7 +88,7 @@ export function useConnections() {
       if (!connection) {
         throw new Error("Connection not found");
       }
-      if (connection.isPreferred) {
+      if (connection.isDefault) {
         throw new Error("Cannot remove preferred connection");
       }
 

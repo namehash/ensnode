@@ -97,21 +97,21 @@ function getVercelAppPublicUrl(): URL {
 }
 
 export function selectedEnsNodeUrl(params: URLSearchParams): string {
-  return new URL(params.get("ensnode") || preferredEnsNodeUrl()).toString();
+  return new URL(params.get("ensnode") || defaultEnsNodeUrl()).toString();
 }
 
-const PREFERRED_ENSNODE_URL = "https://alpha.ensnode.io";
+const DEFAULT_ENSNODE_URL = "https://api.alpha.ensnode.io";
 
-export function preferredEnsNodeUrl(): string {
-  const envVarName = "NEXT_PUBLIC_PREFERRED_ENSNODE_URL";
-  const envVarValue = process.env.NEXT_PUBLIC_PREFERRED_ENSNODE_URL;
+export function defaultEnsNodeUrl(): string {
+  const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URL";
+  const envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URL;
 
   if (!envVarValue) {
     console.warn(
-      `No preferred URL provided in "${envVarName}". Using fallback: ${PREFERRED_ENSNODE_URL}`,
+      `No default ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
     );
 
-    return PREFERRED_ENSNODE_URL;
+    return DEFAULT_ENSNODE_URL;
   }
 
   try {

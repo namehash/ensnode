@@ -1,6 +1,6 @@
 "use client";
 
-import { preferredEnsNodeUrl, selectedEnsNodeUrl } from "@/lib/env";
+import { defaultEnsNodeUrl, selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDown, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -93,7 +93,7 @@ export function ConnectionSelector() {
   };
 
   const handleRemove = (url: string) => {
-    if (url === preferredEnsNodeUrl()) return;
+    if (url === defaultEnsNodeUrl()) return;
     removeConnection.mutate({ url });
   };
 
@@ -132,7 +132,7 @@ export function ConnectionSelector() {
                   <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                connections.map(({ url, isPreferred }) => (
+                connections.map(({ url, isDefault }) => (
                   <DropdownMenuItem
                     key={url}
                     onClick={() => handleSelect(url)}
@@ -152,7 +152,7 @@ export function ConnectionSelector() {
                       >
                         <ExternalLink className="w-3 h-3" />
                       </a>
-                      {!isPreferred && (
+                      {!isDefault && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
