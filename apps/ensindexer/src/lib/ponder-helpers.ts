@@ -1,6 +1,7 @@
 import type { Event } from "ponder:registry";
 import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
+import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
@@ -146,6 +147,33 @@ export const parseEnsRainbowEndpointUrl = (rawValue?: string): string => {
   } catch (e) {
     throw new Error(`'${rawValue}' is not a valid URL`);
   }
+};
+
+/**
+ * Creates a function that fetches ENSRainbow version information.
+ *
+ * @returns A function that fetches ENSRainbow version information
+ */
+export const createEnsRainbowVersionFetcher = () => {
+  const client = new EnsRainbowApiClient({
+    endpointUrl: new URL(ensRainbowEndpointUrl()),
+  });
+
+  return async () => {
+    try {
+      const versionResponse = await client.version();
+      return {
+        version: versionResponse.version,
+        schema_version: versionResponse.schema_version,
+      };
+    } catch (error) {
+      console.error("Failed to fetch ENSRainbow version", error);
+      return {
+        version: "unknown",
+        schema_version: 0,
+      };
+    }
+  };
 };
 
 type AnyObject = { [key: string]: any };

@@ -37,6 +37,12 @@ interface PonderMetadataModule {
 
     /** Network indexing status by chain ID */
     networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
+
+    /** ENSRainbow version info */
+    ensRainbow?: {
+      version: string;
+      schema_version: number;
+    };
   };
 }
 
@@ -153,6 +159,16 @@ export function ponderMetadata<
       console.error("Failed to fetch ponder metadata", error);
     }
 
+    // fetch ENSRainbow version if available
+    let ensRainbowVersionInfo = undefined;
+    if (query.ensRainbowVersion) {
+      try {
+        ensRainbowVersionInfo = await query.ensRainbowVersion();
+      } catch (error) {
+        console.error("Failed to fetch ENSRainbow version", error);
+      }
+    }
+
     const response = {
       app,
       deps: {
@@ -163,6 +179,7 @@ export function ponderMetadata<
       runtime: {
         codebaseBuildId: formatTextMetricValue(ponderAppBuildId),
         networkIndexingStatusByChainId,
+        ensRainbow: ensRainbowVersionInfo,
       },
     } satisfies MetadataMiddlewareResponse;
 

@@ -20,6 +20,9 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
 
     /** Fetches the first block do be indexed for a requested chain ID */
     firstBlockToIndexByChainId(chainId: number, publicClient: PublicClient): Promise<BlockInfo>;
+
+    /** Fetches ENSRainbow version information */
+    ensRainbowVersion?(): Promise<{ version: string; schema_version: number }>;
   };
 
   /** Public clients for each blockchain network fetching data */
