@@ -123,7 +123,7 @@ export function ConnectionSelector() {
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-72 rounded-lg"
               align="start"
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
@@ -137,50 +137,54 @@ export function ConnectionSelector() {
                   <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                connections.map(({ url, isDefault }) => (
-                  <DropdownMenuItem
-                    key={url}
-                    onClick={() => handleSelect(url)}
-                    className={cn(
-                      "group gap-2 p-2 font-mono text-xs justify-between",
-                      url === selectedUrl.toString() ? "bg-primary/10 text-primary" : "",
-                    )}
-                  >
-                    <span className="truncate flex-1">{url}</span>
-                    <div className="flex items-center gap-1">
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1 hover:text-foreground rounded"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                      {!isDefault && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemove(url);
-                          }}
-                          disabled={removeConnection.isPending}
-                          className={cn(
-                            "p-1 rounded",
-                            removeConnection.isPending
-                              ? "text-muted-foreground cursor-not-allowed"
-                              : "hover:text-destructive",
-                          )}
-                        >
-                          {removeConnection.isPending && removeConnection.variables?.url === url ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-3 h-3" />
-                          )}
-                        </button>
+                connections.map(({ url, isDefault }) => {
+                  const isCurrentlySelectedConnection = url === selectedUrl.toString();
+                  return (
+                    <DropdownMenuItem
+                      key={url}
+                      onClick={() => handleSelect(url)}
+                      className={cn(
+                        "group gap-2 p-2 font-mono text-xs justify-between",
+                        isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : "",
                       )}
-                    </div>
-                  </DropdownMenuItem>
-                ))
+                    >
+                      <span className="truncate flex-1">{url}</span>
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1 hover:text-foreground rounded"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        {!isDefault && !isCurrentlySelectedConnection && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemove(url);
+                            }}
+                            disabled={removeConnection.isPending}
+                            className={cn(
+                              "p-1 rounded",
+                              removeConnection.isPending
+                                ? "text-muted-foreground cursor-not-allowed"
+                                : "hover:text-destructive",
+                            )}
+                          >
+                            {removeConnection.isPending &&
+                            removeConnection.variables?.url === url ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  );
+                })
               )}
 
               <DropdownMenuSeparator />

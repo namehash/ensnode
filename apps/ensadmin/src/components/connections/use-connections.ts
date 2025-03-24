@@ -39,10 +39,16 @@ function loadConnections(): Array<Connection> {
   try {
     const savedUrlsRaw = localStorage.getItem(STORAGE_KEY);
     const savedUrls = savedUrlsRaw ? JSON.parse(savedUrlsRaw) : [];
-    const savedConnections: Array<Connection> = savedUrls.map((url: string) => ({
-      url,
-      isDefault: false,
-    }));
+    const savedConnections: Array<Connection> = savedUrls
+      .filter(
+        // filter out those savedConnectionUrl strings that are not on defaultEnsNodeUrls list
+        (savedConnectionUrl: string) =>
+          defaultEnsNodeUrls().every((url) => url.toString() !== savedConnectionUrl),
+      )
+      .map((url: string) => ({
+        url,
+        isDefault: false,
+      }));
 
     connections = [...defaultConnections, ...savedConnections];
   } catch {
@@ -58,7 +64,7 @@ function loadConnections(): Array<Connection> {
  * @param connections
  */
 function saveConnections(connections: Connection[]) {
-  const urls = connections.filter((c) => c.isDefault === false).map((c) => c.url);
+  const urls = connections.map((c) => c.url);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(urls));
 }
 
@@ -124,14 +130,21 @@ export function useConnections({ selectedEnsNodeUrl }: UseConnectionsProps) {
 
   // attempt adding `selectedEnsNodeUrl` to connections list
   useEffect(() => {
-    const url = selectedEnsNodeUrl.toString();
-
-    if (connections.find((c) => c.url === url)) {
+    if (connections.length === 0) {
+      // only try adding selec
       return;
     }
 
-    addConnection.mutate({ url });
-  }, [selectedEnsNodeUrl, addConnection]);
+    if (addConnection.isIdle) {
+      const url = selectedEnsNodeUrl.toString();
+
+      if (connections.some((c) => c.url.toString() === url)) {
+        return;
+      }
+
+      addConnection.mutateAsync({ url });
+    }
+  }, [addConnection, connections, selectedEnsNodeUrl]);
 
   return {
     connections,
