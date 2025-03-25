@@ -82,19 +82,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build ENSIndexer Docker image
         if: steps.publish-meta.outputs.ensindexer_version != ''
         env:
           ENSINDEXER_IMAGE_NAME: ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}
           DOCKERFILE_PATH: apps/ensindexer/Dockerfile
-        shell: bash
         run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker buildx build --push --platform linux/amd64,linux/arm64 -f $DOCKERFILE_PATH -t $ENSINDEXER_IMAGE_NAME  .
           
