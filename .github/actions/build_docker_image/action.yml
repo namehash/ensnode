@@ -24,17 +24,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
 
-    - name: Set up QEMU (for cross-architecture builds)
-      uses: docker/setup-qemu-action@v3
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
     - name: Build & Push Docker image for the ENSIndexer app
       env:
         IMAGE_NAME: ${{ inputs.image_name }}
