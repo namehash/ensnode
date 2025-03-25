@@ -1,3 +1,4 @@
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { queryPonderMeta, queryPonderStatus } from "./db-helpers";
@@ -7,12 +8,7 @@ import type {
   PonderMetadataMiddlewareOptions,
   PonderMetadataMiddlewareResponse,
 } from "./types/api";
-import type {
-  BlockInfo,
-  EnsRainbowVersionInfo,
-  NetworkIndexingStatus,
-  PonderBlockStatus,
-} from "./types/common";
+import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "./types/common";
 
 /**
  * Ponder Metadata types definition.
@@ -44,7 +40,7 @@ interface PonderMetadataModule {
     networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
 
     /** ENSRainbow version info */
-    ensRainbow?: EnsRainbowVersionInfo;
+    ensRainbow?: EnsRainbow.VersionInfo;
   };
 }
 
