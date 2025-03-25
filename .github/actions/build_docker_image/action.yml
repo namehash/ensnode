@@ -44,7 +44,7 @@ runs:
   
     - name: Build & Push Docker image for the ENSIndexer app
       env:
-        IMAGE_NAME: ${{ inputs.tag }}
+        IMAGE_NAME: ${{ inputs.image_name }}
         DOCKERFILE_PATH: ${{ inputs.dockerfile_path }}
       shell: bash
       run: |
