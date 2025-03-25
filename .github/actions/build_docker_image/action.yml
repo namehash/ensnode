@@ -43,5 +43,5 @@ runs:
         GITHUB_TOKEN: ${{ inputs.registry_token }}
       shell: bash
       run: |
-        echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
+        # echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
         docker buildx build --push --platform linux/amd64,linux/arm64 -f $DOCKERFILE_PATH -t $IMAGE_NAME  .
