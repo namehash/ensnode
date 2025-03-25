@@ -53,16 +53,12 @@ export default function ReactFlowPoCPage() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
-    (params) =>
+    (params: Edge | Connection) =>
       setEdges((eds) =>
         addEdge(
           {
             ...params,
             type: "animatedSvg",
-            style: {
-              strokeWidth: 1,
-              stroke: "#05eeff",
-            },
             markerEnd: {
               type: MarkerType.Arrow,
               width: 20,

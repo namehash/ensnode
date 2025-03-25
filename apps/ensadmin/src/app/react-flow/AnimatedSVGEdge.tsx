@@ -10,7 +10,6 @@ export function AnimatedSVGEdge({
   sourcePosition,
   targetPosition,
   markerEnd,
-  style,
 }: EdgeProps) {
   const [edgePath] = getSmoothStepPath({
     sourceX,
@@ -23,7 +22,10 @@ export function AnimatedSVGEdge({
 
   return (
     <>
-      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={style} />
+      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={{
+        strokeWidth: "1",
+        stroke: "#05eeff",
+      }} />
       <g
         xmlns="http://www.w3.org/2000/svg"
         width="24"
