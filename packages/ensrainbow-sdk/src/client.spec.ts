@@ -90,8 +90,8 @@ describe("EnsRainbowApiClient", () => {
 
     expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
-    expect(typeof response.version === "string").toBeTruthy();
-    expect(typeof response.schema_version === "number").toBeTruthy();
+    expect(typeof response.versionInfo.version === "string").toBeTruthy();
+    expect(typeof response.versionInfo.schema_version === "number").toBeTruthy();
   });
 });
 

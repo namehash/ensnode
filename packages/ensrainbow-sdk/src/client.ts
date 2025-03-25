@@ -122,8 +122,9 @@ export namespace EnsRainbow {
   /**
    * Interface for the version endpoint response
    */
-  export interface VersionResponse extends VersionInfo {
+  export interface VersionResponse {
     status: typeof StatusCode.Success;
+    versionInfo: VersionInfo;
   }
 }
 
