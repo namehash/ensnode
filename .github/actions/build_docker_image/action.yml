@@ -46,5 +46,6 @@ runs:
       env:
         IMAGE_NAME: ${{ inputs.tag }}
         DOCKERFILE_PATH: ${{ inputs.dockerfile_path }}
+      shell: bash
       run: |
         docker buildx build --push --platform linux/amd64,linux/arm64 -f $DOCKERFILE_PATH -t $IMAGE_NAME  .
