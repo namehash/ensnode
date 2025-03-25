@@ -131,10 +131,12 @@ export function useConnections({ selectedEnsNodeUrl }: UseConnectionsProps) {
   // attempt adding `selectedEnsNodeUrl` to connections list
   useEffect(() => {
     if (connections.length === 0) {
-      // only try adding selec
+      // don't add a new connection before the list of connections is loaded
       return;
     }
 
+    // only attempt adding a new connection if there's no other connection
+    // being added at the moment
     if (addConnection.isIdle) {
       const url = selectedEnsNodeUrl.toString();
 
