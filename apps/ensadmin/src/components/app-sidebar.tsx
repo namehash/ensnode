@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, RadioTower, ChartNetwork } from "lucide-react";
+import { Activity, ChartNetwork, RadioTower } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
