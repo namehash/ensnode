@@ -52,7 +52,7 @@ jobs:
           # PUBLISHED_PACKAGES: steps.changesets.outputs.publishedPackages 
         run: |  
 
-            echo "ensindexer_version=test" >> $GITHUB_OUTPUT
+            echo "ensindexer_version=dev" >> $GITHUB_OUTPUT
             # Iterate through each item in the JSON array
             # echo "$PUBLISHED_PACKAGES" | jq -c '.[]' | while read -r item; do
             #   # Extract name and version using jq
@@ -72,20 +72,14 @@ jobs:
             #   esac
             # done
           
-
-      - name: Test condition
+      - name: Build ENSIndexer Docker image
         if: steps.publish-meta.outputs.ensindexer_version != ''
-        run: |  
-
-            echo "SUCCESS"
-      # - name: Build ENSIndexer Docker image
-      #   if: steps.publish-meta.outputs.ensindexer_version != ''
-      #   uses: ./.github/actions/build_docker_image.yml
-      #   env:
-      #     ENSINDEXER_IMAGE_NAME: ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}
-      #   with:
-      #     image_name: ${{ env.ENSINDEXER_IMAGE_NAME }}
-      #     dockerfile_path: apps/ensindexer/Dockerfile
-      #     registry_user: ${{ github.actor }}
-      #     registry_token: ${{ secrets.GITHUB_TOKEN }} 
+        uses: ./.github/actions/build_docker_image.yml
+        env:
+          ENSINDEXER_IMAGE_NAME: ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}
+        with:
+          image_name: ${{ env.ENSINDEXER_IMAGE_NAME }}
+          dockerfile_path: apps/ensindexer/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }} 
           
