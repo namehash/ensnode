@@ -1,37 +1,36 @@
 "use client";
 
 import {
-  Background,
-  Controls,
-  MarkerType,
-  MiniMap,
-  ReactFlow,
-  addEdge,
-  useEdgesState,
-  useNodesState,
+    addEdge,
+    Background,
+    type Connection,
+    Controls,
+    type Edge,
+    MarkerType,
+    MiniMap,
+    type Node,
+    Position,
+    ReactFlow,
+    useEdgesState,
+    useNodesState
 } from "@xyflow/react";
-import React, { useCallback } from "react";
-import { AnimatedSVGEdge } from "./AnimatedSVGEdge";
+import React, {useCallback} from "react";
+import {AnimatedSVGEdge} from "./AnimatedSVGEdge";
 
 import "@xyflow/react/dist/style.css";
 
-export default function ReactFlowPoCPage() {
-  const initialNodes = [
-    { id: "1", position: { x: 600, y: 200 }, data: { label: "ENSNode" }, targetPosition: "left" },
-    {
-      id: "2",
-      position: { x: 200, y: 200 },
-      data: { label: "Some blockchain" },
-      sourcePosition: "right",
-    },
-    { id: "3", position: { x: 400, y: 100 }, data: { label: "Some other blockchain" } },
-  ];
+const initialNodes: Node[] = [
+  { id: "1", position: { x: 600, y: 200 }, data: { label: "ENSNode" }, targetPosition: Position.Left },
+  { id: "2", position: { x: 200, y: 200 }, data: { label: "Some blockchain" } },
+  { id: "3", position: { x: 400, y: 100 }, data: { label: "Some other blockchain" } },
+];
 
+export default function ReactFlowPoCPage() {
   const edgeTypes = {
     animatedSvg: AnimatedSVGEdge,
   };
 
-  const initialEdges = [
+  const initialEdges: Edge[] = [
     {
       id: "2->1",
       type: "animatedSvg",
@@ -50,10 +49,8 @@ export default function ReactFlowPoCPage() {
     },
   ];
 
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-  setNodes(initialNodes);
 
   const onConnect = useCallback(
     (params) =>
