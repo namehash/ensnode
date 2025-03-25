@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/445-add-versioning-for-ensnode
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -59,7 +58,7 @@ jobs:
               echo "Version: $version"
               
               case "$name" in
-                  '@apps/ensindexer')
+                  '@ensnode/ensindexer')
                       echo "ensindexer_version=$version" >> $GITHUB_OUTPUT
                       ;;
                   *)
