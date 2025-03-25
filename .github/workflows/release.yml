@@ -54,7 +54,7 @@ jobs:
           # PUBLISHED_PACKAGES: steps.changesets.outputs.publishedPackages 
         run: |  
 
-            echo "ensindexer_version=dev" >> $GITHUB_OUTPUT
+            echo "ensindexer_version=test" >> $GITHUB_OUTPUT
             # Iterate through each item in the JSON array
             # echo "$PUBLISHED_PACKAGES" | jq -c '.[]' | while read -r item; do
             #   # Extract name and version using jq
