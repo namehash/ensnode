@@ -25,13 +25,4 @@ runs:
   using: composite
   steps:
 
-    - name: Build & Push Docker image for the ENSIndexer app
-      env:
-        IMAGE_NAME: ${{ inputs.image_name }}
-        DOCKERFILE_PATH: ${{ inputs.dockerfile_path }}
-        GITHUB_USER: ${{ inputs.registry_user }}
-        GITHUB_TOKEN: ${{ inputs.registry_token }}
-      shell: bash
-      run: |
-        # echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
-        docker buildx build --push --platform linux/amd64,linux/arm64 -f $DOCKERFILE_PATH -t $IMAGE_NAME  .
+

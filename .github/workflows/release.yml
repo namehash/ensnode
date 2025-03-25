@@ -91,12 +91,10 @@ jobs:
 
       - name: Build ENSIndexer Docker image
         if: steps.publish-meta.outputs.ensindexer_version != ''
-        uses: ./.github/actions/build_docker_image
         env:
           ENSINDEXER_IMAGE_NAME: ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}
-        with:
-          image_name: ${{ env.ENSINDEXER_IMAGE_NAME }}
-          dockerfile_path: apps/ensindexer/Dockerfile
-          registry_user: ${{ github.actor }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }} 
+          DOCKERFILE_PATH: apps/ensindexer/Dockerfile
+        shell: bash
+        run: |
+          docker buildx build --push --platform linux/amd64,linux/arm64 -f $DOCKERFILE_PATH -t $ENSINDEXER_IMAGE_NAME  .
           
