@@ -154,8 +154,8 @@ describe("Server Command Tests", () => {
       const data = await response.json();
 
       expect(data.status).toEqual(StatusCode.Success);
-      expect(typeof data.version).toBe("string");
-      expect(typeof data.schema_version).toBe("number");
+      expect(typeof data.versionInfo.version).toBe("string");
+      expect(typeof data.versionInfo.schema_version).toBe("number");
     });
   });
 

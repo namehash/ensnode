@@ -51,8 +51,10 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     logger.debug("Version request");
     const result: EnsRainbow.VersionResponse = {
       status: StatusCode.Success,
-      version: packageJson.version,
-      schema_version: SCHEMA_VERSION,
+      versionInfo: {
+        version: packageJson.version,
+        schema_version: SCHEMA_VERSION,
+      },
     };
     logger.debug(`Version result:`, result);
     return c.json(result);
