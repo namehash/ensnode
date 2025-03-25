@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - feat/445-add-versioning-for-ensnode
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release
+    if: github.repository == 'namehash/ensnode'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      # - name: Install dependencies
+      #   run: pnpm install --frozen-lockfile
+
+      # - name: Create Release PR or Publish to NPM
+      #   id: changesets
+      #   uses: changesets/action@v1
+      #   with:
+      #     version: pnpm version
+      #     publish: pnpm release
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Parse publish results
+        id: publish-meta
+        # if: steps.changesets.outputs.published == 'true'
+        # env:
+          # PUBLISHED_PACKAGES: steps.changesets.outputs.publishedPackages 
+        run: |  
+
+            echo "TESING"
+            # Iterate through each item in the JSON array
+            # echo "$PUBLISHED_PACKAGES" | jq -c '.[]' | while read -r item; do
+            #   # Extract name and version using jq
+            #   name=$(echo "$item" | jq -r '.name')
+            #   version=$(echo "$item" | jq -r '.version')
+
+            #   echo "Processing package: $name"
+            #   echo "Version: $version"
+              
+            #   case "$name" in
+            #       '@apps/ensindexer')
+            #           echo "ensindexer_version=$version" >> $GITHUB_OUTPUT
+            #           ;;
+            #       *)
+            #           echo "Skipping: $name"
+            #           ;;
+            #   esac
+            # done
+          
+
+      - name: Test condition
+        if: steps.publish-meta.outputs.ensindexer_version != ''
+        run: |  
+
+            echo "SUCCESS"
+      # - name: Build ENSIndexer Docker image
+      #   if: steps.publish-meta.outputs.ensindexer_version != ''
+      #   uses: ./.github/actions/build_docker_image.yml
+      #   env:
+      #     ENSINDEXER_IMAGE_NAME: ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}
+      #   with:
+      #     image_name: ${{ env.ENSINDEXER_IMAGE_NAME }}
+      #     dockerfile_path: apps/ensindexer/Dockerfile
+      #     registry_user: ${{ github.actor }}
+      #     registry_token: ${{ secrets.GITHUB_TOKEN }} 
+          
