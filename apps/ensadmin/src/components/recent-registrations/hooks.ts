@@ -8,7 +8,7 @@ import { RecentRegistrationsResponse } from "./types";
  * @param baseUrl ENSNode URL
  * @returns Info about the 5 most recently registered .eth domains that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistrationsResponse> {
+async function fetchRecentRegistrations(baseUrl: URL): Promise<RecentRegistrationsResponse> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: 5, orderBy: registrationDate, orderDirection: desc) {
