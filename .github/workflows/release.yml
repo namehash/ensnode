@@ -29,45 +29,44 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # - name: Install dependencies
-      #   run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      # - name: Create Release PR or Publish to NPM
-      #   id: changesets
-      #   uses: changesets/action@v1
-      #   with:
-      #     version: pnpm version
-      #     publish: pnpm release
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create Release PR or Publish to NPM
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm version
+          publish: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Parse publish results
         id: publish-meta
-        # if: steps.changesets.outputs.published == 'true'
-        # env:
-        #   PUBLISHED_PACKAGES: steps.changesets.outputs.publishedPackages 
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          PUBLISHED_PACKAGES: steps.changesets.outputs.publishedPackages 
         run: |  
 
-            echo "ensindexer_version=test" >> $GITHUB_OUTPUT
             # Iterate through each item in the JSON array
-            # echo "$PUBLISHED_PACKAGES" | jq -c '.[]' | while read -r item; do
-            #   # Extract name and version using jq
-            #   name=$(echo "$item" | jq -r '.name')
-            #   version=$(echo "$item" | jq -r '.version')
+            echo "$PUBLISHED_PACKAGES" | jq -c '.[]' | while read -r item; do
+              # Extract name and version using jq
+              name=$(echo "$item" | jq -r '.name')
+              version=$(echo "$item" | jq -r '.version')
 
-            #   echo "Processing package: $name"
-            #   echo "Version: $version"
+              echo "Processing package: $name"
+              echo "Version: $version"
               
-            #   case "$name" in
-            #       '@apps/ensindexer')
-            #           echo "ensindexer_version=$version" >> $GITHUB_OUTPUT
-            #           ;;
-            #       *)
-            #           echo "Skipping: $name"
-            #           ;;
-            #   esac
-            # done
+              case "$name" in
+                  '@apps/ensindexer')
+                      echo "ensindexer_version=$version" >> $GITHUB_OUTPUT
+                      ;;
+                  *)
+                      echo "Skipping: $name"
+                      ;;
+              esac
+            done
           
       - name: Build ENSIndexer Docker image
         if: steps.publish-meta.outputs.ensindexer_version != ''
