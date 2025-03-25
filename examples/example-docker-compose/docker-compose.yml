@@ -42,10 +42,10 @@ services:
       # Override ENSADMIN_PUBLIC_URL to point to docker compose ensindexer
       # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
       ENSADMIN_PUBLIC_URL: http://localhost:4173
-      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to docker compose ensindexer
-      # Note: it must be a comma-separated list of URLs that are accessible from web browser
-      # (i.e. it cannot be a hostname in docker network)
-      NEXT_PUBLIC_DEFAULT_ENSNODE_URLS: http://localhost:42069,https://api.alpha.ensnode.io
+      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensindexer
+      # Note: it must be a comma-separated list of URLs that are accessible from a web browser
+      # (i.e. it cannot be a hostname in the docker network)
+      NEXT_PUBLIC_DEFAULT_ENSNODE_URLS: http://localhost:42069
     env_file:
       # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
       - path: ./apps/ensadmin/.env.local

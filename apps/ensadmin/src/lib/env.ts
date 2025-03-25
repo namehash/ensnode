@@ -134,14 +134,14 @@ export function defaultEnsNodeUrls(): Array<URL> {
     const urlList = envVarValue.split(",").map((maybeUrl) => parseUrl(maybeUrl));
 
     if (urlList.length === 0) {
-      throw new Error(`At least one valid URL must be set to "${envVarName}"`);
+      throw new Error(`Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid URL`);
     }
 
     return urlList;
   } catch (error) {
     console.error(error);
 
-    throw new Error(`Invalid ${envVarName} value "${envVarValue}". It should be a valid URL.`);
+    throw new Error(`Invalid ${envVarName} value "${envVarValue}" must contain a comma separated list of valid URLs.`);
   }
 }
 
