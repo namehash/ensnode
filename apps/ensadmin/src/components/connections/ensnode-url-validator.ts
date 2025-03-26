@@ -2,8 +2,10 @@ export interface EnsNodeValidator {
   validate(url: string): Promise<{ isValid: boolean; error?: string }>;
 }
 
+type ValidationResult = { isValid: true; error?: never } | { isValid: false; error: string };
+
 export class BasicEnsNodeValidator implements EnsNodeValidator {
-  async validate(url: string): Promise<{ isValid: boolean; error?: string }> {
+  async validate(url: string): Promise<ValidationResult> {
     try {
       const parsedUrl = new URL(url);
 

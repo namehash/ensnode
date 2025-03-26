@@ -96,31 +96,65 @@ function getVercelAppPublicUrl(): URL {
   return new URL(`https://${vercelAppHostname}`);
 }
 
-export function selectedEnsNodeUrl(params: URLSearchParams): string {
-  return new URL(params.get("ensnode") || preferredEnsNodeUrl()).toString();
+/**
+ * Get URL of currently selected ENSNode instance.
+ * @param params
+ * @returns URL from `ensnode` search param or the first URL from default URLs list
+ */
+export function selectedEnsNodeUrl(params: URLSearchParams): URL {
+  const ensnode = params.get("ensnode");
+
+  if (!ensnode) {
+    return defaultEnsNodeUrl();
+  }
+
+  return new URL(ensnode);
 }
 
-const PREFERRED_ENSNODE_URL = "https://api.alpha.ensnode.io";
+const DEFAULT_ENSNODE_URL = "https://api.alpha.ensnode.io";
 
-export function preferredEnsNodeUrl(): string {
-  const envVarName = "NEXT_PUBLIC_PREFERRED_ENSNODE_URL";
-  const envVarValue = process.env.NEXT_PUBLIC_PREFERRED_ENSNODE_URL;
+/**
+ * Get list of URLs for default ENSNode instances.
+ *
+ * @returns a list (with at least one element) of URLs for default ENSNode instances
+ */
+export function defaultEnsNodeUrls(): Array<URL> {
+  const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URLS";
+  const envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URLS;
 
   if (!envVarValue) {
     console.warn(
-      `No preferred URL provided in "${envVarName}". Using fallback: ${PREFERRED_ENSNODE_URL}`,
+      `No default ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
     );
 
-    return PREFERRED_ENSNODE_URL;
+    return [new URL(DEFAULT_ENSNODE_URL)];
   }
 
   try {
-    return parseUrl(envVarValue).toString();
+    const urlList = envVarValue.split(",").map((maybeUrl) => parseUrl(maybeUrl));
+
+    if (urlList.length === 0) {
+      throw new Error(
+        `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid URL`,
+      );
+    }
+
+    return urlList;
   } catch (error) {
     console.error(error);
 
-    throw new Error(`Invalid ${envVarName} value "${envVarValue}". It should be a valid URL.`);
+    throw new Error(
+      `Invalid ${envVarName} value "${envVarValue}" must contain a comma separated list of valid URLs.`,
+    );
   }
+}
+
+/**
+ * Get the first URL from a list of URLs for default ENSNode instances.
+ * @returns URL for default ENSNode instance
+ */
+export function defaultEnsNodeUrl(): URL {
+  return defaultEnsNodeUrls()[0];
 }
 
 function parseUrl(maybeUrl: string): URL {

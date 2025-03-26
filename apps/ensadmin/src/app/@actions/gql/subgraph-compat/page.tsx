@@ -1,5 +1,5 @@
 import { CopyButton } from "@/components/ui/copy-button";
-import { preferredEnsNodeUrl } from "@/lib/env";
+import { defaultEnsNodeUrl } from "@/lib/env";
 
 type ActionProps = {
   searchParams: Promise<{
@@ -8,13 +8,13 @@ type ActionProps = {
 };
 
 export default async function ActionsSubgraphCompatPage({ searchParams }: ActionProps) {
-  const { ensnode = preferredEnsNodeUrl() } = await searchParams;
+  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
 
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
       ? ensnode
-      : preferredEnsNodeUrl();
+      : defaultEnsNodeUrl();
 
   const url = new URL(`/subgraph`, baseUrl).toString();
 

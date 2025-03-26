@@ -9,7 +9,7 @@ import type { EnsNode } from "./types";
  * @param baseUrl ENSNode URL
  * @returns Information about the ENSNode runtime, environment, dependencies, and more.
  */
-async function fetchEnsNodeStatus(baseUrl: string): Promise<EnsNode.Metadata> {
+async function fetchEnsNodeStatus(baseUrl: URL): Promise<EnsNode.Metadata> {
   const response = await fetch(new URL(`/metadata`, baseUrl), {
     headers: {
       "content-type": "application/json",
