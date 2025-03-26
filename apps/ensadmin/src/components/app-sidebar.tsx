@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, ChartNetwork, RadioTower } from "lucide-react";
+import { Activity, PackageSearch, RadioTower } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
@@ -15,9 +15,9 @@ const navItems = [
     icon: Activity,
   },
   {
-    title: "React-Flow PoC",
+    title: "ENS Protocol Inspector",
     url: "/react-flow",
-    icon: ChartNetwork,
+    icon: PackageSearch,
   },
   {
     title: "APIs",
