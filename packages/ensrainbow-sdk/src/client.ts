@@ -105,12 +105,26 @@ export namespace EnsRainbow {
   export type CountResponse = CountSuccess | CountServerError;
 
   /**
+   * ENSRainbow version information.
+   */
+  export interface VersionInfo {
+    /**
+     * ENSRainbow version.
+     */
+    version: string;
+
+    /**
+     * ENSRainbow schema version.
+     */
+    schema_version: number;
+  }
+
+  /**
    * Interface for the version endpoint response
    */
   export interface VersionResponse {
     status: typeof StatusCode.Success;
-    version: string;
-    schema_version: number;
+    versionInfo: VersionInfo;
   }
 }
 
