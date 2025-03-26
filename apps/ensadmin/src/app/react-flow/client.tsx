@@ -8,11 +8,11 @@ import {
 } from "@xyflow/react";
 import React from "react";
 import "@xyflow/react/dist/style.css";
-import { AnimatedSVGEdge } from "./AnimatedSVGEdge";
 import CustomEdgeStartEnd from "@/app/react-flow/custom-components/CustomEdgeStartEnd";
-import {LabeledGroupNode} from "@/app/react-flow/custom-components/LabeledGroupNode";
-import {initialNodes} from "@/app/react-flow/schema-elements/nodes";
-import {initialEdges} from "@/app/react-flow/schema-elements/edges";
+import { LabeledGroupNode } from "@/app/react-flow/custom-components/LabeledGroupNode";
+import { initialEdges } from "@/app/react-flow/schema-elements/edges";
+import { initialNodes } from "@/app/react-flow/schema-elements/nodes";
+import { AnimatedSVGEdge } from "./AnimatedSVGEdge";
 
 export default function ReactFlowClient() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -20,7 +20,7 @@ export default function ReactFlowClient() {
 
   const edgeTypes = {
     animatedSvg: AnimatedSVGEdge,
-    'start-end': CustomEdgeStartEnd,
+    "start-end": CustomEdgeStartEnd,
   };
 
   const nodeTypes = {
