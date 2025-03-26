@@ -15,10 +15,10 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
-      - uses: actions/checkout@v3
-
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -70,10 +70,8 @@ jobs:
       - name: Build ENSIndexer Docker image
         if: steps.publish-meta.outputs.ensindexer_version != ''
         uses: ./.github/actions/build_docker_image
-        env:
-          ENSINDEXER_IMAGE_NAME: ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}
         with:
-          image_name: ${{ env.ENSINDEXER_IMAGE_NAME }}
+          image_name:  ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}  
           dockerfile_path: apps/ensindexer/Dockerfile
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }} 
