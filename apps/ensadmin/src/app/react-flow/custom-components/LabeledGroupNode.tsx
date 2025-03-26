@@ -22,7 +22,7 @@ export const GroupNodeLabel = forwardRef<HTMLDivElement, GroupNodeLabelProps>(
 GroupNodeLabel.displayName = "GroupNodeLabel";
 
 export type GroupNodeProps = Partial<NodeProps> & {
-  label?: ReactNode;
+  label?: ReactNode | string;
   position?: PanelPosition;
 };
 
@@ -67,5 +67,5 @@ export const GroupNode = forwardRef<HTMLDivElement, GroupNodeProps>(
 GroupNode.displayName = "GroupNode";
 
 export const LabeledGroupNode = memo(({ selected, data }: NodeProps) => {
-  return <GroupNode position="top-left" selected={selected} label={data.label} />;
+  return <GroupNode position="top-left" selected={selected} label={data.label as string} />;
 });

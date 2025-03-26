@@ -18,7 +18,7 @@ export default function ActionsReactFlow() {
   const searchParams = useSearchParams();
 
   const initialStrategy = searchParams.get("strategy") || "resolveAddress";
-  const initialName = searchParams.get("name") || "jesse.bath.eth";
+  const initialName = searchParams.get("name") || "jesse.base.eth";
 
   const [strategy, setStrategy] = useState(initialStrategy);
   const [name, setName] = useState(initialName);
