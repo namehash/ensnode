@@ -42,7 +42,8 @@
   "dependencies": {
     "drizzle-orm": "catalog:",
     "parse-prometheus-text-format": "^1.1.1",
-    "viem": "catalog:"
+    "viem": "catalog:",
+    "@ensnode/ensrainbow-sdk": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
