@@ -1,5 +1,6 @@
 "use client";
 
+import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,6 @@ import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { fromUnixTime, intlFormat } from "date-fns";
 import { Clock } from "lucide-react";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
@@ -214,8 +214,8 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
       <header className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-semibold flex items-center gap-2">
-            <Image src="/ensindexer-light.svg" alt="ENSIndexer Logo" width={24} height={24} />
-            ENSIndexer Status
+            <ENSIndexerIcon width={24} height={24} />
+            <span>ENSIndexer Status</span>
           </h2>
           <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
             <InlineSummary items={ensNodeDepsViewModel(data.deps)} />
