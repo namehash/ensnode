@@ -155,7 +155,7 @@ export function ensNodeEnvViewModel(env: EnsNode.Metadata["env"]) {
  * @returns An array of label-value pairs for ENSRainbow version info, or null if not available
  */
 export function ensRainbowViewModel(runtime: EnsNode.Metadata["runtime"]) {
-  //TODO: remove this once we deploy current ENSIndexer
+  //TODO: uncommenta nd fix this when current ENSIndexer is deployed
   // if (!runtime.ensRainbow) {
   //   return null;
   // }
