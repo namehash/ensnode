@@ -2,9 +2,11 @@
 
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
+import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { fromUnixTime, intlFormat } from "date-fns";
@@ -194,6 +196,8 @@ interface NetworkIndexingTimelineProps {
  */
 function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   const { indexingStatus } = props;
+  const searchParams = useSearchParams();
+  const currentEnsNodeUrl = selectedEnsNodeUrl(searchParams);
 
   if (indexingStatus.isLoading) {
     return <NetworkIndexingTimelineFallback />;
@@ -214,33 +218,65 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
 
   return (
     <section className="px-6">
-      <header className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold flex items-center gap-2">
-            <ENSIndexerIcon width={24} height={24} />
-            <span>ENSIndexer Status</span>
-          </h2>
-          <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
-            <InlineSummary items={ensNodeDepsViewModel(data.deps)} />
-          </ul>
+      <Card className="w-full mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ENSNodeIcon width={24} height={24} />
+            <span>ENSNode</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-3 text-sm text-muted-foreground">
+            <span className="font-semibold">Connection:</span> {currentEnsNodeUrl.toString()}
+          </div>
 
-          <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
-            <InlineSummary items={ensNodeEnvViewModel(data.env)} />
-          </ul>
+          <div className="space-y-6">
+            {/* ENSIndexer Section */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <ENSIndexerIcon width={24} height={24} />
+                  <span>ENSIndexer</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div>
+                    <ul className="text-sm text-muted-foreground flex gap-4">
+                      <InlineSummary items={ensNodeDepsViewModel(data.deps)} />
+                    </ul>
+                  </div>
 
-          {ensRainbowVersion && (
-            <div className="mt-4">
-              <h2 className="text-2xl font-semibold flex items-center gap-2">
-                <ENSRainbowIcon width={24} height={24} />
-                <span>ENSRainbow Status</span>
-              </h2>
-              <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
-                <InlineSummary items={ensRainbowVersion} />
-              </ul>
-            </div>
-          )}
-        </div>
-      </header>
+                  <div>
+                    <ul className="text-sm text-muted-foreground flex gap-4">
+                      <InlineSummary items={ensNodeEnvViewModel(data.env)} />
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* ENSRainbow Section - only show if available */}
+            {ensRainbowVersion && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <ENSRainbowIcon width={24} height={24} />
+                    <span>ENSRainbow</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <ul className="text-sm text-muted-foreground flex gap-4">
+                      <InlineSummary items={ensRainbowVersion} />
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <main className="grid gap-4">
         <IndexingTimeline
