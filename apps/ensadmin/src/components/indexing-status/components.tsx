@@ -219,14 +219,14 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   return (
     <section className="px-6">
       <Card className="w-full mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ENSNodeIcon width={24} height={24} />
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-2xl">
+            <ENSNodeIcon width={28} height={28} />
             <span>ENSNode</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-3 text-sm text-muted-foreground pl-8">
+          <div className="text-sm text-muted-foreground pl-9 mb-4">
             <span className="font-semibold">Connection:</span> {currentEnsNodeUrl.toString()}
           </div>
 
@@ -234,7 +234,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
             {/* ENSIndexer Section */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-xl">
                   <ENSIndexerIcon width={24} height={24} />
                   <span>ENSIndexer</span>
                 </CardTitle>
@@ -260,7 +260,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
             {ensRainbowVersion && (
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <ENSRainbowIcon width={24} height={24} />
                     <span>ENSRainbow</span>
                   </CardTitle>
