@@ -8,7 +8,7 @@ import {
 } from "@xyflow/react";
 import React, { type FC } from "react";
 
-const CustomEdge: FC<EdgeProps<Edge<{ startLabel: string; endLabel: string }>>> = ({
+const CustomEdge: FC<EdgeProps<Edge<{ startLabel: string; endLabel: string, offsetY: number, offsetX: number }>>> = ({
   id,
   sourceX,
   sourceY,
@@ -35,7 +35,7 @@ const CustomEdge: FC<EdgeProps<Edge<{ startLabel: string; endLabel: string }>>> 
         {!data ||
           (data.startLabel && (
             <EdgeLabel
-              transform={`translate(-50%, 20%) translate(${sourceX}px,${sourceY}px)`}
+              transform={`translate(-50%, 0%) translate(${sourceX+(data.offsetX || 0)}px,${sourceY+(data.offsetY || 0)}px)`}
               label={data.startLabel}
             />
           ))}

@@ -14,6 +14,7 @@ export const initialEdges: Edge[] = [
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    targetHandle: "StartInp"
   },
   {
     id: "Namehash->UniRes",
@@ -27,6 +28,7 @@ export const initialEdges: Edge[] = [
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    sourceHandle: "UniResOut"
   },
   {
     id: "UniRes->ENSReg",
@@ -63,6 +65,7 @@ export const initialEdges: Edge[] = [
     style: {
       stroke: "black",
     },
+    targetHandle: "RegRecInp"
   },
   {
     id: "OffDatLok->Finish",
@@ -71,11 +74,13 @@ export const initialEdges: Edge[] = [
     type: "start-end",
     data: {
       startLabel: "Resolved Address 0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1",
+      offsetY: -28,
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    sourceHandle: "FinishOut"
   },
   {
     id: "ResolverL1->OffDatLok",
@@ -84,11 +89,14 @@ export const initialEdges: Edge[] = [
     type: "start-end",
     data: {
       startLabel: "Revert OffchainLookup",
+      offsetY: -35,
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    sourceHandle: "OffDatLokOut1",
+    targetHandle: "ResolverL1Inp1"
   },
   {
     id: "ResolverL1->OffDatLok(2)",
@@ -97,11 +105,14 @@ export const initialEdges: Edge[] = [
     type: "start-end",
     data: {
       startLabel: "Return Data",
+      offsetY: -35,
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    sourceHandle: "OffDatLokOut2",
+    targetHandle: "ResolverL1Inp2"
   },
   {
     id: "OffDatLok->ResolverL1",
@@ -110,11 +121,14 @@ export const initialEdges: Edge[] = [
     type: "start-end",
     data: {
       startLabel: "Verify Offchain Data",
+      offsetY: 35,
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    targetHandle: "OffDatLokInp",
+    sourceHandle: "ResolverL1Out"
   },
   {
     id: "OffDatLok->CCIPRead",
@@ -123,11 +137,14 @@ export const initialEdges: Edge[] = [
     type: "start-end",
     data: {
       startLabel: "Ask Offchain Gateway",
+      offsetY: 35,
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    targetHandle: "OffDatLokInp",
+    sourceHandle: "CCIPReadOut"
   },
   {
     id: "CCIPRead->OffDatLok",
@@ -141,6 +158,8 @@ export const initialEdges: Edge[] = [
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    sourceHandle: "OffDatLokOut",
+    targetHandle: "CCIPReadInp"
   },
   {
     id: "CCIPRead->ResolverL2",
@@ -149,11 +168,14 @@ export const initialEdges: Edge[] = [
     type: "start-end",
     data: {
       startLabel: "Resolve Address (node)",
+      offsetY: 8,
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    sourceHandle: "ResolverL2Out",
+    targetHandle: "CCIPReadInp"
   },
   {
     id: "ResolverL2->CCIPRead",
@@ -162,10 +184,14 @@ export const initialEdges: Edge[] = [
     type: "start-end",
     data: {
       startLabel: "Resolved Address 0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1",
+      offsetY: -10,
+      offsetX: 0,
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: "black",
     },
+    targetHandle: "ResolverL2Inp",
+    sourceHandle: "CCIPReadOut"
   },
 ];

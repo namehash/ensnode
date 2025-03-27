@@ -12,20 +12,24 @@ import CustomEdgeStartEnd from "@/app/react-flow/custom-components/CustomEdgeSta
 import { LabeledGroupNode } from "@/app/react-flow/custom-components/LabeledGroupNode";
 import { initialEdges } from "@/app/react-flow/schema-elements/edges";
 import { initialNodes } from "@/app/react-flow/schema-elements/nodes";
-import { AnimatedSVGEdge } from "./AnimatedSVGEdge";
+import { AnimatedSVGEdge } from "./custom-components/AnimatedSVGEdge";
+import MultipleHandlesNode from "@/app/react-flow/custom-components/MultipleHandlesNode";
+import ParallelogramNode from "@/app/react-flow/custom-components/ParallelogramNode";
+
+const edgeTypes = {
+  animatedSvg: AnimatedSVGEdge,
+  "start-end": CustomEdgeStartEnd,
+};
+
+const nodeTypes = {
+  labeledGroupNode: LabeledGroupNode,
+  multipleHandlesNode: MultipleHandlesNode,
+  parallelogramNode: ParallelogramNode,
+};
 
 export default function ReactFlowClient() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-  const edgeTypes = {
-    animatedSvg: AnimatedSVGEdge,
-    "start-end": CustomEdgeStartEnd,
-  };
-
-  const nodeTypes = {
-    labeledGroupNode: LabeledGroupNode,
-  };
 
   return (
     <ReactFlow
@@ -37,6 +41,10 @@ export default function ReactFlowClient() {
       onEdgesChange={onEdgesChange}
       fitView
       style={{ backgroundColor: "#F7F9FB" }}
+      proOptions={{
+        account: 'paid-pro',
+        hideAttribution: true,
+      }}
     >
       <Controls />
       <MiniMap />
