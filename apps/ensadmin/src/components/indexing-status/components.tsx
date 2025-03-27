@@ -226,7 +226,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-3 text-sm text-muted-foreground">
+          <div className="mb-3 text-sm text-muted-foreground pl-8">
             <span className="font-semibold">Connection:</span> {currentEnsNodeUrl.toString()}
           </div>
 
@@ -240,7 +240,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <div className="space-y-2 pl-8">
                   <div>
                     <ul className="text-sm text-muted-foreground flex gap-4">
                       <InlineSummary items={ensNodeDepsViewModel(data.deps)} />
@@ -266,7 +266,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div>
+                  <div className="pl-8">
                     <ul className="text-sm text-muted-foreground flex gap-4">
                       <InlineSummary items={ensRainbowVersion} />
                     </ul>
