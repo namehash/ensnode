@@ -10,11 +10,11 @@ import React from "react";
 import "@xyflow/react/dist/style.css";
 import CustomEdgeStartEnd from "@/app/react-flow/custom-components/CustomEdgeStartEnd";
 import { LabeledGroupNode } from "@/app/react-flow/custom-components/LabeledGroupNode";
+import MultipleHandlesNode from "@/app/react-flow/custom-components/MultipleHandlesNode";
+import ParallelogramNode from "@/app/react-flow/custom-components/ParallelogramNode";
 import { initialEdges } from "@/app/react-flow/schema-elements/edges";
 import { initialNodes } from "@/app/react-flow/schema-elements/nodes";
 import { AnimatedSVGEdge } from "./custom-components/AnimatedSVGEdge";
-import MultipleHandlesNode from "@/app/react-flow/custom-components/MultipleHandlesNode";
-import ParallelogramNode from "@/app/react-flow/custom-components/ParallelogramNode";
 
 const edgeTypes = {
   animatedSvg: AnimatedSVGEdge,
@@ -42,7 +42,7 @@ export default function ReactFlowClient() {
       fitView
       style={{ backgroundColor: "#F7F9FB" }}
       proOptions={{
-        account: 'paid-pro',
+        account: "paid-pro",
         hideAttribution: true,
       }}
     >

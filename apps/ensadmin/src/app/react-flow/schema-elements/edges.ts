@@ -14,7 +14,7 @@ export const initialEdges: Edge[] = [
       type: MarkerType.ArrowClosed,
       color: "black",
     },
-    targetHandle: "StartInp"
+    targetHandle: "StartInp",
   },
   {
     id: "Namehash->UniRes",
@@ -28,7 +28,7 @@ export const initialEdges: Edge[] = [
       type: MarkerType.ArrowClosed,
       color: "black",
     },
-    sourceHandle: "UniResOut"
+    sourceHandle: "UniResOut",
   },
   {
     id: "UniRes->ENSReg",
@@ -65,7 +65,7 @@ export const initialEdges: Edge[] = [
     style: {
       stroke: "black",
     },
-    targetHandle: "RegRecInp"
+    targetHandle: "RegRecInp",
   },
   {
     id: "OffDatLok->Finish",
@@ -80,7 +80,7 @@ export const initialEdges: Edge[] = [
       type: MarkerType.ArrowClosed,
       color: "black",
     },
-    sourceHandle: "FinishOut"
+    sourceHandle: "FinishOut",
   },
   {
     id: "ResolverL1->OffDatLok",
@@ -96,7 +96,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     sourceHandle: "OffDatLokOut1",
-    targetHandle: "ResolverL1Inp1"
+    targetHandle: "ResolverL1Inp1",
   },
   {
     id: "ResolverL1->OffDatLok(2)",
@@ -112,7 +112,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     sourceHandle: "OffDatLokOut2",
-    targetHandle: "ResolverL1Inp2"
+    targetHandle: "ResolverL1Inp2",
   },
   {
     id: "OffDatLok->ResolverL1",
@@ -128,7 +128,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     targetHandle: "OffDatLokInp",
-    sourceHandle: "ResolverL1Out"
+    sourceHandle: "ResolverL1Out",
   },
   {
     id: "OffDatLok->CCIPRead",
@@ -144,7 +144,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     targetHandle: "OffDatLokInp",
-    sourceHandle: "CCIPReadOut"
+    sourceHandle: "CCIPReadOut",
   },
   {
     id: "CCIPRead->OffDatLok",
@@ -159,7 +159,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     sourceHandle: "OffDatLokOut",
-    targetHandle: "CCIPReadInp"
+    targetHandle: "CCIPReadInp",
   },
   {
     id: "CCIPRead->ResolverL2",
@@ -175,7 +175,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     sourceHandle: "ResolverL2Out",
-    targetHandle: "CCIPReadInp"
+    targetHandle: "CCIPReadInp",
   },
   {
     id: "ResolverL2->CCIPRead",
@@ -192,6 +192,6 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     targetHandle: "ResolverL2Inp",
-    sourceHandle: "CCIPReadOut"
+    sourceHandle: "CCIPReadOut",
   },
 ];
