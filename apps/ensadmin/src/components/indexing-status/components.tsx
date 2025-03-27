@@ -2,6 +2,7 @@
 
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
+import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ import {
   NetworkStatusViewModel,
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
+  ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
 
@@ -208,6 +210,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   }
 
   const { data } = indexingStatus;
+  const ensRainbowVersion = ensRainbowViewModel(data.runtime);
 
   return (
     <section className="px-6">
@@ -224,6 +227,18 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
           <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
             <InlineSummary items={ensNodeEnvViewModel(data.env)} />
           </ul>
+
+          {ensRainbowVersion && (
+            <div className="mt-4">
+              <h2 className="text-2xl font-semibold flex items-center gap-2">
+                <ENSRainbowIcon width={24} height={24} />
+                <span>ENSRainbow Status</span>
+              </h2>
+              <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
+                <InlineSummary items={ensRainbowVersion} />
+              </ul>
+            </div>
+          )}
         </div>
       </header>
 
