@@ -11,6 +11,10 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "prettier": false,
+  "privatePackages": {
+    "version": true,
+    "tag": true 
+  },
   "ignore": [
     "@docs/ensnode",
     "@docs/ensrainbow"

@@ -24,8 +24,7 @@ jobs:
         id: meta
         run: |
           # Set default tag as latest
-          DOCKER_TAG="dev"
-          
+          DOCKER_TAG="latest"
           # If this is a tag push, use the tag name instead
           if [[ $GITHUB_REF == refs/tags/@ensnode/ensindexer@* ]]; then
             DOCKER_TAG=${GITHUB_REF#refs/tags/@ensnode/ensindexer@}
