@@ -2,8 +2,24 @@ import { SVGProps } from "react";
 
 export function ENSNodeIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <rect x="1" y="1" width="26" height="26" rx="3" fill="#528BFF" stroke="black" strokeWidth="2" />
+    <svg
+      width="28"
+      height="28"
+      viewBox="0 0 28 28"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect
+        x="1"
+        y="1"
+        width="26"
+        height="26"
+        rx="3"
+        fill="#528BFF"
+        stroke="black"
+        strokeWidth="2"
+      />
       <path
         d="M8.11704 12.4324C8.29929 12.8207 8.75095 13.5893 8.75095 13.5893L13.941 5.00781L8.8698 8.54183C8.5687 8.73992 8.32306 9.01726 8.14874 9.33421C7.68123 10.3088 7.67331 11.4419 8.11704 12.4324Z"
         fill="url(#paint0_linear_ensnode)"
@@ -48,4 +64,4 @@ export function ENSNodeIcon(props: SVGProps<SVGSVGElement>) {
       </defs>
     </svg>
   );
-} 
+}
