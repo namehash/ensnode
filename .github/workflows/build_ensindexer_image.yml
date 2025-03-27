@@ -34,7 +34,6 @@ jobs:
           echo "tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and push ENSIndexer Docker image
-        if: steps.publish-meta.outputs.ensindexer_version != ''
         uses: ./.github/actions/build_docker_image
         with:
           image_name:  ghcr.io/${{ github.repository }}/ensindexer:${{ env.tag }}  
