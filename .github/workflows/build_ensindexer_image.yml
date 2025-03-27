@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/445-add-versioning-for-ensnode-2
     tags:
       - '@ensnode/ensindexer*'
 
@@ -28,7 +27,7 @@ jobs:
           DOCKER_TAG="dev"
           
           # If this is a tag push, use the tag name instead
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
+          if [[ $GITHUB_REF == refs/tags/@ensnode/ensindexer@* ]]; then
             DOCKER_TAG=${GITHUB_REF#refs/tags/@ensnode/ensindexer@}
           fi
           echo "tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
