@@ -15,7 +15,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     targetHandle: "StartInp",
-    animated: true
+    animated: true,
   },
   {
     id: "Namehash->UniRes",
@@ -30,7 +30,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     sourceHandle: "UniResOut",
-    animated: true
+    animated: true,
   },
   {
     id: "UniRes->ENSReg",
@@ -43,7 +43,7 @@ export const initialEdges: Edge[] = [
     style: {
       stroke: "black",
     },
-    animated: true
+    animated: true,
   },
   {
     id: "ENSReg->RegRec",
@@ -56,7 +56,7 @@ export const initialEdges: Edge[] = [
     style: {
       stroke: "black",
     },
-    animated: true
+    animated: true,
   },
   {
     id: "RegRec->ResolverL1",
@@ -70,7 +70,7 @@ export const initialEdges: Edge[] = [
       stroke: "black",
     },
     targetHandle: "RegRecInp",
-    animated: true
+    animated: true,
   },
   {
     id: "OffDatLok->Finish",
@@ -86,7 +86,7 @@ export const initialEdges: Edge[] = [
       color: "black",
     },
     sourceHandle: "FinishOut",
-    animated: true
+    animated: true,
   },
   {
     id: "ResolverL1->OffDatLok",
@@ -103,7 +103,7 @@ export const initialEdges: Edge[] = [
     },
     sourceHandle: "OffDatLokOut1",
     targetHandle: "ResolverL1Inp1",
-    animated: true
+    animated: true,
   },
   {
     id: "ResolverL1->OffDatLok(2)",
@@ -120,7 +120,7 @@ export const initialEdges: Edge[] = [
     },
     sourceHandle: "OffDatLokOut2",
     targetHandle: "ResolverL1Inp2",
-    animated: true
+    animated: true,
   },
   {
     id: "OffDatLok->ResolverL1",
@@ -137,7 +137,7 @@ export const initialEdges: Edge[] = [
     },
     targetHandle: "OffDatLokInp",
     sourceHandle: "ResolverL1Out",
-    animated: true
+    animated: true,
   },
   {
     id: "OffDatLok->CCIPRead",
@@ -154,7 +154,7 @@ export const initialEdges: Edge[] = [
     },
     targetHandle: "OffDatLokInp",
     sourceHandle: "CCIPReadOut",
-    animated: true
+    animated: true,
   },
   {
     id: "CCIPRead->OffDatLok",
@@ -171,7 +171,7 @@ export const initialEdges: Edge[] = [
     },
     sourceHandle: "OffDatLokOut",
     targetHandle: "CCIPReadInp",
-    animated: true
+    animated: true,
   },
   {
     id: "CCIPRead->ResolverL2",
@@ -188,7 +188,7 @@ export const initialEdges: Edge[] = [
     },
     sourceHandle: "ResolverL2Out",
     targetHandle: "CCIPReadInp",
-    animated: true
+    animated: true,
   },
   {
     id: "ResolverL2->CCIPRead",
@@ -206,6 +206,6 @@ export const initialEdges: Edge[] = [
     },
     targetHandle: "ResolverL2Inp",
     sourceHandle: "CCIPReadOut",
-    animated: true
+    animated: true,
   },
 ];

@@ -33,7 +33,7 @@ export const ENSAppNodes: Node[] = [
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: "#C2D6FF"
+      backgroundColor: "#C2D6FF",
     },
     type: "input",
     parentId: "ENSApp",
@@ -50,7 +50,7 @@ export const ENSAppNodes: Node[] = [
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: "#C2D6FF"
+      backgroundColor: "#C2D6FF",
     },
     type: "output",
     targetPosition: Position.Bottom,
@@ -78,7 +78,7 @@ export const ENSClientNodes: Node[] = [
         { x: 26, y: -5, position: Position.Top, id: "StartInp", type: "target" },
         { x: 45, y: 35, position: Position.Bottom, id: "UniResOut", type: "source" },
       ],
-      style: "bg-[#C2D6FF]"
+      style: "bg-[#C2D6FF]",
     },
     position: { x: 80, y: 20 },
     style: {
@@ -130,7 +130,7 @@ export const EthereumMainnetL1Nodes: Node[] = [
     position: { x: 80, y: 35 },
     style: {
       width: 80,
-      backgroundColor: "#C2D6FF"
+      backgroundColor: "#C2D6FF",
     },
     parentId: "EthereumMainnetL1",
     extent: "parent",
@@ -141,7 +141,7 @@ export const EthereumMainnetL1Nodes: Node[] = [
     position: { x: 80, y: 120 },
     style: {
       width: 80,
-      backgroundColor: "#C2D6FF"
+      backgroundColor: "#C2D6FF",
     },
     parentId: "EthereumMainnetL1",
     extent: "parent",
@@ -152,7 +152,7 @@ export const EthereumMainnetL1Nodes: Node[] = [
     position: { x: 80, y: 210 },
     style: {
       width: 80,
-      backgroundColor: "#C2D6FF"
+      backgroundColor: "#C2D6FF",
     },
     parentId: "EthereumMainnetL1",
     extent: "parent",

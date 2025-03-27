@@ -1,4 +1,8 @@
-export default function EdgeLabel({ transform, label, bgColor="#F7F9FB" }: { transform: string; label: string, bgColor?: string }) {
+export default function EdgeLabel({
+  transform,
+  label,
+  bgColor = "#F7F9FB",
+}: { transform: string; label: string; bgColor?: string }) {
   return (
     <div
       style={{
@@ -8,7 +12,7 @@ export default function EdgeLabel({ transform, label, bgColor="#F7F9FB" }: { tra
         color: "black",
         fontSize: 8,
         fontWeight: 500,
-          zIndex: 10,
+        zIndex: 10,
         transform,
       }}
       className="nodrag nopan"

@@ -9,7 +9,15 @@ import {
 import React, { type FC } from "react";
 
 const CustomEdge: FC<
-  EdgeProps<Edge<{ startLabel: string; endLabel: string; offsetY: number; offsetX: number, bgColor: string }>>
+  EdgeProps<
+    Edge<{
+      startLabel: string;
+      endLabel: string;
+      offsetY: number;
+      offsetX: number;
+      bgColor: string;
+    }>
+  >
 > = ({
   id,
   sourceX,
@@ -32,7 +40,12 @@ const CustomEdge: FC<
 
   return (
     <>
-      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={{ stroke: "black", zIndex: 10 }} />
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={{ stroke: "black", zIndex: 10 }}
+      />
       <EdgeLabelRenderer>
         {!data ||
           (data.startLabel && (
