@@ -16,7 +16,7 @@ const navItems = [
   },
   {
     title: "ENS Protocol Inspector",
-    url: "/react-flow",
+    url: "/inspector",
     icon: PackageSearch,
   },
   {

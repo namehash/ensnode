@@ -13,7 +13,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 
-export default function ActionsReactFlow() {
+export default function ActionsInspector() {
   const router = useRouter();
   const searchParams = useSearchParams();
 

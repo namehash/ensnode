@@ -33,6 +33,7 @@ export const ENSAppNodes: Node[] = [
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: "#C2D6FF"
     },
     type: "input",
     parentId: "ENSApp",
@@ -49,6 +50,7 @@ export const ENSAppNodes: Node[] = [
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: "#C2D6FF"
     },
     type: "output",
     targetPosition: Position.Bottom,
@@ -76,6 +78,7 @@ export const ENSClientNodes: Node[] = [
         { x: 26, y: -5, position: Position.Top, id: "StartInp", type: "target" },
         { x: 45, y: 35, position: Position.Bottom, id: "UniResOut", type: "source" },
       ],
+      style: "bg-[#C2D6FF]"
     },
     position: { x: 80, y: 20 },
     style: {
@@ -98,7 +101,7 @@ export const ENSClientNodes: Node[] = [
         { x: 220, y: 0, position: Position.Bottom, id: "ResolverL1Out", type: "source" },
         { x: 260, y: 0, position: Position.Top, id: "FinishOut", type: "source" },
       ],
-      style: "h-[40px]",
+      style: "h-[40px] bg-[#C2D6FF]",
     },
     position: { x: 180, y: 20 },
     style: {
@@ -127,6 +130,7 @@ export const EthereumMainnetL1Nodes: Node[] = [
     position: { x: 80, y: 35 },
     style: {
       width: 80,
+      backgroundColor: "#C2D6FF"
     },
     parentId: "EthereumMainnetL1",
     extent: "parent",
@@ -137,6 +141,7 @@ export const EthereumMainnetL1Nodes: Node[] = [
     position: { x: 80, y: 120 },
     style: {
       width: 80,
+      backgroundColor: "#C2D6FF"
     },
     parentId: "EthereumMainnetL1",
     extent: "parent",
@@ -147,6 +152,7 @@ export const EthereumMainnetL1Nodes: Node[] = [
     position: { x: 80, y: 210 },
     style: {
       width: 80,
+      backgroundColor: "#C2D6FF"
     },
     parentId: "EthereumMainnetL1",
     extent: "parent",
@@ -161,7 +167,7 @@ export const EthereumMainnetL1Nodes: Node[] = [
         { x: 140, y: 0, position: Position.Top, id: "OffDatLokOut1", type: "source" },
         { x: 360, y: 0, position: Position.Top, id: "OffDatLokOut2", type: "source" },
       ],
-      style: "items-start pl-[16px]",
+      style: "items-start pl-[16px] bg-[#C2D6FF]",
     },
     position: { x: 80, y: 290 },
     style: {
@@ -194,6 +200,7 @@ export const OffchainNodes: Node[] = [
         { x: 210, y: 0, position: Position.Top, id: "OffDatLokOut", type: "source" },
         { x: 40, y: 0, position: Position.Bottom, id: "ResolverL2Out", type: "source" },
       ],
+      style: "bg-[#C2D6FF]",
     },
     type: "multipleHandlesNode",
     position: { x: 150, y: 20 },
@@ -224,6 +231,7 @@ export const BaseL2Nodes: Node[] = [
         { x: 40, y: 0, position: Position.Top, id: "CCIPReadInp", type: "target" },
         { x: 210, y: 0, position: Position.Top, id: "CCIPReadOut", type: "source" },
       ],
+      style: "bg-[#C2D6FF]",
     },
     position: { x: 150, y: 20 },
     style: {

@@ -1,4 +1,4 @@
-import EdgeLabel from "@/app/react-flow/custom-components/EdgeLabel";
+import EdgeLabel from "@/app/inspector/custom-components/EdgeLabel";
 import {
   BaseEdge,
   type Edge,
@@ -9,7 +9,7 @@ import {
 import React, { type FC } from "react";
 
 const CustomEdge: FC<
-  EdgeProps<Edge<{ startLabel: string; endLabel: string; offsetY: number; offsetX: number }>>
+  EdgeProps<Edge<{ startLabel: string; endLabel: string; offsetY: number; offsetX: number, bgColor: string }>>
 > = ({
   id,
   sourceX,
@@ -32,13 +32,14 @@ const CustomEdge: FC<
 
   return (
     <>
-      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={{ stroke: "black" }} />
+      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={{ stroke: "black", zIndex: 10 }} />
       <EdgeLabelRenderer>
         {!data ||
           (data.startLabel && (
             <EdgeLabel
               transform={`translate(-50%, 0%) translate(${sourceX + (data.offsetX || 0)}px,${sourceY + (data.offsetY || 0)}px)`}
               label={data.startLabel}
+              bgColor={data.bgColor}
             />
           ))}
         {!data ||
@@ -46,6 +47,7 @@ const CustomEdge: FC<
             <EdgeLabel
               transform={`translate(-50%, -100%) translate(${targetX}px,${targetY}px)`}
               label={data.endLabel}
+              bgColor={data.bgColor}
             />
           ))}
       </EdgeLabelRenderer>

@@ -8,12 +8,12 @@ import {
 } from "@xyflow/react";
 import React from "react";
 import "@xyflow/react/dist/style.css";
-import CustomEdgeStartEnd from "@/app/react-flow/custom-components/CustomEdgeStartEnd";
-import { LabeledGroupNode } from "@/app/react-flow/custom-components/LabeledGroupNode";
-import MultipleHandlesNode from "@/app/react-flow/custom-components/MultipleHandlesNode";
-import ParallelogramNode from "@/app/react-flow/custom-components/ParallelogramNode";
-import { initialEdges } from "@/app/react-flow/schema-elements/edges";
-import { initialNodes } from "@/app/react-flow/schema-elements/nodes";
+import CustomEdgeStartEnd from "@/app/inspector/custom-components/CustomEdgeStartEnd";
+import { LabeledGroupNode } from "@/app/inspector/custom-components/LabeledGroupNode";
+import MultipleHandlesNode from "@/app/inspector/custom-components/MultipleHandlesNode";
+import ParallelogramNode from "@/app/inspector/custom-components/ParallelogramNode";
+import { initialEdges } from "@/app/inspector/schema-elements/edges";
+import { initialNodes } from "@/app/inspector/schema-elements/nodes";
 import { AnimatedSVGEdge } from "./custom-components/AnimatedSVGEdge";
 
 const edgeTypes = {
