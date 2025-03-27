@@ -40,39 +40,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Parse publish results
-        id: publish-meta
-        if: steps.changesets.outputs.published == 'true'
-        env:
-          PUBLISHED_PACKAGES: steps.changesets.outputs.publishedPackages 
-        run: |  
-
-            # Iterate through each item in the JSON array
-            echo "$PUBLISHED_PACKAGES" | jq -c '.[]' | while read -r item; do
-              # Extract name and version using jq
-              name=$(echo "$item" | jq -r '.name')
-              version=$(echo "$item" | jq -r '.version')
-
-              echo "Processing package: $name"
-              echo "Version: $version"
-              
-              case "$name" in
-                  '@ensnode/ensindexer')
-                      echo "ensindexer_version=$version" >> $GITHUB_OUTPUT
-                      ;;
-                  *)
-                      echo "Skipping: $name"
-                      ;;
-              esac
-            done
-          
-      - name: Build ENSIndexer Docker image
-        if: steps.publish-meta.outputs.ensindexer_version != ''
-        uses: ./.github/actions/build_docker_image
-        with:
-          image_name:  ghcr.io/${{ github.repository }}/ensindexer:${{ steps.publish-meta.outputs.ensindexer_version }}  
-          dockerfile_path: apps/ensindexer/Dockerfile
-          registry_user: ${{ github.actor }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }} 
-          

@@ -1,5 +1,6 @@
 "use client";
 
+import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -212,7 +213,10 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
     <section className="px-6">
       <header className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-semibold">ENSIndexer Status</h2>
+          <h2 className="text-2xl font-semibold flex items-center gap-2">
+            <ENSIndexerIcon width={24} height={24} />
+            <span>ENSIndexer Status</span>
+          </h2>
           <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
             <InlineSummary items={ensNodeDepsViewModel(data.deps)} />
           </ul>

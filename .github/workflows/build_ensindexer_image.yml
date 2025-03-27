@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - v*
+      - '@ensnode/ensindexer*'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -19,29 +19,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
-      - name: Set up QEMU (for cross-architecture builds)
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
     
       - name: Extract metadata for Docker
         id: meta
         run: |
           # Set default tag as latest
-          DOCKER_TAG="latest"
+          DOCKER_TAG="dev"
           
           # If this is a tag push, use the tag name instead
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            DOCKER_TAG=${GITHUB_REF#refs/tags/}
+          if [[ $GITHUB_REF == refs/tags/@ensnode/ensindexer@* ]]; then
+            DOCKER_TAG=${GITHUB_REF#refs/tags/@ensnode/ensindexer@}
           fi
           echo "tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
-      - name: Build & Push Docker image for the ENSIndexer app
+      - name: Build and push ENSIndexer Docker image
+        uses: ./.github/actions/build_docker_image
         env:
-          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensindexer
           TAG: ${{ steps.meta.outputs.tag }}
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker buildx build --push --platform linux/amd64,linux/arm64 -f apps/ensindexer/Dockerfile -t $IMAGE_NAME:$TAG  .
+        with:
+          image_name:  ghcr.io/${{ github.repository }}/ensindexer:${{ env.TAG }}
+          dockerfile_path: apps/ensindexer/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }} 
