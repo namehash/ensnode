@@ -15,7 +15,7 @@ const navItems = [
     icon: Activity,
   },
   {
-    title: "ENS Protocol Inspector",
+    title: "Protocol Inspector",
     url: "/inspector",
     icon: PackageSearch,
   },
