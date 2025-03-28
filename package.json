@@ -7,7 +7,7 @@
     "lint": "pnpm -r lint",
     "lint:ci": "pnpm -r lint:ci",
     "changeset": "changeset",
-    "release": "changeset publish",
+    "release": "changeset publish --filter='!@ensnode/shared-configs'",
     "version": "changeset version",
     "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish",
     "docker:build:ensnode": "pnpm run docker:build:ensindexer && pnpm run docker:build:ensrainbow && pnpm run docker:build:ensadmin",

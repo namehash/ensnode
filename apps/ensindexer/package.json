@@ -1,5 +1,5 @@
 {
-  "name": "@ensnode/ensindexer",
+  "name": "ensindexer",
   "version": "0.0.3",
   "private": true,
   "type": "module",
