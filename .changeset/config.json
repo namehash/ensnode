@@ -5,7 +5,7 @@
     { "repo": "namehash/ensnode" }
   ],
   "commit": false,
-  "fixed": [["*"]],
+  "fixed": [["ensadmin", "ensindexer", "ensrainbow"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
@@ -17,7 +17,6 @@
   },
   "ignore": [
     "@docs/ensnode",
-    "@docs/ensrainbow",
-    "@ensnode/shared-configs"
+    "@docs/ensrainbow"
   ]
 }
