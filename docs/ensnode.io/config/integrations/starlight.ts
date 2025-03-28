@@ -21,12 +21,16 @@ export function starlight(): AstroIntegration {
                   link: "/ensnode",
                 },
                 {
+                  label: "What is the ENS Subgraph?",
+                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                },
+                {
                   label: "What is ENSNode?",
                   link: "/ensnode/concepts/what-is-ensnode",
                 },
                 {
-                  label: "What is ENS Subgraph?",
-                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                  label: "ENSNode Roadmap",
+                  link: "/ensnode/concepts/roadmap",
                 },
               ],
             },
