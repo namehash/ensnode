@@ -76,7 +76,7 @@ Follow instructions in the [ENSIndexer Contribution Guide](/ensindexer/contribut
 
 ```bash
 # from monorepo root
-pnpm run -F @ensnode/ensindexer dev
+pnpm run -F ensindexer dev
 
 # or from apps/ensindexer
 pnpm run dev
@@ -91,7 +91,7 @@ cp .env.local.example .env.local
 
 ```bash
 # from monorepo root
-pnpm run -F @ensnode/ensadmin dev
+pnpm run -F ensadmin dev
 
 # or from apps/ensadmin
 pnpm run dev
@@ -127,7 +127,7 @@ If you make changes in the application code and wish to run those updates, you m
 Run the built images with:
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 - **ENSIndexer**: Available at [http://localhost:42069](http://localhost:42069)

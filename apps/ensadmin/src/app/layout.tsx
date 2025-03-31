@@ -10,16 +10,45 @@ import { Provider as QueryProvider } from "@/components/query-client/provider";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { ensAdminPublicUrl } from "@/lib/env";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "ENSAdmin",
-  description: "Control ENSNode via ENSAdmin Dashboard Interface",
-};
+const siteName = "ENSAdmin";
+const title = "ENSAdmin";
+const description = "Explore the ENS Protocol like never before";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: title,
+    description: description,
+    metadataBase: ensAdminPublicUrl(),
+    openGraph: {
+      title: {
+        template: `${siteName} - %s`,
+        default: title,
+      },
+      description: description,
+      url: "/",
+      type: "website",
+      siteName: siteName,
+      images: ["/opengraph-image.png"],
+    },
+    twitter: {
+      title: {
+        template: `${siteName} - %s`,
+        default: title,
+      },
+      card: "summary_large_image",
+      site: "@NamehashLabs",
+      creator: "@NamehashLabs",
+      images: ["/twitter-image.png"],
+    },
+  };
+}
 
 export default function Layout({
   children,

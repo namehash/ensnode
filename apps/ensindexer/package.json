@@ -1,6 +1,6 @@
 {
-  "name": "@ensnode/ensindexer",
-  "version": "0.0.1",
+  "name": "ensindexer",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",

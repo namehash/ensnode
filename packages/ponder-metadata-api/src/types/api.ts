@@ -1,3 +1,4 @@
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 import type { BlockInfo } from "./common";
@@ -20,6 +21,9 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
 
     /** Fetches the first block do be indexed for a requested chain ID */
     firstBlockToIndexByChainId(chainId: number, publicClient: PublicClient): Promise<BlockInfo>;
+
+    /** Fetches ENSRainbow version information */
+    ensRainbowVersion?(): Promise<EnsRainbow.VersionInfo>;
   };
 
   /** Public clients for each blockchain network fetching data */

@@ -1,6 +1,7 @@
 import type { Event } from "ponder:registry";
 import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
+import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
@@ -146,6 +147,33 @@ export const parseEnsRainbowEndpointUrl = (rawValue?: string): string => {
   } catch (e) {
     throw new Error(`'${rawValue}' is not a valid URL`);
   }
+};
+
+/**
+ * Creates a function that fetches ENSRainbow version information.
+ *
+ * @returns A function that fetches ENSRainbow version information
+ */
+export const createEnsRainbowVersionFetcher = () => {
+  const client = new EnsRainbowApiClient({
+    endpointUrl: new URL(ensRainbowEndpointUrl()),
+  });
+
+  return async () => {
+    try {
+      const versionResponse = await client.version();
+      return {
+        version: versionResponse.versionInfo.version,
+        schema_version: versionResponse.versionInfo.schema_version,
+      };
+    } catch (error) {
+      console.error("Failed to fetch ENSRainbow version", error);
+      return {
+        version: "unknown",
+        schema_version: 0,
+      };
+    }
+  };
 };
 
 type AnyObject = { [key: string]: any };
@@ -350,9 +378,16 @@ export function createFirstBlockToIndexByChainIdFetcher(
     const startBlockNumberForChainId = startBlockNumbers[chainId];
 
     // each chain should have a start block number
-    if (!startBlockNumberForChainId) {
+    if (typeof startBlockNumberForChainId !== "number") {
       // throw an error if the start block number is not found for the chain ID
       throw new Error(`No start block number found for chain ID ${chainId}`);
+    }
+
+    if (startBlockNumberForChainId < 0) {
+      // throw an error if the start block number is invalid block number
+      throw new Error(
+        `Start block number "${startBlockNumberForChainId}" for chain ID ${chainId} must be a non-negative integer`,
+      );
     }
 
     const block = await publicClient.getBlock({
@@ -451,13 +486,7 @@ export async function createStartBlockByChainIdMap(
     for (const contractNetworkConfig of Object.entries(contractConfig.network)) {
       // map string to number
       const chainId = Number(contractNetworkConfig[0]);
-      const startBlock = contractNetworkConfig[1].startBlock;
-
-      // fail if no start block number found for the chain ID
-      // (we don't want to index any contract from the genesis block)
-      if (!startBlock) {
-        throw new Error(`No start block number found for chain ID ${chainId}`);
-      }
+      const startBlock = contractNetworkConfig[1].startBlock || 0;
 
       // update the start block number for the chain ID if it's lower than the current one
       if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {
