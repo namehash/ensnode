@@ -1,9 +1,7 @@
-import {Button, Link} from "@namehash/namekit-react";
-import VideoBackground from "@workspace/docs/ensnode.io/src/components/molecules/VideoBackground.tsx";
 import {GithubIcon} from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
 import ensnode_with_name from "../../assets/dark-logo.svg";
 import HeroImage from "@workspace/docs/ensnode.io/src/components/molecules/HeroImage.tsx";
-import {ENSAdminLogo} from "@workspace/docs/ensnode.io/src/components/atoms/ENSAdminLogo.tsx";
+import {ENSAdminLogoDark} from "@workspace/docs/ensnode.io/src/components/atoms/ENSAdminLogoDark.tsx";
 
 // gray NameGuard-like dots in the bg -> bg-center bg-[radial-gradient(#DEDEDEB2_1px,transparent_1px)] [background-size:24px_24px]
 
@@ -12,7 +10,7 @@ export default function Hero() {
         <section
             className="box-border not-content h-screen w-screen flex flex-col flex-nowrap justify-end sm:justify-center items-center gap-8 sm:gap-4 px-5 sm:px-0 sm:pt-[72px] super_wide_hero:pt-0 pb-5 bg-video_bg_sm sm:bg-video_bg">
             <div
-                className="absolute top-0 box-border flex flex-row flex-nowrap justify-center items-center w-full px-5 sm:px-10 py-3 z-10">
+                className="absolute top-0 box-border flex flex-row flex-nowrap justify-center items-center w-full px-5 sm:px-16 py-3 z-10">
                 <div className="w-full max-w-7xl items-center justify-between flex flex-row">
                     <a href="/">
                         <img
@@ -41,7 +39,7 @@ export default function Hero() {
                             className="no-underline hover:no-underline"
                         >
                             <button
-                                className="transition-all duration-200 hover:shadow-hero_button_shd flex flex-row flex-nowrap justify-center items-center gap-2 text-white border-2 border-white rounded-lg px-4 py-2">
+                                className="transition-all duration-200 bg-white bg-opacity-10 hover:bg-opacity-20 flex flex-row flex-nowrap justify-center items-center gap-2 text-white rounded-lg px-4 py-2">
                                 Docs
                             </button>
                         </a>
@@ -52,7 +50,7 @@ export default function Hero() {
                             className="no-underline hover:no-underline"
                         >
                             <button
-                                className="transition-all duration-200 hover:shadow-hero_button_shd flex flex-row flex-nowrap justify-center items-center gap-2 text-white border-2 border-white rounded-lg px-4 py-2">
+                                className="transition-all duration-200 bg-white bg-opacity-10 hover:bg-opacity-20 flex flex-row flex-nowrap justify-center items-center gap-2 text-white rounded-lg px-4 py-2">
                                 <GithubIcon className="w-6 h-auto"/> GitHub
                             </button>
                         </a>
@@ -73,7 +71,7 @@ export default function Hero() {
                             className="no-underline hover:no-underline"
                         >
                             <button
-                                className="h-8 transition-all duration-200 hover:shadow-hero_button_shd flex flex-row flex-nowrap justify-center items-center gap-2 text-sm text-white border-2 border-white rounded-lg px-2 py-1">
+                                className="h-8 transition-all duration-200 bg-white bg-opacity-10 hover:bg-opacity-20 flex flex-row flex-nowrap justify-center items-center gap-2 text-sm text-white rounded-lg px-2 py-1">
                                 Docs
                             </button>
                         </a>
@@ -84,16 +82,13 @@ export default function Hero() {
                             className="no-underline hover:no-underline"
                         >
                             <button
-                                className="h-8 transition-all duration-200 hover:shadow-hero_button_shd flex flex-row flex-nowrap justify-center items-center gap-2 text-white border-2 border-white rounded-lg px-2 py-1">
+                                className="h-8 transition-all duration-200 bg-white bg-opacity-10 hover:bg-opacity-20 flex flex-row flex-nowrap justify-center items-center gap-2 text-white rounded-lg px-2 py-1">
                                 <GithubIcon className="w-6 h-auto"/>
                             </button>
                         </a>
                     </div>
                 </div>
             </div>
-            {/*<div className="bg-red-600 w-screen sm:flex flex-row flex-nowrap justify-center items-center hidden">*/}
-            {/*    <HeroImage/>*/}
-            {/*</div>*/}
             <HeroImage/>
             <div
                 className="relative z-10 flex flex-col flex-nowrap justify-center items-center gap-3 sm:gap-6 w-full h-1/4 py-5 sm:py-0">
@@ -103,7 +98,7 @@ export default function Hero() {
                 <div className="flex flex-row flex-nowrap justify-center gap-5 items-center w-full">
                     {/*<Button variant="secondary" size="medium" asChild>*/}
                     {/*    <Link href="https://admin.ensnode.io/">*/}
-                    {/*        <ENSAdminLogo className="w-10 h-auto"/>*/}
+                    {/*        <ENSAdminLogoLight className="w-10 h-auto"/>*/}
                     {/*        <div className="flex flex-col flex-nowrap justify-center items-start h-fit w-fit">*/}
                     {/*            Try it now*/}
                     {/*            <p className="text-xs text-left">with ENSAdmin</p>*/}
@@ -117,11 +112,11 @@ export default function Hero() {
                         className="no-underline hover:no-underline"
                     >
                         <button
-                            className="transition-all duration-200 hover:shadow-hero_button_shd flex flex-row flex-nowrap justify-center items-center gap-2 text-white border-2 border-white rounded-lg px-4 py-2">
-                            <ENSAdminLogo className="w-10 h-auto"/>
-                            <div className="flex flex-col flex-nowrap justify-center items-start h-fit w-fit">
-                                Try it now
-                                <p className="text-xs text-left">with ENSAdmin</p>
+                            className="transition-all duration-200 bg-white bg-opacity-10 hover:bg-opacity-20 flex flex-row flex-nowrap justify-center items-center gap-2 rounded-lg pl-2 pr-3 py-2">
+                            <ENSAdminLogoDark className="w-10 h-auto"/>
+                            <div className="flex flex-col flex-nowrap justify-center items-start h-fit w-fit text-white text-sm font-semibold leading-5">
+                                Connect now
+                                <p className="text-xs text-center font-normal leading-5 text-gray-400 w-full">with ENSAdmin</p>
                             </div>
                         </button>
                     </a>

@@ -1,6 +1,6 @@
 import React from "react";
 
-export const ENSAdminLogo = (props: React.SVGProps<SVGSVGElement>) => (
+export const ENSAdminLogoLight = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 28 28" {...props}>
     <path fill="#C2D6FF" d="M2 2h24v24H2V2Z" />
     <path fill="#709FFF" d="m14 6 12 20H2L14 6Z" />

@@ -12,7 +12,7 @@ import "../../styles/videoShadowStyles.css";
 
 export default function HeroImage() {
     return <div
-            className="videoContainer relative flex flex-col justify-center items-center w-screen h-[60%] sm:h-auto sm:w-4/5 xl:w-[calc(100vw-80px)] max-w-[1216px] sm:aspect-[10/4] super_wide_hero:aspect-[10/6]">
+            className="videoContainer relative flex flex-col justify-center items-center w-screen h-[60%] sm:h-auto sm:w-4/5 xl:w-[calc(100vw-15%)] max-w-[1216px] sm:aspect-[10/4] super_wide_hero:aspect-[10/6]">
             <div
                 className="box-border absolute z-10 w-full h-full flex flex-col sm:flex-row flex-nowrap justify-between items-center sm:pl-16">
                 <div
