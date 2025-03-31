@@ -49,7 +49,7 @@ export default function Hero() {
         </div>
       </div>
       <HeroImage />
-      <div className="flex flex-col flex-nowrap justify-center items-center gap-3 sm:gap-6 w-full p-5">
+      <div className="flex flex-col flex-nowrap justify-center items-center gap-3 sm:gap-6 w-full px-5 py-8">
         <h1 className="text-center font-semibold text-2xl sm:text-5xl text-white">
           The new multichain indexer for ENSv2
         </h1>

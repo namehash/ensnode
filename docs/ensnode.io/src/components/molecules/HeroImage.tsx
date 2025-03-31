@@ -13,7 +13,7 @@ export default function HeroImage() {
     <div className="min-h-0 flex-1 flex flex-col justify-center items-center w-full h-full">
       <div className="videoContainer box-border max-h-full min-h-0 relative h-full p-8 flex flex-col justify-center items-center">
         <div className="box-border absolute z-10 w-full h-full flex flex-col sm:flex-row flex-nowrap justify-between items-center sm:pl-16">
-          <div className="flex flex-row sm:flex-col flex-nowrap w-full sm:w-fit h-fit sm:h-full justify-evenly sm:justify-between items-center pt-2 sm:py-5">
+          <div className="flex flex-row sm:flex-col flex-nowrap w-full sm:w-fit h-fit sm:h-full justify-evenly sm:justify-between items-center py-10">
             <ENSLogo className="w-[4rem] sm:w-[5rem] lg:w-[5.5rem] h-auto" />
             <OptimismLogo className="w-[4rem] sm:w-[5rem] lg:w-[5.5rem] h-auto" />
             <UnichainLogo className="w-[4rem] sm:w-[5rem] lg:w-[5.5rem] h-auto" />
