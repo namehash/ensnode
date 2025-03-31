@@ -95,10 +95,10 @@ We welcome community contributions and feedback—please see [CONTRIBUTING.md](C
 NameHash has received generous support from the [ENS DAO](https://ensdao.org/) and [Gitcoin](https://www.gitcoin.co/).
 
 <p align="middle">
-  <a href="https://ensdao.org/" target="_blank">
+  <a href="https://ensdao.org/" target="_blank" style="text-decoration: none;">
     <img src="./docs/ensnode.io/public/ensdao.png" width="180">
   </a>
-  <a href="https://www.gitcoin.co/" target="_blank">
+  <a href="https://www.gitcoin.co/" target="_blank" style="text-decoration: none;">
     <img src="./docs/ensnode.io/public/gitcoin.png" width="180">
   </a>
 </p>
