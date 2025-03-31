@@ -16,7 +16,7 @@ export default function VideoBackground() {
         poster={video_thumbnail.src}
       />
       <video
-        className="block sm:hidden z-0 w-[calc(100%-40px)] h-full object-cover rounded-lg"
+        className="block sm:hidden z-0 w-full h-full object-cover rounded-lg"
         src={ensnode_video_rotated}
         autoPlay
         playsInline

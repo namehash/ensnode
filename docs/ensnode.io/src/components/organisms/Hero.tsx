@@ -5,8 +5,8 @@ import ensnode_with_name from "../../assets/dark-logo.svg";
 
 export default function Hero() {
   return (
-    <section className="box-border not-content h-screen w-screen flex flex-col flex-nowrap justify-end sm:justify-center items-center gap-8 sm:gap-4 px-5 sm:px-0 sm:pt-[72px] super_wide_hero:pt-0 pb-5 bg-hero_bg_sm sm:bg-hero_bg">
-      <div className="absolute top-0 box-border flex flex-row flex-nowrap justify-center items-center w-full px-5 sm:px-16 py-3 z-20 backdrop-blur-md">
+    <section className="box-border not-content h-screen w-screen max-h-screen max-w-screen overflow-hidden flex flex-col flex-nowrap items-stretch sm:px-0 bg-hero_bg_sm sm:bg-hero_bg">
+      <div className="box-border flex flex-row flex-nowrap justify-center items-center w-full px-5 sm:px-16 py-3">
         <div className="w-full max-w-7xl items-center justify-between flex flex-row">
           <a href="/">
             <img className="hidden sm:block h-10" src={ensnode_with_name.src} alt="ENSNode" />
@@ -49,7 +49,7 @@ export default function Hero() {
         </div>
       </div>
       <HeroImage />
-      <div className="relative z-10 flex flex-col flex-nowrap justify-center items-center gap-3 sm:gap-6 w-full h-1/4 py-5 sm:py-0">
+      <div className="flex flex-col flex-nowrap justify-center items-center gap-3 sm:gap-6 w-full p-5">
         <h1 className="text-center font-semibold text-2xl sm:text-5xl text-white">
           The new multichain indexer for ENSv2
         </h1>
