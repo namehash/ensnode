@@ -1,4 +1,11 @@
-# @ensnode/ensindexer
+# ensindexer
+
+## 0.1.2
+### Patch Changes
+
+
+
+- [#461](https://github.com/namehash/ensnode/pull/461) [`25680b9`](https://github.com/namehash/ensnode/commit/25680b97f150fac7e7edec8f8ac5e8a0886de2cb) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Grouped apps for single release
 
 ## 0.0.3
 ### Patch Changes

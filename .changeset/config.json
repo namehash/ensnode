@@ -5,7 +5,7 @@
     { "repo": "namehash/ensnode" }
   ],
   "commit": false,
-  "fixed": [],
+  "fixed": [["ensadmin", "ensindexer", "ensrainbow"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

@@ -68,7 +68,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-8">
+        <CardContent className="flex flex-row gap-8">
           {globalIndexingStatusViewModel(networkIndexingStatusByChainId).networkStatuses.map(
             (networkStatus) => (
               <NetworkIndexingStatsCard key={networkStatus.name} network={networkStatus} />
@@ -103,9 +103,8 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
       </CardHeader>
 
       <CardContent>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-8">
           <BlockStats label="Last indexed block" block={network.lastIndexedBlock} />
-          <BlockStats label="Last synced block" block={network.lastSyncedBlock} />
           <BlockStats label="Latest safe block" block={network.latestSafeBlock} />
         </div>
       </CardContent>
