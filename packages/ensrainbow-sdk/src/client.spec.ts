@@ -84,6 +84,15 @@ describe("EnsRainbowApiClient", () => {
       status: "ok",
     } satisfies EnsRainbow.HealthResponse);
   });
+
+  it("should return version information", async () => {
+    const response = await client.version();
+
+    expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
+    expect(response.status).toEqual(StatusCode.Success);
+    expect(typeof response.versionInfo.version === "string").toBeTruthy();
+    expect(typeof response.versionInfo.schema_version === "number").toBeTruthy();
+  });
 });
 
 describe("HealResponse error detection", () => {

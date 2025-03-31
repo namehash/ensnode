@@ -7,8 +7,8 @@
 <p align="center">
   <a href="https://ensnode.io">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/banner-dark.svg">
-      <img alt="ENSNode" src=".github/banner-light.svg" width="auto" height="80">
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/ensnode-banner-dark.svg">
+      <img alt="ENSNode" src=".github/assets/ensnode-banner-light.svg" width="auto" height="80">
     </picture>
   </a>
 </p>
@@ -114,11 +114,36 @@ The ENSNode monorepo contains multiple modules in the following subdirectories:
 - [`packages`](packages) for libraries that can be embedded into apps.
 - [`docs`](docs) documentation sites.
 
-### [`apps/ensnode`](apps/ensnode)
+### [`apps/ensadmin`](apps/ensadmin)
+
+<table>
+  <tr>
+    <td><img alt="ENSadmin" src=".github/assets/ensadmin-light.svg" width="auto" height="44"></td>
+    <td><a href="https://ensnode.io/ensadmin/" target="_blank">ENSAdmin</a></td>
+  </tr>
+</table>
+
+Explore the ENS Protocol like never before.
+
+### [`apps/ensindexer`](apps/ensindexer)
+
+<table>
+  <tr>
+    <td><img alt="ENSIndexer" src=".github/assets/ensindexer-light.svg" width="auto" height="44"></td>
+    <td><a href="https://ensnode.io/ensindexer/" target="_blank">ENSIndexer</a></td>
+  </tr>
+</table>
 
 The main ENSNode indexer application enabling multichain indexing for ENS.
 
 ### [`apps/ensrainbow`](apps/ensrainbow)
+
+<table>
+  <tr>
+    <td><img alt="ENSRainbow" src=".github/assets/ensrainbow-light.svg" width="auto" height="44"></td>
+    <td><a href="https://ensnode.io/ensrainbow/" target="_blank">ENSRainbow</a></td>
+  </tr>
+</table>
 
 A sidecar service for healing ENS labels. It provides a simple API to recover labels from their hashes. This optimizes a number of ENS use cases, including indexing of ENS data. See the [ENSRainbow documentation](apps/ensrainbow/README.md) for more details.
 

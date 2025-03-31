@@ -1,6 +1,6 @@
 "use client";
 
-import { preferredEnsNodeUrl, selectedEnsNodeUrl } from "@/lib/env";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDown, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -60,7 +60,9 @@ export function ConnectionSelector() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { connections, isLoading, addConnection, removeConnection } = useConnections();
+  const { connections, isLoading, addConnection, removeConnection } = useConnections({
+    selectedEnsNodeUrl: selectedUrl,
+  });
 
   const handleSelect = (url: string) => {
     const params = new URLSearchParams(searchParams);
@@ -93,8 +95,11 @@ export function ConnectionSelector() {
   };
 
   const handleRemove = (url: string) => {
-    if (url === preferredEnsNodeUrl()) return;
-    removeConnection.mutate({ url });
+    const connectionToBeRemoved = connections.find((c) => c.isDefault === false && c.url === url);
+
+    if (connectionToBeRemoved) {
+      removeConnection.mutate(connectionToBeRemoved);
+    }
   };
 
   return (
@@ -112,13 +117,13 @@ export function ConnectionSelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">{selectedUrl}</span>
+                  <span className="truncate text-xs font-mono">{selectedUrl.toString()}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-72 rounded-lg"
               align="start"
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
@@ -132,50 +137,54 @@ export function ConnectionSelector() {
                   <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                connections.map(({ url, isPreferred }) => (
-                  <DropdownMenuItem
-                    key={url}
-                    onClick={() => handleSelect(url)}
-                    className={cn(
-                      "group gap-2 p-2 font-mono text-xs justify-between",
-                      url === selectedUrl ? "bg-primary/10 text-primary" : "",
-                    )}
-                  >
-                    <span className="truncate flex-1">{url}</span>
-                    <div className="flex items-center gap-1">
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1 hover:text-foreground rounded"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                      {!isPreferred && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemove(url);
-                          }}
-                          disabled={removeConnection.isPending}
-                          className={cn(
-                            "p-1 rounded",
-                            removeConnection.isPending
-                              ? "text-muted-foreground cursor-not-allowed"
-                              : "hover:text-destructive",
-                          )}
-                        >
-                          {removeConnection.isPending && removeConnection.variables?.url === url ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-3 h-3" />
-                          )}
-                        </button>
+                connections.map(({ url, isDefault }) => {
+                  const isCurrentlySelectedConnection = url === selectedUrl.toString();
+                  return (
+                    <DropdownMenuItem
+                      key={url}
+                      onClick={() => handleSelect(url)}
+                      className={cn(
+                        "group gap-2 p-2 font-mono text-xs justify-between",
+                        isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : "",
                       )}
-                    </div>
-                  </DropdownMenuItem>
-                ))
+                    >
+                      <span className="truncate flex-1">{url}</span>
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1 hover:text-foreground rounded"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        {!isDefault && !isCurrentlySelectedConnection && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemove(url);
+                            }}
+                            disabled={removeConnection.isPending}
+                            className={cn(
+                              "p-1 rounded",
+                              removeConnection.isPending
+                                ? "text-muted-foreground cursor-not-allowed"
+                                : "hover:text-destructive",
+                            )}
+                          >
+                            {removeConnection.isPending &&
+                            removeConnection.variables?.url === url ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  );
+                })
               )}
 
               <DropdownMenuSeparator />

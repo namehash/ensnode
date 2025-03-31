@@ -2,7 +2,7 @@ FROM node:18-slim AS base
 
 FROM base AS builder
 
-ARG NEXT_PUBLIC_PREFERRED_ENSNODE_URL
+ARG NEXT_PUBLIC_DEFAULT_ENSNODE_URLS
 ARG PNPM_VERSION=9.12.0
 
 RUN apt-get update && \
@@ -32,13 +32,13 @@ RUN pnpm install --frozen-lockfile
 # This will be used to determine if the build output should be standalone
 ENV NEXT_BUILD_OUTPUT_STANDALONE=true
 
-# Set the environment variable for the preferred ENSNode URL
-ENV NEXT_PUBLIC_PREFERRED_ENSNODE_URL=${NEXT_PUBLIC_PREFERRED_ENSNODE_URL}
+# Set the environment variable for the default ENSNode URLs
+ENV NEXT_PUBLIC_DEFAULT_ENSNODE_URLS=${NEXT_PUBLIC_DEFAULT_ENSNODE_URLS}
 
 # Copy the app source code
 COPY apps/ensadmin ./apps/ensadmin
 # Build the app
-RUN pnpm --filter @ensnode/ensadmin build
+RUN pnpm --filter ensadmin build
 
 # # 3. Production image, copy all the files and run next
 FROM base AS runner
