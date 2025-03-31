@@ -8,8 +8,6 @@ import {ENSNodeLogo} from "@workspace/docs/ensnode.io/src/components/atoms/ENSNo
 import VideoBackground from "@workspace/docs/ensnode.io/src/components/molecules/VideoBackground.tsx";
 import "../../styles/videoShadowStyles.css";
 
-//css class for gradient shadow -> videoContainer
-
 export default function HeroImage() {
     return <div
             className="videoContainer relative flex flex-col justify-center items-center w-screen h-[60%] sm:h-auto sm:w-4/5 xl:w-[calc(100vw-15%)] max-w-[1216px] sm:aspect-[10/4] super_wide_hero:aspect-[10/6]">
