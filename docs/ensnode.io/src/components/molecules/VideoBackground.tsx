@@ -10,6 +10,7 @@ export default function VideoBackground() {
         className="hidden sm:block z-0 w-full h-full object-cover rounded-lg"
         src={ensnode_video}
         autoPlay
+        playsinline
         loop
         muted
         poster={video_thumbnail.src}
@@ -18,6 +19,7 @@ export default function VideoBackground() {
         className="block sm:hidden z-0 w-[calc(100%-40px)] h-full object-cover rounded-lg"
         src={ensnode_video_rotated}
         autoPlay
+        playsinline
         loop
         muted
         poster={video_rotated_thumbnail.src}
