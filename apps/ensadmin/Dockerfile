@@ -38,7 +38,7 @@ ENV NEXT_PUBLIC_DEFAULT_ENSNODE_URLS=${NEXT_PUBLIC_DEFAULT_ENSNODE_URLS}
 # Copy the app source code
 COPY apps/ensadmin ./apps/ensadmin
 # Build the app
-RUN pnpm --filter @ensnode/ensadmin build
+RUN pnpm --filter ensadmin build
 
 # # 3. Production image, copy all the files and run next
 FROM base AS runner
