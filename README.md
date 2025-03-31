@@ -122,6 +122,10 @@ The main ENSNode indexer application enabling multichain indexing for ENS.
 
 A sidecar service for healing ENS labels. It provides a simple API to recover labels from their hashes. This optimizes a number of ENS use cases, including indexing of ENS data. See the [ENSRainbow documentation](apps/ensrainbow/README.md) for more details.
 
+### [`apps/ensadmin`](apps/ensadmin)
+
+A dashboard application that provides a convenient interface for navigating and monitoring the state of ENS as indexed by a connected ENSNode instance. It allows users to explore ENS data, view recent registrations, and monitor indexing status. See the [ENSAdmin documentation](https://ensnode.io/ensadmin) for more details.
+
 ## Packages
 
 ### [`packages/ens-deployments`](packages/ens-deployments)
