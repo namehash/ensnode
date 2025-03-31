@@ -14,12 +14,14 @@ ENSNode will introduce an ENSv2-optimized schema and custom API endpoints specif
 
 ## Additional Chain / Integration Support
 
-- [.box Domains](https://my.box/) (`.box`)
-- [3DNS](https://3dns.box) Support
-- [Namefi](https://namefi.io/) Names Support
-- `.cb.id`, `.uni.id`
-- [NameStone](https://namestone.com/) Names
-- ...
+- Tokenized DNS Names
+  - [3DNS](https://3dns.box) Support (`.box`, + more)
+  - [Namefi](https://namefi.io/) Support
+- Offchain Names
+  - `.cb.id`, `.uni.id`, + more
+  - [NameStone](https://namestone.com/) Names
+  - [NameSpace](https://namespace.ninja/) Names
+  - [Justaname](https://www.justaname.id/) Names
 
 :::tip[Contribute]
 Want support for a specific chain/integration? Contribute to this documentation by [opening a Pull Request](https://github.com/namehash/ensnode).
@@ -31,20 +33,18 @@ ENSNode v2 could introduce a custom HTTP/JSON API layer that would allow for per
 
 In particular, when records are indexed by ENSIndexer, ENSNode could directly query name records without relying on UniversalResolver or CCIP-Read, significantly reducing latency and avoiding unnecessary HTTP requests. For names that aren't directly indexed, ENSNode can implement CCIP-Read, ensuring clients only need a single lightweight HTTP/2 request to confidently resolve records for a given name.
 
-
 ENSNode could handle CCIP-Read logic internally, batch multiple requests to reduce RPC calls, and cache CCIP-Read and NFT metadata results. Utilizing HTTP/2 multiplexing and optional batch endpoints could ensure efficient server-side deduplication. To minimize latency in cases like lengthy CCIP-Read or NFT resolution, ENSNode could deliver partial JSON objects over Server-Sent Events (SSE), enabling immediate client updates for critical data like Primary Names while background tasks like avatar resolution complete.
 
-## ENS NFT Marketplace Data (Reservoir Replacement)
+Besides dramatically decreasing latency for client applications, the Protocol Accelerator is also a key step forward in decentralization, away from reliance on centralized offchain gateway servers. This is a big win for the ENS protocol!
+
+## ENS TokenScope: ENS NFT Marketplace Data API
 
 With Reservoir shutting down in the coming months, ENSNode aims to provide replacement infrastructure for tokenized ENS name market data. This includes:
 
-- Past sales history
-- Active buy/sell orders
-- Name registration lifecycle tracking
-- User balance monitoring
-- Both on-chain and off-chain data indexing
+- past sales history
+- active buy/sell orders (on-chain and off-chain)
 
-This capability could be implemented as an optional ENSNode plugin, providing free and open source infrastructure for marketplaces like Vision and other platforms supporting tokenized domain names. The plugin will offer domain-specific capabilities beyond Reservoir's generic NFT market data.
+This capability could be implemented as an optional ENSNode service, providing free and open source infrastructure for marketplaces like Vision and other platforms that support the name market.
 
 By enabling robust secondary markets through this infrastructure, we aim to strengthen both secondary and primary markets for tokenized names, benefiting registrars and the broader ENS ecosystem.
 

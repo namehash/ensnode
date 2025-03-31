@@ -32,11 +32,14 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
   - ✅ Mainnet ENS Names
   - ✅ Basenames (`.base.eth`)
   - ✅ Linea Names (`.linea.eth`)
-  - 🚧 [.box Domains](https://my.box/) (`.box`)
-  - 🚧 [3DNS](https://3dns.box) Support
-  - 🚧 [Namefi](https://namefi.io/) Names Support
-  - 🚧 `.cb.id`, `.uni.id`
-  - 🚧 [NameStone](https://namestone.com/) Names
+  - 🚧 Tokenized DNS Names
+    - [3DNS](https://3dns.box) Support (`.box`, + more)
+    - [Namefi](https://namefi.io/) Support
+  - 🚧 Offchain Names
+    - `.cb.id`, `.uni.id`, + more
+    - [NameStone](https://namestone.com/) Names
+    - [NameSpace](https://namespace.ninja/) Names
+    - [Justaname](https://www.justaname.id/) Names
   - 🚧 + more
 - Built on [Ponder](https://ponder.sh)
   - ✅ Rapid Indexing & Backfill
