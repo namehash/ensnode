@@ -7,7 +7,7 @@ export default function VideoBackground() {
   return (
     <>
       <video
-        className="hidden sm:block z-0 w-full h-full object-cover rounded-lg"
+        className="hidden sm:block z-0 w-full h-full object-cover rounded-2xl"
         src={ensnode_video}
         autoPlay
         playsInline
@@ -16,7 +16,7 @@ export default function VideoBackground() {
         poster={video_thumbnail.src}
       />
       <video
-        className="block sm:hidden z-0 w-full h-full object-cover rounded-lg"
+        className="block sm:hidden z-0 w-full h-full object-cover rounded-2xl"
         src={ensnode_video_rotated}
         autoPlay
         playsInline
