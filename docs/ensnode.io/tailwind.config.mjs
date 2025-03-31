@@ -8,8 +8,8 @@ export default {
         hero_bg_sm: "linear-gradient(180deg, rgba(2,2,6,1) 0%, rgba(4,0,116,1) 100%)",
       },
       screens: {
-        super_wide_hero: "1550px"
-      }
+        super_wide_hero: "1550px",
+      },
     },
   },
   plugins: [],

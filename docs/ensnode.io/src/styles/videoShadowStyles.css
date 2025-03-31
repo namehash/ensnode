@@ -1,17 +1,17 @@
 .videoContainer::before {
-    content: "";
-    position: absolute;
+  content: "";
+  position: absolute;
 
-    inset: 0;
-    filter: blur(27px);
-    background: rgba(16,18,223,1);
+  inset: 0;
+  filter: blur(27px);
+  background: rgba(16, 18, 223, 1);
 
-    @media screen and (min-width: 640px) {
-        inset: -15px;
-        filter: blur(25px);
-        background: rgba(16,18,223,1);
-    }
-    transform: translate3d(0px,0px,-1px);
-    border-radius: inherit;
-    pointer-events: none;
+  @media screen and (min-width: 640px) {
+    inset: -15px;
+    filter: blur(25px);
+    background: rgba(16, 18, 223, 1);
+  }
+  transform: translate3d(0px, 0px, -1px);
+  border-radius: inherit;
+  pointer-events: none;
 }
