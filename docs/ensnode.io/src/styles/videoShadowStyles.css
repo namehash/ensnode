@@ -4,12 +4,15 @@
 
     inset: 0;
     filter: blur(25px);
-    background: linear-gradient(0deg, rgba(16,18,223,1) 0%, rgba(18,19,117,1) 66%, rgba(0,0,0,1) 100%);
+    /*background: linear-gradient(0deg, rgba(16,18,223,1) 0%, rgba(18,19,117,1) 66%, rgba(0,0,0,1) 100%);*/
+    background: rgba(16,18,223,1);
 
     @media screen and (min-width: 640px) {
         inset: -5px;
         filter: blur(25px);
-        background: linear-gradient(270deg, rgba(16,18,223,1) 0%, rgba(18,19,117,1) 66%, rgba(0,0,0,1) 100%);
+        /*background: linear-gradient(270deg, rgba(16,18,223,1) 0%, rgba(18,19,117,1) 66%, rgba(0,0,0,1) 100%);*/
+        /*background: linear-gradient(270deg, rgba(16,18,223,1) 0%, rgba(18,19,117,1) 100%);*/
+        background: rgba(16,18,223,1);
     }
     transform: translate3d(0px,0px,-1px);
     border-radius: inherit;
