@@ -1,4 +1,4 @@
-# @ensnode/ensrainbow
+# ensrainbow
 
 ## 0.1.2
 ### Patch Changes

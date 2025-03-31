@@ -1,4 +1,4 @@
-# @ensnode/ensindexer
+# ensindexer
 
 ## 0.1.2
 ### Patch Changes

@@ -1,4 +1,4 @@
-# @ensnode/ensadmin
+# ensadmin
 
 ## 0.1.2
 ### Patch Changes
