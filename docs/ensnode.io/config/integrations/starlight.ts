@@ -5,6 +5,7 @@ import starlightThemeRapide from "starlight-theme-rapide";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
+    customCss: ["./src/styles/globals.css"],
     plugins: [
       starlightThemeRapide(),
       starlightSidebarTopics([
