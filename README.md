@@ -115,35 +115,35 @@ The ENSNode monorepo contains multiple modules in the following subdirectories:
 - [`docs`](docs) documentation sites.
 
 ### [`apps/ensadmin`](apps/ensadmin)
-  
-<a href="https://ensnode.io/ensadmin/">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/ensadmin-dark.svg">
-    <img alt="ENSNode" src=".github/assets/ensadmin-light.svg" width="auto" height="44">
-  </picture>
-</a>
+
+<table>
+  <tr>
+    <td><img alt="ENSadmin" src=".github/assets/ensadmin-light.svg" width="auto" height="44"></td>
+    <td><a href="https://ensnode.io/ensadmin/" target="_blank">ENSAdmin</a></td>
+  </tr>
+</table>
 
 Explore the ENS Protocol like never before.
 
 ### [`apps/ensindexer`](apps/ensindexer)
 
-<a href="https://ensnode.io/ensindexer/">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/ensindexer-dark.svg">
-    <img alt="ENSNode" src=".github/assets/ensindexer-light.svg" width="auto" height="44">
-  </picture>
-</a>
+<table>
+  <tr>
+    <td><img alt="ENSIndexer" src=".github/assets/ensindexer-light.svg" width="auto" height="44"></td>
+    <td><a href="https://ensnode.io/ensindexer/" target="_blank">ENSIndexer</a></td>
+  </tr>
+</table>
 
 The main ENSNode indexer application enabling multichain indexing for ENS.
 
 ### [`apps/ensrainbow`](apps/ensrainbow)
 
-<a href="https://ensnode.io/ensrainbow/">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/ensrainbow-dark.svg">
-    <img alt="ENSNode" src=".github/assets/ensrainbow-light.svg" width="auto" height="44">
-  </picture>
-</a>
+<table>
+  <tr>
+    <td><img alt="ENSRainbow" src=".github/assets/ensrainbow-light.svg" width="auto" height="44"></td>
+    <td><a href="https://ensnode.io/ensrainbow/" target="_blank">ENSRainbow</a></td>
+  </tr>
+</table>
 
 A sidecar service for healing ENS labels. It provides a simple API to recover labels from their hashes. This optimizes a number of ENS use cases, including indexing of ENS data. See the [ENSRainbow documentation](apps/ensrainbow/README.md) for more details.
 
