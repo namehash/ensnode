@@ -21,32 +21,34 @@ const siteName = "ENSAdmin";
 const title = "ENSAdmin";
 const description = "Explore the ENS Protocol like never before";
 
-export const metadata: Metadata = {
-  title: title,
-  description: description,
-  metadataBase: new URL(ensAdminPublicUrl()),
-  openGraph: {
-    title: {
-      template: `${siteName} - %s`,
-      default: title,
-    },
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: title,
     description: description,
-    url: "/",
-    type: "website",
-    siteName: siteName,
-    images: ["/opengraph-image.png"],
-  },
-  twitter: {
-    title: {
-      template: `${siteName} - %s`,
-      default: title,
+    metadataBase: ensAdminPublicUrl(),
+    openGraph: {
+      title: {
+        template: `${siteName} - %s`,
+        default: title,
+      },
+      description: description,
+      url: "/",
+      type: "website",
+      siteName: siteName,
+      images: ["/opengraph-image.png"],
     },
-    card: "summary_large_image",
-    site: "@NamehashLabs",
-    creator: "@NamehashLabs",
-    images: ["/twitter-image.png"],
-  },
-};
+    twitter: {
+      title: {
+        template: `${siteName} - %s`,
+        default: title,
+      },
+      card: "summary_large_image",
+      site: "@NamehashLabs",
+      creator: "@NamehashLabs",
+      images: ["/twitter-image.png"],
+    },
+  };
+}
 
 export default function Layout({
   children,

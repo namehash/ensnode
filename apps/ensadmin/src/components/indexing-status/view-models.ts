@@ -147,3 +147,26 @@ export function ensNodeEnvViewModel(env: EnsNode.Metadata["env"]) {
     { label: "Database Schema", value: env.DATABASE_SCHEMA },
   ] as const;
 }
+
+/**
+ * View model for the ENSRainbow version info.
+ *
+ * @param runtime The runtime info from the ENSNode metadata
+ * @returns An array of label-value pairs for ENSRainbow version info, or null if not available
+ */
+export function ensRainbowViewModel(runtime: EnsNode.Metadata["runtime"]) {
+  //TODO: uncomment and fix this when current ENSIndexer is deployed
+  // if (!runtime.ensRainbow) {
+  //   return null;
+  // }
+
+  // return [
+  //   { label: "Version", value: runtime.ensRainbow.version },
+  //   { label: "Schema Version", value: runtime.ensRainbow.schema_version.toString() },
+  // ] as const;
+
+  return [
+    { label: "Version", value: "0.1.0" },
+    { label: "Schema Version", value: 2 },
+  ] as const;
+}

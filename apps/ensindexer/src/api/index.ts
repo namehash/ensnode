@@ -7,6 +7,7 @@ import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import packageJson from "../../package.json";
 import {
+  createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
   createPrometheusMetricsFetcher,
   ensAdminUrl,
@@ -63,6 +64,9 @@ const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
 // setup prometheus metrics fetching
 const fetchPrometheusMetrics = createPrometheusMetricsFetcher(ponderPort());
 
+// setup ENSRainbow version fetching
+const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
+
 // use ENSNode middleware at /metadata
 app.get(
   "/metadata",
@@ -80,6 +84,7 @@ app.get(
     query: {
       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
       prometheusMetrics: fetchPrometheusMetrics,
+      ensRainbowVersion: fetchEnsRainbowVersion,
     },
     publicClients,
   }),

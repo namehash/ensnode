@@ -1,0 +1,107 @@
+---
+title: Applications Dependent on ENS Subgraph (partial list)
+description: A partial list of applications and services that rely on the ENS Subgraph for their functionality, demonstrating the critical importance of indexed data in the ENS ecosystem.
+---
+
+## Overview
+
+The ENS Subgraph serves as a critical infrastructure component in the ENS ecosystem, providing indexed data that powers a wide range of applications and services. This page documents some examples of the extensive ecosystem that has been built around and depends on the ENS Subgraph, demonstrating why it will be critical that indexed ENS data remains available for ENSv2 through ENSNode.
+
+## ENS Subgraph Usage Metrics
+
+The ENS Subgraph is a cornerstone of the current ENS architecture (ENSv1), handling an extraordinary volume of requests:
+
+- **Approx 2 million avg daily requests**
+- **Over 717 million requests annually**
+
+<figure>
+  <img src="/ens-subgraph-usage.png" alt="ENS Subgraph usage metrics showing daily query volume" />
+  <figcaption>ENS Subgraph daily query volume following the transition to Graph Network hosting (June 20, 2024 onward)</figcaption>
+</figure>
+
+This massive query volume underscores the central importance of the indexed ENS data and demonstrates the minimum scale at which any replacement solution must operate.
+
+## Ecosystem Impact
+
+The ENS Subgraph's influence extends across multiple categories of Web3 applications, from core infrastructure to end-user applications. Below is a partial list of projects and applications that depend on the ENS Subgraph for their functionality.
+
+### Critical ENS Apps & Infrastructure
+
+- **[Official ENS Manager App](https://app.ens.domains/)**  
+  The primary interface for ENS domain management.
+
+- **[ENS Metadata Service](https://github.com/ensdomains/ens-metadata-service)**  
+  Used by numerous services including:
+  - NFT Marketplaces and APIs (OpenSea, etc.)
+  - Rainbow Wallet
+  - Rotki
+
+- **[ENSjs](https://github.com/ensdomains/ensjs)**  
+  JavaScript library for ENS integration, used by many ENS-integrated applications
+
+- **[ENS Test Environment](https://github.com/ensdomains/ens-test-env)**  
+  Testing framework for ENS development.
+
+- **[Linea Names](https://github.com/Consensys/linea-ens)**  
+  Primary management interface for linea.eth subnames on Linea.
+
+### Popular Wallets
+
+- **[Rainbow Wallet](https://rainbow.me/)**
+  - Mobile Wallet
+  - Browser Extension Wallet
+
+- **[MyEtherWallet](https://www.myetherwallet.com/)**  
+  Ethereum wallet.
+
+### Chain Explorers
+
+- **[Blockscout](https://www.blockscout.com/)**  
+  Blockchain explorer platform.
+
+### DAO Infrastructure
+
+- **[Snapshot.js](https://github.com/snapshot-labs/snapshot.js)**  
+  TypeScript library for Snapshot integration.
+
+### DeFi Applications
+
+- **[Rotki](https://rotki.com/)**  
+  Privacy preserving portfolio tracking.
+
+### Social Applications
+
+- **[Ethereum Follow Protocol](https://efp.app/)**  
+  Onchain social graph protocol.
+
+### ENS Marketplaces
+
+- **[Vision.io](http://vision.io/)**  
+  ENS domain marketplace.
+
+### Other Key Applications
+
+- **[ENSPro](https://enspro.xyz/)** (by NameStone)
+
+- **[ENSBook](https://github.com/hibbb/ensbook)** (by Liuliuben)
+
+- **[L2 Subnames](https://github.com/thenamespace/l2-subnames)** (by NameSpace)
+
+- **[ENS Tools](https://github.com/ensdomains/ens-misctools)** (by Serenae)
+
+- **[ENS Data](https://ensdata.net/)** (by Pugson)
+
+- **[ENS Ideas](https://github.com/frolic/ens-ideas)** (by Frolic)
+
+- **[Next.ID](https://next.id/)**  
+  Which also powers:
+  - [Web3.bio](http://web3.bio/) (by Yan Zhu)
+  - [Eth.cd](https://eth.cd/) (by Webhash / Hid)
+
+## Implications for ENSNode
+
+The breadth of key applications dependent on indexed ENS data highlight the critical need for ENSNode. The growing ENS ecosystem requires a robust, scalable replacement of the ENS Subgraph that overcomes the ENS Subgraph's limitations while simultaneously supporting ENSv2 and multichain ENS indexing (including Namechain).
+
+## Help Us Expand This List
+
+Do you know of other applications that rely on the ENS Subgraph that aren't listed here? Please [contact us through the form on namehashlabs.org](https://namehashlabs.org/contact) to let us know, and we'll update this documentation.

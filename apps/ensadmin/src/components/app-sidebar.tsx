@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, RadioTower } from "lucide-react";
+import { Activity, PackageSearch, RadioTower } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
@@ -13,6 +13,11 @@ const navItems = [
     title: "Status",
     url: "/status",
     icon: Activity,
+  },
+  {
+    title: "Protocol Inspector",
+    url: "/inspector",
+    icon: PackageSearch,
   },
   {
     title: "APIs",

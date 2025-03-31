@@ -1,8 +1,12 @@
 "use client";
 
+import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
+import { ENSNodeIcon } from "@/components/ensnode-icon";
+import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { fromUnixTime, intlFormat } from "date-fns";
@@ -15,6 +19,7 @@ import {
   NetworkStatusViewModel,
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
+  ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
 
@@ -191,6 +196,8 @@ interface NetworkIndexingTimelineProps {
  */
 function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   const { indexingStatus } = props;
+  const searchParams = useSearchParams();
+  const currentEnsNodeUrl = selectedEnsNodeUrl(searchParams);
 
   if (indexingStatus.isLoading) {
     return <NetworkIndexingTimelineFallback />;
@@ -207,21 +214,69 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   }
 
   const { data } = indexingStatus;
+  const ensRainbowVersion = ensRainbowViewModel(data.runtime);
 
   return (
     <section className="px-6">
-      <header className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold">ENSIndexer Status</h2>
-          <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
-            <InlineSummary items={ensNodeDepsViewModel(data.deps)} />
-          </ul>
+      <Card className="w-full mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-2xl">
+            <ENSNodeIcon width={28} height={28} />
+            <span>ENSNode</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground pl-9 mb-4">
+            <span className="font-semibold">Connection:</span> {currentEnsNodeUrl.toString()}
+          </div>
 
-          <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
-            <InlineSummary items={ensNodeEnvViewModel(data.env)} />
-          </ul>
-        </div>
-      </header>
+          <div className="space-y-6">
+            {/* ENSIndexer Section */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <ENSIndexerIcon width={24} height={24} />
+                  <span>ENSIndexer</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 pl-8">
+                  <div>
+                    <ul className="text-sm text-muted-foreground flex gap-4">
+                      <InlineSummary items={ensNodeDepsViewModel(data.deps)} />
+                    </ul>
+                  </div>
+
+                  <div>
+                    <ul className="text-sm text-muted-foreground flex gap-4">
+                      <InlineSummary items={ensNodeEnvViewModel(data.env)} />
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* ENSRainbow Section - only show if available */}
+            {ensRainbowVersion && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <ENSRainbowIcon width={24} height={24} />
+                    <span>ENSRainbow</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="pl-8">
+                    <ul className="text-sm text-muted-foreground flex gap-4">
+                      <InlineSummary items={ensRainbowVersion} />
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <main className="grid gap-4">
         <IndexingTimeline
