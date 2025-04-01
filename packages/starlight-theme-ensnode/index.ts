@@ -8,11 +8,7 @@ export default function starlightThemeEnsnodePlugin(): StarlightPlugin {
     hooks: {
       "config:setup"({ config, logger, updateConfig }) {
         updateConfig({
-          components: overrideComponents(
-            config,
-            [], // ["ThemeSelect"]
-            logger
-          ),
+          components: overrideComponents(config, ["ThemeSelect"], logger),
           customCss: [
             ...(config.customCss ?? []),
             "starlight-theme-ensnode/styles",

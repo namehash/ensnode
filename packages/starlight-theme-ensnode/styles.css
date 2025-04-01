@@ -1,7 +1,7 @@
 :root,
 ::backdrop {
   /* Primary ENS Colors */
-  --sl-color-bg: #011a25; /* ENS dark blue for dark mode */
+  --sl-color-bg: #f6f6f6; /* ENS white for light mode */
   --ens-blue: #0080bc;
   --ens-light-blue: #cee1e8;
   --ens-dark-blue: #011a25;
@@ -20,119 +20,13 @@
   --ens-gray-3: #c4c7c8;
   --ens-gray-2: #e5e5e5;
 
-  /* Improved contrast for hairlines/borders in dark mode */
-  --sl-color-hairline-shade: var(--ens-light-blue);
-  --sl-color-hairline: var(--ens-gray);
-  --sl-color-hairline-light: var(--ens-gray-3);
+  /* Improved contrast for hairlines/borders */
+  --sl-color-hairline-shade: var(--ens-gray-3);
+  --sl-color-hairline: var(--ens-gray-3);
+  --sl-color-hairline-light: var(--ens-gray-2);
 
   /* Base theme adjustments */
   --sl-hue-base: 203; /* Adjusted to blue hue */
-  --sl-color-white: oklch(98% 0.01 var(--sl-hue-base));
-  --sl-color-gray-1: oklch(85% 0.018 var(--sl-hue-base));
-  --sl-color-gray-2: oklch(75% 0.018 var(--sl-hue-base));
-  --sl-color-gray-3: oklch(65% 0.013 var(--sl-hue-base));
-  --sl-color-gray-4: oklch(55% 0.009 var(--sl-hue-base));
-  --sl-color-gray-5: oklch(35% 0.005 var(--sl-hue-base));
-  --sl-color-gray-6: oklch(25% 0.004 var(--sl-hue-base));
-  --sl-color-gray-7: oklch(20% 0.002 var(--sl-hue-base));
-  --sl-color-black: oklch(15% 0.002 var(--sl-hue-base));
-
-  /* Primary brand color - blue */
-  --sl-hue-blue: 203;
-  --sl-color-blue-low: oklch(20% 0.02 var(--sl-hue-blue));
-  --sl-color-blue: #0080bc;
-  --sl-color-blue-high: oklch(86% 0.054 var(--sl-hue-blue));
-  --sl-color-blue-accent: oklch(89% 0.05 var(--sl-hue-blue));
-  --sl-color-blue-accent-invert: oklch(66% 0.154 var(--sl-hue-blue));
-  --sl-color-blue-alt: #011a25;
-  --sl-color-blue-alt-invert: #cee1e8;
-
-  /* Secondary color - green */
-  --sl-hue-green: 150;
-  --sl-color-green-low: oklch(20% 0.018 var(--sl-hue-green));
-  --sl-color-green: #007c23;
-  --sl-color-green-high: oklch(86% 0.054 var(--sl-hue-green));
-  --sl-color-green-accent: #c5ddcc;
-  --sl-color-green-accent-invert: oklch(66% 0.14 var(--sl-hue-green));
-
-  /* Secondary color - magenta (replaces purple) */
-  --sl-hue-purple: 340;
-  --sl-color-purple-low: oklch(22% 0.012 var(--sl-hue-purple));
-  --sl-color-purple: #f53293;
-  --sl-color-purple-high: oklch(86% 0.053 var(--sl-hue-purple));
-  --sl-color-purple-accent: #f2c4da;
-  --sl-color-purple-accent-invert: oklch(66% 0.153 var(--sl-hue-purple));
-  --sl-color-purple-alt: oklch(23.5% 0.012 var(--sl-hue-purple));
-  --sl-color-purple-alt-invert: oklch(36% 0.033 var(--sl-hue-purple));
-
-  /* Secondary color - yellow (replaces orange) */
-  --sl-hue-orange: 60;
-  --sl-color-orange-low: oklch(24% 0.01 var(--sl-hue-orange));
-  --sl-color-orange: #fff72f;
-  --sl-color-orange-high: oklch(92% 0.062 var(--sl-hue-orange));
-  --sl-color-orange-accent: #f8f6d6;
-  --sl-color-orange-accent-invert: oklch(79% 0.162 var(--sl-hue-orange));
-  --sl-color-orange-alt: #674d49; /* Dark brown */
-  --sl-color-orange-alt-invert: oklch(42% 0.042 var(--sl-hue-orange));
-
-  /* Error color - using a red tone */
-  --sl-hue-red: 13;
-  --sl-color-red-low: oklch(20% 0.018 var(--sl-hue-red));
-  --sl-color-red: oklch(44% 0.151 var(--sl-hue-red));
-  --sl-color-red-high: oklch(87% 0.05 var(--sl-hue-red));
-  --sl-color-red-accent: oklch(92% 0.04 var(--sl-hue-red));
-  --sl-color-red-accent-invert: oklch(67% 0.15 var(--sl-hue-red));
-  --sl-color-red-alt: oklch(21.5% 0.018 var(--sl-hue-red));
-  --sl-color-red-alt-invert: oklch(37% 0.03 var(--sl-hue-red));
-
-  /* Primary accent color - set to ENS blue */
-  --sl-hue-accent: 203;
-  --sl-color-accent-low: oklch(19% 0.02 var(--sl-hue-accent));
-  --sl-color-accent: #0080bc;
-  --sl-color-accent-high: #0080bc;
-
-  /* Improved text colors for dark mode */
-  --sl-color-text: var(--ens-gray-2);
-  --sl-color-text-accent: var(--ens-blue);
-  --sl-color-text-muted: var(--ens-light-blue);
-  --sl-color-text-invert: var(--ens-white);
-
-  /* UI Components */
-  --sl-color-bg-nav: var(--ens-dark-blue);
-  --sl-color-bg-sidebar: var(--ens-dark-blue);
-  --sl-color-backdrop-overlay: oklch(24% 0.002 var(--sl-hue-base) / 0.7);
-
-  /* Sidebar improvements */
-  --sl-color-text-sidebar: var(--ens-gray-3);
-  --sl-color-text-sidebar-active: var(--ens-dark-blue);
-  --sl-color-bg-sidebar-hover: var(--ens-blue);
-  --sl-color-border-sidebar: var(--ens-midnight-blue);
-
-  /* Typography */
-  --sl-text-h1: var(--sl-text-3xl);
-  --sl-text-h2: var(--sl-text-2xl);
-  --sl-text-h3: var(--sl-text-xl);
-  --sl-text-h4: var(--sl-text-lg);
-  --sl-text-h5: unset;
-
-  /* UI Elements */
-  --sl-ensnode-ui-bg-color: var(--ens-dark-blue);
-  --sl-ensnode-ui-header-bg-color: var(--ens-dark-blue);
-  --sl-ensnode-ui-border-color: var(--ens-gray);
-
-  --sl-ensnode-ec-marker-bg-color: var(--ens-midnight-blue);
-  --sl-ensnode-ec-marker-border-color: var(--ens-gray);
-
-  /* Code blocks */
-  --sl-color-code-bg: var(--ens-midnight-blue);
-  --sl-color-code-text: var(--ens-light-blue);
-  --sl-color-code-border: var(--ens-gray);
-}
-
-:root[data-theme="light"],
-[data-theme="light"] ::backdrop {
-  --sl-hue-base: 203;
-  --sl-color-bg: var(--ens-white);
   --sl-color-white: #f6f6f6;
   --sl-color-gray-1: #e5e5e5;
   --sl-color-gray-2: #c4c7c8;
@@ -143,12 +37,8 @@
   --sl-color-gray-7: oklch(96% 0.003 var(--sl-hue-base));
   --sl-color-black: var(--ens-dark-blue);
 
-  /* Improved contrast for hairlines/borders in light mode */
-  --sl-color-hairline-shade: var(--ens-gray-3);
-  --sl-color-hairline: var(--ens-gray-3);
-  --sl-color-hairline-light: var(--ens-gray-2);
-
-  /* Light theme colors */
+  /* Primary brand color - blue */
+  --sl-hue-blue: 203;
   --sl-color-blue-low: #cee1e8;
   --sl-color-blue: #0080bc;
   --sl-color-blue-high: #093c52;
@@ -157,12 +47,16 @@
   --sl-color-blue-alt: #cee1e8;
   --sl-color-blue-alt-invert: #093c52;
 
+  /* Secondary color - green */
+  --sl-hue-green: 150;
   --sl-color-green-low: #c5ddcc;
   --sl-color-green: #007c23;
   --sl-color-green-high: oklch(43% 0.09 var(--sl-hue-green));
   --sl-color-green-accent: #007c23;
   --sl-color-green-accent-invert: oklch(50% 0.1 var(--sl-hue-green));
 
+  /* Secondary color - magenta (replaces purple) */
+  --sl-hue-purple: 340;
   --sl-color-purple-low: #f2c4da;
   --sl-color-purple: #f53293;
   --sl-color-purple-high: oklch(40% 0.102 var(--sl-hue-purple));
@@ -171,6 +65,8 @@
   --sl-color-purple-alt: #f2c4da;
   --sl-color-purple-alt-invert: oklch(77% 0.05 var(--sl-hue-purple));
 
+  /* Secondary color - yellow (replaces orange) */
+  --sl-hue-orange: 60;
   --sl-color-orange-low: #f8f6d6;
   --sl-color-orange: #fff72f;
   --sl-color-orange-high: #674d49;
@@ -179,6 +75,8 @@
   --sl-color-orange-alt: #f8f6d6;
   --sl-color-orange-alt-invert: #674d49;
 
+  /* Error color - using a red tone */
+  --sl-hue-red: 13;
   --sl-color-red-low: oklch(95% 0.01 var(--sl-hue-red));
   --sl-color-red: oklch(66% 0.15 var(--sl-hue-red));
   --sl-color-red-high: oklch(42% 0.13 var(--sl-hue-red));
@@ -187,130 +85,49 @@
   --sl-color-red-alt: oklch(94% 0.02 var(--sl-hue-red));
   --sl-color-red-alt-invert: oklch(78% 0.04 var(--sl-hue-red));
 
-  /* Accent color for light mode */
+  /* Primary accent color - set to ENS blue */
   --sl-hue-accent: 203;
   --sl-color-accent-low: #cee1e8;
   --sl-color-accent: #0080bc;
   --sl-color-accent-high: #093c52;
 
-  /* Improved text colors for light mode */
+  /* Improved text colors */
   --sl-color-text: var(--ens-dark-blue);
   --sl-color-text-accent: var(--ens-blue);
   --sl-color-text-muted: var(--ens-gray);
   --sl-color-text-invert: var(--ens-white);
 
+  /* UI Components */
+  --sl-color-bg-nav: var(--ens-white);
+  --sl-color-bg-sidebar: var(--ens-white);
   --sl-color-backdrop-overlay: oklch(84% 0.003 var(--sl-hue-base) / 0.7);
 
-  /* UI Components */
-  --sl-color-bg-sidebar: var(--ens-white);
-
-  /* Sidebar improvements for light mode */
+  /* Sidebar improvements */
   --sl-color-text-sidebar: var(--ens-gray);
   --sl-color-text-sidebar-active: var(--ens-blue);
   --sl-color-bg-sidebar-hover: var(--ens-light-blue);
   --sl-color-border-sidebar: var(--ens-gray-3);
 
-  /* UI Elements for light theme */
+  /* Typography */
+  --sl-text-h1: var(--sl-text-3xl);
+  --sl-text-h2: var(--sl-text-2xl);
+  --sl-text-h3: var(--sl-text-xl);
+  --sl-text-h4: var(--sl-text-lg);
+  --sl-text-h5: unset;
+
+  /* UI Elements */
   --sl-ensnode-ui-bg-color: #f6f6f6;
   --sl-ensnode-ui-header-bg-color: var(--ens-white);
+  --sl-ensnode-ui-border-color: var(--ens-gray-3);
 
   --sl-ensnode-ec-marker-bg-color: #e5e5e5;
   --sl-ensnode-ec-marker-border-color: #4a5c63;
 
-  /* Code blocks for light mode */
-  --sl-color-code-bg: var(--ens-light-blue);
-  --sl-color-code-text: var(--ens-dark-blue);
-  --sl-color-code-border: var(--ens-gray-3);
-
-  /* Text styles */
-   */
-}
-
-.sl-link-button.primary {
-  color: var(--ens-white);
-}
-.sl-link-button.primary:hover {
-  background-color: var(--ens-midnight-blue);
-  border-color: var(--ens-midnight-blue);
-  color: var(--sl-color-white);
-}
-
-/* Header */
-
-header.header {
-  -webkit-backdrop-filter: blur(0.5rem);
-  backdrop-filter: blur(0.5rem);
-  background-color: var(--sl-ensnode-ui-header-bg-color);
-  border-bottom: 1px solid var(--sl-color-border-sidebar);
-}
-
-@media (prefers-reduced-transparency) {
-  header.header {
-    -webkit-backdrop-filter: initial;
-    backdrop-filter: initial;
-    background-color: var(--ens-dark-blue);
+  /* Code blocks */
+  sidebar-content a[aria-current="page"] {
+    color: var(--sl-color-text-sidebar-active);
+    background-color: var(--sl-color-bg-sidebar-hover);
   }
-}
-
-@media (min-width: 50rem) {
-  header.header:not(:has(starlight-lang-select)),
-  [data-has-sidebar] header.header:not(:has(starlight-lang-select)) {
-    padding-inline-end: calc(var(--sl-nav-pad-x) - 1rem);
-  }
-}
-
-header.header .site-title {
-  font-size: var(--sl-text-h3);
-  color: var(--sl-color-text);
-}
-
-header.header .right-group {
-  gap: 0;
-}
-
-starlight-lang-select select {
-  padding-inline-start: 1.5rem;
-  width: calc(var(--sl-ensnode-lang-select-width) + 3rem);
-  color: var(--sl-color-text);
-  border-color: var(--sl-color-hairline-light);
-}
-
-starlight-lang-select label:is(:hover, :focus-visible) {
-  color: var(--sl-color-hairline-light);
-}
-
-starlight-lang-select svg.label-icon {
-  font-size: 1rem;
-}
-
-starlight-menu-button button {
-  box-shadow: initial;
-  color: var(--sl-color-text);
-}
-
-[data-theme="light"] starlight-menu-button button {
-  background-color: var(--ens-white);
-  color: var(--ens-dark-blue);
-}
-
-[data-theme="light"] starlight-menu-button[aria-expanded="true"] button {
-  background-color: var(--ens-light-blue);
-}
-
-/* Sidebar improvements */
-
-.sidebar-content a {
-  color: var(--sl-color-text-sidebar);
-}
-
-.sidebar-content a:hover {
-  color: var(--sl-color-text-sidebar-active);
-  background-color: var(--sl-color-bg-sidebar-hover);
-}
-
-.sidebar-content a[aria-current="page"] {
-  color: var(--sl-color-text-sidebar-active);
-  background-color: var(--sl-color-bg-sidebar-hover);
 }
 
 /* Search */
@@ -352,7 +169,7 @@ site-search button {
   background-color: var(--ens-white);
 }
 
-[data-theme="light"] site-search dialog {
+site-search dialog {
   background-color: var(--ens-white);
 }
 
