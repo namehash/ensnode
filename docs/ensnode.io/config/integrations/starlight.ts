@@ -5,12 +5,13 @@ import starlightThemeEnsnode from "starlight-theme-ensnode";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
+    customCss: ["./src/styles/globals.css"],
     plugins: [
       starlightThemeEnsnode(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
-          link: "/ensnode/",
+          link: "/ensnode",
           icon: "star",
           items: [
             {
@@ -21,12 +22,16 @@ export function starlight(): AstroIntegration {
                   link: "/ensnode",
                 },
                 {
+                  label: "What is the ENS Subgraph?",
+                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                },
+                {
                   label: "What is ENSNode?",
                   link: "/ensnode/concepts/what-is-ensnode",
                 },
                 {
-                  label: "What is ENS Subgraph?",
-                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                  label: "ENSNode Roadmap",
+                  link: "/ensnode/concepts/roadmap",
                 },
               ],
             },
@@ -58,8 +63,34 @@ export function starlight(): AstroIntegration {
           ],
         },
         {
+          label: "ENSIndexer",
+          link: "/ensindexer",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "What is ENSIndexer?",
+                  link: "/ensindexer",
+                },
+              ],
+            },
+            {
+              label: "Using ENSIndexer",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/usage" },
+            },
+            {
+              label: "Contributing",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/contributing" },
+            },
+          ],
+        },
+        {
           label: "ENSRainbow",
-          link: "/ensrainbow/",
+          link: "/ensrainbow",
           icon: "star",
           items: [
             {
@@ -90,7 +121,7 @@ export function starlight(): AstroIntegration {
         },
         {
           label: "ENSAdmin",
-          link: "/ensadmin/",
+          link: "/ensadmin",
           icon: "star",
           items: [
             {
@@ -123,5 +154,49 @@ export function starlight(): AstroIntegration {
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
     },
+    head: [
+      {
+        tag: "meta",
+        attrs: {
+          property: "og:image",
+          content: "https://ensnode.io/OG_image.png",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:card",
+          content: "summary_large_image",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:image",
+          content: "https://ensnode.io/Twitter_OG_image.png",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:title",
+          content: "The new multichain indexer for ENSv2",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:description",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:creator",
+          content: "@NameHashLabs",
+        },
+      },
+    ],
   });
 }

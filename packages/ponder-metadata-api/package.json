@@ -12,20 +12,25 @@
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
   "keywords": ["Ponder"],
   "exports": {
+    ".": "./src/index.ts",
     "./middleware": "./src/middleware.ts"
   },
   "files": ["dist"],
   "publishConfig": {
     "access": "public",
     "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "./middleware": {
         "types": "./dist/middleware.d.ts",
         "default": "./dist/middleware.js"
       }
     },
-    "main": "./dist/middleware.js",
-    "module": "./dist/middleware.mjs",
-    "types": "./dist/middleware.d.ts"
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
   },
   "scripts": {
     "prepublish": "tsup",
@@ -37,7 +42,8 @@
   "dependencies": {
     "drizzle-orm": "catalog:",
     "parse-prometheus-text-format": "^1.1.1",
-    "viem": "catalog:"
+    "viem": "catalog:",
+    "@ensnode/ensrainbow-sdk": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

@@ -15,8 +15,18 @@ COPY apps/ensrainbow/package.json ./apps/ensrainbow/package.json
 COPY apps/ensrainbow/download-rainbow-tables.sh ./apps/ensrainbow/download-rainbow-tables.sh
 
 WORKDIR /app/apps/ensrainbow
-RUN pnpm get-legacy-data
-
+# Allow parametrization of which data version to download
+# Possible values: "v1" (default) or "v2" or "test"
+# This ARG is used to determine which data fetching command to run during the build process.
+# It can be set using the --build-arg flag when building the Docker image.
+ARG DATA_VERSION="v1"
+RUN if [ "$DATA_VERSION" = "v1" ]; then \
+        pnpm get-legacy-data; \
+    elif [ "$DATA_VERSION" = "v2" ]; then \
+        pnpm get-v2-data; \
+    elif [ "$DATA_VERSION" = "test" ]; then \
+        pnpm get-test-data; \
+    fi
 ###################
 ## Dependencies Stage — standard monorepo pnpm install from base
 ###################
@@ -52,5 +62,8 @@ RUN rm ens_names.sql.gz
 ###################
 
 FROM base AS ensrainbow-data
+ARG DATA_VERSION="v1"
+# Set a label to identify the data version
+LABEL io.ensnode.data-version=${DATA_VERSION}
 
 COPY --from=ingest /app/apps/ensrainbow/data ./data

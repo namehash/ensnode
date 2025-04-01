@@ -1,46 +1,65 @@
-# Base working stage
-FROM node:18-slim AS builder
+FROM node:18-slim AS base
+
+FROM base AS builder
+
+ARG NEXT_PUBLIC_DEFAULT_ENSNODE_URLS
 ARG PNPM_VERSION=9.12.0
+
 RUN apt-get update && \
+    apt-get install -y \
+        curl \
+        gnupg \
+        python3 \
+        make \
+        g++ && \
     npm install -g pnpm@${PNPM_VERSION}
+
 WORKDIR /app
 
-# Define the environment variables during the build process
-ARG VITE_ENSNODE_URL
-ENV VITE_ENSNODE_URL=${VITE_ENSNODE_URL}
-
+# Install dependencies based on the preferred package manager
 # Copy pnpm workspace configuration files from the root directory
 COPY pnpm-workspace.yaml ./
 # Copy the root package.json and lockfile
 COPY package.json pnpm-lock.yaml ./
+# Copy the app package.json
+COPY apps/ensadmin/package.json ./apps/ensadmin/package.json
 # Copy all pnpm workspace modules
-COPY apps ./apps
 COPY packages ./packages
 # Install dependencies for the entire monorepo
 RUN pnpm install --frozen-lockfile
-# Change to the specific app directory
-WORKDIR /app/apps/ensadmin
-# Prepare production bundle
-RUN pnpm build
 
-# Production stage
-# use the official Caddy image as the base image
-# https://caddyserver.com/docs/install/docker
-FROM caddy:2-alpine
-COPY --from=builder /app/apps/ensadmin/dist /usr/share/caddy
-# Embed Caddy configuration
-# - Adds proper cache headers:
-#  - Long cache (1 year) for static assets
-#  - No cache for index.html to ensure fresh content
-# - Includes gzip compression
-# - Handles SPA routing by redirecting 404s to index.html
-RUN printf ":4173 {\n\
-    root * /usr/share/caddy\n\
-    try_files {path} /index.html\n\
-    file_server\n\
-    encode gzip\n\
-    header Cache-Control \"public, max-age=31536000\"\n\
-    header /index.html Cache-Control \"no-cache\"\n\
-}\n" > /etc/caddy/Caddyfile
+# Set the environment variable for next.config.ts
+# This will be used to determine if the build output should be standalone
+ENV NEXT_BUILD_OUTPUT_STANDALONE=true
+
+# Set the environment variable for the default ENSNode URLs
+ENV NEXT_PUBLIC_DEFAULT_ENSNODE_URLS=${NEXT_PUBLIC_DEFAULT_ENSNODE_URLS}
+
+# Copy the app source code
+COPY apps/ensadmin ./apps/ensadmin
+# Build the app
+RUN pnpm --filter ensadmin build
+
+# # 3. Production image, copy all the files and run next
+FROM base AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/apps/ensadmin/public ./apps/ensadmin/public
+
+COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/static ./apps/ensadmin/.next/static
+
+USER nextjs
 
 EXPOSE 4173
+
+ENV PORT=4173
+ENV HOSTNAME=0.0.0.0
+
+CMD ["node", "apps/ensadmin/server.js"]

@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - main
+  release:
+    types: [published]
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+          
 jobs:
 
   image-build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
       - name: Checkout repository
@@ -16,32 +20,28 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Make disk space ( remove unnecessary libs )
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+      
+      - name: Extract metadata for Docker
+        id: meta
         run: |
-            # Show disk usage
-            echo "Before cleanup"
-            df -h
-            # Remove unused libaries directories
-            sudo rm -rf /usr/share/dotnet /usr/local/lib/android
-            sudo rm -rf /opt/ghc
-            sudo rm -rf /usr/local/share/powershell
-            sudo rm -rf /usr/local/graalvm
-            sudo rm -rf /usr/local/.ghcup
-            sudo rm -rf /usr/lib/jvm
-            # Show disk usage
-            echo "After cleanup"
-            df -h
-
-      - name: Set up QEMU (for cross-architecture builds)
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-    
+          # Set default tag as latest
+          DOCKER_TAG="latest"
+          # If this is a tag push, use the tag name instead
+          if [[ $GITHUB_REF == refs/tags/ensrainbow@* ]]; then
+            DOCKER_TAG=${GITHUB_REF#refs/tags/ensrainbow@}
+          fi
+          echo "tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+  
       - name: Build & Push Docker image for the ENSRainbow app
+        uses: ./.github/actions/build_docker_image
         env:
-          IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow
-          TAG: latest
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker buildx build --push --platform linux/amd64,linux/arm64 -f apps/ensrainbow/Dockerfile -t $IMAGE_NAME:$TAG  .
+          TAG: ${{ steps.meta.outputs.tag }}
+        with:
+          image_name:  ghcr.io/${{ github.repository }}/ensrainbow:${{ env.TAG }}
+          dockerfile_path: apps/ensrainbow/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }} 

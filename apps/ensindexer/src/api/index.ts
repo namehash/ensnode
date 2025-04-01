@@ -1,31 +1,71 @@
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { ponderMetadata } from "@ensnode/ponder-metadata/middleware";
+import { ponderMetadata } from "@ensnode/ponder-metadata";
 import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
-import { Hono } from "hono";
+import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 import packageJson from "../../package.json";
 import {
+  createEnsRainbowVersionFetcher,
+  createFirstBlockToIndexByChainIdFetcher,
+  createPrometheusMetricsFetcher,
+  ensAdminUrl,
   ensNodePublicUrl,
   getEnsDeploymentChain,
   ponderDatabaseSchema,
+  ponderPort,
   requestedPluginNames,
 } from "../lib/ponder-helpers";
 
 const app = new Hono();
 
-// use CORS middleware
+const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
+  ctx.header("x-ensnode-version", packageJson.version);
+
+  return next();
+};
+
 app.use(
+  // set the X-ENSNode-Version header to the current version
+  ensNodeVersionResponseHeader,
+
+  // use CORS middleware
   cors({
     origin: "*",
   }),
 );
 
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
-app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
+app.onError((error, ctx) => {
+  // log the error for operators
+  console.error(error);
+
+  return ctx.text("Internal server error", 500);
+});
+// use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
+app.use("/", async (ctx) => {
+  try {
+    const ensAdminRedirectUrl = new URL(ensAdminUrl());
+    ensAdminRedirectUrl.searchParams.set("ensnode", ensNodePublicUrl());
+
+    return ctx.redirect(ensAdminRedirectUrl);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
+  }
+});
+
+// setup block indexing status fetching
+const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
+  import("../../ponder.config").then((m) => m.default),
 );
+
+// setup prometheus metrics fetching
+const fetchPrometheusMetrics = createPrometheusMetricsFetcher(ponderPort());
+
+// setup ENSRainbow version fetching
+const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
 
 // use ENSNode middleware at /metadata
 app.get(
@@ -41,8 +81,11 @@ app.get(
       ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
     },
     db,
-    fetchPrometheusMetrics: () =>
-      fetch(`http://localhost:${process.env.PORT}/metrics`).then((res) => res.text()),
+    query: {
+      firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
+      prometheusMetrics: fetchPrometheusMetrics,
+      ensRainbowVersion: fetchEnsRainbowVersion,
+    },
     publicClients,
   }),
 );

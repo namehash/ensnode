@@ -10,7 +10,7 @@ on:
 
 jobs:
   changed-packages:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     outputs:
       packages: ${{ steps.changes.outputs.packages }}
     steps:
@@ -24,7 +24,7 @@ jobs:
               - 'packages/**'
 
   static-analysis:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
       - name: Checkout repository
@@ -34,7 +34,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: useblacksmith/setup-node@v5
         with:
           node-version-file: .nvmrc
 
@@ -83,7 +83,7 @@ jobs:
           fi
 
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
       - name: Checkout repository
@@ -93,7 +93,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: useblacksmith/setup-node@v5
         with:
           node-version-file: .nvmrc
 

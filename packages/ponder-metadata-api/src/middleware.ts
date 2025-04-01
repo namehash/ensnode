@@ -1,127 +1,238 @@
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { MiddlewareHandler } from "hono";
-import { ReadonlyDrizzle } from "ponder";
-import { PublicClient } from "viem";
+import { HTTPException } from "hono/http-exception";
 import { queryPonderMeta, queryPonderStatus } from "./db-helpers";
 import { PrometheusMetrics } from "./prometheus-metrics";
-import type { BlockMetadata, NetworkIndexingStatus } from "./types/common";
+import type {
+  PonderEnvVarsInfo,
+  PonderMetadataMiddlewareOptions,
+  PonderMetadataMiddlewareResponse,
+} from "./types/api";
+import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "./types/common";
 
-export function ponderMetadata({
+/**
+ * Ponder Metadata types definition.
+ */
+interface PonderMetadataModule {
+  /** Application info */
+  AppInfo: {
+    /** Application name */
+    name: string;
+    /** Application version */
+    version: string;
+  };
+
+  /** Environment Variables info */
+  EnvVars: {
+    /** Database schema */
+    DATABASE_SCHEMA: string;
+  } & PonderEnvVarsInfo;
+
+  /** Runtime info */
+  RuntimeInfo: {
+    /**
+     * Application build id
+     * https://github.com/ponder-sh/ponder/blob/626e524/packages/core/src/build/index.ts#L425-L431
+     **/
+    codebaseBuildId: string;
+
+    /** Network indexing status by chain ID */
+    networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
+
+    /** ENSRainbow version info */
+    ensRainbow?: EnsRainbow.VersionInfo;
+  };
+}
+
+export type MetadataMiddlewareResponse = PonderMetadataMiddlewareResponse<
+  PonderMetadataModule["AppInfo"],
+  PonderMetadataModule["EnvVars"],
+  PonderMetadataModule["RuntimeInfo"]
+>;
+
+export function ponderMetadata<
+  AppInfo extends PonderMetadataModule["AppInfo"],
+  EnvVars extends PonderMetadataModule["EnvVars"],
+>({
   app,
   db,
   env,
-  fetchPrometheusMetrics,
+  query,
   publicClients,
-}: {
-  db: ReadonlyDrizzle<Record<string, unknown>>;
-  app: {
-    name: string;
-    version: string;
-  };
-  env: {
-    DATABASE_SCHEMA: string;
-  } & Record<string, unknown>;
-  fetchPrometheusMetrics: () => Promise<string>;
-  publicClients: Record<number, PublicClient>;
-}): MiddlewareHandler {
+}: PonderMetadataMiddlewareOptions<AppInfo, EnvVars>): MiddlewareHandler {
   return async function ponderMetadataMiddleware(ctx) {
     const indexedChainIds = Object.keys(publicClients).map(Number);
 
     const ponderStatus = await queryPonderStatus(env.DATABASE_SCHEMA, db);
-    const ponderMeta = await queryPonderMeta(env.DATABASE_SCHEMA, db);
-    const metrics = PrometheusMetrics.parse(await fetchPrometheusMetrics());
+    const metrics = PrometheusMetrics.parse(await query.prometheusMetrics());
 
-    const networkIndexingStatus: Record<string, NetworkIndexingStatus> = {};
+    const networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus> = {};
 
     for (const indexedChainId of indexedChainIds) {
       const publicClient = publicClients[indexedChainId];
 
       if (!publicClient) {
-        throw new Error(`No public client found for chainId ${indexedChainId}`);
+        throw new HTTPException(500, {
+          message: `No public client found for chainId ${indexedChainId}`,
+        });
       }
 
-      const latestSafeBlock = await publicClient.getBlock();
+      /**
+       * Fetches block metadata from blockchain network for a given block number.
+       * @param blockNumber
+       * @returns block metadata
+       * @throws {Error} if failed to fetch block metadata from blockchain network
+       */
+      const fetchBlockMetadata = async (blockNumber: number): Promise<BlockInfo> => {
+        const block = await publicClient.getBlock({
+          blockNumber: BigInt(blockNumber),
+        });
 
+        if (!block) {
+          throw new Error(
+            `Failed to fetch block metadata for block number ${blockNumber} with chain ID ${indexedChainId}`,
+          );
+        }
+
+        return {
+          number: Number(block.number),
+          timestamp: Number(block.timestamp),
+        } satisfies BlockInfo;
+      };
+
+      const latestSafeBlockData = await publicClient.getBlock();
+
+      if (!latestSafeBlockData) {
+        throw new HTTPException(500, {
+          message: `Failed to fetch latest safe block for chainId ${indexedChainId}`,
+        });
+      }
+
+      // mapping latest safe block
+      const latestSafeBlock = {
+        number: Number(latestSafeBlockData.number),
+        timestamp: Number(latestSafeBlockData.timestamp),
+      } satisfies BlockInfo;
+
+      // mapping chain id to its string representation for metric queries
       const network = indexedChainId.toString();
-      const ponderStatusForNetwork = ponderStatus.find((s) => s.network_name === network);
-      const lastIndexedBlock = mapPonderStatusBlockToBlockMetadata(ponderStatusForNetwork);
 
-      networkIndexingStatus[network] = {
-        totalBlocksCount:
-          metrics.getValue("ponder_historical_total_blocks", {
-            network,
-          }) ?? null,
-        cachedBlocksCount:
-          metrics.getValue("ponder_historical_cached_blocks", {
-            network,
-          }) ?? null,
-        lastSyncedBlock: blockInfo({
-          number:
-            metrics.getValue("ponder_sync_block", {
-              network,
-            }) ?? 0,
-          timestamp: 0,
-        }),
-        latestSafeBlock: blockInfo({
-          number: Number(latestSafeBlock.number),
-          timestamp: Number(latestSafeBlock.timestamp),
-        }),
+      // mapping last synced block if available
+      const lastSyncedBlockHeight = metrics.getValue("ponder_sync_block", {
+        network,
+      });
+      let lastSyncedBlock: BlockInfo | null = null;
+      if (lastSyncedBlockHeight) {
+        try {
+          lastSyncedBlock = await fetchBlockMetadata(lastSyncedBlockHeight);
+        } catch (error) {
+          console.error("Failed to fetch block metadata for last synced block", error);
+        }
+      }
+
+      // mapping ponder status for current network
+      const ponderStatusForNetwork = ponderStatus.find(
+        (ponderStatusEntry) => ponderStatusEntry.network_name === network,
+      );
+
+      // mapping last indexed block if available
+      let lastIndexedBlock: BlockInfo | null = null;
+      if (ponderStatusForNetwork) {
+        lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForNetwork);
+      }
+
+      networkIndexingStatusByChainId[indexedChainId] = {
+        lastSyncedBlock,
         lastIndexedBlock,
-        isRealtime: Boolean(metrics.getValue("ponder_sync_is_realtime", { network })),
-        isComplete: Boolean(metrics.getValue("ponder_sync_is_complete", { network })),
-        isQueued: lastIndexedBlock === null,
+        latestSafeBlock,
+        firstBlockToIndex: await query.firstBlockToIndexByChainId(indexedChainId, publicClient),
       } satisfies NetworkIndexingStatus;
     }
 
-    return ctx.json({
+    // mapping ponder app build id if available
+    let ponderAppBuildId: string | undefined;
+    try {
+      ponderAppBuildId = (await queryPonderMeta(env.DATABASE_SCHEMA, db)).build_id;
+    } catch (error) {
+      console.error("Failed to fetch ponder metadata", error);
+    }
+
+    // fetch ENSRainbow version if available
+    let ensRainbowVersionInfo = undefined;
+    if (query.ensRainbowVersion) {
+      try {
+        ensRainbowVersionInfo = await query.ensRainbowVersion();
+      } catch (error) {
+        console.error("Failed to fetch ENSRainbow version", error);
+      }
+    }
+
+    const response = {
       app,
-      // application dependencies version
       deps: {
-        ponder: metrics.getLabel("ponder_version_info", "version"),
-        nodejs: metrics.getLabel("nodejs_version_info", "version"),
+        ponder: formatTextMetricValue(metrics.getLabel("ponder_version_info", "version")),
+        nodejs: formatTextMetricValue(metrics.getLabel("nodejs_version_info", "version")),
       },
-      // application environment variables
       env,
-      // application runtime information
       runtime: {
-        // application build id
-        // https://github.com/ponder-sh/ponder/blob/626e524/packages/core/src/build/index.ts#L425-L431
-        codebaseBuildId: ponderMeta?.build_id,
-        // tableNames: meta?.table_names,
-        networkIndexingStatus,
+        codebaseBuildId: formatTextMetricValue(ponderAppBuildId),
+        networkIndexingStatusByChainId,
+        ensRainbow: ensRainbowVersionInfo,
       },
-    });
+    } satisfies MetadataMiddlewareResponse;
+
+    // validate if response is in correct state
+    validateResponse(response);
+
+    return ctx.json(response);
   };
 }
 
-function blockInfo(block: {
-  number: number | null;
-  timestamp: number | null;
-}): BlockMetadata | null {
-  if (!block.number) {
+/**
+ * Validates the metadata middleware response to ensure correct state.
+ *
+ * @param response The response to validate
+ * @throws {HTTPException} if the response is in an invalid state
+ */
+function validateResponse(response: MetadataMiddlewareResponse): void {
+  const { networkIndexingStatusByChainId } = response.runtime;
+
+  if (Object.keys(networkIndexingStatusByChainId).length === 0) {
+    throw new HTTPException(500, {
+      message: "No network indexing status found",
+    });
+  }
+
+  if (Object.values(networkIndexingStatusByChainId).some((n) => n.firstBlockToIndex === null)) {
+    throw new HTTPException(500, {
+      message: "Failed to fetch first block to index for some networks",
+    });
+  }
+}
+
+/**
+ * Formats a text metric value.
+ * @param value
+ * @returns
+ */
+function formatTextMetricValue(value?: string): string {
+  return value ?? "unknown";
+}
+
+/**
+ * Converts a Ponder block status to a block info object.
+ **/
+function ponderBlockInfoToBlockMetadata(block: PonderBlockStatus | undefined): BlockInfo | null {
+  if (!block) {
+    return null;
+  }
+
+  if (!block.block_number || !block.block_timestamp) {
     return null;
   }
 
   return {
-    height: block.number,
-    timestamp: block.timestamp ?? 0,
-    utc: block.timestamp ? new Date(block.timestamp * 1000).toISOString() : "",
-  };
-}
-
-function mapPonderStatusBlockToBlockMetadata(
-  block:
-    | {
-        block_number: number | null;
-        block_timestamp: number | null;
-      }
-    | undefined,
-): BlockMetadata | null {
-  if (!block?.block_number) {
-    return null;
-  }
-
-  return blockInfo({
     number: block.block_number,
     timestamp: block.block_timestamp,
-  });
+  };
 }

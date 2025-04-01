@@ -1,0 +1,16 @@
+/*
+ * NOTE: tailwin preflight resets list styles, so here we add them back. In the future we should just
+ * make sure this is unnecessary.
+ */
+
+main ol {
+  list-style: decimal;
+  margin: 0;
+  padding-left: 2rem;
+}
+
+main ul {
+  list-style: disc;
+  margin: 0;
+  padding-left: 2rem;
+}

@@ -7,9 +7,13 @@
     "lint": "pnpm -r lint",
     "lint:ci": "pnpm -r lint:ci",
     "changeset": "changeset",
-    "release": "changeset publish",
+    "release": "changeset publish --filter='!@ensnode/shared-configs'",
     "version": "changeset version",
-    "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish"
+    "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish",
+    "docker:build:ensnode": "pnpm run docker:build:ensindexer && pnpm run docker:build:ensrainbow && pnpm run docker:build:ensadmin",
+    "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
+    "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
+    "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -23,8 +27,11 @@
   },
   "pnpm": {
     "overrides": {
+      "@astrojs/prism>prismjs": "1.30.0",
+      "@babel/runtime": "7.26.10",
+      "@babel/helpers": "7.26.10",
       "@graphiql/react>@headlessui/react": "2.2.0",
-      "ponder>vite": "5.4.14",
+      "ponder>vite": "5.4.15",
       "astro>esbuild": "0.25.0",
       "tsup>esbuild": "0.25.0",
       "tsx>esbuild": "0.25.0",
