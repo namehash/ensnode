@@ -15,8 +15,8 @@ export const ENSAdminLogoDark = (props: React.SVGProps<SVGSVGElement>) => (
     <path d="M8.00014 16H20L20.5991 17H7.40234L8.00014 16Z" fill="#2364E8" />
     <path d="M10.9997 11H16.9999L17.6014 12H10.3999L10.9997 11Z" fill="#2364E8" />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M24 2H4C2.89543 2 2 2.89543 2 4V24C2 25.1046 2.89543 26 4 26H24C25.1046 26 26 25.1046 26 24V4C26 2.89543 25.1046 2 24 2ZM4 0C1.79086 0 0 1.79086 0 4V24C0 26.2091 1.79086 28 4 28H24C26.2091 28 28 26.2091 28 24V4C28 1.79086 26.2091 0 24 0H4Z"
       fill="white"
     />
@@ -29,8 +29,8 @@ export const ENSAdminLogoDark = (props: React.SVGProps<SVGSVGElement>) => (
         gradientUnits="userSpaceOnUse"
         gradientTransform="translate(14 14) rotate(90) scale(12)"
       >
-        <stop offset="0.455" stop-color="#DCE7FF" />
-        <stop offset="1" stop-color="#A9C5FF" />
+        <stop offset="0.455" stopColor="#DCE7FF" />
+        <stop offset="1" stopColor="#A9C5FF" />
       </radialGradient>
       <linearGradient
         id="paint1_linear_708_886"
@@ -40,8 +40,8 @@ export const ENSAdminLogoDark = (props: React.SVGProps<SVGSVGElement>) => (
         y2="26"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#78A5FF" />
-        <stop offset="1" stop-color="#528BFF" />
+        <stop stopColor="#78A5FF" />
+        <stop offset="1" stopColor="#528BFF" />
       </linearGradient>
     </defs>
   </svg>
