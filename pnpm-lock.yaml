@@ -60,12 +60,6 @@ catalogs:
     vitest:
       specifier: ^3.0.5
       version: 3.0.5
-    astro-font:
-      specifier: ^1.0.0
-      version: 1.0.0
-    astro-seo:
-      specifier: ^0.8.4
-      version: 0.8.4
 
 overrides:
   '@astrojs/prism>prismjs': 1.30.0
