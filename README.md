@@ -19,21 +19,29 @@
 
 # ENSNode
 
-[ENSNode](https://ensnode.io) is the new multichain indexer for [ENSv2](https://roadmap.ens.domains/roadmap/).
+<a href="https://ensnode.io" target="_blank">ENSNode</a> is the new multichain indexer for ENS, including [ENSv2](https://roadmap.ens.domains/roadmap/).
 
-Full Documentation ➡︎ [ensnode.io](https://ensnode.io)
+Full Documentation ➡︎ <a href="https://ensnode.io" target="_blank">ensnode.io</a>
 
 ## The future of ENS indexing
 
-ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace in a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
+ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler self-hosted deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace via a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
 
 - Multichain ENS Namespace
   - flattened, unified, multichain and multiregistrar namespace via optional plugins
   - ✅ Mainnet ENS Names
   - ✅ Basenames (`.base.eth`)
   - ✅ Linea Names (`.linea.eth`)
+  - 🚧 Tokenized DNS Names
+    - [3DNS](https://3dns.box) Support (`.box`, + more)
+    - [Namefi](https://namefi.io/) Support
+  - 🚧 Offchain Names
+    - `.cb.id`, `.uni.id`, + more
+    - [NameStone](https://namestone.com/) Names
+    - [NameSpace](https://namespace.ninja/) Names
+    - [Justaname](https://www.justaname.id/) Names
   - 🚧 + more
-- Built on Ponder
+- Built on [Ponder](https://ponder.sh)
   - ✅ Rapid Indexing & Backfill
     - 10x faster than ENS Subgraph
     - Mainnet Backfill: **7 hours** on M1 Macbook
@@ -56,12 +64,12 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
 
 ## Why Index ENS? Why ENSNode?
 
-The ENS protocol enables resolution of names across multiple chains and even off-chain data sources. ENS smart contracts optimize for some operations, but not others. For example, if you wanted to list all of a user's owned names, there's no practical way to do this through ENS contracts.
+The ENS protocol enables resolution of names across multiple chains and, increasingly, off-chain data sources. ENS smart contracts optimize for some operations, but not others: for example, if you wanted to list all of a user's owned names, there's no practical way to do this through ENS contracts, and an off-chain indexer like ENSNode _must_ be used.
 
-An indexer aggregates and reorganizes the representation of ENS's state to make many important queries like that possible, efficient, and convenient:
+An indexer aggregates and reorganizes the representation of ENS's state to make important queries like that possible, efficient, and convenient:
 
 ```graphql
-# get all of a user's domains by address
+# get all of a user's domains by address — not possible on-chain!
 query Domains($adress: String!) {
   domains(where: { owner: $address }) {
     id
@@ -71,9 +79,11 @@ query Domains($adress: String!) {
 }
 ```
 
-Historically the ENS Subgraph has served this purpose, but the Subgraph's limitations are increasingly severe as the ENS protocol grows. For example: The ENS Subgraph can only index a single chain at a time (ex: mainnet). Given how the majority of ENS names are now issued off of mainnet, only a small percentage of ENS names can be indexed by the ENS Subgraph. This issue will only grow more severe with the launch of ENSv2 and Namechain.
+Historically the ENS Subgraph has served this purpose, but the Subgraph's limitations are increasingly severe as the ENS protocol grows: the ENS Subgraph can only index a single chain at a time (ex: mainnet) and can't integrate with off-chain names that require [CCIP-Read](https://docs.ens.domains/resolvers/ccip-read).
 
-ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatible Subgraph queries and sets the stage for supporting [ENSv2](https://roadmap.ens.domains/roadmap/), in particular Namechain and the growing set of off-chain ENS names (like `.uni.eth` and `.cb.id`).
+Given how the majority of ENS names are now issued off of mainnet, only a small percentage of ENS names can be indexed by the ENS Subgraph. This issue will only grow more severe with the launch of [ENSv2](https://roadmap.ens.domains/roadmap/) and [Namechain](https://app.ens.domains/ens-v2).
+
+ENSNode is a modern, multichain indexer for ENS. It supports backwards-compatible Subgraph queries and sets the stage for supporting [ENSv2](https://roadmap.ens.domains/roadmap/), in particular [Namechain](https://app.ens.domains/ens-v2) and the growing set of off-chain ENS names (like `.uni.eth` and `.cb.id`).
 
 ## Documentation
 
@@ -88,12 +98,8 @@ We welcome community contributions and feedback—please see [CONTRIBUTING.md](C
 NameHash has received generous support from the [ENS DAO](https://ensdao.org/) and [Gitcoin](https://www.gitcoin.co/).
 
 <p align="middle">
-  <a href="https://ensdao.org/" target="_blank">
-    <img src="./docs/ensnode.io/public/ensdao.png" width="180">
-  </a>
-  <a href="https://www.gitcoin.co/" target="_blank">
-    <img src="./docs/ensnode.io/public/gitcoin.png" width="180">
-  </a>
+  <a href="https://ensdao.org/" target="_blank"><img src="./docs/ensnode.io/public/ensdao.png" width="180"></a>
+  <a href="https://www.gitcoin.co/" target="_blank" style="text-decoration: none;"><img src="./docs/ensnode.io/public/gitcoin.png" width="180"></a>
 </p>
 
 ## Contact Us
@@ -123,7 +129,7 @@ The ENSNode monorepo contains multiple modules in the following subdirectories:
   </tr>
 </table>
 
-Explore the ENS Protocol like never before.
+ENSAdmin is a dashboard for ENSNode and the ENS protocol. See the [ENSAdmin documentation](https://ensnode.io/ensadmin/) for more details.
 
 ### [`apps/ensindexer`](apps/ensindexer)
 
@@ -134,7 +140,7 @@ Explore the ENS Protocol like never before.
   </tr>
 </table>
 
-The main ENSNode indexer application enabling multichain indexing for ENS.
+ENSIndexer is a Ponder-powered indexer for ENS contracts across mulitple chains. See the [ENSIndexer documentation](https://ensnode.io/ensindexer/) for more details.
 
 ### [`apps/ensrainbow`](apps/ensrainbow)
 
@@ -145,7 +151,7 @@ The main ENSNode indexer application enabling multichain indexing for ENS.
   </tr>
 </table>
 
-A sidecar service for healing ENS labels. It provides a simple API to recover labels from their hashes. This optimizes a number of ENS use cases, including indexing of ENS data. See the [ENSRainbow documentation](apps/ensrainbow/README.md) for more details.
+ENSRainbow heals unknown ENS names: it provides a simple API to recover labels from their labelHashes. See the [ENSRainbow documentation](https://ensnode.io/ensrainbow/) for more details.
 
 ## Packages
 
@@ -167,11 +173,11 @@ Shared Ponder schema definitions
 
 ### [`packages/ponder-subgraph-api`](packages/ponder-subgraph-api)
 
-Subgraph API compatibility layer
+Subgraph-compatible GraphQL API
 
 ### [`packages/shared-configs`](packages/shared-configs)
 
-Shared configuration files
+Shared internal configuration files
 
 ## Docs
 
