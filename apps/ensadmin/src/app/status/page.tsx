@@ -1,21 +1,26 @@
-import { Suspense } from "react";
-
+import { ensNodeMetadataQueryOptions } from "@/components/ensnode/metadata-query";
 import { IndexingStatus } from "@/components/indexing-status/components";
+import { getQueryClient } from "@/components/providers/react-query-client";
+import { parseSearchParams, selectedEnsNodeUrl } from "@/lib/env";
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 
-export default function Status() {
-  return (
-    <>
-      <Suspense fallback={<Loading />}>
-        <IndexingStatus />
-      </Suspense>
-    </>
-  );
+// explicitly set to force-dynamic to require server-side rendering
+export const dynamic = "force-dynamic";
+
+interface StatusProps {
+  searchParams: Promise<Record<string, unknown>>;
 }
 
-function Loading() {
+export default async function Status(props: StatusProps) {
+  const ensNodeUrl = selectedEnsNodeUrl(await parseSearchParams(props.searchParams));
+  
+  const queryClient = getQueryClient();
+  // wait for query data to be fetched on the server-side
+  await queryClient.prefetchQuery(ensNodeMetadataQueryOptions(ensNodeUrl));
+
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <IndexingStatus />
+    </HydrationBoundary>
   );
 }

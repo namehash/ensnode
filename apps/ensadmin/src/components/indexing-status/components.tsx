@@ -10,7 +10,6 @@ import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { fromUnixTime, intlFormat } from "date-fns";
-import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
