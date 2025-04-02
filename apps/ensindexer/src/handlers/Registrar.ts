@@ -104,15 +104,12 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       });
 
       // log RegistrationEvent
-      await context.db
-        .insert(schema.nameRegistered)
-        .values({
-          ...sharedEventValues(event),
-          registrationId,
-          registrantId: owner,
-          expiryDate: expires,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameRegistered).values({
+        ...sharedEventValues(event),
+        registrationId,
+        registrantId: owner,
+        expiryDate: expires,
+      });
     },
 
     async handleNameRegisteredByController({
@@ -162,14 +159,11 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
         .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
 
       // log RegistrationEvent
-      await context.db
-        .insert(schema.nameRenewed)
-        .values({
-          ...sharedEventValues(event),
-          registrationId: id,
-          expiryDate: expires,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameRenewed).values({
+        ...sharedEventValues(event),
+        registrationId: id,
+        expiryDate: expires,
+      });
     },
 
     async handleNameTransferred({
@@ -193,14 +187,11 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
       await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
 
       // log RegistrationEvent
-      await context.db
-        .insert(schema.nameTransferred)
-        .values({
-          ...sharedEventValues(event),
-          registrationId: id,
-          newOwnerId: to,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameTransferred).values({
+        ...sharedEventValues(event),
+        registrationId: id,
+        newOwnerId: to,
+      });
     },
   };
 };

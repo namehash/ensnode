@@ -87,15 +87,12 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
     await context.db.update(schema.domain, { id: node }).set({ wrappedOwnerId: to });
 
     // log DomainEvent
-    await context.db
-      .insert(schema.wrappedTransfer)
-      .values({
-        ...sharedEventValues(event),
-        id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
-        domainId: node,
-        ownerId: to,
-      })
-      .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+    await context.db.insert(schema.wrappedTransfer).values({
+      ...sharedEventValues(event),
+      id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
+      domainId: node,
+      ownerId: to,
+    });
   }
 
   return {
@@ -146,17 +143,14 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await materializeDomainExpiryDate(context, node);
 
       // log DomainEvent
-      await context.db
-        .insert(schema.nameWrapped)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          name,
-          fuses,
-          ownerId: owner,
-          expiryDate: expiry,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameWrapped).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        name,
+        fuses,
+        ownerId: owner,
+        expiryDate: expiry,
+      });
     },
 
     async handleNameUnwrapped({
@@ -181,14 +175,11 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await context.db.delete(schema.wrappedDomain, { id: node });
 
       // log DomainEvent
-      await context.db
-        .insert(schema.nameUnwrapped)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          ownerId: owner,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameUnwrapped).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        ownerId: owner,
+      });
     },
 
     async handleFusesSet({
@@ -212,14 +203,11 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       }
 
       // log DomainEvent
-      await context.db
-        .insert(schema.fusesSet)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          fuses,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.fusesSet).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        fuses,
+      });
     },
     async handleExpiryExtended({
       context,
@@ -242,14 +230,11 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       }
 
       // log DomainEvent
-      await context.db
-        .insert(schema.expiryExtended)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          expiryDate: expiry,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.expiryExtended).values({
+        ...sharedEventValues(event),
+        domainId: node,
+        expiryDate: expiry,
+      });
     },
     async handleTransferSingle({
       context,
