@@ -72,7 +72,7 @@ function validateResponse(response: unknown): EnsNode.Metadata {
       v.string(),
       v.check(
         (version) => satisfies(version, SUPPORTED_ENSNODE_VERSION),
-        `ENSNode version must satisfy ${SUPPORTED_ENSNODE_VERSION}`
+        `ENSNode version must satisfy ${SUPPORTED_ENSNODE_VERSION}`,
       ),
     ),
   });

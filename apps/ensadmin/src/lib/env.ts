@@ -157,7 +157,13 @@ export function defaultEnsNodeUrl(): URL {
   return defaultEnsNodeUrls()[0];
 }
 
-function parseUrl(maybeUrl: string): URL {
+/**
+ * Parses a URL from a string.
+ * @param maybeUrl
+ * @returns URL
+ * @throws when the URL is invalid
+ */
+export function parseUrl(maybeUrl: string): URL {
   try {
     return new URL(maybeUrl);
   } catch (error) {
