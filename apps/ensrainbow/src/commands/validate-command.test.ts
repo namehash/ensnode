@@ -2,8 +2,9 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { mkdtemp, rm } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ENSRainbowDB } from "../lib/database";
-import { validateCommand } from "./validate-command";
+
+import { validateCommand } from "@/commands/validate-command";
+import { ENSRainbowDB } from "@/lib/database";
 
 describe("Validate Command", () => {
   let tempDir: string;
