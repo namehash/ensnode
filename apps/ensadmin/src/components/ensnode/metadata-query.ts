@@ -1,5 +1,11 @@
 import { ensAdminVersion } from "@/lib/env";
+import DeploymentConfigs, {
+  ENSDeploymentChain,
+  ENSDeploymentConfig,
+} from "@ensnode/ens-deployments";
 import { queryOptions } from "@tanstack/react-query";
+import { satisfies } from "semver";
+import * as v from "valibot";
 import type { EnsNode } from "./types";
 
 /**
@@ -12,11 +18,6 @@ export function ensNodeMetadataQueryOptions(ensNodeUrl: URL) {
   return queryOptions({
     queryKey: ["ensnode", ensNodeUrl.toString(), "metadata"],
     queryFn: () => fetchEnsNodeMetadata(ensNodeUrl),
-    select(data) {
-      validateResponse(data);
-
-      return data;
-    },
     throwOnError(error) {
       throw new Error(`ENSNode request error at '${ensNodeUrl}'. Cause: ${error.message}`);
     },
@@ -42,7 +43,7 @@ async function fetchEnsNodeMetadata(baseUrl: URL): Promise<EnsNode.Metadata> {
     throw new Error("Failed to fetch ENSNode status");
   }
 
-  return response.json();
+  return validateResponse(await response.json());
 }
 
 /**
@@ -50,26 +51,66 @@ async function fetchEnsNodeMetadata(baseUrl: URL): Promise<EnsNode.Metadata> {
  * @param response
  * @throws Error if the response is invalid
  */
-function validateResponse(response: EnsNode.Metadata) {
-  const { networkIndexingStatusByChainId } = response.runtime;
+function validateResponse(response: unknown): EnsNode.Metadata {
+  const SUPPORTED_ENSNODE_VERSION = ">=0.0.1";
 
-  if (typeof networkIndexingStatusByChainId === "undefined") {
-    throw new Error(`Network indexing status not found in the response.`);
-  }
+  const supportedEnsDeploymentChains = Array.from(
+    Object.keys(DeploymentConfigs),
+  ) as Array<ENSDeploymentChain>;
 
-  if (Object.keys(networkIndexingStatusByChainId).length === 0) {
-    throw new Error(`No network indexing status found response.`);
-  }
+  const EnsNodeBlockInfoSchema = v.object({
+    number: v.number(),
+    timestamp: v.number(),
+  });
 
-  const networksWithoutFirstBlockToIndex = Object.entries(networkIndexingStatusByChainId).filter(
-    ([, network]) => network.firstBlockToIndex === null,
-  );
+  const EnsNodeAppInfoSchema = v.object({
+    name: v.pipe(
+      v.string(),
+      v.endsWith("ensindexer", "ENSNode application name must end with 'ensindexer'"),
+    ),
+    version: v.pipe(
+      v.string(),
+      v.check(
+        (version) => satisfies(version, SUPPORTED_ENSNODE_VERSION),
+        `ENSNode version must satisfy ${SUPPORTED_ENSNODE_VERSION}`
+      ),
+    ),
+  });
 
-  if (networksWithoutFirstBlockToIndex.length > 0) {
-    throw new Error(
-      `Missing first block to index for some networks with the following chain IDs: ${networksWithoutFirstBlockToIndex
-        .map(([chainId]) => chainId)
-        .join(", ")}`,
-    );
-  }
+  const EnsNodeDepsSchema = v.object({
+    ponder: v.string(),
+    nodejs: v.string(),
+  });
+
+  const EnsNodeEnvSchema = v.object({
+    ACTIVE_PLUGINS: v.pipe(
+      v.string(),
+      v.transform((activePlugins) => activePlugins.split(",") as Array<keyof ENSDeploymentConfig>),
+    ),
+    DATABASE_SCHEMA: v.string(),
+    ENS_DEPLOYMENT_CHAIN: v.pipe(v.picklist(supportedEnsDeploymentChains)),
+  });
+
+  const EnsNodeNetworkIndexingStatusSchema = v.object({
+    firstBlockToIndex: EnsNodeBlockInfoSchema,
+    latestSafeBlock: EnsNodeBlockInfoSchema,
+    lastIndexedBlock: v.nullable(EnsNodeBlockInfoSchema),
+    lastSyncedBlock: v.nullable(EnsNodeBlockInfoSchema),
+  });
+
+  const EnsNodeRuntimeSchema = v.object({
+    codebaseBuildId: v.string(),
+    networkIndexingStatusByChainId: v.pipe(
+      v.record(v.string(), EnsNodeNetworkIndexingStatusSchema),
+    ),
+  });
+
+  const EnsNodeMetadataSchema = v.object({
+    app: EnsNodeAppInfoSchema,
+    deps: EnsNodeDepsSchema,
+    env: EnsNodeEnvSchema,
+    runtime: EnsNodeRuntimeSchema,
+  });
+
+  return v.parse(EnsNodeMetadataSchema, response) satisfies EnsNode.Metadata;
 }

@@ -27,7 +27,7 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
   };
 
   /** Public clients for each blockchain network fetching data */
-  publicClients: Record<number, PublicClient>;
+  publicClients: Record<string, PublicClient>;
 }
 
 export interface PonderMetadataMiddlewareResponse<
