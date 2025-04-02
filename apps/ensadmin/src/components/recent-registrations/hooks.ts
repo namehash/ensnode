@@ -14,7 +14,7 @@ const RECENT_REGISTRATIONS_LIMIT = 10;
  * @param baseUrl ENSNode URL
  * @returns Info about the most recently registered .eth domains that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: string): Promise<RecentRegistrationsResponse> {
+async function fetchRecentRegistrations(baseUrl: URL): Promise<RecentRegistrationsResponse> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${RECENT_REGISTRATIONS_LIMIT}, orderBy: registrationDate, orderDirection: desc) {

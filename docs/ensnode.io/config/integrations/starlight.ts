@@ -5,6 +5,7 @@ import starlightThemeRapide from "starlight-theme-rapide";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
+    customCss: ["./src/styles/globals.css"],
     plugins: [
       starlightThemeRapide(),
       starlightSidebarTopics([
@@ -21,12 +22,16 @@ export function starlight(): AstroIntegration {
                   link: "/ensnode",
                 },
                 {
+                  label: "What is the ENS Subgraph?",
+                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                },
+                {
                   label: "What is ENSNode?",
                   link: "/ensnode/concepts/what-is-ensnode",
                 },
                 {
-                  label: "What is ENS Subgraph?",
-                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                  label: "ENSNode Roadmap",
+                  link: "/ensnode/concepts/roadmap",
                 },
               ],
             },
@@ -167,22 +172,29 @@ export function starlight(): AstroIntegration {
       {
         tag: "meta",
         attrs: {
-          property: "twitter:image",
+          name: "twitter:image",
           content: "https://ensnode.io/Twitter_OG_image.png",
         },
       },
       {
         tag: "meta",
         attrs: {
-          property: "twitter:title",
+          name: "twitter:title",
           content: "The new multichain indexer for ENSv2",
         },
       },
       {
         tag: "meta",
         attrs: {
-          property: "twitter:description",
+          name: "twitter:description",
           content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:creator",
+          content: "@NameHashLabs",
         },
       },
     ],

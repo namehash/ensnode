@@ -147,6 +147,18 @@ describe("Server Command Tests", () => {
     });
   });
 
+  describe("GET /v1/version", () => {
+    it("should return version information", async () => {
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/version`);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+
+      expect(data.status).toEqual(StatusCode.Success);
+      expect(typeof data.versionInfo.version).toBe("string");
+      expect(typeof data.versionInfo.schema_version).toBe("number");
+    });
+  });
+
   describe("CORS headers for /v1/* routes", () => {
     it("should return CORS headers for /v1/* routes", async () => {
       const validLabel = "test-label";
@@ -166,6 +178,9 @@ describe("Server Command Tests", () => {
           method: "OPTIONS",
         }),
         fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`, {
+          method: "OPTIONS",
+        }),
+        fetch(`http://localhost:${nonDefaultPort}/v1/version`, {
           method: "OPTIONS",
         }),
       ]);

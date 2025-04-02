@@ -1,6 +1,5 @@
+import { defaultEnsNodeUrl } from "@/lib/env";
 import { Suspense } from "react";
-
-import { preferredEnsNodeUrl } from "@/lib/env";
 import { Provider as PonderClientProvider } from "../../components/providers/ponder-client-provider";
 import { PonderClientContent } from "./examples-content";
 
@@ -11,17 +10,17 @@ type PageProps = {
 };
 
 export default async function PonderClientPage({ searchParams }: PageProps) {
-  const { ensnode = preferredEnsNodeUrl() } = await searchParams;
+  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
 
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
       ? ensnode
-      : preferredEnsNodeUrl();
+      : defaultEnsNodeUrl();
 
   return (
     <Suspense fallback={<Loading />}>
-      <PonderClientProvider url={baseUrl}>
+      <PonderClientProvider url={baseUrl.toString()}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>

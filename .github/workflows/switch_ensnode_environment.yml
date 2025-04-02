@@ -45,4 +45,6 @@ jobs:
             redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVIRONMENT}-holesky-api"
             redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVIRONMENT}-holesky-indexer"
 
+            # ENSRAINBOW
+            redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
           

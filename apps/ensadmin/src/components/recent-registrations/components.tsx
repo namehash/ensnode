@@ -183,8 +183,10 @@ export function RecentRegistrations() {
     return null;
   }
 
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
+
   return (
-    <PonderClientProvider url={selectedEnsNodeUrl(searchParams)}>
+    <PonderClientProvider url={ensNodeUrl.toString()}>
       <RecentRegistrationsList
         chainId={ensDeploymentChainId}
         ensNodeMetadata={indexingStatus.data}
