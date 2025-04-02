@@ -40,6 +40,7 @@
     "@ensnode/shared-configs": "workspace:",
     "@types/node": "catalog:",
     "typescript": "catalog:",
+    "vite": "^6.2.4",
     "vitest": "catalog:"
   }
 }

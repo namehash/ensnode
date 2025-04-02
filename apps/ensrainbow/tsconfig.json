@@ -1,5 +1,10 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.lib.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "**/*.test.ts"]
 }

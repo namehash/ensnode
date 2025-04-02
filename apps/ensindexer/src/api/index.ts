@@ -1,3 +1,5 @@
+import packageJson from "@/../package.json";
+
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
@@ -5,7 +7,7 @@ import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware"
 import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
-import packageJson from "../../package.json";
+
 import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
@@ -16,7 +18,7 @@ import {
   ponderDatabaseSchema,
   ponderPort,
   requestedPluginNames,
-} from "../lib/ponder-helpers";
+} from "@/lib/ponder-helpers";
 
 const app = new Hono();
 
@@ -31,9 +33,7 @@ app.use(
   ensNodeVersionResponseHeader,
 
   // use CORS middleware
-  cors({
-    origin: "*",
-  }),
+  cors({ origin: "*" }),
 );
 
 app.onError((error, ctx) => {
@@ -42,6 +42,7 @@ app.onError((error, ctx) => {
 
   return ctx.text("Internal server error", 500);
 });
+
 // use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
   try {

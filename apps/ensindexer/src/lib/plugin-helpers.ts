@@ -1,15 +1,16 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
-import { END_BLOCK, START_BLOCK } from "./globals";
+
+import { END_BLOCK, START_BLOCK } from "@/lib/globals";
 import {
   constrainBlockrange,
   getEnsDeploymentChain,
   requestedPluginNames as getRequestedPluginNames,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
-} from "./ponder-helpers";
-import type { OwnedName, PluginName } from "./types";
+} from "@/lib/ponder-helpers";
+import type { OwnedName, PluginName } from "@/lib/types";
 
 /**
  * A factory function that returns a function to create a namespaced contract

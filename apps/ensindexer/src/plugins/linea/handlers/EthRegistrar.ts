@@ -4,9 +4,10 @@ import DeploymentConfigs from "@ensnode/ens-deployments";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
 import { decodeEventLog, zeroAddress } from "viem";
-import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { upsertAccount } from "../../../lib/db-helpers";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+
+import { makeRegistrarHandlers } from "@/handlers/Registrar";
+import { upsertAccount } from "@/lib/db-helpers";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of linea.eth are registered through the linea.eth ETHRegistrarController
