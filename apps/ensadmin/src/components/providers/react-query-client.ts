@@ -6,12 +6,10 @@ import { QueryClient, defaultShouldDehydrateQuery, isServer } from "@tanstack/re
  * @returns A query client.
  */
 function makeQueryClient() {
-  const sixtySeconds = 60 * 1000;
-
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: sixtySeconds,
+        staleTime: 5 * 1000,
       },
       dehydrate: {
         // include pending queries in dehydration
