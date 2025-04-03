@@ -66,7 +66,7 @@ overrides:
   '@babel/runtime': 7.26.10
   '@babel/helpers': 7.26.10
   '@graphiql/react>@headlessui/react': 2.2.0
-  ponder>vite: 5.4.15
+  ponder>vite: 5.4.17
   astro>esbuild: 0.25.0
   tsup>esbuild: 0.25.0
   tsx>esbuild: 0.25.0
@@ -7040,8 +7040,8 @@ packages:
       vite:
         optional: true
 
-  vite@5.4.15:
-    resolution: {integrity: sha512-6ANcZRivqL/4WtwPGTKNaosuNJr5tWiftOC7liM7G9+rMb8+oeJeyzymDu4rTN93seySBmbjSfsS3Vzr19KNtA==}
+  vite@5.4.17:
+    resolution: {integrity: sha512-5+VqZryDj4wgCs55o9Lp+p8GE78TLVg0lasCH5xFZ4jacZjtqZa6JUw9/p0WeAojaOfncSM6v77InkFPGnvPvg==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -14111,9 +14111,9 @@ snapshots:
       superjson: 2.2.2
       terminal-size: 4.0.0
       viem: 2.22.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
-      vite: 5.4.15(@types/node@20.17.14)(lightningcss@1.29.1)
+      vite: 5.4.17(@types/node@20.17.14)(lightningcss@1.29.1)
       vite-node: 1.0.2(@types/node@20.17.14)(lightningcss@1.29.1)
-      vite-tsconfig-paths: 4.3.1(typescript@5.7.3)(vite@5.4.15(@types/node@20.17.14)(lightningcss@1.29.1))
+      vite-tsconfig-paths: 4.3.1(typescript@5.7.3)(vite@5.4.17(@types/node@20.17.14)(lightningcss@1.29.1))
     optionalDependencies:
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -14189,9 +14189,9 @@ snapshots:
       superjson: 2.2.2
       terminal-size: 4.0.0
       viem: 2.22.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
-      vite: 5.4.15(@types/node@22.13.9)(lightningcss@1.29.1)
+      vite: 5.4.17(@types/node@22.13.9)(lightningcss@1.29.1)
       vite-node: 1.0.2(@types/node@22.13.9)(lightningcss@1.29.1)
-      vite-tsconfig-paths: 4.3.1(typescript@5.7.3)(vite@5.4.15(@types/node@22.13.9)(lightningcss@1.29.1))
+      vite-tsconfig-paths: 4.3.1(typescript@5.7.3)(vite@5.4.17(@types/node@22.13.9)(lightningcss@1.29.1))
     optionalDependencies:
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -15682,7 +15682,7 @@ snapshots:
       debug: 4.4.0
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.15(@types/node@20.17.14)(lightningcss@1.29.1)
+      vite: 5.4.17(@types/node@20.17.14)(lightningcss@1.29.1)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -15700,7 +15700,7 @@ snapshots:
       debug: 4.4.0
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.15(@types/node@22.13.9)(lightningcss@1.29.1)
+      vite: 5.4.17(@types/node@22.13.9)(lightningcss@1.29.1)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -15754,29 +15754,29 @@ snapshots:
       - tsx
       - yaml
 
-  vite-tsconfig-paths@4.3.1(typescript@5.7.3)(vite@5.4.15(@types/node@20.17.14)(lightningcss@1.29.1)):
+  vite-tsconfig-paths@4.3.1(typescript@5.7.3)(vite@5.4.17(@types/node@20.17.14)(lightningcss@1.29.1)):
     dependencies:
       debug: 4.4.0
       globrex: 0.1.2
       tsconfck: 3.1.5(typescript@5.7.3)
     optionalDependencies:
-      vite: 5.4.15(@types/node@20.17.14)(lightningcss@1.29.1)
+      vite: 5.4.17(@types/node@20.17.14)(lightningcss@1.29.1)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite-tsconfig-paths@4.3.1(typescript@5.7.3)(vite@5.4.15(@types/node@22.13.9)(lightningcss@1.29.1)):
+  vite-tsconfig-paths@4.3.1(typescript@5.7.3)(vite@5.4.17(@types/node@22.13.9)(lightningcss@1.29.1)):
     dependencies:
       debug: 4.4.0
       globrex: 0.1.2
       tsconfck: 3.1.5(typescript@5.7.3)
     optionalDependencies:
-      vite: 5.4.15(@types/node@22.13.9)(lightningcss@1.29.1)
+      vite: 5.4.17(@types/node@22.13.9)(lightningcss@1.29.1)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@5.4.15(@types/node@20.17.14)(lightningcss@1.29.1):
+  vite@5.4.17(@types/node@20.17.14)(lightningcss@1.29.1):
     dependencies:
       esbuild: 0.25.0
       postcss: 8.5.3
@@ -15786,7 +15786,7 @@ snapshots:
       fsevents: 2.3.3
       lightningcss: 1.29.1
 
-  vite@5.4.15(@types/node@22.13.9)(lightningcss@1.29.1):
+  vite@5.4.17(@types/node@22.13.9)(lightningcss@1.29.1):
     dependencies:
       esbuild: 0.25.0
       postcss: 8.5.3
