@@ -96,7 +96,7 @@ importers:
     dependencies:
       '@ensnode/ponder-metadata':
         specifier: workspace:*
-        version: link:../../packages/ponder-metadata-api
+        version: link:../../packages/ponder-metadata
       '@ensnode/ponder-schema':
         specifier: workspace:*
         version: link:../../packages/ponder-schema
@@ -241,7 +241,7 @@ importers:
         version: link:../../packages/ensrainbow-sdk
       '@ensnode/ponder-metadata':
         specifier: workspace:*
-        version: link:../../packages/ponder-metadata-api
+        version: link:../../packages/ponder-metadata
       '@ensnode/ponder-schema':
         specifier: workspace:*
         version: link:../../packages/ponder-schema
@@ -518,7 +518,7 @@ importers:
         specifier: 'catalog:'
         version: 3.1.1(@types/debug@4.1.12)(@types/node@22.13.9)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.2)(yaml@2.7.0)
 
-  packages/ponder-metadata-api:
+  packages/ponder-metadata:
     dependencies:
       '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
