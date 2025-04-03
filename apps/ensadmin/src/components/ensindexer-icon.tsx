@@ -18,7 +18,7 @@ export const ENSIndexerIcon = (props: SVGProps<SVGSVGElement>) => (
       rx="3"
       fill="#36D9FB"
       stroke="black"
-      stroke-width="2"
+      strokeWidth="2"
     />
     <path d="M26.5 9.5H18.5V17.5H22.5V21.5" stroke="black" />
     <circle cx="5.5" cy="5.5" r="1" stroke="black" />
