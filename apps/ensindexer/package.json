@@ -25,11 +25,11 @@
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/ens-deployments": "workspace:*",
-    "@ensnode/utils": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
+    "@ensnode/utils": "workspace:*",
     "hono": "catalog:",
     "ponder": "catalog:",
     "ts-deepmerge": "^7.0.2",
@@ -37,9 +37,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "typescript": "catalog:",
+    "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"
   }
 }

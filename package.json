@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "pnpm -r lint",
     "lint:ci": "pnpm -r lint:ci",
+    "test": "pnpm -r test run",
     "changeset": "changeset",
     "release": "changeset publish --filter='!@ensnode/shared-configs'",
     "version": "changeset version",
