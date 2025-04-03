@@ -6,7 +6,7 @@ import {
   createLogger,
   getEnvLogLevel,
   parseLogLevel,
-} from "@/utils/logger";
+} from "./logger";
 
 describe("logger", () => {
   describe("parseLogLevel", () => {

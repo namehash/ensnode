@@ -3,7 +3,7 @@ import type { Labelhash } from "@ensnode/utils/types";
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { buildRainbowRecord } from "@/utils/rainbow-record";
+import { buildRainbowRecord } from "./rainbow-record";
 
 describe("buildRainbowRecord", () => {
   it("should parse a valid line", () => {

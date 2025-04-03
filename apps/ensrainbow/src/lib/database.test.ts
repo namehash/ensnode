@@ -15,7 +15,7 @@ import {
   isRainbowRecordKey,
   isSystemKey,
   parseNonNegativeInteger,
-} from "@/lib/database";
+} from "./database";
 
 describe("Database", () => {
   let tempDir: string;

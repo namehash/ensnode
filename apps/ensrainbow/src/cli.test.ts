@@ -3,8 +3,8 @@ import { join } from "path";
 import { mkdtemp, rm } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createCLI, validatePortConfiguration } from "@/cli";
 import { DEFAULT_PORT, getEnvPort } from "@/lib/env";
+import { createCLI, validatePortConfiguration } from "./cli";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");

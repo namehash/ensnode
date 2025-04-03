@@ -5,8 +5,8 @@ import { Hono } from "hono";
 import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { createServer } from "@/commands/server-command";
 import { ENSRainbowDB } from "@/lib/database";
+import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
