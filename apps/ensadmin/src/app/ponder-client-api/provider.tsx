@@ -1,6 +1,5 @@
 "use client";
 
-import { Provider as QueryClientProvider } from "@/components/query-client/provider";
 import * as ponderSchema from "@ensnode/ponder-schema";
 import { createClient } from "@ponder/client";
 import { PonderProvider } from "@ponder/react";
@@ -16,7 +15,7 @@ export function Provider({ url, children }: ProviderProps) {
 
   return (
     <PonderProvider client={ponderClient}>
-      <QueryClientProvider>{children}</QueryClientProvider>
+      {children}
     </PonderProvider>
   );
 }

@@ -143,7 +143,7 @@ export function ponderMetadata<
 
       networkIndexingStatusByChainId[indexedChainId] = {
         lastSyncedBlock,
-        lastIndexedBlock: null,
+        lastIndexedBlock,
         latestSafeBlock,
         firstBlockToIndex: await query.firstBlockToIndexByChainId(indexedChainId, publicClient),
       } satisfies NetworkIndexingStatus;
