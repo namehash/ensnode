@@ -46,7 +46,7 @@ export function useIndexingStatusQuery(
       return data;
     },
     throwOnError(error) {
-      throw new Error(`ENSNode request error at '${ensNodeUrl}'. Cause: ${error.message}`);
+      throw new Error(`Could not fetch ENSNode data from '${ensNodeUrl}'. Cause: ${error.message}`);
     },
   });
 }
