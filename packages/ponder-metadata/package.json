@@ -21,10 +21,6 @@
       ".": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "./middleware": {
-        "types": "./dist/middleware.d.ts",
-        "default": "./dist/middleware.js"
       }
     },
     "main": "./dist/index.js",
