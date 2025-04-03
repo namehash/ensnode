@@ -1,13 +1,13 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
 import starlightSidebarTopics from "starlight-sidebar-topics";
-import starlightThemeRapide from "starlight-theme-rapide";
+import starlightThemeEnsnode from "starlight-theme-ensnode";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
     customCss: ["./src/styles/globals.css"],
     plugins: [
-      starlightThemeRapide(),
+      starlightThemeEnsnode(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
@@ -149,7 +149,9 @@ export function starlight(): AstroIntegration {
       replacesTitle: true,
     },
     social: {
+      twitter: "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
+      telegram: "https://t.me/namehash",
     },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
@@ -187,7 +189,8 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content:
+            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {

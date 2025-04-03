@@ -1,0 +1,220 @@
+:root,
+::backdrop {
+  --ens-blue: #0080bc;
+  --ens-light-blue: #cee1e8;
+  --ens-dark-blue: #011a25;
+  --ens-white: #f6f6f6;
+
+  --ens-green: #007c23;
+  --ens-magenta: #f53293;
+  --ens-yellow: #fff72f;
+  --ens-dark-brown: #674d49;
+  --ens-light-green: #c5ddcc;
+  --ens-light-magenta: #f2c4da;
+  --ens-light-yellow: #f8f6d6;
+  --ens-midnight-blue: #093c52;
+  --ens-gray: #4a5c63;
+  --ens-gray-3: #c4c7c8;
+  --ens-gray-2: #e5e5e5;
+
+  --sl-color-hairline-shade: var(--ens-gray-3);
+  --sl-color-hairline: var(--ens-gray-3);
+  --sl-color-hairline-light: var(--ens-gray-2);
+
+  --sl-hue-base: 203;
+  --sl-color-white: #f6f6f6;
+  --sl-color-gray-1: #e5e5e5;
+  --sl-color-gray-2: #c4c7c8;
+  --sl-color-gray-3: #4a5c63;
+  --sl-color-gray-4: #093c52;
+  --sl-color-gray-5: var(--ens-gray-3);
+  --sl-color-gray-6: #f6f6f6;
+  --sl-color-gray-7: #f6f6f6;
+  --sl-color-black: var(--ens-dark-blue);
+
+  --sl-hue-blue: 203;
+  --sl-color-blue-low: #cee1e8;
+  --sl-color-blue: #0080bc;
+  --sl-color-blue-high: #093c52;
+  --sl-color-blue-accent: #011a25;
+  --sl-color-blue-accent-invert: #0080bc;
+  --sl-color-blue-alt: #cee1e8;
+  --sl-color-blue-alt-invert: #093c52;
+
+  --sl-hue-green: 150;
+  --sl-color-green-low: #c5ddcc;
+  --sl-color-green: #007c23;
+  --sl-color-green-high: #004d15;
+  --sl-color-green-accent: #007c23;
+  --sl-color-green-accent-invert: #c5ddcc;
+
+  --sl-hue-purple: 340;
+  --sl-color-purple-low: #f2c4da;
+  --sl-color-purple: #f53293;
+  --sl-color-purple-high: #b81d6a;
+  --sl-color-purple-accent: #b81d6a;
+  --sl-color-purple-accent-invert: #f53293;
+  --sl-color-purple-alt: #f2c4da;
+  --sl-color-purple-alt-invert: #b81d6a;
+
+  --sl-hue-orange: 60;
+  --sl-color-orange-low: #f8f6d6;
+  --sl-color-orange: #fff72f;
+  --sl-color-orange-high: #674d49;
+  --sl-color-orange-accent: #674d49;
+  --sl-color-orange-accent-invert: #fff72f;
+  --sl-color-orange-alt: #f8f6d6;
+  --sl-color-orange-alt-invert: #674d49;
+
+  --sl-hue-red: 13;
+  --sl-color-red-low: #feeae6;
+  --sl-color-red: #d13814;
+  --sl-color-red-high: #8a250d;
+  --sl-color-red-accent: #8a250d;
+  --sl-color-red-accent-invert: #d13814;
+  --sl-color-red-alt: #feeae6;
+  --sl-color-red-alt-invert: #d13814;
+
+  --sl-hue-accent: 203;
+  --sl-color-accent-low: #cee1e8;
+  --sl-color-accent: #0080bc;
+  --sl-color-accent-high: #093c52;
+
+  --sl-color-bg: #f6f6f6;
+
+  --sl-color-text: var(--ens-dark-blue);
+  --sl-color-text-accent: var(--ens-blue);
+  --sl-color-text-muted: var(--ens-gray);
+  --sl-color-text-invert: var(--ens-white);
+
+  --sl-color-bg-nav: var(--ens-white);
+  --sl-color-bg-sidebar: var(--ens-white);
+  --sl-color-backdrop-overlay: rgba(73, 92, 99, 0.7);
+
+  --sl-color-text-sidebar: var(--ens-gray);
+  --sl-color-text-sidebar-active: var(--ens-blue);
+  --sl-color-bg-sidebar-hover: var(--ens-light-blue);
+  --sl-color-border-sidebar: var(--ens-gray-3);
+
+  --sl-text-h1: var(--sl-text-3xl);
+  --sl-text-h2: var(--sl-text-2xl);
+  --sl-text-h3: var(--sl-text-xl);
+  --sl-text-h4: var(--sl-text-lg);
+  --sl-text-h5: unset;
+
+  --sl-ensnode-ui-bg-color: #f6f6f6;
+  --sl-ensnode-ui-header-bg-color: var(--ens-white);
+  --sl-ensnode-ui-border-color: var(--ens-gray-3);
+  --sl-ensnode-ec-marker-bg-color: #e5e5e5;
+  --sl-ensnode-ec-marker-border-color: #4a5c63;
+
+  --sl-color-code-bg: #f6f6f6;
+  --sl-color-code-text: var(--ens-dark-blue);
+  --sl-color-code-border: var(--ens-gray-3);
+
+  --sl-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --sl-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+sidebar-content a[aria-current="page"] {
+  color: var(--sl-color-text-sidebar-active);
+  background-color: var(--sl-color-bg-sidebar-hover);
+}
+
+/* Search */
+@keyframes sl-ensnode-search-backdrop-fade {
+  from {
+    -webkit-backdrop-filter: initial;
+    backdrop-filter: initial;
+    background-color: transparent;
+  }
+
+  to {
+    -webkit-backdrop-filter: blur(0.25rem);
+    backdrop-filter: blur(0.25rem);
+    background-color: var(--sl-color-backdrop-overlay);
+  }
+}
+
+@keyframes sl-ensnode-search-dialog-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(-2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+site-search dialog {
+  background-color: var(--ens-gray-2);
+  box-shadow: none;
+  min-height: auto;
+  border: 1px solid var(--sl-color-hairline);
+}
+
+site-search button {
+  margin-left: auto;
+  background-color: var(--ens-white);
+}
+
+site-search dialog {
+  background-color: var(--ens-white);
+}
+
+site-search dialog .dialog-frame {
+  padding: 1rem;
+}
+
+site-search dialog #starlight__search {
+  --sl-search-corners: calc(0.5rem * var(--pagefind-ui-scale));
+  --pagefind-ui-border-radius: calc(0.5rem * var(--pagefind-ui-scale));
+}
+
+site-search dialog .pagefind-ui .pagefind-ui__search-input {
+  background-color: var(--sl-ensnode-ui-bg-color);
+  border: 1px solid var(--sl-color-hairline);
+  color: var(--sl-color-text);
+}
+
+.social-icons::after {
+  display: none;
+}
+
+.sl-link-card,
+a[rel="next"],
+a[rel="prev"] {
+  background-color: var(--sl-ensnode-ui-bg-color);
+  border-color: var(--sl-color-gray-4);
+  box-shadow: var(--sl-shadow-sm);
+}
+.sl-link-card:hover,
+a[rel="next"]:hover,
+a[rel="prev"]:hover {
+  border-color: var(--sl-color-gray-3);
+}
+
+.header {
+  background-color: var(--ens-white);
+  border-color: var(--ens-gray-3);
+}
+
+.sidebar-pane {
+  border-color: var(--ens-gray-3);
+}
+
+ul::after {
+  border-color: var(--ens-gray-3);
+}
+
+.content-panel + .content-panel {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.link-title {
+  color: var(--ens-blue);
+}
