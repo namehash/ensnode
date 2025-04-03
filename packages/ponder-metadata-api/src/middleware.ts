@@ -2,14 +2,14 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
-import { queryPonderMeta, queryPonderStatus } from "@/db-helpers";
-import { PrometheusMetrics } from "@/prometheus-metrics";
+import { queryPonderMeta, queryPonderStatus } from "./db-helpers";
+import { PrometheusMetrics } from "./prometheus-metrics";
 import type {
   PonderEnvVarsInfo,
   PonderMetadataMiddlewareOptions,
   PonderMetadataMiddlewareResponse,
-} from "@/types/api";
-import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "@/types/common";
+} from "./types/api";
+import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "./types/common";
 
 /**
  * Ponder Metadata types definition.

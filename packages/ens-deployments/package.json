@@ -11,8 +11,10 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ens-deployments",
   "keywords": ["ENS", "ENSNode"],
-  "exports": "./src/index.ts",
   "files": ["dist"],
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "publishConfig": {
     "access": "public",
     "exports": {

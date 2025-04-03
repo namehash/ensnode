@@ -50,7 +50,6 @@
     "@vitest/coverage-v8": "catalog:",
     "supertest": "^6.3.4",
     "typescript": "^5.3.3",
-    "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"
   }
 }

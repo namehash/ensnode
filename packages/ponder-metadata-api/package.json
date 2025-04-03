@@ -11,11 +11,10 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
   "keywords": ["Ponder"],
-  "exports": {
-    ".": "./src/index.ts",
-    "./middleware": "./src/middleware.ts"
-  },
   "files": ["dist"],
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "publishConfig": {
     "access": "public",
     "exports": {
@@ -53,7 +52,6 @@
     "ponder": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {

@@ -1,11 +1,11 @@
-import type { ENSDeploymentChain, ENSDeploymentConfig } from "@/lib/types";
+import type { ENSDeploymentChain, ENSDeploymentConfig } from "./lib/types";
 
-import ensTestEnv from "@/deployments/ens-test-env";
-import holesky from "@/deployments/holesky";
-import mainnet from "@/deployments/mainnet";
-import sepolia from "@/deployments/sepolia";
+import ensTestEnv from "./ens-test-env";
+import holesky from "./holesky";
+import mainnet from "./mainnet";
+import sepolia from "./sepolia";
 
-export * from "@/lib/types";
+export * from "./lib/types";
 
 /**
  * Mapping from a set of ENSDeploymentChains to an "ENS deployment".

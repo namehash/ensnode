@@ -1,4 +1,4 @@
-import { SubregistryContractConfig } from "@/lib/types";
+import { SubregistryContractConfig } from "./types";
 
 export const ETHResolverFilter = [
   { event: "AddrChanged", args: {} },
