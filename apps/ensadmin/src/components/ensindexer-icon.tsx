@@ -10,16 +10,7 @@ export const ENSIndexerIcon = (props: SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <path d="M2 2H26V26H2V2Z" fill="#36D9FB" />
-    <rect
-      x="1"
-      y="1"
-      width="26"
-      height="26"
-      rx="3"
-      fill="#36D9FB"
-      stroke="black"
-      strokeWidth="2"
-    />
+    <rect x="1" y="1" width="26" height="26" rx="3" fill="#36D9FB" stroke="black" strokeWidth="2" />
     <path d="M26.5 9.5H18.5V17.5H22.5V21.5" stroke="black" />
     <circle cx="5.5" cy="5.5" r="1" stroke="black" />
     <circle cx="6.5" cy="22.5" r="1" stroke="black" />

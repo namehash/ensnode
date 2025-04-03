@@ -13,11 +13,7 @@ type ProviderProps = {
 export function Provider({ url, children }: ProviderProps) {
   const [ponderClient] = useState(() => createPonderClient(url, schema));
 
-  return (
-    <PonderProvider client={ponderClient}>
-      {children}
-    </PonderProvider>
-  );
+  return <PonderProvider client={ponderClient}>{children}</PonderProvider>;
 }
 
 function createPonderClient(ensNodeUrl: string, schema: Record<string, unknown>) {
