@@ -11,11 +11,10 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
   "keywords": ["Ponder"],
-  "exports": {
-    ".": "./src/index.ts",
-    "./middleware": "./src/middleware.ts"
-  },
   "files": ["dist"],
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "publishConfig": {
     "access": "public",
     "exports": {
@@ -40,14 +39,14 @@
     "lint:ci": "biome ci"
   },
   "dependencies": {
+    "@ensnode/ensrainbow-sdk": "workspace:*",
     "drizzle-orm": "catalog:",
     "parse-prometheus-text-format": "^1.1.1",
-    "viem": "catalog:",
-    "@ensnode/ensrainbow-sdk": "workspace:*"
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "hono": "catalog:",
     "ponder": "catalog:",

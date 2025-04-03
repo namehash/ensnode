@@ -3,9 +3,9 @@ import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
-import { ENSRainbowDB, IngestionStatus } from "../lib/database";
-import { logger } from "../utils/logger";
-import { buildRainbowRecord } from "../utils/rainbow-record";
+import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
+import { logger } from "@/utils/logger";
+import { buildRainbowRecord } from "@/utils/rainbow-record";
 
 export interface IngestCommandOptions {
   inputFile: string;

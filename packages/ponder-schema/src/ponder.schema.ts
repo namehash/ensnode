@@ -12,17 +12,17 @@ export const domain = onchainTable("domains", (t) => ({
   // The human readable name, if known. Unknown portions replaced with hash in square brackets (eg, foo.[1234].eth)
   name: t.text(),
   // The human readable label name (imported from CSV), if known
-  labelName: t.text("label_name"),
+  labelName: t.text(),
   // keccak256(labelName)
   labelhash: t.hex(),
   // The namehash (id) of the parent name
   parentId: t.hex(),
 
   // The number of subdomains
-  subdomainCount: t.integer("subdomain_count").notNull().default(0),
+  subdomainCount: t.integer().notNull().default(0),
 
   // Address logged from current resolver, if any
-  resolvedAddressId: t.hex("resolved_address_id"),
+  resolvedAddressId: t.hex(),
 
   // The resolver that controls the domain's settings
   resolverId: t.text(),
@@ -31,19 +31,19 @@ export const domain = onchainTable("domains", (t) => ({
   ttl: t.bigint(),
 
   // Indicates whether the domain has been migrated to a new registrar
-  isMigrated: t.boolean("is_migrated").notNull().default(false),
+  isMigrated: t.boolean().notNull().default(false),
   // The time when the domain was created
-  createdAt: t.bigint("created_at").notNull(),
+  createdAt: t.bigint().notNull(),
 
   // The account that owns the domain
-  ownerId: t.hex("owner_id").notNull(),
+  ownerId: t.hex().notNull(),
   // The account that owns the ERC721 NFT for the domain
-  registrantId: t.hex("registrant_id"),
+  registrantId: t.hex(),
   // The account that owns the wrapped domain
-  wrappedOwnerId: t.hex("wrapped_owner_id"),
+  wrappedOwnerId: t.hex(),
 
   // The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned
-  expiryDate: t.bigint("expiry_date"),
+  expiryDate: t.bigint(),
 }));
 
 // monkeypatch drizzle's column (necessary to match graph-node default collation "C")
@@ -116,14 +116,14 @@ export const resolver = onchainTable(
     // The unique identifier for this resolver, which is a concatenation of the domain namehash and the resolver address
     id: t.text().primaryKey(),
     // The domain that this resolver is associated with
-    domainId: t.hex("domain_id").notNull(),
+    domainId: t.hex().notNull(),
     // The address of the resolver contract
     address: t.hex().notNull().$type<Address>(),
 
     // The current value of the 'addr' record for this resolver, as determined by the associated events
-    addrId: t.hex("addr_id"),
+    addrId: t.hex(),
     // The content hash for this resolver, in binary format
-    contentHash: t.text("content_hash"),
+    contentHash: t.text(),
     // The set of observed text record keys for this resolver
     // NOTE: we avoid .notNull.default([]) to match subgraph behavior
     texts: t.text().array(),
@@ -163,15 +163,15 @@ export const registration = onchainTable(
     // The unique identifier of the registration
     id: t.hex().primaryKey(),
     // The domain name associated with the registration
-    domainId: t.hex("domain_id").notNull(),
+    domainId: t.hex().notNull(),
     // The registration date of the domain
-    registrationDate: t.bigint("registration_date").notNull(),
+    registrationDate: t.bigint().notNull(),
     // The expiry date of the domain
-    expiryDate: t.bigint("expiry_date").notNull(),
+    expiryDate: t.bigint().notNull(),
     // The cost associated with the domain registration
     cost: t.bigint(),
     // The account that registered the domain
-    registrantId: t.hex("registrant_id").notNull(),
+    registrantId: t.hex().notNull(),
     // The human-readable label name associated with the domain registration
     labelName: t.text(),
   }),
@@ -206,13 +206,13 @@ export const wrappedDomain = onchainTable(
     // The unique identifier for each instance of the WrappedDomain entity
     id: t.hex().primaryKey(),
     // The domain that is wrapped by this WrappedDomain
-    domainId: t.hex("domain_id").notNull(),
+    domainId: t.hex().notNull(),
     // The expiry date of the wrapped domain
-    expiryDate: t.bigint("expiry_date").notNull(),
+    expiryDate: t.bigint().notNull(),
     // The number of fuses remaining on the wrapped domain
     fuses: t.integer().notNull(),
     // The account that owns this WrappedDomain
-    ownerId: t.hex("owner_id").notNull(),
+    ownerId: t.hex().notNull(),
     // The name of the wrapped domain
     name: t.text(),
   }),
@@ -238,13 +238,13 @@ export const wrappedDomainRelations = relations(wrappedDomain, ({ one }) => ({
 
 const sharedEventColumns = (t: any) => ({
   id: t.text().primaryKey(),
-  blockNumber: t.integer("block_number").notNull(),
-  transactionID: t.hex("transaction_id").notNull(),
+  blockNumber: t.integer().notNull(),
+  transactionID: t.hex().notNull(),
 });
 
 const domainEvent = (t: any) => ({
   ...sharedEventColumns(t),
-  domainId: t.hex("domain_id").notNull(),
+  domainId: t.hex().notNull(),
 });
 
 const domainEventIndex = (t: any) => ({
@@ -260,7 +260,7 @@ export const transfer = onchainTable(
   "transfers",
   (t) => ({
     ...domainEvent(t),
-    ownerId: t.hex("owner_id").notNull(),
+    ownerId: t.hex().notNull(),
   }),
   domainEventIndex,
 );
@@ -269,8 +269,8 @@ export const newOwner = onchainTable(
   "new_owners",
   (t) => ({
     ...domainEvent(t),
-    ownerId: t.hex("owner_id").notNull(),
-    parentDomainId: t.hex("parent_domain_id").notNull(),
+    ownerId: t.hex().notNull(),
+    parentDomainId: t.hex().notNull(),
   }),
   domainEventIndex,
 );
@@ -279,7 +279,7 @@ export const newResolver = onchainTable(
   "new_resolvers",
   (t) => ({
     ...domainEvent(t),
-    resolverId: t.text("resolver_id").notNull(),
+    resolverId: t.text().notNull(),
   }),
   domainEventIndex,
 );
@@ -297,7 +297,7 @@ export const wrappedTransfer = onchainTable(
   "wrapped_transfers",
   (t) => ({
     ...domainEvent(t),
-    ownerId: t.hex("owner_id").notNull(),
+    ownerId: t.hex().notNull(),
   }),
   domainEventIndex,
 );
@@ -308,8 +308,8 @@ export const nameWrapped = onchainTable(
     ...domainEvent(t),
     name: t.text(),
     fuses: t.integer().notNull(),
-    ownerId: t.hex("owner_id").notNull(),
-    expiryDate: t.bigint("expiry_date").notNull(),
+    ownerId: t.hex().notNull(),
+    expiryDate: t.bigint().notNull(),
   }),
   domainEventIndex,
 );
@@ -318,7 +318,7 @@ export const nameUnwrapped = onchainTable(
   "name_unwrapped",
   (t) => ({
     ...domainEvent(t),
-    ownerId: t.hex("owner_id").notNull(),
+    ownerId: t.hex().notNull(),
   }),
   domainEventIndex,
 );
@@ -336,7 +336,7 @@ export const expiryExtended = onchainTable(
   "expiry_extended",
   (t) => ({
     ...domainEvent(t),
-    expiryDate: t.bigint("expiry_date").notNull(),
+    expiryDate: t.bigint().notNull(),
   }),
   domainEventIndex,
 );
@@ -345,7 +345,7 @@ export const expiryExtended = onchainTable(
 
 const registrationEvent = (t: any) => ({
   ...sharedEventColumns(t),
-  registrationId: t.hex("registration_id").notNull(),
+  registrationId: t.hex().notNull(),
 });
 
 const registrationEventIndex = (t: any) => ({
@@ -359,8 +359,8 @@ export const nameRegistered = onchainTable(
   "name_registered",
   (t) => ({
     ...registrationEvent(t),
-    registrantId: t.hex("registrant_id").notNull(),
-    expiryDate: t.bigint("expiry_date").notNull(),
+    registrantId: t.hex().notNull(),
+    expiryDate: t.bigint().notNull(),
   }),
   registrationEventIndex,
 );
@@ -369,7 +369,7 @@ export const nameRenewed = onchainTable(
   "name_renewed",
   (t) => ({
     ...registrationEvent(t),
-    expiryDate: t.bigint("expiry_date").notNull(),
+    expiryDate: t.bigint().notNull(),
   }),
   registrationEventIndex,
 );
@@ -378,7 +378,7 @@ export const nameTransferred = onchainTable(
   "name_transferred",
   (t) => ({
     ...registrationEvent(t),
-    newOwnerId: t.hex("new_owner_id").notNull(),
+    newOwnerId: t.hex().notNull(),
   }),
   registrationEventIndex,
 );
@@ -387,7 +387,7 @@ export const nameTransferred = onchainTable(
 
 const resolverEvent = (t: any) => ({
   ...sharedEventColumns(t),
-  resolverId: t.text("resolver_id").notNull(),
+  resolverId: t.text().notNull(),
 });
 
 const resolverEventIndex = (t: any) => ({
@@ -401,7 +401,7 @@ export const addrChanged = onchainTable(
   "addr_changed",
   (t) => ({
     ...resolverEvent(t),
-    addrId: t.hex("addr_id").notNull(),
+    addrId: t.hex().notNull(),
   }),
   resolverEventIndex,
 );
@@ -410,7 +410,7 @@ export const multicoinAddrChanged = onchainTable(
   "multicoin_addr_changed",
   (t) => ({
     ...resolverEvent(t),
-    coinType: t.bigint("coin_type").notNull(),
+    coinType: t.bigint().notNull(),
     addr: t.hex().notNull(),
   }),
   resolverEventIndex,
@@ -429,7 +429,7 @@ export const abiChanged = onchainTable(
   "abi_changed",
   (t) => ({
     ...resolverEvent(t),
-    contentType: t.bigint("content_type").notNull(),
+    contentType: t.bigint().notNull(),
   }),
   resolverEventIndex,
 );
@@ -467,7 +467,7 @@ export const interfaceChanged = onchainTable(
   "interface_changed",
   (t) => ({
     ...resolverEvent(t),
-    interfaceID: t.hex("interface_id").notNull(),
+    interfaceID: t.hex().notNull(),
     implementer: t.hex().notNull(),
   }),
   resolverEventIndex,
@@ -479,7 +479,7 @@ export const authorisationChanged = onchainTable(
     ...resolverEvent(t),
     owner: t.hex().notNull(),
     target: t.hex().notNull(),
-    isAuthorized: t.boolean("is_authorized").notNull(),
+    isAuthorized: t.boolean().notNull(),
   }),
   resolverEventIndex,
 );

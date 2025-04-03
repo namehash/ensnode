@@ -1,5 +1,5 @@
+import { bigintMax, hasNullByte, uniq } from "@/lib/lib-helpers";
 import { describe, expect, it } from "vitest";
-import { bigintMax, hasNullByte, uniq } from "../src/lib/lib-helpers";
 
 describe("helpers", () => {
   describe("uniq", () => {

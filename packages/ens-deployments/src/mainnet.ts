@@ -1,8 +1,8 @@
 import { mergeAbis } from "@ponder/utils";
 import { base, linea, mainnet } from "viem/chains";
 
-import { BaseResolverFilter, ETHResolverFilter, LineaResolverFilter } from "./filters";
-import type { ENSDeploymentConfig } from "./types";
+import { BaseResolverFilter, ETHResolverFilter, LineaResolverFilter } from "./lib/filters";
+import type { ENSDeploymentConfig } from "./lib/types";
 
 // Subregistry ABIs for direct subnames of 'eth' on mainnet
 import { BaseRegistrar as eth_BaseRegistrar } from "./abis/eth/BaseRegistrar";

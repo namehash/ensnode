@@ -4,11 +4,12 @@ import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Node } from "@ensnode/utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
-import { createSharedEventValues, upsertAccount } from "../lib/db-helpers";
-import { makeEventId } from "../lib/ids";
-import { bigintMax } from "../lib/lib-helpers";
-import { EventWithArgs } from "../lib/ponder-helpers";
-import type { OwnedName } from "../lib/types";
+
+import { createSharedEventValues, upsertAccount } from "@/lib/db-helpers";
+import { makeEventId } from "@/lib/ids";
+import { bigintMax } from "@/lib/lib-helpers";
+import { EventWithArgs } from "@/lib/ponder-helpers";
+import type { OwnedName } from "@/lib/types";
 
 /**
  * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes

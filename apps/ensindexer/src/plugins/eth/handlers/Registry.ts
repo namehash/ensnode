@@ -2,8 +2,9 @@ import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { ROOT_NODE, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
 import { type Hex } from "viem";
-import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+
+import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains

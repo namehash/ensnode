@@ -1,10 +1,10 @@
 import { tmpdir } from "os";
 import { join } from "path";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
-import { ClassicLevel } from "classic-level";
 import { mkdtemp, rm } from "fs/promises";
-import { ByteArray, labelhash } from "viem";
+import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
+
 import {
   ENSRainbowDB,
   IngestionStatus,

@@ -1,7 +1,8 @@
 import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
-import { logger } from "../utils/logger";
-import { ENSRainbowDB } from "./database";
+
+import { ENSRainbowDB } from "@/lib/database";
+import { logger } from "@/utils/logger";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;

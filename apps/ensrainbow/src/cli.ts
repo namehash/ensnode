@@ -2,11 +2,12 @@ import { join } from "path";
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
-import { ingestCommand } from "./commands/ingest-command";
-import { purgeCommand } from "./commands/purge-command";
-import { serverCommand } from "./commands/server-command";
-import { validateCommand } from "./commands/validate-command";
-import { getDefaultDataSubDir, getEnvPort } from "./lib/env";
+
+import { ingestCommand } from "@/commands/ingest-command";
+import { purgeCommand } from "@/commands/purge-command";
+import { serverCommand } from "@/commands/server-command";
+import { validateCommand } from "@/commands/validate-command";
+import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;

@@ -1,6 +1,6 @@
+import { makeEventId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { labelhash, namehash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
-import { makeEventId, makeRegistrationId, makeResolverId } from "../src/lib/ids";
 
 describe("ids", () => {
   describe("makeResolverId", () => {

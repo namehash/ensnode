@@ -2,6 +2,7 @@ import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import type { Labelhash } from "@ensnode/utils/types";
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
+
 import { buildRainbowRecord } from "./rainbow-record";
 
 describe("buildRainbowRecord", () => {

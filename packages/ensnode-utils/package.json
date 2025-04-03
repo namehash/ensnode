@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "tsup": "^8.3.6",
     "typescript": "catalog:",

@@ -4,11 +4,12 @@ import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
 import type { Labelhash, Node } from "@ensnode/utils/types";
 import { type Hex, zeroAddress } from "viem";
-import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { labelByHash } from "../lib/graphnode-helpers";
-import { makeResolverId } from "../lib/ids";
-import { EventWithArgs } from "../lib/ponder-helpers";
-import { OwnedName } from "../lib/types";
+
+import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { labelByHash } from "@/lib/graphnode-helpers";
+import { makeResolverId } from "@/lib/ids";
+import { EventWithArgs } from "@/lib/ponder-helpers";
+import { OwnedName } from "@/lib/types";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.
