@@ -1,7 +1,6 @@
-import parsePrometheusTextFormat from "parse-prometheus-text-format";
-import type { PrometheusMetric } from "parse-prometheus-text-format";
+import parsePrometheusTextFormat, { type PrometheusMetric } from "parse-prometheus-text-format";
 // Ensures local declaration file is available to downstream consumers
-import "./types/parse-prometheus-text-format";
+import "@/types/parse-prometheus-text-format";
 
 interface ParsedPrometheusMetric extends Omit<PrometheusMetric, "metrics"> {
   metrics: Array<{

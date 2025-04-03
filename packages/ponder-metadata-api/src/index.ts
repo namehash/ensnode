@@ -1,4 +1,3 @@
-export { ponderMetadata } from "./middleware";
-export type { MetadataMiddlewareResponse } from "./middleware";
-export type { PonderMetadataMiddlewareResponse } from "./types/api";
-export type { BlockInfo, NetworkIndexingStatus } from "./types/common";
+export { ponderMetadata, type MetadataMiddlewareResponse } from "@/middleware";
+export type { PonderMetadataMiddlewareResponse } from "@/types/api";
+export type { BlockInfo, NetworkIndexingStatus } from "@/types/common";
