@@ -78,6 +78,18 @@ function validateResponse(response: EnsNode.Metadata) {
         .join(", ")}`,
     );
   }
+
+  const networksWithoutLastIndexedBlock = Object.entries(networkIndexingStatusByChainId).filter(
+    ([, network]) => network.lastIndexedBlock === null,
+  );
+
+  if (networksWithoutLastIndexedBlock.length > 0) {
+    throw new Error(
+      `Missing last indexed block for some networks with the following chain IDs: ${networksWithoutLastIndexedBlock
+        .map(([chainId]) => chainId)
+        .join(", ")}`,
+    );
+  }
 }
 
 /**
