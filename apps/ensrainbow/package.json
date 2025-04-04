@@ -1,6 +1,6 @@
 {
   "name": "ensrainbow",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "description": "ENSRainbow is an ENSNode service for healing ENS labels",
