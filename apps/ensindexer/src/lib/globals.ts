@@ -28,17 +28,3 @@ export const DEPLOYMENT_CONFIG = {
   ...DeploymentConfigs.mainnet,
   ...SELECTED_DEPLOYMENT_CONFIG,
 };
-
-/**
- * Constrain indexing between the following start/end blocks
- * https://ponder.sh/docs/contracts-and-networks#block-range
- *
- * NOTE: with a single variable here it only really makes sense to use start/end blocks when running
- * a single plugin (namely the eth plugin, in order to take snapshots). setting start/end blocks
- * while running multiple plugins (which results in ponder indexing multiple chains) should be
- * considered undefined behavior.
- *
- * TODO: allow runtime configuration, in particular for setting END_BLOCK on eth plugin
- */
-export const START_BLOCK: number | undefined = undefined;
-export const END_BLOCK: number | undefined = undefined;
