@@ -1,4 +1,4 @@
-name: Build ENSRainbow-data image
+name: "Build: ENSRainbow-data"
 
 on:
   workflow_dispatch:
