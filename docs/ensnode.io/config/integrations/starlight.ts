@@ -5,6 +5,7 @@ import starlightSidebarTopics from "starlight-sidebar-topics";
 export function starlight(): AstroIntegration {
   return AstroStarlight({
     components: {
+      ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
     },
     customCss: ["./src/styles/globals.css"],
@@ -153,7 +154,6 @@ export function starlight(): AstroIntegration {
       twitter: "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
       telegram: "https://t.me/ensnode",
-      email: "mailto:hello@namehashlabs.org",
     },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
@@ -191,7 +191,8 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content:
+            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {
