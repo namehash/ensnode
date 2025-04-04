@@ -1077,11 +1077,11 @@ function buildUnionAllQuery(
       const column = allColumns[columnName]!;
       const dbColumnName = table.columns[columnName]
         ? toSnakeCase(table.columns[columnName].name)
-        : null;
+        : "NULL";
 
       return {
         ...memo,
-        [columnName]: sql.raw(`${dbColumnName ?? "NULL"}::${column.getSQLType()}`).as(column.name),
+        [columnName]: sql.raw(`${dbColumnName}::${column.getSQLType()}`).as(column.name),
       };
     }, {});
 
