@@ -1,4 +1,4 @@
-name: CI pipeline
+name: "Test: CI / Static / Unit"
 
 on:
   workflow_dispatch:
