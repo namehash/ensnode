@@ -1,6 +1,16 @@
 name: Build ENSRainbow-test-data image
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/ensrainbow/Dockerfile.data'
+      - 'apps/ensrainbow/download-rainbow-tables.sh'
+      - 'apps/ensrainbow/**'
+      - 'packages/ensrainbow-sdk/**'
+      - '.github/workflows/build_ensrainbow_test_data_image.yml'
 
 jobs:
   image-build-and-push:

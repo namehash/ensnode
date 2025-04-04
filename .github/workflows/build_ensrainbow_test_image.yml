@@ -1,9 +1,26 @@
 name: Build ENSRainbow test image
 
 on:
+  workflow_run:
+    workflows: ["Build ENSRainbow-test-data image"]
+    types:
+      - completed
+    branches:
+      - main
   push:
     branches:
       - main
+    paths:
+      - 'apps/ensrainbow/**'
+      - 'packages/ensrainbow-sdk/**'
+      - 'packages/ensnode-utils/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'biome.json'
+      - '.nvmrc'
+      - '.dockerignore'
+      - '.github/workflows/build_ensrainbow_test_image.yml'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -11,6 +28,9 @@ jobs:
 
   image-build-and-push:
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    # Only run this job if the workflow_run trigger was activated by a successful completion
+    # or if this workflow was triggered by a push event
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout repository

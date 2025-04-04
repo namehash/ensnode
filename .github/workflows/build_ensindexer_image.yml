@@ -4,6 +4,21 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/ensindexer/**'
+      - 'packages/ens-deployments/**'
+      - 'packages/ensrainbow-sdk/**'
+      - 'packages/ponder-metadata/**'
+      - 'packages/ponder-schema/**'
+      - 'packages/ponder-subgraph-api/**'
+      - 'packages/ensnode-utils/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'biome.json'
+      - '.nvmrc'
+      - '.dockerignore'
+      - '.github/workflows/build_ensindexer_image.yml'
   release:
     types: [published]
 
