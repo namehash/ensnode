@@ -5,12 +5,12 @@ RUN corepack enable
 WORKDIR /app
 
 # deps
-FROM base as deps
+FROM base AS deps
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # runner
-FROM deps as runner
+FROM deps AS runner
 WORKDIR /app/apps/ensindexer
 ENV NODE_ENV=production
 EXPOSE 42069
