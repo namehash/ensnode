@@ -2,6 +2,9 @@ name: Test ENSRainbow Test Image on Ubuntu ARM
 
 on:
   workflow_dispatch:
+  schedule:
+    # Run once a week on Monday at 10:00 UTC
+    - cron: '0 10 * * 1'
 
 jobs:
   test-image-on-ubuntu-arm:
