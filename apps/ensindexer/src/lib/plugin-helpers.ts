@@ -165,7 +165,7 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
 export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
   pluginName: PLUGIN_NAME;
   config: CONFIG;
-  activate: VoidFunction;
+  activate: () => Promise<void>;
 }
 
 /**
