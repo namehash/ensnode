@@ -1,12 +1,12 @@
 import { Link } from "@namehash/namekit-react";
 import { ENSServiceProviderBadge } from "../atoms/ENSServiceProviderBadge.tsx";
+import { EfpIcon } from "../atoms/icons/EfpIcon.tsx";
 import { EmailIcon } from "../atoms/icons/EmailIcon.tsx";
 import { FarcasterIcon } from "../atoms/icons/FarcasterIcon.tsx";
 import { GithubIcon } from "../atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "../atoms/icons/TelegramIcon.tsx";
 import { TwitterIcon } from "../atoms/icons/TwitterIcon.tsx";
 import { NameHashLabsLogo } from "../atoms/logos/NameHashLabsLogo.tsx";
-import {EfpIcon} from "../atoms/icons/EfpIcon.tsx";
 
 const footerProducts = [
   {
@@ -141,11 +141,7 @@ export default function Footer({ ...props }: FooterProps) {
               <FarcasterIcon className="hover:text-black text-[#9CA3AF] transition-all duration-200" />
             </Link>
 
-            <Link
-                href="https://efp.app/namehashlabs.eth"
-                target="_blank"
-                aria-label="EFP"
-            >
+            <Link href="https://efp.app/namehashlabs.eth" target="_blank" aria-label="EFP">
               <EfpIcon className="hover:text-black text-[#AFAFAF] transition-all duration-200 w-6 h-6" />
             </Link>
 
