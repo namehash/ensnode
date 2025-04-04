@@ -151,7 +151,7 @@ export function starlight(): AstroIntegration {
       replacesTitle: true,
     },
     social: {
-      twitter: "https://x.com/NamehashLabs",
+      "x.com": "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
       telegram: "https://t.me/ensnode",
     },
