@@ -34,10 +34,10 @@
 
   --sl-hue-blue: 203;
   --sl-color-blue-low: #cee1e8;
-  --sl-color-blue: #0080bc;
+  --sl-color-blue: var(--ens-blue);
   --sl-color-blue-high: #093c52;
   --sl-color-blue-accent: #011a25;
-  --sl-color-blue-accent-invert: #0080bc;
+  --sl-color-blue-accent-invert: var(--ens-blue);
   --sl-color-blue-alt: #cee1e8;
   --sl-color-blue-alt-invert: #093c52;
 
@@ -77,13 +77,13 @@
 
   --sl-hue-accent: 203;
   --sl-color-accent-low: #cee1e8;
-  --sl-color-accent: #0080bc;
+  --sl-color-accent: var(--ens-blue);
   --sl-color-accent-high: #093c52;
 
   --sl-color-bg: #f6f6f6;
 
   --sl-color-text: var(--ens-dark-blue);
-  --sl-color-text-accent: var(--ens-blue);
+  --sl-color-text-accent: #000;
   --sl-color-text-muted: var(--ens-gray);
   --sl-color-text-invert: var(--ens-white);
 
@@ -153,7 +153,7 @@ site-search dialog {
   background-color: var(--ens-gray-2);
   box-shadow: none;
   min-height: auto;
-  border: 1px solid var(--sl-color-hairline);
+  border: 1px solid var(--ens-gray);
 }
 
 site-search button {

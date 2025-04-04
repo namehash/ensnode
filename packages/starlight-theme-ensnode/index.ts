@@ -17,25 +17,7 @@ export default function starlightThemeEnsnodePlugin(): StarlightPlugin {
             config.expressiveCode === false
               ? false
               : {
-                  styleOverrides: {
-                    borderColor: "var(--sl-ensnode-ui-border-color)",
-                    borderRadius: "0.5rem",
-                    frames: {
-                      editorActiveTabIndicatorTopColor: "unset",
-                      editorActiveTabIndicatorBottomColor:
-                        "var(--sl-color-gray-3)",
-                      editorTabBarBorderBottomColor:
-                        "var(--sl-ensnode-ui-border-color)",
-                      frameBoxShadowCssValue: "unset",
-                    },
-                    textMarkers: {
-                      backgroundOpacity: "40%",
-                      markBackground: "var(--sl-ensnode-ec-marker-bg-color)",
-                      markBorderColor:
-                        "var(--sl-ensnode-ec-marker-border-color)",
-                    },
-                  },
-                  themes: ["vitesse-dark", "vitesse-light"],
+                  themes: ["vitesse-light"],
                   ...(typeof config.expressiveCode === "object"
                     ? config.expressiveCode
                     : {}),
