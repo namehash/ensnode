@@ -6,6 +6,7 @@ import { GithubIcon } from "../atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "../atoms/icons/TelegramIcon.tsx";
 import { TwitterIcon } from "../atoms/icons/TwitterIcon.tsx";
 import { NameHashLabsLogo } from "../atoms/logos/NameHashLabsLogo.tsx";
+import {EfpIcon} from "../atoms/icons/EfpIcon.tsx";
 
 const footerProducts = [
   {
@@ -13,14 +14,25 @@ const footerProducts = [
     href: "https://ensnode.io/",
   },
   {
+    name: "ENSRainbow",
+    href: "https://ensrainbow.io",
+  },
+  {
+    name: "ENSAdmin",
+    href: "https://admin.ensnode.io",
+  },
+  {
+    name: "ENSv2 Referral Programs",
+    href: "https://namehashlabs.org/ens-v2-referral-programs",
+  },
+  {
+    name: "NameGraph",
+    href: "https://namegraph.dev",
+  },
+  {
     name: "NameAI",
     href: "https://nameai.io/",
   },
-  // NameGraph is commented out until NameGraph is ready for launch.
-  // {
-  //   name: "NameGraph",
-  //   href: "https://www.namegraph.dev/",
-  // },
   {
     name: "NameGuard",
     href: "https://nameguard.io",
@@ -28,10 +40,6 @@ const footerProducts = [
   {
     name: "NameKit",
     href: "https://namekit.io",
-  },
-  {
-    name: "ENS Referral Program",
-    href: "https://namehashlabs.org/ens-referral-program",
   },
 ];
 
@@ -131,6 +139,14 @@ export default function Footer({ ...props }: FooterProps) {
 
             <Link href="https://warpcast.com/namehash" target="_blank" aria-label="Farcaster">
               <FarcasterIcon className="hover:text-black text-[#9CA3AF] transition-all duration-200" />
+            </Link>
+
+            <Link
+                href="https://efp.app/namehashlabs.eth"
+                target="_blank"
+                aria-label="EFP"
+            >
+              <EfpIcon className="hover:text-black text-[#AFAFAF] transition-all duration-200 w-6 h-6" />
             </Link>
 
             <Link href="https://t.me/namehash" target="_blank" aria-label="Telegram">
