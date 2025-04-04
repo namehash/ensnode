@@ -152,7 +152,7 @@ export function starlight(): AstroIntegration {
     social: {
       twitter: "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
-      telegram: "https://t.me/namehash",
+      telegram: "https://t.me/ensnode",
       email: "mailto:hello@namehashlabs.org",
     },
     editLink: {
