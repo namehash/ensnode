@@ -1,10 +1,11 @@
 name: Build ENSRainbow-data image
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
 
 jobs:
   image-build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
       - name: Checkout repository

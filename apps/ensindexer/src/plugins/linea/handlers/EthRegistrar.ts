@@ -1,11 +1,13 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
+import DeploymentConfigs from "@ensnode/ens-deployments";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
-import { zeroAddress } from "viem";
-import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { upsertAccount } from "../../../lib/db-helpers";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+import { decodeEventLog, zeroAddress } from "viem";
+
+import { makeRegistrarHandlers } from "@/handlers/Registrar";
+import { upsertAccount } from "@/lib/db-helpers";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of linea.eth are registered through the linea.eth ETHRegistrarController
@@ -85,36 +87,80 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"l
     });
   });
 
-  // Linea allows the owner of the EthRegistrarController to register subnames for free
   ponder.on(namespace("EthRegistrarController:OwnerNameRegistered"), async ({ context, event }) => {
-    await handleNameRegisteredByController({
-      context,
-      event: { ...event, args: { ...event.args, cost: 0n } },
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "OwnerNameRegistered",
+      abi: DeploymentConfigs.mainnet.linea.contracts.EthRegistrarController.abi,
+      topics: event.log.topics,
+      data: event.log.data,
     });
-  });
 
-  // Linea allows any wallet address holding a Proof of Humanity (Poh) to register one subname for free
-  ponder.on(namespace("EthRegistrarController:PohNameRegistered"), async ({ context, event }) => {
-    await handleNameRegisteredByController({
-      context,
-      event: { ...event, args: { ...event.args, cost: 0n } },
-    });
-  });
-
-  ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
-    // the new registrar controller uses baseCost + premium to compute cost
     await handleNameRegisteredByController({
       context,
       event: {
         ...event,
         args: {
-          ...event.args,
-          cost: event.args.baseCost + event.args.premium,
+          ...args,
+          // Linea allows the owner of the EthRegistrarController to register subnames for free
+          cost: 0n,
+        },
+      },
+    });
+  });
+
+  ponder.on(namespace("EthRegistrarController:PohNameRegistered"), async ({ context, event }) => {
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "PohNameRegistered",
+      abi: DeploymentConfigs.mainnet.linea.contracts.EthRegistrarController.abi,
+      topics: event.log.topics,
+      data: event.log.data,
+    });
+
+    await handleNameRegisteredByController({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...args,
+          // Linea allows any wallet address holding a Proof of Humanity (Poh) to register one subname for free
+          cost: 0n,
+        },
+      },
+    });
+  });
+
+  ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "NameRegistered",
+      abi: DeploymentConfigs.mainnet.linea.contracts.EthRegistrarController.abi,
+      topics: event.log.topics,
+      data: event.log.data,
+    });
+
+    await handleNameRegisteredByController({
+      context,
+      event: {
+        ...event,
+        args: {
+          ...args,
+          // the new registrar controller uses baseCost + premium to compute cost
+          cost: args.baseCost + args.premium,
         },
       },
     });
   });
   ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewedByController({ context, event });
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "NameRenewed",
+      abi: DeploymentConfigs.mainnet.linea.contracts.EthRegistrarController.abi,
+      topics: event.log.topics,
+      data: event.log.data,
+    });
+
+    await handleNameRenewedByController({ context, event: { ...event, args } });
   });
 }

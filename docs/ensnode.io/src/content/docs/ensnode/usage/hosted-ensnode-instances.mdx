@@ -6,28 +6,50 @@ sidebar:
 ---
 
 ## Hosted Instances
+
 NameHash Labs provides freely available hosted instances for ENS developers looking to get started quickly.
 
 These instances are provided free of charge with no API key required, have no rate limiting, and are maintained and monitored by the NameHash Labs team.
 
 :::caution[No Uptime / Performance Guarantees]
-These hosted instances are provided free of charge to the ENS community, and while we strive for strong uptime and performance, neither of these can be guaranteed. By using these instances you accept the possibility of downtime, degraded performance, or other unforseen events. If you'd like to run ENSNode in production, consider [hosting your own ENSNode instance](/ensnode/deploying/).
+These hosted instances are provided free of charge to the ENS community, and while we strive for strong uptime and performance, neither of these can be guaranteed. By using these instances you accept the possibility of downtime, degraded performance, or other unforeseen events. If you'd like to run ENSNode in production, consider [hosting your own ENSNode instance](/ensnode/deploying/).
 :::
 
 ## Available ENSNode Instances
 
-There are two ENSNode deployments which are serving indexed ENS data. Both are separate deployment which may run on different versions and configurations.
-Main difference from client perspective is list of plugins which each instance handlers. Here is the table listing differences between those two.
+The key differences between these hosted deployments is the ENS deployment being indexed (mainnet vs a testnet) and the list of ENSNode plugins that are activated. See the table below for details.
+Main difference from client perspective is chain being indexed and list of plugins being handled. Here is the table listing differences between those.
+
+|                | **ENSNode 'Alpha'**                                |
+| -------------- | --------------------------------------------       |
+| ENSNode        | https://api.alpha.ensnode.io | 
+| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io) | 
+| Active Plugins | eth, base.eth, linea.eth                     |
+| Purpose        | Demonstration of ENSNode's multichain ENS indexing capability. Provides a superset of the data indexed by the ENS Subgraph     |                 |
 
 
-||**ENSNode 'Alpha'**|**ENSNode 'Subgraph'**|
-|--------|-------------|----------------|
-|URL|[alpha.ensnode.io](https://alpha.ensnode.io)|[subgraph.ensnode.io](https://subgraph.ensnode.io)|
-|Active Plugins|eth, base.eth, linea.eth|eth|
-|Purpose|Superset of ENS Subgraph names|1:1 Subgraph-Compatible Data|
+|                | **ENSNode 'Mainnet'**                              |
+| -------------- | --------------------------------------------       |
+| ENSNode        | https://api.mainnet.ensnode.io                     |
+| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io) | 
+| Active Plugins | eth                        |
+| Purpose        | Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on mainnet. |
+
+|                | **ENSNode 'Sepolia'**                              |
+| -------------- | --------------------------------------------       |
+| ENSNode        | https://api.sepolia.ensnode.io                     |
+| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io) |
+| Active Plugins | eth                                                |
+| Purpose        | Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia.|
+
+|                | **ENSNode 'Holesky'**                              |
+| -------------- | --------------------------------------------       |
+| ENSNode        | https://api.holesky.ensnode.io                     |
+| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io) |
+| Active Plugins | eth                                                |
+| Purpose        | Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Holesky.|
 
 
 ## Endpoints
 
-For more details on how to use these instances, refer to the [ENSNode Quickstart](/ensnode/usage/).
-
+For more details on how to use these instances, refer to the [ENSNode Quickstart](/ensnode/).

@@ -3,11 +3,12 @@ import schema from "ponder:schema";
 import { isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
 import { type Hex, labelhash as _labelhash, namehash } from "viem";
-import { createSharedEventValues, upsertAccount, upsertRegistration } from "../lib/db-helpers";
-import { labelByHash } from "../lib/graphnode-helpers";
-import { makeRegistrationId } from "../lib/ids";
-import { EventWithArgs } from "../lib/ponder-helpers";
-import type { OwnedName } from "../lib/types";
+
+import { createSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
+import { labelByHash } from "@/lib/graphnode-helpers";
+import { makeRegistrationId } from "@/lib/ids";
+import { EventWithArgs } from "@/lib/ponder-helpers";
+import type { OwnedName } from "@/lib/types";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
@@ -26,15 +27,6 @@ export const makeRegistrarHandlers = (ownedName: OwnedName) => {
     labelhash: Labelhash,
     cost: bigint,
   ) {
-    // NOTE: ponder intentionally removes null bytes to spare users the footgun of
-    // inserting null bytes into postgres. We don't like this behavior, though, because it's
-    // important that 'vitalik\x00'.eth and vitalik.eth are differentiable.
-    // https://github.com/ponder-sh/ponder/issues/1456
-    // So here we use the labelhash fn to determine whether ponder modified our `name` argument,
-    // in which case we know that it used to have null bytes in it, and we should ignore it.
-    const didHaveNullBytes = _labelhash(name) !== labelhash;
-    if (didHaveNullBytes) return;
-
     // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
     if (!isLabelIndexable(name)) return;
 

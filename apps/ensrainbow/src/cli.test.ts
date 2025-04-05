@@ -2,8 +2,9 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { mkdtemp, rm } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { DEFAULT_PORT, getEnvPort } from "@/lib/env";
 import { createCLI, validatePortConfiguration } from "./cli";
-import { DEFAULT_PORT, getEnvPort } from "./lib/env";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");
@@ -115,6 +116,18 @@ describe("CLI", () => {
         await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
 
         // Verify database was created by trying to validate it
+        await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
+      });
+    });
+
+    describe("ingest command with environment-specific data", () => {
+      it("should successfully ingest environment-specific test data", async () => {
+        // Use ens-test-env test data for specialized testing
+        const customInputFile = join(TEST_FIXTURES_DIR, "ens_test_env_names.sql.gz");
+
+        await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
+
+        // Verify database was created and can be validated
         await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
       });
     });

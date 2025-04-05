@@ -1,0 +1,57 @@
+{
+  "name": "@ensnode/ponder-metadata",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A Hono middleware for making Ponder app metadata available to clients.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ponder-metadata-api"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
+  "keywords": ["Ponder"],
+  "files": ["dist"],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "lint": "biome check --write",
+    "lint:ci": "biome ci"
+  },
+  "dependencies": {
+    "@ensnode/ensrainbow-sdk": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "parse-prometheus-text-format": "^1.1.1",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "hono": "catalog:",
+    "ponder": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "hono": "catalog:",
+    "ponder": "catalog:"
+  }
+}

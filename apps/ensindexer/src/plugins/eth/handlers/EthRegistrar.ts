@@ -1,8 +1,11 @@
 import { ponder } from "ponder:registry";
+import DeploymentConfigs from "@ensnode/ens-deployments";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
-import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+import { decodeEventLog } from "viem";
+
+import { makeRegistrarHandlers } from "@/handlers/Registrar";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
@@ -64,27 +67,59 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
   });
 
   ponder.on(namespace("EthRegistrarControllerOld:NameRegistered"), async ({ context, event }) => {
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "NameRegistered",
+      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
+      topics: event.log.topics,
+      data: event.log.data,
+    });
+
     // the old registrar controller just had `cost` param
-    await handleNameRegisteredByController({ context, event });
+    await handleNameRegisteredByController({ context, event: { ...event, args } });
   });
   ponder.on(namespace("EthRegistrarControllerOld:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewedByController({ context, event });
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "NameRenewed",
+      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
+      topics: event.log.topics,
+      data: event.log.data,
+    });
+
+    await handleNameRenewedByController({ context, event: { ...event, args } });
   });
 
   ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
-    // the new registrar controller uses baseCost + premium to compute cost
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "NameRegistered",
+      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarController.abi,
+      topics: event.log.topics,
+      data: event.log.data,
+    });
+
     await handleNameRegisteredByController({
       context,
       event: {
         ...event,
         args: {
-          ...event.args,
-          cost: event.args.baseCost + event.args.premium,
+          ...args,
+          // the new registrar controller uses baseCost + premium to compute cost
+          cost: args.baseCost + args.premium,
         },
       },
     });
   });
   ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewedByController({ context, event });
+    // NOTE(name-null-bytes): manually decode args that may contain null bytes
+    const { args } = decodeEventLog({
+      eventName: "NameRenewed",
+      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarController.abi,
+      topics: event.log.topics,
+      data: event.log.data,
+    });
+
+    await handleNameRenewedByController({ context, event: { ...event, args } });
   });
 }

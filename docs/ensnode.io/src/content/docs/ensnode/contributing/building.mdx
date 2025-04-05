@@ -7,19 +7,42 @@ sidebar:
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-## ENSIndexer (`namehash/ensnode/ensindexer`)
+:::note[Building Local Docker Images]
+This guide covers building the Docker images for local development/testing.
+:::
+
+To build all of the images in serial, use the following script:
 
 ```bash
 # from the monorepo root
-docker build -f apps/ensindexer/Dockerfile -t namehash/ensnode/ensindexer .
+pnpm run docker:build:ensnode
+```
+
+## ENSIndexer
+
+```bash
+# from the monorepo root
+pnpm run docker:build:ensindexer
 ```
 
 ## ENSRainbow
 
-For instructions on building the ENSRainbow Docker image, see the [ENSRainbow Building Guide](/ensrainbow/contributing/building).
+```bash
+# from the monorepo root
+pnpm run docker:build:ensrainbow
+```
+
+For full instructions on building the ENSRainbow Docker image, see the [ENSRainbow Building Guide](/ensrainbow/contributing/building).
 
 <LinkCard
   title="View ENSRainbow Building Guide"
   description="Learn how to build the ENSRainbow Docker image"
   href="/ensrainbow/contributing/building"
 />
+
+## ENSAdmin
+
+```bash
+# from the monorepo root
+pnpm run docker:build:ensadmin
+```

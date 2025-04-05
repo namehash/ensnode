@@ -2,7 +2,8 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { mkdtemp, rm } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ENSRainbowDB } from "../lib/database";
+
+import { ENSRainbowDB } from "@/lib/database";
 import { validateCommand } from "./validate-command";
 
 describe("Validate Command", () => {
@@ -28,6 +29,7 @@ describe("Validate Command", () => {
       const label = "vitalik";
       await db.addRainbowRecord(label);
       await db.setPrecalculatedRainbowRecordCount(1);
+      await db.markIngestionFinished();
       await db.close();
 
       await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();

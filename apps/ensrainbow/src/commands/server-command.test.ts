@@ -4,7 +4,8 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { ENSRainbowDB } from "../lib/database";
+
+import { ENSRainbowDB } from "@/lib/database";
 import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
@@ -23,7 +24,7 @@ describe("Server Command Tests", () => {
 
       // Initialize precalculated rainbow record count to be able to start server
       await db.setPrecalculatedRainbowRecordCount(0);
-
+      await db.markIngestionFinished();
       app = await createServer(db);
 
       // Start the server on a different port than what ENSRainbow defaults to
@@ -147,6 +148,18 @@ describe("Server Command Tests", () => {
     });
   });
 
+  describe("GET /v1/version", () => {
+    it("should return version information", async () => {
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/version`);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+
+      expect(data.status).toEqual(StatusCode.Success);
+      expect(typeof data.versionInfo.version).toBe("string");
+      expect(typeof data.versionInfo.schema_version).toBe("number");
+    });
+  });
+
   describe("CORS headers for /v1/* routes", () => {
     it("should return CORS headers for /v1/* routes", async () => {
       const validLabel = "test-label";
@@ -166,6 +179,9 @@ describe("Server Command Tests", () => {
           method: "OPTIONS",
         }),
         fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`, {
+          method: "OPTIONS",
+        }),
+        fetch(`http://localhost:${nonDefaultPort}/v1/version`, {
           method: "OPTIONS",
         }),
       ]);
