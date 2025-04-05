@@ -30,7 +30,7 @@ describe("labelByHash", () => {
     await expect(
       labelByHash("0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da067"),
     ).rejects.toThrow(
-      "Error (400): Invalid labelhash length: expected 32 bytes (64 hex chars), got 33 bytes: 0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da067.",
+      "Error (400): Invalid labelhash length: expected 32 bytes (64 hex chars), got 32.5 bytes: 0x00ca5d0b4ef1129e04bfe7d35ac9def2f4f91daeb202cbe6e613f1dd17b2da067.",
     );
   });
 
