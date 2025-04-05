@@ -3,11 +3,15 @@ import {
   bytesToHex,
   bytesToString,
   concat,
+  isHex,
   keccak256,
   namehash,
   stringToBytes,
   toHex,
 } from "viem";
+
+import { labelhash } from "viem/ens";
+import type { Labelhash } from "./types";
 
 // NOTE: most of these utils could/should be pulled in from some (future) ens helper lib, as they
 // implement standard and reusable logic for typescript ens libs bu aren't necessarily implemented
@@ -16,6 +20,63 @@ import {
 export const ROOT_NODE = namehash("");
 
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
+
+// normalize address to match the format used for addr.reverse subnames
+// as per https://docs.ens.domains/resolution/names#reverse-nodes
+const normalizedAddressDigits = (address: Hex): string => address.slice(2).toLowerCase();
+
+export interface LabelByReverseAddressArgs {
+  /** The address that is possibly associated with the addr.reverse subname */
+  maybeReverseAddress: Hex;
+
+  /** The labelhash of the addr.reverse subname */
+  labelhash: Labelhash;
+}
+
+/**
+ * Attempt to heal the labelhash of an addr.reverse subname using an address that might be related to the subname.
+ *
+ * @throws if reverse address is not a valid hex address
+ * @throws if labelhash is not a valid hash
+ *
+ * @returns the original label if healed, otherwise null
+ */
+export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
+  // check if required arguments are valid
+  validateLabelByReverseAddressArgs(args);
+
+  // derive the assumed label from the normalized address
+  const assumedLabel = normalizedAddressDigits(args.maybeReverseAddress);
+
+  // if labelhash of the assumed label matches the provided labelhash
+  if (labelhash(assumedLabel) === args.labelhash) {
+    // the assumedLabel successfully heals the labelhash
+    return assumedLabel;
+  }
+
+  // otherwise, healing did not succeed
+  return null;
+};
+
+/**
+ * Validate the arguments for `labelByReverseAddress` function.
+ *
+ * @throws if maybeReverseAddress is not a valid Address
+ * @throws if labelhash is not a valid Labelhash
+ */
+const validateLabelByReverseAddressArgs = (args: LabelByReverseAddressArgs) => {
+  if (!isHex(args.maybeReverseAddress) || args.maybeReverseAddress.length !== 42) {
+    throw new Error(
+      `Invalid reverse address: '${args.maybeReverseAddress}'. Must be a valid EVM address, start with '0x' and be 42 characters long.`,
+    );
+  }
+
+  if (!isHex(args.labelhash) || args.labelhash.length !== 66) {
+    throw new Error(
+      `Invalid labelhash: '${args.labelhash}'. Must start with '0x' and be 66 characters long.`,
+    );
+  }
+};
 
 /**
  * Encodes a uint256 bigint as hex string sized to 32 bytes.

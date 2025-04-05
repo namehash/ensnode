@@ -1,3 +1,4 @@
+import type { Node } from "@ensnode/utils/types";
 import { createConfig } from "ponder";
 
 import { DEPLOYMENT_CONFIG } from "@/lib/globals";
@@ -16,6 +17,9 @@ const ownedName = "linea.eth" as const;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
+
+// Support for healing addr.reverse subnames on Linea will be added later
+const canHealReverseAddressFromParentNode = () => false;
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -46,6 +50,7 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
+  canHealReverseAddressFromParentNode,
   ownedName,
   namespace,
   handlers: [

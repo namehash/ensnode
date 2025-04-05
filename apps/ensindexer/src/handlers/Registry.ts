@@ -1,15 +1,20 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
-import type { Labelhash, Node } from "@ensnode/utils/types";
-import { type Hex, zeroAddress } from "viem";
-
 import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { OwnedName } from "@/lib/types";
+import type { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
+import type { OwnedName } from "@/lib/types";
+import { encodeLabelhash } from "@ensdomains/ensjs/utils";
+import {
+  ROOT_NODE,
+  isLabelIndexable,
+  labelByReverseAddress,
+  makeSubnodeNamehash,
+} from "@ensnode/utils/subname-helpers";
+import type { Labelhash, Node } from "@ensnode/utils/types";
+import { type Hex, zeroAddress } from "viem";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.
@@ -74,7 +79,10 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
  *
  * @param ownedName the name that the Registry contract manages subnames of
  */
-export const makeRegistryHandlers = (ownedName: OwnedName) => {
+export const makeRegistryHandlers = <OWNED_NAME extends OwnedName>({
+  canHealReverseAddressFromParentNode,
+  ownedName,
+}: PonderENSPluginHandlerArgs<OWNED_NAME>) => {
   const sharedEventValues = createSharedEventValues(ownedName);
 
   return {
@@ -123,9 +131,24 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         if (!domain.name) {
           const parent = await context.db.find(schema.domain, { id: node });
 
-          // attempt to heal the label associated with labelhash via ENSRainbow
-          // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
-          const healedLabel = await labelByHash(labelhash);
+          let healedLabel = null;
+
+          // if healing label from reverse addresses is possible, give it a go
+          if (canHealReverseAddressFromParentNode(node)) {
+            // TODO: if healing failed, log the event args for analysis and debugging
+            healedLabel = labelByReverseAddress({
+              maybeReverseAddress: owner,
+              labelhash,
+            });
+          }
+
+          // if label hasn't been healed yet
+          if (!healedLabel) {
+            // attempt to heal the label associated with labelhash via ENSRainbow
+            // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
+            healedLabel = await labelByHash(labelhash);
+          }
+
           const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
           // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
