@@ -1,6 +1,7 @@
 import { ponder } from "ponder:registry";
-import { makeResolverHandlers } from "../../../handlers/Resolver";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+
+import { makeResolverHandlers } from "@/handlers/Resolver";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
   const {

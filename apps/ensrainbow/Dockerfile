@@ -2,31 +2,31 @@
 # Using a prebuilt image for ensrainbow-data (infrequently changes) reduces build time for the ENSRainbow app image
 # ensrainbow-data image is only supporting amd64 arch hence define platform at the FROM statement
 ARG DATA_IMAGE_PLATFORM=linux/amd64
-FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/ensrainbow-data AS ensrainbow-data
+# DATA_IMAGE_NAME is set to either "ensrainbow-data" (default) or "ensrainbow-v2-data" based on the build context.
+# It can be set using the --build-arg flag when building the Docker image.
+ARG DATA_IMAGE_NAME="ensrainbow-data"
 
-FROM --platform=${BUILDPLATFORM} node:18-slim AS base
-ARG PNPM_VERSION=9.12.0
-RUN apt-get update && \
-    npm install -g pnpm@${PNPM_VERSION}
+FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/${DATA_IMAGE_NAME} AS ensrainbow-data
+
+FROM --platform=${TARGETPLATFORM} node:22-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 WORKDIR /app
 
 ###################
 ## Application Deps — standard monorepo pnpm install from base
 ###################
 
-FROM base AS app-deps
-COPY pnpm-workspace.yaml ./
-COPY package.json pnpm-lock.yaml ./
-COPY packages ./packages
-COPY apps ./apps
-RUN pnpm install --frozen-lockfile
-
+FROM base AS deps
+COPY . .
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 ###################
 ## App Server — runs server w/ data dir
 ###################
 
-FROM app-deps AS app
+FROM deps AS runner
 
 # cwd to ensrainbow
 WORKDIR /app/apps/ensrainbow

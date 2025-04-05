@@ -1,12 +1,23 @@
 services:
-  ensindex:
+  ensindexer:
     container_name: ensindexer
     image: ghcr.io/namehash/ensnode/ensindexer:latest
     ports:
       - "42069:42069"
     environment:
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/ensnode
+      # Override DATABASE_URL to point to docker compose postgres
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      # Override ENSRAINBOW_URL to point to docker compose ensrainbow
       ENSRAINBOW_URL: http://ensrainbow:3223
+      # Override ENSADMIN_URL to point to docker compose ensadmin
+      ENSADMIN_URL: http://localhost:4173
+      # Override ENSNODE_PUBLIC_URL to point to docker compose ensindexer
+      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
+      ENSNODE_PUBLIC_URL: http://localhost:42069
+    env_file:
+      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
+      - path: ./apps/ensindexer/.env.local
+        required: true
     depends_on:
       - ensrainbow
       - postgres
@@ -16,6 +27,10 @@ services:
     image: ghcr.io/namehash/ensnode/ensrainbow:latest
     ports:
       - "3223:3223"
+    env_file:
+      # NOTE: can define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
+      - path: ./apps/ensrainbow/.env.local
+        required: false
     restart: unless-stopped
 
   ensadmin:
@@ -24,9 +39,19 @@ services:
     ports:
       - "4173:4173"
     environment:
-      VITE_ENSNODE_URL: http://ensnode:42069
+      # Override ENSADMIN_PUBLIC_URL to point to docker compose ensindexer
+      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
+      ENSADMIN_PUBLIC_URL: http://localhost:4173
+      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensindexer
+      # Note: it must be a comma-separated list of URLs that are accessible from a web browser
+      # (i.e. it cannot be a hostname in the docker network)
+      NEXT_PUBLIC_DEFAULT_ENSNODE_URLS: http://localhost:42069
+    env_file:
+      # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
+      - path: ./apps/ensadmin/.env.local
+        required: false
     depends_on:
-      - ensnode
+      - ensindexer
 
   postgres:
     container_name: postgres
@@ -34,7 +59,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: ensnode
     ports:
       - "5432:5432"
     volumes:

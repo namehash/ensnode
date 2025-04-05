@@ -1,0 +1,17 @@
+---
+title: Quickstart
+---
+
+:::caution[Work in Progress]
+This documentation is under active development.
+:::
+
+The easiest way to run ENSAdmin is via Docker container
+
+```bash
+docker run \
+  -d \ # in the background
+  -p 4173:4173 \ # map to host port
+  -e VITE_ENSNODE_URL=http://localhost:42069 \ # point to locally running ENSNode
+  ghcr.io/namehash/ensnode/ensadmin:latest
+```
