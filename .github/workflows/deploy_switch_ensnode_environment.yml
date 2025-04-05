@@ -1,4 +1,4 @@
-name: Switch ENSNode main environment
+name: "Deploy: Switch ENSNode Environment"
 
 on:
   workflow_dispatch:
@@ -17,14 +17,14 @@ jobs:
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
-    
+
     steps:
       - name: Print switch target
-        run: | 
+        run: |
             echo "Switching to: $TARGET_ENVIRONMENT"
 
       - name: Install redis-cli
-        run: | 
+        run: |
             sudo apt install redis-tools
 
       - name: Switch Traefik routers
@@ -47,4 +47,3 @@ jobs:
 
             # ENSRAINBOW
             redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
-          
