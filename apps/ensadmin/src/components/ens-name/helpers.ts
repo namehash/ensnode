@@ -1,50 +1,42 @@
-import { holesky, mainnet, sepolia } from "viem/chains";
+import { ENSDeploymentChain } from "@ensnode/ens-deployments";
 
 /**
- * Get ENS app URL for wallet address on a supported network
- * @param chainId
- * @param nameOrAddress
+ * Get ENS app URL for wallet address on a supported network.
+ * NOTE: not every ENS deployment has an ENS app URL.
+ * @param {ENSDeploymentChain} chain
  * @returns ENS app URL for supported networks, otherwise undefined
  */
-export function getEnsAppUrl(
-  chainId: number | undefined,
-  nameOrAddress: string,
-): string | undefined {
-  switch (chainId) {
-    case mainnet.id:
-      return `https://app.ens.domains/${nameOrAddress}`;
-    case sepolia.id:
-      return `https://sepolia.app.ens.domains/${nameOrAddress}`;
-    case holesky.id:
-      return `https://holesky.app.ens.domains/${nameOrAddress}`;
-    default:
+export function getEnsAppUrl(chain: ENSDeploymentChain): URL | undefined {
+  switch (chain) {
+    case "mainnet":
+      return new URL(`https://app.ens.domains/`);
+    case "sepolia":
+      return new URL(`https://sepolia.app.ens.domains/`);
+    case "holesky":
+      return new URL(`https://holesky.app.ens.domains/`);
+    case "ens-test-env":
+      // ens-test-env cannot be served by app.ens.domains website
       return undefined;
   }
 }
 
 /**
- * Get avatar URL for given ENS name on a supported network
- * @param chainId
- * @param ensName
- * @returns avatar URL for supported networks, otherwise undefined
+ * Get metadata URL for a given ENS deployment
+ * NOTE: not every ENS deployment has an ENS metadata URL.
+ * @param {ENSDeploymentChain} chain
+ * @returns metadata URL for supported networks, otherwise undefined
  */
-export function getEnsAvatarUrl(
-  chainId: number | undefined,
-  ensName: string | undefined,
-): string | undefined {
-  if (!ensName) {
-    return undefined;
-  }
-
-  switch (chainId) {
-    case mainnet.id:
-      return `https://metadata.ens.domains/mainnet/avatar/${ensName}`;
-    case sepolia.id:
-      return `https://metadata.ens.domains/sepolia/avatar/${ensName}`;
-    case holesky.id:
-      // NOTE: there's no metadata api available for holesky network
+export function getEnsMetadataUrl(chain: ENSDeploymentChain): URL | undefined {
+  switch (chain) {
+    case "mainnet":
+      return new URL(`https://metadata.ens.domains/mainnet/avatar/`);
+    case "sepolia":
+      return new URL(`https://metadata.ens.domains/sepolia/avatar/`);
+    case "holesky":
+      // NOTE: there's no metadata api available on metadata.ens.domains website for the holesky network
       return undefined;
-    default:
+    case "ens-test-env":
+      // ens-test-env cannot be served by metadata.ens.domains website
       return undefined;
   }
 }

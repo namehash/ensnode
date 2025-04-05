@@ -22,5 +22,7 @@ export interface Registration {
 }
 
 export interface RecentRegistrationsResponse {
-  registrations: Registration[];
+  data: {
+    registrations: Array<Registration>;
+  };
 }
