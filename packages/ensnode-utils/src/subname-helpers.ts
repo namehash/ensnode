@@ -67,7 +67,7 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
 const validateLabelByReverseAddressArgs = (args: LabelByReverseAddressArgs) => {
   if (!isHex(args.maybeReverseAddress) || args.maybeReverseAddress.length !== 42) {
     throw new Error(
-      `Invalid reverse address: '${args.maybeReverseAddress}'. Must a valid EVM address, start with '0x' and be 42 characters long.`,
+      `Invalid reverse address: '${args.maybeReverseAddress}'. Must be a valid EVM address, start with '0x' and be 42 characters long.`,
     );
   }
 

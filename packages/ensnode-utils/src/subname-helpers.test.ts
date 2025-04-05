@@ -95,7 +95,7 @@ describe("labelByReverseAddress", () => {
           maybeReverseAddress: "0x123",
         }),
       ).toThrowError(
-        "Invalid reverse address: '0x123'. Must a valid EVM address, start with '0x' and be 42 characters long",
+        "Invalid reverse address: '0x123'. Must be a valid EVM address, start with '0x' and be 42 characters long",
       );
     });
 
