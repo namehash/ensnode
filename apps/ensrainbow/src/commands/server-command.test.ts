@@ -4,7 +4,8 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { ENSRainbowDB } from "../lib/database";
+
+import { ENSRainbowDB } from "@/lib/database";
 import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {

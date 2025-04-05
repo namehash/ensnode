@@ -1,49 +1,27 @@
-FROM node:18-slim AS base
-
-FROM base AS builder
-
-ARG NEXT_PUBLIC_DEFAULT_ENSNODE_URLS
-ARG PNPM_VERSION=9.12.0
-
-RUN apt-get update && \
-    apt-get install -y \
-        curl \
-        gnupg \
-        python3 \
-        make \
-        g++ && \
-    npm install -g pnpm@${PNPM_VERSION}
-
+FROM node:22-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-# Copy pnpm workspace configuration files from the root directory
-COPY pnpm-workspace.yaml ./
-# Copy the root package.json and lockfile
-COPY package.json pnpm-lock.yaml ./
-# Copy the app package.json
-COPY apps/ensadmin/package.json ./apps/ensadmin/package.json
-# Copy all pnpm workspace modules
-COPY packages ./packages
-# Install dependencies for the entire monorepo
-RUN pnpm install --frozen-lockfile
+# deps/build
+FROM base AS builder
+COPY . .
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Set the environment variable for the default ENSNode URLs
+ARG NEXT_PUBLIC_DEFAULT_ENSNODE_URLS
+ENV NEXT_PUBLIC_DEFAULT_ENSNODE_URLS=${NEXT_PUBLIC_DEFAULT_ENSNODE_URLS}
 
 # Set the environment variable for next.config.ts
 # This will be used to determine if the build output should be standalone
 ENV NEXT_BUILD_OUTPUT_STANDALONE=true
 
-# Set the environment variable for the default ENSNode URLs
-ENV NEXT_PUBLIC_DEFAULT_ENSNODE_URLS=${NEXT_PUBLIC_DEFAULT_ENSNODE_URLS}
-
-# Copy the app source code
-COPY apps/ensadmin ./apps/ensadmin
-# Build the app
+# build ensadmin
 RUN pnpm --filter ensadmin build
 
-# # 3. Production image, copy all the files and run next
+# runner
 FROM base AS runner
-
-WORKDIR /app
 
 ENV NODE_ENV=production
 
@@ -51,14 +29,12 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/apps/ensadmin/public ./apps/ensadmin/public
-
 COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/static ./apps/ensadmin/.next/static
 
 USER nextjs
 
 EXPOSE 4173
-
 ENV PORT=4173
 ENV HOSTNAME=0.0.0.0
 

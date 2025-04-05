@@ -1,6 +1,7 @@
 import { join } from "path";
-import { logger } from "../utils/logger";
-import { parseNonNegativeInteger } from "./database";
+
+import { parseNonNegativeInteger } from "@/lib/database";
+import { logger } from "@/utils/logger";
 
 export const getDefaultDataSubDir = () => join(process.cwd(), "data");
 

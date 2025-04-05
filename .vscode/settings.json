@@ -12,5 +12,6 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "typescript.tsdk": "node_modules/typescript/lib",
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative"
 }

@@ -35,8 +35,8 @@ export const ENSAdminLogoLight = (props: React.SVGProps<SVGSVGElement>) => (
         gradientUnits="userSpaceOnUse"
         gradientTransform="translate(19.9998 20) rotate(90) scale(17.1429)"
       >
-        <stop offset="0.455" stop-color="#DCE7FF" />
-        <stop offset="1" stop-color="#A9C5FF" />
+        <stop offset="0.455" stopColor="#DCE7FF" />
+        <stop offset="1" stopColor="#A9C5FF" />
       </radialGradient>
       <linearGradient
         id="paint1_linear_767_1094"
@@ -46,8 +46,8 @@ export const ENSAdminLogoLight = (props: React.SVGProps<SVGSVGElement>) => (
         y2="37.143"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#78A5FF" />
-        <stop offset="1" stop-color="#528BFF" />
+        <stop stopColor="#78A5FF" />
+        <stop offset="1" stopColor="#528BFF" />
       </linearGradient>
     </defs>
   </svg>

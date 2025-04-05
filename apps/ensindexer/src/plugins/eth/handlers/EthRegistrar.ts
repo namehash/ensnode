@@ -3,8 +3,9 @@ import DeploymentConfigs from "@ensnode/ens-deployments";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
 import { decodeEventLog } from "viem";
-import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+
+import { makeRegistrarHandlers } from "@/handlers/Registrar";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on

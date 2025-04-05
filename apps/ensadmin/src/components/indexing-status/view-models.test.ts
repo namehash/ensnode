@@ -15,13 +15,13 @@ describe("View Models", () => {
   describe("ensNodeDepsViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeDepsViewModel({
-        nodejs: "v18.19.20",
+        nodejs: "v22.14.0",
         ponder: "v0.9.9",
       });
 
       expect(result).toEqual([
         { label: "Ponder", value: "v0.9.9" },
-        { label: "Node.js", value: "v18.19.20" },
+        { label: "Node.js", value: "v22.14.0" },
       ]);
     });
   });

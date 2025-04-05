@@ -1,5 +1,3 @@
-import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
-import { describe, expect, it } from "vitest";
 import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainBlockrange,
@@ -11,7 +9,9 @@ import {
   parseRpcEndpointUrl,
   parseRpcMaxRequestsPerSecond,
   parseUrl,
-} from "../src/lib/ponder-helpers";
+} from "@/lib/ponder-helpers";
+import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
+import { describe, expect, it } from "vitest";
 
 describe("ponder helpers", () => {
   describe("blockConfig", () => {

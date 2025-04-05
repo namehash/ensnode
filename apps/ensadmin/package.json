@@ -1,6 +1,6 @@
 {
   "name": "ensadmin",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "private": true,
   "type": "module",
   "description": "Explore the ENS Protocol like never before",
@@ -21,8 +21,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@ensnode/ponder-metadata": "workspace:",
-    "@ensnode/ponder-schema": "workspace:",
+    "@ensnode/ponder-metadata": "workspace:*",
+    "@ensnode/ponder-schema": "workspace:*",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",
     "@ponder/react": "catalog:",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/ens-deployments": "workspace:",
+    "@ensnode/ens-deployments": "workspace:*",
     "@eslint/eslintrc": "^3",
     "@types/node": "^22",
     "@types/react": "^18",
@@ -69,7 +69,6 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
-    "vite": "^6.2.4",
     "vitest": "catalog:"
   }
 }
