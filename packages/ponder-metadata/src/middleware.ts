@@ -38,7 +38,7 @@ interface PonderMetadataModule {
     codebaseBuildId: string;
 
     /** Network indexing status by chain ID */
-    networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
+    networkIndexingStatusByChainId: Record<string, NetworkIndexingStatus>;
 
     /** ENSRainbow version info */
     ensRainbow?: EnsRainbow.VersionInfo;
@@ -62,12 +62,12 @@ export function ponderMetadata<
   publicClients,
 }: PonderMetadataMiddlewareOptions<AppInfo, EnvVars>): MiddlewareHandler {
   return async function ponderMetadataMiddleware(ctx) {
-    const indexedChainIds = Object.keys(publicClients).map(Number);
+    const indexedChainIds = Object.keys(publicClients);
 
     const ponderStatus = await queryPonderStatus(env.DATABASE_SCHEMA, db);
     const metrics = PrometheusMetrics.parse(await query.prometheusMetrics());
 
-    const networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus> = {};
+    const networkIndexingStatusByChainId: Record<string, NetworkIndexingStatus> = {};
 
     for (const indexedChainId of indexedChainIds) {
       const publicClient = publicClients[indexedChainId];
@@ -146,7 +146,10 @@ export function ponderMetadata<
         lastSyncedBlock,
         lastIndexedBlock,
         latestSafeBlock,
-        firstBlockToIndex: await query.firstBlockToIndexByChainId(indexedChainId, publicClient),
+        firstBlockToIndex: await query.firstBlockToIndexByChainId(
+          parseInt(indexedChainId),
+          publicClient,
+        ),
       } satisfies NetworkIndexingStatus;
     }
 
