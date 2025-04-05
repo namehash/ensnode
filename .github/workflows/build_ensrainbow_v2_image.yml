@@ -1,6 +1,7 @@
 name: Build ENSRainbow v2 image
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -38,7 +39,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-    
+
       - name: Build & Push Docker image for the ENSRainbow v2 app
         env:
           IMAGE_NAME: ghcr.io/${{ github.repository }}/ensrainbow-v2

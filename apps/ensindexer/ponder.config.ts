@@ -36,7 +36,7 @@ const activePluginsMergedConfig = activePlugins
   .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as AllPluginConfigs;
 
 // load indexing handlers from the active plugins into the runtime
-activePlugins.forEach((plugin) => plugin.activate());
+await Promise.all(activePlugins.map((plugin) => plugin.activate()));
 
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.

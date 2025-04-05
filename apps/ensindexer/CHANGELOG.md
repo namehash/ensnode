@@ -1,5 +1,12 @@
 # ensindexer
 
+## 0.1.3
+### Patch Changes
+
+
+
+- [#470](https://github.com/namehash/ensnode/pull/470) [`8ab269a`](https://github.com/namehash/ensnode/commit/8ab269a38aa6e0d3afcd1d3dfff0e4c85cfcd854) Thanks [@BanaSeba](https://github.com/BanaSeba)! - CI adjustemnt for changeset releases
+
 ## 0.1.2
 ### Patch Changes
 

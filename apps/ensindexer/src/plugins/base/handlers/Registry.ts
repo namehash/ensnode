@@ -1,6 +1,7 @@
 import { ponder } from "ponder:registry";
-import { makeRegistryHandlers, setupRootNode } from "../../../handlers/Registry";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+
+import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
   const {
