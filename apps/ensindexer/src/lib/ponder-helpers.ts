@@ -3,6 +3,7 @@ import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments"
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
+import type { ContractConfig } from "ponder";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
 
@@ -33,6 +34,35 @@ export const constrainBlockrange = (
   startBlock: Math.min(Math.max(start || 0, startBlock || 0), end || Number.MAX_SAFE_INTEGER),
   endBlock: end,
 });
+
+/**
+ * Constrain indexing between the following start/end blocks, configured by START_BLOCK and END_BLOCK
+ * https://ponder.sh/docs/contracts-and-networks#block-range
+ *
+ * NOTE: it only really makes sense to use start/end blocks when running a single plugin
+ * (namely the eth plugin, in order to take snapshots). setting start/end blocks
+ * while running multiple plugins (which results in ponder indexing multiple chains) should be
+ * considered undefined behavior.
+ */
+export const getBlockRange = () => ({
+  startBlock: parseBlockheightEnvVar("START_BLOCK"),
+  endBlock: parseBlockheightEnvVar("END_BLOCK"),
+});
+
+/**
+ * Parses an env var into a blockheight for ponder.
+ *
+ * @param envVarName Name of the environment variable to parse
+ * @returns The parsed block number if valid, undefined otherwise
+ */
+
+const parseBlockheightEnvVar = (envVarName: "START_BLOCK" | "END_BLOCK"): number | undefined => {
+  const envVarValue = process.env[envVarName];
+  if (!envVarValue) return undefined;
+  const num = parseInt(envVarValue, 10);
+  if (isNaN(num) || num < 0) throw new Error(`if specified, ${envVarName} must be a number >= 0`);
+  return num;
+};
 
 /**
  * Gets the RPC endpoint URL for a given chain ID.
