@@ -11,8 +11,10 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ens-deployments",
   "keywords": ["ENS", "ENSNode"],
-  "exports": "./src/index.ts",
   "files": ["dist"],
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "publishConfig": {
     "access": "public",
     "exports": {
@@ -32,7 +34,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "viem": "catalog:"

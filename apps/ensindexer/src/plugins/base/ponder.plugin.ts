@@ -1,11 +1,12 @@
 import { createConfig } from "ponder";
-import { DEPLOYMENT_CONFIG } from "../../lib/globals";
+
+import { DEPLOYMENT_CONFIG } from "@/lib/globals";
 import {
   activateHandlers,
   createPluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
-} from "../../lib/plugin-helpers";
+} from "@/lib/plugin-helpers";
 
 // uses the 'base' plugin config for deployments
 export const pluginName = "base" as const;

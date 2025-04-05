@@ -1,6 +1,6 @@
 import { ensNodeMetadataQueryOptions } from "@/components/ensnode/metadata-query";
 import { IndexingStatus } from "@/components/indexing-status/components";
-import { getQueryClient } from "@/components/providers/react-query-client";
+import { getQueryClient } from "@/components/query-client";
 import { parseSearchParams, selectedEnsNodeUrl } from "@/lib/env";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 

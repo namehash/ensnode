@@ -1,13 +1,15 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
 import starlightSidebarTopics from "starlight-sidebar-topics";
-import starlightThemeRapide from "starlight-theme-rapide";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
+    components: {
+      ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
+      ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
+    },
     customCss: ["./src/styles/globals.css"],
     plugins: [
-      starlightThemeRapide(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
@@ -149,7 +151,9 @@ export function starlight(): AstroIntegration {
       replacesTitle: true,
     },
     social: {
+      "x.com": "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
+      telegram: "https://t.me/ensnode",
     },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",

@@ -4,9 +4,10 @@ import DeploymentConfigs from "@ensnode/ens-deployments";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { Labelhash } from "@ensnode/utils/types";
 import { decodeEventLog, zeroAddress } from "viem";
-import { makeRegistrarHandlers } from "../../../handlers/Registrar";
-import { upsertAccount } from "../../../lib/db-helpers";
-import { PonderENSPluginHandlerArgs } from "../../../lib/plugin-helpers";
+
+import { makeRegistrarHandlers } from "@/handlers/Registrar";
+import { upsertAccount } from "@/lib/db-helpers";
+import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract

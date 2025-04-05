@@ -1,6 +1,7 @@
 name: Build ENSRainbow-v2-data image
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
 
 jobs:
   image-build-and-push:
