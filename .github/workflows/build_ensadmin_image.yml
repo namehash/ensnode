@@ -1,11 +1,12 @@
 name: Build ENSAdmin image
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
   release:
-    types: [published]
+    types: [created, published]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -39,4 +40,4 @@ jobs:
           image_name:  ghcr.io/${{ github.repository }}/ensadmin:${{ env.TAG }}
           dockerfile_path: apps/ensadmin/Dockerfile
           registry_user: ${{ github.actor }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }} 
+          registry_token: ${{ secrets.GITHUB_TOKEN }}

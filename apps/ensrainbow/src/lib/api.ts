@@ -3,10 +3,11 @@ import { StatusCode } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
-import packageJson from "../../package.json";
-import { logger } from "../utils/logger";
-import { ENSRainbowDB, SCHEMA_VERSION } from "./database";
-import { ENSRainbowServer } from "./server";
+
+import packageJson from "@/../package.json";
+import { ENSRainbowDB, SCHEMA_VERSION } from "@/lib/database";
+import { ENSRainbowServer } from "@/lib/server";
+import { logger } from "@/utils/logger";
 
 /**
  * Creates and configures an ENS Rainbow api

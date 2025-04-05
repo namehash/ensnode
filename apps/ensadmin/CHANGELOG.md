@@ -1,5 +1,14 @@
 # ensadmin
 
+## 0.1.4
+### Patch Changes
+
+
+
+- [#481](https://github.com/namehash/ensnode/pull/481) [`7c5f720`](https://github.com/namehash/ensnode/commit/7c5f7206d40f1daf28073c574d4985165bcf0fda) Thanks [@tk-o](https://github.com/tk-o)! - Allow ENSAdmin to validate ENSNode connection more precisely and inform the user about any validation errors.
+
+## 0.1.3
+
 ## 0.1.2
 ### Patch Changes
 

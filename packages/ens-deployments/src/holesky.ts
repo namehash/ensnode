@@ -1,8 +1,8 @@
 import { mergeAbis } from "@ponder/utils";
 import { holesky } from "viem/chains";
 
-import { ETHResolverFilter } from "./filters";
-import type { ENSDeploymentConfig } from "./types";
+import { ETHResolverFilter } from "./lib/filters";
+import type { ENSDeploymentConfig } from "./lib/types";
 
 // Subregistry ABIs for direct subnames of 'eth' on Holesky
 import { BaseRegistrar as eth_BaseRegistrar } from "./abis/eth/BaseRegistrar";
