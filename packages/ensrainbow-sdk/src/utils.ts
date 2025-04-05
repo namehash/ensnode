@@ -1,4 +1,6 @@
 import type { Labelhash } from "@ensnode/utils/types";
+import { Hex } from "viem";
+import { isHex } from "viem/utils";
 
 export type EncodedLabelhash = `[${string}]`;
 
@@ -22,27 +24,28 @@ export class InvalidLabelhashError extends Error {
  */
 export function parseLabelhash(maybeLabelhash: string): Labelhash {
   // Remove 0x prefix if present
-  const hexPart = maybeLabelhash.startsWith("0x") ? maybeLabelhash.slice(2) : maybeLabelhash;
+  let hexPart = maybeLabelhash.startsWith("0x") ? maybeLabelhash.slice(2) : maybeLabelhash;
+
+  // Check if the correct number of bytes (32 bytes = 64 hex chars)
+  // If length is 63, pad with a leading zero to make it 64
+  if (hexPart.length == 63) {
+    hexPart = `0${hexPart}`;
+  } else if (hexPart.length !== 64) {
+    throw new InvalidLabelhashError(
+      `Invalid labelhash length: expected 32 bytes (64 hex chars), got ${hexPart.length / 2} bytes: ${maybeLabelhash}`,
+    );
+  }
+  const normalizedHex: Hex = `0x${hexPart}`;
 
   // Check if all characters are valid hex digits
-  if (!/^[0-9a-fA-F]*$/.test(hexPart)) {
+  if (!isHex(normalizedHex, { strict: true })) {
     throw new InvalidLabelhashError(
       `Invalid labelhash: contains non-hex characters: ${maybeLabelhash}`,
     );
   }
 
-  // If odd number of hex digits, add a leading 0
-  const normalizedHexPart = hexPart.length % 2 === 1 ? `0${hexPart}` : hexPart;
-
-  // Check if the correct number of bytes (32 bytes = 64 hex chars)
-  if (normalizedHexPart.length !== 64) {
-    throw new InvalidLabelhashError(
-      `Invalid labelhash length: expected 32 bytes (64 hex chars), got ${normalizedHexPart.length / 2} bytes: ${maybeLabelhash}`,
-    );
-  }
-
   // Ensure lowercase
-  return `0x${normalizedHexPart.toLowerCase()}` as Labelhash;
+  return normalizedHex.toLowerCase() as Labelhash;
 }
 
 /**

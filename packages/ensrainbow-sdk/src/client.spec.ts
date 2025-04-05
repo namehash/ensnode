@@ -71,11 +71,14 @@ describe("EnsRainbowApiClient", () => {
   });
 
   it("should return a bad request error for an invalid labelhash", async () => {
-    const response = await client.heal("0xinvalid");
+    const response = await client.heal(
+      "0xinvalid1invalid1invalid1invalid1invalid1invalid1invalid1invalid1",
+    );
 
     expect(response).toEqual({
       status: StatusCode.Error,
-      error: "Invalid labelhash: contains non-hex characters: 0xinvalid",
+      error:
+        "Invalid labelhash: contains non-hex characters: 0xinvalid1invalid1invalid1invalid1invalid1invalid1invalid1invalid1",
       errorCode: ErrorCode.BadRequest,
     } satisfies EnsRainbow.HealBadRequestError);
   });
@@ -121,14 +124,15 @@ describe("EnsRainbowApiClient", () => {
     }
   });
 
-  it("should return error response for invalid labelhash", async () => {
+  it("should return error response for invalid labelhash length", async () => {
     const response = await client.heal("invalid-labelhash");
 
     expect(response).toEqual({
-      status: "error",
-      error: "Invalid labelhash: contains non-hex characters: invalid-labelhash",
-      errorCode: 400,
-    });
+      status: StatusCode.Error,
+      error:
+        "Invalid labelhash length: expected 32 bytes (64 hex chars), got 8.5 bytes: invalid-labelhash",
+      errorCode: ErrorCode.BadRequest,
+    } satisfies EnsRainbow.HealBadRequestError);
   });
 
   it("should use cache for repeated requests", async () => {
