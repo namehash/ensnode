@@ -9,4 +9,8 @@ export const ErrorCode = {
   BadRequest: 400,
   NotFound: 404,
   ServerError: 500,
+  // Network error codes
+  TIMEOUT: 1000,
+  NETWORK_OFFLINE: 1001,
+  GENERAL_NETWORK_ERROR: 1099,
 } as const;

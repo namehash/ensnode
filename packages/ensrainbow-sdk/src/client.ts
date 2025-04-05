@@ -23,7 +23,8 @@ export namespace EnsRainbow {
   type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
   export interface HealthResponse {
-    status: "ok";
+    status: "ok" | "error";
+    error?: string;
   }
 
   export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
@@ -64,17 +65,48 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.BadRequest;
   }
 
+  export interface HealTimeoutError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.TIMEOUT> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.TIMEOUT;
+  }
+
+  export interface HealNetworkOfflineError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.NETWORK_OFFLINE> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.NETWORK_OFFLINE;
+  }
+
+  export interface HealGeneralNetworkError
+    extends BaseHealResponse<typeof StatusCode.Error, typeof ErrorCode.GENERAL_NETWORK_ERROR> {
+    status: typeof StatusCode.Error;
+    label?: never;
+    error: string;
+    errorCode: typeof ErrorCode.GENERAL_NETWORK_ERROR;
+  }
+
   export type HealResponse =
     | HealSuccess
     | HealNotFoundError
     | HealServerError
-    | HealBadRequestError;
+    | HealBadRequestError
+    | HealTimeoutError
+    | HealNetworkOfflineError
+    | HealGeneralNetworkError;
+
   export type HealError = Exclude<HealResponse, HealSuccess>;
 
   /**
    * Server errors should not be cached.
    */
-  export type CacheableHealResponse = Exclude<HealResponse, HealServerError>;
+  export type CacheableHealResponse = Exclude<
+    HealResponse,
+    HealServerError | HealTimeoutError | HealNetworkOfflineError | HealGeneralNetworkError
+  >;
 
   export interface BaseCountResponse<Status extends StatusCode, Error extends ErrorCode> {
     status: Status;
@@ -102,7 +134,39 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.ServerError;
   }
 
-  export type CountResponse = CountSuccess | CountServerError;
+  export interface CountNetworkError
+    extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.GENERAL_NETWORK_ERROR> {
+    status: typeof StatusCode.Error;
+    count?: never;
+    timestamp?: never;
+    error: string;
+    errorCode: typeof ErrorCode.GENERAL_NETWORK_ERROR;
+  }
+
+  export interface CountTimeoutError
+    extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.TIMEOUT> {
+    status: typeof StatusCode.Error;
+    count?: never;
+    timestamp?: never;
+    error: string;
+    errorCode: typeof ErrorCode.TIMEOUT;
+  }
+
+  export interface CountNetworkOfflineError
+    extends BaseCountResponse<typeof StatusCode.Error, typeof ErrorCode.NETWORK_OFFLINE> {
+    status: typeof StatusCode.Error;
+    count?: never;
+    timestamp?: never;
+    error: string;
+    errorCode: typeof ErrorCode.NETWORK_OFFLINE;
+  }
+
+  export type CountResponse =
+    | CountSuccess
+    | CountServerError
+    | CountNetworkError
+    | CountTimeoutError
+    | CountNetworkOfflineError;
 
   /**
    * ENSRainbow version information.
@@ -140,6 +204,12 @@ export interface EnsRainbowApiClientOptions {
    * The URL of an ENSRainbow API endpoint.
    */
   endpointUrl: URL;
+
+  /**
+   * Default timeout for API requests in milliseconds.
+   * Defaults to 10000 (10 seconds).
+   */
+  requestTimeout?: number;
 }
 
 /**
@@ -160,6 +230,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly cache: Cache<Labelhash, EnsRainbow.CacheableHealResponse>;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
+  public static readonly DEFAULT_REQUEST_TIMEOUT = 10000;
 
   /**
    * Create default client options.
@@ -170,6 +241,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      requestTimeout: EnsRainbowApiClient.DEFAULT_REQUEST_TIMEOUT,
     };
   }
 
@@ -185,6 +257,35 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   }
 
   /**
+   * Helper method to fetch data with timeout handling
+   *
+   * @param endpoint - The endpoint to fetch from
+   * @returns The response JSON data
+   * @throws Will throw an error if the fetch fails
+   */
+  private async fetchWithTimeout<T>(endpoint: string): Promise<T> {
+    // Create abort controller for timeout handling
+    const controller = new AbortController();
+    const timeout = this.options.requestTimeout || EnsRainbowApiClient.DEFAULT_REQUEST_TIMEOUT;
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(new URL(endpoint, this.options.endpointUrl), {
+        signal: controller.signal,
+      });
+
+      // Clear the timeout
+      clearTimeout(timeoutId);
+
+      return response.json() as Promise<T>;
+    } catch (error) {
+      // Clear the timeout if it hasn't fired yet
+      clearTimeout(timeoutId);
+      throw error; // Re-throw to be caught by the caller
+    }
+  }
+
+  /**
    * Attempt to heal a labelhash to its original label.
    *
    * Note on returned labels: ENSRainbow returns labels exactly as they are
@@ -196,8 +297,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * @param labelhash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
+
    * @example
    * ```typescript
    * const response = await client.heal(
@@ -205,6 +305,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * );
    *
    * console.log(response);
+
    *
    * // Output:
    * // {
@@ -233,44 +334,157 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
       return cachedResult;
     }
 
-    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
-    const healResponse = (await response.json()) as EnsRainbow.HealResponse;
+    try {
+      const healResponse = await this.fetchWithTimeout<EnsRainbow.HealResponse>(
+        `/v1/heal/${labelhash}`,
+      );
 
-    if (isCacheableHealResponse(healResponse)) {
-      this.cache.set(labelhash, healResponse);
+      if (isCacheableHealResponse(healResponse)) {
+        this.cache.set(labelhash, healResponse);
+      }
+
+      return healResponse;
+    } catch (error) {
+      // Handle network errors
+      return this.createNetworkErrorResponse(error);
+    }
+  }
+
+  /**
+   * Helper method to create appropriate network error responses
+   */
+  private createNetworkErrorResponse(error: unknown): EnsRainbow.HealResponse {
+    let errorMessage = "Unknown network error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+
+      // DOMException is thrown for aborts, including timeouts
+      if (error.name === "AbortError") {
+        return {
+          status: StatusCode.Error,
+          error: "Request timed out",
+          errorCode: ErrorCode.TIMEOUT,
+        } as EnsRainbow.HealTimeoutError;
+      }
+
+      // Network connectivity issues
+      if (
+        errorMessage.toLowerCase().includes("network") ||
+        errorMessage.toLowerCase().includes("failed to fetch")
+      ) {
+        return {
+          status: StatusCode.Error,
+          error: "Network connection lost or unavailable",
+          errorCode: ErrorCode.NETWORK_OFFLINE,
+        } as EnsRainbow.HealNetworkOfflineError;
+      }
     }
 
-    return healResponse;
+    // Default to general network error
+    return {
+      status: StatusCode.Error,
+      error: errorMessage,
+      errorCode: ErrorCode.GENERAL_NETWORK_ERROR,
+    } as EnsRainbow.HealGeneralNetworkError;
   }
 
   /**
    * Get Count of Healable Labels
    *
    * @returns a `CountResponse` indicating the result and the timestamp of the request and the number of healable labels if successful
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
    * @example
    *
    * const response = await client.count();
    *
    * console.log(response);
    *
+   * // Success case:
    * // {
    * //   "status": "success",
    * //   "count": 133856894,
    * //   "timestamp": "2024-01-30T11:18:56Z"
    * // }
    *
+   * // Server error case:
+   * // {
+   * //   "status": "error",
+   * //   "error": "Server error",
+   * //   "errorCode": 500
+   * // }
+   *
+   * // Network timeout error case:
+   * // {
+   * //   "status": "error",
+   * //   "error": "Connection timed out",
+   * //   "errorCode": 1000
+   * // }
+   *
+   * // Network offline error case:
+   * // {
+   * //   "status": "error",
+   * //   "error": "Server is unreachable",
+   * //   "errorCode": 1001
+   * // }
+   *
+   * // General network error case:
+   * // {
+   * //   "status": "error",
+   * //   "error": "Unknown network error",
+   * //   "errorCode": 1099
+   * // }
    */
   async count(): Promise<EnsRainbow.CountResponse> {
-    const response = await fetch(new URL("/v1/labels/count", this.options.endpointUrl));
-
-    return response.json() as Promise<EnsRainbow.CountResponse>;
+    try {
+      return await this.fetchWithTimeout<EnsRainbow.CountResponse>("/v1/labels/count");
+    } catch (error) {
+      // Handle network errors
+      return this.createCountNetworkErrorResponse(error);
+    }
   }
 
   /**
-   *
-   * Simple verification that the service is running, either in your local setup or for the provided hosted instance
+   * Helper method to create appropriate network error responses for count
+   */
+  private createCountNetworkErrorResponse(error: unknown): EnsRainbow.CountResponse {
+    let errorMessage = "Unknown network error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+
+      // DOMException is thrown for aborts, including timeouts
+      if (error.name === "AbortError") {
+        return {
+          status: StatusCode.Error,
+          error: "Request timed out",
+          errorCode: ErrorCode.TIMEOUT,
+        } as EnsRainbow.CountTimeoutError;
+      }
+
+      // Network connectivity issues
+      if (
+        errorMessage.toLowerCase().includes("network") ||
+        errorMessage.toLowerCase().includes("failed to fetch") ||
+        errorMessage.toLowerCase().includes("fetch failed")
+      ) {
+        return {
+          status: StatusCode.Error,
+          error: "Network connection lost or unavailable",
+          errorCode: ErrorCode.NETWORK_OFFLINE,
+        } as EnsRainbow.CountNetworkOfflineError;
+      }
+    }
+
+    // Default to general network error
+    return {
+      status: StatusCode.Error,
+      error: errorMessage,
+      errorCode: ErrorCode.GENERAL_NETWORK_ERROR,
+    } as EnsRainbow.CountNetworkError;
+  }
+
+  /**
+   * Simple verification that the service is running
    *
    * @returns a status of ENS Rainbow service
    * @example
@@ -279,14 +493,27 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * console.log(response);
    *
+   * // Success case:
    * // {
-   * //   "status": "ok",
+   * //   "status": "ok"
+   * // }
+   *
+   * // Error case:
+   * // {
+   * //   "status": "error",
+   * //   "error": "Server is unreachable"
    * // }
    */
   async health(): Promise<EnsRainbow.HealthResponse> {
-    const response = await fetch(new URL("/health", this.options.endpointUrl));
-
-    return response.json() as Promise<EnsRainbow.HealthResponse>;
+    try {
+      return await this.fetchWithTimeout<EnsRainbow.HealthResponse>("/health");
+    } catch (error) {
+      // For health checks, we'll return a custom error status
+      return {
+        status: "error",
+        error: error instanceof Error ? error.message : "Unknown network error",
+      };
+    }
   }
 
   /**
@@ -324,6 +551,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const deepCopy = {
       cacheCapacity: this.options.cacheCapacity,
       endpointUrl: new URL(this.options.endpointUrl.href),
+      requestTimeout: this.options.requestTimeout,
     } satisfies EnsRainbowApiClientOptions;
 
     return Object.freeze(deepCopy);
@@ -353,5 +581,26 @@ export const isHealError = (
 export const isCacheableHealResponse = (
   response: EnsRainbow.HealResponse,
 ): response is EnsRainbow.CacheableHealResponse => {
-  return response.status === StatusCode.Success || response.errorCode !== ErrorCode.ServerError;
+  return (
+    response.status === StatusCode.Success ||
+    (response.status === StatusCode.Error &&
+      response.errorCode !== ErrorCode.ServerError &&
+      response.errorCode !== ErrorCode.TIMEOUT &&
+      response.errorCode !== ErrorCode.NETWORK_OFFLINE &&
+      response.errorCode !== ErrorCode.GENERAL_NETWORK_ERROR)
+  );
+};
+
+/**
+ * Determines if a heal error is retryable (i.e., it's a network error)
+ *
+ * @param error - The heal error to check
+ * @returns true if the error is a network error (TIMEOUT, NETWORK_OFFLINE, or GENERAL_NETWORK_ERROR), false otherwise
+ */
+export const isRetryableHealError = (error: EnsRainbow.HealError): boolean => {
+  return (
+    error.errorCode === ErrorCode.TIMEOUT ||
+    error.errorCode === ErrorCode.NETWORK_OFFLINE ||
+    error.errorCode === ErrorCode.GENERAL_NETWORK_ERROR
+  );
 };

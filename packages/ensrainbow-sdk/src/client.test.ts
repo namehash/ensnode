@@ -19,6 +19,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      requestTimeout: EnsRainbowApiClient.DEFAULT_REQUEST_TIMEOUT,
     } satisfies EnsRainbowApiClientOptions);
   });
 
@@ -32,6 +33,7 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
+      requestTimeout: EnsRainbowApiClient.DEFAULT_REQUEST_TIMEOUT,
     } satisfies EnsRainbowApiClientOptions);
   });
 
