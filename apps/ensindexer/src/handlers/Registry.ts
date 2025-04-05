@@ -1,5 +1,11 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
+import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { labelByHash } from "@/lib/graphnode-helpers";
+import { makeResolverId } from "@/lib/ids";
+import type { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
+import type { OwnedName } from "@/lib/types";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import {
   ROOT_NODE,
@@ -9,12 +15,6 @@ import {
 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash, Node } from "@ensnode/utils/types";
 import { type Hex, zeroAddress } from "viem";
-import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { labelByHash } from "../lib/graphnode-helpers";
-import { makeResolverId } from "../lib/ids";
-import type { PonderENSPluginHandlerArgs } from "../lib/plugin-helpers";
-import type { EventWithArgs } from "../lib/ponder-helpers";
-import type { OwnedName } from "../lib/types";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.

@@ -96,3 +96,23 @@ Success Response:
   "errorCode": 500
 }
 ```
+
+## Get Version Information
+
+```bash
+curl http://localhost:3223/v1/version
+```
+
+Success Response:
+
+```json
+{
+  "status": "success",
+  "version": "0.1.0",
+  "schema_version": 2
+}
+```
+
+The response contains:
+- `version`: The current version of ENSRainbow
+- `schema_version`: The current schema version of the database

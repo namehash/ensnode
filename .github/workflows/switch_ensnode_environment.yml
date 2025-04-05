@@ -13,7 +13,7 @@ on:
 
 jobs:
   switch-environment:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
@@ -45,4 +45,6 @@ jobs:
             redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVIRONMENT}-holesky-api"
             redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVIRONMENT}-holesky-indexer"
 
+            # ENSRAINBOW
+            redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
           

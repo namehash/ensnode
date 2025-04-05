@@ -1,7 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { preferredEnsNodeUrl } from "@/lib/env";
-import { ClipboardIcon } from "lucide-react";
+import { CopyButton } from "@/components/ui/copy-button";
+import { defaultEnsNodeUrl } from "@/lib/env";
 
 type ActionProps = {
   searchParams: Promise<{
@@ -10,22 +8,20 @@ type ActionProps = {
 };
 
 export default async function ActionsPonderPage({ searchParams }: ActionProps) {
-  const { ensnode = preferredEnsNodeUrl() } = await searchParams;
+  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
 
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
       ? ensnode
-      : preferredEnsNodeUrl();
+      : defaultEnsNodeUrl();
 
   const url = new URL(`/ponder`, baseUrl).toString();
 
   return (
-    <div className="flex w-full max-w-md items-center space-x-2">
-      <Input type="url" placeholder="URL" disabled value={url} />
-      <Button type="button" variant="ghost">
-        <ClipboardIcon />
-      </Button>
+    <div className="flex w-full items-center space-x-2">
+      <span className="font-mono text-xs select-none text-gray-500">{url}</span>
+      <CopyButton value={url} message="URL copied to clipboard!" />
     </div>
   );
 }

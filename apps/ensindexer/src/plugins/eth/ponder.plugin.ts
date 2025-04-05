@@ -1,13 +1,14 @@
 import type { Node } from "@ensnode/utils/types";
 import { createConfig } from "ponder";
-import { DEPLOYMENT_CONFIG } from "../../lib/globals";
+
+import { DEPLOYMENT_CONFIG } from "@/lib/globals";
 import {
   activateHandlers,
   createPluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
-} from "../../lib/plugin-helpers";
-import { healReverseAddresses } from "../../lib/ponder-helpers";
+} from "@/lib/plugin-helpers";
+import { healReverseAddresses } from "@/lib/ponder-helpers";
 
 // uses the 'eth' plugin config for deployments
 export const pluginName = "eth" as const;

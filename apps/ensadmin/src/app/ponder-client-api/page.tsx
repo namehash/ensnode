@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { preferredEnsNodeUrl } from "@/lib/env";
+import { defaultEnsNodeUrl } from "@/lib/env";
 import { PonderClientContent } from "./examples-content";
 import { Provider as PonderClientProvider } from "./provider";
 
@@ -11,13 +11,13 @@ type PageProps = {
 };
 
 export default async function PonderClientPage({ searchParams }: PageProps) {
-  const { ensnode = preferredEnsNodeUrl() } = await searchParams;
+  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
 
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
       ? ensnode
-      : preferredEnsNodeUrl();
+      : defaultEnsNodeUrl();
 
   const url = new URL(`/subgraph`, baseUrl).toString();
 

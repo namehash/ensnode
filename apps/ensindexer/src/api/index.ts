@@ -1,3 +1,5 @@
+import packageJson from "@/../package.json";
+
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
@@ -5,16 +7,18 @@ import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware"
 import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
-import packageJson from "../../package.json";
+
 import {
+  createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
   createPrometheusMetricsFetcher,
+  ensAdminUrl,
   ensNodePublicUrl,
   getEnsDeploymentChain,
   ponderDatabaseSchema,
   ponderPort,
   requestedPluginNames,
-} from "../lib/ponder-helpers";
+} from "@/lib/ponder-helpers";
 
 const app = new Hono();
 
@@ -29,31 +33,27 @@ app.use(
   ensNodeVersionResponseHeader,
 
   // use CORS middleware
-  cors({
-    origin: "*",
-  }),
+  cors({ origin: "*" }),
 );
 
-app.onError((err, ctx) => {
+app.onError((error, ctx) => {
   // log the error for operators
-  console.error(err);
+  console.error(error);
 
   return ctx.text("Internal server error", 500);
 });
 
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
-app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
-);
-
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+// use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
   try {
-    ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`);
-  } catch (error) {
-    console.error(error);
+    const ensAdminRedirectUrl = new URL(ensAdminUrl());
+    ensAdminRedirectUrl.searchParams.set("ensnode", ensNodePublicUrl());
 
-    return ctx.text("Internal server error", 500);
+    return ctx.redirect(ensAdminRedirectUrl);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
   }
 });
 
@@ -64,6 +64,9 @@ const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
 
 // setup prometheus metrics fetching
 const fetchPrometheusMetrics = createPrometheusMetricsFetcher(ponderPort());
+
+// setup ENSRainbow version fetching
+const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
 
 // use ENSNode middleware at /metadata
 app.get(
@@ -82,6 +85,7 @@ app.get(
     query: {
       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
       prometheusMetrics: fetchPrometheusMetrics,
+      ensRainbowVersion: fetchEnsRainbowVersion,
     },
     publicClients,
   }),

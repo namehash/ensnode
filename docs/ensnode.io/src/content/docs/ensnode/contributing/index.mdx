@@ -50,37 +50,29 @@ ENSNode is a suite of services, and some depend on others. Refer to the `docker-
 />
 :::
 
-### Configuring Environment Variables
-
-```bash
-cd apps/ensindexer
-cp .env.local.example .env.local
-```
-
-<LinkCard
-  title="Environment Variable Configuration Options"
-  href="/ensnode/usage/configuration"
-/>
-
-:::note
-ENSIndexer's `.env.local` should be placed at `apps/ensindexer/.env.local`, _not_ at the monorepo root.
-:::
-
-#### 1. Running Postgres
+### 1. Running Postgres
 
 Ensure Postgres in the background, providing its connection details to ENSIndexer via `DATABASE_URL`.
 
-#### 2. Running ENSRainbow
+### 2. Running ENSRainbow
 
 :::note[Running ENSRainbow in Development]
 To run ENSRainbow in development, the rainbow table data dir must be available. Follow instructions in the [ENSRainbow Contribution Guide](/ensrainbow/contributing) to set up your local environment.
 :::
 
 ```bash
+# from monorepo root
+pnpm run -F @ensnode/ensrainbow serve
+
+# or from apps/ensrainbow
 pnpm run serve
 ```
 
-#### 3. Running ENSIndexer
+### 3. Running ENSIndexer
+
+:::note[Running ENSIndexer in Development]
+Follow instructions in the [ENSIndexer Contribution Guide](/ensindexer/contributing) to set up your local environment.
+:::
 
 ```bash
 # from monorepo root
@@ -90,14 +82,7 @@ pnpm run -F ensindexer dev
 pnpm run dev
 ```
 
-<LinkCard
-  title="View Ponder Documentation"
-  description="Learn more about running Ponder indexers in development and production"
-  href="https://ponder.sh/"
-  target="_blank"
-/>
-
-#### 4. Running ENSAdmin
+### 4. Running ENSAdmin
 
 ```bash
 cd apps/ensadmin
@@ -131,12 +116,18 @@ Before you can use Docker Compose, ensure you have the following installed on yo
 - [Docker](https://www.docker.com/get-started)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
+### Building the Docker Images
+
+Before running `docker compose` the images must be build with the latest changes: see the [Building Docker Images](/ensnode/contributing/building) guide.
+
+If you make changes in the application code and wish to run those updates, you must build the relevant Docker container again.
+
 ### Running the Applications
 
-To start the ENSNode services using Docker Compose, follow these steps:
+Run the built images with:
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 - **ENSIndexer**: Available at [http://localhost:42069](http://localhost:42069)
@@ -155,7 +146,3 @@ docker compose down
 :::note[Postgres Volume in this `docker-compose.yml`]
 `docker compoe down` will _not_ delete the Postgres data volume defined here, as it is a **named** volume. To fully delete the Postgres data volume and start from scratch, use `docker compose down -v`.
 :::
-
-## Building Docker Images
-
-For detailed instructions on building Docker images for ENSNode components, see the [Building Docker Images](/ensnode/contributing/building) guide.
