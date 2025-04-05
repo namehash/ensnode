@@ -1,3 +1,4 @@
+import packageJson from "@/../package.json";
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { StatusCode } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
@@ -5,7 +6,6 @@ import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { logger } from "../utils/logger";
-import packageJson from "@/../package.json";
 import { ENSRainbowDB, SCHEMA_VERSION } from "./database";
 import { ENSRainbowServer } from "./server";
 
