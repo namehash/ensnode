@@ -35,6 +35,9 @@ export function ENSName({
   const { data: ensName, isLoading } = useEnsName({
     address,
     chainId,
+    query: {
+      retry: 0, // Disable retries - helpful for ens-test-env where this RPC endpoint is not supported
+    },
   });
 
   // Handle client-side rendering
