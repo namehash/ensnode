@@ -46,7 +46,7 @@ export function useIndexingStatusQuery(
       return data;
     },
     throwOnError(error) {
-      throw new Error(`ENSNode request error at '${ensNodeUrl}'. Cause: ${error.message}`);
+      throw new Error(`Could not fetch ENSNode data from '${ensNodeUrl}'. Cause: ${error.message}`);
     },
   });
 }
@@ -74,6 +74,18 @@ function validateResponse(response: EnsNode.Metadata) {
   if (networksWithoutFirstBlockToIndex.length > 0) {
     throw new Error(
       `Missing first block to index for some networks with the following chain IDs: ${networksWithoutFirstBlockToIndex
+        .map(([chainId]) => chainId)
+        .join(", ")}`,
+    );
+  }
+
+  const networksWithoutLastIndexedBlock = Object.entries(networkIndexingStatusByChainId).filter(
+    ([, network]) => network.lastIndexedBlock === null,
+  );
+
+  if (networksWithoutLastIndexedBlock.length > 0) {
+    throw new Error(
+      `Missing last indexed block for some networks with the following chain IDs: ${networksWithoutLastIndexedBlock
         .map(([chainId]) => chainId)
         .join(", ")}`,
     );

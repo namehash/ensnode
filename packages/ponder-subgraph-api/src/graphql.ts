@@ -73,6 +73,7 @@ import {
   relations,
   sql,
 } from "drizzle-orm";
+import { toSnakeCase } from "drizzle-orm/casing";
 import {
   type PgColumnBuilderBase,
   PgDialect,
@@ -1074,11 +1075,13 @@ function buildUnionAllQuery(
     // build select object with nulls for missing columns, manually casting them to the correct type
     const selectAllColumnsIncludingNulls = allColumnNames.reduce((memo, columnName) => {
       const column = allColumns[columnName]!;
+      const dbColumnName = table.columns[columnName]
+        ? toSnakeCase(table.columns[columnName].name)
+        : "NULL";
+
       return {
         ...memo,
-        [columnName]: sql
-          .raw(`${table.columns[columnName]?.name ?? "NULL"}::${column.getSQLType()}`)
-          .as(column.name),
+        [columnName]: sql.raw(`${dbColumnName}::${column.getSQLType()}`).as(column.name),
       };
     }, {});
 

@@ -7,7 +7,14 @@ import { starlight } from "./config/integrations/starlight";
 
 export default defineConfig({
   site: "https://ensnode.io",
-  integrations: [starlight(), sitemap(), react(), tailwind()],
+  integrations: [
+    starlight(),
+    sitemap(),
+    react(),
+    tailwind({
+      applyBaseStyles: false,
+    }),
+  ],
   vite: {
     ssr: {
       noExternal: ["@namehash/namekit-react"],
