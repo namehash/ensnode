@@ -1,3 +1,4 @@
+import { EventIdPrefix } from "@/lib/types";
 import type { Labelhash, Node } from "@ensnode/utils/types";
 import type { Address, Hex } from "viem";
 
@@ -8,30 +9,26 @@ export const makeResolverId = (address: Address, node: Hex) =>
 /**
  * Makes a cross-registrar unique event ID.
  *
- * The ENS Subgraph indexes events from a single registrar. However, ENSIndexer
- * enables indexing of events from multiple registrars, which can lead to event
- * ID collisions. This function allows keeping Subgraph-compatible event IDs
- * (produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`)
- * while ensuring event id uniqueness across registrars.
+ * The ENS Subgraph indexes events from a single network and constructs event ids like:
+ * `${blockNumber}-${logIndex}(-${transferIndex})`. Because ENSIndexer indexes multiple networks,
+ * however, event ids can collide between chains, if the blockNumber and logIndex happen to line up.
+ * This function allows for an optional prefix, keeping Subgraph-compatible event IDs
+ * (produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`) if undefined and
+ * ensuring event id uniqueness across plugins if set.
  *
- * @param registrarName the name of the registrar associated with the event
+ * @param prefix optional prefix
  * @param blockNumber
  * @param logIndex
  * @param transferIndex
  * @returns
  */
 export const makeEventId = (
-  registrarName: string,
+  prefix: EventIdPrefix,
   blockNumber: bigint,
   logIndex: number,
   transferIndex?: number,
 ) =>
-  [
-    registrarName === "eth" ? undefined : registrarName,
-    blockNumber.toString(),
-    logIndex.toString(),
-    transferIndex?.toString(),
-  ]
+  [prefix, blockNumber.toString(), logIndex.toString(), transferIndex?.toString()]
     .filter(Boolean)
     .join("-");
 

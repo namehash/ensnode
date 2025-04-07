@@ -3,7 +3,11 @@ import { ponder } from "ponder:registry";
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"linea.eth">) {
+export default function ({
+  pluginName,
+  ownedName,
+  namespace,
+}: PonderENSPluginHandlerArgs<"linea">) {
   const {
     handleNameWrapped,
     handleNameUnwrapped,
@@ -11,7 +15,10 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"l
     handleExpiryExtended,
     handleTransferSingle,
     handleTransferBatch,
-  } = makeNameWrapperHandlers(ownedName);
+  } = makeNameWrapperHandlers({
+    eventIdPrefix: pluginName,
+    registrarManagedName: ownedName,
+  });
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);
   ponder.on(namespace("NameWrapper:NameUnwrapped"), handleNameUnwrapped);

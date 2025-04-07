@@ -11,7 +11,10 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     handleNameWrapped,
     handleTransferBatch,
     handleTransferSingle,
-  } = makeNameWrapperHandlers(ownedName);
+  } = makeNameWrapperHandlers({
+    eventIdPrefix: undefined, // NOTE: no event id prefix for root plugin
+    registrarManagedName: ownedName,
+  });
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);
   ponder.on(namespace("NameWrapper:NameUnwrapped"), handleNameUnwrapped);

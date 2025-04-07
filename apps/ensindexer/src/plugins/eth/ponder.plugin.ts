@@ -3,7 +3,7 @@ import { createConfig } from "ponder";
 import { DEPLOYMENT_CONFIG } from "@/lib/globals";
 import {
   activateHandlers,
-  createPluginNamespace,
+  makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
@@ -15,7 +15,7 @@ export const pluginName = "eth" as const;
 const ownedName = "eth" as const;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
-const namespace = createPluginNamespace(ownedName);
+const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -54,6 +54,7 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
+  pluginName,
   ownedName,
   namespace,
   handlers: [

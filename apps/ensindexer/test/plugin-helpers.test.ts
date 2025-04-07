@@ -1,12 +1,12 @@
-import { createPluginNamespace } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { describe, expect, it } from "vitest";
 
 describe("createPluginNamespace", () => {
   it("should return a function that creates namespaced contract names", () => {
-    const boxNs = createPluginNamespace("box");
-    const ethNs = createPluginNamespace("eth");
-    const baseEthNs = createPluginNamespace("base.eth");
-    const nestedNs = createPluginNamespace("well.done.sir.eth");
+    const boxNs = makePluginNamespace("box");
+    const ethNs = makePluginNamespace("eth");
+    const baseEthNs = makePluginNamespace("base.eth");
+    const nestedNs = makePluginNamespace("well.done.sir.eth");
 
     expect(boxNs("Registry")).toBe("/box/Registry");
     expect(ethNs("Registry")).toBe("/eth/Registry");

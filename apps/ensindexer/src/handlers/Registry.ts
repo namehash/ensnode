@@ -5,11 +5,11 @@ import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils
 import type { Labelhash, Node } from "@ensnode/utils/types";
 import { type Hex, zeroAddress } from "viem";
 
-import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { OwnedName } from "@/lib/types";
+import { EventIdPrefix } from "@/lib/types";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.
@@ -70,12 +70,12 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
 }
 
 /**
- * makes a set of shared handlers for a Registry contract that manages `ownedName`
+ * makes a set of shared handlers for a Registry contract
  *
- * @param ownedName the name that the Registry contract manages subnames of
+ * @param eventIdPrefix a prefix necessary for event ids that may otherwise collide
  */
-export const makeRegistryHandlers = (ownedName: OwnedName) => {
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventIdPrefix }) => {
+  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
 
   return {
     handleNewOwner:

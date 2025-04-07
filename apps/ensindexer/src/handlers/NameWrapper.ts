@@ -5,11 +5,11 @@ import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-hel
 import type { Node } from "@ensnode/utils/types";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { createSharedEventValues, upsertAccount } from "@/lib/db-helpers";
+import { makeSharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import type { OwnedName } from "@/lib/types";
+import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
 
 /**
  * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
@@ -19,11 +19,9 @@ import type { OwnedName } from "@/lib/types";
  */
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
-// if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
+// if the WrappedDomain entity has PCC set in fuses, set Domain entity's expiryDate to the greater of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
-  const wrappedDomain = await context.db.find(schema.wrappedDomain, {
-    id: node,
-  });
+  const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63)
@@ -44,11 +42,18 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 /**
  * makes a set of shared handlers for the NameWrapper contract for a given registry's `ownedName`
  *
- * @param ownedName the name that the Registry that NameWrapper interacts with manages
+ * @param eventIdPrefix
+ * @param registrarManagedName the name that the Registry that NameWrapper interacts with manages
  */
-export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
-  const ownedSubnameNode = namehash(ownedName);
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeNameWrapperHandlers = ({
+  eventIdPrefix,
+  registrarManagedName,
+}: {
+  eventIdPrefix: EventIdPrefix;
+  registrarManagedName: RegistrarManagedName;
+}) => {
+  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
+  const ownedSubnameNode = namehash(registrarManagedName);
 
   async function handleTransfer(
     context: Context,
@@ -262,7 +267,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       await handleTransfer(
         context,
         event,
-        makeEventId(ownedName, event.block.number, event.log.logIndex, 0),
+        makeEventId(registrarManagedName, event.block.number, event.log.logIndex, 0),
         event.args.id,
         event.args.to,
       );
@@ -278,7 +283,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
         await handleTransfer(
           context,
           event,
-          makeEventId(ownedName, event.block.number, event.log.logIndex, i),
+          makeEventId(registrarManagedName, event.block.number, event.log.logIndex, i),
           id,
           event.args.to,
         );

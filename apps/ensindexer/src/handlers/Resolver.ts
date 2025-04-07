@@ -4,11 +4,11 @@ import { DeploymentConfigs } from "@ensnode/ens-deployments";
 import type { Node } from "@ensnode/utils/types";
 import { Hex, decodeEventLog } from "viem";
 
-import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { OwnedName } from "@/lib/types";
+import { EventIdPrefix } from "@/lib/types";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
 // contract on the chain that emits an event with the relevant signatures, which may or may not
@@ -17,12 +17,12 @@ import { OwnedName } from "@/lib/types";
 // therefore needs not assume a Resolver entity already exists
 
 /**
- * makes a set of shared handlers for Resolver contracts related to a plugin managing `ownedName`
+ * makes a set of shared handlers for Resolver contracts
  *
- * @param ownedName the name that the plugin manages subnames of
+ * @param eventIdPrefix
  */
-export const makeResolverHandlers = (ownedName: OwnedName) => {
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventIdPrefix }) => {
+  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
 
   return {
     async handleAddrChanged({

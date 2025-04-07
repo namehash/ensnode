@@ -1,14 +1,4 @@
 /**
- * An owned name for a plugin. Must end with `eth`.
- *
- * Owned names are used to distinguish between plugins that handle different
- * subnames. For example, a plugin that handles `eth` subnames will have an
- * owned name of `eth`, while a plugin that handles `base.eth` subnames will
- * have an owned name of `base.eth`.
- */
-export type OwnedName = string;
-
-/**
  * In this project we use the notion of 'plugins' to describe which registries and subregistries
  * of a given ENS deployment are being indexed by ponder. In this project, a plugin's name is the
  * name of the subregistry it indexes. Note that this type definition is 1:1 with that of
@@ -16,3 +6,24 @@ export type OwnedName = string;
  * and the plugins in this project.
  */
 export type PluginName = "eth" | "base" | "linea";
+
+/**
+ * RegistrarManagedName is an explicit type representing the following concept:
+ *   "the name a registrar indexed by the shared handlers manages subnames of"
+ *
+ * i.e. the basenames plugin uses the shared handlers to index the Basenames Registrar, which manages
+ * subnames of "base.eth".
+ */
+export type RegistrarManagedName = string;
+
+/*
+ * The ENS Subgraph indexes events from a single network and constructs event ids using (blockNumber, logIndex).
+ * Because ENSIndexer indexes multiple networks, however, event ids can collide between chains,
+ * if the blockNumber and logIndex happen to line up.
+ *
+ * An Event Id Prefix is provided by non-eth plugins to the shared handlers in order to scope the
+ * event ids created by the shared handlers and avoid said cross-chain collisions.
+ *
+ * TODO: if we ever discard exact subgraph compatbility, we can use ponder's `event.id` as an event UUID.
+ */
+export type EventIdPrefix = string | undefined;

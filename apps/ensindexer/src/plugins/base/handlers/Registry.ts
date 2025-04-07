@@ -3,13 +3,15 @@ import { ponder } from "ponder:registry";
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
+export default function ({ pluginName, namespace }: PonderENSPluginHandlerArgs<"base">) {
   const {
     handleNewOwner, //
     handleNewResolver,
     handleNewTTL,
     handleTransfer,
-  } = makeRegistryHandlers(ownedName);
+  } = makeRegistryHandlers({
+    eventIdPrefix: pluginName,
+  });
 
   ponder.on(namespace("Registry:setup"), setupRootNode);
   ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));

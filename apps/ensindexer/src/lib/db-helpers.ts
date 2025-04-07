@@ -22,13 +22,13 @@ export async function upsertRegistration(
   return context.db.insert(schema.registration).values(values).onConflictDoUpdate(values);
 }
 
-// shared event values for all event types
-// uses `registrarName` to ensure distinct event ids across separate registrars
-export function createSharedEventValues(registrarName: string) {
+// factory for shared event values for all event types
+// uses optional `prefix` to ensure distinct event ids across plugins
+export function makeSharedEventValues(prefix: string | undefined) {
   // simplifies generating the shared event column values from the ponder Event object
   return function sharedEventValues(event: Omit<Event, "args">) {
     return {
-      id: makeEventId(registrarName, event.block.number, event.log.logIndex),
+      id: makeEventId(prefix, event.block.number, event.log.logIndex),
       blockNumber: event.block.number,
       transactionID: event.transaction.hash,
     };
