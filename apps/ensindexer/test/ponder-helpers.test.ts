@@ -28,12 +28,12 @@ describe("ponder helpers", () => {
 
       it("should return valid startBlock and endBlock", () => {
         const range = constrainContractBlockrange(5);
-        expect(range).toEqual({ startBlock: 5, endBlock: Number.MAX_SAFE_INTEGER });
+        expect(range).toEqual({ startBlock: 5, endBlock: undefined });
       });
 
       it("should handle undefined contractStartBlock", () => {
         const range = constrainContractBlockrange(undefined);
-        expect(range).toEqual({ startBlock: 0, endBlock: Number.MAX_SAFE_INTEGER });
+        expect(range).toEqual({ startBlock: 0, endBlock: undefined });
       });
     });
 

@@ -13,19 +13,24 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 
 /**
  * Given a contract's start block, returns a block range describing a start and end block
- * that maintains validity within the global blockrange.
+ * that maintains validity within the global blockrange. The returned start block will always be
+ * defined, but if no end block is specified, the returned end block will be undefined, indicating
+ * that ponder should index the contract in perpetuity.
  *
  * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
  * @returns the start and end blocks, contrained to the provided `start` and `end`
- *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock || MAX_SAFE_INTEGER)
+ *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
  */
 export const constrainContractBlockrange = (
   contractStartBlock: number | undefined = 0,
 ): Blockrange => {
-  const { startBlock = 0, endBlock = Number.MAX_SAFE_INTEGER } = getGlobalBlockrange();
+  const { startBlock, endBlock } = getGlobalBlockrange();
+
+  const isEndConstrained = endBlock !== undefined;
+  const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
 
   return {
-    startBlock: Math.min(Math.max(startBlock, contractStartBlock), endBlock),
+    startBlock: isEndConstrained ? Math.min(concreteStartBlock, endBlock) : concreteStartBlock,
     endBlock,
   };
 };
