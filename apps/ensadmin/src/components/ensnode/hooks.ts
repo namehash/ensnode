@@ -47,12 +47,7 @@ export function useIndexingStatusQuery(
 
   return useQuery({
     queryKey: ["indexing-status", ensNodeUrl],
-    queryFn: () => fetchEnsNodeStatus(ensNodeUrl),
-    select(data) {
-      validateResponse(data);
-
-      return data;
-    },
+    queryFn: () => fetchEnsNodeStatus(ensNodeUrl).then(validateResponse),
   });
 }
 
@@ -61,7 +56,7 @@ export function useIndexingStatusQuery(
  * @param response
  * @throws Error if the response is invalid
  */
-function validateResponse(response: EnsNode.Metadata) {
+function validateResponse(response: EnsNode.Metadata): EnsNode.Metadata {
   const { networkIndexingStatusByChainId } = response.runtime;
 
   if (typeof networkIndexingStatusByChainId === "undefined") {
@@ -97,6 +92,8 @@ function validateResponse(response: EnsNode.Metadata) {
         .join(", ")}`,
     );
   }
+
+  return response;
 }
 
 /**
