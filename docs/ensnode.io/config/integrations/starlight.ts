@@ -7,7 +7,7 @@ export function starlight(): AstroIntegration {
     components: {
       ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
-      SocialIcons: "./src/components/overrides/SocialIcons.astro"
+      SocialIcons: "./src/components/overrides/SocialIcons.astro",
     },
     customCss: ["./src/styles/globals.css"],
     plugins: [
@@ -191,8 +191,7 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content:
-            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {
