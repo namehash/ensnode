@@ -7,6 +7,7 @@ export function starlight(): AstroIntegration {
     components: {
       ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
+      SocialIcons: "./src/components/overrides/SocialIcons.astro"
     },
     customCss: ["./src/styles/globals.css"],
     plugins: [
@@ -153,7 +154,6 @@ export function starlight(): AstroIntegration {
     social: {
       "x.com": "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
-      telegram: "https://t.me/ensnode",
     },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
