@@ -1,7 +1,7 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
-import starlightSidebarTopics from "starlight-sidebar-topics";
 import starlightLlmsTxt from "starlight-llms-txt";
+import starlightSidebarTopics from "starlight-sidebar-topics";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
@@ -193,8 +193,7 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content:
-            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {

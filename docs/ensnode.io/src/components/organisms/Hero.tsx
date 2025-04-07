@@ -9,16 +9,8 @@ export default function Hero() {
       <div className="absolute top-0 box-border flex flex-row flex-nowrap justify-center items-center w-full px-5 sm:px-16 py-3 z-20 backdrop-blur-md">
         <div className="w-full max-w-7xl items-center justify-between flex flex-row">
           <a href="/">
-            <img
-              className="hidden sm:block h-10"
-              src={ensnode_with_name.src}
-              alt="ENSNode"
-            />
-            <img
-              className="block sm:hidden h-8"
-              src={ensnode_with_name.src}
-              alt="ENSNode"
-            />
+            <img className="hidden sm:block h-10" src={ensnode_with_name.src} alt="ENSNode" />
+            <img className="block sm:hidden h-8" src={ensnode_with_name.src} alt="ENSNode" />
           </a>
           <div className="hidden sm:flex flex-row flex-nowrap justify-end items-center gap-8">
             <a href="/docs/" className="no-underline hover:no-underline">
