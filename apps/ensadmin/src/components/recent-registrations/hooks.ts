@@ -60,8 +60,5 @@ export function useRecentRegistrations(searchParams: URLSearchParams) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeUrl],
     queryFn: () => fetchRecentRegistrations(ensNodeUrl),
-    throwOnError(error) {
-      throw new Error(`Could not fetch ENSNode data from '${ensNodeUrl}'. Cause: ${error.message}`);
-    },
   });
 }

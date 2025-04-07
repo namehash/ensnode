@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { defaultEnsNodeUrl } from "@/lib/env";
+import { parseNextJsPageSearchParams, selectedEnsNodeUrl } from "@/lib/env";
 import { PonderClientContent } from "./examples-content";
 import { Provider as PonderClientProvider } from "./provider";
 
@@ -11,19 +11,12 @@ type PageProps = {
 };
 
 export default async function PonderClientPage({ searchParams }: PageProps) {
-  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
-
-  const baseUrl = Array.isArray(ensnode)
-    ? ensnode[0]
-    : typeof ensnode === "string"
-      ? ensnode
-      : defaultEnsNodeUrl();
-
-  const url = new URL(`/subgraph`, baseUrl).toString();
+  const ensNodeUrl = selectedEnsNodeUrl(parseNextJsPageSearchParams(await searchParams));
+  const ensNodePonderSqlApiUrl = new URL(`/sql`, ensNodeUrl);
 
   return (
     <Suspense fallback={<Loading />}>
-      <PonderClientProvider url={url}>
+      <PonderClientProvider ponderSqlApiUrl={ensNodePonderSqlApiUrl.toString()}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>

@@ -3,15 +3,19 @@
 import "graphiql/graphiql.css";
 
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
-import { GraphiQL } from "graphiql";
+import dynamic from "next/dynamic";
 
-export function GraphiQLEditor({ url }: { url?: string }) {
-  if (!url || typeof window === "undefined") {
-    return null;
-  }
+const GraphiQL = dynamic(() => import("graphiql").then((m) => m.GraphiQL), {
+  ssr: false,
+});
 
+interface GraphiQLEditorProps {
+  graphQlApiUrl: string;
+}
+
+export function GraphiQLEditor({ graphQlApiUrl }: GraphiQLEditorProps) {
   const fetcher = createGraphiQLFetcher({
-    url,
+    url: graphQlApiUrl,
     // Disable subscriptions for now since we don't have a WebSocket server
     // legacyWsClient: false,
     subscriptionUrl: undefined,
@@ -19,7 +23,7 @@ export function GraphiQLEditor({ url }: { url?: string }) {
   });
 
   // Create a unique storage namespace for each endpoint
-  const storageNamespace = `ensnode:graphiql:${url}`;
+  const storageNamespace = `ensnode:${graphQlApiUrl}:graphiql`;
 
   // Custom storage implementation with namespaced keys
   const storage = {

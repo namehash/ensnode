@@ -168,3 +168,20 @@ function parseUrl(maybeUrl: string): URL {
 export async function ensAdminVersion(): Promise<string> {
   return import("../../package.json").then(({ version }) => version);
 }
+
+/**
+ * Parses a custom Next.js search params object into a URLSearchParams object.
+ * @param nextJsPageSearchParams
+ * @returns {URLSearchParams}
+ */
+export function parseNextJsPageSearchParams(
+  nextJsPageSearchParams: Record<string, unknown>,
+): URLSearchParams {
+  const searchParamsNative = new URLSearchParams();
+
+  Object.entries(nextJsPageSearchParams).forEach(([key, value]) => {
+    searchParamsNative.append(key, String(value));
+  });
+
+  return searchParamsNative;
+}

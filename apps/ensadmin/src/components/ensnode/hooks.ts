@@ -1,6 +1,7 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { SupportedChainId, parseSupportedChainIdByName } from "@/lib/wagmi";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+import { ENSNodeError } from "./errors";
 import type { EnsNode } from "./types";
 
 /**
@@ -10,16 +11,23 @@ import type { EnsNode } from "./types";
  * @returns Information about the ENSNode runtime, environment, dependencies, and more.
  */
 async function fetchEnsNodeStatus(baseUrl: URL): Promise<EnsNode.Metadata> {
-  const response = await fetch(new URL(`/metadata`, baseUrl), {
-    headers: {
-      "content-type": "application/json",
-      "x-ensadmin-version": await ensAdminVersion(),
-    },
-  });
+  let response;
+
+  try {
+    response = await fetch(new URL(`/metadata`, baseUrl), {
+      headers: {
+        "content-type": "application/json",
+        "x-ensadmin-version": await ensAdminVersion(),
+      },
+    });
+  } catch (error) {
+    throw ENSNodeError.ensNodeConnectionError(
+      `Network error; ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
 
   if (!response.ok) {
-    console.error("Failed to fetch ENSNode status", response);
-    throw new Error("Failed to fetch ENSNode status");
+    throw ENSNodeError.ensNodeConnectionError(`Server error; ${response.statusText}`);
   }
 
   return response.json();
@@ -45,9 +53,6 @@ export function useIndexingStatusQuery(
 
       return data;
     },
-    throwOnError(error) {
-      throw new Error(`Could not fetch ENSNode data from '${ensNodeUrl}'. Cause: ${error.message}`);
-    },
   });
 }
 
@@ -60,11 +65,13 @@ function validateResponse(response: EnsNode.Metadata) {
   const { networkIndexingStatusByChainId } = response.runtime;
 
   if (typeof networkIndexingStatusByChainId === "undefined") {
-    throw new Error(`Network indexing status not found in the response.`);
+    throw ENSNodeError.ensNodeResponseValidationError(
+      `Network indexing status not found in the response.`,
+    );
   }
 
   if (Object.keys(networkIndexingStatusByChainId).length === 0) {
-    throw new Error(`No network indexing status found response.`);
+    throw ENSNodeError.ensNodeResponseValidationError(`No network indexing status found response.`);
   }
 
   const networksWithoutFirstBlockToIndex = Object.entries(networkIndexingStatusByChainId).filter(
@@ -72,7 +79,7 @@ function validateResponse(response: EnsNode.Metadata) {
   );
 
   if (networksWithoutFirstBlockToIndex.length > 0) {
-    throw new Error(
+    throw ENSNodeError.ensNodeResponseValidationError(
       `Missing first block to index for some networks with the following chain IDs: ${networksWithoutFirstBlockToIndex
         .map(([chainId]) => chainId)
         .join(", ")}`,
@@ -84,7 +91,7 @@ function validateResponse(response: EnsNode.Metadata) {
   );
 
   if (networksWithoutLastIndexedBlock.length > 0) {
-    throw new Error(
+    throw ENSNodeError.ensNodeResponseValidationError(
       `Missing last indexed block for some networks with the following chain IDs: ${networksWithoutLastIndexedBlock
         .map(([chainId]) => chainId)
         .join(", ")}`,

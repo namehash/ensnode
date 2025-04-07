@@ -1,5 +1,5 @@
 import { GraphiQLEditor } from "@/components/graphiql-editor";
-import { defaultEnsNodeUrl } from "@/lib/env";
+import { parseNextJsPageSearchParams, selectedEnsNodeUrl } from "@/lib/env";
 
 type PageProps = {
   searchParams: Promise<{
@@ -8,15 +8,8 @@ type PageProps = {
 };
 
 export default async function SubgraphGraphQLPage({ searchParams }: PageProps) {
-  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
+  const ensNodeUrl = selectedEnsNodeUrl(parseNextJsPageSearchParams(await searchParams));
+  const subgraphApiUrl = new URL(`/subgraph`, ensNodeUrl);
 
-  const baseUrl = Array.isArray(ensnode)
-    ? ensnode[0]
-    : typeof ensnode === "string"
-      ? ensnode
-      : defaultEnsNodeUrl();
-
-  const url = new URL(`/subgraph`, baseUrl).toString();
-
-  return <GraphiQLEditor url={url} />;
+  return <GraphiQLEditor graphQlApiUrl={subgraphApiUrl.toString()} />;
 }
