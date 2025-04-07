@@ -11,7 +11,7 @@
   --sl-color-gray-5: #c4c7c8;
   --sl-color-gray-6: #e5e5e5;
   --sl-color-gray-7: #f6f6f6;
-  --sl-color-black: #f6f6f6;
+  --sl-color-black: #fff;
 
   --sl-color-blue: #0080bc;
   --sl-color-blue-high: #093c52;
@@ -28,6 +28,8 @@
   --sl-color-green: #007c23;
   --sl-color-green-high: #007c23;
   --sl-color-green-low: #c5ddcc;
+
+  --pagination-arrow-color: #c4c7c8;
 }
 
 .header {
@@ -54,7 +56,12 @@ a[rel="prev"] {
 .sl-link-card:hover,
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
-  border-color: var(--sl-color-gray-3);
+  background-color: var(--sl-color-black);
+  border-color: var(--sl-color-accent);
+}
+
+.sl-link-card:where(.astro-yv7oapu3):hover .icon:where(.astro-yv7oapu3) {
+  color: var(--sl-color-accent);
 }
 
 .link-title {
@@ -74,4 +81,8 @@ h1,
 .sl-markdown-content h5,
 .sl-markdown-content h6 {
   color: var(--sl-color-accent-high);
+}
+
+.sl-markdown-content a:hover:not(:where(.not-content *)) > span {
+  color: var(--sl-color-accent);
 }

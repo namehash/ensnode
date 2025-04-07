@@ -20,4 +20,7 @@ export default defineConfig({
       noExternal: ["@namehash/namekit-react"],
     },
   },
+  redirects: {
+    "/ensnode/[...slug]": "/docs/[...slug]",
+  },
 });

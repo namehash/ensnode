@@ -4,7 +4,7 @@ sidebar:
   order: 1
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 :::note
 The following serves as background information regarding the ENS Subgraph and describes the ecosystem & context in which ENSNode was developed. It is not necessary for running ENSNode.
@@ -13,7 +13,7 @@ The following serves as background information regarding the ENS Subgraph and de
 <LinkCard
   title="Skip to 'What is ENSNode?'"
   description="If you already know what the ENS Subgraph is, skip ahead."
-  href="/ensnode/concepts/what-is-ensnode/"
+  href="/docs/concepts/what-is-ensnode/"
 />
 
 ## The Graph & Graph Node
@@ -23,6 +23,7 @@ The following serves as background information regarding the ENS Subgraph and de
 ## Subgraphs
 
 Each Graph Node server can run any number of "subgraphs". Each subgraph is essentially a plugin describing:
+
 1. A strategy for how the Graph Node should index blockchain data.
 2. A schema for a GraphQL API providing access to the indexed data.
 
@@ -46,9 +47,10 @@ This server is running [Graph Node version 0.33.0](https://github.com/graphproto
 
 Our Graph Node instance indexes the ENS Subgraph. The live status can be monitored with [the indexing status API endpoint](https://graphnode.namehashlabs.org:8030/graphql/playground?query=%7B%0A%20%20indexingStatuses%20%7B%0A%20%20%20%20subgraph%0A%20%20%20%20health%0A%20%20%20%20historyBlocks%0A%20%20%20%20paused%0A%20%20%20%20synced%0A%20%20%20%20chains%20%7B%0A%20%20%20%20%20%20network%0A%20%20%20%20%20%20chainHeadBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20latestBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D).
 Subgraph Id: QmVsj1tYQ84DZH3NHAbZKjQ5agQ5Gt6VusUBf67CU32FWP
-   * As of the time of writing this wiki page:
-     * This is the latest version of the ENS Subgraph, published [Feb 15, 2024](https://github.com/graphprotocol/ens-subgraph/commit/c8447914e8743671fb4b20cffe5a0a97020b3cee).
-   * The subgraph is fully synced with the latest block on mainnet.
-   * [Interactive GraphiQL Explorer](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-2/graphql)
+
+- As of the time of writing this wiki page:
+  - This is the latest version of the ENS Subgraph, published [Feb 15, 2024](https://github.com/graphprotocol/ens-subgraph/commit/c8447914e8743671fb4b20cffe5a0a97020b3cee).
+- The subgraph is fully synced with the latest block on mainnet.
+- [Interactive GraphiQL Explorer](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-2/graphql)
 
 This Subgraph Id is understood to be distinct from the "official" hosted ENS subgraph because it is associated with our own hosted Graph Node instance that is not participating in The Graph's distributed network of indexers.
