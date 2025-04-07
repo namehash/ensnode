@@ -4,7 +4,8 @@ import { defineConfig } from "astro/config";
 
 import { sitemap } from "./config/integrations/sitemap";
 import { starlight } from "./config/integrations/starlight";
-import { autoLinkHeadings as rehypeAutolinkHeadings } from "./config/rehype/autolink-headings";
+import { autoLinkHeadings } from "./config/rehype/autolink-headings";
+import { headingIds } from "./config/rehype/heading-ids";
 
 export default defineConfig({
   site: "https://ensnode.io",
@@ -22,6 +23,6 @@ export default defineConfig({
     },
   },
   markdown: {
-    rehypePlugins: [rehypeAutolinkHeadings],
+    rehypePlugins: [headingIds, autoLinkHeadings],
   },
 });

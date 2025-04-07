@@ -8,7 +8,7 @@ export function starlight(): AstroIntegration {
       ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
     },
-    customCss: ["./src/styles/globals.css"],
+    customCss: ["./src/styles/globals.css", "./src/styles/markdown.css"],
     plugins: [
       starlightSidebarTopics([
         {
