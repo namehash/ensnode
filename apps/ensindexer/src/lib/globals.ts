@@ -1,13 +1,3 @@
-/**
- * NOTE(shrugs): I didn't want to use a global as a configuration option, but the typescript typings
- * on the plugin factory pattern kicked my ass, and I'm not ashamed to admit it.
- *
- * So here we specify the global options necessary to configure each plugin, since the addresses
- * and startBlocks of each contract depend on which ENS deployment the indexer is directed to.
- *
- * Additionally, we specify the global start/end block range that is currently helpful for development.
- */
-
 import { getEnsDeploymentChain } from "@/lib/ponder-helpers";
 import DeploymentConfigs from "@ensnode/ens-deployments";
 

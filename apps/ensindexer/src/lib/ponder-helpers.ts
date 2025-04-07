@@ -32,7 +32,7 @@ export const constrainContractBlockrange = (
 
 /**
  * Gets the global block range configured by the START_BLOCK and END_BLOCK environment variables,
- * allowing
+ * validating the range if specified.
  *
  * @returns blockrange of startBlock and endBlock
  */
