@@ -15,8 +15,8 @@ export const ENSAdminLogoDark = (props: React.SVGProps<SVGSVGElement>) => (
     <path d="M8.00014 16H20L20.5991 17H7.40234L8.00014 16Z" fill="#2364E8" />
     <path d="M10.9997 11H16.9999L17.6014 12H10.3999L10.9997 11Z" fill="#2364E8" />
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M24 2H4C2.89543 2 2 2.89543 2 4V24C2 25.1046 2.89543 26 4 26H24C25.1046 26 26 25.1046 26 24V4C26 2.89543 25.1046 2 24 2ZM4 0C1.79086 0 0 1.79086 0 4V24C0 26.2091 1.79086 28 4 28H24C26.2091 28 28 26.2091 28 24V4C28 1.79086 26.2091 0 24 0H4Z"
       fill="white"
     />
