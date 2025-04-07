@@ -1,9 +1,9 @@
 import type { Event } from "ponder:registry";
+import { Blockrange } from "@/lib/types";
 import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
-import type { ContractConfig } from "ponder";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
 
@@ -12,42 +12,43 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 };
 
 /**
- * Given a global start and end block (defaulting to undefined), configures a ContractConfig to use
- * a start and end block that maintains validity within ponder (which requires that every contract's
- * start and end block be within the global range).
+ * Given a contract's start block, returns a block range describing a start and end block
+ * that maintains validity within the global blockrange.
  *
- * @param start minimum possible start block number for the current index
- * @param startBlock the preferred start block for the given contract
- * @param end maximum possible end block number for the current index
+ * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
  * @returns the start and end blocks, contrained to the provided `start` and `end`
- *  aka START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
+ *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock || MAX_SAFE_INTEGER)
  */
-export const constrainBlockrange = (
-  start: number | undefined,
-  startBlock: number | undefined,
-  end: number | undefined,
-): {
-  startBlock: number | undefined;
-  endBlock: number | undefined;
-} => ({
-  // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
-  startBlock: Math.min(Math.max(start || 0, startBlock || 0), end || Number.MAX_SAFE_INTEGER),
-  endBlock: end,
-});
+export const constrainContractBlockrange = (
+  contractStartBlock: number | undefined = 0,
+): Blockrange => {
+  const { startBlock = 0, endBlock = Number.MAX_SAFE_INTEGER } = getGlobalBlockrange();
+
+  return {
+    startBlock: Math.min(Math.max(startBlock, contractStartBlock), endBlock),
+    endBlock,
+  };
+};
 
 /**
- * Constrain indexing between the following start/end blocks, configured by START_BLOCK and END_BLOCK
- * https://ponder.sh/docs/contracts-and-networks#block-range
+ * Gets the global block range configured by the START_BLOCK and END_BLOCK environment variables,
+ * allowing
  *
- * NOTE: it only really makes sense to use start/end blocks when running a single plugin
- * (namely the eth plugin, in order to take snapshots). setting start/end blocks
- * while running multiple plugins (which results in ponder indexing multiple chains) should be
- * considered undefined behavior.
+ * @returns blockrange of startBlock and endBlock
  */
-export const getBlockRange = () => ({
-  startBlock: parseBlockheightEnvVar("START_BLOCK"),
-  endBlock: parseBlockheightEnvVar("END_BLOCK"),
-});
+export const getGlobalBlockrange = (): Blockrange => {
+  const startBlock = parseBlockheightEnvVar("START_BLOCK");
+  const endBlock = parseBlockheightEnvVar("END_BLOCK");
+
+  if (startBlock !== undefined && endBlock !== undefined) {
+    // the global range, if defined, must be start <= end
+    if (!(startBlock <= endBlock)) {
+      throw new Error(`END_BLOCK (${endBlock}) must be >= START_BLOCK (${startBlock})`);
+    }
+  }
+
+  return { startBlock, endBlock };
+};
 
 /**
  * Parses an env var into a blockheight for ponder.
@@ -55,7 +56,6 @@ export const getBlockRange = () => ({
  * @param envVarName Name of the environment variable to parse
  * @returns The parsed block number if valid, undefined otherwise
  */
-
 const parseBlockheightEnvVar = (envVarName: "START_BLOCK" | "END_BLOCK"): number | undefined => {
   const envVarValue = process.env[envVarName];
   if (!envVarValue) return undefined;

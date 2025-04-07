@@ -3,8 +3,7 @@ import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
 import {
-  constrainBlockrange,
-  getBlockRange,
+  constrainContractBlockrange,
   getEnsDeploymentChain,
   requestedPluginNames as getRequestedPluginNames,
   rpcEndpointUrl,
@@ -219,19 +218,17 @@ export function networksConfigForChain(chain: Chain) {
 }
 
 /**
- * Defines a `ponder#ContractConfig['network']` given a contract's config, injecting the global
- * start/end blocks to constrain indexing range.
+ * Defines a `ponder#ContractConfig['network']` given a contract's config, constraining its
+ * start/end blocks within the globally defined range.
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryContractConfig>(
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,
 ) {
-  const { startBlock, endBlock } = getBlockRange();
-
   return {
     [chain.id.toString()]: {
       ...contractConfig,
-      ...constrainBlockrange(startBlock, contractConfig.startBlock, endBlock),
+      ...constrainContractBlockrange(contractConfig.startBlock),
     },
   };
 }
