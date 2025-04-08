@@ -11,7 +11,6 @@ export default {
       },
       screens: {
         super_wide_hero: "1550px",
-        smaller_hero: "800px"
       },
     },
   },
