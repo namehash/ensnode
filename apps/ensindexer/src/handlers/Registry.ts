@@ -141,7 +141,6 @@ export const makeRegistryHandlers = ({
               maybeReverseAddress: owner,
               labelHash: labelhash,
             });
-            console.log("attempted heal:", healedLabel);
           }
 
           // 2. if reverse address healing didn't work, try ENSRainbow
