@@ -11,7 +11,7 @@ import type { EventIdPrefix } from "@/lib/types";
 import { type Labelhash, type Node, REVERSE_ROOT_NODES, ROOT_NODE } from "@ensnode/utils";
 import {
   isLabelIndexable,
-  makeSubnodeNamehash,
+  makeSubnode,
   maybeHealLabelByReverseAddress,
 } from "@ensnode/utils/subname-helpers";
 
@@ -96,7 +96,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         await upsertAccount(context, owner);
 
         // the domain in question is a subdomain of `node` with label `labelhash`
-        const subnode = makeSubnodeNamehash(node, labelhash);
+        const subnode = makeSubnode(labelhash, node);
         let domain = await context.db.find(schema.domain, { id: subnode });
 
         // note that we set isMigrated in each branch such that if this domain is being

@@ -1,6 +1,5 @@
 import {
   Address,
-  type Hex,
   bytesToHex,
   bytesToString,
   concat,
@@ -12,9 +11,14 @@ import {
 } from "viem";
 
 import { labelhash } from "viem/ens";
-import type { Labelhash } from "./types";
+import type { Labelhash, Node } from "./types";
 
-export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
+/**
+ * implements one step of the namehash algorithm, combining `labelHash` with `parentNode` to produce
+ * the `node` of a given subnode.
+ */
+export const makeSubnode = (labelHash: Labelhash, parentNode: Node): Node =>
+  keccak256(concat([parentNode, labelHash]));
 
 // normalize address to match the format used for addr.reverse subnames
 // as per https://docs.ens.domains/resolution/names#reverse-nodes

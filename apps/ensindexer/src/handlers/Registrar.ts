@@ -8,7 +8,7 @@ import { makeRegistrationId } from "@/lib/ids";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
 import { type Labelhash } from "@ensnode/utils";
-import { isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
+import { isLabelIndexable, makeSubnode } from "@ensnode/utils/subname-helpers";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
@@ -37,7 +37,7 @@ export const makeRegistrarHandlers = ({
     // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
     if (!isLabelIndexable(name)) return;
 
-    const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
+    const node = makeSubnode(labelhash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
@@ -72,7 +72,7 @@ export const makeRegistrarHandlers = ({
 
       await upsertAccount(context, owner);
 
-      const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
+      const node = makeSubnode(labelhash, registrarManagedNode);
 
       // attempt to heal the label associated with labelhash via ENSRainbow
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
@@ -154,7 +154,7 @@ export const makeRegistrarHandlers = ({
     }) {
       const { labelhash, expires } = event.args;
 
-      const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
+      const node = makeSubnode(labelhash, registrarManagedNode);
       const id = makeRegistrationId(registrarManagedName, labelhash, node);
 
       // update Registration expiry
@@ -186,7 +186,7 @@ export const makeRegistrarHandlers = ({
       const { labelhash, to } = event.args;
       await upsertAccount(context, to);
 
-      const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
+      const node = makeSubnode(labelhash, registrarManagedNode);
       const id = makeRegistrationId(registrarManagedName, labelhash, node);
 
       const registration = await context.db.find(schema.registration, { id });

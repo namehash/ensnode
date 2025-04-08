@@ -1,7 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { ROOT_NODE } from "@ensnode/utils";
-import { makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
+import { makeSubnode } from "@ensnode/utils/subname-helpers";
 import { type Hex } from "viem";
 
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
@@ -35,7 +35,7 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"eth">) {
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
   ponder.on(namespace("RegistryOld:NewOwner"), async ({ context, event }) => {
-    const node = makeSubnodeNamehash(event.args.node, event.args.label);
+    const node = makeSubnode(event.args.label, event.args.node);
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, node);
     if (shouldIgnoreEvent) return;
 
