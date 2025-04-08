@@ -66,6 +66,9 @@ overrides:
   '@babel/runtime': 7.26.10
   '@babel/helpers': 7.26.10
   '@graphiql/react>@headlessui/react': 2.2.0
+  vitest>vite: 6.2.5
+  '@astrojs/react>vite': 6.2.5
+  astro>vite: 6.2.5
   ponder>vite: 5.4.17
   astro>vite: 6.2.5
   '@astrojs/react>vite': 6.2.5
