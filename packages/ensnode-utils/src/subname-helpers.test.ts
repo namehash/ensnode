@@ -1,12 +1,19 @@
-import { IntegerOutOfRangeError, hexToBytes, labelhash, namehash, toBytes, zeroHash } from "viem";
+import {
+  Address,
+  IntegerOutOfRangeError,
+  hexToBytes,
+  labelhash,
+  namehash,
+  toBytes,
+  zeroHash,
+} from "viem";
 import { describe, expect, it } from "vitest";
 
 import {
-  type LabelByReverseAddressArgs,
   decodeDNSPacketBytes,
   isLabelIndexable,
-  labelByReverseAddress,
   makeSubnodeNamehash,
+  maybeHealLabelByReverseAddress,
   uint256ToHex32,
 } from "./subname-helpers";
 
@@ -80,33 +87,31 @@ describe("makeSubnodeNamehash", () => {
 });
 
 describe("labelByReverseAddress", () => {
-  const address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+  const address: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
   const reverseAddressSubname = "d8da6bf26964af9d7eed9e03e53415d37aa96045";
 
   const validArgs = {
-    labelhash: labelhash(reverseAddressSubname),
+    labelHash: labelhash(reverseAddressSubname),
     maybeReverseAddress: address,
-  } satisfies LabelByReverseAddressArgs;
+  };
 
   describe("arguments validation", () => {
     it("should throw if sender address is not a valid EVM address", () => {
       expect(() =>
-        labelByReverseAddress({
+        maybeHealLabelByReverseAddress({
           ...validArgs,
           maybeReverseAddress: "0x123",
         }),
-      ).toThrowError(
-        "Invalid reverse address: '0x123'. Must be a valid EVM address, start with '0x' and be 42 characters long",
-      );
+      ).toThrowError(/Invalid reverse address/i);
     });
 
     it("should throw if labelhash is not a valid Labelhash", () => {
       expect(() =>
-        labelByReverseAddress({
+        maybeHealLabelByReverseAddress({
           ...validArgs,
-          labelhash: "0x123",
+          labelHash: "0x123",
         }),
-      ).toThrowError("Invalid labelhash: '0x123'. Must start with '0x' and be 66 characters long.");
+      ).toThrowError(/Invalid labelHash/i);
     });
   });
 
@@ -114,15 +119,15 @@ describe("labelByReverseAddress", () => {
     it("should return null if the label cannot be healed", () => {
       const notMatchingLabelhash = labelhash("test.eth");
       expect(
-        labelByReverseAddress({
+        maybeHealLabelByReverseAddress({
           ...validArgs,
-          labelhash: notMatchingLabelhash,
+          labelHash: notMatchingLabelhash,
         }),
       ).toBe(null);
     });
 
     it("should return the label if the label can be healed", () => {
-      expect(labelByReverseAddress(validArgs)).toBe(reverseAddressSubname);
+      expect(maybeHealLabelByReverseAddress(validArgs)).toBe(reverseAddressSubname);
     });
   });
 });

@@ -6,13 +6,13 @@ import { type Hex, zeroAddress } from "viem";
 import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
-import type { EventWithArgs } from "@/lib/ponder-helpers";
+import { type EventWithArgs, healReverseAddresses } from "@/lib/ponder-helpers";
 import type { OwnedName } from "@/lib/types";
 import { type Labelhash, type Node, ROOT_NODE } from "@ensnode/utils";
 import {
   isLabelIndexable,
-  labelByReverseAddress,
   makeSubnodeNamehash,
+  maybeHealLabelByReverseAddress,
 } from "@ensnode/utils/subname-helpers";
 
 /**
@@ -135,9 +135,13 @@ export const makeRegistryHandlers = ({
 
           let healedLabel = null;
 
-          // 1. if healing label from reverse addresses is possible, give it a go
-          if (canHealReverseAddressFromParentNode(node)) {
-            healedLabel = labelByReverseAddress({ maybeReverseAddress: owner, labelhash });
+          // 1. if healing label from reverse addresses is enabled & possible, give it a go
+          if (healReverseAddresses() && canHealReverseAddressFromParentNode(node)) {
+            healedLabel = maybeHealLabelByReverseAddress({
+              maybeReverseAddress: owner,
+              labelHash: labelhash,
+            });
+            console.log("attempted heal:", healedLabel);
           }
 
           // 2. if reverse address healing didn't work, try ENSRainbow

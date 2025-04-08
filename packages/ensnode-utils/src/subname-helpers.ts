@@ -1,9 +1,11 @@
 import {
+  Address,
   type Hex,
   bytesToHex,
   bytesToString,
   concat,
-  isHex,
+  isAddress,
+  isHash,
   keccak256,
   stringToBytes,
   toHex,
@@ -18,58 +20,46 @@ export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([
 // as per https://docs.ens.domains/resolution/names#reverse-nodes
 const normalizedAddressDigits = (address: Hex): string => address.slice(2).toLowerCase();
 
-export interface LabelByReverseAddressArgs {
-  /** The address that is possibly associated with the addr.reverse subname */
-  maybeReverseAddress: Hex;
-
-  /** The labelhash of the addr.reverse subname */
-  labelhash: Labelhash;
-}
-
 /**
  * Attempt to heal the labelhash of an addr.reverse subname using an address that might be related to the subname.
  *
- * @throws if reverse address is not a valid hex address
- * @throws if labelhash is not a valid hash
+ * @throws if maybeReverseAddress is not a valid Address
+ * @throws if labelhash is not a valid Labelhash
  *
  * @returns the original label if healed, otherwise null
  */
-export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
+export const maybeHealLabelByReverseAddress = ({
+  maybeReverseAddress,
+  labelHash,
+}: {
+  /** The address that is possibly associated with the addr.reverse subname */
+  maybeReverseAddress: Address;
+
+  /** The labelhash of the addr.reverse subname */
+  labelHash: Labelhash;
+}): string | null => {
   // check if required arguments are valid
-  validateLabelByReverseAddressArgs(args);
+  if (!isAddress(maybeReverseAddress)) {
+    throw new Error(
+      `Invalid reverse address: '${maybeReverseAddress}'. Must be a valid EVM Address.`,
+    );
+  }
+
+  if (!isHash(labelHash)) {
+    throw new Error(
+      `Invalid labelHash: '${labelHash}'. Must start with '0x' and represent 32 bytes.`,
+    );
+  }
 
   // derive the assumed label from the normalized address
-  const assumedLabel = normalizedAddressDigits(args.maybeReverseAddress);
+  const assumedLabel = normalizedAddressDigits(maybeReverseAddress);
 
-  // if labelhash of the assumed label matches the provided labelhash
-  if (labelhash(assumedLabel) === args.labelhash) {
-    // the assumedLabel successfully heals the labelhash
-    return assumedLabel;
-  }
+  // if labelhash of the assumed label matches the provided labelhash, heal
+  if (labelhash(assumedLabel) === labelHash) return assumedLabel;
 
   // otherwise, healing did not succeed
   // TODO: log the event args for analysis and debugging
   return null;
-};
-
-/**
- * Validate the arguments for `labelByReverseAddress` function.
- *
- * @throws if maybeReverseAddress is not a valid Address
- * @throws if labelhash is not a valid Labelhash
- */
-const validateLabelByReverseAddressArgs = (args: LabelByReverseAddressArgs) => {
-  if (!isHex(args.maybeReverseAddress) || args.maybeReverseAddress.length !== 42) {
-    throw new Error(
-      `Invalid reverse address: '${args.maybeReverseAddress}'. Must be a valid EVM address, start with '0x' and be 42 characters long.`,
-    );
-  }
-
-  if (!isHex(args.labelhash) || args.labelhash.length !== 66) {
-    throw new Error(
-      `Invalid labelhash: '${args.labelhash}'. Must start with '0x' and be 66 characters long.`,
-    );
-  }
 };
 
 /**
