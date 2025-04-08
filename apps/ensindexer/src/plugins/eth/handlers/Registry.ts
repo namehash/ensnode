@@ -20,20 +20,13 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Hex) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({
-  canHealReverseAddressFromParentNode,
-  ownedName,
-  namespace,
-}: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
   const {
     handleNewOwner, //
     handleNewResolver,
     handleNewTTL,
     handleTransfer,
-  } = makeRegistryHandlers({
-    canHealReverseAddressFromParentNode,
-    ownedName,
-  });
+  } = makeRegistryHandlers(ownedName);
 
   ponder.on(namespace("RegistryOld:setup"), setupRootNode);
 

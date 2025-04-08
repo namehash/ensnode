@@ -8,7 +8,7 @@ import { labelByHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { type EventWithArgs, healReverseAddresses } from "@/lib/ponder-helpers";
 import type { OwnedName } from "@/lib/types";
-import { type Labelhash, type Node, ROOT_NODE } from "@ensnode/utils";
+import { type Labelhash, type Node, REVERSE_ROOT_NODES, ROOT_NODE } from "@ensnode/utils";
 import {
   isLabelIndexable,
   makeSubnodeNamehash,
@@ -78,13 +78,7 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
  *
  * @param ownedName the name that the Registry contract manages subnames of
  */
-export const makeRegistryHandlers = ({
-  canHealReverseAddressFromParentNode,
-  ownedName,
-}: {
-  canHealReverseAddressFromParentNode: (node: Node) => boolean;
-  ownedName: OwnedName;
-}) => {
+export const makeRegistryHandlers = (ownedName: OwnedName) => {
   const sharedEventValues = createSharedEventValues(ownedName);
 
   return {
@@ -135,8 +129,9 @@ export const makeRegistryHandlers = ({
 
           let healedLabel = null;
 
-          // 1. if healing label from reverse addresses is enabled & possible, give it a go
-          if (healReverseAddresses() && canHealReverseAddressFromParentNode(node)) {
+          // 1. if healing label from reverse addresses is enabled, and the parent is a known
+          //    reverse node (i.e. addr.reverse), give it a go
+          if (healReverseAddresses() && REVERSE_ROOT_NODES.has(node)) {
             healedLabel = maybeHealLabelByReverseAddress({
               maybeReverseAddress: owner,
               labelHash: labelhash,

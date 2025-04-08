@@ -1,4 +1,3 @@
-import { type Node, REVERSE_ROOT_NODE } from "@ensnode/utils";
 import { createConfig } from "ponder";
 
 import { DEPLOYMENT_CONFIG } from "@/lib/globals";
@@ -17,10 +16,6 @@ const ownedName = "eth" as const;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
-
-// `eth` plugin can heal reverse addresses from its reverse root node
-const canHealReverseAddressFromParentNode = (parentNode: Node): boolean =>
-  parentNode === REVERSE_ROOT_NODE;
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -59,7 +54,6 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
-  canHealReverseAddressFromParentNode,
   ownedName,
   namespace,
   handlers: [

@@ -174,16 +174,7 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
  */
 export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   ownedName: OwnedName;
-
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
-
-  /**
-   * Determines whether reverse address healing can be attempted for a given parent node.
-   * @param {Node} parentNode a node that might be a reverse root node
-   *
-   * @returns true if reverse address healing can be attempted for a given parent node
-   */
-  canHealReverseAddressFromParentNode(parentNode: Node): boolean;
 };
 
 /**

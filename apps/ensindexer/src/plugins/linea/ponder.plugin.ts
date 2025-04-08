@@ -17,9 +17,6 @@ const ownedName = "linea.eth" as const;
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = createPluginNamespace(ownedName);
 
-// Support for healing addr.reverse subnames on Linea will be added later
-const canHealReverseAddressFromParentNode = () => false;
-
 export const config = createConfig({
   networks: networksConfigForChain(chain),
   contracts: {
@@ -49,7 +46,6 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
-  canHealReverseAddressFromParentNode,
   ownedName,
   namespace,
   handlers: [
