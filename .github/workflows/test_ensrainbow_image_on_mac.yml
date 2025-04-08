@@ -1,4 +1,4 @@
-name: Test ENSRainbow Test Image on macOS
+name: "Test: ENSRainbow Test Image on macOS"
 
 on:
   workflow_dispatch:

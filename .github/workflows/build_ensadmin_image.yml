@@ -1,4 +1,4 @@
-name: Build ENSAdmin image
+name: "Build: ENSAdmin"
 
 on:
   workflow_dispatch:
