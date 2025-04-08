@@ -1,6 +1,6 @@
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
-import { ByteArray, labelhash } from "viem";
+import { ByteArray, Hex, labelhash } from "viem";
 
 import { logger } from "@/utils/logger";
 
@@ -483,7 +483,7 @@ export class ENSRainbowDB {
         }
         rainbowRecordCount++;
         // Verify key is a valid labelhash by converting it to hex string
-        const keyHex = `0x${Buffer.from(key).toString("hex")}` as `0x${string}`;
+        const keyHex = `0x${Buffer.from(key).toString("hex")}` as Hex;
         try {
           labelHashToBytes(keyHex);
           validHashes++;
