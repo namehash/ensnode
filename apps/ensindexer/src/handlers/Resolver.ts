@@ -1,6 +1,6 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { DeploymentConfigs } from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/ens-deployments";
 import type { Node } from "@ensnode/utils";
 import { Hex, decodeEventLog } from "viem";
 
@@ -105,7 +105,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         args: { node, name },
       } = decodeEventLog({
         eventName: "NameChanged",
-        abi: DeploymentConfigs.mainnet.eth.contracts.Resolver.abi,
+        abi: ENSDeployments.mainnet.eth.contracts.Resolver.abi,
         topics: event.log.topics,
         data: event.log.data,
       });

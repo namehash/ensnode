@@ -1,5 +1,4 @@
-import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils";
+import type { ContractConfig } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
@@ -179,7 +178,7 @@ export function networksConfigForChain(chain: Chain) {
  * Defines a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  */
-export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryContractConfig>(
+export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,
 ) {

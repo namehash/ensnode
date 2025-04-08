@@ -1,4 +1,4 @@
-import type { ENSDeploymentChain, ENSDeploymentConfig } from "@ensnode/ens-deployments";
+import type { ENSDeployment, ENSDeploymentChain } from "@ensnode/ens-deployments";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
 
 /**
@@ -15,7 +15,7 @@ export namespace EnsNode {
   export interface Metadata extends Omit<PonderMetadata.MetadataMiddlewareResponse, "env"> {
     // override the `env` field to include the fields required by the ENSAdmin client
     env: {
-      ACTIVE_PLUGINS: Array<keyof ENSDeploymentConfig>;
+      ACTIVE_PLUGINS: Array<keyof ENSDeployment>;
       DATABASE_SCHEMA: string;
       ENS_DEPLOYMENT_CHAIN: ENSDeploymentChain;
     };

@@ -5,18 +5,13 @@ import type { Abi, Address, Chain } from "viem";
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with:
  * - A root Registry deployed to the "ENS Deployment" chain.
- * - A capability to expand from that root Registry across any number of chains, subregistries, and offchain resources.
+ * - A capability to expand from that root Registry across any number of additional datasources.
  *
  * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
  * protocol changes, running deterministic test suites, and local development.
  * https://github.com/ensdomains/ens-test-env
  */
 export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
-
-/**
- * Encodes a set of known subregistries.
- */
-export type SubregistryName = "eth" | "base" | "linea";
 
 /**
  * EventFilter specifies a given event's name and arguments to filter that event by.
@@ -28,7 +23,7 @@ export interface EventFilter {
 }
 
 /**
- * Defines the abi, address, filter, and startBlock of a contract relevant to indexing a subregistry.
+ * Defines the abi, address, filter, and startBlock of a contract relevant to a Datasource.
  * A contract is located on-chain either by a static `address` or the event signatures (`filter`)
  * one should filter the chain for.
  *
@@ -37,7 +32,7 @@ export interface EventFilter {
  * @param filter - (optional) array of event signatures to filter the log by
  * @param startBlock - block number the contract was deployed in
  */
-export type SubregistryContractConfig =
+export type ContractConfig =
   | {
       readonly abi: Abi;
       readonly address: Address;
@@ -52,35 +47,31 @@ export type SubregistryContractConfig =
     };
 
 /**
- * Encodes the deployment of a subregistry, including the target chain and contracts.
+ * A DeploymentDatasource describes a set of contracts on a given chain that extend the ENS root.
  */
-export interface SubregistryDeploymentConfig {
+export interface DeploymentDatasource {
   chain: Chain;
-  contracts: Record<string, SubregistryContractConfig>;
+  contracts: Record<string, ContractConfig>;
 }
 
 /**
- * Encodes the set of known subregistries for an "ENS deployment".
+ * Encodes the set of known 'sources' for an "ENS Deployment".
  */
-export type ENSDeploymentConfig = {
+export type ENSDeployment = {
   /**
-   * Subregistry for direct subnames of 'eth'.
+   * The ENS Root and its associated contracts.
    *
    * Required for each "ENS deployment".
    */
-  eth: SubregistryDeploymentConfig;
+  eth: DeploymentDatasource;
 
   /**
-   * Subregistry for direct subnames of 'base.eth'.
-   *
-   * Optional for each "ENS deployment".
+   * Basenames and its associated contracts, optional.
    */
-  base?: SubregistryDeploymentConfig;
+  base?: DeploymentDatasource;
 
   /**
-   * Subregistry for direct subnames of 'linea.eth'.
-   *
-   * Optional for each "ENS deployment".
+   * Linea Names and its associated contracts, optional.
    */
-  linea?: SubregistryDeploymentConfig;
+  linea?: DeploymentDatasource;
 };

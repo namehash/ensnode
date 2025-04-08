@@ -1,8 +1,7 @@
 /**
  * In this project we use the notion of 'plugins' to describe which registries and subregistries
- * of a given ENS deployment are being indexed by ponder. In this project, a plugin's name is the
- * name of the subregistry it indexes. Note that this type definition is 1:1 with that of
- * @ensnode/ens-deployments SubregistryName, simplifying the relationship between an ENSDeploymentConfig
+ * of a given ENS deployment are being indexed by ponder. Note that this type definition is 1:1 with
+ * that of @ensnode/ens-deployments' Datasource, simplifying the relationship between a Datasource
  * and the plugins in this project.
  */
 export type PluginName = "eth" | "base" | "linea";

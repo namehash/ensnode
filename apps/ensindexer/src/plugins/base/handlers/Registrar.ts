@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import DeploymentConfigs from "@ensnode/ens-deployments";
+import {ENSDeployments} from "@ensnode/ens-deployments";
 import { type Labelhash } from "@ensnode/utils";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { decodeEventLog, namehash, zeroAddress } from "viem";
@@ -114,7 +114,7 @@ export default function ({
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.base.contracts.EARegistrarController.abi,
+      abi: ENSDeployments.mainnet.base.contracts.EARegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -129,7 +129,7 @@ export default function ({
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.base.contracts.RegistrarController.abi,
+      abi: ENSDeployments.mainnet.base.contracts.RegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -144,7 +144,7 @@ export default function ({
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRenewed",
-      abi: DeploymentConfigs.mainnet.base.contracts.RegistrarController.abi,
+      abi: ENSDeployments.mainnet.base.contracts.RegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });

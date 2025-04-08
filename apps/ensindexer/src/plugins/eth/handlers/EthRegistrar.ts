@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import DeploymentConfigs from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/ens-deployments";
 import { type Labelhash } from "@ensnode/utils";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { decodeEventLog } from "viem";
@@ -73,7 +73,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
+      abi: ENSDeployments.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -85,7 +85,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRenewed",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
+      abi: ENSDeployments.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -97,7 +97,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.eth.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -118,7 +118,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRenewed",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.eth.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
