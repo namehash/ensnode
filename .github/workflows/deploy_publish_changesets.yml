@@ -10,14 +10,14 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Release
-    if: github.repository == 'namehash/ensnode'
+    name: Publish Changesets
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
           fetch-depth: 1
 
       - name: Setup pnpm
@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release PR or Publish to NPM
+      - name: Create Release PR and Publish to NPM
         id: changesets
         uses: changesets/action@v1
         with:
@@ -39,5 +39,5 @@ jobs:
           title: "chore(release): version apps"
           publish: pnpm release
         env:
-          GITHUB_TOKEN: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
