@@ -1,4 +1,4 @@
-import type { Labelhash } from "@ensnode/utils/types";
+import type { Labelhash } from "@ensnode/utils";
 import { ByteArray, hexToBytes } from "viem";
 
 /**

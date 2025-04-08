@@ -1,4 +1,3 @@
-import type { Node } from "@ensnode/utils/types";
 import { createConfig } from "ponder";
 
 import { DEPLOYMENT_CONFIG } from "@/lib/globals";

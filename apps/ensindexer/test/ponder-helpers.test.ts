@@ -4,8 +4,8 @@ import {
   constrainBlockrange,
   createStartBlockByChainIdMap,
   deepMergeRecursive,
+  healReverseAddresses,
   parseEnsRainbowEndpointUrl,
-  parseHealReverseAddresses,
   parsePonderPort,
   parseRequestedPluginNames,
   parseRpcEndpointUrl,
@@ -13,7 +13,7 @@ import {
   parseUrl,
 } from "@/lib/ponder-helpers";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("ponder helpers", () => {
   describe("blockConfig", () => {
@@ -109,32 +109,43 @@ describe("ponder helpers", () => {
     });
   });
 
-  describe("parseHealReverseAddresses", () => {
-    it("should parse the heal reverse addresses flag", () => {
-      expect(parseHealReverseAddresses("true")).toBe(true);
-      expect(parseHealReverseAddresses("false")).toBe(false);
+  describe("healReverseAddresses", () => {
+    describe("unspecified", () => {
+      afterEach(() => vi.unstubAllEnvs());
+
+      it("should return the default", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "");
+        expect(healReverseAddresses()).toBe(DEFAULT_HEAL_REVERSE_ADDRESSES);
+      });
     });
 
-    it("should return default if the flag is missing", () => {
-      expect(parseHealReverseAddresses()).toBe(DEFAULT_HEAL_REVERSE_ADDRESSES);
+    describe("specified", () => {
+      afterEach(() => vi.unstubAllEnvs());
+      it("should handle true", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
+        expect(healReverseAddresses()).toBe(true);
+      });
+      it("should handle false", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
+        expect(healReverseAddresses()).toBe(false);
+      });
     });
 
-    it("should throw an error if the flag is invalid", () => {
-      expect(() => parseHealReverseAddresses("1")).toThrowError(
-        "'1' is not a valid value. Expected 'true' or 'false'",
-      );
+    describe("malformed", () => {
+      afterEach(() => vi.unstubAllEnvs());
+      it("should throw", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "1");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
 
-      expect(() => parseHealReverseAddresses("0")).toThrowError(
-        "'0' is not a valid value. Expected 'true' or 'false'",
-      );
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "0");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
 
-      expect(() => parseHealReverseAddresses("on")).toThrowError(
-        "'on' is not a valid value. Expected 'true' or 'false'",
-      );
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "on");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
 
-      expect(() => parseHealReverseAddresses("off")).toThrowError(
-        "'off' is not a valid value. Expected 'true' or 'false'",
-      );
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "off");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
+      });
     });
   });
 

@@ -298,6 +298,8 @@ export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
   return rawValue.split(",");
 };
 
+export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
+
 /**
  * Feature flag that determines whether the indexer should attempt healing
  * reverse addresses.
@@ -305,43 +307,14 @@ export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
  * @returns decision whether to heal reverse addresses
  */
 export const healReverseAddresses = (): boolean => {
-  const envVarName = "HEAL_REVERSE_ADDRESSES";
-  const envVarValue = process.env[envVarName];
+  const rawValue = process.env.HEAL_REVERSE_ADDRESSES;
+  if (!rawValue) return DEFAULT_HEAL_REVERSE_ADDRESSES;
+  if (rawValue === "true") return true;
+  if (rawValue === "false") return false;
 
-  let parsedEnvVarValue: boolean;
-
-  try {
-    parsedEnvVarValue = parseHealReverseAddresses(envVarValue);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    throw new Error(`Error parsing environment variable '${envVarName}': ${errorMessage}.`);
-  }
-
-  return parsedEnvVarValue;
-};
-
-export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
-
-/**
- * Parse input value and apply `HEAL_REVERSE_ADDRESSES_DEFAULT` value
- * if not provided.
- *
- * @param rawValue value to be parsed
- * @returns {boolean} parsed input value
- */
-export const parseHealReverseAddresses = (rawValue?: string): boolean => {
-  if (!rawValue) {
-    return DEFAULT_HEAL_REVERSE_ADDRESSES;
-  }
-
-  const isValueValid = (v: string): boolean => v === "true" || v === "false";
-
-  if (!isValueValid(rawValue)) {
-    throw new Error(`'${rawValue}' is not a valid value. Expected 'true' or 'false'`);
-  }
-
-  return rawValue === "true";
+  throw new Error(
+    `Error parsing environment variable 'HEAL_REVERSE_ADDRESS': ${rawValue}' is not a valid value. Expected 'true' or 'false'.`,
+  );
 };
 
 /** Get the Ponder application port */

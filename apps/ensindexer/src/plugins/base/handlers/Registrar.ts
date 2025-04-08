@@ -1,8 +1,8 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import DeploymentConfigs from "@ensnode/ens-deployments";
+import { type Labelhash } from "@ensnode/utils";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import { Labelhash } from "@ensnode/utils/types";
 import { decodeEventLog, zeroAddress } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
@@ -18,8 +18,7 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function (args: PonderENSPluginHandlerArgs<"base.eth">) {
-  const { namespace } = args;
+export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -27,7 +26,7 @@ export default function (args: PonderENSPluginHandlerArgs<"base.eth">) {
     handleNameRenewed,
     handleNameTransferred,
     ownedSubnameNode,
-  } = makeRegistrarHandlers(args);
+  } = makeRegistrarHandlers(ownedName);
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {

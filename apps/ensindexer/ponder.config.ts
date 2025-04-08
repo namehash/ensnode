@@ -21,9 +21,6 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
    * of the indexer to ensure Ponder app build ID is updated when any of them change.
    **/
   indexingBehaviorDependencies: {
-    /**
-     * If set to `false` then indexed data will no longer be backwards compatible with the ENS Subgraph.
-     */
     HEAL_REVERSE_ADDRESSES: boolean;
   };
 };

@@ -1,5 +1,6 @@
 import { IntegerOutOfRangeError, hexToBytes, labelhash, namehash, toBytes, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
+
 import {
   type LabelByReverseAddressArgs,
   decodeDNSPacketBytes,

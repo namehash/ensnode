@@ -1,5 +1,5 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils/types";
+import type { Node } from "@ensnode/utils";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
@@ -178,10 +178,10 @@ export type PonderENSPluginHandlerArgs<OWNED_NAME extends OwnedName> = {
   namespace: ReturnType<typeof createPluginNamespace<OWNED_NAME>>;
 
   /**
-   * Determines whether a reverse address can be healed for given parent node.
+   * Determines whether reverse address healing can be attempted for a given parent node.
    * @param {Node} parentNode a node that might be a reverse root node
    *
-   * @returns true if the reverse address can be healed from the parent node
+   * @returns true if reverse address healing can be attempted for a given parent node
    */
   canHealReverseAddressFromParentNode(parentNode: Node): boolean;
 };

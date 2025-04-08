@@ -5,19 +5,12 @@ import {
   concat,
   isHex,
   keccak256,
-  namehash,
   stringToBytes,
   toHex,
 } from "viem";
 
 import { labelhash } from "viem/ens";
 import type { Labelhash } from "./types";
-
-// NOTE: most of these utils could/should be pulled in from some (future) ens helper lib, as they
-// implement standard and reusable logic for typescript ens libs bu aren't necessarily implemented
-// or exposed by ensjs or viem
-
-export const ROOT_NODE = namehash("");
 
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
 
@@ -55,6 +48,7 @@ export const labelByReverseAddress = (args: LabelByReverseAddressArgs) => {
   }
 
   // otherwise, healing did not succeed
+  // TODO: log the event args for analysis and debugging
   return null;
 };
 

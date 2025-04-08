@@ -1,6 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { ROOT_NODE, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
+import { ROOT_NODE } from "@ensnode/utils";
+import { makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
 import { type Hex } from "viem";
 
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
@@ -19,10 +20,20 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Hex) {
   return domain?.isMigrated ?? false;
 }
 
-export default function (args: PonderENSPluginHandlerArgs<"eth">) {
-  const { namespace } = args;
-  const { handleNewOwner, handleNewResolver, handleNewTTL, handleTransfer } =
-    makeRegistryHandlers(args);
+export default function ({
+  canHealReverseAddressFromParentNode,
+  ownedName,
+  namespace,
+}: PonderENSPluginHandlerArgs<"eth">) {
+  const {
+    handleNewOwner, //
+    handleNewResolver,
+    handleNewTTL,
+    handleTransfer,
+  } = makeRegistryHandlers({
+    canHealReverseAddressFromParentNode,
+    ownedName,
+  });
 
   ponder.on(namespace("RegistryOld:setup"), setupRootNode);
 

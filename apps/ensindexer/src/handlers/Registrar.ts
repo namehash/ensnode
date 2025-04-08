@@ -1,18 +1,14 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
+import { type Hex, labelhash as _labelhash, namehash } from "viem";
+
 import { createSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
-import type { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { OwnedName } from "@/lib/types";
-import {
-  isLabelIndexable,
-  labelByReverseAddress,
-  makeSubnodeNamehash,
-} from "@ensnode/utils/subname-helpers";
-import type { Labelhash } from "@ensnode/utils/types";
-import { type Hex, labelhash as _labelhash, namehash } from "viem";
+import { type Labelhash } from "@ensnode/utils";
+import { isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
@@ -21,9 +17,7 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
  *
  * @param ownedName the name that the Registrar contract manages subnames of
  */
-export const makeRegistrarHandlers = <OWNED_NAME extends OwnedName>({
-  ownedName,
-}: PonderENSPluginHandlerArgs<OWNED_NAME>) => {
+export const makeRegistrarHandlers = (ownedName: OwnedName) => {
   const ownedNameNode = namehash(ownedName);
   const sharedEventValues = createSharedEventValues(ownedName);
 
@@ -49,9 +43,7 @@ export const makeRegistrarHandlers = <OWNED_NAME extends OwnedName>({
     }
 
     await context.db
-      .update(schema.registration, {
-        id: makeRegistrationId(ownedName, labelhash, node),
-      })
+      .update(schema.registration, { id: makeRegistrationId(ownedName, labelhash, node) })
       .set({ labelName: name, cost });
   }
 
