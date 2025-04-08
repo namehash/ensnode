@@ -67,11 +67,16 @@ a[rel="prev"]:hover {
 }
 
 h1,
-.sl-markdown-content h1,
-.sl-markdown-content h2,
-.sl-markdown-content h3,
-.sl-markdown-content h4,
-.sl-markdown-content h5,
-.sl-markdown-content h6 {
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) {
   color: var(--sl-color-accent-high);
+}
+
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
+  color: var(--sl-color-white);
+  text-decoration: none;
+  display: block;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

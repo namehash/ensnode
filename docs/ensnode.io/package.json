@@ -12,21 +12,24 @@
     "lint": "biome check --write"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^6.3.1",
     "@astrojs/react": "catalog:",
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/starlight": "^0.32.1",
     "@astrojs/tailwind": "catalog:",
+    "@namehash/namekit-react": "catalog:",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "astro": "^5.2.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "sharp": "^0.33.5",
-    "starlight-sidebar-topics": "^0.4.1",
-    "tailwindcss": "3.4.13",
-    "classcat": "5.0.5",
     "astro-font": "catalog:",
     "astro-seo": "catalog:",
-    "@namehash/namekit-react": "catalog:"
+    "classcat": "5.0.5",
+    "hastscript": "^9.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rehype-autolink-headings": "^7.1.0",
+    "sharp": "^0.33.5",
+    "starlight-sidebar-topics": "^0.4.1",
+    "tailwindcss": "3.4.13"
   }
 }
