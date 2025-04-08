@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import {ENSDeployments} from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/ens-deployments";
 import { type Labelhash } from "@ensnode/utils";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { decodeEventLog, namehash, zeroAddress } from "viem";
