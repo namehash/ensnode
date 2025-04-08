@@ -18,7 +18,7 @@ export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([
 
 // normalize address to match the format used for addr.reverse subnames
 // as per https://docs.ens.domains/resolution/names#reverse-nodes
-const normalizedAddressDigits = (address: Hex): string => address.slice(2).toLowerCase();
+const normalizedAddressDigits = (address: Address): string => address.slice(2).toLowerCase();
 
 /**
  * Attempt to heal the labelhash of an addr.reverse subname using an address that might be related to the subname.
