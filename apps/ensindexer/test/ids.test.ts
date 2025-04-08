@@ -13,16 +13,16 @@ describe("ids", () => {
 
   describe("makeEventId", () => {
     it("should include token id if available", () => {
-      expect(makeEventId("eth", 123n, 456, 1)).toEqual("123-456-1");
-      expect(makeEventId("eth", 123n, 456)).toEqual("123-456");
+      expect(makeEventId(undefined, 123n, 456, 1)).toEqual("123-456-1");
+      expect(makeEventId(undefined, 123n, 456)).toEqual("123-456");
     });
 
-    it("should include registrar name when its not `eth`", () => {
+    it("should include prefix when provided", () => {
       expect(makeEventId("linea.eth", 123n, 456)).toEqual("linea.eth-123-456");
     });
 
-    it("should not include registrar name when its `eth`", () => {
-      expect(makeEventId("eth", 123n, 456)).toEqual("123-456");
+    it("should not include prefix if not provided", () => {
+      expect(makeEventId(undefined, 123n, 456)).toEqual("123-456");
     });
   });
 

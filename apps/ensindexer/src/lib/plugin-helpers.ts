@@ -25,18 +25,23 @@ import type { PluginName, RegistrarManagedName } from "@/lib/types";
  * namespace prefix is required to distinguish between contracts having the same name, with different
  * implementations. The strong typing is helpful and necessary for ponders auto-generated types to apply.
  *
- * @param prefix an arbitrary plugin-specific prefix, generally the plugin's name
+ * @param prefix An arbitrary plugin-specific prefix, generally the plugin's name. Cannot contain
+ *   ponder-specific characters ('.', ':')
  *
  * @example
  * ```ts
  * const rootNamespace = makePluginNamespace("root");
  * const basenamesNamespace = makePluginNamespace("basenames");
  *
- * rootNamespace("Registry"); // returns "/root/Registry"
- * basenamesNamespace("Registry"); // returns "/basenames/Registry"
+ * rootNamespace("Registry"); // returns "root/Registry"
+ * basenamesNamespace("Registry"); // returns "basenames/Registry"
  * ```
  */
 export function makePluginNamespace<PREFIX extends string>(prefix: PREFIX) {
+  if (/[.:]/.test(prefix)) {
+    throw new Error("Reserved character: Plugin namespace prefix cannot contain '.' or ':'");
+  }
+
   /** Creates a namespaced contract name */
   return function pluginNamespace<CONTRACT_NAME extends string>(
     contractName: CONTRACT_NAME,
