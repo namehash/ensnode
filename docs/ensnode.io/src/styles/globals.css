@@ -86,3 +86,17 @@ h1,
 .sl-markdown-content a:hover:not(:where(.not-content *)) > span {
   color: var(--sl-color-accent);
 }
+
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
+  color: var(--sl-color-white);
+  display: inline;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.sl-markdown-content :global(.anchor-link) {
+  display: inline;
+}
