@@ -1,5 +1,12 @@
 # ensindexer
 
+## 0.1.5
+### Patch Changes
+
+
+
+- [#500](https://github.com/namehash/ensnode/pull/500) [`7122325`](https://github.com/namehash/ensnode/commit/71223254dd8b858b37e7c6e25e128e72c28fa2db) Thanks [@BanaSeba](https://github.com/BanaSeba)! - CI/CD patch
+
 ## 0.1.4
 
 ## 0.1.3
