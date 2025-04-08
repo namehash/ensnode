@@ -1,8 +1,9 @@
 import {
   DEFAULT_RPC_RATE_LIMIT,
-  constrainBlockrange,
+  constrainContractBlockrange,
   createStartBlockByChainIdMap,
   deepMergeRecursive,
+  getGlobalBlockrange,
   parseEnsRainbowEndpointUrl,
   parsePonderPort,
   parseRequestedPluginNames,
@@ -11,18 +12,94 @@ import {
   parseUrl,
 } from "@/lib/ponder-helpers";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("ponder helpers", () => {
-  describe("blockConfig", () => {
-    it("should return valid startBlock and endBlock", () => {
-      const config = constrainBlockrange(5, 10, 20);
-      expect(config).toEqual({ startBlock: 10, endBlock: 20 });
+  describe("constrainContractBlockrange", () => {
+    describe("without global range", () => {
+      beforeEach(() => {
+        vi.stubEnv("START_BLOCK", "");
+        vi.stubEnv("END_BLOCK", "");
+      });
+
+      afterEach(() => {
+        vi.unstubAllEnvs();
+      });
+
+      it("should return valid startBlock and endBlock", () => {
+        const range = constrainContractBlockrange(5);
+        expect(range).toEqual({ startBlock: 5, endBlock: undefined });
+      });
+
+      it("should handle undefined contractStartBlock", () => {
+        const range = constrainContractBlockrange(undefined);
+        expect(range).toEqual({ startBlock: 0, endBlock: undefined });
+      });
     });
 
-    it("should handle undefined start and end", () => {
-      const config = constrainBlockrange(undefined, 10, undefined);
-      expect(config).toEqual({ startBlock: 10, endBlock: undefined });
+    describe("with global range", () => {
+      beforeEach(() => {
+        vi.stubEnv("END_BLOCK", "1234");
+      });
+
+      afterEach(() => {
+        vi.unstubAllEnvs();
+      });
+
+      it("should respect global end block", () => {
+        const config = constrainContractBlockrange(5);
+        expect(config).toEqual({ startBlock: 5, endBlock: 1234 });
+      });
+
+      it("should handle undefined contract start block", () => {
+        const config = constrainContractBlockrange(undefined);
+        expect(config).toEqual({ startBlock: 0, endBlock: 1234 });
+      });
+
+      it("should use contract start block if later than global start", () => {
+        vi.stubEnv("START_BLOCK", "10");
+
+        const config = constrainContractBlockrange(20);
+        expect(config).toEqual({ startBlock: 20, endBlock: 1234 });
+      });
+
+      it("should use global start block if later than contract start", () => {
+        vi.stubEnv("START_BLOCK", "30");
+
+        const config = constrainContractBlockrange(20);
+        expect(config).toEqual({ startBlock: 30, endBlock: 1234 });
+      });
+    });
+  });
+
+  describe("getGlobalBlockrange", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it("should return valid startBlock and endBlock", () => {
+      vi.stubEnv("START_BLOCK", "1234");
+      vi.stubEnv("END_BLOCK", "9999");
+
+      const range = getGlobalBlockrange();
+      expect(range).toEqual({ startBlock: 1234, endBlock: 9999 });
+    });
+
+    it("should throw error for non-numeric values", () => {
+      vi.stubEnv("START_BLOCK", "abc");
+      expect(() => getGlobalBlockrange()).toThrowError(/must be/i);
+    });
+
+    it("should throw error for non-numeric values", () => {
+      vi.stubEnv("END_BLOCK", "abc");
+      expect(() => getGlobalBlockrange()).toThrowError(/must be/i);
+    });
+
+    it("should throw error", () => {
+      vi.stubEnv("START_BLOCK", "9999");
+      vi.stubEnv("END_BLOCK", "1234");
+
+      expect(() => getGlobalBlockrange()).toThrowError(/must be/i);
     });
   });
 
