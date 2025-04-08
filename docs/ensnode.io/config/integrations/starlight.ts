@@ -8,7 +8,7 @@ export function starlight(): AstroIntegration {
       ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       SocialIcons: "./src/components/overrides/SocialIcons.astro",
-      Hero: "./src/components/overrides/Hero.astro"
+      Hero: "./src/components/overrides/Hero.astro",
     },
     customCss: ["./src/styles/globals.css"],
     plugins: [

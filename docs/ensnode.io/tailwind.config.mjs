@@ -1,4 +1,4 @@
-import starlightPlugin from '@astrojs/starlight-tailwind';
+import starlightPlugin from "@astrojs/starlight-tailwind";
 
 /** @type {import('tailwindcss').Config} */
 export default {
