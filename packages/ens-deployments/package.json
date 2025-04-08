@@ -10,8 +10,13 @@
     "directory": "packages/ens-deployments"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ens-deployments",
-  "keywords": ["ENS", "ENSNode"],
-  "files": ["dist"],
+  "keywords": [
+    "ENS",
+    "ENSNode"
+  ],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": "./src/index.ts"
   },

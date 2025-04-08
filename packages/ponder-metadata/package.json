@@ -10,8 +10,12 @@
     "directory": "packages/ponder-metadata-api"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
-  "keywords": ["Ponder"],
-  "files": ["dist"],
+  "keywords": [
+    "Ponder"
+  ],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": "./src/index.ts"
   },
