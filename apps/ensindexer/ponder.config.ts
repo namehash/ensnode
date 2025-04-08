@@ -1,11 +1,17 @@
-import { SELECTED_DEPLOYMENT_CONFIG } from "./src/lib/globals";
-import { type MergedTypes, getActivePlugins } from "./src/lib/plugin-helpers";
-import { deepMergeRecursive, healReverseAddresses } from "./src/lib/ponder-helpers";
-import type { PluginName } from "./src/lib/types";
+import { SELECTED_DEPLOYMENT_CONFIG } from "@/lib/globals";
+import { type MergedTypes, getActivePlugins } from "@/lib/plugin-helpers";
+import {
+  deepMergeRecursive,
+  getEnsDeploymentChain,
+  getGlobalBlockrange,
+  healReverseAddresses,
+  requestedPluginNames,
+} from "@/lib/ponder-helpers";
+import type { PluginName } from "@/lib/types";
 
-import * as baseEthPlugin from "./src/plugins/base/ponder.plugin";
-import * as ethPlugin from "./src/plugins/eth/ponder.plugin";
-import * as lineaEthPlugin from "./src/plugins/linea/ponder.plugin";
+import * as baseEthPlugin from "@/plugins/base/ponder.plugin";
+import * as ethPlugin from "@/plugins/eth/ponder.plugin";
+import * as lineaEthPlugin from "@/plugins/linea/ponder.plugin";
 
 ////////
 // First, generate AllPluginConfigs type representing the merged types of each plugin's `config`,
@@ -48,6 +54,30 @@ const activePluginsMergedConfig = activePlugins
 activePluginsMergedConfig.indexingBehaviorDependencies = {
   HEAL_REVERSE_ADDRESSES: healReverseAddresses(),
 };
+
+// invariant: if using a custom START_BLOCK or END_BLOCK, ponder should be configured to index at most one network
+const globalBlockrange = getGlobalBlockrange();
+if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
+  const numNetworks = Object.keys(activePluginsMergedConfig.networks).length;
+  if (numNetworks > 1) {
+    throw new Error(
+      `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains.
+
+The config currently is:
+ENS_DEPLOYMENT_CHAIN=${getEnsDeploymentChain()}
+ACTIVE_PLUGINS=${requestedPluginNames().join(",")}
+START_BLOCK=${globalBlockrange.startBlock || "n/a"}
+END_BLOCK=${globalBlockrange.endBlock || "n/a"}
+
+The usage you're most likely interested in is:
+  ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=eth END_BLOCK=x pnpm run start
+which runs just the eth plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
+
+In the future, indexing multiple networks with network-specific blockrange constraints may be possible.
+`,
+    );
+  }
+}
 
 // load indexing handlers from the active plugins into the runtime
 await Promise.all(activePlugins.map((plugin) => plugin.activate()));
