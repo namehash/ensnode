@@ -11,9 +11,6 @@ import {
 // uses the 'linea' plugin config for deployments
 export const pluginName = "linea" as const;
 
-// the Registry/Registrar handlers in this plugin manage subdomains of '.linea.eth'
-const ownedName = "linea.eth" as const;
-
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = makePluginNamespace(pluginName);
 
@@ -47,7 +44,8 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   pluginName,
-  ownedName,
+  // the shared handlers in this plugin manage subdomains of '.linea.eth'
+  registrarManagedName: "linea.eth",
   namespace,
   handlers: [
     import("./handlers/Registry"),

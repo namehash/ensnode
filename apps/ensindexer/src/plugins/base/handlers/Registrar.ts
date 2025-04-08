@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import DeploymentConfigs from "@ensnode/ens-deployments";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { Labelhash } from "@ensnode/utils/types";
-import { decodeEventLog, zeroAddress } from "viem";
+import { decodeEventLog, namehash, zeroAddress } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { upsertAccount } from "@/lib/db-helpers";
@@ -18,18 +18,23 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
  */
 const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
 
-export default function ({ pluginName, ownedName, namespace }: PonderENSPluginHandlerArgs<"base">) {
+export default function ({
+  pluginName,
+  registrarManagedName,
+  namespace,
+}: PonderENSPluginHandlerArgs<"base">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-    ownedSubnameNode,
   } = makeRegistrarHandlers({
     eventIdPrefix: pluginName,
-    registrarManagedName: ownedName,
+    registrarManagedName,
   });
+
+  const registrarManagedNode = namehash(registrarManagedName);
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
@@ -91,7 +96,7 @@ export default function ({ pluginName, ownedName, namespace }: PonderENSPluginHa
       await context.db
         .insert(schema.domain)
         .values({
-          id: makeSubnodeNamehash(ownedSubnameNode, labelhash),
+          id: makeSubnodeNamehash(registrarManagedNode, labelhash),
           ownerId: to,
           createdAt: event.block.timestamp,
         })

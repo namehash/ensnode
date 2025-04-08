@@ -5,7 +5,7 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 export default function ({
   pluginName,
-  ownedName,
+  registrarManagedName,
   namespace,
 }: PonderENSPluginHandlerArgs<"linea">) {
   const {
@@ -17,7 +17,7 @@ export default function ({
     handleTransferBatch,
   } = makeNameWrapperHandlers({
     eventIdPrefix: pluginName,
-    registrarManagedName: ownedName,
+    registrarManagedName,
   });
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);

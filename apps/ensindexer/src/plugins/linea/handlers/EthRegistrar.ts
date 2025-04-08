@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import DeploymentConfigs from "@ensnode/ens-deployments";
 import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import type { Labelhash } from "@ensnode/utils/types";
-import { decodeEventLog, zeroAddress } from "viem";
+import { decodeEventLog, namehash, zeroAddress } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { upsertAccount } from "@/lib/db-helpers";
@@ -20,7 +20,7 @@ const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenI
 
 export default function ({
   pluginName,
-  ownedName,
+  registrarManagedName,
   namespace,
 }: PonderENSPluginHandlerArgs<"linea">) {
   const {
@@ -29,11 +29,12 @@ export default function ({
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-    ownedSubnameNode,
   } = makeRegistrarHandlers({
     eventIdPrefix: pluginName,
-    registrarManagedName: ownedName,
+    registrarManagedName,
   });
+
+  const registrarManagedNode = namehash(registrarManagedName);
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
@@ -80,7 +81,7 @@ export default function ({
       await context.db
         .insert(schema.domain)
         .values({
-          id: makeSubnodeNamehash(ownedSubnameNode, labelhash),
+          id: makeSubnodeNamehash(registrarManagedNode, labelhash),
           ownerId: to,
           createdAt: event.block.timestamp,
         })

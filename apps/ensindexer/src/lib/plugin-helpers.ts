@@ -130,7 +130,7 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
  */
 export type PonderENSPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
   pluginName: PluginName;
-  ownedName: RegistrarManagedName;
+  registrarManagedName: RegistrarManagedName;
   namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
 

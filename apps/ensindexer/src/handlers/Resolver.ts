@@ -19,7 +19,7 @@ import { EventIdPrefix } from "@/lib/types";
 /**
  * makes a set of shared handlers for Resolver contracts
  *
- * @param eventIdPrefix
+ * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
  */
 export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventIdPrefix }) => {
   const sharedEventValues = makeSharedEventValues(eventIdPrefix);

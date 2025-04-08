@@ -13,9 +13,9 @@ import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
 /**
- * makes a set of shared handlers for a Registrar contract that manages `ownedName`
+ * makes a set of shared handlers for a Registrar contract that registers subnames of `registrarManagedName`
  *
- * @param eventIdPrefix
+ * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
  * @param registrarManagedName the name that the Registrar contract manages subnames of
  */
 export const makeRegistrarHandlers = ({
@@ -26,7 +26,7 @@ export const makeRegistrarHandlers = ({
   registrarManagedName: RegistrarManagedName;
 }) => {
   const sharedEventValues = makeSharedEventValues(eventIdPrefix);
-  const ownedNameNode = namehash(registrarManagedName);
+  const registrarManagedNode = namehash(registrarManagedName);
 
   async function setNamePreimage(
     context: Context,
@@ -37,7 +37,7 @@ export const makeRegistrarHandlers = ({
     // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
     if (!isLabelIndexable(name)) return;
 
-    const node = makeSubnodeNamehash(ownedNameNode, labelhash);
+    const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
     const domain = await context.db.find(schema.domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
@@ -57,12 +57,6 @@ export const makeRegistrarHandlers = ({
   }
 
   return {
-    // NOTE: provide the ownedSubnameNode back to the plugin constructing these handlers in order
-    // to facilitate easier access to the event's `node` value (see plugin handlers for usage)
-    get ownedSubnameNode() {
-      return ownedNameNode;
-    },
-
     async handleNameRegistered({
       context,
       event,
@@ -78,7 +72,7 @@ export const makeRegistrarHandlers = ({
 
       await upsertAccount(context, owner);
 
-      const node = makeSubnodeNamehash(ownedNameNode, labelhash);
+      const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
 
       // attempt to heal the label associated with labelhash via ENSRainbow
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
@@ -160,7 +154,7 @@ export const makeRegistrarHandlers = ({
     }) {
       const { labelhash, expires } = event.args;
 
-      const node = makeSubnodeNamehash(ownedNameNode, labelhash);
+      const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
       const id = makeRegistrationId(registrarManagedName, labelhash, node);
 
       // update Registration expiry
@@ -192,7 +186,7 @@ export const makeRegistrarHandlers = ({
       const { labelhash, to } = event.args;
       await upsertAccount(context, to);
 
-      const node = makeSubnodeNamehash(ownedNameNode, labelhash);
+      const node = makeSubnodeNamehash(registrarManagedNode, labelhash);
       const id = makeRegistrationId(registrarManagedName, labelhash, node);
 
       const registration = await context.db.find(schema.registration, { id });

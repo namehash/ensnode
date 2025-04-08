@@ -40,9 +40,9 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 }
 
 /**
- * makes a set of shared handlers for the NameWrapper contract for a given registry's `ownedName`
+ * makes a set of shared handlers for the NameWrapper contract
  *
- * @param eventIdPrefix
+ * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
  * @param registrarManagedName the name that the Registry that NameWrapper interacts with manages
  */
 export const makeNameWrapperHandlers = ({
@@ -53,7 +53,7 @@ export const makeNameWrapperHandlers = ({
   registrarManagedName: RegistrarManagedName;
 }) => {
   const sharedEventValues = makeSharedEventValues(eventIdPrefix);
-  const ownedSubnameNode = namehash(registrarManagedName);
+  const registrarManagedNode = namehash(registrarManagedName);
 
   async function handleTransfer(
     context: Context,
@@ -179,7 +179,7 @@ export const makeNameWrapperHandlers = ({
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
         // null expiry date if the domain is not a direct child of .eth
         // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L123
-        expiryDate: domain.parentId !== ownedSubnameNode ? null : domain.expiryDate,
+        expiryDate: domain.parentId !== registrarManagedNode ? null : domain.expiryDate,
         wrappedOwnerId: null,
       }));
 

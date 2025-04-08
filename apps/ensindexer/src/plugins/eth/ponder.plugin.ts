@@ -11,9 +11,6 @@ import {
 // uses the 'eth' plugin config for deployments
 export const pluginName = "eth" as const;
 
-// the Registry/Registrar handlers in this plugin manage subdomains of '.eth'
-const ownedName = "eth" as const;
-
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = makePluginNamespace(pluginName);
 
@@ -55,7 +52,8 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   pluginName,
-  ownedName,
+  // the shared handlers in this plugin manage subdomains of '.eth'
+  registrarManagedName: "eth",
   namespace,
   handlers: [
     import("./handlers/Registry"),

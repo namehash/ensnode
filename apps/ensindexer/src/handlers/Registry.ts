@@ -72,7 +72,7 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
 /**
  * makes a set of shared handlers for a Registry contract
  *
- * @param eventIdPrefix a prefix necessary for event ids that may otherwise collide
+ * @param eventIdPrefix event id prefix to avoid cross-plugin collisions a prefix necessary for event ids that may otherwise collide
  */
 export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventIdPrefix }) => {
   const sharedEventValues = makeSharedEventValues(eventIdPrefix);
