@@ -1,6 +1,6 @@
 import type { Event } from "ponder:registry";
 import { Blockrange } from "@/lib/types";
-import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
+import DeploymentConfigs, { type ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
@@ -331,6 +331,25 @@ export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
   }
 
   return rawValue.split(",");
+};
+
+export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
+
+/**
+ * Feature flag that determines whether the indexer should attempt healing
+ * reverse addresses.
+ *
+ * @returns decision whether to heal reverse addresses
+ */
+export const healReverseAddresses = (): boolean => {
+  const rawValue = process.env.HEAL_REVERSE_ADDRESSES;
+  if (!rawValue) return DEFAULT_HEAL_REVERSE_ADDRESSES;
+  if (rawValue === "true") return true;
+  if (rawValue === "false") return false;
+
+  throw new Error(
+    `Error parsing environment variable 'HEAL_REVERSE_ADDRESS': ${rawValue}' is not a valid value. Expected 'true' or 'false'.`,
+  );
 };
 
 /** Get the Ponder application port */

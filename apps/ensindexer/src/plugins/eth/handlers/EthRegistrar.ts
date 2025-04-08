@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 import DeploymentConfigs from "@ensnode/ens-deployments";
+import { type Labelhash } from "@ensnode/utils";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import type { Labelhash } from "@ensnode/utils/types";
 import { decodeEventLog } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";

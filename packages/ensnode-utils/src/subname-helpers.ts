@@ -1,21 +1,66 @@
 import {
+  Address,
   type Hex,
   bytesToHex,
   bytesToString,
   concat,
+  isAddress,
+  isHash,
   keccak256,
-  namehash,
   stringToBytes,
   toHex,
 } from "viem";
 
-// NOTE: most of these utils could/should be pulled in from some (future) ens helper lib, as they
-// implement standard and reusable logic for typescript ens libs bu aren't necessarily implemented
-// or exposed by ensjs or viem
-
-export const ROOT_NODE = namehash("");
+import { labelhash } from "viem/ens";
+import type { Labelhash } from "./types";
 
 export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
+
+// normalize address to match the format used for addr.reverse subnames
+// as per https://docs.ens.domains/resolution/names#reverse-nodes
+const normalizedAddressDigits = (address: Address): string => address.slice(2).toLowerCase();
+
+/**
+ * Attempt to heal the labelhash of an addr.reverse subname using an address that might be related to the subname.
+ *
+ * @throws if maybeReverseAddress is not a valid Address
+ * @throws if labelhash is not a valid Labelhash
+ *
+ * @returns the original label if healed, otherwise null
+ */
+export const maybeHealLabelByReverseAddress = ({
+  maybeReverseAddress,
+  labelHash,
+}: {
+  /** The address that is possibly associated with the addr.reverse subname */
+  maybeReverseAddress: Address;
+
+  /** The labelhash of the addr.reverse subname */
+  labelHash: Labelhash;
+}): string | null => {
+  // check if required arguments are valid
+  if (!isAddress(maybeReverseAddress)) {
+    throw new Error(
+      `Invalid reverse address: '${maybeReverseAddress}'. Must be a valid EVM Address.`,
+    );
+  }
+
+  if (!isHash(labelHash)) {
+    throw new Error(
+      `Invalid labelHash: '${labelHash}'. Must start with '0x' and represent 32 bytes.`,
+    );
+  }
+
+  // derive the assumed label from the normalized address
+  const assumedLabel = normalizedAddressDigits(maybeReverseAddress);
+
+  // if labelhash of the assumed label matches the provided labelhash, heal
+  if (labelhash(assumedLabel) === labelHash) return assumedLabel;
+
+  // otherwise, healing did not succeed
+  // TODO: log the event args for analysis and debugging
+  return null;
+};
 
 /**
  * Encodes a uint256 bigint as hex string sized to 32 bytes.

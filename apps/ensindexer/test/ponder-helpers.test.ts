@@ -1,9 +1,11 @@
 import {
+  DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_RPC_RATE_LIMIT,
   constrainContractBlockrange,
   createStartBlockByChainIdMap,
   deepMergeRecursive,
   getGlobalBlockrange,
+  healReverseAddresses,
   parseEnsRainbowEndpointUrl,
   parsePonderPort,
   parseRequestedPluginNames,
@@ -181,6 +183,46 @@ describe("ponder helpers", () => {
 
     it("should throw an error if the list is not set", () => {
       expect(() => parseRequestedPluginNames()).toThrowError("Expected value not set");
+    });
+  });
+
+  describe("healReverseAddresses", () => {
+    describe("unspecified", () => {
+      afterEach(() => vi.unstubAllEnvs());
+
+      it("should return the default", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "");
+        expect(healReverseAddresses()).toBe(DEFAULT_HEAL_REVERSE_ADDRESSES);
+      });
+    });
+
+    describe("specified", () => {
+      afterEach(() => vi.unstubAllEnvs());
+      it("should handle true", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
+        expect(healReverseAddresses()).toBe(true);
+      });
+      it("should handle false", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
+        expect(healReverseAddresses()).toBe(false);
+      });
+    });
+
+    describe("malformed", () => {
+      afterEach(() => vi.unstubAllEnvs());
+      it("should throw", () => {
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "1");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
+
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "0");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
+
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "on");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
+
+        vi.stubEnv("HEAL_REVERSE_ADDRESSES", "off");
+        expect(() => healReverseAddresses()).toThrowError(/Error parsing environment variable/i);
+      });
     });
   });
 

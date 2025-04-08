@@ -1,4 +1,5 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
+import type { Node } from "@ensnode/utils";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 

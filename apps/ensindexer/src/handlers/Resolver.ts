@@ -1,14 +1,14 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { DeploymentConfigs } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils/types";
+import type { Node } from "@ensnode/utils";
 import { Hex, decodeEventLog } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { EventIdPrefix } from "@/lib/types";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventIdPrefix } from "@/lib/types";
 
 // NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
 // contract on the chain that emits an event with the relevant signatures, which may or may not

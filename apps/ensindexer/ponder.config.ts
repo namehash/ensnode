@@ -4,6 +4,7 @@ import {
   deepMergeRecursive,
   getEnsDeploymentChain,
   getGlobalBlockrange,
+  healReverseAddresses,
   requestedPluginNames,
 } from "@/lib/ponder-helpers";
 import type { PluginName } from "@/lib/types";
@@ -19,7 +20,16 @@ import * as lineaEthPlugin from "@/plugins/linea/ponder.plugin";
 
 const ALL_PLUGINS = [ethPlugin, baseEthPlugin, lineaEthPlugin] as const;
 
-type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]>;
+type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
+  /**
+   * The environment variables that change the behavior of the indexer.
+   * It's important to include all environment variables that change the behavior
+   * of the indexer to ensure Ponder app build ID is updated when any of them change.
+   **/
+  indexingBehaviorDependencies: {
+    HEAL_REVERSE_ADDRESSES: boolean;
+  };
+};
 
 ////////
 // Next, filter ALL_PLUGINS by those that are available and that the user has activated.
@@ -39,6 +49,11 @@ const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);
 const activePluginsMergedConfig = activePlugins
   .map((plugin) => plugin.config)
   .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as AllPluginConfigs;
+
+// set the indexing behavior dependencies
+activePluginsMergedConfig.indexingBehaviorDependencies = {
+  HEAL_REVERSE_ADDRESSES: healReverseAddresses(),
+};
 
 // invariant: if using a custom START_BLOCK or END_BLOCK, ponder should be configured to index at most one network
 const globalBlockrange = getGlobalBlockrange();
