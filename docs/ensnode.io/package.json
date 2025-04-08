@@ -9,7 +9,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "lint": "biome check --write"
+    "lint": "biome check --write",
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "@astrojs/react": "catalog:",
