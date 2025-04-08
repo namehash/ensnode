@@ -13,7 +13,7 @@ export default function Hero() {
             <img className="block sm:hidden h-8" src={ensnode_with_name.src} alt="ENSNode" />
           </a>
           <div className="hidden sm:flex flex-row flex-nowrap justify-end items-center gap-8">
-            <a href="/ensnode/" className="no-underline hover:no-underline">
+            <a href="/docs/" className="no-underline hover:no-underline">
               <button className="transition-all duration-200 bg-white bg-opacity-10 hover:bg-opacity-20 flex flex-row flex-nowrap justify-center items-center gap-2 text-white rounded-lg px-4 py-2">
                 Docs
               </button>
@@ -30,7 +30,7 @@ export default function Hero() {
             </a>
           </div>
           <div className="sm:hidden flex flex-row flex-nowrap justify-end items-center gap-2">
-            <a href="/ensnode/" className="no-underline hover:no-underline">
+            <a href="/docs/" className="no-underline hover:no-underline">
               <button className="h-8 transition-all duration-200 bg-white bg-opacity-10 hover:bg-opacity-20 flex flex-row flex-nowrap justify-center items-center gap-2 text-sm text-white rounded-lg px-2 py-1">
                 Docs
               </button>

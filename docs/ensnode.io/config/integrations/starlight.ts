@@ -1,5 +1,6 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
+import starlightLlmsTxt from "starlight-llms-txt";
 import starlightSidebarTopics from "starlight-sidebar-topics";
 
 export function starlight(): AstroIntegration {
@@ -8,12 +9,13 @@ export function starlight(): AstroIntegration {
       ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
     },
-    customCss: ["./src/styles/globals.css"],
+    customCss: ["./src/styles/globals.css", "./src/styles/pagination.css"],
     plugins: [
+      starlightLlmsTxt(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
-          link: "/ensnode",
+          link: "/docs",
           icon: "star",
           items: [
             {
@@ -21,46 +23,46 @@ export function starlight(): AstroIntegration {
               items: [
                 {
                   label: "Quickstart",
-                  link: "/ensnode",
+                  link: "/docs",
                 },
                 {
                   label: "What is the ENS Subgraph?",
-                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                  link: "/docs/concepts/what-is-the-ens-subgraph",
                 },
                 {
                   label: "What is ENSNode?",
-                  link: "/ensnode/concepts/what-is-ensnode",
+                  link: "/docs/concepts/what-is-ensnode",
                 },
                 {
                   label: "ENSNode Roadmap",
-                  link: "/ensnode/concepts/roadmap",
+                  link: "/docs/concepts/roadmap",
                 },
               ],
             },
             {
               label: "Using ENSNode",
               collapsed: false,
-              autogenerate: { directory: "ensnode/usage" },
+              autogenerate: { directory: "docs/usage" },
             },
             {
               label: "Deploying ENSNode",
               collapsed: true,
-              autogenerate: { directory: "ensnode/deploying" },
+              autogenerate: { directory: "docs/deploying" },
             },
             {
               label: "Local ENSNode",
               collapsed: true,
-              autogenerate: { directory: "ensnode/running" },
+              autogenerate: { directory: "docs/running" },
             },
             {
               label: "Contributing",
               collapsed: true,
-              autogenerate: { directory: "ensnode/contributing" },
+              autogenerate: { directory: "docs/contributing" },
             },
             {
               label: "Reference",
               collapsed: true,
-              autogenerate: { directory: "ensnode/reference" },
+              autogenerate: { directory: "docs/reference" },
             },
           ],
         },
@@ -191,8 +193,7 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content:
-            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {
