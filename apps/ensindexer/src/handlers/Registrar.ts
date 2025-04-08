@@ -1,6 +1,6 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Hex, labelhash as _labelhash, namehash } from "viem";
+import { type Address, labelhash as _labelhash, namehash } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByHash } from "@/lib/graphnode-helpers";
@@ -64,7 +64,7 @@ export const makeRegistrarHandlers = ({
       context: Context;
       event: EventWithArgs<{
         labelhash: Labelhash;
-        owner: Hex;
+        owner: Address;
         expires: bigint;
       }>;
     }) {
@@ -181,7 +181,7 @@ export const makeRegistrarHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ labelhash: Labelhash; from: Hex; to: Hex }>;
+      event: EventWithArgs<{ labelhash: Labelhash; from: Address; to: Address }>;
     }) {
       const { labelhash, to } = event.args;
       await upsertAccount(context, to);

@@ -1,4 +1,4 @@
-import { Hex } from "viem";
+import type { Address } from "viem";
 
 /**
  * Types for the recent registrations component
@@ -8,10 +8,10 @@ export interface Domain {
   createdAt: string;
   expiryDate: string;
   owner: {
-    id: Hex;
+    id: Address;
   };
   wrappedOwner?: {
-    id: Hex;
+    id: Address;
   };
 }
 

@@ -14,14 +14,17 @@ import { labelhash } from "viem/ens";
 import type { Labelhash, Node } from "./types";
 
 /**
- * implements one step of the namehash algorithm, combining `labelHash` with `parentNode` to produce
- * the `node` of a given subnode.
+ * Implements one step of the namehash algorithm, combining `labelHash` with `parentNode` to produce
+ * the `node` of a given subnode. Note that the order of the arguments is 'reversed' (as compared to
+ * the actual concatenation) in order to improve readability (i.e. read as [label].[parentNode]).
  */
 export const makeSubnode = (labelHash: Labelhash, parentNode: Node): Node =>
   keccak256(concat([parentNode, labelHash]));
 
-// normalize address to match the format used for addr.reverse subnames
-// as per https://docs.ens.domains/resolution/names#reverse-nodes
+/**
+ * Normalizes `address` to match the format used for addr.reverse subnames as per
+ * https://docs.ens.domains/resolution/names#reverse-nodes
+ */
 const normalizedAddressDigits = (address: Address): string => address.slice(2).toLowerCase();
 
 /**

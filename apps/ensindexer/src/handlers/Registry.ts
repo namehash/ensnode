@@ -1,7 +1,7 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { type Hex, zeroAddress } from "viem";
+import { type Address, zeroAddress } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByHash } from "@/lib/graphnode-helpers";
@@ -58,7 +58,7 @@ function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
 
 // a more accurate name for 'recurseDomainDelete'
 // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64
-async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
+async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Node) {
   const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
@@ -89,7 +89,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         event,
       }: {
         context: Context;
-        event: EventWithArgs<{ node: Node; label: Labelhash; owner: Hex }>;
+        event: EventWithArgs<{ node: Node; label: Labelhash; owner: Address }>;
       }) => {
         const { label: labelhash, node, owner } = event.args;
 
@@ -185,7 +185,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Hex; owner: Hex }>;
+      event: EventWithArgs<{ node: Node; owner: Address }>;
     }) {
       const { node, owner } = event.args;
 
@@ -244,7 +244,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; resolver: Hex }>;
+      event: EventWithArgs<{ node: Node; resolver: Address }>;
     }) {
       const { node, resolver: resolverAddress } = event.args;
 

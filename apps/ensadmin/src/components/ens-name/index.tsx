@@ -6,11 +6,11 @@ import type { SupportedChainId } from "@/lib/wagmi";
 import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { Hex } from "viem";
+import type { Address } from "viem";
 import { useEnsName } from "wagmi";
 
 interface ENSNameProps {
-  address: Hex;
+  address: Address;
   chainId: SupportedChainId;
   showAvatar?: boolean;
   showExternalLink?: boolean;

@@ -112,7 +112,7 @@ export const makeNameWrapperHandlers = ({
       context: Context;
       event: EventWithArgs<{
         node: Node;
-        owner: Hex;
+        owner: Address;
         fuses: number;
         expiry: bigint;
         name: Hex;
@@ -170,7 +170,7 @@ export const makeNameWrapperHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; owner: Hex }>;
+      event: EventWithArgs<{ node: Node; owner: Address }>;
     }) {
       const { node, owner } = event.args;
 
@@ -262,7 +262,7 @@ export const makeNameWrapperHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ id: bigint; to: Hex }>;
+      event: EventWithArgs<{ id: bigint; to: Address }>;
     }) {
       await handleTransfer(
         context,
@@ -277,7 +277,7 @@ export const makeNameWrapperHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ ids: readonly bigint[]; to: Hex }>;
+      event: EventWithArgs<{ ids: readonly bigint[]; to: Address }>;
     }) {
       for (const [i, id] of event.args.ids.entries()) {
         await handleTransfer(

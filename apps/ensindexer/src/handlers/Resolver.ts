@@ -2,7 +2,7 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import type { Node } from "@ensnode/utils";
-import { Hex, decodeEventLog } from "viem";
+import { type Address, Hash, type Hex, decodeEventLog } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
@@ -30,7 +30,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; a: Hex }>;
+      event: EventWithArgs<{ node: Node; a: Address }>;
     }) {
       const { a: address, node } = event.args;
       await upsertAccount(context, address);
@@ -65,7 +65,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Hex }>;
+      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Address }>;
     }) {
       const { node, coinType, newAddress } = event.args;
 
@@ -233,7 +233,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; hash: Hex }>;
+      event: EventWithArgs<{ node: Node; hash: Hash }>;
     }) {
       const { node, hash } = event.args;
       const id = makeResolverId(event.log.address, node);
@@ -289,7 +289,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       context: Context;
       event: EventWithArgs<{
         node: Node;
-        owner: Hex;
+        owner: Address;
         target: Hex;
         isAuthorised: boolean;
       }>;
@@ -362,7 +362,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record: Hex;
@@ -377,7 +377,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record?: Hex;
@@ -391,7 +391,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Hex; zonehash: Hex }>;
+      event: EventWithArgs<{ node: Node; zonehash: Hash }>;
     }) {
       // subgraph ignores
     },
