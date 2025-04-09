@@ -18,6 +18,10 @@ inputs:
     description: 'Registry token for Docker registry authentication'
     required: true
 
+  build_args:
+    description: docker/build-push-action#build-args
+    required: false
+
 runs:
   using: composite
   steps:
@@ -49,3 +53,4 @@ runs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        build-args: ${{ inputs.build_args }}

@@ -1,4 +1,4 @@
-name: "Deploy: Publish Changesets"
+name: "Deploy: Changesets"
 
 on:
   workflow_dispatch:
@@ -12,6 +12,9 @@ jobs:
   release:
     name: Release
     if: github.repository == 'namehash/ensnode'
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
@@ -36,8 +39,9 @@ jobs:
         uses: changesets/action@v1
         with:
           commit: "chore(release): version apps"
-          title: "chore(release): version apps"
-          publish: pnpm release
+          title: "Release New Version"
+          version: pnpm version
+          publish: pnpm publish
         env:
-          GITHUB_TOKEN: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

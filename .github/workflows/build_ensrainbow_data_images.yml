@@ -1,0 +1,39 @@
+name: "Build: ENSRainbow Data Images"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  image-build-and-push:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: true
+      matrix:
+        includes:
+          - data_version: v1
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow-data
+          - data_version: v2
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow-v2-data
+          - data_version: test
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow-test2-data
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+
+      - name: Build & Push
+        uses: ./.github/actions/build_docker_image
+        with:
+          image_name:  ${{ matrix.image_name }}
+          dockerfile_path: apps/ensrainbow/Dockerfile.data
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            DATA_VERSION=${{ matrix.data_version }}

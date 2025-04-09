@@ -4,12 +4,12 @@
   "commit": false,
   "access": "public",
   "baseBranch": "main",
-  "fixed": [["ensindexer", "ensadmin"], ["ensrainbow", "@ensnode/ensrainbow-sdk"]],
+  "fixed": [["ensindexer", "ensadmin", "ensrainbow"]],
   "updateInternalDependencies": "patch",
   "prettier": false,
   "privatePackages": {
     "version": true,
     "tag": true
   },
-  "ignore": ["@docs/ensnode", "@docs/ensrainbow"]
+  "ignore": ["@docs/ensnode", "@docs/ensrainbow", "@ensnode/shared-configs"]
 }

@@ -11,7 +11,7 @@ on:
           - green
           - blue
       tag:
-        description: 'Unique tag for deployment. Used for schema name generation'
+        description: 'Docker Image Tag (also used for schema name generation)'
         required: true
         type: string
 

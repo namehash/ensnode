@@ -9,7 +9,7 @@
     "test": "pnpm -r --parallel test run",
     "typecheck": "pnpm -r --parallel typecheck",
     "changeset": "changeset",
-    "release": "changeset publish --filter='!@ensnode/shared-configs'",
+    "publish": "changeset publish",
     "version": "changeset version",
     "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish",
     "docker:build:ensnode": "pnpm run docker:build:ensindexer && pnpm run docker:build:ensrainbow && pnpm run docker:build:ensadmin",
