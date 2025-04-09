@@ -1,8 +1,7 @@
-import { Suspense } from "react";
-
 import { defaultEnsNodeUrl } from "@/lib/env";
+import { Suspense } from "react";
+import { Provider as PonderClientProvider } from "../../components/providers/ponder-client-provider";
 import { PonderClientContent } from "./examples-content";
-import { Provider as PonderClientProvider } from "./provider";
 
 type PageProps = {
   searchParams: Promise<{
@@ -19,11 +18,9 @@ export default async function PonderClientPage({ searchParams }: PageProps) {
       ? ensnode
       : defaultEnsNodeUrl();
 
-  const url = new URL(`/subgraph`, baseUrl).toString();
-
   return (
     <Suspense fallback={<Loading />}>
-      <PonderClientProvider url={url}>
+      <PonderClientProvider url={baseUrl.toString()}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
