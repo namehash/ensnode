@@ -1,0 +1,32 @@
+name: "Build: ENSNode Docker Images"
+on:
+  release:
+    types: [published]
+
+jobs:
+  image-build-and-push:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile_path: apps/ensindexer/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensindexer
+          - dockerfile_path: apps/ensadmin/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensadmin
+          - dockerfile_path: apps/ensrainbow/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build & Push Docker image for the ENSAdmin app
+        uses: ./.github/actions/build_docker_image
+        with:
+          image_name:  ${{ matrix.image_name }}
+          dockerfile_path: ${{ matrix.dockerfile_path }}
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
