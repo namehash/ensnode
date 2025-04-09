@@ -7,9 +7,10 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { PluginName } from "@/lib/types";
 
-// uses the 'eth' plugin config for deployments
-export const pluginName = "eth" as const;
+// describes indexing behavior for the ENS Root Contracts
+export const pluginName = "root" as const satisfies PluginName;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = makePluginNamespace(pluginName);

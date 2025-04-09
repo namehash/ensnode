@@ -1,16 +1,15 @@
 /**
- * In this project we use the notion of 'plugins' to describe which registries and subregistries
- * of a given ENS deployment are being indexed by ponder. Note that this type definition is 1:1 with
- * that of @ensnode/ens-deployments' Datasource, simplifying the relationship between a Datasource
- * and the plugins in this project.
+ * In this project we use the notion of 'plugins' to describe bundles of indexing logic.
+ * Note that this type definition is currently 1:1 with that of @ensnode/ens-deployments' Datasource,
+ * simplifying the relationship between a Datasource and the plugins in this project.
  */
-export type PluginName = "eth" | "base" | "linea";
+export type PluginName = "root" | "basenames" | "lineanames";
 
 /**
  * RegistrarManagedName is an explicit type representing the following concept:
  *   "the name a registrar indexed by the shared handlers manages subnames of"
  *
- * i.e. the basenames plugin uses the shared handlers to index the Basenames Registrar, which manages
+ * i.e. the basenames plugin uses the shared handlers to index the Basenames Registrar that manages
  * subnames of "base.eth".
  */
 export type RegistrarManagedName = string;
@@ -20,7 +19,7 @@ export type RegistrarManagedName = string;
  * Because ENSIndexer indexes multiple networks, however, event ids can collide between chains,
  * if the blockNumber and logIndex happen to line up.
  *
- * An Event Id Prefix is provided by non-eth plugins to the shared handlers in order to scope the
+ * An Event Id Prefix is provided by non-root plugins to the shared handlers in order to scope the
  * event ids created by the shared handlers and avoid said cross-chain collisions.
  *
  * TODO: if we ever discard exact subgraph compatbility, we can use ponder's `event.id` as an event UUID.

@@ -57,9 +57,6 @@ export const makeEventId = (
  * @returns a unique registration id
  */
 export const makeRegistrationId = (pluginName: PluginName, labelHash: LabelHash, node: Node) => {
-  if (pluginName === "eth") {
-    return labelHash;
-  } else {
-    return node;
-  }
+  if (pluginName === "root") return labelHash;
+  return node;
 };

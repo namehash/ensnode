@@ -7,9 +7,10 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { PluginName } from "@/lib/types";
 
-// uses the 'base' plugin config for deployments
-export const pluginName = "base" as const;
+// describes indexing behavior for the Basenames ENS Datasource
+export const pluginName = "basenames" as const satisfies PluginName;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = makePluginNamespace(pluginName);

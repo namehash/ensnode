@@ -3,7 +3,7 @@ import { ponder } from "ponder:registry";
 import { makeResolverHandlers } from "@/handlers/Resolver";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
-export default function ({ pluginName, namespace }: PonderENSPluginHandlerArgs<"linea">) {
+export default function ({ pluginName, namespace }: PonderENSPluginHandlerArgs<"lineanames">) {
   const {
     handleABIChanged,
     handleAddrChanged,

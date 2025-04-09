@@ -7,7 +7,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<"linea">) {
+}: PonderENSPluginHandlerArgs<"lineanames">) {
   const {
     handleNameWrapped,
     handleNameUnwrapped,

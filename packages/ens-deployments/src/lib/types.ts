@@ -48,6 +48,12 @@ export type ContractConfig =
 
 /**
  * A DeploymentDatasource describes a set of contracts on a given chain that extend the ENS root.
+ *
+ * NOTE: this currently encodes the assumption that a given on-chain ENS datasource correlates to
+ * contracts on exactly 1 chain. If this is not the case in the future, DeploymentDatasource can
+ * be updated to reflect that OR multiple `DeploymentDatasources` can be defined, and the respective
+ * ENSIndexer Plugin can intentionally read from multiple DeploymentDatasources to construct its
+ * Ponder config.
  */
 export interface DeploymentDatasource {
   chain: Chain;
@@ -63,15 +69,15 @@ export type ENSDeployment = {
    *
    * Required for each "ENS deployment".
    */
-  eth: DeploymentDatasource;
+  root: DeploymentDatasource;
 
   /**
    * Basenames and its associated contracts, optional.
    */
-  base?: DeploymentDatasource;
+  basenames?: DeploymentDatasource;
 
   /**
    * Linea Names and its associated contracts, optional.
    */
-  linea?: DeploymentDatasource;
+  lineanames?: DeploymentDatasource;
 };

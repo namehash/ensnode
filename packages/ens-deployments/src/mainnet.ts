@@ -37,7 +37,7 @@ export default {
    * Addresses and Start Blocks from ENS Mainnet Subgraph Manifest
    * https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
    */
-  eth: {
+  root: {
     chain: mainnet,
     contracts: {
       RegistryOld: {
@@ -84,7 +84,7 @@ export default {
    * Addresses and Start Blocks from Basenames
    * https://github.com/base-org/basenames
    */
-  base: {
+  basenames: {
     /**
      * As of 9-Feb-2025 the Resolver for 'base.eth' in the mainnet "ENS deployment" is
      * 0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31.
@@ -136,7 +136,7 @@ export default {
    * Addresses and Start Blocks from Linea Names
    * https://github.com/Consensys/linea-ens
    */
-  linea: {
+  lineanames: {
     /**
      * As of 9-Feb-2025 the Resolver for 'linea.eth' in the mainnet "ENS deployment" is
      * 0xde16ee87B0C019499cEBDde29c9F7686560f679a.

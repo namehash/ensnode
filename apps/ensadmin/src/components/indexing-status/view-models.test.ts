@@ -29,13 +29,13 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        ACTIVE_PLUGINS: ["eth"],
+        ACTIVE_PLUGINS: ["root"],
         DATABASE_SCHEMA: "public",
         ENS_DEPLOYMENT_CHAIN: "ens-test-env",
       });
 
       expect(result).toEqual([
-        { label: "Active Plugins", value: ["eth"] },
+        { label: "Active Plugins", value: ["root"] },
         { label: "ENS Deployment Chain", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);

@@ -4,16 +4,16 @@ import { describe, expect, it } from "vitest";
 describe("createPluginNamespace", () => {
   it("should return a function that creates namespaced contract names", () => {
     const boxNs = makePluginNamespace("box");
-    const ethNs = makePluginNamespace("eth");
-    const baseEthNs = makePluginNamespace("base");
+    const rootNs = makePluginNamespace("root");
+    const basenamesNes = makePluginNamespace("basenames");
 
     expect(boxNs("Registry")).toBe("box/Registry");
-    expect(ethNs("Registry")).toBe("eth/Registry");
-    expect(baseEthNs("Registry")).toBe("base/Registry");
+    expect(rootNs("Registry")).toBe("root/Registry");
+    expect(basenamesNes("Registry")).toBe("basenames/Registry");
   });
 
   it("should throw if invalid characters", () => {
-    expect(() => makePluginNamespace("eth.test")).toThrowError(/reserved/i);
-    expect(() => makePluginNamespace("eth:test")).toThrowError(/reserved/i);
+    expect(() => makePluginNamespace("root.test")).toThrowError(/reserved/i);
+    expect(() => makePluginNamespace("root:test")).toThrowError(/reserved/i);
   });
 });

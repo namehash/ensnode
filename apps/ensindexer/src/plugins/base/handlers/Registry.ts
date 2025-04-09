@@ -3,7 +3,7 @@ import { ponder } from "ponder:registry";
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
-export default function ({ pluginName, namespace }: PonderENSPluginHandlerArgs<"base">) {
+export default function ({ pluginName, namespace }: PonderENSPluginHandlerArgs<"basenames">) {
   const {
     handleNewOwner, //
     handleNewResolver,

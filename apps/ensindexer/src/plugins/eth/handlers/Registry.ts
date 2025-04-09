@@ -19,7 +19,7 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({ namespace }: PonderENSPluginHandlerArgs<"root">) {
   const {
     handleNewOwner, //
     handleNewResolver,

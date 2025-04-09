@@ -104,7 +104,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         args: { node, name },
       } = decodeEventLog({
         eventName: "NameChanged",
-        abi: ENSDeployments.mainnet.eth.contracts.Resolver.abi,
+        abi: ENSDeployments.mainnet.root.contracts.Resolver.abi,
         topics: event.log.topics,
         data: event.log.data,
       });

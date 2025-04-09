@@ -7,9 +7,10 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { PluginName } from "@/lib/types";
 
-// uses the 'linea' plugin config for deployments
-export const pluginName = "linea" as const;
+// describes indexing behavior for the Linea Names ENS Datasource
+export const pluginName = "lineanames" as const satisfies PluginName;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = makePluginNamespace(pluginName);

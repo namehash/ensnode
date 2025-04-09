@@ -495,22 +495,22 @@ interface PonderNetworkConfig {
  * ```ts
  * const ponderConfig = {
  *  contracts: {
- *   "/eth/Registrar": {
+ *   "root/Registrar": {
  *     network: {
  *       "1": { startBlock: 444_444_444 }
  *      }
  *   },
- *   "/eth/Registry": {
+ *   "root/Registry": {
  *     network: {
  *       "1": { startBlock: 444_444_333 }
  *      }
  *   },
- *   "/eth/base/Registrar": {
+ *   "basenames/Registrar": {
  *     network: {
  *       "8453": { startBlock: 1_799_433 }
  *     }
  *   },
- *   "/eth/base/Registry": {
+ *   "basenames/Registry": {
  *     network: {
  *       "8453": { startBlock: 1_799_430 }
  *     }

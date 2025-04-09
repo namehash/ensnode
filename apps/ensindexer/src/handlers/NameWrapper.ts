@@ -177,7 +177,7 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
-        // null expiry date if the domain is not a direct child of .eth
+        // null expiry date if the domain is not a direct child of the registrar managed name
         // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L123
         expiryDate: domain.parentId !== registrarManagedNode ? null : domain.expiryDate,
         wrappedOwnerId: null,

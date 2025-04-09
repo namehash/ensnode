@@ -22,7 +22,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<"linea">) {
+}: PonderENSPluginHandlerArgs<"lineanames">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -100,7 +100,7 @@ export default function ({
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "OwnerNameRegistered",
-      abi: ENSDeployments.mainnet.linea.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.lineanames.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -122,7 +122,7 @@ export default function ({
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "PohNameRegistered",
-      abi: ENSDeployments.mainnet.linea.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.lineanames.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -144,7 +144,7 @@ export default function ({
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: ENSDeployments.mainnet.linea.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.lineanames.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -165,7 +165,7 @@ export default function ({
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRenewed",
-      abi: ENSDeployments.mainnet.linea.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.lineanames.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });

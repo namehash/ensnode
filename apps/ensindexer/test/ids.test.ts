@@ -27,15 +27,15 @@ describe("ids", () => {
   });
 
   describe("makeRegistrationId", () => {
-    it("should use labelHash when plugin name is `eth` to ensure subgraph compatibility", () => {
-      expect(makeRegistrationId("eth", labelhash("vitalik"), namehash("vitalik.eth"))).toEqual(
+    it("should use labelHash when plugin name is `root` to ensure subgraph compatibility", () => {
+      expect(makeRegistrationId("root", labelhash("vitalik"), namehash("vitalik.eth"))).toEqual(
         labelhash("vitalik"),
       );
     });
 
-    it("should use node when plugin name is not `eth`", () => {
+    it("should use node when plugin name is not `root`", () => {
       expect(
-        makeRegistrationId("linea", labelhash("vitalik"), namehash("vitalik.linea.eth")),
+        makeRegistrationId("lineanames", labelhash("vitalik"), namehash("vitalik.linea.eth")),
       ).toEqual(namehash("vitalik.linea.eth"));
     });
   });
