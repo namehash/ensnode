@@ -43,6 +43,8 @@
       "tsx>esbuild": "0.25.0",
       "vite>esbuild": "0.25.0"
     },
-    "ignoredBuiltDependencies": ["bun"]
+    "ignoredBuiltDependencies": [
+      "bun"
+    ]
   }
 }

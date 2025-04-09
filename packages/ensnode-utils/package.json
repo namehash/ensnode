@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/utils",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "A utility library for interacting with ENS data",
   "license": "MIT",
@@ -10,7 +10,9 @@
     "directory": "packages/ensnode-utils"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-utils",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./subname-helpers": "./src/subname-helpers.ts"
