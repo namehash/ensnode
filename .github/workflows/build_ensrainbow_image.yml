@@ -16,27 +16,6 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-
-      # - name: Extract metadata for Docker
-      #   id: meta
-      #   run: |
-      #     # Set default tag as latest
-      #     DOCKER_TAG="latest"
-      #     # If this is a tag push, use the tag name instead
-      #     if [[ $GITHUB_REF == refs/tags/ensrainbow@* ]]; then
-      #       DOCKER_TAG=${GITHUB_REF#refs/tags/ensrainbow@}
-      #     fi
-      #     echo "tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
-
       - name: Build & Push Docker image for the ENSRainbow app
         uses: ./.github/actions/build_docker_image
         with:
