@@ -194,8 +194,7 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content:
-            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {
