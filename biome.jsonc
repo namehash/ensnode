@@ -35,7 +35,7 @@
   },
   "overrides": [
     /**
-     * disable biome formatting of package.json because neither biome nor changesets is suficiently
+     * disable biome formatting of package.json because neither biome nor changesets is sufficiently
      * configurable to play well together regarding the auto-formatting of package.json files
      *
      * https://github.com/changesets/changesets/issues/1434
