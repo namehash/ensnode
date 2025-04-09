@@ -2,11 +2,8 @@ name: "Build: ENSIndexer"
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
   release:
-    types: [created, published]
+    types: [published]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -21,23 +18,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Extract metadata for Docker
-        id: meta
-        run: |
-          # Set default tag as latest
-          DOCKER_TAG="latest"
-          # If this is a tag push, use the tag name instead
-          if [[ $GITHUB_REF == refs/tags/ensindexer@* ]]; then
-            DOCKER_TAG=${GITHUB_REF#refs/tags/ensindexer@}
-          fi
-          echo "tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
-
       - name: Build and push ENSIndexer Docker image
         uses: ./.github/actions/build_docker_image
-        env:
-          TAG: ${{ steps.meta.outputs.tag }}
         with:
-          image_name:  ghcr.io/${{ github.repository }}/ensindexer:${{ env.TAG }}
+          image_name:  ghcr.io/${{ github.repository }}/ensindexer
           dockerfile_path: apps/ensindexer/Dockerfile
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
