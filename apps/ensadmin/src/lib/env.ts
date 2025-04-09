@@ -169,18 +169,22 @@ export async function ensAdminVersion(): Promise<string> {
   return import("../../package.json").then(({ version }) => version);
 }
 
+type NextJsPageSearchParams = Record<string, string | string[] | undefined>;
+
 /**
  * Parses a custom Next.js search params object into a URLSearchParams object.
  * @param nextJsPageSearchParams
  * @returns {URLSearchParams}
  */
-export function parseNextJsPageSearchParams(
-  nextJsPageSearchParams: Record<string, unknown>,
-): URLSearchParams {
+export function parseSearchParams(searchParams: NextJsPageSearchParams): URLSearchParams {
   const searchParamsNative = new URLSearchParams();
 
-  Object.entries(nextJsPageSearchParams).forEach(([key, value]) => {
-    searchParamsNative.append(key, String(value));
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((v) => searchParamsNative.append(key, v));
+    } else {
+      searchParamsNative.append(key, `${value}`);
+    }
   });
 
   return searchParamsNative;

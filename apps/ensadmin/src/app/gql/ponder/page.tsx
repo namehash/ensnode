@@ -11,5 +11,5 @@ export default async function PonderGraphQLPage({ searchParams }: PageProps) {
   const ensNodeUrl = selectedEnsNodeUrl(parseNextJsPageSearchParams(await searchParams));
   const ensNodePonderApiUrl = new URL(`/ponder`, ensNodeUrl);
 
-  return <GraphiQLEditor graphQlApiUrl={ensNodePonderApiUrl.toString()} />;
+  return <GraphiQLEditor url={ensNodePonderApiUrl.toString()} />;
 }

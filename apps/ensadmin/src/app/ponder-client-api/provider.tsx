@@ -6,11 +6,11 @@ import { PonderProvider } from "@ponder/react";
 import { PropsWithChildren, useState } from "react";
 
 interface ProviderProps extends PropsWithChildren {
-  ponderSqlApiUrl: string;
+  url: string;
 }
 
-export function Provider({ ponderSqlApiUrl, children }: ProviderProps) {
-  const [ponderClient] = useState(() => createClient(ponderSqlApiUrl, { schema }));
+export function Provider({ url, children }: ProviderProps) {
+  const [ponderClient] = useState(() => createClient(url, { schema }));
 
   return <PonderProvider client={ponderClient}>{children}</PonderProvider>;
 }
