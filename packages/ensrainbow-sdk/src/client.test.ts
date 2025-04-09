@@ -35,7 +35,7 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbowApiClientOptions);
   });
 
-  it("should heal a known labelhash", async () => {
+  it("should heal a known labelHash", async () => {
     const response = await client.heal(
       "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
     );
@@ -46,7 +46,7 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealSuccess);
   });
 
-  it("should return a not found error for an unknown labelhash", async () => {
+  it("should return a not found error for an unknown labelHash", async () => {
     const response = await client.heal(
       "0xf64dc17ae2e2b9b16dbcb8cb05f35a2e6080a5ff1dc53ac0bc48f0e79111f264",
     );
@@ -58,12 +58,12 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealNotFoundError);
   });
 
-  it("should return a bad request error for an invalid labelhash", async () => {
+  it("should return a bad request error for an invalid labelHash", async () => {
     const response = await client.heal("0xinvalid");
 
     expect(response).toEqual({
       status: StatusCode.Error,
-      error: "Invalid labelhash length 9 characters (expected 66)",
+      error: "Invalid labelHash length 9 characters (expected 66)",
       errorCode: ErrorCode.BadRequest,
     } satisfies EnsRainbow.HealBadRequestError);
   });

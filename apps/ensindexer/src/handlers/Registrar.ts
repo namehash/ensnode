@@ -1,13 +1,13 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, labelhash as _labelhash, namehash } from "viem";
+import { type Address, namehash } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
-import { labelByHash } from "@/lib/graphnode-helpers";
+import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
-import { type Labelhash } from "@ensnode/utils";
+import type { EventIdPrefix, PluginName, RegistrarManagedName } from "@/lib/types";
+import { Label, type LabelHash } from "@ensnode/utils";
 import { isLabelIndexable, makeSubnode } from "@ensnode/utils/subname-helpers";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
@@ -19,9 +19,11 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
  * @param registrarManagedName the name that the Registrar contract manages subnames of
  */
 export const makeRegistrarHandlers = ({
+  pluginName,
   eventIdPrefix,
   registrarManagedName,
 }: {
+  pluginName: PluginName;
   eventIdPrefix: EventIdPrefix;
   registrarManagedName: RegistrarManagedName;
 }) => {
@@ -30,30 +32,32 @@ export const makeRegistrarHandlers = ({
 
   async function setNamePreimage(
     context: Context,
-    name: string,
-    labelhash: Labelhash,
+    label: Label,
+    labelHash: LabelHash,
     cost: bigint,
   ) {
     // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
-    if (!isLabelIndexable(name)) return;
+    if (!isLabelIndexable(label)) return;
 
-    const node = makeSubnode(labelhash, registrarManagedNode);
+    const node = makeSubnode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
 
-    if (domain.labelName !== name) {
+    // update the domain's labelName with label
+    if (domain.labelName !== label) {
       await context.db
         .update(schema.domain, { id: node })
-        .set({ labelName: name, name: `${name}.${registrarManagedName}` });
+        .set({ labelName: label, name: `${label}.${registrarManagedName}` });
     }
 
+    // materialize the registration's labelName as well
     await context.db
       .update(schema.registration, {
-        id: makeRegistrationId(registrarManagedName, labelhash, node),
+        id: makeRegistrationId(pluginName, labelHash, node),
       })
-      .set({ labelName: name, cost });
+      .set({ labelName: label, cost });
   }
 
   return {
@@ -63,20 +67,20 @@ export const makeRegistrarHandlers = ({
     }: {
       context: Context;
       event: EventWithArgs<{
-        labelhash: Labelhash;
+        labelHash: LabelHash;
         owner: Address;
         expires: bigint;
       }>;
     }) {
-      const { labelhash, owner, expires } = event.args;
+      const { labelHash, owner, expires } = event.args;
 
       await upsertAccount(context, owner);
 
-      const node = makeSubnode(labelhash, registrarManagedNode);
+      const node = makeSubnode(labelHash, registrarManagedNode);
 
-      // attempt to heal the label associated with labelhash via ENSRainbow
+      // attempt to heal the label via ENSRainbow
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
-      const healedLabel = await labelByHash(labelhash);
+      const healedLabel = await labelByLabelHash(labelHash);
 
       // only update the label if it is healed & indexable
       // undefined value means no change to the label
@@ -97,7 +101,7 @@ export const makeRegistrarHandlers = ({
 
       // update registration
       // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
-      const registrationId = makeRegistrationId(registrarManagedName, labelhash, node);
+      const registrationId = makeRegistrationId(pluginName, labelHash, node);
       await upsertRegistration(context, {
         id: registrationId,
         domainId: node,
@@ -125,13 +129,13 @@ export const makeRegistrarHandlers = ({
     }: {
       context: Context;
       event: EventWithArgs<{
-        name: string;
-        label: Labelhash;
+        name: Label;
+        label: LabelHash;
         cost: bigint;
       }>;
     }) {
-      const { name, label, cost } = event.args;
-      await setNamePreimage(context, name, label, cost);
+      const { name: label, label: labelHash, cost } = event.args;
+      await setNamePreimage(context, label, labelHash, cost);
     },
 
     async handleNameRenewedByController({
@@ -139,10 +143,10 @@ export const makeRegistrarHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ name: string; label: Labelhash; cost: bigint }>;
+      event: EventWithArgs<{ name: Label; label: LabelHash; cost: bigint }>;
     }) {
-      const { name, label, cost } = event.args;
-      await setNamePreimage(context, name, label, cost);
+      const { name: label, label: labelHash, cost } = event.args;
+      await setNamePreimage(context, label, labelHash, cost);
     },
 
     async handleNameRenewed({
@@ -150,12 +154,12 @@ export const makeRegistrarHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ labelhash: Labelhash; expires: bigint }>;
+      event: EventWithArgs<{ labelHash: LabelHash; expires: bigint }>;
     }) {
-      const { labelhash, expires } = event.args;
+      const { labelHash, expires } = event.args;
 
-      const node = makeSubnode(labelhash, registrarManagedNode);
-      const id = makeRegistrationId(registrarManagedName, labelhash, node);
+      const node = makeSubnode(labelHash, registrarManagedNode);
+      const id = makeRegistrationId(pluginName, labelHash, node);
 
       // update Registration expiry
       await context.db.update(schema.registration, { id }).set({ expiryDate: expires });
@@ -181,13 +185,13 @@ export const makeRegistrarHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ labelhash: Labelhash; from: Address; to: Address }>;
+      event: EventWithArgs<{ labelHash: LabelHash; from: Address; to: Address }>;
     }) {
-      const { labelhash, to } = event.args;
+      const { labelHash, to } = event.args;
       await upsertAccount(context, to);
 
-      const node = makeSubnode(labelhash, registrarManagedNode);
-      const id = makeRegistrationId(registrarManagedName, labelhash, node);
+      const node = makeSubnode(labelHash, registrarManagedNode);
+      const id = makeRegistrationId(pluginName, labelHash, node);
 
       const registration = await context.db.find(schema.registration, { id });
       if (!registration) return;

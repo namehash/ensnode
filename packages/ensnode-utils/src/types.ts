@@ -13,9 +13,28 @@ import type { Hex } from "viem";
 export type Node = Hex;
 
 /**
- * A hash value that identifies only a single part or "label" of an ENS name.
- * The labelhash is just the Keccak-256 output for the label.
+ * A LabelHash is the result of the labelhash function (which is just keccak256) on a label.
  *
- * @link https://docs.ens.domains/ensip/1#labelhash-algorithm
+ * @link https://docs.ens.domains/terminology#labelhash
  */
-export type Labelhash = Hex;
+export type LabelHash = Hex;
+
+/**
+ * A Label is a single part of an ENS Name.
+ *
+ * @link https://docs.ens.domains/terminology#label
+ */
+export type Label = string;
+
+/**
+ * An EncodedLabelHash represents a LabelHash when used in an ENS name.
+ *
+ */
+export type EncodedLabelHash = `[${string}]`;
+
+/**
+ * A Name represents a human-readable ENS name.
+ *
+ * ex: vitalik.eth
+ */
+export type Name = string;

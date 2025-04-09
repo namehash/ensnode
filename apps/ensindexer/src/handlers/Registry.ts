@@ -4,11 +4,11 @@ import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
-import { labelByHash } from "@/lib/graphnode-helpers";
+import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { type EventWithArgs, healReverseAddresses } from "@/lib/ponder-helpers";
 import type { EventIdPrefix } from "@/lib/types";
-import { type Labelhash, type Node, REVERSE_ROOT_NODES, ROOT_NODE } from "@ensnode/utils";
+import { type LabelHash, type Node, REVERSE_ROOT_NODES, ROOT_NODE } from "@ensnode/utils";
 import {
   isLabelIndexable,
   makeSubnode,
@@ -89,14 +89,14 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         event,
       }: {
         context: Context;
-        event: EventWithArgs<{ node: Node; label: Labelhash; owner: Address }>;
+        event: EventWithArgs<{ node: Node; label: LabelHash; owner: Address }>;
       }) => {
-        const { label: labelhash, node, owner } = event.args;
+        const { label: labelHash, node: parentNode, owner } = event.args;
 
         await upsertAccount(context, owner);
 
-        // the domain in question is a subdomain of `node` with label `labelhash`
-        const subnode = makeSubnode(labelhash, node);
+        // the domain in question is a subdomain of `parentNode`
+        const subnode = makeSubnode(labelHash, parentNode);
         let domain = await context.db.find(schema.domain, { id: subnode });
 
         // note that we set isMigrated in each branch such that if this domain is being
@@ -111,45 +111,45 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
           domain = await context.db.insert(schema.domain).values({
             id: subnode,
             ownerId: owner,
-            parentId: node,
+            parentId: parentNode,
             createdAt: event.block.timestamp,
-            labelhash: event.args.label,
+            labelhash: labelHash,
             isMigrated,
           });
 
           // and increment parent subdomainCount
           await context.db
-            .update(schema.domain, { id: node })
+            .update(schema.domain, { id: parentNode })
             .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
         }
 
         // if the domain doesn't yet have a name, attempt to construct it here
         if (!domain.name) {
-          const parent = await context.db.find(schema.domain, { id: node });
+          const parent = await context.db.find(schema.domain, { id: parentNode });
 
           let healedLabel = null;
 
           // 1. if healing label from reverse addresses is enabled, and the parent is a known
           //    reverse node (i.e. addr.reverse), give it a go
-          if (healReverseAddresses() && REVERSE_ROOT_NODES.has(node)) {
+          if (healReverseAddresses() && REVERSE_ROOT_NODES.has(parentNode)) {
             healedLabel = maybeHealLabelByReverseAddress({
               maybeReverseAddress: owner,
-              labelHash: labelhash,
+              labelHash,
             });
           }
 
           // 2. if reverse address healing didn't work, try ENSRainbow
           if (!healedLabel) {
-            // attempt to heal the label associated with labelhash via ENSRainbow
+            // attempt to heal the label associated with labelHash via ENSRainbow
             // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
-            healedLabel = await labelByHash(labelhash);
+            healedLabel = await labelByLabelHash(labelHash);
           }
 
           const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
           // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
           // NOTE: for the root node, the parent is null, so we just use the label value as is
-          const label = validLabel || encodeLabelhash(labelhash);
+          const label = validLabel || encodeLabelhash(labelHash);
           const name = parent?.name ? `${label}.${parent.name}` : label;
 
           // akin to domain.save()
@@ -174,7 +174,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
           .values({
             ...sharedEventValues(event),
 
-            parentDomainId: node,
+            parentDomainId: parentNode,
             domainId: subnode,
             ownerId: owner,
           })

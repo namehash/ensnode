@@ -105,7 +105,7 @@ describe("labelByReverseAddress", () => {
       ).toThrowError(/Invalid reverse address/i);
     });
 
-    it("should throw if labelhash is not a valid Labelhash", () => {
+    it("should throw if labelHash is not a valid LabelHash", () => {
       expect(() =>
         maybeHealLabelByReverseAddress({
           ...validArgs,
@@ -117,11 +117,11 @@ describe("labelByReverseAddress", () => {
 
   describe("label healing", () => {
     it("should return null if the label cannot be healed", () => {
-      const notMatchingLabelhash = labelhash("test.eth");
+      const notMatchingLabelHash = labelhash("test.eth");
       expect(
         maybeHealLabelByReverseAddress({
           ...validArgs,
-          labelHash: notMatchingLabelhash,
+          labelHash: notMatchingLabelHash,
         }),
       ).toBe(null);
     });

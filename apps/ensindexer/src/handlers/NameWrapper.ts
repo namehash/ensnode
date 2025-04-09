@@ -129,9 +129,9 @@ export const makeNameWrapperHandlers = ({
       if (!domain) throw new Error("domain is guaranteed to already exist");
 
       // upsert the healed name iff !domain.labelName && label
-      // NOTE: this means that future wraps of a domain with encoded label hashes in the name
+      // NOTE: this means that future wraps of a domain with a encoded labelHash in the name
       //   will _not_ use the newly healed label emitted by the NameWrapper contract, and will
-      //   continue to have an un-healed labelhash in its name field
+      //   continue to have an un-healed encoded labelHash in its name field
       // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
       // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
       if (!domain.labelName && label) {

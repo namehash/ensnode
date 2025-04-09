@@ -34,7 +34,9 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"eth">) {
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
   ponder.on(namespace("RegistryOld:NewOwner"), async ({ context, event }) => {
-    const node = makeSubnode(event.args.label, event.args.node);
+    const { label: labelHash, node: parentNode } = event.args;
+
+    const node = makeSubnode(labelHash, parentNode);
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, node);
     if (shouldIgnoreEvent) return;
 

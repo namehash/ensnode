@@ -13,12 +13,12 @@ export interface IngestCommandOptions {
 }
 
 // Total number of expected records in the ENS rainbow table SQL dump
-// This number represents the count of unique label-labelhash pairs
+// This number represents the count of unique label-labelHash pairs
 // as of January 30, 2024 from the Graph Protocol's ENS rainbow tables
 // Source file: ens_names.sql.gz
 // SHA256: a6316b1e7770b1f3142f1f21d4248b849a5c6eb998e3e66336912c9750c41f31
 // Note: The input file contains one known invalid record at line 10878
-// where the labelhash value is literally "hash". This record is skipped
+// where the labelHash value is literally "hash". This record is skipped
 // during ingestion since it would be unreachable through the ENS Subgraph anyway.
 // See: https://github.com/namehash/ensnode/issues/140
 const TOTAL_EXPECTED_RECORDS = 133_856_894;
@@ -155,7 +155,7 @@ export async function ingestCommand(options: IngestCommandOptions): Promise<void
 
     // Run count as second phase to verify the number of unique records in the database.
     // While processedRecords tells us how many records we ingested, we need to count
-    // the actual database entries to confirm how many unique label-labelhash pairs exist,
+    // the actual database entries to confirm how many unique label-labelHash pairs exist,
     // as the input data could potentially contain duplicates.
     logger.info("\nStarting rainbow record counting phase...");
     const count = await db.countRainbowRecords();

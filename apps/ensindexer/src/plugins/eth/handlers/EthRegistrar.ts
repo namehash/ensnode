@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import { type Labelhash } from "@ensnode/utils";
+import { type LabelHash } from "@ensnode/utils";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { decodeEventLog } from "viem";
 
@@ -14,9 +14,13 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
  * direct subname of .eth that was registered.
  * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/ethregistrar/ETHRegistrarController.sol#L215
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-export default function ({ registrarManagedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({
+  pluginName,
+  registrarManagedName,
+  namespace,
+}: PonderENSPluginHandlerArgs<"eth">) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -24,6 +28,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
     handleNameRenewed,
     handleNameTransferred,
   } = makeRegistrarHandlers({
+    pluginName,
     eventIdPrefix: undefined, // NOTE: no event id prefix for root plugin
     registrarManagedName,
   });
@@ -35,7 +40,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -48,7 +53,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -63,7 +68,7 @@ export default function ({ registrarManagedName, namespace }: PonderENSPluginHan
         args: {
           from,
           to,
-          labelhash: tokenIdToLabelhash(tokenId),
+          labelHash: tokenIdToLabelHash(tokenId),
         },
       },
     });

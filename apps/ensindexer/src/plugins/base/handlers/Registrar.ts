@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import { type Labelhash } from "@ensnode/utils";
+import { type LabelHash } from "@ensnode/utils";
 import { makeSubnode, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { decodeEventLog, namehash, zeroAddress } from "viem";
 
@@ -16,7 +16,7 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
  * subname of base.eth that was registered.
  * https://github.com/base/basenames/blob/1b5c1ad/src/L2/RegistrarController.sol#L488
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
 export default function ({
   pluginName,
@@ -30,6 +30,7 @@ export default function ({
     handleNameRenewed,
     handleNameTransferred,
   } = makeRegistrarHandlers({
+    pluginName,
     eventIdPrefix: pluginName,
     registrarManagedName,
   });
@@ -44,7 +45,7 @@ export default function ({
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -57,7 +58,7 @@ export default function ({
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -70,7 +71,7 @@ export default function ({
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -80,7 +81,7 @@ export default function ({
     // base.eth's BaseRegistrar uses `id` instead of `tokenId`
     const { id: tokenId, from, to } = event.args;
 
-    const labelhash = tokenIdToLabelhash(tokenId);
+    const labelHash = tokenIdToLabelHash(tokenId);
 
     if (event.args.from === zeroAddress) {
       // Each domain must reference an account of its owner,
@@ -96,7 +97,7 @@ export default function ({
       await context.db
         .insert(schema.domain)
         .values({
-          id: makeSubnode(labelhash, registrarManagedNode),
+          id: makeSubnode(labelHash, registrarManagedNode),
           ownerId: to,
           createdAt: event.block.timestamp,
         })
@@ -106,7 +107,7 @@ export default function ({
 
     await handleNameTransferred({
       context,
-      event: { ...event, args: { from, to, labelhash } },
+      event: { ...event, args: { from, to, labelHash } },
     });
   });
 
