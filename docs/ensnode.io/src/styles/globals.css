@@ -50,8 +50,8 @@
   width: fit-content;
 }
 
-@media screen and (min-width: 800px){
-  button[aria-label="Search"]{
+@media screen and (min-width: 800px) {
+  button[aria-label="Search"] {
     width: 30vw;
   }
 }
