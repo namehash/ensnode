@@ -9,8 +9,8 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
- * Ethereum mainnet, a NFT is minted that tokenizes ownership of the registration. The minted NFT
- * will be assigned a unique tokenId represented as uint256(labelhash(label)) where label is the
+ * Ethereum mainnet, an ERC721 NFT is minted that tokenizes ownership of the registration. The minted NFT
+ * will be assigned a unique tokenId which is uint256(labelhash(label)) where label is the
  * direct subname of .eth that was registered.
  * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/ethregistrar/ETHRegistrarController.sol#L215
  */

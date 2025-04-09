@@ -11,7 +11,7 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of linea.eth are registered through the linea.eth ETHRegistrarController
- * contract on Linea a NFT is minted that tokenizes ownership of the registration. The minted NFT
+ * contract on Linea, an ERC721 NFT is minted that tokenizes ownership of the registration. The minted NFT
  * will be assigned a unique tokenId represented as uint256(labelhash(label)) where label is the
  * direct subname of linea.eth that was registered.
  * https://github.com/Consensys/linea-ens/blob/3a4f02f/packages/linea-ens-contracts/contracts/ethregistrar/ETHRegistrarController.sol#L447

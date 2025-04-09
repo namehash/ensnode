@@ -10,14 +10,13 @@ import { hasNullByte, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { EventIdPrefix } from "@/lib/types";
 
-// NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
-// contract on the chain that emits an event with the relevant signatures, which may or may not
-// actually be a contract intended for use with ENS as a Resolver. because of this as well, each
-// event could be the first event the indexer has seen for this contract (and its Resolver id) and
-// therefore needs not assume a Resolver entity already exists
-
 /**
  * makes a set of shared handlers for Resolver contracts
+ *
+ * NOTE: Both the subgraph and this indexer use upserts in this file since a 'Resolver' can be any
+ * contract that emits events with the relevant signatures. The contract may not necessarily be
+ * intended for use with ENS as a Resolver. Each event could be the first one seen for a contract
+ * and its Resolver ID, so we cannot assume a Resolver entity exists.
  *
  * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
  */

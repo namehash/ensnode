@@ -49,7 +49,7 @@ export const activate = activateHandlers({
   namespace,
   handlers: [
     import("./handlers/Registry"),
-    import("./handlers/EthRegistrar"),
+    import("./handlers/Registrar"),
     import("./handlers/Resolver"),
     import("./handlers/NameWrapper"),
   ],
