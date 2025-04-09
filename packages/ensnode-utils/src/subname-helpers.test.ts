@@ -1,9 +1,19 @@
-import { IntegerOutOfRangeError, hexToBytes, labelhash, namehash, toBytes, zeroHash } from "viem";
+import {
+  Address,
+  IntegerOutOfRangeError,
+  hexToBytes,
+  labelhash,
+  namehash,
+  toBytes,
+  zeroHash,
+} from "viem";
 import { describe, expect, it } from "vitest";
+
 import {
   decodeDNSPacketBytes,
   isLabelIndexable,
   makeSubnodeNamehash,
+  maybeHealLabelByReverseAddress,
   uint256ToHex32,
 } from "./subname-helpers";
 
@@ -73,5 +83,51 @@ describe("makeSubnodeNamehash", () => {
     expect(makeSubnodeNamehash(namehash("base.eth"), labelhash("test🚀"))).toBe(
       namehash("test🚀.base.eth"),
     );
+  });
+});
+
+describe("labelByReverseAddress", () => {
+  const address: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+  const reverseAddressSubname = "d8da6bf26964af9d7eed9e03e53415d37aa96045";
+
+  const validArgs = {
+    labelHash: labelhash(reverseAddressSubname),
+    maybeReverseAddress: address,
+  };
+
+  describe("arguments validation", () => {
+    it("should throw if sender address is not a valid EVM address", () => {
+      expect(() =>
+        maybeHealLabelByReverseAddress({
+          ...validArgs,
+          maybeReverseAddress: "0x123",
+        }),
+      ).toThrowError(/Invalid reverse address/i);
+    });
+
+    it("should throw if labelhash is not a valid Labelhash", () => {
+      expect(() =>
+        maybeHealLabelByReverseAddress({
+          ...validArgs,
+          labelHash: "0x123",
+        }),
+      ).toThrowError(/Invalid labelHash/i);
+    });
+  });
+
+  describe("label healing", () => {
+    it("should return null if the label cannot be healed", () => {
+      const notMatchingLabelhash = labelhash("test.eth");
+      expect(
+        maybeHealLabelByReverseAddress({
+          ...validArgs,
+          labelHash: notMatchingLabelhash,
+        }),
+      ).toBe(null);
+    });
+
+    it("should return the label if the label can be healed", () => {
+      expect(maybeHealLabelByReverseAddress(validArgs)).toBe(reverseAddressSubname);
+    });
   });
 });

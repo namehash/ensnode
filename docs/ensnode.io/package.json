@@ -9,7 +9,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "lint": "biome check --write"
+    "lint": "biome check --write",
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "@astrojs/react": "catalog:",
@@ -27,6 +28,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sharp": "^0.33.5",
+    "starlight-llms-txt": "^0.5.0",
     "starlight-sidebar-topics": "^0.4.1",
     "tailwindcss": "3.4.13"
   }

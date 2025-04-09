@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { labelByHash } from "@/lib/graphnode-helpers";
-import type { Labelhash } from "@ensnode/utils/types";
+import type { Labelhash } from "@ensnode/utils";
 
 describe("labelByHash", () => {
   it("heals a valid known labelhash", async () => {
