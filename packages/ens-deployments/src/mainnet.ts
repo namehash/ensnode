@@ -5,27 +5,27 @@ import { BaseResolverFilter, ETHResolverFilter, LineaResolverFilter } from "./li
 import type { ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
-import { BaseRegistrar as eth_BaseRegistrar } from "./abis/eth/BaseRegistrar";
-import { EthRegistrarController as eth_EthRegistrarController } from "./abis/eth/EthRegistrarController";
-import { EthRegistrarControllerOld as eth_EthRegistrarControllerOld } from "./abis/eth/EthRegistrarControllerOld";
-import { LegacyPublicResolver as eth_LegacyPublicResolver } from "./abis/eth/LegacyPublicResolver";
-import { NameWrapper as eth_NameWrapper } from "./abis/eth/NameWrapper";
-import { Registry as eth_Registry } from "./abis/eth/Registry";
-import { Resolver as eth_Resolver } from "./abis/eth/Resolver";
+import { BaseRegistrar as eth_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { EthRegistrarController as eth_EthRegistrarController } from "./abis/root/EthRegistrarController";
+import { EthRegistrarControllerOld as eth_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { LegacyPublicResolver as eth_LegacyPublicResolver } from "./abis/root/LegacyPublicResolver";
+import { NameWrapper as eth_NameWrapper } from "./abis/root/NameWrapper";
+import { Registry as eth_Registry } from "./abis/root/Registry";
+import { Resolver as eth_Resolver } from "./abis/root/Resolver";
 
 // ABIs for Basenames Datasource
-import { BaseRegistrar as base_BaseRegistrar } from "./abis/base/BaseRegistrar";
-import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/base/EARegistrarController";
-import { L2Resolver as base_L2Resolver } from "./abis/base/L2Resolver";
-import { RegistrarController as base_RegistrarController } from "./abis/base/RegistrarController";
-import { Registry as base_Registry } from "./abis/base/Registry";
+import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
+import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
+import { L2Resolver as base_L2Resolver } from "./abis/basenames/L2Resolver";
+import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
+import { Registry as base_Registry } from "./abis/basenames/Registry";
 
 // ABIs for Linea Names Datasource
-import { BaseRegistrar as linea_BaseRegistrar } from "./abis/linea/BaseRegistrar";
-import { EthRegistrarController as linea_EthRegistrarController } from "./abis/linea/EthRegistrarController";
-import { NameWrapper as linea_NameWrapper } from "./abis/linea/NameWrapper";
-import { Registry as linea_Registry } from "./abis/linea/Registry";
-import { Resolver as linea_Resolver } from "./abis/linea/Resolver";
+import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
+import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
+import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
+import { Registry as linea_Registry } from "./abis/lineanames/Registry";
+import { Resolver as linea_Resolver } from "./abis/lineanames/Resolver";
 
 /**
  * The Mainnet ENSDeployment configuration

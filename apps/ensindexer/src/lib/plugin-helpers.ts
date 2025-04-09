@@ -137,7 +137,7 @@ export type PonderENSPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
  * An ENS Plugin Handler accepts PonderENSPluginHandlerArgs and registers ponder event handlers.
  */
 export type PonderENSPluginHandler<PLUGIN_NAME extends PluginName> = (
-  options: PonderENSPluginHandlerArgs<PLUGIN_NAME>,
+  args: PonderENSPluginHandlerArgs<PLUGIN_NAME>,
 ) => void;
 
 /**

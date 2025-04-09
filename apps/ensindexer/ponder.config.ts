@@ -9,16 +9,16 @@ import {
 } from "@/lib/ponder-helpers";
 import type { PluginName } from "@/lib/types";
 
-import * as baseEthPlugin from "@/plugins/base/ponder.plugin";
-import * as ethPlugin from "@/plugins/eth/ponder.plugin";
-import * as lineaEthPlugin from "@/plugins/linea/ponder.plugin";
+import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
+import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
+import * as rootPlugin from "@/plugins/root/root.plugin";
 
 ////////
 // First, generate AllPluginConfigs type representing the merged types of each plugin's `config`,
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 
-const ALL_PLUGINS = [ethPlugin, baseEthPlugin, lineaEthPlugin] as const;
+const ALL_PLUGINS = [rootPlugin, basenamesPlugin, lineaNamesPlugin] as const;
 
 type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
   /**
@@ -36,13 +36,14 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
 ////////
 
 // the available PluginNames are those that the selected ENS Deployment defines as available
+// TODO: this encodes a 1:1 assumption between DeploymentDatasources and Plugins that may not be true in the future
 const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as PluginName[];
 
 // filter the set of available plugins by those that are 'active' in the env
 const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);
 
 ////////
-// Next, merge the plugins' configs into a single ponder config and activate their handlers.
+// Merge the plugins' configs into a single ponder config, including injected dependencies.
 ////////
 
 // merge the resulting configs
@@ -70,8 +71,8 @@ START_BLOCK=${globalBlockrange.startBlock || "n/a"}
 END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
 The usage you're most likely interested in is:
-  ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=eth END_BLOCK=x pnpm run start
-which runs just the eth plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
+  ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=root END_BLOCK=x pnpm run start
+which runs just the root plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
 In the future, indexing multiple networks with network-specific blockrange constraints may be possible.
 `,
@@ -79,7 +80,10 @@ In the future, indexing multiple networks with network-specific blockrange const
   }
 }
 
-// load indexing handlers from the active plugins into the runtime
+////////
+// Activate the active plugins' handlers, which register indexing handlers with Ponder.
+////////
+
 await Promise.all(activePlugins.map((plugin) => plugin.activate()));
 
 ////////

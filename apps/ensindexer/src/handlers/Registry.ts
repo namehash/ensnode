@@ -41,7 +41,7 @@ export async function setupRootNode({ context }: { context: Context }) {
       // NOTE: we initialize the root node as migrated because:
       // 1. this matches subgraph's existing behavior, despite the root node not technically being
       //    migrated until the new registry is deployed and
-      // 2. other plugins (base, linea) don't have the concept of migration but defaulting to true
+      // 2. other plugins (Basenames, Linea Names) don't have the concept of migration but defaulting to true
       //    is a reasonable behavior
       isMigrated: true,
     })
