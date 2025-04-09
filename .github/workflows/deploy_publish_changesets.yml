@@ -1,4 +1,4 @@
-name: Release
+name: "Deploy: Publish Changesets"
 
 on:
   workflow_dispatch:
@@ -7,11 +7,6 @@ on:
       - main
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
 
 jobs:
   release:
@@ -44,5 +39,5 @@ jobs:
           title: "chore(release): version apps"
           publish: pnpm release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

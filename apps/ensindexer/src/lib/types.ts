@@ -16,3 +16,13 @@ export type OwnedName = string;
  * and the plugins in this project.
  */
 export type PluginName = "eth" | "base" | "linea";
+
+/**
+ * Describes a ponder-compatible blockrange with optional start and end blocks, minus 'latest' support.
+ * An undefined start block indicates indexing from block 0, and undefined end block indicates
+ * indexing in perpetuity (realtime).
+ *
+ * @docs https://ponder.sh/docs/contracts-and-networks#block-range
+ * i.e. Pick<ContractConfig, 'startBlock' | 'endBlock'>
+ */
+export type Blockrange = { startBlock: number | undefined; endBlock: number | undefined };

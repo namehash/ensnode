@@ -1,4 +1,4 @@
-name: Build ENSRainbow image
+name: "Build: ENSRainbow"
 
 on:
   workflow_dispatch:

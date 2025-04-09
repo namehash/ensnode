@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { DeploymentConfigs } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils/types";
+import type { Node } from "@ensnode/utils";
 import { Hex, decodeEventLog } from "viem";
 
 import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";

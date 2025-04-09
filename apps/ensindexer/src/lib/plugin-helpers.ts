@@ -1,10 +1,10 @@
 import type { SubregistryContractConfig } from "@ensnode/ens-deployments";
+import type { Node } from "@ensnode/utils";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
-import { END_BLOCK, START_BLOCK } from "@/lib/globals";
 import {
-  constrainBlockrange,
+  constrainContractBlockrange,
   getEnsDeploymentChain,
   requestedPluginNames as getRequestedPluginNames,
   rpcEndpointUrl,
@@ -219,8 +219,8 @@ export function networksConfigForChain(chain: Chain) {
 }
 
 /**
- * Defines a `ponder#ContractConfig['network']` given a contract's config, injecting the global
- * start/end blocks to constrain indexing range.
+ * Defines a `ponder#ContractConfig['network']` given a contract's config, constraining its
+ * start/end blocks within the globally defined range.
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryContractConfig>(
   chain: Chain,
@@ -229,7 +229,7 @@ export function networkConfigForContract<CONTRACT_CONFIG extends SubregistryCont
   return {
     [chain.id.toString()]: {
       ...contractConfig,
-      ...constrainBlockrange(START_BLOCK, contractConfig.startBlock, END_BLOCK),
+      ...constrainContractBlockrange(contractConfig.startBlock),
     },
   };
 }
