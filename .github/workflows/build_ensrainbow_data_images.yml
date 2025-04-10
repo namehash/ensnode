@@ -8,9 +8,9 @@ jobs:
     name: Build Data ${{ matrix.data_version }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        includes:
+        include:
           - data_version: v1
             image: ensrainbow-data
           - data_version: v2
