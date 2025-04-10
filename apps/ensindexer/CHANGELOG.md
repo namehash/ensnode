@@ -1,23 +1,26 @@
 # ensindexer
 
-## 0.3.0
+## 0.4.0
+
 ### Minor Changes
 
+- [#553](https://github.com/namehash/ensnode/pull/553) [`2a3d1e6`](https://github.com/namehash/ensnode/commit/2a3d1e6cc74994072cd6afcf081bc58d22dbec7e) Thanks [@shrugs](https://github.com/shrugs)! - test version bump
 
+- [#555](https://github.com/namehash/ensnode/pull/555) [`3c3b091`](https://github.com/namehash/ensnode/commit/3c3b09134f83c636bb921cf883dda28cfe187f2b) Thanks [@shrugs](https://github.com/shrugs)! - test release please ignore
+
+## 0.3.0
+
+### Minor Changes
 
 - [#549](https://github.com/namehash/ensnode/pull/549) [`7c62c92`](https://github.com/namehash/ensnode/commit/7c62c9258de0914db41ce43d4f516a2e1c4c8628) Thanks [@shrugs](https://github.com/shrugs)! - test version bump
 
 ## 0.2.0
+
 ### Minor Changes
-
-
 
 - [#362](https://github.com/namehash/ensnode/pull/362) [`afbc730`](https://github.com/namehash/ensnode/commit/afbc730ff98d72b8118df0d2e7712429f23b8747) Thanks [@tk-o](https://github.com/tk-o)! - ENSIndexer gains ability to heal labels based on reverse addresses.
 
-
 ### Patch Changes
-
-
 
 - [#500](https://github.com/namehash/ensnode/pull/500) [`7122325`](https://github.com/namehash/ensnode/commit/71223254dd8b858b37e7c6e25e128e72c28fa2db) Thanks [@BanaSeba](https://github.com/BanaSeba)! - CI/CD patch
 
@@ -28,29 +31,25 @@
 ## 0.1.4
 
 ## 0.1.3
+
 ### Patch Changes
-
-
 
 - [#470](https://github.com/namehash/ensnode/pull/470) [`8ab269a`](https://github.com/namehash/ensnode/commit/8ab269a38aa6e0d3afcd1d3dfff0e4c85cfcd854) Thanks [@BanaSeba](https://github.com/BanaSeba)! - CI adjustemnt for changeset releases
 
 ## 0.1.2
+
 ### Patch Changes
-
-
 
 - [#461](https://github.com/namehash/ensnode/pull/461) [`25680b9`](https://github.com/namehash/ensnode/commit/25680b97f150fac7e7edec8f8ac5e8a0886de2cb) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Grouped apps for single release
 
 ## 0.0.3
+
 ### Patch Changes
-
-
 
 - [#458](https://github.com/namehash/ensnode/pull/458) [`f1d18a9`](https://github.com/namehash/ensnode/commit/f1d18a942187525982771a33fdafb6e3149e2e01) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Tagging logic for core docker images
 
 ## 0.0.2
+
 ### Patch Changes
-
-
 
 - [#453](https://github.com/namehash/ensnode/pull/453) [`2ba20d0`](https://github.com/namehash/ensnode/commit/2ba20d01c7d752c8eb2dd0577d1597e4b65a9aac) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Changesets integration
