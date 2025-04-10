@@ -98,6 +98,9 @@ importers:
 
   apps/ensadmin:
     dependencies:
+      '@ensnode/ensrainbow-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ensrainbow-sdk
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata

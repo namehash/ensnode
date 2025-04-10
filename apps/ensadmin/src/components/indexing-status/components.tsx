@@ -213,7 +213,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   }
 
   const { data } = indexingStatus;
-  const ensRainbowVersion = ensRainbowViewModel(data.runtime);
+  const ensRainbowVersion = ensRainbowViewModel(data.deps);
 
   return (
     <section className="px-6">

@@ -1,7 +1,7 @@
 import type { Event } from "ponder:registry";
 import { Blockrange } from "@/lib/types";
 import DeploymentConfigs, { type ENSDeploymentChain } from "@ensnode/ens-deployments";
-import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
+import { DEFAULT_ENSRAINBOW_URL, type EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { merge as tsDeepMerge } from "ts-deepmerge";
@@ -194,9 +194,10 @@ export const createEnsRainbowVersionFetcher = () => {
     endpointUrl: new URL(ensRainbowEndpointUrl()),
   });
 
-  return async () => {
+  return async function ensRainbowVersionFetcher(): Promise<EnsRainbow.VersionInfo> {
     try {
       const versionResponse = await client.version();
+
       return {
         version: versionResponse.versionInfo.version,
         schema_version: versionResponse.versionInfo.schema_version,

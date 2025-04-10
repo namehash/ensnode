@@ -76,6 +76,9 @@ app.get(
       name: packageJson.name,
       version: packageJson.version,
     },
+    deps: {
+      ensRainbow: await fetchEnsRainbowVersion(),
+    },
     env: {
       ACTIVE_PLUGINS: requestedPluginNames().join(","),
       DATABASE_SCHEMA: ponderDatabaseSchema(),
@@ -85,7 +88,6 @@ app.get(
     query: {
       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
       prometheusMetrics: fetchPrometheusMetrics,
-      ensRainbowVersion: fetchEnsRainbowVersion,
     },
     publicClients,
   }),

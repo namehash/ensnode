@@ -1,4 +1,3 @@
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
@@ -23,6 +22,9 @@ interface PonderMetadataModule {
     version: string;
   };
 
+  /** Application dependencies info */
+  DepsInfo: Record<string, unknown>;
+
   /** Environment Variables info */
   EnvVars: {
     /** Database schema */
@@ -39,28 +41,28 @@ interface PonderMetadataModule {
 
     /** Network indexing status by chain ID */
     networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
-
-    /** ENSRainbow version info */
-    ensRainbow?: EnsRainbow.VersionInfo;
   };
 }
 
 export type MetadataMiddlewareResponse = PonderMetadataMiddlewareResponse<
   PonderMetadataModule["AppInfo"],
+  PonderMetadataModule["DepsInfo"],
   PonderMetadataModule["EnvVars"],
   PonderMetadataModule["RuntimeInfo"]
 >;
 
 export function ponderMetadata<
   AppInfo extends PonderMetadataModule["AppInfo"],
+  DepsInfo extends PonderMetadataModule["DepsInfo"],
   EnvVars extends PonderMetadataModule["EnvVars"],
 >({
   app,
+  deps,
   db,
   env,
   query,
   publicClients,
-}: PonderMetadataMiddlewareOptions<AppInfo, EnvVars>): MiddlewareHandler {
+}: PonderMetadataMiddlewareOptions<AppInfo, DepsInfo, EnvVars>): MiddlewareHandler {
   return async function ponderMetadataMiddleware(ctx) {
     const indexedChainIds = Object.keys(publicClients).map(Number);
 
@@ -158,27 +160,17 @@ export function ponderMetadata<
       console.error("Failed to fetch ponder metadata", error);
     }
 
-    // fetch ENSRainbow version if available
-    let ensRainbowVersionInfo = undefined;
-    if (query.ensRainbowVersion) {
-      try {
-        ensRainbowVersionInfo = await query.ensRainbowVersion();
-      } catch (error) {
-        console.error("Failed to fetch ENSRainbow version", error);
-      }
-    }
-
     const response = {
       app,
       deps: {
         ponder: formatTextMetricValue(metrics.getLabel("ponder_version_info", "version")),
         nodejs: formatTextMetricValue(metrics.getLabel("nodejs_version_info", "version")),
+        ...deps,
       },
       env,
       runtime: {
         codebaseBuildId: formatTextMetricValue(ponderAppBuildId),
         networkIndexingStatusByChainId,
-        ensRainbow: ensRainbowVersionInfo,
       },
     } satisfies MetadataMiddlewareResponse;
 

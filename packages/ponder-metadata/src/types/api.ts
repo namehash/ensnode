@@ -1,16 +1,22 @@
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 
 import type { BlockInfo } from "./common";
 
 export type PonderEnvVarsInfo = Record<string, unknown>;
-export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends PonderEnvVarsInfo> {
+export interface PonderMetadataMiddlewareOptions<
+  AppInfo,
+  DepsInfo extends Record<string, unknown>,
+  EnvVars extends PonderEnvVarsInfo,
+> {
   /** Database access object (readonly Drizzle) */
   db: ReadonlyDrizzle<Record<string, unknown>>;
 
   /** Application info */
   app: AppInfo;
+
+  /** Application dependencies info */
+  deps: DepsInfo;
 
   /** Environment settings info */
   env: EnvVars;
@@ -22,9 +28,6 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
 
     /** Fetches the first block do be indexed for a requested chain ID */
     firstBlockToIndexByChainId(chainId: number, publicClient: PublicClient): Promise<BlockInfo>;
-
-    /** Fetches ENSRainbow version information */
-    ensRainbowVersion?(): Promise<EnsRainbow.VersionInfo>;
   };
 
   /** Public clients for each blockchain network fetching data */
@@ -33,6 +36,7 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
 
 export interface PonderMetadataMiddlewareResponse<
   AppInfo,
+  DepsInfo extends Record<string, unknown>,
   EnvVarsInfo extends PonderEnvVarsInfo,
   RuntimeInfo,
 > {
@@ -46,7 +50,7 @@ export interface PonderMetadataMiddlewareResponse<
 
     /** Node.js runtime version */
     nodejs: string;
-  };
+  } & DepsInfo;
 
   /** Environment settings info */
   env: EnvVarsInfo;

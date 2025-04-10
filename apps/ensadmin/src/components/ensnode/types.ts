@@ -1,4 +1,5 @@
 import type { ENSDeploymentChain, ENSDeploymentConfig } from "@ensnode/ens-deployments";
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
 
 /**
@@ -12,7 +13,12 @@ export namespace EnsNode {
   /**
    * The status of the ENS node.
    */
-  export interface Metadata extends Omit<PonderMetadata.MetadataMiddlewareResponse, "env"> {
+  export interface Metadata extends PonderMetadata.MetadataMiddlewareResponse {
+    /** Application dependencies info */
+    deps: PonderMetadata.MetadataMiddlewareResponse["deps"] & {
+      ensRainbow: EnsRainbow.VersionInfo;
+    };
+
     // override the `env` field to include the fields required by the ENSAdmin client
     env: {
       ACTIVE_PLUGINS: Array<keyof ENSDeploymentConfig>;
