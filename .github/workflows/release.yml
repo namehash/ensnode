@@ -58,5 +58,5 @@ jobs:
 
       # - name: Create Github Release
       #   if: ${{ steps.changesets.outputs.hasChangesets }}
-            # - name: Create Github Release
-            #   if: ${{ steps.changesets.outputs.hasChangesets }}
+      #   run: |
+      #     gh release create
