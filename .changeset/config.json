@@ -11,5 +11,5 @@
     "version": true,
     "tag": true
   },
-  "ignore": ["@docs/ensnode", "@docs/ensrainbow", "@ensnode/shared-configs"]
+  "ignore": ["@docs/ensnode", "@docs/ensrainbow"]
 }
