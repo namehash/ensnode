@@ -364,6 +364,9 @@ importers:
       '@astrojs/tailwind':
         specifier: 'catalog:'
         version: 6.0.0(astro@5.2.3(@types/node@22.13.9)(idb-keyval@6.2.1)(jiti@2.4.2)(lightningcss@1.29.1)(rollup@4.31.0)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0))(tailwindcss@3.4.13(ts-node@10.9.2(@types/node@22.13.9)(typescript@5.7.3)))(ts-node@10.9.2(@types/node@22.13.9)(typescript@5.7.3))
+      '@fontsource/inter':
+        specifier: ^5.2.5
+        version: 5.2.5
       '@namehash/namekit-react':
         specifier: 'catalog:'
         version: 0.12.0(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
@@ -1299,6 +1302,9 @@ packages:
 
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
+
+  '@fontsource/inter@5.2.5':
+    resolution: {integrity: sha512-kbsPKj0S4p44JdYRFiW78Td8Ge2sBVxi/PIBwmih+RpSXUdvS9nbs1HIiuUSPtRMi14CqLEZ/fbk7dj7vni1Sg==}
 
   '@graphiql/react@0.28.2':
     resolution: {integrity: sha512-6PE2Ff9dXpyQMHy3oKzCjT738kY2+wdQ4Xce8+1K+G2yMGZ716Fo0i4vW3S6ErHVI4S/C76gFTQlv/pzxU5ylg==}
@@ -8458,6 +8464,8 @@ snapshots:
       tabbable: 6.2.0
 
   '@floating-ui/utils@0.2.9': {}
+
+  '@fontsource/inter@5.2.5': {}
 
   '@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
