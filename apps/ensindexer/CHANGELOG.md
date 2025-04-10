@@ -1,5 +1,21 @@
 # ensindexer
 
+## 0.7.0
+
+### Minor Changes
+
+- [#569](https://github.com/namehash/ensnode/pull/569) [`a5dee9b`](https://github.com/namehash/ensnode/commit/a5dee9b27f6953d0367f36dee1dab4cd1fccabb7) Thanks [@shrugs](https://github.com/shrugs)! - test bump
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.7.0
+  - @ensnode/utils@0.7.0
+  - @ensnode/ensrainbow-sdk@0.7.0
+  - @ensnode/ponder-metadata@0.7.0
+  - @ensnode/ponder-schema@0.7.0
+  - @ensnode/ponder-subgraph@0.7.0
+
 ## 0.6.0
 
 ### Patch Changes
