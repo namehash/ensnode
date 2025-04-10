@@ -14,23 +14,23 @@ jobs:
       matrix:
         include:
           # ensindexer
-          - dockerfile_path: apps/ensindexer/Dockerfile
-            image_name: ghcr.io/${{ github.repository }}/ensindexer
+          - dockerfile: apps/ensindexer/Dockerfile
+            image: ghcr.io/${{ github.repository }}/ensindexer
           # ensadmin
-          - dockerfile_path: apps/ensadmin/Dockerfile
-            image_name: ghcr.io/${{ github.repository }}/ensadmin
+          - dockerfile: apps/ensadmin/Dockerfile
+            image: ghcr.io/${{ github.repository }}/ensadmin
           # ensrainbow v1
-          - dockerfile_path: apps/ensrainbow/Dockerfile
-            image_name: ghcr.io/${{ github.repository }}/ensrainbow
-            ensrainbow_data_image_name: ensrainbow-data
+          - dockerfile: apps/ensrainbow/Dockerfile
+            image: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image: ensrainbow-data
           # ensrainbow v2
-          - dockerfile_path: apps/ensrainbow/Dockerfile
-            image_name: ghcr.io/${{ github.repository }}/ensrainbow
-            ensrainbow_data_image_name: ensrainbow-v2-data
+          - dockerfile: apps/ensrainbow/Dockerfile
+            image: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image: ensrainbow-v2-data
           # ensrainbow test
-          - dockerfile_path: apps/ensrainbow/Dockerfile
-            image_name: ghcr.io/${{ github.repository }}/ensrainbow
-            ensrainbow_data_image_name: ensrainbow-test-data
+          - dockerfile: apps/ensrainbow/Dockerfile
+            image: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image: ensrainbow-test-data
 
     steps:
       - name: Checkout repository
@@ -41,9 +41,9 @@ jobs:
       - name: Build & Push Docker image for the ENSAdmin app
         uses: ./.github/actions/build_docker_image
         with:
-          image_name:  ${{ matrix.image_name }}
-          dockerfile_path: ${{ matrix.dockerfile_path }}
+          image:  ${{ matrix.image }}
+          dockerfile: ${{ matrix.dockerfile }}
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
           build_args: |
-            DATA_IMAGE_NAME=${{ matrix.ensrainbow_data_image_name }}
+            DATA_IMAGE_NAME=${{ matrix.ensrainbow_data_image }}
