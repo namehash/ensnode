@@ -1,4 +1,4 @@
-name: "Deploy: Changesets"
+name: "Release: Changesets"
 
 on:
   workflow_dispatch:
