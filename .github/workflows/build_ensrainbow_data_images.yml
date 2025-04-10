@@ -5,18 +5,18 @@ on:
 
 jobs:
   build-and-push:
-    name: ${{ matrix.image }}
+    name: Build Data ${{ matrix.data_version }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: true
       matrix:
         includes:
           - data_version: v1
-            image: ghcr.io/${{ github.repository }}/ensrainbow-data
+            image: ensrainbow-data
           - data_version: v2
-            image: ghcr.io/${{ github.repository }}/ensrainbow-v2-data
+            image: ensrainbow-v2-data
           - data_version: test
-            image: ghcr.io/${{ github.repository }}/ensrainbow-test2-data
+            image: ensrainbow-test-data
 
     steps:
       - name: Checkout repository
@@ -32,7 +32,7 @@ jobs:
       - name: Build & Push
         uses: ./.github/actions/build_docker_image
         with:
-          image:  ${{ matrix.image }}
+          image: ghcr.io/${{ github.repository }}/${{ matrix.image }}
           dockerfile: apps/ensrainbow/Dockerfile.data
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}

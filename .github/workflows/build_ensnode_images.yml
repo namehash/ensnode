@@ -8,29 +8,24 @@ on:
 
 jobs:
   build-and-push:
-    name: ${{ matrix.image }}
+    name: ${{ matrix.image }} ${{ matrix.ensrainbow_data_image }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
       matrix:
         include:
           # ensindexer
-          - dockerfile: apps/ensindexer/Dockerfile
-            image: ghcr.io/${{ github.repository }}/ensindexer
+          - app_name: ensindexer
           # ensadmin
-          - dockerfile: apps/ensadmin/Dockerfile
-            image: ghcr.io/${{ github.repository }}/ensadmin
+          - app_name: ensadmin
           # ensrainbow v1
-          - dockerfile: apps/ensrainbow/Dockerfile
-            image: ghcr.io/${{ github.repository }}/ensrainbow
+          - app_name: ensrainbow
             ensrainbow_data_image: ensrainbow-data
           # ensrainbow v2
-          - dockerfile: apps/ensrainbow/Dockerfile
-            image: ghcr.io/${{ github.repository }}/ensrainbow
+          - app_name: ensrainbow
             ensrainbow_data_image: ensrainbow-v2-data
           # ensrainbow test
-          - dockerfile: apps/ensrainbow/Dockerfile
-            image: ghcr.io/${{ github.repository }}/ensrainbow
+          - app_name: ensrainbow
             ensrainbow_data_image: ensrainbow-test-data
 
     steps:
@@ -42,8 +37,8 @@ jobs:
       - name: Build & Push
         uses: ./.github/actions/build_docker_image
         with:
-          image:  ${{ matrix.image }}
-          dockerfile: ${{ matrix.dockerfile }}
+          image: ghcr.io/${{ github.repository }}/${{ matrix.app_name }}
+          dockerfile: apps/${{ matrix.app_name }}/Dockerfile
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
           build_args: |
