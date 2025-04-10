@@ -1,5 +1,23 @@
 # ensindexer
 
+## 0.2.0
+### Minor Changes
+
+
+
+- [#362](https://github.com/namehash/ensnode/pull/362) [`afbc730`](https://github.com/namehash/ensnode/commit/afbc730ff98d72b8118df0d2e7712429f23b8747) Thanks [@tk-o](https://github.com/tk-o)! - ENSIndexer gains ability to heal labels based on reverse addresses.
+
+
+### Patch Changes
+
+
+
+- [#500](https://github.com/namehash/ensnode/pull/500) [`7122325`](https://github.com/namehash/ensnode/commit/71223254dd8b858b37e7c6e25e128e72c28fa2db) Thanks [@BanaSeba](https://github.com/BanaSeba)! - CI/CD patch
+
+- Updated dependencies [[`afbc730`](https://github.com/namehash/ensnode/commit/afbc730ff98d72b8118df0d2e7712429f23b8747)]:
+  - @ensnode/utils@0.2.0
+  - @ensnode/ensrainbow-sdk@0.1.0
+
 ## 0.1.4
 
 ## 0.1.3
