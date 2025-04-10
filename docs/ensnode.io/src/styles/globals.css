@@ -4,7 +4,7 @@
 
 :root,
 :root[data-theme="light"] {
-  --sl-font: "Inter Variable", sans-serif;
+  --sl-font: "Inter", sans-serif;
 
   --sl-color-accent-low: #cee1e8;
   --sl-color-accent: #0080bc;
