@@ -1,0 +1,59 @@
+name: "Release: Changesets"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+# only one changeset workflow running per branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Changesets
+    if: github.repository == 'namehash/ensnode'
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Upsert Release PR
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          commit: "chore(release): version apps"
+          title: "Release New Version"
+          createGithubReleases: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Log Published Packages
+        if: steps.changesets.outputs.publishedPackages
+        run: |
+          echo "Published packages: ${{ steps.changesets.outputs.publishedPackages }}"
+
+      - name: Create GitHub Release
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: |
+          gh release create --generate-notes
