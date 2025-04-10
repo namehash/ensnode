@@ -7,7 +7,8 @@ on:
       - 'v[0-9]*'
 
 jobs:
-  ensnode-build-and-push:
+  build-and-push:
+    name: ${{ matrix.image }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
@@ -38,7 +39,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Build & Push Docker image for the ENSAdmin app
+      - name: Build & Push
         uses: ./.github/actions/build_docker_image
         with:
           image:  ${{ matrix.image }}

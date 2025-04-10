@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  image-build-and-push:
+  build-and-push:
+    name: ${{ matrix.image }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: true
@@ -28,7 +29,7 @@ jobs:
         with:
           tool-cache: true
 
-      - name: Build & Push
+      - name: Build/Push ENSRainbow Data ${{ matrix.data_version }}
         uses: ./.github/actions/build_docker_image
         with:
           image:  ${{ matrix.image }}
