@@ -7,28 +7,33 @@ import { ENSAdminLogoLight } from "../atoms/ENSAdminLogoLight";
         <h1 class="max-w-xl font-semibold leading-tight  text-3xl sm:text-[4rem]">The new multichain indexer for ENSv2</h1>
         <p class="text-base sm:text-xl sm:max-w-[50ch] text-[#4a5c63] font-normal">Multichain indexer for ENS with ENS Subgraph backwards compatibility.</p>
     </div>
-    <div class="w-full flex flex-row flex-nowrap justify-center min-[800px]:justify-start items-center gap-8">
+    <div class="w-full flex flex-col sm:flex-row flex-nowrap justify-center min-[800px]:justify-start items-center gap-8">
+        <a
+                href="/ensnode/"
+                class="sm:hidden block"
+        >
+            <button class="cursor-pointer transition-all duration-200 bg-transparent hover:bg-black/5 button-as-child text-black text-base rounded-lg border-0 font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-2 px-4">
+                Documentation
+            </button>
+        </a>
         <a
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://admin.ensnode.io/"
                 class="no-underline hover:no-underline"
         >
-            <button class="cursor-pointer transition-all duration-200 bg-black hover:bg-[#272727] flex flex-row flex-nowrap justify-center items-center gap-2 rounded-lg pl-2 pr-3 py-2">
+            <button class="button-as-child cursor-pointer transition-all duration-200 bg-black hover:bg-[#272727] flex flex-row flex-nowrap justify-center items-center gap-2 rounded-lg pl-2 pr-3 py-2 text-white whitespace-nowrap text-sm font-semibold leading-5">
                 <ENSAdminLogoLight className="w-10 h-auto" />
-                <div class="flex flex-col flex-nowrap justify-center items-start h-fit w-fit text-white text-sm font-semibold leading-5">
-                    Connect now
-                    <p class="text-xs text-center font-normal leading-5 text-gray-400 w-full">
-                        with ENSAdmin
-                    </p>
-                </div>
+                Connect with ENSAdmin
             </button>
         </a>
         <a
                 href="/ensnode/"
-                class="text-black text-base font-normal underline decoration-transparent hover:decoration-current sm:underline-offset-[4px] sm:transition-all sm:duration-200 sm:hover:underline-offset-[2px]"
+                class="hidden sm:block"
         >
-            Documentation &rarr;
+            <button class="h-[56px]  cursor-pointer transition-all duration-200 bg-transparent hover:bg-black/5 button-as-child text-black text-base rounded-lg border-0 font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-2 px-4">
+                Documentation
+            </button>
         </a>
     </div>
 </div>
