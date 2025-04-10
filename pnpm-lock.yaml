@@ -74,6 +74,7 @@ overrides:
   tsup>esbuild: 0.25.0
   tsx>esbuild: 0.25.0
   vite>esbuild: 0.25.0
+  vite: ^6.2.5
 
 importers:
 
@@ -259,7 +260,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
       ts-deepmerge:
         specifier: ^7.0.2
         version: 7.0.2
@@ -555,7 +556,7 @@ importers:
         version: 4.6.17
       ponder:
         specifier: 'catalog:'
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0)
@@ -570,7 +571,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.9)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
+        version: 0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.9)(hono@4.6.17)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
       viem:
         specifier: 'catalog:'
         version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
@@ -2674,7 +2675,7 @@ packages:
     resolution: {integrity: sha512-SCCPBJtYLdE8PX/7ZQAs1QAZ8Jqwih+0VBLum1EGqmCCQal+MIUqLCzj3ZUy8ufbC0cAM4LRlSTm7IQJwWT4ug==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
-      vite: ^4.2.0 || ^5.0.0 || ^6.0.0
+      vite: ^6.2.5
 
   '@vitest/coverage-v8@3.1.1':
     resolution: {integrity: sha512-MgV6D2dhpD6Hp/uroUoAIvFqA8AuvXEFBC2eepG3WFc1pxTfdk1LEqqkWoWhjz+rytoqrnUUCdf6Lzco3iHkLQ==}
@@ -2692,7 +2693,7 @@ packages:
     resolution: {integrity: sha512-bmpJJm7Y7i9BBELlLuuM1J1Q6EQ6K5Ye4wcyOpOMXMcePYKSIYlpcrCm4l/O6ja4VJA5G2aMJiuZkZdnxlC3SA==}
     peerDependencies:
       msw: ^2.4.9
-      vite: ^5.0.0 || ^6.0.0
+      vite: ^6.2.5
     peerDependenciesMeta:
       msw:
         optional: true
@@ -7055,7 +7056,7 @@ packages:
   vite-tsconfig-paths@4.3.1:
     resolution: {integrity: sha512-cfgJwcGOsIxXOLU/nELPny2/LUD/lcf1IbfyeKTv2bsupVbTH/xpFtdQlBmIP1GEK2CjjLxYhFfB+QODFAx5aw==}
     peerDependencies:
-      vite: '*'
+      vite: ^6.2.5
     peerDependenciesMeta:
       vite:
         optional: true
@@ -7134,7 +7135,7 @@ packages:
   vitefu@1.0.5:
     resolution: {integrity: sha512-h4Vflt9gxODPFNGPwp4zAMZRpZR7eslzwH2c5hn5kNZ5rhnKyRJ50U+yGCdc2IRaBs8O4haIgLNGrV5CrpMsCA==}
     peerDependencies:
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+      vite: ^6.2.5
     peerDependenciesMeta:
       vite:
         optional: true
@@ -7142,7 +7143,7 @@ packages:
   vitefu@1.0.6:
     resolution: {integrity: sha512-+Rex1GlappUyNN6UfwbVZne/9cYC4+R2XDk9xkNXBKMw6HQagdX9PgZ8V2v1WUSK1wfBLp7qbI1+XSNIlB1xmA==}
     peerDependencies:
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+      vite: ^6.2.5
     peerDependenciesMeta:
       vite:
         optional: true
@@ -14122,7 +14123,7 @@ snapshots:
 
   pngjs@5.0.0: {}
 
-  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@20.17.14)(hono@4.6.17)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -14159,7 +14160,7 @@ snapshots:
       terminal-size: 4.0.0
       viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       vite: 5.4.17(@types/node@20.17.14)(lightningcss@1.29.1)
-      vite-node: 1.0.2(@types/node@20.17.14)(lightningcss@1.29.1)
+      vite-node: 1.0.2(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
       vite-tsconfig-paths: 4.3.1(typescript@5.7.3)(vite@5.4.17(@types/node@20.17.14)(lightningcss@1.29.1))
     optionalDependencies:
       typescript: 5.7.3
@@ -14183,6 +14184,7 @@ snapshots:
       - better-sqlite3
       - bun-types
       - expo-sqlite
+      - jiti
       - knex
       - less
       - lightningcss
@@ -14198,9 +14200,11 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+      - tsx
+      - yaml
       - zod
 
-  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.9)(hono@4.6.17)(lightningcss@1.29.1)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2):
+  ponder@0.9.27(@opentelemetry/api@1.7.0)(@types/node@22.13.9)(hono@4.6.17)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -14237,7 +14241,7 @@ snapshots:
       terminal-size: 4.0.0
       viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       vite: 5.4.17(@types/node@22.13.9)(lightningcss@1.29.1)
-      vite-node: 1.0.2(@types/node@22.13.9)(lightningcss@1.29.1)
+      vite-node: 1.0.2(@types/node@22.13.9)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
       vite-tsconfig-paths: 4.3.1(typescript@5.7.3)(vite@5.4.17(@types/node@22.13.9)(lightningcss@1.29.1))
     optionalDependencies:
       typescript: 5.7.3
@@ -14261,6 +14265,7 @@ snapshots:
       - better-sqlite3
       - bun-types
       - expo-sqlite
+      - jiti
       - knex
       - less
       - lightningcss
@@ -14276,6 +14281,8 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+      - tsx
+      - yaml
       - zod
 
   pony-cause@2.1.11: {}
@@ -15759,15 +15766,16 @@ snapshots:
       - utf-8-validate
       - zod
 
-  vite-node@1.0.2(@types/node@20.17.14)(lightningcss@1.29.1):
+  vite-node@1.0.2(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.0
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.17(@types/node@20.17.14)(lightningcss@1.29.1)
+      vite: 6.2.5(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
     transitivePeerDependencies:
       - '@types/node'
+      - jiti
       - less
       - lightningcss
       - sass
@@ -15776,16 +15784,19 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+      - tsx
+      - yaml
 
-  vite-node@1.0.2(@types/node@22.13.9)(lightningcss@1.29.1):
+  vite-node@1.0.2(@types/node@22.13.9)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.0
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.17(@types/node@22.13.9)(lightningcss@1.29.1)
+      vite: 6.2.5(@types/node@22.13.9)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
     transitivePeerDependencies:
       - '@types/node'
+      - jiti
       - less
       - lightningcss
       - sass
@@ -15794,6 +15805,8 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+      - tsx
+      - yaml
 
   vite-node@3.1.1(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0):
     dependencies:
