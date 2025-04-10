@@ -1,7 +1,12 @@
 name: "Build: ENSRainbow test"
 
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Build ENSRainbow-test-data image"]
+    types:
+      - completed
+    branches:
+      - main
   push:
     branches:
       - main
@@ -12,6 +17,9 @@ jobs:
 
   image-build-and-push:
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    # Only run this job if the workflow_run trigger was activated by a successful completion
+    # or if this workflow was triggered by a push event
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout repository

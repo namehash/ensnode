@@ -2,6 +2,9 @@ name: "Build: ENSRainbow-test-data"
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   image-build-and-push:
