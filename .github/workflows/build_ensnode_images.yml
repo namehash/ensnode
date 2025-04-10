@@ -1,32 +1,36 @@
 name: "Build: ENSNode Images"
+
 on:
   workflow_dispatch:
-  release:
-    types: [published]
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+  push:
+    tags:
+      - 'v[0-9]*'
 
 jobs:
   ensnode-build-and-push:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
-      # This workflow will generate 5 runs:
-      # 1. ensindexer image build (1 run)
-      # 2. ensadmin image build (1 run)
-      # 3. ensrainbow image builds with different data images (3 runs):
-      #    - with ensrainbow-data
-      #    - with ensrainbow-test-data
-      #    - with ensrainbow-v2-data
       matrix:
-        ensrainbow_data_image_name: [ensrainbow-data, ensrainbow-test-data, ensrainbow-v2-data]
         include:
+          # ensindexer
           - dockerfile_path: apps/ensindexer/Dockerfile
             image_name: ghcr.io/${{ github.repository }}/ensindexer
+          # ensadmin
           - dockerfile_path: apps/ensadmin/Dockerfile
             image_name: ghcr.io/${{ github.repository }}/ensadmin
+          # ensrainbow v1
           - dockerfile_path: apps/ensrainbow/Dockerfile
             image_name: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image_name: ensrainbow-data
+          # ensrainbow v2
+          - dockerfile_path: apps/ensrainbow/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image_name: ensrainbow-v2-data
+          # ensrainbow test
+          - dockerfile_path: apps/ensrainbow/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image_name: ensrainbow-test-data
 
     steps:
       - name: Checkout repository
