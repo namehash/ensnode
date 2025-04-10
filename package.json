@@ -39,7 +39,8 @@
       "astro>esbuild": "0.25.0",
       "tsup>esbuild": "0.25.0",
       "tsx>esbuild": "0.25.0",
-      "vite>esbuild": "0.25.0"
+      "vite>esbuild": "0.25.0",
+      "vite": "^6.2.5"
     },
     "ignoredBuiltDependencies": [
       "bun"
