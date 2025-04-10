@@ -42,7 +42,6 @@ jobs:
         with:
           commit: "chore(release): version apps"
           title: "Release New Version"
-          version: pnpm version
           publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
