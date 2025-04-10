@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-push:
-    name: ${{ matrix.image }} ${{ matrix.ensrainbow_data_image }}
+    name: ${{ matrix.app_name }} ${{ matrix.ensrainbow_data_image }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
