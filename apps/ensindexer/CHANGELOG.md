@@ -1,5 +1,13 @@
 # ensindexer
 
+## 0.5.0
+
+### Minor Changes
+
+- [#564](https://github.com/namehash/ensnode/pull/564) [`d528b53`](https://github.com/namehash/ensnode/commit/d528b538dddb4751e6b4fe3944789079dc94d328) Thanks [@shrugs](https://github.com/shrugs)! - bump minor
+
+- [#563](https://github.com/namehash/ensnode/pull/563) [`26fac83`](https://github.com/namehash/ensnode/commit/26fac83425194c1a267e58e32a207d70aee991bc) Thanks [@shrugs](https://github.com/shrugs)! - idk man please just work
+
 ## 0.4.0
 
 ### Minor Changes

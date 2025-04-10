@@ -1,5 +1,0 @@
----
-"ensindexer": minor
----
-
-bump minor
