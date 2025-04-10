@@ -1,5 +1,16 @@
 # ensindexer
 
+## 0.4.0
+### Minor Changes
+
+
+
+- [#553](https://github.com/namehash/ensnode/pull/553) [`2a3d1e6`](https://github.com/namehash/ensnode/commit/2a3d1e6cc74994072cd6afcf081bc58d22dbec7e) Thanks [@shrugs](https://github.com/shrugs)! - test version bump
+
+
+
+- [#555](https://github.com/namehash/ensnode/pull/555) [`7f40cc2`](https://github.com/namehash/ensnode/commit/7f40cc26f17017a6214c25dfcd9f1265b75dcb40) Thanks [@shrugs](https://github.com/shrugs)! - test release please ignore
+
 ## 0.3.0
 ### Minor Changes
 
