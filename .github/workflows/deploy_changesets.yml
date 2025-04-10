@@ -1,4 +1,4 @@
-name: "Deploy: Publish Changesets"
+name: "Deploy: Changesets"
 
 on:
   workflow_dispatch:
@@ -6,12 +6,18 @@ on:
     branches:
       - main
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+# only one changeset workflow running per branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
     name: Release
     if: github.repository == 'namehash/ensnode'
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
@@ -35,9 +41,9 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
+          createGithubReleases: false
           commit: "chore(release): version apps"
-          title: "chore(release): version apps"
-          publish: pnpm release
+          title: "Release New Version"
         env:
-          GITHUB_TOKEN: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

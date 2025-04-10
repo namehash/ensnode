@@ -1,0 +1,49 @@
+name: "Build: ENSNode Images"
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v[0-9]*'
+
+jobs:
+  ensnode-build-and-push:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ensindexer
+          - dockerfile_path: apps/ensindexer/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensindexer
+          # ensadmin
+          - dockerfile_path: apps/ensadmin/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensadmin
+          # ensrainbow v1
+          - dockerfile_path: apps/ensrainbow/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image_name: ensrainbow-data
+          # ensrainbow v2
+          - dockerfile_path: apps/ensrainbow/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image_name: ensrainbow-v2-data
+          # ensrainbow test
+          - dockerfile_path: apps/ensrainbow/Dockerfile
+            image_name: ghcr.io/${{ github.repository }}/ensrainbow
+            ensrainbow_data_image_name: ensrainbow-test-data
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build & Push Docker image for the ENSAdmin app
+        uses: ./.github/actions/build_docker_image
+        with:
+          image_name:  ${{ matrix.image_name }}
+          dockerfile_path: ${{ matrix.dockerfile_path }}
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            DATA_IMAGE_NAME=${{ matrix.ensrainbow_data_image_name }}

@@ -1,22 +1,15 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": [
-    "@changesets/changelog-github",
-    { "repo": "namehash/ensnode" }
-  ],
+  "changelog": ["@changesets/changelog-github", { "repo": "namehash/ensnode" }],
   "commit": false,
-  "fixed": [["ensadmin", "ensindexer", "ensrainbow"]],
-  "linked": [],
   "access": "public",
   "baseBranch": "main",
+  "fixed": [["ensindexer", "ensadmin", "ensrainbow"]],
   "updateInternalDependencies": "patch",
   "prettier": false,
   "privatePackages": {
     "version": true,
-    "tag": true 
+    "tag": true
   },
-  "ignore": [
-    "@docs/ensnode",
-    "@docs/ensrainbow"
-  ]
+  "ignore": ["@docs/ensnode", "@docs/ensrainbow"]
 }
