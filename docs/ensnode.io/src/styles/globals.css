@@ -72,6 +72,25 @@
   align-items: center;
 }
 
+@media (min-width: 1484px) {
+  .page {
+    flex-direction: row;
+    max-width: 1484px;
+    margin-inline: auto;
+  }
+
+  nav.sidebar .sidebar-pane {
+    position: sticky;
+    height: calc(100vh - var(--sl-nav-height));
+  }
+
+  div.main-frame {
+    padding-inline-start: initial;
+    flex: 1;
+  }
+}
+
+
 site-search dialog {
   background-color: var(--sl-color-black);
   border-color: var(--sl-color-gray-7);
