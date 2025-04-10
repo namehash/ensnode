@@ -23,6 +23,8 @@
 
 Full Documentation ➡︎ <a href="https://ensnode.io" target="_blank">ensnode.io</a>
 
+[Join us on Telegram](https://t.me/ensnode) to get support, share ideas, and discuss the future of ENSNode.
+
 ## The future of ENS indexing
 
 ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler self-hosted deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace via a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
@@ -104,7 +106,7 @@ NameHash has received generous support from the [ENS DAO](https://ensdao.org/) a
 
 ## Contact Us
 
-Visit our [website](https://namehashlabs.org/) to get in contact.
+Visit our [website](https://namehashlabs.org/) to get in contact, or [Join us on Telegram](https://t.me/ensnode).
 
 ## License
 
