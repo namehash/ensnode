@@ -48,12 +48,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Log Published Packages
-        if: steps.changesets.outputs.publishedPackages
-        run: |
-          echo "Published packages: ${{ steps.changesets.outputs.publishedPackages }}"
-
       - name: Create GitHub Release
         if: steps.changesets.outputs.hasChangesets == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create --generate-notes
