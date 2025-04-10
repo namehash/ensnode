@@ -1,12 +1,12 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": ["@changesets/changelog-github", { "repo": "namehash/ensnode" }],
-  "commit": false,
+  "commit": true,
   "access": "public",
   "baseBranch": "main",
   "fixed": [["ensindexer", "ensadmin", "ensrainbow"]],
   "updateInternalDependencies": "patch",
-  "prettier": false,
+  "prettier": true,
   "privatePackages": {
     "version": true,
     "tag": true

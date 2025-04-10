@@ -38,25 +38,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create Release PR or Publish to NPM
-        id: changesets
         uses: changesets/action@v1
         with:
-          createGithubReleases: false
           commit: "chore(release): version apps"
           title: "Release New Version"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Log Changesets
-        env:
-          A: ${{ steps.changesets.outputs.publishedPackages }}
-          B: ${{ steps.changesets.outputs.hasChangesets }}
-        run: |
-          echo "publishedPackages=${{ env.A }}" >> $GITHUB_OUTPUT
-          echo "hasChangesets=${{ env.B }}" >> $GITHUB_OUTPUT
-
-      # - name: Create Github Release
-      #   if: ${{ steps.changesets.outputs.hasChangesets }}
-      #   run: |
-      #     gh release create

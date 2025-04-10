@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-and-push:
-    name: Build Data ${{ matrix.data_version }}
+    name: ${{ matrix.data_version }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
