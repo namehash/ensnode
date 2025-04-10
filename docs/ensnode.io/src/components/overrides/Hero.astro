@@ -1,21 +1,14 @@
 ---
 import { ENSAdminLogoLight } from "../atoms/ENSAdminLogoLight";
+import { Balancer } from "react-wrap-balancer";
 ---
 
 <div class="not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center min-[800px]:items-start text-center min-[800px]:text-start sm:py-20">
     <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
-        <h1 class="max-w-2xl font-semibold leading-tight  text-3xl sm:text-[4rem]">The new multichain indexer for ENSv2</h1>
-        <p class="text-base sm:text-xl sm:max-w-[50ch] text-[#4a5c63] font-normal">Multichain indexer for ENS with ENS Subgraph backwards compatibility.</p>
+        <h1 class="max-w-[690px] font-semibold leading-tight  text-3xl sm:text-[4rem]">The new multichain indexer for ENSv2</h1>
+        <Balancer as="p" className="max-w-[650px] text-base sm:text-xl text-[#4a5c63] font-normal">Multichain indexer for ENS with ENS&nbsp;Subgraph backwards compatibility.</Balancer>
     </div>
     <div class="w-full flex flex-col sm:flex-row flex-nowrap justify-center min-[800px]:justify-start items-center gap-8">
-        <a
-                href="/ensnode/"
-                class="sm:hidden block"
-        >
-            <button class="cursor-pointer transition-all duration-200 bg-transparent hover:bg-black/5 button-as-child text-black text-lg rounded-lg border-0 font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-3 px-6">
-                Read the docs
-            </button>
-        </a>
         <a
                 target="_blank"
                 rel="noopener noreferrer"
@@ -28,10 +21,9 @@ import { ENSAdminLogoLight } from "../atoms/ENSAdminLogoLight";
             </button>
         </a>
         <a
-                href="/ensnode/"
-                class="hidden sm:block"
+                href="/docs/"
         >
-            <button class="h-16 cursor-pointer transition-all duration-200 bg-transparent hover:bg-black/5 button-as-child text-black rounded-lg border-0 font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-3 px-6 text-lg">
+            <button class="h-16 cursor-pointer transition-all duration-200 bg-white hover:bg-gray-50 border-[#DBDBDB] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] button-as-child text-black rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-3 px-6 text-lg">
                 Read the docs
             </button>
         </a>

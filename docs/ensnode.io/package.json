@@ -28,6 +28,7 @@
     "classcat": "5.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-wrap-balancer": "^1.1.1",
     "sharp": "^0.33.5",
     "starlight-llms-txt": "^0.5.0",
     "starlight-sidebar-topics": "^0.4.1",
