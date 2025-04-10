@@ -90,6 +90,10 @@ function validateResponse(response: EnsNode.Metadata) {
         .join(", ")}`,
     );
   }
+
+  if (typeof response.deps.ensRainbow === "undefined") {
+    throw new Error(`ENSRainbow version not found in the response.`);
+  }
 }
 
 /**

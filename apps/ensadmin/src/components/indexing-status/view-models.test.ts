@@ -17,6 +17,10 @@ describe("View Models", () => {
       const result = ensNodeDepsViewModel({
         nodejs: "v22.14.0",
         ponder: "v0.9.9",
+        ensRainbow: {
+          schema_version: 3,
+          version: "3.1.0",
+        },
       });
 
       expect(result).toEqual([
