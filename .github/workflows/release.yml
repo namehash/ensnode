@@ -55,11 +55,24 @@ jobs:
         with:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
+          # the following jq script expands the `ensrainbow` package into its 3 variants.
+          # TODO: this can be removed once variants are runtime-behavior and not build-behavior and this
+          # script can become: map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
           script: |-
-            map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+            map(
+              if .name == "ensrainbow" then
+                ["ensrainbow-data", "ensrainbow-v2-data", "ensrainbow-test-data"] | map({
+                  "name": $parent.name,
+                  "version": $parent.version,
+                  "ensrainbow_data_image": .
+                })
+              else
+                .
+              end
+            ) | flatten | map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
 
   build-and-push-ensnode:
-    name: ${{ matrix.apps.name }} ${{ matrix.apps.version }}
+    name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
     # if changesets published our npm packages, also build docker images
     needs: release
     if: needs.release.outputs.published == 'true'
@@ -68,21 +81,6 @@ jobs:
       fail-fast: false
       matrix:
         apps: ${{ fromJson(needs.release.outputs.publishedApps) }}
-      # TODO: further matrix ensrainbow
-        # include:
-        #   # ensindexer
-        #   - app_name: ensindexer
-        #   # ensadmin
-        #   - app_name: ensadmin
-        #   # ensrainbow v1
-        #   - app_name: ensrainbow
-        #     ensrainbow_data_image: ensrainbow-data
-        #   # ensrainbow v2
-        #   - app_name: ensrainbow
-        #     ensrainbow_data_image: ensrainbow-v2-data
-        #   # ensrainbow test
-        #   - app_name: ensrainbow
-        #     ensrainbow_data_image: ensrainbow-test-data
 
     steps:
       - name: Checkout repository
