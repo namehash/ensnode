@@ -1,5 +1,17 @@
 # ensrainbow
 
+## 0.17.0
+
+### Minor Changes
+
+- [#593](https://github.com/namehash/ensnode/pull/593) [`0142a51`](https://github.com/namehash/ensnode/commit/0142a51e686dadbcf37a9027734a09876a29c8ad) Thanks [@shrugs](https://github.com/shrugs)! - include ensrainbow variants in build matrix
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.17.0
+  - @ensnode/ensrainbow-sdk@0.17.0
+
 ## 0.16.0
 
 ### Patch Changes
