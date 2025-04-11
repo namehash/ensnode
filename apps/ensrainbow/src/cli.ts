@@ -9,7 +9,9 @@ import { ingestCommand } from "@/commands/ingest-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
+import { serializeCommand, deserializeCommand } from "@/commands/serialize-command";
 import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
+import { SerializationFormat } from "@/utils/serializers/serializer-factory";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
@@ -38,6 +40,19 @@ interface ValidateArgs {
 
 interface PurgeArgs {
   "data-dir": string;
+}
+
+interface SerializeArgs {
+  "input-file": string;
+  "output-file": string;
+  format: string;
+  limit: number;
+}
+
+interface DeserializeArgs {
+  "input-file": string;
+  format: string;
+  limit: number;
 }
 
 export interface CLIOptions {
@@ -134,6 +149,72 @@ export function createCLI(options: CLIOptions = {}) {
       async (argv: ArgumentsCamelCase<PurgeArgs>) => {
         await purgeCommand({
           dataDir: argv["data-dir"],
+        });
+      },
+    )
+    .command(
+      "serialize",
+      "Serialize ENS names from SQL dump into a binary format",
+      (yargs: Argv) => {
+        return yargs
+          .option("input-file", {
+            type: "string",
+            description: "Path to the gzipped SQL dump file",
+            default: join(process.cwd(), "ens_names.sql.gz"),
+          })
+          .option("output-file", {
+            type: "string",
+            description: "Path to the output file",
+            demandOption: true,
+          })
+          .option("format", {
+            type: "string",
+            description: "Serialization format to use",
+            choices: Object.values(SerializationFormat),
+            default: SerializationFormat.MsgPack,
+          })
+          .option("limit", {
+            type: "number",
+            description: "Maximum number of records to process (0 for no limit)",
+            default: 0,
+          });
+      },
+      async (argv: ArgumentsCamelCase<SerializeArgs>) => {
+        await serializeCommand({
+          inputFile: argv["input-file"],
+          outputFile: argv["output-file"],
+          format: argv.format as SerializationFormat,
+          limit: argv.limit > 0 ? argv.limit : undefined,
+        });
+      },
+    )
+    .command(
+      "deserialize",
+      "Deserialize ENS names from a binary format for validation",
+      (yargs: Argv) => {
+        return yargs
+          .option("input-file", {
+            type: "string",
+            description: "Path to the serialized file",
+            demandOption: true,
+          })
+          .option("format", {
+            type: "string",
+            description: "Serialization format to use",
+            choices: Object.values(SerializationFormat),
+            default: SerializationFormat.MsgPack,
+          })
+          .option("limit", {
+            type: "number",
+            description: "Maximum number of records to process (0 for no limit)",
+            default: 0,
+          });
+      },
+      async (argv: ArgumentsCamelCase<DeserializeArgs>) => {
+        await deserializeCommand({
+          inputFile: argv["input-file"],
+          format: argv.format as SerializationFormat,
+          limit: argv.limit > 0 ? argv.limit : undefined,
         });
       },
     )

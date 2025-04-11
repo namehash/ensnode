@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package ensrainbow;
+
+message RainbowRecord {
+  bytes label_hash = 1;
+  string label = 2;
+}
+
+message RainbowRecordCollection {
+  repeated RainbowRecord records = 1;
+} 
