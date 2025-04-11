@@ -1,5 +1,23 @@
 # ensindexer
 
+## 0.15.0
+
+### Minor Changes
+
+- [#590](https://github.com/namehash/ensnode/pull/590) [`b5c352b`](https://github.com/namehash/ensnode/commit/b5c352badd5cecfc85e5674de18e1df251d027a9) Thanks [@shrugs](https://github.com/shrugs)! - build docker images during release
+
+- [#588](https://github.com/namehash/ensnode/pull/588) [`298f8d4`](https://github.com/namehash/ensnode/commit/298f8d4039e93b735bdf7cb43634920a62cdccec) Thanks [@shrugs](https://github.com/shrugs)! - simpler docker version tag parsing
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.15.0
+  - @ensnode/utils@0.15.0
+  - @ensnode/ensrainbow-sdk@0.15.0
+  - @ensnode/ponder-metadata@0.15.0
+  - @ensnode/ponder-schema@0.15.0
+  - @ensnode/ponder-subgraph@0.15.0
+
 ## 0.14.0
 
 ### Minor Changes
