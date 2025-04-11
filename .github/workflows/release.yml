@@ -58,11 +58,12 @@ jobs:
           # the following jq script expands the `ensrainbow` package into its 3 variants.
           # TODO: this can be removed once variants are runtime-behavior and not build-behavior and this
           # script can become: map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+          # TODO: once ensrainbow-v2-data can be built, include '"ensrainbow-v2-data",' in the variants list below
           script: |-
             map(
               if .name == "ensrainbow" then
                 . as $parent
-                | ["ensrainbow-data", "ensrainbow-v2-data", "ensrainbow-test-data"]
+                | ["ensrainbow-data", "ensrainbow-test-data"]
                   | map({
                     "name": $parent.name,
                     "version": $parent.version,
