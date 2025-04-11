@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-subgraph",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "type": "module",
   "description": "A Hono middleware for generating Subgraph-compatible GraphQL schema.",
   "license": "MIT",
