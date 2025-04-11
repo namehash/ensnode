@@ -45,7 +45,7 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   pluginName,
-  // the shared handlers in this plugin manage subdomains of '.linea.eth'
+  // the shared Registrar handler in this plugin indexes direct subnames of '.linea.eth'
   registrarManagedName: "linea.eth",
   namespace,
   handlers: [

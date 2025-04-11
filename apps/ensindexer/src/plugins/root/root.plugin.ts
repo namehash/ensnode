@@ -9,7 +9,7 @@ import {
 } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-// describes indexing behavior for the ENS Root Contracts
+// describes indexing behavior in alignment with the legacy ENS Subgraph
 export const pluginName = PluginName.Root;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
@@ -53,7 +53,7 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   pluginName,
-  // the shared handlers in this plugin manage subdomains of '.eth'
+  // the shared Registrar handler in this plugin indexes direct subnames of '.eth'
   registrarManagedName: "eth",
   namespace,
   handlers: [
