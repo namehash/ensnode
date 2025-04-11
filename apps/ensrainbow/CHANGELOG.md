@@ -1,5 +1,17 @@
 # ensrainbow
 
+## 0.18.0
+
+### Minor Changes
+
+- [#595](https://github.com/namehash/ensnode/pull/595) [`14d9d46`](https://github.com/namehash/ensnode/commit/14d9d46b9789ed76688da940b3548d44f872c2dc) Thanks [@shrugs](https://github.com/shrugs)! - fix variant expansion jq script
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.18.0
+  - @ensnode/ensrainbow-sdk@0.18.0
+
 ## 0.17.0
 
 ### Minor Changes
