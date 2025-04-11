@@ -129,7 +129,9 @@ export const makeRegistrarHandlers = ({
     }: {
       context: Context;
       event: EventWithArgs<{
+        // NOTE: `name` event arg actually represents a `Label`
         name: Label;
+        // NOTE: `label` event arg actually represents a `LabelHash`
         label: LabelHash;
         cost: bigint;
       }>;
@@ -143,7 +145,13 @@ export const makeRegistrarHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ name: Label; label: LabelHash; cost: bigint }>;
+      event: EventWithArgs<{
+        // NOTE: `name` event arg actually represents a `Label`
+        name: Label;
+        // NOTE: `label` event arg actually represents a `LabelHash`
+        label: LabelHash;
+        cost: bigint;
+      }>;
     }) {
       const { name: label, label: labelHash, cost } = event.args;
       await setNamePreimage(context, label, labelHash, cost);

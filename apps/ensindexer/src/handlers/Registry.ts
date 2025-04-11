@@ -89,7 +89,13 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         event,
       }: {
         context: Context;
-        event: EventWithArgs<{ node: Node; label: LabelHash; owner: Address }>;
+        event: EventWithArgs<{
+          // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
+          node: Node;
+          // NOTE: `label` event arg represents a `LabelHash` for the subnode under `node`
+          label: LabelHash;
+          owner: Address;
+        }>;
       }) => {
         const { label: labelHash, node: parentNode, owner } = event.args;
 
