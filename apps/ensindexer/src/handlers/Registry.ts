@@ -92,7 +92,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         event: EventWithArgs<{
           // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
           node: Node;
-          // NOTE: `label` event arg represents a `LabelHash` for the subnode under `node`
+          // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
           label: LabelHash;
           owner: Address;
         }>;
@@ -102,20 +102,20 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         await upsertAccount(context, owner);
 
         // the domain in question is a subdomain of `parentNode`
-        const subnode = makeSubnode(labelHash, parentNode);
-        let domain = await context.db.find(schema.domain, { id: subnode });
+        const node = makeSubnode(labelHash, parentNode);
+        let domain = await context.db.find(schema.domain, { id: node });
 
         // note that we set isMigrated in each branch such that if this domain is being
         // interacted with on the new registry, its migration status is set here
         if (domain) {
           // if the domain already exists, this is just an update of the owner record (& isMigrated)
           domain = await context.db
-            .update(schema.domain, { id: subnode })
+            .update(schema.domain, { id: node })
             .set({ ownerId: owner, isMigrated });
         } else {
           // otherwise create the domain (w/ isMigrated)
           domain = await context.db.insert(schema.domain).values({
-            id: subnode,
+            id: node,
             ownerId: owner,
             parentId: parentNode,
             createdAt: event.block.timestamp,
@@ -160,7 +160,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
 
           // akin to domain.save()
           // via https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
-          await context.db.update(schema.domain, { id: subnode }).set({
+          await context.db.update(schema.domain, { id: node }).set({
             name,
             // NOTE: only update Domain.labelName iff label is healed and valid
             // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
@@ -171,7 +171,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         // garbage collect newly 'empty' domain iff necessary
         // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
-          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, subnode);
+          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
         }
 
         // log DomainEvent
@@ -181,7 +181,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
             ...sharedEventValues(event),
 
             parentDomainId: parentNode,
-            domainId: subnode,
+            domainId: node,
             ownerId: owner,
           })
           .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
