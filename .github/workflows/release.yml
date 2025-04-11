@@ -19,7 +19,7 @@ jobs:
     outputs:
       published: ${{ steps.changesets.outputs.published }}
       publishedApps: ${{ steps.publishedApps.outputs.output }}
-      # [{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]
+      # [{"name":"ensadmin","version":"0.15.0"},{"name":"ensindexer","version":"0.15.0"},{"name":"ensrainbow","version":"0.15.0"}]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -59,14 +59,15 @@ jobs:
             map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
 
   build-and-push-ensnode:
-    name: ${{ matrix.name }} ${{ matrix.version }}
+    name: ${{ matrix.apps.name }} ${{ matrix.apps.version }}
     # if changesets published our npm packages, also build docker images
     needs: release
     if: needs.release.outputs.published == 'true'
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.release.outputs.publishedApps) }}
+      matrix:
+        apps: ${{ fromJson(needs.release.outputs.publishedApps) }}
       # TODO: further matrix ensrainbow
         # include:
         #   # ensindexer
@@ -92,14 +93,14 @@ jobs:
       - name: Build & Push
         uses: ./.github/actions/build_docker_image
         with:
-          image: ghcr.io/${{ github.repository }}/${{ matrix.name }}
-          dockerfile: apps/${{ matrix.name }}/Dockerfile
+          image: ghcr.io/${{ github.repository }}/${{ matrix.apps.name }}
+          dockerfile: apps/${{ matrix.apps.name }}/Dockerfile
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
           build_args: |
-            DATA_IMAGE_NAME=${{ matrix.ensrainbow_data_image }}
+            DATA_IMAGE_NAME=${{ matrix.apps.ensrainbow_data_image }}
           # construct docker tag using the changesets-reported version
           tags: |
-            type=semver,pattern={{version}},value=${{ matrix.version }}
+            type=semver,pattern={{version}},value=${{ matrix.apps.version }}
             type=ref,event=branch
             type=sha
