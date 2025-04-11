@@ -15,8 +15,8 @@ import type { EventIdPrefix } from "@/lib/types";
  *
  * NOTE: Both the subgraph and this indexer use upserts in this file since a 'Resolver' can be any
  * contract that emits events with the relevant signatures. The contract may not necessarily be
- * intended for use with ENS as a Resolver. Each event could be the first one seen for a contract
- * and its Resolver ID, so we cannot assume a Resolver entity exists.
+ * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
+ * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
  *
  * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
  */

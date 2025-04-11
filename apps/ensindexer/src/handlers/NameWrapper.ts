@@ -43,7 +43,7 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
  * makes a set of shared handlers for the NameWrapper contract
  *
  * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
- * @param registrarManagedName the name that the Registry that NameWrapper interacts with manages
+ * @param registrarManagedName the name that the Registrar that NameWrapper interacts with indexes
  */
 export const makeNameWrapperHandlers = ({
   eventIdPrefix,
@@ -129,9 +129,9 @@ export const makeNameWrapperHandlers = ({
       if (!domain) throw new Error("domain is guaranteed to already exist");
 
       // upsert the healed name iff !domain.labelName && label
-      // NOTE: this means that future wraps of a domain with a encoded labelHash in the name
+      // NOTE: this means that future wraps of a domain with an EncodedLabelHash in the name
       //   will _not_ use the newly healed label emitted by the NameWrapper contract, and will
-      //   continue to have an un-healed encoded labelHash in its name field
+      //   continue to have an un-healed EncodedLabelHash in its name field
       // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
       // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
       if (!domain.labelName && label) {
@@ -264,12 +264,14 @@ export const makeNameWrapperHandlers = ({
       context: Context;
       event: EventWithArgs<{ id: bigint; to: Address }>;
     }) {
+      const { id: tokenId, to } = event.args;
+
       await handleTransfer(
         context,
         event,
         makeEventId(registrarManagedName, event.block.number, event.log.logIndex, 0),
-        event.args.id,
-        event.args.to,
+        tokenId,
+        to,
       );
     },
     async handleTransferBatch({
@@ -279,13 +281,15 @@ export const makeNameWrapperHandlers = ({
       context: Context;
       event: EventWithArgs<{ ids: readonly bigint[]; to: Address }>;
     }) {
-      for (const [i, id] of event.args.ids.entries()) {
+      const { ids: tokenIds, to } = event.args;
+
+      for (const [transferIndex, tokenId] of tokenIds.entries()) {
         await handleTransfer(
           context,
           event,
-          makeEventId(registrarManagedName, event.block.number, event.log.logIndex, i),
-          id,
-          event.args.to,
+          makeEventId(registrarManagedName, event.block.number, event.log.logIndex, transferIndex),
+          tokenId,
+          to,
         );
       }
     },

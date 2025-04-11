@@ -10,10 +10,9 @@ export * from "./lib/types";
 /**
  * ENSDeployments maps from an ENSDeploymentChain to an ENSDeployment.
  *
- * Each "ENS deployment" is a single, unified namespace of ENS names with a distinct
- * onchain root Registry but with the capability of spanning from that root Registry
- * across many chains, subregistries, and offchain resources. These additional data sources are
- * called `Datasource`s.
+ * Each "ENS deployment" is a single, unified namespace of ENS names with a distinct onchain root
+ * Registry but with the capability of spanning from that root Registry across many `Datasource`s that
+ * may be distributed across multiple chains and offchain resources.
  *
  * For example, as of 9-Feb-2025 the canonical "ENS deployment" on mainnet includes:
  * - A root Registry on mainnet.

@@ -23,30 +23,27 @@ import { PluginName } from "@ensnode/utils";
  *
  * However, because plugins within ENSIndexer may use the same contract/event names, an additional
  * namespace prefix is required to distinguish between contracts having the same name, with different
- * implementations. The strong typing is helpful and necessary for ponders auto-generated types to apply.
- *
- * @param prefix An arbitrary plugin-specific prefix, generally the plugin's name. Cannot contain
- *   ponder-specific characters ('.', ':')
+ * implementations. The strong typing is helpful and necessary for Ponder's auto-generated types to apply.
  *
  * @example
  * ```ts
- * const rootNamespace = makePluginNamespace("root");
- * const basenamesNamespace = makePluginNamespace("basenames");
+ * const rootNamespace = makePluginNamespace(PluginName.Root);
+ * const basenamesNamespace = makePluginNamespace(PluginName.Basenames);
  *
  * rootNamespace("Registry"); // returns "root/Registry"
  * basenamesNamespace("Registry"); // returns "basenames/Registry"
  * ```
  */
-export function makePluginNamespace<PREFIX extends string>(prefix: PREFIX) {
-  if (/[.:]/.test(prefix)) {
+export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: PLUGIN_NAME) {
+  if (/[.:]/.test(pluginName)) {
     throw new Error("Reserved character: Plugin namespace prefix cannot contain '.' or ':'");
   }
 
   /** Creates a namespaced contract name */
   return function pluginNamespace<CONTRACT_NAME extends string>(
     contractName: CONTRACT_NAME,
-  ): `${PREFIX}/${CONTRACT_NAME}` {
-    return `${prefix}/${contractName}`;
+  ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
+    return `${pluginName}/${contractName}`;
   };
 }
 
@@ -126,7 +123,7 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
 }
 
 /**
- * An PonderENSPlugin's handlers are provided runtime information about their respective plugin.
+ * A PonderENSPlugin's handlers are provided runtime information about their respective plugin.
  */
 export type PonderENSPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
   pluginName: PluginName;
@@ -135,7 +132,7 @@ export type PonderENSPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
 };
 
 /**
- * An ENS Plugin Handler accepts PonderENSPluginHandlerArgs and registers ponder event handlers.
+ * A PonderENSPlugin accepts PonderENSPluginHandlerArgs and registers ponder event handlers.
  */
 export type PonderENSPluginHandler<PLUGIN_NAME extends PluginName> = (
   args: PonderENSPluginHandlerArgs<PLUGIN_NAME>,

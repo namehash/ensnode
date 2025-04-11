@@ -14,7 +14,7 @@ import { Registry as eth_Registry } from "./abis/root/Registry";
 import { Resolver as eth_Resolver } from "./abis/root/Resolver";
 
 /**
- * The ens-test-env ENSDeployment configuration
+ * The ens-test-env ENSDeployment
  *
  * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
  * protocol changes, running deterministic test suites, and local development.

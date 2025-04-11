@@ -14,7 +14,7 @@ import { Registry as eth_Registry } from "./abis/root/Registry";
 import { Resolver as eth_Resolver } from "./abis/root/Resolver";
 
 /**
- * The Sepolia ENSDeployment configuration
+ * The Sepolia ENSDeployment
  */
 export default {
   /**

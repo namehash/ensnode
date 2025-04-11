@@ -28,7 +28,7 @@ import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 import { Resolver as linea_Resolver } from "./abis/lineanames/Resolver";
 
 /**
- * The Mainnet ENSDeployment configuration
+ * The Mainnet ENSDeployment
  */
 export default {
   /**

@@ -7,14 +7,11 @@ export const makeResolverId = (address: Address, node: Node) =>
   [address.toLowerCase(), node].join("-");
 
 /**
- * Makes a cross-registrar unique event ID.
+ * Makes a unique event ID, optionally prefixed to avoid collisions.
+ * See {@link EventIdPrefix} for additional discussion on collisions.
  *
- * The ENS Subgraph indexes events from a single network and constructs event ids like:
- * `${blockNumber}-${logIndex}(-${transferIndex})`. Because ENSIndexer indexes multiple networks,
- * however, event ids can collide between chains, if the blockNumber and logIndex happen to line up.
- * This function allows for an optional prefix, keeping Subgraph-compatible event IDs
- * (produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`) if undefined and
- * ensuring event id uniqueness across plugins if set.
+ * @example With no prefix (subgraph-compat): `${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example With prefix (plugin-scoped): `${prefix}-${blockNumber}-${logIndex}(-${transferIndex})`
  *
  * @param prefix optional prefix
  * @param blockNumber
@@ -35,20 +32,26 @@ export const makeEventId = (
 /**
  * Makes a cross-registrar unique registration ID.
  *
- * The ENS Subgraph, as originally designed, uses a Domain's labelHash as its Registration entity's ID.
- * Because ENSIndexer supports multiple plugins using the shared handlers (modelled after the
- * Subgraph's indexing logic) that may create additional Registration entities, ID collisions must
- * be avoided.
+ * The ENS Subgraph only indexes Registration entities for a single registrar: the registrar for
+ * direct subnames of ".eth". It uses the labelHash of each registered ".eth" subname to
+ * form a unique Registration id.
  *
- * To do so, if the caller identifies as the root plugin, we use the Domain's `labelHash` as
+ * Because ENSIndexer supports indexing multiple Registrar contracts via plugins
+ * (currently using the shared handlers modelled after the Subgraph's indexing logic), however,
+ * additional Registration entities may be created. A unique ID other than labelHash is necessary,
+ * otherwise Registration entities for the same label would collide.
+ *
+ * To avoid collisions, if the caller identifies as the root plugin, we use the Domain's `labelHash` as
  * originally specified. Otherwise, for any other plugin, we use the Domain's `node`, which is
- * certain to avoid collisions.
+ * globally unique within ENS.
  *
- * We intentionally mix `labelHash` and `node` (namehash) values as registration ids: both are
- * keccak256 hashes, so we take advantage of the odds of a collision being practically zero.
+ * We intentionally mix `labelHash` (labelhash) and `node` (namehash) values as registration ids:
+ * both result in keccak256 hashes (the odds of a collision being practically zero) and are derived
+ * differently — the result of `namehash` will never (practically zero) collide with the result of
+ * `labelhash` because `namehash` always includes the recursive hashing of the root node.
  *
  * For the "v1" of ENSIndexer (at a minimum) we want to preserve exact backwards compatibility with
- * Registration IDs issued by the ENS Subgraph. In the future we may abandon exact subgraph
+ * Registration IDs issued by the ENS Subgraph. In the future we may abandon exact subgraph backwards
  * compatibility and use `node` for all Registration IDs.
  *
  * @param pluginName the name of the active plugin issuing the registration
