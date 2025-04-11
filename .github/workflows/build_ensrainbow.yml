@@ -2,12 +2,12 @@ name: "Build: ENSRainbow"
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'ensrainbow@*'
+  release:
+    types: [published]
 
 jobs:
   build-and-push-ensnode:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.release.tag_name, 'ensrainbow@') }}
     name: w/ ${{ matrix.data_image_name }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
