@@ -45,5 +45,7 @@ jobs:
           title: "Release New Version"
           publish: pnpm changeset-publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NOTE: we use the PAT approach to ensure that workflows run in response to the tags created
+          # by changesets
+          GITHUB_TOKEN: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
