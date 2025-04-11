@@ -3,6 +3,7 @@ import schema from "ponder:schema";
 import type { Address } from "viem";
 
 import { makeEventId } from "@/lib/ids";
+import { EventIdPrefix } from "@/lib/types";
 
 export async function upsertAccount(context: Context, address: Address) {
   return context.db.insert(schema.account).values({ id: address }).onConflictDoNothing();
@@ -24,7 +25,7 @@ export async function upsertRegistration(
 
 // factory for shared event values for all event types
 // uses optional `prefix` to ensure distinct event ids across plugins
-export function makeSharedEventValues(prefix: string | undefined) {
+export function makeSharedEventValues(prefix: EventIdPrefix) {
   // simplifies generating the shared event column values from the ponder Event object
   return function sharedEventValues(event: Omit<Event, "args">) {
     return {

@@ -16,7 +16,7 @@ export default function ({
     handleTransferBatch,
     handleTransferSingle,
   } = makeNameWrapperHandlers({
-    eventIdPrefix: undefined, // NOTE: no event id prefix for root plugin
+    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
     registrarManagedName,
   });
 

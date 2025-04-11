@@ -20,7 +20,7 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Ro
     handleTextChanged,
     handleVersionChanged,
   } = makeResolverHandlers({
-    eventIdPrefix: undefined, // NOTE: no event id prefix for root plugin
+    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
   });
 
   ponder.on(namespace("Resolver:AddrChanged"), handleAddrChanged);

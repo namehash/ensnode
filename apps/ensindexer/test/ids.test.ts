@@ -14,8 +14,8 @@ describe("ids", () => {
 
   describe("makeEventId", () => {
     it("should include token id if available", () => {
-      expect(makeEventId(undefined, 123n, 456, 1)).toEqual("123-456-1");
-      expect(makeEventId(undefined, 123n, 456)).toEqual("123-456");
+      expect(makeEventId(null, 123n, 456, 1)).toEqual("123-456-1");
+      expect(makeEventId(null, 123n, 456)).toEqual("123-456");
     });
 
     it("should include prefix when provided", () => {
@@ -23,7 +23,7 @@ describe("ids", () => {
     });
 
     it("should not include prefix if not provided", () => {
-      expect(makeEventId(undefined, 123n, 456)).toEqual("123-456");
+      expect(makeEventId(null, 123n, 456)).toEqual("123-456");
     });
   });
 

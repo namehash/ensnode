@@ -15,9 +15,11 @@ export type RegistrarManagedName = string;
  * An Event Id Prefix is provided by non-root plugins to the shared handlers in order to scope the
  * event ids created by the shared handlers and avoid said cross-chain collisions.
  *
+ * `null` value implies no event id prefix (necessary for subgraph id generation compatibility)
+ *
  * TODO: if we ever discard exact subgraph compatbility, we can use ponder's `event.id` as an event UUID.
  */
-export type EventIdPrefix = string | undefined;
+export type EventIdPrefix = string | null;
 
 /**
  * Describes a ponder-compatible blockrange with optional start and end blocks, minus 'latest' support.
