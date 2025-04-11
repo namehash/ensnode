@@ -1,5 +1,21 @@
 # ensindexer
 
+## 0.16.0
+
+### Minor Changes
+
+- [#591](https://github.com/namehash/ensnode/pull/591) [`b18ee8d`](https://github.com/namehash/ensnode/commit/b18ee8d18e7139d17bae3952a4db8643f6c48c78) Thanks [@shrugs](https://github.com/shrugs)! - use correct matrix format for builds
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.16.0
+  - @ensnode/utils@0.16.0
+  - @ensnode/ensrainbow-sdk@0.16.0
+  - @ensnode/ponder-metadata@0.16.0
+  - @ensnode/ponder-schema@0.16.0
+  - @ensnode/ponder-subgraph@0.16.0
+
 ## 0.15.0
 
 ### Minor Changes
