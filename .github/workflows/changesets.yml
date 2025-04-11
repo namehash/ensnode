@@ -1,4 +1,4 @@
-name: "Deploy: Publish Changesets"
+name: "Release: Changesets"
 
 on:
   workflow_dispatch:
@@ -6,12 +6,18 @@ on:
     branches:
       - main
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+# only one changeset workflow running per branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
-    name: Release
+    name: Changesets
     if: github.repository == 'namehash/ensnode'
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
@@ -31,13 +37,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release PR or Publish to NPM
+      - name: Upsert Release PR
         id: changesets
         uses: changesets/action@v1
         with:
           commit: "chore(release): version apps"
-          title: "chore(release): version apps"
-          publish: pnpm release
+          title: "Release New Version"
+          createGithubReleases: false
         env:
-          GITHUB_TOKEN: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create --generate-notes
