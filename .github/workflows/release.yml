@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Changesets
+    if: github.repository == 'namehash/ensnode'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      publishedApps: ${{ steps.publishedApps.outputs.output }}
+      # [{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PUBLISHING_GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create Release Pull Request or Publish to npm
+        uses: changesets/action@v1
+        id: changesets
+        with:
+          commit: "chore(release): version apps"
+          title: "Release New Version"
+          publish: pnpm changeset-publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Filter Published Packages For Apps
+        uses: cloudposse/github-action-jq@main
+        id: publishedApps
+        with:
+          compact: true
+          input: ${{ steps.changesets.outputs.publishedPackages }}
+          script: |-
+            map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+
+  build-and-push-ensnode:
+    name: ${{ matrix.name }} ${{ matrix.version }}
+    # if changesets published our npm packages, also build docker images
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.release.outputs.publishedApps) }}
+      # TODO: further matrix ensrainbow
+        # include:
+        #   # ensindexer
+        #   - app_name: ensindexer
+        #   # ensadmin
+        #   - app_name: ensadmin
+        #   # ensrainbow v1
+        #   - app_name: ensrainbow
+        #     ensrainbow_data_image: ensrainbow-data
+        #   # ensrainbow v2
+        #   - app_name: ensrainbow
+        #     ensrainbow_data_image: ensrainbow-v2-data
+        #   # ensrainbow test
+        #   - app_name: ensrainbow
+        #     ensrainbow_data_image: ensrainbow-test-data
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build & Push
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.name }}
+          dockerfile: apps/${{ matrix.name }}/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            DATA_IMAGE_NAME=${{ matrix.ensrainbow_data_image }}
+          # construct docker tag using the changesets-reported version
+          tags: |
+            type=semver,pattern={{version}},value=${{ matrix.version }}
+            type=ref,event=branch
+            type=sha

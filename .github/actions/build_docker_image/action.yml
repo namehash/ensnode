@@ -10,6 +10,10 @@ inputs:
     description: 'Target Dockerfile path'
     required: true
 
+  tags:
+    description: 'Docker Image Tags'
+    required: false
+
   registry_user:
     description: 'Username for Docker registry'
     required: true
@@ -30,15 +34,7 @@ runs:
       uses: docker/metadata-action@v5
       with:
         images: ${{ inputs.image }}
-        # changesets publishes a release with tag like ensindexer@1.1.1, but we want the semver tag to be
-        # just 1.1.1, so we use the built-in 'match' tag type to parse the version
-        # https://github.com/docker/metadata-action?tab=readme-ov-file#typematch
-        tags: |
-          type=match,pattern=\d.\d.\d
-          type=match,pattern=\d.\d
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha
+        tags: ${{ inputs.tags }}
 
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
