@@ -1,0 +1,12 @@
+namespace ensrainbow;
+
+table RainbowRecord {
+  label_hash:[ubyte];
+  label:string;
+}
+
+table RainbowRecordCollection {
+  records:[RainbowRecord];
+}
+
+root_type RainbowRecordCollection; 
