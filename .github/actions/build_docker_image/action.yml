@@ -10,10 +10,6 @@ inputs:
     description: 'Target Dockerfile path'
     required: true
 
-  tag:
-    description: 'Docker image version tag'
-    required: false
-
   registry_user:
     description: 'Username for Docker registry'
     required: true
@@ -38,8 +34,11 @@ runs:
         # just 1.1.1, so we use the built-in 'match' tag type to parse the version
         # https://github.com/docker/metadata-action?tab=readme-ov-file#typematch
         tags: |
+          type=match,pattern=\d.\d.\d
+          type=match,pattern=\d.\d
           type=ref,event=branch
-          type=match,pattern=\w+@(.*),group=1
+          type=ref,event=pr
+          type=sha
 
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v3
