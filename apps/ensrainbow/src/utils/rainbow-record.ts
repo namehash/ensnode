@@ -1,5 +1,5 @@
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
-import type { Labelhash } from "@ensnode/utils";
+import type { LabelHash } from "@ensnode/utils";
 import { ByteArray } from "viem";
 
 export interface RainbowRecord {
@@ -10,8 +10,8 @@ export interface RainbowRecord {
 /**
  * Parses a line from the rainbow table SQL dump into a RainbowRecord.
  *
- * @param line A line from the rainbow table SQL dump in the format "labelhash\tlabel"
- * @returns A RainbowRecord containing the parsed labelhash and label
+ * @param line A line from the rainbow table SQL dump in the format "labelHash\tlabel"
+ * @returns A RainbowRecord containing the parsed labelHash and label
  * @throws Error if the line format is invalid
  */
 export function buildRainbowRecord(line: string): RainbowRecord {
@@ -23,10 +23,7 @@ export function buildRainbowRecord(line: string): RainbowRecord {
   }
 
   const [maybeLabelHash, label] = parts;
-  const labelHash = labelHashToBytes(maybeLabelHash as Labelhash);
+  const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
 
-  return {
-    labelHash,
-    label,
-  };
+  return { labelHash, label };
 }

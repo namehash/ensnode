@@ -1,6 +1,5 @@
 import {
   Address,
-  type Hex,
   bytesToHex,
   bytesToString,
   concat,
@@ -12,19 +11,27 @@ import {
 } from "viem";
 
 import { labelhash } from "viem/ens";
-import type { Labelhash } from "./types";
-
-export const makeSubnodeNamehash = (node: Hex, label: Hex) => keccak256(concat([node, label]));
-
-// normalize address to match the format used for addr.reverse subnames
-// as per https://docs.ens.domains/resolution/names#reverse-nodes
-const normalizedAddressDigits = (address: Address): string => address.slice(2).toLowerCase();
+import type { Label, LabelHash, Name, Node } from "./types";
 
 /**
- * Attempt to heal the labelhash of an addr.reverse subname using an address that might be related to the subname.
+ * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce
+ * the `node` of a given subdomain. Note that the order of the arguments is 'reversed' (as compared to
+ * the actual concatenation) in order to improve readability (i.e. read as [labelHash].[node]).
+ */
+export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
+  keccak256(concat([node, labelHash]));
+
+/**
+ * Gets the Label used for subnames of "addr.reverse" used for reverse lookups of `address` as per
+ * https://docs.ens.domains/resolution/names#reverse-nodes
+ */
+const addrReverseLabel = (address: Address): Label => address.slice(2).toLowerCase();
+
+/**
+ * Attempt to heal the labelHash of an addr.reverse subname using an address that might be related to the subname.
  *
  * @throws if maybeReverseAddress is not a valid Address
- * @throws if labelhash is not a valid Labelhash
+ * @throws if labelHash is not a valid Labelhash
  *
  * @returns the original label if healed, otherwise null
  */
@@ -36,7 +43,7 @@ export const maybeHealLabelByReverseAddress = ({
   maybeReverseAddress: Address;
 
   /** The labelhash of the addr.reverse subname */
-  labelHash: Labelhash;
+  labelHash: LabelHash;
 }): string | null => {
   // check if required arguments are valid
   if (!isAddress(maybeReverseAddress)) {
@@ -52,9 +59,9 @@ export const maybeHealLabelByReverseAddress = ({
   }
 
   // derive the assumed label from the normalized address
-  const assumedLabel = normalizedAddressDigits(maybeReverseAddress);
+  const assumedLabel = addrReverseLabel(maybeReverseAddress);
 
-  // if labelhash of the assumed label matches the provided labelhash, heal
+  // if labelHash of the assumed label matches the provided labelHash, heal
   if (labelhash(assumedLabel) === labelHash) return assumedLabel;
 
   // otherwise, healing did not succeed
@@ -65,7 +72,7 @@ export const maybeHealLabelByReverseAddress = ({
 /**
  * Encodes a uint256 bigint as hex string sized to 32 bytes.
  * Uses include, in the context of ENS, decoding the uint256-encoded tokenId of NFT-issuing contracts
- * into Node or Labelhash, which is a common behavior in the ENS ecosystem.
+ * into Node or LabelHash, which is a common behavior in the ENS ecosystem.
  * (see NameWrapper, ETHRegistrarController)
  */
 export const uint256ToHex32 = (num: bigint) => toHex(num, { size: 32 });
@@ -88,17 +95,17 @@ export const uint256ToHex32 = (num: bigint) => toHex(num, { size: 32 });
  *
  * Some indexed labels are "unknown" (or "unindexable") but still require a
  * representation within indexed data. For this purpose, a special "unknown
- * label" format is defined that represents these labels in the format of
- * "[{labelhash}]" where {labelhash} is the labelhash of the unknown label.
+ * label" format is defined (an EncodedLabelHash) that represents these labels in the format of
+ * "[{labelHash}]" where {labelHash} is the labelHash of the unknown label.
  * When an indexed label is in this format it is necessary to distinguish an
- * "unknown" label containing a labelhash, from an unnormalized label literal
+ * "unknown" label containing a labelHash, from an unnormalized label literal
  * that is formatted to appear like an "unknown" label. For example, if the
  * unnormalized label literal
  * "[24695ee963d29f0f52edfdea1e830d2fcfc9052d5ba70b194bddd0afbbc89765]"
  * is indexed, it will be considered "unindexable" (due to the square bracket
  * characters) and therefore be represented as the following "unknown" label instead
  * "[80968d00b78a91f47b233eaa213576293d16dadcbbdceb257bca94b08451ba7f]"
- * which encodes the labelhash of the unnormalized label literal in
+ * which encodes the labelHash of the unnormalized label literal in
  * square brackets.
  */
 const UNINDEXABLE_LABEL_CHARACTERS = [
@@ -123,7 +130,7 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  *
  * @returns `true` if the label is indexable, `false` otherwise.
  */
-export const isLabelIndexable = (label: string | null): label is string => {
+export const isLabelIndexable = (label: Label | null): label is Label => {
   if (!label) return false;
 
   for (let i = 0; i < label.length; i++) {
@@ -155,7 +162,7 @@ export const isLabelIndexable = (label: string | null): label is string => {
  * ensnode commit hash bace0ab55077d9f5cd37bd9d6638c4acb16334a8 for an example implementation.
  *
  */
-export function decodeDNSPacketBytes(buf: Uint8Array): [string | null, string | null] {
+export function decodeDNSPacketBytes(buf: Uint8Array): [Label | null, Name | null] {
   let offset = 0;
   let list = new Uint8Array(0);
   let dot = stringToBytes(".");

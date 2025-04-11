@@ -8,11 +8,21 @@ import {
 } from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
+import { afterEach, vi } from "vitest";
+
+// Mock fetch globally
+const mockFetch = vi.fn();
+vi.stubGlobal("fetch", mockFetch);
+
 describe("EnsRainbowApiClient", () => {
   let client: EnsRainbowApiClient;
 
   beforeEach(() => {
     client = new EnsRainbowApiClient();
+  });
+
+  afterEach(() => {
+    mockFetch.mockReset();
   });
 
   it("should apply default options when no options provided", () => {
@@ -35,7 +45,15 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbowApiClientOptions);
   });
 
-  it("should heal a known labelhash", async () => {
+  it("should heal a known labelHash", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          label: "vitalik",
+        } satisfies EnsRainbow.HealSuccess),
+    });
+
     const response = await client.heal(
       "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
     );
@@ -46,7 +64,16 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealSuccess);
   });
 
-  it("should return a not found error for an unknown labelhash", async () => {
+  it("should return a not found error for an unknown labelHash", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Error,
+          error: "Label not found",
+          errorCode: ErrorCode.NotFound,
+        } satisfies EnsRainbow.HealNotFoundError),
+    });
+
     const response = await client.heal(
       "0xf64dc17ae2e2b9b16dbcb8cb05f35a2e6080a5ff1dc53ac0bc48f0e79111f264",
     );
@@ -58,17 +85,35 @@ describe("EnsRainbowApiClient", () => {
     } satisfies EnsRainbow.HealNotFoundError);
   });
 
-  it("should return a bad request error for an invalid labelhash", async () => {
+  it("should return a bad request error for an invalid labelHash", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Error,
+          error: "Invalid labelHash length 9 characters (expected 66)",
+          errorCode: ErrorCode.BadRequest,
+        } satisfies EnsRainbow.HealBadRequestError),
+    });
+
     const response = await client.heal("0xinvalid");
 
     expect(response).toEqual({
       status: StatusCode.Error,
-      error: "Invalid labelhash length 9 characters (expected 66)",
+      error: "Invalid labelHash length 9 characters (expected 66)",
       errorCode: ErrorCode.BadRequest,
     } satisfies EnsRainbow.HealBadRequestError);
   });
 
   it("should return a count of healable labels", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          count: 133856894,
+          timestamp: "2024-01-30T11:18:56Z",
+        } satisfies EnsRainbow.CountSuccess),
+    });
+
     const response = await client.count();
 
     expect(response satisfies EnsRainbow.CountResponse).toBeTruthy();
@@ -78,6 +123,13 @@ describe("EnsRainbowApiClient", () => {
   });
 
   it("should return a positive health check", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: "ok",
+        } satisfies EnsRainbow.HealthResponse),
+    });
+
     const response = await client.health();
 
     expect(response).toEqual({
@@ -86,6 +138,17 @@ describe("EnsRainbowApiClient", () => {
   });
 
   it("should return version information", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          versionInfo: {
+            version: "1.0.0",
+            schema_version: 1,
+          },
+        } satisfies EnsRainbow.VersionResponse),
+    });
+
     const response = await client.version();
 
     expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();

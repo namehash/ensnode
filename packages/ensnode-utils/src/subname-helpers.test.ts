@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 import {
   decodeDNSPacketBytes,
   isLabelIndexable,
-  makeSubnodeNamehash,
+  makeSubdomainNode,
   maybeHealLabelByReverseAddress,
   uint256ToHex32,
 } from "./subname-helpers";
@@ -80,7 +80,7 @@ describe("uint256ToHex32", () => {
 
 describe("makeSubnodeNamehash", () => {
   it("should return the correct namehash for a subnode", () => {
-    expect(makeSubnodeNamehash(namehash("base.eth"), labelhash("test🚀"))).toBe(
+    expect(makeSubdomainNode(labelhash("test🚀"), namehash("base.eth"))).toBe(
       namehash("test🚀.base.eth"),
     );
   });
@@ -105,7 +105,7 @@ describe("labelByReverseAddress", () => {
       ).toThrowError(/Invalid reverse address/i);
     });
 
-    it("should throw if labelhash is not a valid Labelhash", () => {
+    it("should throw if labelHash is not a valid LabelHash", () => {
       expect(() =>
         maybeHealLabelByReverseAddress({
           ...validArgs,
@@ -117,11 +117,11 @@ describe("labelByReverseAddress", () => {
 
   describe("label healing", () => {
     it("should return null if the label cannot be healed", () => {
-      const notMatchingLabelhash = labelhash("test.eth");
+      const notMatchingLabelHash = labelhash("test.eth");
       expect(
         maybeHealLabelByReverseAddress({
           ...validArgs,
-          labelHash: notMatchingLabelhash,
+          labelHash: notMatchingLabelHash,
         }),
       ).toBe(null);
     });

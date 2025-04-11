@@ -1,10 +1,11 @@
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
-import { ByteArray, labelhash } from "viem";
+import { ByteArray, Hex, labelhash } from "viem";
 
 import { logger } from "@/utils/logger";
+import { Label } from "@ensnode/utils";
 
-// System keys must have a byte length different from 32 to avoid collisions with labelhashes
+// System keys must have a byte length different from 32 to avoid collisions with labelHashes
 export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
   0xff, 0xff, 0xff, 0xff,
 ]) as ByteArray;
@@ -43,7 +44,7 @@ export function isSystemKey(key: ByteArray): boolean {
 }
 
 /**
- * Checks if a key is a valid rainbow record key (a 32-byte ByteArray representing an ENS labelhash).
+ * Checks if a key is a valid rainbow record key (a 32-byte ByteArray representing an ENS labelHash).
  * @param key The ByteArray key to check
  * @returns true if the key is a valid rainbow record key (32 bytes long), false otherwise
  */
@@ -56,11 +57,11 @@ export function isRainbowRecordKey(key: ByteArray): boolean {
  *
  * Schema:
  * - Keys are binary encoded and represent:
- *   - For rainbow records: The raw bytes of the ENS labelhash. Always a byte length of 32.
+ *   - For rainbow records: The raw bytes of the ENS labelHash. Always a byte length of 32.
  *   - For metadata: A special key format for storing metadata. Always a byte length other than 32.
  *
  * - Values are UTF-8 strings and represent:
- *   - For rainbow records: the label that was hashed to create the labelhash.
+ *   - For rainbow records: the label that was hashed to create the labelHash.
  *     Labels are stored exactly as they appear in source data and:
  *     - May or may not be ENS-normalized
  *     - Can contain any valid string, including '.' (dot / period / full stop) and null bytes
@@ -273,19 +274,19 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Retrieves a label from the database by its labelhash.
+   * Retrieves a label from the database by its labelHash.
    *
-   * @param labelhash The ByteArray labelhash to look up
+   * @param labelHash The ByteArray labelHash to look up
    * @returns The label as a string if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getLabel(labelhash: ByteArray): Promise<string | null> {
-    // Verify that the key has the correct length for a labelhash (32 bytes) which means it is not a system key
-    if (!isRainbowRecordKey(labelhash)) {
-      throw new Error(`Invalid labelhash length: expected 32 bytes, got ${labelhash.length} bytes`);
+  public async getLabel(labelHash: ByteArray): Promise<Label | null> {
+    // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
+    if (!isRainbowRecordKey(labelHash)) {
+      throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
     }
 
-    return this.get(labelhash);
+    return this.get(labelHash);
   }
 
   /**
@@ -407,11 +408,11 @@ export class ENSRainbowDB {
    * Validation includes:
    * 1. Checking the ingestion status (must be "finished" for a valid database)
    * 2. Verifying the schema version matches the expected version
-   * 3. In full validation mode: Verifying the keys for all rainbow records are valid labelhashes and match their related labels
+   * 3. In full validation mode: Verifying the keys for all rainbow records are valid labelHashes and match their related labels
    * 4. In full validation mode: Verifying the precalculated rainbow record count matches the actual count
    *
    * @param options Validation options
-   * @param options.lite If true, performs a faster validation by skipping labelhash verification and precalculated record count validation
+   * @param options.lite If true, performs a faster validation by skipping labelHash verification and precalculated record count validation
    * @returns boolean indicating if validation passed
    */
   public async validate(options: { lite?: boolean } = {}): Promise<boolean> {
@@ -482,13 +483,13 @@ export class ENSRainbowDB {
           continue;
         }
         rainbowRecordCount++;
-        // Verify key is a valid labelhash by converting it to hex string
-        const keyHex = `0x${Buffer.from(key).toString("hex")}` as `0x${string}`;
+        // Verify key is a valid labelHash by converting it to hex string
+        const keyHex = `0x${Buffer.from(key).toString("hex")}` as Hex;
         try {
           labelHashToBytes(keyHex);
           validHashes++;
         } catch (e) {
-          logger.error(`Invalid labelhash key format: ${keyHex}`);
+          logger.error(`Invalid labelHash key format: ${keyHex}`);
           invalidHashes++;
           continue;
         }
@@ -530,7 +531,7 @@ export class ENSRainbowDB {
       logger.info(`Total keys: ${rainbowRecordCount}`);
       logger.info(`Valid rainbow records: ${validHashes}`);
       logger.info(`Invalid rainbow records: ${invalidHashes}`);
-      logger.info(`labelhash mismatches: ${hashMismatches}`);
+      logger.info(`labelHash mismatches: ${hashMismatches}`);
 
       // Return false if any validation errors were found
       if (invalidHashes > 0 || hashMismatches > 0) {

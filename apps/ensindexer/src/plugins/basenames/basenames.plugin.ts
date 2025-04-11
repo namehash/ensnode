@@ -3,27 +3,21 @@ import { createConfig } from "ponder";
 import { DEPLOYMENT_CONFIG } from "@/lib/globals";
 import {
   activateHandlers,
-  createPluginNamespace,
+  makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
-// uses the 'eth' plugin config for deployments
-export const pluginName = "eth" as const;
-
-// the Registry/Registrar handlers in this plugin manage subdomains of '.eth'
-const ownedName = "eth" as const;
+// describes indexing behavior for the Basenames ENS Datasource
+export const pluginName = PluginName.Basenames;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
-const namespace = createPluginNamespace(ownedName);
+const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
   contracts: {
-    [namespace("RegistryOld")]: {
-      network: networkConfigForContract(chain, contracts.RegistryOld),
-      abi: contracts.Registry.abi,
-    },
     [namespace("Registry")]: {
       network: networkConfigForContract(chain, contracts.Registry),
       abi: contracts.Registry.abi,
@@ -38,28 +32,25 @@ export const config = createConfig({
       network: networkConfigForContract(chain, contracts.BaseRegistrar),
       abi: contracts.BaseRegistrar.abi,
     },
-    [namespace("EthRegistrarControllerOld")]: {
-      network: networkConfigForContract(chain, contracts.EthRegistrarControllerOld),
-      abi: contracts.EthRegistrarControllerOld.abi,
+    [namespace("EARegistrarController")]: {
+      network: networkConfigForContract(chain, contracts.EARegistrarController),
+      abi: contracts.EARegistrarController.abi,
     },
-    [namespace("EthRegistrarController")]: {
-      network: networkConfigForContract(chain, contracts.EthRegistrarController),
-      abi: contracts.EthRegistrarController.abi,
-    },
-    [namespace("NameWrapper")]: {
-      network: networkConfigForContract(chain, contracts.NameWrapper),
-      abi: contracts.NameWrapper.abi,
+    [namespace("RegistrarController")]: {
+      network: networkConfigForContract(chain, contracts.RegistrarController),
+      abi: contracts.RegistrarController.abi,
     },
   },
 });
 
 export const activate = activateHandlers({
-  ownedName,
+  pluginName,
+  // the shared Registrar handler in this plugin indexes direct subnames of '.base.eth'
+  registrarManagedName: "base.eth",
   namespace,
   handlers: [
     import("./handlers/Registry"),
-    import("./handlers/EthRegistrar"),
+    import("./handlers/Registrar"),
     import("./handlers/Resolver"),
-    import("./handlers/NameWrapper"),
   ],
 });

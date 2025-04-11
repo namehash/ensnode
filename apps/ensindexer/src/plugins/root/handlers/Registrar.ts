@@ -1,29 +1,38 @@
 import { ponder } from "ponder:registry";
-import DeploymentConfigs from "@ensnode/ens-deployments";
-import { type Labelhash } from "@ensnode/utils";
+import { ENSDeployments } from "@ensnode/ens-deployments";
+import { type LabelHash } from "@ensnode/utils";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { decodeEventLog } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
- * Ethereum mainnet, a NFT is minted that tokenizes ownership of the registration. The minted NFT
- * will be assigned a unique tokenId represented as uint256(labelhash(label)) where label is the
+ * Ethereum mainnet, an ERC721 NFT is minted that tokenizes ownership of the registration. The minted NFT
+ * will be assigned a unique tokenId which is uint256(labelhash(label)) where label is the
  * direct subname of .eth that was registered.
  * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/ethregistrar/ETHRegistrarController.sol#L215
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({
+  pluginName,
+  registrarManagedName,
+  namespace,
+}: PonderENSPluginHandlerArgs<PluginName.Root>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-  } = makeRegistrarHandlers(ownedName);
+  } = makeRegistrarHandlers({
+    pluginName,
+    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
+    registrarManagedName,
+  });
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
@@ -32,7 +41,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -45,7 +54,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -60,7 +69,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
         args: {
           from,
           to,
-          labelhash: tokenIdToLabelhash(tokenId),
+          labelHash: tokenIdToLabelHash(tokenId),
         },
       },
     });
@@ -70,7 +79,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
+      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarControllerOld.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -82,7 +91,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRenewed",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarControllerOld.abi,
+      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarControllerOld.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -94,7 +103,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -115,7 +124,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"e
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRenewed",
-      abi: DeploymentConfigs.mainnet.eth.contracts.EthRegistrarController.abi,
+      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });

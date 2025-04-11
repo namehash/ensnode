@@ -1,7 +1,7 @@
 import { getEnsDeploymentChain } from "@/lib/ponder-helpers";
-import DeploymentConfigs from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/ens-deployments";
 
-export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChain()];
+export const SELECTED_DEPLOYMENT_CONFIG = ENSDeployments[getEnsDeploymentChain()];
 
 /**
  * Note that here, we define the global DEPLOYMENT_CONFIG as the _merge_ of mainnet (which fully
@@ -15,6 +15,6 @@ export const SELECTED_DEPLOYMENT_CONFIG = DeploymentConfigs[getEnsDeploymentChai
  * (see ponder.config.ts and `getActivePlugins`) and never activated.
  */
 export const DEPLOYMENT_CONFIG = {
-  ...DeploymentConfigs.mainnet,
+  ...ENSDeployments.mainnet,
   ...SELECTED_DEPLOYMENT_CONFIG,
 };

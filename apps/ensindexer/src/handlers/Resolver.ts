@@ -1,28 +1,27 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { DeploymentConfigs } from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/ens-deployments";
 import type { Node } from "@ensnode/utils";
-import { Hex, decodeEventLog } from "viem";
+import { type Address, Hash, type Hex, decodeEventLog } from "viem";
 
-import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { OwnedName } from "@/lib/types";
-
-// NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
-// contract on the chain that emits an event with the relevant signatures, which may or may not
-// actually be a contract intended for use with ENS as a Resolver. because of this as well, each
-// event could be the first event the indexer has seen for this contract (and its Resolver id) and
-// therefore needs not assume a Resolver entity already exists
+import type { EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventIdPrefix } from "@/lib/types";
 
 /**
- * makes a set of shared handlers for Resolver contracts related to a plugin managing `ownedName`
+ * makes a set of shared handlers for Resolver contracts
  *
- * @param ownedName the name that the plugin manages subnames of
+ * NOTE: Both the subgraph and this indexer use upserts in this file since a 'Resolver' can be any
+ * contract that emits events with the relevant signatures. The contract may not necessarily be
+ * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
+ * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
+ *
+ * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
  */
-export const makeResolverHandlers = (ownedName: OwnedName) => {
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventIdPrefix }) => {
+  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
 
   return {
     async handleAddrChanged({
@@ -30,7 +29,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; a: Hex }>;
+      event: EventWithArgs<{ node: Node; a: Address }>;
     }) {
       const { a: address, node } = event.args;
       await upsertAccount(context, address);
@@ -65,7 +64,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Hex }>;
+      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Address }>;
     }) {
       const { node, coinType, newAddress } = event.args;
 
@@ -105,7 +104,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         args: { node, name },
       } = decodeEventLog({
         eventName: "NameChanged",
-        abi: DeploymentConfigs.mainnet.eth.contracts.Resolver.abi,
+        abi: ENSDeployments.mainnet.root.contracts.Resolver.abi,
         topics: event.log.topics,
         data: event.log.data,
       });
@@ -233,7 +232,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; hash: Hex }>;
+      event: EventWithArgs<{ node: Node; hash: Hash }>;
     }) {
       const { node, hash } = event.args;
       const id = makeResolverId(event.log.address, node);
@@ -289,7 +288,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{
         node: Node;
-        owner: Hex;
+        owner: Address;
         target: Hex;
         isAuthorised: boolean;
       }>;
@@ -362,7 +361,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record: Hex;
@@ -377,7 +376,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record?: Hex;
@@ -391,7 +390,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Hex; zonehash: Hex }>;
+      event: EventWithArgs<{ node: Node; zonehash: Hash }>;
     }) {
       // subgraph ignores
     },

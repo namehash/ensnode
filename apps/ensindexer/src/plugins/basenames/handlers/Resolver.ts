@@ -2,8 +2,12 @@ import { ponder } from "ponder:registry";
 
 import { makeResolverHandlers } from "@/handlers/Resolver";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
+export default function ({
+  pluginName,
+  namespace,
+}: PonderENSPluginHandlerArgs<PluginName.Basenames>) {
   const {
     handleABIChanged,
     handleAddrChanged,
@@ -17,7 +21,9 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
     handlePubkeyChanged,
     handleTextChanged,
     handleVersionChanged,
-  } = makeResolverHandlers(ownedName);
+  } = makeResolverHandlers({
+    eventIdPrefix: pluginName,
+  });
 
   ponder.on(namespace("Resolver:AddrChanged"), handleAddrChanged);
   ponder.on(namespace("Resolver:AddressChanged"), handleAddressChanged);

@@ -57,15 +57,13 @@ Each plugin is an isolated ponder indexing configuration that uses the shared ha
 
 ### Plugin-Scoping
 
-Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin, id-generating code was abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
+Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin—which didn't expect multichain or multi-source entities—, id-generating code is abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
 
-This scoping also applies to the concept of an `OwnedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — each plugin exists in the context of a name whos subnames they manage, and the shared handlers reference that name instead of a hardcoded constant (`"eth"`, in the subgraph implementation).
+This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — teh shared handlers derived from the subgraph which are  used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
 
 ### Plugin Definition
 
 An ENSIndexer plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function).
-
-Each plugin handler file is executed in the context of the plugin's `namespace` and `ownedName` which helps the plugin customize its logic to avoid clobbering other plugins' entities.
 
 ### Ponder Plugin Integration
 
