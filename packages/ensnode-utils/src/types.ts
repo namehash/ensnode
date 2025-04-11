@@ -13,7 +13,7 @@ import type { Hex } from "viem";
 export type Node = Hex;
 
 /**
- * A LabelHash is the result of the labelhash function (which is just keccak256) on a label.
+ * A LabelHash is the result of the labelhash function (which is just keccak256) on a Label.
  *
  * @link https://docs.ens.domains/terminology#labelhash
  */
@@ -27,8 +27,11 @@ export type LabelHash = Hex;
 export type Label = string;
 
 /**
- * An EncodedLabelHash represents a LabelHash when used in an ENS name.
+ * An EncodedLabelHash is a specially formatted unnormalized Label that should be interpreted as a
+ * LabelHash literal, particularly for use within an ENS Name.
  *
+ * @example [abcd]
+ * @example [abcd].example.eth
  */
 export type EncodedLabelHash = `[${string}]`;
 

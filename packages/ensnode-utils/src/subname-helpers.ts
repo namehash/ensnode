@@ -14,12 +14,12 @@ import { labelhash } from "viem/ens";
 import type { Label, LabelHash, Name, Node } from "./types";
 
 /**
- * Implements one step of the namehash algorithm, combining `labelHash` with `parentNode` to produce
- * the `node` of a given subnode. Note that the order of the arguments is 'reversed' (as compared to
- * the actual concatenation) in order to improve readability (i.e. read as [label].[parentNode]).
+ * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce
+ * the `node` of a given subdomain. Note that the order of the arguments is 'reversed' (as compared to
+ * the actual concatenation) in order to improve readability (i.e. read as [label].[node]).
  */
-export const makeSubnode = (labelHash: LabelHash, parentNode: Node): Node =>
-  keccak256(concat([parentNode, labelHash]));
+export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
+  keccak256(concat([node, labelHash]));
 
 /**
  * Normalizes `address` to match the format used for addr.reverse subnames as per

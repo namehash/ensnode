@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { type LabelHash } from "@ensnode/utils";
-import { makeSubnode, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
+import { makeSubdomainNode, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { decodeEventLog, namehash, zeroAddress } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
@@ -97,7 +97,7 @@ export default function ({
       await context.db
         .insert(schema.domain)
         .values({
-          id: makeSubnode(labelHash, registrarManagedNode),
+          id: makeSubdomainNode(labelHash, registrarManagedNode),
           ownerId: to,
           createdAt: event.block.timestamp,
         })

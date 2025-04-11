@@ -1,7 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { Node, ROOT_NODE } from "@ensnode/utils";
-import { makeSubnode } from "@ensnode/utils/subname-helpers";
+import { makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
@@ -36,7 +36,7 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<"root">) {
   ponder.on(namespace("RegistryOld:NewOwner"), async ({ context, event }) => {
     const { label: labelHash, node: parentNode } = event.args;
 
-    const node = makeSubnode(labelHash, parentNode);
+    const node = makeSubdomainNode(labelHash, parentNode);
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, node);
     if (shouldIgnoreEvent) return;
 
