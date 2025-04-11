@@ -4,11 +4,10 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - '*'
+      - 'ensadmin@*'
 
 jobs:
   build-and-push:
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, 'ensadmin@') }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - name: Checkout repository

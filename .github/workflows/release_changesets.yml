@@ -15,9 +15,6 @@ jobs:
   release:
     name: Changesets
     if: github.repository == 'namehash/ensnode'
-    permissions:
-      contents: write
-      pull-requests: write
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
@@ -37,8 +34,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Upsert Release PR
-        id: changesets
+      - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
         with:
           commit: "chore(release): version apps"
