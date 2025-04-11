@@ -1,5 +1,17 @@
 # ensrainbow
 
+## 0.19.0
+
+### Minor Changes
+
+- [#597](https://github.com/namehash/ensnode/pull/597) [`3758d7e`](https://github.com/namehash/ensnode/commit/3758d7e644a2d477b922ccd72af5522440846c65) Thanks [@shrugs](https://github.com/shrugs)! - temp stop building v2 app image because no data image available
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.19.0
+  - @ensnode/ensrainbow-sdk@0.19.0
+
 ## 0.18.0
 
 ### Minor Changes
