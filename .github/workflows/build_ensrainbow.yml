@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-push-ensnode:
     name: w/ ${{ matrix.data_image_name }}
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.release.tag_name, 'ensrainbow') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, 'ensrainbow@') }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
