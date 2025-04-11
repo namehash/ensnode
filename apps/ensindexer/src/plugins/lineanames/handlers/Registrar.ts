@@ -8,6 +8,7 @@ import { decodeEventLog, namehash, zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { upsertAccount } from "@/lib/db-helpers";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
 /**
  * When direct subnames of linea.eth are registered through the linea.eth ETHRegistrarController
@@ -22,7 +23,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<"lineanames">) {
+}: PonderENSPluginHandlerArgs<PluginName.LineaNames>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

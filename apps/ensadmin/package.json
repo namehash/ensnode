@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@ensnode/ponder-metadata": "workspace:*",
+    "@ensnode/utils": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",

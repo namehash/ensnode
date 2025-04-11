@@ -1,5 +1,5 @@
-import type { EventIdPrefix, PluginName } from "@/lib/types";
-import type { LabelHash, Node } from "@ensnode/utils";
+import { EventIdPrefix } from "@/lib/types";
+import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
 import type { Address } from "viem";
 
 // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
@@ -57,6 +57,6 @@ export const makeEventId = (
  * @returns a unique registration id
  */
 export const makeRegistrationId = (pluginName: PluginName, labelHash: LabelHash, node: Node) => {
-  if (pluginName === "root") return labelHash;
+  if (pluginName === PluginName.Root) return labelHash;
   return node;
 };

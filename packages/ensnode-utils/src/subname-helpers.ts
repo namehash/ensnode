@@ -16,16 +16,16 @@ import type { Label, LabelHash, Name, Node } from "./types";
 /**
  * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce
  * the `node` of a given subdomain. Note that the order of the arguments is 'reversed' (as compared to
- * the actual concatenation) in order to improve readability (i.e. read as [label].[node]).
+ * the actual concatenation) in order to improve readability (i.e. read as [labelHash].[node]).
  */
 export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
   keccak256(concat([node, labelHash]));
 
 /**
- * Normalizes `address` to match the format used for addr.reverse subnames as per
+ * Gets the Label used for subnames of "addr.reverse" used for reverse lookups of `address` as per
  * https://docs.ens.domains/resolution/names#reverse-nodes
  */
-const normalizedAddressDigits = (address: Address): string => address.slice(2).toLowerCase();
+const addrReverseLabel = (address: Address): Label => address.slice(2).toLowerCase();
 
 /**
  * Attempt to heal the labelHash of an addr.reverse subname using an address that might be related to the subname.
@@ -59,7 +59,7 @@ export const maybeHealLabelByReverseAddress = ({
   }
 
   // derive the assumed label from the normalized address
-  const assumedLabel = normalizedAddressDigits(maybeReverseAddress);
+  const assumedLabel = addrReverseLabel(maybeReverseAddress);
 
   // if labelHash of the assumed label matches the provided labelHash, heal
   if (labelhash(assumedLabel) === labelHash) return assumedLabel;

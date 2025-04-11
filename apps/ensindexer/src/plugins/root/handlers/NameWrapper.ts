@@ -2,8 +2,12 @@ import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
-export default function ({ registrarManagedName, namespace }: PonderENSPluginHandlerArgs<"root">) {
+export default function ({
+  registrarManagedName,
+  namespace,
+}: PonderENSPluginHandlerArgs<PluginName.Root>) {
   const {
     handleExpiryExtended,
     handleFusesSet,

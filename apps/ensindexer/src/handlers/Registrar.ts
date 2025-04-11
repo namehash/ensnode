@@ -6,8 +6,8 @@ import { makeSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import type { EventIdPrefix, PluginName, RegistrarManagedName } from "@/lib/types";
-import { Label, type LabelHash } from "@ensnode/utils";
+import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
+import { Label, type LabelHash, PluginName } from "@ensnode/utils";
 import { isLabelIndexable, makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds

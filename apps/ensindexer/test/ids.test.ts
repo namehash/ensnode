@@ -1,4 +1,5 @@
 import { makeEventId, makeRegistrationId, makeResolverId } from "@/lib/ids";
+import { PluginName } from "@ensnode/utils";
 import { labelhash, namehash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
@@ -27,15 +28,19 @@ describe("ids", () => {
   });
 
   describe("makeRegistrationId", () => {
-    it("should use labelHash when plugin name is `root` to ensure subgraph compatibility", () => {
-      expect(makeRegistrationId("root", labelhash("vitalik"), namehash("vitalik.eth"))).toEqual(
-        labelhash("vitalik"),
-      );
+    it("should use the labelHash of the registered name when plugin name is `root`", () => {
+      expect(
+        makeRegistrationId(PluginName.Root, labelhash("vitalik"), namehash("vitalik.eth")),
+      ).toEqual(labelhash("vitalik"));
     });
 
-    it("should use node when plugin name is not `root`", () => {
+    it("should use the node of the registered name when plugin name is not `root`", () => {
       expect(
-        makeRegistrationId("lineanames", labelhash("vitalik"), namehash("vitalik.linea.eth")),
+        makeRegistrationId(
+          PluginName.LineaNames,
+          labelhash("vitalik"),
+          namehash("vitalik.linea.eth"),
+        ),
       ).toEqual(namehash("vitalik.linea.eth"));
     });
   });

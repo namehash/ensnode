@@ -7,10 +7,10 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { PluginName } from "@/lib/types";
+import { PluginName } from "@ensnode/utils";
 
 // describes indexing behavior for the Basenames ENS Datasource
-export const pluginName = "basenames" as const satisfies PluginName;
+export const pluginName = PluginName.Basenames;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
 const namespace = makePluginNamespace(pluginName);

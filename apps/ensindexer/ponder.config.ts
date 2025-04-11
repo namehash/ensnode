@@ -7,7 +7,7 @@ import {
   healReverseAddresses,
   requestedPluginNames,
 } from "@/lib/ponder-helpers";
-import type { PluginName } from "@/lib/types";
+import type { PluginName } from "@ensnode/utils";
 
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";

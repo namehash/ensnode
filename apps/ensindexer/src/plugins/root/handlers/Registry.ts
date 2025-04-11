@@ -5,6 +5,7 @@ import { makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains
@@ -19,7 +20,7 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<"root">) {
+export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Root>) {
   const {
     handleNewOwner, //
     handleNewResolver,

@@ -8,6 +8,7 @@ import { decodeEventLog, namehash, zeroAddress } from "viem";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { upsertAccount } from "@/lib/db-helpers";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
@@ -22,7 +23,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<"basenames">) {
+}: PonderENSPluginHandlerArgs<PluginName.Basenames>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

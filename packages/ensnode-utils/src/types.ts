@@ -1,6 +1,17 @@
 import type { Hex } from "viem";
 
 /**
+ * Within ENSNode we use the notion of 'plugins' to describe bundles of indexing logic.
+ * Note that this type definition is currently 1:1 with that of @ensnode/ens-deployments' Datasource,
+ * simplifying the relationship between a Datasource and the plugins in this project.
+ */
+export enum PluginName {
+  Root = "root",
+  Basenames = "basenames",
+  LineaNames = "lineanames",
+}
+
+/**
  * A hash value that uniquely identifies a single ENS name.
  * Result of `namehash` function as specified in ENSIP-1.
  *

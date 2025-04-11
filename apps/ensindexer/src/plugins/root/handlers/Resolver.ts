@@ -2,8 +2,9 @@ import { ponder } from "ponder:registry";
 
 import { makeResolverHandlers } from "@/handlers/Resolver";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<"root">) {
+export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Root>) {
   const {
     handleABIChanged,
     handleAddrChanged,

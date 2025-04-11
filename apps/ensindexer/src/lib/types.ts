@@ -1,11 +1,4 @@
 /**
- * In this project we use the notion of 'plugins' to describe bundles of indexing logic.
- * Note that this type definition is currently 1:1 with that of @ensnode/ens-deployments' Datasource,
- * simplifying the relationship between a Datasource and the plugins in this project.
- */
-export type PluginName = "root" | "basenames" | "lineanames";
-
-/**
  * RegistrarManagedName is an explicit type representing the following concept:
  *   "the name a registrar indexed by the shared handlers manages subnames of"
  *

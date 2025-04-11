@@ -6,6 +6,7 @@ import { decodeEventLog } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
@@ -20,7 +21,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<"root">) {
+}: PonderENSPluginHandlerArgs<PluginName.Root>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

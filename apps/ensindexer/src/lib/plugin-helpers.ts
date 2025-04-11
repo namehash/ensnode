@@ -9,7 +9,8 @@ import {
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "@/lib/ponder-helpers";
-import type { PluginName, RegistrarManagedName } from "@/lib/types";
+import type { RegistrarManagedName } from "@/lib/types";
+import { PluginName } from "@ensnode/utils";
 
 /**
  * A factory function that returns a function to create a namespaced contract name for Ponder handlers.
