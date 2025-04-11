@@ -1,0 +1,33 @@
+name: "Build: ENSRainbow"
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-and-push-ensnode:
+    name: w/ ${{ matrix.data_image_name }}
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.release.tag_name, 'ensrainbow') }}
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        data_image_name: [ensrainbow-data, ensrainbow-v2-data, ensrainbow-test-data]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build & Push
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/ensrainbow
+          dockerfile: apps/ensrainbow/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            DATA_IMAGE_NAME=${{ matrix.data_image_name }}
