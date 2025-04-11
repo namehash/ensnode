@@ -8,8 +8,23 @@ export function starlight(): AstroIntegration {
     components: {
       ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
       ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
+      SocialIcons: "./src/components/overrides/SocialIcons.astro",
+      Hero: "./src/components/overrides/Hero.astro",
+      TableOfContents: "./src/components/overrides/TableOfContents.astro",
     },
-    customCss: ["./src/styles/globals.css", "./src/styles/pagination.css"],
+    customCss: [
+      "./src/styles/globals.css",
+      "./src/styles/pagination.css",
+      "@fontsource/inter/100.css",
+      "@fontsource/inter/200.css",
+      "@fontsource/inter/300.css",
+      "@fontsource/inter/400.css",
+      "@fontsource/inter/500.css",
+      "@fontsource/inter/600.css",
+      "@fontsource/inter/700.css",
+      "@fontsource/inter/800.css",
+      "@fontsource/inter/900.css",
+    ],
     plugins: [
       starlightLlmsTxt(),
       starlightSidebarTopics([
@@ -155,7 +170,6 @@ export function starlight(): AstroIntegration {
     social: {
       "x.com": "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
-      telegram: "https://t.me/ensnode",
     },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",

@@ -1,5 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root,
 :root[data-theme="light"] {
+  --sl-font: "Inter", sans-serif;
+
   --sl-color-accent-low: #cee1e8;
   --sl-color-accent: #0080bc;
   --sl-color-accent-high: #093c52;
@@ -30,11 +36,71 @@
   --sl-color-green-low: #c5ddcc;
 
   --pagination-arrow-color: #c4c7c8;
+
+  --sl-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --sl-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 .header {
   background-color: var(--sl-color-black);
   border-color: var(--sl-color-gray-6);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+/*header elements max width*/
+.header.sl-flex > div.sl-flex {
+  width: fit-content;
+}
+
+@media screen and (min-width: 800px) {
+  button[aria-label="Search"] {
+    width: 30vw;
+  }
+}
+
+.header.sl-flex {
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.social-icons {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  align-items: center;
+
+  @media screen and (min-width: 1270px) {
+    margin-right: calc(40.5vw - 32rem);
+  }
+
+  @media screen and (min-width: 1484px) {
+    margin-right: 82px;
+  }
+}
+
+@media (min-width: 1484px) {
+  .page {
+    flex-direction: row;
+    max-width: 1484px;
+    margin-inline: auto;
+  }
+
+  nav.sidebar .sidebar-pane {
+    position: sticky;
+    height: calc(100vh - var(--sl-nav-height));
+  }
+
+  div.main-frame {
+    padding-inline-start: initial;
+    flex: 1;
+  }
 }
 
 site-search dialog {
