@@ -1,5 +1,12 @@
 # @ensnode/ponder-metadata
 
+## 0.8.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@0.8.0
+
 ## 0.7.0
 
 ### Patch Changes
