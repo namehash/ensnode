@@ -76,8 +76,8 @@
   justify-content: end;
   align-items: center;
 
-  @media screen and (min-width: 1260px) {
-    margin-right: calc(40.5vw - 31.69rem);
+  @media screen and (min-width: 1270px) {
+    margin-right: calc(40.5vw - 32rem);
   }
 
   @media screen and (min-width: 1484px) {
