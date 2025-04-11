@@ -1,5 +1,21 @@
 # ensindexer
 
+## 0.14.0
+
+### Minor Changes
+
+- [#586](https://github.com/namehash/ensnode/pull/586) [`1208538`](https://github.com/namehash/ensnode/commit/12085388856e478e5de42a1ce0c891e1b9d37824) Thanks [@shrugs](https://github.com/shrugs)! - try parsing docker tags for workflow
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.14.0
+  - @ensnode/utils@0.14.0
+  - @ensnode/ensrainbow-sdk@0.14.0
+  - @ensnode/ponder-metadata@0.14.0
+  - @ensnode/ponder-schema@0.14.0
+  - @ensnode/ponder-subgraph@0.14.0
+
 ## 0.13.0
 
 ### Minor Changes
