@@ -61,13 +61,15 @@ jobs:
           script: |-
             map(
               if .name == "ensrainbow" then
-                ["ensrainbow-data", "ensrainbow-v2-data", "ensrainbow-test-data"] | map({
-                  "name": $parent.name,
-                  "version": $parent.version,
-                  "ensrainbow_data_image": .
-                })
+                . as $parent
+                | ["ensrainbow-data", "ensrainbow-v2-data", "ensrainbow-test-data"]
+                  | map({
+                    "name": $parent.name,
+                    "version": $parent.version,
+                    "ensrainbow_data_image": .
+                  })
               else
-                .
+                [.]
               end
             ) | flatten | map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
 
