@@ -7,9 +7,9 @@ import yargs from "yargs/yargs";
 
 import { ingestCommand } from "@/commands/ingest-command";
 import { purgeCommand } from "@/commands/purge-command";
+import { deserializeCommand, serializeCommand } from "@/commands/serialize-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
-import { serializeCommand, deserializeCommand } from "@/commands/serialize-command";
 import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
 import { SerializationFormat } from "@/utils/serializers/serializer-factory";
 

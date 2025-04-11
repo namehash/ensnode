@@ -1,8 +1,8 @@
+import { execSync } from "child_process";
+import { promises as fs } from "fs";
+import { join } from "path";
 import * as flatbuffers from "flatbuffers";
 import { ByteArray } from "viem";
-import { join } from "path";
-import { promises as fs } from "fs";
-import { execSync } from "child_process";
 
 import { RainbowRecord } from "@/utils/rainbow-record";
 import { BaseSerializer } from "./serializer";
@@ -39,25 +39,25 @@ export class FlatBuffersSerializer extends BaseSerializer {
   async writeRecord(record: RainbowRecord): Promise<void> {
     // Reset the builder for each record
     this.builder.clear();
-    
+
     // Create the label string
     const labelOffset = this.builder.createString(record.label);
-    
+
     // Create the label_hash byte array using our custom function
     const labelHashOffset = this.createUint8Vector(record.labelHash);
-    
+
     // Start building the RainbowRecord
     this.builder.startObject(2);
     this.builder.addFieldOffset(0, labelHashOffset, 0);
     this.builder.addFieldOffset(1, labelOffset, 0);
-    
+
     // Finish the RainbowRecord
     const recordOffset = this.builder.endObject();
     this.builder.finish(recordOffset);
-    
+
     // Get the finished bytes
     const buffer = Buffer.from(this.builder.asUint8Array());
-    
+
     await this.writeBuffer(buffer);
   }
 
@@ -66,24 +66,25 @@ export class FlatBuffersSerializer extends BaseSerializer {
     // We'll look for patterns in the buffer that might indicate the structure of our data
     try {
       // console.debug("Attempting fallback raw buffer extraction");
-      
+
       // Assuming a 32-byte hash is somewhere in the buffer
       // Look for sequences that might be a buffer length prefix, followed by reasonable data
       for (let i = 0; i < buffer.length - 36; i++) {
         // Check for what looks like a length field (32 for labelHash)
         const possibleLength = buffer.readUInt32LE(i);
-        if (possibleLength === 32) { // ENS labelhash is always 32 bytes
+        if (possibleLength === 32) {
+          // ENS labelhash is always 32 bytes
           // If we find a 32-length, check if there's enough space after it for the data
           if (i + 4 + 32 <= buffer.length) {
             // Extract the potential labelHash bytes
             const hashData = buffer.subarray(i + 4, i + 4 + 32);
             // console.debug(`Found potential 32-byte hash at offset ${i}`);
-            
+
             // Extract any visible ASCII characters that could be a label
             // This is a best-effort approach
             let label = "";
             let foundLabel = false;
-            
+
             // Search for printable strings after the hash data
             for (let j = i + 4 + 32; j < buffer.length - 4; j++) {
               // Look for string length markers (1-100 characters is reasonable for a label)
@@ -92,7 +93,7 @@ export class FlatBuffersSerializer extends BaseSerializer {
                 // Try to read a string
                 let tmpStr = "";
                 let isValidStr = true;
-                
+
                 for (let k = 0; k < strLen; k++) {
                   const charCode = buffer[j + 4 + k];
                   // Check if it's a printable ASCII or common UTF-8 character
@@ -103,7 +104,7 @@ export class FlatBuffersSerializer extends BaseSerializer {
                     break;
                   }
                 }
-                
+
                 if (isValidStr && tmpStr.length > 0) {
                   label = tmpStr;
                   foundLabel = true;
@@ -112,7 +113,7 @@ export class FlatBuffersSerializer extends BaseSerializer {
                 }
               }
             }
-            
+
             // If we found a hash, create a record even if we didn't find the label
             return {
               labelHash: hashData as ByteArray,
@@ -121,7 +122,7 @@ export class FlatBuffersSerializer extends BaseSerializer {
           }
         }
       }
-      
+
       // If we didn't find a 32-byte hash pattern, try a more generic approach
       // This is highly heuristic and may not work in all cases
       // Look for any 32-byte segments that might be a hash
@@ -133,18 +134,18 @@ export class FlatBuffersSerializer extends BaseSerializer {
         for (let j = 0; j < segment.length; j++) {
           if (segment[j] !== 0) nonZeroCount++;
         }
-        
+
         // If at least 25% of bytes are non-zero, it might be a hash
         if (nonZeroCount > 8) {
           // console.debug(`Found potential hash pattern at offset ${i}`);
-          
+
           return {
             labelHash: segment as ByteArray,
             label: `unknown-${Date.now()}`,
           };
         }
       }
-      
+
       console.debug("No valid data patterns found in buffer");
       return null;
     } catch (error) {
@@ -157,23 +158,23 @@ export class FlatBuffersSerializer extends BaseSerializer {
     try {
       // console.debug("FlatBuffersSerializer: Reading next buffer");
       const buffer = await this.readNextBuffer();
-      
+
       if (!buffer) {
         // console.debug("FlatBuffersSerializer: No buffer received, returning null");
         return null;
       }
-      
+
       // console.debug(`FlatBuffersSerializer: Got buffer of size ${buffer.length}`);
-      
+
       // Safety check: Ensure buffer has minimum required size
       if (buffer.length < 8) {
         // console.error(`FlatBuffersSerializer: Buffer too small (${buffer.length} bytes)`);
         return null;
       }
-      
+
       // DEBUG: Print out the buffer for inspection
       // console.debug("Buffer bytes (first 32):", Buffer.from(buffer).toString('hex').match(/.{1,2}/g)?.join(' '));
-      
+
       // Our generated file structure doesn't match what FlatBuffers expects,
       // so we need to do a simple extraction of the data
       return this.tryToExtractDataFromRawBuffer(buffer);
@@ -185,4 +186,4 @@ export class FlatBuffersSerializer extends BaseSerializer {
       return null;
     }
   }
-} 
+}

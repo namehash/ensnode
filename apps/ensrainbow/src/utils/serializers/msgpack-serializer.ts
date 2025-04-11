@@ -15,7 +15,7 @@ export class MsgPackSerializer extends BaseSerializer {
       labelHash: Array.from(record.labelHash),
       label: record.label,
     });
-    
+
     await this.writeBuffer(encoded);
   }
 
@@ -23,7 +23,7 @@ export class MsgPackSerializer extends BaseSerializer {
     try {
       const buffer = await this.readNextBuffer();
       if (!buffer) return null;
-      
+
       const decoded = msgpack.decode(buffer);
       return {
         labelHash: new Uint8Array(decoded.labelHash) as ByteArray,
@@ -36,4 +36,4 @@ export class MsgPackSerializer extends BaseSerializer {
       throw error;
     }
   }
-} 
+}

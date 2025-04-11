@@ -1,8 +1,8 @@
+import { BinarySerializer } from "./binary-serializer";
+import { CapnProtoSerializer } from "./capnp-serializer";
+import { FlatBuffersSerializer } from "./flatbuffers-serializer";
 import { MsgPackSerializer } from "./msgpack-serializer";
 import { ProtobufSerializer } from "./protobuf-serializer";
-import { FlatBuffersSerializer } from "./flatbuffers-serializer";
-import { CapnProtoSerializer } from "./capnp-serializer";
-import { BinarySerializer } from "./binary-serializer";
 import { BaseSerializer } from "./serializer";
 
 /**
@@ -13,7 +13,7 @@ export enum SerializationFormat {
   Protobuf = "protobuf",
   FlatBuffers = "flatbuffers",
   CapnProto = "capnproto",
-  Binary = "binary"
+  Binary = "binary",
 }
 
 /**
@@ -22,7 +22,10 @@ export enum SerializationFormat {
  * @param outputFilePath The path to the output file
  * @returns A serializer for the specified format
  */
-export function createSerializer(format: SerializationFormat, outputFilePath: string): BaseSerializer {
+export function createSerializer(
+  format: SerializationFormat,
+  outputFilePath: string,
+): BaseSerializer {
   switch (format) {
     case SerializationFormat.MsgPack:
       return new MsgPackSerializer(outputFilePath);
@@ -37,4 +40,4 @@ export function createSerializer(format: SerializationFormat, outputFilePath: st
     default:
       throw new Error(`Unsupported serialization format: ${format}`);
   }
-} 
+}

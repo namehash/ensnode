@@ -1,12 +1,12 @@
 import { createReadStream } from "fs";
+import { join } from "path";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
-import { join } from "path";
 
 import { logger } from "@/utils/logger";
 import { buildRainbowRecord } from "@/utils/rainbow-record";
-import { createSerializer, SerializationFormat } from "@/utils/serializers/serializer-factory";
+import { SerializationFormat, createSerializer } from "@/utils/serializers/serializer-factory";
 
 export interface SerializeCommandOptions {
   inputFile: string;
@@ -17,10 +17,10 @@ export interface SerializeCommandOptions {
 
 export async function serializeCommand(options: SerializeCommandOptions): Promise<void> {
   const { inputFile, outputFile, format, limit } = options;
-  
+
   // Create the appropriate serializer
   const serializer = createSerializer(format, outputFile);
-  
+
   try {
     // Create a read stream for the gzipped file
     const fileStream = createReadStream(inputFile);
@@ -34,7 +34,7 @@ export async function serializeCommand(options: SerializeCommandOptions): Promis
     let processedRecords = 0;
     let invalidRecords = 0;
     const maxRecords = limit || Number.POSITIVE_INFINITY;
-    
+
     const bar = new ProgressBar(
       `Serializing to ${format} [:bar] :current records (:percent) - :rate records/sec - :etas remaining`,
       {
@@ -85,64 +85,65 @@ export async function serializeCommand(options: SerializeCommandOptions): Promis
       }
     }
 
-    logger.info(`\nSerialization complete! Created ${outputFile} with ${processedRecords} records.`);
+    logger.info(
+      `\nSerialization complete! Created ${outputFile} with ${processedRecords} records.`,
+    );
     if (invalidRecords > 0) {
       logger.warn(`Skipped ${invalidRecords} invalid records during processing.`);
     }
-    
+
     // Close readline interface
     rl.close();
-    
+
     // Make sure all file handles and resources are fully closed
     fileStream.destroy();
     gunzip.destroy();
-    
   } finally {
     // Ensure the serializer is properly closed to prevent hanging
     await serializer.close();
-    logger.info('All resources closed successfully.');
+    logger.info("All resources closed successfully.");
   }
 }
 
-export async function deserializeCommand(options: { 
+export async function deserializeCommand(options: {
   inputFile: string;
   format: SerializationFormat;
   limit?: number;
 }): Promise<void> {
   const { inputFile, format, limit } = options;
-  
+
   // Create the appropriate serializer for reading
   const serializer = createSerializer(format, inputFile);
-  
+
   try {
     let processedRecords = 0;
     const maxRecords = limit || Number.POSITIVE_INFINITY;
-    
+
     logger.info(`Starting deserialization from ${format} format...`);
-    
+
     await serializer.openForReading();
-    
+
     // Read and process records
     let record = await serializer.readRecord();
     while (record !== null && processedRecords < maxRecords) {
       // Just count the records for validation
       processedRecords++;
-      
+
       if (processedRecords % 10000 === 0) {
         logger.info(`Processed ${processedRecords} records...`);
       }
-      
+
       // Get the next record
       record = await serializer.readRecord();
 
       // Print record
-    //   console.log(record);
+      //   console.log(record);
     }
-    
+
     logger.info(`\nDeserialization complete! Read ${processedRecords} records from ${inputFile}.`);
   } finally {
     // Ensure we close the serializer completely
     await serializer.close();
-    logger.info('All resources closed successfully.');
+    logger.info("All resources closed successfully.");
   }
-} 
+}
