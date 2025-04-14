@@ -3,15 +3,10 @@
 import { Activity, RadioTower } from "lucide-react";
 import * as React from "react";
 
-import { NavMain } from "@/components/nav-main";
 import { IconENS } from "@/components/icons/ens";
+import { NavMain } from "@/components/nav-main";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
 import { ConnectionSelector } from "./connections/connection-selector";
 
 const navItems = [
