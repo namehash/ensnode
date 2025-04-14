@@ -44,7 +44,7 @@ export default function InspectorForm({ className = "" }: InspectorFormProps) {
         <Label htmlFor="strategy" className="whitespace-nowrap">
           Strategy
         </Label>
-        <Select value={strategy} onValueChange={setStrategy}>
+        <Select value={strategy} onValueChange={setStrategy} disabled>
           <SelectTrigger className="w-full" id="strategy">
             <SelectValue placeholder="Select strategy" />
           </SelectTrigger>
@@ -63,6 +63,7 @@ export default function InspectorForm({ className = "" }: InspectorFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full"
+          disabled
         />
       </div>
 
