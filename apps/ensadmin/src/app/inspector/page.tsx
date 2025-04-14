@@ -2,12 +2,11 @@
 
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import InspectorForm from "./components/inspector-form";
 
 const InspectorClient = dynamic(() => import("./client"), { ssr: false });
 
-function InspectorContent() {
+export default function InspectorPage() {
   const searchParams = useSearchParams();
   const hasParams = searchParams.has("strategy") && searchParams.has("name");
 
@@ -27,16 +26,4 @@ function InspectorContent() {
   }
 
   return <InspectorClient />;
-}
-
-export default function InspectorPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-[calc(100vh-6rem)]">Loading...</div>
-      }
-    >
-      <InspectorContent />
-    </Suspense>
-  );
 }
