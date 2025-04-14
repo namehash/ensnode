@@ -7,6 +7,7 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
@@ -14,8 +15,9 @@ import { PluginName } from "@ensnode/utils";
  * legacy ENS Subgraph indexing logic.
  */
 export const pluginName = PluginName.Root;
+export const deps = [DatasourceName.Root];
 
-const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
+const { chain, contracts } = DEPLOYMENT_CONFIG[DatasourceName.Root];
 const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({

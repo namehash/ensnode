@@ -7,7 +7,7 @@ import {
   healReverseAddresses,
   requestedPluginNames,
 } from "@/lib/ponder-helpers";
-import type { PluginName } from "@ensnode/utils";
+import { DatasourceName } from "@ensnode/ens-deployments";
 
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
@@ -32,15 +32,15 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
 };
 
 ////////
-// Next, filter ALL_PLUGINS by those that are available and that the user has activated.
+// Next, filter ALL_PLUGINS by those that are 'available' in the selected ENSDeployment
+// and are activated by the user.
 ////////
 
-// the available PluginNames are those that the selected ENS Deployment defines as available
-// TODO: this encodes a 1:1 assumption between Datasources and Plugins that may not be true in the future
-const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as PluginName[];
+// the available Datasources are those that the selected ENS Deployment defines.
+const availableDatasourceNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as DatasourceName[];
 
 // filter the set of available plugins by those that are 'active' in the env
-const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);
+const activePlugins = getActivePlugins(ALL_PLUGINS, availableDatasourceNames);
 
 ////////
 // Merge the plugins' configs into a single ponder config, including injected dependencies.
