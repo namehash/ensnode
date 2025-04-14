@@ -9,7 +9,10 @@ import {
 } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-// describes indexing behavior for the Linea Names ENS Datasource
+/**
+ * The Linea Names plugin describes indexing behavior for the Linea Names ENS Datasource, leveraging
+ * the shared Subgraph-compatible indexing logic.
+ */
 export const pluginName = PluginName.LineaNames;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];

@@ -9,7 +9,10 @@ import {
 } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-// describes indexing behavior in alignment with the legacy ENS Subgraph
+/**
+ * The Root plugin describes indexing behavior for the root Datasource, in alignment with the
+ * legacy ENS Subgraph indexing logic.
+ */
 export const pluginName = PluginName.Root;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];

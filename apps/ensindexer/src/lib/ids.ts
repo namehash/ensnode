@@ -41,11 +41,11 @@ export const makeEventId = (
  * additional Registration entities may be created. A unique ID other than labelHash is necessary,
  * otherwise Registration entities for the same label would collide.
  *
- * To avoid collisions, if the caller identifies as the root plugin, we use the Domain's `labelHash` as
- * originally specified. Otherwise, for any other plugin, we use the Domain's `node`, which is
+ * To avoid collisions, if the caller identifies as the root plugin, we use the Domain's `labelHash`
+ * (subgraph compat). Otherwise, for any other plugin, we use the Domain's `node`, which is
  * globally unique within ENS.
  *
- * We intentionally mix `labelHash` (labelhash) and `node` (namehash) values as registration ids:
+ * We knowingly mix `labelHash` (labelhash) and `node` (namehash) values as registration ids:
  * both result in keccak256 hashes (the odds of a collision being practically zero) and are derived
  * differently — the result of `namehash` will never (practically zero) collide with the result of
  * `labelhash` because `namehash` always includes the recursive hashing of the root node.

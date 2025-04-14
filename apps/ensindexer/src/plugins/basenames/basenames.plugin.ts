@@ -9,7 +9,10 @@ import {
 } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-// describes indexing behavior for the Basenames ENS Datasource
+/**
+ * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging
+ * the shared Subgraph-compatible indexing logic.
+ */
 export const pluginName = PluginName.Basenames;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
