@@ -2,7 +2,7 @@ import { mergeAbis } from "@ponder/utils";
 import { anvil } from "viem/chains";
 
 import { ETHResolverFilter } from "./lib/filters";
-import type { ENSDeployment } from "./lib/types";
+import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as eth_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -27,7 +27,7 @@ export default {
    * Addresses and Start Blocks from ens-test-env
    * https://github.com/ensdomains/ens-test-env/
    */
-  root: {
+  [DatasourceName.Root]: {
     // ens-test-env runs on a local Anvil chain with id 1337
     chain: { ...anvil, id: 1337 },
     contracts: {

@@ -2,7 +2,7 @@ import { mergeAbis } from "@ponder/utils";
 import { sepolia } from "viem/chains";
 
 import { ETHResolverFilter } from "./lib/filters";
-import type { ENSDeployment } from "./lib/types";
+import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as eth_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -23,7 +23,7 @@ export default {
    * Addresses and Start Blocks from ENS Sepolia Subgraph Manifest
    * https://ipfs.io/ipfs/QmdDtoN9QCRsBUsyoiiUUMQPPmPp5jimUQe81828UyWLtg
    */
-  root: {
+  [DatasourceName.Root]: {
     chain: sepolia,
     contracts: {
       RegistryOld: {
