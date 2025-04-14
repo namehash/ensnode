@@ -27,10 +27,10 @@ import { PluginName } from "@ensnode/utils";
  *
  * @example
  * ```ts
- * const rootNamespace = makePluginNamespace(PluginName.Root);
+ * const subgraphNamespace = makePluginNamespace(PluginName.Subgraph);
  * const basenamesNamespace = makePluginNamespace(PluginName.Basenames);
  *
- * rootNamespace("Registry"); // returns "root/Registry"
+ * subgraphNamespace("Registry"); // returns "subgraph/Registry"
  * basenamesNamespace("Registry"); // returns "basenames/Registry"
  * ```
  */

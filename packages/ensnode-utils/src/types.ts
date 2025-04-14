@@ -5,7 +5,7 @@ import type { Hex } from "viem";
  * of indexing logic.
  */
 export enum PluginName {
-  Root = "root",
+  Subgraph = "subgraph",
   Basenames = "basenames",
   LineaNames = "lineanames",
 }

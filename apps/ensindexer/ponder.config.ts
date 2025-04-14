@@ -11,14 +11,14 @@ import { DatasourceName } from "@ensnode/ens-deployments";
 
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
-import * as rootPlugin from "@/plugins/root/root.plugin";
+import * as subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
 
 ////////
 // First, generate AllPluginConfigs type representing the merged types of each plugin's `config`,
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 
-const ALL_PLUGINS = [rootPlugin, basenamesPlugin, lineaNamesPlugin] as const;
+const ALL_PLUGINS = [subgraphPlugin, basenamesPlugin, lineaNamesPlugin] as const;
 
 type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
   /**
@@ -71,8 +71,8 @@ START_BLOCK=${globalBlockrange.startBlock || "n/a"}
 END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
 The usage you're most likely interested in is:
-  ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=root END_BLOCK=x pnpm run start
-which runs just the root plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
+  ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
+which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
 In the future, indexing multiple networks with network-specific blockrange constraints may be possible.
 `,

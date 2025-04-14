@@ -248,12 +248,12 @@ describe("ponder helpers", () => {
     it("should return a map of start blocks by chain ID", async () => {
       const partialPonderConfig = {
         contracts: {
-          "root/Registrar": {
+          "subgraph/Registrar": {
             network: {
               "1": { startBlock: 444_444_444 },
             },
           },
-          "root/Registry": {
+          "subgraph/Registry": {
             network: {
               "1": { startBlock: 444_444_333 },
             },

@@ -4,7 +4,7 @@ import { makeResolverHandlers } from "@/handlers/Resolver";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Root>) {
+export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleABIChanged,
     handleAddrChanged,

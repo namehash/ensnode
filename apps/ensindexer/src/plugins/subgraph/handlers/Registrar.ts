@@ -21,7 +21,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.Root>) {
+}: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

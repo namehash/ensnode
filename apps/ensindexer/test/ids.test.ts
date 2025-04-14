@@ -28,13 +28,13 @@ describe("ids", () => {
   });
 
   describe("makeRegistrationId", () => {
-    it("should use the labelHash of the registered name when plugin name is `root`", () => {
+    it("should use the labelHash of the registered name when plugin name is `subgraph`", () => {
       expect(
-        makeRegistrationId(PluginName.Root, labelhash("vitalik"), namehash("vitalik.eth")),
+        makeRegistrationId(PluginName.Subgraph, labelhash("vitalik"), namehash("vitalik.eth")),
       ).toEqual(labelhash("vitalik"));
     });
 
-    it("should use the node of the registered name when plugin name is not `root`", () => {
+    it("should use the node of the registered name when plugin name is not `subgraph`", () => {
       expect(
         makeRegistrationId(
           PluginName.LineaNames,

@@ -41,7 +41,7 @@ export const makeEventId = (
  * additional Registration entities may be created. A unique ID other than labelHash is necessary,
  * otherwise Registration entities for the same label would collide.
  *
- * To avoid collisions, if the caller identifies as the root plugin, we use the Domain's `labelHash`
+ * To avoid collisions, if the caller identifies as the subgraph plugin, we use the Domain's `labelHash`
  * (subgraph compat). Otherwise, for any other plugin, we use the Domain's `node`, which is
  * globally unique within ENS.
  *
@@ -51,7 +51,7 @@ export const makeEventId = (
  * `labelhash` because `namehash` always includes the recursive hashing of the root node.
  *
  * For the "v1" of ENSIndexer (at a minimum) we want to preserve exact backwards compatibility with
- * Registration IDs issued by the ENS Subgraph. In the future we may abandon exact subgraph backwards
+ * Registration IDs issued by the ENS Subgraph. In the future we may relax exact subgraph backwards
  * compatibility and use `node` for all Registration IDs.
  *
  * @param pluginName the name of the active plugin issuing the registration
@@ -60,6 +60,6 @@ export const makeEventId = (
  * @returns a unique registration id
  */
 export const makeRegistrationId = (pluginName: PluginName, labelHash: LabelHash, node: Node) => {
-  if (pluginName === PluginName.Root) return labelHash;
+  if (pluginName === PluginName.Subgraph) return labelHash;
   return node;
 };

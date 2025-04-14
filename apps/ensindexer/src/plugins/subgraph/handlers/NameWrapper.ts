@@ -7,7 +7,7 @@ import { PluginName } from "@ensnode/utils";
 export default function ({
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.Root>) {
+}: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleExpiryExtended,
     handleFusesSet,

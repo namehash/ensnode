@@ -495,12 +495,12 @@ interface PonderNetworkConfig {
  * ```ts
  * const ponderConfig = {
  *  contracts: {
- *   "root/Registrar": {
+ *   "subgraph/Registrar": {
  *     network: {
  *       "1": { startBlock: 444_444_444 }
  *      }
  *   },
- *   "root/Registry": {
+ *   "subgraph/Registry": {
  *     network: {
  *       "1": { startBlock: 444_444_333 }
  *      }

@@ -20,7 +20,7 @@ You can update the `NEXT_PUBLIC_DEFAULT_ENSNODE_URLS` environment variable if yo
 
 #### RPC URLs
 
-ENSAdmin may use RPC URLs for each chain with a "root" ENS Deployment:
+ENSAdmin may use RPC URLs for relevant chains.
 
 - `RPC_URL_1` - Ethereum Mainnet (Chain ID: 1)
 - `RPC_URL_11155111` - Sepolia Testnet (Chain ID: 11155111)
