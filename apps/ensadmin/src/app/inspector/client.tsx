@@ -28,27 +28,32 @@ const nodeTypes = {
 };
 
 export default function ReactFlowClient() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const safeInitialNodes = Array.isArray(initialNodes) ? initialNodes : [];
+  const safeInitialEdges = Array.isArray(initialEdges) ? initialEdges : [];
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(safeInitialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(safeInitialEdges);
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      nodeTypes={nodeTypes}
-      edges={edges}
-      edgeTypes={edgeTypes}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      fitView
-      style={{ backgroundColor: "#F7F9FB" }}
-      proOptions={{
-        account: "paid-pro",
-        hideAttribution: true,
-      }}
-    >
-      <Controls />
-      <MiniMap />
-      <Background />
-    </ReactFlow>
+    <div className="h-[calc(100vh-6rem)]">
+      <ReactFlow
+        nodes={nodes}
+        nodeTypes={nodeTypes}
+        edges={edges}
+        edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        fitView
+        style={{ backgroundColor: "#F7F9FB" }}
+        proOptions={{
+          account: "paid-pro",
+          hideAttribution: true,
+        }}
+      >
+        <Controls />
+        <MiniMap />
+        <Background />
+      </ReactFlow>
+    </div>
   );
 }

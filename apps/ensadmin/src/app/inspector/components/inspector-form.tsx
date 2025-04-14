@@ -10,10 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 
-export default function InspectorForm({ className = "" }: { className?: string }) {
+type InspectorFormProps = {
+  className?: string;
+};
+
+export default function InspectorForm({ className = "" }: InspectorFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -34,13 +39,13 @@ export default function InspectorForm({ className = "" }: { className?: string }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`flex items-center gap-4 ${className}`}>
-      <div className="flex items-center gap-2">
+    <form onSubmit={handleSubmit} className={cn("flex gap-4", className)}>
+      <div className="flex items-center gap-2 w-full">
         <Label htmlFor="strategy" className="whitespace-nowrap">
           Strategy
         </Label>
         <Select value={strategy} onValueChange={setStrategy}>
-          <SelectTrigger className="w-[180px]" id="strategy">
+          <SelectTrigger className="w-full" id="strategy">
             <SelectValue placeholder="Select strategy" />
           </SelectTrigger>
           <SelectContent>
@@ -49,7 +54,7 @@ export default function InspectorForm({ className = "" }: { className?: string }
         </Select>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full">
         <Label htmlFor="name" className="whitespace-nowrap">
           Name
         </Label>
@@ -57,11 +62,11 @@ export default function InspectorForm({ className = "" }: { className?: string }
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-[250px]"
+          className="w-full"
         />
       </div>
 
-      <Button type="submit">
+      <Button type="submit" className="whitespace-nowrap">
         Inspect
       </Button>
     </form>
