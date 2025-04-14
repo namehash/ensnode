@@ -104,6 +104,11 @@ app.use(
     db,
     schema,
 
+    metaConfig: {
+      version: packageJson.version,
+      schema: ponderDatabaseSchema(),
+    },
+
     // describes the polymorphic (interface) relationships in the schema
     polymorphicConfig: {
       types: {

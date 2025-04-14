@@ -110,6 +110,9 @@ import {
   GraphQLString,
 } from "graphql";
 import { GraphQLJSON } from "graphql-scalars";
+
+import { queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata/db-helpers";
+
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
 
@@ -157,8 +160,21 @@ export interface PolymorphicConfig {
   fields: Record<string, string>;
 }
 
+export interface MetaConfig {
+  /**
+   * ENSIndexer version to report within `Query._meta.deployment`
+   */
+  version: string;
+
+  /**
+   * database schema from which to derive indexing status
+   */
+  schema: string;
+}
+
 export function buildGraphQLSchema(
   _schema: Schema,
+  metaConfig: MetaConfig,
   polymorphicConfig: PolymorphicConfig = { types: {}, fields: {} },
 ): GraphQLSchema {
   // copy schema to avoid injecting `intersection_table`s into ponder's schema object
@@ -583,6 +599,48 @@ export function buildGraphQLSchema(
         implementingTableConfigs: polymorphicTableConfigs[interfaceTypeName]!,
       });
     });
+
+  // Subgraph Meta Field
+  queryFields._meta = {
+    type: new GraphQLObjectType({
+      name: "_Meta_",
+      fields: {
+        block: {
+          type: new GraphQLNonNull(
+            new GraphQLObjectType({
+              name: "_Block_",
+              fields: {
+                hash: { type: GraphQLString },
+                number: { type: new GraphQLNonNull(GraphQLInt) },
+                timestamp: { type: new GraphQLNonNull(GraphQLInt) },
+                parentHash: { type: GraphQLString },
+              },
+            }),
+          ),
+        },
+        deployment: { type: new GraphQLNonNull(GraphQLString) },
+        hasIndexingErrors: { type: new GraphQLNonNull(GraphQLBoolean) },
+      },
+    }),
+    resolve: async (_source, _args, context) => {
+      const status = await queryPonderStatus(metaConfig.schema, context.drizzle);
+      const mainnetStatus = status.find((status) => status.network_name === "1");
+
+      if (!mainnetStatus) return {};
+
+      const meta = await queryPonderMeta(metaConfig.schema, context.drizzle);
+
+      return {
+        deployment: `${metaConfig.version}-${meta.build_id}`,
+        hasIndexingErrors: false,
+        block: {
+          // TODO: implement block hash, parentHash
+          number: mainnetStatus.block_number,
+          timestamp: mainnetStatus.block_timestamp,
+        },
+      };
+    },
+  };
 
   return new GraphQLSchema({
     // Include these here so they are listed first in the printed schema.

@@ -12,16 +12,18 @@ import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
-import { PolymorphicConfig, buildDataLoaderCache, buildGraphQLSchema } from "./graphql";
+import { MetaConfig, PolymorphicConfig, buildDataLoaderCache, buildGraphQLSchema } from "./graphql";
 
 export const graphql = (
   {
     db,
     schema,
+    metaConfig,
     polymorphicConfig,
   }: {
     db: any;
     schema: any;
+    metaConfig: MetaConfig;
     polymorphicConfig: PolymorphicConfig;
   },
   {
@@ -40,7 +42,7 @@ export const graphql = (
     maxOperationAliases: 30,
   },
 ) => {
-  const graphqlSchema = buildGraphQLSchema(schema, polymorphicConfig);
+  const graphqlSchema = buildGraphQLSchema(schema, metaConfig, polymorphicConfig);
 
   const yoga = createYoga({
     graphqlEndpoint: "*", // Disable built-in route validation, use Hono routing instead

@@ -597,6 +597,9 @@ importers:
 
   packages/ponder-subgraph-api:
     dependencies:
+      '@ensnode/ponder-metadata':
+        specifier: workspace:*
+        version: link:../ponder-metadata
       '@escape.tech/graphql-armor-max-aliases':
         specifier: ^2.6.0
         version: 2.6.0
