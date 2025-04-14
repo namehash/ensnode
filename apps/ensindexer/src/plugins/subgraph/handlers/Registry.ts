@@ -20,14 +20,17 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
+export default function ({
+  pluginName,
+  namespace,
+}: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleNewOwner, //
     handleNewResolver,
     handleNewTTL,
     handleTransfer,
   } = makeRegistryHandlers({
-    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
+    pluginName,
   });
 
   ponder.on(namespace("RegistryOld:setup"), setupRootNode);

@@ -1,14 +1,13 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils";
+import type { Node, PluginName } from "@ensnode/utils";
 import { type Address, Hash, type Hex, decodeEventLog } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import type { EventIdPrefix } from "@/lib/types";
 
 /**
  * makes a set of shared handlers for Resolver contracts
@@ -18,10 +17,10 @@ import type { EventIdPrefix } from "@/lib/types";
  * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
  * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
  *
- * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
+ * @param pluginName
  */
-export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventIdPrefix }) => {
-  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
+export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+  const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {
     async handleAddrChanged({
@@ -52,7 +51,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.addrChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           addrId: address,
         })
@@ -84,7 +83,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.multicoinAddrChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           coinType,
           addr: newAddress,
@@ -122,7 +121,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.nameChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           name,
         })
@@ -150,7 +149,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.abiChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           contentType,
         })
@@ -178,7 +177,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.pubkeyChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           x,
           y,
@@ -215,7 +214,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.textChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           key,
           // ponder's (viem's) event parsing produces empty string for some TextChanged events
@@ -247,7 +246,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.contenthashChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           hash,
         })
@@ -273,7 +272,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.interfaceChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           interfaceID,
           implementer,
@@ -306,7 +305,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.authorisationChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           owner,
           target,
@@ -348,7 +347,7 @@ export const makeResolverHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.versionChanged)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           resolverId: id,
           version: newVersion,
         })

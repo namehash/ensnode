@@ -30,7 +30,6 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
     registrarManagedName,
   });
 

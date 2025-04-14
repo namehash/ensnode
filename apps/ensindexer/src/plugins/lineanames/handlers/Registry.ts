@@ -14,7 +14,7 @@ export default function ({
     handleNewTTL,
     handleTransfer,
   } = makeRegistryHandlers({
-    eventIdPrefix: pluginName,
+    pluginName,
   });
 
   ponder.on(namespace("Registry:setup"), setupRootNode);

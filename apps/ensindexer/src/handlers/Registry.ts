@@ -7,8 +7,13 @@ import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-h
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { type EventWithArgs, healReverseAddresses } from "@/lib/ponder-helpers";
-import type { EventIdPrefix } from "@/lib/types";
-import { type LabelHash, type Node, REVERSE_ROOT_NODES, ROOT_NODE } from "@ensnode/utils";
+import {
+  type LabelHash,
+  type Node,
+  PluginName,
+  REVERSE_ROOT_NODES,
+  ROOT_NODE,
+} from "@ensnode/utils";
 import {
   isLabelIndexable,
   makeSubdomainNode,
@@ -76,10 +81,10 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
 /**
  * makes a set of shared handlers for a Registry contract
  *
- * @param eventIdPrefix event id prefix to avoid cross-plugin collisions a prefix necessary for event ids that may otherwise collide
+ * @param pluginName
  */
-export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventIdPrefix }) => {
-  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
+export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+  const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {
     handleNewOwner:
@@ -178,8 +183,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
         await context.db
           .insert(schema.newOwner)
           .values({
-            ...sharedEventValues(event),
-
+            ...sharedEventValues(context.network.chainId, event),
             parentDomainId: parentNode,
             domainId: node,
             ownerId: owner,
@@ -212,7 +216,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.transfer)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           domainId: node,
           ownerId: owner,
         })
@@ -238,7 +242,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.newTTL)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           domainId: node,
           ttl,
         })
@@ -288,7 +292,7 @@ export const makeRegistryHandlers = ({ eventIdPrefix }: { eventIdPrefix: EventId
       await context.db
         .insert(schema.newResolver)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           domainId: node,
           // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
           // but there is never a resolver record created for the zeroAddress. so if you query the

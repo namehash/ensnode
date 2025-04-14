@@ -32,7 +32,6 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    eventIdPrefix: pluginName,
     registrarManagedName,
   });
 

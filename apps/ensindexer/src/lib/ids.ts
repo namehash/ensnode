@@ -1,4 +1,3 @@
-import { EventIdPrefix } from "@/lib/types";
 import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
 import type { Address } from "viem";
 
@@ -7,11 +6,11 @@ export const makeResolverId = (address: Address, node: Node) =>
   [address.toLowerCase(), node].join("-");
 
 /**
- * Makes a unique event ID, optionally prefixed to avoid collisions.
- * See {@link EventIdPrefix} for additional discussion on collisions.
+ * Makes a unique, chain-scoped event ID.
+ * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
  *
- * @example With no prefix (subgraph-compat): `${blockNumber}-${logIndex}(-${transferIndex})`
- * @example With prefix (plugin-scoped): `${prefix}-${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example Subgraph plugin: `${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example All other plugins (chain-scoped): `${chainId}-${blockNumber}-${logIndex}(-${transferIndex})`
  *
  * @param prefix optional prefix
  * @param blockNumber
@@ -20,12 +19,19 @@ export const makeResolverId = (address: Address, node: Node) =>
  * @returns
  */
 export const makeEventId = (
-  prefix: EventIdPrefix,
+  pluginName: PluginName,
+  chainId: number,
   blockNumber: bigint,
   logIndex: number,
   transferIndex?: number,
 ) =>
-  [prefix, blockNumber.toString(), logIndex.toString(), transferIndex?.toString()]
+  [
+    // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
+    pluginName === PluginName.Subgraph ? null : chainId,
+    blockNumber.toString(),
+    logIndex.toString(),
+    transferIndex?.toString(),
+  ]
     .filter(Boolean)
     .join("-");
 

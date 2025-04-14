@@ -5,6 +5,7 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 export default function ({
+  pluginName,
   registrarManagedName,
   namespace,
 }: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
@@ -16,7 +17,7 @@ export default function ({
     handleTransferBatch,
     handleTransferSingle,
   } = makeNameWrapperHandlers({
-    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
+    pluginName,
     registrarManagedName,
   });
 

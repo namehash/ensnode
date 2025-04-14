@@ -22,7 +22,7 @@ export default function ({
     handleTextChanged,
     handleVersionChanged,
   } = makeResolverHandlers({
-    eventIdPrefix: pluginName,
+    pluginName,
   });
 
   ponder.on(namespace("Resolver:AddrChanged"), handleAddrChanged);

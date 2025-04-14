@@ -17,7 +17,7 @@ export default function ({
     handleTransferSingle,
     handleTransferBatch,
   } = makeNameWrapperHandlers({
-    eventIdPrefix: pluginName,
+    pluginName,
     registrarManagedName,
   });
 

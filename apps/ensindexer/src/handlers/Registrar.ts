@@ -6,7 +6,7 @@ import { makeSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
+import type { RegistrarManagedName } from "@/lib/types";
 import { Label, type LabelHash, PluginName } from "@ensnode/utils";
 import { isLabelIndexable, makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
@@ -15,19 +15,17 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 /**
  * makes a set of shared handlers for a Registrar contract that registers subnames of `registrarManagedName`
  *
- * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
+ * @param pluginName
  * @param registrarManagedName the name that the Registrar contract indexes subnames of
  */
 export const makeRegistrarHandlers = ({
   pluginName,
-  eventIdPrefix,
   registrarManagedName,
 }: {
   pluginName: PluginName;
-  eventIdPrefix: EventIdPrefix;
   registrarManagedName: RegistrarManagedName;
 }) => {
-  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
+  const sharedEventValues = makeSharedEventValues(pluginName);
   const registrarManagedNode = namehash(registrarManagedName);
 
   async function setNamePreimage(
@@ -115,7 +113,7 @@ export const makeRegistrarHandlers = ({
       await context.db
         .insert(schema.nameRegistered)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           registrationId,
           registrantId: owner,
           expiryDate: expires,
@@ -181,7 +179,7 @@ export const makeRegistrarHandlers = ({
       await context.db
         .insert(schema.nameRenewed)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           registrationId: id,
           expiryDate: expires,
         })
@@ -212,7 +210,7 @@ export const makeRegistrarHandlers = ({
       await context.db
         .insert(schema.nameTransferred)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           registrationId: id,
           newOwnerId: to,
         })

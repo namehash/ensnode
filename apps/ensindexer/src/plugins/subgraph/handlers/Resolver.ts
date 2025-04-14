@@ -4,7 +4,10 @@ import { makeResolverHandlers } from "@/handlers/Resolver";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
+export default function ({
+  pluginName,
+  namespace,
+}: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleABIChanged,
     handleAddrChanged,
@@ -20,7 +23,7 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Su
     handleTextChanged,
     handleVersionChanged,
   } = makeResolverHandlers({
-    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
+    pluginName,
   });
 
   ponder.on(namespace("Resolver:AddrChanged"), handleAddrChanged);

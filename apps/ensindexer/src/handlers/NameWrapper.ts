@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { type Node } from "@ensnode/utils";
+import { type Node, PluginName } from "@ensnode/utils";
 import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
@@ -9,7 +9,7 @@ import { makeSharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
+import type { RegistrarManagedName } from "@/lib/types";
 
 /**
  * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
@@ -42,17 +42,17 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 /**
  * makes a set of shared handlers for the NameWrapper contract
  *
- * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
+ * @param pluginName
  * @param registrarManagedName the name that the Registrar that NameWrapper interacts with registers subnames of
  */
 export const makeNameWrapperHandlers = ({
-  eventIdPrefix,
+  pluginName,
   registrarManagedName,
 }: {
-  eventIdPrefix: EventIdPrefix;
+  pluginName: PluginName;
   registrarManagedName: RegistrarManagedName;
 }) => {
-  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
+  const sharedEventValues = makeSharedEventValues(pluginName);
   const registrarManagedNode = namehash(registrarManagedName);
 
   async function handleTransfer(
@@ -96,7 +96,7 @@ export const makeNameWrapperHandlers = ({
     await context.db
       .insert(schema.wrappedTransfer)
       .values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
         domainId: node,
         ownerId: to,
@@ -155,7 +155,7 @@ export const makeNameWrapperHandlers = ({
       await context.db
         .insert(schema.nameWrapped)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           domainId: node,
           name,
           fuses,
@@ -190,7 +190,7 @@ export const makeNameWrapperHandlers = ({
       await context.db
         .insert(schema.nameUnwrapped)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           domainId: node,
           ownerId: owner,
         })
@@ -221,7 +221,7 @@ export const makeNameWrapperHandlers = ({
       await context.db
         .insert(schema.fusesSet)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           domainId: node,
           fuses,
         })
@@ -251,7 +251,7 @@ export const makeNameWrapperHandlers = ({
       await context.db
         .insert(schema.expiryExtended)
         .values({
-          ...sharedEventValues(event),
+          ...sharedEventValues(context.network.chainId, event),
           domainId: node,
           expiryDate: expiry,
         })
@@ -269,7 +269,13 @@ export const makeNameWrapperHandlers = ({
       await handleTransfer(
         context,
         event,
-        makeEventId(registrarManagedName, event.block.number, event.log.logIndex, 0),
+        makeEventId(
+          pluginName, //
+          context.network.chainId,
+          event.block.number,
+          event.log.logIndex,
+          0,
+        ),
         tokenId,
         to,
       );
@@ -287,7 +293,13 @@ export const makeNameWrapperHandlers = ({
         await handleTransfer(
           context,
           event,
-          makeEventId(registrarManagedName, event.block.number, event.log.logIndex, transferIndex),
+          makeEventId(
+            pluginName,
+            context.network.chainId,
+            event.block.number,
+            event.log.logIndex,
+            transferIndex,
+          ),
           tokenId,
           to,
         );

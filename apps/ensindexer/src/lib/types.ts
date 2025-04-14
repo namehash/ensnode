@@ -22,20 +22,6 @@
  */
 export type RegistrarManagedName = string;
 
-/*
- * The ENS Subgraph indexes events from a single chain and constructs event ids using just (blockNumber, logIndex).
- * Because ENSIndexer indexes multiple chains, however, these event ids can collide between chains,
- * if and when the blockNumber and logIndex happen to coincide across chains. To solve this (and
- * maintain subgraph compat), an EventIdPrefix is provided by non-root plugins to the shared handlers
- * in order to scope the event ids created by the shared handlers and avoid said cross-chain collisions.
- *
- * `null` value represents no EventIdPrefix (for subgraph compat in the "root" plugin)
- *
- * TODO: if we decide to relax exact subgraph backwards compatibility, we can simply use ponder's
- * `event.id` as an event UUID and remove this concept entirely.
- */
-export type EventIdPrefix = string | null;
-
 /**
  * Describes a ponder-compatible blockrange with optional start and end blocks, minus 'latest' support.
  * An undefined start block indicates indexing from block 0, and undefined end block indicates
