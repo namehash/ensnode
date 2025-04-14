@@ -1,11 +1,17 @@
 "use client";
 
-import { Activity, PackageSearch, RadioTower } from "lucide-react";
+import { Activity, RadioTower } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
+import { IconENS } from "@/components/icons/ens";
 
-import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
 import { ConnectionSelector } from "./connections/connection-selector";
 
 const navItems = [
@@ -15,9 +21,9 @@ const navItems = [
     icon: Activity,
   },
   {
-    title: "Protocol Inspector",
+    title: "ENS Protocol Inspector",
     url: "/inspector",
-    icon: PackageSearch,
+    icon: IconENS,
   },
   {
     title: "APIs",
