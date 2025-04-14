@@ -2,8 +2,9 @@
 
 import InspectorForm from "@/app/inspector/components/inspector-form";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function ActionsInspector() {
+function ActionsInspectorContent() {
   const searchParams = useSearchParams();
   const hasParams = searchParams.has("strategy") && searchParams.has("name");
 
@@ -15,5 +16,13 @@ export default function ActionsInspector() {
     <div className="flex items-center">
       <InspectorForm />
     </div>
+  );
+}
+
+export default function ActionsInspector() {
+  return (
+    <Suspense fallback={<div className="flex items-center">Loading...</div>}>
+      <ActionsInspectorContent />
+    </Suspense>
   );
 }
