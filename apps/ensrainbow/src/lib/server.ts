@@ -88,7 +88,7 @@ export class ENSRainbowServer {
       // Only return the label if its set number is less than or equal to highest_label_set
       if (labelSetNumber > highest_label_set) {
         logger.info(
-          `Label set ${labelSetNumber} for ${labelhash} exceeds highest_label_set ${highest_label_set}`,
+          `Label set ${labelSetNumber} for ${labelHash} exceeds highest_label_set ${highest_label_set}`,
         );
         return {
           status: StatusCode.Error,
