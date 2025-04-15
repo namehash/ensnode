@@ -28,8 +28,8 @@ export class ENSRainbowServer {
   }
 
   async heal(
-    labelhash: `0x${string}`, 
-    highest_label_set: number = Number.MAX_SAFE_INTEGER
+    labelhash: `0x${string}`,
+    highest_label_set: number = Number.MAX_SAFE_INTEGER,
   ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
@@ -57,8 +57,8 @@ export class ENSRainbowServer {
       // Check if the label has a label set prefix
       // Format expected: "labelSetNumber:actualLabel"
       // Only split by the first colon
-      const firstColonIndex = label.indexOf(':');
-      
+      const firstColonIndex = label.indexOf(":");
+
       // If there's no colon or it's the first character, the format is invalid
       if (firstColonIndex <= 0) {
         logger.error(`Invalid label format (missing set number prefix): "${label}"`);
@@ -72,7 +72,7 @@ export class ENSRainbowServer {
       // Extract the label set number and the actual label
       const labelSetStr = label.substring(0, firstColonIndex);
       const actualLabel = label.substring(firstColonIndex + 1);
-      
+
       // Parse the label set number
       const labelSetNumber = parseInt(labelSetStr, 10);
       if (isNaN(labelSetNumber)) {
@@ -86,7 +86,9 @@ export class ENSRainbowServer {
 
       // Only return the label if its set number is less than or equal to highest_label_set
       if (labelSetNumber > highest_label_set) {
-        logger.info(`Label set ${labelSetNumber} for ${labelhash} exceeds highest_label_set ${highest_label_set}`);
+        logger.info(
+          `Label set ${labelSetNumber} for ${labelhash} exceeds highest_label_set ${highest_label_set}`,
+        );
         return {
           status: StatusCode.Error,
           error: "Label not found",
@@ -94,7 +96,9 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.HealError;
       }
 
-      logger.info(`Successfully healed labelhash ${labelhash} to label "${actualLabel}" (set ${labelSetNumber})`);
+      logger.info(
+        `Successfully healed labelhash ${labelhash} to label "${actualLabel}" (set ${labelSetNumber})`,
+      );
       return {
         status: StatusCode.Success,
         label: actualLabel,
