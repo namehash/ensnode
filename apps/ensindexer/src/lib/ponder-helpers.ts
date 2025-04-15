@@ -1,10 +1,11 @@
 import type { Event } from "ponder:registry";
+import { merge as tsDeepMerge } from "ts-deepmerge";
+import { PublicClient } from "viem";
+
 import { Blockrange } from "@/lib/types";
 import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
-import { merge as tsDeepMerge } from "ts-deepmerge";
-import { PublicClient } from "viem";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
