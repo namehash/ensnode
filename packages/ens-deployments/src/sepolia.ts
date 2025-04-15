@@ -1,7 +1,7 @@
 import { mergeAbis } from "@ponder/utils";
 import { sepolia } from "viem/chains";
 
-import { ETHResolverFilter } from "./lib/filters";
+import { RootResolverFilter } from "./lib/filters";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
@@ -27,19 +27,19 @@ export default {
     chain: sepolia,
     contracts: {
       RegistryOld: {
-        abi: root_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x94f523b8261B815b87EFfCf4d18E6aBeF18d6e4b",
         startBlock: 3702721,
       },
       Registry: {
-        abi: root_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         startBlock: 3702728,
       },
       Resolver: {
         abi: mergeAbis([root_LegacyPublicResolver, root_Resolver]),
-        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
-        startBlock: 3702721, // based on startBlock of RegistryOld on Sepolia
+        filter: RootResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        startBlock: 3702721, // ignores any Resolver events prior to `startBlock` of RegistryOld on Sepolia
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
@@ -64,7 +64,7 @@ export default {
     },
   },
   /**
-   * Within the Sepolia "ENS deployment" there is no known deployment of Basenames.
+   * The Sepolia ENSDeployment has no known Datasource for Basenames.
    *
    * linea.eth's L1Resolver is deployed to Sepolia, but we do not index Linea Sepolia names here.
    * https://github.com/Consensys/linea-ens/tree/main/packages/linea-ens-resolver/deployments/sepolia

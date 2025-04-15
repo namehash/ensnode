@@ -1,6 +1,6 @@
 import { createConfig } from "ponder";
 
-import { DEPLOYMENT_CONFIG } from "@/lib/globals";
+import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
   makePluginNamespace,
@@ -17,7 +17,8 @@ import { PluginName } from "@ensnode/utils";
 export const pluginName = PluginName.Subgraph;
 export const deps = [DatasourceName.Root];
 
-const { chain, contracts } = DEPLOYMENT_CONFIG[DatasourceName.Root];
+// extract the chain and contract configs for root Datasource in order to build ponder config
+const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Root];
 const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({

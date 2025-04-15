@@ -1,7 +1,7 @@
 import type { Abi, Address, Chain } from "viem";
 
 /**
- * ENSDeploymentChain encodes a set of chains known to provide the root of an "ENS deployment".
+ * ENSDeploymentChain encodes the set of chains known to provide the root Datasource of an ENSDeployment.
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with:
  * - A root Registry deployed to the "ENS Deployment" chain.
@@ -87,7 +87,7 @@ export type ENSDeployment = {
   [DatasourceName.Basenames]?: Datasource;
 
   /**
-   * Linea Names and its associated contracts, optional.
+   * LineaNames and its associated contracts, optional.
    */
   [DatasourceName.LineaNames]?: Datasource;
 };

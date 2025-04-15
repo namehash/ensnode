@@ -1,6 +1,6 @@
 import { createConfig } from "ponder";
 
-import { DEPLOYMENT_CONFIG } from "@/lib/globals";
+import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
   makePluginNamespace,
@@ -11,13 +11,14 @@ import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
- * The Linea Names plugin describes indexing behavior for the Linea Names ENS Datasource, leveraging
+ * The LineaNames plugin describes indexing behavior for the LineaNames ENS Datasource, leveraging
  * the shared Subgraph-compatible indexing logic.
  */
 export const pluginName = PluginName.LineaNames;
 export const deps = [DatasourceName.LineaNames];
 
-const { chain, contracts } = DEPLOYMENT_CONFIG[DatasourceName.LineaNames];
+// extract the chain and contract configs for LineaNames Datasource in order to build ponder config
+const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.LineaNames];
 const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({

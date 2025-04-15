@@ -1,7 +1,7 @@
 import { mergeAbis } from "@ponder/utils";
 import { anvil } from "viem/chains";
 
-import { ETHResolverFilter } from "./lib/filters";
+import { RootResolverFilter } from "./lib/filters";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
@@ -32,18 +32,18 @@ export default {
     chain: { ...anvil, id: 1337 },
     contracts: {
       RegistryOld: {
-        abi: root_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
         startBlock: 0,
       },
       Registry: {
-        abi: root_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
         startBlock: 0,
       },
       Resolver: {
         abi: mergeAbis([root_LegacyPublicResolver, root_Resolver]),
-        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        filter: RootResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
         startBlock: 0,
       },
       BaseRegistrar: {
@@ -69,6 +69,6 @@ export default {
     },
   },
   /**
-   * Within the 'ens-test-env' "ENS deployment" there is no deployment of Basenames or Linea Names.
+   * The 'ens-test-env' ENSDeployment does not have a Basenames or LineaNames Datasource.
    */
 } satisfies ENSDeployment;

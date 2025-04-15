@@ -46,7 +46,7 @@ export async function setupRootNode({ context }: { context: Context }) {
       // NOTE: we initialize the root node as migrated because:
       // 1. this matches subgraph's existing behavior, despite the root node not technically being
       //    migrated until the new registry is deployed and
-      // 2. other plugins (Basenames, Linea Names) don't have the concept of migration but defaulting to true
+      // 2. other plugins (Basenames, LineaNames) don't have the concept of migration but defaulting to true
       //    is a reasonable behavior
       isMigrated: true,
     })
@@ -81,7 +81,7 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
 /**
  * makes a set of shared handlers for a Registry contract
  *
- * @param pluginName
+ * @param pluginName the name of the plugin using these shared handlers
  */
 export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName }) => {
   const sharedEventValues = makeSharedEventValues(pluginName);

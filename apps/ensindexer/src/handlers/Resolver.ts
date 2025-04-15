@@ -17,7 +17,7 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
  * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
  * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
  *
- * @param pluginName
+ * @param pluginName the name of the plugin using these shared handlers
  */
 export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName }) => {
   const sharedEventValues = makeSharedEventValues(pluginName);

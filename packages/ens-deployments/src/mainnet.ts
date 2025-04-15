@@ -1,7 +1,7 @@
 import { mergeAbis } from "@ponder/utils";
 import { base, linea, mainnet } from "viem/chains";
 
-import { BaseResolverFilter, ETHResolverFilter, LineaResolverFilter } from "./lib/filters";
+import { BaseResolverFilter, LineaResolverFilter, RootResolverFilter } from "./lib/filters";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
@@ -20,7 +20,7 @@ import { L2Resolver as base_L2Resolver } from "./abis/basenames/L2Resolver";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 
-// ABIs for Linea Names Datasource
+// ABIs for LineaNames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
@@ -41,19 +41,19 @@ export default {
     chain: mainnet,
     contracts: {
       RegistryOld: {
-        abi: root_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x314159265dd8dbb310642f98f50c066173c1259b",
         startBlock: 3327417,
       },
       Registry: {
-        abi: root_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         startBlock: 9380380,
       },
       Resolver: {
         abi: mergeAbis([root_LegacyPublicResolver, root_Resolver]),
-        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
-        startBlock: 3327417, // based on startBlock of RegistryOld on Mainnet
+        filter: RootResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
@@ -131,9 +131,9 @@ export default {
   },
 
   /**
-   * Linea Name Datasource
+   * LineaNames Datasource
    *
-   * Addresses and Start Blocks from Linea Names
+   * Addresses and Start Blocks from LineaNames
    * https://github.com/Consensys/linea-ens
    */
   [DatasourceName.LineaNames]: {

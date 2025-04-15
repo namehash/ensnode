@@ -15,7 +15,7 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 /**
  * makes a set of shared handlers for a Registrar contract that registers subnames of `registrarManagedName`
  *
- * @param pluginName
+ * @param pluginName the name of the plugin using these shared handlers
  * @param registrarManagedName the name that the Registrar contract indexes subnames of
  */
 export const makeRegistrarHandlers = ({

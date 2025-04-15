@@ -1,4 +1,4 @@
-import { SELECTED_DEPLOYMENT_CONFIG } from "@/lib/globals";
+import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
 import { type MergedTypes, getActivePlugins } from "@/lib/plugin-helpers";
 import {
   deepMergeRecursive,
@@ -32,14 +32,14 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
 };
 
 ////////
-// Next, filter ALL_PLUGINS by those that are 'available' in the selected ENSDeployment
-// and are activated by the user.
+// Next, filter ALL_PLUGINS by those that the user has selected (via ACTIVE_PLUGINS), panicking if a
+// user-specified plugin is unsupported by the Datasources available in SELECTED_ENS_DEPLOYMENT.
 ////////
 
-// the available Datasources are those that the selected ENS Deployment defines.
-const availableDatasourceNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as DatasourceName[];
+// the available Datasources are those that the selected ENSDeployment defines
+const availableDatasourceNames = Object.keys(SELECTED_ENS_DEPLOYMENT) as DatasourceName[];
 
-// filter the set of available plugins by those that are 'active' in the env
+// filter the set of available plugins by those that are 'active'
 const activePlugins = getActivePlugins(ALL_PLUGINS, availableDatasourceNames);
 
 ////////
@@ -56,7 +56,11 @@ activePluginsMergedConfig.indexingBehaviorDependencies = {
   HEAL_REVERSE_ADDRESSES: healReverseAddresses(),
 };
 
-// invariant: if using a custom START_BLOCK or END_BLOCK, ponder should be configured to index at most one network
+////////
+// Invariant: if using a custom START_BLOCK or END_BLOCK, ponder should be configured to index at
+// most one network.
+////////
+
 const globalBlockrange = getGlobalBlockrange();
 if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
   const numNetworks = Object.keys(activePluginsMergedConfig.networks).length;
@@ -74,8 +78,7 @@ The usage you're most likely interested in is:
   ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
 which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
-In the future, indexing multiple networks with network-specific blockrange constraints may be possible.
-`,
+In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
     );
   }
 }
