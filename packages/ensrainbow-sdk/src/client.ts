@@ -238,10 +238,10 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     }
 
     const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
-    
+
     // Add highest_label_set as a query parameter if provided
     if (highest_label_set !== undefined) {
-      url.searchParams.append('highest_label_set', highest_label_set.toString());
+      url.searchParams.append("highest_label_set", highest_label_set.toString());
     }
 
     const response = await fetch(url);
