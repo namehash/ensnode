@@ -111,10 +111,9 @@ import {
 } from "graphql";
 import { GraphQLJSON } from "graphql-scalars";
 
-import { queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata/db-helpers";
-
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
+import type { PonderMetadataProvider } from "./types";
 
 type Parent = Record<string, any>;
 type Context = {
@@ -160,23 +159,19 @@ export interface PolymorphicConfig {
   fields: Record<string, string>;
 }
 
-export interface MetaConfig {
-  /**
-   * ENSIndexer version to report within `Query._meta.deployment`
-   */
-  version: string;
-
-  /**
-   * database schema from which to derive indexing status
-   */
-  schema: string;
+interface BuildGraphQLSchemaOptions {
+  schema: Schema;
+  polymorphicConfig?: PolymorphicConfig;
+  metadataProvider: PonderMetadataProvider;
 }
 
-export function buildGraphQLSchema(
-  _schema: Schema,
-  metaConfig: MetaConfig,
-  polymorphicConfig: PolymorphicConfig = { types: {}, fields: {} },
-): GraphQLSchema {
+export function buildGraphQLSchema({
+  schema: _schema,
+  polymorphicConfig: _polymorphicConfig,
+  metadataProvider,
+}: BuildGraphQLSchemaOptions): GraphQLSchema {
+  const polymorphicConfig = _polymorphicConfig ?? { types: {}, fields: {} };
+
   // copy schema to avoid injecting `intersection_table`s into ponder's schema object
   const schema: Schema = { ..._schema };
 
@@ -622,23 +617,28 @@ export function buildGraphQLSchema(
         hasIndexingErrors: { type: new GraphQLNonNull(GraphQLBoolean) },
       },
     }),
-    resolve: async (_source, _args, context) => {
-      const status = await queryPonderStatus(metaConfig.schema, context.drizzle);
-      const mainnetStatus = status.find((status) => status.network_name === "1");
+    resolve: async (_source, _args) => {
+      try {
+        const [lastIndexedBlock, hasIndexingErrors, ponderBuildId] = await Promise.all([
+          metadataProvider.getLastIndexedBlock(),
+          metadataProvider.hasIndexingErrors(),
+          metadataProvider.getPonderBuildId(),
+        ]);
 
-      if (!mainnetStatus) return {};
-
-      const meta = await queryPonderMeta(metaConfig.schema, context.drizzle);
-
-      return {
-        deployment: `${metaConfig.version}-${meta.build_id}`,
-        hasIndexingErrors: false,
-        block: {
-          // TODO: implement block hash, parentHash
-          number: mainnetStatus.block_number,
-          timestamp: mainnetStatus.block_timestamp,
-        },
-      };
+        return {
+          deployment: `${metadataProvider.version}-${ponderBuildId}`,
+          hasIndexingErrors,
+          block: {
+            number: Number(lastIndexedBlock.number),
+            timestamp: Number(lastIndexedBlock.timestamp),
+            hash: lastIndexedBlock.hash,
+            parentHash: lastIndexedBlock.parentHash,
+          },
+        };
+      } catch (error) {
+        console.error("Cannot build subgraph meta", error);
+        return {};
+      }
     },
   };
 

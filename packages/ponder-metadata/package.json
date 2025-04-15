@@ -17,8 +17,7 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts",
-    "./db-helpers": "./src/db-helpers.ts"
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "access": "public",
