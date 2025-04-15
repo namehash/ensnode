@@ -637,7 +637,7 @@ export function buildGraphQLSchema({
         };
       } catch (error) {
         console.error("Cannot build subgraph meta", error);
-        return {};
+        return null;
       }
     },
   };

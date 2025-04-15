@@ -98,7 +98,7 @@ app.use(
     graphqlSchema: buildSubgraphGraphQLSchema({
       schema,
       // provide the schema with ponder's internal metadata to power _meta
-      metadataProvider: makePonderMetdataProvider(),
+      metadataProvider: makePonderMetdataProvider({ db, publicClients }),
       // describes the polymorphic (interface) relationships in the schema
       polymorphicConfig: {
         types: {
