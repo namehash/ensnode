@@ -52,12 +52,12 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
  * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
  * names. The function returns the plugins that are included in the list.
  *
- * @throws if no plugins are active
- * @throws if invalid plugin names
- * @throws if plugins requiredDatasources are not available in the set of `availableDatasourceNames`
+ * @throws if invalid plugins are requested
+ * @throws if activated plugins' `requiredDatasources` are not available in the set of `availableDatasourceNames`
  *
  * @param availablePlugins a list of all available plugins
- * @param availableDatasourceNames is a list of DatasourceNames specified by the current ENSDeployment
+ * @param requestedPluginNames list of user-requested plugin names
+ * @param availableDatasourceNames is a list of available DatasourceNames
  * @returns the active plugins
  */
 export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
@@ -81,8 +81,13 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
     );
   }
 
-  // validate that each plugin's requiredDatasources are available in availableDatasourceNames
-  for (const plugin of availablePlugins) {
+  // filter allPlugins by those that the user requested
+  const activePlugins = availablePlugins.filter((plugin) =>
+    requestedPluginNames.includes(plugin.pluginName),
+  );
+
+  // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
+  for (const plugin of activePlugins) {
     const hasRequiredDatasources = plugin.requiredDatasources.every((datasourceName) =>
       availableDatasourceNames.includes(datasourceName),
     );
@@ -94,8 +99,7 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
     }
   }
 
-  // filter allPlugins by those that the user requested
-  return availablePlugins.filter((plugin) => requestedPluginNames.includes(plugin.pluginName));
+  return activePlugins;
 }
 
 // Helper type to merge multiple types into one
@@ -104,7 +108,7 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
   : never;
 
 /**
- * Describes a ENSIndexerPlugin used within the ENSIndexer project.
+ * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  */
 export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
   /**
@@ -119,7 +123,8 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
   requiredDatasources: DatasourceName[];
 
   /**
-   * A Ponder config.
+   * An ENSIndexerPlugin must return a Ponder Config.
+   * https://ponder.sh/docs/contracts-and-networks
    */
   config: CONFIG;
 
@@ -130,7 +135,7 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
 }
 
 /**
- * A ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
+ * An ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
  */
 export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
   pluginName: PluginName;
@@ -139,14 +144,14 @@ export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
 };
 
 /**
- * A ENSIndexerPlugin accepts ENSIndexerPluginHandlerArgs and registers ponder event handlers.
+ * An ENSIndexerPlugin accepts ENSIndexerPluginHandlerArgs and registers ponder event handlers.
  */
 export type ENSIndexerPluginHandler<PLUGIN_NAME extends PluginName> = (
   args: ENSIndexerPluginHandlerArgs<PLUGIN_NAME>,
 ) => void;
 
 /**
- * A helper function for defining a ENSIndexerPlugin's `activate()` function.
+ * A helper function for defining an ENSIndexerPlugin's `activate()` function.
  *
  * Given a set of handler file imports, returns a function that executes them with the provided args.
  */
