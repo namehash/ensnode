@@ -29,8 +29,21 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
 
   api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     const labelhash = c.req.param("labelhash") as `0x${string}`;
-    logger.debug(`Healing request for labelhash: ${labelhash}`);
-    const result = await server.heal(labelhash);
+    // Parse the highest_label_set from query string if provided
+    const highestLabelSetParam = c.req.query("highest_label_set");
+    let highestLabelSet: number | undefined = undefined;
+    
+    if (highestLabelSetParam !== undefined) {
+      const parsed = parseInt(highestLabelSetParam, 10);
+      if (!isNaN(parsed) && parsed >= 0) {
+        highestLabelSet = parsed;
+      } else {
+        logger.warn(`Invalid highest_label_set parameter: ${highestLabelSetParam}`);
+      }
+    }
+    
+    logger.debug(`Healing request for labelhash: ${labelhash}, highest_label_set: ${highestLabelSet}`);
+    const result = await server.heal(labelhash, highestLabelSet);
     logger.debug(`Heal result:`, result);
     return c.json(result, result.errorCode);
   });

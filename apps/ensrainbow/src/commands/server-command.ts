@@ -22,6 +22,10 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
   const db = await ENSRainbowDB.open(options.dataDir);
 
   try {
+    // Read and log the highest label set
+    const highestLabelSet = await db.getHighestLabelSet();
+    logger.info(`Current highest label set: ${highestLabelSet}`);
+    
     const app = await createServer(db);
 
     const server = serve({

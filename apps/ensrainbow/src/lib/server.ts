@@ -27,7 +27,10 @@ export class ENSRainbowServer {
     return server;
   }
 
-  async heal(labelhash: `0x${string}`): Promise<EnsRainbow.HealResponse> {
+  async heal(
+    labelhash: `0x${string}`, 
+    highest_label_set: number = Number.MAX_SAFE_INTEGER
+  ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
       labelHashBytes = labelHashToBytes(labelhash);
@@ -51,10 +54,50 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.HealError;
       }
 
-      logger.info(`Successfully healed labelhash ${labelhash} to label "${label}"`);
+      // Check if the label has a label set prefix
+      // Format expected: "labelSetNumber:actualLabel"
+      // Only split by the first colon
+      const firstColonIndex = label.indexOf(':');
+      
+      // If there's no colon or it's the first character, the format is invalid
+      if (firstColonIndex <= 0) {
+        logger.error(`Invalid label format (missing set number prefix): "${label}"`);
+        return {
+          status: StatusCode.Error,
+          error: "Internal server error",
+          errorCode: ErrorCode.ServerError,
+        } satisfies EnsRainbow.HealError;
+      }
+
+      // Extract the label set number and the actual label
+      const labelSetStr = label.substring(0, firstColonIndex);
+      const actualLabel = label.substring(firstColonIndex + 1);
+      
+      // Parse the label set number
+      const labelSetNumber = parseInt(labelSetStr, 10);
+      if (isNaN(labelSetNumber)) {
+        logger.error(`Invalid label set number: "${labelSetStr}"`);
+        return {
+          status: StatusCode.Error,
+          error: "Internal server error",
+          errorCode: ErrorCode.ServerError,
+        } satisfies EnsRainbow.HealError;
+      }
+
+      // Only return the label if its set number is less than or equal to highest_label_set
+      if (labelSetNumber > highest_label_set) {
+        logger.info(`Label set ${labelSetNumber} for ${labelhash} exceeds highest_label_set ${highest_label_set}`);
+        return {
+          status: StatusCode.Error,
+          error: "Label not found",
+          errorCode: ErrorCode.NotFound,
+        } satisfies EnsRainbow.HealError;
+      }
+
+      logger.info(`Successfully healed labelhash ${labelhash} to label "${actualLabel}" (set ${labelSetNumber})`);
       return {
         status: StatusCode.Success,
-        label,
+        label: actualLabel,
       } satisfies EnsRainbow.HealSuccess;
     } catch (error) {
       logger.error("Error healing label:", error);

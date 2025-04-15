@@ -180,6 +180,15 @@ export class ENSRainbowDB {
       // Verify schema version
       await dbInstance.validateSchemaVersion();
 
+      // Check if HIGHEST_LABEL_SET exists, initialize it if not
+      //TODO: move to method
+      try {
+        await dbInstance.getHighestLabelSet();
+      } catch (error) {
+        logger.warn("Highest label set not found, initializing to 0");
+        await db.put(SYSTEM_KEY_HIGHEST_LABEL_SET, "0");
+      }
+
       return dbInstance;
     } catch (error) {
       if (error instanceof Error && error.message.includes("does not exist")) {
@@ -314,7 +323,18 @@ export class ENSRainbowDB {
       throw new Error(`Invalid labelhash length: expected 32 bytes, got ${labelhash.length} bytes`);
     }
 
-    return this.get(labelhash);
+    const label = await this.get(labelhash);
+    if (label === null) {
+      return null;
+    }
+
+    // Validate the label format (must have a label set prefix)
+    //TODO: remove
+    // if (!label.includes(':')) {
+    //   logger.warn(`Label with missing set prefix found: "${label}"`);
+    // }
+
+    return label;
   }
 
   /**

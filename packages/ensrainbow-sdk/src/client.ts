@@ -7,7 +7,12 @@ export namespace EnsRainbow {
   export interface ApiClient {
     count(): Promise<CountResponse>;
 
-    heal(labelhash: Labelhash): Promise<HealResponse>;
+    /**
+     * Heal a labelhash to its original label
+     * @param labelhash The labelhash to heal
+     * @param highest_label_set Optional highest label set to accept. If provided, only labels from sets less than or equal to this value will be returned.
+     */
+    heal(labelhash: Labelhash, highest_label_set?: number): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
 
@@ -193,6 +198,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * - Clients should handle all possible string values appropriately
    *
    * @param labelhash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
+   * @param highest_label_set Optional highest label set to accept. If provided, only labels from sets less than or equal to this value will be returned.
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
    *
@@ -224,14 +230,21 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash): Promise<EnsRainbow.HealResponse> {
+  async heal(labelhash: Labelhash, highest_label_set?: number): Promise<EnsRainbow.HealResponse> {
     const cachedResult = this.cache.get(labelhash);
 
     if (cachedResult) {
       return cachedResult;
     }
 
-    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    const url = new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl);
+    
+    // Add highest_label_set as a query parameter if provided
+    if (highest_label_set !== undefined) {
+      url.searchParams.append('highest_label_set', highest_label_set.toString());
+    }
+
+    const response = await fetch(url);
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
