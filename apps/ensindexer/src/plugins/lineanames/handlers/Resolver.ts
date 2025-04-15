@@ -1,13 +1,13 @@
 import { ponder } from "ponder:registry";
 
 import { makeResolverHandlers } from "@/handlers/Resolver";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 export default function ({
   pluginName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.Lineanames>) {
+}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleABIChanged,
     handleAddrChanged,

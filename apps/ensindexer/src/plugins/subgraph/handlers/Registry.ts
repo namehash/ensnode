@@ -4,7 +4,7 @@ import { Node, ROOT_NODE } from "@ensnode/utils";
 import { makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
@@ -23,7 +23,7 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
 export default function ({
   pluginName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.Subgraph>) {
+}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleNewOwner, //
     handleNewResolver,

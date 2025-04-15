@@ -7,7 +7,7 @@ import { decodeEventLog, namehash, zeroAddress } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { upsertAccount } from "@/lib/db-helpers";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 /**
@@ -23,7 +23,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.Lineanames>) {
+}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

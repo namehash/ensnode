@@ -60,7 +60,7 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
  * @param availableDatasourceNames is a list of DatasourceNames specified by the current ENSDeployment
  * @returns the active plugins
  */
-export function getActivePlugins<PLUGIN extends PonderENSPlugin>(
+export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
   availablePlugins: readonly PLUGIN[],
   requestedPluginNames: string[],
   availableDatasourceNames: DatasourceName[],
@@ -104,9 +104,9 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
   : never;
 
 /**
- * Describes a PonderENSPlugin used within the ENSIndexer project.
+ * Describes a ENSIndexerPlugin used within the ENSIndexer project.
  */
-export interface PonderENSPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
+export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
   /**
    * A unique plugin name for identification
    */
@@ -130,23 +130,23 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName = PluginName, CO
 }
 
 /**
- * A PonderENSPlugin's handlers are provided runtime information about their respective plugin.
+ * A ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
  */
-export type PonderENSPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
+export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
   pluginName: PluginName;
   registrarManagedName: RegistrarManagedName;
   namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
 
 /**
- * A PonderENSPlugin accepts PonderENSPluginHandlerArgs and registers ponder event handlers.
+ * A ENSIndexerPlugin accepts ENSIndexerPluginHandlerArgs and registers ponder event handlers.
  */
-export type PonderENSPluginHandler<PLUGIN_NAME extends PluginName> = (
-  args: PonderENSPluginHandlerArgs<PLUGIN_NAME>,
+export type ENSIndexerPluginHandler<PLUGIN_NAME extends PluginName> = (
+  args: ENSIndexerPluginHandlerArgs<PLUGIN_NAME>,
 ) => void;
 
 /**
- * A helper function for defining a PonderENSPlugin's `activate()` function.
+ * A helper function for defining a ENSIndexerPlugin's `activate()` function.
  *
  * Given a set of handler file imports, returns a function that executes them with the provided args.
  */
@@ -154,8 +154,8 @@ export const activateHandlers =
   <PLUGIN_NAME extends PluginName>({
     handlers,
     ...args
-  }: PonderENSPluginHandlerArgs<PLUGIN_NAME> & {
-    handlers: Promise<{ default: PonderENSPluginHandler<PLUGIN_NAME> }>[];
+  }: ENSIndexerPluginHandlerArgs<PLUGIN_NAME> & {
+    handlers: Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
   }) =>
   async () => {
     await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
