@@ -1,0 +1,23 @@
+---
+import Search from '@astrojs/starlight/components/Search.astro'
+import ENSNode2D from "../../assets/light-logo.svg"
+import HeaderButtons from "../molecules/HeaderButtons";
+---
+
+<header class="fixed bg-white top-0 w-full z-20 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none">
+    <div class="max-w-7xl mx-auto items-center justify-between flex flex-row px-8">
+        <div class="flex flex-row lg:gap-2 xl:gap-7 justify-between items-center">
+            <div class="flex flex-row justify-between items-center gap-2 sm:gap-[14px] cursor-pointer flex-shrink-0 pr-2">
+                <a
+                        href="/"
+                        class="text-black not-italic font-bold text-[21.539px] leading-[26.51px] tracking-[-0.907px] sm:text-[26px] sm:leading-8 sm:tracking-[-1.113px]"
+                >
+                    <img src={ENSNode2D.src} class="h-8 min-[800px]:h-10" alt="ENSRainbow" />
+                </a>
+                <Search />
+            </div>
+        </div>
+        <HeaderButtons />
+    </div>
+</header>
+

@@ -1,31 +1,36 @@
 ---
-import { Balancer } from "react-wrap-balancer";
-import { ENSAdminLogoLight } from "../atoms/ENSAdminLogoLight";
+import {Balancer} from "react-wrap-balancer";
+import {ENSAdminLogoLight} from "../atoms/logos/ENSAdminLogoLight";
 ---
-
-<div class="not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center min-[800px]:items-start text-center min-[800px]:text-start sm:py-20">
-    <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
-        <h1 class="max-w-[690px] font-semibold leading-tight  text-3xl sm:text-[4rem]">The new multichain indexer for ENSv2</h1>
-        <Balancer as="p" className="max-w-[650px] text-base sm:text-xl text-[#4a5c63] font-normal">Multichain indexer for ENS with ENS&nbsp;Subgraph backwards compatibility.</Balancer>
+<section class="w-full h-screen flex flex-col flex-nowrap justify-center items-center">
+    <div class="not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center text-center">
+        <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
+            <h1 class="max-w-[600px] w-full font-bold leading-[68px] text-3xl sm:text-6xl">The new multichain indexer
+                for ENSv2</h1>
+            <Balancer as="p" className="max-w-[600px] w-full text-base leading-6 text-[#4a5c63] font-normal">Multichain
+                indexer for ENS with ENS&nbsp;Subgraph backwards compatibility.
+            </Balancer>
+        </div>
+        <div class="w-full flex flex-col sm:flex-row flex-nowrap justify-center items-center gap-8">
+            <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://admin.ensnode.io/"
+                    class="no-underline hover:no-underline"
+            >
+                <button class="button-as-child cursor-pointer transition-all duration-200 bg-black hover:bg-[#272727] flex flex-row flex-nowrap justify-center items-center gap-2 rounded-lg pl-2 pr-3 py-2 text-white whitespace-nowrap text-base leading-6 font-medium">
+                    <ENSAdminLogoLight className="w-[26px] h-auto"/>
+                    Connect with ENSAdmin
+                </button>
+            </a>
+            <a
+                    href="/docs/"
+                    class="h-fit"
+            >
+                <button class="h-[42px] box-border cursor-pointer transition-all duration-200 bg-white hover:bg-gray-50 border-[#DBDBDB] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] button-as-child text-black rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-[9xp] px-[17px] text-base leading-6">
+                    Read the docs
+                </button>
+            </a>
+        </div>
     </div>
-    <div class="w-full flex flex-col sm:flex-row flex-nowrap justify-center min-[800px]:justify-start items-center gap-8">
-        <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://admin.ensnode.io/"
-                class="no-underline hover:no-underline"
-        >
-            <button class="button-as-child cursor-pointer transition-all duration-200 bg-black hover:bg-[#272727] flex flex-row flex-nowrap justify-center items-center gap-2 rounded-lg pl-3 pr-6 py-3 text-white whitespace-nowrap text-lg font-medium">
-                <ENSAdminLogoLight className="w-10 h-auto" />
-                Connect with ENSAdmin
-            </button>
-        </a>
-        <a
-                href="/docs/"
-        >
-            <button class="h-16 cursor-pointer transition-all duration-200 bg-white hover:bg-gray-50 border-[#DBDBDB] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] button-as-child text-black rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-3 px-6 text-lg">
-                Read the docs
-            </button>
-        </a>
-    </div>
-</div>
+</section>

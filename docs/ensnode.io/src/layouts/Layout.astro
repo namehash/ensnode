@@ -1,7 +1,10 @@
 ---
 import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
-// import "@namehash/namekit-react/styles.css";
+import Footer from "../components/organisms/Footer.tsx";
+import Header from "../components/organisms/Header.astro";
+import "../styles/globals.css"
+import "@namehash/namekit-react/styles.css";
 ---
 <!doctype html>
 <html lang="en">
@@ -54,7 +57,9 @@ import { SEO } from "astro-seo";
     />
 </head>
 <body>
+<Header />
 <slot/>
+<Footer client:load />
 </body>
 </html>
 

@@ -11,7 +11,6 @@ export function starlight(): AstroIntegration {
       SocialIcons: "./src/components/overrides/SocialIcons.astro",
       Hero: "./src/components/overrides/Hero.astro",
       TableOfContents: "./src/components/overrides/TableOfContents.astro",
-      Header: "./src/components/overrides/Header.astro"
     },
     customCss: [
       "./src/styles/globals.css",
