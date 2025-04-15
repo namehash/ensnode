@@ -10,8 +10,8 @@ import {
   ensAdminUrl,
   ensNodePublicUrl,
   getEnsDeploymentChain,
+  getRequestedPluginNames,
   ponderDatabaseSchema,
-  requestedPluginNames,
 } from "@/lib/ponder-helpers";
 import {
   fetchEnsRainbowVersion,
@@ -70,7 +70,7 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: requestedPluginNames().join(","),
+      ACTIVE_PLUGINS: getRequestedPluginNames().join(","),
       DATABASE_SCHEMA: ponderDatabaseSchema(),
       ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
     },

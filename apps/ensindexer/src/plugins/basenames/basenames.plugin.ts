@@ -15,7 +15,7 @@ import { PluginName } from "@ensnode/utils";
  * the shared Subgraph-compatible indexing logic.
  */
 export const pluginName = PluginName.Basenames;
-export const deps = [DatasourceName.Basenames];
+export const requiredDatasources = [DatasourceName.Basenames];
 
 // extract the chain and contract configs for Basenames Datasource in order to build ponder config
 const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Basenames];

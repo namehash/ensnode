@@ -4,8 +4,8 @@ import {
   deepMergeRecursive,
   getEnsDeploymentChain,
   getGlobalBlockrange,
+  getRequestedPluginNames,
   healReverseAddresses,
-  requestedPluginNames,
 } from "@/lib/ponder-helpers";
 import { DatasourceName } from "@ensnode/ens-deployments";
 
@@ -14,13 +14,13 @@ import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
 import * as subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
 
 ////////
-// First, generate AllPluginConfigs type representing the merged types of each plugin's `config`,
+// First, generate MergedPluginConfig type representing the merged types of each plugin's `config`,
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 
-const ALL_PLUGINS = [subgraphPlugin, basenamesPlugin, lineaNamesPlugin] as const;
+const AVAILABLE_PLUGINS = [subgraphPlugin, basenamesPlugin, lineaNamesPlugin] as const;
 
-type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
+type MergedPluginConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number]["config"]> & {
   /**
    * The environment variables that change the behavior of the indexer.
    * It's important to include all environment variables that change the behavior
@@ -36,23 +36,29 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
 // user-specified plugin is unsupported by the Datasources available in SELECTED_ENS_DEPLOYMENT.
 ////////
 
+const requestedPluginNames = getRequestedPluginNames();
+
 // the available Datasources are those that the selected ENSDeployment defines
 const availableDatasourceNames = Object.keys(SELECTED_ENS_DEPLOYMENT) as DatasourceName[];
 
 // filter the set of available plugins by those that are 'active'
-const activePlugins = getActivePlugins(ALL_PLUGINS, availableDatasourceNames);
+const activePlugins = getActivePlugins(
+  AVAILABLE_PLUGINS,
+  requestedPluginNames,
+  availableDatasourceNames,
+);
 
 ////////
 // Merge the plugins' configs into a single ponder config, including injected dependencies.
 ////////
 
-// merge the resulting configs
-const activePluginsMergedConfig = activePlugins
+// merge the resulting configs into the config we return to Ponder
+const ponderConfig = activePlugins
   .map((plugin) => plugin.config)
-  .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as AllPluginConfigs;
+  .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as MergedPluginConfig;
 
 // set the indexing behavior dependencies
-activePluginsMergedConfig.indexingBehaviorDependencies = {
+ponderConfig.indexingBehaviorDependencies = {
   HEAL_REVERSE_ADDRESSES: healReverseAddresses(),
 };
 
@@ -63,14 +69,14 @@ activePluginsMergedConfig.indexingBehaviorDependencies = {
 
 const globalBlockrange = getGlobalBlockrange();
 if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-  const numNetworks = Object.keys(activePluginsMergedConfig.networks).length;
+  const numNetworks = Object.keys(ponderConfig.networks).length;
   if (numNetworks > 1) {
     throw new Error(
       `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains.
 
 The config currently is:
 ENS_DEPLOYMENT_CHAIN=${getEnsDeploymentChain()}
-ACTIVE_PLUGINS=${requestedPluginNames().join(",")}
+ACTIVE_PLUGINS=${requestedPluginNames.join(",")}
 START_BLOCK=${globalBlockrange.startBlock || "n/a"}
 END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
@@ -93,6 +99,4 @@ await Promise.all(activePlugins.map((plugin) => plugin.activate()));
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
 ////////
 
-// The type of the default export is a merge of all active plugin configs
-// configs so that each plugin can be correctly typechecked
-export default activePluginsMergedConfig;
+export default ponderConfig;

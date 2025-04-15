@@ -16,15 +16,11 @@ export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-e
 
 /**
  * A Datasource describes a set of contracts on a given chain that interact with the ENS protocol.
- *
- * NOTE: this currently encodes the assumption that a given onchain ENS datasource correlates to
- * contracts on exactly 1 chain. If this is not the case in the future, Datasource can
- * be updated to reflect that OR multiple `Datasources` can be defined, and the respective
- * ENSIndexer Plugin can intentionally read from multiple Datasources to construct its
- * Ponder config.
  */
 export interface Datasource {
   chain: Chain;
+
+  // map of contract name to config
   contracts: Record<string, ContractConfig>;
 }
 
@@ -75,19 +71,19 @@ export type ContractConfig =
  */
 export type ENSDeployment = {
   /**
-   * The ENS Root and its associated contracts.
+   * The Datasource for the ENS root.
    *
    * Required for each "ENS deployment".
    */
   [DatasourceName.Root]: Datasource;
 
   /**
-   * Basenames and its associated contracts, optional.
+   * The Datasource for Basenames, optional.
    */
   [DatasourceName.Basenames]?: Datasource;
 
   /**
-   * Lineanames and its associated contracts, optional.
+   * The Datasource for Lineanames, optional.
    */
   [DatasourceName.Lineanames]?: Datasource;
 };

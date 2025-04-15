@@ -5,7 +5,6 @@ import { http, Chain } from "viem";
 import {
   constrainContractBlockrange,
   getEnsDeploymentChain,
-  requestedPluginNames as getRequestedPluginNames,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "@/lib/ponder-helpers";
@@ -55,26 +54,22 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
  *
  * @throws if no plugins are active
  * @throws if invalid plugin names
- * @throws if plugins datasource deps are not available
+ * @throws if plugins requiredDatasources are not available in the set of `availableDatasourceNames`
  *
- * @param allPlugins a list of all plugins
+ * @param availablePlugins a list of all available plugins
  * @param availableDatasourceNames is a list of DatasourceNames specified by the current ENSDeployment
  * @returns the active plugins
  */
 export function getActivePlugins<PLUGIN extends PonderENSPlugin>(
-  allPlugins: readonly PLUGIN[],
+  availablePlugins: readonly PLUGIN[],
+  requestedPluginNames: string[],
   availableDatasourceNames: DatasourceName[],
 ): PLUGIN[] {
-  /** @var a list of the requested plugin names (see `src/plugins` for available plugins) */
-  const requestedPluginNames = getRequestedPluginNames();
+  if (!requestedPluginNames.length) throw new Error("Must activate at least 1 plugin.");
 
-  if (!requestedPluginNames.length) {
-    throw new Error("Set the ACTIVE_PLUGINS environment variable to activate one or more plugins.");
-  }
-
-  // validate requestedPluginNames names against allPlugins
+  // validate that each of the requestedPluginNames is included in allPlugins
   const invalidPlugins = requestedPluginNames.filter(
-    (requestedPlugin) => !allPlugins.some((plugin) => plugin.pluginName === requestedPlugin),
+    (requestedPlugin) => !availablePlugins.some((plugin) => plugin.pluginName === requestedPlugin),
   );
 
   if (invalidPlugins.length) {
@@ -86,18 +81,21 @@ export function getActivePlugins<PLUGIN extends PonderENSPlugin>(
     );
   }
 
-  // validate that each plugin's deps are available in availableDatasourceNames
-  for (const plugin of allPlugins) {
-    const hasDeps = plugin.deps.every((dep) => availableDatasourceNames.includes(dep));
-    if (!hasDeps) {
+  // validate that each plugin's requiredDatasources are available in availableDatasourceNames
+  for (const plugin of availablePlugins) {
+    const hasRequiredDatasources = plugin.requiredDatasources.every((datasourceName) =>
+      availableDatasourceNames.includes(datasourceName),
+    );
+
+    if (!hasRequiredDatasources) {
       throw new Error(
-        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${getEnsDeploymentChain()} deployment. ${plugin.pluginName} specifies dependent datasources: ${plugin.deps.join(", ")}, but available datasources in the ${getEnsDeploymentChain()} deployment are: ${availableDatasourceNames.join(", ")}.`,
+        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${getEnsDeploymentChain()} deployment. ${plugin.pluginName} specifies dependent datasources: ${plugin.requiredDatasources.join(", ")}, but available datasources in the ${getEnsDeploymentChain()} deployment are: ${availableDatasourceNames.join(", ")}.`,
       );
     }
   }
 
   // filter allPlugins by those that the user requested
-  return allPlugins.filter((plugin) => requestedPluginNames.includes(plugin.pluginName));
+  return availablePlugins.filter((plugin) => requestedPluginNames.includes(plugin.pluginName));
 }
 
 // Helper type to merge multiple types into one
@@ -115,13 +113,13 @@ export interface PonderENSPlugin<PLUGIN_NAME extends PluginName = PluginName, CO
   pluginName: PLUGIN_NAME;
 
   /**
-   * A list of datasources this plugin requires access to, necessary for determining whether
+   * A list of DatasourceNames this plugin requires access to, necessary for determining whether
    * a set of ACTIVE_PLUGINS are valid for a given ENS_DEPLOYMENT_CHAIN
    */
-  deps: DatasourceName[];
+  requiredDatasources: DatasourceName[];
 
   /**
-   * A Ponder config
+   * A Ponder config.
    */
   config: CONFIG;
 

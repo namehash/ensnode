@@ -270,11 +270,11 @@ export const makeNameWrapperHandlers = ({
         context,
         event,
         makeEventId(
-          pluginName, //
+          pluginName,
           context.network.chainId,
           event.block.number,
           event.log.logIndex,
-          0,
+          0, // transferIndex
         ),
         tokenId,
         to,
