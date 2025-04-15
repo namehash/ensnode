@@ -3,6 +3,7 @@ import ensnode_video from "/ensnode_video.mp4";
 import video_rotated_thumbnail from "../../assets/bacground_video_rotated_thumbnail_compressed.png";
 import video_thumbnail from "../../assets/background_video_thumbnail_compressed.png";
 
+//TODO: leave for now as "intuition" for injecting proposal video and delete later
 export default function VideoBackground() {
   return (
     <>
