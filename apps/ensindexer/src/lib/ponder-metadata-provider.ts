@@ -1,6 +1,6 @@
 import packageJson from "@/../package.json";
 
-import { db, publicClients } from "ponder:api";
+import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 
 import {
@@ -25,25 +25,19 @@ export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
 // setup prometheus metrics fetching
 export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(ponderPort());
 
-export const makePonderMetdataProvider = (): PonderMetadataProvider => {
+export const makePonderMetdataProvider = ({
+  db,
+  publicClients,
+}: {
+  db: ReadonlyDrizzle<Record<string, unknown>>;
+  publicClients: Record<string, PublicClient>;
+}): PonderMetadataProvider => {
   // get the chain ID for the ENS deployment
   const ensDeploymentChainId = getEnsDeploymentChainId();
+  const publicClient = publicClients[ensDeploymentChainId];
 
-  /**
-   * Get the public client for the ENS deployment chain
-   * @returns the public client for the ENS deployment chain
-   * @throws an error if the public client is not found
-   */
-  function getEnsDeploymentPublicClient(): PublicClient {
-    // get the public client for the ENS deployment chain
-    const publicClient = publicClients[ensDeploymentChainId];
-
-    if (!publicClient) {
-      throw new Error(`Could not find public client for chain ID: ${ensDeploymentChainId}`);
-    }
-
-    return publicClient;
-  }
+  if (!publicClient)
+    throw new Error(`Invariant: no public client available for ${ensDeploymentChainId}`);
 
   /**
    * Get the last block indexed by Ponder.
@@ -62,7 +56,7 @@ export const makePonderMetdataProvider = (): PonderMetadataProvider => {
       );
     }
 
-    return getEnsDeploymentPublicClient().getBlock({
+    return publicClient.getBlock({
       blockNumber: BigInt(chainStatus.block_number),
     });
   };
