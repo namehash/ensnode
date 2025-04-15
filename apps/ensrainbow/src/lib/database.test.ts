@@ -60,7 +60,7 @@ describe("Database", () => {
       }
     });
 
-    it("should detect invalid labelhash format", async () => {
+    it("should detect invalid labelHash format", async () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
@@ -69,9 +69,9 @@ describe("Database", () => {
 
         // Add records using batch
         const batch = db.batch();
-        // Add rainbow record with invalid labelhash format
-        const invalidLabelhash = new Uint8Array([1, 2, 3]); // Too short
-        batch.put(invalidLabelhash, "test");
+        // Add rainbow record with invalid labelHash format
+        const invalidLabelHash = new Uint8Array([1, 2, 3]); // Too short
+        batch.put(invalidLabelHash, "test");
         await batch.write();
 
         const isValid = await db.validate();
@@ -81,7 +81,7 @@ describe("Database", () => {
       }
     });
 
-    it("should detect labelhash mismatch", async () => {
+    it("should detect labelHash mismatch", async () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
@@ -90,10 +90,10 @@ describe("Database", () => {
 
         // Add records using batch
         const batch = db.batch();
-        // Add rainbow record with mismatched labelhash
+        // Add rainbow record with mismatched labelHash
         const label = "vitalik";
-        const wrongLabelhash = labelhash("ethereum");
-        batch.put(labelHashToBytes(wrongLabelhash), label);
+        const wrongLabelHash = labelhash("ethereum");
+        batch.put(labelHashToBytes(wrongLabelHash), label);
         await batch.write();
 
         const isValid = await db.validate();
@@ -191,15 +191,15 @@ describe("Database", () => {
       }
     });
 
-    it("should skip labelhash verification in lite mode", async () => {
+    it("should skip labelHash verification in lite mode", async () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
-        // Add rainbow record with mismatched labelhash (would fail in full validation)
+        // Add rainbow record with mismatched labelHash (would fail in full validation)
         const label = "vitalik";
-        const wrongLabelhash = labelhash("ethereum");
+        const wrongLabelHash = labelhash("ethereum");
         const batch = db.batch();
-        batch.put(labelHashToBytes(wrongLabelhash), label);
+        batch.put(labelHashToBytes(wrongLabelHash), label);
         await batch.write();
         await db.setPrecalculatedRainbowRecordCount(1);
         await db.markIngestionFinished();
@@ -240,8 +240,8 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
       try {
         const labelWithNull = "test\0label";
-        const labelWithNullLabelhash = labelhash(labelWithNull);
-        const labelHashBytes = labelHashToBytes(labelWithNullLabelhash);
+        const labelWithNullLabelHash = labelhash(labelWithNull);
+        const labelHashBytes = labelHashToBytes(labelWithNullLabelHash);
 
         // Add record
         await db.addRainbowRecord(labelWithNull);

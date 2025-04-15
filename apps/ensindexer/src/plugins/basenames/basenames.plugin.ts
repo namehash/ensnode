@@ -3,19 +3,20 @@ import { createConfig } from "ponder";
 import { DEPLOYMENT_CONFIG } from "@/lib/globals";
 import {
   activateHandlers,
-  createPluginNamespace,
+  makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
-// uses the 'base' plugin config for deployments
-export const pluginName = "base" as const;
-
-// the Registry/Registrar handlers in this plugin manage subdomains of '.base.eth'
-const ownedName = "base.eth" as const;
+/**
+ * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging
+ * the shared Subgraph-compatible indexing logic.
+ */
+export const pluginName = PluginName.Basenames;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
-const namespace = createPluginNamespace(ownedName);
+const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -46,7 +47,9 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
-  ownedName,
+  pluginName,
+  // the shared Registrar handler in this plugin indexes direct subnames of '.base.eth'
+  registrarManagedName: "base.eth",
   namespace,
   handlers: [
     import("./handlers/Registry"),

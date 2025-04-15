@@ -1,11 +1,11 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { ROOT_NODE } from "@ensnode/utils";
-import { makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
-import { type Hex } from "viem";
+import { Node, ROOT_NODE } from "@ensnode/utils";
+import { makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains
@@ -15,25 +15,29 @@ import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 // these handlers should ignore 'RegistryOld' events for a given domain if it has been migrated to the
 // (new) Registry, which is tracked in the `Domain.isMigrated` field
-async function shouldIgnoreRegistryOldEvents(context: Context, node: Hex) {
+async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   const domain = await context.db.find(schema.domain, { id: node });
   return domain?.isMigrated ?? false;
 }
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"eth">) {
+export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Root>) {
   const {
     handleNewOwner, //
     handleNewResolver,
     handleNewTTL,
     handleTransfer,
-  } = makeRegistryHandlers(ownedName);
+  } = makeRegistryHandlers({
+    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
+  });
 
   ponder.on(namespace("RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
   ponder.on(namespace("RegistryOld:NewOwner"), async ({ context, event }) => {
-    const node = makeSubnodeNamehash(event.args.node, event.args.label);
+    const { label: labelHash, node: parentNode } = event.args;
+
+    const node = makeSubdomainNode(labelHash, parentNode);
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, node);
     if (shouldIgnoreEvent) return;
 

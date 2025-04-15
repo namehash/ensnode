@@ -1,9 +1,10 @@
 import type { Event } from "ponder:registry";
 import { Blockrange } from "@/lib/types";
-import DeploymentConfigs, { type ENSDeploymentChain } from "@ensnode/ens-deployments";
+import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
+import type { ContractConfig } from "ponder";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
 
@@ -235,7 +236,7 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
   const value = process.env.ENS_DEPLOYMENT_CHAIN;
   if (!value) return "mainnet";
 
-  const validValues = Object.keys(DeploymentConfigs);
+  const validValues = Object.keys(ENSDeployments);
   if (!validValues.includes(value)) {
     throw new Error(`Error: ENS_DEPLOYMENT_CHAIN must be one of ${validValues.join(" | ")}`);
   }
@@ -494,22 +495,22 @@ interface PonderNetworkConfig {
  * ```ts
  * const ponderConfig = {
  *  contracts: {
- *   "/eth/Registrar": {
+ *   "root/Registrar": {
  *     network: {
  *       "1": { startBlock: 444_444_444 }
  *      }
  *   },
- *   "/eth/Registry": {
+ *   "root/Registry": {
  *     network: {
  *       "1": { startBlock: 444_444_333 }
  *      }
  *   },
- *   "/eth/base/Registrar": {
+ *   "basenames/Registrar": {
  *     network: {
  *       "8453": { startBlock: 1_799_433 }
  *     }
  *   },
- *   "/eth/base/Registry": {
+ *   "basenames/Registry": {
  *     network: {
  *       "8453": { startBlock: 1_799_430 }
  *     }

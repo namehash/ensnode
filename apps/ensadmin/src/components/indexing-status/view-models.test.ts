@@ -1,3 +1,4 @@
+import { PluginName } from "@ensnode/utils";
 import { fromUnixTime } from "date-fns";
 import { base, mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
@@ -29,13 +30,13 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        ACTIVE_PLUGINS: ["eth"],
+        ACTIVE_PLUGINS: [PluginName.Root],
         DATABASE_SCHEMA: "public",
         ENS_DEPLOYMENT_CHAIN: "ens-test-env",
       });
 
       expect(result).toEqual([
-        { label: "Active Plugins", value: ["eth"] },
+        { label: "Active Plugins", value: [PluginName.Root] },
         { label: "ENS Deployment Chain", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);

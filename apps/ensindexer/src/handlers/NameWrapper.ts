@@ -5,11 +5,11 @@ import { type Node } from "@ensnode/utils";
 import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { createSharedEventValues, upsertAccount } from "@/lib/db-helpers";
+import { makeSharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import type { OwnedName } from "@/lib/types";
+import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
 
 /**
  * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
@@ -19,11 +19,9 @@ import type { OwnedName } from "@/lib/types";
  */
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
-// if the wrappedDomain has PCC set in fuses, set domain's expiryDate to the greatest of the two
+// if the WrappedDomain entity has PCC set in fuses, set Domain entity's expiryDate to the greater of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
-  const wrappedDomain = await context.db.find(schema.wrappedDomain, {
-    id: node,
-  });
+  const wrappedDomain = await context.db.find(schema.wrappedDomain, { id: node });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63)
@@ -42,13 +40,20 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 }
 
 /**
- * makes a set of shared handlers for the NameWrapper contract for a given registry's `ownedName`
+ * makes a set of shared handlers for the NameWrapper contract
  *
- * @param ownedName the name that the Registry that NameWrapper interacts with manages
+ * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
+ * @param registrarManagedName the name that the Registrar that NameWrapper interacts with registers subnames of
  */
-export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
-  const ownedSubnameNode = namehash(ownedName);
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeNameWrapperHandlers = ({
+  eventIdPrefix,
+  registrarManagedName,
+}: {
+  eventIdPrefix: EventIdPrefix;
+  registrarManagedName: RegistrarManagedName;
+}) => {
+  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
+  const registrarManagedNode = namehash(registrarManagedName);
 
   async function handleTransfer(
     context: Context,
@@ -107,7 +112,7 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{
         node: Node;
-        owner: Hex;
+        owner: Address;
         fuses: number;
         expiry: bigint;
         name: Hex;
@@ -124,9 +129,9 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       if (!domain) throw new Error("domain is guaranteed to already exist");
 
       // upsert the healed name iff !domain.labelName && label
-      // NOTE: this means that future wraps of a domain with encoded label hashes in the name
+      // NOTE: this means that future wraps of a domain with an EncodedLabelHash in the name
       //   will _not_ use the newly healed label emitted by the NameWrapper contract, and will
-      //   continue to have an un-healed labelhash in its name field
+      //   continue to have an un-healed EncodedLabelHash in its name field
       // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
       // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
       if (!domain.labelName && label) {
@@ -165,16 +170,16 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; owner: Hex }>;
+      event: EventWithArgs<{ node: Node; owner: Address }>;
     }) {
       const { node, owner } = event.args;
 
       await upsertAccount(context, owner);
 
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
-        // null expiry date if the domain is not a direct child of .eth
+        // null expiry date if the domain is not a direct child of the registrar managed name
         // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L123
-        expiryDate: domain.parentId !== ownedSubnameNode ? null : domain.expiryDate,
+        expiryDate: domain.parentId !== registrarManagedNode ? null : domain.expiryDate,
         wrappedOwnerId: null,
       }));
 
@@ -257,14 +262,16 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ id: bigint; to: Hex }>;
+      event: EventWithArgs<{ id: bigint; to: Address }>;
     }) {
+      const { id: tokenId, to } = event.args;
+
       await handleTransfer(
         context,
         event,
-        makeEventId(ownedName, event.block.number, event.log.logIndex, 0),
-        event.args.id,
-        event.args.to,
+        makeEventId(registrarManagedName, event.block.number, event.log.logIndex, 0),
+        tokenId,
+        to,
       );
     },
     async handleTransferBatch({
@@ -272,15 +279,17 @@ export const makeNameWrapperHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ ids: readonly bigint[]; to: Hex }>;
+      event: EventWithArgs<{ ids: readonly bigint[]; to: Address }>;
     }) {
-      for (const [i, id] of event.args.ids.entries()) {
+      const { ids: tokenIds, to } = event.args;
+
+      for (const [transferIndex, tokenId] of tokenIds.entries()) {
         await handleTransfer(
           context,
           event,
-          makeEventId(ownedName, event.block.number, event.log.logIndex, i),
-          id,
-          event.args.to,
+          makeEventId(registrarManagedName, event.block.number, event.log.logIndex, transferIndex),
+          tokenId,
+          to,
         );
       }
     },

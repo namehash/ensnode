@@ -1,4 +1,4 @@
-import { type Cache, type Labelhash, LruCache } from "@ensnode/utils";
+import { type Cache, Label, type LabelHash, LruCache } from "@ensnode/utils";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
 export namespace EnsRainbow {
@@ -12,7 +12,7 @@ export namespace EnsRainbow {
      * @param labelhash The labelhash to heal
      * @param highest_label_set Optional highest label set to accept. If provided, only labels from sets less than or equal to this value will be returned.
      */
-    heal(labelhash: Labelhash, highest_label_set?: number): Promise<HealResponse>;
+    heal(labelHash: LabelHash, highest_label_set?: number): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
 
@@ -31,14 +31,14 @@ export namespace EnsRainbow {
 
   export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
     status: Status;
-    label?: string | never;
+    label?: Label | never;
     error?: string | never;
     errorCode?: Error | never;
   }
 
   export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success, never> {
     status: typeof StatusCode.Success;
-    label: string;
+    label: Label;
     error?: never;
     errorCode?: never;
   }
@@ -160,7 +160,7 @@ export interface EnsRainbowApiClientOptions {
  */
 export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
-  private readonly cache: Cache<Labelhash, EnsRainbow.CacheableHealResponse>;
+  private readonly cache: Cache<LabelHash, EnsRainbow.CacheableHealResponse>;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -182,13 +182,13 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
       ...options,
     };
 
-    this.cache = new LruCache<Labelhash, EnsRainbow.CacheableHealResponse>(
+    this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
       this.options.cacheCapacity,
     );
   }
 
   /**
-   * Attempt to heal a labelhash to its original label.
+   * Attempt to heal a labelHash to its original label.
    *
    * Note on returned labels: ENSRainbow returns labels exactly as they are
    * represented in source rainbow table data. This means:
@@ -197,7 +197,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * - Labels can contain any valid string, including dots, null bytes, or be empty
    * - Clients should handle all possible string values appropriately
    *
-   * @param labelhash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
+   * @param labelHash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
    * @param highest_label_set Optional highest label set to accept. If provided, only labels from sets less than or equal to this value will be returned.
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
@@ -230,14 +230,14 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash, highest_label_set?: number): Promise<EnsRainbow.HealResponse> {
-    const cachedResult = this.cache.get(labelhash);
+  async heal(labelHash: LabelHash, highest_label_set?: number): Promise<EnsRainbow.HealResponse> {
+    const cachedResult = this.cache.get(labelHash);
 
     if (cachedResult) {
       return cachedResult;
     }
 
-    const url = new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl);
+    const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
     
     // Add highest_label_set as a query parameter if provided
     if (highest_label_set !== undefined) {
@@ -248,7 +248,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
-      this.cache.set(labelhash, healResponse);
+      this.cache.set(labelHash, healResponse);
     }
 
     return healResponse;

@@ -3,6 +3,7 @@ import { ByteArray } from "viem";
 
 import { ENSRainbowDB } from "@/lib/database";
 import { logger } from "@/utils/logger";
+import { LabelHash } from "@ensnode/utils";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
@@ -28,14 +29,14 @@ export class ENSRainbowServer {
   }
 
   async heal(
-    labelhash: `0x${string}`,
+    labelHash: LabelHash,
     highest_label_set: number = Number.MAX_SAFE_INTEGER,
   ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
-      labelHashBytes = labelHashToBytes(labelhash);
+      labelHashBytes = labelHashToBytes(labelHash);
     } catch (error) {
-      const defaultErrorMsg = "Invalid labelhash - must be a valid hex string";
+      const defaultErrorMsg = "Invalid labelHash - must be a valid hex string";
       return {
         status: StatusCode.Error,
         error: (error as Error).message ?? defaultErrorMsg,
@@ -46,7 +47,7 @@ export class ENSRainbowServer {
     try {
       const label = await this.db.getLabel(labelHashBytes);
       if (label === null) {
-        logger.info(`Unhealable labelhash request: ${labelhash}`);
+        logger.info(`Unhealable labelHash request: ${labelHash}`);
         return {
           status: StatusCode.Error,
           error: "Label not found",
@@ -97,7 +98,7 @@ export class ENSRainbowServer {
       }
 
       logger.info(
-        `Successfully healed labelhash ${labelhash} to label "${actualLabel}" (set ${labelSetNumber})`,
+        `Successfully healed labelHash ${labelHash} to label "${actualLabel}" (set ${labelSetNumber})`,
       );
       return {
         status: StatusCode.Success,

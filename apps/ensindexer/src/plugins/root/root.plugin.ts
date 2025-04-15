@@ -3,23 +3,28 @@ import { createConfig } from "ponder";
 import { DEPLOYMENT_CONFIG } from "@/lib/globals";
 import {
   activateHandlers,
-  createPluginNamespace,
+  makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
-// uses the 'linea' plugin config for deployments
-export const pluginName = "linea" as const;
-
-// the Registry/Registrar handlers in this plugin manage subdomains of '.linea.eth'
-const ownedName = "linea.eth" as const;
+/**
+ * The Root plugin describes indexing behavior for the root Datasource, in alignment with the
+ * legacy ENS Subgraph indexing logic.
+ */
+export const pluginName = PluginName.Root;
 
 const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
-const namespace = createPluginNamespace(ownedName);
+const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
   contracts: {
+    [namespace("RegistryOld")]: {
+      network: networkConfigForContract(chain, contracts.RegistryOld),
+      abi: contracts.Registry.abi,
+    },
     [namespace("Registry")]: {
       network: networkConfigForContract(chain, contracts.Registry),
       abi: contracts.Registry.abi,
@@ -34,6 +39,10 @@ export const config = createConfig({
       network: networkConfigForContract(chain, contracts.BaseRegistrar),
       abi: contracts.BaseRegistrar.abi,
     },
+    [namespace("EthRegistrarControllerOld")]: {
+      network: networkConfigForContract(chain, contracts.EthRegistrarControllerOld),
+      abi: contracts.EthRegistrarControllerOld.abi,
+    },
     [namespace("EthRegistrarController")]: {
       network: networkConfigForContract(chain, contracts.EthRegistrarController),
       abi: contracts.EthRegistrarController.abi,
@@ -46,11 +55,13 @@ export const config = createConfig({
 });
 
 export const activate = activateHandlers({
-  ownedName,
+  pluginName,
+  // the shared Registrar handler in this plugin indexes direct subnames of '.eth'
+  registrarManagedName: "eth",
   namespace,
   handlers: [
     import("./handlers/Registry"),
-    import("./handlers/EthRegistrar"),
+    import("./handlers/Registrar"),
     import("./handlers/Resolver"),
     import("./handlers/NameWrapper"),
   ],

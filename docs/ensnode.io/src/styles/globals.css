@@ -113,20 +113,18 @@ site-search dialog {
   display: none;
 }
 
-.sl-link-card,
-a[rel="next"],
-a[rel="prev"] {
+.sl-link-card {
   border-color: var(--sl-color-gray-4);
   box-shadow: var(--sl-shadow-sm);
 }
 .sl-link-card:hover,
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
-  background-color: var(--sl-color-black);
+  background: var(--sl-color-black);
   border-color: var(--sl-color-accent);
 }
 
-.sl-link-card:where(.astro-yv7oapu3):hover .icon:where(.astro-yv7oapu3) {
+.sl-link-card:hover .icon {
   color: var(--sl-color-accent);
 }
 

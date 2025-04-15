@@ -1,32 +1,42 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import DeploymentConfigs from "@ensnode/ens-deployments";
-import { type Labelhash } from "@ensnode/utils";
-import { makeSubnodeNamehash, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import { decodeEventLog, zeroAddress } from "viem";
+import { ENSDeployments } from "@ensnode/ens-deployments";
+import { type LabelHash } from "@ensnode/utils";
+import { makeSubdomainNode, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
+import { decodeEventLog, namehash, zeroAddress } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { upsertAccount } from "@/lib/db-helpers";
 import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
- * on Base a NFT is minted that tokenizes ownership of the registration. The minted NFT will be
+ * on Base, an ERC721 NFT is minted that tokenizes ownership of the registration. The minted NFT will be
  * assigned a unique tokenId represented as uint256(labelhash(label)) where label is the direct
  * subname of base.eth that was registered.
  * https://github.com/base/basenames/blob/1b5c1ad/src/L2/RegistrarController.sol#L488
  */
-const tokenIdToLabelhash = (tokenId: bigint): Labelhash => uint256ToHex32(tokenId);
+const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"base.eth">) {
+export default function ({
+  pluginName,
+  registrarManagedName,
+  namespace,
+}: PonderENSPluginHandlerArgs<PluginName.Basenames>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-    ownedSubnameNode,
-  } = makeRegistrarHandlers(ownedName);
+  } = makeRegistrarHandlers({
+    pluginName,
+    eventIdPrefix: pluginName,
+    registrarManagedName,
+  });
+
+  const registrarManagedNode = namehash(registrarManagedName);
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
@@ -36,7 +46,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -49,7 +59,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -62,7 +72,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
         ...event,
         args: {
           ...event.args,
-          labelhash: tokenIdToLabelhash(event.args.id),
+          labelHash: tokenIdToLabelHash(event.args.id),
         },
       },
     });
@@ -72,7 +82,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
     // base.eth's BaseRegistrar uses `id` instead of `tokenId`
     const { id: tokenId, from, to } = event.args;
 
-    const labelhash = tokenIdToLabelhash(tokenId);
+    const labelHash = tokenIdToLabelHash(tokenId);
 
     if (event.args.from === zeroAddress) {
       // Each domain must reference an account of its owner,
@@ -88,7 +98,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
       await context.db
         .insert(schema.domain)
         .values({
-          id: makeSubnodeNamehash(ownedSubnameNode, labelhash),
+          id: makeSubdomainNode(labelHash, registrarManagedNode),
           ownerId: to,
           createdAt: event.block.timestamp,
         })
@@ -98,7 +108,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
 
     await handleNameTransferred({
       context,
-      event: { ...event, args: { from, to, labelhash } },
+      event: { ...event, args: { from, to, labelHash } },
     });
   });
 
@@ -106,7 +116,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.base.contracts.EARegistrarController.abi,
+      abi: ENSDeployments.mainnet.basenames.contracts.EARegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -121,7 +131,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRegistered",
-      abi: DeploymentConfigs.mainnet.base.contracts.RegistrarController.abi,
+      abi: ENSDeployments.mainnet.basenames.contracts.RegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
@@ -136,7 +146,7 @@ export default function ({ ownedName, namespace }: PonderENSPluginHandlerArgs<"b
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({
       eventName: "NameRenewed",
-      abi: DeploymentConfigs.mainnet.base.contracts.RegistrarController.abi,
+      abi: ENSDeployments.mainnet.basenames.contracts.RegistrarController.abi,
       topics: event.log.topics,
       data: event.log.data,
     });
