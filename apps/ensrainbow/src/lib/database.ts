@@ -17,6 +17,11 @@ export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
  */
 export const SYSTEM_KEY_INGESTION_STATUS = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
+/**
+ * Key for storing the highest label set counter
+ * Stores the current label set number as a string
+ */
+export const SYSTEM_KEY_HIGHEST_LABEL_SET = new Uint8Array([0xff, 0xff, 0xff, 0xfc]) as ByteArray;
 export const SCHEMA_VERSION = 2;
 
 // Ingestion status values
@@ -38,7 +43,8 @@ export function isSystemKey(key: ByteArray): boolean {
     !isRainbowRecordKey(key) &&
     (byteArraysEqual(key, SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT) ||
       byteArraysEqual(key, SYSTEM_KEY_INGESTION_STATUS) ||
-      byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION))
+      byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION) ||
+      byteArraysEqual(key, SYSTEM_KEY_HIGHEST_LABEL_SET))
   );
 }
 
@@ -241,6 +247,29 @@ export class ENSRainbowDB {
    */
   public async markIngestionFinished(): Promise<void> {
     await this.db.put(SYSTEM_KEY_INGESTION_STATUS, IngestionStatus.Finished);
+  }
+
+  /**
+   * Get the current highest label set number
+   * @returns The current highest label set number, or 0 if not set yet
+   */
+  public async getHighestLabelSet(): Promise<number> {
+    const labelSet = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET);
+    if (labelSet === null) {
+      return 0;
+    }
+    return parseNonNegativeInteger(labelSet);
+  }
+
+  /**
+   * Increment the highest label set number and return the new value
+   * @returns The new highest label set number after incrementing
+   */
+  public async incrementHighestLabelSet(): Promise<number> {
+    const currentValue = await this.getHighestLabelSet();
+    const newValue = currentValue + 1;
+    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET, newValue.toString());
+    return newValue;
   }
 
   /**

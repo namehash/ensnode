@@ -14,7 +14,7 @@
   "scripts": {
     "serve": "tsx src/cli.ts serve",
     "ingest": "tsx src/cli.ts ingest",
-    "ingest-protobuf": "tsx src/cli.ts ingest-protobuf",
+    "ingest-ensrainbow": "tsx src/cli.ts ingest-ensrainbow",
     "validate": "tsx src/cli.ts validate",
     "validate:lite": "tsx src/cli.ts validate --lite",
     "purge": "tsx src/cli.ts purge",

@@ -86,7 +86,7 @@ export function createCLI(options: CLIOptions = {}) {
       },
     )
     .command(
-      "ingest-protobuf",
+      "ingest-ensrainbow",
       "Ingest labels from protobuf file into LevelDB",
       (yargs: Argv) => {
         return yargs
