@@ -1,4 +1,4 @@
-export type Block = {
+export type SubgraphMetaBlock = {
   /** Block number */
   number: bigint;
 
@@ -13,14 +13,19 @@ export type Block = {
 };
 
 /**
- * The data provider interface used to fetch data from the application layer.
+ * The metadata provider interface used to fetch data from the application layer.
  */
-export interface DataProvider {
+export interface PonderMetadataProvider {
+  /**
+   * ENSIndexer app version.
+   */
+  version: string;
+
   /**
    * Get last indexed block status
    * @returns The last indexed block status
    */
-  getLastIndexedBlock(): Promise<Block>;
+  getLastIndexedBlock(): Promise<SubgraphMetaBlock>;
 
   /**
    * Get the Ponder build ID

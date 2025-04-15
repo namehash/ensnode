@@ -1,4 +1,3 @@
 export * from "./middleware";
+export * from "./types";
 export { buildGraphQLSchema } from "./graphql";
-export type { DataProvider } from "./types";
-export type { Block } from "./types";

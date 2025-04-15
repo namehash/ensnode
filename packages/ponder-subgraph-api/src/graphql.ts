@@ -113,7 +113,7 @@ import { GraphQLJSON } from "graphql-scalars";
 
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
-import type { DataProvider } from "./types";
+import type { PonderMetadataProvider } from "./types";
 
 type Parent = Record<string, any>;
 type Context = {
@@ -159,30 +159,16 @@ export interface PolymorphicConfig {
   fields: Record<string, string>;
 }
 
-export interface MetaConfig {
-  /**
-   * ENSIndexer version to report within `Query._meta.deployment`
-   */
-  version: string;
-
-  /**
-   * database schema from which to derive indexing status
-   */
-  schema: string;
-}
-
 interface BuildGraphQLSchemaOptions {
   schema: Schema;
-  metaConfig: MetaConfig;
   polymorphicConfig?: PolymorphicConfig;
-  dataProvider: DataProvider;
+  metadataProvider: PonderMetadataProvider;
 }
 
 export function buildGraphQLSchema({
   schema: _schema,
-  metaConfig,
   polymorphicConfig: _polymorphicConfig,
-  dataProvider,
+  metadataProvider,
 }: BuildGraphQLSchemaOptions): GraphQLSchema {
   const polymorphicConfig = _polymorphicConfig ?? { types: {}, fields: {} };
 
@@ -633,12 +619,14 @@ export function buildGraphQLSchema({
     }),
     resolve: async (_source, _args) => {
       try {
-        const lastIndexedBlock = await dataProvider.getLastIndexedBlock();
-        const hasIndexingErrors = await dataProvider.hasIndexingErrors();
-        const ponderBuildId = await dataProvider.getPonderBuildId();
+        const [lastIndexedBlock, hasIndexingErrors, ponderBuildId] = await Promise.all([
+          metadataProvider.getLastIndexedBlock(),
+          metadataProvider.hasIndexingErrors(),
+          metadataProvider.getPonderBuildId(),
+        ]);
 
         return {
-          deployment: `${metaConfig.version}-${ponderBuildId}`,
+          deployment: `${metadataProvider.version}-${ponderBuildId}`,
           hasIndexingErrors,
           block: {
             number: Number(lastIndexedBlock.number),
