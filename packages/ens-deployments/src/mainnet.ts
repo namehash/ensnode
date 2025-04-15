@@ -1,17 +1,17 @@
 import { mergeAbis } from "@ponder/utils";
 import { base, linea, mainnet } from "viem/chains";
 
-import { BaseResolverFilter, ETHResolverFilter, LineaResolverFilter } from "./lib/filters";
-import type { ENSDeployment } from "./lib/types";
+import { BaseResolverFilter, LineaResolverFilter, RootResolverFilter } from "./lib/filters";
+import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
-import { BaseRegistrar as eth_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { EthRegistrarController as eth_EthRegistrarController } from "./abis/root/EthRegistrarController";
-import { EthRegistrarControllerOld as eth_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
-import { LegacyPublicResolver as eth_LegacyPublicResolver } from "./abis/root/LegacyPublicResolver";
-import { NameWrapper as eth_NameWrapper } from "./abis/root/NameWrapper";
-import { Registry as eth_Registry } from "./abis/root/Registry";
-import { Resolver as eth_Resolver } from "./abis/root/Resolver";
+import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
+import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { LegacyPublicResolver as root_LegacyPublicResolver } from "./abis/root/LegacyPublicResolver";
+import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
+import { Registry as root_Registry } from "./abis/root/Registry";
+import { Resolver as root_Resolver } from "./abis/root/Resolver";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
@@ -20,7 +20,7 @@ import { L2Resolver as base_L2Resolver } from "./abis/basenames/L2Resolver";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 
-// ABIs for Linea Names Datasource
+// ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
@@ -37,41 +37,41 @@ export default {
    * Addresses and Start Blocks from ENS Mainnet Subgraph Manifest
    * https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
    */
-  root: {
+  [DatasourceName.Root]: {
     chain: mainnet,
     contracts: {
       RegistryOld: {
-        abi: eth_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x314159265dd8dbb310642f98f50c066173c1259b",
         startBlock: 3327417,
       },
       Registry: {
-        abi: eth_Registry,
+        abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
         startBlock: 9380380,
       },
       Resolver: {
-        abi: mergeAbis([eth_LegacyPublicResolver, eth_Resolver]),
-        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
-        startBlock: 3327417, // based on startBlock of RegistryOld on Mainnet
+        abi: mergeAbis([root_LegacyPublicResolver, root_Resolver]),
+        filter: RootResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
       },
       BaseRegistrar: {
-        abi: eth_BaseRegistrar,
+        abi: root_BaseRegistrar,
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
         startBlock: 9380410,
       },
       EthRegistrarControllerOld: {
-        abi: eth_EthRegistrarControllerOld,
+        abi: root_EthRegistrarControllerOld,
         address: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
         startBlock: 9380471,
       },
       EthRegistrarController: {
-        abi: eth_EthRegistrarController,
+        abi: root_EthRegistrarController,
         address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
         startBlock: 16925618,
       },
       NameWrapper: {
-        abi: eth_NameWrapper,
+        abi: root_NameWrapper,
         address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
         startBlock: 16925608,
       },
@@ -84,7 +84,7 @@ export default {
    * Addresses and Start Blocks from Basenames
    * https://github.com/base-org/basenames
    */
-  basenames: {
+  [DatasourceName.Basenames]: {
     /**
      * As of 9-Feb-2025 the Resolver for 'base.eth' in the mainnet "ENS deployment" is
      * 0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31.
@@ -131,12 +131,12 @@ export default {
   },
 
   /**
-   * Linea Name Datasource
+   * Lineanames Datasource
    *
-   * Addresses and Start Blocks from Linea Names
+   * Addresses and Start Blocks from Lineanames
    * https://github.com/Consensys/linea-ens
    */
-  lineanames: {
+  [DatasourceName.Lineanames]: {
     /**
      * As of 9-Feb-2025 the Resolver for 'linea.eth' in the mainnet "ENS deployment" is
      * 0xde16ee87B0C019499cEBDde29c9F7686560f679a.

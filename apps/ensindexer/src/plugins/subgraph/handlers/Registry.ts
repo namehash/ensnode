@@ -4,7 +4,7 @@ import { Node, ROOT_NODE } from "@ensnode/utils";
 import { makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
 import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
@@ -20,14 +20,17 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Root>) {
+export default function ({
+  pluginName,
+  namespace,
+}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleNewOwner, //
     handleNewResolver,
     handleNewTTL,
     handleTransfer,
   } = makeRegistryHandlers({
-    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
+    pluginName,
   });
 
   ponder.on(namespace("RegistryOld:setup"), setupRootNode);

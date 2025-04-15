@@ -15,7 +15,7 @@
     "Subgraph"
   ],
   "exports": {
-    "./middleware": "./src/middleware.ts"
+    ".": "./src/index.ts"
   },
   "files": [
     "dist"
@@ -23,18 +23,19 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      "./middleware": {
-        "types": "./dist/middleware.d.ts",
-        "default": "./dist/middleware.js"
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
-    "main": "./dist/middleware.js",
-    "module": "./dist/middleware.mjs",
-    "types": "./dist/middleware.d.ts"
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
   },
   "scripts": {
     "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
+    "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
   "dependencies": {

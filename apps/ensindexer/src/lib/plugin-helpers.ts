@@ -1,11 +1,10 @@
-import type { ContractConfig } from "@ensnode/ens-deployments";
+import type { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
 import {
   constrainContractBlockrange,
   getEnsDeploymentChain,
-  requestedPluginNames as getRequestedPluginNames,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "@/lib/ponder-helpers";
@@ -27,10 +26,10 @@ import { PluginName } from "@ensnode/utils";
  *
  * @example
  * ```ts
- * const rootNamespace = makePluginNamespace(PluginName.Root);
+ * const subgraphNamespace = makePluginNamespace(PluginName.Subgraph);
  * const basenamesNamespace = makePluginNamespace(PluginName.Basenames);
  *
- * rootNamespace("Registry"); // returns "root/Registry"
+ * subgraphNamespace("Registry"); // returns "subgraph/Registry"
  * basenamesNamespace("Registry"); // returns "basenames/Registry"
  * ```
  */
@@ -53,24 +52,24 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
  * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
  * names. The function returns the plugins that are included in the list.
  *
- * @param allPlugins a list of all plugins
- * @param availablePluginNames is a list of plugin names that can be used
+ * @throws if invalid plugins are requested
+ * @throws if activated plugins' `requiredDatasources` are not available in the set of `availableDatasourceNames`
+ *
+ * @param availablePlugins a list of all available plugins
+ * @param requestedPluginNames list of user-requested plugin names
+ * @param availableDatasourceNames is a list of available DatasourceNames
  * @returns the active plugins
  */
-export function getActivePlugins<T extends { pluginName: PluginName }>(
-  allPlugins: readonly T[],
-  availablePluginNames: PluginName[],
-): T[] {
-  /** @var a list of the requested plugin names (see `src/plugins` for available plugins) */
-  const requestedPluginNames = getRequestedPluginNames();
+export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
+  availablePlugins: readonly PLUGIN[],
+  requestedPluginNames: string[],
+  availableDatasourceNames: DatasourceName[],
+): PLUGIN[] {
+  if (!requestedPluginNames.length) throw new Error("Must activate at least 1 plugin.");
 
-  if (!requestedPluginNames.length) {
-    throw new Error("Set the ACTIVE_PLUGINS environment variable to activate one or more plugins.");
-  }
-
-  // Check if the requested plugins are valid at all
+  // validate that each of the requestedPluginNames is included in allPlugins
   const invalidPlugins = requestedPluginNames.filter(
-    (requestedPlugin) => !allPlugins.some((plugin) => plugin.pluginName === requestedPlugin),
+    (requestedPlugin) => !availablePlugins.some((plugin) => plugin.pluginName === requestedPlugin),
   );
 
   if (invalidPlugins.length) {
@@ -82,29 +81,25 @@ export function getActivePlugins<T extends { pluginName: PluginName }>(
     );
   }
 
-  // Ensure that the requested plugins only reference availablePluginNames
-  const unavailablePlugins = requestedPluginNames.filter(
-    (name) => !availablePluginNames.includes(name as PluginName),
+  // filter allPlugins by those that the user requested
+  const activePlugins = availablePlugins.filter((plugin) =>
+    requestedPluginNames.includes(plugin.pluginName),
   );
 
-  if (unavailablePlugins.length) {
-    throw new Error(
-      `Requested plugins are not available in the ${getEnsDeploymentChain()} deployment: ${unavailablePlugins.join(
-        ", ",
-      )}. Available plugins in the ${getEnsDeploymentChain()} are: ${availablePluginNames.join(
-        ", ",
-      )}`,
+  // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
+  for (const plugin of activePlugins) {
+    const hasRequiredDatasources = plugin.requiredDatasources.every((datasourceName) =>
+      availableDatasourceNames.includes(datasourceName),
     );
+
+    if (!hasRequiredDatasources) {
+      throw new Error(
+        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${getEnsDeploymentChain()} deployment. ${plugin.pluginName} specifies dependent datasources: ${plugin.requiredDatasources.join(", ")}, but available datasources in the ${getEnsDeploymentChain()} deployment are: ${availableDatasourceNames.join(", ")}.`,
+      );
+    }
   }
 
-  return (
-    // return the set of all plugins...
-    allPlugins
-      // filtered by those that are available to the selected deployment
-      .filter((plugin) => availablePluginNames.includes(plugin.pluginName))
-      // and are requested by the user
-      .filter((plugin) => requestedPluginNames.includes(plugin.pluginName))
-  );
+  return activePlugins;
 }
 
 // Helper type to merge multiple types into one
@@ -113,33 +108,50 @@ export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x
   : never;
 
 /**
- * A PonderENSPlugin provides a pluginName to identify it, a ponder config, and an activate
- * function to load handlers.
+ * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  */
-export interface PonderENSPlugin<PLUGIN_NAME extends PluginName, CONFIG> {
+export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
+  /**
+   * A unique plugin name for identification
+   */
   pluginName: PLUGIN_NAME;
+
+  /**
+   * A list of DatasourceNames this plugin requires access to, necessary for determining whether
+   * a set of ACTIVE_PLUGINS are valid for a given ENS_DEPLOYMENT_CHAIN
+   */
+  requiredDatasources: DatasourceName[];
+
+  /**
+   * An ENSIndexerPlugin must return a Ponder Config.
+   * https://ponder.sh/docs/contracts-and-networks
+   */
   config: CONFIG;
+
+  /**
+   * An `activate` handler that should load a plugin's handlers that eventually execute `ponder.on`
+   */
   activate: () => Promise<void>;
 }
 
 /**
- * A PonderENSPlugin's handlers are provided runtime information about their respective plugin.
+ * An ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
  */
-export type PonderENSPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
+export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
   pluginName: PluginName;
   registrarManagedName: RegistrarManagedName;
   namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
 
 /**
- * A PonderENSPlugin accepts PonderENSPluginHandlerArgs and registers ponder event handlers.
+ * An ENSIndexerPlugin accepts ENSIndexerPluginHandlerArgs and registers ponder event handlers.
  */
-export type PonderENSPluginHandler<PLUGIN_NAME extends PluginName> = (
-  args: PonderENSPluginHandlerArgs<PLUGIN_NAME>,
+export type ENSIndexerPluginHandler<PLUGIN_NAME extends PluginName> = (
+  args: ENSIndexerPluginHandlerArgs<PLUGIN_NAME>,
 ) => void;
 
 /**
- * A helper function for defining a PonderENSPlugin's `activate()` function.
+ * A helper function for defining an ENSIndexerPlugin's `activate()` function.
  *
  * Given a set of handler file imports, returns a function that executes them with the provided args.
  */
@@ -147,8 +159,8 @@ export const activateHandlers =
   <PLUGIN_NAME extends PluginName>({
     handlers,
     ...args
-  }: PonderENSPluginHandlerArgs<PLUGIN_NAME> & {
-    handlers: Promise<{ default: PonderENSPluginHandler<PLUGIN_NAME> }>[];
+  }: ENSIndexerPluginHandlerArgs<PLUGIN_NAME> & {
+    handlers: Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
   }) =>
   async () => {
     await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));

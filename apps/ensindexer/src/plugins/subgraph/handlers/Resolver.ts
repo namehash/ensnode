@@ -1,10 +1,13 @@
 import { ponder } from "ponder:registry";
 
 import { makeResolverHandlers } from "@/handlers/Resolver";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Root>) {
+export default function ({
+  pluginName,
+  namespace,
+}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleABIChanged,
     handleAddrChanged,
@@ -20,7 +23,7 @@ export default function ({ namespace }: PonderENSPluginHandlerArgs<PluginName.Ro
     handleTextChanged,
     handleVersionChanged,
   } = makeResolverHandlers({
-    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
+    pluginName,
   });
 
   ponder.on(namespace("Resolver:AddrChanged"), handleAddrChanged);

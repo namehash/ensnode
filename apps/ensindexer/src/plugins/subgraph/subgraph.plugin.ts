@@ -1,21 +1,24 @@
 import { createConfig } from "ponder";
 
-import { DEPLOYMENT_CONFIG } from "@/lib/globals";
+import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
- * The Root plugin describes indexing behavior for the root Datasource, in alignment with the
+ * The Subgraph plugin describes indexing behavior for the 'Root' Datasource, in alignment with the
  * legacy ENS Subgraph indexing logic.
  */
-export const pluginName = PluginName.Root;
+export const pluginName = PluginName.Subgraph;
+export const requiredDatasources = [DatasourceName.Root];
 
-const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
+// extract the chain and contract configs for root Datasource in order to build ponder config
+const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Root];
 const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({

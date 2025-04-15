@@ -3,7 +3,7 @@ import { type LabelHash } from "@ensnode/utils";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 /**
@@ -19,7 +19,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.Root>) {
+}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -28,7 +28,6 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    eventIdPrefix: null, // NOTE: no event id prefix for root plugin (subgraph-compat)
     registrarManagedName,
   });
 

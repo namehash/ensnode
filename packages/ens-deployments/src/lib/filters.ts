@@ -1,6 +1,6 @@
 import type { EventFilter } from "./types";
 
-export const ETHResolverFilter = [
+export const RootResolverFilter = [
   { event: "AddrChanged", args: {} },
   { event: "AddressChanged", args: {} },
   { event: "NameChanged", args: {} },
