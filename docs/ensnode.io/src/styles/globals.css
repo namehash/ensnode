@@ -37,7 +37,8 @@
 
   --pagination-arrow-color: #c4c7c8;
 
-  --sl-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --sl-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
   --sl-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
@@ -113,20 +114,18 @@ site-search dialog {
   display: none;
 }
 
-.sl-link-card,
-a[rel="next"],
-a[rel="prev"] {
+.sl-link-card {
   border-color: var(--sl-color-gray-4);
   box-shadow: var(--sl-shadow-sm);
 }
 .sl-link-card:hover,
 a[rel="next"]:hover,
 a[rel="prev"]:hover {
-  background-color: var(--sl-color-black);
+  background: var(--sl-color-black);
   border-color: var(--sl-color-accent);
 }
 
-.sl-link-card:where(.astro-yv7oapu3):hover .icon:where(.astro-yv7oapu3) {
+.sl-link-card:hover .icon {
   color: var(--sl-color-accent);
 }
 
