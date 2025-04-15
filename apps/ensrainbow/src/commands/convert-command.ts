@@ -1,5 +1,4 @@
-import { createReadStream } from "fs";
-import { writeFileSync } from "fs";
+import { createReadStream, createWriteStream } from "fs";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
@@ -15,15 +14,13 @@ export interface ConvertCommandOptions {
 
 /**
  * Converts rainbow tables from SQL dump directly to protobuf format
+ * Uses a streaming approach to avoid memory issues with large datasets
  */
 export async function convertCommand(options: ConvertCommandOptions): Promise<void> {
   try {
     logger.info("Starting conversion from SQL dump to protobuf format...");
     logger.info(`Input file: ${options.inputFile}`);
     logger.info(`Output file: ${options.outputFile}`);
-    
-    // Create a simple in-memory collection
-    const records = [];
     
     // Set up progress bar
     const bar = new ProgressBar(
@@ -32,7 +29,7 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
         complete: "=",
         incomplete: " ",
         width: 40,
-        total: 150000000, // estimated, will be updated after parsing
+        total: 150000000, // estimated
       },
     );
     
@@ -43,6 +40,12 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
       input: fileStream.pipe(gunzip),
       crlfDelay: Infinity,
     });
+    
+    // Create a write stream for the output file
+    const outputStream = createWriteStream(options.outputFile);
+    
+    // Use the shared protobuf schema - we only need the RainbowRecord type, not the collection
+    const { RainbowRecordType } = createRainbowProtobufRoot();
     
     let isCopySection = false;
     let processedRecords = 0;
@@ -64,15 +67,19 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
         continue;
       }
       
-      let record;
       try {
-        record = buildRainbowRecord(line);
+        // Parse the record from SQL dump
+        const record = buildRainbowRecord(line);
         
-        // Add the record to our collection
-        records.push({
+        // Create a protobuf message for just this record
+        const message = RainbowRecordType.fromObject({
           label_hash: Buffer.from(record.labelHash),
           label: record.label
         });
+        
+        // Encode the record and write it directly to the output stream
+        const buffer = RainbowRecordType.encode(message).finish();
+        outputStream.write(buffer);
         
         processedRecords++;
         
@@ -92,30 +99,15 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
       }
     }
     
+    // Close the output stream to ensure all data is written
+    outputStream.end();
+    
     logger.info(`\nSQL parsing complete! Processed ${processedRecords} records`);
     if (invalidRecords > 0) {
       logger.warn(`Skipped ${invalidRecords} invalid records`);
     }
     
-    // Use the shared protobuf schema
-    logger.info("Setting up protobuf encoder...");
-    const { RainbowRecordCollectionType } = createRainbowProtobufRoot();
-    
-    // Create the collection message
-    const message = RainbowRecordCollectionType.fromObject({
-      records: records
-    });
-    
-    // Encode the collection
-    logger.info("Encoding protobuf data...");
-    const buffer = RainbowRecordCollectionType.encode(message).finish();
-    
-    // Write the buffer to the output file
-    logger.info(`Writing protobuf data to ${options.outputFile}...`);
-    writeFileSync(options.outputFile, buffer);
-    
     logger.info(`Conversion complete! ${processedRecords} records written to ${options.outputFile}`);
-    logger.info(`File size: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`);
     
   } catch (error) {
     logger.error(`Error during conversion: ${error}`);
