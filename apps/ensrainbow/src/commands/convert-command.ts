@@ -15,6 +15,10 @@ export interface ConvertCommandOptions {
 /**
  * Converts rainbow tables from SQL dump directly to protobuf format
  * Uses a streaming approach to avoid memory issues with large datasets
+ * 
+ * The output format is a standard length-prefixed protobuf stream:
+ * - Each message is prefixed with its length as a varint
+ * - This allows for cross-platform compatibility with other protobuf implementations
  */
 export async function convertCommand(options: ConvertCommandOptions): Promise<void> {
   try {
@@ -77,9 +81,12 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
           label: record.label
         });
         
-        // Encode the record and write it directly to the output stream
+        // Encode the record
         const buffer = RainbowRecordType.encode(message).finish();
-        outputStream.write(buffer);
+        
+        // Write the message with length-prefix encoding (standard protobuf delimited format)
+        // Using the Protobuf.js built-in method that handles the proper varint encoding
+        outputStream.write(Buffer.from(RainbowRecordType.encodeDelimited(message).finish()));
         
         processedRecords++;
         
@@ -108,6 +115,7 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
     }
     
     logger.info(`Conversion complete! ${processedRecords} records written to ${options.outputFile}`);
+    logger.info(`The file is in standard protobuf delimited format and can be read by any protobuf implementation.`);
     
   } catch (error) {
     logger.error(`Error during conversion: ${error}`);
