@@ -11,14 +11,14 @@ import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
- * The LineaNames plugin describes indexing behavior for the LineaNames ENS Datasource, leveraging
+ * The Lineanames plugin describes indexing behavior for the Lineanames ENS Datasource, leveraging
  * the shared Subgraph-compatible indexing logic.
  */
-export const pluginName = PluginName.LineaNames;
-export const deps = [DatasourceName.LineaNames];
+export const pluginName = PluginName.Lineanames;
+export const deps = [DatasourceName.Lineanames];
 
-// extract the chain and contract configs for LineaNames Datasource in order to build ponder config
-const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.LineaNames];
+// extract the chain and contract configs for Lineanames Datasource in order to build ponder config
+const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Lineanames];
 const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({

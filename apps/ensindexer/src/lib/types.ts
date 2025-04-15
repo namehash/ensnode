@@ -4,13 +4,13 @@
  *
  * ENSIndexer uses "shared handlers" for common indexing logic across plugins. While not suitable
  * for all theoretical ENS datasources, they work for current ones, particularly those that re-use the
- * original ENS contracts (i.e. Basenames, LineaNames). When indexing onchain events, these handlers
+ * original ENS contracts (i.e. Basenames, Lineanames). When indexing onchain events, these handlers
  * sometimes need context about parent ENS names of indexed subnames, which is what RegistrarManagedName
  * provides.
  *
  * ex: .eth for the ETH Registry
  * ex: .base.eth for Basenames Registry
- * ex: .linea.eth for the LineaNames Registry
+ * ex: .linea.eth for the Lineanames Registry
  *
  * Currently, the relationship between a plugin and a RegistrarManagedName is simplified to be 1:1.
  * In the future, we plan to enhance this data model to support indexing any number of Registrars

@@ -7,7 +7,7 @@ import { PluginName } from "@ensnode/utils";
 export default function ({
   pluginName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.LineaNames>) {
+}: PonderENSPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleABIChanged,
     handleAddrChanged,

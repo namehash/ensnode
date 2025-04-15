@@ -20,7 +20,7 @@ import { L2Resolver as base_L2Resolver } from "./abis/basenames/L2Resolver";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 
-// ABIs for LineaNames Datasource
+// ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
@@ -131,12 +131,12 @@ export default {
   },
 
   /**
-   * LineaNames Datasource
+   * Lineanames Datasource
    *
-   * Addresses and Start Blocks from LineaNames
+   * Addresses and Start Blocks from Lineanames
    * https://github.com/Consensys/linea-ens
    */
-  [DatasourceName.LineaNames]: {
+  [DatasourceName.Lineanames]: {
     /**
      * As of 9-Feb-2025 the Resolver for 'linea.eth' in the mainnet "ENS deployment" is
      * 0xde16ee87B0C019499cEBDde29c9F7686560f679a.

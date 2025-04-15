@@ -34,7 +34,7 @@ export interface Datasource {
 export enum DatasourceName {
   Root = "root",
   Basenames = "basenames",
-  LineaNames = "lineanames",
+  Lineanames = "lineanames",
 }
 
 /**
@@ -87,7 +87,7 @@ export type ENSDeployment = {
   [DatasourceName.Basenames]?: Datasource;
 
   /**
-   * LineaNames and its associated contracts, optional.
+   * Lineanames and its associated contracts, optional.
    */
-  [DatasourceName.LineaNames]?: Datasource;
+  [DatasourceName.Lineanames]?: Datasource;
 };

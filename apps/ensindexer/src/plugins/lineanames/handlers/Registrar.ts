@@ -23,7 +23,7 @@ export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.LineaNames>) {
+}: PonderENSPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,

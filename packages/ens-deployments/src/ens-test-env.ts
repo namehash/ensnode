@@ -69,6 +69,6 @@ export default {
     },
   },
   /**
-   * The 'ens-test-env' ENSDeployment does not have a Basenames or LineaNames Datasource.
+   * The 'ens-test-env' ENSDeployment does not have a Basenames or Lineanames Datasource.
    */
 } satisfies ENSDeployment;

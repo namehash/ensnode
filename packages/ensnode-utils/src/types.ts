@@ -7,7 +7,7 @@ import type { Hex } from "viem";
 export enum PluginName {
   Subgraph = "subgraph",
   Basenames = "basenames",
-  LineaNames = "lineanames",
+  Lineanames = "lineanames",
 }
 
 /**

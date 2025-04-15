@@ -64,6 +64,6 @@ export default {
     },
   },
   /**
-   * The Holesky ENSDeployment has no known Datasource for Basenames or LineaNames.
+   * The Holesky ENSDeployment has no known Datasource for Basenames or Lineanames.
    */
 } satisfies ENSDeployment;
