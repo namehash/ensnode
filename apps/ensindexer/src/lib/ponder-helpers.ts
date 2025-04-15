@@ -1,10 +1,8 @@
 import type { Event } from "ponder:registry";
 import { Blockrange } from "@/lib/types";
 import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
-import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
-import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import { DEFAULT_ENSRAINBOW_URL, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
-import type { ContractConfig } from "ponder";
 import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
 
@@ -242,6 +240,15 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
   }
 
   return value as ENSDeploymentChain;
+};
+
+/**
+ * Get the ENSDeployment chain ID.
+ *
+ * @returns the ENSDeployment chain ID
+ */
+export const getEnsDeploymentChainId = (): number => {
+  return ENSDeployments[getEnsDeploymentChain()].root.chain.id;
 };
 
 /**
