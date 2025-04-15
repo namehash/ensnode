@@ -5,7 +5,9 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
+import { convertCommand } from "@/commands/convert-command";
 import { ingestCommand } from "@/commands/ingest-command";
+import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
@@ -26,6 +28,11 @@ interface IngestArgs {
   "data-dir": string;
 }
 
+interface IngestProtobufArgs {
+  "input-file": string;
+  "data-dir": string;
+}
+
 interface ServeArgs {
   port: number;
   "data-dir": string;
@@ -38,6 +45,11 @@ interface ValidateArgs {
 
 interface PurgeArgs {
   "data-dir": string;
+}
+
+interface ConvertArgs {
+  "input-file": string;
+  "output-file": string;
 }
 
 export interface CLIOptions {
@@ -68,6 +80,29 @@ export function createCLI(options: CLIOptions = {}) {
       },
       async (argv: ArgumentsCamelCase<IngestArgs>) => {
         await ingestCommand({
+          inputFile: argv["input-file"],
+          dataDir: argv["data-dir"],
+        });
+      },
+    )
+    .command(
+      "ingest-protobuf",
+      "Ingest labels from protobuf file into LevelDB",
+      (yargs: Argv) => {
+        return yargs
+          .option("input-file", {
+            type: "string",
+            description: "Path to the protobuf file",
+            default: join(process.cwd(), "rainbow-records.pb"),
+          })
+          .option("data-dir", {
+            type: "string",
+            description: "Directory to store LevelDB data",
+            default: getDefaultDataSubDir(),
+          });
+      },
+      async (argv: ArgumentsCamelCase<IngestProtobufArgs>) => {
+        await ingestProtobufCommand({
           inputFile: argv["input-file"],
           dataDir: argv["data-dir"],
         });
@@ -134,6 +169,29 @@ export function createCLI(options: CLIOptions = {}) {
       async (argv: ArgumentsCamelCase<PurgeArgs>) => {
         await purgeCommand({
           dataDir: argv["data-dir"],
+        });
+      },
+    )
+    .command(
+      "convert",
+      "Convert rainbow tables from SQL dump to protobuf format",
+      (yargs: Argv) => {
+        return yargs
+          .option("input-file", {
+            type: "string",
+            description: "Path to the gzipped SQL dump file",
+            default: join(process.cwd(), "ens_names.sql.gz"),
+          })
+          .option("output-file", {
+            type: "string",
+            description: "Path to the output protobuf file",
+            default: join(process.cwd(), "rainbow-records.pb"),
+          });
+      },
+      async (argv: ArgumentsCamelCase<ConvertArgs>) => {
+        await convertCommand({
+          inputFile: argv["input-file"],
+          outputFile: argv["output-file"],
         });
       },
     )
