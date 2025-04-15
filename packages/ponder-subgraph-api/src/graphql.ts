@@ -620,7 +620,7 @@ export function buildGraphQLSchema({
     resolve: async (_source, _args) => {
       try {
         const [lastIndexedBlock, hasIndexingErrors, ponderBuildId] = await Promise.all([
-          metadataProvider.getLastIndexedBlock(),
+          metadataProvider.getLastIndexedDeploymentChainBlock(),
           metadataProvider.hasIndexingErrors(),
           metadataProvider.getPonderBuildId(),
         ]);
