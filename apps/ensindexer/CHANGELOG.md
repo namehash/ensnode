@@ -1,5 +1,17 @@
 # ensindexer
 
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies [[`7ef8b05`](https://github.com/namehash/ensnode/commit/7ef8b0502945339d6cdbf496f1fb26cc7f1d02a2)]:
+  - @ensnode/ponder-metadata@0.19.1
+  - @ensnode/ens-deployments@0.19.1
+  - @ensnode/utils@0.19.1
+  - @ensnode/ensrainbow-sdk@0.19.1
+  - @ensnode/ponder-schema@0.19.1
+  - @ensnode/ponder-subgraph@0.19.1
+
 ## 0.19.0
 
 ### Minor Changes
