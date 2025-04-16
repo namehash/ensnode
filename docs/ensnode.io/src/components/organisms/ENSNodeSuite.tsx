@@ -3,9 +3,9 @@ import SecondaryButtonIsland, {
 } from "@workspace/docs/ensnode.io/src/components/atoms/SecondaryButtonIsland.tsx";
 import { StarIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/StarIcon.tsx";
 import cc from "classcat";
+import { Balancer } from "react-wrap-balancer";
 import ENSAdminVisual from "../../assets/4 1.png";
 import JoinTelegram from "../molecules/JoinTelegram.tsx";
-import {Balancer} from "react-wrap-balancer";
 
 const appsSuite: {
   visual: React.ReactNode;
@@ -80,7 +80,9 @@ export default function ENSNodeSuite() {
               className={cc([
                 verticalDivStyles,
                 "gap-6",
-                idx < appsSuite.length - 1 ? "border-b sm:border-r border-gray-200 pb-6 sm:pr-6" : "",
+                idx < appsSuite.length - 1
+                  ? "border-b sm:border-r border-gray-200 pb-6 sm:pr-6"
+                  : "",
               ])}
             >
               {namehashApp.visual}

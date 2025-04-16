@@ -1,9 +1,9 @@
 import { BoltIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/BoltIcon.tsx";
 import { HeartIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/HeartIcon.tsx";
 import { LockIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/LockIcon.tsx";
-import {ENSAdminImage} from "@workspace/docs/ensnode.io/src/components/atoms/images/ENSAdminImage.tsx";
-import {FasterLookupImage} from "@workspace/docs/ensnode.io/src/components/atoms/images/FasterLookupImage.tsx";
-import {LostENSNamesImage} from "@workspace/docs/ensnode.io/src/components/atoms/images/LostENSNamesImage.tsx";
+import { ENSAdminImage } from "@workspace/docs/ensnode.io/src/components/atoms/images/ENSAdminImage.tsx";
+import { FasterLookupImage } from "@workspace/docs/ensnode.io/src/components/atoms/images/FasterLookupImage.tsx";
+import { LostENSNamesImage } from "@workspace/docs/ensnode.io/src/components/atoms/images/LostENSNamesImage.tsx";
 import { Fragment } from "react";
 import SectionDivider from "../atoms/SectionDivider.tsx";
 import InnovationSection, { InnovationSectionProps } from "../molecules/InnovationSection.tsx";

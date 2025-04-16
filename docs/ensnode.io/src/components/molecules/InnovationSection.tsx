@@ -17,7 +17,12 @@ export type InnovationSectionProps = {
 
 export default function InnovationSection(props: InnovationSectionProps) {
   return (
-    <section className={cc(["box-border h-fit w-full flex flex-col items-center justify-center px-5 py-10 md:py-20 xl:px-28 xl:py-[120px]", props.sectionBackground])}>
+    <section
+      className={cc([
+        "box-border h-fit w-full flex flex-col items-center justify-center px-5 py-10 md:py-20 xl:px-28 xl:py-[120px]",
+        props.sectionBackground,
+      ])}
+    >
       <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-10 sm:gap-0 xl:gap-20 max-w-[1216px]">
         {!props.isTextOnTheLeft && (
           <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 max-w-2xl overflow-visible">
