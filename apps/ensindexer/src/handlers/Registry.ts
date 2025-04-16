@@ -1,9 +1,6 @@
 import { Context } from "ponder:registry";
-// import schema from "ponder:schema";
-// import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { type Address, zeroAddress } from "viem";
+import { type Address } from "viem";
 
-import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
 
@@ -13,8 +10,6 @@ import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
  * @param pluginName the name of the plugin using these shared handlers
  */
 export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName }) => {
-  const sharedEventValues = makeSharedEventValues(pluginName);
-
   return {
     handleNewOwner:
       (isMigrated: boolean) =>
