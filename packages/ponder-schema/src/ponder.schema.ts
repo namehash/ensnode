@@ -48,8 +48,8 @@ export const domain = onchainTable("domains", (t) => ({
 
 // monkeypatch drizzle's column (necessary to match graph-node default collation "C")
 // https://github.com/drizzle-team/drizzle-orm/issues/638
-monkeypatchCollate(domain.name, '"C"');
-monkeypatchCollate(domain.labelName, '"C"');
+// monkeypatchCollate(domain.name, '"C"');
+// monkeypatchCollate(domain.labelName, '"C"');
 
 export const domainRelations = relations(domain, ({ one, many }) => ({
   resolvedAddress: one(account, {

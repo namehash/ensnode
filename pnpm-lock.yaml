@@ -40,13 +40,13 @@ catalogs:
       specifier: ^0.8.4
       version: 0.8.4
     drizzle-orm:
-      specifier: ^0.39.3
-      version: 0.39.3
+      specifier: ^0.42.0
+      version: 0.42.0
     hono:
       specifier: ^4.6.14
       version: 4.6.17
     ponder:
-      specifier: ^0.9.27
+      specifier: ^0.9.27-next.2
       version: 0.9.27
     tsup:
       specifier: ^8.3.6
@@ -63,8 +63,6 @@ catalogs:
 
 overrides:
   '@astrojs/prism>prismjs': 1.30.0
-  '@babel/runtime': 7.26.10
-  '@babel/helpers': 7.26.10
   '@graphiql/react>@headlessui/react': 2.2.0
   ponder>vite: 5.4.18
   astro>vite: 6.2.6
@@ -246,15 +244,9 @@ importers:
       '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
         version: link:../../packages/ensrainbow-sdk
-      '@ensnode/ponder-metadata':
-        specifier: workspace:*
-        version: link:../../packages/ponder-metadata
       '@ensnode/ponder-schema':
         specifier: workspace:*
         version: link:../../packages/ponder-schema
-      '@ensnode/ponder-subgraph':
-        specifier: workspace:*
-        version: link:../../packages/ponder-subgraph-api
       '@ensnode/utils':
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
@@ -540,7 +532,7 @@ importers:
         version: link:../ensrainbow-sdk
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+        version: 0.42.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
       parse-prometheus-text-format:
         specifier: ^1.1.1
         version: 1.1.1
@@ -611,7 +603,7 @@ importers:
         version: 2.2.3
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
+        version: 0.42.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
       graphql:
         specifier: ^16.10.0
         version: 16.10.0
@@ -3743,6 +3735,95 @@ packages:
       bun-types:
         optional: true
       expo-sqlite:
+        optional: true
+      knex:
+        optional: true
+      kysely:
+        optional: true
+      mysql2:
+        optional: true
+      pg:
+        optional: true
+      postgres:
+        optional: true
+      prisma:
+        optional: true
+      sql.js:
+        optional: true
+      sqlite3:
+        optional: true
+
+  drizzle-orm@0.42.0:
+    resolution: {integrity: sha512-pS8nNJm2kBNZwrOjTHJfdKkaU+KuUQmV/vk5D57NojDq4FG+0uAYGMulXtYT///HfgsMF0hnFFvu1ezI3OwOkg==}
+    peerDependencies:
+      '@aws-sdk/client-rds-data': '>=3'
+      '@cloudflare/workers-types': '>=4'
+      '@electric-sql/pglite': '>=0.2.0'
+      '@libsql/client': '>=0.10.0'
+      '@libsql/client-wasm': '>=0.10.0'
+      '@neondatabase/serverless': '>=0.10.0'
+      '@op-engineering/op-sqlite': '>=2'
+      '@opentelemetry/api': ^1.4.1
+      '@planetscale/database': '>=1.13'
+      '@prisma/client': '*'
+      '@tidbcloud/serverless': '*'
+      '@types/better-sqlite3': '*'
+      '@types/pg': '*'
+      '@types/sql.js': '*'
+      '@vercel/postgres': '>=0.8.0'
+      '@xata.io/client': '*'
+      better-sqlite3: '>=7'
+      bun-types: '*'
+      expo-sqlite: '>=14.0.0'
+      gel: '>=2'
+      knex: '*'
+      kysely: '*'
+      mysql2: '>=2'
+      pg: '>=8'
+      postgres: '>=3'
+      prisma: '*'
+      sql.js: '>=1'
+      sqlite3: '>=5'
+    peerDependenciesMeta:
+      '@aws-sdk/client-rds-data':
+        optional: true
+      '@cloudflare/workers-types':
+        optional: true
+      '@electric-sql/pglite':
+        optional: true
+      '@libsql/client':
+        optional: true
+      '@libsql/client-wasm':
+        optional: true
+      '@neondatabase/serverless':
+        optional: true
+      '@op-engineering/op-sqlite':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+      '@planetscale/database':
+        optional: true
+      '@prisma/client':
+        optional: true
+      '@tidbcloud/serverless':
+        optional: true
+      '@types/better-sqlite3':
+        optional: true
+      '@types/pg':
+        optional: true
+      '@types/sql.js':
+        optional: true
+      '@vercel/postgres':
+        optional: true
+      '@xata.io/client':
+        optional: true
+      better-sqlite3:
+        optional: true
+      bun-types:
+        optional: true
+      expo-sqlite:
+        optional: true
+      gel:
         optional: true
       knex:
         optional: true
@@ -11538,6 +11619,13 @@ snapshots:
   dotenv@8.6.0: {}
 
   drizzle-orm@0.39.3(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3):
+    optionalDependencies:
+      '@electric-sql/pglite': 0.2.13
+      '@opentelemetry/api': 1.7.0
+      kysely: 0.26.3
+      pg: 8.11.3
+
+  drizzle-orm@0.42.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3):
     optionalDependencies:
       '@electric-sql/pglite': 0.2.13
       '@opentelemetry/api': 1.7.0
