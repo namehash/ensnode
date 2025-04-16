@@ -5,9 +5,9 @@ import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/
 export default function HeaderButtons() {
   return (
     <>
-      <div className="hidden sm:flex items-center justify-center gap-1">
+      <div className="hidden sm:flex items-center justify-end gap-1">
         <Button variant="ghost" asChild>
-          <Link href="https://ensnode.io/ensrainbow/">Docs</Link>
+          <Link href="/docs/">Docs</Link>
         </Button>
 
         <Button variant="ghost" asChild>
@@ -36,25 +36,7 @@ export default function HeaderButtons() {
             size="small"
             className="hover:no-underline nk-underline-none"
           >
-            Docs
-          </Link>
-        </IconButton>
-
-        <IconButton asChild variant="ghost" className="p-[7px]">
-          <Link href="https://x.com/NamehashLabs">
-            <TwitterIcon className="fill-current" />
-          </Link>
-        </IconButton>
-
-        <IconButton asChild variant="ghost" className="p-[7px]">
-          <Link href="https://github.com/namehash/ensnode">
-            <GithubIcon className="fill-current" />
-          </Link>
-        </IconButton>
-
-        <IconButton asChild variant="ghost" className="p-[7px]">
-          <Link href="http://t.me/ensnode">
-            <TelegramIcon className="text-[#1F2937]" />
+            Hamburger
           </Link>
         </IconButton>
       </div>

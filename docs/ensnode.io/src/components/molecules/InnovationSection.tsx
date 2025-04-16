@@ -7,7 +7,7 @@ export type InnovationSectionProps = {
   badgeText: string;
   badgeIcon: React.ReactNode;
   descriptionExternalElements?: React.ReactNode;
-  sectionBackgroundName: string;
+  sectionBackground: string;
   isTextOnTheLeft: boolean;
   svgImage: React.ReactNode;
   normalImage?: ImageCharacteristics;
@@ -17,10 +17,10 @@ export type InnovationSectionProps = {
 
 export default function InnovationSection(props: InnovationSectionProps) {
   return (
-    <section className="box-border h-fit w-full flex flex-col items-center justify-center py-[60px] px-5 bg-white md:py-20 xl:px-28 xl:py-[120px]">
-      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-5 sm:gap-0 max-w-[1216px]">
+    <section className={cc(["box-border h-fit w-full flex flex-col items-center justify-center px-5 py-10 md:py-20 xl:px-28 xl:py-[120px]", props.sectionBackground])}>
+      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-10 sm:gap-0 xl:gap-20 max-w-[1216px]">
         {!props.isTextOnTheLeft && (
-          <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0 max-w-2xl pr-20">
+          <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 max-w-2xl overflow-visible">
             {props.normalImage ? (
               <img
                 className={cc([
@@ -65,7 +65,7 @@ export default function InnovationSection(props: InnovationSectionProps) {
         {props.isTextOnTheLeft && (
           <div
             className={cc([
-              "relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-3/5 rounded-none bg-origin-border flex-shrink-0 max-w-2xl",
+              "relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 max-w-2xl",
             ])}
           >
             {props.normalImage ? (
@@ -86,7 +86,7 @@ export default function InnovationSection(props: InnovationSectionProps) {
         )}
 
         {!props.mobileImageOnTop && (
-          <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none py-5 bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
+          <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
             {props.designatedMobileImage ? props.designatedMobileImage : props.svgImage}
           </div>
         )}

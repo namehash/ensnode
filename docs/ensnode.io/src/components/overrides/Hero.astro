@@ -1,17 +1,18 @@
 ---
 import { Balancer } from "react-wrap-balancer";
 import { ENSAdminLogoLight } from "../atoms/logos/ENSAdminLogoLight";
+import skies_image from "../../assets/hero_skies_image.png"
 ---
-<section class="w-full h-screen flex flex-col flex-nowrap justify-center items-center">
-    <div class="not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center text-center">
+<section style={`background-image: url(${skies_image.src});`} class="w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-cover bg-center">
+    <div class="not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center text-center px-5 sm:px-0">
         <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
-            <h1 class="max-w-[600px] w-full font-bold leading-[68px] text-3xl sm:text-6xl">The new multichain indexer
+            <h1 class="max-w-[600px] w-full font-bold leading-10 sm:leading-[68px] text-4xl sm:text-6xl text-white">The new multichain indexer
                 for ENSv2</h1>
-            <Balancer as="p" className="max-w-[600px] w-full text-base leading-6 text-[#4a5c63] font-normal">Multichain
+            <Balancer as="p" className="max-w-[600px] w-full text-base text-white leading-6 font-normal">Multichain
                 indexer for ENS with ENS&nbsp;Subgraph backwards compatibility.
             </Balancer>
         </div>
-        <div class="w-full flex flex-col sm:flex-row flex-nowrap justify-center items-center gap-8">
+        <div class="w-full flex flex-col sm:flex-row flex-nowrap justify-center items-center gap-4 sm:gap-8">
             <a
                     target="_blank"
                     rel="noopener noreferrer"

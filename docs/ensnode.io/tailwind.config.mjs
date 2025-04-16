@@ -6,8 +6,7 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        hero_bg: "linear-gradient(94deg, rgba(2,2,6,1) 0%, rgba(4,0,116,1) 100%)",
-        hero_bg_sm: "linear-gradient(180deg, rgba(2,2,6,1) 0%, rgba(4,0,116,1) 100%)",
+        telegram_bg: "linear-gradient(90deg, #F9FAFB 0%, #F3F5F7 100%)"
       },
       screens: {
         super_wide_hero: "1550px",

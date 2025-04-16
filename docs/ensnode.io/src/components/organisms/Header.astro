@@ -4,8 +4,8 @@ import ENSNode2D from "../../assets/light-logo.svg";
 import HeaderButtons from "../molecules/HeaderButtons";
 ---
 
-<header class="fixed bg-white top-0 w-full z-20 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none">
-    <div class="max-w-7xl mx-auto items-center justify-between flex flex-row px-8">
+<header class="fixed bg-transparent backdrop-blur-md top-0 w-full z-20 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none">
+    <div class="box-border max-w-7xl mx-auto items-center justify-between flex flex-row px-8">
         <div class="flex flex-row lg:gap-2 xl:gap-7 justify-between items-center">
             <div class="flex flex-row justify-between items-center gap-2 sm:gap-[14px] cursor-pointer flex-shrink-0 pr-2">
                 <a
@@ -14,7 +14,7 @@ import HeaderButtons from "../molecules/HeaderButtons";
                 >
                     <img src={ENSNode2D.src} class="h-8 min-[800px]:h-10" alt="ENSRainbow" />
                 </a>
-                <Search />
+                <Search class="hidden sm:block"/>
             </div>
         </div>
         <HeaderButtons />

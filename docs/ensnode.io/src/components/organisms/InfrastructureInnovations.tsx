@@ -1,11 +1,9 @@
 import { BoltIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/BoltIcon.tsx";
 import { HeartIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/HeartIcon.tsx";
 import { LockIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/LockIcon.tsx";
-import ensNode from "@workspace/docs/ensrainbow.io/src/assets/Illustration.svg";
-import { ENSNodeSchema } from "@workspace/docs/ensrainbow.io/src/components/atoms/ENSNodeSchema.tsx";
-import { ENSProfile } from "@workspace/docs/ensrainbow.io/src/components/atoms/ENSProfile.tsx";
-import { ENSProfileMobile } from "@workspace/docs/ensrainbow.io/src/components/atoms/ENSProfileMobile.tsx";
-import { LearnMoreButton } from "@workspace/docs/ensrainbow.io/src/components/atoms/LearnMoreButton.tsx";
+import {ENSAdminImage} from "@workspace/docs/ensnode.io/src/components/atoms/images/ENSAdminImage.tsx";
+import {FasterLookupImage} from "@workspace/docs/ensnode.io/src/components/atoms/images/FasterLookupImage.tsx";
+import {LostENSNamesImage} from "@workspace/docs/ensnode.io/src/components/atoms/images/LostENSNamesImage.tsx";
 import { Fragment } from "react";
 import SectionDivider from "../atoms/SectionDivider.tsx";
 import InnovationSection, { InnovationSectionProps } from "../molecules/InnovationSection.tsx";
@@ -14,11 +12,11 @@ export default function InfrastructureInnovations() {
   return (
     <>
       <Fragment key="Infrastructure-Innovations-Header">
-        <div className="w-full h-fit flex flex-col justify-center items-center gap-5 pt-[120px]">
-          <h1 className="max-w-[720px] text-center text-black text-4xl leading-10 font-bold">
+        <div className="w-full h-fit flex flex-col justify-center items-center gap-5 px-5 sm:px-0 pt-10 sm:pt-[120px]">
+          <h1 className="max-w-[720px] text-center text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold">
             ENSv2 Infrastructure Innovations
           </h1>
-          <p className="max-w-[720px] text-center text-gray-500 text-lg leading-7 font-normal">
+          <p className="max-w-[720px] text-center text-gray-500 text-lg leading-8 sm:leading-7 font-normal">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
             incididunt ut labore et dolore magna aliqua.{" "}
           </p>
@@ -47,13 +45,10 @@ const innovationSections: InnovationSectionProps[] = [
     ),
     badgeText: "Deliver vital ENSv2 infrastructure",
     badgeIcon: <HeartIcon className="w-[20px] h-[20px]" />,
-    sectionBackgroundName: "",
+    sectionBackground: "bg-white",
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
-    svgImage: <ENSProfile styles="relative z-10 w-full h-full" />,
-    designatedMobileImage: (
-      <ENSProfileMobile styles="relative z-10 w-full h-full -right-5 shadow-[inset_50px_0px_8px_0px_white]" />
-    ),
+    svgImage: <LostENSNamesImage styles="relative z-10 w-full h-full" />,
   },
   {
     sectionHeader: <>Strengthen the decentralization and &quot;unstoppability&quot; of ENS:</>,
@@ -67,20 +62,10 @@ const innovationSections: InnovationSectionProps[] = [
     ),
     badgeText: "Secure millions of ENS names from loss",
     badgeIcon: <LockIcon className="w-[20px] h-[20px]" />,
-    sectionBackgroundName: "",
+    sectionBackground: "bg-gray-50",
     isTextOnTheLeft: false,
-    mobileImageOnTop: true,
-    normalImage: {
-      source: ensNode.src,
-      tagWidth: 640,
-      tagHeight: 340,
-      alt: "ENSNode sidecar service ENSRainbow",
-    },
-    svgImage: (
-      <>
-        <ENSNodeSchema styles="relative z-10 w-full h-full" />
-      </>
-    ),
+    mobileImageOnTop: false,
+    svgImage: <ENSAdminImage styles="relative z-10 w-full h-full" />,
   },
   {
     sectionHeader: <>Deliver game-changing ENS protocol innovations</>,
@@ -93,12 +78,9 @@ const innovationSections: InnovationSectionProps[] = [
     ),
     badgeText: "Encourage more big ENS integrations",
     badgeIcon: <BoltIcon className="w-[20px] h-[20px]" />,
-    sectionBackgroundName: "",
+    sectionBackground: "bg-white",
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
-    svgImage: <ENSProfile styles="relative z-10 w-full h-full" />,
-    designatedMobileImage: (
-      <ENSProfileMobile styles="relative z-10 w-full h-full -right-5 shadow-[inset_50px_0px_8px_0px_white]" />
-    ),
+    svgImage: <FasterLookupImage styles="relative z-10 w-full h-full" />,
   },
 ];
