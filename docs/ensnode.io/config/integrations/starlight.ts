@@ -1,17 +1,36 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
+import starlightLlmsTxt from "starlight-llms-txt";
 import starlightSidebarTopics from "starlight-sidebar-topics";
-import starlightThemeRapide from "starlight-theme-rapide";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
-    customCss: ["./src/styles/globals.css"],
+    components: {
+      ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
+      ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
+      SocialIcons: "./src/components/overrides/SocialIcons.astro",
+      Hero: "./src/components/overrides/Hero.astro",
+      TableOfContents: "./src/components/overrides/TableOfContents.astro",
+    },
+    customCss: [
+      "./src/styles/globals.css",
+      "./src/styles/pagination.css",
+      "@fontsource/inter/100.css",
+      "@fontsource/inter/200.css",
+      "@fontsource/inter/300.css",
+      "@fontsource/inter/400.css",
+      "@fontsource/inter/500.css",
+      "@fontsource/inter/600.css",
+      "@fontsource/inter/700.css",
+      "@fontsource/inter/800.css",
+      "@fontsource/inter/900.css",
+    ],
     plugins: [
-      starlightThemeRapide(),
+      starlightLlmsTxt(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
-          link: "/ensnode",
+          link: "/docs",
           icon: "star",
           items: [
             {
@@ -19,46 +38,46 @@ export function starlight(): AstroIntegration {
               items: [
                 {
                   label: "Quickstart",
-                  link: "/ensnode",
+                  link: "/docs",
                 },
                 {
                   label: "What is the ENS Subgraph?",
-                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                  link: "/docs/concepts/what-is-the-ens-subgraph",
                 },
                 {
                   label: "What is ENSNode?",
-                  link: "/ensnode/concepts/what-is-ensnode",
+                  link: "/docs/concepts/what-is-ensnode",
                 },
                 {
                   label: "ENSNode Roadmap",
-                  link: "/ensnode/concepts/roadmap",
+                  link: "/docs/concepts/roadmap",
                 },
               ],
             },
             {
               label: "Using ENSNode",
               collapsed: false,
-              autogenerate: { directory: "ensnode/usage" },
+              autogenerate: { directory: "docs/usage" },
             },
             {
               label: "Deploying ENSNode",
               collapsed: true,
-              autogenerate: { directory: "ensnode/deploying" },
+              autogenerate: { directory: "docs/deploying" },
             },
             {
               label: "Local ENSNode",
               collapsed: true,
-              autogenerate: { directory: "ensnode/running" },
+              autogenerate: { directory: "docs/running" },
             },
             {
               label: "Contributing",
               collapsed: true,
-              autogenerate: { directory: "ensnode/contributing" },
+              autogenerate: { directory: "docs/contributing" },
             },
             {
               label: "Reference",
               collapsed: true,
-              autogenerate: { directory: "ensnode/reference" },
+              autogenerate: { directory: "docs/reference" },
             },
           ],
         },
@@ -149,6 +168,7 @@ export function starlight(): AstroIntegration {
       replacesTitle: true,
     },
     social: {
+      "x.com": "https://x.com/NamehashLabs",
       github: "https://github.com/namehash/ensnode",
     },
     editLink: {

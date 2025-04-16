@@ -1,0 +1,36 @@
+name: "Build: ENSNode Images"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Image Version (Docker Tag)'
+        type: string
+        required: true
+
+jobs:
+  build-and-push-ensnode:
+    name: ${{ matrix.app }}
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ensindexer, ensadmin]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build & Push
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          dockerfile: apps/${{ matrix.app }}/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ inputs.version }}
+            type=ref,event=branch
+            type=sha

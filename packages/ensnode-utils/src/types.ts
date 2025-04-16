@@ -1,6 +1,16 @@
 import type { Hex } from "viem";
 
 /**
+ * A PluginName is a unique id for a 'plugin': we use the notion of 'plugins' to describe bundles
+ * of indexing logic.
+ */
+export enum PluginName {
+  Subgraph = "subgraph",
+  Basenames = "basenames",
+  Lineanames = "lineanames",
+}
+
+/**
  * A hash value that uniquely identifies a single ENS name.
  * Result of `namehash` function as specified in ENSIP-1.
  *
@@ -13,9 +23,31 @@ import type { Hex } from "viem";
 export type Node = Hex;
 
 /**
- * A hash value that identifies only a single part or "label" of an ENS name.
- * The labelhash is just the Keccak-256 output for the label.
+ * A LabelHash is the result of the labelhash function (which is just keccak256) on a Label.
  *
- * @link https://docs.ens.domains/ensip/1#labelhash-algorithm
+ * @link https://docs.ens.domains/terminology#labelhash
  */
-export type Labelhash = Hex;
+export type LabelHash = Hex;
+
+/**
+ * A Label is a single part of an ENS Name.
+ *
+ * @link https://docs.ens.domains/terminology#label
+ */
+export type Label = string;
+
+/**
+ * An EncodedLabelHash is a specially formatted unnormalized Label that should be interpreted as a
+ * LabelHash literal, particularly for use within an ENS Name.
+ *
+ * @example [abcd]
+ * @example [abcd].example.eth
+ */
+export type EncodedLabelHash = `[${string}]`;
+
+/**
+ * A Name represents a human-readable ENS name.
+ *
+ * ex: vitalik.eth
+ */
+export type Name = string;

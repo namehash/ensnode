@@ -1,6 +1,6 @@
 {
   "name": "ensrainbow",
-  "version": "0.1.2",
+  "version": "0.19.0",
   "private": true,
   "type": "module",
   "description": "ENSRainbow is an ENSNode service for healing ENS labels",
@@ -12,35 +12,31 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensrainbow",
   "scripts": {
-    "serve": "bun src/cli.ts serve",
-    "ingest": "bun src/cli.ts ingest",
-    "validate": "bun src/cli.ts validate",
-    "get-legacy-data": "./download-rainbow-tables.sh",
-    "get-v2-data": "./download-rainbow-tables.sh v2",
-    "get-test-data": "./download-rainbow-tables.sh test",
-    "validate:lite": "bun src/cli.ts validate --lite",
-    "purge": "bun src/cli.ts purge",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "serve": "tsx src/cli.ts serve",
+    "ingest": "tsx src/cli.ts ingest",
+    "validate": "tsx src/cli.ts validate",
+    "validate:lite": "tsx src/cli.ts validate --lite",
+    "purge": "tsx src/cli.ts purge",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "get-legacy-data": "./download-rainbow-tables.sh",
+    "get-v2-data": "DATA_VERSION=v2 ./download-rainbow-tables.sh",
+    "get-test-data": "DATA_VERSION=test ./download-rainbow-tables.sh"
   },
   "dependencies": {
+    "@ensnode/ensrainbow-sdk": "workspace:*",
+    "@ensnode/utils": "workspace:*",
     "@hono/node-server": "^1.4.1",
     "classic-level": "^1.4.1",
-    "@ensnode/utils": "workspace:*",
-    "@ensnode/ensrainbow-sdk": "workspace:*",
     "hono": "catalog:",
+    "pino": "^8.19.0",
+    "pino-pretty": "^10.3.1",
     "progress": "^2.0.3",
     "viem": "catalog:",
-    "yargs": "^17.7.2",
-    "pino": "^8.19.0",
-    "pino-pretty": "^10.3.1"
-  },
-  "optionalDependencies": {
-    "bun": "^1.2.2"
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
@@ -50,6 +46,7 @@
     "@types/yargs": "^17.0.32",
     "@vitest/coverage-v8": "catalog:",
     "supertest": "^6.3.4",
+    "tsx": "^4.19.3",
     "typescript": "^5.3.3",
     "vitest": "catalog:"
   }

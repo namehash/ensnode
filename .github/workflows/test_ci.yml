@@ -1,0 +1,103 @@
+name: "Test: CI"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  changed-packages:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    outputs:
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for package changes
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+
+  static-analysis:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=moderate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Biome CI
+        run: pnpm -r lint:ci
+
+      - name: Run TypeScript type checks
+        run: pnpm -r typecheck
+
+      - name: Build packages
+        if: needs.changed-packages.outputs.packages == 'true'
+        run: pnpm packages:prepublish
+
+      # This will run the dev command in background, wait for
+      # RUNTIME_CHECK_TIMEOUT_SECONDS seconds, and then kill the process if it
+      # is still running. If the command does not throw an error within that
+      # time, the step will exit successfully. If it does throw an error,
+      # the step will exit and fail the CI pipeline. This runtime check uses
+      # a pglite database that only lives in the CI environment.
+      # It will be discarded after the CI run.
+      - name: Run Ponder runtime integrity checks
+        working-directory: apps/ensindexer
+        env:
+          ACTIVE_PLUGINS: subgraph,basenames,lineanames
+          RPC_URL_1: https://eth.drpc.org
+          RPC_URL_8453: https://base.drpc.org
+          RPC_URL_59144: https://linea.drpc.org
+          RUNTIME_CHECK_TIMEOUT_SECONDS: 10
+        run: |
+          pnpm dev --disable-ui -vv &
+          PID=$!
+          sleep $RUNTIME_CHECK_TIMEOUT_SECONDS
+          if ps -p $PID > /dev/null; then
+            kill $PID
+            wait $PID || true
+            exit 0
+          else
+            wait $PID
+            exit $?
+          fi
+
+  unit-tests:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        run: pnpm -r test

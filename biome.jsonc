@@ -1,0 +1,52 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "ignore": [".astro/", ".ponder/", ".next/", "dist/", "generated/"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "lineWidth": 100
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true
+    }
+  },
+  "overrides": [
+    /**
+     * disable biome formatting of package.json because neither biome nor changesets is sufficiently
+     * configurable to play well together regarding the auto-formatting of package.json files
+     *
+     * https://github.com/changesets/changesets/issues/1434
+     * https://github.com/changesets/changesets/issues/1591
+     * https://github.com/biomejs/biome/issues/2684
+     */
+    {
+      "include": ["**/package.json"],
+      "formatter": {
+        "enabled": false
+      }
+    }
+  ]
+}

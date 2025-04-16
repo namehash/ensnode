@@ -3,11 +3,15 @@
 **/.git
 **/Dockerfile
 .dockerignore
+**/npm-debug.log
+**/README.md
+**/.next
+**/docker
+
+# ignore env files (and let docker compose link to env files)
+**/.env*
 
 # ignore ensrainbow artifacts on host machine
 ens_names.sql
 ens_name.sql.*
 apps/ensrainbow/data/
-
-# ignore env files (and let docker compose link to env files)
-**/.env*

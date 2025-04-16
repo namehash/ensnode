@@ -1,14 +1,24 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { ROOT_NODE, isLabelIndexable, makeSubnodeNamehash } from "@ensnode/utils/subname-helpers";
-import type { Labelhash, Node } from "@ensnode/utils/types";
-import { type Hex, zeroAddress } from "viem";
-import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { labelByHash } from "../lib/graphnode-helpers";
-import { makeResolverId } from "../lib/ids";
-import { EventWithArgs } from "../lib/ponder-helpers";
-import { OwnedName } from "../lib/types";
+import { type Address, zeroAddress } from "viem";
+
+import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { labelByLabelHash } from "@/lib/graphnode-helpers";
+import { makeResolverId } from "@/lib/ids";
+import { type EventWithArgs, healReverseAddresses } from "@/lib/ponder-helpers";
+import {
+  type LabelHash,
+  type Node,
+  PluginName,
+  REVERSE_ROOT_NODES,
+  ROOT_NODE,
+} from "@ensnode/utils";
+import {
+  isLabelIndexable,
+  makeSubdomainNode,
+  maybeHealLabelByReverseAddress,
+} from "@ensnode/utils/subname-helpers";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.
@@ -36,7 +46,7 @@ export async function setupRootNode({ context }: { context: Context }) {
       // NOTE: we initialize the root node as migrated because:
       // 1. this matches subgraph's existing behavior, despite the root node not technically being
       //    migrated until the new registry is deployed and
-      // 2. other plugins (base, linea) don't have the concept of migration but defaulting to true
+      // 2. other plugins (Basenames, Lineanames) don't have the concept of migration but defaulting to true
       //    is a reasonable behavior
       isMigrated: true,
     })
@@ -53,7 +63,7 @@ function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
 
 // a more accurate name for 'recurseDomainDelete'
 // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L64
-async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Hex) {
+async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Context, node: Node) {
   const domain = await context.db.find(schema.domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
@@ -69,12 +79,12 @@ async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(context: Con
 }
 
 /**
- * makes a set of shared handlers for a Registry contract that manages `ownedName`
+ * makes a set of shared handlers for a Registry contract
  *
- * @param ownedName the name that the Registry contract manages subnames of
+ * @param pluginName the name of the plugin using these shared handlers
  */
-export const makeRegistryHandlers = (ownedName: OwnedName) => {
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+  const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {
     handleNewOwner:
@@ -84,57 +94,78 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         event,
       }: {
         context: Context;
-        event: EventWithArgs<{ node: Node; label: Labelhash; owner: Hex }>;
+        event: EventWithArgs<{
+          // NOTE: `node` event arg represents a `Node` that is the _parent_ of the node the NewOwner event is about
+          node: Node;
+          // NOTE: `label` event arg represents a `LabelHash` for the sub-node under `node`
+          label: LabelHash;
+          owner: Address;
+        }>;
       }) => {
-        const { label: labelhash, node, owner } = event.args;
+        const { label: labelHash, node: parentNode, owner } = event.args;
 
         await upsertAccount(context, owner);
 
-        // the domain in question is a subdomain of `node` with label `labelhash`
-        const subnode = makeSubnodeNamehash(node, labelhash);
-        let domain = await context.db.find(schema.domain, { id: subnode });
+        // the domain in question is a subdomain of `parentNode`
+        const node = makeSubdomainNode(labelHash, parentNode);
+        let domain = await context.db.find(schema.domain, { id: node });
 
         // note that we set isMigrated in each branch such that if this domain is being
         // interacted with on the new registry, its migration status is set here
         if (domain) {
           // if the domain already exists, this is just an update of the owner record (& isMigrated)
           domain = await context.db
-            .update(schema.domain, { id: subnode })
+            .update(schema.domain, { id: node })
             .set({ ownerId: owner, isMigrated });
         } else {
           // otherwise create the domain (w/ isMigrated)
           domain = await context.db.insert(schema.domain).values({
-            id: subnode,
+            id: node,
             ownerId: owner,
-            parentId: node,
+            parentId: parentNode,
             createdAt: event.block.timestamp,
-            labelhash: event.args.label,
+            labelhash: labelHash,
             isMigrated,
           });
 
           // and increment parent subdomainCount
           await context.db
-            .update(schema.domain, { id: node })
+            .update(schema.domain, { id: parentNode })
             .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
         }
 
-        // if the domain doesn't yet have a name, construct it here
+        // if the domain doesn't yet have a name, attempt to construct it here
         if (!domain.name) {
-          const parent = await context.db.find(schema.domain, { id: node });
+          const parent = await context.db.find(schema.domain, { id: parentNode });
 
-          // attempt to heal the label associated with labelhash via ENSRainbow
-          // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L112-L116
-          const healedLabel = await labelByHash(labelhash);
+          let healedLabel = null;
+
+          // 1. if healing label from reverse addresses is enabled, and the parent is a known
+          //    reverse node (i.e. addr.reverse), give it a go
+          if (healReverseAddresses() && REVERSE_ROOT_NODES.has(parentNode)) {
+            healedLabel = maybeHealLabelByReverseAddress({
+              maybeReverseAddress: owner,
+              labelHash,
+            });
+          }
+
+          // 2. if reverse address healing didn't work, try ENSRainbow
+          if (!healedLabel) {
+            // attempt to heal the label associated with labelHash via ENSRainbow
+            // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
+            healedLabel = await labelByLabelHash(labelHash);
+          }
+
           const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
           // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
           // NOTE: for the root node, the parent is null, so we just use the label value as is
-          const label = validLabel || encodeLabelhash(labelhash);
+          const label = validLabel || encodeLabelhash(labelHash);
           const name = parent?.name ? `${label}.${parent.name}` : label;
 
           // akin to domain.save()
           // via https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
-          await context.db.update(schema.domain, { id: subnode }).set({
+          await context.db.update(schema.domain, { id: node }).set({
             name,
             // NOTE: only update Domain.labelName iff label is healed and valid
             // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
@@ -145,15 +176,14 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
         // garbage collect newly 'empty' domain iff necessary
         // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
-          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, subnode);
+          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
         }
 
         // log DomainEvent
         await context.db.insert(schema.newOwner).values({
-          ...sharedEventValues(event),
-
-          parentDomainId: node,
-          domainId: subnode,
+          ...sharedEventValues(context.network.chainId, event),
+          parentDomainId: parentNode,
+          domainId: node,
           ownerId: owner,
         });
       },
@@ -162,7 +192,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Hex; owner: Hex }>;
+      event: EventWithArgs<{ node: Node; owner: Address }>;
     }) {
       const { node, owner } = event.args;
 
@@ -181,7 +211,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
       // log DomainEvent
       await context.db.insert(schema.transfer).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         domainId: node,
         ownerId: owner,
       });
@@ -204,7 +234,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
       // log DomainEvent
       await context.db.insert(schema.newTTL).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         domainId: node,
         ttl,
       });
@@ -215,7 +245,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; resolver: Hex }>;
+      event: EventWithArgs<{ node: Node; resolver: Address }>;
     }) {
       const { node, resolver: resolverAddress } = event.args;
 
@@ -251,7 +281,7 @@ export const makeRegistryHandlers = (ownedName: OwnedName) => {
 
       // log DomainEvent
       await context.db.insert(schema.newResolver).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         domainId: node,
         // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
         // but there is never a resolver record created for the zeroAddress. so if you query the

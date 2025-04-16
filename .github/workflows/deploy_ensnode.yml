@@ -1,4 +1,4 @@
-name: Deploy ENSNode on given environment
+name: "Deploy: ENSNode to Railway Environment"
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ on:
           - green
           - blue
       tag:
-        description: 'Unique tag for deployment. Used for schema name generation'
+        description: 'Docker Image Tag (also used for schema name generation)'
         required: true
         type: string
 
@@ -26,19 +26,18 @@ jobs:
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
-    
+
     steps:
       - name: Check if Docker image exists
-        run: | 
-            docker manifest inspect ${{ env.DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.DOCKER_IMAGE }}"; exit 1; } 
+        run: |
+            docker manifest inspect ${{ env.DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.DOCKER_IMAGE }}"; exit 1; }
 
       - name: Print switch target
-        run: | 
+        run: |
             echo "Deploying on: $TARGET_ENVIRONMENT"
-        
+
       - name: Calculate env variables
         run: |
-            TARGET_ENVIRONMENT="green"
             case "$TARGET_ENVIRONMENT" in
               "green")
                 #ENVIRONMENT
@@ -97,7 +96,7 @@ jobs:
                           "input": {"source": {"image": "${{ env.DOCKER_IMAGE }}"}},
                           "serviceId": "'$service_id'"
                         }
-                      }' 
+                      }'
             echo "Finished updating $service_id"
           }
 

@@ -1,27 +1,26 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { DeploymentConfigs } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils/types";
-import { Hex, decodeEventLog } from "viem";
-import { createSharedEventValues, upsertAccount, upsertResolver } from "../lib/db-helpers";
-import { makeResolverId } from "../lib/ids";
-import { hasNullByte, uniq } from "../lib/lib-helpers";
-import { EventWithArgs } from "../lib/ponder-helpers";
-import { OwnedName } from "../lib/types";
+import { ENSDeployments } from "@ensnode/ens-deployments";
+import type { Node, PluginName } from "@ensnode/utils";
+import { type Address, Hash, type Hex, decodeEventLog } from "viem";
 
-// NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
-// contract on the chain that emits an event with the relevant signatures, which may or may not
-// actually be a contract intended for use with ENS as a Resolver. because of this as well, each
-// event could be the first event the indexer has seen for this contract (and its Resolver id) and
-// therefore needs not assume a Resolver entity already exists
+import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { makeResolverId } from "@/lib/ids";
+import { hasNullByte, uniq } from "@/lib/lib-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
- * makes a set of shared handlers for Resolver contracts related to a plugin managing `ownedName`
+ * makes a set of shared handlers for Resolver contracts
  *
- * @param ownedName the name that the plugin manages subnames of
+ * NOTE: Both the subgraph and this indexer use upserts in this file since a 'Resolver' can be any
+ * contract that emits events with the relevant signatures. The contract may not necessarily be
+ * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
+ * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
+ *
+ * @param pluginName the name of the plugin using these shared handlers
  */
-export const makeResolverHandlers = (ownedName: OwnedName) => {
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+  const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {
     async handleAddrChanged({
@@ -29,7 +28,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; a: Hex }>;
+      event: EventWithArgs<{ node: Node; a: Address }>;
     }) {
       const { a: address, node } = event.args;
       await upsertAccount(context, address);
@@ -50,7 +49,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.addrChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         addrId: address,
       });
@@ -61,7 +60,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Hex }>;
+      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Address }>;
     }) {
       const { node, coinType, newAddress } = event.args;
 
@@ -79,7 +78,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.multicoinAddrChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         coinType,
         addr: newAddress,
@@ -98,7 +97,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         args: { node, name },
       } = decodeEventLog({
         eventName: "NameChanged",
-        abi: DeploymentConfigs.mainnet.eth.contracts.Resolver.abi,
+        abi: ENSDeployments.mainnet.root.contracts.Resolver.abi,
         topics: event.log.topics,
         data: event.log.data,
       });
@@ -114,7 +113,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.nameChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         name,
       });
@@ -139,7 +138,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.abiChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         contentType,
       });
@@ -164,7 +163,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.pubkeyChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         x,
         y,
@@ -198,7 +197,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.textChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         key,
         // ponder's (viem's) event parsing produces empty string for some TextChanged events
@@ -214,7 +213,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; hash: Hex }>;
+      event: EventWithArgs<{ node: Node; hash: Hash }>;
     }) {
       const { node, hash } = event.args;
       const id = makeResolverId(event.log.address, node);
@@ -227,7 +226,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.contenthashChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         hash,
       });
@@ -250,7 +249,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.interfaceChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         interfaceID,
         implementer,
@@ -264,7 +263,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{
         node: Node;
-        owner: Hex;
+        owner: Address;
         target: Hex;
         isAuthorised: boolean;
       }>;
@@ -280,7 +279,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.authorisationChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         owner,
         target,
@@ -319,7 +318,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
 
       // log ResolverEvent
       await context.db.insert(schema.versionChanged).values({
-        ...sharedEventValues(event),
+        ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         version: newVersion,
       });
@@ -331,7 +330,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record: Hex;
@@ -346,7 +345,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record?: Hex;
@@ -360,7 +359,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Hex; zonehash: Hex }>;
+      event: EventWithArgs<{ node: Node; zonehash: Hash }>;
     }) {
       // subgraph ignores
     },

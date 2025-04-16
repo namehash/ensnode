@@ -1,6 +1,6 @@
 {
   "name": "ensindexer",
-  "version": "0.1.2",
+  "version": "0.19.0",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",
@@ -25,11 +25,11 @@
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/ens-deployments": "workspace:*",
-    "@ensnode/utils": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
+    "@ensnode/utils": "workspace:*",
     "hono": "catalog:",
     "ponder": "catalog:",
     "ts-deepmerge": "^7.0.2",
@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

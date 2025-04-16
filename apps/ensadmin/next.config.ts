@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Enable source maps in production
+  productionBrowserSourceMaps: true,
   async redirects() {
     return [
       {

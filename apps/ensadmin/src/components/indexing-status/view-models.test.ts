@@ -1,3 +1,4 @@
+import { PluginName } from "@ensnode/utils";
 import { fromUnixTime } from "date-fns";
 import { base, mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
@@ -15,13 +16,13 @@ describe("View Models", () => {
   describe("ensNodeDepsViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeDepsViewModel({
-        nodejs: "v18.19.20",
+        nodejs: "v22.14.0",
         ponder: "v0.9.9",
       });
 
       expect(result).toEqual([
         { label: "Ponder", value: "v0.9.9" },
-        { label: "Node.js", value: "v18.19.20" },
+        { label: "Node.js", value: "v22.14.0" },
       ]);
     });
   });
@@ -29,13 +30,13 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        ACTIVE_PLUGINS: ["eth"],
+        ACTIVE_PLUGINS: [PluginName.Subgraph],
         DATABASE_SCHEMA: "public",
         ENS_DEPLOYMENT_CHAIN: "ens-test-env",
       });
 
       expect(result).toEqual([
-        { label: "Active Plugins", value: ["eth"] },
+        { label: "Active Plugins", value: [PluginName.Subgraph] },
         { label: "ENS Deployment Chain", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);

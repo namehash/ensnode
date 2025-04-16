@@ -1,24 +1,25 @@
-name: Release
+name: Changesets Release
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-
 jobs:
   release:
-    name: Release
+    name: Changesets
     if: github.repository == 'namehash/ensnode'
     runs-on: blacksmith-4vcpu-ubuntu-2204
-
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      publishedApps: ${{ steps.publishedApps.outputs.output }}
+      # [{"name":"ensadmin","version":"0.15.0"},{"name":"ensindexer","version":"0.15.0"},{"name":"ensrainbow","version":"0.15.0"}]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,13 +37,71 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release PR or Publish to NPM
-        id: changesets
+      - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1
+        id: changesets
         with:
           commit: "chore(release): version apps"
-          title: "chore(release): version apps"
-          publish: pnpm release
+          title: "Release New Version"
+          publish: pnpm changeset-publish
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Filter Published Packages For Apps
+        uses: cloudposse/github-action-jq@main
+        id: publishedApps
+        with:
+          compact: true
+          input: ${{ steps.changesets.outputs.publishedPackages }}
+          # the following jq script expands the `ensrainbow` package into its 3 variants.
+          # TODO: this can be removed once variants are runtime-behavior and not build-behavior and this
+          # script can become: map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+          # TODO: once ensrainbow-v2-data can be built, include '"ensrainbow-v2-data",' in the variants list below
+          script: |-
+            map(
+              if .name == "ensrainbow" then
+                . as $parent
+                | ["ensrainbow-data", "ensrainbow-test-data"]
+                  | map({
+                    "name": $parent.name,
+                    "version": $parent.version,
+                    "ensrainbow_data_image": .
+                  })
+              else
+                [.]
+              end
+            ) | flatten | map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+
+  build-and-push-ensnode:
+    name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
+    # if changesets published our npm packages, also build docker images
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        apps: ${{ fromJson(needs.release.outputs.publishedApps) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build & Push
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.apps.name }}
+          dockerfile: apps/${{ matrix.apps.name }}/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
+            DATA_IMAGE_NAME=${{ matrix.apps.ensrainbow_data_image }}
+          # construct docker tag using the changesets-reported version
+          tags: |
+            type=semver,pattern={{version}},value=${{ matrix.apps.version }}
+            type=ref,event=branch
+            type=sha

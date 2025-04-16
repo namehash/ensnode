@@ -1,4 +1,4 @@
-name: Test ENSRainbow Test Image on macOS
+name: "Test: ENSRainbow Test Image on macOS"
 
 on:
   workflow_dispatch:
@@ -6,68 +6,68 @@ on:
 jobs:
   test-image-on-mac:
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      
+
       - name: Set up Docker
         uses: docker-practice/actions-setup-docker@master
         with:
           docker_channel: stable
           docker_buildx: true
-      
+
       - name: Verify Docker installation
         run: |
           docker --version
           docker info
-      
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Pull ENSRainbow test image
         run: |
           docker pull ghcr.io/namehash/ensnode/ensrainbow-test:latest
-      
+
       - name: Run ENSRainbow test container
         run: |
           # Run the container in detached mode
           CONTAINER_ID=$(docker run -d -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest)
           echo "Container ID: $CONTAINER_ID"
-          
+
           # Wait for container to start up
           echo "Waiting for container to start up..."
           sleep 30
-          
+
           # Check container logs
           echo "Container logs:"
           docker logs $CONTAINER_ID
-          
+
           # Check if container is running
           CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' $CONTAINER_ID)
           echo "Container status: $CONTAINER_STATUS"
-          
+
           if [ "$CONTAINER_STATUS" != "running" ]; then
             echo "Container is not running!"
             exit 1
           fi
-          
+
           # Test API endpoint
           echo "Testing API endpoint..."
           curl -v http://localhost:3223/health || exit 1
-          
+
           # Stop and remove container
           docker stop $CONTAINER_ID
           docker rm $CONTAINER_ID
-      
+
       - name: Report test results
         if: always()
         run: |
           echo "ENSRainbow test image verification completed"
-          # Add any additional reporting or notifications here 
+          # Add any additional reporting or notifications here

@@ -18,7 +18,7 @@ export function ENSNodeIcon(props: SVGProps<SVGSVGElement>) {
         rx="3"
         fill="#528BFF"
         stroke="black"
-        stroke-width="2"
+        strokeWidth="2"
       />
       <path
         d="M8.1168 12.4324C8.29905 12.8207 8.7507 13.5893 8.7507 13.5893L13.9408 5.00781L8.86956 8.54183C8.56846 8.73992 8.32282 9.01726 8.14849 9.33421C7.68099 10.3088 7.67307 11.4419 8.1168 12.4324Z"
@@ -49,9 +49,9 @@ export function ENSNodeIcon(props: SVGProps<SVGSVGElement>) {
           y2="12.4349"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.58" stop-color="#A0A8D4" />
-          <stop offset="0.73" stop-color="#8791C7" />
-          <stop offset="0.91" stop-color="#6470B4" />
+          <stop offset="0.58" stopColor="#A0A8D4" />
+          <stop offset="0.73" stopColor="#8791C7" />
+          <stop offset="0.91" stopColor="#6470B4" />
         </linearGradient>
         <linearGradient
           id="paint1_linear_689_31"
@@ -61,9 +61,9 @@ export function ENSNodeIcon(props: SVGProps<SVGSVGElement>) {
           y2="15.9294"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0.58" stop-color="#A0A8D4" />
-          <stop offset="0.73" stop-color="#8791C7" />
-          <stop offset="0.91" stop-color="#6470B4" />
+          <stop offset="0.58" stopColor="#A0A8D4" />
+          <stop offset="0.73" stopColor="#8791C7" />
+          <stop offset="0.91" stopColor="#6470B4" />
         </linearGradient>
       </defs>
     </svg>

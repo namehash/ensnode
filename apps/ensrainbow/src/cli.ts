@@ -1,12 +1,15 @@
 import { join } from "path";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
-import { ingestCommand } from "./commands/ingest-command";
-import { purgeCommand } from "./commands/purge-command";
-import { serverCommand } from "./commands/server-command";
-import { validateCommand } from "./commands/validate-command";
-import { getDefaultDataSubDir, getEnvPort } from "./lib/env";
+
+import { ingestCommand } from "@/commands/ingest-command";
+import { purgeCommand } from "@/commands/purge-command";
+import { serverCommand } from "@/commands/server-command";
+import { validateCommand } from "@/commands/validate-command";
+import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
@@ -140,6 +143,7 @@ export function createCLI(options: CLIOptions = {}) {
 }
 
 // Only execute if this is the main module
-if (require.main === module) {
+const isMainModule = resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMainModule) {
   createCLI().parse(hideBin(process.argv));
 }

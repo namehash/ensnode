@@ -4,7 +4,8 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { ENSRainbowDB } from "../lib/database";
+
+import { ENSRainbowDB } from "@/lib/database";
 import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
@@ -54,15 +55,15 @@ describe("Server Command Tests", () => {
     }
   });
 
-  describe("GET /v1/heal/:labelhash", () => {
-    it("should return the label for a valid labelhash", async () => {
+  describe("GET /v1/heal/:labelHash", () => {
+    it("should return the label for a valid labelHash", async () => {
       const validLabel = "test-label";
-      const validLabelhash = labelhash(validLabel);
+      const validLabelHash = labelhash(validLabel);
 
       // Add test data
       await db.addRainbowRecord(validLabel);
 
-      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelhash}`);
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelHash}`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as EnsRainbow.HealResponse;
       const expectedData: EnsRainbow.HealSuccess = {
@@ -72,26 +73,26 @@ describe("Server Command Tests", () => {
       expect(data).toEqual(expectedData);
     });
 
-    it("should handle missing labelhash parameter", async () => {
+    it("should handle missing labelHash parameter", async () => {
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/`);
       expect(response.status).toBe(404); // Hono returns 404 for missing parameters
       const text = await response.text();
       expect(text).toBe("404 Not Found"); // Hono's default 404 response
     });
 
-    it("should reject invalid labelhash format", async () => {
+    it("should reject invalid labelHash format", async () => {
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/invalid-hash`);
       expect(response.status).toBe(400);
       const data = (await response.json()) as EnsRainbow.HealResponse;
       const expectedData: EnsRainbow.HealError = {
         status: StatusCode.Error,
-        error: "Invalid labelhash length 12 characters (expected 66)",
+        error: "Invalid labelHash length 12 characters (expected 66)",
         errorCode: ErrorCode.BadRequest,
       };
       expect(data).toEqual(expectedData);
     });
 
-    it("should handle non-existent labelhash", async () => {
+    it("should handle non-existent labelHash", async () => {
       const nonExistentHash = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${nonExistentHash}`);
       expect(response.status).toBe(404);
@@ -162,16 +163,16 @@ describe("Server Command Tests", () => {
   describe("CORS headers for /v1/* routes", () => {
     it("should return CORS headers for /v1/* routes", async () => {
       const validLabel = "test-label";
-      const validLabelhash = labelhash(validLabel);
+      const validLabelHash = labelhash(validLabel);
 
       // Add test data
       await db.addRainbowRecord(validLabel);
 
       const responses = await Promise.all([
-        fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelhash}`, {
+        fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelHash}`, {
           method: "OPTIONS",
         }),
-        fetch(`http://localhost:${nonDefaultPort}/v1/heal/0xinvalidlabelhash`, {
+        fetch(`http://localhost:${nonDefaultPort}/v1/heal/0xinvalidlabelHash`, {
           method: "OPTIONS",
         }),
         fetch(`http://localhost:${nonDefaultPort}/v1/not-found`, {

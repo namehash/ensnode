@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-subgraph",
-  "version": "0.1.0",
+  "version": "0.19.0",
   "type": "module",
   "description": "A Hono middleware for generating Subgraph-compatible GraphQL schema.",
   "license": "MIT",
@@ -10,26 +10,32 @@
     "directory": "packages/ponder-subgraph-api"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-subgraph-api",
-  "keywords": ["Ponder", "Subgraph"],
+  "keywords": [
+    "Ponder",
+    "Subgraph"
+  ],
   "exports": {
-    "./middleware": "./src/middleware.ts"
+    ".": "./src/index.ts"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {
-      "./middleware": {
-        "types": "./dist/middleware.d.ts",
-        "default": "./dist/middleware.js"
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
-    "main": "./dist/middleware.js",
-    "module": "./dist/middleware.mjs",
-    "types": "./dist/middleware.d.ts"
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
   },
   "scripts": {
     "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
+    "lint": "biome check --write",
     "lint:ci": "biome ci"
   },
   "dependencies": {
@@ -44,7 +50,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/shared-configs": "workspace:",
+    "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "hono": "catalog:",
     "tsup": "catalog:",

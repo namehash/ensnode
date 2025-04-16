@@ -2,8 +2,9 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { mkdtemp, rm } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { DEFAULT_PORT, getEnvPort } from "@/lib/env";
 import { createCLI, validatePortConfiguration } from "./cli";
-import { DEFAULT_PORT, getEnvPort } from "./lib/env";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");
@@ -183,7 +184,7 @@ describe("CLI", () => {
         const countData = await countResponse.json();
         expect(countData.count).toBe(63);
 
-        // Make a request to heal endpoint with valid labelhash
+        // Make a request to heal endpoint with valid labelHash
         const healResponse = await fetch(
           `http://localhost:${customPort}/v1/heal/0x73338cf209492ea926532bf0a21a859c9be97ba8623061fd0b8390ef6844a1ec`,
         );
@@ -192,7 +193,7 @@ describe("CLI", () => {
         expect(healData.label).toBe("materiauxbricolage");
         expect(healData.status).toBe("success");
 
-        // Make a request to heal endpoint with non-healable labelhash
+        // Make a request to heal endpoint with non-healable labelHash
         const nonHealableResponse = await fetch(
           `http://localhost:${customPort}/v1/heal/0x745156acaa628d9cb587c847f1b03b9c5f4ba573d67699112e6a11bb6a8c24cf`,
         );
@@ -201,14 +202,14 @@ describe("CLI", () => {
         expect(nonHealableData.errorCode).toBe(404);
         expect(nonHealableData.error).toBe("Label not found");
 
-        // Make a request to heal endpoint with invalid labelhash
+        // Make a request to heal endpoint with invalid labelHash
         const invalidHealResponse = await fetch(
           `http://localhost:${customPort}/v1/heal/0x1234567890`,
         );
         expect(invalidHealResponse.status).toBe(400);
         const invalidHealData = await invalidHealResponse.json();
         expect(invalidHealData.errorCode).toBe(400);
-        expect(invalidHealData.error).toBe("Invalid labelhash length 12 characters (expected 66)");
+        expect(invalidHealData.error).toBe("Invalid labelHash length 12 characters (expected 66)");
 
         // Cleanup - send SIGINT to stop server
         process.emit("SIGINT", "SIGINT");

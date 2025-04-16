@@ -1,6 +1,5 @@
 "use client";
 
-import { Provider as QueryClientProvider } from "@/components/query-client/provider";
 import * as ponderSchema from "@ensnode/ponder-schema";
 import { createClient } from "@ponder/client";
 import { PonderProvider } from "@ponder/react";
@@ -14,11 +13,7 @@ type ProviderProps = {
 export function Provider({ url, children }: ProviderProps) {
   const [ponderClient] = useState(() => createPonderClient(url, schema));
 
-  return (
-    <PonderProvider client={ponderClient}>
-      <QueryClientProvider>{children}</QueryClientProvider>
-    </PonderProvider>
-  );
+  return <PonderProvider client={ponderClient}>{children}</PonderProvider>;
 }
 
 function createPonderClient(ensNodeUrl: string, schema: Record<string, unknown>) {

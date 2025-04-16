@@ -73,6 +73,7 @@ import {
   relations,
   sql,
 } from "drizzle-orm";
+import { toSnakeCase } from "drizzle-orm/casing";
 import {
   type PgColumnBuilderBase,
   PgDialect,
@@ -109,8 +110,10 @@ import {
   GraphQLString,
 } from "graphql";
 import { GraphQLJSON } from "graphql-scalars";
+
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
+import type { PonderMetadataProvider } from "./types";
 
 type Parent = Record<string, any>;
 type Context = {
@@ -156,10 +159,19 @@ export interface PolymorphicConfig {
   fields: Record<string, string>;
 }
 
-export function buildGraphQLSchema(
-  _schema: Schema,
-  polymorphicConfig: PolymorphicConfig = { types: {}, fields: {} },
-): GraphQLSchema {
+interface BuildGraphQLSchemaOptions {
+  schema: Schema;
+  polymorphicConfig?: PolymorphicConfig;
+  metadataProvider: PonderMetadataProvider;
+}
+
+export function buildGraphQLSchema({
+  schema: _schema,
+  polymorphicConfig: _polymorphicConfig,
+  metadataProvider,
+}: BuildGraphQLSchemaOptions): GraphQLSchema {
+  const polymorphicConfig = _polymorphicConfig ?? { types: {}, fields: {} };
+
   // copy schema to avoid injecting `intersection_table`s into ponder's schema object
   const schema: Schema = { ..._schema };
 
@@ -582,6 +594,53 @@ export function buildGraphQLSchema(
         implementingTableConfigs: polymorphicTableConfigs[interfaceTypeName]!,
       });
     });
+
+  // Subgraph Meta Field
+  queryFields._meta = {
+    type: new GraphQLObjectType({
+      name: "_Meta_",
+      fields: {
+        block: {
+          type: new GraphQLNonNull(
+            new GraphQLObjectType({
+              name: "_Block_",
+              fields: {
+                hash: { type: GraphQLString },
+                number: { type: new GraphQLNonNull(GraphQLInt) },
+                timestamp: { type: new GraphQLNonNull(GraphQLInt) },
+                parentHash: { type: GraphQLString },
+              },
+            }),
+          ),
+        },
+        deployment: { type: new GraphQLNonNull(GraphQLString) },
+        hasIndexingErrors: { type: new GraphQLNonNull(GraphQLBoolean) },
+      },
+    }),
+    resolve: async (_source, _args) => {
+      try {
+        const [lastIndexedBlock, hasIndexingErrors, ponderBuildId] = await Promise.all([
+          metadataProvider.getLastIndexedDeploymentChainBlock(),
+          metadataProvider.hasIndexingErrors(),
+          metadataProvider.getPonderBuildId(),
+        ]);
+
+        return {
+          deployment: `${metadataProvider.version}-${ponderBuildId}`,
+          hasIndexingErrors,
+          block: {
+            number: Number(lastIndexedBlock.number),
+            timestamp: Number(lastIndexedBlock.timestamp),
+            hash: lastIndexedBlock.hash,
+            parentHash: lastIndexedBlock.parentHash,
+          },
+        };
+      } catch (error) {
+        console.error("Cannot build subgraph meta", error);
+        return null;
+      }
+    },
+  };
 
   return new GraphQLSchema({
     // Include these here so they are listed first in the printed schema.
@@ -1074,11 +1133,13 @@ function buildUnionAllQuery(
     // build select object with nulls for missing columns, manually casting them to the correct type
     const selectAllColumnsIncludingNulls = allColumnNames.reduce((memo, columnName) => {
       const column = allColumns[columnName]!;
+      const dbColumnName = table.columns[columnName]
+        ? toSnakeCase(table.columns[columnName].name)
+        : "NULL";
+
       return {
         ...memo,
-        [columnName]: sql
-          .raw(`${table.columns[columnName]?.name ?? "NULL"}::${column.getSQLType()}`)
-          .as(column.name),
+        [columnName]: sql.raw(`${dbColumnName}::${column.getSQLType()}`).as(column.name),
       };
     }, {});
 
