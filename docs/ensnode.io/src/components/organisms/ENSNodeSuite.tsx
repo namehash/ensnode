@@ -57,18 +57,18 @@ const appsSuite: {
 export default function ENSNodeSuite() {
   const verticalDivStyles = "flex flex-col flex-nowrap justify-center items-center";
   return (
-    <section class="flex flex-col flex-nowrap justify-center items-center gap-20 py-10 sm:py-20 px-5 sm:px-28">
-      <div class="max-w-[1216px] w-full h-fit flex flex-col justify-center items-center gap-5">
-        <span class="w-fit flex flex-row flex-nowrap justify-center items-center gap-2 px-4 py-2 rounded-[20px] border-gray-300 border">
+    <section className="flex flex-col flex-nowrap justify-center items-center gap-10 sm:gap-20 py-10 sm:py-20 px-5 sm:px-28">
+      <div className="max-w-[1216px] w-full h-fit flex flex-col justify-center items-center gap-5">
+        <span className="w-fit flex flex-row flex-nowrap justify-center items-center gap-2 px-4 py-2 rounded-[20px] border-gray-300 border">
           <StarIcon className="w-[20px] h-[20px]" />
-          <p class="text-sm leading-5 font-medium text-center text-black">
+          <p className="text-sm leading-5 font-medium text-center text-black">
             ENS Infrastructure Solutions
           </p>
         </span>
-        <h1 class="max-w-[720px] text-center text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold">
+        <h1 className="max-w-[720px] text-center text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold">
           Introducing the ENSNode suite of apps
         </h1>
-        <p class="max-w-[720px] text-center text-gray-500 text-lg leading-8 sm:leading-7 font-normal">
+        <p className="max-w-[720px] text-center text-gray-500 text-lg leading-8 sm:leading-7 font-normal">
           Each ENSNode is powered by a suite of powerful apps that combine to deliver the future of
           ENS indexing and big enhancements to the ENS protocol.
         </p>
@@ -81,7 +81,7 @@ export default function ENSNodeSuite() {
                 verticalDivStyles,
                 "gap-6",
                 idx < appsSuite.length - 1
-                  ? "border-b sm:border-r border-gray-200 pb-6 sm:pr-6"
+                  ? "max-sm:border-b sm:border-r border-gray-200 max-sm:pb-6 sm:pr-6"
                   : "",
               ])}
             >
