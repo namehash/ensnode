@@ -1,5 +1,11 @@
 # @ensnode/ensrainbow-sdk
 
+## 0.19.0
+
+### Minor Changes
+
+- [#532](https://github.com/namehash/ensnode/pull/532) [`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be) Thanks [@shrugs](https://github.com/shrugs)! - the great naming terminology refactor
+
 ## 0.18.0
 
 ## 0.17.0

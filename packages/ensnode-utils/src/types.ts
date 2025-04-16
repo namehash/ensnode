@@ -1,14 +1,13 @@
 import type { Hex } from "viem";
 
 /**
- * Within ENSNode we use the notion of 'plugins' to describe bundles of indexing logic.
- * Note that this type definition is currently 1:1 with that of @ensnode/ens-deployments' Datasource,
- * simplifying the relationship between a Datasource and the plugins in this project.
+ * A PluginName is a unique id for a 'plugin': we use the notion of 'plugins' to describe bundles
+ * of indexing logic.
  */
 export enum PluginName {
-  Root = "root",
+  Subgraph = "subgraph",
   Basenames = "basenames",
-  LineaNames = "lineanames",
+  Lineanames = "lineanames",
 }
 
 /**

@@ -3,6 +3,9 @@ import { PluginName } from "@ensnode/utils";
 import { labelhash, namehash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
+const CHAIN_ID = 1337;
+const OTHER_PLUGIN_NAME = "other" as PluginName;
+
 describe("ids", () => {
   describe("makeResolverId", () => {
     it("should match snapshot", () => {
@@ -13,34 +16,30 @@ describe("ids", () => {
   });
 
   describe("makeEventId", () => {
-    it("should include token id if available", () => {
-      expect(makeEventId(null, 123n, 456, 1)).toEqual("123-456-1");
-      expect(makeEventId(null, 123n, 456)).toEqual("123-456");
+    it("should include transferIndex if available", () => {
+      expect(makeEventId(PluginName.Subgraph, 1, 123n, 456)).toEqual("123-456");
+      expect(makeEventId(PluginName.Subgraph, 1, 123n, 456, 1)).toEqual("123-456-1");
     });
 
-    it("should include prefix when provided", () => {
-      expect(makeEventId("linea.eth", 123n, 456)).toEqual("linea.eth-123-456");
+    it("should not include chainId if subgraph plugin", () => {
+      expect(makeEventId(PluginName.Subgraph, CHAIN_ID, 123n, 456)).toEqual("123-456");
     });
 
-    it("should not include prefix if not provided", () => {
-      expect(makeEventId(null, 123n, 456)).toEqual("123-456");
+    it("should include chainId for other plugins", () => {
+      expect(makeEventId(OTHER_PLUGIN_NAME, CHAIN_ID, 123n, 456)).toEqual("1337-123-456");
     });
   });
 
   describe("makeRegistrationId", () => {
-    it("should use the labelHash of the registered name when plugin name is `root`", () => {
+    it("should use the labelHash of the registered name when plugin name is `subgraph`", () => {
       expect(
-        makeRegistrationId(PluginName.Root, labelhash("vitalik"), namehash("vitalik.eth")),
+        makeRegistrationId(PluginName.Subgraph, labelhash("vitalik"), namehash("vitalik.eth")),
       ).toEqual(labelhash("vitalik"));
     });
 
-    it("should use the node of the registered name when plugin name is not `root`", () => {
+    it("should use the node of the registered name when plugin name is not `subgraph`", () => {
       expect(
-        makeRegistrationId(
-          PluginName.LineaNames,
-          labelhash("vitalik"),
-          namehash("vitalik.linea.eth"),
-        ),
+        makeRegistrationId(OTHER_PLUGIN_NAME, labelhash("vitalik"), namehash("vitalik.linea.eth")),
       ).toEqual(namehash("vitalik.linea.eth"));
     });
   });

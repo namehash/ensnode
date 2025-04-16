@@ -1,14 +1,14 @@
 import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 export default function ({
   pluginName,
   registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.LineaNames>) {
+}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleNameWrapped,
     handleNameUnwrapped,
@@ -17,7 +17,7 @@ export default function ({
     handleTransferSingle,
     handleTransferBatch,
   } = makeNameWrapperHandlers({
-    eventIdPrefix: pluginName,
+    pluginName,
     registrarManagedName,
   });
 

@@ -1,7 +1,7 @@
 import type { Abi, Address, Chain } from "viem";
 
 /**
- * Encodes a set of chains known to provide an "ENS deployment".
+ * ENSDeploymentChain encodes the set of chains known to provide the root Datasource of an ENSDeployment.
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with:
  * - A root Registry deployed to the "ENS Deployment" chain.
@@ -15,8 +15,27 @@ import type { Abi, Address, Chain } from "viem";
 export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
 
 /**
+ * A Datasource describes a set of contracts on a given chain that interact with the ENS protocol.
+ */
+export interface Datasource {
+  chain: Chain;
+
+  // map of contract name to config
+  contracts: Record<string, ContractConfig>;
+}
+
+/**
+ * DatasourceName encodes a unique id for each known Datasource.
+ */
+export enum DatasourceName {
+  Root = "root",
+  Basenames = "basenames",
+  Lineanames = "lineanames",
+}
+
+/**
  * EventFilter specifies a given event's name and arguments to filter that event by.
- * It is intentionally a subset of ponder's `ContractConfig['filter']`.
+ * It is intentionally a subset of Ponder's `ContractConfig['filter']`.
  */
 export interface EventFilter {
   event: string;
@@ -26,7 +45,7 @@ export interface EventFilter {
 /**
  * Defines the abi, address, filter, and startBlock of a contract relevant to a Datasource.
  * A contract is located onchain either by a static `address` or the event signatures (`filter`)
- * one should filter the chain for.
+ * one should filter the chain for. This type is intentionally a subset of Ponder's ContractConfig.
  *
  * @param abi - the ABI of the contract
  * @param address - (optional) address of the contract
@@ -48,37 +67,23 @@ export type ContractConfig =
     };
 
 /**
- * A Datasource describes a set of contracts on a given chain that interact with the ENS protocol.
- *
- * NOTE: this currently encodes the assumption that a given onchain ENS datasource correlates to
- * contracts on exactly 1 chain. If this is not the case in the future, Datasource can
- * be updated to reflect that OR multiple `Datasources` can be defined, and the respective
- * ENSIndexer Plugin can intentionally read from multiple Datasources to construct its
- * Ponder config.
- */
-export interface Datasource {
-  chain: Chain;
-  contracts: Record<string, ContractConfig>;
-}
-
-/**
- * Encodes the set of known 'sources' for an "ENS Deployment".
+ * Encodes the set of known Datasources for an "ENS Deployment".
  */
 export type ENSDeployment = {
   /**
-   * The ENS Root and its associated contracts.
+   * The Datasource for the ENS root.
    *
    * Required for each "ENS deployment".
    */
-  root: Datasource;
+  [DatasourceName.Root]: Datasource;
 
   /**
-   * Basenames and its associated contracts, optional.
+   * The Datasource for Basenames, optional.
    */
-  basenames?: Datasource;
+  [DatasourceName.Basenames]?: Datasource;
 
   /**
-   * Linea Names and its associated contracts, optional.
+   * The Datasource for Lineanames, optional.
    */
-  lineanames?: Datasource;
+  [DatasourceName.Lineanames]?: Datasource;
 };

@@ -2,7 +2,7 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.7.1",
+  "packageManager": "pnpm@10.8.1",
   "scripts": {
     "lint": "pnpm -r lint",
     "lint:ci": "pnpm -r lint:ci",

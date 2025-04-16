@@ -2,29 +2,33 @@ import packageJson from "@/../package.json";
 
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { ponderMetadata } from "@ensnode/ponder-metadata";
-import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
 import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
 import {
-  createEnsRainbowVersionFetcher,
-  createFirstBlockToIndexByChainIdFetcher,
-  createPrometheusMetricsFetcher,
   ensAdminUrl,
   ensNodePublicUrl,
   getEnsDeploymentChain,
+  getRequestedPluginNames,
   ponderDatabaseSchema,
-  ponderPort,
-  requestedPluginNames,
 } from "@/lib/ponder-helpers";
+import {
+  fetchEnsRainbowVersion,
+  fetchFirstBlockToIndexByChainId,
+  fetchPrometheusMetrics,
+  makePonderMetdataProvider,
+} from "@/lib/ponder-metadata-provider";
+import { ponderMetadata } from "@ensnode/ponder-metadata";
+import {
+  buildGraphQLSchema as buildSubgraphGraphQLSchema,
+  graphql as subgraphGraphQL,
+} from "@ensnode/ponder-subgraph";
 
 const app = new Hono();
 
 const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
   ctx.header("x-ensnode-version", packageJson.version);
-
   return next();
 };
 
@@ -57,17 +61,6 @@ app.use("/", async (ctx) => {
   }
 });
 
-// setup block indexing status fetching
-const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
-  import("../../ponder.config").then((m) => m.default),
-);
-
-// setup prometheus metrics fetching
-const fetchPrometheusMetrics = createPrometheusMetricsFetcher(ponderPort());
-
-// setup ENSRainbow version fetching
-const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
-
 // use ENSNode middleware at /metadata
 app.get(
   "/metadata",
@@ -77,7 +70,7 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: requestedPluginNames().join(","),
+      ACTIVE_PLUGINS: getRequestedPluginNames().join(","),
       DATABASE_SCHEMA: ponderDatabaseSchema(),
       ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
     },
@@ -102,42 +95,45 @@ app.use(
   "/subgraph",
   subgraphGraphQL({
     db,
-    schema,
-
-    // describes the polymorphic (interface) relationships in the schema
-    polymorphicConfig: {
-      types: {
-        DomainEvent: [
-          schema.transfer,
-          schema.newOwner,
-          schema.newResolver,
-          schema.newTTL,
-          schema.wrappedTransfer,
-          schema.nameWrapped,
-          schema.nameUnwrapped,
-          schema.fusesSet,
-          schema.expiryExtended,
-        ],
-        RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
-        ResolverEvent: [
-          schema.addrChanged,
-          schema.multicoinAddrChanged,
-          schema.nameChanged,
-          schema.abiChanged,
-          schema.pubkeyChanged,
-          schema.textChanged,
-          schema.contenthashChanged,
-          schema.interfaceChanged,
-          schema.authorisationChanged,
-          schema.versionChanged,
-        ],
+    graphqlSchema: buildSubgraphGraphQLSchema({
+      schema,
+      // provide the schema with ponder's internal metadata to power _meta
+      metadataProvider: makePonderMetdataProvider({ db, publicClients }),
+      // describes the polymorphic (interface) relationships in the schema
+      polymorphicConfig: {
+        types: {
+          DomainEvent: [
+            schema.transfer,
+            schema.newOwner,
+            schema.newResolver,
+            schema.newTTL,
+            schema.wrappedTransfer,
+            schema.nameWrapped,
+            schema.nameUnwrapped,
+            schema.fusesSet,
+            schema.expiryExtended,
+          ],
+          RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+          ResolverEvent: [
+            schema.addrChanged,
+            schema.multicoinAddrChanged,
+            schema.nameChanged,
+            schema.abiChanged,
+            schema.pubkeyChanged,
+            schema.textChanged,
+            schema.contenthashChanged,
+            schema.interfaceChanged,
+            schema.authorisationChanged,
+            schema.versionChanged,
+          ],
+        },
+        fields: {
+          "Domain.events": "DomainEvent",
+          "Registration.events": "RegistrationEvent",
+          "Resolver.events": "ResolverEvent",
+        },
       },
-      fields: {
-        "Domain.events": "DomainEvent",
-        "Registration.events": "RegistrationEvent",
-        "Resolver.events": "ResolverEvent",
-      },
-    },
+    }),
   }),
 );
 

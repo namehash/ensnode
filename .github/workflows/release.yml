@@ -1,4 +1,4 @@
-name: Release
+name: Changesets Release
 
 on:
   workflow_dispatch:
@@ -44,6 +44,7 @@ jobs:
           commit: "chore(release): version apps"
           title: "Release New Version"
           publish: pnpm changeset-publish
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

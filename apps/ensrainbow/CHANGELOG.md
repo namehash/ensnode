@@ -1,5 +1,19 @@
 # ensrainbow
 
+## 0.19.0
+
+### Minor Changes
+
+- [#597](https://github.com/namehash/ensnode/pull/597) [`3758d7e`](https://github.com/namehash/ensnode/commit/3758d7e644a2d477b922ccd72af5522440846c65) Thanks [@shrugs](https://github.com/shrugs)! - temp stop building v2 app image because no data image available
+
+- [#532](https://github.com/namehash/ensnode/pull/532) [`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be) Thanks [@shrugs](https://github.com/shrugs)! - the great naming terminology refactor
+
+### Patch Changes
+
+- Updated dependencies [[`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be)]:
+  - @ensnode/ensrainbow-sdk@0.19.0
+  - @ensnode/utils@0.19.0
+
 ## 0.18.0
 
 ### Minor Changes
