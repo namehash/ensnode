@@ -1,5 +1,23 @@
 # ensindexer
 
+## 0.19.0
+
+### Minor Changes
+
+- [#607](https://github.com/namehash/ensnode/pull/607) [`b477584`](https://github.com/namehash/ensnode/commit/b477584c0ab9645214ced764b50224af6a636ffa) Thanks [@shrugs](https://github.com/shrugs)! - Rename root plugin to subgraph
+
+- [#532](https://github.com/namehash/ensnode/pull/532) [`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be) Thanks [@shrugs](https://github.com/shrugs)! - the great naming terminology refactor
+
+### Patch Changes
+
+- Updated dependencies [[`b477584`](https://github.com/namehash/ensnode/commit/b477584c0ab9645214ced764b50224af6a636ffa), [`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be)]:
+  - @ensnode/ens-deployments@0.19.0
+  - @ensnode/ensrainbow-sdk@0.19.0
+  - @ensnode/utils@0.19.0
+  - @ensnode/ponder-metadata@0.19.0
+  - @ensnode/ponder-schema@0.19.0
+  - @ensnode/ponder-subgraph@0.19.0
+
 ## 0.18.0
 
 ### Patch Changes
