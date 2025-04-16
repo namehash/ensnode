@@ -1,4 +1,4 @@
-import { Context } from "ponder:registry";
+import { Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";

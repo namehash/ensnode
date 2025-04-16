@@ -5,7 +5,6 @@ import { PublicClient } from "viem";
 import { Blockrange } from "@/lib/types";
 import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
-import type { BlockInfo } from "@ensnode/ponder-metadata";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -429,14 +428,14 @@ export function createFirstBlockToIndexByChainIdFetcher(
    * @param chainId the chain ID to get the first block to index for
    * @param publicClient the public client to fetch the block from
    *
-   * @returns {Promise<BlockInfo>} the first block to index for the requested chain ID
+   * @returns the first block to index for the requested chain ID
    * @throws if the start block number is not found for the chain ID
    * @throws if the block is not available on the network
    */
   return async function fetchFirstBlockToIndexByChainId(
     chainId: number,
     publicClient: PublicClient,
-  ): Promise<BlockInfo> {
+  ) {
     const startBlockNumbers: Record<number, number> =
       await createStartBlockByChainIdMap(ponderConfig);
     const startBlockNumberForChainId = startBlockNumbers[chainId];
