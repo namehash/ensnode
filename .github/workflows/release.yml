@@ -1,4 +1,4 @@
-name: Changesets Release
+name: Release
 
 on:
   workflow_dispatch:
@@ -105,3 +105,58 @@ jobs:
             type=semver,pattern={{version}},value=${{ matrix.apps.version }}
             type=ref,event=branch
             type=sha
+
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    # run only if (1) changesets published our npm packages AND
+    if: needs.release.outputs.published == 'true'
+    # (2) we built and pushed the docker images
+    needs: [release, build-and-push-ensnode]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR information
+        id: get-pr
+        run: |
+          # Get the PR number from the commit message
+          # Note: it must be a release PR with a title "Release New Version"
+          PR_NUMBER=$(git log -1 --pretty=%B | grep -o 'Release New Version (#[0-9]\+)' | grep -o '[0-9]\+')
+          if [ -z "$PR_NUMBER" ]; then
+            echo "Could not find PR number in commit message"
+            exit 1
+          fi
+          
+          # Get PR body using GitHub CLI
+          PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
+          if [ -z "$PR_BODY" ]; then
+            echo "Could not fetch PR body"
+            exit 1
+          fi
+          
+          # Extract version from PR body
+          VERSION=$(echo "$PR_BODY" | grep -o '@[^@]*@[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1 | awk -F@ '{print $3}')
+          if [ -z "$VERSION" ]; then
+            echo "Could not extract version from PR body"
+            exit 1
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "pr_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$PR_BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get-pr.outputs.version }}
+          name: Release v${{ steps.get-pr.outputs.version }}
+          body: ${{ steps.get-pr.outputs.pr_body }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
