@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/utils",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "type": "module",
   "description": "A utility library for interacting with ENS data",
   "license": "MIT",

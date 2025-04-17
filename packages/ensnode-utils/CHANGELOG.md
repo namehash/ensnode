@@ -1,5 +1,11 @@
 # @ensnode/utils
 
+## 0.19.2
+
+### Patch Changes
+
+- [#622](https://github.com/namehash/ensnode/pull/622) [`396607e`](https://github.com/namehash/ensnode/commit/396607e08532e22b2367b2b4b1a2962983924e81) Thanks [@tk-o](https://github.com/tk-o)! - Updated CI workflow for creating Github Releases.
+
 ## 0.19.1
 
 ## 0.19.0
