@@ -1,5 +1,11 @@
 # @ensnode/utils
 
+## 0.19.3
+
+### Patch Changes
+
+- [#624](https://github.com/namehash/ensnode/pull/624) [`387c7c2`](https://github.com/namehash/ensnode/commit/387c7c24c5a7e76c2145799962b3537ed000b6c4) Thanks [@tk-o](https://github.com/tk-o)! - Allow CI workflow to read PR information to generate Github Release notes.
+
 ## 0.19.2
 
 ### Patch Changes
