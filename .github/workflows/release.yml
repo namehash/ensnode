@@ -121,6 +121,8 @@ jobs:
 
       - name: Get PR information
         id: get-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Get the PR number from the commit message
           # Note: it must be a release PR with a title "Release New Version"
