@@ -1,8 +1,8 @@
 import { Button, Link } from "@namehash/namekit-react";
+import HeaderMobileNavigation from "@workspace/docs/ensnode.io/src/components/molecules/HeaderMobileNavigation.tsx";
 import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TwitterIcon.tsx";
-import HeaderMobileNavigation from "@workspace/docs/ensnode.io/src/components/molecules/HeaderMobileNavigation.tsx";
 export default function HeaderButtons() {
   return (
     <>
@@ -30,7 +30,7 @@ export default function HeaderButtons() {
         </Button>
       </div>
       <div className="sm:hidden flex items-center justify-center gap-1">
-        <HeaderMobileNavigation/>
+        <HeaderMobileNavigation />
       </div>
     </>
   );
