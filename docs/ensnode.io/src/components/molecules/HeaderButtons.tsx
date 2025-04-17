@@ -1,7 +1,8 @@
-import { Button, IconButton, Link } from "@namehash/namekit-react";
+import { Button, Link } from "@namehash/namekit-react";
 import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon.tsx";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TwitterIcon.tsx";
+import HeaderMobileNavigation from "@workspace/docs/ensnode.io/src/components/molecules/HeaderMobileNavigation.tsx";
 export default function HeaderButtons() {
   return (
     <>
@@ -29,16 +30,7 @@ export default function HeaderButtons() {
         </Button>
       </div>
       <div className="sm:hidden flex items-center justify-center gap-1">
-        <IconButton asChild variant="ghost">
-          <Link
-            href="https://ensnode.io/ensrainbow/"
-            target="_blank"
-            size="small"
-            className="hover:no-underline nk-underline-none"
-          >
-            Hamburger
-          </Link>
-        </IconButton>
+        <HeaderMobileNavigation/>
       </div>
     </>
   );
