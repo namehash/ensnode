@@ -1,5 +1,23 @@
 # ensindexer
 
+## 0.22.0
+
+### Minor Changes
+
+- [#639](https://github.com/namehash/ensnode/pull/639) [`0115784`](https://github.com/namehash/ensnode/commit/0115784f15bb775f0e0dc6dd197376724cb37add) Thanks [@shrugs](https://github.com/shrugs)! - fix private package tagging
+
+- [#640](https://github.com/namehash/ensnode/pull/640) [`e4ab45b`](https://github.com/namehash/ensnode/commit/e4ab45bd3ef3fa6e8071393f625eaf5e615b5a0b) Thanks [@shrugs](https://github.com/shrugs)! - fix changeset publish once again
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.22.0
+  - @ensnode/utils@0.22.0
+  - @ensnode/ensrainbow-sdk@0.22.0
+  - @ensnode/ponder-metadata@0.22.0
+  - @ensnode/ponder-schema@0.22.0
+  - @ensnode/ponder-subgraph@0.22.0
+
 ## 0.21.0
 
 ### Minor Changes
