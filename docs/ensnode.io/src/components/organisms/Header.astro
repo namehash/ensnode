@@ -2,9 +2,10 @@
 import Search from "@astrojs/starlight/components/Search.astro";
 import ENSNode2D from "../../assets/light-logo.svg";
 import HeaderButtons from "../molecules/HeaderButtons";
+import ScrollHeader from "../../scripts/ScrollHeader";
 ---
 
-<header class="fixed bg-transparent backdrop-blur-md top-0 w-full z-20 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none">
+<header id="site-header" class="custom_header fixed top-0 w-full z-20 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none">
     <div class="box-border max-w-7xl mx-auto items-center justify-between flex flex-row pl-5 pr-3 sm:px-8">
         <div class="flex flex-row lg:gap-2 xl:gap-7 justify-between items-center">
             <div class="flex flex-row justify-between items-center gap-2 sm:gap-[14px] cursor-pointer flex-shrink-0 pr-2">
@@ -20,4 +21,27 @@ import HeaderButtons from "../molecules/HeaderButtons";
         <HeaderButtons client:load/>
     </div>
 </header>
+
+<ScrollHeader client:load />
+
+<style>
+    .custom_header {
+        transition: background-color 0.3s ease;
+        color: white;
+    }
+
+    .custom_header.scrolled {
+        background-color: white;
+        border-bottom: 1px solid oklch(87.2% 0.01 258.338);
+        color: black;
+    }
+
+    .scroll_test {
+        color: white;
+    }
+
+    .scroll_test.scrolled {
+        color: black;
+    }
+</style>
 
