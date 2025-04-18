@@ -79,7 +79,7 @@ jobs:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
     # if changesets published our npm packages, also build docker images
     needs: release
-    if: needs.release.outputs.published == 'true'
+    if: needs.release.outputs.published == 'true' && length(fromJson(needs.release.outputs.publishedApps)) > 0
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
@@ -132,24 +132,24 @@ jobs:
             echo "Could not find PR number in commit message"
             exit 1
           fi
-          
+
           # Get PR body using GitHub CLI
           PR_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
           if [ -z "$PR_BODY" ]; then
             echo "Could not fetch PR body"
             exit 1
           fi
-          
+
           # Extract version from PR body
           VERSION=$(echo "$PR_BODY" | grep -o '@[^@]*@[0-9]\+\.[0-9]\+\.[0-9]\+' | head -1 | awk -F@ '{print $3}')
           if [ -z "$VERSION" ]; then
             echo "Could not extract version from PR body"
             exit 1
           fi
-          
+
           # Extract release notes (everything below # Releases)
           RELEASE_NOTES=$(echo "$PR_BODY" | awk '/^# Releases/{p=1;next}p')
-          
+
           # Add NPM package links
           RELEASE_NOTES+=$'\n\n## :package: NPM packages\n'
           RELEASE_NOTES+=$(echo "${{ needs.release.outputs.publishedPackages }}" | jq -r '.[] | "- [\(.name)@\(.version)](https://www.npmjs.com/package/\(.name)/v/\(.version))"')
@@ -157,7 +157,7 @@ jobs:
           # Add Docker image links
           RELEASE_NOTES+=$'\n\n## :whale: Docker images\n'
           RELEASE_NOTES+=$(echo "${{ needs.release.outputs.publishedApps }}" | jq -r '.[] | "- [\(.name):\(.version)](https://ghcr.io/namehash/ensnode/\(.name):\(.version))"')
-          
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "pr_body<<EOF" >> $GITHUB_OUTPUT
           echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
