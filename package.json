@@ -9,7 +9,7 @@
     "test": "pnpm -r --parallel test run",
     "typecheck": "pnpm -r --parallel typecheck",
     "changeset": "changeset",
-    "changeset-publish": "changeset publish",
+    "changeset-publish": "changeset publish --no-git-tag",
     "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish",
     "docker:build:ensnode": "pnpm run docker:build:ensindexer && pnpm run docker:build:ensrainbow && pnpm run docker:build:ensadmin",
     "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",

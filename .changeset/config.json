@@ -22,7 +22,7 @@
   "prettier": true,
   "privatePackages": {
     "version": true,
-    "tag": true
+    "tag": false
   },
   "ignore": ["@docs/ensnode", "@docs/ensrainbow"]
 }
