@@ -1,5 +1,7 @@
 # @ensnode/shared-configs
 
+## 0.20.0
+
 ## 0.19.4
 
 ## 0.19.3

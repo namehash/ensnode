@@ -1,5 +1,21 @@
 # ensindexer
 
+## 0.20.0
+
+### Minor Changes
+
+- [#635](https://github.com/namehash/ensnode/pull/635) [`6dd9699`](https://github.com/namehash/ensnode/commit/6dd969915cd74350af3b68fb88e12ebdefc56dfb) Thanks [@shrugs](https://github.com/shrugs)! - fix issue with selecting schema name other than 'public'
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.20.0
+  - @ensnode/utils@0.20.0
+  - @ensnode/ensrainbow-sdk@0.20.0
+  - @ensnode/ponder-metadata@0.20.0
+  - @ensnode/ponder-schema@0.20.0
+  - @ensnode/ponder-subgraph@0.20.0
+
 ## 0.19.4
 
 ### Patch Changes
