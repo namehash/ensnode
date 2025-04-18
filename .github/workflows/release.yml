@@ -9,7 +9,7 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  release:
+  changesets:
     name: Changesets
     if: github.repository == 'namehash/ensnode'
     runs-on: blacksmith-4vcpu-ubuntu-2204
@@ -87,13 +87,13 @@ jobs:
   build-and-push-ensnode:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
     # if changesets published our npm packages, also build docker images
-    needs: release
-    if: needs.release.outputs.published == 'true' && needs.release.outputs.publishedApps != '[]'
+    needs: changesets
+    if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedApps != '[]'
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
       matrix:
-        apps: ${{ fromJson(needs.release.outputs.publishedApps) }}
+        apps: ${{ fromJson(needs.changesets.outputs.publishedApps) }}
 
     steps:
       - name: Checkout repository
@@ -120,9 +120,9 @@ jobs:
     name: Create GitHub Release
     runs-on: blacksmith-4vcpu-ubuntu-2204
     # run only if (1) changesets published our npm packages AND
-    if: needs.release.outputs.published == 'true'
+    if: needs.changesets.outputs.published == 'true'
     # (2) we built and pushed the docker images
-    needs: [release, build-and-push-ensnode]
+    needs: [changesets, build-and-push-ensnode]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -161,11 +161,11 @@ jobs:
 
           # Add NPM package links
           RELEASE_NOTES+=$'\n\n## :package: NPM packages\n'
-          RELEASE_NOTES+=$(echo '${{ needs.release.outputs.publishedPackages }}' | jq -r '.[] | "- [\(.name)@\(.version)](https://www.npmjs.com/package/\(.name)/v/\(.version))"')
+          RELEASE_NOTES+=$(echo '${{ needs.changesets.outputs.publishedPackages }}' | jq -r '.[] | "- [\(.name)@\(.version)](https://www.npmjs.com/package/\(.name)/v/\(.version))"')
 
           # Add Docker image links
           RELEASE_NOTES+=$'\n\n## :whale: Docker images\n'
-          RELEASE_NOTES+=$(echo '${{ needs.release.outputs.publishedApps }}' | jq -r '.[] | "- [\(.name):\(.version)](https://ghcr.io/namehash/ensnode/\(.name):\(.version))"')
+          RELEASE_NOTES+=$(echo '${{ needs.changesets.outputs.publishedApps }}' | jq -r '.[] | "- [\(.name):\(.version)](https://ghcr.io/namehash/ensnode/\(.name):\(.version))"')
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "pr_body<<EOF" >> $GITHUB_OUTPUT
