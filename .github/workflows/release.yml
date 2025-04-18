@@ -18,9 +18,8 @@ jobs:
       pull-requests: write
     outputs:
       published: ${{ steps.changesets.outputs.published }}
-      # publishedApps example [{"name":"ensadmin","version":"0.15.0"},{"name":"ensindexer","version":"0.15.0"},{"name":"ensrainbow","version":"0.15.0"}]
       publishedApps: ${{ steps.publishedApps.outputs.output }}
-      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
+      publishedPackages: ${{ steps.publishedPackages.outputs.output }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,6 +73,16 @@ jobs:
                 [.]
               end
             ) | flatten | map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+
+      - name: Filter Published Packages For NPM Packages
+        uses: cloudposse/github-action-jq@main
+        id: publishedPackages
+        with:
+          compact: true
+          input: ${{ steps.changesets.outputs.publishedPackages }}
+          # filters changesets' publishedPackages for those not in our 'apps'
+          script: |-
+            map(select(.name != "ensindexer" and .name != "ensadmin" and .name != "ensrainbow"))
 
   build-and-push-ensnode:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
