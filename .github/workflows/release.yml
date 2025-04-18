@@ -149,6 +149,10 @@ jobs:
           # Extract release notes (everything below # Releases)
           RELEASE_NOTES=$(echo "$PR_BODY" | awk '/^# Releases/{p=1;next}p')
           
+          # Add NPM package links
+          RELEASE_NOTES+=$'\n\n## :package: NPM packages\n'
+          RELEASE_NOTES+=$(echo "${{ needs.release.outputs.publishedPackages }}" | jq -r '.[] | "- [\(.name)@\(.version)](https://www.npmjs.com/package/\(.name)/v/\(.version))"')
+          
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "pr_body<<EOF" >> $GITHUB_OUTPUT
           echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
