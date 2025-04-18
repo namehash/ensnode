@@ -1,5 +1,11 @@
 # @ensnode/utils
 
+## 0.19.4
+
+### Patch Changes
+
+- [#628](https://github.com/namehash/ensnode/pull/628) [`829d50f`](https://github.com/namehash/ensnode/commit/829d50f6b2ea1f49276a8cb614b082c80aea760d) Thanks [@tk-o](https://github.com/tk-o)! - Update release notes format when creating Github Release. Also, stop pushing git tag per each released package.
+
 ## 0.19.3
 
 ### Patch Changes

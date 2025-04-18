@@ -1,5 +1,13 @@
 # ensrainbow
 
+## 0.19.4
+
+### Patch Changes
+
+- Updated dependencies [[`829d50f`](https://github.com/namehash/ensnode/commit/829d50f6b2ea1f49276a8cb614b082c80aea760d)]:
+  - @ensnode/utils@0.19.4
+  - @ensnode/ensrainbow-sdk@0.19.4
+
 ## 0.19.3
 
 ### Patch Changes
