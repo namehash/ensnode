@@ -93,7 +93,9 @@ In the future, indexing multiple networks with network-specific blockrange const
 // Activate the active plugins' handlers, which register indexing handlers with Ponder.
 ////////
 
-await Promise.all(activePlugins.map((plugin) => plugin.activate()));
+// NOTE: we explicitly delay the execution of this function for 1 tick, to avoid a race condition
+// within ponder internals related to the schema name and drizzle-orm
+setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
