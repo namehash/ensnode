@@ -146,9 +146,12 @@ jobs:
             exit 1
           fi
           
+          # Extract release notes (everything below # Releases)
+          RELEASE_NOTES=$(echo "$PR_BODY" | awk '/^# Releases/{p=1;next}p')
+          
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "pr_body<<EOF" >> $GITHUB_OUTPUT
-          echo "$PR_BODY" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
 
@@ -156,7 +159,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.get-pr.outputs.version }}
-          name: Release v${{ steps.get-pr.outputs.version }}
+          name: v${{ steps.get-pr.outputs.version }}
           body: ${{ steps.get-pr.outputs.pr_body }}
           draft: false
           prerelease: false
