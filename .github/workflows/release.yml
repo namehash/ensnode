@@ -18,8 +18,9 @@ jobs:
       pull-requests: write
     outputs:
       published: ${{ steps.changesets.outputs.published }}
+      # publishedApps example [{"name":"ensadmin","version":"0.15.0"},{"name":"ensindexer","version":"0.15.0"},{"name":"ensrainbow","version":"0.15.0"}]
       publishedApps: ${{ steps.publishedApps.outputs.output }}
-      # [{"name":"ensadmin","version":"0.15.0"},{"name":"ensindexer","version":"0.15.0"},{"name":"ensrainbow","version":"0.15.0"}]
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -152,6 +153,10 @@ jobs:
           # Add NPM package links
           RELEASE_NOTES+=$'\n\n## :package: NPM packages\n'
           RELEASE_NOTES+=$(echo "${{ needs.release.outputs.publishedPackages }}" | jq -r '.[] | "- [\(.name)@\(.version)](https://www.npmjs.com/package/\(.name)/v/\(.version))"')
+
+          # Add Docker image links
+          RELEASE_NOTES+=$'\n\n## :whale: Docker images\n'
+          RELEASE_NOTES+=$(echo "${{ needs.release.outputs.publishedApps }}" | jq -r '.[] | "- [\(.name):\(.version)](https://ghcr.io/namehash/ensnode/\(.name):\(.version))"')
           
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "pr_body<<EOF" >> $GITHUB_OUTPUT
