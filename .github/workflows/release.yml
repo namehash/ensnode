@@ -79,7 +79,7 @@ jobs:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
     # if changesets published our npm packages, also build docker images
     needs: release
-    if: needs.release.outputs.published == 'true' && length(fromJson(needs.release.outputs.publishedApps)) > 0
+    if: needs.release.outputs.published == 'true' && needs.release.outputs.publishedApps !== '[]'
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
