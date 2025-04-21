@@ -2,7 +2,7 @@
 
 import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
-import { ChevronsUpDown, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
+import { ChevronsUpDown, Loader2, Plus, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -33,6 +33,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { CopyButton } from "../ui/copy-button";
 import { useConnections } from "./use-connections";
 
 const validateUrl = (url: string) => {
@@ -129,7 +130,7 @@ export function ConnectionSelector() {
               sideOffset={4}
             >
               <DropdownMenuLabel className="text-xs text-muted-foreground">
-                ENSNode Connections
+                ENSNode Connection Library
               </DropdownMenuLabel>
 
               {isLoading ? (
@@ -137,60 +138,82 @@ export function ConnectionSelector() {
                   <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                connections.map(({ url, isDefault }) => {
-                  const isCurrentlySelectedConnection = url === selectedUrl.toString();
-                  return (
-                    <DropdownMenuItem
-                      key={url}
-                      onClick={() => handleSelect(url)}
-                      className={cn(
-                        "group gap-2 p-2 font-mono text-xs justify-between",
-                        isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : "",
-                      )}
-                    >
-                      <span className="truncate flex-1">{url}</span>
-                      <div className="flex items-center gap-1">
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-1 hover:text-foreground rounded"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                        {!isDefault && !isCurrentlySelectedConnection && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemove(url);
-                            }}
-                            disabled={removeConnection.isPending}
-                            className={cn(
-                              "p-1 rounded",
-                              removeConnection.isPending
-                                ? "text-muted-foreground cursor-not-allowed"
-                                : "hover:text-destructive",
-                            )}
-                          >
-                            {removeConnection.isPending &&
-                            removeConnection.variables?.url === url ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-3 h-3" />
-                            )}
-                          </button>
+                connections
+                  .filter(({ isDefault }) => isDefault)
+                  .map(({ url, isDefault }) => {
+                    const isCurrentlySelectedConnection = url === selectedUrl.toString();
+                    return (
+                      <DropdownMenuItem
+                        key={url}
+                        onClick={() => handleSelect(url)}
+                        className={cn(
+                          "group gap-2 p-2 font-mono text-xs justify-between cursor-pointer",
+                          isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : "",
                         )}
-                      </div>
-                    </DropdownMenuItem>
-                  );
-                })
+                      >
+                        <span className="truncate flex-1">{url}</span>
+                        <div className="flex items-center gap-1">
+                          <CopyButton value={url} size="sm" className="-mr-2" />
+                        </div>
+                      </DropdownMenuItem>
+                    );
+                  })
+              )}
+
+              {!isLoading && connections.some(({ isDefault }) => !isDefault) && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
+                    My Custom Connections
+                  </DropdownMenuLabel>
+
+                  {connections
+                    .filter(({ isDefault }) => !isDefault)
+                    .map(({ url }) => {
+                      const isCurrentlySelectedConnection = url === selectedUrl.toString();
+                      return (
+                        <DropdownMenuItem
+                          key={url}
+                          onClick={() => handleSelect(url)}
+                          className={cn(
+                            "group gap-2 p-2 font-mono text-xs justify-between cursor-pointer",
+                            isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : "",
+                          )}
+                        >
+                          <span className="truncate flex-1">{url}</span>
+                          <div className="flex items-center gap-1">
+                            {!isCurrentlySelectedConnection && (
+                              <Button
+                                variant="destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemove(url);
+                                }}
+                                disabled={removeConnection.isPending}
+                                className={cn(
+                                  removeConnection.isPending ? "cursor-not-allowed" : "",
+                                )}
+                              >
+                                {removeConnection.isPending &&
+                                removeConnection.variables?.url === url ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-3 h-3" />
+                                )}
+                              </Button>
+                            )}
+                            <CopyButton value={url} size="sm" className="-mr-2" />
+                          </div>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                </>
               )}
 
               <DropdownMenuSeparator />
 
               <DialogTrigger asChild>
-                <DropdownMenuItem className="gap-2 p-2">
+                <DropdownMenuItem className="gap-2 p-2 cursor-pointer">
                   <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                     <Plus className="size-4" />
                   </div>
@@ -206,7 +229,7 @@ export function ConnectionSelector() {
         <DialogHeader>
           <DialogTitle>Add ENSNode Connection</DialogTitle>
           <DialogDescription>
-            Enter the URL of the ENSNode service you want to connect to.
+            Enter the URL of the ENSNode you want to connect to.
           </DialogDescription>
         </DialogHeader>
         <form
