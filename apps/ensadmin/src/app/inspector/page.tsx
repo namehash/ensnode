@@ -42,9 +42,8 @@ export default function InspectorPage() {
               </span>
             </h2>
             <p className="mb-6 text-gray-600">
-              Select an ENS protocol inspection strategy and enter an ENS name
-              for a developer-friendly interactive visualization of how the ENS
-              protocol operates.
+              Select an ENS protocol inspection strategy and enter an ENS name for a
+              developer-friendly interactive visualization of how the ENS protocol operates.
             </p>
             <InspectorForm className="flex-col items-start" />
           </div>
