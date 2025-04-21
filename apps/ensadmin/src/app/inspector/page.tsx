@@ -16,7 +16,7 @@ export default function InspectorPage() {
         <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-sm border">
           <h2 className="text-2xl font-semibold mb-6">ENS Protocol Inspector</h2>
           <p className="mb-6 text-gray-600">
-            Enter an ENS name and strategy to visualize its resolution process through the ENS
+            Select an ENS protocol inspection strategy and enter an ENS name for a developer-friendly interactive visualization of how the ENS protocol operates.
             protocol.
           </p>
           <InspectorForm className="flex-col items-start" />
