@@ -1,7 +1,7 @@
 "use client";
 
-import InspectorSummary from "./inspector-summary";
 import { useSearchParams } from "next/navigation";
+import InspectorSummary from "./inspector-summary";
 
 export default function ActionsInspector() {
   const searchParams = useSearchParams();

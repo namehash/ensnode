@@ -68,7 +68,7 @@ export default function InspectorForm({ className = "" }: InspectorFormProps) {
       </div>
 
       <Button type="submit" className="whitespace-nowrap">
-        Inspect
+        New Inspection
       </Button>
     </form>
   );
