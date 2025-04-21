@@ -22,8 +22,11 @@ export default function InspectorForm({ className = "" }: InspectorFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialStrategy = searchParams.get("strategy") || "resolveAddress";
-  const initialName = searchParams.get("name") || "jesse.base.eth";
+  const initialStrategy = "resolveAddress";
+  const initialName = "jesse.base.eth";
+
+  // const initialStrategy = searchParams.get("strategy") || "resolveAddress";
+  // const initialName = searchParams.get("name") || "jesse.base.eth";
 
   const [strategy, setStrategy] = useState(initialStrategy);
   const [name, setName] = useState(initialName);
@@ -40,7 +43,7 @@ export default function InspectorForm({ className = "" }: InspectorFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className={cn("flex gap-4", className)}>
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex flex-col items-start gap-2 w-full">
         <Label htmlFor="strategy" className="whitespace-nowrap">
           Strategy
         </Label>
@@ -54,7 +57,7 @@ export default function InspectorForm({ className = "" }: InspectorFormProps) {
         </Select>
       </div>
 
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex flex-col items-start gap-2 w-full">
         <Label htmlFor="name" className="whitespace-nowrap">
           Name
         </Label>
@@ -68,7 +71,7 @@ export default function InspectorForm({ className = "" }: InspectorFormProps) {
       </div>
 
       <Button type="submit" className="whitespace-nowrap">
-        New Inspection
+        Inspect ENS
       </Button>
     </form>
   );

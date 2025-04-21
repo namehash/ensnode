@@ -32,7 +32,7 @@ export default function InspectorPage() {
 
   if (!hasParams) {
     return (
-      <div className="bg-[#F7F9FB] h-screen w-full">
+      <div className="bg-[#F7F9FB] h-full w-full">
         <div className="flex flex-col items-center justify-center h-[calc(100vh-6rem)] p-8">
           <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-sm border">
             <h2 className="text-2xl font-semibold mb-6 inline-flex items-center gap-1">
@@ -42,8 +42,9 @@ export default function InspectorPage() {
               </span>
             </h2>
             <p className="mb-6 text-gray-600">
-              Select an ENS protocol inspection strategy and enter an ENS name for a
-              developer-friendly interactive visualization of how the ENS protocol operates.
+              Select an ENS protocol inspection strategy and enter an ENS name
+              for a developer-friendly interactive visualization of how the ENS
+              protocol operates.
             </p>
             <InspectorForm className="flex-col items-start" />
           </div>
