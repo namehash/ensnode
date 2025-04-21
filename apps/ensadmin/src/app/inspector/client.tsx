@@ -35,7 +35,7 @@ export default function ReactFlowClient() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(safeInitialEdges);
 
   return (
-    <div className="h-[calc(100vh-6rem)]">
+    <>
       <ReactFlow
         nodes={nodes}
         nodeTypes={nodeTypes}
@@ -54,6 +54,6 @@ export default function ReactFlowClient() {
         <MiniMap />
         <Background />
       </ReactFlow>
-    </div>
+    </>
   );
 }

@@ -11,13 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 
 export default function InspectorSummary() {
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
 
-  const strategy = searchParams.get("strategy") || "resolveAddress";
-  const name = searchParams.get("name") || "";
+  // const strategy = searchParams.get("strategy") || "resolveAddress";
+  // const name = searchParams.get("name") || "Unknown";
+
+  const strategy = "resolveAddress";
+  const name = "jesse.base.eth";
 
   return (
     <div className="flex items-center gap-4">

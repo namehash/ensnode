@@ -33,7 +33,7 @@ export default function InspectorPage() {
   if (!hasParams) {
     return (
       <div className="bg-[#F7F9FB] h-full w-full">
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-6rem)] p-8">
+        <div className="flex flex-col items-center justify-center h-full p-8">
           <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-sm border">
             <h2 className="text-2xl font-semibold mb-6 inline-flex items-center gap-1">
               <span>ENS Protocol Inspector</span>
@@ -57,5 +57,9 @@ export default function InspectorPage() {
     return <Loading />;
   }
 
-  return <InspectorClient />;
+  return (
+    <div className="bg-[#F7F9FB] h-full">
+      <InspectorClient />
+    </div>
+  );
 }
