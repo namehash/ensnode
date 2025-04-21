@@ -1,6 +1,6 @@
 "use client";
 
-import InspectorForm from "@/app/inspector/components/inspector-form";
+import InspectorSummary from "./inspector-summary";
 import { useSearchParams } from "next/navigation";
 
 export default function ActionsInspector() {
@@ -13,7 +13,7 @@ export default function ActionsInspector() {
 
   return (
     <div className="flex items-center">
-      <InspectorForm />
+      <InspectorSummary />
     </div>
   );
 }
