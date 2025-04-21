@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/utils",
-  "version": "0.1.0",
+  "version": "0.22.0",
   "type": "module",
   "description": "A utility library for interacting with ENS data",
   "license": "MIT",
@@ -10,28 +10,28 @@
     "directory": "packages/ensnode-utils"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-utils",
+  "files": [
+    "dist"
+  ],
   "exports": {
-    "./cache": "./src/cache.ts",
-    "./subname-helpers": "./src/subname-helpers.ts",
-    "./types": "./src/types.ts"
+    ".": "./src/index.ts",
+    "./subname-helpers": "./src/subname-helpers.ts"
   },
-  "files": ["dist"],
   "publishConfig": {
     "access": "public",
     "exports": {
-      "./cache": {
-        "types": "./dist/cache.d.ts",
-        "default": "./dist/cache.js"
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "./subname-helpers": {
         "types": "./dist/subname-helpers.d.ts",
         "default": "./dist/subname-helpers.js"
-      },
-      "./types": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
       }
-    }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
   },
   "scripts": {
     "prepublish": "tsup",

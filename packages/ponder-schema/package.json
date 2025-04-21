@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-schema",
-  "version": "0.1.0",
+  "version": "0.22.0",
   "type": "module",
   "description": "The ponder schema for ENSNode",
   "license": "MIT",
@@ -10,11 +10,17 @@
     "directory": "packages/ponder-schema"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-schema",
-  "keywords": ["ENS", "ENSNode", "Ponder"],
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "Ponder"
+  ],
   "exports": {
     ".": "./src/ponder.schema.ts"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {

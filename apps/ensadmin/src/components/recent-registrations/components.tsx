@@ -16,7 +16,7 @@ import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Hex, getAddress, isAddressEqual } from "viem";
+import { Address, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
 
 // Helper function to safely format dates
@@ -133,7 +133,7 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
  * @param wrappedOwner The wrapped owner address (optional)
  * @returns The true owner address
  */
-function getTrueOwner(owner: { id: Hex }, wrappedOwner?: { id: Hex }) {
+function getTrueOwner(owner: { id: Address }, wrappedOwner?: { id: Address }) {
   // Only use wrapped owner if the owner is the NameWrapper contract
   if (wrappedOwner?.id && isAddressEqual(owner.id, NAME_WRAPPER_ADDRESS)) {
     return getAddress(wrappedOwner.id);

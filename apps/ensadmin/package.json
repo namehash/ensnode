@@ -1,6 +1,6 @@
 {
   "name": "ensadmin",
-  "version": "0.1.4",
+  "version": "0.22.0",
   "private": true,
   "type": "module",
   "description": "Explore the ENS Protocol like never before",
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@ensnode/ponder-metadata": "workspace:*",
+    "@ensnode/utils": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",

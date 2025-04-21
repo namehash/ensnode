@@ -23,6 +23,8 @@
 
 Full Documentation ➡︎ <a href="https://ensnode.io" target="_blank">ensnode.io</a>
 
+[Join us on Telegram](https://t.me/ensnode) to get support, share ideas, and discuss the future of ENSNode.
+
 ## The future of ENS indexing
 
 ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, including faster indexing and simpler self-hosted deployments. Initial multichain capabilities include indexing mainnet, Basenames, and Linea, providing a unified multichain namespace via a subgraph-compatible GraphQL api. When indexing just mainnet, it has full data equivalency with the ENS Subgraph.
@@ -51,16 +53,16 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
   - ✅ Automatically reconciles chain reorganizations
   - ✅ Deploy anywhere with Node.js & Docker
 - Designed for web developers
-  - ✅ [use ENSNode with ENSjs](https://www.ensnode.io/ensnode/usage/with-ensjs/)
-  - ✅ [GraphQL APIs](https://ensnode.io/ensnode/usage/api/)
+  - ✅ [use ENSNode with ENSjs](https://www.ensnode.io/docs/usage/with-ensjs/)
+  - ✅ [GraphQL APIs](https://ensnode.io/docs/usage/api/)
   - ✅ [Live Queries & React Hooks](https://ponder.sh/docs/query/client)
   - ✅ Custom APIs for your app
-- [1:1 Subgraph Compatibility](https://www.ensnode.io/ensnode/reference/subgraph-compatibility/)
+- [1:1 Subgraph Compatibility](https://www.ensnode.io/docs/reference/subgraph-compatibility/)
   - ✅ [100% data equivalency](https://github.com/namehash/ens-subgraph-transition-tools) as compared to Subgraph
   - ✅ 100% ensjs test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
   - 🚧 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
 - Own your ENSNode index
-  - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/ensnode/deploying/) for controlling your own uptime guarantees and private queries
+  - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/docs/deploying/) for controlling your own uptime guarantees and private queries
 
 ## Why Index ENS? Why ENSNode?
 
@@ -104,7 +106,7 @@ NameHash has received generous support from the [ENS DAO](https://ensdao.org/) a
 
 ## Contact Us
 
-Visit our [website](https://namehashlabs.org/) to get in contact.
+Visit our [website](https://namehashlabs.org/) to get in contact, or [Join us on Telegram](https://t.me/ensnode).
 
 ## License
 

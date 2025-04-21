@@ -1,16 +1,20 @@
-import { createPluginNamespace } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
+import { PluginName } from "@ensnode/utils";
 import { describe, expect, it } from "vitest";
 
 describe("createPluginNamespace", () => {
   it("should return a function that creates namespaced contract names", () => {
-    const boxNs = createPluginNamespace("box");
-    const ethNs = createPluginNamespace("eth");
-    const baseEthNs = createPluginNamespace("base.eth");
-    const nestedNs = createPluginNamespace("well.done.sir.eth");
+    const boxNs = makePluginNamespace("box" as PluginName);
+    const subgraphNs = makePluginNamespace(PluginName.Subgraph);
+    const basenamesNes = makePluginNamespace(PluginName.Basenames);
 
-    expect(boxNs("Registry")).toBe("/box/Registry");
-    expect(ethNs("Registry")).toBe("/eth/Registry");
-    expect(baseEthNs("Registry")).toBe("/eth/base/Registry");
-    expect(nestedNs("Registry")).toBe("/eth/sir/done/well/Registry");
+    expect(boxNs("Registry")).toBe("box/Registry");
+    expect(subgraphNs("Registry")).toBe("subgraph/Registry");
+    expect(basenamesNes("Registry")).toBe("basenames/Registry");
+  });
+
+  it("should throw if invalid characters", () => {
+    expect(() => makePluginNamespace("subgraph.test" as PluginName)).toThrowError(/reserved/i);
+    expect(() => makePluginNamespace("subgraph:test" as PluginName)).toThrowError(/reserved/i);
   });
 });

@@ -1,28 +1,26 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { DeploymentConfigs } from "@ensnode/ens-deployments";
-import type { Node } from "@ensnode/utils/types";
-import { Hex, decodeEventLog } from "viem";
+import { ENSDeployments } from "@ensnode/ens-deployments";
+import type { Node, PluginName } from "@ensnode/utils";
+import { type Address, Hash, type Hex, decodeEventLog } from "viem";
 
-import { createSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { OwnedName } from "@/lib/types";
-
-// NOTE: both subgraph and this indexer use upserts in this file because a 'Resolver' is _any_
-// contract on the chain that emits an event with the relevant signatures, which may or may not
-// actually be a contract intended for use with ENS as a Resolver. because of this as well, each
-// event could be the first event the indexer has seen for this contract (and its Resolver id) and
-// therefore needs not assume a Resolver entity already exists
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
- * makes a set of shared handlers for Resolver contracts related to a plugin managing `ownedName`
+ * makes a set of shared handlers for Resolver contracts
  *
- * @param ownedName the name that the plugin manages subnames of
+ * NOTE: Both the subgraph and this indexer use upserts in this file since a 'Resolver' can be any
+ * contract that emits events with the relevant signatures. The contract may not necessarily be
+ * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
+ * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
+ *
+ * @param pluginName the name of the plugin using these shared handlers
  */
-export const makeResolverHandlers = (ownedName: OwnedName) => {
-  const sharedEventValues = createSharedEventValues(ownedName);
+export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+  const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {
     async handleAddrChanged({
@@ -30,7 +28,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; a: Hex }>;
+      event: EventWithArgs<{ node: Node; a: Address }>;
     }) {
       const { a: address, node } = event.args;
       await upsertAccount(context, address);
@@ -50,14 +48,11 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       }
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.addrChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          addrId: address,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.addrChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        addrId: address,
+      });
     },
 
     async handleAddressChanged({
@@ -65,7 +60,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Hex }>;
+      event: EventWithArgs<{ node: Node; coinType: bigint; newAddress: Address }>;
     }) {
       const { node, coinType, newAddress } = event.args;
 
@@ -82,15 +77,12 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.multicoinAddrChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          coinType,
-          addr: newAddress,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.multicoinAddrChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        coinType,
+        addr: newAddress,
+      });
     },
 
     async handleNameChanged({
@@ -105,7 +97,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         args: { node, name },
       } = decodeEventLog({
         eventName: "NameChanged",
-        abi: DeploymentConfigs.mainnet.eth.contracts.Resolver.abi,
+        abi: ENSDeployments.mainnet.root.contracts.Resolver.abi,
         topics: event.log.topics,
         data: event.log.data,
       });
@@ -120,14 +112,11 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.nameChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          name,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        name,
+      });
     },
 
     async handleABIChanged({
@@ -148,14 +137,11 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.abiChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          contentType,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.abiChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        contentType,
+      });
     },
 
     async handlePubkeyChanged({
@@ -176,15 +162,12 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.pubkeyChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          x,
-          y,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.pubkeyChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        x,
+        y,
+      });
     },
 
     async handleTextChanged({
@@ -213,19 +196,16 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
         .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.textChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          key,
-          // ponder's (viem's) event parsing produces empty string for some TextChanged events
-          // (which is correct) but the subgraph records null for these instances, so we coalesce
-          // falsy strings to null for compatibility
-          // ex: last TextChanged in tx 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
-          value: value || null,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.textChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        key,
+        // ponder's (viem's) event parsing produces empty string for some TextChanged events
+        // (which is correct) but the subgraph records null for these instances, so we coalesce
+        // falsy strings to null for compatibility
+        // ex: last TextChanged in tx 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
+        value: value || null,
+      });
     },
 
     async handleContenthashChanged({
@@ -233,7 +213,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Node; hash: Hex }>;
+      event: EventWithArgs<{ node: Node; hash: Hash }>;
     }) {
       const { node, hash } = event.args;
       const id = makeResolverId(event.log.address, node);
@@ -245,14 +225,11 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.contenthashChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          hash,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.contenthashChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        hash,
+      });
     },
 
     async handleInterfaceChanged({
@@ -271,15 +248,12 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.interfaceChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          interfaceID,
-          implementer,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.interfaceChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        interfaceID,
+        implementer,
+      });
     },
 
     async handleAuthorisationChanged({
@@ -289,7 +263,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       context: Context;
       event: EventWithArgs<{
         node: Node;
-        owner: Hex;
+        owner: Address;
         target: Hex;
         isAuthorised: boolean;
       }>;
@@ -304,17 +278,14 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.authorisationChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          owner,
-          target,
-          // NOTE: the spelling difference is kept for subgraph backwards-compatibility
-          isAuthorized: isAuthorised,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.authorisationChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        owner,
+        target,
+        // NOTE: the spelling difference is kept for subgraph backwards-compatibility
+        isAuthorized: isAuthorised,
+      });
     },
 
     async handleVersionChanged({
@@ -346,14 +317,11 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.versionChanged)
-        .values({
-          ...sharedEventValues(event),
-          resolverId: id,
-          version: newVersion,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.versionChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        version: newVersion,
+      });
     },
 
     async handleDNSRecordChanged({
@@ -362,7 +330,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record: Hex;
@@ -377,7 +345,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
     }: {
       context: Context;
       event: EventWithArgs<{
-        node: Hex;
+        node: Node;
         name: Hex;
         resource: number;
         record?: Hex;
@@ -391,7 +359,7 @@ export const makeResolverHandlers = (ownedName: OwnedName) => {
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ node: Hex; zonehash: Hex }>;
+      event: EventWithArgs<{ node: Node; zonehash: Hash }>;
     }) {
       // subgraph ignores
     },

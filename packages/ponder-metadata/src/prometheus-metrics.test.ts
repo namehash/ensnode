@@ -19,6 +19,10 @@ ponder_historical_start_timestamp_seconds 1740391265
 # TYPE ponder_historical_total_indexing_seconds gauge
 ponder_historical_total_indexing_seconds{network="1"} 251224935
 ponder_historical_total_indexing_seconds{network="8453"} 251224935
+
+# HELP ponder_indexing_has_error Boolean (0 or 1) indicating if there is an indexing error
+# TYPE ponder_indexing_has_error gauge
+ponder_indexing_has_error 0
 `;
 
   describe("parsePrometheusText", () => {
@@ -103,6 +107,10 @@ ponder_historical_total_indexing_seconds{network="8453"} 251224935
       expect(networks).toContain("1");
       expect(networks).toContain("8453");
       expect(networks.length).toBe(2);
+    });
+
+    it("should get indexing has error metrics", () => {
+      expect(parser.getValue("ponder_indexing_has_error")).toBe(0);
     });
 
     it("should get help text", () => {

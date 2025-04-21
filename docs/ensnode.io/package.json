@@ -9,14 +9,17 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "lint": "biome check --write"
+    "lint": "biome check --write",
+    "lint:ci": "biome ci"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^6.3.1",
     "@astrojs/react": "catalog:",
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/starlight": "^0.32.1",
+    "@astrojs/starlight-tailwind": "^3.0.1",
     "@astrojs/tailwind": "catalog:",
+    "@fontsource/inter": "^5.2.5",
     "@namehash/namekit-react": "catalog:",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
@@ -28,7 +31,11 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rehype-autolink-headings": "^7.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-wrap-balancer": "^1.1.1",
     "sharp": "^0.33.5",
+    "starlight-llms-txt": "^0.5.0",
     "starlight-sidebar-topics": "^0.4.1",
     "tailwindcss": "3.4.13"
   }

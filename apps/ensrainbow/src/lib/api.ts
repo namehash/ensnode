@@ -27,10 +27,10 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     }),
   );
 
-  api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
-    const labelhash = c.req.param("labelhash") as `0x${string}`;
-    logger.debug(`Healing request for labelhash: ${labelhash}`);
-    const result = await server.heal(labelhash);
+  api.get("/v1/heal/:labelHash", async (c: HonoContext) => {
+    const labelHash = c.req.param("labelHash") as `0x${string}`;
+    logger.debug(`Healing request for labelHash: ${labelHash}`);
+    const result = await server.heal(labelHash);
     logger.debug(`Heal result:`, result);
     return c.json(result, result.errorCode);
   });

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensrainbow-sdk",
-  "version": "0.1.0",
+  "version": "0.22.0",
   "type": "module",
   "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
   "license": "MIT",
@@ -10,8 +10,14 @@
     "directory": "packages/ensrainbow-sdk"
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk",
-  "keywords": ["ENS", "ENSNode", "ENSRainbow"],
-  "files": ["dist"],
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "ENSRainbow"
+  ],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
