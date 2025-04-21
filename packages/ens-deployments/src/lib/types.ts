@@ -31,6 +31,8 @@ export enum DatasourceName {
   Root = "root",
   Basenames = "basenames",
   Lineanames = "lineanames",
+  ThreeDNSOptimism = "threedns-optimism",
+  ThreeDNSBase = "threedns-base",
 }
 
 /**
@@ -86,4 +88,14 @@ export type ENSDeployment = {
    * The Datasource for Lineanames, optional.
    */
   [DatasourceName.Lineanames]?: Datasource;
+
+  /**
+   * The Datasource for 3DNS-Powered Names on Optimism
+   */
+  [DatasourceName.ThreeDNSOptimism]?: Datasource;
+
+  /**
+   * The Datasource for 3DNS-Powered Names on Base
+   */
+  [DatasourceName.ThreeDNSBase]?: Datasource;
 };

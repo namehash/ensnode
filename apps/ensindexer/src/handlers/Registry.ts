@@ -159,7 +159,7 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
           const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
           // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
-          // NOTE: for the root node, the parent is null, so we just use the label value as is
+          // NOTE: for TLDs, the parent is null, so we just use the label value as is
           const label = validLabel || encodeLabelhash(labelHash);
           const name = parent?.name ? `${label}.${parent.name}` : label;
 

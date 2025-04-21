@@ -9,6 +9,10 @@ export async function upsertAccount(context: Context, address: Address) {
   return context.db.insert(schema.account).values({ id: address }).onConflictDoNothing();
 }
 
+export async function upsertDomain(context: Context, values: typeof schema.domain.$inferInsert) {
+  return context.db.insert(schema.domain).values(values).onConflictDoUpdate(values);
+}
+
 export async function upsertResolver(
   context: Context,
   values: typeof schema.resolver.$inferInsert,

@@ -1,5 +1,5 @@
 import { mergeAbis } from "@ponder/utils";
-import { base, linea, mainnet } from "viem/chains";
+import { base, linea, mainnet, optimism } from "viem/chains";
 
 import { BaseResolverFilter, LineaResolverFilter, RootResolverFilter } from "./lib/filters";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
@@ -26,6 +26,7 @@ import { EthRegistrarController as linea_EthRegistrarController } from "./abis/l
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 import { Resolver as linea_Resolver } from "./abis/lineanames/Resolver";
+import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 
 /**
  * The Mainnet ENSDeployment
@@ -178,6 +179,36 @@ export default {
         abi: linea_NameWrapper,
         address: "0xA53cca02F98D590819141Aa85C891e2Af713C223",
         startBlock: 6682956,
+      },
+    },
+  },
+
+  /**
+   * The 3DNS Datasource on Optimism.
+   * https://opensea.io/collection/3dns-powered-domains
+   */
+  [DatasourceName.ThreeDNSOptimism]: {
+    chain: optimism,
+    contracts: {
+      ThreeDNSToken: {
+        abi: ThreeDNSToken,
+        address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
+        startBlock: 110393959,
+      },
+    },
+  },
+
+  /**
+   * The 3DNS Datasource on Base.
+   * https://opensea.io/collection/3dns-powered-domains-base
+   */
+  [DatasourceName.ThreeDNSBase]: {
+    chain: base,
+    contracts: {
+      ThreeDNSToken: {
+        abi: ThreeDNSToken,
+        address: "0xbb7b805b257d7c76ca9435b3ffe780355e4c4b17",
+        startBlock: 17522624,
       },
     },
   },

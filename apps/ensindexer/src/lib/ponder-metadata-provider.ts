@@ -36,6 +36,8 @@ export const makePonderMetdataProvider = ({
   const ensDeploymentChainId = getEnsDeploymentChainId();
   const publicClient = publicClients[ensDeploymentChainId];
 
+  console.log(Object.keys(publicClients));
+
   if (!publicClient)
     throw new Error(`Invariant: no public client available for ${ensDeploymentChainId}`);
 
