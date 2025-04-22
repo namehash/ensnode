@@ -2,8 +2,6 @@ services:
   ensindexer:
     container_name: ensindexer
     image: ghcr.io/namehash/ensnode/ensindexer:latest
-    ports:
-      - "42069:42069"
     environment:
       # Override DATABASE_URL to point to docker compose postgres
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
@@ -28,8 +26,7 @@ services:
     # Same Docker image as ensindexer
     image: ghcr.io/namehash/ensnode/ensindexer:latest
     ports:
-      # Avoid port collision with ensindexer. API's endpoints expoded on 42070
-      - "42070:42069"
+      - "42069:42069"
     environment:
       # Start ensindexer instance in "serve" mode
       PONDER_COMMAND: serve
@@ -68,10 +65,10 @@ services:
     ports:
       - "4173:4173"
     environment:
-      # Override ENSADMIN_PUBLIC_URL to point to docker compose ensindexer
+      # Override ENSADMIN_PUBLIC_URL to point to docker compose ensindexer-api
       # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
       ENSADMIN_PUBLIC_URL: http://localhost:4173
-      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensindexer
+      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensindexer-api
       # Note: it must be a comma-separated list of URLs that are accessible from a web browser
       # (i.e. it cannot be a hostname in the docker network)
       NEXT_PUBLIC_DEFAULT_ENSNODE_URLS: http://localhost:42069
@@ -80,7 +77,7 @@ services:
       - path: ./apps/ensadmin/.env.local
         required: false
     depends_on:
-      - ensindexer
+      - ensindexer-api
 
   postgres:
     container_name: postgres
