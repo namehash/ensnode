@@ -21,16 +21,18 @@ jobs:
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       TAG: ${{ inputs.tag }}
-      DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
+      ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
+      ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.tag }}"
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
 
     steps:
-      - name: Check if Docker image exists
+      - name: Check if Docker images exists
         run: |
-            docker manifest inspect ${{ env.DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.DOCKER_IMAGE }}"; exit 1; }
+            docker manifest inspect ${{ env.ENSINDEXER_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSINDEXER_DOCKER_IMAGE }}"; exit 1; }
+            docker manifest inspect ${{ env.ENSRAINBOW_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}"; exit 1; }
 
       - name: Print switch target
         run: |
@@ -54,6 +56,8 @@ jobs:
                 #HOLESKY
                 echo "HOLESKY_API_SVC_ID="${{ secrets.GREEN_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
                 echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.GREEN_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #ENSRAINBOW
+                echo "ENSRAINBOW_SVC_ID="${{ secrets.GREEN_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
                 ;;
               "blue")
                 #ENVIRONMENT
@@ -70,6 +74,8 @@ jobs:
                 #HOLESKY
                 echo "HOLESKY_API_SVC_ID="${{ secrets.BLUE_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
                 echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.BLUE_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+                #ENSRAINBOW
+                echo "ENSRAINBOW_SVC_ID="${{ secrets.BLUE_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
                 ;;
               *)
                 echo "Environment not recognized, skipping workflow"
@@ -82,6 +88,7 @@ jobs:
           update_service_image() {
             local environment_id=$1
             local service_id=$2
+            local docker_image=$3
             echo "Updating service $service_id"
             curl --request POST \
               --silent \
@@ -93,7 +100,7 @@ jobs:
                         "query": "mutation serviceInstanceUpdate($environmentId: String, $input: ServiceInstanceUpdateInput!, $serviceId: String!) { serviceInstanceUpdate(environmentId: $environmentId input: $input serviceId: $serviceId) }",
                         "variables": {
                           "environmentId": "'$environment_id'",
-                          "input": {"source": {"image": "${{ env.DOCKER_IMAGE }}"}},
+                          "input": {"source": {"image": "'$docker_image'"}},
                           "serviceId": "'$service_id'"
                         }
                       }'
@@ -101,17 +108,19 @@ jobs:
           }
 
           #ALPHA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}       ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}   ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #MAINNET
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #SEPOLIA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #HOLESKY
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #ENSRAINBOW
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}      ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
 
       # Update DATABASE_SCHEMA for each indexer based on input tag
       - name: Update shared environment variable
@@ -136,7 +145,7 @@ jobs:
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_DATABASE_SCHEMA" "sepoliaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "HOLESKY_DATABASE_SCHEMA" "holeskySchema${TAG}"
 
-      - name: Redeploy ENSIndexer instances
+      - name: Redeploy ENSNode instances
         run: |
             redeploy_service() {
             local environment_id=$1
@@ -163,3 +172,5 @@ jobs:
             #HOLESKY
             redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}
             redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
+            #ENSRAINBOW
+            redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
