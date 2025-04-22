@@ -119,6 +119,7 @@ export default function ({
       },
     });
   });
+
   ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
     // NOTE(name-null-bytes): manually decode args that may contain null bytes
     const { args } = decodeEventLog({

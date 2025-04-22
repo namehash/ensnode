@@ -474,6 +474,9 @@ importers:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../shared-configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.17.14
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0)
