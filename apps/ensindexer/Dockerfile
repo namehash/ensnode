@@ -17,4 +17,4 @@ ENV NODE_ENV=production
 EXPOSE 42069
 
 # NOTE: we use this $PONDER_COMMAND pattern because railway terraform provider can't override CMD
-CMD ["pnpm", "exec", "ponder", "$PONDER_COMMAND"]
+CMD pnpm exec ponder $PONDER_COMMAND
