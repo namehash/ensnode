@@ -16,7 +16,6 @@ interface DeploymentAddresses {
  */
 export function getDeploymentAddresses(): DeploymentAddresses | null {
   try {
-    console.log(process.env.NEXT_PUBLIC_DEPLOYMENT_ADDRESSES);
     return JSON.parse(
       process.env.NEXT_PUBLIC_DEPLOYMENT_ADDRESSES || process.env.DEPLOYMENT_ADDRESSES || "{}",
     ) as DeploymentAddresses;
