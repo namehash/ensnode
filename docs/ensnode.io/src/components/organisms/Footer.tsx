@@ -19,7 +19,7 @@ const footerProducts = [
   },
   {
     name: "ENSAdmin",
-    href: "https://admin.ensnode.io",
+    href: "https://ensadmin.io",
   },
   {
     name: "ENSv2 Referral Programs",

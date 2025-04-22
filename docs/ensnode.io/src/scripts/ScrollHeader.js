@@ -3,7 +3,7 @@ export default function ScrollHeader() {
         const header = document.getElementById('site-header');
         const defaultImage = document.getElementsByClassName('defaultImage')[0];
         const onScrollImage = document.getElementsByClassName('onScrollImage')[0];
-        const headerButtons = document.getElementsByClassName('scroll_test');
+        const headerButtons = document.getElementsByClassName('onScrollElement');
 
         const scrollWatcher = document.createElement("div");
 

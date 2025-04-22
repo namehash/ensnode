@@ -9,24 +9,24 @@ export default function HeaderButtons() {
     <>
       <div className="hidden sm:flex items-center justify-end gap-1">
         <Button variant="ghost" asChild>
-          <Link href="/docs/"><p className="scroll_test">Docs</p></Link>
+          <Link href="/docs/"><p className="onScrollElement text-sm font-medium leading-5">Docs</p></Link>
         </Button>
 
         <Button variant="ghost" asChild>
           <Link href="https://x.com/NamehashLabs">
-            <TwitterIcon className="scroll_test" />
+            <TwitterIcon className="onScrollElement" />
           </Link>
         </Button>
 
         <Button variant="ghost" asChild>
           <Link href="https://github.com/namehash/ensnode">
-            <GithubIcon className="scroll_test" />
+            <GithubIcon className="onScrollElement" />
           </Link>
         </Button>
 
         <Button variant="ghost" asChild>
           <Link href="http://t.me/ensnode">
-            <TelegramIcon className="scroll_test" />
+            <TelegramIcon className="onScrollElement" />
           </Link>
         </Button>
       </div>

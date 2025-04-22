@@ -23,11 +23,9 @@ export default function InfrastructureInnovations() {
         </div>
       </Fragment>
       {innovationSections.map((section) => (
-        <Fragment key={section.sectionHeader.toString().replace(" ", "-")}>
-          <InnovationSection {...section} />
-          <SectionDivider />
-        </Fragment>
+          <InnovationSection key={section.sectionHeader.toString().replace(" ", "-")} {...section} />
       ))}
+        <SectionDivider />
     </>
   );
 }
