@@ -1,5 +1,11 @@
 # @ensnode/utils
 
+## 0.22.1
+
+### Patch Changes
+
+- [#658](https://github.com/namehash/ensnode/pull/658) [`8f494c4`](https://github.com/namehash/ensnode/commit/8f494c499ec1693d25d0c033158ac75cfdb88cc5) Thanks [@tk-o](https://github.com/tk-o)! - Ensuring Github Release Notes correctness: NPM links
+
 ## 0.22.0
 
 ## 0.21.0
