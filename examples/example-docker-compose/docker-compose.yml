@@ -2,8 +2,6 @@ services:
   ensindexer:
     container_name: ensindexer
     image: ghcr.io/namehash/ensnode/ensindexer:latest
-    ports:
-      - "42069:42069"
     environment:
       # Override DATABASE_URL to point to docker compose postgres
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
