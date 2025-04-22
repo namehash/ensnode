@@ -22,6 +22,35 @@ services:
       - ensrainbow
       - postgres
 
+  # Instance of ensindexer started in "serve" Ponder mode. This will force application to only expose API's endpoints and skip any background indexing related logic
+  ensindexer-api:
+    container_name: ensindexer-api
+    # Same Docker image as ensindexer
+    image: ghcr.io/namehash/ensnode/ensindexer:latest
+    ports:
+      # Avoid port collision with ensindexer. API's endpoints expoded on 42070
+      - "42070:42069"
+    environment:
+      # Start ensindexer instance in "serve" mode
+      PONDER_COMMAND: serve
+      # Same DATABASE_URL as ensindexer instance
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      # Same ENSRAINBOW_URL as ensindexer instance
+      ENSRAINBOW_URL: http://ensrainbow:3223
+      # Same ENSADMIN_URL as ensindexer instance
+      ENSADMIN_URL: http://localhost:4173
+      # Override ENSNODE_PUBLIC_URL to point to docker compose ensindexer-api
+      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
+      ENSNODE_PUBLIC_URL: http://localhost:42070
+    env_file:
+      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
+      - path: ./apps/ensindexer/.env.local
+        required: true
+    depends_on:
+      - ensrainbow
+      - postgres
+      - ensindexer
+
   ensrainbow:
     container_name: ensrainbow
     image: ghcr.io/namehash/ensnode/ensrainbow:latest
