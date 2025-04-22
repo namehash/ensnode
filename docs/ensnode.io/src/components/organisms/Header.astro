@@ -1,6 +1,7 @@
 ---
 import Search from "@astrojs/starlight/components/Search.astro";
-import ENSNode2D from "../../assets/light-logo.svg";
+import ENSNode2DLight from "../../assets/light-logo.svg";
+import ENSNode2DDark from "../../assets/dark-logo.svg";
 import HeaderButtons from "../molecules/HeaderButtons";
 import ScrollHeader from "../../scripts/ScrollHeader";
 ---
@@ -13,7 +14,8 @@ import ScrollHeader from "../../scripts/ScrollHeader";
                         href="/"
                         class="flex justify-center items-center text-black not-italic font-bold text-[21.539px] leading-[26.51px] tracking-[-0.907px] sm:text-[26px] sm:leading-8 sm:tracking-[-1.113px]"
                 >
-                    <img src={ENSNode2D.src} class="h-8 min-[800px]:h-10" alt="ENSNode" />
+                    <img src={ENSNode2DLight.src} class="onScrollImage h-8 min-[800px]:h-10" alt="ENSNode" />
+                    <img src={ENSNode2DDark.src} class="defaultImage h-8 min-[800px]:h-10" alt="ENSNode" />
                 </a>
                 <Search class="hidden min-[800px]:block"/>
             </div>
@@ -26,7 +28,7 @@ import ScrollHeader from "../../scripts/ScrollHeader";
 
 <style>
     .custom_header {
-        transition: background-color 0.3s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         color: white;
     }
 
@@ -36,12 +38,12 @@ import ScrollHeader from "../../scripts/ScrollHeader";
         color: black;
     }
 
-    .scroll_test {
-        color: white;
+    .onScrollImage, .defaultImage.scrolled {
+        display: none;
     }
 
-    .scroll_test.scrolled {
-        color: black;
+    .onScrollImage.scrolled, .defaultImage {
+        display: block;
     }
 </style>
 

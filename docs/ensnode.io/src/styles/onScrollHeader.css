@@ -1,0 +1,7 @@
+.scroll_test {
+    color: white;
+}
+
+.scroll_test.scrolled {
+    color: black;
+}
