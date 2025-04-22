@@ -23,7 +23,7 @@ const deploymentAddresses = getDeploymentAddresses();
  * protocol changes, running deterministic test suites, and local development.
  * https://github.com/ensdomains/ens-test-env
  *
- * In both ensjs and ens-app-v3, the an env variable is available to the ens-test-env tool that
+ * In both ensjs and ens-app-v3, an env variable is available to the ens-test-env tool that
  * lists the addresses of each contract after deployment. These addresses are different in each
  * app and may change over time. In this ens-test-env ENSDeployment we use any env variable provided,
  * falling back to the addresses used by ensjs if necessary.
