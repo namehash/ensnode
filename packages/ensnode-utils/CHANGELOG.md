@@ -1,5 +1,37 @@
 # @ensnode/utils
 
+## 0.22.1
+
+### Patch Changes
+
+- [#658](https://github.com/namehash/ensnode/pull/658) [`8f494c4`](https://github.com/namehash/ensnode/commit/8f494c499ec1693d25d0c033158ac75cfdb88cc5) Thanks [@tk-o](https://github.com/tk-o)! - Ensuring Github Release Notes correctness: NPM links
+
+## 0.22.0
+
+## 0.21.0
+
+## 0.20.0
+
+## 0.19.4
+
+### Patch Changes
+
+- [#628](https://github.com/namehash/ensnode/pull/628) [`829d50f`](https://github.com/namehash/ensnode/commit/829d50f6b2ea1f49276a8cb614b082c80aea760d) Thanks [@tk-o](https://github.com/tk-o)! - Update release notes format when creating Github Release. Also, stop pushing git tag per each released package.
+
+## 0.19.3
+
+### Patch Changes
+
+- [#624](https://github.com/namehash/ensnode/pull/624) [`387c7c2`](https://github.com/namehash/ensnode/commit/387c7c24c5a7e76c2145799962b3537ed000b6c4) Thanks [@tk-o](https://github.com/tk-o)! - Allow CI workflow to read PR information to generate Github Release notes.
+
+## 0.19.2
+
+### Patch Changes
+
+- [#622](https://github.com/namehash/ensnode/pull/622) [`396607e`](https://github.com/namehash/ensnode/commit/396607e08532e22b2367b2b4b1a2962983924e81) Thanks [@tk-o](https://github.com/tk-o)! - Updated CI workflow for creating Github Releases.
+
+## 0.19.1
+
 ## 0.19.0
 
 ### Minor Changes

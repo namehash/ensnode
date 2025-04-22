@@ -110,15 +110,12 @@ export const makeRegistrarHandlers = ({
       });
 
       // log RegistrationEvent
-      await context.db
-        .insert(schema.nameRegistered)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          registrationId,
-          registrantId: owner,
-          expiryDate: expires,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameRegistered).values({
+        ...sharedEventValues(context.network.chainId, event),
+        registrationId,
+        registrantId: owner,
+        expiryDate: expires,
+      });
     },
 
     async handleNameRegisteredByController({
@@ -176,14 +173,11 @@ export const makeRegistrarHandlers = ({
         .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
 
       // log RegistrationEvent
-      await context.db
-        .insert(schema.nameRenewed)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          registrationId: id,
-          expiryDate: expires,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameRenewed).values({
+        ...sharedEventValues(context.network.chainId, event),
+        registrationId: id,
+        expiryDate: expires,
+      });
     },
 
     async handleNameTransferred({
@@ -207,14 +201,11 @@ export const makeRegistrarHandlers = ({
       await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
 
       // log RegistrationEvent
-      await context.db
-        .insert(schema.nameTransferred)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          registrationId: id,
-          newOwnerId: to,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameTransferred).values({
+        ...sharedEventValues(context.network.chainId, event),
+        registrationId: id,
+        newOwnerId: to,
+      });
     },
   };
 };

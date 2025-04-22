@@ -9,7 +9,5 @@ declare module "parse-prometheus-text-format" {
     }>;
   }
 
-  function parsePrometheusTextFormat(text: string): Array<PrometheusMetric>;
-
-  export default parsePrometheusTextFormat;
+  export default function parsePrometheusTextFormat(text: string): Array<PrometheusMetric>;
 }

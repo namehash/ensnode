@@ -1,5 +1,77 @@
 # ensadmin
 
+## 0.22.1
+
+### Patch Changes
+
+- Updated dependencies [[`8f494c4`](https://github.com/namehash/ensnode/commit/8f494c499ec1693d25d0c033158ac75cfdb88cc5)]:
+  - @ensnode/utils@0.22.1
+  - @ensnode/ponder-metadata@0.22.1
+  - @ensnode/ponder-schema@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.22.0
+  - @ensnode/ponder-metadata@0.22.0
+  - @ensnode/ponder-schema@0.22.0
+
+## 0.21.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.21.0
+  - @ensnode/ponder-metadata@0.21.0
+  - @ensnode/ponder-schema@0.21.0
+
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.20.0
+  - @ensnode/ponder-metadata@0.20.0
+  - @ensnode/ponder-schema@0.20.0
+
+## 0.19.4
+
+### Patch Changes
+
+- Updated dependencies [[`829d50f`](https://github.com/namehash/ensnode/commit/829d50f6b2ea1f49276a8cb614b082c80aea760d)]:
+  - @ensnode/utils@0.19.4
+  - @ensnode/ponder-metadata@0.19.4
+  - @ensnode/ponder-schema@0.19.4
+
+## 0.19.3
+
+### Patch Changes
+
+- Updated dependencies [[`387c7c2`](https://github.com/namehash/ensnode/commit/387c7c24c5a7e76c2145799962b3537ed000b6c4)]:
+  - @ensnode/utils@0.19.3
+  - @ensnode/ponder-metadata@0.19.3
+  - @ensnode/ponder-schema@0.19.3
+
+## 0.19.2
+
+### Patch Changes
+
+- Updated dependencies [[`396607e`](https://github.com/namehash/ensnode/commit/396607e08532e22b2367b2b4b1a2962983924e81)]:
+  - @ensnode/utils@0.19.2
+  - @ensnode/ponder-metadata@0.19.2
+  - @ensnode/ponder-schema@0.19.2
+
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies [[`7ef8b05`](https://github.com/namehash/ensnode/commit/7ef8b0502945339d6cdbf496f1fb26cc7f1d02a2)]:
+  - @ensnode/ponder-metadata@0.19.1
+  - @ensnode/utils@0.19.1
+  - @ensnode/ponder-schema@0.19.1
+
 ## 0.19.0
 
 ### Minor Changes
