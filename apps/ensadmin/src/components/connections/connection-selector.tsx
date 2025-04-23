@@ -124,7 +124,7 @@ export function ConnectionSelector() {
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-[--radix-dropdown-menu-trigger-width] min-w-72 rounded-lg"
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-80 rounded-lg"
               align="start"
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
@@ -147,11 +147,11 @@ export function ConnectionSelector() {
                         <DropdownMenuItem
                           onClick={() => handleSelect(url)}
                           className={cn(
-                            "cursor-pointer flex-1 py-2.5",
+                            "cursor-pointer flex-1 py-2.5 truncate",
                             isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : null,
                           )}
                         >
-                          <span className="font-mono text-xs truncate flex-1">{url}</span>
+                          <span className="font-mono text-xs flex-1">{url}</span>
                         </DropdownMenuItem>
                         <CopyButton value={url} />
                       </div>
@@ -175,11 +175,11 @@ export function ConnectionSelector() {
                           <DropdownMenuItem
                             onClick={() => handleSelect(url)}
                             className={cn(
-                              "cursor-pointer flex-1 py-2.5",
+                              "cursor-pointer flex-1 py-2.5 truncate",
                               isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : null,
                             )}
                           >
-                            <span className="font-mono text-xs truncate flex-1">{url}</span>
+                            <span className="font-mono text-xs flex-1">{url}</span>
                           </DropdownMenuItem>
                           <div className="flex items-center">
                             {!isCurrentlySelectedConnection && (
