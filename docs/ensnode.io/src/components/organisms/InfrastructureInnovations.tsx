@@ -49,6 +49,7 @@ const innovationSections: InnovationSectionProps[] = [
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
     svgImage: <LostENSNamesImage styles="relative z-10 w-full h-full" />,
+      designatedMobileImage: <ENSAdminImage styles="relative z-10 w-full h-full" />
   },
   {
     sectionHeader: <>Strengthen the decentralization and &quot;unstoppability&quot; of ENS:</>,
