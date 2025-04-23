@@ -1,6 +1,6 @@
 import type { ImageCharacteristics } from "@workspace/docs/ensrainbow.io/src/types/imageTypes.ts";
 import cc from "classcat";
-import {Balancer} from "react-wrap-balancer";
+import { Balancer } from "react-wrap-balancer";
 
 export type InnovationSectionProps = {
   sectionHeader: React.ReactNode;
@@ -55,10 +55,16 @@ export default function InnovationSection(props: InnovationSectionProps) {
               {props.badgeText}
             </p>
           </span>
-          <Balancer as="h1" className="text-black font-bold not-italic z-10 text-center xl:text-left text-2xl leading-8">
+          <Balancer
+            as="h1"
+            className="text-black font-bold not-italic z-10 text-center xl:text-left text-2xl leading-8"
+          >
             {props.sectionHeader}
           </Balancer>
-          <Balancer as="p" className="text-gray-500 not-italic font-normal z-10 text-center text-lg leading-8 xl:text-left self-stretch">
+          <Balancer
+            as="p"
+            className="text-gray-500 not-italic font-normal z-10 text-center text-lg leading-8 xl:text-left self-stretch"
+          >
             {props.sectionDescription}
           </Balancer>
           {props.descriptionExternalElements && props.descriptionExternalElements}

@@ -5,11 +5,10 @@ import { StarIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/
 import cc from "classcat";
 import { Fragment } from "react";
 import { Balancer } from "react-wrap-balancer";
-import JoinTelegram from "../molecules/JoinTelegram.tsx";
 import ENSAdmin3DImage from "../../assets/ENSAdmin3D.png";
 import ENSIndexer3DImage from "../../assets/ENSIndexer3D.png";
 import ENSRainbow3DImage from "../../assets/ENSRainbow3D.png";
-
+import JoinTelegram from "../molecules/JoinTelegram.tsx";
 
 const appsSuite: {
   visual: React.ReactNode;
@@ -18,7 +17,13 @@ const appsSuite: {
   buttonData: ButtonIslandProps;
 }[] = [
   {
-    visual: <img src={ENSAdmin3DImage.src} alt="ENSAdmin" className="object-contain scale-125 sm:scale-[80%] lg:scale-150"/>,
+    visual: (
+      <img
+        src={ENSAdmin3DImage.src}
+        alt="ENSAdmin"
+        className="object-contain scale-125 sm:scale-[80%] lg:scale-150"
+      />
+    ),
     name: "ENSAdmin",
     description: "Explore the ENS protocol like never before",
     buttonData: {
@@ -31,7 +36,13 @@ const appsSuite: {
     },
   },
   {
-    visual: <img src={ENSIndexer3DImage.src} alt="ENSIndexer" className="object-contain scale-125 sm:scale-[80%] lg:scale-150"/>,
+    visual: (
+      <img
+        src={ENSIndexer3DImage.src}
+        alt="ENSIndexer"
+        className="object-contain scale-125 sm:scale-[80%] lg:scale-150"
+      />
+    ),
     name: "ENSIndexer",
     description: "Index multichain ENS data for ENSv2",
     buttonData: {
@@ -44,7 +55,13 @@ const appsSuite: {
     },
   },
   {
-    visual: <img src={ENSRainbow3DImage.src} alt="ENSRainbow" className="object-contain scale-125 sm:scale-[80%] lg:scale-150"/>,
+    visual: (
+      <img
+        src={ENSRainbow3DImage.src}
+        alt="ENSRainbow"
+        className="object-contain scale-125 sm:scale-[80%] lg:scale-150"
+      />
+    ),
     name: "ENSRainbow",
     description: 'Heal millions of "unknown" ENS names',
     buttonData: {
@@ -69,7 +86,10 @@ export default function ENSNodeSuite() {
             ENS Infrastructure Solutions
           </p>
         </span>
-        <Balancer as="h1" className="max-w-[720px] text-center text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold">
+        <Balancer
+          as="h1"
+          className="max-w-[720px] text-center text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold"
+        >
           Introducing the ENSNode suite of apps
         </Balancer>
         <p className="max-w-[720px] text-center text-gray-500 text-lg leading-8 sm:leading-7 font-normal">

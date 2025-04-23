@@ -5,11 +5,11 @@ import { ENSAdminImage } from "@workspace/docs/ensnode.io/src/components/atoms/i
 import { FasterLookupImage } from "@workspace/docs/ensnode.io/src/components/atoms/images/FasterLookupImage.tsx";
 import { LostENSNamesImage } from "@workspace/docs/ensnode.io/src/components/atoms/images/LostENSNamesImage.tsx";
 import { Fragment } from "react";
+import ENSAdminDecentralizationMobileImage from "../../assets/Decentralization.png";
+import InfrastructureGapsMobileImage from "../../assets/InfrustructureGaps.png";
+import ProtocolInnovationsMobileImage from "../../assets/ProtocolInnovations.png";
 import SectionDivider from "../atoms/SectionDivider.tsx";
 import InnovationSection, { InnovationSectionProps } from "../molecules/InnovationSection.tsx";
-import ENSAdminDecentralizationMobileImage from "../../assets/Decentralization.png";
-import ProtocolInnovationsMobileImage from "../../assets/ProtocolInnovations.png";
-import InfrastructureGapsMobileImage from "../../assets/InfrustructureGaps.png";
 
 export default function InfrastructureInnovations() {
   return (
@@ -50,10 +50,10 @@ const innovationSections: InnovationSectionProps[] = [
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
     svgImage: <LostENSNamesImage styles="relative z-10 w-full h-full" />,
-      designatedMobileImage: <img src={InfrastructureGapsMobileImage.src} alt="lost names"/>
+    designatedMobileImage: <img src={InfrastructureGapsMobileImage.src} alt="lost names" />,
   },
-    {
-        sectionHeader: <>Strengthen the decentralization and &quot;unstoppability&quot; of ENS:</>,
+  {
+    sectionHeader: <>Strengthen the decentralization and &quot;unstoppability&quot; of ENS:</>,
     sectionDescription: (
       <>
         Our infrastructure under development removes a strict dependency on many centralized
@@ -68,7 +68,9 @@ const innovationSections: InnovationSectionProps[] = [
     isTextOnTheLeft: false,
     mobileImageOnTop: false,
     svgImage: <ENSAdminImage styles="relative z-10 w-full h-full" />,
-      designatedMobileImage: <img src={ENSAdminDecentralizationMobileImage.src} alt="ENSAdmin decentralization"/>
+    designatedMobileImage: (
+      <img src={ENSAdminDecentralizationMobileImage.src} alt="ENSAdmin decentralization" />
+    ),
   },
   {
     sectionHeader: <>Deliver game-changing ENS protocol innovations</>,
@@ -85,6 +87,8 @@ const innovationSections: InnovationSectionProps[] = [
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
     svgImage: <FasterLookupImage styles="relative z-10 w-full h-full" />,
-      designatedMobileImage: <img src={ProtocolInnovationsMobileImage.src} alt="20 times faster lookup"/>
+    designatedMobileImage: (
+      <img src={ProtocolInnovationsMobileImage.src} alt="20 times faster lookup" />
+    ),
   },
 ];
