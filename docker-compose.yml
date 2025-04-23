@@ -21,7 +21,7 @@ services:
       - ensrainbow
       - postgres
 
-  # Instance of ensindexer started in Ponder's "serve" mode. This ensindexer instance exposes API endpoints but skips any indexing logic (deferring this responsibility only to the ensindexer instance started in Ponder's "start" mode. More details here: https://ponder.sh/docs/api-reference/ponder-cli#serve This division of responsibilities between ensindexer instances ensures API availability continues uninterrupted even if an error occurs in indexing logic.
+  # Instance of ENSIndexer started in Ponder's "serve" mode. This mode causes the ENSIndexer instance to skip the execution of any indexing logic and instead to exclusively focus on the responsibility of serving the main "public-facing" API endpoints for the overall ENSNode deployment. This division of "start" vs "serve" responsibilities between ENSIndexer instances ensures API availability continues uninterrupted for the overall ENSNode deployment through ensnode-api even if an indexing error in ensindexer causes it to crash. The following docs explain more about Ponder's "start" vs "serve" modes: https://ponder.sh/docs/api-reference/ponder-cli#serve.
   ensnode-api:
     container_name: ensnode-api
     # Same Docker image as ensindexer
@@ -29,7 +29,7 @@ services:
     ports:
       - "42069:42069"
     environment:
-      # Start ensindexer instance in "serve" mode
+      # Start ensindexer instance in "serve" mode. This environment variable is intercepted by the ensindexer Docker image to modify the ensindexer start command. This special strategy for dynamically configuring the ensindexer start command is used due to limitations with Railway Terraform.
       PONDER_COMMAND: serve
       # Same DATABASE_URL as ensindexer instance
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
@@ -40,7 +40,7 @@ services:
       ENSADMIN_URL: http://localhost:4173
       # Override ENSNODE_PUBLIC_URL to point to the docker compose ensindexer-api
       # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
-      ENSNODE_PUBLIC_URL: http://localhost:42070
+      ENSNODE_PUBLIC_URL: http://localhost:42069
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example). Requires same env configuration as ensindexer
       - path: ./apps/ensindexer/.env.local
