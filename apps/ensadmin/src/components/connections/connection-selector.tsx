@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { ChevronsUpDown, Loader2, Plus, Trash2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { ENSAdminIcon } from "@/components/ensadmin-icon";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ export function ConnectionSelector() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
   const selectedUrl = selectedEnsNodeUrl(searchParams);
 
   const [newUrl, setNewUrl] = useState("");
@@ -90,6 +92,7 @@ export function ConnectionSelector() {
           setNewUrl("");
           setUrlError(null);
           setDialogOpen(false);
+          toast.success(`You are now connected to ${newUrl}`);
         },
       },
     );
