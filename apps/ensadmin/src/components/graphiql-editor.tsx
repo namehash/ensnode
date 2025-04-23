@@ -3,9 +3,16 @@
 import "graphiql/graphiql.css";
 
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
-import { GraphiQL } from "graphiql";
+import { GraphiQL, type GraphiQLProps } from "graphiql";
 
-export function GraphiQLEditor({ url }: { url?: string }) {
+// TODO: Remove this import
+import { savedQueries } from "@/app/gql/ponder/plugins/saved-queries";
+
+export type GraphiQLPropsWithUrl = Omit<GraphiQLProps, "fetcher"> & {
+  url?: string;
+};
+
+export function GraphiQLEditor({ url, ...props }: GraphiQLPropsWithUrl) {
   if (!url || typeof window === "undefined") {
     return null;
   }
@@ -41,11 +48,15 @@ export function GraphiQLEditor({ url }: { url?: string }) {
   return (
     <div className="flex-1 graphiql-container">
       <GraphiQL
-        fetcher={fetcher}
         defaultEditorToolsVisibility={true}
         shouldPersistHeaders={true}
         storage={storage}
         forcedTheme="light"
+        fetcher={fetcher}
+        // TODO: Don't pass plugins here, instead let props do it
+        // See app/gql/ponder/page.tsx
+        plugins={[savedQueries]}
+        {...props}
       />
     </div>
   );

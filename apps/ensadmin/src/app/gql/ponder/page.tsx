@@ -1,5 +1,6 @@
 import { GraphiQLEditor } from "@/components/graphiql-editor";
 import { defaultEnsNodeUrl } from "@/lib/env";
+import { savedQueries } from "./plugins/saved-queries";
 
 type PageProps = {
   searchParams: Promise<{
@@ -19,4 +20,7 @@ export default async function PonderGraphQLPage({ searchParams }: PageProps) {
   const url = new URL(`/ponder`, baseUrl).toString();
 
   return <GraphiQLEditor url={url} />;
+  // Make this more abstract and pass plugins here so they
+  // can change for subgraph/ponder APIs
+  // return <GraphiQLEditor url={url} plugins={[savedQueries]} />;
 }
