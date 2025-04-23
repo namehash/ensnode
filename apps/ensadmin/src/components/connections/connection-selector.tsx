@@ -140,22 +140,21 @@ export function ConnectionSelector() {
               ) : (
                 connections
                   .filter(({ isDefault }) => isDefault)
-                  .map(({ url, isDefault }) => {
+                  .map(({ url }) => {
                     const isCurrentlySelectedConnection = url === selectedUrl.toString();
                     return (
-                      <DropdownMenuItem
-                        key={url}
-                        onClick={() => handleSelect(url)}
-                        className={cn(
-                          "group gap-2 p-2 font-mono text-xs justify-between cursor-pointer",
-                          isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : "",
-                        )}
-                      >
-                        <span className="truncate flex-1">{url}</span>
-                        <div className="flex items-center gap-1">
-                          <CopyButton value={url} size="sm" className="-mr-2" />
-                        </div>
-                      </DropdownMenuItem>
+                      <div key={url} className="flex items-center justify-between gap-1">
+                        <DropdownMenuItem
+                          onClick={() => handleSelect(url)}
+                          className={cn(
+                            "cursor-pointer flex-1 py-2.5",
+                            isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : null,
+                          )}
+                        >
+                          <span className="font-mono text-xs truncate flex-1">{url}</span>
+                        </DropdownMenuItem>
+                        <CopyButton value={url} />
+                      </div>
                     );
                   })
               )}
@@ -172,19 +171,21 @@ export function ConnectionSelector() {
                     .map(({ url }) => {
                       const isCurrentlySelectedConnection = url === selectedUrl.toString();
                       return (
-                        <DropdownMenuItem
-                          key={url}
-                          onClick={() => handleSelect(url)}
-                          className={cn(
-                            "group gap-2 p-2 font-mono text-xs justify-between cursor-pointer",
-                            isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : "",
-                          )}
-                        >
-                          <span className="truncate flex-1">{url}</span>
-                          <div className="flex items-center gap-1">
+                        <div key={url} className="flex items-center justify-between gap-1">
+                          <DropdownMenuItem
+                            onClick={() => handleSelect(url)}
+                            className={cn(
+                              "cursor-pointer flex-1 py-2.5",
+                              isCurrentlySelectedConnection ? "bg-primary/10 text-primary" : null,
+                            )}
+                          >
+                            <span className="font-mono text-xs truncate flex-1">{url}</span>
+                          </DropdownMenuItem>
+                          <div className="flex items-center">
                             {!isCurrentlySelectedConnection && (
                               <Button
-                                variant="destructive"
+                                variant="ghost"
+                                size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleRemove(url);
@@ -202,9 +203,9 @@ export function ConnectionSelector() {
                                 )}
                               </Button>
                             )}
-                            <CopyButton value={url} size="sm" className="-mr-2" />
+                            <CopyButton value={url} />
                           </div>
-                        </DropdownMenuItem>
+                        </div>
                       );
                     })}
                 </>
