@@ -44,7 +44,7 @@ const appsSuite: {
     },
   },
   {
-    visual: <img src={ENSRainbow3DImage.src} alt="ENSRainbow" class="object-contain scale-125 sm:scale-[80%] lg:scale-150"/>,
+    visual: <img src={ENSRainbow3DImage.src} alt="ENSRainbow" className="object-contain scale-125 sm:scale-[80%] lg:scale-150"/>,
     name: "ENSRainbow",
     description: 'Heal millions of "unknown" ENS names',
     buttonData: {
