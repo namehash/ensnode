@@ -8,6 +8,7 @@ import {
 } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
+import { parseLabelAndNameFromOnChainMetadata } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { LabelHash, Node, PluginName } from "@ensnode/utils";
@@ -16,12 +17,18 @@ import {
   isLabelIndexable,
   makeSubdomainNode,
 } from "@ensnode/utils/subname-helpers";
-import { Address, Hex, hexToBytes, labelhash } from "viem";
+import { Address, Hex, hexToBigInt, hexToBytes, labelhash } from "viem";
 
 /**
  * makes a set of shared handlers for a ThreeDNSToken contract
  */
-export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+export const makeThreeDNSTokenHandlers = ({
+  pluginName,
+  getUriForTokenId,
+}: {
+  pluginName: PluginName;
+  getUriForTokenId: (context: Context, tokenId: bigint) => Promise<string>;
+}) => {
   const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {
@@ -73,10 +80,21 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
       if (!domain.name) {
         const parent = await context.db.find(schema.domain, { id: parentNode });
 
-        // attempt to heal the label associated with labelHash via ENSRainbow
-        const healedLabel = await labelByLabelHash(labelHash);
-        const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+        let healedLabel = null;
 
+        // 1. attempt metadata retrieval
+        if (!healedLabel) {
+          const tokenId = hexToBigInt(node, { size: 32 });
+          const uri = await getUriForTokenId(context, tokenId);
+          [healedLabel] = parseLabelAndNameFromOnChainMetadata(uri);
+        }
+
+        // 2. attempt to heal the label associated with labelHash via ENSRainbow
+        if (!healedLabel) {
+          healedLabel = await labelByLabelHash(labelHash);
+        }
+
+        const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
         // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
         // NOTE: for a TLD, the parent is null, so we just use the label value as is
         const label = validLabel || encodeLabelhash(labelHash);
@@ -135,8 +153,6 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
         console.table({ ...event.args, tx: event.transaction.hash });
         throw new Error(`>2LD emitted RegistrationCreated: ${name}`);
       }
-
-      console.log(`RegistrationCreated ${name}`);
 
       const labelHash = labelhash(label);
 

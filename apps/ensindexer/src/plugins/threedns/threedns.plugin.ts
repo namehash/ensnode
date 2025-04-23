@@ -9,7 +9,6 @@ import {
 } from "@/lib/plugin-helpers";
 import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
-import { zeroAddress } from "viem";
 
 /**
  * The ThreeDNS plugin describes indexing behavior for the ThreeDNSOptimism & ThreeDNSBase Datasources.
@@ -51,9 +50,8 @@ export const activate = activateHandlers({
   registrarManagedName: "eth",
   namespace,
   handlers: [
-    import("./handlers/ThreeDNSToken"),
-    // import("./handlers/Registrar"),
-    // import("./handlers/Resolver"),
-    // import("./handlers/NameWrapper"),
+    import("./handlers/ThreeDNSTokenOptimism"),
+    import("./handlers/ThreeDNSTokenBase"),
+    // TODO: Resolvers for each chain w/ idempotency
   ],
 });

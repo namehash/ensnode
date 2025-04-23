@@ -46,4 +46,11 @@ export const ThreeDNSToken = [
       { type: "address", name: "burner", indexed: true },
     ],
   },
+  {
+    type: "function",
+    name: "uri",
+    inputs: [{ type: "uint256", name: "tokenId_" }],
+    outputs: [{ type: "string", name: "" }],
+    stateMutability: "view",
+  },
 ] as const;
