@@ -1,0 +1,30 @@
+---
+title: Contributing to Releases
+sidebar:
+  label: Releases
+  order: 3
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+We use [changesets](https://github.com/changesets/changesets) to manage version bumps and release notes for our NPM packages and Docker images (ENSIndexer, ENSAdmin, and ENSRainbow).
+
+## Adding a Changeset to Your PR
+
+When you open a PR with feature or bug fix changes, you'll need to include a changeset file that documents your changes:
+
+1. Run `changeset` or `pnpm changeset` in the repository root
+2. Select the packages/apps your changes affect using the interactive prompt
+3. Choose whether your changes are "major" (breaking changes), "minor" (features), or "patch" (bug fixes).
+4. Write a clear description of your changes - this will appear in the release notes
+
+The `changesets/bot` will automatically comment on your PR to either remind you to add a changeset or confirm the version changes that will happen when your PR is merged.
+
+**Important notes:**
+- Changesets are only required for user-facing changes (features, bug fixes)
+- You don't need a changeset for documentation changes or internal refactoring
+- All our packages use "fixed" versioning - they all share the same version number regardless of which package triggered the version bump
+
+## Upon a New Release
+
+Upon the publishing of a new release, your change will be included in the produced packages/images and your contributions will be referenced in the GitHub Release notes.
