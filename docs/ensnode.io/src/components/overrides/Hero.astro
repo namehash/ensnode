@@ -1,10 +1,12 @@
 ---
 import { Balancer } from "react-wrap-balancer";
+import { Image } from 'astro:assets';
 import skies_image from "../../assets/hero_skies_image.png";
 import { ENSAdminLogoLight } from "../atoms/logos/ENSAdminLogoLight";
 ---
-<section style={`background-image: url(${skies_image.src});`} class="w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-cover bg-center">
-    <div class="not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center text-center px-5 sm:px-0">
+<section class="bg-gradient-to-b from-[#4182B8] to-[#FEE7B7] w-full h-screen flex flex-col flex-nowrap justify-center items-center bg-cover bg-center bg-no-repeat">
+    <Image src={skies_image} alt="background skies" class="absolute w-full h-screen z-0 object-center object-cover" quality={100}/>
+    <div class="relative z-10 not-content antialiased flex flex-col flex-nowrap gap-8 justify-center items-center text-center px-5 sm:px-0">
         <div class="flex flex-col flex-nowrap justify-center items-start gap-4">
             <h1 class="max-w-[600px] w-full font-bold leading-10 sm:leading-[68px] text-4xl sm:text-6xl text-white">The new multichain indexer
                 for ENSv2</h1>

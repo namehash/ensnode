@@ -7,6 +7,8 @@ import { LostENSNamesImage } from "@workspace/docs/ensnode.io/src/components/ato
 import { Fragment } from "react";
 import SectionDivider from "../atoms/SectionDivider.tsx";
 import InnovationSection, { InnovationSectionProps } from "../molecules/InnovationSection.tsx";
+import TestImage from "../../assets/Decentralization.png";
+import TestImageSVG from "../../assets/Illustration 2.svg";
 
 export default function InfrastructureInnovations() {
   return (
@@ -64,6 +66,7 @@ const innovationSections: InnovationSectionProps[] = [
     isTextOnTheLeft: false,
     mobileImageOnTop: false,
     svgImage: <ENSAdminImage styles="relative z-10 w-full h-full" />,
+      designatedMobileImage: <img src={TestImage.src} alt="ENSAdmin"/>
   },
   {
     sectionHeader: <>Deliver game-changing ENS protocol innovations</>,
@@ -80,5 +83,6 @@ const innovationSections: InnovationSectionProps[] = [
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
     svgImage: <FasterLookupImage styles="relative z-10 w-full h-full" />,
+      designatedMobileImage: <img src={TestImageSVG.src} alt="ENSAdmin"/>
   },
 ];

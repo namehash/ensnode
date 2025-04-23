@@ -1,5 +1,6 @@
 import type { ImageCharacteristics } from "@workspace/docs/ensrainbow.io/src/types/imageTypes.ts";
 import cc from "classcat";
+import {Balancer} from "react-wrap-balancer";
 
 export type InnovationSectionProps = {
   sectionHeader: React.ReactNode;
@@ -23,7 +24,7 @@ export default function InnovationSection(props: InnovationSectionProps) {
         props.sectionBackground,
       ])}
     >
-      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-10 sm:gap-0 xl:gap-20 max-w-[1216px]">
+      <div className="flex flex-col xl:flex-row items-center justify-center xl:justify-between gap-10 sm:gap-5 xl:gap-20 max-w-[1216px]">
         {!props.isTextOnTheLeft && (
           <div className="relative hidden sm:flex flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 max-w-2xl overflow-visible">
             {props.normalImage ? (
@@ -54,17 +55,12 @@ export default function InnovationSection(props: InnovationSectionProps) {
               {props.badgeText}
             </p>
           </span>
-          <h1 className="hidden sm:block text-black font-bold not-italic z-10 text-center xl:text-left text-2xl leading-8">
+          <Balancer as="h1" className="text-black font-bold not-italic z-10 text-center xl:text-left text-2xl leading-8">
             {props.sectionHeader}
-          </h1>
-          <div className="flex flex-col items-center gap-3 sm:hidden">
-            <h1 className="sm:hidden text-black font-bold not-italic z-10 text-center text-2xl leading-8">
-              {props.sectionHeader}
-            </h1>
-          </div>
-          <p className="text-gray-500 not-italic font-normal z-10 text-center text-lg leading-8 xl:text-left self-stretch">
+          </Balancer>
+          <Balancer as="p" className="text-gray-500 not-italic font-normal z-10 text-center text-lg leading-8 xl:text-left self-stretch">
             {props.sectionDescription}
-          </p>
+          </Balancer>
           {props.descriptionExternalElements && props.descriptionExternalElements}
         </div>
         {props.isTextOnTheLeft && (

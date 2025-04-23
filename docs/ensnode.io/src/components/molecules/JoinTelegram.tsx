@@ -18,7 +18,7 @@ export default function JoinTelegram() {
           Run your own ENSNode
         </p>
         <Button asChild size="medium" variant="primary">
-          <Link target="_blank" href="https://t.me/namehash">
+          <Link target="_blank" href="http://t.me/ensnode">
             <TelegramIcon /> Join our Telegram
           </Link>
         </Button>
