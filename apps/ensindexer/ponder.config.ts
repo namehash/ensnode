@@ -63,6 +63,8 @@ const ponderConfig = activePlugins
   .map((plugin) => plugin.config)
   .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as MergedPluginConfig;
 
+// TODO: need to ensure that for `Resolver` contract, the lowest value of startBlock is taken
+
 // set the indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
   HEAL_REVERSE_ADDRESSES: healReverseAddresses(),

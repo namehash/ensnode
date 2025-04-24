@@ -41,17 +41,25 @@ export const config = createConfig({
       network: networkConfigForContract(base, baseContracts.ThreeDNSToken),
       abi: baseContracts.ThreeDNSToken.abi,
     },
+    Resolver: {
+      network: {
+        ...networkConfigForContract(optimism, optimismContracts.Resolver),
+        ...networkConfigForContract(base, baseContracts.Resolver),
+      },
+      abi: optimismContracts.Resolver.abi,
+    },
   },
 });
 
 export const activate = activateHandlers({
   pluginName,
   // the shared Registrar handler in this plugin indexes direct subnames of '.eth'
+  // TODO: no longer necessary for this plugin, bad assumption...
   registrarManagedName: "eth",
   namespace,
   handlers: [
     import("./handlers/ThreeDNSTokenOptimism"),
     import("./handlers/ThreeDNSTokenBase"),
-    // TODO: Resolvers for each chain w/ idempotency
+    import("../shared/Resolver"),
   ],
 });

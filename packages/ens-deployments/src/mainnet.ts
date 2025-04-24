@@ -1,32 +1,28 @@
-import { mergeAbis } from "@ponder/utils";
 import { base, linea, mainnet, optimism } from "viem/chains";
 
-import { BaseResolverFilter, LineaResolverFilter, RootResolverFilter } from "./lib/filters";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
-import { LegacyPublicResolver as root_LegacyPublicResolver } from "./abis/root/LegacyPublicResolver";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { Resolver as root_Resolver } from "./abis/root/Resolver";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
 import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
-import { L2Resolver as base_L2Resolver } from "./abis/basenames/L2Resolver";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 
+import { zeroAddress } from "viem";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
-import { Resolver as linea_Resolver } from "./abis/lineanames/Resolver";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
+import { ResolverConfig } from "./lib/resolver";
 
 /**
  * The Mainnet ENSDeployment
@@ -52,8 +48,7 @@ export default {
         startBlock: 9380380,
       },
       Resolver: {
-        abi: mergeAbis([root_LegacyPublicResolver, root_Resolver]),
-        filter: RootResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
       },
       BaseRegistrar: {
@@ -109,8 +104,7 @@ export default {
         startBlock: 17571480,
       },
       Resolver: {
-        abi: base_L2Resolver,
-        filter: BaseResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
@@ -161,8 +155,7 @@ export default {
         startBlock: 6682888,
       },
       Resolver: {
-        abi: linea_Resolver,
-        filter: LineaResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {
@@ -195,6 +188,11 @@ export default {
         address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
         startBlock: 110393959,
       },
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: zeroAddress,
+        startBlock: 110393959,
+      },
     },
   },
 
@@ -208,6 +206,11 @@ export default {
       ThreeDNSToken: {
         abi: ThreeDNSToken,
         address: "0xbb7b805b257d7c76ca9435b3ffe780355e4c4b17",
+        startBlock: 17522624,
+      },
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: zeroAddress,
         startBlock: 17522624,
       },
     },

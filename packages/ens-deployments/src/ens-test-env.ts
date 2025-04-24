@@ -1,17 +1,14 @@
-import { mergeAbis } from "@ponder/utils";
 import { anvil } from "viem/chains";
 
-import { RootResolverFilter } from "./lib/filters";
+import { ResolverConfig } from "./lib/resolver";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
-import { LegacyPublicResolver as root_LegacyPublicResolver } from "./abis/root/LegacyPublicResolver";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { Resolver as root_Resolver } from "./abis/root/Resolver";
 
 /**
  * The ens-test-env ENSDeployment
@@ -42,8 +39,7 @@ export default {
         startBlock: 0,
       },
       Resolver: {
-        abi: mergeAbis([root_LegacyPublicResolver, root_Resolver]),
-        filter: RootResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 0,
       },
       BaseRegistrar: {

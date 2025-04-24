@@ -137,7 +137,7 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
 /**
  * An ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
  */
-export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName> = {
+export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
   pluginName: PluginName;
   registrarManagedName: RegistrarManagedName;
   namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
