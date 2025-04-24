@@ -81,8 +81,9 @@ jobs:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
           # filters changesets' publishedPackages for those not in our 'apps'
+          # and also filter out our private packages we don't want visible in release notes
           script: |-
-            map(select(.name != "ensindexer" and .name != "ensadmin" and .name != "ensrainbow"))
+            map(select(.name != "ensindexer" and .name != "ensadmin" and .name != "ensrainbow" and .name != "@ensnode/shared-configs"))
 
   build-and-push-ensnode:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
@@ -158,6 +159,13 @@ jobs:
 
           # Extract release notes (everything below # Releases)
           RELEASE_NOTES=$(echo "$PR_BODY" | awk '/^# Releases/{p=1;next}p')
+
+          # Strip out @ensnode/shared-configs section (thank you claude-san)
+          RELEASE_NOTES=$(echo "$RELEASE_NOTES" | awk '
+            /^## @ensnode\/shared-configs@.*/ { skip=1; next } # Set skip flag and skip further processing for this line
+            /^## / { skip=0 }                                  # On subsequent lines, clear skip flag if H2 is found
+            !skip                                              # Print line only if skip flag is not set
+          ')
 
           # Add NPM package links
           RELEASE_NOTES+=$'\n\n## :package: NPM packages\n'
