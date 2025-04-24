@@ -66,7 +66,7 @@ const MAX_TOKENS_PER_MESSAGE = 1024;
 const SYSTEM_PROMPT = `
 You are a helpful assistant that generates GraphQL queries and variables.
 
-You will be given a prompt and a GQL API URL.
+You will be given a prompt and a GQL schema.
 
 You will generate a GraphQL query and variables that will be used to test the GQL API.
 
@@ -110,7 +110,7 @@ async function getQueryGeneratorClient(
       url: options.gqlApiUrl.toString(),
       adapter: new AdapterAnthropic({
         apiKey: options.llmApiKey,
-        model: Model.Claude37Sonnet,
+        model: Model.Claude35Sonnet,
         systemPrompt: SYSTEM_PROMPT,
         maxTokensPerMessage: MAX_TOKENS_PER_MESSAGE,
       }),
