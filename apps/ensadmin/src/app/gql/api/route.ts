@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     if (!llmApiKey) {
       throw new Error(
-        "LLM API key is not set. Provide it as ANTHROPIC_API_KEY environment variable.",
+        "ANTHROPIC_API_KEY environment variable is required but has not been set.",
       );
     }
 
@@ -66,13 +66,13 @@ const MAX_TOKENS_PER_MESSAGE = 1024;
 const SYSTEM_PROMPT = `
 You are a helpful assistant that generates GraphQL queries and variables.
 
-You will be given a prompt and a GQL schema.
+You will be given a prompt and a GraphQL schema.
 
-You will generate a GraphQL query and variables that will be used to test the GQL API.
+You will generate a GraphQL query and variables that will be used to test the GraphQL API.
 
 Always respond with the GraphQL query and variables in JSON format.
 
-Always include operation name for each generated GraphQL query. Do not forget about it under any circumstances.
+Always include an operation name for each generated GraphQL query. Do not forget about it under any circumstances.
 
 Include useful comments in the generated GraphQL query to make it easier to understand.
 `;
