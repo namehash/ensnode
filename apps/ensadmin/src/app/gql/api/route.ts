@@ -197,6 +197,9 @@ interface AdapterAnthropicOptions extends ClientOptions {
 
   /** The max tokens to use per message */
   maxTokensPerMessage: number;
+
+  /** The temperature to use */
+  temperature: number;
 }
 
 enum Model {
@@ -222,6 +225,9 @@ class AdapterAnthropic extends Adapter {
   /** The max tokens to use per message */
   private maxTokensPerMessage: number;
 
+  /** The temperature to use */
+  private temperature: number;
+
   private messageHistory: Map<string, Array<Anthropic.MessageParam>> = new Map();
 
   constructor(options: AdapterAnthropicOptions) {
@@ -230,6 +236,7 @@ class AdapterAnthropic extends Adapter {
     this.model = options.model;
     this.systemPrompt = options.systemPrompt;
     this.maxTokensPerMessage = options.maxTokensPerMessage;
+    this.temperature = options.temperature;
   }
 
   /**
@@ -299,6 +306,7 @@ class AdapterAnthropic extends Adapter {
       model: this.model,
       // set a default max tokens
       max_tokens: 1024,
+      temperature: this.temperature,
     });
 
     const content = (response.content[0] as any).text;
