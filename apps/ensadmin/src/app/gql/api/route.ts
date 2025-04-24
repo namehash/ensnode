@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
 
   // try to generate the query and variables
   try {
-    const generatedQuery = await queryGeneratorClient.generateQueryAndVariables(
+    const generatedQueryAndVariables = await queryGeneratorClient.generateQueryAndVariables(
       generateQueryDto.prompt,
     );
-    return Response.json({ generateQueryDto, generatedQuery });
+    return Response.json(generatedQueryAndVariables);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Query generation error: ${errorMessage}`);

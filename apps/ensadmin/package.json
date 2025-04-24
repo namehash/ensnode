@@ -22,10 +22,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@gqlpt/adapter-base": "0.0.0-alpha.31",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/utils": "workspace:*",
+    "@gqlpt/adapter-base": "0.0.0-alpha.31",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",
     "@ponder/react": "catalog:",
