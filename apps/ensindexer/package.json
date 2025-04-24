@@ -1,6 +1,6 @@
 {
   "name": "ensindexer",
-  "version": "0.22.1",
+  "version": "0.23.0",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",
