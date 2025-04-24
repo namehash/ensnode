@@ -257,7 +257,7 @@ class AdapterAnthropic extends Adapter {
   async sendText(text: string, conversationId?: string): Promise<AdapterResponse> {
     let beforeText: string | undefined;
     const splitPhrase = "And this plain text query:";
-    
+
     let messages: Array<Anthropic.MessageParam>;
 
     if (text.includes(splitPhrase)) {
@@ -265,21 +265,23 @@ class AdapterAnthropic extends Adapter {
       beforeText = text.substring(0, splitIndex);
       text = text.substring(splitIndex);
 
-      messages = [{
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: beforeText,
-            cache_control: {type: "ephemeral"}
-          },
-          {
-            type: "text",
-            text: text
-          }
-        ]
-      }];
-    }else {
+      messages = [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: beforeText,
+              cache_control: { type: "ephemeral" },
+            },
+            {
+              type: "text",
+              text: text,
+            },
+          ],
+        },
+      ];
+    } else {
       messages = [{ role: "user", content: text }];
     }
 
