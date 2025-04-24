@@ -62,6 +62,9 @@ export async function GET(request: NextRequest) {
 /** The max tokens to use per message */
 const MAX_TOKENS_PER_MESSAGE = 1024;
 
+/** The LLM temperature */
+const TEMPERATURE = 0.1;
+
 /** The system prompt to use for the LLM */
 const SYSTEM_PROMPT = `
 You are a helpful assistant that generates GraphQL queries and variables.
@@ -113,6 +116,7 @@ async function getQueryGeneratorClient(
         model: Model.Claude37Sonnet,
         systemPrompt: SYSTEM_PROMPT,
         maxTokensPerMessage: MAX_TOKENS_PER_MESSAGE,
+        temperature: TEMPERATURE,
       }),
     });
 
