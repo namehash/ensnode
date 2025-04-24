@@ -82,6 +82,8 @@ Values such as 'vitalik.eth' or 'abc.123.com' should be interpreted as domain na
 Hex values with 40 hex digits (20 bytes) such as '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' should be interpreted as addresses or account id values. All addresses and account id values in your output should be formatted completely in lowercase.
 
 Hex values with 64 hex digits (32 bytes) such as '0x412329d38ad88cb88b1bb6d4005cd6aa010b7bdeb55fd28f980943d423725fb1' should be interpreted as either a labelhash, or the id of a domain. All labelhash and domain id values in your output should be formatted completely in lowercase.
+
+If requested to generate a query that finds domains by name, unless specifically requested to use a particular strategy such as "names ending with", default to finding name values that are an exact match.
 `;
 
 /**
