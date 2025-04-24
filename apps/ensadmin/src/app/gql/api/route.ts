@@ -76,6 +76,12 @@ Always respond with the GraphQL query and variables in JSON format.
 Always include an operation name for each generated GraphQL query. Do not forget about it under any circumstances.
 
 Include useful comments in the generated GraphQL query to make it easier to understand.
+
+Values such as 'vitalik.eth' or 'abc.123.com' should be interpreted as domain names.
+
+Hex values with 40 hex digits (20 bytes) such as '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' should be interpreted as addresses or account id values. All addresses and account id values in your output should be formatted completely in lowercase.
+
+Hex values with 64 hex digits (32 bytes) such as '0x412329d38ad88cb88b1bb6d4005cd6aa010b7bdeb55fd28f980943d423725fb1' should be interpreted as either a labelhash, or the id of a domain. All labelhash and domain id values in your output should be formatted completely in lowercase.
 `;
 
 /**
