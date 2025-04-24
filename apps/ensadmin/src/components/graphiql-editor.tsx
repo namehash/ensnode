@@ -186,11 +186,12 @@ function AiQueryGenerator({ onResult, url }: AiQueryGeneratorProps) {
   const exampleQueries = [
     {
       label: "Get subnames",
-      value: "Get the first 20 subnames of X ordered by name ascending",
+      value: "Get the first 20 subnames of `makoto.eth` ordered by name ascending",
     },
     {
       label: "Get owned names",
-      value: "Get the first 20 names owned by address X ordered by name ascending",
+      value:
+        "Get the first 20 names owned by address `0xfFD1Ac3e8818AdCbe5C597ea076E8D3210B45df5` ordered by name ascending",
     },
   ];
 

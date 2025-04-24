@@ -2,7 +2,7 @@ import Anthropic, { type ClientOptions } from "@anthropic-ai/sdk";
 import { Adapter, type AdapterResponse } from "@gqlpt/adapter-base";
 import { GQLPTClient } from "gqlpt";
 import { type NextRequest } from "next/server";
-
+import { ensSubgraphSchemaGql } from "./ens-subgraph-gql-schema";
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const maybePrompt = requestUrl.searchParams.get("prompt");
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 const MAX_TOKENS_PER_MESSAGE = 1024;
 
 /** The LLM temperature */
-const TEMPERATURE = 0.1;
+const TEMPERATURE = 0;
 
 /** The system prompt to use for the LLM */
 const SYSTEM_PROMPT = `
@@ -112,7 +112,7 @@ async function getQueryGeneratorClient(
       adapter: new AdapterAnthropic({
         apiKey: options.llmApiKey,
         model: Model.Claude35Sonnet,
-        systemPrompt: SYSTEM_PROMPT,
+        systemPrompt: `${SYSTEM_PROMPT}\n\n${ensSubgraphSchemaGql}`,
         maxTokensPerMessage: MAX_TOKENS_PER_MESSAGE,
         temperature: TEMPERATURE,
       }),
