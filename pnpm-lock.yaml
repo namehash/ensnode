@@ -6,18 +6,9 @@ settings:
 
 catalogs:
   default:
-    '@astrojs/react':
-      specifier: ^4.2.0
-      version: 4.2.0
-    '@astrojs/tailwind':
-      specifier: ^6.0.0
-      version: 6.0.0
     '@biomejs/biome':
       specifier: ^1.9.4
       version: 1.9.4
-    '@namehash/namekit-react':
-      specifier: 0.12.0
-      version: 0.12.0
     '@ponder/client':
       specifier: ^0.9.27
       version: 0.9.27
@@ -27,33 +18,6 @@ catalogs:
     '@ponder/utils':
       specifier: ^0.2.3
       version: 0.2.3
-    '@types/node':
-      specifier: ^20.10.0
-      version: 20.17.14
-    '@vitest/coverage-v8':
-      specifier: ^3.1.1
-      version: 3.1.1
-    astro-font:
-      specifier: ^1.0.0
-      version: 1.0.0
-    astro-seo:
-      specifier: ^0.8.4
-      version: 0.8.4
-    drizzle-orm:
-      specifier: ^0.39.3
-      version: 0.39.3
-    hono:
-      specifier: ^4.6.14
-      version: 4.6.17
-    ponder:
-      specifier: ^0.9.27
-      version: 0.9.27
-    tsup:
-      specifier: ^8.3.6
-      version: 8.3.6
-    typescript:
-      specifier: ^5.7.3
-      version: 5.7.3
     viem:
       specifier: ^2.22.13
       version: 2.23.2
@@ -183,8 +147,8 @@ importers:
         specifier: ^18
         version: 18.3.1(react@18.3.1)
       sonner:
-        specifier: ^2.0.1
-        version: 2.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^2.0.3
+        version: 2.0.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tailwind-merge:
         specifier: ^3.0.2
         version: 3.0.2
@@ -6523,8 +6487,8 @@ packages:
   sonic-boom@3.8.1:
     resolution: {integrity: sha512-y4Z8LCDBuum+PBP3lSV7RHrXscqksve/bi0as7mhwVnBW+/wUqKT/2Kb7um8yqcFy0duYbbPxzt89Zy2nOCaxg==}
 
-  sonner@2.0.1:
-    resolution: {integrity: sha512-FRBphaehZ5tLdLcQ8g2WOIRE+Y7BCfWi5Zyd8bCvBjiW8TxxAyoWZIxS661Yz6TGPqFQ4VLzOF89WEYhfynSFQ==}
+  sonner@2.0.3:
+    resolution: {integrity: sha512-njQ4Hht92m0sMqqHVDL32V2Oun9W1+PHO9NDv9FHfJjT3JT22IG4Jpo3FPQy+mouRKCXFWO+r67v6MrHX2zeIA==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
       react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
@@ -12192,7 +12156,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -12214,7 +12178,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -15468,7 +15432,7 @@ snapshots:
     dependencies:
       atomic-sleep: 1.0.0
 
-  sonner@2.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  sonner@2.0.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
