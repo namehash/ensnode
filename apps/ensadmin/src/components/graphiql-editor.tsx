@@ -203,7 +203,7 @@ function AiQueryGenerator({ onResult, url }: AiQueryGeneratorProps) {
           </SelectTrigger>
           <SelectContent>
             {exampleQueries.map((exampleQuery) => (
-              <SelectItem key={exampleQuery.value} value={exampleQuery.value}>
+              <SelectItem key={exampleQuery.label} value={exampleQuery.label}>
                 {exampleQuery.value}
               </SelectItem>
             ))}
