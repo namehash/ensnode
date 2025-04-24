@@ -10,8 +10,9 @@ export async function GET(request: NextRequest) {
   const maybePrompt = requestUrl.searchParams.get("prompt");
   const maybeGqlApiUrl = requestUrl.searchParams.get("gqlApiUrl");
 
-  let generateQueryDto: GenerateQueryDto | undefined;
+  let generateQueryDto: GenerateQueryDto;
 
+  // try to parse the request into a DTO
   try {
     generateQueryDto = getQueryGeneratorClient.parseRequest({
       maybePrompt,
@@ -22,8 +23,9 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: `Parsing request error: ${errorMessage}` }, { status: 400 });
   }
 
-  let queryGeneratorClient: QueryGeneratorClient | undefined;
+  let queryGeneratorClient: QueryGeneratorClient;
 
+  // try to get the query generator client
   try {
     // get the optional LLM API key from the environment variable
     const llmApiKey = process.env.ANTHROPIC_API_KEY;
@@ -40,6 +42,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: `Query generator client error` }, { status: 500 });
   }
 
+  // try to generate the query and variables
   try {
     const generatedQuery = await queryGeneratorClient.generateQueryAndVariables(
       generateQueryDto.prompt,
