@@ -107,12 +107,6 @@ importers:
       '@ensnode/utils':
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
-      '@gqlpt/adapter-anthropic':
-        specifier: 0.0.0-alpha.31
-        version: 0.0.0-alpha.31
-      '@graphiql/react':
-        specifier: ^0.28.2
-        version: 0.28.2(@codemirror/language@6.0.0)(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/toolkit':
         specifier: ^0.11.1
         version: 0.11.1(@types/node@22.13.9)(graphql@16.10.0)
@@ -170,9 +164,6 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
-      gqlpt:
-        specifier: 0.0.0-alpha.31
-        version: 0.0.0-alpha.31(graphql@16.10.0)
       graphiql:
         specifier: ^3.8.3
         version: 3.8.3(@codemirror/language@6.0.0)(@types/node@22.13.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -494,6 +485,16 @@ importers:
         version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
 
   packages/ensnode-utils:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.39.0
+        version: 0.39.0
+      '@gqlpt/adapter-base':
+        specifier: 0.0.0-alpha.31
+        version: 0.0.0-alpha.31
+      gqlpt:
+        specifier: 0.0.0-alpha.31
+        version: 0.0.0-alpha.31(graphql@16.10.0)
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -678,8 +679,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@anthropic-ai/sdk@0.32.1':
-    resolution: {integrity: sha512-U9JwTrDvdQ9iWuABVsMLj8nJVwAyQz6QXvgLsVhryhCEPkLsbcP/MXxm+jYcAwLoV8ESbaTTjnD4kuAFa+Hyjg==}
+  '@anthropic-ai/sdk@0.39.0':
+    resolution: {integrity: sha512-eMyDIPRZbt1CCLErRCi3exlAvNkBtRe+kW5vvJyef93PmNr/clstYgHhtvmkxN82nlKgzyGPCyGxrm0JQ1ZIdg==}
 
   '@apollo/utils.sortast@3.0.0':
     resolution: {integrity: sha512-qZG5L95wnvYD8Nsh+kKvtTDomn76wOC8H1KJGsxMTifXyY5M+PdKeAJVfPkyw11Pkq7sGVg96vk2BZ6pdFP/QA==}
@@ -1339,9 +1340,6 @@ packages:
 
   '@fontsource/inter@5.2.5':
     resolution: {integrity: sha512-kbsPKj0S4p44JdYRFiW78Td8Ge2sBVxi/PIBwmih+RpSXUdvS9nbs1HIiuUSPtRMi14CqLEZ/fbk7dj7vni1Sg==}
-
-  '@gqlpt/adapter-anthropic@0.0.0-alpha.31':
-    resolution: {integrity: sha512-5hVAHbXZGFbs2nO392oHoTDT767U9cIWzZ1xhcwlYnVtljVHuvzTiyk04kjzSmZ02ISehRbjKBVoY75dWcsyUw==}
 
   '@gqlpt/adapter-base@0.0.0-alpha.31':
     resolution: {integrity: sha512-J2Zt972lN2Yvztw1Q/WsCGZN3qMqDOvb+kP/0oPQNFgbIQAx9pZbXgCsyIuzx+bdckQ2gbqodQHKBhV6vROjBA==}
@@ -7802,7 +7800,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@anthropic-ai/sdk@0.32.1':
+  '@anthropic-ai/sdk@0.39.0':
     dependencies:
       '@types/node': 18.19.86
       '@types/node-fetch': 2.6.12
@@ -8731,13 +8729,6 @@ snapshots:
   '@floating-ui/utils@0.2.9': {}
 
   '@fontsource/inter@5.2.5': {}
-
-  '@gqlpt/adapter-anthropic@0.0.0-alpha.31':
-    dependencies:
-      '@anthropic-ai/sdk': 0.32.1
-      '@gqlpt/adapter-base': 0.0.0-alpha.31
-    transitivePeerDependencies:
-      - encoding
 
   '@gqlpt/adapter-base@0.0.0-alpha.31': {}
 

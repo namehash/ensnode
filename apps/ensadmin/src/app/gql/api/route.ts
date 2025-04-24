@@ -1,49 +1,53 @@
-import { AdapterAnthropic } from "@gqlpt/adapter-anthropic";
-import { GQLPTClient } from "gqlpt";
+import {
+  type GenerateQueryDto,
+  type QueryGeneratorClient,
+  getQueryGeneratorClient,
+} from "@ensnode/utils";
 import { type NextRequest } from "next/server";
-
-const clients = new Map<string, GQLPTClient>();
-const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-
-if (!anthropicApiKey) {
-  throw new Error("ANTHROPIC_API_KEY is not set");
-}
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
-  const prompt = requestUrl.searchParams.get("prompt");
-  const gqlApiUrl = requestUrl.searchParams.get("gqlApiUrl");
+  const maybePrompt = requestUrl.searchParams.get("prompt");
+  const maybeGqlApiUrl = requestUrl.searchParams.get("gqlApiUrl");
 
-  if (!gqlApiUrl) {
-    return Response.json({ error: "gqlApiUrl is required" }, { status: 400 });
+  let generateQueryDto: GenerateQueryDto | undefined;
+
+  try {
+    generateQueryDto = getQueryGeneratorClient.parseRequest({
+      maybePrompt,
+      maybeGqlApiUrl,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return Response.json({ error: `Parsing request error: ${errorMessage}` }, { status: 400 });
+  }
+
+  let queryGeneratorClient: QueryGeneratorClient | undefined;
+
+  try {
+    // get the optional LLM API key from the environment variable
+    const llmApiKey = process.env.ANTHROPIC_API_KEY;
+
+    // get the query generator client for the given GQL API URL
+    queryGeneratorClient = await getQueryGeneratorClient({
+      ...generateQueryDto,
+      llmApiKey,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    console.error(`Query generator client error: ${errorMessage}`);
+    return Response.json({ error: `Query generator client error` }, { status: 500 });
   }
 
   try {
-    new URL(gqlApiUrl);
+    const generatedQuery = await queryGeneratorClient.generateQueryAndVariables(
+      generateQueryDto.prompt,
+    );
+    return Response.json({ generateQueryDto, generatedQuery });
   } catch (error) {
-    return Response.json({ error: "Invalid gqlApiUrl" }, { status: 400 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Query generation error: ${errorMessage}`);
+    return Response.json({ error: errorMessage }, { status: 500 });
   }
-
-  if (!prompt) {
-    return Response.json({ error: "prompt is required" }, { status: 400 });
-  }
-
-  let gqlptClient = clients.get(gqlApiUrl);
-
-  if (!gqlptClient) {
-    gqlptClient = new GQLPTClient({
-      url: gqlApiUrl,
-      adapter: new AdapterAnthropic({
-        apiKey: anthropicApiKey,
-      }),
-    });
-
-    await gqlptClient.connect();
-
-    clients.set(gqlApiUrl, gqlptClient);
-  }
-
-  const result = await gqlptClient.generateQueryAndVariables(prompt);
-
-  return Response.json({ result, gqlApiUrl, prompt });
 }
