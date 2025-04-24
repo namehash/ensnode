@@ -3,6 +3,7 @@ import ProgressBar from "progress";
 import protobuf from "protobufjs";
 import { ByteArray } from "viem";
 
+import { CURRENT_FORMAT_VERSION } from "@/commands/convert-command";
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { logger } from "@/utils/logger";
 import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
@@ -20,7 +21,7 @@ export interface IngestProtobufCommandOptions {
  * different platforms and languages.
  */
 export async function ingestProtobufCommand(options: IngestProtobufCommandOptions): Promise<void> {
-  const db = await ENSRainbowDB.create(options.dataDir);
+  const db = await ENSRainbowDB.openOrCreate(options.dataDir);
 
   try {
     // Check the current ingestion status
@@ -49,28 +50,34 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
     }
 
     if (ingestionStatus === IngestionStatus.Finished) {
-      const errorMessage =
-        "ENSRainbow currently only supports a single ingestion. We're working to enhance this soon!\n" +
-        "If you want to re-ingest data:\n" +
-        "1. Delete the data directory\n" +
-        "2. Run the ingestion command again: ensrainbow ingest-ensrainbow <input-file>";
-      logger.error(errorMessage);
-      throw new Error(errorMessage);
+      // const errorMessage =
+      //   "ENSRainbow currently only supports a single ingestion. We're working to enhance this soon!\n" +
+      //   "If you want to re-ingest data:\n" +
+      //   "1. Delete the data directory\n" +
+      //   "2. Run the ingestion command again: ensrainbow ingest-ensrainbow <input-file>";
+      // logger.error(errorMessage);
+      // throw new Error(errorMessage);
+      logger.info("Ingestion to already pre-existing database.");
     }
 
-    // Mark ingestion as started
-    await db.markIngestionUnfinished();
+    // Values that will be read from the file header
+    let fileVersion = 0;
+    let fileNamespace = "";
+    let fileLabelSet = -1;
 
-    // Get and increment the highest label set
-    const labelSetNumber = await db.incrementHighestLabelSet();
-    logger.info(`Using label set number: ${labelSetNumber}`);
+    // Create a way to reject the command from event handlers
+    let commandReject: (reason: Error) => void;
+    const commandPromise = new Promise<void>((_, reject) => {
+      commandReject = reject;
+    });
 
     logger.info("Starting ingestion from protobuf file...");
     logger.info(`Input file: ${options.inputFile}`);
     logger.info(`Data directory: ${options.dataDir}`);
+    logger.info("Version, Namespace and Label Set will be read from file header");
 
-    // Set up protobuf parser - we need the RainbowRecord type
-    const { RainbowRecordType } = createRainbowProtobufRoot();
+    // Set up protobuf parser - need both record and collection types
+    const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
 
     // Prepare the database batch
     let batch = db.batch();
@@ -83,19 +90,20 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
     // We'll accumulate bytes until we have a complete message
     let buffer = Buffer.alloc(0);
+    let headerRead = false; // Flag to track if header is read
 
-    // Set up a progress bar (can't show total since we don't know yet)
+    // Set up a progress bar
     const bar = new ProgressBar(
       "Ingesting [:bar] :current records - :rate records/sec - :elapsed elapsed",
       {
         complete: "=",
         incomplete: " ",
         width: 40,
-        total: 1000000000, // Just a big number, we'll update the progress by percentage
+        total: 1000000000, // Placeholder total
       },
     );
 
-    logger.info("Reading and ingesting protobuf data...");
+    logger.info("Reading protobuf data (header first, then records)...");
 
     // Set up the file stream handler
     fileStream.on("data", (chunk) => {
@@ -106,17 +114,173 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
       let bytesRead = 0;
 
       try {
-        while (bytesRead < buffer.length) {
-          // Try to decode a delimited message from the current position
+        // --- Read Header (if not already read) ---
+        if (!headerRead) {
           try {
             const reader = protobuf.Reader.create(buffer.subarray(bytesRead));
-            // Use decodeDelimited to read a length-prefixed message
-            const message = RainbowRecordType.decodeDelimited(reader);
+            // Use decodeDelimited to read the header collection message
+            const headerCollection = RainbowRecordCollectionType.decodeDelimited(reader);
+            const headerLength = reader.pos;
 
-            // If successful, get the message length (including the length prefix)
+            // Process the header
+            const headerObj = RainbowRecordCollectionType.toObject(headerCollection, {
+              bytes: Buffer.from,
+              defaults: true,
+            });
+
+            fileVersion = headerObj.version;
+            fileNamespace = headerObj.namespace;
+            fileLabelSet = headerObj.label_set;
+
+            // Validate version
+            if (fileVersion !== CURRENT_FORMAT_VERSION) {
+              const msg = `File format version ${fileVersion} is not supported. Update your application to the latest version.`;
+              logger.error(msg);
+              fileStream.destroy(new Error(msg)); // Stop processing
+              return;
+            }
+
+            // Log header info
+            logger.info(
+              `Read header: Version=${fileVersion}, Namespace=${fileNamespace}, Label Set=${fileLabelSet}`,
+            );
+
+            // Validate header against database state
+            logger.info(`Read header: Namespace=${fileNamespace}, Label Set=${fileLabelSet}`);
+
+            // Validate the label set
+            if (ingestionStatus === IngestionStatus.Unstarted) {
+              if (fileLabelSet !== 0) {
+                const msg = `Initial ingestion must use a file with label set 0, but file has label set ${fileLabelSet}!`;
+                logger.error(msg);
+                fileStream.destroy(new Error(msg)); // Stop processing
+                return;
+              }
+            } else {
+              // For existing db, we need to validate namespace and label set
+              // Using .then() as we are inside a sync event handler
+              db.getNamespace()
+                .then((currentNamespace) => {
+                  if (currentNamespace !== fileNamespace) {
+                    const msg = `Namespace mismatch! Database namespace: ${currentNamespace}, File namespace: ${fileNamespace}!`;
+                    logger.error(msg);
+                    fileStream.destroy(new Error(msg)); // Stop processing
+                    commandReject(new Error(msg));
+                    return;
+                  }
+
+                  // Now check label set
+                  db.getHighestLabelSet()
+                    .then((currentLabelSet) => {
+                      if (fileLabelSet !== currentLabelSet! + 1) {
+                        const msg =
+                          `Label set must be exactly one higher than the current highest label set.\n` +
+                          `Current highest label set: ${currentLabelSet}, File label set: ${fileLabelSet}`;
+                        logger.error(msg);
+                        console.log("KURW1");
+                        fileStream.destroy(new Error(msg)); // Stop processing
+                        commandReject(new Error(msg));
+                        return;
+                      }
+                    })
+                    .catch((err) => {
+                      logger.error(`Failed to get highest label set: ${err}`);
+                      fileStream.destroy(err);
+                    });
+                })
+                .catch((err) => {
+                  logger.error(`Failed to get namespace: ${err}`);
+                  fileStream.destroy(err);
+                });
+            }
+
+            // If this is the first ingestion, set the namespace in the DB
+            if (ingestionStatus === IngestionStatus.Unstarted) {
+              // Using .then() as we are inside a sync event handler
+              db.setNamespace(fileNamespace)
+                .then(() => {
+                  logger.info(`Initialized database namespace to: ${fileNamespace} from header.`);
+                  return db.setHighestLabelSet(0);
+                })
+                .then(() => {
+                  // Initial set is 0
+                  logger.info("Initialized highest label set to: 0");
+                  // Mark ingestion as started after initialization
+                  return db.markIngestionUnfinished();
+                })
+                .then(() => {
+                  logger.info("Marked ingestion as unfinished");
+                  console.log("KURW2");
+                })
+                .catch((err) => {
+                  logger.error(`Failed during initialization: ${err}`);
+                  fileStream.destroy(err);
+                });
+            } else {
+              // For existing db, validate namespace and label set before marking as unfinished
+              db.getNamespace()
+                .then((currentNamespace) => {
+                  if (currentNamespace !== fileNamespace) {
+                    const msg = `Namespace mismatch! Database namespace: ${currentNamespace}, File namespace: ${fileNamespace}!`;
+                    logger.error(msg);
+                    fileStream.destroy(new Error(msg)); // Stop processing
+                    commandReject(new Error(msg));
+                    return;
+                  }
+
+                  // Now check label set
+                  return db.getHighestLabelSet();
+                })
+                .then((currentLabelSet) => {
+                  if (fileLabelSet !== currentLabelSet! + 1) {
+                    const msg =
+                      `Label set must be exactly one higher than the current highest label set.\n` +
+                      `Current highest label set: ${currentLabelSet}, File label set: ${fileLabelSet}`;
+                    logger.error(msg);
+                    console.log("KURW1");
+                    fileStream.destroy(new Error(msg)); // Stop processing
+                    commandReject(new Error(msg));
+                    return;
+                  }
+
+                  // Only mark as unfinished if validation passes
+                  return db.markIngestionUnfinished();
+                })
+                .then(() => {
+                  logger.info("Marked ingestion as unfinished");
+                  console.log("KURW2");
+                })
+                .catch((err) => {
+                  if (
+                    !err.message?.includes("Namespace mismatch") &&
+                    !err.message?.includes("Label set must be exactly")
+                  ) {
+                    logger.error(`Failed during validation: ${err}`);
+                    fileStream.destroy(err);
+                  }
+                });
+            }
+
+            headerRead = true;
+            bytesRead += headerLength;
+            logger.info("Header processed successfully. Reading records...");
+          } catch (e) {
+            // If we can't decode the header yet, we need more data
+            // Don't proceed to read records until header is done
+            return;
+          }
+        }
+        // --- End Header Read ---
+
+        // --- Read Records (only after header is read) ---
+        while (headerRead && bytesRead < buffer.length) {
+          try {
+            const reader = protobuf.Reader.create(buffer.subarray(bytesRead));
+            // Use decodeDelimited to read a length-prefixed RainbowRecord message
+            const message = RainbowRecordType.decodeDelimited(reader);
             const messageLength = reader.pos;
 
-            // Process the message
+            // Process the record
             const record = RainbowRecordType.toObject(message, {
               bytes: Buffer.from,
               defaults: true,
@@ -127,12 +291,11 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             if (Buffer.isBuffer(record.label_hash)) {
               labelHashBuffer = record.label_hash;
             } else {
-              // If it's not a buffer, try to convert it (shouldn't happen, but just in case)
               labelHashBuffer = Buffer.from(record.label_hash);
             }
 
-            // Prefix the label with the current label set number and a colon
-            const prefixedLabel = `${labelSetNumber}:${String(record.label)}`;
+            // Prefix the label with the actual label set number from the header
+            const prefixedLabel = `${fileLabelSet}:${String(record.label)}`;
 
             // Add to database batch
             batch.put(labelHashBuffer as ByteArray, prefixedLabel);
@@ -141,9 +304,6 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
             // Write batch if needed
             if (batchSize >= MAX_BATCH_SIZE) {
-              // Note: this would ideally be awaited, but we're in a non-async event handler
-              // In a real implementation, we might want to use a more complex approach
-              // that pauses the stream while we write the batch
               batch
                 .write()
                 .then(() => {
@@ -152,6 +312,8 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                 })
                 .catch((err) => {
                   logger.error(`Error writing batch: ${err}`);
+                  // Consider stopping the stream here if batch writes fail
+                  // fileStream.destroy(err);
                 });
             }
 
@@ -161,55 +323,85 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             // Move to the next message
             bytesRead += messageLength;
           } catch (e) {
-            // If we can't decode a message, we need more data
+            // If we can't decode a record message, we need more data
             break;
           }
         }
+        // --- End Record Read ---
 
-        // Keep any partial message for the next chunk
+        // Keep any partial message data for the next chunk
         if (bytesRead > 0) {
           buffer = buffer.subarray(bytesRead);
         }
       } catch (e) {
-        logger.error(`Error processing protobuf data: ${e}`);
+        // Catch errors during the processing loop
+        logger.error(`Error processing protobuf data chunk: ${e}`);
+        fileStream.destroy(e instanceof Error ? e : new Error(String(e)));
       }
     });
 
     // Wait for the stream to finish
-    await new Promise<void>((resolve, reject) => {
-      fileStream.on("end", async () => {
-        try {
-          // Write any remaining entries
-          if (batchSize > 0) {
-            await batch.write();
+    await Promise.race([
+      commandPromise,
+      new Promise<void>((resolve, reject) => {
+        fileStream.on("end", async () => {
+          try {
+            // Check if header was ever read
+            if (!headerRead) {
+              throw new Error(
+                "Stream finished but header message was not found or was incomplete.",
+              );
+            }
+
+            // Write any remaining entries
+            if (batchSize > 0) {
+              await batch.write();
+            }
+
+            logger.info("\nIngestion from protobuf file complete!");
+            logger.info(`Successfully ingested ${processedRecords} records`);
+
+            // Run count as second phase
+            logger.info("\nStarting rainbow record counting phase...");
+            const count = await db.countRainbowRecords();
+            await db.setPrecalculatedRainbowRecordCount(count);
+
+            // Update the highest label set with the one from the file header
+            await db.setHighestLabelSet(fileLabelSet);
+            logger.info(`Updated highest label set to: ${fileLabelSet}`);
+
+            // Mark ingestion as finished
+            await db.markIngestionFinished();
+
+            logger.info("Data ingestion and count verification complete!");
+            resolve();
+          } catch (error) {
+            logger.error(`Error during stream end processing: ${error}`);
+            // Ensure ingestion is marked as unfinished on error
+            // db.markIngestionUnfinished().finally(() => reject(error));
+            reject(error);
           }
+        });
 
-          logger.info("\nIngestion from protobuf file complete!");
-          logger.info(`Successfully ingested ${processedRecords} records`);
-
-          // Run count as second phase to verify the number of unique records in the database.
-          logger.info("\nStarting rainbow record counting phase...");
-          const count = await db.countRainbowRecords();
-          await db.setPrecalculatedRainbowRecordCount(count);
-
-          // Mark ingestion as finished since we completed successfully
-          await db.markIngestionFinished();
-
-          logger.info("Data ingestion and count verification complete!");
-          resolve();
-        } catch (error) {
+        fileStream.on("error", (error) => {
+          logger.error(`Error reading input file stream: ${error}`);
+          // Ensure ingestion is marked as unfinished on stream error
+          // db.markIngestionUnfinished().finally(() => reject(error));
           reject(error);
-        }
-      });
-
-      fileStream.on("error", (error) => {
-        reject(error);
-      });
-    });
+        });
+      }),
+    ]);
   } catch (error) {
-    logger.error(`Error during ingestion: ${error}`);
+    logger.error(`Ingestion failed: ${error}`);
+    // Attempt to mark as unfinished if an error occurred before stream processing finished
+    // await db
+    //   .markIngestionUnfinished()
+    //   .catch((err) =>
+    //     logger.error(`Failed to mark ingestion as unfinished on final error: ${err}`),
+    //   );
     throw error;
   } finally {
     await db.close();
+    logger.info("Database connection closed.");
   }
 }

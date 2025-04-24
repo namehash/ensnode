@@ -4,6 +4,7 @@ import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
 import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
+import { vi } from "vitest";
 
 import {
   ENSRainbowDB,
@@ -46,12 +47,14 @@ describe("Database", () => {
 
       try {
         for (const label of testDataLabels) {
-          await db.addRainbowRecord(label);
+          await db.addRainbowRecord(label, 0);
         }
 
         await db.setPrecalculatedRainbowRecordCount(testDataLabels.length);
 
         await db.markIngestionFinished();
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
 
         const isValid = await db.validate();
         expect(isValid).toBe(true);
@@ -66,6 +69,9 @@ describe("Database", () => {
       try {
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
+        await db.markIngestionFinished();
 
         // Add records using batch
         const batch = db.batch();
@@ -87,7 +93,9 @@ describe("Database", () => {
       try {
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
-
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
+        await db.markIngestionFinished();
         // Add records using batch
         const batch = db.batch();
         // Add rainbow record with mismatched labelHash
@@ -109,8 +117,10 @@ describe("Database", () => {
       try {
         // Add record
         const label = "vitalik";
-        await db.addRainbowRecord(label);
-
+        await db.addRainbowRecord(label, 0);
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
+        await db.markIngestionFinished();
         const isValid = await db.validate();
         expect(isValid).toBe(false);
       } finally {
@@ -124,7 +134,10 @@ describe("Database", () => {
       try {
         // Add record
         const label = "vitalik";
-        await db.addRainbowRecord(label);
+        await db.addRainbowRecord(label, 0);
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
+        await db.markIngestionFinished();
         // Add incorrect precalculated rainbow record count
         db.setPrecalculatedRainbowRecordCount(2);
 
@@ -141,7 +154,10 @@ describe("Database", () => {
       try {
         // Add a valid record
         const label = "vitalik";
-        await db.addRainbowRecord(label);
+        await db.addRainbowRecord(label, 0);
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
+
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
         // Set ingestion unfinished flag
@@ -160,7 +176,49 @@ describe("Database", () => {
       try {
         // Add a valid record
         const label = "vitalik";
-        await db.addRainbowRecord(label);
+        await db.addRainbowRecord(label, 0);
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
+        // Set precalculated rainbow record count key
+        db.setPrecalculatedRainbowRecordCount(1);
+        // Don't set any ingestion status
+
+        const isValid = await db.validate();
+        expect(isValid).toBe(false);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should detect when namespace is not set", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        // Add a valid record
+        const label = "vitalik";
+        await db.addRainbowRecord(label, 0);
+        await db.setHighestLabelSet(0);
+        await db.markIngestionFinished();
+        // Set precalculated rainbow record count key
+        db.setPrecalculatedRainbowRecordCount(1);
+        // Don't set any ingestion status
+
+        const isValid = await db.validate();
+        expect(isValid).toBe(false);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should detect when highest label set is not set", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+
+      try {
+        // Add a valid record
+        const label = "vitalik";
+        await db.addRainbowRecord(label, 0);
+        await db.setNamespace("test-namespace");
+        await db.markIngestionFinished();
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
         // Don't set any ingestion status
@@ -178,7 +236,9 @@ describe("Database", () => {
       try {
         // Add a valid record
         const label = "vitalik";
-        await db.addRainbowRecord(label);
+        await db.addRainbowRecord(label, 0);
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
         // Mark ingestion as done
@@ -203,6 +263,8 @@ describe("Database", () => {
         await batch.write();
         await db.setPrecalculatedRainbowRecordCount(1);
         await db.markIngestionFinished();
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
 
         // Should pass in lite mode despite hash mismatch
         const isValidLite = await db.validate({ lite: true });
@@ -220,7 +282,10 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
-        await db.addRainbowRecord("test");
+        await db.addRainbowRecord("test", 0);
+        await db.setNamespace("test-namespace");
+        await db.setHighestLabelSet(0);
+        await db.markIngestionFinished();
 
         // Should fail in lite mode due to invalid format
         const isValid = await db.validate({ lite: true });
@@ -244,10 +309,10 @@ describe("Database", () => {
         const labelHashBytes = labelHashToBytes(labelWithNullLabelHash);
 
         // Add record
-        await db.addRainbowRecord(labelWithNull);
+        await db.addRainbowRecord(labelWithNull, 0);
 
         const retrieved = await db.getLabel(labelHashBytes);
-        expect(retrieved).toBe(labelWithNull);
+        expect(retrieved).toEqual({ labelSet: 0, label: labelWithNull });
       } finally {
         await db.close();
       }
@@ -394,6 +459,9 @@ describe("schema version", () => {
     try {
       // Set a different schema version
       await db.setDatabaseSchemaVersion(SCHEMA_VERSION + 1);
+      await db.setNamespace("test-namespace");
+      await db.setHighestLabelSet(0);
+      await db.markIngestionFinished();
 
       // Validation should fail due to version mismatch
       const isValid = await db.validate();
@@ -442,5 +510,112 @@ describe("isSystemKey", () => {
     // Create a non-system key with length other than 32
     const nonSystemKey = new Uint8Array([0x01, 0x02, 0x03, 0x04]);
     expect(isSystemKey(nonSystemKey)).toBe(false);
+  });
+});
+
+describe("ENSRainbowDB.open", () => {
+  let tempDir: string;
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-database-open"));
+  });
+
+  afterEach(async () => {
+    await rm(tempDir, { recursive: true, force: true });
+  });
+
+  it("should throw an error when database does not exist", async () => {
+    // Try to open a non-existent database
+    await expect(ENSRainbowDB.open(tempDir)).rejects.toThrow("Database is not open");
+  });
+
+  it("should successfully open an existing database", async () => {
+    // First create a database
+    const db = await ENSRainbowDB.create(tempDir);
+    await db.close();
+
+    // Then try to open it
+    const reopenedDb = await ENSRainbowDB.open(tempDir);
+    try {
+      // Check that schema version is correct
+      const version = await reopenedDb.getDatabaseSchemaVersion();
+      expect(version).toBe(SCHEMA_VERSION);
+    } finally {
+      await reopenedDb.close();
+    }
+  });
+
+  it("should validate schema version when opening", async () => {
+    // Create a database with a different schema version
+    const db = await ENSRainbowDB.create(tempDir);
+    await db.setDatabaseSchemaVersion(SCHEMA_VERSION + 1);
+    await db.close();
+
+    // Try to open it - should throw error due to schema mismatch
+    await expect(ENSRainbowDB.open(tempDir)).rejects.toThrow(
+      "Database schema version mismatch: expected=3, actual=4",
+    );
+  });
+});
+
+describe("ENSRainbowDB.openOrCreate", () => {
+  let tempDir: string;
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-database-open-or-create"));
+  });
+
+  afterEach(async () => {
+    await rm(tempDir, { recursive: true, force: true });
+  });
+
+  it("should create a new database when it doesn't exist", async () => {
+    // Open or create should create a new database
+    const db = await ENSRainbowDB.openOrCreate(tempDir);
+    try {
+      // Check schema version to confirm it's properly initialized
+      const version = await db.getDatabaseSchemaVersion();
+      expect(version).toBe(SCHEMA_VERSION);
+    } finally {
+      await db.close();
+    }
+  });
+
+  it("should open an existing database when it exists", async () => {
+    // First create a database with a test record
+    const db = await ENSRainbowDB.create(tempDir);
+    await db.addRainbowRecord("test", 0);
+    await db.setPrecalculatedRainbowRecordCount(1);
+    await db.close();
+
+    // Then try to open it with openOrCreate
+    const reopenedDb = await ENSRainbowDB.openOrCreate(tempDir);
+    try {
+      // Check that the count is still correct
+      const count = await reopenedDb.getPrecalculatedRainbowRecordCount();
+      expect(count).toBe(1);
+    } finally {
+      await reopenedDb.close();
+    }
+  });
+
+  it("should propagate errors other than 'does not exist'", async () => {
+    // Mock implementation to test error propagation
+    const originalOpen = ENSRainbowDB.open;
+    const mockError = new Error("Permission denied");
+
+    try {
+      // Override the open method to throw a different error
+      ENSRainbowDB.open = vi.fn().mockRejectedValue(mockError);
+
+      // Should propagate the error since it's not a "does not exist" error
+      await expect(ENSRainbowDB.openOrCreate(tempDir)).rejects.toThrow("Permission denied");
+
+      // Verify open was called but create was not
+      expect(ENSRainbowDB.open).toHaveBeenCalledWith(tempDir);
+    } finally {
+      // Restore the original method
+      ENSRainbowDB.open = originalOpen;
+    }
   });
 });

@@ -25,6 +25,8 @@ describe("Server Command Tests", () => {
       // Initialize precalculated rainbow record count to be able to start server
       await db.setPrecalculatedRainbowRecordCount(0);
       await db.markIngestionFinished();
+      await db.setNamespace("test-namespace");
+      await db.setHighestLabelSet(0);
       app = await createServer(db);
 
       // Start the server on a different port than what ENSRainbow defaults to
@@ -61,7 +63,7 @@ describe("Server Command Tests", () => {
       const validLabelHash = labelhash(validLabel);
 
       // Add test data
-      await db.addRainbowRecord(validLabel);
+      await db.addRainbowRecord(validLabel, 0);
 
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelHash}`);
       expect(response.status).toBe(200);
@@ -166,7 +168,7 @@ describe("Server Command Tests", () => {
       const validLabelHash = labelhash(validLabel);
 
       // Add test data
-      await db.addRainbowRecord(validLabel);
+      await db.addRainbowRecord(validLabel, 0);
 
       const responses = await Promise.all([
         fetch(`http://localhost:${nonDefaultPort}/v1/heal/${validLabelHash}`, {

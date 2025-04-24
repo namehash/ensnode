@@ -10,21 +10,33 @@ import { buildRainbowRecord } from "@/utils/rainbow-record";
 export interface ConvertCommandOptions {
   inputFile: string;
   outputFile: string;
+  namespace: string;
+  labelSet: number;
 }
+
+// Current protobuf file format version
+export const CURRENT_FORMAT_VERSION = 1;
 
 /**
  * Converts rainbow tables from SQL dump directly to protobuf format
  * Uses a streaming approach to avoid memory issues with large datasets
  *
- * The output format is a standard length-prefixed protobuf stream:
- * - Each message is prefixed with its length as a varint
- * - This allows for cross-platform compatibility with other protobuf implementations
+ * The output format consists of:
+ * 1. A single header message (RainbowRecordCollection) containing version, namespace and label set.
+ * 2. A stream of individual RainbowRecord messages, each length-prefixed.
  */
 export async function convertCommand(options: ConvertCommandOptions): Promise<void> {
   try {
+    const namespace = options.namespace;
+    const labelSet = options.labelSet;
+
     logger.info("Starting conversion from SQL dump to protobuf format...");
     logger.info(`Input file: ${options.inputFile}`);
     logger.info(`Output file: ${options.outputFile}`);
+    logger.info(`Namespace: ${namespace}`);
+    logger.info(`Label Set: ${labelSet}`);
+    logger.info(`Format Version: ${CURRENT_FORMAT_VERSION}`);
+    logger.info("Output format: Header message + stream of individual records");
 
     // Set up progress bar
     const bar = new ProgressBar(
@@ -48,14 +60,28 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
     // Create a write stream for the output file
     const outputStream = createWriteStream(options.outputFile);
 
-    // Use the shared protobuf schema - we only need the RainbowRecord type, not the collection
-    const { RainbowRecordType } = createRainbowProtobufRoot();
+    // Use the shared protobuf schema - need both record and collection types
+    const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
+
+    // --- Write Header ---
+    const headerCollection = RainbowRecordCollectionType.fromObject({
+      version: CURRENT_FORMAT_VERSION,
+      namespace: namespace,
+      label_set: labelSet,
+      records: [], // Header has no records
+    });
+    // Encode and write the header collection with length-prefix encoding
+    outputStream.write(
+      Buffer.from(RainbowRecordCollectionType.encodeDelimited(headerCollection).finish()),
+    );
+    logger.info("Wrote header message with version, namespace and label set.");
+    // --- End Header ---
 
     let isCopySection = false;
     let processedRecords = 0;
     let invalidRecords = 0;
 
-    logger.info("Parsing SQL dump file...");
+    logger.info("Parsing SQL dump file and writing individual records...");
 
     for await (const line of rl) {
       if (line.startsWith("COPY public.ens_names")) {
@@ -75,23 +101,23 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
         // Parse the record from SQL dump
         const record = buildRainbowRecord(line);
 
-        // Create a protobuf message for just this record
-        const message = RainbowRecordType.fromObject({
+        // Create a protobuf message for this record
+        const recordMessage = RainbowRecordType.fromObject({
           label_hash: Buffer.from(record.labelHash),
           label: record.label,
         });
 
-        // Encode the record
-        const buffer = RainbowRecordType.encode(message).finish();
-
-        // Write the message with length-prefix encoding (standard protobuf delimited format)
-        // Using the Protobuf.js built-in method that handles the proper varint encoding
-        outputStream.write(Buffer.from(RainbowRecordType.encodeDelimited(message).finish()));
-
+        // Encode and write the individual record message with length-prefix encoding
+        outputStream.write(Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish()));
         processedRecords++;
 
         // Update progress bar
         bar.tick();
+
+        // Log progress periodically
+        if (processedRecords % 1000000 === 0) {
+          logger.info(`Processed ${processedRecords} records so far`);
+        }
       } catch (e) {
         if (e instanceof Error) {
           logger.warn(
@@ -117,7 +143,7 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
       `Conversion complete! ${processedRecords} records written to ${options.outputFile}`,
     );
     logger.info(
-      `The file is in standard protobuf delimited format and can be read by any protobuf implementation.`,
+      `The file contains a header message followed by ${processedRecords} individual RainbowRecord messages.`,
     );
   } catch (error) {
     logger.error(`Error during conversion: ${error}`);

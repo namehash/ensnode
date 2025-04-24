@@ -23,7 +23,12 @@ export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]
  * Stores the current label set number as a string
  */
 export const SYSTEM_KEY_HIGHEST_LABEL_SET = new Uint8Array([0xff, 0xff, 0xff, 0xfc]) as ByteArray;
-export const SCHEMA_VERSION = 2;
+/**
+ * Key for storing the namespace
+ * Stores the namespace identifier as a string
+ */
+export const SYSTEM_KEY_NAMESPACE = new Uint8Array([0xff, 0xff, 0xff, 0xfb]) as ByteArray;
+export const SCHEMA_VERSION = 3;
 
 // Ingestion status values
 export const IngestionStatus = {
@@ -33,6 +38,33 @@ export const IngestionStatus = {
 } as const;
 
 export type IngestionStatus = (typeof IngestionStatus)[keyof typeof IngestionStatus];
+
+/**
+ * Splits a label string into its label set number and actual label components.
+ * Format of input is expected to be "{labelSet}:{actualLabel}"
+ *
+ * @param label The label string to split
+ * @returns An object containing the label set number and the actual label
+ * @throws Error if the label format is invalid or the label set is not a valid number
+ */
+export function splitLabelString(label: string): { labelSet: number; label: string } {
+  const colonIndex = label.indexOf(":");
+  if (colonIndex <= 0) {
+    throw new Error(`Invalid label format (missing set number prefix): "${label}"`);
+  }
+
+  const labelSet = label.substring(0, colonIndex);
+  const actualLabel = label.substring(colonIndex + 1);
+
+  try {
+    const labelSetNumber = parseNonNegativeInteger(labelSet);
+    return { labelSet: labelSetNumber, label: actualLabel };
+  } catch (error: unknown) {
+    throw new Error(
+      `Invalid label set number "${labelSet}" in label "${label}": ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
 
 /**
  * Checks if a key is a system key (one of the special keys used for database metadata).
@@ -45,7 +77,8 @@ export function isSystemKey(key: ByteArray): boolean {
     (byteArraysEqual(key, SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT) ||
       byteArraysEqual(key, SYSTEM_KEY_INGESTION_STATUS) ||
       byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION) ||
-      byteArraysEqual(key, SYSTEM_KEY_HIGHEST_LABEL_SET))
+      byteArraysEqual(key, SYSTEM_KEY_HIGHEST_LABEL_SET) ||
+      byteArraysEqual(key, SYSTEM_KEY_NAMESPACE))
   );
 }
 
@@ -187,8 +220,8 @@ export class ENSRainbowDB {
         await dbInstance.getHighestLabelSet();
       } catch (error) {
         logger.warn("Highest label set not found, initializing to 0");
-        await db.put(SYSTEM_KEY_HIGHEST_LABEL_SET, "0");
       }
+      //TODO validate lite?
 
       return dbInstance;
     } catch (error) {
@@ -201,8 +234,38 @@ export class ENSRainbowDB {
         logger.error("If you're certain no other process is using it, try removing the lock file");
       } else {
         logger.error("Failed to open database:", error);
+        logger.error(`No database found at ${dataDir}`);
+        logger.error("If you want to create a new database, start the ingestion step");
         logger.error(`Please ensure you have read permissions for ${dataDir}`);
       }
+      throw error;
+    }
+  }
+
+  /**
+   * Opens an existing database or creates a new one if it doesn't exist.
+   *
+   * This function:
+   * 1. Attempts to open an existing database using the open() method
+   * 2. If the database doesn't exist, creates a new one using the create() method
+   * 3. If opening fails for any other reason (e.g., permission issues), throws the error
+   *
+   * @param dataDir The directory path where the database is or should be located
+   * @returns An instance of ENSRainbowDB
+   * @throws Error if there are permission issues or other errors not related to database existence
+   */
+  public static async openOrCreate(dataDir: string): Promise<ENSRainbowDB> {
+    try {
+      // First try to open the existing database
+      return await ENSRainbowDB.open(dataDir);
+    } catch (error) {
+      // If database doesn't exist, create a new one
+      if (error instanceof Error && error.message.includes("Database is not open")) {
+        logger.info(`Database doesn't exist at ${dataDir}, creating a new one`);
+        return await ENSRainbowDB.create(dataDir);
+      }
+
+      // For any other error, propagate it upward
       throw error;
     }
   }
@@ -266,9 +329,20 @@ export class ENSRainbowDB {
   public async getHighestLabelSet(): Promise<number> {
     const labelSet = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET);
     if (labelSet === null) {
-      return 0;
+      throw new Error("Highest label set not found");
     }
     return parseNonNegativeInteger(labelSet);
+  }
+
+  /**
+   * Set the highest label set number directly
+   * @param labelSet The label set number to set
+   */
+  public async setHighestLabelSet(labelSet: number): Promise<void> {
+    if (!Number.isInteger(labelSet) || labelSet < 0) {
+      throw new Error(`Invalid label set value: ${labelSet}`);
+    }
+    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET, labelSet.toString());
   }
 
   /**
@@ -280,6 +354,30 @@ export class ENSRainbowDB {
     const newValue = currentValue + 1;
     await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET, newValue.toString());
     return newValue;
+  }
+
+  /**
+   * Get the namespace from the database
+   * @returns The namespace string
+   * @throws Error if the namespace is not set
+   */
+  public async getNamespace(): Promise<string> {
+    const namespace = await this.get(SYSTEM_KEY_NAMESPACE);
+    if (namespace === null) {
+      throw new Error("Database namespace is null");
+    }
+    return namespace;
+  }
+
+  /**
+   * Set the namespace in the database
+   * @param namespace The namespace string to set
+   */
+  public async setNamespace(namespace: string): Promise<void> {
+    if (!namespace) {
+      throw new Error("Namespace cannot be empty");
+    }
+    await this.db.put(SYSTEM_KEY_NAMESPACE, namespace);
   }
 
   /**
@@ -318,7 +416,7 @@ export class ENSRainbowDB {
    * @returns The label as a string if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getLabel(labelHash: ByteArray): Promise<Label | null> {
+  public async getLabel(labelHash: ByteArray): Promise<{ labelSet: number; label: string } | null> {
     // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
     if (!isRainbowRecordKey(labelHash)) {
       throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
@@ -334,8 +432,7 @@ export class ENSRainbowDB {
     // if (!label.includes(':')) {
     //   logger.warn(`Label with missing set prefix found: "${label}"`);
     // }
-
-    return label;
+    return splitLabelString(label);
   }
 
   /**
@@ -469,8 +566,10 @@ export class ENSRainbowDB {
     const isLiteMode = options.lite === true;
 
     logger.info(`Starting database validation${isLiteMode ? " (lite mode)" : ""}...`);
-    // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
 
+    // --- Basic Checks (Run in both Lite and Full mode) ---
+
+    // 1. Check Ingestion Status
     let ingestionStatus: IngestionStatus;
     try {
       ingestionStatus = await this.getIngestionStatus();
@@ -497,6 +596,7 @@ export class ENSRainbowDB {
       return false;
     }
 
+    // 2. Check Schema Version
     try {
       await this.validateSchemaVersion();
     } catch (error) {
@@ -504,94 +604,180 @@ export class ENSRainbowDB {
       return false;
     }
 
-    //TODO should we validate if the count is TOTAL_EXPECTED_RECORDS?
+    // 3. Check Namespace Existence
+    try {
+      const namespace = await this.getNamespace();
+      if (namespace === null) {
+        const errorMsg = generatePurgeErrorMessage("Database is missing the namespace identifier.");
+        logger.error(errorMsg);
+        return false;
+      }
+      logger.info(`Namespace verified: ${namespace}`);
+    } catch (error) {
+      const errorMsg = generatePurgeErrorMessage(`Error checking namespace: ${error}`);
+      logger.error(errorMsg);
+      return false;
+    }
+
+    // 4. Check Highest Label Set Existence and Validity
+    let highestLabelSet: number;
+    try {
+      highestLabelSet = await this.getHighestLabelSet();
+      logger.info(`Highest label set verified: ${highestLabelSet}`);
+    } catch (error) {
+      // getHighestLabelSet already throws a clear error if value is invalid
+      const errorMsg = generatePurgeErrorMessage(`Error checking highest label set: ${error}`);
+      logger.error(errorMsg);
+      return false;
+    }
+
+    // 5. Check Precalculated Count Existence (even in lite mode, the key should exist)
+    try {
+      const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+      // Only log the count if we pass validation later
+    } catch (error) {
+      const errorMsg = generatePurgeErrorMessage(
+        `Database is in an invalid state: failed to get precalculated rainbow record count key: ${error}`,
+      );
+      logger.error(errorMsg);
+      return false;
+    }
+
+    // --- Lite Mode Completion ---
+    if (isLiteMode) {
+      // Lite mode passed basic checks
+      const precalculatedCount = await this.getPrecalculatedRainbowRecordCount(); // Already checked existence
+      logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
+      logger.info("\nLite validation successful! Basic checks passed.");
+      return true;
+    }
+
+    // --- Full Validation (Requires iterating through records) ---
+    logger.info("Starting full validation (iterating through records)...");
 
     let rainbowRecordCount = 0;
     let validHashes = 0;
     let invalidHashes = 0;
     let hashMismatches = 0;
+    let invalidLabelFormats = 0;
+    let labelSetMismatches = 0;
 
-    // In lite mode, just verify we can get the precalculated rainbow record count
-    if (isLiteMode) {
-      try {
-        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
-        logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
-        return true;
-      } catch (error) {
-        const errorMsg = generatePurgeErrorMessage(
-          `Database is in an invalid state: failed to get precalculated rainbow record count: ${error}`,
-        );
-        logger.error(errorMsg);
-        return false;
+    for await (const [key, value] of this.db.iterator()) {
+      // Skip keys not associated with rainbow records
+      if (isSystemKey(key)) {
+        continue;
       }
-    } else {
-      // Full validation of each key-value pair
-      for await (const [key, value] of this.db.iterator()) {
-        // Skip keys not associated with rainbow records
-        if (isSystemKey(key)) {
-          continue;
-        }
-        rainbowRecordCount++;
-        // Verify key is a valid labelHash by converting it to hex string
-        const keyHex = `0x${Buffer.from(key).toString("hex")}` as Hex;
+      rainbowRecordCount++;
+
+      // --- Key Validation (LabelHash Format) ---
+      const keyHex = `0x${Buffer.from(key).toString("hex")}` as Hex;
+      try {
+        labelHashToBytes(keyHex); // Ensures key is 32 bytes and valid hex
+        validHashes++;
+      } catch (e) {
+        logger.error(`Invalid labelHash key format: ${keyHex}`);
+        invalidHashes++;
+        continue; // Skip further checks for this invalid record
+      }
+
+      // --- Value Validation (Label Format & Set Number) ---
+      const firstColonIndex = value.indexOf(":");
+      let recordLabelSet: number | null = null;
+
+      // If there's no colon or it's the first character, the format is invalid
+      if (firstColonIndex <= 0) {
+        logger.error(`Invalid label format (missing set number prefix): "${value}"`);
+        invalidLabelFormats++;
+      } else {
+        // Try to parse using the splitLabelString function
         try {
-          labelHashToBytes(keyHex);
-          validHashes++;
-        } catch (e) {
-          logger.error(`Invalid labelHash key format: ${keyHex}`);
-          invalidHashes++;
-          continue;
-        }
-
-        // Verify hash matches label
-        const computedHash = labelHashToBytes(labelhash(value));
-        if (!byteArraysEqual(computedHash, key)) {
-          logger.error(
-            `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
-              computedHash,
-            ).toString("hex")}`,
-          );
-          hashMismatches++;
+          const result = splitLabelString(value);
+          recordLabelSet = result.labelSet;
+        } catch (error) {
+          logger.error(`Invalid label format: "${value}" - ${error}`);
+          invalidLabelFormats++;
         }
       }
 
-      // Verify precalculated rainbow record count
-      try {
-        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
-
-        if (precalculatedCount !== rainbowRecordCount) {
-          const errorMsg = generatePurgeErrorMessage(
-            `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
+      // Only proceed with label set comparison if the format was valid
+      if (recordLabelSet !== null) {
+        if (recordLabelSet > highestLabelSet) {
+          logger.error(
+            `Label set mismatch for label "${value}": record set ${recordLabelSet} > highest set ${highestLabelSet}`,
           );
-          logger.error(errorMsg);
-          return false;
+          labelSetMismatches++;
         }
-        logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
-      } catch (error) {
+      }
+
+      // --- Key-Value Validation (Hash Match) ---
+      const actualLabel = value.substring(firstColonIndex + 1);
+      const computedHash = labelHashToBytes(labelhash(actualLabel));
+      if (!byteArraysEqual(computedHash, key)) {
+        logger.error(
+          `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
+            computedHash,
+          ).toString("hex")}`,
+        );
+        hashMismatches++;
+      }
+    }
+
+    // --- Final Count Verification ---
+    let precalculatedCount: number | undefined;
+    try {
+      precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+
+      if (precalculatedCount !== rainbowRecordCount) {
         const errorMsg = generatePurgeErrorMessage(
-          `Error verifying precalculated rainbow record count: ${error}`,
+          `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
         );
         logger.error(errorMsg);
-        return false;
+        // Don't return immediately, report all errors first
+      } else {
+        logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
       }
-
-      // Report results
-      logger.info("\nValidation Results:");
-      logger.info(`Total keys: ${rainbowRecordCount}`);
-      logger.info(`Valid rainbow records: ${validHashes}`);
-      logger.info(`Invalid rainbow records: ${invalidHashes}`);
-      logger.info(`labelHash mismatches: ${hashMismatches}`);
-
-      // Return false if any validation errors were found
-      if (invalidHashes > 0 || hashMismatches > 0) {
-        const errorMsg = generatePurgeErrorMessage("Validation failed! See errors above.");
-        logger.error(errorMsg);
-        return false;
-      }
-
-      logger.info("\nValidation successful! No errors found.");
-      return true;
+    } catch (error) {
+      // Should not happen due to early check, but handle defensively
+      const errorMsg = generatePurgeErrorMessage(
+        `Error verifying precalculated rainbow record count: ${error}`,
+      );
+      logger.error(errorMsg);
+      // Don't return immediately, report all errors first
     }
+
+    // --- Report Results ---
+    logger.info("\nValidation Results:");
+    logger.info(`Total rainbow records iterated: ${rainbowRecordCount}`);
+    logger.info(`Valid labelHash keys: ${validHashes}`);
+    logger.info(`Invalid labelHash keys: ${invalidHashes}`);
+    logger.info(`Labels with hash mismatches: ${hashMismatches}`);
+    logger.info(`Labels with invalid format/set prefix: ${invalidLabelFormats}`);
+    logger.info(`Labels with set number > highest set: ${labelSetMismatches}`);
+    if (precalculatedCount !== undefined && precalculatedCount !== rainbowRecordCount) {
+      logger.error(
+        `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
+      );
+    }
+
+    // --- Determine Final Outcome ---
+    const hasErrors =
+      precalculatedCount === undefined || // Error if we couldn't get the precalculated count
+      invalidHashes > 0 ||
+      hashMismatches > 0 ||
+      invalidLabelFormats > 0 ||
+      labelSetMismatches > 0 ||
+      (precalculatedCount !== undefined && precalculatedCount !== rainbowRecordCount); // Check count mismatch if count was retrieved
+
+    if (hasErrors) {
+      const errorMsg = generatePurgeErrorMessage(
+        "Full validation failed! See errors above. Database is inconsistent.",
+      );
+      logger.error(errorMsg);
+      return false;
+    }
+
+    logger.info("\nFull validation successful! No errors found.");
+    return true;
   }
 
   /**
@@ -639,9 +825,21 @@ export class ENSRainbowDB {
     return count;
   }
 
-  public async addRainbowRecord(label: string) {
+  /**
+   * Adds a rainbow record to the database.
+   *
+   * @param label The label to add (without label set prefix)
+   * @param labelSet The label set number to associate with this label
+   * @throws Error if labelSet is invalid
+   */
+  public async addRainbowRecord(label: string, labelSet: number): Promise<void> {
+    // Validate label set is a non-negative integer
+    if (!Number.isInteger(labelSet) || labelSet < 0) {
+      throw new Error(`Invalid label set: ${labelSet} (must be a non-negative integer)`);
+    }
+
     const key = labelHashToBytes(labelhash(label));
-    await this.db.put(key, label);
+    await this.db.put(key, `${labelSet}:${label}`);
   }
 }
 

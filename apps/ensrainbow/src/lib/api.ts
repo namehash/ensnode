@@ -1,5 +1,5 @@
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
-import { StatusCode } from "@ensnode/ensrainbow-sdk";
+import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
@@ -27,25 +27,53 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     }),
   );
 
-  api.get("/v1/heal/:labelHash", async (c: HonoContext) => {
-    const labelHash = c.req.param("labelHash") as `0x${string}`;
-    // Parse the highest_label_set from query string if provided
-    const highestLabelSetParam = c.req.query("highest_label_set");
-    let highestLabelSet: number | undefined = undefined;
+  api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
+    const labelhash = c.req.param("labelhash") as `0x${string}`;
 
-    if (highestLabelSetParam !== undefined) {
+    // Parse the highest_label_set from query string if provided
+    const highestLabelSetParam = c.req.query("label_set");
+    const namespaceParam = c.req.query("namespace");
+
+    // Both parameters must be provided together or neither should be provided
+    if ((highestLabelSetParam === undefined) !== (namespaceParam === undefined)) {
+      logger.warn(
+        `Invalid parameters: both 'label_set' and 'namespace' must be provided together or neither should be provided`,
+      );
+      return c.json(
+        {
+          status: StatusCode.Error,
+          error: "Invalid parameters: both 'label_set' and 'namespace' must be provided together",
+          errorCode: ErrorCode.BadRequest,
+        },
+        400,
+      );
+    }
+
+    let labelSet: number | undefined = undefined;
+    let namespace: string | undefined = undefined;
+
+    if (highestLabelSetParam !== undefined && namespaceParam !== undefined) {
       const parsed = parseInt(highestLabelSetParam, 10);
       if (!isNaN(parsed) && parsed >= 0) {
-        highestLabelSet = parsed;
+        labelSet = parsed;
+        namespace = namespaceParam;
       } else {
-        logger.warn(`Invalid highest_label_set parameter: ${highestLabelSetParam}`);
+        logger.warn(`Invalid label_set parameter: ${highestLabelSetParam}`);
+        return c.json(
+          {
+            status: StatusCode.Error,
+            error: "Invalid label_set parameter: must be a non-negative integer",
+            errorCode: ErrorCode.BadRequest,
+          },
+          400,
+        );
       }
     }
 
     logger.debug(
-      `Healing request for labelHash: ${labelHash}, highest_label_set: ${highestLabelSet}`,
+      `Healing request for labelhash: ${labelhash}, label_set: ${labelSet}, namespace: ${namespace}`,
     );
-    const result = await server.heal(labelHash, highestLabelSet);
+    const result = await server.heal(labelhash, labelSet, namespace);
     logger.debug(`Heal result:`, result);
     return c.json(result, result.errorCode);
   });

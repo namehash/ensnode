@@ -26,6 +26,16 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     const highestLabelSet = await db.getHighestLabelSet();
     logger.info(`Current highest label set: ${highestLabelSet}`);
 
+    // Read and log the namespace
+    const namespace = await db.getNamespace();
+    if (namespace === null) {
+      logger.warn(
+        "Database namespace not set. This database may not have been initialized properly.",
+      );
+    } else {
+      logger.info(`Database namespace: ${namespace}`);
+    }
+
     const app = await createServer(db);
 
     const server = serve({
