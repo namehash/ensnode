@@ -30,6 +30,12 @@ export async function GET(request: NextRequest) {
     // get the optional LLM API key from the environment variable
     const llmApiKey = process.env.ANTHROPIC_API_KEY;
 
+    if (!llmApiKey) {
+      throw new Error(
+        "LLM API key is not set. Provide it as ANTHROPIC_API_KEY environment variable.",
+      );
+    }
+
     // get the query generator client for the given GQL API URL
     queryGeneratorClient = await getQueryGeneratorClient({
       ...generateQueryDto,
