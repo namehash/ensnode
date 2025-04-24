@@ -2,7 +2,7 @@ import {
   type GenerateQueryDto,
   type QueryGeneratorClient,
   getQueryGeneratorClient,
-} from "@ensnode/utils";
+} from "@/components/ai-query-generator";
 import { type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {

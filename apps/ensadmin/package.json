@@ -21,6 +21,8 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@gqlpt/adapter-base": "0.0.0-alpha.31",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/utils": "workspace:*",
@@ -43,6 +45,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "gqlpt": "0.0.0-alpha.31",
     "graphiql": "^3.8.3",
     "lucide-react": "^0.476.0",
     "next": "15.2.4",
