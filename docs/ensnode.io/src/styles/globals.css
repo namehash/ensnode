@@ -61,6 +61,12 @@
   }
 }
 
+.searchOverlay button[aria-label="Search"]{
+  opacity: 0;
+  position: absolute;
+  left: 0;
+}
+
 .header.sl-flex {
   width: 100%;
   max-width: 1440px;
