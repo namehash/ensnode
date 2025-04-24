@@ -61,7 +61,7 @@
   }
 }
 
-.searchOverlay button[aria-label="Search"]{
+.searchOverlay button[aria-label="Search"] {
   opacity: 0;
   position: absolute;
   left: 0;
