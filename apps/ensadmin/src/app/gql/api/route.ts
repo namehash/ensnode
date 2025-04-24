@@ -264,13 +264,39 @@ class AdapterAnthropic extends Adapter {
    * Based on https://github.com/rocket-connect/gqlpt/blob/18af9c9/packages/adapter-anthropic/src/index.ts#L32-L61
    */
   async sendText(text: string, conversationId?: string): Promise<AdapterResponse> {
-    let messages: Array<Anthropic.MessageParam> = [{ role: "user", content: text }];
+    let beforeText: string | undefined;
+    const splitPhrase = "And this plain text query:";
+
+    let messages: Array<Anthropic.MessageParam>;
+
+    if (text.includes(splitPhrase)) {
+      const splitIndex = text.indexOf(splitPhrase);
+      beforeText = text.substring(0, splitIndex);
+      text = text.substring(splitIndex);
+
+      messages = [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: beforeText,
+              cache_control: { type: "ephemeral" },
+            },
+            {
+              type: "text",
+              text: text,
+            },
+          ],
+        },
+      ];
+    } else {
+      messages = [{ role: "user", content: text }];
+    }
 
     if (conversationId && this.messageHistory.has(conversationId)) {
       messages = [...this.messageHistory.get(conversationId)!, ...messages];
     }
-
-    console.log("Sending messages to Anthropic", messages);
 
     const response = await this.anthropic.messages.create({
       // add system prompt if it was provided
