@@ -46,10 +46,10 @@ export async function GET(request: NextRequest) {
 
   // try to generate the query and variables
   try {
-    const generatedQuery = await queryGeneratorClient.generateQueryAndVariables(
+    const generatedQueryAndVariables = await queryGeneratorClient.generateQueryAndVariables(
       generateQueryDto.prompt,
     );
-    return Response.json({ generateQueryDto, generatedQuery });
+    return Response.json(generatedQueryAndVariables);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Query generation error: ${errorMessage}`);
@@ -59,6 +59,9 @@ export async function GET(request: NextRequest) {
 
 /** The max tokens to use per message */
 const MAX_TOKENS_PER_MESSAGE = 1024;
+
+/** The LLM temperature */
+const TEMPERATURE = 0.1;
 
 /** The system prompt to use for the LLM */
 const SYSTEM_PROMPT = `
@@ -111,6 +114,7 @@ async function getQueryGeneratorClient(
         model: Model.Claude35Sonnet,
         systemPrompt: SYSTEM_PROMPT,
         maxTokensPerMessage: MAX_TOKENS_PER_MESSAGE,
+        temperature: TEMPERATURE,
       }),
     });
 

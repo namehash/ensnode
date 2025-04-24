@@ -18,5 +18,5 @@ export default async function PonderGraphQLPage({ searchParams }: PageProps) {
 
   const url = new URL(`/ponder`, baseUrl).toString();
 
-  return <GraphiQLEditor url={url} />;
+  return <GraphiQLEditor url={url} aiQueryGeneratorEnabled={false} />;
 }
