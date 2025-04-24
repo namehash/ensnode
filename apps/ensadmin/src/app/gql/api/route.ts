@@ -29,9 +29,7 @@ export async function GET(request: NextRequest) {
     const llmApiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!llmApiKey) {
-      throw new Error(
-        "ANTHROPIC_API_KEY environment variable is required but has not been set.",
-      );
+      throw new Error("ANTHROPIC_API_KEY environment variable is required but has not been set.");
     }
 
     // get the query generator client for the given GQL API URL
