@@ -37,7 +37,7 @@ export default function InspectorPage() {
           <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-sm border">
             <h2 className="text-2xl font-semibold mb-6 inline-flex items-center gap-1">
               <span>ENS Protocol Inspector</span>
-              <span className="hidden xl:inline relative -top-1 bg-black w-fit h-fit p-[2.8px] rounded-[2.8px] flex-shrink-0 text-white not-italic font-semibold pb-0.5 text-[6.857px] leading-[7.619px] sm:text-[8.409px] sm:leading-[9.343px] select-none">
+              <span className="relative -top-1 bg-black w-fit h-fit p-[2.8px] rounded-[2.8px] flex-shrink-0 text-white not-italic font-semibold pb-0.5 text-[6.857px] leading-[7.619px] sm:text-[8.409px] sm:leading-[9.343px] select-none">
                 teaser
               </span>
             </h2>
