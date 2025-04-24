@@ -29,9 +29,7 @@ export async function GET(request: NextRequest) {
     const llmApiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!llmApiKey) {
-      throw new Error(
-        "LLM API key is not set. Provide it as ANTHROPIC_API_KEY environment variable.",
-      );
+      throw new Error("ANTHROPIC_API_KEY environment variable is required but has not been set.");
     }
 
     // get the query generator client for the given GQL API URL
@@ -66,13 +64,13 @@ const MAX_TOKENS_PER_MESSAGE = 1024;
 const SYSTEM_PROMPT = `
 You are a helpful assistant that generates GraphQL queries and variables.
 
-You will be given a prompt and a GQL API URL.
+You will be given a prompt and a GraphQL schema.
 
-You will generate a GraphQL query and variables that will be used to test the GQL API.
+You will generate a GraphQL query and variables that will be used to test the GraphQL API.
 
 Always respond with the GraphQL query and variables in JSON format.
 
-Always include operation name for each generated GraphQL query. Do not forget about it under any circumstances.
+Always include an operation name for each generated GraphQL query. Do not forget about it under any circumstances.
 
 Include useful comments in the generated GraphQL query to make it easier to understand.
 `;
@@ -110,7 +108,7 @@ async function getQueryGeneratorClient(
       url: options.gqlApiUrl.toString(),
       adapter: new AdapterAnthropic({
         apiKey: options.llmApiKey,
-        model: Model.Claude37Sonnet,
+        model: Model.Claude35Sonnet,
         systemPrompt: SYSTEM_PROMPT,
         maxTokensPerMessage: MAX_TOKENS_PER_MESSAGE,
       }),
@@ -260,6 +258,8 @@ class AdapterAnthropic extends Adapter {
     if (conversationId && this.messageHistory.has(conversationId)) {
       messages = [...this.messageHistory.get(conversationId)!, ...messages];
     }
+
+    console.log("Sending messages to Anthropic", messages);
 
     const response = await this.anthropic.messages.create({
       // add system prompt if it was provided
