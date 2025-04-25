@@ -49,7 +49,7 @@ const innovationSections: InnovationSectionProps[] = [
     sectionBackground: "bg-white",
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
-      imageOnBottomForColumnLayout: true,
+    imageOnBottomForColumnLayout: true,
     svgImage: <LostENSNamesImage styles="relative z-10 w-full h-full" />,
     designatedMobileImage: <img src={InfrastructureGapsMobileImage.src} alt="lost names" />,
   },
@@ -68,7 +68,7 @@ const innovationSections: InnovationSectionProps[] = [
     sectionBackground: "bg-gray-50",
     isTextOnTheLeft: false,
     mobileImageOnTop: false,
-      imageOnBottomForColumnLayout: true,
+    imageOnBottomForColumnLayout: true,
     svgImage: <ENSAdminImage styles="relative z-10 w-full h-full" />,
     designatedMobileImage: (
       <img src={ENSAdminDecentralizationMobileImage.src} alt="ENSAdmin decentralization" />
@@ -88,7 +88,7 @@ const innovationSections: InnovationSectionProps[] = [
     sectionBackground: "bg-white",
     isTextOnTheLeft: true,
     mobileImageOnTop: false,
-      imageOnBottomForColumnLayout: true,
+    imageOnBottomForColumnLayout: true,
     svgImage: <FasterLookupImage styles="relative z-10 w-full h-full" />,
     designatedMobileImage: (
       <img src={ProtocolInnovationsMobileImage.src} alt="20 times faster lookup" />
