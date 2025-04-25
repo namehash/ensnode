@@ -1,6 +1,6 @@
 {
   "name": "ensadmin",
-  "version": "0.22.1",
+  "version": "0.23.0",
   "private": true,
   "type": "module",
   "description": "Explore the ENS Protocol like never before",
@@ -21,9 +21,11 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/utils": "workspace:*",
+    "@gqlpt/adapter-base": "0.0.0-alpha.31",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",
     "@ponder/react": "catalog:",
@@ -43,6 +45,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "gqlpt": "0.0.0-alpha.31",
     "graphiql": "^3.8.3",
     "lucide-react": "^0.476.0",
     "next": "15.2.4",

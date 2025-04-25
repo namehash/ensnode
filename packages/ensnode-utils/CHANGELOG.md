@@ -1,5 +1,7 @@
 # @ensnode/utils
 
+## 0.23.0
+
 ## 0.22.1
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # ensindexer
 
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.23.0
+  - @ensnode/utils@0.23.0
+  - @ensnode/ensrainbow-sdk@0.23.0
+  - @ensnode/ponder-metadata@0.23.0
+  - @ensnode/ponder-schema@0.23.0
+  - @ensnode/ponder-subgraph@0.23.0
+
 ## 0.22.1
 
 ### Patch Changes

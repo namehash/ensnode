@@ -1,5 +1,7 @@
 # @ensnode/ponder-schema
 
+## 0.23.0
+
 ## 0.22.1
 
 ## 0.22.0

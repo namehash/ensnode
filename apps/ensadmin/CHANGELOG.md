@@ -1,5 +1,18 @@
 # ensadmin
 
+## 0.23.0
+
+### Minor Changes
+
+- [#665](https://github.com/namehash/ensnode/pull/665) [`8b5f360`](https://github.com/namehash/ensnode/commit/8b5f360536bdb1fdf8e958745a70e2e789d1012f) Thanks [@tk-o](https://github.com/tk-o)! - Introducing ai-query-generator integration to ENSAdmin API.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.23.0
+  - @ensnode/ponder-metadata@0.23.0
+  - @ensnode/ponder-schema@0.23.0
+
 ## 0.22.1
 
 ### Patch Changes
