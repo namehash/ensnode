@@ -188,8 +188,10 @@ export default {
         address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
         startBlock: 110393959,
       },
-      Resolver: {
-        ...ResolverConfig,
+      ThreeDNSResolver: {
+        abi: ResolverConfig.abi,
+        // NOTE: 3DNSToken on Optimism has a hardcoded protocol-wide Resolver at this address
+        address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
         startBlock: 110393959,
       },
     },
@@ -207,8 +209,10 @@ export default {
         address: "0xbb7b805b257d7c76ca9435b3ffe780355e4c4b17",
         startBlock: 17522624,
       },
-      Resolver: {
-        ...ResolverConfig,
+      ThreeDNSResolver: {
+        abi: ResolverConfig.abi,
+        // NOTE: 3DNSToken on Base has a hardcoded protocol-wide Resolver at this address
+        address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
         startBlock: 17522624,
       },
     },

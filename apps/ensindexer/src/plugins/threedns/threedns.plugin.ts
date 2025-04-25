@@ -38,12 +38,13 @@ export const config = createConfig({
       network: networkConfigForContract(base, baseContracts.ThreeDNSToken),
       abi: baseContracts.ThreeDNSToken.abi,
     },
-    Resolver: {
-      network: {
-        ...networkConfigForContract(optimism, optimismContracts.Resolver),
-        ...networkConfigForContract(base, baseContracts.Resolver),
-      },
-      abi: optimismContracts.Resolver.abi,
+    [namespace("ThreeDNSResolverOptimism")]: {
+      network: networkConfigForContract(optimism, optimismContracts.ThreeDNSResolver),
+      abi: optimismContracts.ThreeDNSResolver.abi,
+    },
+    [namespace("ThreeDNSResolverBase")]: {
+      network: networkConfigForContract(base, baseContracts.ThreeDNSResolver),
+      abi: baseContracts.ThreeDNSResolver.abi,
     },
   },
 });
@@ -55,8 +56,7 @@ export const activate = activateHandlers({
   registrarManagedName: "eth",
   namespace,
   handlers: [
-    import("./handlers/ThreeDNSTokenOptimism"),
-    import("./handlers/ThreeDNSTokenBase"),
-    import("../shared/Resolver"),
+    import("./handlers/ThreeDNSOptimism"), //
+    import("./handlers/ThreeDNSBase"),
   ],
 });

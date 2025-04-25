@@ -53,4 +53,11 @@ export const ThreeDNSToken = [
     outputs: [{ type: "string", name: "" }],
     stateMutability: "view",
   },
+  {
+    type: "function",
+    name: "resolver",
+    inputs: [{ type: "bytes32", name: "node" }],
+    outputs: [{ type: "address", name: "" }],
+    stateMutability: "view",
+  },
 ] as const;
