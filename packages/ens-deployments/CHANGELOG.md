@@ -1,5 +1,13 @@
 # @ensnode/ens-deployments
 
+## 0.24.0
+
+### Minor Changes
+
+- [#662](https://github.com/namehash/ensnode/pull/662) [`ea87355`](https://github.com/namehash/ensnode/commit/ea87355e2893448bf53d586bef436ce20095b66d) Thanks [@shrugs](https://github.com/shrugs)! - update ens-test-env to read from env variables for deployment addresses
+
+## 0.23.0
+
 ## 0.22.1
 
 ## 0.22.0
