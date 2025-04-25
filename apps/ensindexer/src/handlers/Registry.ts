@@ -180,15 +180,12 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
         }
 
         // log DomainEvent
-        await context.db
-          .insert(schema.newOwner)
-          .values({
-            ...sharedEventValues(context.network.chainId, event),
-            parentDomainId: parentNode,
-            domainId: node,
-            ownerId: owner,
-          })
-          .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+        await context.db.insert(schema.newOwner).values({
+          ...sharedEventValues(context.network.chainId, event),
+          parentDomainId: parentNode,
+          domainId: node,
+          ownerId: owner,
+        });
       },
     async handleTransfer({
       context,
@@ -213,14 +210,11 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
       }
 
       // log DomainEvent
-      await context.db
-        .insert(schema.transfer)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          domainId: node,
-          ownerId: owner,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.transfer).values({
+        ...sharedEventValues(context.network.chainId, event),
+        domainId: node,
+        ownerId: owner,
+      });
     },
 
     async handleNewTTL({
@@ -239,14 +233,11 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
       await context.db.update(schema.domain, { id: node }).set({ ttl });
 
       // log DomainEvent
-      await context.db
-        .insert(schema.newTTL)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          domainId: node,
-          ttl,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.newTTL).values({
+        ...sharedEventValues(context.network.chainId, event),
+        domainId: node,
+        ttl,
+      });
     },
 
     async handleNewResolver({
@@ -289,20 +280,17 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
       }
 
       // log DomainEvent
-      await context.db
-        .insert(schema.newResolver)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          domainId: node,
-          // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
-          // but there is never a resolver record created for the zeroAddress. so if you query the
-          // `resolver { id }` of a NewResolver event that set the resolver to zeroAddress
-          // ex: newResolver(id: "3745840-2") { id resolver {id} }
-          // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
-          // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
-          resolverId: isZeroResolver ? zeroAddress : resolverId,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.newResolver).values({
+        ...sharedEventValues(context.network.chainId, event),
+        domainId: node,
+        // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
+        // but there is never a resolver record created for the zeroAddress. so if you query the
+        // `resolver { id }` of a NewResolver event that set the resolver to zeroAddress
+        // ex: newResolver(id: "3745840-2") { id resolver {id} }
+        // you will receive a GraphQL type error. for subgraph compatibility we re-implement this
+        // behavior here, but it should be entirely avoided in a v2 restructuring of the schema.
+        resolverId: isZeroResolver ? zeroAddress : resolverId,
+      });
     },
   };
 };

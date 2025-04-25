@@ -47,14 +47,11 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       }
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.addrChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          addrId: address,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.addrChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        addrId: address,
+      });
     },
 
     async handleAddressChanged({
@@ -79,15 +76,12 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.multicoinAddrChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          coinType,
-          addr: newAddress,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.multicoinAddrChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        coinType,
+        addr: newAddress,
+      });
     },
 
     async handleNameChanged({
@@ -108,14 +102,11 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.nameChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          name,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        name,
+      });
     },
 
     async handleABIChanged({
@@ -136,14 +127,11 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.abiChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          contentType,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.abiChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        contentType,
+      });
     },
 
     async handlePubkeyChanged({
@@ -164,15 +152,12 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.pubkeyChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          x,
-          y,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.pubkeyChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        x,
+        y,
+      });
     },
 
     async handleTextChanged({
@@ -201,19 +186,16 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.textChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          key,
-          // ponder's (viem's) event parsing produces empty string for some TextChanged events
-          // (which is correct) but the subgraph records null for these instances, so we coalesce
-          // falsy strings to null for compatibility
-          // ex: last TextChanged in tx 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
-          value: value || null,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.textChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        key,
+        // ponder's (viem's) event parsing produces empty string for some TextChanged events
+        // (which is correct) but the subgraph records null for these instances, so we coalesce
+        // falsy strings to null for compatibility
+        // ex: last TextChanged in tx 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
+        value: value || null,
+      });
     },
 
     async handleContenthashChanged({
@@ -233,14 +215,11 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.contenthashChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          hash,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.contenthashChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        hash,
+      });
     },
 
     async handleInterfaceChanged({
@@ -259,15 +238,12 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.interfaceChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          interfaceID,
-          implementer,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.interfaceChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        interfaceID,
+        implementer,
+      });
     },
 
     async handleAuthorisationChanged({
@@ -292,17 +268,14 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.authorisationChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          owner,
-          target,
-          // NOTE: the spelling difference is kept for subgraph backwards-compatibility
-          isAuthorized: isAuthorised,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.authorisationChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        owner,
+        target,
+        // NOTE: the spelling difference is kept for subgraph backwards-compatibility
+        isAuthorized: isAuthorised,
+      });
     },
 
     async handleVersionChanged({
@@ -334,14 +307,11 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
 
       // log ResolverEvent
-      await context.db
-        .insert(schema.versionChanged)
-        .values({
-          ...sharedEventValues(context.network.chainId, event),
-          resolverId: id,
-          version: newVersion,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.versionChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        version: newVersion,
+      });
     },
 
     async handleDNSRecordChanged({

@@ -95,6 +95,7 @@ export default function ({
       },
     });
   });
+
   ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewedByController({ context, event });
   });

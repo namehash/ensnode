@@ -18,5 +18,5 @@ export default async function SubgraphGraphQLPage({ searchParams }: PageProps) {
 
   const url = new URL(`/subgraph`, baseUrl).toString();
 
-  return <GraphiQLEditor url={url} />;
+  return <GraphiQLEditor url={url} aiQueryGeneratorEnabled={true} />;
 }

@@ -1,5 +1,91 @@
 # ensrainbow
 
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.23.0
+  - @ensnode/ensrainbow-sdk@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- Updated dependencies [[`8f494c4`](https://github.com/namehash/ensnode/commit/8f494c499ec1693d25d0c033158ac75cfdb88cc5)]:
+  - @ensnode/utils@0.22.1
+  - @ensnode/ensrainbow-sdk@0.22.1
+
+## 0.22.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.22.0
+  - @ensnode/ensrainbow-sdk@0.22.0
+
+## 0.21.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.21.0
+  - @ensnode/ensrainbow-sdk@0.21.0
+
+## 0.20.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.20.0
+  - @ensnode/ensrainbow-sdk@0.20.0
+
+## 0.19.4
+
+### Patch Changes
+
+- Updated dependencies [[`829d50f`](https://github.com/namehash/ensnode/commit/829d50f6b2ea1f49276a8cb614b082c80aea760d)]:
+  - @ensnode/utils@0.19.4
+  - @ensnode/ensrainbow-sdk@0.19.4
+
+## 0.19.3
+
+### Patch Changes
+
+- Updated dependencies [[`387c7c2`](https://github.com/namehash/ensnode/commit/387c7c24c5a7e76c2145799962b3537ed000b6c4)]:
+  - @ensnode/utils@0.19.3
+  - @ensnode/ensrainbow-sdk@0.19.3
+
+## 0.19.2
+
+### Patch Changes
+
+- Updated dependencies [[`396607e`](https://github.com/namehash/ensnode/commit/396607e08532e22b2367b2b4b1a2962983924e81)]:
+  - @ensnode/utils@0.19.2
+  - @ensnode/ensrainbow-sdk@0.19.2
+
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.19.1
+  - @ensnode/ensrainbow-sdk@0.19.1
+
+## 0.19.0
+
+### Minor Changes
+
+- [#597](https://github.com/namehash/ensnode/pull/597) [`3758d7e`](https://github.com/namehash/ensnode/commit/3758d7e644a2d477b922ccd72af5522440846c65) Thanks [@shrugs](https://github.com/shrugs)! - temp stop building v2 app image because no data image available
+
+- [#532](https://github.com/namehash/ensnode/pull/532) [`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be) Thanks [@shrugs](https://github.com/shrugs)! - the great naming terminology refactor
+
+### Patch Changes
+
+- Updated dependencies [[`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be)]:
+  - @ensnode/ensrainbow-sdk@0.19.0
+  - @ensnode/utils@0.19.0
+
 ## 0.18.0
 
 ### Minor Changes

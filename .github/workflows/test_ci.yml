@@ -63,13 +63,13 @@ jobs:
       - name: Run Ponder runtime integrity checks
         working-directory: apps/ensindexer
         env:
-          ACTIVE_PLUGINS: eth,base,linea
+          ACTIVE_PLUGINS: subgraph,basenames,lineanames
           RPC_URL_1: https://eth.drpc.org
           RPC_URL_8453: https://base.drpc.org
           RPC_URL_59144: https://linea.drpc.org
           RUNTIME_CHECK_TIMEOUT_SECONDS: 10
         run: |
-          pnpm dev -vv &
+          pnpm dev --disable-ui -vv &
           PID=$!
           sleep $RUNTIME_CHECK_TIMEOUT_SECONDS
           if ps -p $PID > /dev/null; then
