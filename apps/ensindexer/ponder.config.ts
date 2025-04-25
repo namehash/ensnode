@@ -107,6 +107,4 @@ setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
 ////////
 
-console.log(JSON.stringify(ponderConfig));
-
 export default ponderConfig;

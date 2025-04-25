@@ -17,7 +17,6 @@ export const pluginName = PluginName.ThreeDNS;
 export const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase];
 
 // extract the chain and contract configs for root Datasource in order to build ponder config
-const { chain: root } = MERGED_ENS_DEPLOYMENT[DatasourceName.Root];
 const { chain: optimism, contracts: optimismContracts } =
   MERGED_ENS_DEPLOYMENT[DatasourceName.ThreeDNSOptimism];
 const { chain: base, contracts: baseContracts } =
@@ -27,8 +26,6 @@ const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({
   networks: {
-    // include root so that this plugin can be run independently
-    ...networksConfigForChain(root),
     ...networksConfigForChain(optimism),
     ...networksConfigForChain(base),
   },

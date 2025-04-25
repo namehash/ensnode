@@ -194,8 +194,8 @@ export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>
 ) {
   return {
     [chain.id.toString()]: {
-      ...contractConfig,
-      ...constrainContractBlockrange(contractConfig.startBlock),
+      address: contractConfig.address, // provide per-network address if available
+      ...constrainContractBlockrange(contractConfig.startBlock), // per-network blockrange
     },
   };
 }

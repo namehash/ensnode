@@ -1,11 +1,12 @@
 import type { Event } from "ponder:registry";
 import { DeepMergeBuiltInMetaData, deepmergeCustom } from "deepmerge-ts";
-import { PublicClient } from "viem";
+import { Abi, PublicClient } from "viem";
 
 import { Blockrange } from "@/lib/types";
 import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
 import { DEFAULT_ENSRAINBOW_URL, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
+import { mergeAbis } from "ponder";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -217,26 +218,31 @@ export const createEnsRainbowVersionFetcher = () => {
  */
 const mergePonderConfigsWithResolverBlockrange = deepmergeCustom({
   enableImplicitDefaultMerging: true,
-  // metaDataUpdater injects `keyPath` into `meta`
-  // https://github.com/RebeccaStevens/deepmerge-ts/blob/HEAD/docs/deepmergeCustom.md
+  // this metaDataUpdater implementation injects `keyPath` into `meta`
+  // via: https://github.com/RebeccaStevens/deepmerge-ts/blob/HEAD/docs/deepmergeCustom.md
   metaDataUpdater: (previousMeta: any, metaMeta: any) => {
     if (previousMeta === undefined) {
       if (metaMeta.key === undefined) {
         return { keyPath: [] };
       }
-      return { keyPath: [metaMeta.key] };
+      return { ...metaMeta, keyPath: [metaMeta.key] };
     }
-    if (metaMeta.key === undefined) {
-      return previousMeta;
-    }
+    if (metaMeta.key === undefined) return previousMeta;
     return {
       ...metaMeta,
       keyPath: [...(previousMeta as any).keyPath, metaMeta.key],
     };
   },
+  mergeArrays(values, utils, meta) {
+    // if merging any `abi` key, use viem#mergeAbi to avoid duplicates
+    if (meta !== undefined && meta.key === "abi") {
+      return mergeAbis(values as unknown as Abi[]);
+    }
+  },
   mergeOthers: (values, utils, meta) => {
+    // matches keyPath = [ 'contracts', 'Resolver', 'networks', '1', 'startBlock' ]
     if (
-      meta !== undefined &&
+      meta &&
       meta.keyPath.length === 5 && // check depth
       meta.keyPath[0] === "contracts" &&
       meta.keyPath[1] === "Resolver" &&
@@ -247,8 +253,9 @@ const mergePonderConfigsWithResolverBlockrange = deepmergeCustom({
       return Math.min(...(values as unknown as number[]));
     }
 
+    // matches keyPath = [ 'contracts', 'Resolver', 'networks', '1', 'endBlock' ]
     if (
-      meta !== undefined &&
+      meta &&
       meta.keyPath.length === 5 && // check depth
       meta.keyPath[0] === "contracts" &&
       meta.keyPath[1] === "Resolver" &&
