@@ -62,27 +62,27 @@ app.use("/", async (ctx) => {
 });
 
 // use ENSNode middleware at /metadata
-// app.get(
-//   "/metadata",
-//   ponderMetadata({
-//     app: {
-//       name: packageJson.name,
-//       version: packageJson.version,
-//     },
-//     env: {
-//       ACTIVE_PLUGINS: getRequestedPluginNames().join(","),
-//       DATABASE_SCHEMA: ponderDatabaseSchema(),
-//       ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
-//     },
-//     db,
-//     query: {
-//       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
-//       prometheusMetrics: fetchPrometheusMetrics,
-//       ensRainbowVersion: fetchEnsRainbowVersion,
-//     },
-//     publicClients,
-//   }),
-// );
+app.get(
+  "/metadata",
+  ponderMetadata({
+    app: {
+      name: packageJson.name,
+      version: packageJson.version,
+    },
+    env: {
+      ACTIVE_PLUGINS: getRequestedPluginNames().join(","),
+      DATABASE_SCHEMA: ponderDatabaseSchema(),
+      ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
+    },
+    db,
+    query: {
+      firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
+      prometheusMetrics: fetchPrometheusMetrics,
+      ensRainbowVersion: fetchEnsRainbowVersion,
+    },
+    publicClients,
+  }),
+);
 
 // use ponder client support
 app.use("/sql/*", client({ db, schema }));
@@ -91,50 +91,50 @@ app.use("/sql/*", client({ db, schema }));
 app.use("/ponder", ponderGraphQL({ db, schema }));
 
 // use our custom graphql middleware at /subgraph
-// app.use(
-//   "/subgraph",
-//   subgraphGraphQL({
-//     db,
-//     graphqlSchema: buildSubgraphGraphQLSchema({
-//       schema,
-//       // provide the schema with ponder's internal metadata to power _meta
-//       metadataProvider: makePonderMetdataProvider({ db, publicClients }),
-//       // describes the polymorphic (interface) relationships in the schema
-//       polymorphicConfig: {
-//         types: {
-//           DomainEvent: [
-//             schema.transfer,
-//             schema.newOwner,
-//             schema.newResolver,
-//             schema.newTTL,
-//             schema.wrappedTransfer,
-//             schema.nameWrapped,
-//             schema.nameUnwrapped,
-//             schema.fusesSet,
-//             schema.expiryExtended,
-//           ],
-//           RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
-//           ResolverEvent: [
-//             schema.addrChanged,
-//             schema.multicoinAddrChanged,
-//             schema.nameChanged,
-//             schema.abiChanged,
-//             schema.pubkeyChanged,
-//             schema.textChanged,
-//             schema.contenthashChanged,
-//             schema.interfaceChanged,
-//             schema.authorisationChanged,
-//             schema.versionChanged,
-//           ],
-//         },
-//         fields: {
-//           "Domain.events": "DomainEvent",
-//           "Registration.events": "RegistrationEvent",
-//           "Resolver.events": "ResolverEvent",
-//         },
-//       },
-//     }),
-//   }),
-// );
+app.use(
+  "/subgraph",
+  subgraphGraphQL({
+    db,
+    graphqlSchema: buildSubgraphGraphQLSchema({
+      schema,
+      // provide the schema with ponder's internal metadata to power _meta
+      metadataProvider: makePonderMetdataProvider({ db, publicClients }),
+      // describes the polymorphic (interface) relationships in the schema
+      polymorphicConfig: {
+        types: {
+          DomainEvent: [
+            schema.transfer,
+            schema.newOwner,
+            schema.newResolver,
+            schema.newTTL,
+            schema.wrappedTransfer,
+            schema.nameWrapped,
+            schema.nameUnwrapped,
+            schema.fusesSet,
+            schema.expiryExtended,
+          ],
+          RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+          ResolverEvent: [
+            schema.addrChanged,
+            schema.multicoinAddrChanged,
+            schema.nameChanged,
+            schema.abiChanged,
+            schema.pubkeyChanged,
+            schema.textChanged,
+            schema.contenthashChanged,
+            schema.interfaceChanged,
+            schema.authorisationChanged,
+            schema.versionChanged,
+          ],
+        },
+        fields: {
+          "Domain.events": "DomainEvent",
+          "Registration.events": "RegistrationEvent",
+          "Resolver.events": "ResolverEvent",
+        },
+      },
+    }),
+  }),
+);
 
 export default app;
