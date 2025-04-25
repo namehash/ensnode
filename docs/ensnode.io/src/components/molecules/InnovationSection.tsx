@@ -85,7 +85,9 @@ export default function InnovationSection(props: InnovationSectionProps) {
         </div>
         {props.isTextOnTheLeft && <ImageSection {...props} displayStyles="sm:flex" />}
         {!props.isTextOnTheLeft && props.imageOnBottomForColumnLayout && (
-          <ImageSection {...props} displayStyles="sm:flex xl:hidden" />
+          <div className="w-full h-auto max-xl:max-w-[620px] hidden sm:flex xl:hidden">
+            {props.designatedMobileImage}
+          </div>
         )}
         {!props.mobileImageOnTop && (
           <div className="flex sm:hidden flex-row justify-center items-center w-full h-fit rounded-none bg-origin-border bg-center bg-no-repeat bg-contain flex-shrink-0">
