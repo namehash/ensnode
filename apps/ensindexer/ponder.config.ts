@@ -1,7 +1,7 @@
 import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
 import { type MergedTypes, getActivePlugins } from "@/lib/plugin-helpers";
 import {
-  deepMergeRecursive,
+  deepMergePonderConfigs,
   getEnsDeploymentChain,
   getGlobalBlockrange,
   getRequestedPluginNames,
@@ -61,9 +61,7 @@ const activePlugins = getActivePlugins(
 // merge the resulting configs into the config we return to Ponder
 const ponderConfig = activePlugins
   .map((plugin) => plugin.config)
-  .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as MergedPluginConfig;
-
-// TODO: need to ensure that for `Resolver` contract, the lowest value of startBlock is taken
+  .reduce((acc, val) => deepMergePonderConfigs(acc, val), {}) as MergedPluginConfig;
 
 // set the indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
@@ -108,5 +106,7 @@ setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
 ////////
+
+console.log(JSON.stringify(ponderConfig));
 
 export default ponderConfig;

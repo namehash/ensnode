@@ -1,3 +1,4 @@
+import { zeroAddress } from "viem";
 import { base, linea, mainnet, optimism } from "viem/chains";
 
 import { DatasourceName, type ENSDeployment } from "./lib/types";
@@ -15,7 +16,6 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 
-import { zeroAddress } from "viem";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
@@ -189,8 +189,7 @@ export default {
         startBlock: 110393959,
       },
       Resolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress,
+        ...ResolverConfig,
         startBlock: 110393959,
       },
     },
@@ -209,8 +208,7 @@ export default {
         startBlock: 17522624,
       },
       Resolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress,
+        ...ResolverConfig,
         startBlock: 17522624,
       },
     },

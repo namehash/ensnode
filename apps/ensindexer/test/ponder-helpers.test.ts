@@ -3,7 +3,7 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainContractBlockrange,
   createStartBlockByChainIdMap,
-  deepMergeRecursive,
+  deepMergePonderConfigs,
   getGlobalBlockrange,
   healReverseAddresses,
   parseEnsRainbowEndpointUrl,
@@ -282,7 +282,7 @@ describe("ponder helpers", () => {
     it("should deeply merge two objects", () => {
       const target = { a: 1, b: { c: 2 } };
       const source = { b: { d: 3 }, e: 4 };
-      const result = deepMergeRecursive(target, source);
+      const result = deepMergePonderConfigs(target, source);
       expect(result).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
     });
   });

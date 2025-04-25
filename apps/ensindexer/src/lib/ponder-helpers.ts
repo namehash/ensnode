@@ -1,5 +1,5 @@
 import type { Event } from "ponder:registry";
-import { merge as tsDeepMerge } from "ts-deepmerge";
+import { DeepMergeBuiltInMetaData, deepmergeCustom } from "deepmerge-ts";
 import { PublicClient } from "viem";
 
 import { Blockrange } from "@/lib/types";
@@ -211,19 +211,64 @@ export const createEnsRainbowVersionFetcher = () => {
   };
 };
 
-type AnyObject = { [key: string]: any };
+/**
+ * merges ponder configs, using the minimum value of `startBlock` and maximum value of `endBlock`
+ * for shared `Resolver` definitions to ensure that no Resolvers are left out.
+ */
+const mergePonderConfigsWithResolverBlockrange = deepmergeCustom({
+  enableImplicitDefaultMerging: true,
+  // metaDataUpdater injects `keyPath` into `meta`
+  // https://github.com/RebeccaStevens/deepmerge-ts/blob/HEAD/docs/deepmergeCustom.md
+  metaDataUpdater: (previousMeta: any, metaMeta: any) => {
+    if (previousMeta === undefined) {
+      if (metaMeta.key === undefined) {
+        return { keyPath: [] };
+      }
+      return { keyPath: [metaMeta.key] };
+    }
+    if (metaMeta.key === undefined) {
+      return previousMeta;
+    }
+    return {
+      ...metaMeta,
+      keyPath: [...(previousMeta as any).keyPath, metaMeta.key],
+    };
+  },
+  mergeOthers: (values, utils, meta) => {
+    if (
+      meta !== undefined &&
+      meta.keyPath.length === 5 && // check depth
+      meta.keyPath[0] === "contracts" &&
+      meta.keyPath[1] === "Resolver" &&
+      meta.keyPath[2] === "network" &&
+      meta.keyPath[4] === "startBlock"
+    ) {
+      // if so, do custom 'minimum startBlock' logic
+      return Math.min(...(values as unknown as number[]));
+    }
+
+    if (
+      meta !== undefined &&
+      meta.keyPath.length === 5 && // check depth
+      meta.keyPath[0] === "contracts" &&
+      meta.keyPath[1] === "Resolver" &&
+      meta.keyPath[2] === "network" &&
+      meta.keyPath[4] === "endBlock"
+    ) {
+      // if so, do custom 'maximum endBlock' logic
+      return Math.max(...(values as unknown as number[]));
+    }
+  },
+});
 
 /**
- * Deep merge two objects recursively.
- * @param target The target object to merge into.
- * @param source The source object to merge from.
- * @returns The merged object.
+ * Deep merges two ponder configs, casting to the correct type.
  */
-export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
-  target: T,
-  source: U,
-): T & U {
-  return tsDeepMerge(target, source) as T & U;
+export function deepMergePonderConfigs<
+  T extends { [key: string]: any },
+  U extends { [key: string]: any },
+>(target: T, source: U): T & U {
+  return mergePonderConfigsWithResolverBlockrange(target, source) as T & U;
 }
 
 /**
