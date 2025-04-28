@@ -1,9 +1,8 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { ENSDeployments } from "@ensnode/ens-deployments";
 import { type LabelHash } from "@ensnode/utils";
 import { makeSubdomainNode, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import { decodeEventLog, namehash, zeroAddress } from "viem";
+import { namehash, zeroAddress } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { upsertAccount } from "@/lib/db-helpers";
@@ -112,47 +111,23 @@ export default function ({
   });
 
   ponder.on(namespace("EARegistrarController:NameRegistered"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRegistered",
-      abi: ENSDeployments.mainnet.basenames.contracts.EARegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     await handleNameRegisteredByController({
       context,
-      event: { ...event, args: { ...args, cost: 0n } },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
   ponder.on(namespace("RegistrarController:NameRegistered"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRegistered",
-      abi: ENSDeployments.mainnet.basenames.contracts.RegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     await handleNameRegisteredByController({
       context,
-      event: { ...event, args: { ...args, cost: 0n } },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
   ponder.on(namespace("RegistrarController:NameRenewed"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRenewed",
-      abi: ENSDeployments.mainnet.basenames.contracts.RegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     await handleNameRenewedByController({
       context,
-      event: { ...event, args: { ...args, cost: 0n } },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 }
