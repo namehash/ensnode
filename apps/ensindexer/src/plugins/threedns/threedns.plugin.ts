@@ -30,21 +30,19 @@ export const config = createConfig({
     ...networksConfigForChain(base),
   },
   contracts: {
-    [namespace("ThreeDNSTokenOptimism")]: {
-      network: networkConfigForContract(optimism, optimismContracts.ThreeDNSToken),
+    [namespace("ThreeDNSToken")]: {
+      network: {
+        ...networkConfigForContract(optimism, optimismContracts.ThreeDNSToken),
+        ...networkConfigForContract(base, baseContracts.ThreeDNSToken),
+      },
       abi: optimismContracts.ThreeDNSToken.abi,
     },
-    [namespace("ThreeDNSTokenBase")]: {
-      network: networkConfigForContract(base, baseContracts.ThreeDNSToken),
-      abi: baseContracts.ThreeDNSToken.abi,
-    },
-    [namespace("ThreeDNSResolverOptimism")]: {
-      network: networkConfigForContract(optimism, optimismContracts.ThreeDNSResolver),
+    [namespace("ThreeDNSResolver")]: {
+      network: {
+        ...networkConfigForContract(optimism, optimismContracts.ThreeDNSResolver),
+        ...networkConfigForContract(base, baseContracts.ThreeDNSResolver),
+      },
       abi: optimismContracts.ThreeDNSResolver.abi,
-    },
-    [namespace("ThreeDNSResolverBase")]: {
-      network: networkConfigForContract(base, baseContracts.ThreeDNSResolver),
-      abi: baseContracts.ThreeDNSResolver.abi,
     },
   },
 });
@@ -55,8 +53,5 @@ export const activate = activateHandlers({
   // TODO: no longer necessary for this plugin, bad assumption...
   registrarManagedName: "eth",
   namespace,
-  handlers: [
-    import("./handlers/ThreeDNSOptimism"), //
-    import("./handlers/ThreeDNSBase"),
-  ],
+  handlers: [import("./handlers/ThreeDNSToken")],
 });

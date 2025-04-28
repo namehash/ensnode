@@ -20,15 +20,23 @@ import {
 import { Address, Hex, hexToBigInt, hexToBytes, labelhash } from "viem";
 
 /**
+ * Gets the `uri` for a given tokenId using the relevant ThreeDNSToken from `context`
+ */
+const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<string> => {
+  // ThreeDNSToken is network-specific in ponder multi-network usage
+  // https://ponder.sh/docs/indexing/read-contract-data#multiple-networks
+  return context.client.readContract({
+    abi: context.contracts["threedns/ThreeDNSToken"].abi,
+    address: context.contracts["threedns/ThreeDNSToken"].address,
+    functionName: "uri",
+    args: [tokenId],
+  });
+};
+
+/**
  * makes a set of shared handlers for a ThreeDNSToken contract
  */
-export const makeThreeDNSTokenHandlers = ({
-  pluginName,
-  getUriForTokenId,
-}: {
-  pluginName: PluginName;
-  getUriForTokenId: (context: Context, tokenId: bigint) => Promise<string>;
-}) => {
+export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginName }) => {
   const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {

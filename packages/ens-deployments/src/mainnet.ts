@@ -206,7 +206,7 @@ export default {
     contracts: {
       ThreeDNSToken: {
         abi: ThreeDNSToken,
-        address: "0xbb7b805b257d7c76ca9435b3ffe780355e4c4b17",
+        address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
         startBlock: 17522624,
       },
       ThreeDNSResolver: {
