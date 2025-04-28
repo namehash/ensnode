@@ -1,8 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { ENSDeployments } from "@ensnode/ens-deployments";
 import type { Node, PluginName } from "@ensnode/utils";
-import { type Address, Hash, type Hex, decodeEventLog } from "viem";
+import { type Address, Hash, type Hex } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
@@ -92,16 +91,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       context: Context;
       event: EventWithArgs<{ node: Node; name: string }>;
     }) {
-      // NOTE(name-null-bytes): manually decode args that may contain null bytes
-      const {
-        args: { node, name },
-      } = decodeEventLog({
-        eventName: "NameChanged",
-        abi: ENSDeployments.mainnet.root.contracts.Resolver.abi,
-        topics: event.log.topics,
-        data: event.log.data,
-      });
-
+      const { node, name } = event.args;
       if (hasNullByte(name)) return;
 
       const id = makeResolverId(event.log.address, node);

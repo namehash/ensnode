@@ -1,5 +1,14 @@
 # ensadmin
 
+## 0.24.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.24.0
+  - @ensnode/ponder-metadata@0.24.0
+  - @ensnode/ponder-schema@0.24.0
+
 ## 0.23.0
 
 ### Minor Changes
