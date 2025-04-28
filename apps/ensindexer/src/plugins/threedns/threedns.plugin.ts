@@ -16,7 +16,6 @@ import { PluginName } from "@ensnode/utils";
 export const pluginName = PluginName.ThreeDNS;
 export const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase];
 
-// extract the chain and contract configs for root Datasource in order to build ponder config
 const { chain: optimism, contracts: optimismContracts } =
   MERGED_ENS_DEPLOYMENT[DatasourceName.ThreeDNSOptimism];
 const { chain: base, contracts: baseContracts } =
@@ -49,9 +48,6 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   pluginName,
-  // the shared Registrar handler in this plugin indexes direct subnames of '.eth'
-  // TODO: no longer necessary for this plugin, bad assumption...
-  registrarManagedName: "eth",
   namespace,
   handlers: [import("./handlers/ThreeDNSToken")],
 });

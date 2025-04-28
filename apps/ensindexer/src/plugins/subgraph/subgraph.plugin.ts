@@ -61,8 +61,6 @@ export const config = createConfig({
 
 export const activate = activateHandlers({
   pluginName,
-  // the shared Registrar handler in this plugin indexes direct subnames of '.eth'
-  registrarManagedName: "eth",
   namespace,
   handlers: [
     import("./handlers/Registry"),

@@ -44,7 +44,9 @@ export const makePonderMetdataProvider = ({
   let publicClient = publicClients[ensDeploymentChainId];
   if (!publicClient) {
     const networkId = availableNetworkNames[0]!; // length check done above
-    console.warn(`No public client available for ${ensDeploymentChainId}, using ${networkId}.`);
+    console.warn(
+      `No public client available for chain '${ensDeploymentChainId}', using status of chain '${networkId}' to power 'Query._meta'.`,
+    );
     publicClient = publicClients[networkId]!; // must exist
   }
 

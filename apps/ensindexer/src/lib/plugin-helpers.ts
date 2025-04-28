@@ -8,7 +8,6 @@ import {
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "@/lib/ponder-helpers";
-import type { RegistrarManagedName } from "@/lib/types";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
 /**
@@ -139,7 +138,6 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
  */
 export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
   pluginName: PluginName;
-  registrarManagedName: RegistrarManagedName;
   namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
 

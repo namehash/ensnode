@@ -1,13 +1,14 @@
+import { DatasourceName } from "@ensnode/ens-deployments";
+
 import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
+import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { type MergedTypes, getActivePlugins } from "@/lib/plugin-helpers";
 import {
-  deepMergePonderConfigs,
   getEnsDeploymentChain,
   getGlobalBlockrange,
   getRequestedPluginNames,
   healReverseAddresses,
 } from "@/lib/ponder-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
 
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
@@ -61,7 +62,7 @@ const activePlugins = getActivePlugins(
 // merge the resulting configs into the config we return to Ponder
 const ponderConfig = activePlugins
   .map((plugin) => plugin.config)
-  .reduce((acc, val) => deepMergePonderConfigs(acc, val), {}) as MergedPluginConfig;
+  .reduce((acc, val) => mergePonderConfigs(acc, val), {}) as MergedPluginConfig;
 
 // set the indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
