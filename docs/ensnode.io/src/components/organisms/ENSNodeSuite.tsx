@@ -21,7 +21,7 @@ const appsSuite: {
       <img
         src={ENSAdmin3DImage.src}
         alt="ENSAdmin"
-        className="object-contain scale-125 sm:scale-[80%] lg:scale-150"
+        className="object-contain scale-125 min-[510px]:scale-[90%] sm:scale-[80%] lg:scale-150"
       />
     ),
     name: "ENSAdmin",
@@ -40,7 +40,7 @@ const appsSuite: {
       <img
         src={ENSIndexer3DImage.src}
         alt="ENSIndexer"
-        className="object-contain scale-125 sm:scale-[80%] lg:scale-150"
+        className="object-contain scale-125 min-[510px]:scale-[90%] sm:scale-[80%] lg:scale-150"
       />
     ),
     name: "ENSIndexer",
@@ -59,7 +59,7 @@ const appsSuite: {
       <img
         src={ENSRainbow3DImage.src}
         alt="ENSRainbow"
-        className="object-contain scale-125 sm:scale-[80%] lg:scale-150"
+        className="object-contain scale-125 min-[510px]:scale-[90%] sm:scale-[80%] lg:scale-150"
       />
     ),
     name: "ENSRainbow",

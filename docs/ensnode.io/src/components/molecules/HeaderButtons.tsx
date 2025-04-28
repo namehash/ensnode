@@ -10,7 +10,7 @@ export default function HeaderButtons() {
       <div className="hidden sm:flex items-center justify-end gap-1">
         <Button variant="ghost" asChild>
           <Link href="/docs/">
-            <p className="onScrollElement text-sm font-medium leading-5">Docs</p>
+            <p className="onScrollElement text-sm font-medium leading-6">Docs</p>
           </Link>
         </Button>
 

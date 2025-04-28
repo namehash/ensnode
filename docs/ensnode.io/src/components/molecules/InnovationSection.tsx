@@ -24,7 +24,7 @@ type ImageDisplayStyles = {
 const ImageSection = (props: InnovationSectionProps & ImageDisplayStyles) => (
   <div
     className={cc([
-      "relative hidden flex-row justify-center items-center w-full h-2/3 xl:h-full xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 max-w-2xl",
+      "relative hidden flex-row justify-center items-center w-full h-2/3 xl:h-full min-[680px]:w-3/4 xl:w-1/2 rounded-none bg-origin-border flex-shrink-0 max-w-2xl",
       props.displayStyles,
     ])}
   >
@@ -65,7 +65,7 @@ export default function InnovationSection(props: InnovationSectionProps) {
         <div className="flex flex-col gap-5 h-fit w-full max-w-3xl items-center xl:items-start xl:w-1/2 md:px-[72px] xl:px-0">
           <span className="w-fit flex flex-row flex-nowrap justify-center items-center gap-2 px-4 py-2 rounded-[20px] border-gray-300 border">
             {props.badgeIcon}
-            <p className="text-sm leading-5 font-medium text-center text-black">
+            <p className="text-sm leading-5 font-medium text-center xl:text-left text-black">
               {props.badgeText}
             </p>
           </span>
