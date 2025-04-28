@@ -1,8 +1,10 @@
 import { ponder } from "ponder:registry";
 
-import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
+
+import { makeRegistryHandlers } from "@/handlers/Registry";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { setupRootNode } from "@/lib/subgraph-helpers";
 
 export default function ({
   pluginName,

@@ -1,9 +1,11 @@
 import { ponder } from "ponder:registry";
-import { setupRootNode } from "@/handlers/Registry";
+
+import { PluginName } from "@ensnode/utils";
+
 import { makeResolverHandlers } from "@/handlers/Resolver";
 import { makeThreeDNSTokenHandlers } from "@/handlers/ThreeDNSToken";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/utils";
+import { setupRootNode } from "@/lib/subgraph-helpers";
 
 export default function ({
   pluginName,
@@ -13,12 +15,19 @@ export default function ({
   /// ThreeDNSToken Handlers
   ///
 
-  const { handleNewOwner, handleRegistrationCreated } = makeThreeDNSTokenHandlers({ pluginName });
+  const {
+    handleNewOwner, //
+    handleTransfer,
+    handleRegistrationCreated,
+    handleRegistrationExtended,
+  } = makeThreeDNSTokenHandlers({ pluginName });
 
   // register each handler on each contract
   ponder.on(namespace("ThreeDNSToken:setup"), setupRootNode);
   ponder.on(namespace("ThreeDNSToken:NewOwner"), handleNewOwner);
+  ponder.on(namespace("ThreeDNSToken:Transfer"), handleTransfer);
   ponder.on(namespace("ThreeDNSToken:RegistrationCreated"), handleRegistrationCreated);
+  ponder.on(namespace("ThreeDNSToken:RegistrationExtended"), handleRegistrationExtended);
 
   ///
   /// ThreeDNSResolver Handlers

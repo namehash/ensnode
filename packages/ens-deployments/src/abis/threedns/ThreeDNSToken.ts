@@ -60,4 +60,23 @@ export const ThreeDNSToken = [
     outputs: [{ type: "address", name: "" }],
     stateMutability: "view",
   },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "node",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "Transfer",
+    type: "event",
+  },
 ] as const;
