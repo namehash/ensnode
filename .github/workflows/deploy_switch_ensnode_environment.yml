@@ -47,3 +47,14 @@ jobs:
 
             # ENSRAINBOW
             redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
+    
+      - name: Slack Notification on Success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: "ENSNode Bot"
+          SLACK_ICON: "https://ensnode.io/favicon.svg"
+          SLACK_TITLE: "✅ Switch ENSNode environment completed"
+          SLACK_MESSAGE: "Environment successfully switched to ${{ env.TARGET_ENVIRONMENT }}"
+          SLACK_COLOR: good
