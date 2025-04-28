@@ -109,7 +109,7 @@ export default function ENSNodeSuite() {
                   <h3 className="self-stretch text-2xl leading-8 font-semibold text-black text-center">
                     {namehashApp.name}
                   </h3>
-                  <Balancer className="text-gray-500 text-lg leading-7 font-normal text-center">
+                  <Balancer className="min-[1245px]:max-[1405px]:max-w-[20ch] text-gray-500 text-lg leading-7 font-normal text-center">
                     {namehashApp.description}
                   </Balancer>
                 </div>

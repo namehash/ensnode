@@ -6,15 +6,15 @@ import MobileTelegramBanner from "../../assets/telegram_mobile_image.svg";
 
 export default function JoinTelegram() {
   return (
-    <div className="bg-telegram_bg max-w-[1216px] w-full h-fit flex flex-col min-[900px]:flex-row justify-center items-center flex-nowrap gap-10 min-[900px]:gap-5 min-[900px]:pl-20 min-[900px]:pr-5 pt-10 min-[900px]:pt-0 rounded-[20px] overflow-hidden">
-      <div className="w-4/5 h-fit flex flex-col flex-nowrap items-center min-[900px]:items-start justify-center gap-5 min-[900px]:py-5">
+    <div className="bg-telegram_bg max-w-[1216px] w-full h-fit flex flex-col min-[930px]:flex-row justify-center items-center flex-nowrap gap-10 min-[930px]:gap-5 min-[930px]:pl-20 min-[930px]:pr-5 pt-10 min-[930px]:pt-0 rounded-[20px] overflow-hidden">
+      <div className="w-4/5 h-fit flex flex-col flex-nowrap items-center min-[930px]:items-start justify-center gap-5 min-[930px]:py-5">
         <Balancer
           as="h2"
-          className="self-stretch text-3xl min-[900px]:text-4xl leading-9 min-[900px]:leading-10 font-bold text-black text-center min-[900px]:text-left"
+          className="self-stretch text-3xl min-[930px]:text-4xl leading-9 min-[930px]:leading-10 font-bold text-black text-center min-[930px]:text-left"
         >
           Become a part of our community in Telegram
         </Balancer>
-        <p className="text-lg leading-8 min-[900px]:leading-7 font-normal text-gray-500">
+        <p className="text-lg leading-8 min-[930px]:leading-7 font-normal text-gray-500">
           Run your own ENSNode
         </p>
         <Button asChild size="medium" variant="primary">
