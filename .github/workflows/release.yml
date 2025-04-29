@@ -191,3 +191,14 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Slack Notification on Success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: "ENSNode Bot"
+          SLACK_ICON: "https://ensnode.io/favicon.svg"
+          SLACK_TITLE: "✅ Release ENSNode completed"
+          SLACK_MESSAGE: "ENSNode new version released: v${{ steps.get-pr.outputs.version }}"
+          SLACK_COLOR: good
