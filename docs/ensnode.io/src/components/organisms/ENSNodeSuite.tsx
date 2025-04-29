@@ -44,7 +44,7 @@ const appsSuite: {
       />
     ),
     name: "ENSIndexer",
-    description: "Index multichain ENS data for ENSv2",
+    description: "Powerful multichain indexer for ENSv2",
     buttonData: {
       text: "View documentation",
       size: "medium",
