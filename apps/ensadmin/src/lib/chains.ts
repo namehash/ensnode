@@ -1,9 +1,10 @@
-import { base, holesky, linea, mainnet, sepolia } from "viem/chains";
+import { base, holesky, linea, mainnet, optimism, sepolia } from "viem/chains";
 
 const chains = {
   [mainnet.id]: mainnet,
   [sepolia.id]: sepolia,
   [holesky.id]: holesky,
+  [optimism.id]: optimism,
   [base.id]: base,
   [linea.id]: linea,
 } as const;
