@@ -100,6 +100,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.39.0
         version: 0.39.0
+      '@ensnode/ens-deployments':
+        specifier: workspace:*
+        version: link:../../packages/ens-deployments
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata
@@ -209,9 +212,6 @@ importers:
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 1.9.4
-      '@ensnode/ens-deployments':
-        specifier: workspace:*
-        version: link:../../packages/ens-deployments
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.2.0

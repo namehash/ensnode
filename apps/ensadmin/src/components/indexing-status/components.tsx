@@ -58,6 +58,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
   }
 
   const { networkIndexingStatusByChainId } = data.runtime;
+  const ensDeploymentChain = data.env.ENS_DEPLOYMENT_CHAIN;
 
   return (
     <div className="px-6">
@@ -69,11 +70,12 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
         </CardHeader>
 
         <CardContent className="flex flex-row gap-8">
-          {globalIndexingStatusViewModel(networkIndexingStatusByChainId).networkStatuses.map(
-            (networkStatus) => (
-              <NetworkIndexingStatsCard key={networkStatus.name} network={networkStatus} />
-            ),
-          )}
+          {globalIndexingStatusViewModel(
+            networkIndexingStatusByChainId,
+            ensDeploymentChain,
+          ).networkStatuses.map((networkStatus) => (
+            <NetworkIndexingStatsCard key={networkStatus.name} network={networkStatus} />
+          ))}
         </CardContent>
       </Card>
     </div>
@@ -279,7 +281,10 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
 
       <main className="grid gap-4">
         <IndexingTimeline
-          {...globalIndexingStatusViewModel(data.runtime.networkIndexingStatusByChainId)}
+          {...globalIndexingStatusViewModel(
+            data.runtime.networkIndexingStatusByChainId,
+            data.env.ENS_DEPLOYMENT_CHAIN,
+          )}
         />
       </main>
     </section>

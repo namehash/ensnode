@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@ensnode/ens-deployments": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/utils": "workspace:*",
@@ -60,7 +61,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/ens-deployments": "workspace:*",
     "@eslint/eslintrc": "^3",
     "@types/node": "^22",
     "@types/react": "^18",

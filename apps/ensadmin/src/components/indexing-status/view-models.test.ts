@@ -50,7 +50,7 @@ describe("View Models", () => {
       const mainnetStatus = ensNodeNetworkStatus[mainnet.id];
       const baseStatus = ensNodeNetworkStatus[base.id];
 
-      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus)).toEqual({
+      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus, "mainnet")).toEqual({
         networkStatuses: [
           {
             name: "Ethereum",
@@ -96,7 +96,7 @@ describe("View Models", () => {
     it("should return the correct view model", () => {
       expect(
         networkIndexingStatusViewModel(
-          `${base.id}`,
+          `${base.name}`,
           {
             latestSafeBlock: {
               number: 333,

@@ -1,7 +1,7 @@
 import type { EnsNode } from "@/components/ensnode";
-import { getChainName } from "@/lib/chains";
+import { getChainById } from "@/lib/chains";
+import { type ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { fromUnixTime } from "date-fns";
-
 /**
  * Basic information about a block and its date.
  */
@@ -49,16 +49,18 @@ export interface GlobalIndexingStatusViewModel {
  */
 export function globalIndexingStatusViewModel(
   networkIndexingStatus: Record<number, EnsNode.NetworkIndexingStatus>,
+  ensDeploymentChain: ENSDeploymentChain,
 ): GlobalIndexingStatusViewModel {
   const indexingStartDatesAcrossNetworks = Object.values(networkIndexingStatus).map(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
+  const getChainName = (chainId: number) => getChainById(ensDeploymentChain, chainId).name;
 
   const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
     ([chainId, networkIndexingStatus]) =>
       networkIndexingStatusViewModel(
-        chainId,
+        getChainName(parseInt(chainId, 10)),
         networkIndexingStatus,
         firstBlockToIndexGloballyTimestamp,
       ),
@@ -80,13 +82,13 @@ export function globalIndexingStatusViewModel(
 
 /**
  * View model for the network indexing status.
- * @param chainId
+ * @param chainName
  * @param networkStatus
  * @param firstBlockToIndexGloballyTimestamp
  * @returns
  */
 export function networkIndexingStatusViewModel(
-  chainId: string,
+  chainName: string,
   networkStatus: EnsNode.NetworkIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
 ): NetworkStatusViewModel {
@@ -109,7 +111,7 @@ export function networkIndexingStatusViewModel(
   });
 
   return {
-    name: getChainName(parseInt(chainId, 10)),
+    name: chainName,
     latestSafeBlock: blockViewModel(latestSafeBlock),
     firstBlockToIndex: blockViewModel(firstBlockToIndex),
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,
