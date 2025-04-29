@@ -1,4 +1,5 @@
-import { GraphiQLEditor } from "@/components/graphiql-editor";
+import { PonderGraphiQLEditor } from "@/components/graphiql-editor";
+import { type SavedQuery } from "@/components/graphiql-editor/plugins/saved-queries";
 import { defaultEnsNodeUrl } from "@/lib/env";
 
 type PageProps = {
@@ -6,6 +7,24 @@ type PageProps = {
     [key: string]: string | string[] | undefined;
   }>;
 };
+
+const savedQueries = [
+  {
+    operationName: "getDomains",
+    id: "1",
+    name: "Get Domains",
+    query: /* GraphQL */ `
+      query getDomains {
+        domains {
+          items {
+            id
+            name
+          }
+        }
+      }
+    `,
+  },
+] satisfies Array<SavedQuery>;
 
 export default async function PonderGraphQLPage({ searchParams }: PageProps) {
   const { ensnode = defaultEnsNodeUrl() } = await searchParams;
@@ -18,8 +37,5 @@ export default async function PonderGraphQLPage({ searchParams }: PageProps) {
 
   const url = new URL(`/ponder`, baseUrl).toString();
 
-  // Make this more abstract and pass plugins here so they
-  // can change for subgraph/ponder APIs
-  // return <GraphiQLEditor url={url} plugins={[savedQueries]} />;
-  return <GraphiQLEditor url={url} aiQueryGeneratorEnabled={false} />;
+  return <PonderGraphiQLEditor url={url} savedQueries={savedQueries} />;
 }
