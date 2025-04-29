@@ -99,30 +99,18 @@ In the future, indexing multiple networks with network-specific blockrange const
 }
 
 ////////
-// Warn if configured networks are using a default RPC URL (indexing will likely be rate-limited).
+// Invariant: All configured networks must have a custom RPC endpoint provided. Public RPC endpoints
+// will ratelimit and make indexing more or less unusable.
 ////////
 
-const hasValidTransport = (network: NetworkConfig) => {
-  try {
-    // attempt to use transport without providing a url
-    network.transport({});
-
-    // if it succeeds, a non-default url was provided to the http transport
-    return true;
-  } catch (error) {
-    // otherwise, if it fails, `undefined` was passed and the transport will use a default RPC provider
-    return false;
-  }
-};
-
 // if not every network has a valid transport, panic
-const allNetworks = Object.values(ponderConfig.networks);
-if (!allNetworks.every(hasValidTransport)) {
+const allChainIds = Object.values(ponderConfig.networks).map((network) => network.chainId);
+if (!allChainIds.every((chainId) => rpcEndpointUrl(chainId) !== undefined)) {
   throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${requestedPluginNames.join(", ")}.
-These plugins, collectively, index events from the following chains: ${allNetworks.map((n) => n.chainId).join(", ")}.
+These plugins, collectively, index events from the following chains: ${allChainIds.join(", ")}.
 
 The following RPC_URL_* environment variables must be defined for nominal indexing behavior:
-${allNetworks.map((n) => `RPC_URL_${n.chainId}: ${rpcEndpointUrl(n.chainId) || "N/A"}`).join("\n")}
+${allChainIds.map((chainId) => `RPC_URL_${chainId}: ${rpcEndpointUrl(chainId) || "N/A"}`).join("\n")}
 `);
 }
 
