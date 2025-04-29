@@ -16,7 +16,7 @@ export default function InfrastructureInnovations() {
   return (
     <>
       <Fragment key="Infrastructure-Innovations-Header">
-        <div className="w-full h-fit flex flex-col justify-center items-center gap-5 px-5 sm:px-0 pt-10 sm:pt-[120px]">
+        <div className="w-full h-fit flex flex-col justify-center items-center gap-5 px-5 sm:px-0 pt-10 sm:pt-[40px]">
           <h1 className="max-w-[720px] text-center text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold">
             ENSv2 Infrastructure Innovations
           </h1>
