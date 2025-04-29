@@ -166,19 +166,16 @@ export const activateHandlers =
 
 /**
  * Defines a ponder#NetworksConfig for a single, specific chain.
- * Implemented as a computed getter to avoid runtime assertions for unused RPC env vars.
  */
 export function networksConfigForChain(chain: Chain) {
   return {
-    get [chain.id.toString()]() {
-      return {
-        chainId: chain.id,
-        transport: http(rpcEndpointUrl(chain.id)),
-        maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
-        // NOTE: disable cache on 'Anvil' chains
-        ...(chain.name === "Anvil" && { disableCache: true }),
-      } satisfies NetworkConfig;
-    },
+    [chain.id.toString()]: {
+      chainId: chain.id,
+      transport: http(rpcEndpointUrl(chain.id)),
+      maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
+      // NOTE: disable cache on 'Anvil' chains
+      ...(chain.name === "Anvil" && { disableCache: true }),
+    } satisfies NetworkConfig,
   };
 }
 

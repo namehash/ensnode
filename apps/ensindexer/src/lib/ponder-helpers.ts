@@ -74,7 +74,7 @@ const parseBlockheightEnvVar = (envVarName: "START_BLOCK" | "END_BLOCK"): number
  * @param chainId the chain ID to get the RPC URL for
  * @returns the URL of the RPC endpoint
  */
-export const rpcEndpointUrl = (chainId: number): string => {
+export const rpcEndpointUrl = (chainId: number): string | undefined => {
   /**
    * Reads the RPC URL for a given chain ID from the environment variable:
    * RPC_URL_{chainId}. For example, for Ethereum mainnet the chainId is `1`,
@@ -90,12 +90,9 @@ export const rpcEndpointUrl = (chainId: number): string => {
   }
 };
 
-export const parseRpcEndpointUrl = (rawValue?: string): string => {
-  // no RPC URL provided
-  if (!rawValue) {
-    // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(`Expected value not set`);
-  }
+export const parseRpcEndpointUrl = (rawValue?: string): string | undefined => {
+  // no RPC URL provided, default to undefined
+  if (!rawValue) return undefined;
 
   try {
     return new URL(rawValue).toString();

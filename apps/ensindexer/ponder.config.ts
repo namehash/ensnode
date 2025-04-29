@@ -8,12 +8,14 @@ import {
   getGlobalBlockrange,
   getRequestedPluginNames,
   healReverseAddresses,
+  rpcEndpointUrl,
 } from "@/lib/ponder-helpers";
 
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
 import * as subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
 import * as threednsPlugin from "@/plugins/threedns/threedns.plugin";
+import { NetworkConfig } from "ponder";
 
 ////////
 // First, generate MergedPluginConfig type representing the merged types of each plugin's `config`,
@@ -94,6 +96,34 @@ which runs just the 'subgraph' plugin with a specific end block, suitable for sn
 In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
     );
   }
+}
+
+////////
+// Warn if configured networks are using a default RPC URL (indexing will likely be rate-limited).
+////////
+
+const hasValidTransport = (network: NetworkConfig) => {
+  try {
+    // attempt to use transport without providing a url
+    network.transport({});
+
+    // if it succeeds, a non-default url was provided to the http transport
+    return true;
+  } catch (error) {
+    // otherwise, if it fails, `undefined` was passed and the transport will use a default RPC provider
+    return false;
+  }
+};
+
+// if not every network has a valid transport, panic
+const allNetworks = Object.values(ponderConfig.networks);
+if (!allNetworks.every(hasValidTransport)) {
+  throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${requestedPluginNames.join(", ")}.
+These plugins, collectively, index events from the following chains: ${allNetworks.map((n) => n.chainId).join(", ")}.
+
+The following RPC_URL_* environment variables must be defined for nominal indexing behavior:
+${allNetworks.map((n) => `RPC_URL_${n.chainId}: ${rpcEndpointUrl(n.chainId) || "N/A"}`).join("\n")}
+`);
 }
 
 ////////
