@@ -5,6 +5,7 @@ import { ENSAdminImage } from "@workspace/docs/ensnode.io/src/components/atoms/i
 import { FasterLookupImage } from "@workspace/docs/ensnode.io/src/components/atoms/images/FasterLookupImage.tsx";
 import { LostENSNamesImage } from "@workspace/docs/ensnode.io/src/components/atoms/images/LostENSNamesImage.tsx";
 import { Fragment } from "react";
+import { Balancer } from "react-wrap-balancer";
 import ENSAdminDecentralizationMobileImage from "../../assets/Decentralization.png";
 import InfrastructureGapsMobileImage from "../../assets/InfrustructureGaps.png";
 import ProtocolInnovationsMobileImage from "../../assets/ProtocolInnovations.png";
@@ -19,10 +20,13 @@ export default function InfrastructureInnovations() {
           <h1 className="max-w-[720px] text-center text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold">
             ENSv2 Infrastructure Innovations
           </h1>
-          <p className="max-w-[720px] text-center text-gray-500 text-lg leading-8 sm:leading-7 font-normal">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua.{" "}
-          </p>
+          <Balancer
+            as="p"
+            className="max-w-[720px] text-center text-gray-500 text-lg leading-8 sm:leading-7 font-normal"
+          >
+            Current ENS indexing cannot support the protocol's expansion beyond mainnet. A complete
+            multi-chain solution is required for the ecosystem to thrive.
+          </Balancer>
         </div>
       </Fragment>
       {innovationSections.map((section) => (

@@ -14,9 +14,13 @@ export default function JoinTelegram() {
         >
           Become a part of our community in Telegram
         </Balancer>
-        <p className="text-lg leading-8 min-[930px]:leading-7 font-normal text-gray-500">
-          Run your own ENSNode
-        </p>
+        <Balancer
+          as="p"
+          className="text-lg leading-8 min-[930px]:leading-7 font-normal text-gray-500 text-center min-[930px]:text-left"
+        >
+          Get updates, technical support, and connect with ENS developers building the multi-chain
+          future.
+        </Balancer>
         <Button asChild size="medium" variant="primary">
           <Link target="_blank" href="http://t.me/ensnode">
             <TelegramIcon /> Join our Telegram
