@@ -63,7 +63,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Index</SidebarGroupLabel>
+      <SidebarGroupLabel>Services</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const hasItems = item.items && item.items.length > 0;

@@ -1,4 +1,5 @@
 import { mergeAbis } from "@ponder/utils";
+import { Address } from "viem";
 import { anvil } from "viem/chains";
 
 import { RootResolverFilter } from "./lib/filters";
@@ -12,13 +13,31 @@ import { LegacyPublicResolver as root_LegacyPublicResolver } from "./abis/root/L
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { Resolver as root_Resolver } from "./abis/root/Resolver";
+import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
+
+const deploymentAddresses = getENSTestEnvDeploymentAddresses();
+
+const EMPTY_ADDRESS = "" as Address;
 
 /**
  * The ens-test-env ENSDeployment
  *
- * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
- * protocol changes, running deterministic test suites, and local development.
+ * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for development of
+ * ENS apps and running test suites against a deterministic deployment of the ENS protocol.
  * https://github.com/ensdomains/ens-test-env
+ *
+ * The 'ens-test-env' ENSDeployment is only relevant in the context of apps that use the ens-test-env
+ * tool (i.e. ensjs and ens-app-v3) and it depends on the addresses of the contracts deployed by
+ * that app (each app deploys the ENS protocol to slightly different addresses).
+ *
+ * In both ensjs and ens-app-v3, an env variable is available to the ens-test-env tool that
+ * lists the addresses of each contract after deployment. These addresses are different in each
+ * app and may change over time.
+ *
+ * If the addresses are not available in the environment, we use empty string as a mock to ensure
+ * type-correctness: consumers of this ens-test-env deployment, if using outside of the context
+ * of the ens-test-env tool, should validate that an Address is provided, or they may experience
+ * undefined runtime behavior.
  */
 export default {
   /**
@@ -33,12 +52,12 @@ export default {
     contracts: {
       RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
+        address: deploymentAddresses?.LegacyENSRegistry ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: deploymentAddresses?.ENSRegistry ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       Resolver: {
@@ -48,22 +67,22 @@ export default {
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+        address: deploymentAddresses?.BaseRegistrarImplementation ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       EthRegistrarControllerOld: {
         abi: root_EthRegistrarControllerOld,
-        address: "0xf5059a5D33d5853360D16C683c16e67980206f36",
+        address: deploymentAddresses?.LegacyETHRegistrarController ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       EthRegistrarController: {
         abi: root_EthRegistrarController,
-        address: "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
+        address: deploymentAddresses?.ETHRegistrarController ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+        address: deploymentAddresses?.NameWrapper ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
     },
