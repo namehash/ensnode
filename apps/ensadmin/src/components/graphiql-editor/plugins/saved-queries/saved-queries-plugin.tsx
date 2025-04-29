@@ -9,7 +9,15 @@ import "./saved-queries-plugin.css";
 export interface SavedQuery {
   id: string;
   name: string;
+
+  /**
+   * The GraphQL query.
+   */
   query: string;
+
+  /**
+   * The GraphQL variables.
+   */
   variables?: string;
   headers?: string;
   operationName?: string;

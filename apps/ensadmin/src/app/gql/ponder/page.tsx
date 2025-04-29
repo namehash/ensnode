@@ -10,19 +10,25 @@ type PageProps = {
 
 const savedQueries = [
   {
-    operationName: "getDomains",
+    operationName: "getLatestDomains",
     id: "1",
-    name: "Get Domains",
-    query: /* GraphQL */ `
-      query getDomains {
-        domains {
-          items {
-            id
-            name
-          }
-        }
-      }
+    name: "Get Latest Domains",
+    query: `query GetLatestDomains($limit: Int!) {
+  domains(orderBy: "createdAt", orderDirection: "desc", limit: $limit) {
+    items {
+      name
+      expiryDate
+    }
+  }
+}
     `,
+    variables: JSON.stringify(
+      {
+        limit: 5,
+      },
+      null,
+      2,
+    ),
   },
 ] satisfies Array<SavedQuery>;
 

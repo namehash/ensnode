@@ -11,15 +11,21 @@ const savedQueries = [
   {
     operationName: "getDomains",
     id: "1",
-    name: "Get Domains",
-    query: /* GraphQL */ `
-      query getDomains {
-        domains {
-          id
-          name
-        }
-      }
+    name: "Get Latest Domains",
+    query: `query GetLatestDomains($first: Int!) {
+  domains(orderBy: createdAt, orderDirection: desc, first: $first) {
+    name
+    expiryDate
+  }
+}
     `,
+    variables: JSON.stringify(
+      {
+        first: 5,
+      },
+      null,
+      2,
+    ),
   },
 ] satisfies Array<SavedQuery>;
 
