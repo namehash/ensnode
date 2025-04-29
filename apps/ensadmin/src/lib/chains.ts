@@ -1,19 +1,13 @@
-import { base, holesky, linea, mainnet, sepolia } from "viem/chains";
+import { type Chain, base, holesky, linea, mainnet, optimism, sepolia } from "viem/chains";
 
-const chains = {
-  [mainnet.id]: mainnet,
-  [sepolia.id]: sepolia,
-  [holesky.id]: holesky,
-  [base.id]: base,
-  [linea.id]: linea,
-} as const;
+const chains = [mainnet, sepolia, holesky, optimism, base, linea] satisfies Array<Chain>;
 
 export function getChainName(chainId: number): string {
-  return chains[chainId as keyof typeof chains]?.name || `Chain ${chainId}`;
-}
+  const chain = chains.find((chain) => chain.id === chainId);
 
-export function getBlockExplorerUrl(chainId: number, blockNumber: number): string | null {
-  const chain = chains[chainId as keyof typeof chains];
-  if (!chain?.blockExplorers?.default?.url) return null;
-  return `${chain.blockExplorers.default.url}/block/${blockNumber}`;
+  if (!chain) {
+    throw new Error(`Chain ${chainId} is not supported`);
+  }
+
+  return chain.name;
 }
