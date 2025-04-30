@@ -34,8 +34,8 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
   - ✅ Mainnet ENS Names
   - ✅ Basenames (`.base.eth`)
   - ✅ Linea Names (`.linea.eth`)
+  - ✅ [3DNS](https://3dns.box) Support (`.box`, `.xyz`, +more)
   - 🚧 Tokenized DNS Names
-    - [3DNS](https://3dns.box) Support (`.box`, + more)
     - [Namefi](https://namefi.io/) Support
   - 🚧 Offchain Names
     - `.cb.id`, `.uni.id`, + more
@@ -46,7 +46,7 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
 - Built on [Ponder](https://ponder.sh)
   - ✅ Rapid Indexing & Backfill
     - 10x faster than ENS Subgraph
-    - Mainnet Backfill: **7 hours** on M1 Macbook
+    - Mainnet Cached Backfill: **4.5 hours** on M1 Macbook Pro
   - ✅ More efficient than ENS Subgraph
     - 35x less disk space and 35% fewer RPC credits [[source]](https://ponder.sh/docs/why-ponder)
   - ✅ End-to-end type safety
@@ -60,7 +60,7 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
 - [1:1 Subgraph Compatibility](https://www.ensnode.io/docs/reference/subgraph-compatibility/)
   - ✅ [100% data equivalency](https://github.com/namehash/ens-subgraph-transition-tools) as compared to Subgraph
   - ✅ 100% ensjs test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
-  - 🚧 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
+  - ✅ 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
 - Own your ENSNode index
   - ✅ [Deploy ENSNode to your own cloud](https://ensnode.io/docs/deploying/) for controlling your own uptime guarantees and private queries
 
