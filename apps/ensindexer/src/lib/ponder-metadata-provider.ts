@@ -34,10 +34,21 @@ export const makePonderMetdataProvider = ({
 }): PonderMetadataProvider => {
   // get the chain ID for the ENS deployment
   const ensDeploymentChainId = getEnsDeploymentChainId();
-  const publicClient = publicClients[ensDeploymentChainId];
+  const availableNetworkNames = Object.keys(publicClients);
 
-  if (!publicClient)
-    throw new Error(`Invariant: no public client available for ${ensDeploymentChainId}`);
+  if (availableNetworkNames.length === 0) {
+    throw new Error(`Invariant: no available publicClients for constructing ponder metadata.`);
+  }
+
+  // use the deployment chain's publicClient if available, otherwise warn and use first found
+  let publicClient = publicClients[ensDeploymentChainId];
+  if (!publicClient) {
+    const networkId = availableNetworkNames[0]!; // length check done above
+    console.warn(
+      `No public client available for chain '${ensDeploymentChainId}', using status of chain '${networkId}' to power 'Query._meta'.`,
+    );
+    publicClient = publicClients[networkId]!; // must exist
+  }
 
   /**
    * Get the last block indexed by Ponder.

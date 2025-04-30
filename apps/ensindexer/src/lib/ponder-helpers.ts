@@ -1,5 +1,4 @@
 import type { Event } from "ponder:registry";
-import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
 
 import { Blockrange } from "@/lib/types";
@@ -210,21 +209,6 @@ export const createEnsRainbowVersionFetcher = () => {
     }
   };
 };
-
-type AnyObject = { [key: string]: any };
-
-/**
- * Deep merge two objects recursively.
- * @param target The target object to merge into.
- * @param source The source object to merge from.
- * @returns The merged object.
- */
-export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
-  target: T,
-  source: U,
-): T & U {
-  return tsDeepMerge(target, source) as T & U;
-}
 
 /**
  * Gets the ENS Deployment Chain, defaulting to mainnet.

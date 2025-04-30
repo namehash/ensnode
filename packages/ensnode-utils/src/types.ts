@@ -8,6 +8,7 @@ export enum PluginName {
   Subgraph = "subgraph",
   Basenames = "basenames",
   Lineanames = "lineanames",
+  ThreeDNS = "threedns",
 }
 
 /**

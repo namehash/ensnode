@@ -1,24 +1,31 @@
+import { DatasourceName } from "@ensnode/ens-deployments";
+
 import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
+import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { type MergedTypes, getActivePlugins } from "@/lib/plugin-helpers";
 import {
-  deepMergeRecursive,
   getEnsDeploymentChain,
   getGlobalBlockrange,
   getRequestedPluginNames,
   healReverseAddresses,
 } from "@/lib/ponder-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
 
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
 import * as subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
+import * as threednsPlugin from "@/plugins/threedns/threedns.plugin";
 
 ////////
 // First, generate MergedPluginConfig type representing the merged types of each plugin's `config`,
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 
-const AVAILABLE_PLUGINS = [subgraphPlugin, basenamesPlugin, lineaNamesPlugin] as const;
+const AVAILABLE_PLUGINS = [
+  subgraphPlugin,
+  basenamesPlugin,
+  lineaNamesPlugin,
+  threednsPlugin,
+] as const;
 
 type MergedPluginConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number]["config"]> & {
   /**
@@ -55,7 +62,7 @@ const activePlugins = getActivePlugins(
 // merge the resulting configs into the config we return to Ponder
 const ponderConfig = activePlugins
   .map((plugin) => plugin.config)
-  .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as MergedPluginConfig;
+  .reduce((acc, val) => mergePonderConfigs(acc, val), {}) as MergedPluginConfig;
 
 // set the indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {

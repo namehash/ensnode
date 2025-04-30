@@ -3,7 +3,6 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainContractBlockrange,
   createStartBlockByChainIdMap,
-  deepMergeRecursive,
   getGlobalBlockrange,
   healReverseAddresses,
   parseEnsRainbowEndpointUrl,
@@ -275,15 +274,6 @@ describe("ponder helpers", () => {
         1: 444_444_333,
         8453: 1_799_430,
       });
-    });
-  });
-
-  describe("deepMergeRecursive", () => {
-    it("should deeply merge two objects", () => {
-      const target = { a: 1, b: { c: 2 } };
-      const source = { b: { d: 3 }, e: 4 };
-      const result = deepMergeRecursive(target, source);
-      expect(result).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
     });
   });
 });
