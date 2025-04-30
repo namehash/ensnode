@@ -56,9 +56,14 @@ export function generateYearMarkers(timelineStart: Date, timelineEnd: Date): Arr
  * @param networkStatus view model
  */
 export function currentPhase(
-  date: Date,
+  date: Date | null,
   networkStatus: NetworkStatusViewModel,
 ): NetworkIndexingPhaseViewModel {
+  // if the network is not indexed yet, return the first phase
+  if (!date) {
+    return networkStatus.phases[0];
+  }
+
   for (let i = networkStatus.phases.length - 1; i >= 0; i--) {
     if (date >= networkStatus.phases[i].startDate) {
       return networkStatus.phases[i];

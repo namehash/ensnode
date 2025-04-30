@@ -66,17 +66,22 @@ export function globalIndexingStatusViewModel(
       ),
   ) satisfies Array<NetworkStatusViewModel>;
 
-  const currentIndexingDate = Math.max(
-    // get the last indexed block date for each network for which it is available
-    ...networkStatusesViewModel
-      .filter((n) => Boolean(n.lastIndexedBlock))
-      .map((n) => n.lastIndexedBlock!.timestamp),
+  // Sort the network statuses by the first block to index timestamp
+  networkStatusesViewModel.sort(
+    (a, b) => a.firstBlockToIndex.timestamp - b.firstBlockToIndex.timestamp,
   );
+
+  const lastIndexedBlockDates = networkStatusesViewModel
+    .filter((n) => Boolean(n.lastIndexedBlock))
+    .map((n) => n.lastIndexedBlock!.timestamp);
+
+  const currentIndexingDate =
+    lastIndexedBlockDates.length > 0 ? fromUnixTime(Math.max(...lastIndexedBlockDates)) : null;
 
   return {
     networkStatuses: networkStatusesViewModel,
-    currentIndexingDate: fromUnixTime(currentIndexingDate),
     indexingStartsAt: fromUnixTime(firstBlockToIndexGloballyTimestamp),
+    currentIndexingDate,
   };
 }
 
