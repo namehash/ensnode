@@ -1,3 +1,7 @@
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useRef } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +14,25 @@ import {
 } from "@/components/ui/select";
 import type { AiQueryGeneratorResult } from "./types";
 
-import { useMutation } from "@tanstack/react-query";
-import { useCallback, useRef } from "react";
-import { toast } from "sonner";
+interface QueryPromptExample {
+  /** The label of the example query */
+  label: string;
+
+  /** The value (prompt) of the example query */
+  value: string;
+}
+
+const exampleQueries = [
+  {
+    label: "Get subnames",
+    value: "Get the first 20 subnames of `ens.eth` ordered by name ascending",
+  },
+  {
+    label: "Get owned names",
+    value:
+      "Get the first 20 names owned by address `0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5` ordered by name ascending",
+  },
+] satisfies Array<QueryPromptExample>;
 
 export interface AiQueryGeneratorProps {
   /** The callback to handle the result of the AI query generation */
@@ -22,6 +42,12 @@ export interface AiQueryGeneratorProps {
   url: string;
 }
 
+/**
+ * A form for generating GraphQL queries using AI.
+ *
+ * @param onResult - The callback to handle the result of the AI query generation.
+ * @param url - The URL of the GraphQL endpoint.
+ */
 export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
   const createAiGeneratedQuery = useCallback(
     async (prompt: string) => {
@@ -62,7 +88,7 @@ export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
     mutationFn: createAiGeneratedQuery,
     onSuccess: (data) => {
       onResult(data);
-      console.log("AI generated suggested GraphQL query", data);
+
       toast.success("AI generated suggested GraphQL query");
     },
     onError: (error) => {
@@ -73,6 +99,9 @@ export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
 
   const promptInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * The handler for the form submission.
+   * */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -86,23 +115,14 @@ export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
     aiQueryGeneratorMutation.mutate(prompt.toString());
   };
 
+  /**
+   * The handler for the example query selection change.
+   * */
   const handleSelectChange = (value: string) => {
     if (promptInputRef.current) {
       promptInputRef.current.value = value;
     }
   };
-
-  const exampleQueries = [
-    {
-      label: "Get subnames",
-      value: "Get the first 20 subnames of `ens.eth` ordered by name ascending",
-    },
-    {
-      label: "Get owned names",
-      value:
-        "Get the first 20 names owned by address `0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5` ordered by name ascending",
-    },
-  ];
 
   return (
     <form className="flex flex-col gap-2 p-4" onSubmit={handleSubmit}>
@@ -120,6 +140,7 @@ export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
           </SelectContent>
         </Select>
       </fieldset>
+
       <fieldset className="flex flex-col md:grid grid-cols-[auto_1fr_auto] gap-2 items-center">
         <Label htmlFor="prompt" className="w-auto">
           ENS AI Query Generator

@@ -1,5 +1,4 @@
-import { PonderGraphiQLEditor } from "@/components/graphiql-editor";
-import { type SavedQuery } from "@/components/graphiql-editor/plugins/saved-queries";
+import { PonderGraphiQLEditor, type SavedQuery } from "@/components/graphiql-editor";
 import { defaultEnsNodeUrl } from "@/lib/env";
 
 type PageProps = {
