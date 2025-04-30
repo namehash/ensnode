@@ -42,10 +42,8 @@
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "^20.17.14",
     "@types/progress": "^2.0.7",
-    "@types/supertest": "^6.0.2",
     "@types/yargs": "^17.0.32",
     "@vitest/coverage-v8": "catalog:",
-    "supertest": "^6.3.4",
     "tsx": "^4.19.3",
     "typescript": "^5.3.3",
     "vitest": "catalog:"
