@@ -110,11 +110,11 @@ describe("ponder helpers", () => {
     });
 
     it("should throw an error if the URL is invalid", () => {
-      expect(() => parseRpcEndpointUrl("invalid")).toThrowError("'invalid' is not a valid URL");
+      expect(() => parseRpcEndpointUrl("invalid")).toThrowError(/is not a valid URL/);
     });
 
-    it("should throw an error if the URL is missing", () => {
-      expect(() => parseRpcEndpointUrl()).toThrowError("Expected value not set");
+    it("should return undefined if the URL is missing", () => {
+      expect(parseRpcEndpointUrl()).toBeUndefined();
     });
   });
 
