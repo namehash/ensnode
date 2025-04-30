@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ens-deployments",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "type": "module",
   "description": "Catalog of ENS deployments, including key contract addresses and other attributes.",
   "license": "MIT",

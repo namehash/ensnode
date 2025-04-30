@@ -1,5 +1,4 @@
 import type { Event } from "ponder:registry";
-import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
 
 import { Blockrange } from "@/lib/types";
@@ -75,7 +74,7 @@ const parseBlockheightEnvVar = (envVarName: "START_BLOCK" | "END_BLOCK"): number
  * @param chainId the chain ID to get the RPC URL for
  * @returns the URL of the RPC endpoint
  */
-export const rpcEndpointUrl = (chainId: number): string => {
+export const rpcEndpointUrl = (chainId: number): string | undefined => {
   /**
    * Reads the RPC URL for a given chain ID from the environment variable:
    * RPC_URL_{chainId}. For example, for Ethereum mainnet the chainId is `1`,
@@ -91,12 +90,9 @@ export const rpcEndpointUrl = (chainId: number): string => {
   }
 };
 
-export const parseRpcEndpointUrl = (rawValue?: string): string => {
-  // no RPC URL provided
-  if (!rawValue) {
-    // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(`Expected value not set`);
-  }
+export const parseRpcEndpointUrl = (rawValue?: string): string | undefined => {
+  // no RPC URL provided, default to undefined
+  if (!rawValue) return undefined;
 
   try {
     return new URL(rawValue).toString();
@@ -210,21 +206,6 @@ export const createEnsRainbowVersionFetcher = () => {
     }
   };
 };
-
-type AnyObject = { [key: string]: any };
-
-/**
- * Deep merge two objects recursively.
- * @param target The target object to merge into.
- * @param source The source object to merge from.
- * @returns The merged object.
- */
-export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
-  target: T,
-  source: U,
-): T & U {
-  return tsDeepMerge(target, source) as T & U;
-}
 
 /**
  * Gets the ENS Deployment Chain, defaulting to mainnet.

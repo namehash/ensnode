@@ -1,5 +1,11 @@
 # @ensnode/ens-deployments
 
+## 0.25.0
+
+### Minor Changes
+
+- [#657](https://github.com/namehash/ensnode/pull/657) [`edd2b1e`](https://github.com/namehash/ensnode/commit/edd2b1ebb4e052a5036edee090dd05c80cb732ca) Thanks [@shrugs](https://github.com/shrugs)! - added threedns datasources
+
 ## 0.24.0
 
 ### Minor Changes
