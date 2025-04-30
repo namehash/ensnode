@@ -1,8 +1,6 @@
-"use client";
-
-import "graphiql/graphiql.css";
-
-import { GraphiQL } from "graphiql";
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useRef } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,98 +12,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { AiQueryGeneratorResult } from "./types";
 
-import { createGraphiQLFetcher } from "@graphiql/toolkit";
-import { useMutation } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
-import { toast } from "sonner";
+interface QueryPromptExample {
+  /** The label of the example query */
+  label: string;
 
-interface GraphiQLEditorProps {
-  /** The URL of the GraphQL endpoint */
-  url?: string;
-
-  /** Whether to use the AI query generator */
-  aiQueryGeneratorEnabled: boolean;
+  /** The value (prompt) of the example query */
+  value: string;
 }
 
-export function GraphiQLEditor({ url, aiQueryGeneratorEnabled }: GraphiQLEditorProps) {
-  if (!url || typeof window === "undefined") {
-    return null;
-  }
+const exampleQueries = [
+  {
+    label: "Get subnames",
+    value: "Get the first 20 subnames of `ens.eth` ordered by name ascending",
+  },
+  {
+    label: "Get owned names",
+    value:
+      "Get the first 20 names owned by address `0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5` ordered by name ascending",
+  },
+] satisfies Array<QueryPromptExample>;
 
-  const fetcher = createGraphiQLFetcher({
-    url,
-    // Disable subscriptions for now since we don't have a WebSocket server
-    // legacyWsClient: false,
-    subscriptionUrl: undefined,
-    wsConnectionParams: undefined,
-  });
-
-  // Create a unique storage namespace for each endpoint
-  const storageNamespace = `ensnode:graphiql:${url}`;
-
-  // Custom storage implementation with namespaced keys
-  const storage = {
-    getItem: (key: string) => {
-      return localStorage.getItem(`${storageNamespace}:${key}`);
-    },
-    setItem: (key: string, value: string) => {
-      localStorage.setItem(`${storageNamespace}:${key}`, value);
-    },
-    removeItem: (key: string) => {
-      localStorage.removeItem(`${storageNamespace}:${key}`);
-    },
-    clear: () => {
-      localStorage.clear();
-    },
-    length: localStorage.length,
-  };
-
-  const [aiGeneratedQueryResult, setAiGeneratedQueryResult] = useState<AiQueryGeneratorResult>();
-
-  const handleAiQueryResult = useCallback(
-    (result: AiQueryGeneratorResult) => {
-      setAiGeneratedQueryResult(result);
-    },
-    [setAiGeneratedQueryResult],
-  );
-
-  let query: string | undefined;
-  let variables: string | undefined;
-
-  if (aiQueryGeneratorEnabled && aiGeneratedQueryResult) {
-    query = aiGeneratedQueryResult.query;
-    variables = JSON.stringify(aiGeneratedQueryResult.variables, null, 2);
-  }
-
-  return (
-    <section className="flex flex-col flex-1">
-      {aiQueryGeneratorEnabled && <AiQueryGenerator onResult={handleAiQueryResult} url={url} />}
-
-      <div className="flex-1 graphiql-container">
-        <GraphiQL
-          fetcher={fetcher}
-          defaultEditorToolsVisibility={true}
-          shouldPersistHeaders={true}
-          storage={storage}
-          forcedTheme="light"
-          query={query}
-          variables={variables}
-        />
-      </div>
-    </section>
-  );
-}
-
-interface AiQueryGeneratorResult {
-  /** The query to execute */
-  query: string;
-
-  /** The variables to use for the query */
-  variables: Record<string, unknown>;
-}
-
-interface AiQueryGeneratorProps {
+export interface AiQueryGeneratorProps {
   /** The callback to handle the result of the AI query generation */
   onResult: (result: AiQueryGeneratorResult) => void;
 
@@ -113,7 +42,13 @@ interface AiQueryGeneratorProps {
   url: string;
 }
 
-function AiQueryGenerator({ onResult, url }: AiQueryGeneratorProps) {
+/**
+ * A form for generating GraphQL queries using AI.
+ *
+ * @param onResult - The callback to handle the result of the AI query generation.
+ * @param url - The URL of the GraphQL endpoint.
+ */
+export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
   const createAiGeneratedQuery = useCallback(
     async (prompt: string) => {
       const requestUrl = new URL("/gql/api", window.location.origin);
@@ -153,7 +88,7 @@ function AiQueryGenerator({ onResult, url }: AiQueryGeneratorProps) {
     mutationFn: createAiGeneratedQuery,
     onSuccess: (data) => {
       onResult(data);
-      console.log("AI generated suggested GraphQL query", data);
+
       toast.success("AI generated suggested GraphQL query");
     },
     onError: (error) => {
@@ -164,6 +99,9 @@ function AiQueryGenerator({ onResult, url }: AiQueryGeneratorProps) {
 
   const promptInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * The handler for the form submission.
+   * */
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -177,23 +115,14 @@ function AiQueryGenerator({ onResult, url }: AiQueryGeneratorProps) {
     aiQueryGeneratorMutation.mutate(prompt.toString());
   };
 
+  /**
+   * The handler for the example query selection change.
+   * */
   const handleSelectChange = (value: string) => {
     if (promptInputRef.current) {
       promptInputRef.current.value = value;
     }
   };
-
-  const exampleQueries = [
-    {
-      label: "Get subnames",
-      value: "Get the first 20 subnames of `ens.eth` ordered by name ascending",
-    },
-    {
-      label: "Get owned names",
-      value:
-        "Get the first 20 names owned by address `0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5` ordered by name ascending",
-    },
-  ];
 
   return (
     <form className="flex flex-col gap-2 p-4" onSubmit={handleSubmit}>
@@ -211,6 +140,7 @@ function AiQueryGenerator({ onResult, url }: AiQueryGeneratorProps) {
           </SelectContent>
         </Select>
       </fieldset>
+
       <fieldset className="flex flex-col md:grid grid-cols-[auto_1fr_auto] gap-2 items-center">
         <Label htmlFor="prompt" className="w-auto">
           ENS AI Query Generator
