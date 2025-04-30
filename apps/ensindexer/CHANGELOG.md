@@ -1,5 +1,21 @@
 # ensindexer
 
+## 0.26.0
+
+### Minor Changes
+
+- [#679](https://github.com/namehash/ensnode/pull/679) [`04d224c`](https://github.com/namehash/ensnode/commit/04d224c21a55ad723116ef64cb961a54deb6313e) Thanks [@shrugs](https://github.com/shrugs)! - fix issue where rpc endpoints for all plugins were required at runtime
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.26.0
+  - @ensnode/utils@0.26.0
+  - @ensnode/ensrainbow-sdk@0.26.0
+  - @ensnode/ponder-metadata@0.26.0
+  - @ensnode/ponder-schema@0.26.0
+  - @ensnode/ponder-subgraph@0.26.0
+
 ## 0.25.0
 
 ### Minor Changes

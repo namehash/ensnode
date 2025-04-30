@@ -1,5 +1,15 @@
 # ensrainbow
 
+## 0.26.0
+
+### Patch Changes
+
+- [#681](https://github.com/namehash/ensnode/pull/681) [`5b128a7`](https://github.com/namehash/ensnode/commit/5b128a7cda20e6fc928c32fe10303ae603b55264) Thanks [@tk-o](https://github.com/tk-o)! - Drop unused dependencies and fix dependency audit issue.
+
+- Updated dependencies []:
+  - @ensnode/utils@0.26.0
+  - @ensnode/ensrainbow-sdk@0.26.0
+
 ## 0.25.0
 
 ### Patch Changes
