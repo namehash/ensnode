@@ -106,7 +106,7 @@ NameHash has received generous support from the [ENS DAO](https://ensdao.org/) a
 
 ## Contact Us
 
-Visit our [website](https://namehashlabs.org/) to get in contact, or [Join us on Telegram](https://t.me/ensnode).
+Visit our [website](https://namehashlabs.org/) to get in contact, or [join us on Telegram](https://t.me/ensnode).
 
 ## License
 
