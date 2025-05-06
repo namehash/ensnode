@@ -16,9 +16,9 @@ export * from "./lib/types";
  *
  * For example, as of 9-Feb-2025 the canonical "ENS deployment" on mainnet includes:
  * - A root Registry on mainnet.
- * - An onchain subregistry for direct subnames of 'eth' on mainnet.
- * - An onchain subregistry for direct subnames of 'base.eth' on Base.
- * - An onchain subregistry for direct subnames of 'linea.eth' on Linea.
+ * - An onchain Registrar for direct subnames of 'eth' on mainnet.
+ * - An onchain Registry and Registrar for direct subnames of 'base.eth' on Base.
+ * - An onchain Registry and Registrar subregistry for direct subnames of 'linea.eth' on Linea.
  * - An offchain subregistry for subnames of '.cb.id'.
  * - An offchain subregistry for subnames of '.uni.eth'.
  * - Etc..

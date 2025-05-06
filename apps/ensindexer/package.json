@@ -1,6 +1,6 @@
 {
   "name": "ensindexer",
-  "version": "0.24.0",
+  "version": "0.26.0",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",
@@ -30,9 +30,9 @@
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
     "@ensnode/utils": "workspace:*",
+    "deepmerge-ts": "^7.1.5",
     "hono": "catalog:",
     "ponder": "catalog:",
-    "ts-deepmerge": "^7.0.2",
     "viem": "catalog:"
   },
   "devDependencies": {

@@ -1,0 +1,49 @@
+---
+import ENSNode2DDark from "../../assets/dark-logo.svg";
+import ENSNode2DLight from "../../assets/light-logo.svg";
+import ScrollHeader from "../../scripts/ScrollHeader";
+import CustomSearch from "../molecules/CustomSearch.astro";
+import HeaderButtons from "../molecules/HeaderButtons";
+---
+
+<header id="site-header" class="custom_header fixed top-0 w-full z-20 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none">
+    <div class="box-border max-w-7xl mx-auto items-center justify-between flex flex-row pl-5 pr-3 sm:px-8">
+        <div class="flex flex-row lg:gap-2 xl:gap-7 justify-between items-center">
+            <div class="flex flex-row justify-between items-center gap-2 sm:gap-[14px] cursor-pointer flex-shrink-0 sm:mr-10 lg::mr-[76px]">
+                <a
+                        href="/"
+                        class="flex justify-center items-center text-black not-italic font-bold text-[21.539px] leading-[26.51px] tracking-[-0.907px] sm:text-[26px] sm:leading-8 sm:tracking-[-1.113px]"
+                >
+                    <img src={ENSNode2DLight.src} class="onScrollImage h-8 min-[800px]:h-10" alt="ENSNode" />
+                    <img src={ENSNode2DDark.src} class="defaultImage h-8 min-[800px]:h-10" alt="ENSNode" />
+                </a>
+            </div>
+        </div>
+        <CustomSearch />
+        <HeaderButtons client:load/>
+    </div>
+</header>
+
+<ScrollHeader client:load />
+
+<style>
+    .custom_header {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        color: white;
+    }
+
+    .custom_header.scrolled {
+        background-color: white;
+        border-bottom: 1px solid oklch(87.2% 0.01 258.338);
+        color: black;
+    }
+
+    .onScrollImage, .defaultImage.scrolled {
+        display: none;
+    }
+
+    .onScrollImage.scrolled, .defaultImage {
+        display: block;
+    }
+</style>
+

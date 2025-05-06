@@ -167,10 +167,6 @@ export function starlight(): AstroIntegration {
       dark: "./src/assets/dark-logo.svg",
       replacesTitle: true,
     },
-    social: {
-      "x.com": "https://x.com/NamehashLabs",
-      github: "https://github.com/namehash/ensnode",
-    },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
     },

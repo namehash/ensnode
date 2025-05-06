@@ -1,6 +1,6 @@
 {
   "name": "ensadmin",
-  "version": "0.24.0",
+  "version": "0.26.0",
   "private": true,
   "type": "module",
   "description": "Explore the ENS Protocol like never before",
@@ -22,10 +22,13 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@ensnode/ens-deployments": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-schema": "workspace:*",
     "@ensnode/utils": "workspace:*",
     "@gqlpt/adapter-base": "0.0.0-alpha.31",
+    "@graphiql/plugin-explorer": "^4.0.2",
+    "@graphiql/react": "^0.28.2",
     "@graphiql/toolkit": "^0.11.1",
     "@ponder/client": "catalog:",
     "@ponder/react": "catalog:",
@@ -60,7 +63,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@ensnode/ens-deployments": "workspace:*",
     "@eslint/eslintrc": "^3",
     "@types/node": "^22",
     "@types/react": "^18",

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-schema",
-  "version": "0.24.0",
+  "version": "0.26.0",
   "type": "module",
   "description": "The ponder schema for ENSNode",
   "license": "MIT",

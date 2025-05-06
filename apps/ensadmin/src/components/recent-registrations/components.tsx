@@ -87,7 +87,10 @@ const getEnsAppUrlForName = (name: string) => {
 function FormattedDate({
   timestamp,
   options,
-}: { timestamp: string; options: Intl.DateTimeFormatOptions }) {
+}: {
+  timestamp: string;
+  options: Intl.DateTimeFormatOptions;
+}) {
   const [formattedDate, setFormattedDate] = useState<string>("");
 
   useEffect(() => {
@@ -112,7 +115,10 @@ function RelativeTime({ timestamp }: { timestamp: string }) {
 function Duration({
   registrationDate,
   expiryDate,
-}: { registrationDate: string; expiryDate: string }) {
+}: {
+  registrationDate: string;
+  expiryDate: string;
+}) {
   const [duration, setDuration] = useState<string>("");
 
   useEffect(() => {
@@ -156,8 +162,10 @@ export function RecentRegistrations() {
 
   // Get the current indexing date from the indexing status
   const currentIndexingDate = indexingStatus.data
-    ? globalIndexingStatusViewModel(indexingStatus.data.runtime.networkIndexingStatusByChainId)
-        .currentIndexingDate
+    ? globalIndexingStatusViewModel(
+        indexingStatus.data.runtime.networkIndexingStatusByChainId,
+        indexingStatus.data.env.ENS_DEPLOYMENT_CHAIN,
+      ).currentIndexingDate
     : null;
 
   return (

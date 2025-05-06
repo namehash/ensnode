@@ -1,5 +1,39 @@
 # ensindexer
 
+## 0.26.0
+
+### Minor Changes
+
+- [#679](https://github.com/namehash/ensnode/pull/679) [`04d224c`](https://github.com/namehash/ensnode/commit/04d224c21a55ad723116ef64cb961a54deb6313e) Thanks [@shrugs](https://github.com/shrugs)! - fix issue where rpc endpoints for all plugins were required at runtime
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.26.0
+  - @ensnode/utils@0.26.0
+  - @ensnode/ensrainbow-sdk@0.26.0
+  - @ensnode/ponder-metadata@0.26.0
+  - @ensnode/ponder-schema@0.26.0
+  - @ensnode/ponder-subgraph@0.26.0
+
+## 0.25.0
+
+### Minor Changes
+
+- [#657](https://github.com/namehash/ensnode/pull/657) [`edd2b1e`](https://github.com/namehash/ensnode/commit/edd2b1ebb4e052a5036edee090dd05c80cb732ca) Thanks [@shrugs](https://github.com/shrugs)! - refactored resolver logic to use ponder multi-network behavior rather than per-plugin
+
+- [#657](https://github.com/namehash/ensnode/pull/657) [`edd2b1e`](https://github.com/namehash/ensnode/commit/edd2b1ebb4e052a5036edee090dd05c80cb732ca) Thanks [@shrugs](https://github.com/shrugs)! - implemented threedns indexer for base and optimism datasources with name healing from HybridMetadataService
+
+### Patch Changes
+
+- Updated dependencies [[`edd2b1e`](https://github.com/namehash/ensnode/commit/edd2b1ebb4e052a5036edee090dd05c80cb732ca)]:
+  - @ensnode/ens-deployments@0.25.0
+  - @ensnode/utils@0.25.0
+  - @ensnode/ensrainbow-sdk@0.25.0
+  - @ensnode/ponder-metadata@0.25.0
+  - @ensnode/ponder-schema@0.25.0
+  - @ensnode/ponder-subgraph@0.25.0
+
 ## 0.24.0
 
 ### Minor Changes

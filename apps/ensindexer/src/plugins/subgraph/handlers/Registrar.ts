@@ -17,7 +17,6 @@ const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenI
 
 export default function ({
   pluginName,
-  registrarManagedName,
   namespace,
 }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
@@ -28,7 +27,8 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    registrarManagedName,
+    // the shared Registrar handlers in this plugin index direct subnames of '.eth'
+    registrarManagedName: "eth",
   });
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {

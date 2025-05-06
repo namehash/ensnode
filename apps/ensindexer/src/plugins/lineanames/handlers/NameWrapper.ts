@@ -6,7 +6,6 @@ import { PluginName } from "@ensnode/utils";
 
 export default function ({
   pluginName,
-  registrarManagedName,
   namespace,
 }: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
@@ -18,7 +17,8 @@ export default function ({
     handleTransferBatch,
   } = makeNameWrapperHandlers({
     pluginName,
-    registrarManagedName,
+    // the shared Registrar handlers in this plugin index direct subnames of '.linea.eth'
+    registrarManagedName: "linea.eth",
   });
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);

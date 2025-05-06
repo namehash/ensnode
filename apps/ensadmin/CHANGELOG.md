@@ -1,5 +1,30 @@
 # ensadmin
 
+## 0.26.0
+
+### Minor Changes
+
+- [#664](https://github.com/namehash/ensnode/pull/664) [`3ac214b`](https://github.com/namehash/ensnode/commit/3ac214b85c092c3dfc22c091a6883cf68f71b8bd) Thanks [@notrab](https://github.com/notrab)! - Improvements to ENSAdmin user experience: introducing "Saved Queries" to GraphQL Editor UI to enable users access useful data quickly from ENSNode.'
+
+### Patch Changes
+
+- [#674](https://github.com/namehash/ensnode/pull/674) [`a00320c`](https://github.com/namehash/ensnode/commit/a00320c6e02a923a1ab65485026a6a9ff9e9d64a) Thanks [@tk-o](https://github.com/tk-o)! - Include Optimism Mainnet configuration to allow proper data display.
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.26.0
+  - @ensnode/utils@0.26.0
+  - @ensnode/ponder-metadata@0.26.0
+  - @ensnode/ponder-schema@0.26.0
+
+## 0.25.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/utils@0.25.0
+  - @ensnode/ponder-metadata@0.25.0
+  - @ensnode/ponder-schema@0.25.0
+
 ## 0.24.0
 
 ### Patch Changes
