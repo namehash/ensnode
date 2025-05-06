@@ -1,12 +1,13 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Node, PluginName } from "@ensnode/utils";
-import { type Address, Hash, type Hex } from "viem";
+import { Node, PluginName } from "@ensnode/utils";
+import { type Address, Hash, type Hex, hexToBytes, hexToString } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
+import { decodeDNSPacketBytes } from "@ensnode/utils/subname-helpers";
 
 /**
  * makes a set of shared handlers for Resolver contracts
@@ -322,11 +323,26 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{
         node: Node;
         name: Hex;
+        // DNS Record Type
         resource: number;
+        ttl?: number;
         record: Hex;
       }>;
     }) {
-      // subgraph ignores
+      // subgraph ignores this event
+      if (pluginName === PluginName.Subgraph) return;
+
+      const { node, name, resource, record } = event.args;
+
+      // parse the DNS name
+      const [, domainName] = decodeDNSPacketBytes(hexToBytes(name));
+
+      console.log({
+        on: "DNSRecordChanged",
+        domainName,
+        resource,
+        record: hexToString(record),
+      });
     },
 
     async handleDNSRecordDeleted({

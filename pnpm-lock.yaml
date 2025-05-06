@@ -6,51 +6,18 @@ settings:
 
 catalogs:
   default:
-    '@astrojs/react':
-      specifier: ^4.2.0
-      version: 4.2.0
-    '@astrojs/tailwind':
-      specifier: ^6.0.0
-      version: 6.0.0
     '@biomejs/biome':
       specifier: ^1.9.4
       version: 1.9.4
-    '@namehash/namekit-react':
-      specifier: 0.12.0
-      version: 0.12.0
-    '@ponder/client':
-      specifier: 0.10.18
-      version: 0.10.18
-    '@ponder/react':
-      specifier: 0.10.18
-      version: 0.10.18
-    '@ponder/utils':
-      specifier: 0.2.3
-      version: 0.2.3
     '@types/node':
       specifier: ^22.14.0
       version: 22.15.3
-    '@vitest/coverage-v8':
-      specifier: ^3.1.1
-      version: 3.1.1
-    astro-font:
-      specifier: ^1.0.0
-      version: 1.0.0
-    astro-seo:
-      specifier: ^0.8.4
-      version: 0.8.4
-    drizzle-orm:
-      specifier: '=0.41.0'
-      version: 0.41.0
     hono:
       specifier: ^4.7.6
       version: 4.7.8
     ponder:
       specifier: 0.10.18
       version: 0.10.18
-    tsup:
-      specifier: ^8.3.6
-      version: 8.3.6
     typescript:
       specifier: ^5.7.3
       version: 5.7.3
@@ -117,13 +84,13 @@ importers:
         version: 0.0.0-alpha.31
       '@graphiql/plugin-explorer':
         specifier: ^4.0.2
-        version: 4.0.2(@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 4.0.2(@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/react':
         specifier: ^0.28.2
-        version: 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.28.2(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/toolkit':
         specifier: ^0.11.1
-        version: 0.11.1(@types/node@22.14.1)
+        version: 0.11.1(@types/node@22.15.3)
       '@ponder/client':
         specifier: 'catalog:'
         version: 0.10.18(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
@@ -183,7 +150,7 @@ importers:
         version: 0.0.0-alpha.31
       graphiql:
         specifier: ^3.8.3
-        version: 3.8.3(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 3.8.3(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lucide-react:
         specifier: ^0.476.0
         version: 0.476.0(react@18.3.1)
@@ -207,7 +174,7 @@ importers:
         version: 3.0.2
       tailwindcss-animate:
         specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3)))
+        version: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3)))
       viem:
         specifier: 'catalog:'
         version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
@@ -223,7 +190,7 @@ importers:
         version: 3.2.0
       '@types/node':
         specifier: ^22
-        version: 22.14.1
+        version: 22.15.3
       '@types/react':
         specifier: ^18
         version: 18.3.18
@@ -241,13 +208,13 @@ importers:
         version: 8.5.3
       tailwindcss:
         specifier: ^3.4.17
-        version: 3.4.17(ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3))
+        version: 3.4.17(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3))
       typescript:
         specifier: ^5
         version: 5.7.3
       vitest:
         specifier: 'catalog:'
-        version: 3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
+        version: 3.1.1(@types/debug@4.1.12)(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
 
   apps/ensindexer:
     dependencies:
@@ -2644,9 +2611,6 @@ packages:
 
   '@types/node@20.17.14':
     resolution: {integrity: sha512-w6qdYetNL5KRBiSClK/KWai+2IMEJuAj+EujKCumalFOwXtvOXaEan9AuwcRID2IcOIAWSIfR495hBtgKlx2zg==}
-
-  '@types/node@22.14.1':
-    resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
 
   '@types/node@22.15.3':
     resolution: {integrity: sha512-lX7HFZeHf4QG/J7tBZqrCAXwz9J5RD56Y6MpP0eJkka8p+K0RY/yBTW7CYFJ4VGCclxqOLKmiGP5juQc6MKgcw==}
@@ -8428,16 +8392,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@graphiql/plugin-explorer@4.0.2(@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/plugin-explorer@4.0.2(@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphiql-explorer: 0.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@graphiql/toolkit': 0.11.1(@types/node@22.14.1)
+      '@graphiql/toolkit': 0.11.1(@types/node@22.15.3)
       '@headlessui/react': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dialog': 1.1.6(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dropdown-menu': 2.1.6(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -8463,10 +8427,10 @@ snapshots:
       - '@types/react-dom'
       - graphql-ws
 
-  '@graphiql/toolkit@0.11.1(@types/node@22.14.1)':
+  '@graphiql/toolkit@0.11.1(@types/node@22.15.3)':
     dependencies:
       '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
-      meros: 1.3.0(@types/node@22.14.1)
+      meros: 1.3.0(@types/node@22.15.3)
     transitivePeerDependencies:
       - '@types/node'
 
@@ -9881,10 +9845,6 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@22.14.1':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@22.15.3':
     dependencies:
       undici-types: 6.21.0
@@ -10046,14 +10006,6 @@ snapshots:
       magic-string: 0.30.17
     optionalDependencies:
       vite: 6.2.7(@types/node@20.17.14)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
-
-  '@vitest/mocker@3.1.1(vite@6.2.7(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0))':
-    dependencies:
-      '@vitest/spy': 3.1.1
-      estree-walker: 3.0.3
-      magic-string: 0.30.17
-    optionalDependencies:
-      vite: 6.2.7(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
 
   '@vitest/mocker@3.1.1(vite@6.2.7(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
@@ -12247,9 +12199,9 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  graphiql@3.8.3(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  graphiql@3.8.3(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
@@ -13268,9 +13220,9 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  meros@1.3.0(@types/node@22.14.1):
+  meros@1.3.0(@types/node@22.15.3):
     optionalDependencies:
-      '@types/node': 22.14.1
+      '@types/node': 22.15.3
 
   micro-ftch@0.3.1: {}
 
@@ -14138,14 +14090,6 @@ snapshots:
     dependencies:
       camelcase-css: 2.0.1
       postcss: 8.5.3
-
-  postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3)):
-    dependencies:
-      lilconfig: 3.1.3
-      yaml: 2.7.0
-    optionalDependencies:
-      postcss: 8.5.3
-      ts-node: 10.9.2(@types/node@22.14.1)(typescript@5.7.3)
 
   postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3)):
     dependencies:
@@ -15065,9 +15009,9 @@ snapshots:
 
   tailwind-merge@3.0.2: {}
 
-  tailwindcss-animate@1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3))):
+  tailwindcss-animate@1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3))):
     dependencies:
-      tailwindcss: 3.4.17(ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3))
+      tailwindcss: 3.4.17(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3))
 
   tailwindcss@3.4.13(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3)):
     dependencies:
@@ -15096,7 +15040,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3)):
+  tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -15115,7 +15059,7 @@ snapshots:
       postcss: 8.5.3
       postcss-import: 15.1.0(postcss@8.5.3)
       postcss-js: 4.0.1(postcss@8.5.3)
-      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3))
+      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3))
       postcss-nested: 6.2.0(postcss@8.5.3)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.10
@@ -15199,25 +15143,6 @@ snapshots:
       typescript: 5.7.3
 
   ts-interface-checker@0.1.13: {}
-
-  ts-node@10.9.2(@types/node@22.14.1)(typescript@5.7.3):
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.11
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      '@types/node': 22.14.1
-      acorn: 8.14.0
-      acorn-walk: 8.3.4
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 5.7.3
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-    optional: true
 
   ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3):
     dependencies:
@@ -15608,27 +15533,6 @@ snapshots:
       - tsx
       - yaml
 
-  vite-node@3.1.1(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0):
-    dependencies:
-      cac: 6.7.14
-      debug: 4.4.0
-      es-module-lexer: 1.6.0
-      pathe: 2.0.3
-      vite: 6.2.7(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
-    transitivePeerDependencies:
-      - '@types/node'
-      - jiti
-      - less
-      - lightningcss
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - yaml
-
   vite-node@3.1.1(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0):
     dependencies:
       cac: 6.7.14
@@ -15668,19 +15572,6 @@ snapshots:
       rollup: 4.40.0
     optionalDependencies:
       '@types/node': 20.17.14
-      fsevents: 2.3.3
-      jiti: 2.4.2
-      lightningcss: 1.29.1
-      tsx: 4.19.3
-      yaml: 2.7.0
-
-  vite@6.2.7(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0):
-    dependencies:
-      esbuild: 0.25.0
-      postcss: 8.5.3
-      rollup: 4.40.0
-    optionalDependencies:
-      '@types/node': 22.14.1
       fsevents: 2.3.3
       jiti: 2.4.2
       lightningcss: 1.29.1
@@ -15729,45 +15620,6 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 20.17.14
-    transitivePeerDependencies:
-      - jiti
-      - less
-      - lightningcss
-      - msw
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - yaml
-
-  vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0):
-    dependencies:
-      '@vitest/expect': 3.1.1
-      '@vitest/mocker': 3.1.1(vite@6.2.7(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0))
-      '@vitest/pretty-format': 3.1.1
-      '@vitest/runner': 3.1.1
-      '@vitest/snapshot': 3.1.1
-      '@vitest/spy': 3.1.1
-      '@vitest/utils': 3.1.1
-      chai: 5.2.0
-      debug: 4.4.0
-      expect-type: 1.2.1
-      magic-string: 0.30.17
-      pathe: 2.0.3
-      std-env: 3.8.1
-      tinybench: 2.9.0
-      tinyexec: 0.3.2
-      tinypool: 1.0.2
-      tinyrainbow: 2.0.0
-      vite: 6.2.7(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
-      vite-node: 3.1.1(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@types/debug': 4.1.12
-      '@types/node': 22.14.1
     transitivePeerDependencies:
       - jiti
       - less
