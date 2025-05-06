@@ -111,7 +111,6 @@ import {
 } from "graphql";
 import { GraphQLJSON } from "graphql-scalars";
 
-import { getFieldDescription } from "./field-descriptions";
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
 import type { PonderMetadataProvider } from "./types";
@@ -351,7 +350,6 @@ export function buildGraphQLSchema({
     // construct a GraphQLInterfaceType representing the intersection table
     interfaceTypes[interfaceTypeName] = new GraphQLInterfaceType({
       name: interfaceTypeName,
-      description: getFieldDescription(interfaceTypeName),
       fields: () => {
         const fieldConfigMap: GraphQLFieldConfigMap<Parent, Context> = {};
 
@@ -359,7 +357,6 @@ export function buildGraphQLSchema({
           const type = columnToGraphQLCore(column, enumTypes);
           fieldConfigMap[columnName] = {
             type: column.notNull ? new GraphQLNonNull(type) : type,
-            description: getFieldDescription(`${interfaceTypeName}.${columnName}`),
           };
         }
 
@@ -376,7 +373,6 @@ export function buildGraphQLSchema({
     const entityTypeName = getSubgraphEntityName(table.tsName);
     entityTypes[table.tsName] = new GraphQLObjectType({
       name: entityTypeName,
-      description: getFieldDescription(entityTypeName),
       interfaces: Object.entries(polymorphicTableConfigs)
         // if this entity implements an interface...
         .filter(([, implementingTables]) =>
@@ -392,7 +388,6 @@ export function buildGraphQLSchema({
           const type = columnToGraphQLCore(column, enumTypes);
           fieldConfigMap[columnName] = {
             type: column.notNull ? new GraphQLNonNull(type) : type,
-            description: getFieldDescription(`${entityTypeName}.${columnName}`),
           };
         }
 
@@ -434,7 +429,6 @@ export function buildGraphQLSchema({
               // to be internal / incorrect. Until we have support for foriegn
               // key constraints, all `one` relations must be nullable.
               type: referencedEntityType,
-              description: getFieldDescription(`${entityTypeName}.${relationName}`),
               resolve: (parent, _args, context) => {
                 const loader = context.getDataLoader({ table: referencedTable });
 
@@ -475,7 +469,6 @@ export function buildGraphQLSchema({
 
             fieldConfigMap[relationName] = {
               type: referencedEntityPageType,
-              description: getFieldDescription(`${entityTypeName}.${relationName}`),
               args: {
                 where: { type: referencedEntityFilterType },
                 orderBy: { type: referencedEntityOrderByType },
