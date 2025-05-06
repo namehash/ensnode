@@ -115,12 +115,15 @@ importers:
       '@gqlpt/adapter-base':
         specifier: 0.0.0-alpha.31
         version: 0.0.0-alpha.31
+      '@graphiql/plugin-explorer':
+        specifier: ^4.0.2
+        version: 4.0.2(@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/react':
         specifier: ^0.28.2
-        version: 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/toolkit':
         specifier: ^0.11.1
-        version: 0.11.1(@types/node@22.14.1)(graphql@16.10.0)
+        version: 0.11.1(@types/node@22.14.1)
       '@ponder/client':
         specifier: 'catalog:'
         version: 0.10.18(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
@@ -177,10 +180,10 @@ importers:
         version: 4.1.0
       gqlpt:
         specifier: 0.0.0-alpha.31
-        version: 0.0.0-alpha.31(graphql@16.10.0)
+        version: 0.0.0-alpha.31
       graphiql:
         specifier: ^3.8.3
-        version: 3.8.3(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 3.8.3(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lucide-react:
         specifier: ^0.476.0
         version: 0.476.0(react@18.3.1)
@@ -1343,6 +1346,14 @@ packages:
     resolution: {integrity: sha512-/07hlR/cM/M+7+uHp7yfmcPem2nbdSj/4YhPCwJy2XOanUmN4HYcxt1zKGSTUDteekxonPtsKubkh8V66cBXXg==}
     peerDependencies:
       graphql: ^16.0.0 || ^17.0.0
+
+  '@graphiql/plugin-explorer@4.0.2':
+    resolution: {integrity: sha512-bHAtlx5K2NwWhvARDj7EiXhtBJZoKVSCxM4R8NYTptkE/hNSL5oKiN+by4bY5pkU6+EIBWcNjHOK66zyKsXQQQ==}
+    peerDependencies:
+      '@graphiql/react': ^0.32.0
+      graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
 
   '@graphiql/react@0.28.2':
     resolution: {integrity: sha512-6PE2Ff9dXpyQMHy3oKzCjT738kY2+wdQ4Xce8+1K+G2yMGZ716Fo0i4vW3S6ErHVI4S/C76gFTQlv/pzxU5ylg==}
@@ -4388,6 +4399,13 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  graphiql-explorer@0.9.0:
+    resolution: {integrity: sha512-fZC/wsuatqiQDO2otchxriFO0LaWIo/ovF/CQJ1yOudmY0P7pzDiP+l9CEHUiWbizk3e99x6DQG4XG1VxA+d6A==}
+    peerDependencies:
+      graphql: ^0.6.0 || ^0.7.0 || ^0.8.0-b || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
+      react: ^15.6.0 || ^16.0.0
+      react-dom: ^15.6.0 || ^16.0.0
 
   graphiql@3.8.3:
     resolution: {integrity: sha512-cuPDYtXVKV86Pu5PHBX642Odi/uVEE2y1Jxq5rGO/Qy1G2lRp7ZZ7a/T30RzxhuLSWo9zUbzq0P3U49//H0Ugw==}
@@ -7495,9 +7513,8 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@apollo/utils.sortast@3.0.0(graphql@16.10.0)':
+  '@apollo/utils.sortast@3.0.0':
     dependencies:
-      graphql: 16.10.0
       lodash.sortby: 4.7.0
 
   '@astrojs/check@0.5.10(typescript@5.7.3)':
@@ -8401,20 +8418,26 @@ snapshots:
 
   '@gqlpt/adapter-base@0.0.0-alpha.31': {}
 
-  '@gqlpt/utils@0.0.0-alpha.31(graphql@16.10.0)':
+  '@gqlpt/utils@0.0.0-alpha.31':
     dependencies:
-      '@graphql-tools/schema': 10.0.6(graphql@16.10.0)
+      '@graphql-tools/schema': 10.0.6
       '@types/debug': 4.1.12
       debug: 4.3.7
-      graphql: 16.10.0
-      graphql-yoga: 5.8.0(graphql@16.10.0)
+      graphql-yoga: 5.8.0
       node-fetch: 3.3.2
     transitivePeerDependencies:
       - supports-color
 
-  '@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/plugin-explorer@4.0.2(@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@graphiql/toolkit': 0.11.1(@types/node@22.14.1)(graphql@16.10.0)
+      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      graphiql-explorer: 0.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@graphiql/toolkit': 0.11.1(@types/node@22.14.1)
       '@headlessui/react': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dialog': 1.1.6(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dropdown-menu': 2.1.6(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -8423,12 +8446,11 @@ snapshots:
       '@types/codemirror': 5.60.15
       clsx: 1.2.1
       codemirror: 5.65.18
-      codemirror-graphql: 2.2.0(@codemirror/language@6.0.0)(codemirror@5.65.18)(graphql@16.10.0)
+      codemirror-graphql: 2.2.0(@codemirror/language@6.0.0)(codemirror@5.65.18)
       copy-to-clipboard: 3.3.3
       framer-motion: 6.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       get-value: 3.0.1
-      graphql: 16.10.0
-      graphql-language-service: 5.3.0(graphql@16.10.0)
+      graphql-language-service: 5.3.0
       markdown-it: 14.1.0
       react: 18.3.1
       react-compiler-runtime: 19.0.0-beta-37ed2a7-20241206(react@18.3.1)
@@ -8441,10 +8463,9 @@ snapshots:
       - '@types/react-dom'
       - graphql-ws
 
-  '@graphiql/toolkit@0.11.1(@types/node@22.14.1)(graphql@16.10.0)':
+  '@graphiql/toolkit@0.11.1(@types/node@22.14.1)':
     dependencies:
       '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
-      graphql: 16.10.0
       meros: 1.3.0(@types/node@22.14.1)
     transitivePeerDependencies:
       - '@types/node'
@@ -8473,11 +8494,10 @@ snapshots:
       tslib: 2.8.1
       value-or-promise: 1.0.12
 
-  '@graphql-tools/schema@10.0.6(graphql@16.10.0)':
+  '@graphql-tools/schema@10.0.6':
     dependencies:
       '@graphql-tools/merge': 9.0.17(graphql@16.10.0)
       '@graphql-tools/utils': 10.7.2(graphql@16.10.0)
-      graphql: 16.10.0
       tslib: 2.8.1
       value-or-promise: 1.0.12
 
@@ -11117,13 +11137,12 @@ snapshots:
 
   clsx@2.1.1: {}
 
-  codemirror-graphql@2.2.0(@codemirror/language@6.0.0)(codemirror@5.65.18)(graphql@16.10.0):
+  codemirror-graphql@2.2.0(@codemirror/language@6.0.0)(codemirror@5.65.18):
     dependencies:
       '@codemirror/language': 6.0.0
       '@types/codemirror': 0.0.90
       codemirror: 5.65.18
-      graphql: 16.10.0
-      graphql-language-service: 5.3.0(graphql@16.10.0)
+      graphql-language-service: 5.3.0
 
   codemirror@5.65.18: {}
 
@@ -11701,7 +11720,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -11723,7 +11742,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -12211,12 +12230,11 @@ snapshots:
 
   gopd@1.2.0: {}
 
-  gqlpt@0.0.0-alpha.31(graphql@16.10.0):
+  gqlpt@0.0.0-alpha.31:
     dependencies:
-      '@apollo/utils.sortast': 3.0.0(graphql@16.10.0)
+      '@apollo/utils.sortast': 3.0.0
       '@gqlpt/adapter-base': 0.0.0-alpha.31
-      '@gqlpt/utils': 0.0.0-alpha.31(graphql@16.10.0)
-      graphql: 16.10.0
+      '@gqlpt/utils': 0.0.0-alpha.31
     transitivePeerDependencies:
       - supports-color
 
@@ -12224,10 +12242,14 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  graphiql@3.8.3(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  graphiql-explorer@0.9.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql@16.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      graphql: 16.10.0
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  graphiql@3.8.3(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      '@graphiql/react': 0.28.2(@codemirror/language@6.0.0)(@types/node@22.14.1)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
@@ -12237,10 +12259,9 @@ snapshots:
       - '@types/react-dom'
       - graphql-ws
 
-  graphql-language-service@5.3.0(graphql@16.10.0):
+  graphql-language-service@5.3.0:
     dependencies:
       debounce-promise: 3.1.2
-      graphql: 16.10.0
       nullthrows: 1.1.1
       vscode-languageserver-types: 3.17.5
 
@@ -12272,7 +12293,7 @@ snapshots:
       lru-cache: 10.4.3
       tslib: 2.8.1
 
-  graphql-yoga@5.8.0(graphql@16.10.0):
+  graphql-yoga@5.8.0:
     dependencies:
       '@envelop/core': 5.0.3
       '@graphql-tools/executor': 1.3.12(graphql@16.10.0)
@@ -12283,7 +12304,6 @@ snapshots:
       '@whatwg-node/fetch': 0.9.23
       '@whatwg-node/server': 0.9.65
       dset: 3.1.4
-      graphql: 16.10.0
       lru-cache: 10.4.3
       tslib: 2.8.1
 
