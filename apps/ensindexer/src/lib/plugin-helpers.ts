@@ -2,9 +2,9 @@ import type { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Address, Chain, isAddress } from "viem";
 
+import { getConfig } from "@/config/app-config";
 import {
   constrainContractBlockrange,
-  getEnsDeploymentChain,
   rpcEndpointUrl,
   rpcMaxRequestsPerSecond,
 } from "@/lib/ponder-helpers";
@@ -64,6 +64,8 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
   requestedPluginNames: string[],
   availableDatasourceNames: DatasourceName[],
 ): PLUGIN[] {
+  const config = getConfig();
+
   if (!requestedPluginNames.length) throw new Error("Must activate at least 1 plugin.");
 
   // validate that each of the requestedPluginNames is included in allPlugins
@@ -93,7 +95,15 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
 
     if (!hasRequiredDatasources) {
       throw new Error(
-        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${getEnsDeploymentChain()} deployment. ${plugin.pluginName} specifies dependent datasources: ${plugin.requiredDatasources.join(", ")}, but available datasources in the ${getEnsDeploymentChain()} deployment are: ${availableDatasourceNames.join(", ")}.`,
+        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${
+          config.ensDeploymentChain
+        } deployment. ${
+          plugin.pluginName
+        } specifies dependent datasources: ${plugin.requiredDatasources.join(
+          ", ",
+        )}, but available datasources in the ${
+          config.ensDeploymentChain
+        } deployment are: ${availableDatasourceNames.join(", ")}.`,
       );
     }
   }
@@ -235,6 +245,8 @@ export function validateContractConfigs<CONTRACT_CONFIGS extends Record<string, 
   pluginName: PluginName,
   contracts: CONTRACT_CONFIGS,
 ) {
+  const config = getConfig();
+
   // invariant: `contracts` must provide valid addresses if a filter is not provided
   //  (see packages/ens-deployments/src/ens-test-env.ts) for context
   const hasAddresses = Object.values(contracts)
@@ -243,7 +255,9 @@ export function validateContractConfigs<CONTRACT_CONFIGS extends Record<string, 
 
   if (!hasAddresses) {
     throw new Error(
-      `The ENSDeployment '${getEnsDeploymentChain()}' provided to the '${pluginName}' plugin does not define valid addresses. This occurs if the 'address' of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
+      `The ENSDeployment '${
+        config.ensDeploymentChain
+      }' provided to the '${pluginName}' plugin does not define valid addresses. This occurs if the 'address' of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
 
 Here are the contract configs we attempted to validate:
 ${JSON.stringify(contracts)}`,

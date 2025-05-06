@@ -1,9 +1,10 @@
 import type { Event } from "ponder:registry";
 import { PublicClient } from "viem";
 
+import { getConfig } from "@/config/app-config";
 import { Blockrange } from "@/lib/types";
-import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
-import { DEFAULT_ENSRAINBOW_URL, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import { ENSDeployments } from "@ensnode/ens-deployments";
+import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
@@ -23,7 +24,9 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 export const constrainContractBlockrange = (
   contractStartBlock: number | undefined = 0,
 ): Blockrange => {
-  const { startBlock, endBlock } = getGlobalBlockrange();
+  const {
+    globalBlockrange: { startBlock, endBlock },
+  } = getConfig();
 
   const isEndConstrained = endBlock !== undefined;
   const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
@@ -32,26 +35,6 @@ export const constrainContractBlockrange = (
     startBlock: isEndConstrained ? Math.min(concreteStartBlock, endBlock) : concreteStartBlock,
     endBlock,
   };
-};
-
-/**
- * Gets the global block range configured by the START_BLOCK and END_BLOCK environment variables,
- * validating the range if specified.
- *
- * @returns blockrange of startBlock and endBlock
- */
-export const getGlobalBlockrange = (): Blockrange => {
-  const startBlock = parseBlockheightEnvVar("START_BLOCK");
-  const endBlock = parseBlockheightEnvVar("END_BLOCK");
-
-  if (startBlock !== undefined && endBlock !== undefined) {
-    // the global range, if defined, must be start <= end
-    if (!(startBlock <= endBlock)) {
-      throw new Error(`END_BLOCK (${endBlock}) must be >= START_BLOCK (${startBlock})`);
-    }
-  }
-
-  return { startBlock, endBlock };
 };
 
 /**
@@ -151,43 +134,13 @@ export const parseRpcMaxRequestsPerSecond = (rawValue?: string): number => {
 };
 
 /**
- * Gets the ENSRainbow API endpoint URL.
- *
- * @returns the ENSRainbow API endpoint URL
- */
-export const ensRainbowEndpointUrl = (): string => {
-  const envVarName = "ENSRAINBOW_URL";
-  const envVarValue = process.env[envVarName];
-
-  try {
-    return parseEnsRainbowEndpointUrl(envVarValue);
-  } catch (e: any) {
-    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
-  }
-};
-
-export const parseEnsRainbowEndpointUrl = (rawValue?: string): string => {
-  // no ENSRainbow URL provided
-  if (!rawValue) {
-    // apply default URL value
-    return DEFAULT_ENSRAINBOW_URL;
-  }
-
-  try {
-    return new URL(rawValue).toString();
-  } catch (e) {
-    throw new Error(`'${rawValue}' is not a valid URL`);
-  }
-};
-
-/**
  * Creates a function that fetches ENSRainbow version information.
  *
  * @returns A function that fetches ENSRainbow version information
  */
 export const createEnsRainbowVersionFetcher = () => {
   const client = new EnsRainbowApiClient({
-    endpointUrl: new URL(ensRainbowEndpointUrl()),
+    endpointUrl: new URL(getConfig().ensRainbowEndpointUrl),
   });
 
   return async () => {
@@ -208,67 +161,12 @@ export const createEnsRainbowVersionFetcher = () => {
 };
 
 /**
- * Gets the ENS Deployment Chain, defaulting to mainnet.
- *
- * @throws if not a valid deployment chain value
- */
-export const getEnsDeploymentChain = (): ENSDeploymentChain => {
-  const value = process.env.ENS_DEPLOYMENT_CHAIN;
-  if (!value) return "mainnet";
-
-  const validValues = Object.keys(ENSDeployments);
-  if (!validValues.includes(value)) {
-    throw new Error(`Error: ENS_DEPLOYMENT_CHAIN must be one of ${validValues.join(" | ")}`);
-  }
-
-  return value as ENSDeploymentChain;
-};
-
-/**
  * Get the ENSDeployment chain ID.
  *
  * @returns the ENSDeployment chain ID
  */
 export const getEnsDeploymentChainId = (): number => {
-  return ENSDeployments[getEnsDeploymentChain()].root.chain.id;
-};
-
-/**
- * Get the ENSNode public URL.
- *
- * @returns the ENSNode public URL
- */
-export const ensNodePublicUrl = (): string => {
-  const envVarName = "ENSNODE_PUBLIC_URL";
-  const envVarValue = process.env[envVarName];
-
-  try {
-    return parseUrl(envVarValue);
-  } catch (e: any) {
-    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
-  }
-};
-
-const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
-
-/**
- * Get the ENSAdmin URL.
- *
- * @returns the ENSAdmin URL
- */
-export const ensAdminUrl = (): string => {
-  const envVarName = "ENSADMIN_URL";
-  const envVarValue = process.env[envVarName];
-
-  if (!envVarValue) {
-    return DEFAULT_ENSADMIN_URL;
-  }
-
-  try {
-    return parseUrl(envVarValue);
-  } catch (e: any) {
-    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
-  }
+  return ENSDeployments[getConfig().ensDeploymentChain].root.chain.id;
 };
 
 export const parseUrl = (rawValue?: string): string => {
@@ -281,97 +179,6 @@ export const parseUrl = (rawValue?: string): string => {
   } catch (e) {
     throw new Error(`'${rawValue}' is not a valid URL`);
   }
-};
-
-const DEFAULT_DATABASE_SCHEMA = "public";
-
-/**
- * Get the database schema name used by Ponder indexer.
- *
- * @returns the database schema name used by Ponder indexer
- */
-export const ponderDatabaseSchema = (): string => {
-  const envVarName = "DATABASE_SCHEMA";
-  const envVarValue = process.env[envVarName];
-
-  return parsePonderDatabaseSchema(envVarValue);
-};
-
-export const parsePonderDatabaseSchema = (rawValue?: string): string => {
-  if (!rawValue) {
-    return DEFAULT_DATABASE_SCHEMA;
-  }
-  return rawValue;
-};
-
-export const getRequestedPluginNames = (): Array<string> => {
-  const envVarName = "ACTIVE_PLUGINS";
-  const envVarValue = process.env[envVarName];
-
-  try {
-    return parseRequestedPluginNames(envVarValue);
-  } catch (e: any) {
-    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
-  }
-};
-
-export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
-  if (!rawValue) throw new Error("Expected value not set");
-  const value = rawValue.split(",");
-  if (value.length === 0) {
-    throw new Error("ACTIVE_PLUGINS expected at least one activated plugin.");
-  }
-  return value;
-};
-
-export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
-
-/**
- * Feature flag that determines whether the indexer should attempt healing
- * reverse addresses.
- *
- * @returns decision whether to heal reverse addresses
- */
-export const healReverseAddresses = (): boolean => {
-  const rawValue = process.env.HEAL_REVERSE_ADDRESSES;
-  if (!rawValue) return DEFAULT_HEAL_REVERSE_ADDRESSES;
-  if (rawValue === "true") return true;
-  if (rawValue === "false") return false;
-
-  throw new Error(
-    `Error parsing environment variable 'HEAL_REVERSE_ADDRESS': ${rawValue}' is not a valid value. Expected 'true' or 'false'.`,
-  );
-};
-
-/** Get the Ponder application port */
-export const ponderPort = (): number => {
-  const envVarName = "PORT";
-  const envVarValue = process.env[envVarName];
-
-  try {
-    return parsePonderPort(envVarValue);
-  } catch (e: any) {
-    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
-  }
-};
-
-/** Parse the Ponder application port */
-export const parsePonderPort = (rawValue?: string): number => {
-  if (!rawValue) {
-    throw new Error("Expected value not set");
-  }
-
-  const parsedValue = parseInt(rawValue, 10);
-
-  if (Number.isNaN(parsedValue)) {
-    throw new Error(`'${rawValue}' is not a number`);
-  }
-
-  if (parsedValue <= 0) {
-    throw new Error(`'${rawValue}' is not a natural number`);
-  }
-
-  return parsedValue;
 };
 
 /**

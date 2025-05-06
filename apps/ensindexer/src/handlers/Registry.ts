@@ -3,10 +3,11 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
+import { getConfig } from "@/config/app-config";
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { type EventWithArgs, healReverseAddresses } from "@/lib/ponder-helpers";
+import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 import { type LabelHash, type Node, PluginName, REVERSE_ROOT_NODES } from "@ensnode/utils";
 import {
@@ -14,13 +15,16 @@ import {
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
 } from "@ensnode/utils/subname-helpers";
-
 /**
  * makes a set of shared handlers for a Registry contract
  *
  * @param pluginName the name of the plugin using these shared handlers
  */
-export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+export const makeRegistryHandlers = ({
+  pluginName,
+}: {
+  pluginName: PluginName;
+}) => {
   const sharedEventValues = makeSharedEventValues(pluginName);
 
   return {
@@ -73,13 +77,15 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
 
         // if the domain doesn't yet have a name, attempt to construct it here
         if (!domain.name) {
-          const parent = await context.db.find(schema.domain, { id: parentNode });
+          const parent = await context.db.find(schema.domain, {
+            id: parentNode,
+          });
 
           let healedLabel = null;
 
           // 1. if healing label from reverse addresses is enabled, and the parent is a known
           //    reverse node (i.e. addr.reverse), give it a go
-          if (healReverseAddresses() && REVERSE_ROOT_NODES.has(parentNode)) {
+          if (getConfig().healReverseAddresses && REVERSE_ROOT_NODES.has(parentNode)) {
             healedLabel = maybeHealLabelByReverseAddress({
               maybeReverseAddress: owner,
               labelHash,
