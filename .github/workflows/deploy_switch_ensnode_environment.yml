@@ -67,7 +67,7 @@ jobs:
           esac
 
       - uses: ./.github/actions/send_slack_notification
-        env:
+        with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: ${{ env.SLACK_TITLE }}
           slack_message: "✅ Switch ENSNode environment completed"

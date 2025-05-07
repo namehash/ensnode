@@ -14,7 +14,7 @@ runs:
   using: composite
   steps:
     - uses: rtCamp/action-slack-notify@v2
-      env:
+      with:
         SLACK_WEBHOOK: ${{ inputs.slack_webhook }}
         SLACK_USERNAME: "ENSNode Bot"
         SLACK_ICON: "https://ensnode.io/favicon.svg"

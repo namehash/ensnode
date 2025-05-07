@@ -193,7 +193,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: ./.github/actions/send_slack_notification
-        env:
+        with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: "ENSNode new version released: v${{ steps.get-pr.outputs.version }}"
           slack_message: "✅ Release ENSNode completed"

@@ -183,7 +183,7 @@ jobs:
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
 
       - uses: ./.github/actions/send_slack_notification
-        env:
+        with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: ${{ env.SLACK_TITLE }}
           slack_message: "✅ Deploy ENSNode completed"
