@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'New main environment (green or blue)'
+        description: "New main environment (green or blue)"
         required: true
         type: choice
         options:
@@ -21,40 +21,48 @@ jobs:
     steps:
       - name: Print switch target
         run: |
-            echo "Switching to: $TARGET_ENVIRONMENT"
+          echo "Switching to: $TARGET_ENVIRONMENT"
 
       - name: Install redis-cli
         run: |
-            sudo apt install redis-tools
+          sudo apt install redis-tools
 
       - name: Switch Traefik routers
         run: |
-            # SEPOLIA
-            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
+          # SEPOLIA
+          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
 
-            # ALPHA
-            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-api-router/service "${TARGET_ENVIRONMENT}-alpha-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-indexer-router/service "${TARGET_ENVIRONMENT}-alpha-indexer"
+          # ALPHA
+          redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-api-router/service "${TARGET_ENVIRONMENT}-alpha-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-indexer-router/service "${TARGET_ENVIRONMENT}-alpha-indexer"
 
-            # MAINNET
-            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-api-router/service "${TARGET_ENVIRONMENT}-mainnet-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-indexer-router/service "${TARGET_ENVIRONMENT}-mainnet-indexer"
+          # MAINNET
+          redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-api-router/service "${TARGET_ENVIRONMENT}-mainnet-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-indexer-router/service "${TARGET_ENVIRONMENT}-mainnet-indexer"
 
-            # HOLESKY
-            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVIRONMENT}-holesky-api"
-            redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVIRONMENT}-holesky-indexer"
+          # HOLESKY
+          redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVIRONMENT}-holesky-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVIRONMENT}-holesky-indexer"
 
-            # ENSRAINBOW
-            redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
-    
-      - name: Slack Notification on Success
-        if: success()
-        uses: rtCamp/action-slack-notify@v2
+          # ENSRAINBOW
+          redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
+
+      - name: Calculate env variables
+        run: |
+          case "$TARGET_ENVIRONMENT" in
+            "green")
+              echo "SLACK_TITLE=':large_green_circle: GREEN environment activated" >> "$GITHUB_ENV"
+              ;;
+            "blue")
+              echo "SLACK_TITLE=':large_blue_circle: BLUE environment activated" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "SLACK_TITLE=':large_red_circle: Unrecognized environment activated" >> "$GITHUB_ENV"
+          esac
+
+      - uses: ./.github/actions/send_slack_notification
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_USERNAME: "ENSNode Bot"
-          SLACK_ICON: "https://ensnode.io/favicon.svg"
-          SLACK_TITLE: "✅ Switch ENSNode environment completed"
-          SLACK_MESSAGE: "Environment successfully switched to ${{ env.TARGET_ENVIRONMENT }}"
-          SLACK_COLOR: good
+          slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_title: ${{ env.SLACK_TITLE }}
+          slack_message: "✅ Switch ENSNode environment completed"

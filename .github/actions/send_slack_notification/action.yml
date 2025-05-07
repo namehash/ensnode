@@ -1,0 +1,23 @@
+name: Send Slack notification
+
+inputs:
+  slack_webhook:
+    required: true
+
+  slack_title:
+    required: true
+
+  slack_message:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ inputs.slack_webhook }}
+        SLACK_USERNAME: "ENSNode Bot"
+        SLACK_ICON: "https://ensnode.io/favicon.svg"
+        SLACK_TITLE: ${{ inputs.slack_title }}
+        SLACK_MESSAGE: ${{ inputs.slack_message }}
+        SLACK_COLOR: good
