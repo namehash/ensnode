@@ -3,14 +3,11 @@ import { MergedPluginConfig } from "@/plugins";
 
 export const validateGlobalBlockrange = (
   networks: MergedPluginConfig["networks"],
-  requestedPluginNames: string[]
+  requestedPluginNames: string[],
 ): void => {
   const { globalBlockrange, ensDeploymentChain } = getConfig();
 
-  if (
-    globalBlockrange.startBlock !== undefined ||
-    globalBlockrange.endBlock !== undefined
-  ) {
+  if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
     const numNetworks = Object.keys(networks).length;
     if (numNetworks > 1) {
       throw new Error(
@@ -26,7 +23,7 @@ export const validateGlobalBlockrange = (
     ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
   
-  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`
+  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
       );
     }
   }
@@ -34,30 +31,23 @@ export const validateGlobalBlockrange = (
 
 export const validateChainConfigs = (
   allChainIds: number[],
-  requestedPluginNames: string[]
+  requestedPluginNames: string[],
 ): void => {
   if (!allChainIds.every((chainId) => rpcEndpointUrl(chainId) !== undefined)) {
     throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${requestedPluginNames.join(
-      ", "
+      ", ",
     )}.
-    These plugins, collectively, index events from the following chains: ${allChainIds.join(
-      ", "
-    )}.
+    These plugins, collectively, index events from the following chains: ${allChainIds.join(", ")}.
     
     The following RPC_URL_* environment variables must be defined for nominal indexing behavior:
     ${allChainIds
-      .map(
-        (chainId) => `RPC_URL_${chainId}: ${rpcEndpointUrl(chainId) || "N/A"}`
-      )
+      .map((chainId) => `RPC_URL_${chainId}: ${rpcEndpointUrl(chainId) || "N/A"}`)
       .join("\n")}
     `);
   }
 };
 
-export function validateConfig(
-  allChainIds: number[],
-  networks: MergedPluginConfig["networks"]
-) {
+export function validateConfig(allChainIds: number[], networks: MergedPluginConfig["networks"]) {
   const { requestedPluginNames } = getConfig();
 
   ////////

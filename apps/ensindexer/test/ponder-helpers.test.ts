@@ -1,19 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  setupConfigMock,
   mockConfig,
-  setGlobalBlockrange,
   resetMockConfig,
+  setGlobalBlockrange,
+  setupConfigMock,
 } from "./utils/mockConfig";
 
 // Set up the mock before importing modules that depend on config
 setupConfigMock();
 
 // Now safely import the modules being tested
-import {
-  constrainContractBlockrange,
-  createStartBlockByChainIdMap,
-} from "@/lib/ponder-helpers";
+import { constrainContractBlockrange, createStartBlockByChainIdMap } from "@/lib/ponder-helpers";
 
 describe("ponder helpers", () => {
   // Reset mock config before each test
@@ -124,9 +121,7 @@ describe("ponder helpers", () => {
         },
       };
 
-      expect(
-        await createStartBlockByChainIdMap(Promise.resolve(partialPonderConfig))
-      ).toEqual({
+      expect(await createStartBlockByChainIdMap(Promise.resolve(partialPonderConfig))).toEqual({
         1: 444_444_333,
         8453: 1_799_430,
       });

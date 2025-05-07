@@ -2,11 +2,7 @@ import type { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Address, Chain, isAddress } from "viem";
 
-import {
-  getConfig,
-  rpcEndpointUrl,
-  rpcMaxRequestsPerSecond,
-} from "@/config/app-config";
+import { getConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "@/config/app-config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
@@ -32,18 +28,14 @@ import { Label, Name, PluginName } from "@ensnode/utils";
  * basenamesNamespace("Registry"); // returns "basenames/Registry"
  * ```
  */
-export function makePluginNamespace<PLUGIN_NAME extends PluginName>(
-  pluginName: PLUGIN_NAME
-) {
+export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: PLUGIN_NAME) {
   if (/[.:]/.test(pluginName)) {
-    throw new Error(
-      "Reserved character: Plugin namespace prefix cannot contain '.' or ':'"
-    );
+    throw new Error("Reserved character: Plugin namespace prefix cannot contain '.' or ':'");
   }
 
   /** Creates a namespaced contract name */
   return function pluginNamespace<CONTRACT_NAME extends string>(
-    contractName: CONTRACT_NAME
+    contractName: CONTRACT_NAME,
   ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
     return `${pluginName}/${contractName}`;
   };
@@ -66,37 +58,35 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(
 export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
   availablePlugins: readonly PLUGIN[],
   requestedPluginNames: string[],
-  availableDatasourceNames: DatasourceName[]
+  availableDatasourceNames: DatasourceName[],
 ): PLUGIN[] {
   const config = getConfig();
 
-  if (!requestedPluginNames.length)
-    throw new Error("Must activate at least 1 plugin.");
+  if (!requestedPluginNames.length) throw new Error("Must activate at least 1 plugin.");
 
   // validate that each of the requestedPluginNames is included in allPlugins
   const invalidPlugins = requestedPluginNames.filter(
-    (requestedPlugin) =>
-      !availablePlugins.some((plugin) => plugin.pluginName === requestedPlugin)
+    (requestedPlugin) => !availablePlugins.some((plugin) => plugin.pluginName === requestedPlugin),
   );
 
   if (invalidPlugins.length) {
     // Throw an error if there are invalid plugins
     throw new Error(
       `Invalid plugin names found: ${invalidPlugins.join(
-        ", "
-      )}. Please check the ACTIVE_PLUGINS environment variable.`
+        ", ",
+      )}. Please check the ACTIVE_PLUGINS environment variable.`,
     );
   }
 
   // filter allPlugins by those that the user requested
   const activePlugins = availablePlugins.filter((plugin) =>
-    requestedPluginNames.includes(plugin.pluginName)
+    requestedPluginNames.includes(plugin.pluginName),
   );
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
   for (const plugin of activePlugins) {
-    const hasRequiredDatasources = plugin.requiredDatasources.every(
-      (datasourceName) => availableDatasourceNames.includes(datasourceName)
+    const hasRequiredDatasources = plugin.requiredDatasources.every((datasourceName) =>
+      availableDatasourceNames.includes(datasourceName),
     );
 
     if (!hasRequiredDatasources) {
@@ -106,10 +96,10 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
         } deployment. ${
           plugin.pluginName
         } specifies dependent datasources: ${plugin.requiredDatasources.join(
-          ", "
+          ", ",
         )}, but available datasources in the ${
           config.ensDeploymentChain
-        } deployment are: ${availableDatasourceNames.join(", ")}.`
+        } deployment are: ${availableDatasourceNames.join(", ")}.`,
       );
     }
   }
@@ -118,19 +108,14 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
 }
 
 // Helper type to merge multiple types into one
-export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (
-  x: infer R
-) => void
+export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
   ? R
   : never;
 
 /**
  * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  */
-export interface ENSIndexerPlugin<
-  PLUGIN_NAME extends PluginName = PluginName,
-  CONFIG = unknown
-> {
+export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
   /**
    * A unique plugin name for identification
    */
@@ -157,9 +142,7 @@ export interface ENSIndexerPlugin<
 /**
  * An ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
  */
-export type ENSIndexerPluginHandlerArgs<
-  PLUGIN_NAME extends PluginName = PluginName
-> = {
+export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
   pluginName: PluginName;
   namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
@@ -168,7 +151,7 @@ export type ENSIndexerPluginHandlerArgs<
  * An ENSIndexerPlugin accepts ENSIndexerPluginHandlerArgs and registers ponder event handlers.
  */
 export type ENSIndexerPluginHandler<PLUGIN_NAME extends PluginName> = (
-  args: ENSIndexerPluginHandlerArgs<PLUGIN_NAME>
+  args: ENSIndexerPluginHandlerArgs<PLUGIN_NAME>,
 ) => void;
 
 /**
@@ -184,9 +167,7 @@ export const activateHandlers =
     handlers: Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
   }) =>
   async () => {
-    await Promise.all(handlers).then((modules) =>
-      modules.map((m) => m.default(args))
-    );
+    await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
   };
 
 /**
@@ -208,9 +189,10 @@ export function networksConfigForChain(chain: Chain) {
  * Defines a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  */
-export function networkConfigForContract<
-  CONTRACT_CONFIG extends ContractConfig
->(chain: Chain, contractConfig: CONTRACT_CONFIG) {
+export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
+  chain: Chain,
+  contractConfig: CONTRACT_CONFIG,
+) {
   return {
     [chain.id.toString()]: {
       address: contractConfig.address, // provide per-network address if available
@@ -230,18 +212,13 @@ const POSSIBLE_PREFIXES = [
  * @param uri - The base64-encoded JSON metadata URI string
  * @returns A tuple containing [label, name] if parsing succeeds, or [null, null] if it fails
  */
-export function parseLabelAndNameFromOnChainMetadata(
-  uri: string
-): [Label, Name] | [null, null] {
+export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name] | [null, null] {
   if (!POSSIBLE_PREFIXES.some((prefix) => uri.startsWith(prefix))) {
     // console.error("Invalid tokenURI format:", uri);
     return [null, null];
   }
 
-  const base64String = POSSIBLE_PREFIXES.reduce(
-    (memo, prefix) => memo.replace(prefix, ""),
-    uri
-  );
+  const base64String = POSSIBLE_PREFIXES.reduce((memo, prefix) => memo.replace(prefix, ""), uri);
   const jsonString = Buffer.from(base64String, "base64").toString("utf-8");
   const metadata = JSON.parse(jsonString);
 
@@ -260,9 +237,10 @@ export function parseLabelAndNameFromOnChainMetadata(
  * @param contracts - An array of contract configurations to validate
  * @throws {Error} If any contract with an address field has an invalid address format
  */
-export function validateContractConfigs<
-  CONTRACT_CONFIGS extends Record<string, ContractConfig>
->(pluginName: PluginName, contracts: CONTRACT_CONFIGS) {
+export function validateContractConfigs<CONTRACT_CONFIGS extends Record<string, ContractConfig>>(
+  pluginName: PluginName,
+  contracts: CONTRACT_CONFIGS,
+) {
   const config = getConfig();
 
   // invariant: `contracts` must provide valid addresses if a filter is not provided
@@ -278,7 +256,7 @@ export function validateContractConfigs<
       }' provided to the '${pluginName}' plugin does not define valid addresses. This occurs if the 'address' of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
 
 Here are the contract configs we attempted to validate:
-${JSON.stringify(contracts)}`
+${JSON.stringify(contracts)}`,
     );
   }
 }

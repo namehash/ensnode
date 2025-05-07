@@ -7,10 +7,7 @@ import { ENSDeployments } from "@ensnode/ens-deployments";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 
-export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<
-  Event,
-  "args"
-> & {
+export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
 };
 
@@ -25,7 +22,7 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<
  *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
  */
 export const constrainContractBlockrange = (
-  contractStartBlock: number | undefined = 0
+  contractStartBlock: number | undefined = 0,
 ): Blockrange => {
   const {
     globalBlockrange: { startBlock, endBlock },
@@ -35,9 +32,7 @@ export const constrainContractBlockrange = (
   const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
 
   return {
-    startBlock: isEndConstrained
-      ? Math.min(concreteStartBlock, endBlock)
-      : concreteStartBlock,
+    startBlock: isEndConstrained ? Math.min(concreteStartBlock, endBlock) : concreteStartBlock,
     endBlock,
   };
 };
@@ -88,7 +83,7 @@ export const getEnsDeploymentChainId = (): number => {
  * @returns fetcher function
  */
 export function createPrometheusMetricsFetcher(
-  ponderApplicationPort: number
+  ponderApplicationPort: number,
 ): () => Promise<string> {
   /**
    * Fetches the Prometheus metrics from the Ponder application endpoint.
@@ -96,9 +91,7 @@ export function createPrometheusMetricsFetcher(
    * @returns Prometheus metrics as a text string
    */
   return async function fetchPrometheusMetrics(): Promise<string> {
-    const response = await fetch(
-      `http://localhost:${ponderApplicationPort}/metrics`
-    );
+    const response = await fetch(`http://localhost:${ponderApplicationPort}/metrics`);
 
     return response.text();
   };
@@ -108,7 +101,7 @@ export function createPrometheusMetricsFetcher(
  * Creates a first block to index fetcher for the given ponder configuration.
  */
 export function createFirstBlockToIndexByChainIdFetcher(
-  ponderConfig: Promise<PartialPonderConfig>
+  ponderConfig: Promise<PartialPonderConfig>,
 ) {
   /**
    * Fetches the first block to index for the requested chain ID.
@@ -122,7 +115,7 @@ export function createFirstBlockToIndexByChainIdFetcher(
    */
   return async function fetchFirstBlockToIndexByChainId(
     chainId: number,
-    publicClient: PublicClient
+    publicClient: PublicClient,
   ): Promise<BlockInfo> {
     const startBlockNumbers: Record<number, number> =
       await createStartBlockByChainIdMap(ponderConfig);
@@ -137,7 +130,7 @@ export function createFirstBlockToIndexByChainIdFetcher(
     if (startBlockNumberForChainId < 0) {
       // throw an error if the start block number is invalid block number
       throw new Error(
-        `Start block number "${startBlockNumberForChainId}" for chain ID ${chainId} must be a non-negative integer`
+        `Start block number "${startBlockNumberForChainId}" for chain ID ${chainId} must be a non-negative integer`,
       );
     }
 
@@ -148,9 +141,7 @@ export function createFirstBlockToIndexByChainIdFetcher(
     // the decided start block number should be available on the network
     if (!block) {
       // throw an error if the block is not available
-      throw Error(
-        `Failed to fetch block ${startBlockNumberForChainId} for chainId ${chainId}`
-      );
+      throw Error(`Failed to fetch block ${startBlockNumberForChainId} for chainId ${chainId}`);
     }
 
     // otherwise, return the start block info
@@ -227,7 +218,7 @@ interface PonderNetworkConfig {
  * ```
  */
 export async function createStartBlockByChainIdMap(
-  ponderConfig: Promise<PartialPonderConfig>
+  ponderConfig: Promise<PartialPonderConfig>,
 ): Promise<Record<number, number>> {
   const config = Object.values((await ponderConfig).contracts);
 
@@ -236,18 +227,13 @@ export async function createStartBlockByChainIdMap(
   // go through each contract configuration
   for (const contractConfig of config) {
     // and then through each network configuration for the contract
-    for (const contractNetworkConfig of Object.entries(
-      contractConfig.network
-    )) {
+    for (const contractNetworkConfig of Object.entries(contractConfig.network)) {
       // map string to number
       const chainId = Number(contractNetworkConfig[0]);
       const startBlock = contractNetworkConfig[1].startBlock || 0;
 
       // update the start block number for the chain ID if it's lower than the current one
-      if (
-        !startBlockNumbers[chainId] ||
-        startBlock < startBlockNumbers[chainId]
-      ) {
+      if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {
         startBlockNumbers[chainId] = startBlock;
       }
     }

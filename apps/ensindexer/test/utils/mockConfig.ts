@@ -1,5 +1,5 @@
-import { vi } from "vitest";
 import { ChainConfig } from "@/config/types";
+import { vi } from "vitest";
 
 // Default mock configuration object that can be modified by tests
 export const mockConfig: any = {
@@ -34,12 +34,10 @@ export function setupConfigMock() {
     return {
       getConfig: vi.fn(() => mockConfig),
       rpcMaxRequestsPerSecond: vi.fn(
-        (chainId: number) =>
-          mockConfig.chains[chainId]?.rpcMaxRequestsPerSecond || 50
+        (chainId: number) => mockConfig.chains[chainId]?.rpcMaxRequestsPerSecond || 50,
       ),
       rpcEndpointUrl: vi.fn(
-        (chainId: number) =>
-          mockConfig.chains[chainId]?.rpcEndpointUrl || "http://localhost:8545"
+        (chainId: number) => mockConfig.chains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
       ),
     };
   });
@@ -107,7 +105,7 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
 export function setChainConfig(
   chainId: number,
   rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50
+  rpcMaxRequestsPerSecond: number = 50,
 ) {
   if (!mockConfig.chains) {
     mockConfig.chains = {};
