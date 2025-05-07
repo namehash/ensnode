@@ -1,8 +1,10 @@
 "use client";
 
 import "graphiql/graphiql.css";
+import "@graphiql/plugin-explorer/style.css";
 
 import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
+import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
 import { useMemo } from "react";
@@ -101,7 +103,7 @@ interface GraphiQLPropsWithUrl extends Omit<GraphiQLProps, "fetcher"> {
  * We use this component to render the Ponder and Subgraph GraphiQL editors
  * that are exported from this file.
  */
-function GraphiQLEditor({ url, ...props }: GraphiQLPropsWithUrl) {
+function GraphiQLEditor({ url, plugins = [], ...props }: GraphiQLPropsWithUrl) {
   if (!url || typeof window === "undefined") {
     return null;
   }
@@ -134,6 +136,8 @@ function GraphiQLEditor({ url, ...props }: GraphiQLPropsWithUrl) {
     length: localStorage.length,
   };
 
+  const explorer = explorerPlugin();
+
   return (
     <div className="flex-1 graphiql-container">
       <GraphiQL
@@ -142,6 +146,7 @@ function GraphiQLEditor({ url, ...props }: GraphiQLPropsWithUrl) {
         storage={storage}
         forcedTheme="light"
         fetcher={fetcher}
+        plugins={[explorer, ...plugins]}
         {...props}
       />
     </div>
