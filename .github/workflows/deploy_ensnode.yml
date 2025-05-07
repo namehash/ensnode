@@ -29,6 +29,11 @@ jobs:
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Check if Docker images exists
         run: |
           docker manifest inspect ${{ env.ENSINDEXER_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSINDEXER_DOCKER_IMAGE }}"; exit 1; }
