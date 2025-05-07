@@ -1,9 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@layer base, starlight, theme, components, utilities;
 
-:root,
-:root[data-theme="light"] {
+@import "@astrojs/starlight-tailwind";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "@namehash/namekit-react/styles.css" layer(utilities);
+
+@theme {
   --sl-font: "Inter", sans-serif;
 
   --sl-color-accent-low: #cee1e8;
@@ -147,7 +150,6 @@ a[rel="prev"]:hover {
   padding-top: 0;
 }
 
-h1,
 .sl-markdown-content h1,
 .sl-markdown-content h2,
 .sl-markdown-content h3,
