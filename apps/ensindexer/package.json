@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensindexer",
   "scripts": {
-    "dev": "ponder dev --schema=public",
+    "dev": "DATABASE_SCHEMA=public ponder dev",
     "start": "ponder start",
     "serve": "ponder serve",
     "db": "ponder db",
