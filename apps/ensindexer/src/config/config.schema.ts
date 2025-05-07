@@ -1,53 +1,54 @@
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
 import * as z from "zod";
 
-// TODO: This is declared somewhere else, remove it in the other place.
 export const DEFAULT_RPC_RATE_LIMIT = 50;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
-export const DEFAULT_DATABASE_SCHEMA = "public";
+export const DEFAULT_DATABASE_SCHEMA = "ensnode";
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
+export const DEFAULT_DEPLOYMENT = "mainnet";
 
-// Custom URL schema to allow localhost urls and provide clear errors
 const customUrlSchema = (envVarKey: string) => {
   return (
     z
       .string({
-        // This error handler is for when the input is not even a string.
+        // This error handler is primarily for the case where the input is not a string type at all
+        // (e.g., undefined if it wasn't handled by a .default() before this schema, or a number).
         error: (issue) => {
           if (issue.code === "invalid_type") {
-            return `${envVarKey} must be a string. Received: ${typeof issue.input}.`;
+            return `${envVarKey} must be a string. Received type: ${typeof issue.input}.`;
           }
-          // Fallback for other unexpected string errors, though less likely.
-          return `${envVarKey} has an invalid string value.`;
+          // This is a fallback if it's a string but somehow fails the base string check
+          // before .min() or .refine() are even reached (less common).
+          return `${envVarKey} has an invalid string value. Please check the format.`;
         },
       })
-      // First refinement: Ensure the string is not empty after basic type check.
-      // This should be the primary check for "required and not empty".
-      .refine((val) => val.trim() !== "", {
-        error: `${envVarKey} is required and cannot be empty.`,
-      })
-      // Second refinement: Check if the non-empty string is a valid URL format.
-      // This will only run if the first refine (non-empty check) passes.
+      // Step 1: Ensure the string, if provided, is not empty or just whitespace.
+      // The .trim() method is applied first, then .min(1) checks the length of the trimmed string.
+      .trim()
+      .min(1, { error: `${envVarKey} is required and cannot be empty.` })
+      // Step 2: If the string is non-empty, then try to parse it as a URL.
+      // This .refine() will only execute if the .min(1) check (on the trimmed string) passes.
       .refine(
         (val) => {
+          // val is guaranteed by .min(1) to be a non-empty string at this point.
           try {
-            new URL(val); // val is already confirmed to be a non-empty string here
+            new URL(val);
             return true;
           } catch {
             return false;
           }
         },
         {
-          error: `${envVarKey} must be a valid URL string (e.g. http://localhost:8080 or https://example.com).`,
+          // This message is for when the string is non-empty but not a valid URL format.
+          error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
         }
       )
   );
 };
 
 const ChainConfigSchema = z.object({
-  rpcEndpointUrl: customUrlSchema("RPC_URL_{chainId}"),
+  rpcEndpointUrl: customUrlSchema("RPC_URL"),
   rpcMaxRequestsPerSecond: z
     .number({ error: "RPC max requests per second must be a number." })
     .int({ error: "RPC max requests per second must be an integer." })
@@ -63,7 +64,7 @@ const ENSDeploymentChainSchema = z
       ).join(", ")}`;
     },
   })
-  .default("mainnet");
+  .default(DEFAULT_DEPLOYMENT);
 
 export const ENSIndexerConfigSchema = z.object({
   ensDeploymentChain: ENSDeploymentChainSchema,
@@ -132,6 +133,7 @@ export const ENSIndexerConfigSchema = z.object({
   ),
   healReverseAddresses: z.preprocess(
     (val) => {
+      // handle empty strings as default instead of throwing an error
       if (val === undefined || (typeof val === "string" && val.trim() === ""))
         return DEFAULT_HEAL_REVERSE_ADDRESSES;
       if (val === "true") return true;
@@ -139,7 +141,7 @@ export const ENSIndexerConfigSchema = z.object({
       return val;
     },
     z.boolean({
-      error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.", // Zod 4: direct error message for type
+      error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
     })
   ),
   ponderPort: z.preprocess(
@@ -156,9 +158,7 @@ export const ENSIndexerConfigSchema = z.object({
           "Ponder port (PORT env var) must be a number between 1 and 65535.",
       })
   ),
-  ensRainbowEndpointUrl: customUrlSchema("ENSRAINBOW_URL").default(
-    DEFAULT_ENSRAINBOW_URL
-  ),
+  ensRainbowEndpointUrl: customUrlSchema("ENSRAINBOW_URL"),
   chains: z
     .record(
       z

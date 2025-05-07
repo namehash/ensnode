@@ -16,7 +16,7 @@ function setEnv(env: Record<string, string | undefined>) {
 const BASE_ENV = {
   ENSNODE_PUBLIC_URL: "http://localhost:42069",
   ENSADMIN_URL: "https://admin.ensnode.io",
-  DATABASE_SCHEMA: "public",
+  DATABASE_SCHEMA: "ensnode",
   ACTIVE_PLUGINS: "subgraph",
   HEAL_REVERSE_ADDRESSES: "true",
   PORT: "3000",
@@ -24,6 +24,7 @@ const BASE_ENV = {
   ENS_DEPLOYMENT_CHAIN: "mainnet",
   START_BLOCK: "0",
   END_BLOCK: "100",
+  RPC_URL_1: "https://eth-mainnet.g.alchemy.com/v2/1234",
 };
 
 // Main describe block for all getConfig tests
@@ -53,7 +54,7 @@ describe("getConfig", () => {
       expect(config.globalBlockrange).toEqual({ startBlock: 0, endBlock: 100 });
       expect(config.ensNodePublicUrl).toBe("http://localhost:42069");
       expect(config.ensAdminUrl).toBe("https://admin.ensnode.io");
-      expect(config.ponderDatabaseSchema).toBe("public");
+      expect(config.ponderDatabaseSchema).toBe("ensnode");
       expect(config.requestedPluginNames).toEqual(["subgraph"]);
       expect(config.healReverseAddresses).toBe(true);
       expect(config.ponderPort).toBe(3000);
@@ -101,12 +102,16 @@ describe("getConfig", () => {
 
     it("throws if START_BLOCK is negative", () => {
       process.env.START_BLOCK = "-1";
-      expect(() => localGetConfig()).toThrow(/START_BLOCK must be a non-negative number/i);
+      expect(() => localGetConfig()).toThrow(
+        /START_BLOCK must be a non-negative number/i
+      );
     });
 
     it("throws if END_BLOCK is negative", () => {
       process.env.END_BLOCK = "-5";
-      expect(() => localGetConfig()).toThrow(/END_BLOCK must be a non-negative number/i);
+      expect(() => localGetConfig()).toThrow(
+        /END_BLOCK must be a non-negative number/i
+      );
     });
 
     it("throws if START_BLOCK is not a number", () => {
@@ -123,7 +128,7 @@ describe("getConfig", () => {
       process.env.START_BLOCK = "100";
       process.env.END_BLOCK = "50";
       expect(() => localGetConfig()).toThrow(
-        /END_BLOCK must be greater than or equal to START_BLOCK/i,
+        /END_BLOCK must be greater than or equal to START_BLOCK/i
       );
     });
   });
@@ -131,18 +136,22 @@ describe("getConfig", () => {
   describe(".ensNodePublicUrl", () => {
     it("throws an error if ENSNODE_PUBLIC_URL is not a valid URL", () => {
       process.env.ENSNODE_PUBLIC_URL = "invalid url";
-      expect(() => localGetConfig()).toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
+      expect(() => localGetConfig()).toThrow(
+        /ENSNODE_PUBLIC_URL must be a valid URL string/i
+      );
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is empty", () => {
       process.env.ENSNODE_PUBLIC_URL = "";
-      expect(() => localGetConfig()).toThrow(/URL is required and cannot be empty/i);
+      expect(() => localGetConfig()).toThrow(
+        /URL is required and cannot be empty/i
+      );
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is undefined (explicitly testing the refine)", () => {
       delete process.env.ENSNODE_PUBLIC_URL;
       expect(() => localGetConfig()).toThrow(
-        /ENSNODE_PUBLIC_URL must be a string. Received: undefined/i,
+        /ENSNODE_PUBLIC_URL must be a string. Received type: undefined/i
       );
     });
 
@@ -162,7 +171,9 @@ describe("getConfig", () => {
   describe(".ensAdminUrl", () => {
     it("throws an error if ENSADMIN_URL is not a valid URL", () => {
       process.env.ENSADMIN_URL = "invalid url";
-      expect(() => localGetConfig()).toThrow(/ENSADMIN_URL must be a valid URL string/i);
+      expect(() => localGetConfig()).toThrow(
+        /ENSADMIN_URL must be a valid URL string/i
+      );
     });
 
     it("returns the provided ENSADMIN_URL if it is a valid URL", () => {
@@ -181,7 +192,9 @@ describe("getConfig", () => {
   describe(".ensRainbowEndpointUrl", () => {
     it("throws an error if ENSRAINBOW_URL is not a valid URL", () => {
       process.env.ENSRAINBOW_URL = "invalid url";
-      expect(() => localGetConfig()).toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
+      expect(() => localGetConfig()).toThrow(
+        /ENSRAINBOW_URL must be a valid URL string/i
+      );
     });
 
     it("returns the ENSRAINBOW_URL if it is a valid URL", () => {
@@ -190,10 +203,11 @@ describe("getConfig", () => {
       expect(config.ensRainbowEndpointUrl).toBe("https://customrainbow.com");
     });
 
-    it("returns the default ENSRAINBOW_URL if it is not set", () => {
+    it("throws an error if ENSRAINBOW_URL is not set", () => {
       delete process.env.ENSRAINBOW_URL;
-      const config = localGetConfig();
-      expect(config.ensRainbowEndpointUrl).toBe(DEFAULT_ENSRAINBOW_URL);
+      expect(() => localGetConfig()).toThrow(
+        /ENSRAINBOW_URL must be a string. Received type: undefined/i
+      );
     });
   });
 
@@ -207,7 +221,7 @@ describe("getConfig", () => {
     it("returns the default DATABASE_SCHEMA if it is not set", () => {
       delete process.env.DATABASE_SCHEMA;
       const config = localGetConfig();
-      expect(config.ponderDatabaseSchema).toBe("public");
+      expect(config.ponderDatabaseSchema).toBe("ensnode");
     });
   });
 
@@ -227,32 +241,36 @@ describe("getConfig", () => {
 
     it("throws if PORT is not a number", () => {
       process.env.PORT = "not-a-port";
-      expect(() => localGetConfig()).toThrow(/Ponder port \(PORT env var\) must be a number/i);
+      expect(() => localGetConfig()).toThrow(
+        /Ponder port \(PORT env var\) must be a number/i
+      );
     });
 
     it("throws if PORT is not an integer", () => {
       process.env.PORT = "3000.5";
-      expect(() => localGetConfig()).toThrow(/Ponder port \(PORT env var\) must be an integer/i);
+      expect(() => localGetConfig()).toThrow(
+        /Ponder port \(PORT env var\) must be an integer/i
+      );
     });
 
     it("throws if PORT is less than 1", () => {
       process.env.PORT = "0";
       expect(() => localGetConfig()).toThrow(
-        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i,
+        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i
       );
     });
 
     it("throws if PORT is a negative number", () => {
       process.env.PORT = "-100";
       expect(() => localGetConfig()).toThrow(
-        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i,
+        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i
       );
     });
 
     it("throws if PORT is greater than 65535", () => {
       process.env.PORT = "65536";
       expect(() => localGetConfig()).toThrow(
-        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i,
+        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i
       );
     });
   });
@@ -278,7 +296,9 @@ describe("getConfig", () => {
 
     it("throws if HEAL_REVERSE_ADDRESSES is an invalid string value", () => {
       process.env.HEAL_REVERSE_ADDRESSES = "not-a-boolean";
-      expect(() => localGetConfig()).toThrow(/HEAL_REVERSE_ADDRESSES must be 'true' or 'false'/i);
+      expect(() => localGetConfig()).toThrow(
+        /HEAL_REVERSE_ADDRESSES must be 'true' or 'false'/i
+      );
     });
   });
 
@@ -298,7 +318,7 @@ describe("getConfig", () => {
     it("throws if ENS_DEPLOYMENT_CHAIN is an invalid string value", () => {
       process.env.ENS_DEPLOYMENT_CHAIN = "not-a-chain";
       expect(() => localGetConfig()).toThrow(
-        /Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: mainnet, sepolia, holesky, ens-test-env/i,
+        /Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: mainnet, sepolia, holesky, ens-test-env/i
       );
     });
   });
@@ -319,22 +339,57 @@ describe("getConfig", () => {
     it("throws if ACTIVE_PLUGINS is an empty string", () => {
       process.env.ACTIVE_PLUGINS = "";
       expect(() => localGetConfig()).toThrow(
-        /ACTIVE_PLUGINS must be set and contain at least one valid plugin name/i,
+        /ACTIVE_PLUGINS must be set and contain at least one valid plugin name/i
       );
     });
 
     it("throws if ACTIVE_PLUGINS consists only of commas or whitespace", () => {
       process.env.ACTIVE_PLUGINS = " ,,  ,";
       expect(() => localGetConfig()).toThrow(
-        /ACTIVE_PLUGINS must be set and contain at least one valid plugin name/i,
+        /ACTIVE_PLUGINS must be set and contain at least one valid plugin name/i
       );
     });
 
     it("throws if ACTIVE_PLUGINS is not set (undefined)", () => {
       delete process.env.ACTIVE_PLUGINS;
       expect(() => localGetConfig()).toThrow(
-        /ACTIVE_PLUGINS must be set and contain at least one valid plugin name/i,
+        /ACTIVE_PLUGINS must be set and contain at least one valid plugin name/i
       );
+    });
+  });
+
+  describe(".chains", () => {
+    it("returns the chains if it is a valid object", () => {
+      process.env.RPC_URL_1 = "https://eth-mainnet.g.alchemy.com/v2/1234";
+      const config = localGetConfig();
+      expect(config.chains).toEqual({
+        1: {
+          rpcEndpointUrl: "https://eth-mainnet.g.alchemy.com/v2/1234",
+          // default value
+          rpcMaxRequestsPerSecond: 50,
+        },
+      });
+    });
+
+    it("throws an error if RPC_URL_1 is not a valid URL", () => {
+      process.env.RPC_URL_1 = "invalid url";
+      expect(() => localGetConfig()).toThrow(
+        /RPC_URL must be a valid URL string/i
+      );
+    });
+  });
+
+  describe(".rpcMaxRequestsPerSecond", () => {
+    it("returns the RPC_REQUEST_RATE_LIMIT_1 if it is a valid number", () => {
+      process.env.RPC_REQUEST_RATE_LIMIT_1 = "100";
+      const config = localGetConfig();
+      expect(config.chains[1]!.rpcMaxRequestsPerSecond).toBe(100);
+    });
+
+    it("returns the default RPC_REQUEST_RATE_LIMIT_1 if it is not set", () => {
+      delete process.env.RPC_REQUEST_RATE_LIMIT_1;
+      const config = localGetConfig();
+      expect(config.chains[1]!.rpcMaxRequestsPerSecond).toBe(50);
     });
   });
 });

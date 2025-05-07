@@ -1,4 +1,7 @@
-import { DEFAULT_RPC_RATE_LIMIT, ENSIndexerConfigSchema } from "@/config/config.schema";
+import {
+  DEFAULT_RPC_RATE_LIMIT,
+  ENSIndexerConfigSchema,
+} from "@/config/config.schema";
 import { ChainConfig, ENSIndexerConfig } from "@/config/types";
 import z from "zod";
 
@@ -23,7 +26,8 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
     const chainId = Number(match[1]);
 
     const rpcMaxRequestsPerSecond =
-      Number(process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`]) || DEFAULT_RPC_RATE_LIMIT;
+      Number(process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`]) ||
+      DEFAULT_RPC_RATE_LIMIT;
 
     chains[chainId] = {
       rpcEndpointUrl: value,
@@ -45,8 +49,7 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
  * required environment variables, correct formats, or logical consistency) is handled
  * separately by dedicated validation utilities elsewhere in the codebase.
  */
-function buildENSIndexerConfig(): ENSIndexerConfig {
-  console.log("building config");
+export function buildENSIndexerConfig(): ENSIndexerConfig {
   const chains = getChainsFromEnv();
 
   const config = {
@@ -60,8 +63,13 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
     ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
     globalBlockrange: {
       startBlock:
-        process.env.START_BLOCK !== undefined ? Number(process.env.START_BLOCK) : undefined,
-      endBlock: process.env.END_BLOCK !== undefined ? Number(process.env.END_BLOCK) : undefined,
+        process.env.START_BLOCK !== undefined
+          ? Number(process.env.START_BLOCK)
+          : undefined,
+      endBlock:
+        process.env.END_BLOCK !== undefined
+          ? Number(process.env.END_BLOCK)
+          : undefined,
     },
     chains,
   };
@@ -70,7 +78,6 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
 
   if (!parsed.success) {
     const errorMessage = getValidationErrors(parsed.error.issues);
-    console.error(errorMessage);
     throw new Error(errorMessage);
   }
 
@@ -90,3 +97,33 @@ export function getConfig() {
   }
   return _config;
 }
+
+/**
+ * Gets the RPC request rate limit for a given chain ID.
+ *
+ * @param chainId the chain ID to get the rate limit for
+ * @returns the rate limit in requests per second (rps)
+ */
+export const rpcMaxRequestsPerSecond = (chainId: number): number => {
+  const config = getConfig();
+  if (!config.chains[chainId]?.rpcMaxRequestsPerSecond) {
+    throw new Error(
+      `RPC max requests per second not found for chain ID ${chainId}`
+    );
+  }
+  return config.chains[chainId].rpcMaxRequestsPerSecond;
+};
+
+/**
+ * Gets the RPC endpoint URL for a given chain ID.
+ *
+ * @param chainId the chain ID to get the RPC URL for
+ * @returns the URL of the RPC endpoint
+ */
+export const rpcEndpointUrl = (chainId: number): string => {
+  const config = getConfig();
+  if (!config.chains[chainId]?.rpcEndpointUrl) {
+    throw new Error(`RPC endpoint URL not found for chain ID ${chainId}`);
+  }
+  return config.chains[chainId].rpcEndpointUrl;
+};

@@ -1,17 +1,33 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  DEFAULT_RPC_RATE_LIMIT,
+  setupConfigMock,
+  mockConfig,
+  setGlobalBlockrange,
+  resetMockConfig,
+} from "./utils/mockConfig";
+
+// Set up the mock before importing modules that depend on config
+setupConfigMock();
+
+// Now safely import the modules being tested
+import {
   constrainContractBlockrange,
   createStartBlockByChainIdMap,
-  parseRpcEndpointUrl,
-  parseRpcMaxRequestsPerSecond,
-  parseUrl,
 } from "@/lib/ponder-helpers";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("ponder helpers", () => {
+  // Reset mock config before each test
+  beforeEach(() => {
+    resetMockConfig();
+    vi.clearAllMocks();
+  });
+
   describe("constrainContractBlockrange", () => {
     describe("without global range", () => {
       beforeEach(() => {
+        // Set empty blockrange
+        setGlobalBlockrange(undefined, undefined);
+
         vi.stubEnv("START_BLOCK", "");
         vi.stubEnv("END_BLOCK", "");
       });
@@ -33,6 +49,9 @@ describe("ponder helpers", () => {
 
     describe("with global range", () => {
       beforeEach(() => {
+        // Set end block only
+        setGlobalBlockrange(undefined, 1234);
+
         vi.stubEnv("END_BLOCK", "1234");
       });
 
@@ -51,6 +70,12 @@ describe("ponder helpers", () => {
       });
 
       it("should use contract start block if later than global start", () => {
+        // Update the mockConfig for this test
+        mockConfig.globalBlockrange = {
+          startBlock: 10,
+          endBlock: 1234,
+        };
+
         vi.stubEnv("START_BLOCK", "10");
 
         const config = constrainContractBlockrange(20);
@@ -58,64 +83,17 @@ describe("ponder helpers", () => {
       });
 
       it("should use global start block if later than contract start", () => {
+        // Update the mockConfig for this test
+        mockConfig.globalBlockrange = {
+          startBlock: 30,
+          endBlock: 1234,
+        };
+
         vi.stubEnv("START_BLOCK", "30");
 
         const config = constrainContractBlockrange(20);
         expect(config).toEqual({ startBlock: 30, endBlock: 1234 });
       });
-    });
-  });
-
-  describe("parseRpcEndpointUrl", () => {
-    it("should parse a valid RPC URL", () => {
-      expect(parseRpcEndpointUrl("https://eth.drpc.org")).toBe("https://eth.drpc.org/");
-    });
-
-    it("should throw an error if the URL is invalid", () => {
-      expect(() => parseRpcEndpointUrl("invalid")).toThrowError(/is not a valid URL/);
-    });
-
-    it("should return undefined if the URL is missing", () => {
-      expect(parseRpcEndpointUrl()).toBeUndefined();
-    });
-  });
-
-  describe("parseRpcMaxRequestsPerSecond", () => {
-    it("should parse the RPC rate limit as a number", () => {
-      expect(parseRpcMaxRequestsPerSecond("10")).toBe(10);
-    });
-
-    it("should return the default rate limit if the value is undefined", () => {
-      expect(parseRpcMaxRequestsPerSecond()).toBe(DEFAULT_RPC_RATE_LIMIT);
-    });
-
-    it("should throw an error if the value is invalid", () => {
-      expect(() => parseRpcMaxRequestsPerSecond("invalid")).toThrowError(
-        "'invalid' is not a number",
-      );
-    });
-
-    it("should throw an error if the value is out of bounds", () => {
-      expect(() => parseRpcMaxRequestsPerSecond("0")).toThrowError("'0' is not a positive integer");
-      expect(() => parseRpcMaxRequestsPerSecond("-1")).toThrowError(
-        "'-1' is not a positive integer",
-      );
-    });
-  });
-
-  describe("parseUrl", () => {
-    it("should parse the public URL", () => {
-      expect(parseUrl("https://public.ensnode.io")).toBe("https://public.ensnode.io/");
-    });
-
-    it("should throw an error if the URL is invalid", () => {
-      expect(() => parseUrl("https//public.ensnode.io")).toThrowError(
-        "'https//public.ensnode.io' is not a valid URL",
-      );
-    });
-
-    it("should throw an error if the URL is missing", () => {
-      expect(() => parseUrl()).toThrowError("Expected value not set");
     });
   });
 
@@ -146,7 +124,9 @@ describe("ponder helpers", () => {
         },
       };
 
-      expect(await createStartBlockByChainIdMap(Promise.resolve(partialPonderConfig))).toEqual({
+      expect(
+        await createStartBlockByChainIdMap(Promise.resolve(partialPonderConfig))
+      ).toEqual({
         1: 444_444_333,
         8453: 1_799_430,
       });
