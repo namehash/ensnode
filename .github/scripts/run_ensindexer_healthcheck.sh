@@ -29,16 +29,16 @@ echo "Starting Ponder in the background from $(pwd)..."
 LOG_FILE=$(mktemp)
 echo "Logging output to $LOG_FILE"
 
-# Create a temporary .env.local file for Ponder
-ENV_FILE="$ENSINDEXER_DIR/.env.local"
-echo "Creating temporary .env.local file at $ENV_FILE"
-cat > "$ENV_FILE" << EOL
-PORT=42069
-# Add any other environment variables needed here
-EOL
+# # Create a temporary .env.local file for Ponder
+# ENV_FILE="$ENSINDEXER_DIR/.env.local"
+# echo "Creating temporary .env.local file at $ENV_FILE"
+# cat > "$ENV_FILE" << EOL
+# PORT=42069
+# # Add any other environment variables needed here
+# EOL
 
-# Ensure the original script still has access to these variables
-export PORT=42069
+# # Ensure the original script still has access to these variables
+# export PORT=42069
 
 # Run the Ponder dev command in background and redirect output to log file
 pnpm dev --disable-ui -vv > "$LOG_FILE" 2>&1 &
