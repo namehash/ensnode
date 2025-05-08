@@ -33,6 +33,7 @@
     "deepmerge-ts": "^7.1.5",
     "hono": "catalog:",
     "ponder": "catalog:",
+    "ponder-enrich-gql-docs-middleware": "^0.1.3",
     "viem": "catalog:"
   },
   "devDependencies": {
