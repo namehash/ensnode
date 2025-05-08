@@ -616,11 +616,13 @@ export function buildGraphQLSchema({
         },
         deployment: {
           type: new GraphQLNonNull(GraphQLString),
-          description: "A unique ID representing this instance of ENSNode.",
+          description:
+            "An ID representing this instance of ENSNode. It is composed of the ENSNode version (https://github.com/namehash/ensnode/releases) and the Ponder build_id (https://ponder.sh/docs/api-reference/database#instance-lifecycle).",
         },
         hasIndexingErrors: {
           type: new GraphQLNonNull(GraphQLBoolean),
-          description: "If true, ENSNode encountered indexing errors at some past block.",
+          description:
+            "If true, ENSIndexer has reported an indexing error and is not actively indexing blocks.",
         },
       },
     }),
@@ -643,7 +645,7 @@ export function buildGraphQLSchema({
           },
         };
       } catch (error) {
-        console.error("Cannot build subgraph meta", error);
+        console.error("Cannot build subgraph _Meta_", error);
         return null;
       }
     },
