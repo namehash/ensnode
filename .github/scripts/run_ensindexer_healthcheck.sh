@@ -4,7 +4,8 @@
 # This script is used in CI and can be run locally
 
 # Set default timeout if not provided by environment
-: "${HEALTH_CHECK_TIMEOUT:=60}"  # Use env var if set, otherwise default to 60
+: "${HEALTH_CHECK_TIMEOUT:=20}"  # Use env var if set, otherwise default to 60
+: "${PORT:=3000}"  # Set default port to 42069 to test since i dont have acces to ci
 
 # Detect if running from CI or local
 if [ -n "$GITHUB_WORKSPACE" ]; then
