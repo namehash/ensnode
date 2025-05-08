@@ -206,31 +206,6 @@ export const Resolver = [
       {
         indexed: false,
         internalType: "bytes",
-        name: "name",
-        type: "bytes",
-      },
-      {
-        indexed: false,
-        internalType: "uint16",
-        name: "resource",
-        type: "uint16",
-      },
-    ],
-    name: "DNSRecordDeleted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "bytes",
         name: "lastzonehash",
         type: "bytes",
       },

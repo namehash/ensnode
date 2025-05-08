@@ -47,6 +47,7 @@ export default function ({
     handlePubkeyChanged,
     handleTextChanged,
     handleVersionChanged,
+    handleZoneCreated,
   } = makeResolverHandlers({ pluginName });
 
   ponder.on(namespace("ThreeDNSResolver:AddrChanged"), handleAddrChanged);
@@ -84,10 +85,5 @@ export default function ({
   );
   ponder.on(namespace("ThreeDNSResolver:DNSRecordDeleted"), handleDNSRecordDeleted);
   ponder.on(namespace("ThreeDNSResolver:DNSZonehashChanged"), handleDNSZonehashChanged);
-  ponder.on(namespace("ThreeDNSResolver:ZoneCreated"), async ({ context, event }) => {
-    console.log({
-      on: "ZoneCreated",
-      ...event.args,
-    });
-  });
+  ponder.on(namespace("ThreeDNSResolver:ZoneCreated"), handleZoneCreated);
 }
