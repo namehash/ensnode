@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Simple script to verify Ponder starts up correctly
+# Simple script to verify ENSIndexer starts up correctly
 # This script is used in CI and can be run locally
 
 # Set default timeout if not provided by environment
-: "${HEALTH_CHECK_TIMEOUT:=60}"  # Use env var if set, otherwise default to 60
+# Use env var if set, otherwise default to 60 seconds
+: "${HEALTH_CHECK_TIMEOUT:=60}" 
 
 # Detect if running from CI or local
 if [ -n "$GITHUB_WORKSPACE" ]; then
@@ -13,7 +14,8 @@ if [ -n "$GITHUB_WORKSPACE" ]; then
 else
   # Running locally - determine path relative to script location
   SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  REPO_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"  # Adjusted for .github/scripts path
+  # Adjusted for .github/scripts path
+  REPO_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
   ENSINDEXER_DIR="$REPO_ROOT/apps/ensindexer"
 fi
 
@@ -23,17 +25,18 @@ cd "$ENSINDEXER_DIR" || {
   exit 1
 }
 
-echo "Starting Ponder in the background from $(pwd)..."
+echo "Starting ENSIndexer in the background from $(pwd)..."
 
 # Create a temporary log file
 LOG_FILE=$(mktemp)
 echo "Logging output to $LOG_FILE"
 
-# Run the Ponder dev command in background and redirect output to log file
+# Run ENSIndexer using the Ponder dev command in background
+# and redirect output to log file
 pnpm dev --disable-ui -vv > "$LOG_FILE" 2>&1 &
 PID=$!
 
-echo "Ponder started with PID: $PID"
+echo "ENSIndexer started with PID: $PID"
 
 # Wait for health check to pass
 echo "Waiting for health check to pass (up to $HEALTH_CHECK_TIMEOUT seconds)..."
@@ -53,7 +56,7 @@ while true; do
 
   # Check if the process is still running
   if ! ps -p $PID > /dev/null; then
-    echo "Ponder process exited before health check passed"
+    echo "ENSIndexer process exited before health check passed"
     wait $PID
     EXIT_CODE=$?
     echo "Exit code: $EXIT_CODE"
@@ -67,9 +70,9 @@ while true; do
 
   # Check for health ready message
   if grep -q "Started returning 200 responses from /health endpoint" "$LOG_FILE"; then
-    echo "Health check passed! Ponder is up and running."
-    echo "Test successful - terminating Ponder"
-    # Force kill the Ponder process
+    echo "Health check passed! ENSIndexer is up and running."
+    echo "Test successful - terminating ENSIndexer"
+    # Force kill the ENSIndexer process
     kill -9 $PID 2>/dev/null || true
     # Make sure we don't wait for the process to exit since we've force killed it
     wait $PID 2>/dev/null || true
@@ -85,7 +88,7 @@ while true; do
   elapsed=$((current_time - health_check_start))
 
   if [ $elapsed -ge $HEALTH_CHECK_TIMEOUT ]; then
-    echo "Health check timeout reached. Ponder did not become healthy."
+    echo "Health check timeout reached. ENSIndexer did not become healthy."
     kill -9 $PID 2>/dev/null || true
     wait $PID 2>/dev/null || true
     echo "Last 30 lines of log:"

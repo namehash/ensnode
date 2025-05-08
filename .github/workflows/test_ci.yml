@@ -53,17 +53,21 @@ jobs:
         if: needs.changed-packages.outputs.packages == 'true'
         run: pnpm packages:prepublish
 
-      # This will run the dev command in background, wait for
-      # RUNTIME_CHECK_TIMEOUT_SECONDS seconds, and then kill the process if it
-      # is still running. If the command does not throw an error within that
-      # time, the step will exit successfully. If it does throw an error,
-      # the step will exit and fail the CI pipeline. This runtime check uses
-      # a pglite database that only lives in the CI environment.
-      # It will be discarded after the CI run.
-      - name: Run Ponder runtime integrity checks
+      # This will run the dev command in background, and wait up to
+      # HEALTH_CHECK_TIMEOUT seconds. It will monitor the log output to
+      # ensure the app healthcheck is live. If the command does not
+      # print the log with the healthcheck message within that time, the step
+      # will exit with a failure.
+      # This runtime check uses a pglite database that only lives in the CI
+      # environment. It will be discarded after the CI run. The app will not
+      # check anything beyond the healthcheck as its job is to ensure the app
+      # starts successfully only. With the configured RPCs there is likely to
+      # be rate limits hit but we do not care for those.
+      - name: Run ENSIndexer runtime integrity checks
         env:
-          ACTIVE_PLUGINS: subgraph,basenames,lineanames
+          ACTIVE_PLUGINS: subgraph,basenames,lineanames,threedns
           RPC_URL_1: https://eth.drpc.org
+          RPC_URL_10: https://optimism.drpc.org
           RPC_URL_8453: https://base.drpc.org
           RPC_URL_59144: https://linea.drpc.org
           HEALTH_CHECK_TIMEOUT: 60
