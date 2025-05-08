@@ -61,25 +61,15 @@ jobs:
       # a pglite database that only lives in the CI environment.
       # It will be discarded after the CI run.
       - name: Run Ponder runtime integrity checks
-        working-directory: apps/ensindexer
         env:
           ACTIVE_PLUGINS: subgraph,basenames,lineanames
           RPC_URL_1: https://eth.drpc.org
           RPC_URL_8453: https://base.drpc.org
           RPC_URL_59144: https://linea.drpc.org
-          RUNTIME_CHECK_TIMEOUT_SECONDS: 10
+          HEALTH_CHECK_TIMEOUT: 60
         run: |
-          pnpm dev --disable-ui -vv &
-          PID=$!
-          sleep $RUNTIME_CHECK_TIMEOUT_SECONDS
-          if ps -p $PID > /dev/null; then
-            kill $PID
-            wait $PID || true
-            exit 0
-          else
-            wait $PID
-            exit $?
-          fi
+          chmod +x ./.github/scripts/run_ensindexer_healthcheck.sh
+          ./.github/scripts/run_ensindexer_healthcheck.sh
 
   unit-tests:
     runs-on: blacksmith-4vcpu-ubuntu-2204
