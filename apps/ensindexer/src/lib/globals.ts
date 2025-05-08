@@ -1,7 +1,10 @@
-import { getEnsDeploymentChain } from "@/lib/ponder-helpers";
+import { getConfig } from "@/config/app-config";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 
-export const SELECTED_ENS_DEPLOYMENT = ENSDeployments[getEnsDeploymentChain()];
+const config = getConfig();
+const ensDeploymentChain = config.ensDeploymentChain;
+
+export const SELECTED_ENS_DEPLOYMENT = ENSDeployments[ensDeploymentChain];
 
 /**
  * Note that here, we define the global MERGED_ENS_DEPLOYMENT as the _merge_ of mainnet (which fully

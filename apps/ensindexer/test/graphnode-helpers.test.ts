@@ -1,9 +1,16 @@
-import { describe, expect, it } from "vitest";
-
-import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import type { LabelHash } from "@ensnode/utils";
+import { describe, expect, it, vi } from "vitest";
+import { setupConfigMock } from "./utils/mockConfig";
+
+// Set up the mock before importing modules that depend on config
+setupConfigMock();
+
+// Now safely import the module being tested
+import { labelByLabelHash } from "@/lib/graphnode-helpers";
 
 describe("labelByLabelHash", () => {
+  it("empty environment", () => {});
+
   it("heals a valid known labelHash", async () => {
     expect(
       await labelByLabelHash("0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"),

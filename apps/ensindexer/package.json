@@ -33,7 +33,8 @@
     "deepmerge-ts": "^7.1.5",
     "hono": "catalog:",
     "ponder": "catalog:",
-    "viem": "catalog:"
+    "viem": "catalog:",
+    "zod": "4.0.0-beta.20250505T195954"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

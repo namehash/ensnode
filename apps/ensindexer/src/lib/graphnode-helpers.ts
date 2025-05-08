@@ -1,10 +1,9 @@
+import { getConfig } from "@/config/app-config";
 import { EnsRainbowApiClient, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 import type { Label, LabelHash } from "@ensnode/utils";
 
-import { ensRainbowEndpointUrl } from "@/lib/ponder-helpers";
-
 const ensRainbowApiClient = new EnsRainbowApiClient({
-  endpointUrl: new URL(ensRainbowEndpointUrl()),
+  endpointUrl: new URL(getConfig().ensRainbowEndpointUrl),
 });
 
 if (
