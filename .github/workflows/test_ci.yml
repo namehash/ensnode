@@ -67,7 +67,7 @@ jobs:
           RPC_URL_1: https://eth.drpc.org
           RPC_URL_8453: https://base.drpc.org
           RPC_URL_59144: https://linea.drpc.org
-          RUNTIME_CHECK_TIMEOUT_SECONDS: 10
+          RUNTIME_CHECK_TIMEOUT_SECONDS: 300
         run: |
           pnpm dev --disable-ui -vv &
           PID=$!
