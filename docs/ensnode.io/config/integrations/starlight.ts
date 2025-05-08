@@ -119,6 +119,10 @@ export function starlight(): AstroIntegration {
                   label: "Quickstart",
                   link: "/ensrainbow",
                 },
+                {
+                  label: "What is ENSRainbow?",
+                  link: "/ensrainbow/overview/what-is-ensrainbow",
+                },
               ],
             },
             {
@@ -149,6 +153,10 @@ export function starlight(): AstroIntegration {
                 {
                   label: "Quickstart",
                   link: "/ensadmin",
+                },
+                {
+                  label: "What is ENSAdmin?",
+                  link: "/ensadmin/overview/what-is-ensadmin",
                 },
               ],
             },
@@ -203,7 +211,8 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content:
+            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {

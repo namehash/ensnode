@@ -1,0 +1,54 @@
+---
+title: What is ENSRainbow?
+description: An overview of the ENSRainbow project.
+order: 1
+sidebar:
+  label: What is ENSRainbow?
+  order: 1
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+ENSRainbow is an open-source public good designed to make the "unknown, known" by healing millions of unknown ENS (Ethereum Name Service) names. It functions as a sidecar service for ENSNode, the multichain indexer for ENSv2.
+
+ENSRainbow builds upon foundational work from The Graph Protocol (original rainbow tables) and ENS Labs (ENS Subgraph development and maintenance). It is part of the Namehash Labs suite of tools dedicated to supporting the growth of the ENS Protocol.
+
+### The Problem: Unknown Labels
+
+Many ENS names can appear with encoded labelhashes (e.g., `[428...b0b]`) in applications. These represent unknown labels that, without a service like ENSRainbow, would not display correctly, impacting user experience across the ENS ecosystem. A core value proposition of the ENS protocol is to provide human-readable names for blockchain addresses, effectively acting as a decentralized identity layer. These cryptic labels directly undermine this value by making names unintelligible, thereby eroding the user-friendliness and overall utility of ENS.
+
+### How ENSRainbow Helps
+
+ENSRainbow significantly improves "name healing" coverage compared to relying solely on services like the ENS Subgraph. Its goal is to heal as many ENS names as possible, abstracting away technical complexities for the end-user.
+
+Key aspects of ENSRainbow include:
+
+*   **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable names.
+*   **Sidecar to ENSNode:** It integrates with ENSNode to provide comprehensive name data.
+*   **Improved Coverage:** Aims for a high percentage of name healing, far exceeding previous capabilities.
+
+##### HTTP API
+
+ENSRainbow serves an HTTP API for healing labels documented below.
+
+<LinkCard
+  title="API Reference"
+  description="View the complete ENSRainbow API documentation"
+  href="/ensrainbow/usage/api/"
+/>
+
+##### Client SDK
+
+ENSRainbow provides an official TypeScript client SDK `@ensnode/ensrainbow-sdk` to simplify integrations with the API.
+
+<LinkCard
+  title="Client SDK"
+  description="View the complete ENSRainbow API documentation"
+  href="/ensrainbow/usage/client-sdk/"
+/>
+
+##### Self-hosting and Deploying
+
+ENSRainbow is designed to be self-hosted and deployed by anyone and everyone.
+
+For details of how to deploy, see the [deployment guide](/ensrainbow/deploying), or for details on how to run locally, check the [contributing guide](/ensrainbow/contributing/).
