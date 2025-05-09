@@ -186,7 +186,7 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
     }) {
       const { node, resolver: resolverAddress } = event.args;
 
-      const resolverId = makeResolverId(resolverAddress, node);
+      const resolverId = makeResolverId(pluginName, context.network.chainId, resolverAddress, node);
 
       const isZeroResolver = resolverAddress === zeroAddress;
 

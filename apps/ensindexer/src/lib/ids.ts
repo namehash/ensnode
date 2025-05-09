@@ -1,9 +1,35 @@
 import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
 import type { Address } from "viem";
 
-// NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
-export const makeResolverId = (address: Address, node: Node) =>
-  [address.toLowerCase(), node].join("-");
+/**
+ * Makes a unique, chain-scoped resolver ID.
+ * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
+ *
+ * @example Subgraph plugin: `${address}-${node}`
+ * @example All other plugins (chain-scoped): `${chainId}-${address}-${node}`
+ *
+ * @param pluginName the plugin name
+ * @param chainId the chain ID
+ * @param address the resolver contract address
+ * @param node the ENS node
+ * @returns a unique resolver ID
+ */
+
+export const makeResolverId = (
+  pluginName: PluginName,
+  chainId: number,
+  address: Address,
+  node: Node,
+) =>
+  [
+    // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
+    pluginName === PluginName.Subgraph ? null : chainId,
+    // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
+    address.toLowerCase(),
+    node,
+  ]
+    .filter(Boolean)
+    .join("-");
 
 /**
  * Makes a unique, chain-scoped event ID.
