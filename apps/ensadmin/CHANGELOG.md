@@ -1,5 +1,17 @@
 # ensadmin
 
+## 0.27.0
+
+### Patch Changes
+
+- [#686](https://github.com/namehash/ensnode/pull/686) [`95119d2`](https://github.com/namehash/ensnode/commit/95119d29c6cffd80cf6d628487f0af82087bdc3d) Thanks [@tk-o](https://github.com/tk-o)! - Allow displaying indexing status for chains pending indexing.
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.27.0
+  - @ensnode/utils@0.27.0
+  - @ensnode/ponder-metadata@0.27.0
+  - @ensnode/ponder-schema@0.27.0
+
 ## 0.26.0
 
 ### Minor Changes
