@@ -1,13 +1,10 @@
 import { ponder } from "ponder:registry";
-import schema from "ponder:schema";
-import { type LabelHash } from "@ensnode/utils";
-import { makeSubdomainNode, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import { namehash, zeroAddress } from "viem";
+
+import { type LabelHash, PluginName } from "@ensnode/utils";
+import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
-import { upsertAccount } from "@/lib/db-helpers";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/utils";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
@@ -34,79 +31,32 @@ export default function ({
     registrarManagedName: "base.eth",
   });
 
-  const registrarManagedNode = namehash("base.eth");
-
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
-        },
-      },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
-        },
-      },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
   ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewed({
       context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
-        },
-      },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
   ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
-    // base.eth's BaseRegistrar uses `id` instead of `tokenId`
-    const { id: tokenId, from, to } = event.args;
-
-    const labelHash = tokenIdToLabelHash(tokenId);
-
-    if (event.args.from === zeroAddress) {
-      // Each domain must reference an account of its owner,
-      // so we ensure the account exists before inserting the domain
-      await upsertAccount(context, to);
-      // The ens-subgraph `handleNameTransferred` handler implementation
-      // assumes an indexed record for the domain already exists. However,
-      // when an NFT token is minted (transferred from `0x0` address),
-      // there's no domain entity in the database yet. That very first transfer
-      // event has to ensure the domain entity for the requested token ID
-      // has been inserted into the database. This is a workaround to meet
-      // expectations of the `handleNameTransferred` subgraph implementation.
-      await context.db
-        .insert(schema.domain)
-        .values({
-          id: makeSubdomainNode(labelHash, registrarManagedNode),
-          ownerId: to,
-          createdAt: event.block.timestamp,
-        })
-        // ensure existing domain entity in database has its owner updated
-        .onConflictDoUpdate({ ownerId: to });
-    }
-
     await handleNameTransferred({
       context,
-      event: { ...event, args: { from, to, labelHash } },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
