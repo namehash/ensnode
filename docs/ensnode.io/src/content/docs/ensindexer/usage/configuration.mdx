@@ -9,7 +9,21 @@ import { LinkCard } from '@astrojs/starlight/components';
 import { Code } from '@astrojs/starlight/components';
 import envExample from '@workspace/apps/ensindexer/.env.local.example?raw';
 
-ENSIndexer's behavior can be configured through environment variables.
+ENSIndexer's behavior can be configured through environment variables shown below.
+
+### RPC providers
+
+ENSIndexer requires a lot of RPC requests to fetch data from the whole chain. You will need a private node or private RPC endpoint with high rate limits.
+
+We recommend using [Alchemy](https://www.alchemy.com/) or [QuickNode](https://www.quicknode.com/) or [dRPC](https://drpc.org/) to get a private RPC endpoint with high rate limits.
+
+:::danger[Warning]
+ENSIndexer makes A LOT of RPC requests.
+
+It is **extremely important** that you use a private node or private RPC endpoint with high rate limits.
+
+**DO NOT TRY TO USE PUBLIC RPC ENDPOINTS. THEY WILL NOT WORK!!!**
+:::
 
 <Code code={envExample} lang="bash" title=".env.local.example" />
 

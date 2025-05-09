@@ -12,7 +12,15 @@ This document assumes general knowledge of the ENS protocol and the ENS Subgraph
 
 ### What is ENSNode
 
-ENSNode is the new multichain indexer for ENS and ENSv2. It is built on [Ponder](https://ponder.sh/) and provides enhanced capabilities over the ENS Subgraph, as well as being more efficient, flexible, and maintainable. ENSNode's enhanced capabilities include multichain and multiregistrar indexing while maintaining backwards compatibility with existing ENS Subgraph APIs.
+ENSNode is a group of applications that work together to provide an easy way to access data for ENS and in future ENSv2. The main function is 'indexing' across multiple blockchains. In simple terms, this means it collects, processes, and organizes all the information related to ENS names (like who owns a name, what it resolves to, and other settings) from various blockchain networks. This makes the complex world of ENS data much simpler to search and use for developers and their applications.
+
+It is comprised of three main components:
+
+- ENSIndexer is the a multichain indexer for ENS and ENSv2. It is built on [Ponder](https://ponder.sh/) and provides enhanced capabilities over the ENS Subgraph, as well as being more efficient, flexible, and maintainable. ENSNode's enhanced capabilities include multichain and multiregistrar indexing while maintaining backwards compatibility with existing ENS Subgraph APIs.
+- ENSRainbow is a labelhash resolver that resolves ENS and ENSv2 names off-chain.
+- ENSAdmin is a web interface that allows you to manage and monitor hosted ENSNode instances.
+
+If you are a developer looking to access ENS data with ENSNode from the hosted API you will be using the API in ENSIndexer of which there is a hosted instance. We recommend starting with the [ENSNode Quickstart](/ensnode/quickstart/).
 
 ### ENSNode Version 1
 
