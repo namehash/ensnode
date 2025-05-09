@@ -88,14 +88,42 @@ export const makeRegistrarHandlers = ({
       // undefined value means no change to the name
       const name = validLabel ? `${validLabel}.${registrarManagedName}` : undefined;
 
-      // update domain's registrant & expiryDate
-      // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L63
-      await context.db.update(schema.domain, { id: node }).set({
-        registrantId: owner,
-        expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName: validLabel,
-        name,
-      });
+      // the subgraph _requires_ that a domain exist here (i.e. Registry#NewOwner event is emitted
+      // before Registrar#NameRegistered), but Basenames and LineaNames do not follow this convention
+      // (i.e. Registrar#NameRegistered is emitted before Registry#NewOwner). To make this shared
+      // logic work for each of these two event orders, we allow for the creation of a domain in
+      // NameRegistered, but only for non-subgraph plugins, making sure to also include the
+      // subdomainCount materialization effect on create, which will otherwise _not_ get run within
+      // the NewOwner handler.
+      let domain = await context.db.find(schema.domain, { id: node });
+      if (domain) {
+        // if the domain already exists, this is just an update of domain's registrant & expiryDate
+        await context.db.update(schema.domain, { id: node }).set({
+          registrantId: owner,
+          expiryDate: expires + GRACE_PERIOD_SECONDS,
+          labelName: validLabel,
+          name,
+        });
+      } else {
+        // invariant: the domain should _always_ exist in the subgraph plugin
+        if (pluginName === PluginName.Subgraph) {
+          throw new Error(
+            "Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist.",
+          );
+        }
+
+        await context.db.insert(schema.domain).values({
+          id: node,
+          ownerId: owner,
+          parentId: registrarManagedNode,
+          createdAt: event.block.timestamp,
+        });
+
+        // and increment parent subdomainCount
+        await context.db
+          .update(schema.domain, { id: registrarManagedNode })
+          .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
+      }
 
       // update registration
       // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
