@@ -82,6 +82,8 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
         // in ThreeDNS there's a hard-coded Resolver that all domains use, so we link them together
         // during creation
         const resolverId = makeResolverId(
+          pluginName,
+          context.network.chainId,
           // not sure why inferred type is Address | undefined, but we know this exists
           context.contracts["threedns/ThreeDNSResolver"].address!,
           node,

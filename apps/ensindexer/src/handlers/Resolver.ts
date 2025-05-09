@@ -32,7 +32,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       const { a: address, node } = event.args;
       await upsertAccount(context, address);
 
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -63,7 +63,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
     }) {
       const { node, coinType, newAddress } = event.args;
 
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       const resolver = await upsertResolver(context, {
         id,
         domainId: node,
@@ -94,7 +94,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       const { node, name } = event.args;
       if (hasNullByte(name)) return;
 
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -117,7 +117,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; contentType: bigint }>;
     }) {
       const { node, contentType } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       // upsert resolver
       await upsertResolver(context, {
@@ -142,7 +142,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; x: Hex; y: Hex }>;
     }) {
       const { node, x, y } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       // upsert resolver
       await upsertResolver(context, {
@@ -173,7 +173,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       }>;
     }) {
       const { node, key, value } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       const resolver = await upsertResolver(context, {
         id,
         domainId: node,
@@ -206,7 +206,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; hash: Hash }>;
     }) {
       const { node, hash } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -230,7 +230,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; interfaceID: Hex; implementer: Hex }>;
     }) {
       const { node, interfaceID, implementer } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -259,7 +259,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       }>;
     }) {
       const { node, owner, target, isAuthorised } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       await upsertResolver(context, {
         id,
@@ -286,7 +286,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; newVersion: bigint }>;
     }) {
       const { node, newVersion } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
       const domain = await context.db.find(schema.domain, { id: node });
