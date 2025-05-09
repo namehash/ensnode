@@ -47,6 +47,7 @@ export default function ({
     handlePubkeyChanged,
     handleTextChanged,
     handleVersionChanged,
+    handleZoneCreated,
   } = makeResolverHandlers({ pluginName });
 
   ponder.on(namespace("ThreeDNSResolver:AddrChanged"), handleAddrChanged);
@@ -70,7 +71,19 @@ export default function ({
   ponder.on(namespace("ThreeDNSResolver:InterfaceChanged"), handleInterfaceChanged);
   ponder.on(namespace("ThreeDNSResolver:AuthorisationChanged"), handleAuthorisationChanged);
   ponder.on(namespace("ThreeDNSResolver:VersionChanged"), handleVersionChanged);
-  ponder.on(namespace("ThreeDNSResolver:DNSRecordChanged"), handleDNSRecordChanged);
+  ponder.on(
+    namespace(
+      "ThreeDNSResolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, bytes record)",
+    ),
+    handleDNSRecordChanged,
+  );
+  ponder.on(
+    namespace(
+      "ThreeDNSResolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
+    ),
+    handleDNSRecordChanged,
+  );
   ponder.on(namespace("ThreeDNSResolver:DNSRecordDeleted"), handleDNSRecordDeleted);
   ponder.on(namespace("ThreeDNSResolver:DNSZonehashChanged"), handleDNSZonehashChanged);
+  ponder.on(namespace("ThreeDNSResolver:ZoneCreated"), handleZoneCreated);
 }

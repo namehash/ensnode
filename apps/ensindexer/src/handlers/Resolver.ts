@@ -1,12 +1,14 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Node, PluginName } from "@ensnode/utils";
-import { type Address, Hash, type Hex } from "viem";
+import { Node, PluginName } from "@ensnode/utils";
+import { type Address, Hash, type Hex, hexToBytes } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
+import { decodeDNSPacketBytes } from "@ensnode/utils/subname-helpers";
 
 /**
  * makes a set of shared handlers for Resolver contracts
@@ -323,10 +325,72 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         node: Node;
         name: Hex;
         resource: number;
+        ttl?: number;
         record: Hex;
       }>;
     }) {
-      // subgraph ignores
+      // subgraph ignores this event
+      if (pluginName === PluginName.Subgraph) return;
+
+      // but for non-subgraph plugins, we parse the RR set data for relevant records
+      const { node, name, resource, record } = event.args;
+
+      // we only index TXT records (resource id 16)
+      if (resource !== 16) return;
+
+      // parse the record's name, which is the key of the DNS record
+      const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
+
+      // invariant: recordName is always available and parsed correctly
+      if (!recordName) throw new Error(`Invalid DNSPacket, cannot parse name '${name}'.`);
+
+      // relevant keys end with .ens
+      if (!recordName.endsWith(".ens")) return;
+
+      // trim the .ens off the end to match ENS record naming
+      const key = recordName.slice(0, -4);
+
+      // parse the `record` parameter, which is an RRSet describing the value of the DNS record
+      const answers = parseRRSet(record);
+      for (const answer of answers) {
+        switch (answer.type) {
+          case "TXT": {
+            // > When decoding, the return value will always be an array of Buffer.
+            // https://github.com/mafintosh/dns-packet
+            const value = decodeTXTData(answer.data as Buffer[]);
+
+            const id = makeResolverId(event.log.address, node);
+            const resolver = await upsertResolver(context, {
+              id,
+              domainId: node,
+              address: event.log.address,
+            });
+
+            // upsert new key
+            await context.db
+              .update(schema.resolver, { id })
+              .set({ texts: uniq([...(resolver.texts ?? []), key]) });
+
+            // log ResolverEvent
+            await context.db.insert(schema.textChanged).values({
+              ...sharedEventValues(context.network.chainId, event),
+              resolverId: id,
+              key,
+              // note: coalesce empty string to null, see `handleTextChanged` for context
+              value: value || null,
+            });
+            break;
+          }
+          default: {
+            // no-op unhandled records
+            // NOTE: should never occur due to resource id check above
+            console.warn(
+              `Invariant: received answer ${JSON.stringify(answer)} that is not type === TXT despite resource === 16 check!`,
+            );
+            break;
+          }
+        }
+      }
     },
 
     async handleDNSRecordDeleted({
@@ -338,10 +402,47 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         node: Node;
         name: Hex;
         resource: number;
-        record?: Hex;
       }>;
     }) {
-      // subgraph ignores
+      // subgraph ignores this event
+      if (pluginName === PluginName.Subgraph) return;
+
+      const { node, name, resource } = event.args;
+
+      // we only index TXT records (resource id 16)
+      if (resource !== 16) return;
+
+      // parse the record's name, which is the key of the DNS record
+      const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
+
+      // invariant: recordName is always available and parsed correctly
+      if (!recordName) throw new Error(`Invalid DNSPacket, cannot parse name '${name}'.`);
+
+      // relevant keys end with .ens
+      if (!recordName.endsWith(".ens")) return;
+
+      // trim the .ens off the end to match ENS record naming
+      const key = recordName.slice(0, -4);
+
+      const id = makeResolverId(event.log.address, node);
+      const resolver = await upsertResolver(context, {
+        id,
+        domainId: node,
+        address: event.log.address,
+      });
+
+      // remove relevant key
+      await context.db
+        .update(schema.resolver, { id })
+        .set({ texts: (resolver.texts ?? []).filter((text) => text !== key) });
+
+      // log ResolverEvent
+      await context.db.insert(schema.textChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        key,
+        value: null,
+      });
     },
 
     async handleDNSZonehashChanged({
@@ -352,6 +453,16 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; zonehash: Hash }>;
     }) {
       // subgraph ignores
+    },
+
+    async handleZoneCreated({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: EventWithArgs<{ node: Node; version: bigint }>;
+    }) {
+      // ignored
     },
   };
 };

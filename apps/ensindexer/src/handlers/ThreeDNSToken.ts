@@ -15,6 +15,7 @@ import {
   upsertAccount,
   upsertDomain,
   upsertRegistration,
+  upsertResolver,
 } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId, makeResolverId } from "@/lib/ids";
@@ -73,20 +74,28 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
       const node = makeSubdomainNode(labelHash, parentNode);
       let domain = await context.db.find(schema.domain, { id: node });
 
+      // in ThreeDNS there's a hard-coded Resolver that all domains use
+      const resolverId = makeResolverId(
+        // NetworkConfig#address is `Address | undefined`, but we know this is defined for ThreeDNSResolver
+        context.contracts["threedns/ThreeDNSResolver"].address!,
+        node,
+      );
+
+      // so upsert the resolver record and link Domain.resolverId below
+      await upsertResolver(context, {
+        id: resolverId,
+        address: context.contracts["threedns/ThreeDNSResolver"].address!,
+        domainId: node,
+      });
+
       if (domain) {
         // if the domain already exists, this is just an update of the owner record
-        domain = await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
+        domain = await context.db.update(schema.domain, { id: node }).set({
+          ownerId: owner,
+          resolverId, // and ensure resolver reference is set
+        });
       } else {
         // otherwise create the domain
-
-        // in ThreeDNS there's a hard-coded Resolver that all domains use, so we link them together
-        // during creation
-        const resolverId = makeResolverId(
-          // not sure why inferred type is Address | undefined, but we know this exists
-          context.contracts["threedns/ThreeDNSResolver"].address!,
-          node,
-        );
-
         domain = await context.db.insert(schema.domain).values({
           id: node,
           ownerId: owner,
@@ -94,7 +103,7 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
           createdAt: event.block.timestamp,
           labelhash: labelHash,
 
-          resolverId,
+          resolverId, // and ensure resolver reference is set
 
           // NOTE: threedns has no concept of registry migration, so domains indexed by this plugin
           // are always considered 'migrated'
@@ -157,11 +166,8 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
 
       await upsertAccount(context, owner);
 
-      // ensure domain & update owner
-      await context.db
-        .insert(schema.domain)
-        .values([{ id: node, ownerId: owner, createdAt: event.block.timestamp }])
-        .onConflictDoUpdate({ ownerId: owner });
+      // update owner (Domain is guaranteed to exist because NewOwner fires before Transfer)
+      await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
 
       // garbage collect newly 'empty' domain iff necessary
       if (owner === zeroAddress) {

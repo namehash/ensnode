@@ -29,6 +29,7 @@ export default function ({ pluginName }: ENSIndexerPluginHandlerArgs) {
     handlePubkeyChanged,
     handleTextChanged,
     handleVersionChanged,
+    handleZoneCreated,
   } = makeResolverHandlers({ pluginName });
 
   ponder.on("Resolver:AddrChanged", handleAddrChanged);
@@ -48,7 +49,15 @@ export default function ({ pluginName }: ENSIndexerPluginHandlerArgs) {
   ponder.on("Resolver:InterfaceChanged", handleInterfaceChanged);
   ponder.on("Resolver:AuthorisationChanged", handleAuthorisationChanged);
   ponder.on("Resolver:VersionChanged", handleVersionChanged);
-  ponder.on("Resolver:DNSRecordChanged", handleDNSRecordChanged);
+  ponder.on(
+    "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, bytes record)",
+    handleDNSRecordChanged,
+  );
+  ponder.on(
+    "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
+    handleDNSRecordChanged,
+  );
   ponder.on("Resolver:DNSRecordDeleted", handleDNSRecordDeleted);
   ponder.on("Resolver:DNSZonehashChanged", handleDNSZonehashChanged);
+  ponder.on("Resolver:ZoneCreated", handleZoneCreated);
 }
