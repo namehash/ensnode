@@ -358,7 +358,7 @@ export const ponderPort = (): number => {
 /** Parse the Ponder application port */
 export const parsePonderPort = (rawValue?: string): number => {
   if (!rawValue) {
-    throw new Error("Expected value not set");
+    return 42069;
   }
 
   const parsedValue = parseInt(rawValue, 10);

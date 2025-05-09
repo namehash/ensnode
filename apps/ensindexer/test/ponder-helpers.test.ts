@@ -238,8 +238,8 @@ describe("ponder helpers", () => {
       expect(() => parsePonderPort("-1")).toThrowError("'-1' is not a natural number");
     });
 
-    it("should throw an error if the port is missing", () => {
-      expect(() => parsePonderPort()).toThrowError("Expected value not set");
+    it("should use the default port if the environment variable is not set", () => {
+      expect(parsePonderPort()).toBe(42069);
     });
   });
 
