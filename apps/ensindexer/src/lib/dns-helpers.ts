@@ -58,5 +58,5 @@ export function decodeTXTData(data: Buffer[]): string | null {
     );
   }
 
-  return decoded[0] as string; // guaranteed to exist due to length check above
+  return decoded[0]!; // guaranteed to exist due to length check above
 }
