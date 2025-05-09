@@ -1,5 +1,21 @@
 # ensindexer
 
+## 0.27.0
+
+### Minor Changes
+
+- [#703](https://github.com/namehash/ensnode/pull/703) [`db9fc86`](https://github.com/namehash/ensnode/commit/db9fc86d3a5c4af1d4ec81ac810179f3bdc1b326) Thanks [@0xBison](https://github.com/0xBison)! - use default port if one isn't specified
+
+### Patch Changes
+
+- Updated dependencies [[`33c46ae`](https://github.com/namehash/ensnode/commit/33c46aef7e452daafef189ec9fef7d16ce8ceecb)]:
+  - @ensnode/ponder-subgraph@0.27.0
+  - @ensnode/ens-deployments@0.27.0
+  - @ensnode/utils@0.27.0
+  - @ensnode/ensrainbow-sdk@0.27.0
+  - @ensnode/ponder-metadata@0.27.0
+  - @ensnode/ponder-schema@0.27.0
+
 ## 0.26.0
 
 ### Minor Changes
