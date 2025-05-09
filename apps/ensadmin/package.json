@@ -24,7 +24,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@ensnode/ens-deployments": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
-    "@ensnode/ponder-schema": "workspace:*",
+    "@ensnode/ensnode-schema": "workspace:*",
     "@ensnode/utils": "workspace:*",
     "@gqlpt/adapter-base": "0.0.0-alpha.31",
     "@graphiql/plugin-explorer": "^4.0.2",

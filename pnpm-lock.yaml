@@ -103,12 +103,12 @@ importers:
       '@ensnode/ens-deployments':
         specifier: workspace:*
         version: link:../../packages/ens-deployments
+      '@ensnode/ensnode-schema':
+        specifier: workspace:*
+        version: link:../../packages/ensnode-schema
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata
-      '@ensnode/ponder-schema':
-        specifier: workspace:*
-        version: link:../../packages/ponder-schema
       '@ensnode/utils':
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
@@ -257,15 +257,15 @@ importers:
       '@ensnode/ens-deployments':
         specifier: workspace:*
         version: link:../../packages/ens-deployments
+      '@ensnode/ensnode-schema':
+        specifier: workspace:*
+        version: link:../../packages/ensnode-schema
       '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
         version: link:../../packages/ensrainbow-sdk
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata
-      '@ensnode/ponder-schema':
-        specifier: workspace:*
-        version: link:../../packages/ponder-schema
       '@ensnode/ponder-subgraph':
         specifier: workspace:*
         version: link:../../packages/ponder-subgraph
@@ -501,6 +501,28 @@ importers:
         specifier: 'catalog:'
         version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
 
+  packages/ensnode-schema:
+    dependencies:
+      ponder:
+        specifier: 'catalog:'
+        version: 0.10.18(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
+      viem:
+        specifier: 'catalog:'
+        version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 1.9.4
+      '@ensnode/shared-configs':
+        specifier: workspace:*
+        version: link:../shared-configs
+      tsup:
+        specifier: 'catalog:'
+        version: 8.3.6(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.3
+
   packages/ensnode-utils:
     devDependencies:
       '@biomejs/biome':
@@ -589,28 +611,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.1.1(@types/debug@4.1.12)(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)
-
-  packages/ponder-schema:
-    dependencies:
-      ponder:
-        specifier: 'catalog:'
-        version: 0.10.18(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
-      viem:
-        specifier: 'catalog:'
-        version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 'catalog:'
-        version: 1.9.4
-      '@ensnode/shared-configs':
-        specifier: workspace:*
-        version: link:../shared-configs
-      tsup:
-        specifier: 'catalog:'
-        version: 8.3.6(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.7.3
 
   packages/ponder-subgraph:
     dependencies:
