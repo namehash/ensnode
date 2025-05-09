@@ -117,6 +117,7 @@ export const makeRegistrarHandlers = ({
           ownerId: owner,
           parentId: registrarManagedNode,
           createdAt: event.block.timestamp,
+          labelhash: labelHash,
         });
 
         // and increment parent subdomainCount
