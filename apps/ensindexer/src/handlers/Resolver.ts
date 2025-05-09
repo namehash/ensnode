@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { Node, PluginName } from "@ensnode/utils";
-import { type Address, Hash, type Hex, hexToBytes, hexToString, namehash } from "viem";
+import { type Address, Hash, type Hex, hexToBytes } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
@@ -333,8 +333,10 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       if (pluginName === PluginName.Subgraph) return;
 
       // but for non-subgraph plugins, we parse the RR set data for relevant records
-      // NOTE: `resource` is unused as it represents the DNS record type which is included in `record`
-      const { node, name, record } = event.args;
+      const { node, name, resource, record } = event.args;
+
+      // we only index TXT records (resource id 16)
+      if (resource !== 16) return;
 
       // parse the record's name, which is the key of the DNS record
       const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
@@ -381,6 +383,10 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
           }
           default: {
             // no-op unhandled records
+            // NOTE: should never occur due to resource id check above
+            console.warn(
+              `Invariant: received answer ${JSON.stringify(answer)} that is not type === TXT despite resource === 16 check!`,
+            );
             break;
           }
         }
@@ -401,7 +407,10 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       // subgraph ignores this event
       if (pluginName === PluginName.Subgraph) return;
 
-      const { node, name } = event.args;
+      const { node, name, resource } = event.args;
+
+      // we only index TXT records (resource id 16)
+      if (resource !== 16) return;
 
       // parse the record's name, which is the key of the DNS record
       const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
