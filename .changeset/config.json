@@ -13,7 +13,7 @@
       "@ensnode/utils",
       "@ensnode/ensrainbow-sdk",
       "@ensnode/ponder-metadata",
-      "@ensnode/ponder-schema",
+      "@ensnode/ensnode-schema",
       "@ensnode/ponder-subgraph",
       "@ensnode/shared-configs"
     ]

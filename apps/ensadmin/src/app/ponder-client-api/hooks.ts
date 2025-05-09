@@ -1,8 +1,9 @@
-import * as schema from "@ensnode/ponder-schema";
 import { desc } from "@ponder/client";
 import type { createClient } from "@ponder/client";
 import { usePonderQuery } from "@ponder/react";
 import { useMemo, useState } from "react";
+
+import * as schema from "@ensnode/ensnode-schema";
 
 type PonderClient = ReturnType<typeof createClient>;
 

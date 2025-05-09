@@ -1,4 +1,4 @@
-# @ensnode/ponder-schema
+# @ensnode/ensnode-schema
 
 ## 0.26.0
 

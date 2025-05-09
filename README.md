@@ -169,9 +169,9 @@ TypeScript library for interacting with the [ENSRainbow API](apps/ensrainbow).
 
 Common utilities used across ENSNode applications
 
-### [`packages/ponder-schema`](packages/ponder-schema)
+### [`packages/ensnode-schema`](packages/ensnode-schema)
 
-Shared Ponder schema definitions
+Shared Ponder schema definitions used by ENSNode
 
 ### [`packages/ponder-subgraph`](packages/ponder-subgraph)
 

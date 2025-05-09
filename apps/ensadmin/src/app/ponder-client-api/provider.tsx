@@ -1,9 +1,10 @@
 "use client";
 
-import * as ponderSchema from "@ensnode/ponder-schema";
 import { createClient } from "@ponder/client";
 import { PonderProvider } from "@ponder/react";
 import { useState } from "react";
+
+import * as ponderSchema from "@ensnode/ensnode-schema";
 
 type ProviderProps = {
   url: string;
