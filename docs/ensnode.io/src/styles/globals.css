@@ -45,17 +45,24 @@
   --sl-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
-.header {
+header.header {
   background-color: var(--sl-color-black);
   border-color: var(--sl-color-gray-6);
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 /*header elements max width*/
-.header.sl-flex > div.sl-flex {
+header.header > div.header {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+header.header div.sl-flex {
   width: fit-content;
 }
 
@@ -75,9 +82,10 @@
   visibility: hidden;
 }
 
-.header.sl-flex {
+div.header {
   width: 100%;
   max-width: 1440px;
+  margin: 0 auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
