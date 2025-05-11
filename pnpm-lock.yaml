@@ -96,7 +96,7 @@ importers:
 
   apps/ensadmin:
     dependencies:
-      "@ensnode/ens-deployments":
+      '@ensnode/ens-deployments':
         specifier: workspace:*
         version: link:../../packages/ens-deployments
       "@ensnode/ponder-metadata":
@@ -108,10 +108,10 @@ importers:
       "@ensnode/utils":
         specifier: workspace:*
         version: link:../../packages/ensnode-utils
-      "@gqlpt/adapter-anthropic":
+      '@gqlpt/adapter-anthropic':
         specifier: 0.0.0-alpha.33
         version: 0.0.0-alpha.33
-      "@graphiql/plugin-explorer":
+      '@graphiql/plugin-explorer':
         specifier: ^4.0.2
         version: 4.0.2(@graphiql/react@0.28.2(@codemirror/language@6.0.0)(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       "@graphiql/react":
@@ -1801,23 +1801,14 @@ packages:
         integrity: sha512-kbsPKj0S4p44JdYRFiW78Td8Ge2sBVxi/PIBwmih+RpSXUdvS9nbs1HIiuUSPtRMi14CqLEZ/fbk7dj7vni1Sg==,
       }
 
-  "@gqlpt/adapter-anthropic@0.0.0-alpha.33":
-    resolution:
-      {
-        integrity: sha512-poZ0cWfQXw9G2P+WGxc3drB0K+cVvRGxLEhr9SAEKSqdlhAf1RqQbShvXpIYueyW4CRf3LJx1KUPhtP+239VSg==,
-      }
+  '@gqlpt/adapter-anthropic@0.0.0-alpha.33':
+    resolution: {integrity: sha512-poZ0cWfQXw9G2P+WGxc3drB0K+cVvRGxLEhr9SAEKSqdlhAf1RqQbShvXpIYueyW4CRf3LJx1KUPhtP+239VSg==}
 
-  "@gqlpt/adapter-base@0.0.0-alpha.33":
-    resolution:
-      {
-        integrity: sha512-fVkpsC4y1X/btb/ELBQPvfh26lVMEA3uPsAW06hHs2HPDqcnhW7RAAaLYNcKYV9PrQRa3HQjrWsvEK1Z9PjO+g==,
-      }
+  '@gqlpt/adapter-base@0.0.0-alpha.33':
+    resolution: {integrity: sha512-fVkpsC4y1X/btb/ELBQPvfh26lVMEA3uPsAW06hHs2HPDqcnhW7RAAaLYNcKYV9PrQRa3HQjrWsvEK1Z9PjO+g==}
 
-  "@gqlpt/utils@0.0.0-alpha.33":
-    resolution:
-      {
-        integrity: sha512-hslccj2udFbjtNJ4eejA9n2P3w7+m7/TamoDxFpwF8GbC45VlnKRYBMWHuH1lCvl+KE05JMZx8QEZhfT3E+63A==,
-      }
+  '@gqlpt/utils@0.0.0-alpha.33':
+    resolution: {integrity: sha512-hslccj2udFbjtNJ4eejA9n2P3w7+m7/TamoDxFpwF8GbC45VlnKRYBMWHuH1lCvl+KE05JMZx8QEZhfT3E+63A==}
     peerDependencies:
       graphql: ^16.0.0 || ^17.0.0
 
@@ -7084,10 +7075,7 @@ packages:
     engines: { node: ">= 0.4" }
 
   gqlpt@0.0.0-alpha.33:
-    resolution:
-      {
-        integrity: sha512-HgC59tpBlU9f+SGhjyC9YrtpX5z4EVvsc56H9AAybVq1l8AZCXs4tFdWwQQbWrJ0K4x9K2/GS0G7VRhe1woVvQ==,
-      }
+    resolution: {integrity: sha512-HgC59tpBlU9f+SGhjyC9YrtpX5z4EVvsc56H9AAybVq1l8AZCXs4tFdWwQQbWrJ0K4x9K2/GS0G7VRhe1woVvQ==}
     peerDependencies:
       graphql: ^16.0.0 || ^17.0.0
 
@@ -13491,7 +13479,16 @@ snapshots:
 
   "@fontsource/inter@5.2.5": {}
 
-  "@gqlpt/adapter-anthropic@0.0.0-alpha.33":
+  '@gqlpt/adapter-anthropic@0.0.0-alpha.33':
+    dependencies:
+      '@anthropic-ai/sdk': 0.39.0
+      '@gqlpt/adapter-base': 0.0.0-alpha.33
+    transitivePeerDependencies:
+      - encoding
+
+  '@gqlpt/adapter-base@0.0.0-alpha.33': {}
+
+  '@gqlpt/utils@0.0.0-alpha.33':
     dependencies:
       "@anthropic-ai/sdk": 0.39.0
       "@gqlpt/adapter-base": 0.0.0-alpha.33
@@ -16901,8 +16898,8 @@ snapshots:
       "@typescript-eslint/parser": 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-react: 7.37.4(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-react-hooks: 5.1.0(eslint@9.20.1(jiti@2.4.2))
@@ -16921,7 +16918,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       "@nolyfill/is-core-module": 1.0.39
       debug: 4.4.0
@@ -16932,22 +16929,22 @@ snapshots:
       stable-hash: 0.0.4
       tinyglobby: 0.2.12
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       "@typescript-eslint/parser": 8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.8.3)(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       "@rtsao/scc": 1.1.0
       array-includes: 3.1.8
@@ -16958,7 +16955,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.20.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.24.0(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.8.3(eslint-plugin-import@2.31.0)(eslint@9.20.1(jiti@2.4.2)))(eslint@9.20.1(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -17460,9 +17457,9 @@ snapshots:
 
   gqlpt@0.0.0-alpha.33:
     dependencies:
-      "@apollo/utils.sortast": 3.0.0
-      "@gqlpt/adapter-base": 0.0.0-alpha.33
-      "@gqlpt/utils": 0.0.0-alpha.33
+      '@apollo/utils.sortast': 3.0.0
+      '@gqlpt/adapter-base': 0.0.0-alpha.33
+      '@gqlpt/utils': 0.0.0-alpha.33
     transitivePeerDependencies:
       - supports-color
 
