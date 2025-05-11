@@ -173,7 +173,7 @@ Common utilities used across ENSNode applications
 
 Shared Ponder schema definitions
 
-### [`packages/ponder-subgraph-api`](packages/ponder-subgraph-api)
+### [`packages/ponder-subgraph`](packages/ponder-subgraph)
 
 Subgraph-compatible GraphQL API
 
