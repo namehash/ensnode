@@ -123,6 +123,9 @@ async function getQueryGeneratorClient(
         systemPrompt: `${SYSTEM_PROMPT}\n\n${ensSubgraphSchemaGql}`,
         maxTokensPerMessage: MAX_TOKENS_PER_MESSAGE,
         temperature: TEMPERATURE,
+        cacheControl: {
+          type: "ephemeral",
+        }
       }),
     });
 
