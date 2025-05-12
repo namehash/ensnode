@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
-import { config } from "@/config/app-config";
+import config from "@/config/app-config";
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
@@ -15,6 +15,7 @@ import {
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
 } from "@ensnode/utils/subname-helpers";
+
 /**
  * makes a set of shared handlers for a Registry contract
  *

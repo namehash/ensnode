@@ -1,4 +1,4 @@
-import { config, rpcEndpointUrl } from "@/config/app-config";
+import config, { rpcEndpointUrl } from "@/config/app-config";
 import { MergedPluginConfig } from "@/plugins";
 
 export const validateGlobalBlockrange = (

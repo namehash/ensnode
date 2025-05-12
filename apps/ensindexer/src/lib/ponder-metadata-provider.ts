@@ -3,7 +3,7 @@ import packageJson from "@/../package.json";
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 
-import { config } from "@/config/app-config";
+import config from "@/config/app-config";
 import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,

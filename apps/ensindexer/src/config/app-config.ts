@@ -73,21 +73,11 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
   return parsed.data;
 }
 
-let _config: ReturnType<typeof buildENSIndexerConfig> | undefined;
+// Build the config object right away
+const config = buildENSIndexerConfig();
 
-/**
- * Returns the ENSIndexer configuration object. If it doesnt exist will instantiate it
- * via the buildENSIndexerConfig function. This function ensures that the configuration
- * is built only once (on app startup) and cached for reuse.
- */
-export function getConfig() {
-  if (!_config) {
-    _config = buildENSIndexerConfig();
-  }
-  return _config;
-}
-
-export const config = getConfig();
+// Default export for new code to use
+export default config;
 
 /**
  * Gets the RPC request rate limit for a given chain ID.

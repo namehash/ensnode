@@ -1,9 +1,7 @@
-import { config } from "@/config/app-config";
+import config from "@/config/app-config";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 
-const ensDeploymentChain = config.ensDeploymentChain;
-
-export const SELECTED_ENS_DEPLOYMENT = ENSDeployments[ensDeploymentChain];
+export const SELECTED_ENS_DEPLOYMENT = ENSDeployments[config.ensDeploymentChain];
 
 /**
  * Note that here, we define the global MERGED_ENS_DEPLOYMENT as the _merge_ of mainnet (which fully

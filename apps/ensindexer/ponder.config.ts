@@ -1,10 +1,12 @@
-import { config } from "@/config/app-config";
+import config from "@/config/app-config";
 import { validateConfig } from "@/config/validations";
 import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { getActivePlugins } from "@/lib/plugin-helpers";
 import { AVAILABLE_PLUGINS, MergedPluginConfig } from "@/plugins";
 import { DatasourceName } from "@ensnode/ens-deployments";
+
+const { requestedPluginNames, healReverseAddresses } = config;
 
 ////////
 // Filter AVAILABLE_PLUGINS by those that the user has selected (via ACTIVE_PLUGINS), panicking if a
@@ -17,7 +19,7 @@ const availableDatasourceNames = Object.keys(SELECTED_ENS_DEPLOYMENT) as Datasou
 // filter the set of available plugins by those that are 'active'
 const activePlugins = getActivePlugins(
   AVAILABLE_PLUGINS,
-  config.requestedPluginNames,
+  requestedPluginNames,
   availableDatasourceNames,
 );
 
@@ -32,7 +34,7 @@ const ponderConfig = activePlugins
 
 // set the indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
-  HEAL_REVERSE_ADDRESSES: config.healReverseAddresses,
+  HEAL_REVERSE_ADDRESSES: healReverseAddresses,
 };
 
 const allChainIds = Object.values(ponderConfig.networks).map((network) => network.chainId);

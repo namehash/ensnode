@@ -34,7 +34,7 @@ export function setupConfigMock() {
   // This works because vi.mock is hoisted to the top of the file
   // and mockConfig is a top-level variable
   vi.mock("@/config/app-config", () => {
-    return {
+    const module = {
       getConfig: vi.fn(() => mockConfig),
       config: mockConfig,
       rpcMaxRequestsPerSecond: vi.fn(
@@ -43,7 +43,9 @@ export function setupConfigMock() {
       rpcEndpointUrl: vi.fn(
         (chainId: number) => mockConfig.chains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
       ),
+      default: mockConfig, // Mock the default export too
     };
+    return module;
   });
 }
 
@@ -62,10 +64,10 @@ export function updateMockConfig(updates: Partial<typeof mockConfig>) {
 }
 
 /**
- * Resets the mock configuration to default values
+ * Resets the mockConfig object to its default values.
+ * This is useful for tests that need to start with a clean slate.
  */
 export function resetMockConfig() {
-  // Reset to defaults
   mockConfig.ensDeploymentChain = "mainnet";
   mockConfig.ensNodePublicUrl = "http://localhost:42069";
   mockConfig.ensAdminUrl = "http://localhost:3000";

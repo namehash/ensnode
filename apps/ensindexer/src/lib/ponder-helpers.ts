@@ -1,7 +1,7 @@
 import type { Event } from "ponder:registry";
 import { PublicClient } from "viem";
 
-import { config } from "@/config/app-config";
+import config from "@/config/app-config";
 import { Blockrange } from "@/lib/types";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
@@ -24,9 +24,7 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 export const constrainContractBlockrange = (
   contractStartBlock: number | undefined = 0,
 ): Blockrange => {
-  const {
-    globalBlockrange: { startBlock, endBlock },
-  } = config;
+  const { startBlock, endBlock } = config.globalBlockrange;
 
   const isEndConstrained = endBlock !== undefined;
   const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
