@@ -170,6 +170,7 @@ export function starlight(): AstroIntegration {
       ]),
     ],
     title: "ENSNode",
+    disable404Route: true,
     logo: {
       light: "./src/assets/light-logo.svg",
       dark: "./src/assets/dark-logo.svg",
