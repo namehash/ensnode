@@ -55,7 +55,7 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
     ponderDatabaseSchema: process.env.DATABASE_SCHEMA,
     requestedPluginNames: process.env.ACTIVE_PLUGINS,
     healReverseAddresses: process.env.HEAL_REVERSE_ADDRESSES,
-    ponderPort: process.env.PORT,
+    port: process.env.PORT,
     ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
     globalBlockrange: {
       // use as to avoid requiring a separate type with a string.

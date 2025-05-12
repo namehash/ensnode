@@ -58,7 +58,7 @@ describe("config", () => {
       expect(config.ponderDatabaseSchema).toBe("ensnode");
       expect(config.requestedPluginNames).toEqual(["subgraph"]);
       expect(config.healReverseAddresses).toBe(true);
-      expect(config.ponderPort).toBe(3000);
+      expect(config.port).toBe(3000);
       expect(config.ensRainbowEndpointUrl).toBe("https://api.ensrainbow.io");
     });
 
@@ -70,7 +70,7 @@ describe("config", () => {
       process.env.PORT = "4000";
       const newConfig = await getFreshConfig();
 
-      expect(newConfig.ponderPort).toBe(4000);
+      expect(newConfig.port).toBe(4000);
       expect(newConfig).not.toBe(initialConfig); // Should be a different object
     });
   });
@@ -243,18 +243,18 @@ describe("config", () => {
     });
   });
 
-  describe(".ponderPort", () => {
+  describe(".port", () => {
     it("returns the PORT if it is a valid number", async () => {
       // Different from BASE_ENV to ensure it's being read
       process.env.PORT = "3001";
       const config = await getFreshConfig();
-      expect(config.ponderPort).toBe(3001);
+      expect(config.port).toBe(3001);
     });
 
     it("returns the default PORT if it is not set", async () => {
       delete process.env.PORT;
       const config = await getFreshConfig();
-      expect(config.ponderPort).toBe(42069);
+      expect(config.port).toBe(42069);
     });
 
     it("throws if PORT is not a number", async () => {

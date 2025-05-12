@@ -24,7 +24,7 @@ export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdF
 export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
 
 // setup prometheus metrics fetching
-export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.ponderPort);
+export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.port);
 
 export const makePonderMetdataProvider = ({
   db,

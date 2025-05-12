@@ -66,20 +66,19 @@ const ENSDeploymentChainSchema = z
   })
   .default(DEFAULT_DEPLOYMENT);
 
+const BlockNumberSchema = (envVarKey: string) =>
+  z.coerce
+    .number({ error: `${envVarKey} must be a number.` })
+    .int({ error: `${envVarKey} must be an integer.` })
+    .min(0, { error: `${envVarKey} must be a non-negative number.` })
+    .optional();
+
 export const ENSIndexerConfigSchema = z.object({
   ensDeploymentChain: ENSDeploymentChainSchema,
   globalBlockrange: z
     .object({
-      startBlock: z.coerce
-        .number({ error: "START_BLOCK must be a number." })
-        .int({ error: "START_BLOCK must be an integer." })
-        .min(0, { error: "START_BLOCK must be a non-negative number." })
-        .optional(),
-      endBlock: z.coerce
-        .number({ error: "END_BLOCK must be a number." })
-        .int({ error: "END_BLOCK must be an integer." })
-        .min(0, { error: "END_BLOCK must be a non-negative number." })
-        .optional(),
+      startBlock: BlockNumberSchema("START_BLOCK"),
+      endBlock: BlockNumberSchema("END_BLOCK"),
     })
     .refine(
       (val) =>
@@ -135,18 +134,16 @@ export const ENSIndexerConfigSchema = z.object({
       error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
     }),
   ),
-  ponderPort: z.preprocess(
-    (val) => (val === undefined || val === "" ? DEFAULT_PORT : Number(val)),
-    z
-      .number({ error: "Ponder port (PORT env var) must be a number." })
-      .int({ error: "Ponder port (PORT env var) must be an integer." })
-      .max(65535, {
-        error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
-      })
-      .min(1, {
-        error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
-      }),
-  ),
+  port: z.coerce
+    .number({ error: "Ponder port (PORT env var) must be a number." })
+    .int({ error: "Ponder port (PORT env var) must be an integer." })
+    .max(65535, {
+      error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
+    })
+    .min(1, {
+      error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
+    })
+    .default(DEFAULT_PORT),
   ensRainbowEndpointUrl: customUrlSchema("ENSRAINBOW_URL"),
   chains: z
     .record(
@@ -168,3 +165,6 @@ export const ENSIndexerConfigSchema = z.object({
     .optional()
     .default({}),
 });
+
+export type ENSIndexerConfig = z.infer<typeof ENSIndexerConfigSchema>;
+export type ChainConfig = z.infer<typeof ChainConfigSchema>;
