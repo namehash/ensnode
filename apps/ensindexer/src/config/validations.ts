@@ -2,23 +2,17 @@ import { ENSIndexerConfig } from "@/config/types";
 import { MergedPluginConfig } from "../../ponder.config";
 
 // Helper function to check rpc url exists for a given chain
-const doesRpcUrlExistForChain = (
-  config: ENSIndexerConfig,
-  chainId: number
-): boolean => {
+const doesRpcUrlExistForChain = (config: ENSIndexerConfig, chainId: number): boolean => {
   return config.chains[chainId]?.rpcEndpointUrl !== undefined;
 };
 
 export const validateGlobalBlockrange = (
   config: ENSIndexerConfig,
-  ponderConfig: MergedPluginConfig
+  ponderConfig: MergedPluginConfig,
 ): void => {
   const { globalBlockrange, ensDeploymentChain, requestedPluginNames } = config;
 
-  if (
-    globalBlockrange.startBlock !== undefined ||
-    globalBlockrange.endBlock !== undefined
-  ) {
+  if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
     const numNetworks = Object.keys(ponderConfig.networks).length;
     if (numNetworks > 1) {
       throw new Error(
@@ -34,7 +28,7 @@ export const validateGlobalBlockrange = (
     ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
   
-  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`
+  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
       );
     }
   }
@@ -42,41 +36,27 @@ export const validateGlobalBlockrange = (
 
 export const validateChainConfigs = (
   config: ENSIndexerConfig,
-  ponderConfig: MergedPluginConfig
+  ponderConfig: MergedPluginConfig,
 ): void => {
   const { requestedPluginNames } = config;
 
-  const allChainIds = Object.values(ponderConfig.networks).map(
-    (network) => network.chainId
-  );
+  const allChainIds = Object.values(ponderConfig.networks).map((network) => network.chainId);
 
-  if (
-    !allChainIds.every((chainId) => doesRpcUrlExistForChain(config, chainId))
-  ) {
+  if (!allChainIds.every((chainId) => doesRpcUrlExistForChain(config, chainId))) {
     throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${requestedPluginNames.join(
-      ", "
+      ", ",
     )}.
-    These plugins, collectively, index events from the following chains: ${allChainIds.join(
-      ", "
-    )}.
+    These plugins, collectively, index events from the following chains: ${allChainIds.join(", ")}.
     
     The following RPC_URL_* environment variables must be defined for nominal indexing behavior:
     ${allChainIds
-      .map(
-        (chainId) =>
-          `RPC_URL_${chainId}: ${
-            config.chains[chainId]?.rpcEndpointUrl || "N/A"
-          }`
-      )
+      .map((chainId) => `RPC_URL_${chainId}: ${config.chains[chainId]?.rpcEndpointUrl || "N/A"}`)
       .join("\n    ")}
     `);
   }
 };
 
-export function validateConfig(
-  config: ENSIndexerConfig,
-  ponderConfig: MergedPluginConfig
-) {
+export function validateConfig(config: ENSIndexerConfig, ponderConfig: MergedPluginConfig) {
   ////////
   // Invariant: All configured networks must have a custom RPC endpoint provided. Public RPC endpoints
   // will ratelimit and make indexing more or less unusable.

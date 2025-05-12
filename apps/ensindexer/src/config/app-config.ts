@@ -1,7 +1,4 @@
-import {
-  DEFAULT_RPC_RATE_LIMIT,
-  ENSIndexerConfigSchema,
-} from "@/config/config.schema";
+import { DEFAULT_RPC_RATE_LIMIT, ENSIndexerConfigSchema } from "@/config/config.schema";
 import { ChainConfig, ENSIndexerConfig } from "@/config/types";
 import z from "zod";
 
@@ -24,8 +21,7 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
 
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond =
-      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       rpcEndpointUrl: value,

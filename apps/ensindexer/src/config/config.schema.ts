@@ -3,7 +3,6 @@ import * as z from "zod";
 
 export const DEFAULT_RPC_RATE_LIMIT = 50;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
-export const DEFAULT_DATABASE_SCHEMA = "ensnode";
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_DEPLOYMENT = "mainnet";
@@ -91,15 +90,13 @@ export const ENSIndexerConfigSchema = z.object({
     ),
   ensNodePublicUrl: customUrlSchema("ENSNODE_PUBLIC_URL"),
   ensAdminUrl: customUrlSchema("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL),
-  ponderDatabaseSchema: z
-    .string({
-      error: (issue) => {
-        if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
-        if (String(issue.input).trim() === "") return "DATABASE_SCHEMA cannot be empty.";
-        return "DATABASE_SCHEMA must be a string.";
-      },
-    })
-    .default(DEFAULT_DATABASE_SCHEMA),
+  ponderDatabaseSchema: z.string({
+    error: (issue) => {
+      if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
+      if (String(issue.input).trim() === "") return "DATABASE_SCHEMA cannot be empty.";
+      return "DATABASE_SCHEMA must be a string.";
+    },
+  }),
   requestedPluginNames: z.preprocess(
     (val) => {
       if (val === undefined) {

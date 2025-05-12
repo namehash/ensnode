@@ -236,10 +236,10 @@ describe("config", () => {
       expect(config.ponderDatabaseSchema).toBe("someschema");
     });
 
-    it("returns the default DATABASE_SCHEMA if it is not set", async () => {
+    it("throws an error when DATABASE_SCHEMA is not set", async () => {
       delete process.env.DATABASE_SCHEMA;
-      const config = await getFreshConfig();
-      expect(config.ponderDatabaseSchema).toBe("ensnode");
+
+      await expect(getFreshConfig()).rejects.toThrow(/DATABASE_SCHEMA is required/);
     });
   });
 
