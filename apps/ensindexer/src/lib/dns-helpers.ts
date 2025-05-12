@@ -22,14 +22,22 @@ export function parseRRSet(record: Hex) {
   // By iterating until dnsPacket.answer.decode fails to decode, or we run out of data to decode,
   // we can extract the entire set of `Answer`s encoded in the record Buffer.
   while (offset < data.length) {
-    const answer = (dnsPacket as any).answer.decode(data, offset) as Answer;
-    if (!answer) break; // decode failed, break
+    let answer: Answer | undefined;
+    try {
+      answer = (dnsPacket as any).answer.decode(data, offset);
+    } catch {}
+
+    // if decode threw or returned undefined, break
+    if (!answer) break;
+    // if decode returned type of UNKNOWN_0 (malformed RRSet), break
+    if ((answer.type as string) === "UNKNOWN_0") break;
 
     const consumedLength = (dnsPacket as any).answer.encodingLength(answer);
 
     // consumed length is 0, done
     if (consumedLength === 0) break;
 
+    // finally, we have a valid decoded answer, include in response set
     decodedRecords.push(answer);
 
     // continue
@@ -45,16 +53,14 @@ export function decodeTXTData(data: Buffer[]): string | null {
 
   // soft-invariant: we never receive 0 data results in a TXT record
   if (decoded.length === 0) {
-    console.warn(
-      `decodeTXTData received multiple 'data' results, this is unexpected. ${decoded.join(",")}`,
-    );
+    console.warn(`decodeTXTData zero 'data' results, this is unexpected.`);
     return null;
   }
 
   // soft-invariant: we never receive more than 1 data result in a TXT record
   if (decoded.length > 1) {
     console.warn(
-      `decodeTXTData received multiple 'data' results, this is unexpected. ${decoded.join(",")}`,
+      `decodeTXTData received multiple 'data' results, this is unexpected. data = '${decoded.join(",")}'`,
     );
   }
 
