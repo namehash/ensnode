@@ -1,4 +1,7 @@
-import { DEFAULT_RPC_RATE_LIMIT, ENSIndexerConfigSchema } from "@/config/config.schema";
+import {
+  DEFAULT_RPC_RATE_LIMIT,
+  ENSIndexerConfigSchema,
+} from "@/config/config.schema";
 import { ChainConfig, ENSIndexerConfig } from "@/config/types";
 import z from "zod";
 
@@ -21,12 +24,13 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
 
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond =
-      Number(process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`]) || DEFAULT_RPC_RATE_LIMIT;
+    const rpcMaxRequestsPerSecond = Number(
+      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`]
+    );
 
     chains[chainId] = {
       rpcEndpointUrl: value,
-      rpcMaxRequestsPerSecond,
+      rpcMaxRequestsPerSecond: rpcMaxRequestsPerSecond,
     };
   });
 
@@ -58,8 +62,13 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
     ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
     globalBlockrange: {
       startBlock:
-        process.env.START_BLOCK !== undefined ? Number(process.env.START_BLOCK) : undefined,
-      endBlock: process.env.END_BLOCK !== undefined ? Number(process.env.END_BLOCK) : undefined,
+        process.env.START_BLOCK !== undefined
+          ? Number(process.env.START_BLOCK)
+          : undefined,
+      endBlock:
+        process.env.END_BLOCK !== undefined
+          ? Number(process.env.END_BLOCK)
+          : undefined,
     },
     chains,
   };
@@ -87,7 +96,9 @@ export default config;
  */
 export const rpcMaxRequestsPerSecond = (chainId: number): number => {
   if (!config.chains[chainId]?.rpcMaxRequestsPerSecond) {
-    throw new Error(`RPC max requests per second not found for chain ID ${chainId}`);
+    throw new Error(
+      `RPC max requests per second not found for chain ID ${chainId}`
+    );
   }
   return config.chains[chainId].rpcMaxRequestsPerSecond;
 };
