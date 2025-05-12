@@ -18,8 +18,7 @@ export default function JoinTelegram() {
           as="p"
           className="text-lg leading-8 min-[930px]:leading-7 font-normal text-gray-500 text-center min-[930px]:text-left"
         >
-          Get updates, technical support, and connect with ENS developers building the multi-chain
-          future.
+          Get updates, technical support, and connect with our team building the multichain future.
         </Balancer>
         <Button asChild size="medium" variant="primary">
           <Link target="_blank" href="http://t.me/ensnode">

@@ -24,8 +24,7 @@ export default function InfrastructureInnovations() {
             as="p"
             className="max-w-[720px] text-center text-gray-500 text-lg leading-8 sm:leading-7 font-normal"
           >
-            Current ENS indexing cannot support the protocol's expansion beyond mainnet. A complete
-            multi-chain solution is required for the ecosystem to thrive.
+            ENSNode addresses essential needs for a multichain ENS future.
           </Balancer>
         </div>
       </Fragment>
@@ -58,7 +57,7 @@ const innovationSections: InnovationSectionProps[] = [
     designatedMobileImage: <img src={InfrastructureGapsMobileImage.src} alt="lost names" />,
   },
   {
-    sectionHeader: <>Strengthen the decentralization and &quot;unstoppability&quot; of ENS:</>,
+    sectionHeader: <>Strengthen the decentralization and &quot;unstoppability&quot; of ENS</>,
     sectionDescription: (
       <>
         Our infrastructure under development removes a strict dependency on many centralized
