@@ -1,27 +1,14 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CodeBlock } from "@/components/ui/code-block";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  ExternalLink,
-  Database,
-  PackagePlus,
-  FileSearch,
-  PlayCircle,
-} from "lucide-react";
+import { ConnectionSelector } from "@/components/connections/connection-selector";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ConnectionSelector } from "@/components/connections/connection-selector";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CodeBlock } from "@/components/ui/code-block";
 import {
   Select,
   SelectContent,
@@ -29,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Database, ExternalLink, FileSearch, PackagePlus, PlayCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
@@ -139,7 +128,7 @@ function QuerySelector() {
       params.set("example", value);
       router.push(`?${params.toString()}`, { scroll: false });
     },
-    [searchParams, router]
+    [searchParams, router],
   );
 
   const selectedExample =
@@ -161,9 +150,7 @@ function QuerySelector() {
       </Select>
 
       <div className="p-4 border rounded-md">
-        <p className="text-sm font-medium mb-2">
-          {selectedExample.description}
-        </p>
+        <p className="text-sm font-medium mb-2">{selectedExample.description}</p>
         <CodeBlock language="graphql" className="text-xs">
           {selectedExample.graphql}
         </CodeBlock>
@@ -181,9 +168,7 @@ export default function QuickstartsPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          ENSNode Quickstart
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">ENSNode Quickstart</h1>
         <p className="mt-2 text-lg text-muted-foreground">
           Get started with ENSNode using your preferred client library
         </p>
@@ -193,9 +178,7 @@ export default function QuickstartsPage() {
         <div className="space-y-6">
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                1
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">1</span>
             </div>
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
@@ -214,9 +197,7 @@ export default function QuickstartsPage() {
 
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                2
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">2</span>
             </div>
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
@@ -269,33 +250,24 @@ export default function QuickstartsPage() {
 
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                3
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">3</span>
             </div>
             <div className="space-y-2 pt-1 w-full">
               <h3 className="font-medium text-lg flex items-center gap-2">
                 <FileSearch className="h-5 w-5 text-primary" />
                 Define Your Data Requirements
               </h3>
-              <p className="text-muted-foreground">
-                Choose what ENS data you need.
-              </p>
+              <p className="text-muted-foreground">Choose what ENS data you need.</p>
               <div className="mt-2">
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="bg-muted/50 rounded-md"
-                >
+                <Accordion type="single" collapsible className="bg-muted/50 rounded-md">
                   <AccordionItem value="best-practice" className="border-0">
                     <AccordionTrigger className="p-4 hover:no-underline">
                       <p className="text-sm font-medium">Best Practice</p>
                     </AccordionTrigger>
                     <AccordionContent className="px-4">
                       <p className="text-sm text-muted-foreground">
-                        When querying by ENS name, always normalize the name and
-                        use namehash to calculate the node ID for stable
-                        identification.
+                        When querying by ENS name, always normalize the name and use namehash to
+                        calculate the node ID for stable identification.
                       </p>
                       <CodeBlock language="typescript" className="text-xs mt-2">
                         {`import { namehash, normalize } from "viem/ens";
@@ -321,9 +293,7 @@ const nodeId = namehash(normalizedName);
 
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                4
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">4</span>
             </div>
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
@@ -331,8 +301,7 @@ const nodeId = namehash(normalizedName);
                 Execute Your Query
               </h3>
               <p className="text-muted-foreground">
-                Use your chosen client to execute a GraphQL query against your
-                ENSNode endpoint.
+                Use your chosen client to execute a GraphQL query against your ENSNode endpoint.
               </p>
             </div>
           </div>
@@ -340,9 +309,7 @@ const nodeId = namehash(normalizedName);
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">
-          Example: {selectedExample.name}
-        </h2>
+        <h2 className="text-xl font-semibold">Example: {selectedExample.name}</h2>
         <Tabs defaultValue="graphql" className="w-full">
           <TabsList className="w-full justify-start mb-4">
             <TabsTrigger value="graphql">GraphQL</TabsTrigger>
@@ -410,10 +377,7 @@ executeQuery();`}
             </CodeBlock>
           </TabsContent>
 
-          <TabsContent
-            value="graphql-request"
-            className="rounded-md border p-4"
-          >
+          <TabsContent value="graphql-request" className="rounded-md border p-4">
             <CodeBlock language="typescript" className="text-sm">
               {`import { request, gql } from 'graphql-request';
 import { namehash, normalize } from 'viem/ens';
@@ -490,11 +454,9 @@ executeQuery();`}
 
 curl -X POST \\
   -H "Content-Type: application/json" \\
-  --data '{ "query": ${JSON.stringify(
-    selectedExample.graphql.replace(/\n/g, " ")
-  ).replace(
+  --data '{ "query": ${JSON.stringify(selectedExample.graphql.replace(/\n/g, " ")).replace(
     /"/g,
-    '\\"'
+    '\\"',
   )}, "variables": { "id": "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835" } }' \\
   https://api.ens.domains/graphql`}
             </CodeBlock>
@@ -518,8 +480,7 @@ ${selectedExample.graphql}
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">Useful Resources</h2>
           <p className="text-muted-foreground">
-            Explore these resources to learn more about ENSNode and GraphQL best
-            practices.
+            Explore these resources to learn more about ENSNode and GraphQL best practices.
           </p>
         </div>
 
@@ -537,8 +498,8 @@ ${selectedExample.graphql}
                   <ExternalLink className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </CardTitle>
                 <CardDescription>
-                  Learn how to optimize your GraphQL queries and improve
-                  performance when working with ENS data.
+                  Learn how to optimize your GraphQL queries and improve performance when working
+                  with ENS data.
                 </CardDescription>
               </CardHeader>
             </a>
@@ -557,8 +518,8 @@ ${selectedExample.graphql}
                   <ExternalLink className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </CardTitle>
                 <CardDescription>
-                  Discover what ENSNode is and how it can help you build
-                  applications using ENS data.
+                  Discover what ENSNode is and how it can help you build applications using ENS
+                  data.
                 </CardDescription>
               </CardHeader>
             </a>

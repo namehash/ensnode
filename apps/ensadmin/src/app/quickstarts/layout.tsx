@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 
 const title = "ENS GraphQL API Quickstarts";
-const description =
-  "Get started with ENS GraphQL API using your preferred client library";
+const description = "Get started with ENS GraphQL API using your preferred client library";
 
 export const metadata: Metadata = {
   title,

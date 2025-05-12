@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { cn } from "@/lib/utils";
 import { CopyButton } from "@/components/ui/copy-button";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 interface CodeBlockProps {
   language: string;
@@ -21,21 +21,14 @@ export function CodeBlock({
   const formattedCode = showLineNumbers
     ? children.split("\n").map((line, i) => (
         <div key={i} className="table-row">
-          <span className="table-cell pr-4 text-right opacity-50 select-none">
-            {i + 1}
-          </span>
+          <span className="table-cell pr-4 text-right opacity-50 select-none">{i + 1}</span>
           <span className="table-cell">{line}</span>
         </div>
       ))
     : children;
 
   return (
-    <div
-      className={cn(
-        "relative group rounded-md overflow-hidden bg-muted",
-        className
-      )}
-    >
+    <div className={cn("relative group rounded-md overflow-hidden bg-muted", className)}>
       <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <CopyButton value={children} variant="ghost" size="sm" />
       </div>
