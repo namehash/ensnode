@@ -28,19 +28,19 @@ export default function HeaderButtons({ isScrollable }: HeaderButtonsProps) {
 
         <Button variant="ghost" asChild>
           <Link href="https://x.com/NamehashLabs">
-            <TwitterIcon className={cc([isScrollable ? "onScrollElement" : ""])} />
+            <TwitterIcon className={cc({ onScrollElement: isScrollable })} />
           </Link>
         </Button>
 
         <Button variant="ghost" asChild>
           <Link href="https://github.com/namehash/ensnode">
-            <GithubIcon className={cc([isScrollable ? "onScrollElement" : ""])} />
+            <GithubIcon className={cc({ onScrollElement: isScrollable })} />
           </Link>
         </Button>
 
         <Button variant="ghost" asChild>
           <Link href="http://t.me/ensnode">
-            <TelegramIcon className={cc([isScrollable ? "onScrollElement" : ""])} />
+            <TelegramIcon className={cc({ onScrollElement: isScrollable })} />
           </Link>
         </Button>
       </div>
