@@ -8,3 +8,35 @@
   font-size: 1em;
   transform: translateY(1px);
 }
+
+/* Custom icon logic for specific sidebar items based on URL - hack as only
+ * icons are supported in starlight. */
+
+/* Styles to replace the default Starlight sidebar icon with a custom image */
+.starlight-sidebar-topics-icon svg {
+  display: none; /* Hide the default SVG icon */
+}
+
+/* Default sidebar icon (parent) */
+.starlight-sidebar-topics-icon {
+  background-image: url('../assets/placeholder.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+/* URL based custom icons */
+a[href*="ensindexer"] .starlight-sidebar-topics-icon {
+  background-image: url('../assets/ensindexer-icon.svg');
+}
+
+a[href*="ensrainbow"] .starlight-sidebar-topics-icon {
+  background-image: url('../assets/ensrainbow-icon.svg');
+}
+
+a[href*="ensadmin"] .starlight-sidebar-topics-icon {
+  background-image: url('../assets/ensadmin-icon.svg');
+}
