@@ -81,7 +81,7 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
           //    reverse node (i.e. addr.reverse), give it a go
           if (healReverseAddresses() && REVERSE_ROOT_NODES.has(parentNode)) {
             healedLabel = maybeHealLabelByReverseAddress({
-              maybeReverseAddress: owner,
+              maybeReverseAddress: event.transaction.from,
               labelHash,
             });
           }
