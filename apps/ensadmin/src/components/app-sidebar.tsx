@@ -6,7 +6,12 @@ import * as React from "react";
 import { IconENS } from "@/components/icons/ens";
 import { NavMain } from "@/components/nav-main";
 
-import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
 import { ConnectionSelector } from "./connections/connection-selector";
 
 const navItems = [
@@ -26,6 +31,10 @@ const navItems = [
     icon: RadioTower,
     isActive: true,
     items: [
+      {
+        title: "Quickstart",
+        url: "/quickstarts",
+      },
       {
         title: "GraphQL (Ponder-style)",
         url: "/gql/ponder",
