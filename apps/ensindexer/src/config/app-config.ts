@@ -44,7 +44,7 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
  * required environment variables, correct formats, or logical consistency) is handled
  * separately by dedicated validation utilities elsewhere in the codebase.
  */
-export function buildENSIndexerConfig(): ENSIndexerConfig {
+function buildENSIndexerConfig(): ENSIndexerConfig {
   const chains = getChainsFromEnv();
 
   const config = {
@@ -87,6 +87,8 @@ export function getConfig() {
   return _config;
 }
 
+export const config = getConfig();
+
 /**
  * Gets the RPC request rate limit for a given chain ID.
  *
@@ -94,7 +96,6 @@ export function getConfig() {
  * @returns the rate limit in requests per second (rps)
  */
 export const rpcMaxRequestsPerSecond = (chainId: number): number => {
-  const config = getConfig();
   if (!config.chains[chainId]?.rpcMaxRequestsPerSecond) {
     throw new Error(`RPC max requests per second not found for chain ID ${chainId}`);
   }
@@ -108,7 +109,6 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
  * @returns the URL of the RPC endpoint
  */
 export const rpcEndpointUrl = (chainId: number): string => {
-  const config = getConfig();
   if (!config.chains[chainId]?.rpcEndpointUrl) {
     throw new Error(`RPC endpoint URL not found for chain ID ${chainId}`);
   }

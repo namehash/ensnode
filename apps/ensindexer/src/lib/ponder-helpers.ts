@@ -1,7 +1,7 @@
 import type { Event } from "ponder:registry";
 import { PublicClient } from "viem";
 
-import { getConfig } from "@/config/app-config";
+import { config } from "@/config/app-config";
 import { Blockrange } from "@/lib/types";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
@@ -26,7 +26,7 @@ export const constrainContractBlockrange = (
 ): Blockrange => {
   const {
     globalBlockrange: { startBlock, endBlock },
-  } = getConfig();
+  } = config;
 
   const isEndConstrained = endBlock !== undefined;
   const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
@@ -44,7 +44,7 @@ export const constrainContractBlockrange = (
  */
 export const createEnsRainbowVersionFetcher = () => {
   const client = new EnsRainbowApiClient({
-    endpointUrl: new URL(getConfig().ensRainbowEndpointUrl),
+    endpointUrl: new URL(config.ensRainbowEndpointUrl),
   });
 
   return async () => {
@@ -70,7 +70,7 @@ export const createEnsRainbowVersionFetcher = () => {
  * @returns the ENSDeployment chain ID
  */
 export const getEnsDeploymentChainId = (): number => {
-  return ENSDeployments[getConfig().ensDeploymentChain].root.chain.id;
+  return ENSDeployments[config.ensDeploymentChain].root.chain.id;
 };
 
 /**

@@ -30,9 +30,13 @@ export const mockConfig: any = {
  * import { yourModule } from '@/your-module';
  */
 export function setupConfigMock() {
+  // Use mockConfig directly - no proxy
+  // This works because vi.mock is hoisted to the top of the file
+  // and mockConfig is a top-level variable
   vi.mock("@/config/app-config", () => {
     return {
       getConfig: vi.fn(() => mockConfig),
+      config: mockConfig,
       rpcMaxRequestsPerSecond: vi.fn(
         (chainId: number) => mockConfig.chains[chainId]?.rpcMaxRequestsPerSecond || 50,
       ),

@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
-import { getConfig } from "@/config/app-config";
+import { config } from "@/config/app-config";
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
@@ -85,7 +85,7 @@ export const makeRegistryHandlers = ({
 
           // 1. if healing label from reverse addresses is enabled, and the parent is a known
           //    reverse node (i.e. addr.reverse), give it a go
-          if (getConfig().healReverseAddresses && REVERSE_ROOT_NODES.has(parentNode)) {
+          if (config.healReverseAddresses && REVERSE_ROOT_NODES.has(parentNode)) {
             healedLabel = maybeHealLabelByReverseAddress({
               maybeReverseAddress: owner,
               labelHash,

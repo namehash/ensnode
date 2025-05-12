@@ -1,11 +1,11 @@
-import { getConfig, rpcEndpointUrl } from "@/config/app-config";
+import { config, rpcEndpointUrl } from "@/config/app-config";
 import { MergedPluginConfig } from "@/plugins";
 
 export const validateGlobalBlockrange = (
   networks: MergedPluginConfig["networks"],
   requestedPluginNames: string[],
 ): void => {
-  const { globalBlockrange, ensDeploymentChain } = getConfig();
+  const { globalBlockrange, ensDeploymentChain } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
     const numNetworks = Object.keys(networks).length;
@@ -48,7 +48,7 @@ export const validateChainConfigs = (
 };
 
 export function validateConfig(allChainIds: number[], networks: MergedPluginConfig["networks"]) {
-  const { requestedPluginNames } = getConfig();
+  const { requestedPluginNames } = config;
 
   ////////
   // Invariant: All configured networks must have a custom RPC endpoint provided. Public RPC endpoints

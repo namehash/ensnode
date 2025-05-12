@@ -1,13 +1,10 @@
-import { getConfig } from "@/config/app-config";
+import { config } from "@/config/app-config";
 import { validateConfig } from "@/config/validations";
 import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { getActivePlugins } from "@/lib/plugin-helpers";
 import { AVAILABLE_PLUGINS, MergedPluginConfig } from "@/plugins";
 import { DatasourceName } from "@ensnode/ens-deployments";
-
-// Call the config builder before anything else to configure the config object.
-const config = getConfig();
 
 ////////
 // Filter AVAILABLE_PLUGINS by those that the user has selected (via ACTIVE_PLUGINS), panicking if a

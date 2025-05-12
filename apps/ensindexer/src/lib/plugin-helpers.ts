@@ -2,7 +2,7 @@ import type { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Address, Chain, isAddress } from "viem";
 
-import { getConfig, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "@/config/app-config";
+import { config, rpcEndpointUrl, rpcMaxRequestsPerSecond } from "@/config/app-config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
@@ -60,8 +60,6 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
   requestedPluginNames: string[],
   availableDatasourceNames: DatasourceName[],
 ): PLUGIN[] {
-  const config = getConfig();
-
   if (!requestedPluginNames.length) throw new Error("Must activate at least 1 plugin.");
 
   // validate that each of the requestedPluginNames is included in allPlugins
@@ -241,8 +239,6 @@ export function validateContractConfigs<CONTRACT_CONFIGS extends Record<string, 
   pluginName: PluginName,
   contracts: CONTRACT_CONFIGS,
 ) {
-  const config = getConfig();
-
   // invariant: `contracts` must provide valid addresses if a filter is not provided
   //  (see packages/ens-deployments/src/ens-test-env.ts) for context
   const hasAddresses = Object.values(contracts)

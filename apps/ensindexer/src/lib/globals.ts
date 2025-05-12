@@ -1,7 +1,6 @@
-import { getConfig } from "@/config/app-config";
+import { config } from "@/config/app-config";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 
-const config = getConfig();
 const ensDeploymentChain = config.ensDeploymentChain;
 
 export const SELECTED_ENS_DEPLOYMENT = ENSDeployments[ensDeploymentChain];

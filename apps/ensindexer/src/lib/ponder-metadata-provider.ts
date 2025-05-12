@@ -3,7 +3,7 @@ import packageJson from "@/../package.json";
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 
-import { getConfig } from "@/config/app-config";
+import { config } from "@/config/app-config";
 import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
@@ -13,7 +13,7 @@ import {
 import { PrometheusMetrics, queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata";
 import type { PonderMetadataProvider } from "@ensnode/ponder-subgraph";
 
-const { ponderDatabaseSchema } = getConfig();
+const { ponderDatabaseSchema } = config;
 
 // setup block indexing status fetching
 export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
@@ -24,7 +24,7 @@ export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdF
 export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
 
 // setup prometheus metrics fetching
-export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(getConfig().ponderPort);
+export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.ponderPort);
 
 export const makePonderMetdataProvider = ({
   db,
