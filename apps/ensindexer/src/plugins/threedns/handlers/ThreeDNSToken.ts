@@ -30,7 +30,7 @@ export default function ({
   ponder.on(namespace("ThreeDNSToken:RegistrationExtended"), handleRegistrationExtended);
 
   ///
-  /// ThreeDNSResolver Handlers
+  /// ThreeDNS Resolver Handlers
   ///
 
   const {
@@ -50,40 +50,35 @@ export default function ({
     handleZoneCreated,
   } = makeResolverHandlers({ pluginName });
 
-  ponder.on(namespace("ThreeDNSResolver:AddrChanged"), handleAddrChanged);
-  ponder.on(namespace("ThreeDNSResolver:AddressChanged"), handleAddressChanged);
-  ponder.on(namespace("ThreeDNSResolver:NameChanged"), handleNameChanged);
-  ponder.on(namespace("ThreeDNSResolver:ABIChanged"), handleABIChanged);
-  ponder.on(namespace("ThreeDNSResolver:PubkeyChanged"), handlePubkeyChanged);
+  ponder.on(namespace("Resolver:AddrChanged"), handleAddrChanged);
+  ponder.on(namespace("Resolver:AddressChanged"), handleAddressChanged);
+  ponder.on(namespace("Resolver:NameChanged"), handleNameChanged);
+  ponder.on(namespace("Resolver:ABIChanged"), handleABIChanged);
+  ponder.on(namespace("Resolver:PubkeyChanged"), handlePubkeyChanged);
   ponder.on(
-    namespace(
-      "ThreeDNSResolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-    ),
+    namespace("Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)"),
     handleTextChanged,
   );
   ponder.on(
     namespace(
-      "ThreeDNSResolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+      "Resolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
     ),
     handleTextChanged,
   );
-  ponder.on(namespace("ThreeDNSResolver:ContenthashChanged"), handleContenthashChanged);
-  ponder.on(namespace("ThreeDNSResolver:InterfaceChanged"), handleInterfaceChanged);
-  ponder.on(namespace("ThreeDNSResolver:AuthorisationChanged"), handleAuthorisationChanged);
-  ponder.on(namespace("ThreeDNSResolver:VersionChanged"), handleVersionChanged);
+  ponder.on(namespace("Resolver:ContenthashChanged"), handleContenthashChanged);
+  ponder.on(namespace("Resolver:InterfaceChanged"), handleInterfaceChanged);
+  ponder.on(namespace("Resolver:AuthorisationChanged"), handleAuthorisationChanged);
+  ponder.on(namespace("Resolver:VersionChanged"), handleVersionChanged);
+  // NOTE: 3DNS' Resolver contract only emits DNSRecordChanged with the included `ttl` argument
+  // and we explicitly do not index ens-contracts' IDNSRecordResolver#DNSRecordChanged (without the `ttl`)
+  // in this file, as these handlers are 3DNS-specific
   ponder.on(
     namespace(
-      "ThreeDNSResolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, bytes record)",
+      "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
     ),
     handleDNSRecordChanged,
   );
-  ponder.on(
-    namespace(
-      "ThreeDNSResolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
-    ),
-    handleDNSRecordChanged,
-  );
-  ponder.on(namespace("ThreeDNSResolver:DNSRecordDeleted"), handleDNSRecordDeleted);
-  ponder.on(namespace("ThreeDNSResolver:DNSZonehashChanged"), handleDNSZonehashChanged);
-  ponder.on(namespace("ThreeDNSResolver:ZoneCreated"), handleZoneCreated);
+  ponder.on(namespace("Resolver:DNSRecordDeleted"), handleDNSRecordDeleted);
+  ponder.on(namespace("Resolver:DNSZonehashChanged"), handleDNSZonehashChanged);
+  ponder.on(namespace("Resolver:ZoneCreated"), handleZoneCreated);
 }

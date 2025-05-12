@@ -78,15 +78,15 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
       const resolverId = makeResolverId(
         pluginName,
         context.network.chainId,
-        // NetworkConfig#address is `Address | undefined`, but we know this is defined for ThreeDNSResolver
-        context.contracts["threedns/ThreeDNSResolver"].address!,
+        // NetworkConfig#address is `Address | undefined`, but we know this is defined for 3DNS' Resolver
+        context.contracts["threedns/Resolver"].address!,
         node,
       );
 
       // so upsert the resolver record and link Domain.resolverId below
       await upsertResolver(context, {
         id: resolverId,
-        address: context.contracts["threedns/ThreeDNSResolver"].address!,
+        address: context.contracts["threedns/Resolver"].address!,
         domainId: node,
       });
 

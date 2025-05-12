@@ -316,6 +316,9 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
     },
 
+    /**
+     * Handles both ens-contracts' IDNSRecordResolver#DNSRecordChanged AND 3DNS' Resolver#DNSRecordChanged
+     */
     async handleDNSRecordChanged({
       context,
       event,
@@ -325,8 +328,10 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         node: Node;
         name: Hex;
         resource: number;
-        ttl?: number;
         record: Hex;
+        // 3DNS includes a `ttl` in its event ABI for DNSRecordChanged, but
+        // ens-contracts's IDNSRecordResolver#DNSRecordChanged does not, so we consider it optional
+        ttl?: number;
       }>;
     }) {
       // subgraph ignores this event
@@ -359,7 +364,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
             // https://github.com/mafintosh/dns-packet
             const value = decodeTXTData(answer.data as Buffer[]);
 
-            const id = makeResolverId(event.log.address, node);
+            const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
             const resolver = await upsertResolver(context, {
               id,
               domainId: node,
@@ -424,7 +429,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       // trim the .ens off the end to match ENS record naming
       const key = recordName.slice(0, -4);
 
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       const resolver = await upsertResolver(context, {
         id,
         domainId: node,
