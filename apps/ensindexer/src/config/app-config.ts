@@ -1,4 +1,7 @@
-import { ENSIndexerConfigSchema } from "@/config/config.schema";
+import {
+  DEFAULT_RPC_RATE_LIMIT,
+  ENSIndexerConfigSchema,
+} from "@/config/config.schema";
 import { ChainConfig, ENSIndexerConfig } from "@/config/types";
 import z from "zod";
 
@@ -21,7 +24,8 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
 
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    const rpcMaxRequestsPerSecond =
+      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       rpcEndpointUrl: value,
@@ -93,8 +97,9 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
   const chainConfig = config.chains[chainId];
 
   if (!chainConfig?.rpcMaxRequestsPerSecond) {
-    throw new Error(`RPC max requests per second not found for chain ID ${chainId}`);
+    return DEFAULT_RPC_RATE_LIMIT;
   }
+
   return chainConfig.rpcMaxRequestsPerSecond;
 };
 
@@ -104,11 +109,12 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
  * @param chainId the chain ID to get the RPC URL for
  * @returns the URL of the RPC endpoint
  */
-export const rpcEndpointUrl = (chainId: number): string => {
+export const rpcEndpointUrl = (chainId: number): string | undefined => {
   const chainConfig = config.chains[chainId];
 
   if (!chainConfig?.rpcEndpointUrl) {
-    throw new Error(`RPC endpoint URL not found for chain ID ${chainId}`);
+    return undefined;
   }
+
   return chainConfig.rpcEndpointUrl;
 };

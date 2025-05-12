@@ -1,14 +1,25 @@
-import config, { rpcEndpointUrl } from "@/config/app-config";
-import { MergedPluginConfig } from "@/plugins";
+import { ENSIndexerConfig } from "@/config/types";
+import { MergedPluginConfig } from "../../ponder.config";
+
+// Helper function to check rpc url exists for a given chain
+const doesRpcUrlExistForChain = (
+  config: ENSIndexerConfig,
+  chainId: number
+): boolean => {
+  return config.chains[chainId]?.rpcEndpointUrl !== undefined;
+};
 
 export const validateGlobalBlockrange = (
-  networks: MergedPluginConfig["networks"],
-  requestedPluginNames: string[],
+  config: ENSIndexerConfig,
+  ponderConfig: MergedPluginConfig
 ): void => {
-  const { globalBlockrange, ensDeploymentChain } = config;
+  const { globalBlockrange, ensDeploymentChain, requestedPluginNames } = config;
 
-  if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    const numNetworks = Object.keys(networks).length;
+  if (
+    globalBlockrange.startBlock !== undefined ||
+    globalBlockrange.endBlock !== undefined
+  ) {
+    const numNetworks = Object.keys(ponderConfig.networks).length;
     if (numNetworks > 1) {
       throw new Error(
         `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains.
@@ -23,42 +34,58 @@ export const validateGlobalBlockrange = (
     ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
   
-  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
+  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`
       );
     }
   }
 };
 
 export const validateChainConfigs = (
-  allChainIds: number[],
-  requestedPluginNames: string[],
+  config: ENSIndexerConfig,
+  ponderConfig: MergedPluginConfig
 ): void => {
-  if (!allChainIds.every((chainId) => rpcEndpointUrl(chainId) !== undefined)) {
+  const { requestedPluginNames } = config;
+
+  const allChainIds = Object.values(ponderConfig.networks).map(
+    (network) => network.chainId
+  );
+
+  if (
+    !allChainIds.every((chainId) => doesRpcUrlExistForChain(config, chainId))
+  ) {
     throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${requestedPluginNames.join(
-      ", ",
+      ", "
     )}.
-    These plugins, collectively, index events from the following chains: ${allChainIds.join(", ")}.
+    These plugins, collectively, index events from the following chains: ${allChainIds.join(
+      ", "
+    )}.
     
     The following RPC_URL_* environment variables must be defined for nominal indexing behavior:
     ${allChainIds
-      .map((chainId) => `RPC_URL_${chainId}: ${rpcEndpointUrl(chainId) || "N/A"}`)
-      .join("\n")}
+      .map(
+        (chainId) =>
+          `RPC_URL_${chainId}: ${
+            config.chains[chainId]?.rpcEndpointUrl || "N/A"
+          }`
+      )
+      .join("\n    ")}
     `);
   }
 };
 
-export function validateConfig(allChainIds: number[], networks: MergedPluginConfig["networks"]) {
-  const { requestedPluginNames } = config;
-
+export function validateConfig(
+  config: ENSIndexerConfig,
+  ponderConfig: MergedPluginConfig
+) {
   ////////
   // Invariant: All configured networks must have a custom RPC endpoint provided. Public RPC endpoints
   // will ratelimit and make indexing more or less unusable.
   ////////
-  validateChainConfigs(allChainIds, requestedPluginNames);
+  validateChainConfigs(config, ponderConfig);
 
   ////////
   // Invariant: if using a custom START_BLOCK or END_BLOCK, ponder should be configured to index at
   // most one network.
   ////////
-  validateGlobalBlockrange(networks, requestedPluginNames);
+  validateGlobalBlockrange(config, ponderConfig);
 }
