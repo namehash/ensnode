@@ -10,8 +10,8 @@ import { Code } from '@astrojs/starlight/components';
 import envExample from '@workspace/apps/ensindexer/.env.local.example?raw';
 
 :::caution[Performance Tip: ENSRainbow Server]
-Warning: The public ENSRainbow server (`https://api.ensrainbow.io`) can slow down indexing.
-For optimal performance, run a local instance and set `ENSRAINBOW_URL` to your local ENSRainbow server.
+Warning: Configuring ENSIndexer to use the public ENSRainbow server (`https://api.ensrainbow.io`) will significantly slow down indexing.
+For optimal indexing performance, always colocate ENSIndexer and ENSRainbow. For example, if you are running ENSIndexer locally, you should also run a local instance of ENSRainbow and set `ENSRAINBOW_URL` to your local ENSRainbow server.
 :::
 ENSIndexer's behavior can be configured through environment variables.
 

@@ -3,7 +3,7 @@ import { ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { Chain } from "viem";
 
 /**
- * Configuration for a single blockchain network (chain) used by the ENSIndexer.
+ * Configuration for a single blockchain network (chain) used by ENSIndexer.
  */
 export interface ChainConfig {
   /**
@@ -20,8 +20,7 @@ export interface ChainConfig {
 }
 
 /**
- * The complete configuration object for the ENSIndexer application.
- * This object is typically constructed at startup and used throughout the app.
+ * The complete runtime configuration for an ENSIndexer application instance.
  */
 export interface ENSIndexerConfig {
   /**
