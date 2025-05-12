@@ -21,8 +21,7 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
 
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond =
-      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       rpcEndpointUrl: value,
@@ -94,9 +93,7 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
   const chainConfig = config.chains[chainId];
 
   if (!chainConfig?.rpcMaxRequestsPerSecond) {
-    throw new Error(
-      `RPC max requests per second not found for chain ID ${chainId}`
-    );
+    throw new Error(`RPC max requests per second not found for chain ID ${chainId}`);
   }
   return chainConfig.rpcMaxRequestsPerSecond;
 };

@@ -43,7 +43,7 @@ const customUrlSchema = (envVarKey: string) => {
         {
           // This message is for when the string is non-empty but not a valid URL format.
           error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        }
+        },
       )
   );
 };
@@ -61,7 +61,7 @@ const ENSDeploymentChainSchema = z
   .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
     error: (issue) => {
       return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-        ENSDeployments
+        ENSDeployments,
       ).join(", ")}`;
     },
   })
@@ -87,7 +87,7 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
     ),
   ensNodePublicUrl: customUrlSchema("ENSNODE_PUBLIC_URL"),
   ensAdminUrl: customUrlSchema("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL),
@@ -95,8 +95,7 @@ export const ENSIndexerConfigSchema = z.object({
     .string({
       error: (issue) => {
         if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
-        if (String(issue.input).trim() === "")
-          return "DATABASE_SCHEMA cannot be empty.";
+        if (String(issue.input).trim() === "") return "DATABASE_SCHEMA cannot be empty.";
         return "DATABASE_SCHEMA must be a string.";
       },
     })
@@ -119,12 +118,12 @@ export const ENSIndexerConfigSchema = z.object({
         z.string({
           error: "Each plugin name in ACTIVE_PLUGINS must be a string.",
         }),
-        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." }
+        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." },
       )
       .min(1, {
         error:
           "ACTIVE_PLUGINS must be set and contain at least one valid plugin name (e.g. 'subgraph' or 'subgraph,basenames').",
-      })
+      }),
   ),
   healReverseAddresses: z.preprocess(
     (val) => {
@@ -137,7 +136,7 @@ export const ENSIndexerConfigSchema = z.object({
     },
     z.boolean({
       error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-    })
+    }),
   ),
   ponderPort: z.preprocess(
     (val) => (val === undefined || val === "" ? DEFAULT_PORT : Number(val)),
@@ -145,13 +144,11 @@ export const ENSIndexerConfigSchema = z.object({
       .number({ error: "Ponder port (PORT env var) must be a number." })
       .int({ error: "Ponder port (PORT env var) must be an integer." })
       .max(65535, {
-        error:
-          "Ponder port (PORT env var) must be a number between 1 and 65535.",
+        error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
       })
       .min(1, {
-        error:
-          "Ponder port (PORT env var) must be a number between 1 and 65535.",
-      })
+        error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
+      }),
   ),
   ensRainbowEndpointUrl: customUrlSchema("ENSRAINBOW_URL"),
   chains: z
@@ -159,8 +156,7 @@ export const ENSIndexerConfigSchema = z.object({
       z
         .string({
           error: (issue) => {
-            if (issue.input === undefined)
-              return "Chain ID key in RPC_URL_{chainId} is required.";
+            if (issue.input === undefined) return "Chain ID key in RPC_URL_{chainId} is required.";
             if (!/^\d+$/.test(String(issue.input)))
               return "Chain ID in RPC_URL_{chainId} must be a string of digits.";
             return "Invalid Chain ID key format for RPC_URL_{chainId}.";
@@ -169,9 +165,8 @@ export const ENSIndexerConfigSchema = z.object({
         .transform(Number),
       ChainConfigSchema,
       {
-        error:
-          "Chains configuration must be an object mapping numeric chain IDs to their configs.",
-      }
+        error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+      },
     )
     .optional()
     .default({}),
