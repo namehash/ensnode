@@ -1,0 +1,22 @@
+---
+import ENSNode2DLight from "../../assets/light-logo.svg";
+import CustomSearch from "../molecules/CustomSearch.astro";
+import HeaderButtons from "../molecules/HeaderButtons";
+---
+
+<header class="fixed top-0 w-full z-20 h-[56px] py-[9px] sm:h-[70px] sm:py-4 select-none border border-b border-gray-200 bg-white">
+    <div class="box-border max-w-7xl mx-auto items-center justify-between flex flex-row pl-5 pr-3 sm:px-8">
+        <div class="flex flex-row lg:gap-2 xl:gap-7 justify-between items-center">
+            <div class="flex flex-row justify-between items-center gap-2 sm:gap-[14px] cursor-pointer flex-shrink-0 sm:mr-10 lg::mr-[76px]">
+                <a
+                        href="/"
+                        class="flex justify-center items-center text-black not-italic font-bold text-[21.539px] leading-[26.51px] tracking-[-0.907px] sm:text-[26px] sm:leading-8 sm:tracking-[-1.113px]"
+                >
+                    <img src={ENSNode2DLight.src} class="h-8 min-[800px]:h-10" alt="ENSNode" />
+                </a>
+            </div>
+        </div>
+        <CustomSearch />
+        <HeaderButtons client:load isScrollable={false}/>
+    </div>
+</header>
