@@ -76,6 +76,8 @@ export const makeThreeDNSTokenHandlers = ({ pluginName }: { pluginName: PluginNa
 
       // in ThreeDNS there's a hard-coded Resolver that all domains use
       const resolverId = makeResolverId(
+        pluginName,
+        context.network.chainId,
         // NetworkConfig#address is `Address | undefined`, but we know this is defined for ThreeDNSResolver
         context.contracts["threedns/ThreeDNSResolver"].address!,
         node,
