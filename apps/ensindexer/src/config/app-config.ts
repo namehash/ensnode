@@ -1,7 +1,4 @@
-import {
-  DEFAULT_RPC_RATE_LIMIT,
-  ENSIndexerConfigSchema,
-} from "@/config/config.schema";
+import { ENSIndexerConfigSchema } from "@/config/config.schema";
 import { ChainConfig, ENSIndexerConfig } from "@/config/types";
 import z from "zod";
 
@@ -24,13 +21,14 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
 
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond = Number(
-      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`]
-    );
+    const rpcMaxRequestsPerSecond =
+      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       rpcEndpointUrl: value,
-      rpcMaxRequestsPerSecond: rpcMaxRequestsPerSecond,
+      // use as to avoid requiring a separate type with a string.
+      // zod will take care of the type coercion to number.
+      rpcMaxRequestsPerSecond: rpcMaxRequestsPerSecond as unknown as number,
     };
   });
 
@@ -61,14 +59,12 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
     ponderPort: process.env.PORT,
     ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
     globalBlockrange: {
-      startBlock:
-        process.env.START_BLOCK !== undefined
-          ? Number(process.env.START_BLOCK)
-          : undefined,
-      endBlock:
-        process.env.END_BLOCK !== undefined
-          ? Number(process.env.END_BLOCK)
-          : undefined,
+      // use as to avoid requiring a separate type with a string.
+      // zod will take care of the type coercion to number.
+      startBlock: process.env.START_BLOCK as unknown as number | undefined,
+      // use as to avoid requiring a separate type with a string.
+      // zod will take care of the type coercion to number.
+      endBlock: process.env.END_BLOCK as unknown as number | undefined,
     },
     chains,
   };
@@ -95,12 +91,14 @@ export default config;
  * @returns the rate limit in requests per second (rps)
  */
 export const rpcMaxRequestsPerSecond = (chainId: number): number => {
-  if (!config.chains[chainId]?.rpcMaxRequestsPerSecond) {
+  const chainConfig = config.chains[chainId];
+
+  if (!chainConfig?.rpcMaxRequestsPerSecond) {
     throw new Error(
       `RPC max requests per second not found for chain ID ${chainId}`
     );
   }
-  return config.chains[chainId].rpcMaxRequestsPerSecond;
+  return chainConfig.rpcMaxRequestsPerSecond;
 };
 
 /**
@@ -110,8 +108,10 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
  * @returns the URL of the RPC endpoint
  */
 export const rpcEndpointUrl = (chainId: number): string => {
-  if (!config.chains[chainId]?.rpcEndpointUrl) {
+  const chainConfig = config.chains[chainId];
+
+  if (!chainConfig?.rpcEndpointUrl) {
     throw new Error(`RPC endpoint URL not found for chain ID ${chainId}`);
   }
-  return config.chains[chainId].rpcEndpointUrl;
+  return chainConfig.rpcEndpointUrl;
 };

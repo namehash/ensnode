@@ -8,6 +8,7 @@ export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_DEPLOYMENT = "mainnet";
 
+// This validates URLs but also accepts localhost URLs
 const customUrlSchema = (envVarKey: string) => {
   return (
     z
@@ -49,7 +50,8 @@ const customUrlSchema = (envVarKey: string) => {
 
 const ChainConfigSchema = z.object({
   rpcEndpointUrl: customUrlSchema("RPC_URL"),
-  rpcMaxRequestsPerSecond: z
+  rpcMaxRequestsPerSecond: z.coerce
+    .number({ error: "RPC max requests per second must be a number." })
     .int({ error: "RPC max requests per second must be an integer." })
     .min(1, { error: "RPC max requests per second must be at least 1." })
     .default(DEFAULT_RPC_RATE_LIMIT),
@@ -69,22 +71,16 @@ export const ENSIndexerConfigSchema = z.object({
   ensDeploymentChain: ENSDeploymentChainSchema,
   globalBlockrange: z
     .object({
-      startBlock: z.preprocess(
-        (v) => (v === undefined || v === "" ? undefined : Number(v)),
-        z
-          .number({ error: "START_BLOCK must be a number." })
-          .int({ error: "START_BLOCK must be an integer." })
-          .min(0, { error: "START_BLOCK must be a non-negative number." })
-          .optional()
-      ),
-      endBlock: z.preprocess(
-        (v) => (v === undefined || v === "" ? undefined : Number(v)),
-        z
-          .number({ error: "END_BLOCK must be a number." })
-          .int({ error: "END_BLOCK must be an integer." })
-          .min(0, { error: "END_BLOCK must be a non-negative number." })
-          .optional()
-      ),
+      startBlock: z.coerce
+        .number({ error: "START_BLOCK must be a number." })
+        .int({ error: "START_BLOCK must be an integer." })
+        .min(0, { error: "START_BLOCK must be a non-negative number." })
+        .optional(),
+      endBlock: z.coerce
+        .number({ error: "END_BLOCK must be a number." })
+        .int({ error: "END_BLOCK must be an integer." })
+        .min(0, { error: "END_BLOCK must be a non-negative number." })
+        .optional(),
     })
     .refine(
       (val) =>
