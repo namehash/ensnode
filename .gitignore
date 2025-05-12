@@ -23,3 +23,6 @@ generated
 
 #jetbrains elements
 .idea
+
+# VSCode local history plugin
+.history

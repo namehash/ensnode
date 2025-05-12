@@ -7,6 +7,8 @@ import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
 import { getConfig } from "@/config/app-config";
+import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
+import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
   fetchEnsRainbowVersion,
   fetchFirstBlockToIndexByChainId,
@@ -89,10 +91,14 @@ app.get(
 // use ponder client support
 app.use("/sql/*", client({ db, schema }));
 
-// use ponder middleware at `/ponder`
+// use ponder middleware at `/ponder` with description injection
+app.use("/ponder", fixContentLengthMiddleware);
+app.use("/ponder", makeApiDocumentationMiddleware("/ponder"));
 app.use("/ponder", ponderGraphQL({ db, schema }));
 
-// use our custom graphql middleware at /subgraph
+// use our custom graphql middleware at /subgraph with description injection
+app.use("/subgraph", fixContentLengthMiddleware);
+app.use("/subgraph", makeApiDocumentationMiddleware("/subgraph"));
 app.use(
   "/subgraph",
   subgraphGraphQL({
