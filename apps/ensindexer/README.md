@@ -4,7 +4,7 @@ Indexes EVM chains for ENSNode.
 
 ## Documentation
 
-For detailed documentation and guides, see the [ENSNode Documentation](https://ensnode.io/docs).
+For detailed documentation and guides, see the [ENSNode Documentation](https://ensnode.io/docs) in particular the [ENSNode Indexer Documentation](https://ensnode.io/ensindexer/).
 
 ## License
 

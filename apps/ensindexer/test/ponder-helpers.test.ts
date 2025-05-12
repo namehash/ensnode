@@ -3,7 +3,6 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
   constrainContractBlockrange,
   createStartBlockByChainIdMap,
-  deepMergeRecursive,
   getGlobalBlockrange,
   healReverseAddresses,
   parseEnsRainbowEndpointUrl,
@@ -111,11 +110,11 @@ describe("ponder helpers", () => {
     });
 
     it("should throw an error if the URL is invalid", () => {
-      expect(() => parseRpcEndpointUrl("invalid")).toThrowError("'invalid' is not a valid URL");
+      expect(() => parseRpcEndpointUrl("invalid")).toThrowError(/is not a valid URL/);
     });
 
-    it("should throw an error if the URL is missing", () => {
-      expect(() => parseRpcEndpointUrl()).toThrowError("Expected value not set");
+    it("should return undefined if the URL is missing", () => {
+      expect(parseRpcEndpointUrl()).toBeUndefined();
     });
   });
 
@@ -239,8 +238,8 @@ describe("ponder helpers", () => {
       expect(() => parsePonderPort("-1")).toThrowError("'-1' is not a natural number");
     });
 
-    it("should throw an error if the port is missing", () => {
-      expect(() => parsePonderPort()).toThrowError("Expected value not set");
+    it("should use the default port if the environment variable is not set", () => {
+      expect(parsePonderPort()).toBe(42069);
     });
   });
 
@@ -275,15 +274,6 @@ describe("ponder helpers", () => {
         1: 444_444_333,
         8453: 1_799_430,
       });
-    });
-  });
-
-  describe("deepMergeRecursive", () => {
-    it("should deeply merge two objects", () => {
-      const target = { a: 1, b: { c: 2 } };
-      const source = { b: { d: 3 }, e: 4 };
-      const result = deepMergeRecursive(target, source);
-      expect(result).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
     });
   });
 });

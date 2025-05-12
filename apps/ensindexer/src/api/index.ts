@@ -2,10 +2,12 @@ import packageJson from "@/../package.json";
 
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { Hono, MiddlewareHandler } from "hono";
+import { Context, Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
+import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
+import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
   ensAdminUrl,
   ensNodePublicUrl,
@@ -24,6 +26,11 @@ import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
+import {
+  addDocStringsToIntrospection,
+  extendWithBaseDefinitions,
+  generateTypeDocSet,
+} from "ponder-enrich-gql-docs-middleware";
 
 const app = new Hono();
 
@@ -87,10 +94,14 @@ app.get(
 // use ponder client support
 app.use("/sql/*", client({ db, schema }));
 
-// use ponder middleware at `/ponder`
+// use ponder middleware at `/ponder` with description injection
+app.use("/ponder", fixContentLengthMiddleware);
+app.use("/ponder", makeApiDocumentationMiddleware("/ponder"));
 app.use("/ponder", ponderGraphQL({ db, schema }));
 
-// use our custom graphql middleware at /subgraph
+// use our custom graphql middleware at /subgraph with description injection
+app.use("/subgraph", fixContentLengthMiddleware);
+app.use("/subgraph", makeApiDocumentationMiddleware("/subgraph"));
 app.use(
   "/subgraph",
   subgraphGraphQL({

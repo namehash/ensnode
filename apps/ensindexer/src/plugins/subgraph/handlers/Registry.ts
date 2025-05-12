@@ -1,11 +1,12 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { Node, ROOT_NODE } from "@ensnode/utils";
+
+import { Node, PluginName, ROOT_NODE } from "@ensnode/utils";
 import { makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
-import { makeRegistryHandlers, setupRootNode } from "@/handlers/Registry";
+import { makeRegistryHandlers } from "@/handlers/Registry";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/utils";
+import { setupRootNode } from "@/lib/subgraph-helpers";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains

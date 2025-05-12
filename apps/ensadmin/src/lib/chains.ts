@@ -1,19 +1,24 @@
-import { base, holesky, linea, mainnet, sepolia } from "viem/chains";
+import { type Datasource, type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
+import { type Chain } from "viem";
 
-const chains = {
-  [mainnet.id]: mainnet,
-  [sepolia.id]: sepolia,
-  [holesky.id]: holesky,
-  [base.id]: base,
-  [linea.id]: linea,
-} as const;
+/**
+ * Get the chain by ID based on the current ENSDeployment configuration.
+ *
+ * @param ensDeploymentChain - the ENSDeployment chain to get the chain for
+ * @param chainId the chain ID to get the chain for
+ * @returns the chain
+ * @throws if the chain ID is not supported for the ENSDeployment chain
+ */
+export const getChainById = (ensDeploymentChain: ENSDeploymentChain, chainId: number): Chain => {
+  const ensDeployment = ENSDeployments[ensDeploymentChain];
+  const datasources = Object.values(ensDeployment) as Array<Datasource>;
+  const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
 
-export function getChainName(chainId: number): string {
-  return chains[chainId as keyof typeof chains]?.name || `Chain ${chainId}`;
-}
+  if (!datasource) {
+    throw new Error(
+      `Chain ID "${chainId}" is not supported for the "${ensDeploymentChain}" ENS Deployment Chain`,
+    );
+  }
 
-export function getBlockExplorerUrl(chainId: number, blockNumber: number): string | null {
-  const chain = chains[chainId as keyof typeof chains];
-  if (!chain?.blockExplorers?.default?.url) return null;
-  return `${chain.blockExplorers.default.url}/block/${blockNumber}`;
-}
+  return datasource.chain;
+};

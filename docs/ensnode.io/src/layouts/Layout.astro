@@ -1,7 +1,11 @@
 ---
 import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
+import Footer from "../components/organisms/Footer.tsx";
+import Header from "../components/organisms/Header.astro";
+import "../styles/globals.css";
 import "@namehash/namekit-react/styles.css";
+import heroImage from "../assets/hero_skies_image.png";
 ---
 <!doctype html>
 <html lang="en">
@@ -9,6 +13,7 @@ import "@namehash/namekit-react/styles.css";
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width"/>
     <meta name="generator" content={Astro.generator}/>
+    <link rel="preload" as="image" href={heroImage.src} />
     <AstroFont
             config={[
                 {
@@ -54,7 +59,9 @@ import "@namehash/namekit-react/styles.css";
     />
 </head>
 <body>
+<Header />
 <slot/>
+<Footer client:load />
 </body>
 </html>
 

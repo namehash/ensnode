@@ -1,0 +1,7 @@
+.onScrollElement {
+  color: white;
+}
+
+.onScrollElement.scrolled {
+  color: black;
+}

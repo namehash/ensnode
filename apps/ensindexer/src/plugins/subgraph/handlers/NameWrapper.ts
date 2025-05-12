@@ -6,7 +6,6 @@ import { PluginName } from "@ensnode/utils";
 
 export default function ({
   pluginName,
-  registrarManagedName,
   namespace,
 }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
@@ -18,7 +17,8 @@ export default function ({
     handleTransferSingle,
   } = makeNameWrapperHandlers({
     pluginName,
-    registrarManagedName,
+    // the shared Registrar handlers in this plugin index direct subnames of '.eth'
+    registrarManagedName: "eth",
   });
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);

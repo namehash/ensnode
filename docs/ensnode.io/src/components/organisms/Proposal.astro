@@ -1,0 +1,36 @@
+---
+import cc from "classcat";
+import SecondaryButtonIsland from "../atoms/SecondaryButtonIsland";
+
+const flexStyles =
+  "flex flex-col flex-nowrap justify-center items-center xl:items-start text-center xl:text-left";
+const namehashS2ProposalYoutube = "https://www.youtube.com/embed/g88tCK5TECU?si=5RLwiBjGGEm7smSO";
+---
+
+<section
+        class="relative bottom-14 sm:bottom-20 not-content w-full h-fit px-5 sm:px-28 flex flex-col items-center self-stretch">
+    <div class="w-full h-full box-border max-w-[1216px] flex flex-col xl:flex-row flex-nowrap justify-center items-center gap-10 sm:gap-[60px] rounded-[20px] bg-[#F9FAFB] p-5 sm:p-[60px]">
+        <div class={cc([flexStyles, "gap-6"])}>
+            <div class={cc([flexStyles, "gap-4 sm:gap-5 self-stretch"])}>
+                <h3 class="text-gray-500 text-base leading-6 font-medium">OUR PROPOSAL</h3>
+                <h1 class="self-stretch text-black text-3xl sm:text-4xl leading-9 sm:leading-10 font-bold">Why it's
+                    important for ENS?</h1>
+                <p class="text-gray-500 text-lg leading-8 font-normal">ENS has evolved beyond mainnet, yet indexing
+                    hasn't kept pace. ENSNode solves this with a purpose-built indexer, ensuring ENSv2 and Namechain
+                    launch with the complete data foundation the ecosystem requires.</p>
+            </div>
+            <SecondaryButtonIsland text="Learn more" size="medium"
+                                   style=`px-[25px] py-[13px] max-sm:w-full max-sm:flex max-sm:justify-center`
+                                   linkData={{
+                                       target: "_blank",
+                                       link: "https://discuss.ens.domains/t/spp2-namehash-labs-application/20502"
+                                   }}/>
+        </div>
+        <iframe
+                class="w-full min-[780px]:w-[520px] h-[calc(100vw*(9/16))] sm:h-[calc((100vw-222px)*(9/16))] min-[780px]:h-[340px] shrink-0 rounded-[20px] object-cover"
+                src={namehashS2ProposalYoutube}
+                title="NameHash Labs Season 2 Proposal"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen/>
+    </div>
+</section>

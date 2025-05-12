@@ -119,6 +119,10 @@ export function starlight(): AstroIntegration {
                   label: "Quickstart",
                   link: "/ensrainbow",
                 },
+                {
+                  label: "What is ENSRainbow?",
+                  link: "/ensrainbow/overview/what-is-ensrainbow",
+                },
               ],
             },
             {
@@ -150,6 +154,10 @@ export function starlight(): AstroIntegration {
                   label: "Quickstart",
                   link: "/ensadmin",
                 },
+                {
+                  label: "What is ENSAdmin?",
+                  link: "/ensadmin/overview/what-is-ensadmin",
+                },
               ],
             },
             {
@@ -166,10 +174,6 @@ export function starlight(): AstroIntegration {
       light: "./src/assets/light-logo.svg",
       dark: "./src/assets/dark-logo.svg",
       replacesTitle: true,
-    },
-    social: {
-      "x.com": "https://x.com/NamehashLabs",
-      github: "https://github.com/namehash/ensnode",
     },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",

@@ -1,22 +1,18 @@
-import { mergeAbis } from "@ponder/utils";
-import { base, linea, mainnet } from "viem/chains";
+import { zeroAddress } from "viem";
+import { base, linea, mainnet, optimism } from "viem/chains";
 
-import { BaseResolverFilter, LineaResolverFilter, RootResolverFilter } from "./lib/filters";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
-import { LegacyPublicResolver as root_LegacyPublicResolver } from "./abis/root/LegacyPublicResolver";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
-import { Resolver as root_Resolver } from "./abis/root/Resolver";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
 import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
-import { L2Resolver as base_L2Resolver } from "./abis/basenames/L2Resolver";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 
@@ -25,7 +21,8 @@ import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegi
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
-import { Resolver as linea_Resolver } from "./abis/lineanames/Resolver";
+import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
+import { ResolverConfig } from "./lib/resolver";
 
 /**
  * The Mainnet ENSDeployment
@@ -51,8 +48,7 @@ export default {
         startBlock: 9380380,
       },
       Resolver: {
-        abi: mergeAbis([root_LegacyPublicResolver, root_Resolver]),
-        filter: RootResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
       },
       BaseRegistrar: {
@@ -108,8 +104,7 @@ export default {
         startBlock: 17571480,
       },
       Resolver: {
-        abi: base_L2Resolver,
-        filter: BaseResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
@@ -160,8 +155,7 @@ export default {
         startBlock: 6682888,
       },
       Resolver: {
-        abi: linea_Resolver,
-        filter: LineaResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {
@@ -178,6 +172,48 @@ export default {
         abi: linea_NameWrapper,
         address: "0xA53cca02F98D590819141Aa85C891e2Af713C223",
         startBlock: 6682956,
+      },
+    },
+  },
+
+  /**
+   * The 3DNS Datasource on Optimism.
+   * https://opensea.io/collection/3dns-powered-domains
+   */
+  [DatasourceName.ThreeDNSOptimism]: {
+    chain: optimism,
+    contracts: {
+      ThreeDNSToken: {
+        abi: ThreeDNSToken,
+        address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
+        startBlock: 110393959,
+      },
+      ThreeDNSResolver: {
+        abi: ResolverConfig.abi,
+        // NOTE: 3DNSToken on Optimism has a hardcoded protocol-wide Resolver at this address
+        address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
+        startBlock: 110393959,
+      },
+    },
+  },
+
+  /**
+   * The 3DNS Datasource on Base.
+   * https://opensea.io/collection/3dns-powered-domains-base
+   */
+  [DatasourceName.ThreeDNSBase]: {
+    chain: base,
+    contracts: {
+      ThreeDNSToken: {
+        abi: ThreeDNSToken,
+        address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
+        startBlock: 17522624,
+      },
+      ThreeDNSResolver: {
+        abi: ResolverConfig.abi,
+        // NOTE: 3DNSToken on Base has a hardcoded protocol-wide Resolver at this address
+        address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
+        startBlock: 17522624,
       },
     },
   },

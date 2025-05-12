@@ -1,7 +1,7 @@
 import type { EnsNode } from "@/components/ensnode";
-import { getChainName } from "@/lib/chains";
+import { getChainById } from "@/lib/chains";
+import { type ENSDeploymentChain } from "@ensnode/ens-deployments";
 import { fromUnixTime } from "date-fns";
-
 /**
  * Basic information about a block and its date.
  */
@@ -49,44 +49,51 @@ export interface GlobalIndexingStatusViewModel {
  */
 export function globalIndexingStatusViewModel(
   networkIndexingStatus: Record<number, EnsNode.NetworkIndexingStatus>,
+  ensDeploymentChain: ENSDeploymentChain,
 ): GlobalIndexingStatusViewModel {
   const indexingStartDatesAcrossNetworks = Object.values(networkIndexingStatus).map(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
+  const getChainName = (chainId: number) => getChainById(ensDeploymentChain, chainId).name;
 
   const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
     ([chainId, networkIndexingStatus]) =>
       networkIndexingStatusViewModel(
-        chainId,
+        getChainName(parseInt(chainId, 10)),
         networkIndexingStatus,
         firstBlockToIndexGloballyTimestamp,
       ),
   ) satisfies Array<NetworkStatusViewModel>;
 
-  const currentIndexingDate = Math.max(
-    // get the last indexed block date for each network for which it is available
-    ...networkStatusesViewModel
-      .filter((n) => Boolean(n.lastIndexedBlock))
-      .map((n) => n.lastIndexedBlock!.timestamp),
+  // Sort the network statuses by the first block to index timestamp
+  networkStatusesViewModel.sort(
+    (a, b) => a.firstBlockToIndex.timestamp - b.firstBlockToIndex.timestamp,
   );
+
+  const lastIndexedBlockDates = networkStatusesViewModel
+    .filter((n) => Boolean(n.lastIndexedBlock))
+    .map((n) => n.lastIndexedBlock!.timestamp);
+
+  const currentIndexingDate =
+    lastIndexedBlockDates.length > 0 ? fromUnixTime(Math.max(...lastIndexedBlockDates)) : null;
 
   return {
     networkStatuses: networkStatusesViewModel,
-    currentIndexingDate: fromUnixTime(currentIndexingDate),
     indexingStartsAt: fromUnixTime(firstBlockToIndexGloballyTimestamp),
+    currentIndexingDate,
   };
 }
 
 /**
  * View model for the network indexing status.
- * @param chainId
+ * @param chainName
  * @param networkStatus
  * @param firstBlockToIndexGloballyTimestamp
  * @returns
  */
 export function networkIndexingStatusViewModel(
-  chainId: string,
+  chainName: string,
   networkStatus: EnsNode.NetworkIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
 ): NetworkStatusViewModel {
@@ -109,7 +116,7 @@ export function networkIndexingStatusViewModel(
   });
 
   return {
-    name: getChainName(parseInt(chainId, 10)),
+    name: chainName,
     latestSafeBlock: blockViewModel(latestSafeBlock),
     firstBlockToIndex: blockViewModel(firstBlockToIndex),
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,

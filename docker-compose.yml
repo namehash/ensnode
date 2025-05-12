@@ -2,20 +2,47 @@ services:
   ensindexer:
     container_name: ensindexer
     image: ghcr.io/namehash/ensnode/ensindexer:latest
-    ports:
-      - "42069:42069"
     environment:
       # Override DATABASE_URL to point to docker compose postgres
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
       # Override ENSRAINBOW_URL to point to docker compose ensrainbow
       ENSRAINBOW_URL: http://ensrainbow:3223
       # Override ENSADMIN_URL to point to docker compose ensadmin
+      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
       ENSADMIN_URL: http://localhost:4173
       # Override ENSNODE_PUBLIC_URL to point to docker compose ensindexer
-      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
+      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
       ENSNODE_PUBLIC_URL: http://localhost:42069
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
+      - path: ./apps/ensindexer/.env.local
+        required: true
+    depends_on:
+      - ensrainbow
+      - postgres
+
+  # Instance of ENSIndexer started in Ponder's "serve" mode. This mode causes the ENSIndexer instance to skip the execution of any indexing logic and instead to exclusively focus on the responsibility of serving the main "public-facing" API endpoints for the overall ENSNode deployment. This division of "start" vs "serve" responsibilities between ENSIndexer instances ensures API availability continues uninterrupted for the overall ENSNode deployment through ensnode-api even if an indexing error in ensindexer causes it to crash. The following docs explain more about Ponder's "start" vs "serve" modes: https://ponder.sh/docs/api-reference/ponder-cli#serve.
+  ensnode-api:
+    container_name: ensnode-api
+    # Same Docker image as ensindexer
+    image: ghcr.io/namehash/ensnode/ensindexer:latest
+    ports:
+      - "42069:42069"
+    environment:
+      # Start ensindexer instance in "serve" mode. This environment variable is intercepted by the ensindexer Docker image to modify the ensindexer start command. This special strategy for dynamically configuring the ensindexer start command is used due to limitations with Railway Terraform.
+      PONDER_COMMAND: serve
+      # Same DATABASE_URL as ensindexer instance
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      # Same ENSRAINBOW_URL as ensindexer instance
+      ENSRAINBOW_URL: http://ensrainbow:3223
+      # Same ENSADMIN_URL as ensindexer instance
+      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
+      ENSADMIN_URL: http://localhost:4173
+      # Override ENSNODE_PUBLIC_URL to point to the docker compose ensindexer-api
+      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
+      ENSNODE_PUBLIC_URL: http://localhost:42069
+    env_file:
+      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example). Requires same env configuration as ensindexer
       - path: ./apps/ensindexer/.env.local
         required: true
     depends_on:
@@ -39,10 +66,10 @@ services:
     ports:
       - "4173:4173"
     environment:
-      # Override ENSADMIN_PUBLIC_URL to point to docker compose ensindexer
-      # Note: it must be URL accessible from web browser (i.e. it cannot be a hostname in docker network)
+      # Override ENSADMIN_PUBLIC_URL to point to docker compose ensnode-api
+      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
       ENSADMIN_PUBLIC_URL: http://localhost:4173
-      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensindexer
+      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensnode-api
       # Note: it must be a comma-separated list of URLs that are accessible from a web browser
       # (i.e. it cannot be a hostname in the docker network)
       NEXT_PUBLIC_DEFAULT_ENSNODE_URLS: http://localhost:42069
@@ -51,7 +78,7 @@ services:
       - path: ./apps/ensadmin/.env.local
         required: false
     depends_on:
-      - ensindexer
+      - ensnode-api
 
   postgres:
     container_name: postgres

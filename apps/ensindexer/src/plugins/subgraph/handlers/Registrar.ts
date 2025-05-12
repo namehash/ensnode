@@ -1,8 +1,6 @@
 import { ponder } from "ponder:registry";
-import { ENSDeployments } from "@ensnode/ens-deployments";
 import { type LabelHash } from "@ensnode/utils";
 import { uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import { decodeEventLog } from "viem";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
@@ -19,7 +17,6 @@ const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenI
 
 export default function ({
   pluginName,
-  registrarManagedName,
   namespace,
 }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
@@ -30,7 +27,8 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    registrarManagedName,
+    // the shared Registrar handlers in this plugin index direct subnames of '.eth'
+    registrarManagedName: "eth",
   });
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
@@ -75,59 +73,30 @@ export default function ({
   });
 
   ponder.on(namespace("EthRegistrarControllerOld:NameRegistered"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRegistered",
-      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarControllerOld.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     // the old registrar controller just had `cost` param
-    await handleNameRegisteredByController({ context, event: { ...event, args } });
+    await handleNameRegisteredByController({ context, event });
   });
-  ponder.on(namespace("EthRegistrarControllerOld:NameRenewed"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRenewed",
-      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarControllerOld.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
 
-    await handleNameRenewedByController({ context, event: { ...event, args } });
+  ponder.on(namespace("EthRegistrarControllerOld:NameRenewed"), async ({ context, event }) => {
+    // the old registrar controller just had `cost` param
+    await handleNameRenewedByController({ context, event });
   });
 
   ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRegistered",
-      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     await handleNameRegisteredByController({
       context,
       event: {
         ...event,
         args: {
-          ...args,
+          ...event.args,
           // the new registrar controller uses baseCost + premium to compute cost
-          cost: args.baseCost + args.premium,
+          cost: event.args.baseCost + event.args.premium,
         },
       },
     });
   });
-  ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRenewed",
-      abi: ENSDeployments.mainnet.root.contracts.EthRegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
 
-    await handleNameRenewedByController({ context, event: { ...event, args } });
+  ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
+    await handleNameRenewedByController({ context, event });
   });
 }
