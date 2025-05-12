@@ -328,13 +328,15 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         node: Node;
         name: Hex;
         resource: number;
-        record: Hex;
         // 3DNS includes a `ttl` in its event ABI for DNSRecordChanged, but
-        // ens-contracts's IDNSRecordResolver#DNSRecordChanged does not, so we consider it optional
+        // ens-contracts's IDNSRecordResolver#DNSRecordChanged does not. In this current indexing
+        // logic, the concept of ttl is not used, so we define it here for completness but otherwise
+        // ignore it.
         ttl?: number;
+        record: Hex;
       }>;
     }) {
-      // subgraph ignores this event
+      // subgraph explicitly ignores this event
       if (pluginName === PluginName.Subgraph) return;
 
       // but for non-subgraph plugins, we parse the RR set data for relevant records
@@ -355,6 +357,14 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       // trim the .ens off the end to match ENS record naming
       const key = recordName.slice(0, -4);
 
+      // upsert Resolver entity
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
+      const resolver = await upsertResolver(context, {
+        id,
+        domainId: node,
+        address: event.log.address,
+      });
+
       // parse the `record` parameter, which is an RRSet describing the value of the DNS record
       const answers = parseRRSet(record);
       for (const answer of answers) {
@@ -363,13 +373,6 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
             // > When decoding, the return value will always be an array of Buffer.
             // https://github.com/mafintosh/dns-packet
             const value = decodeTXTData(answer.data as Buffer[]);
-
-            const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
-            const resolver = await upsertResolver(context, {
-              id,
-              domainId: node,
-              address: event.log.address,
-            });
 
             // upsert new key
             await context.db
@@ -409,7 +412,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         resource: number;
       }>;
     }) {
-      // subgraph ignores this event
+      // subgraph explicitly ignores this event
       if (pluginName === PluginName.Subgraph) return;
 
       const { node, name, resource } = event.args;
@@ -429,6 +432,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       // trim the .ens off the end to match ENS record naming
       const key = recordName.slice(0, -4);
 
+      // upsert Resolver entity
       const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       const resolver = await upsertResolver(context, {
         id,
@@ -457,7 +461,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       context: Context;
       event: EventWithArgs<{ node: Node; zonehash: Hash }>;
     }) {
-      // subgraph ignores
+      // explicitly ignored
     },
 
     async handleZoneCreated({
@@ -467,7 +471,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       context: Context;
       event: EventWithArgs<{ node: Node; version: bigint }>;
     }) {
-      // ignored
+      // explicitly ignored
     },
   };
 };
