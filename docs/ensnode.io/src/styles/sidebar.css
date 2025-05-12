@@ -1,0 +1,10 @@
+/* starlight doesnt have support for adding classes to the sidebar items, so this code targets that directly
+ * to add an arrow to the sidebar items which are not the first item
+ */
+#starlight__sidebar > div > ul > li:not(:first-child) > a::before {
+  content: "↳";
+  display: inline-block;
+  color: #888;
+  font-size: 1em;
+  transform: translateY(1px);
+}
