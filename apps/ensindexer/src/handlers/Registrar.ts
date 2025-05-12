@@ -113,11 +113,18 @@ export const makeRegistrarHandlers = ({
         }
 
         await context.db.insert(schema.domain).values({
+          // domain creation parameters
           id: node,
           ownerId: owner,
           parentId: registrarManagedNode,
           createdAt: event.block.timestamp,
           labelhash: labelHash,
+
+          // NameRegistered updates
+          registrantId: owner,
+          expiryDate: expires + GRACE_PERIOD_SECONDS,
+          labelName: validLabel,
+          name,
         });
 
         // and increment parent subdomainCount
