@@ -125,7 +125,7 @@ async function getQueryGeneratorClient(
         temperature: TEMPERATURE,
         cacheControl: {
           type: "ephemeral",
-        }
+        },
       }),
     });
 
