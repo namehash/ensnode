@@ -358,7 +358,7 @@ const client = new ApolloClient({
 
 async function fetchData() {
   const QUERY = gql\`${selectedExample.graphql}\`;
-  
+
   // Variables for the query
   const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
 
@@ -367,7 +367,7 @@ async function fetchData() {
       query: QUERY,
       variables: variables,
     });
-    
+
     console.log(data);
     return data;
   } catch (error) {
@@ -386,7 +386,7 @@ const endpoint = '${graphqlEndpoint}';
 
 async function fetchData() {
   const query = \`${selectedExample.graphql}\`;
-  
+
   // Variables for the query
   const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
 
@@ -403,12 +403,12 @@ async function fetchData() {
     });
 
     const { data, errors } = await response.json();
-    
+
     if (errors) {
       console.error('GraphQL Errors:', errors);
       return;
     }
-    
+
     console.log(data);
     return data;
   } catch (error) {
@@ -429,7 +429,7 @@ const endpoint = '${graphqlEndpoint}';
 
 async function fetchData() {
   const query = gql\`${selectedExample.graphql}\`;
-  
+
   // Variables for the query
   const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
 
@@ -439,7 +439,7 @@ async function fetchData() {
       document: query,
       variables: variables,
     });
-    
+
     console.log(data);
     return data;
   } catch (error) {
@@ -462,18 +462,18 @@ const client = createClient({
 
 async function fetchData() {
   const QUERY = gql\`${selectedExample.graphql}\`;
-  
+
   // Variables for the query
   const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
 
   try {
     const { data, error } = await client.query(QUERY, variables).toPromise();
-    
+
     if (error) {
       console.error('Error:', error);
       return;
     }
-    
+
     console.log(data);
     return data;
   } catch (error) {
@@ -485,21 +485,6 @@ fetchData();`}
                   </CodeBlock>
                 </TabsContent>
               </Tabs>
-
-              <div className="mt-4 flex items-center">
-                <p className="text-sm mr-2">
-                  For more examples and detailed documentation, visit our docs:
-                </p>
-                <a
-                  href="https://docs.ensnode.org"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                >
-                  docs.ensnode.org
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
             </div>
           </div>
         </div>
