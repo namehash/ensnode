@@ -1,4 +1,5 @@
 import { ChainConfig, ENSIndexerConfig } from "@/config/config.schema";
+import { PluginName } from "@ensnode/utils";
 import { vi } from "vitest";
 
 // Default mock configuration object that can be modified by tests
@@ -7,7 +8,11 @@ export const mockConfig: ENSIndexerConfig = {
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  requestedPluginNames: ["subgraph", "basenames", "lineanames"],
+  requestedPluginNames: [
+    PluginName.Subgraph,
+    PluginName.Basenames,
+    PluginName.Lineanames,
+  ],
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: 42069,
@@ -40,11 +45,13 @@ export function setupConfigMock() {
       getConfig: vi.fn(() => mockConfig),
       config: mockConfig,
       rpcMaxRequestsPerSecond: vi.fn(
-        (chainId: number) => mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50,
+        (chainId: number) =>
+          mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50
       ),
       rpcEndpointUrl: vi.fn(
         (chainId: number) =>
-          mockConfig.indexedChains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
+          mockConfig.indexedChains[chainId]?.rpcEndpointUrl ||
+          "http://localhost:8545"
       ),
       default: mockConfig, // Mock the default export too
     };
@@ -75,7 +82,11 @@ export function resetMockConfig() {
   mockConfig.ensNodePublicUrl = "http://localhost:42069";
   mockConfig.ensAdminUrl = "http://localhost:3000";
   mockConfig.ponderDatabaseSchema = "test_schema";
-  mockConfig.requestedPluginNames = ["subgraph", "basenames", "lineanames"];
+  mockConfig.requestedPluginNames = [
+    PluginName.Subgraph,
+    PluginName.Basenames,
+    PluginName.Lineanames,
+  ];
   mockConfig.ensRainbowEndpointUrl = "https://api.ensrainbow.io";
   mockConfig.healReverseAddresses = true;
   mockConfig.port = 42069;
@@ -116,7 +127,7 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
 export function setChainConfig(
   chainId: number,
   rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50,
+  rpcMaxRequestsPerSecond: number = 50
 ) {
   if (!mockConfig.indexedChains) {
     mockConfig.indexedChains = {};

@@ -1,4 +1,5 @@
 import { ENSDeployments } from "@ensnode/ens-deployments";
+import { PluginName } from "@ensnode/utils";
 import * as z from "zod";
 
 export const DEFAULT_RPC_RATE_LIMIT = 50;
@@ -43,7 +44,7 @@ const url = (envVarKey: string) => {
         {
           // This message is for when the string is non-empty but not a valid URL format.
           error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        },
+        }
       )
   );
 };
@@ -101,7 +102,7 @@ export const ENSIndexerConfigSchema = z.object({
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
         return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-          ENSDeployments,
+          ENSDeployments
         ).join(", ")}`;
       },
     })
@@ -123,7 +124,7 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
     ),
 
   /**
@@ -171,7 +172,8 @@ export const ENSIndexerConfigSchema = z.object({
   ponderDatabaseSchema: z.string({
     error: (issue) => {
       if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
-      if (String(issue.input).trim() === "") return "DATABASE_SCHEMA cannot be empty.";
+      if (String(issue.input).trim() === "")
+        return "DATABASE_SCHEMA cannot be empty.";
       return "DATABASE_SCHEMA must be a string.";
     },
   }),
@@ -180,31 +182,24 @@ export const ENSIndexerConfigSchema = z.object({
    * Identify which indexer plugins to activate (see `src/plugins` for available plugins)
    * This is a comma separated list of one or more available plugin names (case-sensitive).
    */
-  requestedPluginNames: z.preprocess(
-    (val) => {
-      if (val === undefined) {
-        return []; // Convert undefined to an empty array
-      }
-      if (typeof val === "string") {
-        return val
-          .split(",")
-          .map((name) => name.trim())
-          .filter((name) => name.length > 0);
-      }
-      return val;
-    },
-    z
-      .array(
-        z.string({
-          error: "Each plugin name in ACTIVE_PLUGINS must be a string.",
-        }),
-        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." },
-      )
-      .min(1, {
-        error:
-          "ACTIVE_PLUGINS must be set and contain at least one valid plugin name (e.g. 'subgraph' or 'subgraph,basenames').",
-      }),
-  ),
+  requestedPluginNames: z.coerce
+    .string()
+    .transform((val) => val.split(",").filter(Boolean))
+    .pipe(
+      z
+        .array(
+          z.enum(PluginName, {
+            error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
+              PluginName
+            ).join(", ")}`,
+          })
+        )
+        .min(1, {
+          error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
+            PluginName
+          ).join(", ")}`,
+        })
+    ),
 
   /**
    * A feature flag to enable or disable healing of addr.reverse subnames.
@@ -217,19 +212,15 @@ export const ENSIndexerConfigSchema = z.object({
    * compatible with the ENS Subgraph. For full data-level backwards
    * compatibility with the ENS Subgraph, this should be set to `false`.
    */
-  healReverseAddresses: z.preprocess(
-    (val) => {
-      // handle empty strings as default instead of throwing an error
-      if (val === undefined || (typeof val === "string" && val.trim() === ""))
-        return DEFAULT_HEAL_REVERSE_ADDRESSES;
-      if (val === "true") return true;
-      if (val === "false") return false;
-      return val;
-    },
-    z.boolean({
-      error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-    }),
-  ),
+  healReverseAddresses: z
+    .string()
+    .pipe(
+      z.enum(["true", "false"], {
+        error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
+      })
+    )
+    .transform((val) => val === "true")
+    .default(DEFAULT_HEAL_REVERSE_ADDRESSES),
 
   /**
    * The network port ENSIndexer listens for http requests on. ENSIndexer
@@ -242,12 +233,8 @@ export const ENSIndexerConfigSchema = z.object({
   port: z.coerce
     .number({ error: "PORT must be a number." })
     .int({ error: "PORT must be an integer." })
-    .max(65535, {
-      error: "PORT must be a number between 1 and 65535.",
-    })
-    .min(1, {
-      error: "PORT must be a number between 1 and 65535.",
-    })
+    .min(1, { error: "PORT must be a number between 1 and 65535." })
+    .max(65535, { error: "PORT must be a number between 1 and 65535." })
     .default(DEFAULT_PORT),
 
   /**
@@ -265,7 +252,8 @@ export const ENSIndexerConfigSchema = z.object({
    */
   indexedChains: z
     .record(z.string().transform(Number), ChainConfigSchema, {
-      error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+      error:
+        "Chains configuration must be an object mapping numeric chain IDs to their configs.",
     })
     // Allow no chains to be configured. Other validations will trigger later if this is the case.
     .default({}),
