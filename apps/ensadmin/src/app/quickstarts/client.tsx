@@ -21,8 +21,8 @@ const QUERY_EXAMPLES = [
     id: "names",
     name: "Names by Label",
     description: "Query names by label (exact match)",
-    graphql: `query GetNamesByLabel {
-  names(where: { label: "vitalik" }) {
+    graphql: `query GetNamesByLabel($label: String!) {
+  names(where: { label: $label }) {
     id
     labelName
     wrappedOwner {
@@ -34,13 +34,16 @@ const QUERY_EXAMPLES = [
     expiryDate
   }
 }`,
+    variables: {
+      label: "vitalik",
+    },
   },
   {
     id: "names-substring",
     name: "Names by Substring",
     description: "Query names where label contains a substring",
-    graphql: `query GetNamesBySubstring {
-  names(where: { labelName_contains: "eth" }) {
+    graphql: `query GetNamesBySubstring($substring: String!) {
+  names(where: { labelName_contains: $substring }) {
     id
     labelName
     wrappedOwner {
@@ -52,13 +55,16 @@ const QUERY_EXAMPLES = [
     expiryDate
   }
 }`,
+    variables: {
+      substring: "eth",
+    },
   },
   {
     id: "domains-by-owner",
     name: "Domains by Owner",
     description: "Query domains owned by a specific address",
-    graphql: `query GetDomainsByOwner {
-  domains(where: { owner: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045" }) {
+    graphql: `query GetDomainsByOwner($owner: String!) {
+  domains(where: { owner: $owner }) {
     id
     name
     labelName
@@ -67,13 +73,16 @@ const QUERY_EXAMPLES = [
     }
   }
 }`,
+    variables: {
+      owner: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+    },
   },
   {
     id: "registrations",
     name: "Registration Details",
     description: "Query registration details for a domain",
-    graphql: `query GetRegistrationDetails {
-  registrations(where: { domain_: { name: "vitalik.eth" } }) {
+    graphql: `query GetRegistrationDetails($name: String!) {
+  registrations(where: { domain_: { name: $name } }) {
     id
     registrationDate
     expiryDate
@@ -84,13 +93,16 @@ const QUERY_EXAMPLES = [
     }
   }
 }`,
+    variables: {
+      name: "vitalik.eth",
+    },
   },
   {
     id: "text-records",
     name: "Text Records",
     description: "Query text records for a domain",
-    graphql: `query GetTextRecords {
-  textChangeds(where: { resolver_: { domain_: { name: "vitalik.eth" } } }) {
+    graphql: `query GetTextRecords($name: String!) {
+  textChangeds(where: { resolver_: { domain_: { name: $name } } }) {
     id
     key
     value
@@ -101,6 +113,9 @@ const QUERY_EXAMPLES = [
     }
   }
 }`,
+    variables: {
+      name: "vitalik.eth",
+    },
   },
 ];
 
@@ -142,6 +157,12 @@ function QuerySelector() {
         <CodeBlock language="graphql" className="text-xs">
           {selectedExample.graphql}
         </CodeBlock>
+        <div className="mt-2">
+          <p className="text-sm font-medium mb-1">Variables:</p>
+          <CodeBlock language="json" className="text-xs">
+            {JSON.stringify(selectedExample.variables, null, 2)}
+          </CodeBlock>
+        </div>
       </div>
     </div>
   );
@@ -154,7 +175,7 @@ export function Quickstarts() {
     QUERY_EXAMPLES.find((ex) => ex.id === currentExample) || QUERY_EXAMPLES[0];
 
   const selectedUrl = selectedEnsNodeUrl(searchParams);
-  const graphqlEndpoint = new URL("/ponder", selectedUrl).toString();
+  const graphqlEndpoint = new URL("/api/graphql", selectedUrl).toString();
 
   return (
     <div className="space-y-10">
@@ -218,14 +239,44 @@ export function Quickstarts() {
                 Set up your project with the tools you need to connect to ENSNode.
               </p>
 
-              <Tabs defaultValue="js" className="mt-4">
+              <Tabs defaultValue="apollo" className="mt-4">
                 <TabsList className="mb-4">
-                  <TabsTrigger value="js">JavaScript</TabsTrigger>
-                  <TabsTrigger value="python">Python</TabsTrigger>
-                  <TabsTrigger value="rust">Rust</TabsTrigger>
+                  <TabsTrigger value="apollo">Apollo Client</TabsTrigger>
+                  <TabsTrigger value="fetch">Node.js (Fetch)</TabsTrigger>
+                  <TabsTrigger value="graphql-request">graphql-request</TabsTrigger>
+                  <TabsTrigger value="urql">urql</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="js" className="mt-2 space-y-4">
+                <TabsContent value="apollo" className="mt-2 space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Using npm</h4>
+                    <CodeBlock className="text-xs" language="bash">
+                      npm install @apollo/client graphql
+                    </CodeBlock>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Using yarn</h4>
+                    <CodeBlock className="text-xs" language="bash">
+                      yarn add @apollo/client graphql
+                    </CodeBlock>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Using pnpm</h4>
+                    <CodeBlock className="text-xs" language="bash">
+                      pnpm add @apollo/client graphql
+                    </CodeBlock>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="fetch" className="mt-2 space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm">Node.js has the Fetch API built-in (in Node.js 18+)</p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="graphql-request" className="mt-2 space-y-4">
                   <div className="space-y-2">
                     <h4 className="font-medium">Using npm</h4>
                     <CodeBlock className="text-xs" language="bash">
@@ -248,22 +299,25 @@ export function Quickstarts() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="python" className="mt-2 space-y-4">
-                  <CodeBlock className="text-xs" language="bash">
-                    pip install gql requests
-                  </CodeBlock>
-                </TabsContent>
-
-                <TabsContent value="rust" className="mt-2 space-y-4">
+                <TabsContent value="urql" className="mt-2 space-y-4">
                   <div className="space-y-2">
-                    <p className="text-sm">Add to your Cargo.toml:</p>
-                    <CodeBlock className="text-xs" language="toml">
-                      {`[dependencies]
-graphql_client = "0.13.0"
-reqwest = { version = "0.11", features = ["json"] }
-tokio = { version = "1", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"`}
+                    <h4 className="font-medium">Using npm</h4>
+                    <CodeBlock className="text-xs" language="bash">
+                      npm install urql graphql
+                    </CodeBlock>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Using yarn</h4>
+                    <CodeBlock className="text-xs" language="bash">
+                      yarn add urql graphql
+                    </CodeBlock>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Using pnpm</h4>
+                    <CodeBlock className="text-xs" language="bash">
+                      pnpm add urql graphql
                     </CodeBlock>
                   </div>
                 </TabsContent>
@@ -284,110 +338,150 @@ serde_json = "1.0"`}
                 Copy this example code to query ENSNode from your application.
               </p>
 
-              <Tabs defaultValue="js" className="mt-4">
+              <Tabs defaultValue="apollo" className="mt-4">
                 <TabsList className="mb-4">
-                  <TabsTrigger value="js">JavaScript</TabsTrigger>
-                  <TabsTrigger value="python">Python</TabsTrigger>
-                  <TabsTrigger value="rust">Rust</TabsTrigger>
+                  <TabsTrigger value="apollo">Apollo Client</TabsTrigger>
+                  <TabsTrigger value="fetch">Node.js (Fetch)</TabsTrigger>
+                  <TabsTrigger value="graphql-request">graphql-request</TabsTrigger>
+                  <TabsTrigger value="urql">urql</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="js" className="mt-2 space-y-4">
+                <TabsContent value="apollo" className="mt-2 space-y-4">
                   <CodeBlock className="text-xs" language="javascript">
-                    {`import { request } from 'graphql-request'
+                    {`import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
 // Use the URL from your ENSNode connection
-const endpoint = '${graphqlEndpoint}'
+const client = new ApolloClient({
+  uri: '${graphqlEndpoint}',
+  cache: new InMemoryCache(),
+});
 
 async function fetchData() {
-  const query = \`${selectedExample.graphql}\`
+  const QUERY = gql\`${selectedExample.graphql}\`;
+  
+  // Variables for the query
+  const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
 
   try {
-    const data = await request(endpoint, query)
-    console.log(data)
-    return data
+    const { data } = await client.query({
+      query: QUERY,
+      variables: variables,
+    });
+    
+    console.log(data);
+    return data;
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error:', error);
   }
 }
 
-fetchData()`}
+fetchData();`}
                   </CodeBlock>
                 </TabsContent>
 
-                <TabsContent value="python" className="mt-2 space-y-4">
-                  <CodeBlock className="text-xs" language="python">
-                    {`from gql import Client, gql
-from gql.transport.requests import RequestsHTTPTransport
+                <TabsContent value="fetch" className="mt-2 space-y-4">
+                  <CodeBlock className="text-xs" language="javascript">
+                    {`// Use the URL from your ENSNode connection
+const endpoint = '${graphqlEndpoint}';
 
-# Use the URL from your ENSNode connection
-endpoint = '${graphqlEndpoint}'
+async function fetchData() {
+  const query = \`${selectedExample.graphql}\`;
+  
+  // Variables for the query
+  const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
 
-# Create a transport and client
-transport = RequestsHTTPTransport(url=endpoint)
-client = Client(transport=transport, fetch_schema_from_transport=True)
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+    });
 
-# Define the query
-query = gql("""
-${selectedExample.graphql}
-""")
-
-# Execute the query
-try:
-    result = client.execute(query)
-    print(result)
-except Exception as e:
-    print(f"Error: {e}")`}
-                  </CodeBlock>
-                </TabsContent>
-
-                <TabsContent value="rust" className="mt-2 space-y-4">
-                  <CodeBlock className="text-xs" language="rust">
-                    {`use graphql_client::{GraphQLQuery, Response};
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
-
-// Define your GraphQL query
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schema.graphql",
-    query_path = "query.graphql",
-    response_derives = "Debug"
-)]
-struct ExampleQuery;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Use the URL from your ENSNode connection
-    let endpoint = "${graphqlEndpoint}";
-
-    let client = Client::new();
-
-    // Build the request body
-    let variables = example_query::Variables {};
-    let request_body = ExampleQuery::build_query(variables);
-
-    // Execute the query
-    let res = client.post(endpoint)
-        .json(&request_body)
-        .send()
-        .await?;
-
-    let response_body: Response<example_query::ResponseData> = res.json().await?;
-
-    // Handle the response
-    if let Some(data) = response_body.data {
-        println!("{:?}", data);
-    } else if let Some(errors) = response_body.errors {
-        println!("Errors: {:?}", errors);
+    const { data, errors } = await response.json();
+    
+    if (errors) {
+      console.error('GraphQL Errors:', errors);
+      return;
     }
-
-    Ok(())
+    
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error('Network Error:', error);
+  }
 }
 
-// Example query.graphql file would contain:
-/*
-${selectedExample.graphql}
-*/`}
+fetchData();`}
+                  </CodeBlock>
+                </TabsContent>
+
+                <TabsContent value="graphql-request" className="mt-2 space-y-4">
+                  <CodeBlock className="text-xs" language="javascript">
+                    {`import { request, gql } from 'graphql-request';
+
+// Use the URL from your ENSNode connection
+const endpoint = '${graphqlEndpoint}';
+
+async function fetchData() {
+  const query = gql\`${selectedExample.graphql}\`;
+  
+  // Variables for the query
+  const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
+
+  try {
+    const data = await request({
+      url: endpoint,
+      document: query,
+      variables: variables,
+    });
+    
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+fetchData();`}
+                  </CodeBlock>
+                </TabsContent>
+
+                <TabsContent value="urql" className="mt-2 space-y-4">
+                  <CodeBlock className="text-xs" language="javascript">
+                    {`import { createClient, gql } from 'urql';
+
+// Use the URL from your ENSNode connection
+const client = createClient({
+  url: '${graphqlEndpoint}',
+});
+
+async function fetchData() {
+  const QUERY = gql\`${selectedExample.graphql}\`;
+  
+  // Variables for the query
+  const variables = ${JSON.stringify(selectedExample.variables, null, 2)};
+
+  try {
+    const { data, error } = await client.query(QUERY, variables).toPromise();
+    
+    if (error) {
+      console.error('Error:', error);
+      return;
+    }
+    
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error('Network Error:', error);
+  }
+}
+
+fetchData();`}
                   </CodeBlock>
                 </TabsContent>
               </Tabs>
