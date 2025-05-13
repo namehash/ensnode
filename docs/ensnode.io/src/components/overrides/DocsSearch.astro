@@ -1,0 +1,11 @@
+---
+import Default from "@astrojs/starlight/components/Search.astro";
+import CustomSearch from "../molecules/CustomSearch.astro";
+---
+
+<CustomSearch />
+<div class="block min-[800px]:hidden">
+    <Default>
+        <slot />
+    </Default>
+</div>
