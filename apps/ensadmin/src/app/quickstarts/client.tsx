@@ -1,8 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { ConnectionSelector } from "@/components/connections/connection-selector";
 import { CodeBlock } from "@/components/ui/code-block";
 import {
   Select,
@@ -12,14 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Database,
-  ExternalLink,
-  FileSearch,
-  PackagePlus,
-  PlayCircle,
-} from "lucide-react";
-import { ConnectionSelector } from "@/components/connections/connection-selector";
+import { Database, ExternalLink, FileSearch, PackagePlus, PlayCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 const QUERY_EXAMPLES = [
   {
@@ -121,7 +115,7 @@ function QuerySelector() {
       params.set("example", value);
       router.push(`?${params.toString()}`, { scroll: false });
     },
-    [searchParams, router]
+    [searchParams, router],
   );
 
   const selectedExample =
@@ -143,9 +137,7 @@ function QuerySelector() {
       </Select>
 
       <div className="p-4 border rounded-md">
-        <p className="text-sm font-medium mb-2">
-          {selectedExample.description}
-        </p>
+        <p className="text-sm font-medium mb-2">{selectedExample.description}</p>
         <CodeBlock language="graphql" className="text-xs">
           {selectedExample.graphql}
         </CodeBlock>
@@ -163,9 +155,7 @@ export function Quickstarts() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          ENSNode Quickstart
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">ENSNode Quickstart</h1>
         <p className="mt-2 text-lg text-muted-foreground">
           Get started with ENSNode using your preferred client library
         </p>
@@ -175,9 +165,7 @@ export function Quickstarts() {
         <div className="space-y-6">
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                1
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">1</span>
             </div>
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
@@ -196,9 +184,7 @@ export function Quickstarts() {
 
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                2
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">2</span>
             </div>
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
@@ -206,8 +192,7 @@ export function Quickstarts() {
                 Explore Data with Example Queries
               </h3>
               <p className="text-muted-foreground">
-                Try these example GraphQL queries to see what data is available
-                in ENSNode.
+                Try these example GraphQL queries to see what data is available in ENSNode.
               </p>
 
               <div className="mt-4">
@@ -218,9 +203,7 @@ export function Quickstarts() {
 
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                3
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">3</span>
             </div>
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
@@ -228,8 +211,7 @@ export function Quickstarts() {
                 Install Your Preferred Client
               </h3>
               <p className="text-muted-foreground">
-                Set up your project with the tools you need to connect to
-                ENSNode.
+                Set up your project with the tools you need to connect to ENSNode.
               </p>
 
               <Tabs defaultValue="js" className="mt-4">
@@ -287,9 +269,7 @@ serde_json = "1.0"`}
 
           <div className="flex gap-4 items-start">
             <div className="bg-primary/10 rounded-full p-2 flex-shrink-0">
-              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">
-                4
-              </span>
+              <span className="flex items-center justify-center h-8 w-8 text-lg font-bold">4</span>
             </div>
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
