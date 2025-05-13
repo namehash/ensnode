@@ -43,13 +43,16 @@ const url = (envVarKey: string) => {
         {
           // This message is for when the string is non-empty but not a valid URL format.
           error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        }
+        },
       )
   );
 };
 
 /**
  * Configuration for a single blockchain network (chain) used by ENSIndexer.
+ *
+ * Invariants:
+ * - The keys (chainId) must be a number
  */
 const ChainConfigSchema = z.object({
   /**
@@ -66,6 +69,9 @@ const ChainConfigSchema = z.object({
    * The maximum number of RPC requests per second allowed for this chain.
    * This is used to avoid rate limiting by the RPC provider. This value
    * is optional and defaults to DEFAULT_RPC_RATE_LIMIT if not specified.
+   *
+   * Invariants:
+   * - The value must be a number greater than 0
    */
   rpcMaxRequestsPerSecond: z.coerce
     .number({ error: "RPC max requests per second must be a number." })
@@ -95,7 +101,7 @@ export const ENSIndexerConfigSchema = z.object({
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
         return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-          ENSDeployments
+          ENSDeployments,
         ).join(", ")}`;
       },
     })
@@ -106,7 +112,10 @@ export const ENSIndexerConfigSchema = z.object({
    */
   globalBlockrange: z
     .object({
+      // Invariant - Must be a number greater than 0
       startBlock: BlockNumberSchema("START_BLOCK"),
+
+      // Invariant - Must be a number greater than 0
       endBlock: BlockNumberSchema("END_BLOCK"),
     })
     .refine(
@@ -114,7 +123,7 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
     ),
 
   /**
@@ -156,12 +165,13 @@ export const ENSIndexerConfigSchema = z.object({
    *
    * Read more about database schema rules here:
    * https://ponder.sh/docs/api-reference/database#database-schema-rules
+   *
+   * Invariant: Must be a valid non-empty string
    */
   ponderDatabaseSchema: z.string({
     error: (issue) => {
       if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
-      if (String(issue.input).trim() === "")
-        return "DATABASE_SCHEMA cannot be empty.";
+      if (String(issue.input).trim() === "") return "DATABASE_SCHEMA cannot be empty.";
       return "DATABASE_SCHEMA must be a string.";
     },
   }),
@@ -188,12 +198,12 @@ export const ENSIndexerConfigSchema = z.object({
         z.string({
           error: "Each plugin name in ACTIVE_PLUGINS must be a string.",
         }),
-        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." }
+        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." },
       )
       .min(1, {
         error:
           "ACTIVE_PLUGINS must be set and contain at least one valid plugin name (e.g. 'subgraph' or 'subgraph,basenames').",
-      })
+      }),
   ),
 
   /**
@@ -218,13 +228,16 @@ export const ENSIndexerConfigSchema = z.object({
     },
     z.boolean({
       error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-    })
+    }),
   ),
 
   /**
    * The network port ENSIndexer listens for http requests on. ENSIndexer
    * exposes various APIs, most notably the GRAPHQL API. All APIs are accessable
    * on the same port. This defaults to DEFAULT_PORT if not specified.
+   *
+   * Invariants:
+   * - The port must be a number between 1 and 65535
    */
   port: z.coerce
     .number({ error: "PORT must be a number." })
@@ -246,13 +259,15 @@ export const ENSIndexerConfigSchema = z.object({
 
   /**
    * Configuration for each indexed chain, keyed by chain ID.
+   *
+   * Invariants:
+   * - The key (chainId) must be a number
    */
   indexedChains: z
     .record(z.string().transform(Number), ChainConfigSchema, {
-      error:
-        "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+      error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
     })
-    .optional()
+    // Allow no chains to be configured. Other validations will trigger later if this is the case.
     .default({}),
 });
 

@@ -40,13 +40,11 @@ export function setupConfigMock() {
       getConfig: vi.fn(() => mockConfig),
       config: mockConfig,
       rpcMaxRequestsPerSecond: vi.fn(
-        (chainId: number) =>
-          mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50
+        (chainId: number) => mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50,
       ),
       rpcEndpointUrl: vi.fn(
         (chainId: number) =>
-          mockConfig.indexedChains[chainId]?.rpcEndpointUrl ||
-          "http://localhost:8545"
+          mockConfig.indexedChains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
       ),
       default: mockConfig, // Mock the default export too
     };
@@ -118,7 +116,7 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
 export function setChainConfig(
   chainId: number,
   rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50
+  rpcMaxRequestsPerSecond: number = 50,
 ) {
   if (!mockConfig.indexedChains) {
     mockConfig.indexedChains = {};
