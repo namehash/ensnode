@@ -27,6 +27,10 @@ const navItems = [
     isActive: true,
     items: [
       {
+        title: "Quickstart",
+        url: "/quickstarts",
+      },
+      {
         title: "GraphQL (Ponder-style)",
         url: "/gql/ponder",
       },
