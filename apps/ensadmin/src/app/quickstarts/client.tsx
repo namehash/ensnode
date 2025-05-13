@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { Database, ExternalLink, FileSearch, PackagePlus, PlayCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -152,6 +153,9 @@ export function Quickstarts() {
   const selectedExample =
     QUERY_EXAMPLES.find((ex) => ex.id === currentExample) || QUERY_EXAMPLES[0];
 
+  const selectedUrl = selectedEnsNodeUrl(searchParams);
+  const graphqlEndpoint = new URL("/ponder", selectedUrl).toString();
+
   return (
     <div className="space-y-10">
       <div>
@@ -292,7 +296,7 @@ serde_json = "1.0"`}
                     {`import { request } from 'graphql-request'
 
 // Use the URL from your ENSNode connection
-const endpoint = '${window.location.origin}/api/graphql'
+const endpoint = '${graphqlEndpoint}'
 
 async function fetchData() {
   const query = \`${selectedExample.graphql}\`
@@ -316,7 +320,7 @@ fetchData()`}
 from gql.transport.requests import RequestsHTTPTransport
 
 # Use the URL from your ENSNode connection
-endpoint = '${window.location.origin}/api/graphql'
+endpoint = '${graphqlEndpoint}'
 
 # Create a transport and client
 transport = RequestsHTTPTransport(url=endpoint)
@@ -354,7 +358,7 @@ struct ExampleQuery;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Use the URL from your ENSNode connection
-    let endpoint = "${window.location.origin}/api/graphql";
+    let endpoint = "${graphqlEndpoint}";
 
     let client = Client::new();
 
