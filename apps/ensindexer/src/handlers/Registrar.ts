@@ -12,6 +12,8 @@ import { isLabelIndexable, makeSubdomainNode } from "@ensnode/utils/subname-help
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
+let total = 0;
+
 /**
  * makes a set of shared handlers for a Registrar contract that registers subnames of `registrarManagedName`
  *
@@ -88,14 +90,30 @@ export const makeRegistrarHandlers = ({
       // undefined value means no change to the name
       const name = validLabel ? `${validLabel}.${registrarManagedName}` : undefined;
 
-      // the subgraph _requires_ that a domain exist here (i.e. Registry#NewOwner event is emitted
-      // before Registrar#NameRegistered), but Basenames and LineaNames do not follow this convention
-      // (i.e. Registrar#NameRegistered is emitted before Registry#NewOwner). To make this shared
-      // logic work for each of these two event orders, we allow for the creation of a domain in
-      // NameRegistered, but only for non-subgraph plugins, making sure to also include the
-      // subdomainCount materialization effect on create, which will otherwise _not_ get run within
+      // NOTE: because the mainnet ENS contract _always_ emit Registry#NewOwner _before_
+      // Registrar#NameRegistered, the subgraph logic expects a domain entity to exist here.
+      // Basenames, however, supports the concept of 'preminting' a domain using a `registerOnly`
+      // method which avoids actually registering the name in the Registry.
+      // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/src/L2/BaseRegistrar.sol#L248
+      // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/script/premint/Premint.s.sol#L36
+      //
+      // Because of this, preminted names emit just the Transfer and Registrar#NameRegisteredWithRecord
+      // events. Without this logic below, when `registerOnly` is called, `handleNameRegistered` would
+      // fail upon updating a domain entity that does not yet exist.
+      //
+      // To make this shared logic work for each of these two patterns, we allow for the creation of
+      // a domain in NameRegistered, but only for non-subgraph plugins, making sure to also include
+      // the subdomainCount materialization effect on create, which will otherwise _not_ get run within
       // the NewOwner handler.
       let domain = await context.db.find(schema.domain, { id: node });
+
+      // invariant: the domain should _always_ exist in the context of the subgraph plugin
+      if (pluginName === PluginName.Subgraph && !domain) {
+        throw new Error(
+          "Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist.",
+        );
+      }
+
       if (domain) {
         // if the domain already exists, this is just an update of domain's registrant & expiryDate
         await context.db.update(schema.domain, { id: node }).set({
@@ -105,13 +123,10 @@ export const makeRegistrarHandlers = ({
           name,
         });
       } else {
-        // invariant: the domain should _always_ exist in the subgraph plugin
-        if (pluginName === PluginName.Subgraph) {
-          throw new Error(
-            "Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist.",
-          );
-        }
+        total++;
+        console.log(`PREMINT? ${event.transaction.hash} ${total}`);
 
+        // otherwise, create the domain with default values, including registration-specific params
         await context.db.insert(schema.domain).values({
           // domain creation parameters
           id: node,
