@@ -1,15 +1,17 @@
-import { ChainConfig } from "@/config/types";
+import { ChainConfig, ENSIndexerConfig } from "@/config/config.schema";
 import { vi } from "vitest";
 
 // Default mock configuration object that can be modified by tests
-export const mockConfig: any = {
+export const mockConfig: ENSIndexerConfig = {
   ensDeploymentChain: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
   requestedPluginNames: ["subgraph", "basenames", "lineanames"],
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
-  chains: {},
+  healReverseAddresses: true,
+  port: 42069,
+  indexedChains: {},
   globalBlockrange: {
     startBlock: undefined,
     endBlock: undefined,
@@ -38,10 +40,13 @@ export function setupConfigMock() {
       getConfig: vi.fn(() => mockConfig),
       config: mockConfig,
       rpcMaxRequestsPerSecond: vi.fn(
-        (chainId: number) => mockConfig.chains[chainId]?.rpcMaxRequestsPerSecond || 50,
+        (chainId: number) =>
+          mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50
       ),
       rpcEndpointUrl: vi.fn(
-        (chainId: number) => mockConfig.chains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
+        (chainId: number) =>
+          mockConfig.indexedChains[chainId]?.rpcEndpointUrl ||
+          "http://localhost:8545"
       ),
       default: mockConfig, // Mock the default export too
     };
@@ -74,7 +79,9 @@ export function resetMockConfig() {
   mockConfig.ponderDatabaseSchema = "test_schema";
   mockConfig.requestedPluginNames = ["subgraph", "basenames", "lineanames"];
   mockConfig.ensRainbowEndpointUrl = "https://api.ensrainbow.io";
-  mockConfig.chains = {};
+  mockConfig.healReverseAddresses = true;
+  mockConfig.port = 42069;
+  mockConfig.indexedChains = {};
   mockConfig.globalBlockrange = {
     startBlock: undefined,
     endBlock: undefined,
@@ -111,13 +118,13 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
 export function setChainConfig(
   chainId: number,
   rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50,
+  rpcMaxRequestsPerSecond: number = 50
 ) {
-  if (!mockConfig.chains) {
-    mockConfig.chains = {};
+  if (!mockConfig.indexedChains) {
+    mockConfig.indexedChains = {};
   }
 
-  mockConfig.chains[chainId] = {
+  mockConfig.indexedChains[chainId] = {
     rpcEndpointUrl,
     rpcMaxRequestsPerSecond,
   };
@@ -129,8 +136,8 @@ export function setChainConfig(
  * @param chainId The chain ID to remove
  */
 export function removeChainConfig(chainId: number) {
-  if (mockConfig.chains && mockConfig.chains[chainId]) {
-    delete mockConfig.chains[chainId];
+  if (mockConfig.indexedChains && mockConfig.indexedChains[chainId]) {
+    delete mockConfig.indexedChains[chainId];
   }
 }
 
@@ -140,5 +147,5 @@ export function removeChainConfig(chainId: number) {
  * @returns Record of chain configurations by chain ID
  */
 export function getChainConfigs(): Record<number, ChainConfig> {
-  return { ...mockConfig.chains };
+  return { ...mockConfig.indexedChains };
 }

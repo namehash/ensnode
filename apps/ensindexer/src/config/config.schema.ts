@@ -237,7 +237,7 @@ export const ENSIndexerConfigSchema = z.object({
   /**
    * Configuration for each indexed chain, keyed by chain ID.
    */
-  chains: z
+  indexedChains: z
     .record(
       z
         .string({

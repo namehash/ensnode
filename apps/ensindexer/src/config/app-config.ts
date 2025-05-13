@@ -1,5 +1,9 @@
-import { DEFAULT_RPC_RATE_LIMIT, ENSIndexerConfigSchema } from "@/config/config.schema";
-import { ChainConfig, ENSIndexerConfig } from "@/config/types";
+import {
+  ChainConfig,
+  DEFAULT_RPC_RATE_LIMIT,
+  ENSIndexerConfig,
+  ENSIndexerConfigSchema,
+} from "@/config/config.schema";
 import z from "zod";
 
 function getValidationErrors(issues: z.core.$ZodIssue[]) {
@@ -21,7 +25,8 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
 
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    const rpcMaxRequestsPerSecond =
+      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       rpcEndpointUrl: value,
@@ -46,7 +51,7 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
  * separately by dedicated validation utilities elsewhere in the codebase.
  */
 function buildENSIndexerConfig(): ENSIndexerConfig {
-  const chains = getChainsFromEnv();
+  const indexedChains = getChainsFromEnv();
 
   const config = {
     ensDeploymentChain: process.env.ENS_DEPLOYMENT_CHAIN,
@@ -65,7 +70,7 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
       // zod will take care of the type coercion to number.
       endBlock: process.env.END_BLOCK as unknown as number | undefined,
     },
-    chains,
+    indexedChains,
   };
 
   const parsed = ENSIndexerConfigSchema.safeParse(config);
@@ -90,7 +95,7 @@ export default config;
  * @returns the rate limit in requests per second (rps)
  */
 export const rpcMaxRequestsPerSecond = (chainId: number): number => {
-  const chainConfig = config.chains[chainId];
+  const chainConfig = config.indexedChains[chainId];
 
   if (!chainConfig?.rpcMaxRequestsPerSecond) {
     return DEFAULT_RPC_RATE_LIMIT;
@@ -106,7 +111,7 @@ export const rpcMaxRequestsPerSecond = (chainId: number): number => {
  * @returns the URL of the RPC endpoint
  */
 export const rpcEndpointUrl = (chainId: number): string | undefined => {
-  const chainConfig = config.chains[chainId];
+  const chainConfig = config.indexedChains[chainId];
 
   if (!chainConfig?.rpcEndpointUrl) {
     return undefined;

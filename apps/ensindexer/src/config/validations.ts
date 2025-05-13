@@ -6,7 +6,7 @@ const doesRpcUrlExistForChain = (
   config: ENSIndexerConfig,
   chainId: number
 ): boolean => {
-  return config.chains[chainId]?.rpcEndpointUrl !== undefined;
+  return config.indexedChains[chainId]?.rpcEndpointUrl !== undefined;
 };
 
 export const validateGlobalBlockrange = (
@@ -73,7 +73,7 @@ export const validateChainConfigs = (
       .map(
         (chainId) =>
           `RPC_URL_${chainId}: ${
-            config.chains[chainId]?.rpcEndpointUrl || "N/A"
+            config.indexedChains[chainId]?.rpcEndpointUrl || "N/A"
           }`
       )
       .join("\n    ")}
