@@ -98,13 +98,13 @@ export const makeRegistrarHandlers = ({
       // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/script/premint/Premint.s.sol#L36
       //
       // Because of this, preminted names emit just the Transfer and Registrar#NameRegisteredWithRecord
-      // events. Without this logic below, when `registerOnly` is called, `handleNameRegistered` would
-      // fail upon updating a domain entity that does not yet exist.
+      // events.
+      // ex: https://basescan.org/tx/0xa61fc930ecf12cfaf247b315c9af50196d86f4276ed1cb93fee48b58a370cc25#eventlog
       //
-      // To make this shared logic work for each of these two patterns, we allow for the creation of
-      // a domain in NameRegistered, but only for non-subgraph plugins, making sure to also include
-      // the subdomainCount materialization effect on create, which will otherwise _not_ get run within
-      // the NewOwner handler.
+      // To allow this shared Registrar handler logic work for each of these two patterns, we allow
+      // for the creation of a domain in NameRegistered, but only for non-subgraph plugins, making
+      // sure to also include the subdomainCount materialization effect on create, which would
+      // otherwise _not_ get run within the NewOwner handler.
       let domain = await context.db.find(schema.domain, { id: node });
 
       // invariant: the domain should _always_ exist in the context of the subgraph plugin
