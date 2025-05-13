@@ -75,6 +75,12 @@ header.header div.sl-flex {
   opacity: 0;
   position: absolute;
   left: 0;
+  top:0;
+  z-index: 10;
+
+  @media screen and (max-width: 800px) {
+    top: -10px;
+  }
 }
 
 .dialog-frame button {
