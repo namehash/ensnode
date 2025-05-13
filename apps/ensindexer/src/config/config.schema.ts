@@ -44,7 +44,7 @@ const url = (envVarKey: string) => {
         {
           // This message is for when the string is non-empty but not a valid URL format.
           error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        }
+        },
       )
   );
 };
@@ -82,6 +82,7 @@ const ChainConfigSchema = z.object({
 });
 
 // Schema for a variable for a block number
+// Invariant: The value must be a number greater than 0
 const BlockNumberSchema = (envVarKey: string) =>
   z.coerce
     .number({ error: `${envVarKey} must be a number.` })
@@ -102,7 +103,7 @@ export const ENSIndexerConfigSchema = z.object({
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
         return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-          ENSDeployments
+          ENSDeployments,
         ).join(", ")}`;
       },
     })
@@ -124,7 +125,7 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
     ),
 
   /**
@@ -169,18 +170,26 @@ export const ENSIndexerConfigSchema = z.object({
    *
    * Invariant: Must be a valid non-empty string
    */
-  ponderDatabaseSchema: z.string({
-    error: (issue) => {
-      if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
-      if (String(issue.input).trim() === "")
-        return "DATABASE_SCHEMA cannot be empty.";
-      return "DATABASE_SCHEMA must be a string.";
-    },
-  }),
+  ponderDatabaseSchema: z
+    .string({
+      error: "DATABASE_SCHEMA is required.",
+    })
+    .trim()
+    .min(1, {
+      error: "DATABASE_SCHEMA is required and cannot be an empty string.",
+    }),
 
   /**
    * Identify which indexer plugins to activate (see `src/plugins` for available plugins)
    * This is a comma separated list of one or more available plugin names (case-sensitive).
+   *
+   * Invariants:
+   * - An array of valid plugin names with at least one value
+   * - For any requested plugin, the config will have a key for chainId in the
+   *   indexedChains object. In that indexedChains object, the config will have a
+   *   rpcEndpointUrl that is defined for that chainId and a rpcMaxRequestsPerSecond
+   *   that is defined for that chainId. This is ensured by the validateChainConfigs
+   *   function in `validations.ts` and not part of the schema validation here.
    */
   requestedPluginNames: z.coerce
     .string()
@@ -190,15 +199,15 @@ export const ENSIndexerConfigSchema = z.object({
         .array(
           z.enum(PluginName, {
             error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-              PluginName
+              PluginName,
             ).join(", ")}`,
-          })
+          }),
         )
         .min(1, {
           error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-            PluginName
+            PluginName,
           ).join(", ")}`,
-        })
+        }),
     ),
 
   /**
@@ -211,20 +220,22 @@ export const ENSIndexerConfigSchema = z.object({
    * Setting this to `true` results in indexed data no longer being backwards
    * compatible with the ENS Subgraph. For full data-level backwards
    * compatibility with the ENS Subgraph, this should be set to `false`.
+   *
+   * Invariant: The value must be 'true' or 'false'
    */
   healReverseAddresses: z
     .string()
     .pipe(
       z.enum(["true", "false"], {
         error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-      })
+      }),
     )
     .transform((val) => val === "true")
     .default(DEFAULT_HEAL_REVERSE_ADDRESSES),
 
   /**
    * The network port ENSIndexer listens for http requests on. ENSIndexer
-   * exposes various APIs, most notably the GRAPHQL API. All APIs are accessable
+   * exposes various APIs, most notably the GRAPHQL API. All APIs are accessible
    * on the same port. This defaults to DEFAULT_PORT if not specified.
    *
    * Invariants:
@@ -241,6 +252,9 @@ export const ENSIndexerConfigSchema = z.object({
    * The endpoint URL for the ENSRainbow API. ENSIndexer uses this for fetching
    * data about labelhashes (healing) when indexing. This should be set to a
    * colocated instance of ENSRainbow for best performance.
+   *
+   * Invariant: The URL must be a valid URL. localhost urls are allowed,
+   * and expected.
    */
   ensRainbowEndpointUrl: url("ENSRAINBOW_URL"),
 
@@ -248,12 +262,14 @@ export const ENSIndexerConfigSchema = z.object({
    * Configuration for each indexed chain, keyed by chain ID.
    *
    * Invariants:
-   * - The key (chainId) must be a number
+   * - Each key (chainId) must be a number
+   * - For any requested plugin, the config will have a key for chainId in this
+   *   indexedChains object which is ensured by the validateChainConfigs
+   *   function in `validations.ts` and not part of the schema validation here.
    */
   indexedChains: z
     .record(z.string().transform(Number), ChainConfigSchema, {
-      error:
-        "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+      error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
     })
     // Allow no chains to be configured. Other validations will trigger later if this is the case.
     .default({}),
