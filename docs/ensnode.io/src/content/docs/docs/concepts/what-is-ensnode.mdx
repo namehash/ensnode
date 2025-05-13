@@ -17,11 +17,14 @@ ENSNode is a group of applications that work together to provide an easy way to 
 
 It is comprised of three main components:
 
-- ENSIndexer is the a multichain indexer for ENS and ENSv2. It is built on [Ponder](https://ponder.sh/) and provides enhanced capabilities over the ENS Subgraph, as well as being more efficient, flexible, and maintainable. ENSNode's enhanced capabilities include multichain and multiregistrar indexing while maintaining backwards compatibility with existing ENS Subgraph APIs.
+- ENSIndexer is the multichain indexer for ENS and ENSv2. It is built on [Ponder](https://ponder.sh/) and provides enhanced capabilities over the ENS Subgraph, as well as being more efficient, flexible, and maintainable. ENSNode's enhanced capabilities include multichain and multiregistrar indexing while maintaining backwards compatibility with existing ENS Subgraph APIs.
 - ENSRainbow is a labelhash resolver that resolves ENS and ENSv2 names off-chain.
 - ENSAdmin is a web interface that allows you to manage and monitor hosted ENSNode instances.
 
 If you are a developer looking to access ENS data with ENSNode from the hosted API you will be using the API in ENSIndexer of which there is a hosted instance. We recommend starting with the [ENSNode Quickstart](/ensnode/quickstart/).
+
+### ENSNode Architecture
+<br />
 
 <EnsFlowDiagram client:load />
 

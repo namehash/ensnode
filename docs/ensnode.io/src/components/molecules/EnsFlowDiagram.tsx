@@ -12,11 +12,13 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import ethereumLogoUrl from "../../assets/ethereum-logo.svg";
-import optimismLogoUrl from "../../assets/optimism-logo.svg";
+import ensadminLogoUrl from "../../assets/ENSAdmin.svg";
+import ensindexerLogoUrl from "../../assets/ENSIndexer.svg";
+import ensrainbowLogoUrl from "../../assets/ENSRainbow.svg";
 import baseLogoUrl from "../../assets/base-logo.svg";
+import ethereumLogoUrl from "../../assets/ethereum-logo.svg";
 import lineaLogoUrl from "../../assets/linea-logo.svg";
-import placeholderLogoUrl from "../../assets/placeholder.svg";
+import optimismLogoUrl from "../../assets/optimism-logo.svg";
 
 const getGroupLabelStyle = (
   position: "top" | "bottom" = "top"
@@ -115,7 +117,7 @@ const initialNodes: Node[] = [
           ENS Indexer
           <br />
           <img
-            src={placeholderLogoUrl.src}
+            src={ensindexerLogoUrl.src}
             alt="ENS Indexer Placeholder"
             style={{
               display: "block",
@@ -148,7 +150,7 @@ const initialNodes: Node[] = [
           ENS Admin
           <br />
           <img
-            src={placeholderLogoUrl.src}
+            src={ensadminLogoUrl.src}
             alt="ENS Admin Placeholder"
             style={{
               display: "block",
@@ -181,7 +183,7 @@ const initialNodes: Node[] = [
           ENS Rainbow
           <br />
           <img
-            src={placeholderLogoUrl.src}
+            src={ensrainbowLogoUrl.src}
             alt="ENS Rainbow Placeholder"
             style={{
               display: "block",

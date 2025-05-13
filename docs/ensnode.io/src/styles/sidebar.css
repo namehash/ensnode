@@ -19,7 +19,7 @@
 
 /* Default sidebar icon (parent) */
 .starlight-sidebar-topics-icon {
-  background-image: url('../assets/placeholder.svg');
+  background-image: url("../assets/ENSNode.svg");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -30,13 +30,37 @@
 
 /* URL based custom icons */
 a[href*="ensindexer"] .starlight-sidebar-topics-icon {
-  background-image: url('../assets/ensindexer-icon.svg');
+  background-image: url("../assets/ENSIndexer.svg");
 }
 
 a[href*="ensrainbow"] .starlight-sidebar-topics-icon {
-  background-image: url('../assets/ensrainbow-icon.svg');
+  background-image: url("../assets/ENSRainbow.svg");
 }
 
 a[href*="ensadmin"] .starlight-sidebar-topics-icon {
-  background-image: url('../assets/ensadmin-icon.svg');
+  background-image: url("../assets/ENSAdmin.svg");
+}
+
+/* Enhance hover and selected states for sidebar items */
+#starlight__sidebar a {
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+#starlight__sidebar a:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+  transform: translateX(2px);
+}
+
+/* Make selected state more obvious */
+a.starlight-sidebar-topics-current {
+  background-color: rgba(65, 130, 184, 0.1) !important;
+  border-radius: 6px;
+}
+
+a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
+  transform: scale(1.1);
+  filter: brightness(1.2) contrast(1.1);
+  box-shadow: 0 0 8px rgba(65, 130, 184, 0.3);
+  border-radius: 4px;
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
