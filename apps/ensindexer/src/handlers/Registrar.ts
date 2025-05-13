@@ -12,8 +12,6 @@ import { isLabelIndexable, makeSubdomainNode } from "@ensnode/utils/subname-help
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
-let total = 0;
-
 /**
  * makes a set of shared handlers for a Registrar contract that registers subnames of `registrarManagedName`
  *
@@ -102,8 +100,8 @@ export const makeRegistrarHandlers = ({
       // ex: https://basescan.org/tx/0xa61fc930ecf12cfaf247b315c9af50196d86f4276ed1cb93fee48b58a370cc25#eventlog
       //
       // To allow this shared Registrar handler logic work for each of these two patterns, we allow
-      // for the creation of a domain in NameRegistered, but only for non-subgraph plugins, making
-      // sure to also include the subdomainCount materialization effect on create, which would
+      // for the creation of a domain in handleNameRegistered, but only for non-subgraph plugins,
+      // making sure to also include the subdomainCount materialization effect on create, which would
       // otherwise _not_ get run within the NewOwner handler.
       let domain = await context.db.find(schema.domain, { id: node });
 
@@ -123,9 +121,6 @@ export const makeRegistrarHandlers = ({
           name,
         });
       } else {
-        total++;
-        console.log(`PREMINT? ${event.transaction.hash} ${total}`);
-
         // otherwise, create the domain with default values, including registration-specific params
         await context.db.insert(schema.domain).values({
           // domain creation parameters
