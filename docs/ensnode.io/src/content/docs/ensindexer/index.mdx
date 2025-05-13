@@ -8,7 +8,11 @@ sidebar:
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-ENSIndexer is a [Ponder](https://ponder.sh) app that indexes ENS contracts across multiple chains. It processes events from each relevant chain and transforms the data, storing it in your Postgres database.
+Indexing is a data collection process that is used to collect data from blockchains and store it in a database. This data can then be accessed by applications and developers to build new applications and provide data to users.
+
+**ENSIndexer** is an indexer application which aims to be a one-stop-shop for all ENS data. It is a [Ponder](https://ponder.sh) app that indexes ENS contracts across multiple chains. It processes events from each relevant chain and transforms the data, storing it in your Postgres database. It provides a GraphQL API for querying the data. The end goal for ENSIndexer is to support developers who need to use ENS data in their applications without them having to worry about the underlying data storage and retrieval logic.
+
+Previously, developers would have to use the ENS Subgraph to query ENS data. This had various limitations and inefficiencies which ENSIndexer is addressing. ENSIndexer is already backwards compatible with the [ENS Subgraph](../docs/concepts/what-is-the-ens-subgraph), so you can use it as a drop-in replacement! To get started, refer to the [ENSNode Quickstart page](/docs).
 
 :::note
 While ENSIndexer can be run independently in certain scenarios, it is designed to work as part of the complete ENSNode system, and we recommend following the [ENSNode Contribution Guide](/docs/contributing/) if you'd like to run ENSIndexer locally, or the [ENSNode Deployment Guide](/docs/deploying/) if you'd like to run ENSIndexer in the cloud.
