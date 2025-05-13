@@ -1,4 +1,4 @@
-import { type ENSIndexerConfig } from "@/config/types";
+import { ENSIndexerConfig } from "@/config/config.schema";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Helper to set and unset environment variables for each test
@@ -260,24 +260,20 @@ describe("config", () => {
     it("throws if PORT is not a number", async () => {
       process.env.PORT = "not-a-port";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(
-        /Ponder port \(PORT env var\) must be a number/i,
-      );
+      await expect(freshConfigPromise).rejects.toThrow(/PORT must be a number/i);
     });
 
     it("throws if PORT is not an integer", async () => {
       process.env.PORT = "3000.5";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(
-        /Ponder port \(PORT env var\) must be an integer/i,
-      );
+      await expect(freshConfigPromise).rejects.toThrow(/PORT must be an integer/i);
     });
 
     it("throws if PORT is less than 1", async () => {
       process.env.PORT = "0";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i,
+        /PORT must be a number between 1 and 65535/i,
       );
     });
 
@@ -285,7 +281,7 @@ describe("config", () => {
       process.env.PORT = "-100";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i,
+        /PORT must be a number between 1 and 65535/i,
       );
     });
 
@@ -293,7 +289,7 @@ describe("config", () => {
       process.env.PORT = "65536";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /Ponder port \(PORT env var\) must be a number between 1 and 65535/i,
+        /PORT must be a number between 1 and 65535/i,
       );
     });
   });

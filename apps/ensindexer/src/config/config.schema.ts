@@ -43,13 +43,27 @@ const url = (envVarKey: string) => {
         {
           // This message is for when the string is non-empty but not a valid URL format.
           error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        }
+        },
       )
   );
 };
 
+/**
+ * Configuration for a single blockchain network (chain) used by ENSIndexer.
+ */
 const ChainConfigSchema = z.object({
+  /**
+   * The RPC endpoint URL for the chain.
+   * Example: "https://eth-mainnet.g.alchemy.com/v2/..."
+   * This must be an endpoint with high rate limits
+   */
   rpcEndpointUrl: url("RPC_URL"),
+
+  /**
+   * The maximum number of RPC requests per second allowed for this chain.
+   * This is used to avoid rate limiting by the RPC provider. This value
+   * is optional and defaults to DEFAULT_RPC_RATE_LIMIT if not specified.
+   */
   rpcMaxRequestsPerSecond: z.coerce
     .number({ error: "RPC max requests per second must be a number." })
     .int({ error: "RPC max requests per second must be an integer." })
@@ -57,16 +71,7 @@ const ChainConfigSchema = z.object({
     .default(DEFAULT_RPC_RATE_LIMIT),
 });
 
-const ENSDeploymentChainSchema = z
-  .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
-    error: (issue) => {
-      return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-        ENSDeployments
-      ).join(", ")}`;
-    },
-  })
-  .default(DEFAULT_DEPLOYMENT);
-
+// Schema for a variable for a block number
 const BlockNumberSchema = (envVarKey: string) =>
   z.coerce
     .number({ error: `${envVarKey} must be a number.` })
@@ -74,8 +79,28 @@ const BlockNumberSchema = (envVarKey: string) =>
     .min(0, { error: `${envVarKey} must be a non-negative number.` })
     .optional();
 
+/**
+ * The complete runtime configuration for an ENSIndexer application instance.
+ */
 export const ENSIndexerConfigSchema = z.object({
-  ensDeploymentChain: ENSDeploymentChainSchema,
+  /**
+   * The ENS Deployment for the indexer which could be "mainnet", "sepolia", etc.
+   *
+   * (see `@ensnode/ens-deployments` for available deployments)
+   */
+  ensDeploymentChain: z
+    .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
+      error: (issue) => {
+        return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
+          ENSDeployments,
+        ).join(", ")}`;
+      },
+    })
+    .default(DEFAULT_DEPLOYMENT),
+
+  /**
+   * The global block range to index (start and end block numbers).
+   */
   globalBlockrange: z
     .object({
       startBlock: BlockNumberSchema("START_BLOCK"),
@@ -86,18 +111,55 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
     ),
+
+  /**
+   * The ENSIndexer public service URL
+   *
+   * When the root route `/` of ENSIndexer receives a request, ENSIndexer redirects to the
+   * configured ENSADMIN_URL with an instruction for that ENSAdmin instance to connect back to this
+   * provided URL for querying state about the ENSNode instance.
+   */
   ensNodePublicUrl: url("ENSNODE_PUBLIC_URL"),
+
+  /**
+   * The ENSAdmin service URL.
+   *
+   * When the root route `/` of ENSIndexer receives a request, ENSIndexer redirects to this
+   * provided ENSAdmin URL with an instruction for that ENSAdmin instance to connect back to the
+   * configured ENSNODE_PUBLIC_URL.
+   *
+   * If this is not set, DEFAULT_ENSADMIN_URL will be used to provide easy access to an ENSAdmin UI.
+   */
   ensAdminUrl: url("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL),
+
+  /*
+   * This is a namespace for the tables that the indexer will create to store indexed data.
+   * It should be a string that is unique to the running indexer instance.
+   *
+   * Keeping the database schema unique to the indexer instance is important to
+   * 1) speed up indexing after a restart
+   * 2) prevent data corruption from multiple indexer app instances writing state
+   *    concurrently to the same db schema
+   *
+   * No two indexer instances can use the same database schema at the same time.
+   *
+   * Read more about database schema rules here:
+   * https://ponder.sh/docs/api-reference/database#database-schema-rules
+   */
   ponderDatabaseSchema: z.string({
     error: (issue) => {
       if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
-      if (String(issue.input).trim() === "")
-        return "DATABASE_SCHEMA cannot be empty.";
+      if (String(issue.input).trim() === "") return "DATABASE_SCHEMA cannot be empty.";
       return "DATABASE_SCHEMA must be a string.";
     },
   }),
+
+  /**
+   * Identify which indexer plugins to activate (see `src/plugins` for available plugins)
+   * This is a comma separated list of one or more available plugin names (case-sensitive).
+   */
   requestedPluginNames: z.preprocess(
     (val) => {
       if (val === undefined) {
@@ -116,13 +178,25 @@ export const ENSIndexerConfigSchema = z.object({
         z.string({
           error: "Each plugin name in ACTIVE_PLUGINS must be a string.",
         }),
-        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." }
+        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." },
       )
       .min(1, {
         error:
           "ACTIVE_PLUGINS must be set and contain at least one valid plugin name (e.g. 'subgraph' or 'subgraph,basenames').",
-      })
+      }),
   ),
+
+  /**
+   * A feature flag to enable or disable healing of addr.reverse subnames.
+   * If this is set to true, ENSIndexer will attempt to heal subnames of
+   * addr.reverse.
+   *
+   * If this is not set, the default value is set to `DEFAULT_HEAL_REVERSE_ADDRESSES`.
+   *
+   * Setting this to `true` results in indexed data no longer being backwards
+   * compatible with the ENS Subgraph. For full data-level backwards
+   * compatibility with the ENS Subgraph, this should be set to `false`.
+   */
   healReverseAddresses: z.preprocess(
     (val) => {
       // handle empty strings as default instead of throwing an error
@@ -134,26 +208,41 @@ export const ENSIndexerConfigSchema = z.object({
     },
     z.boolean({
       error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-    })
+    }),
   ),
+
+  /**
+   * The network port ENSIndexer listens for http requests on. ENSIndexer
+   * exposes various APIs, most notably the GRAPHQL API. All APIs are accessable
+   * on the same port. This defaults to DEFAULT_PORT if not specified.
+   */
   port: z.coerce
-    .number({ error: "Ponder port (PORT env var) must be a number." })
-    .int({ error: "Ponder port (PORT env var) must be an integer." })
+    .number({ error: "PORT must be a number." })
+    .int({ error: "PORT must be an integer." })
     .max(65535, {
-      error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
+      error: "PORT must be a number between 1 and 65535.",
     })
     .min(1, {
-      error: "Ponder port (PORT env var) must be a number between 1 and 65535.",
+      error: "PORT must be a number between 1 and 65535.",
     })
     .default(DEFAULT_PORT),
+
+  /**
+   * The endpoint URL for the ENSRainbow API. ENSIndexer uses this for fetching
+   * data about labelhashes (healing) when indexing. This should be set to a
+   * colocated instance of ENSRainbow for best performance.
+   */
   ensRainbowEndpointUrl: url("ENSRAINBOW_URL"),
+
+  /**
+   * Configuration for each indexed chain, keyed by chain ID.
+   */
   chains: z
     .record(
       z
         .string({
           error: (issue) => {
-            if (issue.input === undefined)
-              return "Chain ID key in RPC_URL_{chainId} is required.";
+            if (issue.input === undefined) return "Chain ID key in RPC_URL_{chainId} is required.";
             if (!/^\d+$/.test(String(issue.input)))
               return "Chain ID in RPC_URL_{chainId} must be a string of digits.";
             return "Invalid Chain ID key format for RPC_URL_{chainId}.";
@@ -162,9 +251,8 @@ export const ENSIndexerConfigSchema = z.object({
         .transform(Number),
       ChainConfigSchema,
       {
-        error:
-          "Chains configuration must be an object mapping numeric chain IDs to their configs.",
-      }
+        error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+      },
     )
     .optional()
     .default({}),
