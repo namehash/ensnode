@@ -43,7 +43,7 @@ const url = (envVarKey: string) => {
         {
           // This message is for when the string is non-empty but not a valid URL format.
           error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        },
+        }
       )
   );
 };
@@ -56,6 +56,9 @@ const ChainConfigSchema = z.object({
    * The RPC endpoint URL for the chain.
    * Example: "https://eth-mainnet.g.alchemy.com/v2/..."
    * This must be an endpoint with high rate limits
+   *
+   * Invariants:
+   * - The URL must be a valid URL (localhost urls are allowed)
    */
   rpcEndpointUrl: url("RPC_URL"),
 
@@ -92,7 +95,7 @@ export const ENSIndexerConfigSchema = z.object({
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
         return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-          ENSDeployments,
+          ENSDeployments
         ).join(", ")}`;
       },
     })
@@ -111,7 +114,7 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
     ),
 
   /**
@@ -120,6 +123,9 @@ export const ENSIndexerConfigSchema = z.object({
    * When the root route `/` of ENSIndexer receives a request, ENSIndexer redirects to the
    * configured ENSADMIN_URL with an instruction for that ENSAdmin instance to connect back to this
    * provided URL for querying state about the ENSNode instance.
+   *
+   * Invariants:
+   * - The URL must be a valid URL (localhost urls are allowed)
    */
   ensNodePublicUrl: url("ENSNODE_PUBLIC_URL"),
 
@@ -131,6 +137,9 @@ export const ENSIndexerConfigSchema = z.object({
    * configured ENSNODE_PUBLIC_URL.
    *
    * If this is not set, DEFAULT_ENSADMIN_URL will be used to provide easy access to an ENSAdmin UI.
+   *
+   * Invariants:
+   * - The URL must be a valid URL (localhost urls are allowed)
    */
   ensAdminUrl: url("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL),
 
@@ -151,7 +160,8 @@ export const ENSIndexerConfigSchema = z.object({
   ponderDatabaseSchema: z.string({
     error: (issue) => {
       if (issue.input === undefined) return "DATABASE_SCHEMA is required.";
-      if (String(issue.input).trim() === "") return "DATABASE_SCHEMA cannot be empty.";
+      if (String(issue.input).trim() === "")
+        return "DATABASE_SCHEMA cannot be empty.";
       return "DATABASE_SCHEMA must be a string.";
     },
   }),
@@ -178,12 +188,12 @@ export const ENSIndexerConfigSchema = z.object({
         z.string({
           error: "Each plugin name in ACTIVE_PLUGINS must be a string.",
         }),
-        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." },
+        { error: "ACTIVE_PLUGINS must resolve to a list of plugin names." }
       )
       .min(1, {
         error:
           "ACTIVE_PLUGINS must be set and contain at least one valid plugin name (e.g. 'subgraph' or 'subgraph,basenames').",
-      }),
+      })
   ),
 
   /**
@@ -208,7 +218,7 @@ export const ENSIndexerConfigSchema = z.object({
     },
     z.boolean({
       error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-    }),
+    })
   ),
 
   /**
@@ -238,22 +248,10 @@ export const ENSIndexerConfigSchema = z.object({
    * Configuration for each indexed chain, keyed by chain ID.
    */
   indexedChains: z
-    .record(
-      z
-        .string({
-          error: (issue) => {
-            if (issue.input === undefined) return "Chain ID key in RPC_URL_{chainId} is required.";
-            if (!/^\d+$/.test(String(issue.input)))
-              return "Chain ID in RPC_URL_{chainId} must be a string of digits.";
-            return "Invalid Chain ID key format for RPC_URL_{chainId}.";
-          },
-        })
-        .transform(Number),
-      ChainConfigSchema,
-      {
-        error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
-      },
-    )
+    .record(z.string().transform(Number), ChainConfigSchema, {
+      error:
+        "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+    })
     .optional()
     .default({}),
 });
