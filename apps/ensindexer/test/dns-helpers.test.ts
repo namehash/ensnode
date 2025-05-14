@@ -54,6 +54,7 @@ describe("dns-helpers", () => {
   describe("decodeDNSPacketBytes", () => {
     it.only("should return [null, null] for empty buffer", () => {
       expect(decodeDNSPacketBytes(new Uint8Array())).toEqual([null, null]);
+      expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
     });
 
     it("should return [null, null] for labels with unindexable characters", () => {
@@ -61,10 +62,6 @@ describe("dns-helpers", () => {
       expect(decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
       expect(decodeDNSPacketBytes(toBytes("test["))).toEqual([null, null]);
       expect(decodeDNSPacketBytes(toBytes("test]"))).toEqual([null, null]);
-
-      // TODO: based on the definition of `isLabelIndexable` the empty label ("")
-      // is not indexable, however this test case returns ["", ""] instead of [null, null]
-      // expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
     });
 
     it("should handle previously bugged name", () => {
