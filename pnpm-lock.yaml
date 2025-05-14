@@ -19,11 +19,11 @@ catalogs:
       specifier: 0.12.0
       version: 0.12.0
     '@ponder/client':
-      specifier: 0.10.18
-      version: 0.10.18
+      specifier: 0.10.26
+      version: 0.10.26
     '@ponder/react':
-      specifier: 0.10.18
-      version: 0.10.18
+      specifier: 0.10.26
+      version: 0.10.26
     '@ponder/utils':
       specifier: 0.2.3
       version: 0.2.3
@@ -46,8 +46,8 @@ catalogs:
       specifier: ^4.7.6
       version: 4.7.8
     ponder:
-      specifier: 0.10.18
-      version: 0.10.18
+      specifier: 0.10.26
+      version: 0.10.26
     tsup:
       specifier: ^8.3.6
       version: 8.3.6
@@ -126,10 +126,10 @@ importers:
         version: 0.11.1(@types/node@22.15.3)
       '@ponder/client':
         specifier: 'catalog:'
-        version: 0.10.18(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+        version: 0.10.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@ponder/react':
         specifier: 'catalog:'
-        version: 0.10.18(@ponder/client@0.10.18(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.67.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
+        version: 0.10.26(@ponder/client@0.10.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.67.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
       '@ponder/utils':
         specifier: 'catalog:'
         version: 0.2.3(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))
@@ -286,7 +286,7 @@ importers:
         version: 4.7.8
       ponder:
         specifier: 'catalog:'
-        version: 0.10.18(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
+        version: 0.10.26(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
       ponder-enrich-gql-docs-middleware:
         specifier: ^0.1.3
         version: 0.1.3(graphql@16.10.0)(hono@4.7.8)
@@ -514,7 +514,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.10.18(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
+        version: 0.10.26(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
       viem:
         specifier: 'catalog:'
         version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
@@ -610,7 +610,7 @@ importers:
         version: 4.7.8
       ponder:
         specifier: 'catalog:'
-        version: 0.10.18(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
+        version: 0.10.26(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0)
@@ -1914,18 +1914,18 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@ponder/client@0.10.18':
-    resolution: {integrity: sha512-RmhuMU5Lf+/v96TKx5i35vKF3upwWqJqmnGxCYXqTrrzb8gEBziO/vsJEQt2sj/ay18wRzl4Ur81u9Qau034WQ==}
+  '@ponder/client@0.10.26':
+    resolution: {integrity: sha512-0SExeVXe99sWzw3KaFTEPdz0LAj/SjFNvhM55QvGXc3S5rwFwjrHH8/wIibBQAh/8lTRZFOi3WoD2Cb7cWjAiw==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  '@ponder/react@0.10.18':
-    resolution: {integrity: sha512-RPhvDCrCLnV/7eZAa4ob10/xoyfi/4dID5iRqM7jnNPOG8IG81HIic95c84icpPxag5RDL+wuzRTTfz34JTsWg==}
+  '@ponder/react@0.10.26':
+    resolution: {integrity: sha512-m45c6Jpm34s8bcWj6smCjGefbBfGOwGceJoYhNgD2Emtjv6F/nmKI94ectC85EKpabi0Jzp43VRahYonmiF+pQ==}
     peerDependencies:
-      '@ponder/client': '>=0.10.18'
+      '@ponder/client': '>=0.10.26'
       '@tanstack/react-query': '>=5.0.0'
       react: '>=18'
       typescript: '>=5.0.4'
@@ -1935,6 +1935,15 @@ packages:
 
   '@ponder/utils@0.2.3':
     resolution: {integrity: sha512-QdlRXrn48nRM/QxNHRffO3PnIFvUf9qHE+rXSut44r74E4iiq9UrIPMhSMyCbJN68yU4QyTupZ/qpqE5PNAo8A==}
+    peerDependencies:
+      typescript: '>=5.0.4'
+      viem: '>=2'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@ponder/utils@0.2.6':
+    resolution: {integrity: sha512-rsb4Sbq9+v2WRwsQMepkBaUXzQYbHE5fNkqumaECL8KSS9pvetA357Lud+S+QDaXVhikidT+BFRcJLYnRjFTdQ==}
     peerDependencies:
       typescript: '>=5.0.4'
       viem: '>=2'
@@ -5952,8 +5961,8 @@ packages:
       graphql: ^16.10.0
       hono: ^4.6.19
 
-  ponder@0.10.18:
-    resolution: {integrity: sha512-6H8XKquYiKwUTXaoS165E9cQPcaNUMX2awE67SbgV+XEb91W2oxdhoEqe6S8Pi0CUm2VLiS8dlG1PRPVDc1l7A==}
+  ponder@0.10.26:
+    resolution: {integrity: sha512-rGKAoO1y1ijDdivOEqpiW91Hmtk1z2pWAdOcnQARvQuE/g4zesx1lbKGugcbd+9Gz8/CocQBn89KUIGVrdXl0A==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -9367,7 +9376,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@ponder/client@0.10.18(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
+  '@ponder/client@0.10.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)':
     dependencies:
       drizzle-orm: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)
       eventsource: 3.0.5
@@ -9404,9 +9413,9 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@ponder/react@0.10.18(@ponder/client@0.10.18(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.67.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
+  '@ponder/react@0.10.26(@ponder/client@0.10.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3))(@tanstack/react-query@5.67.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
     dependencies:
-      '@ponder/client': 0.10.18(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
+      '@ponder/client': 0.10.26(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.7.0)(kysely@0.26.3)(pg@8.11.3)(typescript@5.7.3)
       '@tanstack/react-query': 5.67.1(react@18.3.1)
       react: 18.3.1
       superjson: 2.2.2
@@ -9414,6 +9423,12 @@ snapshots:
       typescript: 5.7.3
 
   '@ponder/utils@0.2.3(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))':
+    dependencies:
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
+    optionalDependencies:
+      typescript: 5.7.3
+
+  '@ponder/utils@0.2.6(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))':
     dependencies:
       viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
     optionalDependencies:
@@ -14448,7 +14463,7 @@ snapshots:
       graphql: 16.10.0
       hono: 4.7.8
 
-  ponder@0.10.18(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2):
+  ponder@0.10.26(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))(yaml@2.7.0)(zod@3.24.2):
     dependencies:
       '@babel/code-frame': 7.26.2
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -14457,7 +14472,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-depth': 2.4.0
       '@escape.tech/graphql-armor-max-tokens': 2.5.0
       '@hono/node-server': 1.13.3(hono@4.7.8)
-      '@ponder/utils': 0.2.3(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))
+      '@ponder/utils': 0.2.6(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2))
       abitype: 0.10.3(typescript@5.7.3)(zod@3.24.2)
       ansi-escapes: 7.0.0
       commander: 12.1.0
