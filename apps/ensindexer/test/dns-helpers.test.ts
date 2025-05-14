@@ -52,12 +52,12 @@ describe("dns-helpers", () => {
   });
 
   describe("decodeDNSPacketBytes", () => {
-    it.only("should return [null, null] for empty buffer", () => {
+    it("should return [null, null] for empty buffer", () => {
       expect(decodeDNSPacketBytes(new Uint8Array())).toEqual([null, null]);
       expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
     });
 
-    it.only("should return [null, null] for malformed dns packet", () => {
+    it("should return [null, null] for malformed dns packet", () => {
       expect(decodeDNSPacketBytes(new Uint8Array([0x00]))).toEqual([null, null]);
     });
 
