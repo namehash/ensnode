@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/subname-helpers.ts"],
+  entry: ["src/index.ts"],
   platform: "browser",
   format: ["esm"],
   target: "es2022",

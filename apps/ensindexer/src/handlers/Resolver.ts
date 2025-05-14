@@ -4,11 +4,10 @@ import { Node, PluginName } from "@ensnode/utils";
 import { type Address, Hash, type Hex, hexToBytes } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
-import { decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
+import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { decodeDNSPacketBytes } from "@ensnode/utils/subname-helpers";
 
 /**
  * makes a set of shared handlers for Resolver contracts

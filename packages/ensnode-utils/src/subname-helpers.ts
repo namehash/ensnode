@@ -1,17 +1,7 @@
-import {
-  Address,
-  bytesToHex,
-  bytesToString,
-  concat,
-  isAddress,
-  isHash,
-  keccak256,
-  stringToBytes,
-  toHex,
-} from "viem";
+import { Address, concat, isAddress, isHash, keccak256, toHex } from "viem";
 
 import { labelhash } from "viem/ens";
-import type { Label, LabelHash, Name, Node } from "./types";
+import type { Label, LabelHash, Node } from "./types";
 
 /**
  * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce
@@ -139,63 +129,3 @@ export const isLabelIndexable = (label: Label | null): label is Label => {
 
   return true;
 };
-
-/**
- * NOTE: there seems to be a bug in ensjs#bytesToPacket regarding malformed names, which we were
- * originally using for this function.
- *
- * For example, in this tx `0x4ece50ae828f2a0f27f45d086e85a55e6284bff31a0a89daca9df4b1b1f5cb75` the
- * `name` input is `8436.eth` (it should have been just `8436`, as the `.eth` is inferred).
- *
- * This operates against a name that actually looks like `[fb1d24d5dc41613d5b4874e6cccb06ecf442f6f1773c3771c4fcce1161985a18].eth`
- * which results in a namehash of `0xfb1d24d5dc41613d5b4874e6cccb06ecf442f6f1773c3771c4fcce1161985a18`
- * and the NameWrapper emits an event with the packet bytes of `08383433362E6574680365746800`.
- * when ensjs#bytesToPacket sees these bytes, it returns a name of `8436.eth.eth`, which is incorrect.
- *
- * The original subgraph logic handled this case correctly, it seems, and so we re-implement it here.
- * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L30
- *
- * More information about this discussion can be found in this thread:
- * https://github.com/namehash/ensnode/issues/36
- *
- * TODO: replace this function with ensjs#bytesToPacket when it correctly handles these cases. See
- * ensnode commit hash bace0ab55077d9f5cd37bd9d6638c4acb16334a8 for an example implementation.
- *
- */
-export function decodeDNSPacketBytes(buf: Uint8Array): [Label | null, Name | null] {
-  let offset = 0;
-  let list = new Uint8Array(0);
-  let dot = stringToBytes(".");
-  let len = buf[offset++];
-  let hex = bytesToHex(buf);
-  let firstLabel = "";
-  if (len === 0) {
-    return [firstLabel, "."];
-  }
-
-  while (len) {
-    const label = hex.slice((offset + 1) * 2, (offset + 1 + len) * 2);
-    const labelBytes = Buffer.from(label, "hex");
-
-    if (!isLabelIndexable(labelBytes.toString())) {
-      return [null, null];
-    }
-
-    if (offset > 1) {
-      list = concatUint8Arrays(list, dot);
-    } else {
-      firstLabel = labelBytes.toString();
-    }
-    list = concatUint8Arrays(list, labelBytes);
-    offset += len;
-    len = buf[offset++];
-  }
-  return [firstLabel, bytesToString(list)];
-}
-
-function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const concatenatedArray = new Uint8Array(a.length + b.length);
-  concatenatedArray.set(a);
-  concatenatedArray.set(b, a.length);
-  return concatenatedArray;
-}

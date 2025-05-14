@@ -2,13 +2,19 @@ import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, namehash } from "viem";
 
+import {
+  type Label,
+  type LabelHash,
+  PluginName,
+  isLabelIndexable,
+  makeSubdomainNode,
+} from "@ensnode/utils";
+
 import { makeSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { RegistrarManagedName } from "@/lib/types";
-import { Label, type LabelHash, PluginName } from "@ensnode/utils";
-import { isLabelIndexable, makeSubdomainNode } from "@ensnode/utils/subname-helpers";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
