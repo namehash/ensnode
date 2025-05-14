@@ -46,7 +46,8 @@ a[href*="ensadmin"] .starlight-sidebar-topics-icon {
   transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
-#starlight__sidebar a:hover {
+/* Only apply hover effects to non-selected items */
+#starlight__sidebar a:not([aria-current="page"]):hover {
   background-color: rgba(128, 128, 128, 0.1);
   transform: translateX(2px);
 }

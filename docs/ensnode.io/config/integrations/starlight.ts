@@ -97,6 +97,30 @@ export function starlight(): AstroIntegration {
               ],
             },
             {
+              label: "Technical Reference",
+              items: [
+                {
+                  label: "Architecture",
+                  link: "ensindexer/technical-reference/architecture",
+                },
+                {
+                  label: "Plugin System",
+                  link: "ensindexer/technical-reference/plugin-system",
+                },
+                {
+                  label: "Data Model",
+                  link: "ensindexer/technical-reference/data-model",
+                },
+                {
+                  label: "Plugins",
+                  collapsed: true,
+                  autogenerate: {
+                    directory: "ensindexer/technical-reference/plugins",
+                  },
+                },
+              ],
+            },
+            {
               label: "Using ENSIndexer",
               collapsed: false,
               autogenerate: { directory: "ensindexer/usage" },

@@ -1,0 +1,58 @@
+---
+title: Architecture
+description: Technical architecture and implementation details of ENSNode
+sidebar:
+  label: Architecture Overview
+  order: 2
+---
+
+This section covers the technical architecture of ENSNode, including its data model, plugin system, and database schema.
+
+
+## General Execution Flow
+
+The subgraph's codebase is not exhaustively documented or trivially readable. In some cases we've decided to simplify the implementation (ensuring accuracy via [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools)) and in others we've elected to match the subgraph's logic closer to 1:1.
+
+In general, however, each handler is written in a more ponder-native way, using ponder's drizzle-inspired entity CRUD apis, rather than the subgraph's active-record-inspired api. It uses minimial branched or nested logic, resulting in code that is much more readable. Along the way we've also documented the purpose of these handlers more exhaustively, which should promote understanding and readability.
+
+## API Layer
+
+ENSIndexer exposes three distinct API endpoints:
+
+1. **Subgraph-Compatible GraphQL** (`/subgraph`)
+
+   - Implements the ENS Subgraph schema and query patterns
+   - Enables gradual migration from existing Subgraph implementations
+   - Maintains compatibility with `ensjs` client library — just replace
+
+2. **Native Ponder GraphQL** (`/ponder`)
+
+   - Auto-generated GraphQL API from Ponder schema
+   - More efficient query patterns than Subgraph API, particularly for pagination
+
+3. **Ponder Client API** (`/sql/*`)
+   - SQL-based alternative to GraphQL
+   - End-to-end type inference
+   - Support for live updates
+   - Optimized for client application integration
+
+## Label Healing with ENSRainbow
+
+ENSIndexer depends on ENSRainbow at runtime to handle the healing of unknown labels. This parallels the ENS Subgraph's reliance on the graph-node's `ens.nameByHash` function.
+
+## Additional Notes in Comments
+
+Additional implementation & background context for certain decisions are included throughout the codebase where relevant, and we encourage curious readers to browse the comments and general structure of the shared handlers & helper libs for further background.
+
+## Components
+
+- [Data Model](/technical-reference/architecture/data-model)
+- [Plugin System](/technical-reference/architecture/plugin-system)
+- [Database Schema](/technical-reference/architecture/database-schema)
+
+## TODO
+
+- Use the diagram from the ENSNode page here too
+- Overview of the APIs that are exposed. we have the backwards compatible subgraph, sql (do we want to mention this, maybe not as i dont know if we want to invest in that), other apis (find out what they are)
+- Overview of plugins and then link to the specific plugin docs
+- Maybe speak about some ponder specific things like how the schema can't be reused for new versions etc. a few different gotchas with ponder so we could explain those here.

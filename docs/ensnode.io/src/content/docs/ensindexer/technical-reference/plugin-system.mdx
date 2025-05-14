@@ -1,0 +1,54 @@
+---
+title: Plugin System
+description: Documentation of ENSNode's plugin architecture
+sidebar:
+  label: Plugin System
+  order: 3
+---
+
+ENSNode uses a plugin-based architecture to support different data sources and chains. This section documents the available plugins and their implementation details.
+
+## Plugins
+
+ENSIndexer implements the core subgraph indexing logic within **shared handler functions** that mirror their subgraph counterpart. These shared handlers functions are in `apps/ensindexer/src/handlers/*.ts`. The `eth` plugin then implements subgraph-compatible logic 1:1, primarily relying on the shared handlers, and its implementation can be found in `apps/ensindexer/src/plugins/eth/ponder.plugin.ts`.
+
+Each plugin is an isolated ponder indexing configuration that uses the shared handlers (plus any necessary plugin-specific logic) to index its respective subregistry. See `apps/ensindexer/src/plugins/base/ponder.plugin.ts` and `apps/ensindexer/src/plugins/linea/ponder.plugin.ts` for examples.
+
+### Plugin-Scoping
+
+Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin—which didn't expect multichain or multi-source entities—, id-generating code is abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
+
+This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — teh shared handlers derived from the subgraph which are  used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
+
+### Plugin Definition
+
+An ENSIndexer plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function).
+
+### Ponder Plugin Integration
+
+#### Contract Namespace
+
+Ponder, by default, does not have the concept of plugins — it assumes that a config is static and that all contract names are known at compile-time. In ENSIndexer, multiple plugins reference contracts of the same name, and further namespacing is required. We namespace each contract by the Registry's `Subname` to avoid collisions (see `apps/ensindexer/src/lib/plugin-helpers.ts` for reference).
+
+#### Contract & Event Typing
+
+Ponder uses the type information of contracts and their abis in the provided config to power the `ponder.on('MyContract:MyEvent', ...)` api, including inferred types for contract names, event names, and event arguments.
+
+In order to replicate this experience with plugins selected at runtime, we use some creative typing in `apps/ensindexer/ponder.config.ts` to merge the possible plugin types for Ponder. With this approach we have full type inference for contract and event names/args across the app regardless of which plugins are activated at runtime.
+
+#### Plugin Execution
+
+When ENSIndexer is run, the configs for all of the active plugins (those selected by the user) are merged and ponder runs in `omnichain` (soon: `multichain`) mode to produce the resulting index.
+
+## Available Plugins
+
+- [Subgraph Plugin](/technical-reference/plugins/subgraph)
+- [Base Names Plugin](/technical-reference/plugins/base-names)
+- [Linea Names Plugin](/technical-reference/plugins/linea-names)
+- [3DNS Plugin](/technical-reference/plugins/3dns)
+
+## TODO
+
+- Anatomy of a plugin (so handlers have namespaced handlers, relationship between data sources etc)
+- How plugins are loaded/configured (via env vars)
+- Maybe some dev docs around writing handlers. This was the questions i had and still kind of have around handlers in development and maybe this should wait until i do the handler story i was going to pick up.
