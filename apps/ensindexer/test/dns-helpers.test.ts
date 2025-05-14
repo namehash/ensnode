@@ -57,6 +57,10 @@ describe("dns-helpers", () => {
       expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
     });
 
+    it.only("should return [null, null] for malformed dns packet", () => {
+      expect(decodeDNSPacketBytes(new Uint8Array([0x00]))).toEqual([null, null]);
+    });
+
     it("should return [null, null] for labels with unindexable characters", () => {
       expect(decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
       expect(decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
