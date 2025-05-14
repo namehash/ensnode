@@ -6,7 +6,7 @@ import { type Address, Hash, type Hex, hexToBytes } from "viem";
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { hasNullByte, uniq } from "@/lib/lib-helpers";
+import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { decodeDNSPacketBytes } from "@ensnode/utils/subname-helpers";
 
@@ -187,16 +187,21 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         .update(schema.resolver, { id })
         .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
+      // NOTE: ponder's (viem's) event parsing produces empty string for some TextChanged events
+      // (which is correct) but the subgraph records null for these instances, so we coalesce
+      // falsy strings to null for compatibility
+      // ex: https://etherscan.io/tx/0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0#eventlog
+      //
+      // NOTE: we also must strip null bytes in strings, which are unindexable by Postgres
+      // ex: https://etherscan.io/tx/0x2eb93d872a8f3e4295ea50773c3816dcaea2541f202f650948e8d6efdcbf4599#eventlog
+      const sanitizedValue = !value ? null : stripNullBytes(value) || null;
+
       // log ResolverEvent
       await context.db.insert(schema.textChanged).values({
         ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         key,
-        // ponder's (viem's) event parsing produces empty string for some TextChanged events
-        // (which is correct) but the subgraph records null for these instances, so we coalesce
-        // falsy strings to null for compatibility
-        // ex: last TextChanged in tx 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
-        value: value || null,
+        value: sanitizedValue,
       });
     },
 
@@ -374,6 +379,9 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
             // https://github.com/mafintosh/dns-packet
             const value = decodeTXTData(answer.data as Buffer[]);
 
+            // note: sanitize value, see `handleTextChanged` for context
+            const sanitizedValue = !value ? null : stripNullBytes(value) || null;
+
             // upsert new key
             await context.db
               .update(schema.resolver, { id })
@@ -384,8 +392,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
               ...sharedEventValues(context.network.chainId, event),
               resolverId: id,
               key,
-              // note: coalesce empty string to null, see `handleTextChanged` for context
-              value: value || null,
+              value: sanitizedValue,
             });
             break;
           }
