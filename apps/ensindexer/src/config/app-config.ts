@@ -14,24 +14,33 @@ function getValidationErrors(issues: z.core.$ZodIssue[]) {
 
 /**
  * Extracts chain configuration from environment variables.
- * Looks for RPC_URL_{chainId} and optional RPC_REQUEST_RATE_LIMIT_{chainId}.
+ *
+ * This function scans all environment variables for keys matching the pattern
+ * "RPC_URL_{chainId}", where {chainId} must be a string of digits (e.g., "1", "10", "8453").
  */
 function getChainsFromEnv(): Record<number, ChainConfig> {
   const chains: Record<number, ChainConfig> = {};
 
   Object.entries(process.env).forEach(([key, value]) => {
+    // Only match keys like "RPC_URL_1", "RPC_URL_10", etc. (digits only after the underscore)
     const match = key.match(/^RPC_URL_(\d+)$/);
+
+    // If the key after `RPC_URL_` is not a number, skip
     if (!match || !value) return;
 
+    // The regex above ensures that only numeric chain IDs are matched.
+    // - Example: "RPC_URL_1" will match and extract "1" as the chainId.
+    // - Example: "RPC_URL_SOMESTRING" will NOT match, so no risk of NaN from non-numeric IDs.
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond =
-      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    // Optionally get the rate limit for this chain, if set.
+    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
+      // The value for each RPC_URL_{chainId} is used as the rpcEndpointUrl.
       rpcEndpointUrl: value,
-      // use as to avoid requiring a separate type with a string.
-      // zod will take care of the type coercion to number.
+      // Note: rpcMaxRequestsPerSecond is typed as number, but may be a string here.
+      // Type coercion is handled later by zod validation.
       rpcMaxRequestsPerSecond: rpcMaxRequestsPerSecond as unknown as number,
     };
   });
@@ -63,11 +72,11 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
     port: process.env.PORT,
     ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
     globalBlockrange: {
-      // use as to avoid requiring a separate type with a string.
-      // zod will take care of the type coercion to number.
+      // Note: startBlock is typed as number, but may be a string here.
+      // Type coercion is handled later by zod validation.
       startBlock: process.env.START_BLOCK as unknown as number | undefined,
-      // use as to avoid requiring a separate type with a string.
-      // zod will take care of the type coercion to number.
+      // Note: endBlock is typed as number, but may be a string here.
+      // Type coercion is handled later by zod validation.
       endBlock: process.env.END_BLOCK as unknown as number | undefined,
     },
     indexedChains,
