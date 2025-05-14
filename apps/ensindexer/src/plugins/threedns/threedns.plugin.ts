@@ -36,12 +36,12 @@ export const config = createConfig({
       },
       abi: optimismContracts.ThreeDNSToken.abi,
     },
-    [namespace("ThreeDNSResolver")]: {
+    [namespace("Resolver")]: {
       network: {
-        ...networkConfigForContract(optimism, optimismContracts.ThreeDNSResolver),
-        ...networkConfigForContract(base, baseContracts.ThreeDNSResolver),
+        ...networkConfigForContract(optimism, optimismContracts.Resolver),
+        ...networkConfigForContract(base, baseContracts.Resolver),
       },
-      abi: optimismContracts.ThreeDNSResolver.abi,
+      abi: optimismContracts.Resolver.abi,
     },
   },
 });
