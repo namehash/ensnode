@@ -10,18 +10,13 @@ import {
   createPrometheusMetricsFetcher,
   getEnsDeploymentChainId,
 } from "@/lib/ponder-helpers";
-import {
-  PrometheusMetrics,
-  queryPonderMeta,
-  queryPonderStatus,
-} from "@ensnode/ponder-metadata";
+import { PrometheusMetrics, queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata";
 import type { PonderMetadataProvider } from "@ensnode/ponder-subgraph";
 
 // setup block indexing status fetching
-export const fetchFirstBlockToIndexByChainId =
-  createFirstBlockToIndexByChainIdFetcher(
-    import("@/../ponder.config").then((m) => m.default)
-  );
+export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
+  import("@/../ponder.config").then((m) => m.default),
+);
 
 // setup ENSRainbow version fetching
 export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
@@ -41,9 +36,7 @@ export const makePonderMetdataProvider = ({
   const availableNetworkNames = Object.keys(publicClients);
 
   if (availableNetworkNames.length === 0) {
-    throw new Error(
-      `Invariant: no available publicClients for constructing ponder metadata.`
-    );
+    throw new Error(`Invariant: no available publicClients for constructing ponder metadata.`);
   }
 
   // use the deployment chain's publicClient if available, otherwise warn and use first found
@@ -51,7 +44,7 @@ export const makePonderMetdataProvider = ({
   if (!publicClient) {
     const networkId = availableNetworkNames[0]!; // length check done above
     console.warn(
-      `No public client available for chain '${ensDeploymentChainId}', using status of chain '${networkId}' to power 'Query._meta'.`
+      `No public client available for chain '${ensDeploymentChainId}', using status of chain '${networkId}' to power 'Query._meta'.`,
     );
     publicClient = publicClients[networkId]!; // must exist
   }
@@ -64,12 +57,12 @@ export const makePonderMetdataProvider = ({
   const getLastIndexedDeploymentChainBlock = async () => {
     const ponderStatus = await queryPonderStatus(ponderDatabaseSchema, db);
     const chainStatus = ponderStatus.find(
-      (status) => status.network_name === ensDeploymentChainId.toString()
+      (status) => status.network_name === ensDeploymentChainId.toString(),
     );
 
     if (!chainStatus || !chainStatus.block_number) {
       throw new Error(
-        `Could not find latest indexed block number for chain ID: ${ensDeploymentChainId}`
+        `Could not find latest indexed block number for chain ID: ${ensDeploymentChainId}`,
       );
     }
 

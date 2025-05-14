@@ -39,7 +39,7 @@ app.use(
   ensNodeVersionResponseHeader,
 
   // use CORS middleware
-  cors({ origin: "*" })
+  cors({ origin: "*" }),
 );
 
 app.onError((error, ctx) => {
@@ -57,8 +57,7 @@ app.use("/", async (ctx) => {
 
     return ctx.redirect(ensAdminRedirectUrl);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
     throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
   }
@@ -84,7 +83,7 @@ app.get(
       ensRainbowVersion: fetchEnsRainbowVersion,
     },
     publicClients,
-  })
+  }),
 );
 
 // use ponder client support
@@ -120,11 +119,7 @@ app.use(
             schema.fusesSet,
             schema.expiryExtended,
           ],
-          RegistrationEvent: [
-            schema.nameRegistered,
-            schema.nameRenewed,
-            schema.nameTransferred,
-          ],
+          RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
           ResolverEvent: [
             schema.addrChanged,
             schema.multicoinAddrChanged,
@@ -145,7 +140,7 @@ app.use(
         },
       },
     }),
-  })
+  }),
 );
 
 export default app;

@@ -1,10 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  mockConfig,
-  resetMockConfig,
-  setGlobalBlockrange,
-  setupConfigMock,
-} from "./utils/mockConfig";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { resetMockConfig, setGlobalBlockrange, setupConfigMock } from "./utils/mockConfig";
 
 // Set up the mock before importing modules that depend on config
 setupConfigMock();
@@ -16,7 +11,6 @@ describe("ponder helpers", () => {
   // Reset mock config before each test
   beforeEach(() => {
     resetMockConfig();
-    vi.clearAllMocks();
   });
 
   describe("constrainContractBlockrange", () => {
@@ -24,13 +18,6 @@ describe("ponder helpers", () => {
       beforeEach(() => {
         // Set empty blockrange
         setGlobalBlockrange(undefined, undefined);
-
-        vi.stubEnv("START_BLOCK", "");
-        vi.stubEnv("END_BLOCK", "");
-      });
-
-      afterEach(() => {
-        vi.unstubAllEnvs();
       });
 
       it("should return valid startBlock and endBlock", () => {
@@ -48,12 +35,6 @@ describe("ponder helpers", () => {
       beforeEach(() => {
         // Set end block only
         setGlobalBlockrange(undefined, 1234);
-
-        vi.stubEnv("END_BLOCK", "1234");
-      });
-
-      afterEach(() => {
-        vi.unstubAllEnvs();
       });
 
       it("should respect global end block", () => {
@@ -67,26 +48,16 @@ describe("ponder helpers", () => {
       });
 
       it("should use contract start block if later than global start", () => {
-        // Update the mockConfig for this test
-        mockConfig.globalBlockrange = {
-          startBlock: 10,
-          endBlock: 1234,
-        };
-
-        vi.stubEnv("START_BLOCK", "10");
+        // Update the global blockrange
+        setGlobalBlockrange(10, 1234);
 
         const config = constrainContractBlockrange(20);
         expect(config).toEqual({ startBlock: 20, endBlock: 1234 });
       });
 
       it("should use global start block if later than contract start", () => {
-        // Update the mockConfig for this test
-        mockConfig.globalBlockrange = {
-          startBlock: 30,
-          endBlock: 1234,
-        };
-
-        vi.stubEnv("START_BLOCK", "30");
+        // Update the global blockrange
+        setGlobalBlockrange(30, 1234);
 
         const config = constrainContractBlockrange(20);
         expect(config).toEqual({ startBlock: 30, endBlock: 1234 });

@@ -2,17 +2,32 @@ import { ChainConfig, ENSIndexerConfig } from "@/config/config.schema";
 import { PluginName } from "@ensnode/utils";
 import { vi } from "vitest";
 
-// Default mock configuration object that can be modified by tests
-export const mockConfig: ENSIndexerConfig = {
+// Internal helper to deep clone configuration objects
+function deepClone<T>(obj: T): T {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => deepClone(item)) as any;
+  }
+
+  const clonedObj = {} as T;
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      clonedObj[key] = deepClone(obj[key]);
+    }
+  }
+  return clonedObj;
+}
+
+// Default, non-exported mock configuration template
+const _defaultMockConfig: ENSIndexerConfig = {
   ensDeploymentChain: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  requestedPluginNames: [
-    PluginName.Subgraph,
-    PluginName.Basenames,
-    PluginName.Lineanames,
-  ],
+  requestedPluginNames: [PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames],
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: 42069,
@@ -23,108 +38,130 @@ export const mockConfig: ENSIndexerConfig = {
   },
 };
 
+// This will hold the current, mutable configuration for tests
+let currentMockConfig: ENSIndexerConfig;
+
+/**
+ * Resets the currentMockConfig object to a deep copy of the default values.
+ * This is crucial for test isolation.
+ */
+// ENSURE THAT THIS IS CALLED FOR EACH NEW TEST!!!
+// ADD IT TO YOUR beforeEach() METHOD
+export function resetMockConfig() {
+  currentMockConfig = deepClone(_defaultMockConfig);
+}
+
+// Initialize currentMockConfig when the module is loaded.
+// This ensures it's defined before setupConfigMock or any tests run.
+resetMockConfig();
+
 /**
  * Sets up mocking for app-config module
- * Call this function at the top of your test file before any imports
+ * Call this function at the top of the test file before any imports
  * that depend on the config
  *
  * @example
- * // At the top of your test file
+ * // At the top of the test file
  * import { setupConfigMock } from './utils/mockConfig';
  * setupConfigMock();
  *
- * // Now you can safely import modules that use config
- * import { yourModule } from '@/your-module';
+ * // Now we can safely import modules that use the config
+ * import { theModule } from '@/the-module';
  */
 export function setupConfigMock() {
-  // Use mockConfig directly - no proxy
-  // This works because vi.mock is hoisted to the top of the file
-  // and mockConfig is a top-level variable
   vi.mock("@/config/app-config", () => {
     const module = {
-      getConfig: vi.fn(() => mockConfig),
-      config: mockConfig,
+      getConfig: vi.fn(() => currentMockConfig),
+      // Use a getter for 'config' to ensure it always returns the latest currentMockConfig
+      get config() {
+        return currentMockConfig;
+      },
       rpcMaxRequestsPerSecond: vi.fn(
         (chainId: number) =>
-          mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50
+          currentMockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50,
       ),
       rpcEndpointUrl: vi.fn(
         (chainId: number) =>
-          mockConfig.indexedChains[chainId]?.rpcEndpointUrl ||
-          "http://localhost:8545"
+          currentMockConfig.indexedChains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
       ),
-      default: mockConfig, // Mock the default export too
+      // Use a getter for the default export as well
+      get default() {
+        return currentMockConfig;
+      },
     };
-    // Add all named exports from app-config as getters
+    // Define named exports as getters pointing to currentMockConfig properties
     Object.defineProperties(module, {
-      ensDeploymentChain: { get: () => mockConfig.ensDeploymentChain },
-      ensNodePublicUrl: { get: () => mockConfig.ensNodePublicUrl },
-      ensAdminUrl: { get: () => mockConfig.ensAdminUrl },
-      ponderDatabaseSchema: { get: () => mockConfig.ponderDatabaseSchema },
-      requestedPluginNames: { get: () => mockConfig.requestedPluginNames },
-      healReverseAddresses: { get: () => mockConfig.healReverseAddresses },
-      port: { get: () => mockConfig.port },
-      ensRainbowEndpointUrl: { get: () => mockConfig.ensRainbowEndpointUrl },
-      globalBlockrange: { get: () => mockConfig.globalBlockrange },
-      indexedChains: { get: () => mockConfig.indexedChains },
+      ensDeploymentChain: {
+        get: () => currentMockConfig.ensDeploymentChain,
+        enumerable: true,
+      },
+      ensNodePublicUrl: {
+        get: () => currentMockConfig.ensNodePublicUrl,
+        enumerable: true,
+      },
+      ensAdminUrl: {
+        get: () => currentMockConfig.ensAdminUrl,
+        enumerable: true,
+      },
+      ponderDatabaseSchema: {
+        get: () => currentMockConfig.ponderDatabaseSchema,
+        enumerable: true,
+      },
+      requestedPluginNames: {
+        get: () => currentMockConfig.requestedPluginNames,
+        enumerable: true,
+      },
+      healReverseAddresses: {
+        get: () => currentMockConfig.healReverseAddresses,
+        enumerable: true,
+      },
+      port: { get: () => currentMockConfig.port, enumerable: true },
+      ensRainbowEndpointUrl: {
+        get: () => currentMockConfig.ensRainbowEndpointUrl,
+        enumerable: true,
+      },
+      globalBlockrange: {
+        get: () => currentMockConfig.globalBlockrange,
+        enumerable: true,
+      },
+      indexedChains: {
+        get: () => currentMockConfig.indexedChains,
+        enumerable: true,
+      },
     });
     return module;
   });
 }
 
 /**
- * Updates the mock configuration for specific tests
+ * Updates the current mock configuration for specific tests
  *
  * @param updates Partial config object with properties to update
  * @example
- * // In your test
+ * // In the test
  * updateMockConfig({
  *   globalBlockrange: { startBlock: 100, endBlock: 200 }
  * });
  */
-export function updateMockConfig(updates: Partial<typeof mockConfig>) {
-  Object.assign(mockConfig, updates);
+export function updateMockConfig(updates: Partial<ENSIndexerConfig>) {
+  Object.assign(currentMockConfig, updates);
 }
 
 /**
- * Resets the mockConfig object to its default values.
- * This is useful for tests that need to start with a clean slate.
- */
-export function resetMockConfig() {
-  mockConfig.ensDeploymentChain = "mainnet";
-  mockConfig.ensNodePublicUrl = "http://localhost:42069";
-  mockConfig.ensAdminUrl = "http://localhost:3000";
-  mockConfig.ponderDatabaseSchema = "test_schema";
-  mockConfig.requestedPluginNames = [
-    PluginName.Subgraph,
-    PluginName.Basenames,
-    PluginName.Lineanames,
-  ];
-  mockConfig.ensRainbowEndpointUrl = "https://api.ensrainbow.io";
-  mockConfig.healReverseAddresses = true;
-  mockConfig.port = 42069;
-  mockConfig.indexedChains = {};
-  mockConfig.globalBlockrange = {
-    startBlock: undefined,
-    endBlock: undefined,
-  };
-}
-
-/**
- * Sets up the global blockrange in the mock config
+ * Sets up the global blockrange in the current mock config
  *
  * @param startBlock Optional start block
  * @param endBlock Optional end block
  */
 export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
-  mockConfig.globalBlockrange = {
+  currentMockConfig.globalBlockrange = {
     startBlock,
     endBlock,
   };
 }
 
 /**
- * Configures a chain in the mock config
+ * Configures a chain in the current mock config
  *
  * @param chainId The chain ID to configure
  * @param rpcEndpointUrl The RPC endpoint URL for the chain
@@ -140,34 +177,34 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
 export function setChainConfig(
   chainId: number,
   rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50
+  rpcMaxRequestsPerSecond: number = 50,
 ) {
-  if (!mockConfig.indexedChains) {
-    mockConfig.indexedChains = {};
+  if (!currentMockConfig.indexedChains) {
+    currentMockConfig.indexedChains = {};
   }
 
-  mockConfig.indexedChains[chainId] = {
+  currentMockConfig.indexedChains[chainId] = {
     rpcEndpointUrl,
     rpcMaxRequestsPerSecond,
   };
 }
 
 /**
- * Removes a chain configuration from the mock config
+ * Removes a chain configuration from the current mock config
  *
  * @param chainId The chain ID to remove
  */
 export function removeChainConfig(chainId: number) {
-  if (mockConfig.indexedChains && mockConfig.indexedChains[chainId]) {
-    delete mockConfig.indexedChains[chainId];
+  if (currentMockConfig.indexedChains && currentMockConfig.indexedChains[chainId]) {
+    delete currentMockConfig.indexedChains[chainId];
   }
 }
 
 /**
- * Gets the current chain configurations
+ * Gets a copy of the current chain configurations
  *
  * @returns Record of chain configurations by chain ID
  */
 export function getChainConfigs(): Record<number, ChainConfig> {
-  return { ...mockConfig.indexedChains };
+  return { ...currentMockConfig.indexedChains };
 }
