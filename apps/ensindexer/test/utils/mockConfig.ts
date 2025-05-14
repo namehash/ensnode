@@ -8,7 +8,11 @@ export const mockConfig: ENSIndexerConfig = {
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  requestedPluginNames: [PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames],
+  requestedPluginNames: [
+    PluginName.Subgraph,
+    PluginName.Basenames,
+    PluginName.Lineanames,
+  ],
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: 42069,
@@ -41,14 +45,29 @@ export function setupConfigMock() {
       getConfig: vi.fn(() => mockConfig),
       config: mockConfig,
       rpcMaxRequestsPerSecond: vi.fn(
-        (chainId: number) => mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50,
+        (chainId: number) =>
+          mockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond || 50
       ),
       rpcEndpointUrl: vi.fn(
         (chainId: number) =>
-          mockConfig.indexedChains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
+          mockConfig.indexedChains[chainId]?.rpcEndpointUrl ||
+          "http://localhost:8545"
       ),
       default: mockConfig, // Mock the default export too
     };
+    // Add all named exports from app-config as getters
+    Object.defineProperties(module, {
+      ensDeploymentChain: { get: () => mockConfig.ensDeploymentChain },
+      ensNodePublicUrl: { get: () => mockConfig.ensNodePublicUrl },
+      ensAdminUrl: { get: () => mockConfig.ensAdminUrl },
+      ponderDatabaseSchema: { get: () => mockConfig.ponderDatabaseSchema },
+      requestedPluginNames: { get: () => mockConfig.requestedPluginNames },
+      healReverseAddresses: { get: () => mockConfig.healReverseAddresses },
+      port: { get: () => mockConfig.port },
+      ensRainbowEndpointUrl: { get: () => mockConfig.ensRainbowEndpointUrl },
+      globalBlockrange: { get: () => mockConfig.globalBlockrange },
+      indexedChains: { get: () => mockConfig.indexedChains },
+    });
     return module;
   });
 }
@@ -121,7 +140,7 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
 export function setChainConfig(
   chainId: number,
   rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50,
+  rpcMaxRequestsPerSecond: number = 50
 ) {
   if (!mockConfig.indexedChains) {
     mockConfig.indexedChains = {};

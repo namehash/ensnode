@@ -20,7 +20,9 @@ export const AVAILABLE_PLUGINS = [
   threednsPlugin,
 ] as const;
 
-export type MergedPluginConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number]["config"]> & {
+export type MergedPluginConfig = MergedTypes<
+  (typeof AVAILABLE_PLUGINS)[number]["config"]
+> & {
   /**
    * The environment variables that change the behavior of the indexer.
    * It's important to include all environment variables that change the behavior
@@ -37,13 +39,15 @@ export type MergedPluginConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number][
 ////////
 
 // the available Datasources are those that the selected ENSDeployment defines
-const availableDatasourceNames = Object.keys(SELECTED_ENS_DEPLOYMENT) as DatasourceName[];
+const availableDatasourceNames = Object.keys(
+  SELECTED_ENS_DEPLOYMENT
+) as DatasourceName[];
 
 // filter the set of available plugins by those that are 'active'
 const activePlugins = getActivePlugins(
   AVAILABLE_PLUGINS,
   config.requestedPluginNames,
-  availableDatasourceNames,
+  availableDatasourceNames
 );
 
 ////////

@@ -3,13 +3,22 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
-import config from "@/config/app-config";
-import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { healReverseAddresses } from "@/config/app-config";
+import {
+  makeSharedEventValues,
+  upsertAccount,
+  upsertResolver,
+} from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
-import { type LabelHash, type Node, PluginName, REVERSE_ROOT_NODES } from "@ensnode/utils";
+import {
+  type LabelHash,
+  type Node,
+  PluginName,
+  REVERSE_ROOT_NODES,
+} from "@ensnode/utils";
 import {
   isLabelIndexable,
   makeSubdomainNode,
@@ -86,7 +95,7 @@ export const makeRegistryHandlers = ({
 
           // 1. if healing label from reverse addresses is enabled, and the parent is a known
           //    reverse node (i.e. addr.reverse), give it a go
-          if (config.healReverseAddresses && REVERSE_ROOT_NODES.has(parentNode)) {
+          if (healReverseAddresses && REVERSE_ROOT_NODES.has(parentNode)) {
             healedLabel = maybeHealLabelByReverseAddress({
               maybeReverseAddress: owner,
               labelHash,
@@ -100,7 +109,9 @@ export const makeRegistryHandlers = ({
             healedLabel = await labelByLabelHash(labelHash);
           }
 
-          const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+          const validLabel = isLabelIndexable(healedLabel)
+            ? healedLabel
+            : undefined;
 
           // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
           // NOTE: for TLDs, the parent is null, so we just use the label value as is
@@ -120,7 +131,10 @@ export const makeRegistryHandlers = ({
         // garbage collect newly 'empty' domain iff necessary
         // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
         if (owner === zeroAddress) {
-          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
+          await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+            context,
+            node
+          );
         }
 
         // log DomainEvent
@@ -145,12 +159,17 @@ export const makeRegistryHandlers = ({
       // ensure domain & update owner
       await context.db
         .insert(schema.domain)
-        .values([{ id: node, ownerId: owner, createdAt: event.block.timestamp }])
+        .values([
+          { id: node, ownerId: owner, createdAt: event.block.timestamp },
+        ])
         .onConflictDoUpdate({ ownerId: owner });
 
       // garbage collect newly 'empty' domain iff necessary
       if (owner === zeroAddress) {
-        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
+        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+          context,
+          node
+        );
       }
 
       // log DomainEvent
@@ -205,7 +224,10 @@ export const makeRegistryHandlers = ({
           .set({ resolverId: null, resolvedAddressId: null });
 
         // garbage collect newly 'empty' domain iff necessary
-        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
+        await recursivelyRemoveEmptyDomainFromParentSubdomainCount(
+          context,
+          node
+        );
       } else {
         // otherwise upsert the resolver
         const resolver = await upsertResolver(context, {

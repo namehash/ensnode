@@ -25,7 +25,8 @@ function getChainsFromEnv(): Record<number, ChainConfig> {
 
     const chainId = Number(match[1]);
 
-    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    const rpcMaxRequestsPerSecond =
+      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       rpcEndpointUrl: value,
@@ -75,10 +76,6 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
   const parsed = ENSIndexerConfigSchema.safeParse(config);
 
   if (!parsed.success) {
-    // if (parsed.error) {
-    //   console.log(z.prettifyError(parsed.error));
-    // }
-
     throw new Error(getValidationErrors(parsed.error.issues));
   }
 
@@ -88,42 +85,18 @@ function buildENSIndexerConfig(): ENSIndexerConfig {
 // Build the config object right away
 const config = buildENSIndexerConfig();
 
-// Default export for new code to use
+// Export individual properties
+export const {
+  ensDeploymentChain,
+  ensNodePublicUrl,
+  ensAdminUrl,
+  ponderDatabaseSchema,
+  requestedPluginNames,
+  healReverseAddresses,
+  port,
+  ensRainbowEndpointUrl,
+  globalBlockrange,
+  indexedChains,
+} = config;
+
 export default config;
-
-/**
- * Gets the RPC request rate limit for a given chain ID.
- *
- * @param chainId the chain ID to get the rate limit for
- * @returns the rate limit in requests per second (rps)
- */
-export const rpcMaxRequestsPerSecond = (chainId: number): number => {
-  const chainConfig = config.indexedChains[chainId];
-
-  if (!chainConfig?.rpcMaxRequestsPerSecond) {
-    return DEFAULT_RPC_RATE_LIMIT;
-  }
-
-  return chainConfig.rpcMaxRequestsPerSecond;
-};
-
-/**
- * Gets the RPC endpoint URL for a given chain ID.
- *
- * This intentionally returns undefined instead of throwing when the chain ID is not
- * configured. This allows us to aggregate all the RPC URLs that are missing and throw
- * a helpful error message aggregating them all instead of throwing an error here which
- * will only flag a single missing RPC URL.
- *
- * @param chainId the chain ID to get the RPC URL for
- * @returns the URL of the RPC endpoint
- */
-export const rpcEndpointUrl = (chainId: number): string | undefined => {
-  const chainConfig = config.indexedChains[chainId];
-
-  if (!chainConfig?.rpcEndpointUrl) {
-    return undefined;
-  }
-
-  return chainConfig.rpcEndpointUrl;
-};

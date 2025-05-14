@@ -6,7 +6,13 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
-import config from "@/config/app-config";
+import {
+  ensAdminUrl,
+  ensDeploymentChain,
+  ensNodePublicUrl,
+  ponderDatabaseSchema,
+  requestedPluginNames,
+} from "@/config/app-config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
@@ -21,14 +27,6 @@ import {
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
 
-const {
-  requestedPluginNames,
-  ensDeploymentChain,
-  ensNodePublicUrl,
-  ensAdminUrl,
-  ponderDatabaseSchema,
-} = config;
-
 const app = new Hono();
 
 const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
@@ -41,7 +39,7 @@ app.use(
   ensNodeVersionResponseHeader,
 
   // use CORS middleware
-  cors({ origin: "*" }),
+  cors({ origin: "*" })
 );
 
 app.onError((error, ctx) => {
@@ -59,7 +57,8 @@ app.use("/", async (ctx) => {
 
     return ctx.redirect(ensAdminRedirectUrl);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
 
     throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
   }
@@ -85,7 +84,7 @@ app.get(
       ensRainbowVersion: fetchEnsRainbowVersion,
     },
     publicClients,
-  }),
+  })
 );
 
 // use ponder client support
@@ -121,7 +120,11 @@ app.use(
             schema.fusesSet,
             schema.expiryExtended,
           ],
-          RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+          RegistrationEvent: [
+            schema.nameRegistered,
+            schema.nameRenewed,
+            schema.nameTransferred,
+          ],
           ResolverEvent: [
             schema.addrChanged,
             schema.multicoinAddrChanged,
@@ -142,7 +145,7 @@ app.use(
         },
       },
     }),
-  }),
+  })
 );
 
 export default app;

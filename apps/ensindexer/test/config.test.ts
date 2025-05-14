@@ -117,26 +117,32 @@ describe("config", () => {
       process.env.START_BLOCK = "-1";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /START_BLOCK must be a non-negative number/i,
+        /START_BLOCK must be a positive number/i
       );
     });
 
     it("throws if END_BLOCK is negative", async () => {
       process.env.END_BLOCK = "-5";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/END_BLOCK must be a non-negative number/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /END_BLOCK must be a positive number/i
+      );
     });
 
     it("throws if START_BLOCK is not a number", async () => {
       process.env.START_BLOCK = "foo";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/START_BLOCK must be a number/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /START_BLOCK must be a positive number/i
+      );
     });
 
     it("throws if END_BLOCK is not a number", async () => {
       process.env.END_BLOCK = "bar";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/END_BLOCK must be a number/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /END_BLOCK must be a positive number/i
+      );
     });
 
     it("throws if START_BLOCK > END_BLOCK", async () => {
@@ -144,7 +150,7 @@ describe("config", () => {
       process.env.END_BLOCK = "50";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /END_BLOCK must be greater than or equal to START_BLOCK/i,
+        /END_BLOCK must be greater than or equal to START_BLOCK/i
       );
     });
   });
@@ -154,21 +160,23 @@ describe("config", () => {
       process.env.ENSNODE_PUBLIC_URL = "invalid url";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ENSNODE_PUBLIC_URL must be a valid URL string/i,
+        /ENSNODE_PUBLIC_URL must be a valid URL string/i
       );
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is empty", async () => {
       process.env.ENSNODE_PUBLIC_URL = "";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/URL is required and cannot be empty/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /URL is required and cannot be empty/i
+      );
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is undefined (explicitly testing the refine)", async () => {
       delete process.env.ENSNODE_PUBLIC_URL;
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ENSNODE_PUBLIC_URL must be a string. Received type: undefined/i,
+        /ENSNODE_PUBLIC_URL must be a string. Received type: undefined/i
       );
     });
 
@@ -189,7 +197,9 @@ describe("config", () => {
     it("throws an error if ENSADMIN_URL is not a valid URL", async () => {
       process.env.ENSADMIN_URL = "invalid url";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/ENSADMIN_URL must be a valid URL string/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /ENSADMIN_URL must be a valid URL string/i
+      );
     });
 
     it("returns the provided ENSADMIN_URL if it is a valid URL", async () => {
@@ -210,7 +220,7 @@ describe("config", () => {
       process.env.ENSRAINBOW_URL = "invalid url";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ENSRAINBOW_URL must be a valid URL string/i,
+        /ENSRAINBOW_URL must be a valid URL string/i
       );
     });
 
@@ -224,7 +234,7 @@ describe("config", () => {
       delete process.env.ENSRAINBOW_URL;
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ENSRAINBOW_URL must be a string. Received type: undefined/i,
+        /ENSRAINBOW_URL must be a string. Received type: undefined/i
       );
     });
   });
@@ -238,20 +248,22 @@ describe("config", () => {
 
     it("throws an error when DATABASE_SCHEMA is not set", async () => {
       delete process.env.DATABASE_SCHEMA;
-      await expect(getFreshConfig()).rejects.toThrow(/DATABASE_SCHEMA is required/);
+      await expect(getFreshConfig()).rejects.toThrow(
+        /DATABASE_SCHEMA is required/
+      );
     });
 
     it("throws an error when DATABASE_SCHEMA is empty", async () => {
       process.env.DATABASE_SCHEMA = "";
       await expect(getFreshConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
+        /DATABASE_SCHEMA is required and cannot be an empty string/
       );
     });
 
     it("throws an error when DATABASE_SCHEMA is only whitespace", async () => {
       process.env.DATABASE_SCHEMA = "   ";
       await expect(getFreshConfig()).rejects.toThrow(
-        /DATABASE_SCHEMA is required and cannot be an empty string/,
+        /DATABASE_SCHEMA is required and cannot be an empty string/
       );
     });
   });
@@ -273,20 +285,24 @@ describe("config", () => {
     it("throws if PORT is not a number", async () => {
       process.env.PORT = "not-a-port";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/PORT must be a number/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /PORT must be a number/i
+      );
     });
 
     it("throws if PORT is not an integer", async () => {
       process.env.PORT = "3000.5";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/PORT must be an integer/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /PORT must be an integer/i
+      );
     });
 
     it("throws if PORT is less than 1", async () => {
       process.env.PORT = "0";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /PORT must be a number between 1 and 65535/i,
+        /PORT must be a number between 1 and 65535/i
       );
     });
 
@@ -294,7 +310,7 @@ describe("config", () => {
       process.env.PORT = "-100";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /PORT must be a number between 1 and 65535/i,
+        /PORT must be a number between 1 and 65535/i
       );
     });
 
@@ -302,7 +318,7 @@ describe("config", () => {
       process.env.PORT = "65536";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /PORT must be a number between 1 and 65535/i,
+        /PORT must be a number between 1 and 65535/i
       );
     });
   });
@@ -330,7 +346,7 @@ describe("config", () => {
       process.env.HEAL_REVERSE_ADDRESSES = "not-a-boolean";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /HEAL_REVERSE_ADDRESSES must be 'true' or 'false'/i,
+        /HEAL_REVERSE_ADDRESSES must be 'true' or 'false'/i
       );
     });
   });
@@ -352,7 +368,7 @@ describe("config", () => {
       process.env.ENS_DEPLOYMENT_CHAIN = "not-a-chain";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: mainnet, sepolia, holesky, ens-test-env/i,
+        /Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: mainnet, sepolia, holesky, ens-test-env/i
       );
     });
   });
@@ -374,7 +390,7 @@ describe("config", () => {
       process.env.ACTIVE_PLUGINS = "";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i
       );
     });
 
@@ -382,7 +398,7 @@ describe("config", () => {
       process.env.ACTIVE_PLUGINS = " ,,  ,";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i
       );
     });
 
@@ -390,7 +406,7 @@ describe("config", () => {
       process.env.ACTIVE_PLUGINS = "some,nonexistent,plugins";
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i
       );
     });
 
@@ -398,7 +414,7 @@ describe("config", () => {
       delete process.env.ACTIVE_PLUGINS;
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i
       );
     });
   });
@@ -419,7 +435,9 @@ describe("config", () => {
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
       process.env.RPC_URL_1 = "invalid url";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/RPC_URL must be a valid URL string/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /RPC_URL must be a valid URL string/i
+      );
     });
   });
 

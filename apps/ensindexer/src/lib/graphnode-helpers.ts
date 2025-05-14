@@ -1,18 +1,23 @@
-import config from "@/config/app-config";
-import { EnsRainbowApiClient, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
+import { ensRainbowEndpointUrl } from "@/config/app-config";
+import {
+  EnsRainbowApiClient,
+  ErrorCode,
+  isHealError,
+} from "@ensnode/ensrainbow-sdk";
 import type { Label, LabelHash } from "@ensnode/utils";
 
 const ensRainbowApiClient = new EnsRainbowApiClient({
-  endpointUrl: new URL(config.ensRainbowEndpointUrl),
+  endpointUrl: new URL(ensRainbowEndpointUrl),
 });
 
 if (
-  ensRainbowApiClient.getOptions().endpointUrl === EnsRainbowApiClient.defaultOptions().endpointUrl
+  ensRainbowApiClient.getOptions().endpointUrl ===
+  EnsRainbowApiClient.defaultOptions().endpointUrl
 ) {
   console.warn(
     `Using default public ENSRainbow server which may cause increased network latency.
     For production, use your own ENSRainbow server that runs on the same network
-    as the ENSIndexer server.`,
+    as the ENSIndexer server.`
   );
 }
 
@@ -24,7 +29,9 @@ if (
  * @returns the original label if found, or null if not found for the labelHash.
  * @throws if the labelHash is not correctly formatted, or server error occurs, or connection error occurs.
  **/
-export async function labelByLabelHash(labelHash: LabelHash): Promise<Label | null> {
+export async function labelByLabelHash(
+  labelHash: LabelHash
+): Promise<Label | null> {
   const healResponse = await ensRainbowApiClient.heal(labelHash);
 
   if (!isHealError(healResponse)) {
@@ -38,6 +45,6 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<Label | nu
   }
 
   throw new Error(
-    `Error healing labelHash: "${labelHash}". Error (${healResponse.errorCode}): ${healResponse.error}.`,
+    `Error healing labelHash: "${labelHash}". Error (${healResponse.errorCode}): ${healResponse.error}.`
   );
 }
