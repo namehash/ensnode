@@ -96,30 +96,22 @@ export const makeRegistrarHandlers = ({
 
       // NOTE: because the mainnet ENS contract _always_ emit Registry#NewOwner _before_
       // Registrar#NameRegistered, the subgraph logic expects a domain entity to exist here.
+      //
       // Basenames, however, supports the concept of 'preminting' a domain using a `registerOnly`
-      // method which avoids actually registering the name in the Registry.
+      // method which avoids actually registering the name in the Registry and emitting NewOwner.
       // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/src/L2/BaseRegistrar.sol#L248
       // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/script/premint/Premint.s.sol#L36
       //
-      // Because of this, preminted names emit just the Transfer and Registrar#NameRegisteredWithRecord
-      // events.
+      // Because of this, preminted names emit just the Transfer and Registrar#NameRegisteredWithRecord events.
       // ex: https://basescan.org/tx/0xa61fc930ecf12cfaf247b315c9af50196d86f4276ed1cb93fee48b58a370cc25#eventlog
       //
       // To allow this shared Registrar handler logic work for each of these two patterns, we allow
-      // for the creation of a domain in handleNameRegistered, but only for non-subgraph plugins,
-      // making sure to also include the subdomainCount materialization effect on create, which would
-      // otherwise _not_ get run within the NewOwner handler.
+      // for just the creation of the Registration, skipping the domain.update, but only for the
+      // Basenames plugin. If/when these 'preminted' names are actually registered in the future,
+      // they will emit NewOwner as expected.
       let domain = await context.db.find(schema.domain, { id: node });
-
-      // invariant: the domain should _always_ exist in the context of the subgraph plugin
-      if (pluginName === PluginName.Subgraph && !domain) {
-        throw new Error(
-          "Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist.",
-        );
-      }
-
       if (domain) {
-        // if the domain already exists, this is just an update of domain's registrant & expiryDate
+        // update of domain's registrant & expiryDate if it exists
         await context.db.update(schema.domain, { id: node }).set({
           registrantId: owner,
           expiryDate: expires + GRACE_PERIOD_SECONDS,
@@ -127,33 +119,23 @@ export const makeRegistrarHandlers = ({
           name,
         });
       } else {
-        // otherwise, create the domain with default values, including registration-specific params
-        await context.db.insert(schema.domain).values({
-          // domain creation parameters
-          id: node,
-          ownerId: owner,
-          parentId: registrarManagedNode,
-          createdAt: event.block.timestamp,
-          labelhash: labelHash,
+        // invariant: if the domain does not exist, this must be a `registerOnly` 'preminted' name
+        // in the Basenames plugin, otherwise panic
+        if (pluginName !== PluginName.Basenames) {
+          throw new Error(
+            `Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist. This indicates that a name was registered in the Registrar but _not_ in the ENS Registry (i.e. 'preminted'). Currently this is only supported on Basenames, but this occurred in plugin '${pluginName}'.`,
+          );
+        }
 
-          // NameRegistered updates
-          registrantId: owner,
-          expiryDate: expires + GRACE_PERIOD_SECONDS,
-          labelName: validLabel,
-          name,
-        });
-
-        // and increment parent subdomainCount
-        await context.db
-          .update(schema.domain, { id: registrarManagedNode })
-          .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
+        // implicit: avoid updating the domain entity (that does not exist) for 'preminted' names
       }
 
-      // update registration
+      // upsert registration
       // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
       const registrationId = makeRegistrationId(pluginName, labelHash, node);
       await upsertRegistration(context, {
         id: registrationId,
+        // NOTE: always set domainId (cannot be null), but for preminted names the relationship will be null
         domainId: node,
         registrationDate: event.block.timestamp,
         expiryDate: expires,
