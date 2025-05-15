@@ -1,16 +1,7 @@
-import {
-  Address,
-  IntegerOutOfRangeError,
-  hexToBytes,
-  labelhash,
-  namehash,
-  toBytes,
-  zeroHash,
-} from "viem";
+import { Address, IntegerOutOfRangeError, labelhash, namehash, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
 
 import {
-  decodeDNSPacketBytes,
   isLabelIndexable,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
@@ -37,33 +28,6 @@ describe("isLabelIndexable", () => {
 
   it("should return false for unhealable lablelhash", () => {
     expect(isLabelIndexable(null)).toBe(false);
-  });
-});
-
-describe("decodeDNSPacketBytes", () => {
-  // TODO: undo the skip when the decodeDNSPacketBytes implementation can be fixed
-  // related discussion: https://github.com/namehash/ensnode/pull/43#discussion_r1924255145
-  it.skip('should return ["", "."] for empty buffer', () => {
-    expect(decodeDNSPacketBytes(new Uint8Array())).toEqual(["", "."]);
-  });
-
-  it("should return [null, null] for labels with unindexable characters", () => {
-    expect(decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
-    expect(decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
-    expect(decodeDNSPacketBytes(toBytes("test["))).toEqual([null, null]);
-    expect(decodeDNSPacketBytes(toBytes("test]"))).toEqual([null, null]);
-
-    // TODO: based on the definition of `isLabelIndexable` the empty label ("")
-    // is not indexable, however this test case returns ["", ""] instead of [null, null]
-    // expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
-  });
-
-  it("should handle previously bugged name", () => {
-    // this `name` from tx 0x2138cdf5fbaeabc9cc2cd65b0a30e4aea47b3961f176d4775869350c702bd401
-    expect(decodeDNSPacketBytes(hexToBytes("0x0831323333333232310365746800"))).toEqual([
-      "12333221",
-      "12333221.eth",
-    ]);
   });
 });
 

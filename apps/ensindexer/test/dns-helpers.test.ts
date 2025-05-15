@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
+import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import { TxtAnswer } from "dns-packet";
-import { decodeEventLog, zeroHash } from "viem";
+import dnsPacket, { TxtAnswer } from "dns-packet";
+import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog
@@ -48,6 +48,32 @@ describe("dns-helpers", () => {
 
     it("returns null if no records", () => {
       expect(decodeTXTData([])).toBe(null);
+    });
+  });
+
+  describe("decodeDNSPacketBytes", () => {
+    it("should return [null, null] for empty buffer", () => {
+      expect(decodeDNSPacketBytes(new Uint8Array())).toEqual([null, null]);
+      expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
+    });
+
+    it("should return [null, null] for malformed dns packet", () => {
+      expect(decodeDNSPacketBytes(new Uint8Array([0x00]))).toEqual([null, null]);
+    });
+
+    it("should return [null, null] for labels with unindexable characters", () => {
+      expect(decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
+      expect(decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
+      expect(decodeDNSPacketBytes(toBytes("test["))).toEqual([null, null]);
+      expect(decodeDNSPacketBytes(toBytes("test]"))).toEqual([null, null]);
+    });
+
+    it("should handle previously bugged name", () => {
+      // this `name` from tx 0x2138cdf5fbaeabc9cc2cd65b0a30e4aea47b3961f176d4775869350c702bd401
+      expect(decodeDNSPacketBytes(hexToBytes("0x0831323333333232310365746800"))).toEqual([
+        "12333221",
+        "12333221.eth",
+      ]);
     });
   });
 });

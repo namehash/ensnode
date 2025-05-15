@@ -14,8 +14,7 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts",
-    "./subname-helpers": "./src/subname-helpers.ts"
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -23,10 +22,6 @@
       ".": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "./subname-helpers": {
-        "types": "./dist/subname-helpers.d.ts",
-        "default": "./dist/subname-helpers.js"
       }
     },
     "main": "./dist/index.js",
