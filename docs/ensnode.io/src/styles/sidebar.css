@@ -1,12 +1,40 @@
 /* starlight doesnt have support for adding classes to the sidebar items, so this code targets that directly
- * to add an arrow to the sidebar items which are not the first item
+ * to add connecting lines to the sidebar items which are not the first item
  */
-#starlight__sidebar > div > ul > li:not(:first-child) > a::before {
-  content: "↳";
-  display: inline-block;
-  color: #888;
-  font-size: 1em;
-  transform: translateY(1px);
+
+/* Define a variable for the gap between items */
+:root {
+  --sidebar-item-gap: 4px;
+}
+
+/* Styling for the list items to prepare for lines */
+#starlight__sidebar > div > ul > li {
+  position: relative; /* For absolute positioning of ::before */
+}
+
+/* Add padding-left only to items that will get a line, to make space for it */
+#starlight__sidebar > div > ul > li:not(:first-child) {
+  padding-left: 20px; /* Space for the line and content */
+}
+
+/* Add margin-bottom for the gap to all LIs except the very last one in the UL */
+#starlight__sidebar > div > ul > li:not(:last-child) {
+  margin-bottom: var(--sidebar-item-gap);
+}
+
+/* Vertical line segment for relevant list items */
+#starlight__sidebar > div > ul > li:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: 8px; /* X-position of the vertical line */
+  top: 0;
+  width: 1px; /* Thickness of the vertical line */
+  background-color: #888; /* Line color */
+  height: 100%; /* Default height, covers the item itself */
+}
+
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
+  height: calc(100% + var(--sidebar-item-gap));
 }
 
 /* Custom icon logic for specific sidebar items based on URL - hack as only
@@ -50,11 +78,12 @@ a[href*="ensadmin"] .starlight-sidebar-topics-icon {
 #starlight__sidebar a:not([aria-current="page"]):hover {
   background-color: rgba(128, 128, 128, 0.1);
   transform: translateX(2px);
+  border-radius: 6px;
 }
 
-/* Make selected state more obvious */
 a.starlight-sidebar-topics-current {
-  background-color: rgba(65, 130, 184, 0.1) !important;
+  background-color: rgb(0, 128, 188) !important;
+  color: white !important;
   border-radius: 6px;
 }
 
