@@ -46,7 +46,7 @@ const url = (envVarKey: string) => {
         {
           // This message is for when the string is non-empty but not a valid URL format.
           error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        },
+        }
       )
   );
 };
@@ -55,7 +55,7 @@ const url = (envVarKey: string) => {
  * Configuration for a single blockchain network (chain) used by ENSIndexer.
  *
  * Invariants:
- * - The keys (chainId) must be a number
+ * - The keys (chainId) must be an integer
  */
 const ChainConfigSchema = z.object({
   /**
@@ -74,22 +74,22 @@ const ChainConfigSchema = z.object({
    * is optional and defaults to DEFAULT_RPC_RATE_LIMIT if not specified.
    *
    * Invariants:
-   * - The value must be a number greater than 0
+   * - The value must be an integer greater than 0
    */
   rpcMaxRequestsPerSecond: z.coerce
-    .number({ error: "RPC max requests per second must be a number." })
+    .number({ error: "RPC max requests per second must be an integer." })
     .int({ error: "RPC max requests per second must be an integer." })
     .min(1, { error: "RPC max requests per second must be at least 1." })
     .default(DEFAULT_RPC_RATE_LIMIT),
 });
 
 // Schema for a variable for a block number
-// Invariant: The value must be a number greater than 0
+// Invariant: The value must be an integer greater than 0
 const BlockNumberSchema = (envVarKey: string) =>
   z.coerce
-    .number({ error: `${envVarKey} must be a positive number.` })
-    .int({ error: `${envVarKey} must be a positive number.` })
-    .min(0, { error: `${envVarKey} must be a positive number.` })
+    .number({ error: `${envVarKey} must be a positive integer.` })
+    .int({ error: `${envVarKey} must be a positive integer.` })
+    .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
 /**
@@ -105,7 +105,7 @@ export const ENSIndexerConfigSchema = z.object({
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
         return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-          ENSDeployments,
+          ENSDeployments
         ).join(", ")}`;
       },
     })
@@ -132,16 +132,16 @@ export const ENSIndexerConfigSchema = z.object({
    * - both startBlock and endBlock are optional, and expected to be undefined
    *   in most cases (always in production)
    * - there is be a single chain in use in the indexer if these values are set
-   * - startBlock must be a number greater than 0 or undefined
-   * - endBlock must be a number greater than 0 or undefined
+   * - startBlock must be an integer greater than 0 or undefined
+   * - endBlock must be an integer greater than 0 or undefined
    * - endBlock must be greater than or equal to startBlock
    */
   globalBlockrange: z
     .object({
-      // Invariant - Must be a number greater than 0
+      // Invariant - Must be an integer greater than 0
       startBlock: BlockNumberSchema("START_BLOCK"),
 
-      // Invariant - Must be a number greater than 0
+      // Invariant - Must be an integer greater than 0
       endBlock: BlockNumberSchema("END_BLOCK"),
     })
     .refine(
@@ -149,7 +149,7 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
     ),
 
   /**
@@ -223,15 +223,15 @@ export const ENSIndexerConfigSchema = z.object({
         .array(
           z.enum(PluginName, {
             error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-              PluginName,
+              PluginName
             ).join(", ")}`,
-          }),
+          })
         )
         .min(1, {
           error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-            PluginName,
+            PluginName
           ).join(", ")}`,
-        }),
+        })
     ),
 
   /**
@@ -252,7 +252,7 @@ export const ENSIndexerConfigSchema = z.object({
     .pipe(
       z.enum(["true", "false"], {
         error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-      }),
+      })
     )
     .transform((val) => val === "true")
     .default(DEFAULT_HEAL_REVERSE_ADDRESSES),
@@ -263,13 +263,13 @@ export const ENSIndexerConfigSchema = z.object({
    * on the same port. This defaults to DEFAULT_PORT if not specified.
    *
    * Invariants:
-   * - The port must be a number between 1 and 65535
+   * - The port must be an integer between 1 and 65535
    */
   port: z.coerce
-    .number({ error: "PORT must be a number." })
+    .number({ error: "PORT must be an integer." })
     .int({ error: "PORT must be an integer." })
-    .min(1, { error: "PORT must be a number between 1 and 65535." })
-    .max(65535, { error: "PORT must be a number between 1 and 65535." })
+    .min(1, { error: "PORT must be an integer between 1 and 65535." })
+    .max(65535, { error: "PORT must be an integer between 1 and 65535." })
     .default(DEFAULT_PORT),
 
   /**
@@ -293,7 +293,8 @@ export const ENSIndexerConfigSchema = z.object({
    */
   indexedChains: z
     .record(z.string().transform(Number), ChainConfigSchema, {
-      error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+      error:
+        "Chains configuration must be an object mapping numeric chain IDs to their configs.",
     })
     // Allow no chains to be configured. Other validations will trigger later if this is the case.
     .default({}),
