@@ -16,6 +16,7 @@ export function starlight(): AstroIntegration {
     customCss: [
       "./src/styles/globals.css",
       "./src/styles/pagination.css",
+      "./src/styles/sidebar.css",
       "@fontsource/inter/100.css",
       "@fontsource/inter/200.css",
       "@fontsource/inter/300.css",
@@ -93,6 +94,30 @@ export function starlight(): AstroIntegration {
                 {
                   label: "What is ENSIndexer?",
                   link: "/ensindexer",
+                },
+              ],
+            },
+            {
+              label: "Technical Reference",
+              items: [
+                {
+                  label: "Architecture",
+                  link: "ensindexer/technical-reference/architecture",
+                },
+                {
+                  label: "Plugin System",
+                  link: "ensindexer/technical-reference/plugin-system",
+                },
+                {
+                  label: "Data Model",
+                  link: "ensindexer/technical-reference/data-model",
+                },
+                {
+                  label: "Plugins",
+                  collapsed: false,
+                  autogenerate: {
+                    directory: "ensindexer/technical-reference/plugins",
+                  },
                 },
               ],
             },
@@ -213,7 +238,8 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content:
+            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {

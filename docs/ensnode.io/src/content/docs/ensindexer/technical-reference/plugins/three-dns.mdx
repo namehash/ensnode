@@ -1,0 +1,23 @@
+---
+title: ThreeDNS Plugin
+description: Documentation for the ThreeDNS plugin (Optimism and Base)
+sidebar:
+  label: ThreeDNS Plugin
+  order: 4
+---
+
+The ThreeDNS plugin indexes data related to ThreeDNS deployments on both the Optimism and Base networks. It handles data from specific ThreeDNS contracts deployed on these chains. It is the first plugin to support indexing of multiple data sources.
+
+### Data sources
+
+The ThreeDNS plugin utilizes two data sources:
+
+- `ThreeDNSOptimism`: For ThreeDNS contracts and events on the Optimism network.
+- `ThreeDNSBase`: For ThreeDNS contracts and events on the Base network.
+
+### Indexed contracts
+
+The ThreeDNS plugin indexes events and data from the following smart contracts, which are deployed on both Optimism and Base:
+
+- `ThreeDNSToken`
+- `ThreeDNSResolver`
