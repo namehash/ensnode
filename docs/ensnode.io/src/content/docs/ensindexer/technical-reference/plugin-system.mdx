@@ -55,8 +55,18 @@ When ENSIndexer is run, the configs for all of the active plugins (those selecte
 - [Linea Names Plugin](/technical-reference/plugins/linea-names)
 - [3DNS Plugin](/technical-reference/plugins/3dns)
 
+
+## Configuring plugins
+
+Plugins can be configured via the `AVAILABLE_PLUGINS` environment variable. This is a comma separated list of plugin names. For example:
+
+```bash
+AVAILABLE_PLUGINS=subgraph,basenames,lineanames,threedns
+```
+
+will activate all plugins
+
 ## TODO
 
 - Anatomy of a plugin (so handlers have namespaced handlers, relationship between data sources etc)
-- How plugins are loaded/configured (via env vars)
 - Maybe some dev docs around writing handlers. This was the questions i had and still kind of have around handlers in development and maybe this should wait until i do the handler story i was going to pick up.

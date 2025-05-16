@@ -1,10 +1,17 @@
 ---
 import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
-import Footer from "../components/organisms/Footer.tsx";
-import Header from "../components/organisms/Header.astro";
 import "../styles/globals.css";
-import heroImage from "../assets/hero_skies_image.png";
+import { Image } from "astro:assets";
+import cc from "classcat";
+import { Balancer } from "react-wrap-balancer";
+import error_code from "../assets/404.svg";
+import skies_image from "../assets/404_clouds_image.png";
+import mobile_skies_image from "../assets/404_mobile_clouds_image.png";
+import SecondaryButtonIsland from "../components/atoms/SecondaryButtonIsland";
+import StaticHeader from "../components/molecules/StaticHeader.astro";
+
+const verticalAlignmentBase = "flex flex-col flex-nowrap justify-center items-center";
 ---
 <!doctype html>
 <html lang="en">
@@ -12,7 +19,6 @@ import heroImage from "../assets/hero_skies_image.png";
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width"/>
     <meta name="generator" content={Astro.generator}/>
-    <link rel="preload" as="image" href={heroImage.src} />
     <AstroFont
             config={[
                 {
@@ -58,9 +64,25 @@ import heroImage from "../assets/hero_skies_image.png";
     />
 </head>
 <body>
-<Header />
-<slot/>
-<Footer client:load />
+<StaticHeader />
+<main class={cc(["w-full h-screen", verticalAlignmentBase])}>
+    <Image src={skies_image} alt="background skies" class="hidden sm:block absolute w-full h-screen z-0 object-center object-cover select-none opacity-[0.08]" quality={100}/>
+    <Image src={mobile_skies_image} alt="background skies" class="block sm:hidden absolute w-full h-screen z-0 object-center select-none" quality={100}/>
+    <div class={cc(["relative z-10 gap-12 px-5 sm:px-0", verticalAlignmentBase])}>
+        <Image src={error_code} alt="404 error" class="h-[77px] sm:h-[200px] sm:pl-[26px] sm:pr-[28px] sm:pb-2 sm:pt-[21px]" quality={100} />
+        <div class={cc([verticalAlignmentBase, "gap-5"])}>
+            <div class={cc([verticalAlignmentBase, "gap-3"])}>
+                <h3 class="text-center text-black text-2xl sm:text-4xl leading-8 sm:leading-10 font-semibold sm:font-bold">Page not found</h3>
+                <Balancer as="p" className="text-center text-gray-500 text-base sm:text-sm leading-6 font-normal">We can’t seem to find the page you’re looking for</Balancer>
+            </div>
+            <SecondaryButtonIsland text="Back to homepage" size="medium"
+                                   style=`px-[17px] py-[9px]`
+                                   linkData={{
+                                       link: "/"
+                                   }}/>
+        </div>
+    </div>
+</main>
 </body>
 </html>
 

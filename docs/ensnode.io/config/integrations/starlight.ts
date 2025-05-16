@@ -11,6 +11,7 @@ export function starlight(): AstroIntegration {
       SocialIcons: "./src/components/overrides/SocialIcons.astro",
       Hero: "./src/components/overrides/Hero.astro",
       TableOfContents: "./src/components/overrides/TableOfContents.astro",
+      Search: "./src/components/overrides/DocsSearch.astro",
     },
     customCss: [
       "./src/styles/globals.css",
@@ -113,7 +114,7 @@ export function starlight(): AstroIntegration {
                 },
                 {
                   label: "Plugins",
-                  collapsed: true,
+                  collapsed: false,
                   autogenerate: {
                     directory: "ensindexer/technical-reference/plugins",
                   },
@@ -195,6 +196,7 @@ export function starlight(): AstroIntegration {
       ]),
     ],
     title: "ENSNode",
+    disable404Route: true,
     logo: {
       light: "./src/assets/light-logo.svg",
       dark: "./src/assets/dark-logo.svg",

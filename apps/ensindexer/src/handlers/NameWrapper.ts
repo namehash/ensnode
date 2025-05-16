@@ -1,11 +1,12 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { type Node, PluginName } from "@ensnode/utils";
-import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
+import { type Node, PluginName, uint256ToHex32 } from "@ensnode/utils";
+
 import { makeSharedEventValues, upsertAccount } from "@/lib/db-helpers";
+import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
@@ -171,9 +172,13 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
-        // null expiry date if the domain is not a direct child of the registrar managed name
+        // when a WrappedDomain is Unwrapped, reset any PCC-materialized expiryDate on the Domain entity
+        // i.e if the domain in question normally has an expiry date (is a direct subname of a
+        // Registrar that implements expiries), keep the domain's expiry date, otherwise, set its
+        // expiry to null because it does not expire.
         // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L123
-        expiryDate: domain.parentId !== registrarManagedNode ? null : domain.expiryDate,
+        // NOTE: undefined = no change, null = null
+        expiryDate: domain.parentId === registrarManagedNode ? undefined : null,
         wrappedOwnerId: null,
       }));
 

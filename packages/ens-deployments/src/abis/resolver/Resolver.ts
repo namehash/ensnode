@@ -206,31 +206,6 @@ export const Resolver = [
       {
         indexed: false,
         internalType: "bytes",
-        name: "name",
-        type: "bytes",
-      },
-      {
-        indexed: false,
-        internalType: "uint16",
-        name: "resource",
-        type: "uint16",
-      },
-    ],
-    name: "DNSRecordDeleted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "node",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "bytes",
         name: "lastzonehash",
         type: "bytes",
       },
@@ -1009,5 +984,45 @@ export const Resolver = [
     ],
     stateMutability: "view",
     type: "function",
+  },
+  {
+    type: "event",
+    name: "DNSRecordChanged",
+    inputs: [
+      { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
+      { name: "name", type: "bytes", indexed: false, internalType: "bytes" },
+      { name: "resource", type: "uint16", indexed: false, internalType: "uint16" },
+      { name: "ttl", type: "uint32", indexed: false, internalType: "uint32" },
+      { name: "record", type: "bytes", indexed: false, internalType: "bytes" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DNSRecordDeleted",
+    inputs: [
+      { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
+      { name: "name", type: "bytes", indexed: false, internalType: "bytes" },
+      { name: "resource", type: "uint16", indexed: false, internalType: "uint16" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DNSZoneUpdated",
+    inputs: [
+      { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
+      { name: "serial", type: "uint32", indexed: false, internalType: "uint32" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "ZoneCreated",
+    inputs: [
+      { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
+      { name: "version", type: "uint64", indexed: true, internalType: "uint64" },
+    ],
+    anonymous: false,
   },
 ] as const;

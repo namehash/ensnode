@@ -3,17 +3,21 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
+import {
+  type LabelHash,
+  type Node,
+  PluginName,
+  REVERSE_ROOT_NODES,
+  isLabelIndexable,
+  makeSubdomainNode,
+  maybeHealLabelByReverseAddress,
+} from "@ensnode/utils";
+
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { type EventWithArgs, healReverseAddresses } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
-import { type LabelHash, type Node, PluginName, REVERSE_ROOT_NODES } from "@ensnode/utils";
-import {
-  isLabelIndexable,
-  makeSubdomainNode,
-  maybeHealLabelByReverseAddress,
-} from "@ensnode/utils/subname-helpers";
 
 /**
  * makes a set of shared handlers for a Registry contract
@@ -81,7 +85,7 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
           //    reverse node (i.e. addr.reverse), give it a go
           if (healReverseAddresses() && REVERSE_ROOT_NODES.has(parentNode)) {
             healedLabel = maybeHealLabelByReverseAddress({
-              maybeReverseAddress: owner,
+              maybeReverseAddress: event.transaction.from,
               labelHash,
             });
           }
@@ -186,7 +190,7 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
     }) {
       const { node, resolver: resolverAddress } = event.args;
 
-      const resolverId = makeResolverId(resolverAddress, node);
+      const resolverId = makeResolverId(pluginName, context.network.chainId, resolverAddress, node);
 
       const isZeroResolver = resolverAddress === zeroAddress;
 

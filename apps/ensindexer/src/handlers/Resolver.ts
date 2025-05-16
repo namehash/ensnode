@@ -1,11 +1,12 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Node, PluginName } from "@ensnode/utils";
-import { type Address, Hash, type Hex } from "viem";
+import { Node, PluginName } from "@ensnode/utils";
+import { type Address, Hash, type Hex, hexToBytes } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { hasNullByte, uniq } from "@/lib/lib-helpers";
+import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
@@ -32,7 +33,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       const { a: address, node } = event.args;
       await upsertAccount(context, address);
 
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -63,7 +64,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
     }) {
       const { node, coinType, newAddress } = event.args;
 
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       const resolver = await upsertResolver(context, {
         id,
         domainId: node,
@@ -94,7 +95,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       const { node, name } = event.args;
       if (hasNullByte(name)) return;
 
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -117,7 +118,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; contentType: bigint }>;
     }) {
       const { node, contentType } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       // upsert resolver
       await upsertResolver(context, {
@@ -142,7 +143,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; x: Hex; y: Hex }>;
     }) {
       const { node, x, y } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       // upsert resolver
       await upsertResolver(context, {
@@ -173,7 +174,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       }>;
     }) {
       const { node, key, value } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       const resolver = await upsertResolver(context, {
         id,
         domainId: node,
@@ -185,16 +186,21 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         .update(schema.resolver, { id })
         .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
+      // NOTE: ponder's (viem's) event parsing produces empty string for some TextChanged events
+      // (which is correct) but the subgraph records null for these instances, so we coalesce
+      // falsy strings to null for compatibility
+      // ex: https://etherscan.io/tx/0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0#eventlog
+      //
+      // NOTE: we also must strip null bytes in strings, which are unindexable by Postgres
+      // ex: https://etherscan.io/tx/0x2eb93d872a8f3e4295ea50773c3816dcaea2541f202f650948e8d6efdcbf4599#eventlog
+      const sanitizedValue = !value ? null : stripNullBytes(value) || null;
+
       // log ResolverEvent
       await context.db.insert(schema.textChanged).values({
         ...sharedEventValues(context.network.chainId, event),
         resolverId: id,
         key,
-        // ponder's (viem's) event parsing produces empty string for some TextChanged events
-        // (which is correct) but the subgraph records null for these instances, so we coalesce
-        // falsy strings to null for compatibility
-        // ex: last TextChanged in tx 0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0
-        value: value || null,
+        value: sanitizedValue,
       });
     },
 
@@ -206,7 +212,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; hash: Hash }>;
     }) {
       const { node, hash } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -230,7 +236,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; interfaceID: Hex; implementer: Hex }>;
     }) {
       const { node, interfaceID, implementer } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
       await upsertResolver(context, {
         id,
         domainId: node,
@@ -259,7 +265,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       }>;
     }) {
       const { node, owner, target, isAuthorised } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       await upsertResolver(context, {
         id,
@@ -286,7 +292,7 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       event: EventWithArgs<{ node: Node; newVersion: bigint }>;
     }) {
       const { node, newVersion } = event.args;
-      const id = makeResolverId(event.log.address, node);
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
 
       // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
       const domain = await context.db.find(schema.domain, { id: node });
@@ -314,6 +320,9 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       });
     },
 
+    /**
+     * Handles both ens-contracts' IDNSRecordResolver#DNSRecordChanged AND 3DNS' Resolver#DNSRecordChanged
+     */
     async handleDNSRecordChanged({
       context,
       event,
@@ -323,10 +332,79 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         node: Node;
         name: Hex;
         resource: number;
+        // 3DNS includes a `ttl` in its event ABI for DNSRecordChanged, but
+        // ens-contracts's IDNSRecordResolver#DNSRecordChanged does not. In this current indexing
+        // logic, the concept of ttl is not used, so we define it here for completness but otherwise
+        // ignore it.
+        ttl?: number;
         record: Hex;
       }>;
     }) {
-      // subgraph ignores
+      // subgraph explicitly ignores this event
+      if (pluginName === PluginName.Subgraph) return;
+
+      // but for non-subgraph plugins, we parse the RR set data for relevant records
+      const { node, name, resource, record } = event.args;
+
+      // we only index TXT records (resource id 16)
+      if (resource !== 16) return;
+
+      // parse the record's name, which is the key of the DNS record
+      const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
+
+      // invariant: recordName is always available and parsed correctly
+      if (!recordName) throw new Error(`Invalid DNSPacket, cannot parse name '${name}'.`);
+
+      // relevant keys end with .ens
+      if (!recordName.endsWith(".ens")) return;
+
+      // trim the .ens off the end to match ENS record naming
+      const key = recordName.slice(0, -4);
+
+      // upsert Resolver entity
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
+      const resolver = await upsertResolver(context, {
+        id,
+        domainId: node,
+        address: event.log.address,
+      });
+
+      // parse the `record` parameter, which is an RRSet describing the value of the DNS record
+      const answers = parseRRSet(record);
+      for (const answer of answers) {
+        switch (answer.type) {
+          case "TXT": {
+            // > When decoding, the return value will always be an array of Buffer.
+            // https://github.com/mafintosh/dns-packet
+            const value = decodeTXTData(answer.data as Buffer[]);
+
+            // note: sanitize value, see `handleTextChanged` for context
+            const sanitizedValue = !value ? null : stripNullBytes(value) || null;
+
+            // upsert new key
+            await context.db
+              .update(schema.resolver, { id })
+              .set({ texts: uniq([...(resolver.texts ?? []), key]) });
+
+            // log ResolverEvent
+            await context.db.insert(schema.textChanged).values({
+              ...sharedEventValues(context.network.chainId, event),
+              resolverId: id,
+              key,
+              value: sanitizedValue,
+            });
+            break;
+          }
+          default: {
+            // no-op unhandled records
+            // NOTE: should never occur due to resource id check above
+            console.warn(
+              `Invariant: received answer ${JSON.stringify(answer)} that is not type === TXT despite resource === 16 check!`,
+            );
+            break;
+          }
+        }
+      }
     },
 
     async handleDNSRecordDeleted({
@@ -338,10 +416,48 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         node: Node;
         name: Hex;
         resource: number;
-        record?: Hex;
       }>;
     }) {
-      // subgraph ignores
+      // subgraph explicitly ignores this event
+      if (pluginName === PluginName.Subgraph) return;
+
+      const { node, name, resource } = event.args;
+
+      // we only index TXT records (resource id 16)
+      if (resource !== 16) return;
+
+      // parse the record's name, which is the key of the DNS record
+      const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
+
+      // invariant: recordName is always available and parsed correctly
+      if (!recordName) throw new Error(`Invalid DNSPacket, cannot parse name '${name}'.`);
+
+      // relevant keys end with .ens
+      if (!recordName.endsWith(".ens")) return;
+
+      // trim the .ens off the end to match ENS record naming
+      const key = recordName.slice(0, -4);
+
+      // upsert Resolver entity
+      const id = makeResolverId(pluginName, context.network.chainId, event.log.address, node);
+      const resolver = await upsertResolver(context, {
+        id,
+        domainId: node,
+        address: event.log.address,
+      });
+
+      // remove relevant key
+      await context.db
+        .update(schema.resolver, { id })
+        .set({ texts: (resolver.texts ?? []).filter((text) => text !== key) });
+
+      // log ResolverEvent
+      await context.db.insert(schema.textChanged).values({
+        ...sharedEventValues(context.network.chainId, event),
+        resolverId: id,
+        key,
+        value: null,
+      });
     },
 
     async handleDNSZonehashChanged({
@@ -351,7 +467,17 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
       context: Context;
       event: EventWithArgs<{ node: Node; zonehash: Hash }>;
     }) {
-      // subgraph ignores
+      // explicitly ignored
+    },
+
+    async handleZoneCreated({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: EventWithArgs<{ node: Node; version: bigint }>;
+    }) {
+      // explicitly ignored
     },
   };
 };
