@@ -3,12 +3,25 @@ title: Subgraph Plugin
 description: Documentation for the ENS Subgraph compatibility plugin
 sidebar:
   label: Subgraph Plugin
-  order: 2
+  order: 1
 ---
 
-## TODO
+The subgraph plugin is designed to index data exactly as it is represented in a subgraph. The subgraph was previously the standard way to access ENS data and so the plugin is designed to be fully compatible with the existing subgraph data. This enables ENSNode to be used as a drop in replacement for the existing subgraph.
 
-- Add plugin overview
-- Add implementation details
-- Add usage examples
-- Add any details about stuff that breaks compatibility. I think healing reverse addresses does from what i remember?
+One exception to this is when the `HEAL_REVERSE_ADDRESSES` config is set to `true`. When this is the case, the plugin will still index data in the same format as the subgraph but it will also attempt to heal reverse records which is not a feature of the subgraph. The data model and query structure will not be impacted by this, but the data returned will be different.
+
+### Data sources
+
+The subgraph plugin has a relationship with the `Root` data source. On the `mainnet` deployment, this is the contracts on Ethereum mainnet.
+
+### Indexed contracts
+
+The Subgraph plugin indexes events and data from the following ENS smart contracts:
+
+- Old ENS Registry
+- ENS Registry
+- BaseRegistrar
+- Old EthRegistrarController
+- EthRegistrarController
+- NameWrapper
+- Resolver

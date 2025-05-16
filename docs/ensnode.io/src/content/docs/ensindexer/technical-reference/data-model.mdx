@@ -6,10 +6,24 @@ sidebar:
   order: 2
 ---
 
+Since the ENSNode data model is based on the ENS subgraph, it inherits the same data model to maintain backwards compatibility. This is for entities indexed with the `subgraph` plugin. The data model is not optimal but to provide backwards compatibility with the subgraph, we must inherit the data model.
+
+Other plugins have their own data models and are not based on the subgraph since they index data that is not available in the subgraph.
+
+## Handlers
+
+Handlers are responsible for indexing data from specific data sources. They listen to on-chain events from various contracts and transform the data into a structured format which is stored in the database.
+
+Each plugin has its own handlers but there is a concept of shared handlers which are used by multiple plugins since there is overlap between events from different data sources (and thus plugins).
+
+## Querying the data model
+
+Since `ENSNode` exposes a GraphQL API, you can query the data model directly to query for exactly what you need from the data model.
+
+## Schema evolution
+
+With most backend systems that involve a database, there is normally a concept of migrations which are defined as SQL scripts and applied to the database in order. With `ENSNode` there is no concept of migrations. In fact, whenever a change is made to the data model, the whole state of the database is recreated from scratch by indexing the whole chain. This is a fundamental design decision in the `ponder` framework (and also most indexing frameworks).
+
 ## TODO
 
-- Possibly add an entity relationships diagram, but ideally generated from the schema so it auto updates when the schema changes
-- Explain how we inherit data model from the subgraph but i dont think this is optimal. @lightwalker was mentioning this.
-- Explain what entities exist, i don't really know this well at all so research first.
-- Handlers and their relationship between entities (general indexing)
-- There's no schema evolution with ponder, you just start fresh every time. this is quite quirky and should be documented here.
+- Possibly add an entity relationships diagram, but ideally generated from the schema so it auto updates when the schema changes.

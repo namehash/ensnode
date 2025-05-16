@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -9,6 +9,9 @@ import ReactFlow, {
   MarkerType,
   type FitViewOptions,
   Handle,
+  type NodeProps,
+  type NodeChange,
+  type EdgeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -19,6 +22,7 @@ import baseLogoUrl from "../../assets/base-logo.svg";
 import ethereumLogoUrl from "../../assets/ethereum-logo.svg";
 import lineaLogoUrl from "../../assets/linea-logo.svg";
 import optimismLogoUrl from "../../assets/optimism-logo.svg";
+import postgresLogoUrl from "../../assets/placeholder.svg";
 
 const getGroupLabelStyle = (
   position: "top" | "bottom" = "top"
@@ -101,11 +105,79 @@ const initialNodes: Node[] = [
     position: { x: 100, y: 50 },
     style: {
       width: 500,
-      height: 180,
+      height: 340,
       backgroundColor: "rgba(0, 128, 255, 0.1)",
       border: "1px solid #0080FF",
       borderRadius: "8px",
       padding: "10px",
+    },
+  },
+  {
+    id: "postgres-db",
+    type: "default",
+    data: {
+      label: (
+        <div style={{ textAlign: "center" }}>
+          Postgres
+          <br />
+          <img
+            src={postgresLogoUrl.src}
+            alt="Postgres Database"
+            style={{
+              display: "block",
+              marginLeft: "auto",
+              marginRight: "auto",
+              width: "50px",
+              height: "50px",
+              marginTop: "10px",
+            }}
+          />
+        </div>
+      ),
+    },
+    position: { x: 205, y: 10 },
+    parentNode: "ens-node-parent",
+    extent: "parent",
+    style: {
+      width: 90,
+      height: 90,
+      backgroundColor: "#F5F5DC",
+      margin: "10px",
+    },
+    sourcePosition: Position.Bottom,
+    targetPosition: Position.Bottom,
+  },
+  {
+    id: "ens-admin",
+    type: "default",
+    data: {
+      label: (
+        <div style={{ textAlign: "center" }}>
+          ENS Admin
+          <br />
+          <img
+            src={ensadminLogoUrl.src}
+            alt="ENS Admin Placeholder"
+            style={{
+              display: "block",
+              marginLeft: "auto",
+              marginRight: "auto",
+              width: "70px",
+              height: "70px",
+              marginTop: "10px",
+            }}
+          />
+        </div>
+      ),
+    },
+    position: { x: 20, y: 150 },
+    parentNode: "ens-node-parent",
+    extent: "parent",
+    style: {
+      width: 130,
+      height: 130,
+      backgroundColor: "#ADD8E6",
+      margin: "10px",
     },
   },
   {
@@ -131,7 +203,7 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 175, y: 30 },
+    position: { x: 175, y: 150 },
     parentNode: "ens-node-parent",
     extent: "parent",
     style: {
@@ -140,39 +212,8 @@ const initialNodes: Node[] = [
       backgroundColor: "#ADD8E6",
       margin: "10px",
     },
-  },
-  {
-    id: "ens-admin",
-    type: "default",
-    data: {
-      label: (
-        <div style={{ textAlign: "center" }}>
-          ENS Admin
-          <br />
-          <img
-            src={ensadminLogoUrl.src}
-            alt="ENS Admin Placeholder"
-            style={{
-              display: "block",
-              marginLeft: "auto",
-              marginRight: "auto",
-              width: "70px",
-              height: "70px",
-              marginTop: "10px",
-            }}
-          />
-        </div>
-      ),
-    },
-    position: { x: 20, y: 30 },
-    parentNode: "ens-node-parent",
-    extent: "parent",
-    style: {
-      width: 130,
-      height: 130,
-      backgroundColor: "#ADD8E6",
-      margin: "10px",
-    },
+    sourcePosition: Position.Top,
+    targetPosition: Position.Top,
   },
   {
     id: "ens-rainbow",
@@ -197,7 +238,7 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 330, y: 30 },
+    position: { x: 330, y: 150 },
     parentNode: "ens-node-parent",
     extent: "parent",
     style: {
@@ -211,7 +252,7 @@ const initialNodes: Node[] = [
     id: "chain-nodes-parent",
     type: "customGroup",
     data: { label: "Blockchain Nodes", labelPosition: "bottom" },
-    position: { x: 100, y: 350 },
+    position: { x: 100, y: 650 },
     style: {
       width: 500,
       height: 200,
@@ -368,24 +409,18 @@ const initialEdges: Edge[] = [
     animated: true,
     style: { stroke: "#000", strokeWidth: 2 },
   },
-  // {
-  //   id: "e-indexer-rainbow",
-  //   source: "ens-indexer",
-  //   sourceHandle: "idx-src-rainbow",
-  //   target: "ens-rainbow",
-  //   markerEnd: { type: MarkerType.ArrowClosed },
-  //   animated: true,
-  //   style: { stroke: "#000", strokeWidth: 2 },
-  // },
-  // {
-  //   id: "e-admin-indexer",
-  //   source: "ens-admin",
-  //   target: "ens-indexer",
-  //   targetHandle: "indexer-target-top",
-  //   markerEnd: { type: MarkerType.ArrowClosed },
-  //   animated: true,
-  //   style: { stroke: "#000", strokeWidth: 2 },
-  // },
+  {
+    id: "e-postgres-indexer-bidirectional",
+    source: "postgres-db",
+    target: "ens-indexer",
+    sourceHandle: null,
+    targetHandle: "indexer-target-top",
+    markerEnd: { type: MarkerType.ArrowClosed },
+    markerStart: { type: MarkerType.ArrowClosed },
+    label: "read/write",
+    animated: true,
+    style: { stroke: "#000", strokeWidth: 2 },
+  },
 ];
 
 const fitViewOptions: FitViewOptions = {
@@ -397,6 +432,68 @@ const nodeTypes = {
   customIndexer: CustomIndexerNode,
 };
 
+const ResizableNode = (props: NodeProps) => {
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  const onMouseDown = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startWidth = nodeRef.current?.offsetWidth || 0;
+    const startHeight = nodeRef.current?.offsetHeight || 0;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.max(60, startWidth + moveEvent.clientX - startX);
+      const newHeight = Math.max(60, startHeight + moveEvent.clientY - startY);
+      if (nodeRef.current) {
+        nodeRef.current.style.width = `${newWidth}px`;
+        nodeRef.current.style.height = `${newHeight}px`;
+      }
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  return (
+    <div
+      ref={nodeRef}
+      style={{
+        ...props.style,
+        position: "relative",
+        background: "#fff",
+        border: props.selected ? "2px solid #007bff" : "1px solid #bbb",
+        borderRadius: 6,
+        minWidth: 60,
+        minHeight: 60,
+        boxSizing: "border-box",
+        overflow: "visible",
+      }}
+    >
+      {props.data.label}
+      <div
+        style={{
+          position: "absolute",
+          right: 0,
+          bottom: 0,
+          width: 16,
+          height: 16,
+          background: "#007bff",
+          borderRadius: "0 0 6px 0",
+          cursor: "nwse-resize",
+          zIndex: 10,
+        }}
+        onMouseDown={onMouseDown}
+      />
+    </div>
+  );
+};
+
 const EnsFlowDiagram: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -406,13 +503,35 @@ const EnsFlowDiagram: React.FC = () => {
     [setEdges]
   );
 
+  const handleNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      onNodesChange(changes);
+      setTimeout(() => {
+        console.log("NODES_JSON:", JSON.stringify(nodes, null, 2));
+        console.log("EDGES_JSON:", JSON.stringify(edges, null, 2));
+      }, 0);
+    },
+    [onNodesChange, nodes, edges]
+  );
+
+  const handleEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      onEdgesChange(changes);
+      setTimeout(() => {
+        console.log("NODES_JSON:", JSON.stringify(nodes, null, 2));
+        console.log("EDGES_JSON:", JSON.stringify(edges, null, 2));
+      }, 0);
+    },
+    [onEdgesChange, nodes, edges]
+  );
+
   return (
     <div style={{ width: "100%", height: "600px", border: "1px solid #eee" }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         fitView

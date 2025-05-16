@@ -3,12 +3,21 @@ title: Linea Names Plugin
 description: Documentation for the Linea Names (.linea.eth) plugin
 sidebar:
   label: Linea Names Plugin
-  order: 4
+  order: 3
 ---
 
-## TODO
+The Lineanames plugin indexes Linea Names (.linea.eth).
 
-- Add plugin overview
-- Add implementation details
-- Add usage examples
-- Add Linea chain specific considerations 
+### Data sources
+
+The Lineanames plugin has a single data source, `Lineanames`.
+
+### Indexed contracts
+
+The Lineanames plugin indexes events and data from the following smart contracts relevant to the Lineanames deployment:
+
+- Registry
+- BaseRegistrar
+- EthRegistrarController
+- NameWrapper
+- Resolver

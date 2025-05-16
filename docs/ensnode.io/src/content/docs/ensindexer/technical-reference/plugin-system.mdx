@@ -6,23 +6,31 @@ sidebar:
   order: 3
 ---
 
-ENSNode uses a plugin-based architecture to support different data sources and chains. This section documents the available plugins and their implementation details.
+ENSNode uses a plugin-based architecture to support different data sources. It also makes ENSNode extensible by allowing new plugins to be added over time and each plugin is compartmentalized so that it can be developed, tested and deployed independently. When you run ENSNode, you can choose which plugins to activate so your instance doesn't have to index data which you don't need.
 
-## Plugins
+As the ENS ecosystem grows, so will the number of plugins available. ENS as a protocol is not the only useful data source. For example, many people trade ENS names on secondary markets and there is potential to index this data in ENSNode.
 
-ENSIndexer implements the core subgraph indexing logic within **shared handler functions** that mirror their subgraph counterpart. These shared handlers functions are in `apps/ensindexer/src/handlers/*.ts`. The `eth` plugin then implements subgraph-compatible logic 1:1, primarily relying on the shared handlers, and its implementation can be found in `apps/ensindexer/src/plugins/eth/ponder.plugin.ts`.
+This architecture allows ENSNode to be extended to support new data sources with minimal modifications to the core codebase.
+
+### Data Sources and Deployments
+
+Before understanding how plugins work, it's important to understand the concept of a data source. A data source is a source of data that can be indexed. It can be a blockchain, off-chain API or any other source of data. Currently all plugins use blockchains as their data source but this is likely to change in the future.
+
+A deployment is a collection of data sources. For example, the mainnet deployment includes all data sources. The `holesky` deployment only includes the `Root` data source which are the ENS contracts on `holesky`.
+
+### Plugin Definition
+
+An ENSIndexer plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function). A plugin has a relationship between at least one data source. For example, the threedns plugin has a relationship with 2 data sources: `ThreeDNSOptimism` and `ThreeDNSBase` and it indexes data from both of those chains.
+
+ENSIndexer implements the core subgraph indexing logic within **shared handler functions** that mirror their subgraph counterpart. These shared handlers functions are in `apps/ensindexer/src/handlers/*.ts`. The `subgraph` plugin then implements subgraph-compatible logic 1:1, primarily relying on the shared handlers, and its implementation can be found in `apps/ensindexer/src/plugins/eth/ponder.plugin.ts`.
 
 Each plugin is an isolated ponder indexing configuration that uses the shared handlers (plus any necessary plugin-specific logic) to index its respective subregistry. See `apps/ensindexer/src/plugins/base/ponder.plugin.ts` and `apps/ensindexer/src/plugins/linea/ponder.plugin.ts` for examples.
 
 ### Plugin-Scoping
 
-Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin—which didn't expect multichain or multi-source entities—, id-generating code is abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
+Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `subgraph` plugin—which didn't expect multichain or multi-source entities—, id-generating code is abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `subgraph` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
 
-This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — teh shared handlers derived from the subgraph which are  used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
-
-### Plugin Definition
-
-An ENSIndexer plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function).
+This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — the shared handlers derived from the subgraph which are  used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
 
 ### Ponder Plugin Integration
 
