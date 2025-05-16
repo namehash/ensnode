@@ -19,6 +19,7 @@
     "@astrojs/starlight-tailwind": "^4.0.1",
     "@astrojs/tailwind": "catalog:",
     "@fontsource/inter": "^5.2.5",
+    "@headlessui-float/react": "0.11.4",
     "@headlessui/react": "^2.2.0",
     "@namehash/namekit-react": "catalog:",
     "@tailwindcss/vite": "^4.1.5",

@@ -1,5 +1,6 @@
 ---
 import Search from "@astrojs/starlight/components/Search.astro";
+import SearchKeyboardShortcut from "../atoms/SearchKeyboardShortcut";
 import { StarlightMagnifier } from "../atoms/icons/StarlightMagnifier";
 ---
 
@@ -8,6 +9,8 @@ import { StarlightMagnifier } from "../atoms/icons/StarlightMagnifier";
         <StarlightMagnifier />
         <p>Search the docs</p>
     </div>
-    <div class="bg-[#e5e5e5] px-[6px] rounded">Ctrl K</div>
+    <div class="bg-white p-[2px] rounded text-gray-400 z-20">
+        <SearchKeyboardShortcut client:visible/>
+    </div>
     <Search class="searchOverlay" />
 </div>

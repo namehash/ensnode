@@ -1,14 +1,15 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { LabelHash, Node, PluginName } from "@ensnode/utils";
+import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+
 import {
-  decodeDNSPacketBytes,
+  type LabelHash,
+  type Node,
+  PluginName,
   isLabelIndexable,
   makeSubdomainNode,
-} from "@ensnode/utils/subname-helpers";
-import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+} from "@ensnode/utils";
 
 import {
   makeSharedEventValues,
@@ -17,6 +18,7 @@ import {
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
+import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/plugin-helpers";
