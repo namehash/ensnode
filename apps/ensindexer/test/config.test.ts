@@ -1,4 +1,4 @@
-import { ENSIndexerConfig } from "@/config/config.schema";
+import { ENSIndexerConfig } from "@/config/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Helper to set and unset environment variables for each test

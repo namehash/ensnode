@@ -1,9 +1,5 @@
-import {
-  ChainConfig,
-  DEFAULT_PORT,
-  DEFAULT_RPC_RATE_LIMIT,
-  ENSIndexerConfig,
-} from "@/config/config.schema";
+import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/config/config.schema";
+import { ChainConfig, ENSIndexerConfig } from "@/config/types";
 import { PluginName } from "@ensnode/utils";
 import { vi } from "vitest";
 

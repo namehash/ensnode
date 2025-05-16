@@ -1,4 +1,4 @@
-import { ENSIndexerConfig } from "@/config/config.schema";
+import { ENSIndexerConfig } from "@/config/types";
 import { MergedPluginConfig } from "../../ponder.config";
 
 // Helper function to check rpc url exists for a given chain
