@@ -1,5 +1,11 @@
 # @ensnode/ponder-subgraph
 
+## 0.27.0
+
+### Minor Changes
+
+- [#685](https://github.com/namehash/ensnode/pull/685) [`33c46ae`](https://github.com/namehash/ensnode/commit/33c46aef7e452daafef189ec9fef7d16ce8ceecb) Thanks [@shrugs](https://github.com/shrugs)! - add descriptions to fields in graphql api
+
 ## 0.26.0
 
 ## 0.25.0
