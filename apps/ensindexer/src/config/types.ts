@@ -1,0 +1,215 @@
+import { ENSDeployment, ENSDeployments } from "@ensnode/ens-deployments";
+import { PluginName } from "@ensnode/utils";
+
+/**
+ * Configuration for a single blockchain network (chain) used by ENSIndexer.
+ *
+ * Invariants:
+ * - The keys (chainId) must be an integer
+ */
+export interface ChainConfig {
+  /**
+   * The RPC endpoint URL for the chain.
+   * Example: "https://eth-mainnet.g.alchemy.com/v2/..."
+   * This must be an endpoint with high rate limits
+   *
+   * Invariants:
+   * - The URL must be a valid URL (localhost urls are allowed)
+   */
+  rpcEndpointUrl: string;
+
+  /**
+   * The maximum number of RPC requests per second allowed for this chain.
+   * This is used to avoid rate limiting by the RPC provider. This value
+   * is optional and defaults to DEFAULT_RPC_RATE_LIMIT if not specified.
+   *
+   * Invariants:
+   * - The value must be an integer greater than 0
+   */
+  rpcMaxRequestsPerSecond: number;
+}
+
+export interface RawChainConfig {
+  rpcEndpointUrl: string;
+  rpcMaxRequestsPerSecond?: string;
+}
+
+export interface GlobalBlockrange {
+  // Invariant - Must be undefined or an integer greater than 0
+  startBlock?: number;
+
+  // Invariant - Must be undefined or an integer greater than 0
+  endBlock?: number;
+}
+
+/**
+ * The complete runtime configuration for an ENSIndexer application instance.
+ */
+export interface ENSIndexerConfig {
+  /**
+   * The ENS Deployment for the indexer which could be "mainnet", "sepolia", etc.
+   *
+   * (see `@ensnode/ens-deployments` for available deployments)
+   */
+  ensDeploymentChain: keyof typeof ENSDeployments;
+
+  /**
+   * This is purely a testing configuration and should NOT be used in production.
+   * It is used to override the global block range. For this to take effect,
+   * there must be a single chain in use in the config or the application will
+   * throw an error.
+   *
+   * If these values are set, the indexer will set the end block on all contracts
+   * to be the provided endBlock. It will not index any blocks beyond this range.
+   *
+   * The startBlock will be used to override the start block of each chain's
+   * contract if it is greater than the contract's start block.
+   *
+   * The logic is present in `constrainContractBlockrange`.
+   *
+   * If these values are not set, the indexer will index the entire available
+   * block range for the chain.
+   *
+   * Invariants:
+   * - both startBlock and endBlock are optional, and expected to be undefined
+   *   in most cases (always in production)
+   * - there is be a single chain in use in the indexer if these values are set
+   * - startBlock must be an integer greater than 0 or undefined
+   * - endBlock must be an integer greater than 0 or undefined
+   * - endBlock must be greater than or equal to startBlock
+   */
+  globalBlockrange: GlobalBlockrange;
+
+  /**
+   * The ENSIndexer public service URL
+   *
+   * When the root route `/` of ENSIndexer receives a request, ENSIndexer redirects to the
+   * configured ENSADMIN_URL with an instruction for that ENSAdmin instance to connect back to this
+   * provided URL for querying state about the ENSNode instance.
+   *
+   * Invariants:
+   * - The URL must be a valid URL (localhost urls are allowed)
+   */
+  ensNodePublicUrl: string;
+
+  /**
+   * The ENSAdmin service URL.
+   *
+   * When the root route `/` of ENSIndexer receives a request, ENSIndexer redirects to this
+   * provided ENSAdmin URL with an instruction for that ENSAdmin instance to connect back to the
+   * configured ENSNODE_PUBLIC_URL.
+   *
+   * If this is not set, DEFAULT_ENSADMIN_URL will be used to provide easy access to an ENSAdmin UI.
+   *
+   * Invariants:
+   * - The URL must be a valid URL (localhost urls are allowed)
+   */
+  ensAdminUrl: string;
+
+  /*
+   * This is a namespace for the tables that the indexer will create to store indexed data.
+   * It should be a string that is unique to the running indexer instance.
+   *
+   * Keeping the database schema unique to the indexer instance is important to
+   * 1) speed up indexing after a restart
+   * 2) prevent data corruption from multiple indexer app instances writing state
+   *    concurrently to the same db schema
+   *
+   * No two indexer instances can use the same database schema at the same time.
+   *
+   * Read more about database schema rules here:
+   * https://ponder.sh/docs/api-reference/database#database-schema-rules
+   *
+   * Invariant: Must be a valid non-empty string
+   */
+  ponderDatabaseSchema: string;
+
+  /**
+   * Identify which indexer plugins to activate (see `src/plugins` for available plugins)
+   * This is a comma separated list of one or more available plugin names (case-sensitive).
+   *
+   * Invariants:
+   * - An array of valid plugin names with at least one value
+   * - For any requested plugin, the config will have a key for chainId in the
+   *   indexedChains object. In that indexedChains object, the config will have a
+   *   rpcEndpointUrl that is defined for that chainId and a rpcMaxRequestsPerSecond
+   *   that is defined for that chainId. This is ensured by the validateChainConfigs
+   *   function in `validations.ts` and not part of the schema validation here.
+   */
+  requestedPluginNames: PluginName[];
+
+  /**
+   * A feature flag to enable or disable healing of addr.reverse subnames.
+   * If this is set to true, ENSIndexer will attempt to heal subnames of
+   * addr.reverse.
+   *
+   * If this is not set, the default value is set to `DEFAULT_HEAL_REVERSE_ADDRESSES`.
+   *
+   * Setting this to `true` results in indexed data no longer being backwards
+   * compatible with the ENS Subgraph. For full data-level backwards
+   * compatibility with the ENS Subgraph, this should be set to `false`.
+   *
+   * Invariant: The value must be 'true' or 'false'
+   */
+  healReverseAddresses: boolean;
+
+  /**
+   * The network port ENSIndexer listens for http requests on. ENSIndexer
+   * exposes various APIs, most notably the GRAPHQL API. All APIs are accessible
+   * on the same port. This defaults to DEFAULT_PORT if not specified.
+   *
+   * Invariants:
+   * - The port must be an integer between 1 and 65535
+   */
+  port: number;
+
+  /**
+   * The endpoint URL for the ENSRainbow API. ENSIndexer uses this for fetching
+   * data about labelhashes (healing) when indexing. This should be set to a
+   * colocated instance of ENSRainbow for best performance.
+   *
+   * Invariant: The URL must be a valid URL. localhost urls are allowed,
+   * and expected.
+   */
+  ensRainbowEndpointUrl: string;
+
+  /**
+   * Configuration for each indexed chain, keyed by chain ID.
+   *
+   * Invariants:
+   * - Each key (chainId) must be a number
+   * - For any requested plugin, the config will have a key for chainId in this
+   *   indexedChains object which is ensured by the validateChainConfigs
+   *   function in `validations.ts` and not part of the schema validation here.
+   */
+  indexedChains: Record<number, ChainConfig>;
+}
+
+/**
+ * Represents the raw environment variables for the ENSIndexer application.
+ * Keys correspond to the environment variable names, and all values are
+ * strings or undefined, reflecting their state in `process.env`.
+ * This interface is intended to be the source type which then gets
+ * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
+ */
+export interface ENSIndexerEnvironment {
+  port: string | undefined;
+  ponderDatabaseSchema: string | undefined;
+  databaseUrl: string | undefined;
+  ensDeploymentChain: string | undefined;
+  requestedPluginNames: string | undefined;
+  ensRainbowEndpointUrl: string | undefined;
+  ensNodePublicUrl: string | undefined;
+  ensAdminUrl: string | undefined;
+  healReverseAddresses: string | undefined;
+
+  startBlock: string | undefined;
+  endBlock: string | undefined;
+
+  globalBlockrange: {
+    startBlock: string | undefined;
+    endBlock: string | undefined;
+  };
+
+  indexedChains: Record<number, RawChainConfig>;
+}

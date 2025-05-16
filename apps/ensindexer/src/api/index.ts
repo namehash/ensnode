@@ -6,13 +6,7 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
-import {
-  ensAdminUrl,
-  ensDeploymentChain,
-  ensNodePublicUrl,
-  ponderDatabaseSchema,
-  requestedPluginNames,
-} from "@/config/app-config";
+import config from "@/config/app-config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
@@ -52,8 +46,8 @@ app.onError((error, ctx) => {
 // use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
   try {
-    const ensAdminRedirectUrl = new URL(ensAdminUrl);
-    ensAdminRedirectUrl.searchParams.set("ensnode", ensNodePublicUrl);
+    const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
+    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl);
 
     return ctx.redirect(ensAdminRedirectUrl);
   } catch (error) {
@@ -72,9 +66,9 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: requestedPluginNames.join(","),
-      DATABASE_SCHEMA: ponderDatabaseSchema,
-      ENS_DEPLOYMENT_CHAIN: ensDeploymentChain,
+      ACTIVE_PLUGINS: config.requestedPluginNames.join(","),
+      DATABASE_SCHEMA: config.ponderDatabaseSchema,
+      ENS_DEPLOYMENT_CHAIN: config.ensDeploymentChain,
     },
     db,
     query: {

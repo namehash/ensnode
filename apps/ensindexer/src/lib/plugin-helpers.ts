@@ -2,7 +2,7 @@ import type { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Address, Chain, isAddress } from "viem";
 
-import { ensDeploymentChain, indexedChains } from "@/config/app-config";
+import config from "@/config/app-config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
@@ -89,15 +89,15 @@ export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
 
     if (!hasRequiredDatasources) {
       throw new Error(
-        `Requested plugin '${
-          plugin.pluginName
-        }' cannot be activated for the ${ensDeploymentChain} deployment. ${
+        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${
+          config.ensDeploymentChain
+        } deployment. ${
           plugin.pluginName
         } specifies dependent datasources: ${plugin.requiredDatasources.join(
           ", ",
-        )}, but available datasources in the ${ensDeploymentChain} deployment are: ${availableDatasourceNames.join(
-          ", ",
-        )}.`,
+        )}, but available datasources in the ${
+          config.ensDeploymentChain
+        } deployment are: ${availableDatasourceNames.join(", ")}.`,
       );
     }
   }
@@ -181,13 +181,13 @@ export function networksConfigForChain(chain: Chain) {
       // all instead of throwing an error here which will only flag a single missing RPC URL.
       // The code which does that validation is the `validateChainConfigs` function in
       // `src/config/validations.ts`.
-      transport: http(indexedChains[chain.id]?.rpcEndpointUrl),
+      transport: http(config.indexedChains[chain.id]?.rpcEndpointUrl),
       // This can only return undefined if there is no RPC url for the chain. This
       // means the `validateChainConfigs` function in `src/config/validations.ts` will
       // throw an error so we don't need to handle undefined here with a default.
       // That is already handled in our schema validation so when the RPC url is added
       // this will not be undefined.
-      maxRequestsPerSecond: indexedChains[chain.id]?.rpcMaxRequestsPerSecond,
+      maxRequestsPerSecond: config.indexedChains[chain.id]?.rpcMaxRequestsPerSecond,
       // NOTE: disable cache on 'Anvil' chains
       ...(chain.name === "Anvil" && { disableCache: true }),
     } satisfies NetworkConfig,
@@ -258,7 +258,9 @@ export function validateContractConfigs<CONTRACT_CONFIGS extends Record<string, 
 
   if (!hasAddresses) {
     throw new Error(
-      `The ENSDeployment '${ensDeploymentChain}' provided to the '${pluginName}' plugin does not define valid addresses. This occurs if the 'address' of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
+      `The ENSDeployment '${
+        config.ensDeploymentChain
+      }' provided to the '${pluginName}' plugin does not define valid addresses. This occurs if the 'address' of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
 
 Here are the contract configs we attempted to validate:
 ${JSON.stringify(contracts)}`,
