@@ -1,6 +1,4 @@
-import type { Cache } from "@ensnode/utils/cache";
-import { LruCache } from "@ensnode/utils/cache";
-import type { Labelhash } from "@ensnode/utils/types";
+import { type Cache, Label, type LabelHash, LruCache } from "@ensnode/utils";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
 export namespace EnsRainbow {
@@ -9,9 +7,11 @@ export namespace EnsRainbow {
   export interface ApiClient {
     count(): Promise<CountResponse>;
 
-    heal(labelhash: Labelhash): Promise<HealResponse>;
+    heal(labelHash: LabelHash): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
+
+    version(): Promise<VersionResponse>;
 
     getOptions(): Readonly<EnsRainbowApiClientOptions>;
   }
@@ -26,14 +26,14 @@ export namespace EnsRainbow {
 
   export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
     status: Status;
-    label?: string | never;
+    label?: Label | never;
     error?: string | never;
     errorCode?: Error | never;
   }
 
   export interface HealSuccess extends BaseHealResponse<typeof StatusCode.Success, never> {
     status: typeof StatusCode.Success;
-    label: string;
+    label: Label;
     error?: never;
     errorCode?: never;
   }
@@ -101,6 +101,29 @@ export namespace EnsRainbow {
   }
 
   export type CountResponse = CountSuccess | CountServerError;
+
+  /**
+   * ENSRainbow version information.
+   */
+  export interface VersionInfo {
+    /**
+     * ENSRainbow version.
+     */
+    version: string;
+
+    /**
+     * ENSRainbow schema version.
+     */
+    schema_version: number;
+  }
+
+  /**
+   * Interface for the version endpoint response
+   */
+  export interface VersionResponse {
+    status: typeof StatusCode.Success;
+    versionInfo: VersionInfo;
+  }
 }
 
 export interface EnsRainbowApiClientOptions {
@@ -132,7 +155,7 @@ export interface EnsRainbowApiClientOptions {
  */
 export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
-  private readonly cache: Cache<Labelhash, EnsRainbow.CacheableHealResponse>;
+  private readonly cache: Cache<LabelHash, EnsRainbow.CacheableHealResponse>;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -154,13 +177,13 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
       ...options,
     };
 
-    this.cache = new LruCache<Labelhash, EnsRainbow.CacheableHealResponse>(
+    this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
       this.options.cacheCapacity,
     );
   }
 
   /**
-   * Attempt to heal a labelhash to its original label.
+   * Attempt to heal a labelHash to its original label.
    *
    * Note on returned labels: ENSRainbow returns labels exactly as they are
    * represented in source rainbow table data. This means:
@@ -169,7 +192,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * - Labels can contain any valid string, including dots, null bytes, or be empty
    * - Clients should handle all possible string values appropriately
    *
-   * @param labelhash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
+   * @param labelHash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
    *
@@ -201,18 +224,18 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * // }
    * ```
    */
-  async heal(labelhash: Labelhash): Promise<EnsRainbow.HealResponse> {
-    const cachedResult = this.cache.get(labelhash);
+  async heal(labelHash: LabelHash): Promise<EnsRainbow.HealResponse> {
+    const cachedResult = this.cache.get(labelHash);
 
     if (cachedResult) {
       return cachedResult;
     }
 
-    const response = await fetch(new URL(`/v1/heal/${labelhash}`, this.options.endpointUrl));
+    const response = await fetch(new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl));
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
-      this.cache.set(labelhash, healResponse);
+      this.cache.set(labelHash, healResponse);
     }
 
     return healResponse;
@@ -262,6 +285,31 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const response = await fetch(new URL("/health", this.options.endpointUrl));
 
     return response.json() as Promise<EnsRainbow.HealthResponse>;
+  }
+
+  /**
+   * Get the version information of the ENSRainbow service
+   *
+   * @returns the version information of the ENSRainbow service
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
+   *
+   * @example
+   * ```typescript
+   * const response = await client.version();
+   *
+   * console.log(response);
+   *
+   * // {
+   * //   "status": "success",
+   * //   "version": "0.1.0",
+   * //   "schema_version": 2
+   * // }
+   * ```
+   */
+  async version(): Promise<EnsRainbow.VersionResponse> {
+    const response = await fetch(new URL("/v1/version", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.VersionResponse>;
   }
 
   /**

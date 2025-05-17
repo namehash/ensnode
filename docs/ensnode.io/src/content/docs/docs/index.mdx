@@ -1,0 +1,59 @@
+---
+title: ENSNode Quickstart
+description: Get started building ENS applications with ENSNode.
+sidebar:
+  label: Quickstart
+  order: 1
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+The fastest way to query ENSNode is to use the NameHash Labs hosted instances of ENSNode. The **alpha** instance provides support for mainnet, `base.eth`, `linea.eth`, and [3DNS](https://3dns.box) ENS names.
+
+```
+https://api.alpha.ensnode.io
+```
+
+For more information about the hosted instances, refer to the following documentation.
+
+<LinkCard
+  title="Hosted ENSNode Instances"
+  href="/docs/usage/hosted-ensnode-instances/"
+/>
+
+## Using ENSNode with ensjs
+
+You can use ENSNode with ensjs by providing an ENSNode url in place of the subgraph url in viem's `Chain` object.
+
+```ts
+import { http, createClient } from "viem";
+import { mainnet } from "viem/chains";
+import { addEnsContracts } from "@ensdomains/ensjs";
+import { getSubgraphRecords } from "@ensdomains/ensjs/subgraph";
+
+const client = createClient({
+  chain: {
+    ...addEnsContracts(mainnet),
+    subgraphs: { ens: { url: "https://api.alpha.ensnode.io/subgraph" } },
+  },
+  transport: http(),
+});
+
+const names = await getNamesForAddress(client, { name: "validator.eth" });
+```
+
+See the following documentation for examples of how to query ENSNode from ensjs.
+
+<LinkCard title="Using ENSNode with ensjs" href="/docs/usage/with-ensjs/" />
+
+## Using ENSNode's APIs
+
+For querying ENSNode via its **GraphQL** or `@ponder/client` apis, refer to the following documentation.
+
+<LinkCard title="Using ENSNode's API" href="/docs/usage/api/" />
+
+## Using ENSNode with `viem/chain`
+
+If you're integrating with a library that retrieves the url for the ENS Subgraph in a provided `viem/chain` object, see the following documentation for integration.
+
+<LinkCard title="Using ENSNode with viem/chain" href="/docs/usage/with-viem/" />

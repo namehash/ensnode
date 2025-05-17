@@ -1,26 +1,41 @@
+import packageJson from "@/../package.json";
+
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { ponderMetadata } from "@ensnode/ponder-metadata";
-import { graphql as subgraphGraphQL } from "@ensnode/ponder-subgraph/middleware";
-import { Hono, MiddlewareHandler } from "hono";
+import { Context, Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
-import packageJson from "../../package.json";
+
+import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
+import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
-  createFirstBlockToIndexByChainIdFetcher,
-  createPrometheusMetricsFetcher,
+  ensAdminUrl,
   ensNodePublicUrl,
   getEnsDeploymentChain,
+  getRequestedPluginNames,
   ponderDatabaseSchema,
-  ponderPort,
-  requestedPluginNames,
-} from "../lib/ponder-helpers";
+} from "@/lib/ponder-helpers";
+import {
+  fetchEnsRainbowVersion,
+  fetchFirstBlockToIndexByChainId,
+  fetchPrometheusMetrics,
+  makePonderMetdataProvider,
+} from "@/lib/ponder-metadata-provider";
+import { ponderMetadata } from "@ensnode/ponder-metadata";
+import {
+  buildGraphQLSchema as buildSubgraphGraphQLSchema,
+  graphql as subgraphGraphQL,
+} from "@ensnode/ponder-subgraph";
+import {
+  addDocStringsToIntrospection,
+  extendWithBaseDefinitions,
+  generateTypeDocSet,
+} from "ponder-enrich-gql-docs-middleware";
 
 const app = new Hono();
 
 const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
   ctx.header("x-ensnode-version", packageJson.version);
-
   return next();
 };
 
@@ -29,41 +44,29 @@ app.use(
   ensNodeVersionResponseHeader,
 
   // use CORS middleware
-  cors({
-    origin: "*",
-  }),
+  cors({ origin: "*" }),
 );
 
-app.onError((err, ctx) => {
+app.onError((error, ctx) => {
   // log the error for operators
-  console.error(err);
+  console.error(error);
 
   return ctx.text("Internal server error", 500);
 });
 
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
-app.use("/", async (ctx) =>
-  ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`),
-);
-
-// use root to redirect to the ENSAdmin website with the current server URL as ensnode parameter
+// use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
   try {
-    ctx.redirect(`https://admin.ensnode.io/about?ensnode=${ensNodePublicUrl()}`);
-  } catch (error) {
-    console.error(error);
+    const ensAdminRedirectUrl = new URL(ensAdminUrl());
+    ensAdminRedirectUrl.searchParams.set("ensnode", ensNodePublicUrl());
 
-    return ctx.text("Internal server error", 500);
+    return ctx.redirect(ensAdminRedirectUrl);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
   }
 });
-
-// setup block indexing status fetching
-const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdFetcher(
-  import("../../ponder.config").then((m) => m.default),
-);
-
-// setup prometheus metrics fetching
-const fetchPrometheusMetrics = createPrometheusMetricsFetcher(ponderPort());
 
 // use ENSNode middleware at /metadata
 app.get(
@@ -74,7 +77,7 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: requestedPluginNames().join(","),
+      ACTIVE_PLUGINS: getRequestedPluginNames().join(","),
       DATABASE_SCHEMA: ponderDatabaseSchema(),
       ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
     },
@@ -82,6 +85,7 @@ app.get(
     query: {
       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
       prometheusMetrics: fetchPrometheusMetrics,
+      ensRainbowVersion: fetchEnsRainbowVersion,
     },
     publicClients,
   }),
@@ -90,50 +94,57 @@ app.get(
 // use ponder client support
 app.use("/sql/*", client({ db, schema }));
 
-// use ponder middleware at `/ponder`
+// use ponder middleware at `/ponder` with description injection
+app.use("/ponder", fixContentLengthMiddleware);
+app.use("/ponder", makeApiDocumentationMiddleware("/ponder"));
 app.use("/ponder", ponderGraphQL({ db, schema }));
 
-// use our custom graphql middleware at /subgraph
+// use our custom graphql middleware at /subgraph with description injection
+app.use("/subgraph", fixContentLengthMiddleware);
+app.use("/subgraph", makeApiDocumentationMiddleware("/subgraph"));
 app.use(
   "/subgraph",
   subgraphGraphQL({
     db,
-    schema,
-
-    // describes the polymorphic (interface) relationships in the schema
-    polymorphicConfig: {
-      types: {
-        DomainEvent: [
-          schema.transfer,
-          schema.newOwner,
-          schema.newResolver,
-          schema.newTTL,
-          schema.wrappedTransfer,
-          schema.nameWrapped,
-          schema.nameUnwrapped,
-          schema.fusesSet,
-          schema.expiryExtended,
-        ],
-        RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
-        ResolverEvent: [
-          schema.addrChanged,
-          schema.multicoinAddrChanged,
-          schema.nameChanged,
-          schema.abiChanged,
-          schema.pubkeyChanged,
-          schema.textChanged,
-          schema.contenthashChanged,
-          schema.interfaceChanged,
-          schema.authorisationChanged,
-          schema.versionChanged,
-        ],
+    graphqlSchema: buildSubgraphGraphQLSchema({
+      schema,
+      // provide the schema with ponder's internal metadata to power _meta
+      metadataProvider: makePonderMetdataProvider({ db, publicClients }),
+      // describes the polymorphic (interface) relationships in the schema
+      polymorphicConfig: {
+        types: {
+          DomainEvent: [
+            schema.transfer,
+            schema.newOwner,
+            schema.newResolver,
+            schema.newTTL,
+            schema.wrappedTransfer,
+            schema.nameWrapped,
+            schema.nameUnwrapped,
+            schema.fusesSet,
+            schema.expiryExtended,
+          ],
+          RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+          ResolverEvent: [
+            schema.addrChanged,
+            schema.multicoinAddrChanged,
+            schema.nameChanged,
+            schema.abiChanged,
+            schema.pubkeyChanged,
+            schema.textChanged,
+            schema.contenthashChanged,
+            schema.interfaceChanged,
+            schema.authorisationChanged,
+            schema.versionChanged,
+          ],
+        },
+        fields: {
+          "Domain.events": "DomainEvent",
+          "Registration.events": "RegistrationEvent",
+          "Resolver.events": "ResolverEvent",
+        },
       },
-      fields: {
-        "Domain.events": "DomainEvent",
-        "Registration.events": "RegistrationEvent",
-        "Resolver.events": "ResolverEvent",
-      },
-    },
+    }),
   }),
 );
 

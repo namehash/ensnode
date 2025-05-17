@@ -1,10 +1,13 @@
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
+import { StatusCode } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "../utils/logger";
-import { ENSRainbowDB } from "./database";
-import { ENSRainbowServer } from "./server";
+
+import packageJson from "@/../package.json";
+import { ENSRainbowDB, SCHEMA_VERSION } from "@/lib/database";
+import { ENSRainbowServer } from "@/lib/server";
+import { logger } from "@/utils/logger";
 
 /**
  * Creates and configures an ENS Rainbow api
@@ -24,10 +27,10 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     }),
   );
 
-  api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
-    const labelhash = c.req.param("labelhash") as `0x${string}`;
-    logger.debug(`Healing request for labelhash: ${labelhash}`);
-    const result = await server.heal(labelhash);
+  api.get("/v1/heal/:labelHash", async (c: HonoContext) => {
+    const labelHash = c.req.param("labelHash") as `0x${string}`;
+    logger.debug(`Healing request for labelHash: ${labelHash}`);
+    const result = await server.heal(labelHash);
     logger.debug(`Heal result:`, result);
     return c.json(result, result.errorCode);
   });
@@ -43,6 +46,19 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     const result = await server.labelCount();
     logger.debug(`Count result:`, result);
     return c.json(result, result.errorCode);
+  });
+
+  api.get("/v1/version", (c: HonoContext) => {
+    logger.debug("Version request");
+    const result: EnsRainbow.VersionResponse = {
+      status: StatusCode.Success,
+      versionInfo: {
+        version: packageJson.version,
+        schema_version: SCHEMA_VERSION,
+      },
+    };
+    logger.debug(`Version result:`, result);
+    return c.json(result);
   });
 
   return api;

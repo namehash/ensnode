@@ -1,6 +1,7 @@
 import { existsSync } from "fs";
 import { rm } from "fs/promises";
-import { logger } from "../utils/logger";
+
+import { logger } from "@/utils/logger";
 
 export interface PurgeCommandOptions {
   dataDir: string;

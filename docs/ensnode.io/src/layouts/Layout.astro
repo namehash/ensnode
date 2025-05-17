@@ -1,0 +1,74 @@
+---
+import { AstroFont } from "astro-font";
+import { SEO } from "astro-seo";
+import Footer from "../components/organisms/Footer.tsx";
+import Header from "../components/organisms/Header.astro";
+import "../styles/globals.css";
+import heroImage from "../assets/hero_skies_image.png";
+---
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width"/>
+    <meta name="generator" content={Astro.generator}/>
+    <link rel="preload" as="image" href={heroImage.src} />
+    <AstroFont
+            config={[
+                {
+                    src: [],
+                    name: "Inter",
+                    // Google Fonts URL
+                googleFontsURL: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+                    preload: true,
+                    display: "swap",
+                    selector: "body",
+                    fallback: "sans-serif",
+                },
+            ]}
+    />
+    <SEO
+            title="The new multichain indexer for ENSv2 | ENSNode"
+            description="Multichain indexer for ENS with ENS Subgraph backwards compatibility."
+            openGraph={{
+                basic: {
+                    title: "The new multichain indexer for ENSv2",
+                    type: "website",
+                    image: "https://ensnode.io/OG_image.png",
+                    url: "https://ensnode.io/",
+                },
+                optional: {
+                    description: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+                    siteName: "ENSNode"
+                }
+            }}
+            twitter={{
+                creator: "@NameHashLabs",
+                title: "The new multichain indexer for ENSv2",
+                image: "https://ensnode.io/Twitter_OG_image.png",
+                description: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+                card: "summary_large_image"
+            }}
+            extend={{
+                link: [
+                    { rel: "icon", href: "/favicon.svg" },
+                    { rel: "apple-touch-icon", href: "/apple-touch-icon.png"}
+                ],
+            }}
+    />
+</head>
+<body>
+<Header />
+<slot/>
+<Footer client:load />
+</body>
+</html>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>

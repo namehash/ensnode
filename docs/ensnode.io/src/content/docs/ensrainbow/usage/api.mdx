@@ -16,7 +16,7 @@ Response: `{"status":"ok"}`
 ## Heal Label
 
 ```bash
-curl http://localhost:3223/v1/heal/0x[labelhash]
+curl http://localhost:3223/v1/heal/0x[labelHash]
 ```
 
 Example:
@@ -42,17 +42,17 @@ Note on returned labels: The service returns labels exactly as they appear in th
 
 #### Error Responses
 
-- `400 Bad Request`: When the labelhash parameter is missing or invalid
+- `400 Bad Request`: When the labelHash parameter is missing or invalid
 
   ```json
   {
     "status": "error",
-    "error": "Invalid labelhash - must be a valid hex string",
+    "error": "Invalid labelHash - must be a valid hex string",
     "errorCode": 400
   }
   ```
 
-- `404 Not Found`: When no label is found for the given labelhash
+- `404 Not Found`: When no label is found for the given labelHash
 
   ```json
   {
@@ -96,3 +96,23 @@ Success Response:
   "errorCode": 500
 }
 ```
+
+## Get Version Information
+
+```bash
+curl http://localhost:3223/v1/version
+```
+
+Success Response:
+
+```json
+{
+  "status": "success",
+  "version": "0.1.0",
+  "schema_version": 2
+}
+```
+
+The response contains:
+- `version`: The current version of ENSRainbow
+- `schema_version`: The current schema version of the database

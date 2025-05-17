@@ -1,33 +1,59 @@
-import type { Labelhash, Node } from "@ensnode/utils/types";
-import type { Address, Hex } from "viem";
-
-// NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
-export const makeResolverId = (address: Address, node: Hex) =>
-  [address.toLowerCase(), node].join("-");
+import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
+import type { Address } from "viem";
 
 /**
- * Makes a cross-registrar unique event ID.
+ * Makes a unique, chain-scoped resolver ID.
+ * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
  *
- * The ENS Subgraph indexes events from a single registrar. However, ENSIndexer
- * enables indexing of events from multiple registrars, which can lead to event
- * ID collisions. This function allows keeping Subgraph-compatible event IDs
- * (produces `blocknumber-logIndex` or `blocknumber-logindex-transferindex`)
- * while ensuring event id uniqueness across registrars.
+ * @example Subgraph plugin: `${address}-${node}`
+ * @example All other plugins (chain-scoped): `${chainId}-${address}-${node}`
  *
- * @param registrarName the name of the registrar associated with the event
+ * @param pluginName the plugin name
+ * @param chainId the chain ID
+ * @param address the resolver contract address
+ * @param node the ENS node
+ * @returns a unique resolver ID
+ */
+
+export const makeResolverId = (
+  pluginName: PluginName,
+  chainId: number,
+  address: Address,
+  node: Node,
+) =>
+  [
+    // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
+    pluginName === PluginName.Subgraph ? null : chainId,
+    // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
+    address.toLowerCase(),
+    node,
+  ]
+    .filter(Boolean)
+    .join("-");
+
+/**
+ * Makes a unique, chain-scoped event ID.
+ * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
+ *
+ * @example Subgraph plugin: `${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example All other plugins (chain-scoped): `${chainId}-${blockNumber}-${logIndex}(-${transferIndex})`
+ *
+ * @param prefix optional prefix
  * @param blockNumber
  * @param logIndex
  * @param transferIndex
  * @returns
  */
 export const makeEventId = (
-  registrarName: string,
+  pluginName: PluginName,
+  chainId: number,
   blockNumber: bigint,
   logIndex: number,
   transferIndex?: number,
 ) =>
   [
-    registrarName === "eth" ? undefined : registrarName,
+    // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
+    pluginName === PluginName.Subgraph ? null : chainId,
     blockNumber.toString(),
     logIndex.toString(),
     transferIndex?.toString(),
@@ -38,40 +64,34 @@ export const makeEventId = (
 /**
  * Makes a cross-registrar unique registration ID.
  *
- * The ENS Subgraph has the potential to index "selected data" for any ENS name
- * (ex: through the Registry or the NameWrapper). However, the "selected data"
- * indexed by the ENS Subgraph varies depending on attributes of the name. For
- * example, the ENS Subgraph only indexes Registration records for direct
- * subnames of ".eth". This allows the ENS Subgraph to assign distinct
- * Registration ids using only the labelhash of the direct subname being
- * registered. (i.e. for the registration of "test.eth", the Registration's id
- * is `labelhash('test'))`.
+ * The ENS Subgraph only indexes Registration entities for a single registrar: the registrar for
+ * direct subnames of ".eth". It uses the labelHash of each registered ".eth" subname to
+ * form a unique Registration id.
  *
- * ENSIndexer (with multiple plugins activated) indexes Registration records from
- * multiple Registrars (like the base.eth and linea.eth Registrars). Therefore,
- * we use this function to avoid Registration id collisions that would otherwise
- * occur. (i.e. this function provides unique registration ids for "test.eth",
- * "test.base.eth", and "test.linea.eth", etc.
+ * Because ENSIndexer supports indexing multiple Registrar contracts via plugins
+ * (currently using the shared handlers modelled after the Subgraph's indexing logic), however,
+ * additional Registration entities may be created. A unique ID other than labelHash is necessary,
+ * otherwise Registration entities for the same label would collide.
  *
- * @param registrarName the name of the registrar issuing the registration
- * @param labelHash the labelHash of the subname that was registered directly
- *                  beneath `registrarName`
- * @param node the node of the full name that was registered
+ * To avoid collisions, if the caller identifies as the subgraph plugin, we use the Domain's `labelHash`
+ * (subgraph compat). Otherwise, for any other plugin, we use the Domain's `node`, which is
+ * globally unique within ENS.
+ *
+ * We knowingly mix `labelHash` (labelhash) and `node` (namehash) values as registration ids:
+ * both result in keccak256 hashes (the odds of a collision being practically zero) and are derived
+ * differently — the result of `namehash` will never (practically zero) collide with the result of
+ * `labelhash` because `namehash` always includes the recursive hashing of the root node.
+ *
+ * For the "v1" of ENSIndexer (at a minimum) we want to preserve exact backwards compatibility with
+ * Registration IDs issued by the ENS Subgraph. In the future we may relax exact subgraph backwards
+ * compatibility and use `node` for all Registration IDs.
+ *
+ * @param pluginName the name of the active plugin issuing the registration
+ * @param labelHash the labelHash of the name that was registered
+ * @param node the node of the name that was registered
  * @returns a unique registration id
  */
-export const makeRegistrationId = (registrarName: string, labelHash: Labelhash, node: Node) => {
-  if (registrarName === "eth") {
-    // For the "v1" of ENSIndexer (at a minimum) we want to preserve backwards
-    // compatibility with Registration id's issued by the ENS Subgraph.
-    // In the future we'll explore more fundamental solutions to avoiding
-    // Registration id collissions. For now are consciously mixing `labelHash`
-    // and `node` (namehash) values as registration ids. Both are keccak256
-    // hashes, so we take advantage of the odds of a collision being
-    // practically zero.
-    return labelHash;
-  } else {
-    // Avoid collisions between Registrations for the same direct subname from
-    // different Registrars.
-    return node;
-  }
+export const makeRegistrationId = (pluginName: PluginName, labelHash: LabelHash, node: Node) => {
+  if (pluginName === PluginName.Subgraph) return labelHash;
+  return node;
 };

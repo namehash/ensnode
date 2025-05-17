@@ -6,6 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@workspace/*": ["../../*"]
-    }
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }

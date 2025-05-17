@@ -1,4 +1,4 @@
-import { ENSRainbowDB } from "../lib/database";
+import { ENSRainbowDB } from "@/lib/database";
 
 export interface ValidateCommandOptions {
   dataDir: string;

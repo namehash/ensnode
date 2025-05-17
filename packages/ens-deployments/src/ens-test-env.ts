@@ -1,75 +1,89 @@
-import { mergeAbis } from "@ponder/utils";
+import { Address } from "viem";
 import { anvil } from "viem/chains";
 
-import { ETHResolverFilter } from "./filters";
-import type { ENSDeploymentConfig } from "./types";
+import { ResolverConfig } from "./lib/resolver";
+import { DatasourceName, type ENSDeployment } from "./lib/types";
 
-// Subregistry ABIs for direct subnames of 'eth' in ens-test-env
-import { BaseRegistrar as eth_BaseRegistrar } from "./abis/eth/BaseRegistrar";
-import { EthRegistrarController as eth_EthRegistrarController } from "./abis/eth/EthRegistrarController";
-import { EthRegistrarControllerOld as eth_EthRegistrarControllerOld } from "./abis/eth/EthRegistrarControllerOld";
-import { LegacyPublicResolver as eth_LegacyPublicResolver } from "./abis/eth/LegacyPublicResolver";
-import { NameWrapper as eth_NameWrapper } from "./abis/eth/NameWrapper";
-import { Registry as eth_Registry } from "./abis/eth/Registry";
-import { Resolver as eth_Resolver } from "./abis/eth/Resolver";
+// ABIs for Root Datasource
+import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
+import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
+import { Registry as root_Registry } from "./abis/root/Registry";
+import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
+
+const deploymentAddresses = getENSTestEnvDeploymentAddresses();
+
+const EMPTY_ADDRESS = "" as Address;
 
 /**
- * The "ENS deployment" configuration for 'ens-test-env'.
+ * The ens-test-env ENSDeployment
  *
- * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
- * protocol changes, running deterministic test suites, and local development.
+ * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for development of
+ * ENS apps and running test suites against a deterministic deployment of the ENS protocol.
  * https://github.com/ensdomains/ens-test-env
+ *
+ * The 'ens-test-env' ENSDeployment is only relevant in the context of apps that use the ens-test-env
+ * tool (i.e. ensjs and ens-app-v3) and it depends on the addresses of the contracts deployed by
+ * that app (each app deploys the ENS protocol to slightly different addresses).
+ *
+ * In both ensjs and ens-app-v3, an env variable is available to the ens-test-env tool that
+ * lists the addresses of each contract after deployment. These addresses are different in each
+ * app and may change over time.
+ *
+ * If the addresses are not available in the environment, we use empty string as a mock to ensure
+ * type-correctness: consumers of this ens-test-env deployment, if using outside of the context
+ * of the ens-test-env tool, should validate that an Address is provided, or they may experience
+ * undefined runtime behavior.
  */
 export default {
   /**
-   * Subregistry for direct subnames of 'eth' on the 'ens-test-env' "ENS deployment".
+   * Root Datasource
+   *
+   * Addresses and Start Blocks from ens-test-env
+   * https://github.com/ensdomains/ens-test-env/
    */
-  eth: {
+  [DatasourceName.Root]: {
     // ens-test-env runs on a local Anvil chain with id 1337
     chain: { ...anvil, id: 1337 },
-
-    // Addresses and Start Blocks from ens-test-env
-    // https://github.com/ensdomains/ens-test-env/
     contracts: {
       RegistryOld: {
-        abi: eth_Registry,
-        address: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
+        abi: root_Registry, // Registry was redeployed, same abi
+        address: deploymentAddresses?.LegacyENSRegistry ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       Registry: {
-        abi: eth_Registry,
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        abi: root_Registry, // Registry was redeployed, same abi
+        address: deploymentAddresses?.ENSRegistry ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       Resolver: {
-        abi: mergeAbis([eth_LegacyPublicResolver, eth_Resolver]),
-        filter: ETHResolverFilter, // NOTE: a Resolver is any contract that matches this `filter`
+        ...ResolverConfig,
         startBlock: 0,
       },
       BaseRegistrar: {
-        abi: eth_BaseRegistrar,
-        address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+        abi: root_BaseRegistrar,
+        address: deploymentAddresses?.BaseRegistrarImplementation ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       EthRegistrarControllerOld: {
-        abi: eth_EthRegistrarControllerOld,
-        address: "0xf5059a5D33d5853360D16C683c16e67980206f36",
+        abi: root_EthRegistrarControllerOld,
+        address: deploymentAddresses?.LegacyETHRegistrarController ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       EthRegistrarController: {
-        abi: eth_EthRegistrarController,
-        address: "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
+        abi: root_EthRegistrarController,
+        address: deploymentAddresses?.ETHRegistrarController ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
       NameWrapper: {
-        abi: eth_NameWrapper,
-        address: "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+        abi: root_NameWrapper,
+        address: deploymentAddresses?.NameWrapper ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
     },
   },
   /**
-   * On the 'ens-test-env' "ENS deployment" there is no known subregistry for direct
-   * subnames of 'base.eth' or 'linea.eth'.
+   * The 'ens-test-env' ENSDeployment does not have a Basenames or Lineanames Datasource.
    */
-} satisfies ENSDeploymentConfig;
+} satisfies ENSDeployment;

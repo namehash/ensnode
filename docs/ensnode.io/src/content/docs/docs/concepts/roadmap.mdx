@@ -1,0 +1,70 @@
+---
+title: ENSNode Roadmap
+sidebar:
+  order: 3
+---
+
+## First-Class ENS v2 Support
+
+With the launch of [ENSv2](https://roadmap.ens.domains/roadmap/), ENS names will increasingly live across multiple chains and require at-request-time resolution via [CCIP-Read](https://docs.ens.domains/resolvers/ccip-read). The ENS Subgraph, which can only index a single chain and lacks support for resolution of off-chain names, is unable to meet these emerging needs.
+
+Built on [Ponder](https://ponder.sh), ENSNode provides multichain indexing and at-request-time resolution capabilities that are essential for ENSv2. It maintains backwards compatibility with Subgraph queries while enabling support for [Namechain](https://app.ens.domains/ens-v2) and off-chain names like `.uni.eth` and `.cb.id`.
+
+ENSNode will introduce an ENSv2-optimized schema and custom API endpoints specifically designed for common ENSjs operations.
+
+## Additional Chain / Integration Support
+
+- Tokenized DNS Names
+    - [Namefi](https://namefi.io/) Support
+- Offchain Names
+    - `.cb.id`, `.uni.id`, + more
+    - [NameStone](https://namestone.com/) Names
+    - [NameSpace](https://namespace.ninja/) Names
+    - [Justaname](https://www.justaname.id/) Names
+
+:::tip[Contribute]
+Want support for a specific chain/integration? Contribute to this documentation by [opening a Pull Request](https://github.com/namehash/ensnode).
+:::
+
+## ENS Protocol Accelerator
+
+ENSNode v2 could introduce a custom HTTP/JSON API layer that would allow for performing additional logic at request time, reducing client-side workload and latency, and accelerating common ENS protocol operations like name/record lookups.
+
+In particular, when records are indexed by ENSIndexer, ENSNode could directly query name records without relying on UniversalResolver or CCIP-Read, significantly reducing latency and avoiding unnecessary HTTP requests. For names that aren't directly indexed, ENSNode can implement CCIP-Read, ensuring clients only need a single lightweight HTTP/2 request to confidently resolve records for a given name.
+
+ENSNode could handle CCIP-Read logic internally, batch multiple requests to reduce RPC calls, and cache CCIP-Read and NFT metadata results. Utilizing HTTP/2 multiplexing and optional batch endpoints could ensure efficient server-side deduplication. To minimize latency in cases like lengthy CCIP-Read or NFT resolution, ENSNode could deliver partial JSON objects over Server-Sent Events (SSE), enabling immediate client updates for critical data like Primary Names while background tasks like avatar resolution complete.
+
+Besides dramatically decreasing latency for client applications, the Protocol Accelerator is also a key step forward in decentralization, away from reliance on centralized offchain gateway servers. This is a big win for the ENS protocol!
+
+## ENS TokenScope: ENS NFT Marketplace Data API
+
+With Reservoir shutting down in the coming months, ENSNode aims to provide replacement infrastructure for tokenized ENS name market data. This includes:
+
+- past sales history
+- active buy/sell orders (on-chain and off-chain)
+
+This capability could be implemented as an optional ENSNode service, providing free and open source infrastructure for marketplaces like Vision and other platforms that support the name market.
+
+By enabling robust secondary markets through this infrastructure, we aim to strengthen both secondary and primary markets for tokenized names, benefiting registrars and the broader ENS ecosystem.
+
+## Label Healing 'Protocol'
+
+ENSRainbow could establish a (decentralized?) protocol for sharing healed ENS labels, enabling community-driven expansion of the rainbow tables. This protocol would:
+
+- allow anyone to contribute newly healed labels to a shared dataset
+- perhaps use a DHT-like peer-to-peer network for label distribution
+- implement verification and validation of contributed labels
+- enable automatic synchronization between ENSNode/ENSRainbow & other network participants
+
+By decentralizing label healing contributions, the protocol would accelerate the growth of available rainbow tables while maintaining data quality through consensus mechanisms. Participants could run lightweight nodes that selectively replicate subsets of the dataset based on their needs. Registration apps could submit healed values of registered names to the protocol, ensuring users' names show up correctly across web3.
+
+## ENS Protocol Inspector & Developer Tools
+
+ENSNode aims to build out the ENS Protocol Inspector and Developer PowerTools in [ENSAdmin](/ensadmin/), including:
+
+- Visual inspection tools for understanding ENS Protocol behavior
+- Testing and debugging capabilities for protocol interactions
+- Edge case exploration and documentation
+- Best practices validation for ENS integrations
+
+Rather than relying solely on historical documentation, the Protocol Inspector will provide an interactive way to understand how the ENS Protocol handles various scenarios, helping developers build more robust integrations.

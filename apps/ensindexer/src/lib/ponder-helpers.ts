@@ -1,37 +1,72 @@
 import type { Event } from "ponder:registry";
-import DeploymentConfigs, { ENSDeploymentChain } from "@ensnode/ens-deployments";
-import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
-import type { BlockInfo } from "@ensnode/ponder-metadata";
-import { merge as tsDeepMerge } from "ts-deepmerge";
 import { PublicClient } from "viem";
+
+import { Blockrange } from "@/lib/types";
+import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
+import { DEFAULT_ENSRAINBOW_URL, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import type { BlockInfo } from "@ensnode/ponder-metadata";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
 };
 
 /**
- * Given a global start and end block (defaulting to undefined), configures a ContractConfig to use
- * a start and end block that maintains validity within ponder (which requires that every contract's
- * start and end block be within the global range).
+ * Given a contract's start block, returns a block range describing a start and end block
+ * that maintains validity within the global blockrange. The returned start block will always be
+ * defined, but if no end block is specified, the returned end block will be undefined, indicating
+ * that ponder should index the contract in perpetuity.
  *
- * @param start minimum possible start block number for the current index
- * @param startBlock the preferred start block for the given contract
- * @param end maximum possible end block number for the current index
+ * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
  * @returns the start and end blocks, contrained to the provided `start` and `end`
- *  aka START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
+ *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
  */
-export const constrainBlockrange = (
-  start: number | undefined,
-  startBlock: number | undefined,
-  end: number | undefined,
-): {
-  startBlock: number | undefined;
-  endBlock: number | undefined;
-} => ({
-  // START_BLOCK < startBlock < (END_BLOCK || MAX_VALUE)
-  startBlock: Math.min(Math.max(start || 0, startBlock || 0), end || Number.MAX_SAFE_INTEGER),
-  endBlock: end,
-});
+export const constrainContractBlockrange = (
+  contractStartBlock: number | undefined = 0,
+): Blockrange => {
+  const { startBlock, endBlock } = getGlobalBlockrange();
+
+  const isEndConstrained = endBlock !== undefined;
+  const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
+
+  return {
+    startBlock: isEndConstrained ? Math.min(concreteStartBlock, endBlock) : concreteStartBlock,
+    endBlock,
+  };
+};
+
+/**
+ * Gets the global block range configured by the START_BLOCK and END_BLOCK environment variables,
+ * validating the range if specified.
+ *
+ * @returns blockrange of startBlock and endBlock
+ */
+export const getGlobalBlockrange = (): Blockrange => {
+  const startBlock = parseBlockheightEnvVar("START_BLOCK");
+  const endBlock = parseBlockheightEnvVar("END_BLOCK");
+
+  if (startBlock !== undefined && endBlock !== undefined) {
+    // the global range, if defined, must be start <= end
+    if (!(startBlock <= endBlock)) {
+      throw new Error(`END_BLOCK (${endBlock}) must be >= START_BLOCK (${startBlock})`);
+    }
+  }
+
+  return { startBlock, endBlock };
+};
+
+/**
+ * Parses an env var into a blockheight for ponder.
+ *
+ * @param envVarName Name of the environment variable to parse
+ * @returns The parsed block number if valid, undefined otherwise
+ */
+const parseBlockheightEnvVar = (envVarName: "START_BLOCK" | "END_BLOCK"): number | undefined => {
+  const envVarValue = process.env[envVarName];
+  if (!envVarValue) return undefined;
+  const num = parseInt(envVarValue, 10);
+  if (isNaN(num) || num < 0) throw new Error(`if specified, ${envVarName} must be a number >= 0`);
+  return num;
+};
 
 /**
  * Gets the RPC endpoint URL for a given chain ID.
@@ -39,7 +74,7 @@ export const constrainBlockrange = (
  * @param chainId the chain ID to get the RPC URL for
  * @returns the URL of the RPC endpoint
  */
-export const rpcEndpointUrl = (chainId: number): string => {
+export const rpcEndpointUrl = (chainId: number): string | undefined => {
   /**
    * Reads the RPC URL for a given chain ID from the environment variable:
    * RPC_URL_{chainId}. For example, for Ethereum mainnet the chainId is `1`,
@@ -55,12 +90,9 @@ export const rpcEndpointUrl = (chainId: number): string => {
   }
 };
 
-export const parseRpcEndpointUrl = (rawValue?: string): string => {
-  // no RPC URL provided
-  if (!rawValue) {
-    // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(`Expected value not set`);
-  }
+export const parseRpcEndpointUrl = (rawValue?: string): string | undefined => {
+  // no RPC URL provided, default to undefined
+  if (!rawValue) return undefined;
 
   try {
     return new URL(rawValue).toString();
@@ -148,20 +180,32 @@ export const parseEnsRainbowEndpointUrl = (rawValue?: string): string => {
   }
 };
 
-type AnyObject = { [key: string]: any };
-
 /**
- * Deep merge two objects recursively.
- * @param target The target object to merge into.
- * @param source The source object to merge from.
- * @returns The merged object.
+ * Creates a function that fetches ENSRainbow version information.
+ *
+ * @returns A function that fetches ENSRainbow version information
  */
-export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
-  target: T,
-  source: U,
-): T & U {
-  return tsDeepMerge(target, source) as T & U;
-}
+export const createEnsRainbowVersionFetcher = () => {
+  const client = new EnsRainbowApiClient({
+    endpointUrl: new URL(ensRainbowEndpointUrl()),
+  });
+
+  return async () => {
+    try {
+      const versionResponse = await client.version();
+      return {
+        version: versionResponse.versionInfo.version,
+        schema_version: versionResponse.versionInfo.schema_version,
+      };
+    } catch (error) {
+      console.error("Failed to fetch ENSRainbow version", error);
+      return {
+        version: "unknown",
+        schema_version: 0,
+      };
+    }
+  };
+};
 
 /**
  * Gets the ENS Deployment Chain, defaulting to mainnet.
@@ -172,12 +216,21 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
   const value = process.env.ENS_DEPLOYMENT_CHAIN;
   if (!value) return "mainnet";
 
-  const validValues = Object.keys(DeploymentConfigs);
+  const validValues = Object.keys(ENSDeployments);
   if (!validValues.includes(value)) {
     throw new Error(`Error: ENS_DEPLOYMENT_CHAIN must be one of ${validValues.join(" | ")}`);
   }
 
   return value as ENSDeploymentChain;
+};
+
+/**
+ * Get the ENSDeployment chain ID.
+ *
+ * @returns the ENSDeployment chain ID
+ */
+export const getEnsDeploymentChainId = (): number => {
+  return ENSDeployments[getEnsDeploymentChain()].root.chain.id;
 };
 
 /**
@@ -190,13 +243,35 @@ export const ensNodePublicUrl = (): string => {
   const envVarValue = process.env[envVarName];
 
   try {
-    return parseEnsNodePublicUrl(envVarValue);
+    return parseUrl(envVarValue);
   } catch (e: any) {
     throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
   }
 };
 
-export const parseEnsNodePublicUrl = (rawValue?: string): string => {
+const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
+
+/**
+ * Get the ENSAdmin URL.
+ *
+ * @returns the ENSAdmin URL
+ */
+export const ensAdminUrl = (): string => {
+  const envVarName = "ENSADMIN_URL";
+  const envVarValue = process.env[envVarName];
+
+  if (!envVarValue) {
+    return DEFAULT_ENSADMIN_URL;
+  }
+
+  try {
+    return parseUrl(envVarValue);
+  } catch (e: any) {
+    throw new Error(`Error parsing environment variable '${envVarName}': ${e.message}.`);
+  }
+};
+
+export const parseUrl = (rawValue?: string): string => {
   if (!rawValue) {
     throw new Error(`Expected value not set`);
   }
@@ -229,7 +304,7 @@ export const parsePonderDatabaseSchema = (rawValue?: string): string => {
   return rawValue;
 };
 
-export const requestedPluginNames = (): Array<string> => {
+export const getRequestedPluginNames = (): Array<string> => {
   const envVarName = "ACTIVE_PLUGINS";
   const envVarValue = process.env[envVarName];
 
@@ -241,11 +316,31 @@ export const requestedPluginNames = (): Array<string> => {
 };
 
 export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
-  if (!rawValue) {
-    throw new Error("Expected value not set");
+  if (!rawValue) throw new Error("Expected value not set");
+  const value = rawValue.split(",");
+  if (value.length === 0) {
+    throw new Error("ACTIVE_PLUGINS expected at least one activated plugin.");
   }
+  return value;
+};
 
-  return rawValue.split(",");
+export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
+
+/**
+ * Feature flag that determines whether the indexer should attempt healing
+ * reverse addresses.
+ *
+ * @returns decision whether to heal reverse addresses
+ */
+export const healReverseAddresses = (): boolean => {
+  const rawValue = process.env.HEAL_REVERSE_ADDRESSES;
+  if (!rawValue) return DEFAULT_HEAL_REVERSE_ADDRESSES;
+  if (rawValue === "true") return true;
+  if (rawValue === "false") return false;
+
+  throw new Error(
+    `Error parsing environment variable 'HEAL_REVERSE_ADDRESS': ${rawValue}' is not a valid value. Expected 'true' or 'false'.`,
+  );
 };
 
 /** Get the Ponder application port */
@@ -263,7 +358,7 @@ export const ponderPort = (): number => {
 /** Parse the Ponder application port */
 export const parsePonderPort = (rawValue?: string): number => {
   if (!rawValue) {
-    throw new Error("Expected value not set");
+    return 42069;
   }
 
   const parsedValue = parseInt(rawValue, 10);
@@ -328,9 +423,16 @@ export function createFirstBlockToIndexByChainIdFetcher(
     const startBlockNumberForChainId = startBlockNumbers[chainId];
 
     // each chain should have a start block number
-    if (!startBlockNumberForChainId) {
+    if (typeof startBlockNumberForChainId !== "number") {
       // throw an error if the start block number is not found for the chain ID
       throw new Error(`No start block number found for chain ID ${chainId}`);
+    }
+
+    if (startBlockNumberForChainId < 0) {
+      // throw an error if the start block number is invalid block number
+      throw new Error(
+        `Start block number "${startBlockNumberForChainId}" for chain ID ${chainId} must be a non-negative integer`,
+      );
     }
 
     const block = await publicClient.getBlock({
@@ -383,22 +485,22 @@ interface PonderNetworkConfig {
  * ```ts
  * const ponderConfig = {
  *  contracts: {
- *   "/eth/Registrar": {
+ *   "subgraph/Registrar": {
  *     network: {
  *       "1": { startBlock: 444_444_444 }
  *      }
  *   },
- *   "/eth/Registry": {
+ *   "subgraph/Registry": {
  *     network: {
  *       "1": { startBlock: 444_444_333 }
  *      }
  *   },
- *   "/eth/base/Registrar": {
+ *   "basenames/Registrar": {
  *     network: {
  *       "8453": { startBlock: 1_799_433 }
  *     }
  *   },
- *   "/eth/base/Registry": {
+ *   "basenames/Registry": {
  *     network: {
  *       "8453": { startBlock: 1_799_430 }
  *     }
@@ -429,13 +531,7 @@ export async function createStartBlockByChainIdMap(
     for (const contractNetworkConfig of Object.entries(contractConfig.network)) {
       // map string to number
       const chainId = Number(contractNetworkConfig[0]);
-      const startBlock = contractNetworkConfig[1].startBlock;
-
-      // fail if no start block number found for the chain ID
-      // (we don't want to index any contract from the genesis block)
-      if (!startBlock) {
-        throw new Error(`No start block number found for chain ID ${chainId}`);
-      }
+      const startBlock = contractNetworkConfig[1].startBlock || 0;
 
       // update the start block number for the chain ID if it's lower than the current one
       if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {

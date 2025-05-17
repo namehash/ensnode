@@ -2,14 +2,20 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm@10.10.0",
   "scripts": {
     "lint": "pnpm -r lint",
     "lint:ci": "pnpm -r lint:ci",
+    "test": "pnpm -r --parallel test run",
+    "typecheck": "pnpm -r --parallel typecheck",
     "changeset": "changeset",
-    "release": "changeset publish",
-    "version": "changeset version",
-    "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish"
+    "changeset-publish": "changeset publish",
+    "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish",
+    "docker:build:ensnode": "pnpm run docker:build:ensindexer && pnpm run docker:build:ensrainbow && pnpm run docker:build:ensadmin",
+    "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
+    "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
+    "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
+    "docker:build:ensrainbow.data": "docker build -f apps/ensrainbow/Dockerfile.data -t ensrainbow-data:latest ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -19,17 +25,25 @@
     "typescript": "catalog:"
   },
   "engines": {
-    "node": ">=18.20.5"
+    "node": ">=22.14.0"
   },
   "pnpm": {
     "overrides": {
       "@astrojs/prism>prismjs": "1.30.0",
+      "@babel/runtime": "7.26.10",
+      "@babel/helpers": "7.26.10",
       "@graphiql/react>@headlessui/react": "2.2.0",
-      "ponder>vite": "5.4.14",
+      "astro>vite": "6.2.7",
+      "@astrojs/react>vite": "6.2.7",
+      "vitest>vite": "6.2.7",
       "astro>esbuild": "0.25.0",
       "tsup>esbuild": "0.25.0",
       "tsx>esbuild": "0.25.0",
-      "vite>esbuild": "0.25.0"
-    }
+      "vite>esbuild": "0.25.0",
+      "vite": "^6.2.7"
+    },
+    "ignoredBuiltDependencies": [
+      "bun"
+    ]
   }
 }

@@ -1,28 +1,29 @@
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
-import type { Labelhash } from "@ensnode/utils/types";
+import type { LabelHash } from "@ensnode/utils";
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
+
 import { buildRainbowRecord } from "./rainbow-record";
 
 describe("buildRainbowRecord", () => {
   it("should parse a valid line", () => {
     const label = "test-label";
-    const validLabelhash = labelhash(label);
-    const line = `${validLabelhash}\t${label}`;
+    const validLabelHash = labelhash(label);
+    const line = `${validLabelHash}\t${label}`;
 
     const record = buildRainbowRecord(line);
     expect(record.label).toBe(label);
-    expect(record.labelHash).toEqual(labelHashToBytes(validLabelhash as Labelhash));
+    expect(record.labelHash).toEqual(labelHashToBytes(validLabelHash as LabelHash));
   });
 
   it("should handle labels with special characters", () => {
     const label = "test🚀label";
-    const validLabelhash = labelhash(label);
-    const line = `${validLabelhash}\t${label}`;
+    const validLabelHash = labelhash(label);
+    const line = `${validLabelHash}\t${label}`;
 
     const record = buildRainbowRecord(line);
     expect(record.label).toBe(label);
-    expect(record.labelHash).toEqual(labelHashToBytes(validLabelhash as Labelhash));
+    expect(record.labelHash).toEqual(labelHashToBytes(validLabelHash as LabelHash));
   });
 
   it("should throw on invalid line format", () => {
@@ -30,18 +31,18 @@ describe("buildRainbowRecord", () => {
     expect(() => buildRainbowRecord(invalidLine)).toThrow("Invalid line format");
   });
 
-  it("should throw on invalid labelhash format", () => {
+  it("should throw on invalid labelHash format", () => {
     const invalidLine = "not-a-hash\tsome-label";
-    expect(() => buildRainbowRecord(invalidLine)).toThrow("Invalid labelhash length");
+    expect(() => buildRainbowRecord(invalidLine)).toThrow("Invalid labelHash length");
   });
 
-  it("should handle a labelhash that does not match the label", () => {
+  it("should handle a labelHash that does not match the label", () => {
     const label = "test-label";
-    const wrongLabelhash = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-    const line = `${wrongLabelhash}\t${label}`;
+    const wrongLabelHash = "0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    const line = `${wrongLabelHash}\t${label}`;
 
     const record = buildRainbowRecord(line);
     expect(record.label).toBe(label);
-    expect(record.labelHash).toEqual(labelHashToBytes(wrongLabelhash as Labelhash));
+    expect(record.labelHash).toEqual(labelHashToBytes(wrongLabelHash as LabelHash));
   });
 });

@@ -1,16 +1,37 @@
 import AstroStarlight from "@astrojs/starlight";
 import { type AstroIntegration } from "astro";
+import starlightLlmsTxt from "starlight-llms-txt";
 import starlightSidebarTopics from "starlight-sidebar-topics";
-import starlightThemeRapide from "starlight-theme-rapide";
 
 export function starlight(): AstroIntegration {
   return AstroStarlight({
+    components: {
+      ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
+      ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
+      SocialIcons: "./src/components/overrides/SocialIcons.astro",
+      Hero: "./src/components/overrides/Hero.astro",
+      TableOfContents: "./src/components/overrides/TableOfContents.astro",
+      Search: "./src/components/overrides/DocsSearch.astro",
+    },
+    customCss: [
+      "./src/styles/globals.css",
+      "./src/styles/pagination.css",
+      "@fontsource/inter/100.css",
+      "@fontsource/inter/200.css",
+      "@fontsource/inter/300.css",
+      "@fontsource/inter/400.css",
+      "@fontsource/inter/500.css",
+      "@fontsource/inter/600.css",
+      "@fontsource/inter/700.css",
+      "@fontsource/inter/800.css",
+      "@fontsource/inter/900.css",
+    ],
     plugins: [
-      starlightThemeRapide(),
+      starlightLlmsTxt(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
-          link: "/ensnode/",
+          link: "/docs",
           icon: "star",
           items: [
             {
@@ -18,48 +39,78 @@ export function starlight(): AstroIntegration {
               items: [
                 {
                   label: "Quickstart",
-                  link: "/ensnode",
+                  link: "/docs",
+                },
+                {
+                  label: "What is the ENS Subgraph?",
+                  link: "/docs/concepts/what-is-the-ens-subgraph",
                 },
                 {
                   label: "What is ENSNode?",
-                  link: "/ensnode/concepts/what-is-ensnode",
+                  link: "/docs/concepts/what-is-ensnode",
                 },
                 {
-                  label: "What is ENS Subgraph?",
-                  link: "/ensnode/concepts/what-is-the-ens-subgraph",
+                  label: "ENSNode Roadmap",
+                  link: "/docs/concepts/roadmap",
                 },
               ],
             },
             {
               label: "Using ENSNode",
               collapsed: false,
-              autogenerate: { directory: "ensnode/usage" },
+              autogenerate: { directory: "docs/usage" },
             },
             {
               label: "Deploying ENSNode",
               collapsed: true,
-              autogenerate: { directory: "ensnode/deploying" },
+              autogenerate: { directory: "docs/deploying" },
             },
             {
               label: "Local ENSNode",
               collapsed: true,
-              autogenerate: { directory: "ensnode/running" },
+              autogenerate: { directory: "docs/running" },
             },
             {
               label: "Contributing",
               collapsed: true,
-              autogenerate: { directory: "ensnode/contributing" },
+              autogenerate: { directory: "docs/contributing" },
             },
             {
               label: "Reference",
               collapsed: true,
-              autogenerate: { directory: "ensnode/reference" },
+              autogenerate: { directory: "docs/reference" },
+            },
+          ],
+        },
+        {
+          label: "ENSIndexer",
+          link: "/ensindexer",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "What is ENSIndexer?",
+                  link: "/ensindexer",
+                },
+              ],
+            },
+            {
+              label: "Using ENSIndexer",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/usage" },
+            },
+            {
+              label: "Contributing",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/contributing" },
             },
           ],
         },
         {
           label: "ENSRainbow",
-          link: "/ensrainbow/",
+          link: "/ensrainbow",
           icon: "star",
           items: [
             {
@@ -68,6 +119,10 @@ export function starlight(): AstroIntegration {
                 {
                   label: "Quickstart",
                   link: "/ensrainbow",
+                },
+                {
+                  label: "What is ENSRainbow?",
+                  link: "/ensrainbow/overview/what-is-ensrainbow",
                 },
               ],
             },
@@ -90,7 +145,7 @@ export function starlight(): AstroIntegration {
         },
         {
           label: "ENSAdmin",
-          link: "/ensadmin/",
+          link: "/ensadmin",
           icon: "star",
           items: [
             {
@@ -99,6 +154,10 @@ export function starlight(): AstroIntegration {
                 {
                   label: "Quickstart",
                   link: "/ensadmin",
+                },
+                {
+                  label: "What is ENSAdmin?",
+                  link: "/ensadmin/overview/what-is-ensadmin",
                 },
               ],
             },
@@ -112,16 +171,58 @@ export function starlight(): AstroIntegration {
       ]),
     ],
     title: "ENSNode",
+    disable404Route: true,
     logo: {
       light: "./src/assets/light-logo.svg",
       dark: "./src/assets/dark-logo.svg",
       replacesTitle: true,
     },
-    social: {
-      github: "https://github.com/namehash/ensnode",
-    },
     editLink: {
       baseUrl: "https://github.com/namehash/ensnode/edit/main/docs/ensnode.io",
     },
+    head: [
+      {
+        tag: "meta",
+        attrs: {
+          property: "og:image",
+          content: "https://ensnode.io/OG_image.png",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:card",
+          content: "summary_large_image",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:image",
+          content: "https://ensnode.io/Twitter_OG_image.png",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:title",
+          content: "The new multichain indexer for ENSv2",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:description",
+          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+        },
+      },
+      {
+        tag: "meta",
+        attrs: {
+          name: "twitter:creator",
+          content: "@NameHashLabs",
+        },
+      },
+    ],
   });
 }

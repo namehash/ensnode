@@ -6,7 +6,7 @@ sidebar:
   order: 1
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 :::note
 This guide covers running ENSRainbow locally for development and contributions.
@@ -15,18 +15,23 @@ This guide covers running ENSRainbow locally for development and contributions.
 ## Local Development
 
 :::caution[Follow ENSNode's Contribution Guide First]
-Follow ENSNode's [contribution guide](/ensnode/contributing/) to prepare your workspace environment & install dependencies.
+Follow ENSNode's [contribution guide](/docs/contributing/) to prepare your workspace environment & install dependencies.
 :::
 
 ### Get the Rainbow Tables
 
-Our copies of the original ENS rainbow tables (6.37 GB) are stored in a public bucket.
+Our copies of the ENS rainbow tables are stored in a public bucket. You can download either the legacy (original) or v2 (extended) dataset using the following commands:
 
 ```bash
+# For legacy data
 pnpm run get-legacy-data
+
+# For v2 data
+pnpm run get-v2-data
 ```
 
-This command will:
+These commands will:
+
 - Download the required files (rainbow tables, checksum, and MIT license)
 - Automatically verify the checksum
 - Place the files in a convenient directory for subsequent use of the ingest command
@@ -76,6 +81,7 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 ### Database Management
 
 If you need to start fresh with the database:
+
 1. Stop any running ENSRainbow processes
 2. Delete the LevelDB data directory (default: './data')
 3. Run the ingest command again
@@ -97,7 +103,6 @@ If you need to start fresh with the database:
 - **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
 - **CPU**: Minimal requirements - operates well with low CPU resources
 
-
 ## Command Line Interface
 
 ENSRainbow provides a command-line interface (CLI) for managing the service. You can view detailed help for any command by adding `--help` after the command:
@@ -118,17 +123,20 @@ pnpm run validate [--data-dir path/to/db] [--lite]
 ```
 
 Validates database integrity by:
+
 - Verifying the keys for all rainbow records are valid labelhashes
 - Ensuring stored labels match their corresponding labelhashes
 - Validating the total rainbow record count
 - Verifying no ingestion was interrupted before successful completion
 
 The `--lite` option performs a faster, less thorough validation by skipping hash verification and record count validation. It only checks that:
+
 - The ingestion was completed successfully
 - The schema version is correct
 - The precalculated count exists and can be retrieved
 
 The process will exit with:
+
 - Code 0: Validation successful
 - Code 1: Validation failed or errors encountered
 
@@ -137,9 +145,11 @@ The process will exit with:
 ```bash
 pnpm run purge [--data-dir path/to/db]
 ```
+
 Completely removes all files from the specified data directory. This is useful when you need to start fresh with a clean database.
 
 The process will exit with:
+
 - Code 0: Successful purge
 - Code 1: Error during purge operation
 
@@ -150,5 +160,75 @@ pnpm run serve [--port 3223] [--data-dir path/to/db]
 ```
 
 Starts the API server. The process will exit with:
+
 - Code 0: Clean shutdown
 - Code 1: Error during operation
+
+## Using ENSRainbow with ens-test-env
+
+The ens-test-env project provides a test environment for ENS development. It includes a small dataset of ENS names in the `ens_test_env_names.sql.gz` file that can be used with ENSRainbow for testing purposes.
+
+### Ingesting ens_test_env_names.sql.gz
+
+To ingest the test data into ENSRainbow:
+
+```bash
+# Navigate to the ENSRainbow directory
+cd apps/ensrainbow
+
+# Ingest the test data
+pnpm ingest --input-file test/fixtures/ens_test_env_names.sql.gz --data-dir data_ens_test_env
+```
+
+### Validating the test data
+
+You can validate the ingested test data to ensure it was properly loaded:
+
+```bash
+# Validate the test data
+pnpm validate --data-dir data_ens_test_env
+```
+
+### Running ENSRainbow with the test data
+
+After ingesting the test data, you can run ENSRainbow with the test data:
+
+```bash
+# Start the ENSRainbow server with the test data
+pnpm serve --data-dir data_ens_test_env --port 3223
+```
+
+### Using with Docker
+
+You can also build a Docker image with the test data:
+
+```bash
+# Build a Docker image with the test data
+docker build -f apps/ensrainbow/Dockerfile.data \
+  --build-arg DATA_VERSION=test \
+  -t ghcr.io/namehash/ensnode/ensrainbow-test-data:latest .
+
+# Build the ENSRainbow image with the test data
+docker build -f apps/ensrainbow/Dockerfile \
+  --build-arg DATA_IMAGE_NAME=ensrainbow-test-data \
+  -t ghcr.io/namehash/ensnode/ensrainbow-test:latest .
+
+# Run the ENSRainbow container with the test data
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest
+```
+
+### Using Pre-built Docker Images
+
+Instead of building the Docker images yourself, you can also download the pre-built images directly from the GitHub Container Registry:
+
+```bash
+# Pull the pre-built ENSRainbow image with test data
+docker pull ghcr.io/namehash/ensnode/ensrainbow-test:latest
+
+# Run the ENSRainbow container with the pulled image
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest
+```
+
+This approach is faster and more convenient as it doesn't require building the images locally.
+
+This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.

@@ -1,21 +1,20 @@
-# Base working stage
-FROM node:18-slim
-ARG PNPM_VERSION=9.12.0
-RUN apt-get update && \
-    npm install -g pnpm@${PNPM_VERSION}
+FROM node:22-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV PONDER_COMMAND=start
+RUN corepack enable
 WORKDIR /app
 
-# Copy pnpm workspace configuration files from the root directory
-COPY pnpm-workspace.yaml ./
-# Copy the root package.json and lockfile
-COPY package.json pnpm-lock.yaml ./
-# Copy all pnpm workspace modules
-COPY apps ./apps
-COPY packages ./packages
-# Install dependencies for the entire monorepo
-RUN pnpm install --frozen-lockfile
-# Change to the specific app directory
-WORKDIR /app/apps/ensindexer
+# deps
+FROM base AS deps
+COPY . .
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
+# runner
+FROM deps AS runner
+WORKDIR /app/apps/ensindexer
+ENV NODE_ENV=production
 EXPOSE 42069
-CMD ["pnpm", "exec", "ponder", "start"]
+
+# NOTE: we use this $PONDER_COMMAND pattern because railway terraform provider can't override CMD
+CMD pnpm exec ponder $PONDER_COMMAND

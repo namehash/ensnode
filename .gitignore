@@ -20,3 +20,9 @@ dist
 # Ponder
 generated
 .ponder
+
+#jetbrains elements
+.idea
+
+# VSCode local history plugin
+.history

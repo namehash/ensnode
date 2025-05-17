@@ -1,3 +1,6 @@
+import { join } from "path";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
@@ -141,6 +144,7 @@ export function createCLI(options: CLIOptions = {}) {
 }
 
 // Only execute if this is the main module
-if (require.main === module) {
+const isMainModule = resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMainModule) {
   createCLI().parse(hideBin(process.argv));
 }
