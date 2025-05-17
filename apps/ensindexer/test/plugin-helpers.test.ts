@@ -1,6 +1,10 @@
+import { describe, expect, it } from "vitest";
+import { setupConfigMock } from "./utils/mockConfig";
+
+setupConfigMock();
+
 import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
-import { describe, expect, it } from "vitest";
 
 describe("createPluginNamespace", () => {
   it("should return a function that creates namespaced contract names", () => {
