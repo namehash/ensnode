@@ -32,6 +32,8 @@ jobs:
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
       # Terraform related envs
+      # Required for aws-actions/configure-aws-credentials@v4
+      # Should be the same as Terraform bucket state region
       AWS_REGION: us-east-1
       TF_VAR_railway_token: ${{ secrets.RAILWAY_TOKEN }}
       TF_VAR_mainnet_rpc_url: ${{ secrets.MAINNET_RPC_URL }}
@@ -195,8 +197,8 @@ jobs:
           #ENSRAINBOW
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
 
-      # Terraform deploy - deploy everytime new
-      - name: Set permissions
+      # Terraform deploy - deploy to test environment everytime new deployment is introduced to either green or blue environment
+      - name: Set full permissions to execute scripts (read / write / execute)
         working-directory: terraform
         run: |
           chmod 777 ./healthcheck.sh

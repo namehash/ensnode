@@ -11,19 +11,19 @@ locals {
 resource "railway_service" "ensindexer" {
   name         = "ensindexer"
   source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ens_indexer_version}"
-  project_id   = var.project_id
+  railway_project_id   = var.railway_project_id
   region = var.railway_region
 }
 
 resource "railway_service" "indexer_api" {
   name         = "indexer_api"
   source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ens_indexer_version}"
-  project_id   = var.project_id
+  railway_project_id   = var.railway_project_id
   region = var.railway_region
 }
 
 resource "railway_variable_collection" "ensindexer" {
-  environment_id = var.environment_id
+  railway_environment_id = var.railway_environment_id
   service_id     = railway_service.ensindexer.id
 
   variables = [
@@ -92,7 +92,7 @@ resource "railway_variable_collection" "ensindexer" {
 
 
 resource "railway_variable_collection" "api" {
-  environment_id = var.environment_id
+  railway_environment_id = var.railway_environment_id
   service_id     = railway_service.indexer_api.id
 
   variables = [

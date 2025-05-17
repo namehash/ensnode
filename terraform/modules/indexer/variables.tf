@@ -1,12 +1,13 @@
 variable "railway_token" {
   type = string
+  description = "API token generated for account workspace. Visit https://railway.com/account/tokens"
 }
 
-variable "project_id" {
+variable "railway_project_id" {
   type = string
 }
 
-variable "environment_id" {
+variable "railway_environment_id" {
   type = string
 }
 

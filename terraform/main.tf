@@ -16,11 +16,11 @@ resource "railway_project" "this" {
 }
 
 module "postgres" {
-  source         = "./modules/indexer_database"
+  source         = "./modules/database"
   railway_region = local.railway_region
   railway_token  = var.railway_token
-  project_id     = railway_project.this.id
-  environment_id = railway_project.this.default_environment.id
+  railway_project_id     = railway_project.this.id
+  railway_environment_id = railway_project.this.default_environment.id
 }
 
 module "holesky_indexer" {
@@ -38,8 +38,8 @@ module "holesky_indexer" {
   #Common envs
   railway_region  = local.railway_region
   railway_token   = var.railway_token
-  project_id      = railway_project.this.id
-  environment_id  = railway_project.this.default_environment.id
+  railway_project_id      = railway_project.this.id
+  railway_environment_id  = railway_project.this.default_environment.id
   database_url    = "$${{${module.postgres.database_instance_name}.DATABASE_URL}}"
   mainnet_rpc_url = var.mainnet_rpc_url
   sepolia_rpc_url = var.sepolia_rpc_url

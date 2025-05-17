@@ -11,7 +11,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "namehash-railway-terraform"
+    bucket = "ensnode-terraform"
     key = "tfstate"
     region = "us-east-1"
   }

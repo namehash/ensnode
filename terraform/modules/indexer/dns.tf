@@ -10,13 +10,13 @@ data "aws_route53_zone" "ensnode" {
 
 resource "railway_custom_domain" "indexer" {
   domain         = local.indexer_domain
-  environment_id = var.environment_id
+  railway_environment_id = var.railway_environment_id
   service_id     = railway_service.ensindexer.id
 }
 
 resource "railway_custom_domain" "api" {
   domain         = local.api_domain
-  environment_id = var.environment_id
+  railway_environment_id = var.railway_environment_id
   service_id     = railway_service.indexer_api.id
 }
 

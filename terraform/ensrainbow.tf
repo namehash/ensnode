@@ -9,14 +9,14 @@ data "aws_route53_zone" "ensnode" {
 
 resource "railway_service" "ensrainbow" {
   name         = "ensrainbow"
-  project_id   = railway_project.this.id
+  railway_project_id   = railway_project.this.id
   source_image = "ghcr.io/namehash/ensnode/ensrainbow:${local.ensnode_version}"
   region       = local.railway_region
 }
 
 resource "railway_custom_domain" "ensrainbow" {
   domain         = local.ensrainbow_domain
-  environment_id = railway_project.this.default_environment.id
+  railway_environment_id = railway_project.this.default_environment.id
   service_id     = railway_service.ensrainbow.id
 }
 
