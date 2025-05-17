@@ -1,6 +1,6 @@
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
-import * as z from "zod";
+import { z } from "zod/v4";
 
 export const DEFAULT_RPC_RATE_LIMIT = 50;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
@@ -8,51 +8,11 @@ export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_DEPLOYMENT = "mainnet";
 
-// This validates URLs but also accepts localhost URLs. The zod equivalent of this is .url()
-// but it doesn't accept localhost URLs.
-// Issue here: https://github.com/colinhacks/zod/issues/4103
-// Once this is fixed we should be able to use .url() instead with custom errors.
-const url = (envVarKey: string) => {
-  return (
-    z
-      .string({
-        // This error handler is primarily for the case where the input is not a string type at all
-        // (e.g., undefined if it wasn't handled by a .default() before this schema, or a number).
-        error: (issue) => {
-          if (issue.code === "invalid_type") {
-            return `${envVarKey} must be a string. Received type: ${typeof issue.input}.`;
-          }
-          // This is a fallback if it's a string but somehow fails the base string check
-          // before .min() or .refine() are even reached (less common).
-          return `${envVarKey} has an invalid string value. Please check the format.`;
-        },
-      })
-      // Step 1: Ensure the string, if provided, is not empty or just whitespace.
-      // The .trim() method is applied first, then .min(1) checks the length of the trimmed string.
-      .trim()
-      .min(1, { error: `${envVarKey} is required and cannot be empty.` })
-      // Step 2: If the string is non-empty, then try to parse it as a URL.
-      // This .refine() will only execute if the .min(1) check (on the trimmed string) passes.
-      .refine(
-        (val) => {
-          // val is guaranteed by .min(1) to be a non-empty string at this point.
-          try {
-            new URL(val);
-            return true;
-          } catch {
-            return false;
-          }
-        },
-        {
-          // This message is for when the string is non-empty but not a valid URL format.
-          error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-        },
-      )
-  );
-};
-
 const ChainConfigSchema = z.object({
-  rpcEndpointUrl: url("RPC_URL"),
+  rpcEndpointUrl: z.url({
+    error:
+      "RPC_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
+  }),
 
   rpcMaxRequestsPerSecond: z.coerce
     .number({ error: "RPC max requests per second must be an integer." })
@@ -92,9 +52,17 @@ export const ENSIndexerConfigSchema = z.object({
       { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
     ),
 
-  ensNodePublicUrl: url("ENSNODE_PUBLIC_URL"),
+  ensNodePublicUrl: z.url({
+    error:
+      "ENSNODE_PUBLIC_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
+  }),
 
-  ensAdminUrl: url("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL),
+  ensAdminUrl: z
+    .url({
+      error:
+        "ENSADMIN_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
+    })
+    .default(DEFAULT_ENSADMIN_URL),
 
   ponderDatabaseSchema: z
     .string({
@@ -141,7 +109,10 @@ export const ENSIndexerConfigSchema = z.object({
     .max(65535, { error: "PORT must be an integer between 1 and 65535." })
     .default(DEFAULT_PORT),
 
-  ensRainbowEndpointUrl: url("ENSRAINBOW_URL"),
+  ensRainbowEndpointUrl: z.url({
+    error:
+      "ENSRAINBOW_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
+  }),
 
   indexedChains: z.record(z.string().transform(Number), ChainConfigSchema, {
     error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",

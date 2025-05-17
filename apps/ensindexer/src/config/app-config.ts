@@ -1,6 +1,6 @@
 import { ENSIndexerConfigSchema } from "@/config/config.schema";
 import { ENSIndexerConfig, ENSIndexerEnvironment, RawChainConfig } from "@/config/types";
-import z from "zod";
+import { z } from "zod/v4";
 
 /**
  * Extracts dynamic chain configuration from environment variables.

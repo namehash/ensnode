@@ -159,14 +159,16 @@ describe("config", () => {
     it("throws an error if ENSNODE_PUBLIC_URL is empty", async () => {
       process.env.ENSNODE_PUBLIC_URL = "";
       const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(/URL is required and cannot be empty/i);
+      await expect(freshConfigPromise).rejects.toThrow(
+        /ENSNODE_PUBLIC_URL must be a valid URL string/i,
+      );
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is undefined (explicitly testing the refine)", async () => {
       delete process.env.ENSNODE_PUBLIC_URL;
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ENSNODE_PUBLIC_URL must be a string. Received type: undefined/i,
+        /ENSNODE_PUBLIC_URL must be a valid URL string/i,
       );
     });
 
@@ -222,7 +224,7 @@ describe("config", () => {
       delete process.env.ENSRAINBOW_URL;
       const freshConfigPromise = getFreshConfig();
       await expect(freshConfigPromise).rejects.toThrow(
-        /ENSRAINBOW_URL must be a string. Received type: undefined/i,
+        /ENSRAINBOW_URL must be a valid URL string/i,
       );
     });
   });
