@@ -84,10 +84,18 @@ export const makeRegistryHandlers = ({ pluginName }: { pluginName: PluginName })
           // 1. if healing label from reverse addresses is enabled, and the parent is a known
           //    reverse node (i.e. addr.reverse), give it a go
           if (healReverseAddresses() && REVERSE_ROOT_NODES.has(parentNode)) {
-            healedLabel = maybeHealLabelByReverseAddress({
-              maybeReverseAddress: event.transaction.from,
-              labelHash,
-            });
+            // first, try to heal the label from the transaction sender
+            // this is a fallback for cases where the owner was not set correctly
+            // on the contract (e.g. due to a bug in the contract or a buggy proxy)
+            healedLabel =
+              maybeHealLabelByReverseAddress({
+                maybeReverseAddress: event.transaction.from,
+                labelHash,
+              }) ??
+              maybeHealLabelByReverseAddress({
+                maybeReverseAddress: event.args.owner,
+                labelHash,
+              });
           }
 
           // 2. if reverse address healing didn't work, try ENSRainbow

@@ -4,12 +4,15 @@ import { anvil } from "viem/chains";
 import { ResolverConfig } from "./lib/resolver";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
+import { ArgentWalletFactory as root_ArgentWalletFactory } from "./abis/root/ArgentWalletFactory";
+import { ArgentWalletFactory2 as root_ArgentWalletFactory2 } from "./abis/root/ArgentWalletFactory2";
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
+
 import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
 
 const deploymentAddresses = getENSTestEnvDeploymentAddresses();
@@ -80,6 +83,16 @@ export default {
         abi: root_NameWrapper,
         address: deploymentAddresses?.NameWrapper ?? EMPTY_ADDRESS,
         startBlock: 0,
+      },
+      ArgentWalletFactory: {
+        abi: root_ArgentWalletFactory,
+        address: "0x851cC731ce1613AE4FD8EC7F61F4B350F9CE1020",
+        startBlock: 7086166,
+      },
+      ArgentWalletFactory2: {
+        abi: root_ArgentWalletFactory2,
+        address: "0x40C84310Ef15B0c0E5c69d25138e0E16e8000fE9",
+        startBlock: 7086166,
       },
     },
   },
