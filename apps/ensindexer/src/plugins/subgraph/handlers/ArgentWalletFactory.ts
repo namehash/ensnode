@@ -42,24 +42,18 @@ async function handleWalletCreated(
   const createdWalletLabelHash = labelHashForReverseAddress(createdWalletAddress);
   const node = makeSubdomainNode(createdWalletLabelHash, REVERSE_ROOT_NODE);
 
-  // Find a related `NewOwner` event entity in database that was handled
-  // just before the currently handled `WalletCreated` event.
-  // The recorded `NewOwner` event entity was created within the same transaction
-  // and with reverse root node as parent domain ID.
-  //
-  // NOTE: We leverage the fact that `WalletCreated` event is the very last event
-  // emitted within the ArgentWalletFactory transaction
-  const newOwnerForReverseDomain = await context.db.find(schema.newOwner, {
-    domainId: node,
-    parentDomainId: REVERSE_ROOT_NODE,
-    transactionID: event.transaction.hash,
+  const reverseDomain = await context.db.find(schema.domain, {
+    id: node,
   });
 
-  // invariant: a related `NewOwner` event entity must exist within the current transaction
-  if (!newOwnerForReverseDomain) {
-    throw new Error(
-      `A related newOwner for "${createdWalletAddress}" reverse address must exist within the "${event.transaction.hash}" transaction`,
-    );
+  if (!reverseDomain) {
+    console.log("Unknown ArgentWalletFactory:WalletCreated", {
+      domainId: node,
+      transactionID: event.transaction.hash,
+      wallet: createdWalletAddress,
+    });
+
+    return;
   }
   const healedLabel = maybeHealLabelByReverseAddress({
     maybeReverseAddress: createdWalletAddress,
