@@ -20,7 +20,7 @@ export const validateGlobalBlockrange = (
   
   The config currently is:
   ENS_DEPLOYMENT_CHAIN=${ensDeploymentChain}
-  ACTIVE_PLUGINS=${plugins.join(",")}
+  ACTIVE_PLUGINS=${Array.from(plugins).join(",")}
   START_BLOCK=${globalBlockrange.startBlock || "n/a"}
   END_BLOCK=${globalBlockrange.endBlock || "n/a"}
   
@@ -51,9 +51,10 @@ export const validateChainConfigs = (
   const allChainIds = Object.values(ponderConfig.networks).map((network) => network.chainId);
 
   if (!allChainIds.every((chainId) => doesRpcUrlExistForChain(config, chainId))) {
-    throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${plugins.join(
-      ", ",
-    )}.
+    throw new Error(
+      `ENSNode has been configured with the following ACTIVE_PLUGINS: ${Array.from(plugins).join(
+        ", ",
+      )}.
     These plugins, collectively, index events from the following chains: ${allChainIds.join(", ")}.
     
     The following RPC_URL_* environment variables must be defined for nominal indexing behavior:
@@ -63,7 +64,8 @@ export const validateChainConfigs = (
           `RPC_URL_${chainId}: ${config.indexedChains[chainId]?.rpcEndpointUrl || "N/A"}`,
       )
       .join("\n    ")}
-    `);
+    `,
+    );
   }
 };
 

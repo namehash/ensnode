@@ -24,11 +24,12 @@ function deepClone<T>(obj: T): T {
 
 // Default, non-exported mock configuration template
 const _defaultMockConfig: ENSIndexerConfig = {
+  databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   ensDeploymentChain: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  plugins: [PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames],
+  plugins: new Set([PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames]),
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: DEFAULT_PORT,
