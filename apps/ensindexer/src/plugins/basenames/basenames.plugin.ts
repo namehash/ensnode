@@ -7,7 +7,6 @@ import {
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
-  validateContractConfigs,
 } from "@/lib/plugin-helpers";
 import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
@@ -22,9 +21,6 @@ export const requiredDatasources = [DatasourceName.Basenames];
 // extract the chain and contract configs for Basenames Datasource in order to build ponder config
 const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Basenames];
 const namespace = makePluginNamespace(pluginName);
-
-// validate runtime contract config
-validateContractConfigs(pluginName, contracts);
 
 export const config = createConfig({
   networks: networksConfigForChain(appConfig, chain.id),

@@ -1,3 +1,4 @@
+import { validateContractConfigs } from "@/config/validations";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 import { parse as parseConnectionString } from "pg-connection-string";
@@ -157,16 +158,44 @@ const parseDatabaseUrl = () =>
     },
   );
 
-export const ENSIndexerConfigSchema = z.object({
-  ensDeploymentChain: parseEnsDeploymentChain(),
-  globalBlockrange: parseGlobalBlockrange(),
-  ensNodePublicUrl: parseEnsNodePublicUrl(),
-  ensAdminUrl: parseEnsAdminUrl(),
-  ponderDatabaseSchema: parsePonderDatabaseSchema(),
-  plugins: parsePlugins(),
-  healReverseAddresses: parseHealReverseAddresses(),
-  port: parsePort(),
-  ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
-  indexedChains: parseIndexedChains(),
-  databaseUrl: parseDatabaseUrl(),
-});
+/**
+ * This function performs invariant checks on the configuration after the schema
+ * has been validated against the zod schema. Here there are more complex checks
+ * beyond the zod schema that we can perform to ensure the configuration is valid.
+ *
+ * Any checks which test multiple fields and their relationships should be performed
+ * here.
+ *
+ * Invariants:
+ * - Each plugin has a correct address defined for each contract
+ *
+ *  @throws {Error} If the configuration is invalid.
+ *  @param config - The configuration to check.
+ * @returns `true` if the configuration is valid, otherwise an error is thrown.
+ */
+const schemaInvariantChecks = (config: z.infer<typeof ENSIndexerConfigSchema>) => {
+  // Invariant for each plugin to check all contracts have a correct address defined
+  config.plugins.forEach((plugin) => {
+    validateContractConfigs(plugin, config.ensDeploymentChain);
+  });
+
+  return true;
+};
+
+export const ENSIndexerConfigSchema = z
+  .object({
+    ensDeploymentChain: parseEnsDeploymentChain(),
+    globalBlockrange: parseGlobalBlockrange(),
+    ensNodePublicUrl: parseEnsNodePublicUrl(),
+    ensAdminUrl: parseEnsAdminUrl(),
+    ponderDatabaseSchema: parsePonderDatabaseSchema(),
+    plugins: parsePlugins(),
+    healReverseAddresses: parseHealReverseAddresses(),
+    port: parsePort(),
+    ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
+    indexedChains: parseIndexedChains(),
+    databaseUrl: parseDatabaseUrl(),
+  })
+  .refine(schemaInvariantChecks, {
+    error: "Invalid configuration. Please check your config file and try again.",
+  });

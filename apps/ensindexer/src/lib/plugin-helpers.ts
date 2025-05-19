@@ -1,9 +1,10 @@
-import type { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
+import { ContractConfig, DatasourceName, ENSDeploymentChain } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Address, Chain, isAddress } from "viem";
 
 import config from "@/config/app-config";
 import { ENSIndexerConfig } from "@/config/types";
+import { MERGED_ENS_DEPLOYMENT, SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
@@ -174,7 +175,7 @@ export function networksConfigForChain(config: ENSIndexerConfig, chainId: number
       // this will not be undefined.
       maxRequestsPerSecond: config.indexedChains[chainId]?.rpcMaxRequestsPerSecond,
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
-      ...(chainId === 31337 && { disableCache: true }),
+      ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies NetworkConfig,
   };
 }
@@ -223,32 +224,4 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
   const [label] = name.split(".");
 
   return [label, name];
-}
-
-/**
- * Validates runtime contract configuration.
- *
- * @param contracts - An array of contract configurations to validate
- * @throws {Error} If any contract with an address field has an invalid address format
- */
-export function validateContractConfigs<CONTRACT_CONFIGS extends Record<string, ContractConfig>>(
-  pluginName: PluginName,
-  contracts: CONTRACT_CONFIGS,
-) {
-  // invariant: `contracts` must provide valid addresses if a filter is not provided
-  //  (see packages/ens-deployments/src/ens-test-env.ts) for context
-  const hasAddresses = Object.values(contracts)
-    .filter((config) => "address" in config) // only ContractConfigs with `address` defined
-    .every((config) => isAddress(config.address as Address)); // must be a valid `Address`
-
-  if (!hasAddresses) {
-    throw new Error(
-      `The ENSDeployment '${
-        config.ensDeploymentChain
-      }' provided to the '${pluginName}' plugin does not define valid addresses. This occurs if the 'address' of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
-
-Here are the contract configs we attempted to validate:
-${JSON.stringify(contracts)}`,
-    );
-  }
 }
