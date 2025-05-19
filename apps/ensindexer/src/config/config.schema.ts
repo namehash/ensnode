@@ -8,28 +8,34 @@ export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_DEPLOYMENT = "mainnet";
 
-const ChainConfigSchema = z.object({
-  rpcEndpointUrl: z.url({
-    error:
-      "RPC_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
-  }),
-
-  rpcMaxRequestsPerSecond: z.coerce
-    .number({ error: "RPC max requests per second must be an integer." })
-    .int({ error: "RPC max requests per second must be an integer." })
-    .min(1, { error: "RPC max requests per second must be at least 1." })
-    .default(DEFAULT_RPC_RATE_LIMIT),
-});
-
-const BlockNumberSchema = (envVarKey: string) =>
+const parseBlockNumber = (envVarKey: string) =>
   z.coerce
     .number({ error: `${envVarKey} must be a positive integer.` })
     .int({ error: `${envVarKey} must be a positive integer.` })
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
-export const ENSIndexerConfigSchema = z.object({
-  ensDeploymentChain: z
+const parseRpcEndpointUrl = () =>
+  z.url({
+    error:
+      "RPC_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
+  });
+
+const parseRpcMaxRequestsPerSecond = () =>
+  z.coerce
+    .number({ error: "RPC max requests per second must be an integer." })
+    .int({ error: "RPC max requests per second must be an integer." })
+    .min(1, { error: "RPC max requests per second must be at least 1." })
+    .default(DEFAULT_RPC_RATE_LIMIT);
+
+const parseChainConfig = () =>
+  z.object({
+    rpcEndpointUrl: parseRpcEndpointUrl(),
+    rpcMaxRequestsPerSecond: parseRpcMaxRequestsPerSecond(),
+  });
+
+const parseEnsDeploymentChain = () =>
+  z
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
         return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
@@ -37,12 +43,13 @@ export const ENSIndexerConfigSchema = z.object({
         ).join(", ")}`;
       },
     })
-    .default(DEFAULT_DEPLOYMENT),
+    .default(DEFAULT_DEPLOYMENT);
 
-  globalBlockrange: z
+const parseGlobalBlockrange = () =>
+  z
     .object({
-      startBlock: BlockNumberSchema("START_BLOCK"),
-      endBlock: BlockNumberSchema("END_BLOCK"),
+      startBlock: parseBlockNumber("START_BLOCK"),
+      endBlock: parseBlockNumber("END_BLOCK"),
     })
     .refine(
       (val) =>
@@ -50,30 +57,34 @@ export const ENSIndexerConfigSchema = z.object({
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
       { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
-    ),
+    );
 
-  ensNodePublicUrl: z.url({
+const parseEnsNodePublicUrl = () =>
+  z.url({
     error:
       "ENSNODE_PUBLIC_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
-  }),
+  });
 
-  ensAdminUrl: z
+const parseEnsAdminUrl = () =>
+  z
     .url({
       error:
         "ENSADMIN_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
     })
-    .default(DEFAULT_ENSADMIN_URL),
+    .default(DEFAULT_ENSADMIN_URL);
 
-  ponderDatabaseSchema: z
+const parsePonderDatabaseSchema = () =>
+  z
     .string({
       error: "DATABASE_SCHEMA is required.",
     })
     .trim()
     .min(1, {
       error: "DATABASE_SCHEMA is required and cannot be an empty string.",
-    }),
+    });
 
-  plugins: z.coerce
+const parsePlugins = () =>
+  z.coerce
     .string()
     .transform((val) => val.split(",").filter(Boolean))
     .pipe(
@@ -94,9 +105,10 @@ export const ENSIndexerConfigSchema = z.object({
     .refine((arr) => arr.length === new Set(arr).size, {
       error: "ACTIVE_PLUGINS cannot contain duplicate values",
     })
-    .transform((arr) => new Set(arr)),
+    .transform((arr) => new Set(arr));
 
-  healReverseAddresses: z
+const parseHealReverseAddresses = () =>
+  z
     .string()
     .pipe(
       z.enum(["true", "false"], {
@@ -104,21 +116,36 @@ export const ENSIndexerConfigSchema = z.object({
       }),
     )
     .transform((val) => val === "true")
-    .default(DEFAULT_HEAL_REVERSE_ADDRESSES),
+    .default(DEFAULT_HEAL_REVERSE_ADDRESSES);
 
-  port: z.coerce
+const parsePort = () =>
+  z.coerce
     .number({ error: "PORT must be an integer." })
     .int({ error: "PORT must be an integer." })
     .min(1, { error: "PORT must be an integer between 1 and 65535." })
     .max(65535, { error: "PORT must be an integer between 1 and 65535." })
-    .default(DEFAULT_PORT),
+    .default(DEFAULT_PORT);
 
-  ensRainbowEndpointUrl: z.url({
+const parseEnsRainbowEndpointUrl = () =>
+  z.url({
     error:
       "ENSRAINBOW_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
-  }),
+  });
 
-  indexedChains: z.record(z.string().transform(Number), ChainConfigSchema, {
+const parseIndexedChains = () =>
+  z.record(z.string().transform(Number), parseChainConfig(), {
     error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
-  }),
+  });
+
+export const ENSIndexerConfigSchema = z.object({
+  ensDeploymentChain: parseEnsDeploymentChain(),
+  globalBlockrange: parseGlobalBlockrange(),
+  ensNodePublicUrl: parseEnsNodePublicUrl(),
+  ensAdminUrl: parseEnsAdminUrl(),
+  ponderDatabaseSchema: parsePonderDatabaseSchema(),
+  plugins: parsePlugins(),
+  healReverseAddresses: parseHealReverseAddresses(),
+  port: parsePort(),
+  ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
+  indexedChains: parseIndexedChains(),
 });
