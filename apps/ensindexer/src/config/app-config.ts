@@ -1,5 +1,6 @@
 import { ENSIndexerConfigSchema } from "@/config/config.schema";
 import { ENSIndexerConfig, ENSIndexerEnvironment, RawChainConfig } from "@/config/types";
+import { ENSDeploymentGlobalType, ENSDeployments } from "@ensnode/ens-deployments";
 import { z } from "zod/v4";
 
 /**
@@ -91,7 +92,12 @@ function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSInde
     );
   }
 
-  return parsed.data;
+  return {
+    ...parsed.data,
+    selectedEnsDeployment: ENSDeployments[
+      parsed.data.ensDeploymentChain
+    ] as ENSDeploymentGlobalType,
+  };
 }
 
 export default buildConfigFromEnvironment(parseEnvironment());

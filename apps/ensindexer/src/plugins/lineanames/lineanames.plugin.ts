@@ -1,7 +1,6 @@
 import { createConfig } from "ponder";
 
 import { default as appConfig } from "@/config/app-config";
-import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
   makePluginNamespace,
@@ -20,7 +19,7 @@ export const pluginName = PluginName.Lineanames;
 export const requiredDatasources = [DatasourceName.Lineanames];
 
 // extract the chain and contract configs for Lineanames Datasource in order to build ponder config
-const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Lineanames];
+const { chain, contracts } = appConfig.selectedEnsDeployment[DatasourceName.Lineanames];
 const namespace = makePluginNamespace(pluginName);
 
 // validate runtime contract config

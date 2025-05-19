@@ -1,4 +1,4 @@
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { type ENSDeploymentGlobalType, ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { z } from "zod/v4";
@@ -157,16 +157,24 @@ const parseDatabaseUrl = () =>
     },
   );
 
-export const ENSIndexerConfigSchema = z.object({
-  ensDeploymentChain: parseEnsDeploymentChain(),
-  globalBlockrange: parseGlobalBlockrange(),
-  ensNodePublicUrl: parseEnsNodePublicUrl(),
-  ensAdminUrl: parseEnsAdminUrl(),
-  ponderDatabaseSchema: parsePonderDatabaseSchema(),
-  plugins: parsePlugins(),
-  healReverseAddresses: parseHealReverseAddresses(),
-  port: parsePort(),
-  ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
-  indexedChains: parseIndexedChains(),
-  databaseUrl: parseDatabaseUrl(),
-});
+const parseSelectedEnsDeployment = () => z.custom<ENSDeploymentGlobalType>();
+
+export const ENSIndexerConfigSchema = z.object(
+  {
+    ensDeploymentChain: parseEnsDeploymentChain(),
+    globalBlockrange: parseGlobalBlockrange(),
+    ensNodePublicUrl: parseEnsNodePublicUrl(),
+    ensAdminUrl: parseEnsAdminUrl(),
+    ponderDatabaseSchema: parsePonderDatabaseSchema(),
+    plugins: parsePlugins(),
+    healReverseAddresses: parseHealReverseAddresses(),
+    port: parsePort(),
+    ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
+    indexedChains: parseIndexedChains(),
+    databaseUrl: parseDatabaseUrl(),
+    selectedEnsDeployment: parseSelectedEnsDeployment(),
+  },
+  {
+    error: "Indexed chains must include all chains in the selected deployment.",
+  },
+);

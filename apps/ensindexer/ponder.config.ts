@@ -1,6 +1,5 @@
 import config from "@/config/app-config";
 import { validateConfig } from "@/config/validations";
-import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { MergedTypes, getActivePlugins } from "@/lib/plugin-helpers";
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
@@ -37,7 +36,7 @@ export type MergedPonderConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number][
 ////////
 
 // the available Datasources are those that the selected ENSDeployment defines
-const availableDatasourceNames = Object.keys(SELECTED_ENS_DEPLOYMENT) as DatasourceName[];
+const availableDatasourceNames = Object.keys(config.selectedEnsDeployment) as DatasourceName[];
 
 // filter the set of available plugins by those that are 'active'
 const activePlugins = getActivePlugins(AVAILABLE_PLUGINS, config.plugins, availableDatasourceNames);
