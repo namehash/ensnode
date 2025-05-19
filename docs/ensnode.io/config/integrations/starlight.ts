@@ -12,6 +12,7 @@ export function starlight(): AstroIntegration {
       Hero: "./src/components/overrides/Hero.astro",
       TableOfContents: "./src/components/overrides/TableOfContents.astro",
       Search: "./src/components/overrides/DocsSearch.astro",
+      EditLink: "./src/components/overrides/EditLink.astro",
     },
     customCss: [
       "./src/styles/globals.css",
@@ -213,7 +214,8 @@ export function starlight(): AstroIntegration {
         tag: "meta",
         attrs: {
           name: "twitter:description",
-          content: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+          content:
+            "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
         },
       },
       {

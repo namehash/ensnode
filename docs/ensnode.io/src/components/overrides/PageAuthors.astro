@@ -1,0 +1,195 @@
+---
+interface Props {
+  repo: string;
+  file: string;
+}
+const { repo, file } = Astro.props;
+
+const url = new URL(`https://api.github.com/repos/${repo}/commits`);
+
+url.searchParams.set('path', file);
+url.searchParams.set('per_page', '100');
+
+let commits = [];
+let error = null;
+try {
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'ensnode-contributors/1.0',
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`GitHub API returned ${response.status}`);
+  }
+
+  commits = await response.json();
+} catch (e) {
+  error = e;
+  console.error('Error fetching contributors:', e);
+}
+
+function filterAndRemoveDuplicates(commits) {
+  if (!commits || !Array.isArray(commits)) return [];
+
+
+
+  const map = new Map();
+  for (const commit of commits) {
+    const author = commit.author;
+
+    // Skip bot commits (like dependabot)
+    if (author && author.id && author.login && !author.login.includes('bot')) {
+      map.set(author.id, {
+        login: author.login,
+        id: author.id,
+        name: commit.commit?.author?.name || author.login,
+        date: commit.commit?.author?.date || '',
+        message: commit.commit?.message?.split('\n')[0] || ''
+      });
+    }
+  }
+
+  return Array.from(map.values())
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+
+const uniqueAuthors = filterAndRemoveDuplicates(commits);
+
+
+const MAX_AUTHORS_TO_SHOW = 12;
+const displayedAuthors = uniqueAuthors.slice(0, MAX_AUTHORS_TO_SHOW);
+
+
+const hasMoreAuthors = uniqueAuthors.length > MAX_AUTHORS_TO_SHOW;
+const additionalAuthorsCount = uniqueAuthors.length - MAX_AUTHORS_TO_SHOW;
+---
+
+
+
+{error && import.meta.env.DEV && (
+  <div class="page-authors error">
+    <p>Unable to load page authors: {error.message}</p>
+  </div>
+)}
+
+{!error && displayedAuthors.length > 0 && (
+  <div class="page-authors">
+    <p>Contributions by {hasMoreAuthors && <span class="more-authors">+{additionalAuthorsCount} more</span>}</p>
+    <ul class="smol-avatar-list not-content">
+      {displayedAuthors.map(({ login, id, name, message }) => (
+        <li>
+          <a
+            href={`https://github.com/${login}`}
+            title={`${name || login}${message ? `: ${message}` : ''}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              alt={`Contributor ${name || login}`}
+              width="64"
+              height="64"
+              src={`https://avatars.githubusercontent.com/u/${id}`}
+              loading="lazy"
+            />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
+<style define:vars={{ 'avatar-count': displayedAuthors.length || 0 }}>
+.page-authors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+}
+
+.page-authors p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--sl-color-gray-4);
+}
+
+.more-authors {
+  font-size: 0.8em;
+  font-weight: normal;
+  color: var(--sl-color-gray-3);
+}
+
+.page-authors.error {
+  color: var(--sl-color-text-accent);
+  font-style: italic;
+}
+
+.debug-info {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Thank you Stephanie Eckles! https://smolcss.dev/#smol-avatar-list */
+.smol-avatar-list {
+  --avatar-size: 2rem;
+
+  display: grid;
+  grid-template-columns: repeat(
+    var(--avatar-count),
+    max(44px, calc(var(--avatar-size) / 1.15))
+  );
+  padding: 0.08em;
+  font-size: var(--avatar-size);
+  list-style: none;
+}
+
+@media (any-hover: hover) and (any-pointer: fine) {
+  .smol-avatar-list {
+    grid-template-columns: repeat(
+      calc(var(--avatar-count) + 1),
+      calc(var(--avatar-size) / 1.75)
+    );
+  }
+}
+
+.smol-avatar-list li {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+}
+
+.smol-avatar-list li:hover ~ li a,
+.smol-avatar-list li:focus-within ~ li a {
+  transform: translateX(33%);
+}
+
+.smol-avatar-list img,
+.smol-avatar-list a {
+  display: block;
+  border-radius: 50%;
+}
+
+.smol-avatar-list a {
+  transition: transform 180ms ease-in-out;
+}
+
+.smol-avatar-list img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #fff;
+  box-shadow: 0 0 0 0.05em #fff, 0 0 0 0.08em rgba(0, 0, 0, 0.15);
+}
+
+.smol-avatar-list a:focus {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 0.08em #29344B, 0 0 0 0.12em white;
+}
+</style>
