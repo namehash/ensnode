@@ -136,7 +136,7 @@ export interface ENSIndexerConfig {
    *   that is defined for that chainId. This is ensured by the validateChainConfigs
    *   function in `validations.ts` and not part of the schema validation here.
    */
-  requestedPluginNames: PluginName[];
+  plugins: PluginName[];
 
   /**
    * A feature flag to enable or disable healing of addr.reverse subnames.
@@ -197,7 +197,7 @@ export interface ENSIndexerEnvironment {
   ponderDatabaseSchema: string | undefined;
   databaseUrl: string | undefined;
   ensDeploymentChain: string | undefined;
-  requestedPluginNames: string | undefined;
+  plugins: string | undefined;
   ensRainbowEndpointUrl: string | undefined;
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;

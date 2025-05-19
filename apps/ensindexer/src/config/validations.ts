@@ -13,7 +13,7 @@ export const validateGlobalBlockrange = (
   config: ENSIndexerConfig,
   ponderConfig: MergedPluginConfig
 ): void => {
-  const { globalBlockrange, ensDeploymentChain, requestedPluginNames } = config;
+  const { globalBlockrange, ensDeploymentChain, plugins } = config;
 
   if (
     globalBlockrange.startBlock !== undefined ||
@@ -26,7 +26,7 @@ export const validateGlobalBlockrange = (
   
   The config currently is:
   ENS_DEPLOYMENT_CHAIN=${ensDeploymentChain}
-  ACTIVE_PLUGINS=${requestedPluginNames.join(",")}
+  ACTIVE_PLUGINS=${plugins.join(",")}
   START_BLOCK=${globalBlockrange.startBlock || "n/a"}
   END_BLOCK=${globalBlockrange.endBlock || "n/a"}
   
@@ -52,7 +52,7 @@ export const validateChainConfigs = (
   config: ENSIndexerConfig,
   ponderConfig: MergedPluginConfig
 ): void => {
-  const { requestedPluginNames } = config;
+  const { plugins } = config;
 
   const allChainIds = Object.values(ponderConfig.networks).map(
     (network) => network.chainId
@@ -61,7 +61,7 @@ export const validateChainConfigs = (
   if (
     !allChainIds.every((chainId) => doesRpcUrlExistForChain(config, chainId))
   ) {
-    throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${requestedPluginNames.join(
+    throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${plugins.join(
       ", "
     )}.
     These plugins, collectively, index events from the following chains: ${allChainIds.join(

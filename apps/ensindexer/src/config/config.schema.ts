@@ -33,7 +33,7 @@ export const ENSIndexerConfigSchema = z.object({
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
         return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
-          ENSDeployments,
+          ENSDeployments
         ).join(", ")}`;
       },
     })
@@ -49,7 +49,7 @@ export const ENSIndexerConfigSchema = z.object({
         val.startBlock === undefined ||
         val.endBlock === undefined ||
         val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
+      { error: "END_BLOCK must be greater than or equal to START_BLOCK." }
     ),
 
   ensNodePublicUrl: z.url({
@@ -73,7 +73,7 @@ export const ENSIndexerConfigSchema = z.object({
       error: "DATABASE_SCHEMA is required and cannot be an empty string.",
     }),
 
-  requestedPluginNames: z.coerce
+  plugins: z.coerce
     .string()
     .transform((val) => val.split(",").filter(Boolean))
     .pipe(
@@ -81,15 +81,15 @@ export const ENSIndexerConfigSchema = z.object({
         .array(
           z.enum(PluginName, {
             error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-              PluginName,
+              PluginName
             ).join(", ")}`,
-          }),
+          })
         )
         .min(1, {
           error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-            PluginName,
+            PluginName
           ).join(", ")}`,
-        }),
+        })
     ),
 
   healReverseAddresses: z
@@ -97,7 +97,7 @@ export const ENSIndexerConfigSchema = z.object({
     .pipe(
       z.enum(["true", "false"], {
         error: "HEAL_REVERSE_ADDRESSES must be 'true' or 'false'.",
-      }),
+      })
     )
     .transform((val) => val === "true")
     .default(DEFAULT_HEAL_REVERSE_ADDRESSES),
@@ -115,6 +115,7 @@ export const ENSIndexerConfigSchema = z.object({
   }),
 
   indexedChains: z.record(z.string().transform(Number), ChainConfigSchema, {
-    error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+    error:
+      "Chains configuration must be an object mapping numeric chain IDs to their configs.",
   }),
 });

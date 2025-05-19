@@ -28,7 +28,7 @@ const _defaultMockConfig: ENSIndexerConfig = {
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  requestedPluginNames: [PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames],
+  plugins: [PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames],
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: DEFAULT_PORT,
@@ -80,11 +80,12 @@ export function setupConfigMock() {
       rpcMaxRequestsPerSecond: vi.fn(
         (chainId: number) =>
           currentMockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond ||
-          DEFAULT_RPC_RATE_LIMIT,
+          DEFAULT_RPC_RATE_LIMIT
       ),
       rpcEndpointUrl: vi.fn(
         (chainId: number) =>
-          currentMockConfig.indexedChains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
+          currentMockConfig.indexedChains[chainId]?.rpcEndpointUrl ||
+          "http://localhost:8545"
       ),
       // Use a getter for the default export as well
       get default() {
@@ -109,8 +110,8 @@ export function setupConfigMock() {
         get: () => currentMockConfig.ponderDatabaseSchema,
         enumerable: true,
       },
-      requestedPluginNames: {
-        get: () => currentMockConfig.requestedPluginNames,
+      plugins: {
+        get: () => currentMockConfig.plugins,
         enumerable: true,
       },
       healReverseAddresses: {
@@ -179,7 +180,7 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
 export function setChainConfig(
   chainId: number,
   rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50,
+  rpcMaxRequestsPerSecond: number = 50
 ) {
   if (!currentMockConfig.indexedChains) {
     currentMockConfig.indexedChains = {};
@@ -197,7 +198,10 @@ export function setChainConfig(
  * @param chainId The chain ID to remove
  */
 export function removeChainConfig(chainId: number) {
-  if (currentMockConfig.indexedChains && currentMockConfig.indexedChains[chainId]) {
+  if (
+    currentMockConfig.indexedChains &&
+    currentMockConfig.indexedChains[chainId]
+  ) {
     delete currentMockConfig.indexedChains[chainId];
   }
 }
