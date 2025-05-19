@@ -1,5 +1,6 @@
 import { createConfig } from "ponder";
 
+import { default as appConfig } from "@/config/app-config";
 import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
@@ -25,8 +26,8 @@ const namespace = makePluginNamespace(pluginName);
 
 export const config = createConfig({
   networks: {
-    ...networksConfigForChain(optimism),
-    ...networksConfigForChain(base),
+    ...networksConfigForChain(appConfig, optimism.id),
+    ...networksConfigForChain(appConfig, base.id),
   },
   contracts: {
     [namespace("ThreeDNSToken")]: {

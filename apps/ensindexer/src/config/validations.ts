@@ -1,5 +1,5 @@
 import { ENSIndexerConfig } from "@/config/types";
-import { MergedPluginConfig } from "../../ponder.config";
+import { MergedPonderConfig } from "../../ponder.config";
 
 // Helper function to check rpc url exists for a given chain
 const doesRpcUrlExistForChain = (config: ENSIndexerConfig, chainId: number): boolean => {
@@ -8,7 +8,7 @@ const doesRpcUrlExistForChain = (config: ENSIndexerConfig, chainId: number): boo
 
 export const validateGlobalBlockrange = (
   config: ENSIndexerConfig,
-  ponderConfig: MergedPluginConfig,
+  ponderConfig: MergedPonderConfig,
 ): void => {
   const { globalBlockrange, ensDeploymentChain, plugins } = config;
 
@@ -44,7 +44,7 @@ export const validateGlobalBlockrange = (
  */
 export const validateChainConfigs = (
   config: ENSIndexerConfig,
-  ponderConfig: MergedPluginConfig,
+  ponderConfig: MergedPonderConfig,
 ): void => {
   const { plugins } = config;
 
@@ -69,7 +69,7 @@ export const validateChainConfigs = (
   }
 };
 
-export function validateConfig(config: ENSIndexerConfig, ponderConfig: MergedPluginConfig) {
+export function validateConfig(config: ENSIndexerConfig, ponderConfig: MergedPonderConfig) {
   ////////
   // Invariant: All configured networks must have a custom RPC endpoint provided. Public RPC endpoints
   // will ratelimit and make indexing more or less unusable.

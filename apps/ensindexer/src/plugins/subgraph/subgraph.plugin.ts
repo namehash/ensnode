@@ -1,5 +1,6 @@
 import { createConfig } from "ponder";
 
+import { default as appConfig } from "@/config/app-config";
 import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
@@ -26,7 +27,7 @@ const namespace = makePluginNamespace(pluginName);
 validateContractConfigs(pluginName, contracts);
 
 export const config = createConfig({
-  networks: networksConfigForChain(chain),
+  networks: networksConfigForChain(appConfig, chain.id),
   contracts: {
     [namespace("RegistryOld")]: {
       network: networkConfigForContract(chain, contracts.RegistryOld),

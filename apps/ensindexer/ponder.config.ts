@@ -10,7 +10,7 @@ import * as threednsPlugin from "@/plugins/threedns/threedns.plugin";
 import { DatasourceName } from "@ensnode/ens-deployments";
 
 ////////
-// First, generate MergedPluginConfig type representing the merged types of each plugin's `config`,
+// First, generate MergedPonderConfig type representing the merged types of each plugin's `config`,
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 export const AVAILABLE_PLUGINS = [
@@ -20,7 +20,7 @@ export const AVAILABLE_PLUGINS = [
   threednsPlugin,
 ] as const;
 
-export type MergedPluginConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number]["config"]> & {
+export type MergedPonderConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number]["config"]> & {
   /**
    * The environment variables that change the behavior of the indexer.
    * It's important to include all environment variables that change the behavior
@@ -49,7 +49,7 @@ const activePlugins = getActivePlugins(AVAILABLE_PLUGINS, config.plugins, availa
 // merge the resulting configs into the config we return to Ponder
 const ponderConfig = activePlugins
   .map((plugin) => plugin.config)
-  .reduce((acc, val) => mergePonderConfigs(acc, val), {}) as MergedPluginConfig;
+  .reduce((acc, val) => mergePonderConfigs(acc, val), {}) as MergedPonderConfig;
 
 // set the indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
