@@ -1,10 +1,9 @@
-import { ContractConfig, DatasourceName, ENSDeploymentChain } from "@ensnode/ens-deployments";
+import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
-import { http, Address, Chain, isAddress } from "viem";
+import { http, Chain } from "viem";
 
 import config from "@/config/app-config";
 import { ENSIndexerConfig } from "@/config/types";
-import { MERGED_ENS_DEPLOYMENT, SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 

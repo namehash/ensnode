@@ -1,4 +1,4 @@
-import { ENSDeployment, ENSDeployments } from "@ensnode/ens-deployments";
+import { type ENSDeploymentGlobalType, ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
@@ -47,6 +47,13 @@ export interface ENSIndexerConfig {
    * (see `@ensnode/ens-deployments` for available deployments)
    */
   ensDeploymentChain: keyof typeof ENSDeployments;
+
+  /**
+   * The selected ENS Deployment for the indexer which could be "mainnet", "sepolia", etc.
+   *
+   * (see `@ensnode/ens-deployments` for available deployments)
+   */
+  selectedEnsDeployment: ENSDeploymentGlobalType;
 
   /**
    * This is purely a testing configuration and should NOT be used in production.

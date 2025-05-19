@@ -1,5 +1,5 @@
 import { validateContractConfigs } from "@/config/validations";
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { type ENSDeploymentGlobalType, ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { z } from "zod/v4";
@@ -158,6 +158,8 @@ const parseDatabaseUrl = () =>
     },
   );
 
+const parseSelectedEnsDeployment = () => z.custom<ENSDeploymentGlobalType>();
+
 /**
  * This function performs invariant checks on the configuration after the schema
  * has been validated against the zod schema. Here there are more complex checks
@@ -176,7 +178,7 @@ const parseDatabaseUrl = () =>
 const schemaInvariantChecks = (config: z.infer<typeof ENSIndexerConfigSchema>) => {
   // Invariant for each plugin to check all contracts have a correct address defined
   config.plugins.forEach((plugin) => {
-    validateContractConfigs(plugin, config.ensDeploymentChain);
+    validateContractConfigs(plugin, config);
   });
 
   return true;
@@ -195,7 +197,13 @@ export const ENSIndexerConfigSchema = z
     ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
     indexedChains: parseIndexedChains(),
     databaseUrl: parseDatabaseUrl(),
+    selectedEnsDeployment: parseSelectedEnsDeployment(),
   })
+  // Add selectedEnsDeployment to the config after as it's a derived value
+  .transform((config) => ({
+    ...config,
+    selectedEnsDeployment: ENSDeployments[config.ensDeploymentChain] as ENSDeploymentGlobalType,
+  }))
   .refine(schemaInvariantChecks, {
     error: "Invalid configuration. Please check your config file and try again.",
   });

@@ -1,7 +1,6 @@
 import { createConfig } from "ponder";
 
 import { default as appConfig } from "@/config/app-config";
-import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
   makePluginNamespace,
@@ -16,11 +15,10 @@ import { PluginName } from "@ensnode/utils";
  */
 export const pluginName = PluginName.ThreeDNS;
 export const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase];
-
 const { chain: optimism, contracts: optimismContracts } =
-  MERGED_ENS_DEPLOYMENT[DatasourceName.ThreeDNSOptimism];
+  appConfig.selectedEnsDeployment[DatasourceName.ThreeDNSOptimism];
 const { chain: base, contracts: baseContracts } =
-  MERGED_ENS_DEPLOYMENT[DatasourceName.ThreeDNSBase];
+  appConfig.selectedEnsDeployment[DatasourceName.ThreeDNSBase];
 
 const namespace = makePluginNamespace(pluginName);
 
