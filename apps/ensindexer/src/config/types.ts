@@ -121,17 +121,17 @@ export interface ENSIndexerConfig {
 
   /**
    * Identify which indexer plugins to activate (see `src/plugins` for available plugins)
-   * This is a comma separated list of one or more available plugin names (case-sensitive).
+   * This is a set of one or more available plugin names.
    *
    * Invariants:
-   * - An array of valid plugin names with at least one value
+   * - A set of valid plugin names with at least one value
    * - For any requested plugin, the config will have a key for chainId in the
    *   indexedChains object. In that indexedChains object, the config will have a
    *   rpcEndpointUrl that is defined for that chainId and a rpcMaxRequestsPerSecond
    *   that is defined for that chainId. This is ensured by the validateChainConfigs
    *   function in `validations.ts` and not part of the schema validation here.
    */
-  plugins: PluginName[];
+  plugins: Set<PluginName>;
 
   /**
    * A feature flag to enable or disable healing of addr.reverse subnames.

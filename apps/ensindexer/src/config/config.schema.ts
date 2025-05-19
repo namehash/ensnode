@@ -90,7 +90,11 @@ export const ENSIndexerConfigSchema = z.object({
             PluginName,
           ).join(", ")}`,
         }),
-    ),
+    )
+    .refine((arr) => arr.length === new Set(arr).size, {
+      error: "ACTIVE_PLUGINS cannot contain duplicate values",
+    })
+    .transform((arr) => new Set(arr)),
 
   healReverseAddresses: z
     .string()

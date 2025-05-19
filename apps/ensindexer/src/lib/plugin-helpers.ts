@@ -57,28 +57,12 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
  */
 export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
   availablePlugins: readonly PLUGIN[],
-  requestedPluginNames: string[],
+  requestedPluginNames: Set<PluginName>,
   availableDatasourceNames: DatasourceName[],
 ): PLUGIN[] {
-  if (!requestedPluginNames.length) throw new Error("Must activate at least 1 plugin.");
-
-  // validate that each of the requestedPluginNames is included in allPlugins
-  const invalidPlugins = requestedPluginNames.filter(
-    (requestedPlugin) => !availablePlugins.some((plugin) => plugin.pluginName === requestedPlugin),
-  );
-
-  if (invalidPlugins.length) {
-    // Throw an error if there are invalid plugins
-    throw new Error(
-      `Invalid plugin names found: ${invalidPlugins.join(
-        ", ",
-      )}. Please check the ACTIVE_PLUGINS environment variable.`,
-    );
-  }
-
   // filter allPlugins by those that the user requested
   const activePlugins = availablePlugins.filter((plugin) =>
-    requestedPluginNames.includes(plugin.pluginName),
+    requestedPluginNames.has(plugin.pluginName),
   );
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
