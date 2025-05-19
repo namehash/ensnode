@@ -1,7 +1,7 @@
 "use client";
 
+// Using Shiki for code syntax highlighting in the quickstart page
 import { ConnectionSelector } from "@/components/connections/connection-selector";
-import { CodeBlock } from "@/components/ui/code-block";
 import {
   Select,
   SelectContent,
@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import { Database, ExternalLink, FileSearch, PackagePlus, PlayCircle } from "lucide-react";
+import { Database, FileSearch, PackagePlus, PlayCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { ShikiCodeBlock } from "./ShikiCodeBlock";
 
 const QUERY_EXAMPLES = [
   {
@@ -75,6 +76,46 @@ const QUERY_EXAMPLES = [
 }`,
     variables: {
       owner: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+    },
+  },
+  {
+    id: "get-subnames",
+    name: "Get Subnames",
+    description: "Query subdomains of a specific name",
+    graphql: `query ($first: Int!, $name: String!) {
+  domains(first: 1, where: {name: $name}) {
+    subdomains(first: $first, orderBy: name, orderDirection: asc) {
+      id
+      labelName
+      name
+      owner {
+        id
+      }
+    }
+  }
+}`,
+    variables: {
+      name: "ens.eth",
+      first: 20,
+    },
+  },
+  {
+    id: "names-by-account",
+    name: "Names Owned by Address",
+    description: "Get first N names owned by an address",
+    graphql: `query ($first: Int!, $orderDirection: OrderDirection!, $owner: String!) {
+  account(id: $owner) {
+    domains(first: $first, orderBy: name, orderDirection: $orderDirection) {
+      id
+      labelName
+      name
+    }
+  }
+}`,
+    variables: {
+      owner: "0xb8c2c29ee19d8307cb7255e1cd9cbde883a267d5",
+      first: 20,
+      orderDirection: "asc",
     },
   },
   {
@@ -140,7 +181,7 @@ function QuerySelector() {
   return (
     <div className="space-y-4">
       <Select value={currentExample} onValueChange={setQueryExample}>
-        <SelectTrigger className="w-full md:w-80">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Select a query example" />
         </SelectTrigger>
         <SelectContent>
@@ -154,14 +195,16 @@ function QuerySelector() {
 
       <div className="p-4 border rounded-md">
         <p className="text-sm font-medium mb-2">{selectedExample.description}</p>
-        <CodeBlock language="graphql" className="text-xs">
+        {/* Shiki-powered syntax highlighting for GraphQL */}
+        <ShikiCodeBlock language="graphql" className="text-xs">
           {selectedExample.graphql}
-        </CodeBlock>
+        </ShikiCodeBlock>
         <div className="mt-2">
           <p className="text-sm font-medium mb-1">Variables:</p>
-          <CodeBlock language="json" className="text-xs">
+          {/* Shiki-powered syntax highlighting for JSON */}
+          <ShikiCodeBlock language="json" className="text-xs">
             {JSON.stringify(selectedExample.variables, null, 2)}
-          </CodeBlock>
+          </ShikiCodeBlock>
         </div>
       </div>
     </div>
@@ -214,10 +257,10 @@ export function Quickstarts() {
             <div className="space-y-2 pt-1">
               <h3 className="font-medium text-lg flex items-center gap-2">
                 <FileSearch className="h-5 w-5 text-primary" />
-                Explore Data with Example Queries
+                Describe your data requirements with GraphQL
               </h3>
               <p className="text-muted-foreground">
-                Try these example GraphQL queries to see what data is available in ENSNode.
+                Try these example queries to see what data is available in ENSNode.
               </p>
 
               <div className="mt-4">
@@ -250,23 +293,24 @@ export function Quickstarts() {
                 <TabsContent value="apollo" className="mt-2 space-y-4">
                   <div className="space-y-2">
                     <h4 className="font-medium">Using npm</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    {/* Bash commands with Shiki highlighting */}
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       npm install @apollo/client graphql
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Using yarn</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       yarn add @apollo/client graphql
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Using pnpm</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       pnpm add @apollo/client graphql
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
                 </TabsContent>
 
@@ -279,46 +323,46 @@ export function Quickstarts() {
                 <TabsContent value="graphql-request" className="mt-2 space-y-4">
                   <div className="space-y-2">
                     <h4 className="font-medium">Using npm</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       npm install graphql graphql-request
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Using yarn</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       yarn add graphql graphql-request
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Using pnpm</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       pnpm add graphql graphql-request
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
                 </TabsContent>
 
                 <TabsContent value="urql" className="mt-2 space-y-4">
                   <div className="space-y-2">
                     <h4 className="font-medium">Using npm</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       npm install urql graphql
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Using yarn</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       yarn add urql graphql
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
 
                   <div className="space-y-2">
                     <h4 className="font-medium">Using pnpm</h4>
-                    <CodeBlock className="text-xs" language="bash">
+                    <ShikiCodeBlock className="text-xs" language="bash">
                       pnpm add urql graphql
-                    </CodeBlock>
+                    </ShikiCodeBlock>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -347,7 +391,8 @@ export function Quickstarts() {
                 </TabsList>
 
                 <TabsContent value="apollo" className="mt-2 space-y-4">
-                  <CodeBlock className="text-xs" language="javascript">
+                  {/* JavaScript code example with Shiki highlighting */}
+                  <ShikiCodeBlock className="text-xs" language="javascript">
                     {`import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
 // Use the URL from your ENSNode connection
@@ -376,11 +421,11 @@ async function fetchData() {
 }
 
 fetchData();`}
-                  </CodeBlock>
+                  </ShikiCodeBlock>
                 </TabsContent>
 
                 <TabsContent value="fetch" className="mt-2 space-y-4">
-                  <CodeBlock className="text-xs" language="javascript">
+                  <ShikiCodeBlock className="text-xs" language="javascript">
                     {`// Use the URL from your ENSNode connection
 const endpoint = '${graphqlEndpoint}';
 
@@ -417,11 +462,11 @@ async function fetchData() {
 }
 
 fetchData();`}
-                  </CodeBlock>
+                  </ShikiCodeBlock>
                 </TabsContent>
 
                 <TabsContent value="graphql-request" className="mt-2 space-y-4">
-                  <CodeBlock className="text-xs" language="javascript">
+                  <ShikiCodeBlock className="text-xs" language="javascript">
                     {`import { request, gql } from 'graphql-request';
 
 // Use the URL from your ENSNode connection
@@ -448,11 +493,11 @@ async function fetchData() {
 }
 
 fetchData();`}
-                  </CodeBlock>
+                  </ShikiCodeBlock>
                 </TabsContent>
 
                 <TabsContent value="urql" className="mt-2 space-y-4">
-                  <CodeBlock className="text-xs" language="javascript">
+                  <ShikiCodeBlock className="text-xs" language="javascript">
                     {`import { createClient, gql } from 'urql';
 
 // Use the URL from your ENSNode connection
@@ -482,7 +527,7 @@ async function fetchData() {
 }
 
 fetchData();`}
-                  </CodeBlock>
+                  </ShikiCodeBlock>
                 </TabsContent>
               </Tabs>
             </div>

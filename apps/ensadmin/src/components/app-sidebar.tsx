@@ -21,15 +21,15 @@ const navItems = [
     icon: IconENS,
   },
   {
+    title: "Quickstart",
+    url: "/quickstart",
+  },
+  {
     title: "APIs",
     url: "#",
     icon: RadioTower,
     isActive: true,
     items: [
-      {
-        title: "Quickstart",
-        url: "/quickstarts",
-      },
       {
         title: "GraphQL (Ponder-style)",
         url: "/gql/ponder",
