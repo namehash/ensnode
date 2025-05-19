@@ -1,0 +1,41 @@
+/* Shiki code block styles */
+.shiki-code-block {
+  font-family: ui-monospace, monospace;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent !important;
+}
+
+.shiki {
+  background: transparent !important;
+}
+
+/* Table styles for line numbers */
+.shiki-code-block .line {
+  display: table-row;
+  padding: 0 0.1em;
+}
+
+.shiki-code-block[data-line-numbers] .line::before {
+  content: attr(data-line);
+  display: table-cell;
+  padding-right: 1rem;
+  text-align: right;
+  opacity: 0.5;
+  user-select: none;
+}
+
+/* Token styles */
+.shiki-code-block .token {
+  font-weight: inherit;
+}
+
+/* Make sure code blocks handle word wrapping properly */
+.shiki-code-block code {
+  white-space: pre;
+  word-break: normal;
+  word-wrap: normal;
+}

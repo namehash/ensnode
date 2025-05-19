@@ -21,6 +21,10 @@ const navItems = [
     icon: IconENS,
   },
   {
+    title: "Quickstart",
+    url: "/quickstart",
+  },
+  {
     title: "APIs",
     url: "#",
     icon: RadioTower,
