@@ -24,6 +24,7 @@ const BASE_ENV = {
   START_BLOCK: "0",
   END_BLOCK: "100",
   RPC_URL_1: "https://eth-mainnet.g.alchemy.com/v2/1234",
+  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
 };
 
 // Main describe block for all config tests
@@ -442,6 +443,74 @@ describe("config", () => {
       delete process.env.RPC_REQUEST_RATE_LIMIT_1;
       const config = await getFreshConfig();
       expect(config.indexedChains[1]!.rpcMaxRequestsPerSecond).toBe(50);
+    });
+  });
+
+  describe(".databaseUrl", () => {
+    it("accepts a valid PostgreSQL connection string", async () => {
+      process.env.DATABASE_URL = "postgresql://user:password@localhost:5432/mydb";
+      const config = await getFreshConfig();
+      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
+    });
+
+    it("accepts a connection string with additional parameters", async () => {
+      process.env.DATABASE_URL = "postgresql://user:password@localhost:5432/mydb?sslmode=require";
+      const config = await getFreshConfig();
+      expect(config.databaseUrl).toBe(
+        "postgresql://user:password@localhost:5432/mydb?sslmode=require",
+      );
+    });
+
+    it("throws an error if DATABASE_URL is not set", async () => {
+      delete process.env.DATABASE_URL;
+      const freshConfigPromise = getFreshConfig();
+      await expect(freshConfigPromise).rejects.toThrow(
+        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+      );
+    });
+
+    it("throws an error if DATABASE_URL is empty", async () => {
+      process.env.DATABASE_URL = "";
+      const freshConfigPromise = getFreshConfig();
+      await expect(freshConfigPromise).rejects.toThrow(
+        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+      );
+    });
+
+    it("throws an error if DATABASE_URL is not a valid postgres connection string", async () => {
+      process.env.DATABASE_URL = "not-a-postgres-connection-string";
+      const freshConfigPromise = getFreshConfig();
+      await expect(freshConfigPromise).rejects.toThrow(
+        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+      );
+    });
+
+    it("throws an error if DATABASE_URL uses the wrong protocol", async () => {
+      process.env.DATABASE_URL = "mysql://user:password@localhost:3306/mydb";
+      const freshConfigPromise = getFreshConfig();
+      await expect(freshConfigPromise).rejects.toThrow(
+        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+      );
+    });
+
+    it("throws an error if DATABASE_URL is missing required components", async () => {
+      process.env.DATABASE_URL = "postgresql://localhost:5432";
+      const freshConfigPromise = getFreshConfig();
+      await expect(freshConfigPromise).rejects.toThrow(
+        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+      );
+    });
+
+    it("accepts postgres:// protocol", async () => {
+      process.env.DATABASE_URL = "postgres://user:password@localhost:5432/mydb";
+      const config = await getFreshConfig();
+      expect(config.databaseUrl).toBe("postgres://user:password@localhost:5432/mydb");
+    });
+
+    it("accepts postgresql:// protocol", async () => {
+      process.env.DATABASE_URL = "postgresql://user:password@localhost:5432/mydb";
+      const config = await getFreshConfig();
+      expect(config.databaseUrl).toBe("postgresql://user:password@localhost:5432/mydb");
     });
   });
 });

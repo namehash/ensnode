@@ -284,6 +284,9 @@ importers:
       hono:
         specifier: 'catalog:'
         version: 4.7.8
+      pg-connection-string:
+        specifier: ^2.9.0
+        version: 2.9.0
       ponder:
         specifier: 'catalog:'
         version: 0.10.26(@opentelemetry/api@1.7.0)(@types/node@22.15.3)(hono@4.7.8)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.0-beta.20250516T044623))(yaml@2.7.0)(zod@3.25.0-beta.20250516T044623)
@@ -5864,8 +5867,8 @@ packages:
   pg-cloudflare@1.1.1:
     resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
 
-  pg-connection-string@2.7.0:
-    resolution: {integrity: sha512-PI2W9mv53rXJQEOb8xNR8lH7Hr+EKa6oJa38zsK0S/ky2er16ios1wLKhZyxzD7jUReiWokc9WK5nxSnC7W1TA==}
+  pg-connection-string@2.9.0:
+    resolution: {integrity: sha512-P2DEBKuvh5RClafLngkAuGe9OUlFV7ebu8w1kmaaOgPcpJd1RIFh7otETfI6hAR8YupOLFTY7nuvvIn7PLciUQ==}
 
   pg-copy-streams@6.0.6:
     resolution: {integrity: sha512-Z+Dd2C2NIDTsjyFKmc6a9QLlpM8tjpERx+43RSx0WmL7j3uNChERi3xSvZUL0hWJ1oRUn4S3fhyt3apdSrTyKQ==}
@@ -14389,7 +14392,7 @@ snapshots:
   pg-cloudflare@1.1.1:
     optional: true
 
-  pg-connection-string@2.7.0: {}
+  pg-connection-string@2.9.0: {}
 
   pg-copy-streams@6.0.6:
     dependencies:
@@ -14417,7 +14420,7 @@ snapshots:
     dependencies:
       buffer-writer: 2.0.0
       packet-reader: 1.0.0
-      pg-connection-string: 2.7.0
+      pg-connection-string: 2.9.0
       pg-pool: 3.7.0(pg@8.11.3)
       pg-protocol: 1.7.0
       pg-types: 2.2.0
@@ -14536,7 +14539,7 @@ snapshots:
       http-terminator: 3.2.0
       kysely: 0.26.3
       pg: 8.11.3
-      pg-connection-string: 2.7.0
+      pg-connection-string: 2.9.0
       pg-copy-streams: 6.0.6
       pg-query-emscripten: 5.1.0
       picocolors: 1.1.1
@@ -14618,7 +14621,7 @@ snapshots:
       http-terminator: 3.2.0
       kysely: 0.26.3
       pg: 8.11.3
-      pg-connection-string: 2.7.0
+      pg-connection-string: 2.9.0
       pg-copy-streams: 6.0.6
       pg-query-emscripten: 5.1.0
       picocolors: 1.1.1

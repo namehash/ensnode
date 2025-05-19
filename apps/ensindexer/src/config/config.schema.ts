@@ -1,5 +1,6 @@
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
+import { parse as parseConnectionString } from "pg-connection-string";
 import { z } from "zod/v4";
 
 export const DEFAULT_RPC_RATE_LIMIT = 50;
@@ -137,6 +138,25 @@ const parseIndexedChains = () =>
     error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
   });
 
+const parseDatabaseUrl = () =>
+  z.coerce.string().refine(
+    (url) => {
+      try {
+        if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
+          return false;
+        }
+        const config = parseConnectionString(url);
+        return !!(config.host && config.port && config.database);
+      } catch {
+        return false;
+      }
+    },
+    {
+      message:
+        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+    },
+  );
+
 export const ENSIndexerConfigSchema = z.object({
   ensDeploymentChain: parseEnsDeploymentChain(),
   globalBlockrange: parseGlobalBlockrange(),
@@ -148,4 +168,5 @@ export const ENSIndexerConfigSchema = z.object({
   port: parsePort(),
   ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
   indexedChains: parseIndexedChains(),
+  databaseUrl: parseDatabaseUrl(),
 });

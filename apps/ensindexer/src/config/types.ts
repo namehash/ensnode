@@ -178,6 +178,14 @@ export interface ENSIndexerConfig {
    *   function in `validations.ts` and not part of the schema validation here.
    */
   indexedChains: Record<number, ChainConfig>;
+
+  /**
+   * The database connection string for the indexer.
+   *
+   * Invariants:
+   * - The URL must be a valid PostgreSQL connection string
+   */
+  databaseUrl: string;
 }
 
 /**
