@@ -1,5 +1,9 @@
 import { ENSIndexerConfigSchema } from "@/config/config.schema";
-import { ENSIndexerConfig, ENSIndexerEnvironment, RawChainConfig } from "@/config/types";
+import {
+  ENSIndexerConfig,
+  ENSIndexerEnvironment,
+  RawChainConfig,
+} from "@/config/types";
 import { z } from "zod/v4";
 
 /**
@@ -20,7 +24,7 @@ export function getChainsFromEnv(): Record<number, RawChainConfig> {
     // Only match keys like "RPC_URL_1", "RPC_URL_10", etc. (digits only after the underscore)
     const match = key.match(/^RPC_URL_(\d+)$/);
 
-    // If the key after `RPC_URL_` is not a number, skip
+    // If the key after `RPC_URL_` is not a number or the value is empty, skip
     if (!match || !value) return;
 
     // The regex above ensures that only numeric chain IDs are matched.
@@ -29,7 +33,8 @@ export function getChainsFromEnv(): Record<number, RawChainConfig> {
     const chainId = Number(match[1]);
 
     // Optionally get the rate limit for this chain, if set.
-    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    const rpcMaxRequestsPerSecond =
+      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       // The value for each RPC_URL_{chainId} is used as the rpcEndpointUrl.
@@ -61,14 +66,10 @@ function parseEnvironment(): ENSIndexerEnvironment {
     ensNodePublicUrl: process.env.ENSNODE_PUBLIC_URL,
     ensAdminUrl: process.env.ENSADMIN_URL,
     healReverseAddresses: process.env.HEAL_REVERSE_ADDRESSES,
-    startBlock: process.env.START_BLOCK,
-    endBlock: process.env.END_BLOCK,
-
     globalBlockrange: {
       startBlock: process.env.START_BLOCK,
       endBlock: process.env.END_BLOCK,
     },
-
     indexedChains: getChainsFromEnv(),
   };
 
@@ -86,12 +87,15 @@ function parseEnvironment(): ENSIndexerEnvironment {
  * required environment variables, correct formats, or logical consistency) is handled
  * separately by dedicated validation utilities elsewhere in the codebase.
  */
-function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
+function buildConfigFromEnvironment(
+  environment: ENSIndexerEnvironment
+): ENSIndexerConfig {
   const parsed = ENSIndexerConfigSchema.safeParse(environment);
 
   if (!parsed.success) {
     throw new Error(
-      "Failed to parse environment configuration: " + getValidationErrors(parsed.error.issues),
+      "Failed to parse environment configuration: " +
+        getValidationErrors(parsed.error.issues)
     );
   }
 

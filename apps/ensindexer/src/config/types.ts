@@ -29,11 +29,6 @@ export interface ChainConfig {
   rpcMaxRequestsPerSecond: number;
 }
 
-export interface RawChainConfig {
-  rpcEndpointUrl: string;
-  rpcMaxRequestsPerSecond?: string;
-}
-
 export interface GlobalBlockrange {
   // Invariant - Must be undefined or an integer greater than 0
   startBlock?: number;
@@ -186,7 +181,22 @@ export interface ENSIndexerConfig {
 }
 
 /**
- * Represents the raw environment variables for the ENSIndexer application.
+ * Represents the raw unvalidated environment variables for a single chain.
+ *
+ * Since an RPC_URL_<chainId> is checked in `getChainsFromEnv`, the value
+ * for rpcEndpointUrl is guaranteed to be a non-empty string.
+ *
+ * rpcMaxRequestsPerSecond is optional and will be undefined if the
+ * RPC_REQUEST_RATE_LIMIT_<chainId> environment variable is not set.
+ */
+export interface RawChainConfig {
+  rpcEndpointUrl: string;
+  rpcMaxRequestsPerSecond: string | undefined;
+}
+
+/**
+ * Represents the raw, unvalidated environment variables for the ENSIndexer application.
+ *
  * Keys correspond to the environment variable names, and all values are
  * strings or undefined, reflecting their state in `process.env`.
  * This interface is intended to be the source type which then gets
@@ -202,14 +212,9 @@ export interface ENSIndexerEnvironment {
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
-
-  startBlock: string | undefined;
-  endBlock: string | undefined;
-
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;
   };
-
   indexedChains: Record<number, RawChainConfig>;
 }
