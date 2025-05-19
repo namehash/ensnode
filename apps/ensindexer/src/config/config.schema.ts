@@ -140,18 +140,21 @@ const parseIndexedChains = () =>
   });
 
 const parseDatabaseUrl = () =>
-  z.coerce.string().refine(
-    (url) => {
-      try {
-        if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
+  z.union(
+    [
+      z.string().refine((url) => {
+        try {
+          if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
+            return false;
+          }
+          const config = parseConnectionString(url);
+          return !!(config.host && config.port && config.database);
+        } catch {
           return false;
         }
-        const config = parseConnectionString(url);
-        return !!(config.host && config.port && config.database);
-      } catch {
-        return false;
-      }
-    },
+      }),
+      z.undefined(),
+    ],
     {
       message:
         "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",

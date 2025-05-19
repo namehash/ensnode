@@ -187,12 +187,13 @@ export interface ENSIndexerConfig {
   indexedChains: Record<number, ChainConfig>;
 
   /**
-   * The database connection string for the indexer.
+   * The database connection string for the indexer if present. When undefined
+   * ponder will default to using an in-memory database, pglite.
    *
    * Invariants:
-   * - The URL must be a valid PostgreSQL connection string
+   * - The URL must be a valid PostgreSQL connection string or undefined.
    */
-  databaseUrl: string;
+  databaseUrl: string | undefined;
 }
 
 /**

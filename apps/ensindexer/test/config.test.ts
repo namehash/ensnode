@@ -463,10 +463,8 @@ describe("config", () => {
 
     it("throws an error if DATABASE_URL is not set", async () => {
       delete process.env.DATABASE_URL;
-      const freshConfigPromise = getFreshConfig();
-      await expect(freshConfigPromise).rejects.toThrow(
-        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-      );
+      const config = await getFreshConfig();
+      expect(config.databaseUrl).toBeUndefined();
     });
 
     it("throws an error if DATABASE_URL is empty", async () => {
