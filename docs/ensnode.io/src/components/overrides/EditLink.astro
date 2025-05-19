@@ -1,12 +1,12 @@
 ---
-import Default from '@astrojs/starlight/components/EditLink.astro';
-import PageAuthors from './PageAuthors.astro';
+import Default from "@astrojs/starlight/components/EditLink.astro";
+import PageAuthors from "./PageAuthors.astro";
 
 const REPO = "namehash/ensnode";
 const BASE_DIR = "docs/ensnode.io";
 const CONTENT_DIR = `${BASE_DIR}/src/content/docs`;
 
-let filePath = '';
+let filePath = "";
 let fileExists = false;
 
 if (Astro.locals.starlightRoute.entry) {
@@ -24,19 +24,19 @@ if (Astro.locals.starlightRoute.entry) {
       fileExists = true;
     }
   } else {
-    if (slug === 'index' || slug === '') {
+    if (slug === "index" || slug === "") {
       filePath = `${CONTENT_DIR}/index.mdx`;
-    } else if (slug.startsWith('docs/')) {
-      const docPath = slug.replace('docs/', '');
+    } else if (slug.startsWith("docs/")) {
+      const docPath = slug.replace("docs/", "");
       filePath = `${CONTENT_DIR}/docs/${docPath}.mdx`;
-    } else if (slug.startsWith('ensadmin/')) {
-      const docPath = slug.replace('ensadmin/', '');
+    } else if (slug.startsWith("ensadmin/")) {
+      const docPath = slug.replace("ensadmin/", "");
       filePath = `${CONTENT_DIR}/ensadmin/${docPath}.mdx`;
-    } else if (slug.startsWith('ensindexer/')) {
-      const docPath = slug.replace('ensindexer/', '');
+    } else if (slug.startsWith("ensindexer/")) {
+      const docPath = slug.replace("ensindexer/", "");
       filePath = `${CONTENT_DIR}/ensindexer/${docPath}.mdx`;
-    } else if (slug.startsWith('ensrainbow/')) {
-      const docPath = slug.replace('ensrainbow/', '');
+    } else if (slug.startsWith("ensrainbow/")) {
+      const docPath = slug.replace("ensrainbow/", "");
       filePath = `${CONTENT_DIR}/ensrainbow/${docPath}.mdx`;
     } else {
       // Default case
@@ -44,8 +44,8 @@ if (Astro.locals.starlightRoute.entry) {
     }
 
     // Fallback to .md if needed (just in case)
-    if (id && id.endsWith('.md')) {
-      filePath = filePath.replace(/\.mdx$/, '.md');
+    if (id && id.endsWith(".md")) {
+      filePath = filePath.replace(/\.mdx$/, ".md");
     }
 
     fileExists = true;

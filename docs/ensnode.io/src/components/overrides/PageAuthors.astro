@@ -7,16 +7,16 @@ const { repo, file } = Astro.props;
 
 const url = new URL(`https://api.github.com/repos/${repo}/commits`);
 
-url.searchParams.set('path', file);
-url.searchParams.set('per_page', '100');
+url.searchParams.set("path", file);
+url.searchParams.set("per_page", "100");
 
 let commits = [];
 let error = null;
 try {
   const response = await fetch(url, {
     headers: {
-      Accept: 'application/vnd.github+json',
-      'User-Agent': 'ensnode-contributors/1.0',
+      Accept: "application/vnd.github+json",
+      "User-Agent": "ensnode-contributors/1.0",
       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
     },
   });
@@ -28,41 +28,35 @@ try {
   commits = await response.json();
 } catch (e) {
   error = e;
-  console.error('Error fetching contributors:', e);
+  console.error("Error fetching contributors:", e);
 }
 
 function filterAndRemoveDuplicates(commits) {
   if (!commits || !Array.isArray(commits)) return [];
-
-
 
   const map = new Map();
   for (const commit of commits) {
     const author = commit.author;
 
     // Skip bot commits (like dependabot)
-    if (author && author.id && author.login && !author.login.includes('bot')) {
+    if (author && author.id && author.login && !author.login.includes("bot")) {
       map.set(author.id, {
         login: author.login,
         id: author.id,
         name: commit.commit?.author?.name || author.login,
-        date: commit.commit?.author?.date || '',
-        message: commit.commit?.message?.split('\n')[0] || ''
+        date: commit.commit?.author?.date || "",
+        message: commit.commit?.message?.split("\n")[0] || "",
       });
     }
   }
 
-  return Array.from(map.values())
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
 }
-
 
 const uniqueAuthors = filterAndRemoveDuplicates(commits);
 
-
 const MAX_AUTHORS_TO_SHOW = 12;
 const displayedAuthors = uniqueAuthors.slice(0, MAX_AUTHORS_TO_SHOW);
-
 
 const hasMoreAuthors = uniqueAuthors.length > MAX_AUTHORS_TO_SHOW;
 const additionalAuthorsCount = uniqueAuthors.length - MAX_AUTHORS_TO_SHOW;
