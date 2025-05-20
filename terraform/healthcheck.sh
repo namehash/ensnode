@@ -1,5 +1,19 @@
-
 #!/bin/bash
+
+# Health Check Script
+#
+# This script performs an HTTP health check on a given URL by repeatedly sending
+# requests and verifying the expected HTTP status code. 
+# The script retries the request multiple times with a delay between
+# attempts and supports configurable timeout, expected status code, and retry logic.
+#
+# Usage: ./health_check.sh <url>
+#
+# Environment Variables:
+#   TIMEOUT          - Maximum time in seconds to wait for a response (default: 30)
+#   EXPECTED_STATUS  - HTTP status code expected from the URL (default: 200)
+#   RETRY_ATTEMPTS   - Number of retry attempts before failing (default: 30)
+#   RETRY_DELAY      - Delay in seconds between retries (default: 10)
 
 # Get URL from command line argument or exit
 URL=$1

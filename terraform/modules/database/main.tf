@@ -3,7 +3,8 @@ locals {
   pg_port                = "5432"
   pg_user                = "postgres"
   pg_database            = "postgres"
-  railway_shm_size_bytes = "536870912"
+  # Increase shared memory for this container on Railway from the default (64MB) to 512MB.
+  railway_shm_size_bytes = "512000000"
   database_url           = "postgresql://${local.pg_user}:${random_string.pg_password.result}@${local.pg_host}:${local.pg_port}/${local.pg_database}"
 }
 
@@ -12,7 +13,7 @@ resource "random_string" "pg_password" {
   special = false
 }
 
-resource "railway_service" "postgres" {
+resource "railway_service" "database" {
   name         = "postgres"
   source_image = "postgres:17"
   railway_project_id   = var.railway_project_id
@@ -23,9 +24,9 @@ resource "railway_service" "postgres" {
   }
 }
 
-resource "railway_variable_collection" "postgres" {
+resource "railway_variable_collection" "database" {
   railway_environment_id = var.railway_environment_id
-  service_id     = railway_service.postgres.id
+  service_id     = railway_service.database.id
 
   variables = [
     {

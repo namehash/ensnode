@@ -10,14 +10,14 @@ locals {
 
 resource "railway_service" "ensindexer" {
   name         = "ensindexer"
-  source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ens_indexer_version}"
+  source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
   railway_project_id   = var.railway_project_id
   region = var.railway_region
 }
 
-resource "railway_service" "indexer_api" {
-  name         = "indexer_api"
-  source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ens_indexer_version}"
+resource "railway_service" "ensindexer_api" {
+  name         = "ensindexer_api"
+  source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
   railway_project_id   = var.railway_project_id
   region = var.railway_region
 }
@@ -61,7 +61,7 @@ resource "railway_variable_collection" "ensindexer" {
     },
     {
       name  = "ENSNODE_PUBLIC_URL"
-      value = "https://${local.indexer_domain}"
+      value = "https://${local.full_ensindexer_hostname}"
     },
     {
       name  = "ENSRAINBOW_URL"
@@ -91,9 +91,9 @@ resource "railway_variable_collection" "ensindexer" {
 }
 
 
-resource "railway_variable_collection" "api" {
+resource "railway_variable_collection" "ensindexer_api" {
   railway_environment_id = var.railway_environment_id
-  service_id     = railway_service.indexer_api.id
+  service_id     = railway_service.ensindexer_api.id
 
   variables = [
     {
@@ -130,7 +130,7 @@ resource "railway_variable_collection" "api" {
     },
     {
       name  = "ENSNODE_PUBLIC_URL"
-      value = "https://${local.api_domain}"
+      value = "https://${local.full_ensindexer_api_hostname}"
     },
     {
       name  = "ENSRAINBOW_URL"

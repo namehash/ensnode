@@ -1,3 +1,3 @@
 output "database_instance_name" {
-  value       = railway_service.postgres.name
+  value       = railway_service.database.name
 }

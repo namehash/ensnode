@@ -1,6 +1,6 @@
 locals {
-  indexer_domain = "indexer.${var.subdomain_name}.${var.domain_name}"
-  api_domain     = "api.${var.subdomain_name}.${var.domain_name}"
+  full_ensindexer_hostname   = "indexer.${var.subdomain_name}.${var.domain_name}"
+  full_ensindexer_api_hostname     = "api.${var.subdomain_name}.${var.domain_name}"
 }
 
 data "aws_route53_zone" "ensnode" {
@@ -8,24 +8,24 @@ data "aws_route53_zone" "ensnode" {
   private_zone = false
 }
 
-resource "railway_custom_domain" "indexer" {
-  domain         = local.indexer_domain
+resource "railway_custom_domain" "ensindexer" {
+  domain         = local.full_ensindexer_hostname
   railway_environment_id = var.railway_environment_id
   service_id     = railway_service.ensindexer.id
 }
 
 resource "railway_custom_domain" "api" {
-  domain         = local.api_domain
+  domain         = local.full_ensindexer_api_hostname
   railway_environment_id = var.railway_environment_id
-  service_id     = railway_service.indexer_api.id
+  service_id     = railway_service.ensindexer_api.id
 }
 
-resource "aws_route53_record" "indexer_validation" {
+resource "aws_route53_record" "ensindexer_validation" {
   zone_id = data.aws_route53_zone.ensnode.zone_id
-  name    = railway_custom_domain.indexer.domain
+  name    = railway_custom_domain.ensindexer.domain
   type    = "CNAME"
   ttl     = 300
-  records = [railway_custom_domain.indexer.dns_record_value]
+  records = [railway_custom_domain.ensindexer.dns_record_value]
 }
 
 resource "aws_route53_record" "api_validation" {
