@@ -1,0 +1,77 @@
+---
+title: Deploying ENSNode with Terraform
+sidebar:
+  label: Terraform
+  order: 4
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+This guide will help you deploy ENSNode using Terraform to Railway. The Terraform configuration provides a complete infrastructure setup including database, ENSIndexer, ENSRainbow, and other required services.
+
+:::note[Important]
+These Terraform scripts are currently specific to ENSNode instances hosted by NameHash Labs. While these scripts provide a good starting point for deploying your own ENSNode instance, you will need to make modifications to suit your specific deployment needs.
+:::
+
+## Prerequisites
+
+- [Terraform](https://www.terraform.io/downloads.html) installed
+- [Railway](https://railway.app/) account
+- Railway API token (generate from https://railway.com/account/tokens)
+- RPC URLs for the networks you want to support (Mainnet, Sepolia, Holesky, Base, Linea)
+- AWS account (for DNS management)
+
+## Configuration
+
+Create a `terraform.tfvars` file with the following variables or set TF_VAR environment variables inside your shell session:
+
+```hcl
+railway_token    = "your_railway_token"
+mainnet_rpc_url  = "your_mainnet_rpc_url"
+sepolia_rpc_url  = "your_sepolia_rpc_url"
+holesky_rpc_url  = "your_holesky_rpc_url"
+base_rpc_url     = "your_base_rpc_url"
+linea_rpc_url    = "your_linea_rpc_url"
+ensnode_version  = "latest"  # or specific version
+```
+
+## Infrastructure Components
+
+The Terraform configuration sets up the following components:
+
+- Railway project and environment
+- PostgreSQL database
+- ENSIndexer services
+- ENSRainbow service
+- DNS configuration
+
+## Deployment Steps
+
+1. Initialize Terraform:
+```bash
+terraform init
+```
+
+2. Review the planned changes:
+```bash
+terraform plan
+```
+
+3. Apply the configuration:
+```bash
+terraform apply
+```
+
+## Cleanup
+
+To destroy the infrastructure:
+
+```bash
+terraform destroy
+```
+
+<LinkCard
+  title="Terraform Configuration"
+  description="View the complete Terraform configuration on GitHub."
+  href="https://github.com/namehash/ensnode/tree/main/terraform"
+/>
