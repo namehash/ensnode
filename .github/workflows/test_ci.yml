@@ -40,6 +40,14 @@ jobs:
       - name: Audit dependencies
         run: pnpm audit --audit-level=moderate
 
+      - name: Clear Cache
+        uses: actions/gh-actions-cache@v1 # Check for the latest version
+        with:
+          key: ${{ runner.os }}-pnpm- # Or your specific key/prefix
+          command: delete
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
