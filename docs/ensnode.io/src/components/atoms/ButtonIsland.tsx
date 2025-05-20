@@ -4,7 +4,7 @@ import React from "react";
 export type ButtonIslandProps = {
   text: string | React.ReactNode;
   size: "small" | "medium" | "large";
-  variant: "primary" | "secondary" | "ghost",
+  variant: "primary" | "secondary" | "ghost";
   linkData?: {
     link: string;
     target?: string;

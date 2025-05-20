@@ -29,7 +29,7 @@ const appsSuite: {
     buttonData: {
       text: "View documentation",
       size: "medium",
-      variant:"secondary",
+      variant: "secondary",
       linkData: {
         link: "/ensadmin/",
         target: "_blank",
@@ -49,7 +49,7 @@ const appsSuite: {
     buttonData: {
       text: "View documentation",
       size: "medium",
-      variant:"secondary",
+      variant: "secondary",
       linkData: {
         link: "/ensindexer/",
         target: "_blank",
@@ -69,7 +69,7 @@ const appsSuite: {
     buttonData: {
       text: "View documentation",
       size: "medium",
-      variant:"secondary",
+      variant: "secondary",
       linkData: {
         link: "/ensrainbow/",
         target: "_blank",
