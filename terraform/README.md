@@ -8,10 +8,12 @@ This Terraform configuration manages the infrastructure for ENSNode deployments,
 
 ### AWS Resources
 - DNS configuration and management
+- S3 bucket for Terraform state - `ensnode-terraform` (must be pre-existing with a predefined name)
 
 ### Railway Resources
 - Application deployment and hosting
 - Service configuration
+- Note: Railway volume size cannot be defined in Terraform and must be manually increased through the Railway UI after deployment
 
 ## Getting Started
 
