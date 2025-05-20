@@ -4,6 +4,7 @@ sidebar:
   label: Hosted ENSNode Instances
   order: 1
 ---
+import SecondaryButtonIsland from "../../../../components/atoms/SecondaryButtonIsland.js"
 
 ## Hosted Instances
 
@@ -20,33 +21,122 @@ These hosted instances are provided free of charge to the ENS community, and whi
 The key differences between these hosted deployments is the ENS deployment being indexed (mainnet vs a testnet) and the list of ENSNode plugins that are activated. See the table below for details.
 Main difference from client perspective is chain being indexed and list of plugins being handled. Here is the table listing differences between those.
 
-|                | **ENSNode 'Alpha'**                                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| ENSNode        | https://api.alpha.ensnode.io                                                                                                |
-| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io)                              |
-| Active Plugins | subgraph, basenames, lineanames, threedns                                                                                   |
-| Purpose        | Demonstration of ENSNode's multichain ENS indexing capability. Provides a superset of the data indexed by the ENS Subgraph. |
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th><strong>ENSNode 'Alpha'</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>ENSNode</td>
+        <td><a href="https://api.alpha.ensnode.io">https://api.alpha.ensnode.io</a></td>
+    </tr>
+    <tr>
+        <td>ENSAdmin</td>
+        <td class="not-content"><SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io", target: "_blank"}}/></td>
+    </tr>
+    <tr>
+        <td>Active Plugins</td>
+        <td>subgraph, basenames, lineanames, threedns</td>
+    </tr>
+    <tr>
+        <td>Purpose</td>
+        <td>
+            Demonstration of ENSNode's multichain ENS indexing capability. Provides a superset of the data indexed by the ENS Subgraph.
+        </td>
+    </tr>
+    </tbody>
 
-|                | **ENSNode 'Mainnet'**                                                                                                       |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| ENSNode        | https://api.mainnet.ensnode.io                                                                                              |
-| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io)                            |
-| Active Plugins | subgraph                                                                                                                    |
-| Purpose        | Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on mainnet. |
+    <thead>
+    <tr>
+        <th></th>
+        <th><strong>ENSNode 'Mainnet'</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>ENSNode</td>
+        <td><a href="https://api.mainnet.ensnode.io">https://api.mainnet.ensnode.io</a></td>
+    </tr>
+    <tr>
+        <td>ENSAdmin</td>
+        <td class="not-content">
+            <SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io", target: "_blank"}}/>
+        </td>
+    </tr>
+    <tr>
+        <td>Active Plugins</td>
+        <td>subgraph</td>
+    </tr>
+    <tr>
+        <td>Purpose</td>
+        <td>
+            Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on mainnet.
+        </td>
+    </tr>
+    </tbody>
 
-|                | **ENSNode 'Sepolia'**                                                                                                       |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| ENSNode        | https://api.sepolia.ensnode.io                                                                                              |
-| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io)                            |
-| Active Plugins | subgraph                                                                                                                    |
-| Purpose        | Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia. |
+    <thead>
+    <tr>
+        <th></th>
+        <th><strong>ENSNode 'Sepolia'</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>ENSNode</td>
+        <td><a href="https://api.sepolia.ensnode.io">https://api.sepolia.ensnode.io</a></td>
+    </tr>
+    <tr>
+        <td>ENSAdmin</td>
+        <td class="not-content">
+            <SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io", target: "_blank"}}/>
+        </td>
+    </tr>
+    <tr>
+        <td>Active Plugins</td>
+        <td>subgraph</td>
+    </tr>
+    <tr>
+        <td>Purpose</td>
+        <td>
+            Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia.
+        </td>
+    </tr>
+    </tbody>
 
-|                | **ENSNode 'Holesky'**                                                                                                       |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| ENSNode        | https://api.holesky.ensnode.io                                                                                              |
-| ENSAdmin       | [Open In ENSAdmin](https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io)                            |
-| Active Plugins | subgraph                                                                                                                    |
-| Purpose        | Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Holesky. |
+    <thead>
+    <tr>
+        <th></th>
+        <th><strong>ENSNode 'Holesky'</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>ENSNode</td>
+        <td><a href="https://api.holesky.ensnode.io">https://api.holesky.ensnode.io</a></td>
+    </tr>
+    <tr>
+        <td>ENSAdmin</td>
+        <td class="not-content">
+            <SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io", target: "_blank"}}/>
+        </td>
+    </tr>
+    <tr>
+        <td>Active Plugins</td>
+        <td>subgraph</td>
+    </tr>
+    <tr>
+        <td>Purpose</td>
+        <td>
+            Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Holesky.
+        </td>
+    </tr>
+    </tbody>
+</table>
+
 
 ## Endpoints
 
