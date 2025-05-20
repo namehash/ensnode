@@ -24,6 +24,10 @@ variable "linea_rpc_url" {
   type = string
 }
 
+variable "optimism_rpc_url" {
+  type = string
+}
+
 variable "ensnode_version" {
   type = string
 }

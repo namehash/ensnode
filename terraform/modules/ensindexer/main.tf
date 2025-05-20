@@ -6,24 +6,25 @@ locals {
   rpc_url_8453       = var.base_rpc_url
   rpc_url_59144      = var.linea_rpc_url
   rpc_url_11155111   = var.sepolia_rpc_url
+  rpc_url_10         = var.optimism_rpc_url
 }
 
 resource "railway_service" "ensindexer" {
   name         = "ensindexer"
   source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
-  railway_project_id   = var.railway_project_id
-  region = var.railway_region
+  project_id   = var.railway_project_id
+  region       = var.railway_region
 }
 
 resource "railway_service" "ensindexer_api" {
   name         = "ensindexer_api"
   source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
-  railway_project_id   = var.railway_project_id
-  region = var.railway_region
+  project_id   = var.railway_project_id
+  region       = var.railway_region
 }
 
 resource "railway_variable_collection" "ensindexer" {
-  railway_environment_id = var.railway_environment_id
+  environment_id = var.railway_environment_id
   service_id     = railway_service.ensindexer.id
 
   variables = [
@@ -60,6 +61,10 @@ resource "railway_variable_collection" "ensindexer" {
       value = local.rpc_url_17000
     },
     {
+      name  = "RPC_URL_10"
+      value = local.rpc_url_10
+    },
+    {
       name  = "ENSNODE_PUBLIC_URL"
       value = "https://${local.full_ensindexer_hostname}"
     },
@@ -92,7 +97,7 @@ resource "railway_variable_collection" "ensindexer" {
 
 
 resource "railway_variable_collection" "ensindexer_api" {
-  railway_environment_id = var.railway_environment_id
+  environment_id = var.railway_environment_id
   service_id     = railway_service.ensindexer_api.id
 
   variables = [
@@ -127,6 +132,10 @@ resource "railway_variable_collection" "ensindexer_api" {
     {
       name  = "RPC_URL_17000"
       value = local.rpc_url_17000
+    },
+    {
+      name  = "RPC_URL_10"
+      value = local.rpc_url_10
     },
     {
       name  = "ENSNODE_PUBLIC_URL"

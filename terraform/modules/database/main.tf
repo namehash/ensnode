@@ -16,7 +16,7 @@ resource "random_string" "pg_password" {
 resource "railway_service" "database" {
   name         = "postgres"
   source_image = "postgres:17"
-  railway_project_id   = var.railway_project_id
+  project_id   = var.railway_project_id
   region       = var.railway_region
   volume = {
     mount_path = "/var/lib/postgresql"
@@ -25,7 +25,7 @@ resource "railway_service" "database" {
 }
 
 resource "railway_variable_collection" "database" {
-  railway_environment_id = var.railway_environment_id
+  environment_id = var.railway_environment_id
   service_id     = railway_service.database.id
 
   variables = [

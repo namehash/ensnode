@@ -70,3 +70,7 @@ variable "base_rpc_url" {
 variable "linea_rpc_url" {
   type = string
 }
+
+variable "optimism_rpc_url" {
+  type = string
+}

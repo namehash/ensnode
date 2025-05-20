@@ -24,9 +24,9 @@ These Terraform scripts are currently specific to ENSNode instances hosted by Na
 
 ## Configuration
 
-Create a `terraform.tfvars` file with the following variables or set TF_VAR environment variables inside your shell session:
+Copy `.env.sample` to `.env.local` and fill in your configuration values:
 
-```hcl
+```bash
 railway_token    = "your_railway_token"
 mainnet_rpc_url  = "your_mainnet_rpc_url"
 sepolia_rpc_url  = "your_sepolia_rpc_url"

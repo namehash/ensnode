@@ -41,6 +41,7 @@ jobs:
       TF_VAR_holesky_rpc_url: ${{ secrets.HOLESKY_RPC_URL }}
       TF_VAR_base_rpc_url: ${{ secrets.BASE_RPC_URL }}
       TF_VAR_linea_rpc_url: ${{ secrets.LINEA_RPC_URL }}
+      TF_VAR_optimism_rpc_url: ${{ secrets.OPTIMISM_RPC_URL }}
       TF_VAR_ensnode_version: ${{ inputs.tag }}
 
     steps:
