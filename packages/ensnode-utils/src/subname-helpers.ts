@@ -60,6 +60,18 @@ export const maybeHealLabelByReverseAddress = ({
 };
 
 /**
+ * Get the labelhash for an address.reverse subname.
+ * @param maybeReverseAddress - The address that is possibly associated with the addr.reverse subname
+ * @returns The labelhash for the address.reverse subname.
+ */
+export const labelHashForReverseAddress = (maybeReverseAddress: Address): LabelHash => {
+  // derive the assumed label from the normalized address
+  const assumedLabel = addrReverseLabel(maybeReverseAddress);
+  // derive the labelhash from the assumed label
+  return labelhash(assumedLabel);
+};
+
+/**
  * Encodes a uint256 bigint as hex string sized to 32 bytes.
  * Uses include, in the context of ENS, decoding the uint256-encoded tokenId of NFT-issuing contracts
  * into Node or LabelHash, which is a common behavior in the ENS ecosystem.

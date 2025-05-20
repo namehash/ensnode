@@ -56,6 +56,14 @@ export const config = createConfig({
       network: networkConfigForContract(chain, contracts.Resolver),
       abi: contracts.Resolver.abi,
     },
+    [namespace("ArgentWalletFactory")]: {
+      network: networkConfigForContract(chain, contracts.ArgentWalletFactory),
+      abi: contracts.ArgentWalletFactory.abi,
+    },
+    [namespace("ArgentWalletFactory2")]: {
+      network: networkConfigForContract(chain, contracts.ArgentWalletFactory2),
+      abi: contracts.ArgentWalletFactory2.abi,
+    },
   },
 });
 
@@ -63,6 +71,7 @@ export const activate = activateHandlers({
   pluginName,
   namespace,
   handlers: [
+    import("./handlers/ArgentWalletFactory"),
     import("./handlers/Registry"),
     import("./handlers/Registrar"),
     import("./handlers/NameWrapper"),
