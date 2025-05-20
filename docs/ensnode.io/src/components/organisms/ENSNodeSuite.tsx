@@ -1,6 +1,6 @@
-import SecondaryButtonIsland, {
+import ButtonIsland, {
   ButtonIslandProps,
-} from "@workspace/docs/ensnode.io/src/components/atoms/SecondaryButtonIsland.tsx";
+} from "@workspace/docs/ensnode.io/src/components/atoms/ButtonIsland.tsx";
 import { StarIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/StarIcon.tsx";
 import cc from "classcat";
 import { Fragment } from "react";
@@ -29,6 +29,7 @@ const appsSuite: {
     buttonData: {
       text: "View documentation",
       size: "medium",
+      variant:"secondary",
       linkData: {
         link: "/ensadmin/",
         target: "_blank",
@@ -48,6 +49,7 @@ const appsSuite: {
     buttonData: {
       text: "View documentation",
       size: "medium",
+      variant:"secondary",
       linkData: {
         link: "/ensindexer/",
         target: "_blank",
@@ -67,6 +69,7 @@ const appsSuite: {
     buttonData: {
       text: "View documentation",
       size: "medium",
+      variant:"secondary",
       linkData: {
         link: "/ensrainbow/",
         target: "_blank",
@@ -113,9 +116,10 @@ export default function ENSNodeSuite() {
                     {namehashApp.description}
                   </Balancer>
                 </div>
-                <SecondaryButtonIsland
+                <ButtonIsland
                   text={namehashApp.buttonData.text}
                   size={namehashApp.buttonData.size}
+                  variant={namehashApp.buttonData.variant}
                   linkData={namehashApp.buttonData.linkData}
                 />
               </div>
