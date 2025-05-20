@@ -10,15 +10,15 @@ export type ButtonIslandProps = {
   styles?: string;
 };
 
-export default function SecondaryButtonIsland({ text, size, linkData, style }: ButtonIslandProps) {
+export default function SecondaryButtonIsland({ text, size, linkData, styles }: ButtonIslandProps) {
   return linkData != undefined ? (
-    <Button variant="secondary" size={size} asChild className={style}>
+    <Button variant="secondary" size={size} asChild className={styles || ""}>
       <Link target={linkData?.target || "_blank"} href={linkData.link}>
         {text}
       </Link>
     </Button>
   ) : (
-    <Button variant="secondary" size={size} className={style}>
+    <Button variant="secondary" size={size} className={styles || ""}>
       {text}
     </Button>
   );

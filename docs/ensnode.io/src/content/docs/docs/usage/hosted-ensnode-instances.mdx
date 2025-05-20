@@ -4,7 +4,7 @@ sidebar:
   label: Hosted ENSNode Instances
   order: 1
 ---
-import SecondaryButtonIsland from "../../../../components/atoms/SecondaryButtonIsland.js"
+import SecondaryButtonIsland from "../../../../components/atoms/SecondaryButtonIsland.js";
 
 ## Hosted Instances
 
@@ -35,7 +35,15 @@ Main difference from client perspective is chain being indexed and list of plugi
     </tr>
     <tr>
         <td>ENSAdmin</td>
-        <td class="not-content"><SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io", target: "_blank"}}/></td>
+        <td class="not-content">
+            <SecondaryButtonIsland
+                client:load
+                text="Open in ENSAdmin"
+                size="small"
+                linkData={({
+                    link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io",
+                    target: "_blank"
+                })}/></td>
     </tr>
     <tr>
         <td>Active Plugins</td>
@@ -63,7 +71,14 @@ Main difference from client perspective is chain being indexed and list of plugi
     <tr>
         <td>ENSAdmin</td>
         <td class="not-content">
-            <SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io", target: "_blank"}}/>
+            <SecondaryButtonIsland
+                client:load
+                text="Open in ENSAdmin"
+                size="small"
+                linkData={({
+                    link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io",
+                    target: "_blank"
+                })}/>
         </td>
     </tr>
     <tr>
@@ -92,7 +107,14 @@ Main difference from client perspective is chain being indexed and list of plugi
     <tr>
         <td>ENSAdmin</td>
         <td class="not-content">
-            <SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io", target: "_blank"}}/>
+            <SecondaryButtonIsland
+                client:load
+                text="Open in ENSAdmin"
+                size="small"
+                linkData={({
+                    link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io",
+                    target: "_blank"
+                })}/>
         </td>
     </tr>
     <tr>
@@ -121,7 +143,14 @@ Main difference from client perspective is chain being indexed and list of plugi
     <tr>
         <td>ENSAdmin</td>
         <td class="not-content">
-            <SecondaryButtonIsland text="Open in ENSAdmin" size="small" linkData={{link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io", target: "_blank"}}/>
+            <SecondaryButtonIsland
+                client:load
+                text="Open in ENSAdmin"
+                size="small"
+                linkData={({
+                    link: "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io",
+                    target: "_blank"
+                })}/>
         </td>
     </tr>
     <tr>
