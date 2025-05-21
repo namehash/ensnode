@@ -1,5 +1,5 @@
 import { ENSIndexerConfigSchema } from "@/config/config.schema";
-import { ENSIndexerConfig, ENSIndexerEnvironment, RawRpcConfig } from "@/config/types";
+import { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfigEnvironment } from "@/config/types";
 import { prettifyError } from "zod/v4";
 
 /**
@@ -13,8 +13,8 @@ import { prettifyError } from "zod/v4";
  *
  * This function returns a raw chain config which is not yet validated against the zod schema.
  */
-export function getRpcConfigsFromEnv(): Record<number, RawRpcConfig> {
-  const rpcConfigs: Record<number, RawRpcConfig> = {};
+export function getRpcConfigsFromEnv(): Record<number, RpcConfigEnvironment> {
+  const rpcConfigs: Record<number, RpcConfigEnvironment> = {};
 
   Object.entries(process.env).forEach(([key, value]) => {
     // Only match keys like "RPC_URL_1", "RPC_URL_10", etc. (digits only after the underscore)

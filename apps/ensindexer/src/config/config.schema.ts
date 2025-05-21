@@ -3,12 +3,7 @@ import { z } from "zod/v4";
 
 import { uniq } from "@/lib/lib-helpers";
 import { PLUGIN_REQUIRED_DATASOURCES } from "@/plugins";
-import {
-  ContractConfig,
-  DatasourceName,
-  ENSDeployments,
-  getENSDeployment,
-} from "@ensnode/ens-deployments";
+import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 import { Address, isAddress } from "viem";
 

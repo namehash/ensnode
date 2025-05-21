@@ -11,11 +11,16 @@ const _defaultMockConfig: ENSIndexerConfig = {
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  plugins: [PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames],
+  plugins: [PluginName.Subgraph],
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: DEFAULT_PORT,
-  rpcConfigs: {},
+  rpcConfigs: {
+    1: {
+      url: "https://eth-mainnet.g.alchemy.com/v2/1234",
+      maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
+    },
+  },
   globalBlockrange: {
     startBlock: undefined,
     endBlock: undefined,
@@ -154,7 +159,11 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
  * // Add base chain configuration
  * setChainConfig(8453, "https://base-mainnet.g.alchemy.com/v2/5678");
  */
-export function setChainConfig(chainId: number, url: string, maxRequestsPerSecond: number = 50) {
+export function setChainConfig(
+  chainId: number,
+  url: string,
+  maxRequestsPerSecond: number = DEFAULT_RPC_RATE_LIMIT,
+) {
   updateMockConfig({
     rpcConfigs: {
       ...(currentMockConfig.rpcConfigs || {}),

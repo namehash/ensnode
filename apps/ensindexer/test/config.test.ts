@@ -1,3 +1,4 @@
+import { DEFAULT_RPC_RATE_LIMIT } from "@/config/config.schema";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -161,7 +162,7 @@ describe("config", () => {
     it("returns the default ENSADMIN_URL if it is not set", async () => {
       vi.stubEnv("ENSADMIN_URL", undefined);
       const config = await getConfig();
-      expect(config.ensAdminUrl).toBe("https://admin.ensnode.io"); // Check against the default
+      expect(config.ensAdminUrl).toBe("https://admin.ensnode.io");
     });
   });
 
@@ -212,7 +213,6 @@ describe("config", () => {
 
   describe(".port", () => {
     it("returns the PORT if it is a valid number", async () => {
-      // Different from BASE_ENV to ensure it's being read
       vi.stubEnv("PORT", "3001");
       const config = await getConfig();
       expect(config.port).toBe(3001);
@@ -348,13 +348,12 @@ describe("config", () => {
 
   describe(".chains", () => {
     it("returns the chains if it is a valid object", async () => {
-      vi.stubEnv("RPC_URL_1", "https://eth-mainnet.g.alchemy.com/v2/1234");
+      vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
       const config = await getConfig();
       expect(config.rpcConfigs).toEqual({
         1: {
-          url: "https://eth-mainnet.g.alchemy.com/v2/1234",
-          // default value
-          maxRequestsPerSecond: 50,
+          url: VALID_RPC_URL,
+          maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
         },
       });
     });
@@ -372,10 +371,10 @@ describe("config", () => {
       expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(100);
     });
 
-    it("returns the default RPC_REQUEST_RATE_LIMIT_1 if it is not set", async () => {
+    it("returns the default if it is not set", async () => {
       vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", undefined);
       const config = await getConfig();
-      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(50);
+      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(DEFAULT_RPC_RATE_LIMIT);
     });
   });
 

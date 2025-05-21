@@ -192,7 +192,7 @@ export interface ENSIndexerConfig {
  * rpcMaxRequestsPerSecond is optional and will be undefined if the
  * RPC_REQUEST_RATE_LIMIT_<chainId> environment variable is not set.
  */
-export interface RawRpcConfig {
+export interface RpcConfigEnvironment {
   url: string;
   maxRequestsPerSecond: string | undefined;
 }
@@ -219,5 +219,5 @@ export interface ENSIndexerEnvironment {
     startBlock: string | undefined;
     endBlock: string | undefined;
   };
-  rpcConfigs: Record<number, RawRpcConfig>;
+  rpcConfigs: Record<number, RpcConfigEnvironment>;
 }
