@@ -27,6 +27,7 @@ import {EthereumIcon} from "@/components/icons/EthereumIcon";
 import {LineaChainIcon} from "@/components/icons/LineaChainIcon";
 import {EthereumTestNetIcon} from "@/components/icons/EthereumTestNetIcon";
 import {EthereumLocalIcon} from "@/components/icons/EthereumLocalIcon";
+import {formatRelativeTime} from "@/components/recent-registrations";
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
@@ -152,14 +153,19 @@ function BlockStats({ label, block }: BlockSatsProps) {
     );
   }
 
+  let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString());
+
+  if (block.timestamp <= Math.floor(Date.now() / 1000) || calculatedRelativeTime === "less than a minute ago"){
+    calculatedRelativeTime = "just now";
+  }
+
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
       {/*TODO: Make these a links to block explorer (only for those chains that allow it, otherwise should remain as is)*/}
       <div className="text-lg font-semibold">{block.number ? `#${block.number}` : "N/A"}</div>
-      {/*TODO: switch to relative timestamp*/}
-      <div className="text-sm text-muted-foreground">
-        {block.timestamp ? intlFormat(fromUnixTime(block.timestamp)) : "N/A"}
+      <div className="text-xs text-muted-foreground">
+        {block.timestamp ? calculatedRelativeTime : "N/A"}
       </div>
     </div>
   );
