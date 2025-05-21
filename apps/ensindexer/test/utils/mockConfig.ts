@@ -1,31 +1,28 @@
 import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/config/config.schema";
 import { ENSIndexerConfig } from "@/config/types";
+import { buildConfigFromEnvironment } from "@/lib/lib-config";
 import { deepClone } from "@/lib/lib-helpers";
-import { PluginName } from "@ensnode/utils";
 import { vi } from "vitest";
 
 // default, non-exported mock configuration template
-const _defaultMockConfig: ENSIndexerConfig = {
+const _defaultMockConfig = buildConfigFromEnvironment({
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   ensDeploymentChain: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  plugins: [PluginName.Subgraph],
+  plugins: "subgraph",
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
-  healReverseAddresses: true,
-  port: DEFAULT_PORT,
+  healReverseAddresses: "true",
+  port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: {
       url: "https://eth-mainnet.g.alchemy.com/v2/1234",
-      maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
+      maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT.toString(),
     },
   },
-  globalBlockrange: {
-    startBlock: undefined,
-    endBlock: undefined,
-  },
-};
+  globalBlockrange: { startBlock: undefined, endBlock: undefined },
+});
 
 // the current, mutable ENSIndexerConfig for tests
 let currentMockConfig: ENSIndexerConfig;
