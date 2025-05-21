@@ -1,26 +1,35 @@
-import { SELECTED_DEPLOYMENT_CONFIG } from "@/lib/globals";
+import { DatasourceName } from "@ensnode/ens-deployments";
+
+import { SELECTED_ENS_DEPLOYMENT } from "@/lib/globals";
+import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { type MergedTypes, getActivePlugins } from "@/lib/plugin-helpers";
 import {
-  deepMergeRecursive,
   getEnsDeploymentChain,
   getGlobalBlockrange,
+  getRequestedPluginNames,
   healReverseAddresses,
-  requestedPluginNames,
+  rpcEndpointUrl,
 } from "@/lib/ponder-helpers";
-import type { PluginName } from "@ensnode/utils";
 
 import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
-import * as rootPlugin from "@/plugins/root/root.plugin";
+import * as subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
+import * as threednsPlugin from "@/plugins/threedns/threedns.plugin";
+import { NetworkConfig } from "ponder";
 
 ////////
-// First, generate AllPluginConfigs type representing the merged types of each plugin's `config`,
+// First, generate MergedPluginConfig type representing the merged types of each plugin's `config`,
 // so ponder's typechecking of the indexing handlers and their event arguments is correct.
 ////////
 
-const ALL_PLUGINS = [rootPlugin, basenamesPlugin, lineaNamesPlugin] as const;
+const AVAILABLE_PLUGINS = [
+  subgraphPlugin,
+  basenamesPlugin,
+  lineaNamesPlugin,
+  threednsPlugin,
+] as const;
 
-type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
+type MergedPluginConfig = MergedTypes<(typeof AVAILABLE_PLUGINS)[number]["config"]> & {
   /**
    * The environment variables that change the behavior of the indexer.
    * It's important to include all environment variables that change the behavior
@@ -32,64 +41,89 @@ type AllPluginConfigs = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
 };
 
 ////////
-// Next, filter ALL_PLUGINS by those that are available and that the user has activated.
+// Next, filter ALL_PLUGINS by those that the user has selected (via ACTIVE_PLUGINS), panicking if a
+// user-specified plugin is unsupported by the Datasources available in SELECTED_ENS_DEPLOYMENT.
 ////////
 
-// the available PluginNames are those that the selected ENS Deployment defines as available
-// TODO: this encodes a 1:1 assumption between Datasources and Plugins that may not be true in the future
-const availablePluginNames = Object.keys(SELECTED_DEPLOYMENT_CONFIG) as PluginName[];
+const requestedPluginNames = getRequestedPluginNames();
 
-// filter the set of available plugins by those that are 'active' in the env
-const activePlugins = getActivePlugins(ALL_PLUGINS, availablePluginNames);
+// the available Datasources are those that the selected ENSDeployment defines
+const availableDatasourceNames = Object.keys(SELECTED_ENS_DEPLOYMENT) as DatasourceName[];
+
+// filter the set of available plugins by those that are 'active'
+const activePlugins = getActivePlugins(
+  AVAILABLE_PLUGINS,
+  requestedPluginNames,
+  availableDatasourceNames,
+);
 
 ////////
 // Merge the plugins' configs into a single ponder config, including injected dependencies.
 ////////
 
-// merge the resulting configs
-const activePluginsMergedConfig = activePlugins
+// merge the resulting configs into the config we return to Ponder
+const ponderConfig = activePlugins
   .map((plugin) => plugin.config)
-  .reduce((acc, val) => deepMergeRecursive(acc, val), {}) as AllPluginConfigs;
+  .reduce((acc, val) => mergePonderConfigs(acc, val), {}) as MergedPluginConfig;
 
 // set the indexing behavior dependencies
-activePluginsMergedConfig.indexingBehaviorDependencies = {
+ponderConfig.indexingBehaviorDependencies = {
   HEAL_REVERSE_ADDRESSES: healReverseAddresses(),
 };
 
-// invariant: if using a custom START_BLOCK or END_BLOCK, ponder should be configured to index at most one network
+////////
+// Invariant: if using a custom START_BLOCK or END_BLOCK, ponder should be configured to index at
+// most one network.
+////////
+
 const globalBlockrange = getGlobalBlockrange();
 if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-  const numNetworks = Object.keys(activePluginsMergedConfig.networks).length;
+  const numNetworks = Object.keys(ponderConfig.networks).length;
   if (numNetworks > 1) {
     throw new Error(
       `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains.
 
 The config currently is:
 ENS_DEPLOYMENT_CHAIN=${getEnsDeploymentChain()}
-ACTIVE_PLUGINS=${requestedPluginNames().join(",")}
+ACTIVE_PLUGINS=${requestedPluginNames.join(",")}
 START_BLOCK=${globalBlockrange.startBlock || "n/a"}
 END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
 The usage you're most likely interested in is:
-  ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=root END_BLOCK=x pnpm run start
-which runs just the root plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
+  ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
+which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
-In the future, indexing multiple networks with network-specific blockrange constraints may be possible.
-`,
+In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
     );
   }
+}
+
+////////
+// Invariant: All configured networks must have a custom RPC endpoint provided. Public RPC endpoints
+// will ratelimit and make indexing more or less unusable.
+////////
+
+// if not every network has a valid transport, panic
+const allChainIds = Object.values(ponderConfig.networks).map((network) => network.chainId);
+if (!allChainIds.every((chainId) => rpcEndpointUrl(chainId) !== undefined)) {
+  throw new Error(`ENSNode has been configured with the following ACTIVE_PLUGINS: ${requestedPluginNames.join(", ")}.
+These plugins, collectively, index events from the following chains: ${allChainIds.join(", ")}.
+
+The following RPC_URL_* environment variables must be defined for nominal indexing behavior:
+${allChainIds.map((chainId) => `RPC_URL_${chainId}: ${rpcEndpointUrl(chainId) || "N/A"}`).join("\n")}
+`);
 }
 
 ////////
 // Activate the active plugins' handlers, which register indexing handlers with Ponder.
 ////////
 
-await Promise.all(activePlugins.map((plugin) => plugin.activate()));
+// NOTE: we explicitly delay the execution of this function for 1 tick, to avoid a race condition
+// within ponder internals related to the schema name and drizzle-orm
+setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
 ////////
 
-// The type of the default export is a merge of all active plugin configs
-// configs so that each plugin can be correctly typechecked
-export default activePluginsMergedConfig;
+export default ponderConfig;

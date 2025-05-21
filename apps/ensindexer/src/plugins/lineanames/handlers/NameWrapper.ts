@@ -1,14 +1,13 @@
 import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
 export default function ({
   pluginName,
-  registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.LineaNames>) {
+}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleNameWrapped,
     handleNameUnwrapped,
@@ -17,8 +16,9 @@ export default function ({
     handleTransferSingle,
     handleTransferBatch,
   } = makeNameWrapperHandlers({
-    eventIdPrefix: pluginName,
-    registrarManagedName,
+    pluginName,
+    // the shared Registrar handlers in this plugin index direct subnames of '.linea.eth'
+    registrarManagedName: "linea.eth",
   });
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);

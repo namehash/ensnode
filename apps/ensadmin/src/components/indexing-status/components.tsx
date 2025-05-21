@@ -58,6 +58,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
   }
 
   const { networkIndexingStatusByChainId } = data.runtime;
+  const ensDeploymentChain = data.env.ENS_DEPLOYMENT_CHAIN;
 
   return (
     <div className="px-6">
@@ -69,11 +70,12 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
         </CardHeader>
 
         <CardContent className="flex flex-row gap-8">
-          {globalIndexingStatusViewModel(networkIndexingStatusByChainId).networkStatuses.map(
-            (networkStatus) => (
-              <NetworkIndexingStatsCard key={networkStatus.name} network={networkStatus} />
-            ),
-          )}
+          {globalIndexingStatusViewModel(
+            networkIndexingStatusByChainId,
+            ensDeploymentChain,
+          ).networkStatuses.map((networkStatus) => (
+            <NetworkIndexingStatsCard key={networkStatus.name} network={networkStatus} />
+          ))}
         </CardContent>
       </Card>
     </div>
@@ -279,7 +281,10 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
 
       <main className="grid gap-4">
         <IndexingTimeline
-          {...globalIndexingStatusViewModel(data.runtime.networkIndexingStatusByChainId)}
+          {...globalIndexingStatusViewModel(
+            data.runtime.networkIndexingStatusByChainId,
+            data.env.ENS_DEPLOYMENT_CHAIN,
+          )}
         />
       </main>
     </section>
@@ -360,15 +365,19 @@ export function IndexingTimeline({
   currentIndexingDate,
   indexingStartsAt,
 }: TimelineProps) {
-  if (!currentIndexingDate) {
-    return <IndexingTimelineFallback />;
-  }
-
   // Timeline boundaries
   const timelineStart = indexingStartsAt;
   const timelineEnd = new Date();
 
   const yearMarkers = generateYearMarkers(timelineStart, timelineEnd);
+  const timelinePositionValue = currentIndexingDate
+    ? getTimelinePosition(currentIndexingDate, timelineStart, timelineEnd)
+    : 0;
+
+  const timelinePosition =
+    timelinePositionValue > 0 && timelinePositionValue < 100
+      ? timelinePositionValue.toFixed(4)
+      : timelinePositionValue;
 
   return (
     <Card className="w-full">
@@ -378,7 +387,8 @@ export function IndexingTimeline({
           <div className="flex items-center gap-1.5">
             <Clock size={16} className="text-blue-600" />
             <span className="text-sm font-medium">
-              Last indexed block on {intlFormat(currentIndexingDate)}
+              Last indexed block on{" "}
+              {currentIndexingDate ? intlFormat(currentIndexingDate) : "pending"}
             </span>
           </div>
         </CardTitle>
@@ -409,7 +419,7 @@ export function IndexingTimeline({
             <div
               className="absolute h-full w-0.5 bg-green-800 z-20"
               style={{
-                left: `${getTimelinePosition(currentIndexingDate, timelineStart, timelineEnd)}%`,
+                left: `${timelinePosition}%`,
                 top: "0",
                 bottom: "0",
                 height: `${networkStatuses.length * 60}px`,
@@ -417,13 +427,7 @@ export function IndexingTimeline({
             >
               <div className="absolute -bottom-8 -translate-x-1/2 whitespace-nowrap">
                 <Badge className="text-xs bg-green-800 text-white flex flex-col">
-                  <span>Processing data</span>{" "}
-                  <span>
-                    {getTimelinePosition(currentIndexingDate, timelineStart, timelineEnd).toFixed(
-                      4,
-                    )}
-                    %
-                  </span>
+                  <span>Processing data</span> <span>{timelinePosition}%</span>
                 </Badge>
               </div>
             </div>
@@ -464,7 +468,7 @@ export function IndexingTimeline({
 }
 
 interface NetworkIndexingStatusProps {
-  currentIndexingDate: Date;
+  currentIndexingDate: Date | null;
   timelineStart: Date;
   timelineEnd: Date;
   networkStatus: NetworkStatusViewModel;

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/utils",
-  "version": "0.18.0",
+  "version": "0.26.0",
   "type": "module",
   "description": "A utility library for interacting with ENS data",
   "license": "MIT",
@@ -14,8 +14,7 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts",
-    "./subname-helpers": "./src/subname-helpers.ts"
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -23,10 +22,6 @@
       ".": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "./subname-helpers": {
-        "types": "./dist/subname-helpers.d.ts",
-        "default": "./dist/subname-helpers.js"
       }
     },
     "main": "./dist/index.js",

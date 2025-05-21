@@ -1,0 +1,97 @@
+---
+import { AstroFont } from "astro-font";
+import { SEO } from "astro-seo";
+import "../styles/globals.css";
+import { Image } from "astro:assets";
+import cc from "classcat";
+import { Balancer } from "react-wrap-balancer";
+import error_code from "../assets/404.svg";
+import skies_image from "../assets/404_clouds_image.png";
+import mobile_skies_image from "../assets/404_mobile_clouds_image.png";
+import SecondaryButtonIsland from "../components/atoms/SecondaryButtonIsland";
+import StaticHeader from "../components/molecules/StaticHeader.astro";
+
+const verticalAlignmentBase = "flex flex-col flex-nowrap justify-center items-center";
+---
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width"/>
+    <meta name="generator" content={Astro.generator}/>
+    <AstroFont
+            config={[
+                {
+                    src: [],
+                    name: "Inter",
+                    // Google Fonts URL
+                googleFontsURL: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+                    preload: true,
+                    display: "swap",
+                    selector: "body",
+                    fallback: "sans-serif",
+                },
+            ]}
+    />
+    <SEO
+            title="The new multichain indexer for ENSv2 | ENSNode"
+            description="Multichain indexer for ENS with ENS Subgraph backwards compatibility."
+            openGraph={{
+                basic: {
+                    title: "The new multichain indexer for ENSv2",
+                    type: "website",
+                    image: "https://ensnode.io/OG_image.png",
+                    url: "https://ensnode.io/",
+                },
+                optional: {
+                    description: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+                    siteName: "ENSNode"
+                }
+            }}
+            twitter={{
+                creator: "@NameHashLabs",
+                title: "The new multichain indexer for ENSv2",
+                image: "https://ensnode.io/Twitter_OG_image.png",
+                description: "Multichain indexer for ENS with ENS Subgraph backwards compatibility.",
+                card: "summary_large_image"
+            }}
+            extend={{
+                link: [
+                    { rel: "icon", href: "/favicon.svg" },
+                    { rel: "apple-touch-icon", href: "/apple-touch-icon.png"}
+                ],
+            }}
+    />
+</head>
+<body>
+<StaticHeader />
+<main class={cc(["w-full h-screen", verticalAlignmentBase])}>
+    <Image src={skies_image} alt="background skies" class="hidden sm:block absolute w-full h-screen z-0 object-center object-cover select-none opacity-[0.08]" quality={100}/>
+    <Image src={mobile_skies_image} alt="background skies" class="block sm:hidden absolute w-full h-screen z-0 object-center select-none" quality={100}/>
+    <div class={cc(["relative z-10 gap-12 px-5 sm:px-0", verticalAlignmentBase])}>
+        <Image src={error_code} alt="404 error" class="h-[77px] sm:h-[200px] sm:pl-[26px] sm:pr-[28px] sm:pb-2 sm:pt-[21px]" quality={100} />
+        <div class={cc([verticalAlignmentBase, "gap-5"])}>
+            <div class={cc([verticalAlignmentBase, "gap-3"])}>
+                <h3 class="text-center text-black text-2xl sm:text-4xl leading-8 sm:leading-10 font-semibold sm:font-bold">Page not found</h3>
+                <Balancer as="p" className="text-center text-gray-500 text-base sm:text-sm leading-6 font-normal">We can’t seem to find the page you’re looking for</Balancer>
+            </div>
+            <SecondaryButtonIsland text="Back to homepage" size="medium"
+                                   style=`px-[17px] py-[9px]`
+                                   linkData={{
+                                       link: "/",
+                                       target: "_self",
+                                   }}/>
+        </div>
+    </div>
+</main>
+</body>
+</html>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>

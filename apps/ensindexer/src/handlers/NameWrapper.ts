@@ -1,15 +1,16 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { type Node } from "@ensnode/utils";
-import { decodeDNSPacketBytes, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
+import { type Node, PluginName, uint256ToHex32 } from "@ensnode/utils";
+
 import { makeSharedEventValues, upsertAccount } from "@/lib/db-helpers";
+import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import type { EventIdPrefix, RegistrarManagedName } from "@/lib/types";
+import type { RegistrarManagedName } from "@/lib/types";
 
 /**
  * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
@@ -42,17 +43,17 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 /**
  * makes a set of shared handlers for the NameWrapper contract
  *
- * @param eventIdPrefix event id prefix to avoid cross-plugin collisions
+ * @param pluginName the name of the plugin using these shared handlers
  * @param registrarManagedName the name that the Registrar that NameWrapper interacts with registers subnames of
  */
 export const makeNameWrapperHandlers = ({
-  eventIdPrefix,
+  pluginName,
   registrarManagedName,
 }: {
-  eventIdPrefix: EventIdPrefix;
+  pluginName: PluginName;
   registrarManagedName: RegistrarManagedName;
 }) => {
-  const sharedEventValues = makeSharedEventValues(eventIdPrefix);
+  const sharedEventValues = makeSharedEventValues(pluginName);
   const registrarManagedNode = namehash(registrarManagedName);
 
   async function handleTransfer(
@@ -93,15 +94,12 @@ export const makeNameWrapperHandlers = ({
     await context.db.update(schema.domain, { id: node }).set({ wrappedOwnerId: to });
 
     // log DomainEvent
-    await context.db
-      .insert(schema.wrappedTransfer)
-      .values({
-        ...sharedEventValues(event),
-        id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
-        domainId: node,
-        ownerId: to,
-      })
-      .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+    await context.db.insert(schema.wrappedTransfer).values({
+      ...sharedEventValues(context.network.chainId, event),
+      id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
+      domainId: node,
+      ownerId: to,
+    });
   }
 
   return {
@@ -152,17 +150,14 @@ export const makeNameWrapperHandlers = ({
       await materializeDomainExpiryDate(context, node);
 
       // log DomainEvent
-      await context.db
-        .insert(schema.nameWrapped)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          name,
-          fuses,
-          ownerId: owner,
-          expiryDate: expiry,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameWrapped).values({
+        ...sharedEventValues(context.network.chainId, event),
+        domainId: node,
+        name,
+        fuses,
+        ownerId: owner,
+        expiryDate: expiry,
+      });
     },
 
     async handleNameUnwrapped({
@@ -177,9 +172,13 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       await context.db.update(schema.domain, { id: node }).set((domain) => ({
-        // null expiry date if the domain is not a direct child of the registrar managed name
+        // when a WrappedDomain is Unwrapped, reset any PCC-materialized expiryDate on the Domain entity
+        // i.e if the domain in question normally has an expiry date (is a direct subname of a
+        // Registrar that implements expiries), keep the domain's expiry date, otherwise, set its
+        // expiry to null because it does not expire.
         // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L123
-        expiryDate: domain.parentId !== registrarManagedNode ? null : domain.expiryDate,
+        // NOTE: undefined = no change, null = null
+        expiryDate: domain.parentId === registrarManagedNode ? undefined : null,
         wrappedOwnerId: null,
       }));
 
@@ -187,14 +186,11 @@ export const makeNameWrapperHandlers = ({
       await context.db.delete(schema.wrappedDomain, { id: node });
 
       // log DomainEvent
-      await context.db
-        .insert(schema.nameUnwrapped)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          ownerId: owner,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.nameUnwrapped).values({
+        ...sharedEventValues(context.network.chainId, event),
+        domainId: node,
+        ownerId: owner,
+      });
     },
 
     async handleFusesSet({
@@ -218,14 +214,11 @@ export const makeNameWrapperHandlers = ({
       }
 
       // log DomainEvent
-      await context.db
-        .insert(schema.fusesSet)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          fuses,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.fusesSet).values({
+        ...sharedEventValues(context.network.chainId, event),
+        domainId: node,
+        fuses,
+      });
     },
     async handleExpiryExtended({
       context,
@@ -248,14 +241,11 @@ export const makeNameWrapperHandlers = ({
       }
 
       // log DomainEvent
-      await context.db
-        .insert(schema.expiryExtended)
-        .values({
-          ...sharedEventValues(event),
-          domainId: node,
-          expiryDate: expiry,
-        })
-        .onConflictDoNothing(); // upsert for successful recovery when restarting indexing
+      await context.db.insert(schema.expiryExtended).values({
+        ...sharedEventValues(context.network.chainId, event),
+        domainId: node,
+        expiryDate: expiry,
+      });
     },
     async handleTransferSingle({
       context,
@@ -269,7 +259,13 @@ export const makeNameWrapperHandlers = ({
       await handleTransfer(
         context,
         event,
-        makeEventId(registrarManagedName, event.block.number, event.log.logIndex, 0),
+        makeEventId(
+          pluginName,
+          context.network.chainId,
+          event.block.number,
+          event.log.logIndex,
+          0, // transferIndex
+        ),
         tokenId,
         to,
       );
@@ -287,7 +283,13 @@ export const makeNameWrapperHandlers = ({
         await handleTransfer(
           context,
           event,
-          makeEventId(registrarManagedName, event.block.number, event.log.logIndex, transferIndex),
+          makeEventId(
+            pluginName,
+            context.network.chainId,
+            event.block.number,
+            event.log.logIndex,
+            transferIndex,
+          ),
           tokenId,
           to,
         );

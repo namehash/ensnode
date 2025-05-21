@@ -1,14 +1,9 @@
 import { ponder } from "ponder:registry";
-import schema from "ponder:schema";
-import { ENSDeployments } from "@ensnode/ens-deployments";
-import { type LabelHash } from "@ensnode/utils";
-import { makeSubdomainNode, uint256ToHex32 } from "@ensnode/utils/subname-helpers";
-import { decodeEventLog, namehash, zeroAddress } from "viem";
+
+import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/utils";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
-import { upsertAccount } from "@/lib/db-helpers";
-import { PonderENSPluginHandlerArgs } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/utils";
+import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
@@ -21,9 +16,8 @@ const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenI
 
 export default function ({
   pluginName,
-  registrarManagedName,
   namespace,
-}: PonderENSPluginHandlerArgs<PluginName.Basenames>) {
+}: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -32,128 +26,57 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    eventIdPrefix: pluginName,
-    registrarManagedName,
+    // the shared Registrar handlers in this plugin index direct subnames of '.base.eth'
+    registrarManagedName: "base.eth",
   });
-
-  const registrarManagedNode = namehash(registrarManagedName);
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
-        },
-      },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
   ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
-        },
-      },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
   ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewed({
       context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
-        },
-      },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
   ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
-    // base.eth's BaseRegistrar uses `id` instead of `tokenId`
-    const { id: tokenId, from, to } = event.args;
-
-    const labelHash = tokenIdToLabelHash(tokenId);
-
-    if (event.args.from === zeroAddress) {
-      // Each domain must reference an account of its owner,
-      // so we ensure the account exists before inserting the domain
-      await upsertAccount(context, to);
-      // The ens-subgraph `handleNameTransferred` handler implementation
-      // assumes an indexed record for the domain already exists. However,
-      // when an NFT token is minted (transferred from `0x0` address),
-      // there's no domain entity in the database yet. That very first transfer
-      // event has to ensure the domain entity for the requested token ID
-      // has been inserted into the database. This is a workaround to meet
-      // expectations of the `handleNameTransferred` subgraph implementation.
-      await context.db
-        .insert(schema.domain)
-        .values({
-          id: makeSubdomainNode(labelHash, registrarManagedNode),
-          ownerId: to,
-          createdAt: event.block.timestamp,
-        })
-        // ensure existing domain entity in database has its owner updated
-        .onConflictDoUpdate({ ownerId: to });
-    }
-
     await handleNameTransferred({
       context,
-      event: { ...event, args: { from, to, labelHash } },
+      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
   ponder.on(namespace("EARegistrarController:NameRegistered"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRegistered",
-      abi: ENSDeployments.mainnet.basenames.contracts.EARegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     await handleNameRegisteredByController({
       context,
-      event: { ...event, args: { ...args, cost: 0n } },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
   ponder.on(namespace("RegistrarController:NameRegistered"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRegistered",
-      abi: ENSDeployments.mainnet.basenames.contracts.RegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     await handleNameRegisteredByController({
       context,
-      event: { ...event, args: { ...args, cost: 0n } },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
   ponder.on(namespace("RegistrarController:NameRenewed"), async ({ context, event }) => {
-    // NOTE(name-null-bytes): manually decode args that may contain null bytes
-    const { args } = decodeEventLog({
-      eventName: "NameRenewed",
-      abi: ENSDeployments.mainnet.basenames.contracts.RegistrarController.abi,
-      topics: event.log.topics,
-      data: event.log.data,
-    });
-
     await handleNameRenewedByController({
       context,
-      event: { ...event, args: { ...args, cost: 0n } },
+      event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 }

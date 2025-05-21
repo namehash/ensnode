@@ -1,17 +1,42 @@
-import { EventIdPrefix } from "@/lib/types";
 import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
 import type { Address } from "viem";
 
-// NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
-export const makeResolverId = (address: Address, node: Node) =>
-  [address.toLowerCase(), node].join("-");
+/**
+ * Makes a unique, chain-scoped resolver ID.
+ * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
+ *
+ * @example Subgraph plugin: `${address}-${node}`
+ * @example All other plugins (chain-scoped): `${chainId}-${address}-${node}`
+ *
+ * @param pluginName the plugin name
+ * @param chainId the chain ID
+ * @param address the resolver contract address
+ * @param node the ENS node
+ * @returns a unique resolver ID
+ */
+
+export const makeResolverId = (
+  pluginName: PluginName,
+  chainId: number,
+  address: Address,
+  node: Node,
+) =>
+  [
+    // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
+    pluginName === PluginName.Subgraph ? null : chainId,
+    // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
+    address.toLowerCase(),
+    node,
+  ]
+    .filter(Boolean)
+    .join("-");
 
 /**
- * Makes a unique event ID, optionally prefixed to avoid collisions.
- * See {@link EventIdPrefix} for additional discussion on collisions.
+ * Makes a unique, chain-scoped event ID.
+ * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
  *
- * @example With no prefix (subgraph-compat): `${blockNumber}-${logIndex}(-${transferIndex})`
- * @example With prefix (plugin-scoped): `${prefix}-${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example Subgraph plugin: `${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example All other plugins (chain-scoped): `${chainId}-${blockNumber}-${logIndex}(-${transferIndex})`
  *
  * @param prefix optional prefix
  * @param blockNumber
@@ -20,12 +45,19 @@ export const makeResolverId = (address: Address, node: Node) =>
  * @returns
  */
 export const makeEventId = (
-  prefix: EventIdPrefix,
+  pluginName: PluginName,
+  chainId: number,
   blockNumber: bigint,
   logIndex: number,
   transferIndex?: number,
 ) =>
-  [prefix, blockNumber.toString(), logIndex.toString(), transferIndex?.toString()]
+  [
+    // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
+    pluginName === PluginName.Subgraph ? null : chainId,
+    blockNumber.toString(),
+    logIndex.toString(),
+    transferIndex?.toString(),
+  ]
     .filter(Boolean)
     .join("-");
 
@@ -41,7 +73,7 @@ export const makeEventId = (
  * additional Registration entities may be created. A unique ID other than labelHash is necessary,
  * otherwise Registration entities for the same label would collide.
  *
- * To avoid collisions, if the caller identifies as the root plugin, we use the Domain's `labelHash`
+ * To avoid collisions, if the caller identifies as the subgraph plugin, we use the Domain's `labelHash`
  * (subgraph compat). Otherwise, for any other plugin, we use the Domain's `node`, which is
  * globally unique within ENS.
  *
@@ -51,7 +83,7 @@ export const makeEventId = (
  * `labelhash` because `namehash` always includes the recursive hashing of the root node.
  *
  * For the "v1" of ENSIndexer (at a minimum) we want to preserve exact backwards compatibility with
- * Registration IDs issued by the ENS Subgraph. In the future we may abandon exact subgraph backwards
+ * Registration IDs issued by the ENS Subgraph. In the future we may relax exact subgraph backwards
  * compatibility and use `node` for all Registration IDs.
  *
  * @param pluginName the name of the active plugin issuing the registration
@@ -60,6 +92,6 @@ export const makeEventId = (
  * @returns a unique registration id
  */
 export const makeRegistrationId = (pluginName: PluginName, labelHash: LabelHash, node: Node) => {
-  if (pluginName === PluginName.Root) return labelHash;
+  if (pluginName === PluginName.Subgraph) return labelHash;
   return node;
 };

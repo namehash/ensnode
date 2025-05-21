@@ -1,11 +1,11 @@
 import { getEnsDeploymentChain } from "@/lib/ponder-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 
-export const SELECTED_DEPLOYMENT_CONFIG = ENSDeployments[getEnsDeploymentChain()];
+export const SELECTED_ENS_DEPLOYMENT = ENSDeployments[getEnsDeploymentChain()];
 
 /**
- * Note that here, we define the global DEPLOYMENT_CONFIG as the _merge_ of mainnet (which fully
- * specifies all plugin configs), overrided with the SELECTED_DEPLOYMENT_CONFIG.
+ * Note that here, we define the global MERGED_ENS_DEPLOYMENT as the _merge_ of mainnet (which fully
+ * specifies all plugin configs), overrided with the SELECTED_ENS_DEPLOYMENT.
  *
  * This ensures that at type-check-time and in `ALL_PLUGINS` every plugin's `config` has valid values
  * (and therefore its type can continue to be inferred). This means that initially upon building the
@@ -14,7 +14,7 @@ export const SELECTED_DEPLOYMENT_CONFIG = ENSDeployments[getEnsDeploymentChain()
  * the mainnet deployment. This is never an issue, however, as those plugin are filtered out
  * (see ponder.config.ts and `getActivePlugins`) and never activated.
  */
-export const DEPLOYMENT_CONFIG = {
+export const MERGED_ENS_DEPLOYMENT = {
   ...ENSDeployments.mainnet,
-  ...SELECTED_DEPLOYMENT_CONFIG,
+  ...SELECTED_ENS_DEPLOYMENT,
 };

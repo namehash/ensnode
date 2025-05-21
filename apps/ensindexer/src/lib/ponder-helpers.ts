@@ -1,12 +1,10 @@
 import type { Event } from "ponder:registry";
+import { PublicClient } from "viem";
+
 import { Blockrange } from "@/lib/types";
 import { type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
-import { DEFAULT_ENSRAINBOW_URL } from "@ensnode/ensrainbow-sdk";
-import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
+import { DEFAULT_ENSRAINBOW_URL, EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
-import type { ContractConfig } from "ponder";
-import { merge as tsDeepMerge } from "ts-deepmerge";
-import { PublicClient } from "viem";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -76,7 +74,7 @@ const parseBlockheightEnvVar = (envVarName: "START_BLOCK" | "END_BLOCK"): number
  * @param chainId the chain ID to get the RPC URL for
  * @returns the URL of the RPC endpoint
  */
-export const rpcEndpointUrl = (chainId: number): string => {
+export const rpcEndpointUrl = (chainId: number): string | undefined => {
   /**
    * Reads the RPC URL for a given chain ID from the environment variable:
    * RPC_URL_{chainId}. For example, for Ethereum mainnet the chainId is `1`,
@@ -92,12 +90,9 @@ export const rpcEndpointUrl = (chainId: number): string => {
   }
 };
 
-export const parseRpcEndpointUrl = (rawValue?: string): string => {
-  // no RPC URL provided
-  if (!rawValue) {
-    // throw an error, as the RPC URL is required and no defaults apply
-    throw new Error(`Expected value not set`);
-  }
+export const parseRpcEndpointUrl = (rawValue?: string): string | undefined => {
+  // no RPC URL provided, default to undefined
+  if (!rawValue) return undefined;
 
   try {
     return new URL(rawValue).toString();
@@ -212,21 +207,6 @@ export const createEnsRainbowVersionFetcher = () => {
   };
 };
 
-type AnyObject = { [key: string]: any };
-
-/**
- * Deep merge two objects recursively.
- * @param target The target object to merge into.
- * @param source The source object to merge from.
- * @returns The merged object.
- */
-export function deepMergeRecursive<T extends AnyObject, U extends AnyObject>(
-  target: T,
-  source: U,
-): T & U {
-  return tsDeepMerge(target, source) as T & U;
-}
-
 /**
  * Gets the ENS Deployment Chain, defaulting to mainnet.
  *
@@ -242,6 +222,15 @@ export const getEnsDeploymentChain = (): ENSDeploymentChain => {
   }
 
   return value as ENSDeploymentChain;
+};
+
+/**
+ * Get the ENSDeployment chain ID.
+ *
+ * @returns the ENSDeployment chain ID
+ */
+export const getEnsDeploymentChainId = (): number => {
+  return ENSDeployments[getEnsDeploymentChain()].root.chain.id;
 };
 
 /**
@@ -315,7 +304,7 @@ export const parsePonderDatabaseSchema = (rawValue?: string): string => {
   return rawValue;
 };
 
-export const requestedPluginNames = (): Array<string> => {
+export const getRequestedPluginNames = (): Array<string> => {
   const envVarName = "ACTIVE_PLUGINS";
   const envVarValue = process.env[envVarName];
 
@@ -327,11 +316,12 @@ export const requestedPluginNames = (): Array<string> => {
 };
 
 export const parseRequestedPluginNames = (rawValue?: string): Array<string> => {
-  if (!rawValue) {
-    throw new Error("Expected value not set");
+  if (!rawValue) throw new Error("Expected value not set");
+  const value = rawValue.split(",");
+  if (value.length === 0) {
+    throw new Error("ACTIVE_PLUGINS expected at least one activated plugin.");
   }
-
-  return rawValue.split(",");
+  return value;
 };
 
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
@@ -368,7 +358,7 @@ export const ponderPort = (): number => {
 /** Parse the Ponder application port */
 export const parsePonderPort = (rawValue?: string): number => {
   if (!rawValue) {
-    throw new Error("Expected value not set");
+    return 42069;
   }
 
   const parsedValue = parseInt(rawValue, 10);
@@ -495,12 +485,12 @@ interface PonderNetworkConfig {
  * ```ts
  * const ponderConfig = {
  *  contracts: {
- *   "root/Registrar": {
+ *   "subgraph/Registrar": {
  *     network: {
  *       "1": { startBlock: 444_444_444 }
  *      }
  *   },
- *   "root/Registry": {
+ *   "subgraph/Registry": {
  *     network: {
  *       "1": { startBlock: 444_444_333 }
  *      }

@@ -1,5 +1,195 @@
 # ensindexer
 
+## 0.26.0
+
+### Minor Changes
+
+- [#679](https://github.com/namehash/ensnode/pull/679) [`04d224c`](https://github.com/namehash/ensnode/commit/04d224c21a55ad723116ef64cb961a54deb6313e) Thanks [@shrugs](https://github.com/shrugs)! - fix issue where rpc endpoints for all plugins were required at runtime
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.26.0
+  - @ensnode/utils@0.26.0
+  - @ensnode/ensrainbow-sdk@0.26.0
+  - @ensnode/ponder-metadata@0.26.0
+  - @ensnode/ponder-schema@0.26.0
+  - @ensnode/ponder-subgraph@0.26.0
+
+## 0.25.0
+
+### Minor Changes
+
+- [#657](https://github.com/namehash/ensnode/pull/657) [`edd2b1e`](https://github.com/namehash/ensnode/commit/edd2b1ebb4e052a5036edee090dd05c80cb732ca) Thanks [@shrugs](https://github.com/shrugs)! - refactored resolver logic to use ponder multi-network behavior rather than per-plugin
+
+- [#657](https://github.com/namehash/ensnode/pull/657) [`edd2b1e`](https://github.com/namehash/ensnode/commit/edd2b1ebb4e052a5036edee090dd05c80cb732ca) Thanks [@shrugs](https://github.com/shrugs)! - implemented threedns indexer for base and optimism datasources with name healing from HybridMetadataService
+
+### Patch Changes
+
+- Updated dependencies [[`edd2b1e`](https://github.com/namehash/ensnode/commit/edd2b1ebb4e052a5036edee090dd05c80cb732ca)]:
+  - @ensnode/ens-deployments@0.25.0
+  - @ensnode/utils@0.25.0
+  - @ensnode/ensrainbow-sdk@0.25.0
+  - @ensnode/ponder-metadata@0.25.0
+  - @ensnode/ponder-schema@0.25.0
+  - @ensnode/ponder-subgraph@0.25.0
+
+## 0.24.0
+
+### Minor Changes
+
+- [#611](https://github.com/namehash/ensnode/pull/611) [`fe51446`](https://github.com/namehash/ensnode/commit/fe51446c9ffc5359f29dcd74419899c0b74d6fcb) Thanks [@shrugs](https://github.com/shrugs)! - update ponder to latest, not backwards compatible with previous version
+
+### Patch Changes
+
+- Updated dependencies [[`ea87355`](https://github.com/namehash/ensnode/commit/ea87355e2893448bf53d586bef436ce20095b66d)]:
+  - @ensnode/ens-deployments@0.24.0
+  - @ensnode/utils@0.24.0
+  - @ensnode/ensrainbow-sdk@0.24.0
+  - @ensnode/ponder-metadata@0.24.0
+  - @ensnode/ponder-schema@0.24.0
+  - @ensnode/ponder-subgraph@0.24.0
+
+## 0.23.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.23.0
+  - @ensnode/utils@0.23.0
+  - @ensnode/ensrainbow-sdk@0.23.0
+  - @ensnode/ponder-metadata@0.23.0
+  - @ensnode/ponder-schema@0.23.0
+  - @ensnode/ponder-subgraph@0.23.0
+
+## 0.22.1
+
+### Patch Changes
+
+- Updated dependencies [[`8f494c4`](https://github.com/namehash/ensnode/commit/8f494c499ec1693d25d0c033158ac75cfdb88cc5)]:
+  - @ensnode/utils@0.22.1
+  - @ensnode/ensrainbow-sdk@0.22.1
+  - @ensnode/ens-deployments@0.22.1
+  - @ensnode/ponder-metadata@0.22.1
+  - @ensnode/ponder-schema@0.22.1
+  - @ensnode/ponder-subgraph@0.22.1
+
+## 0.22.0
+
+### Minor Changes
+
+- [#639](https://github.com/namehash/ensnode/pull/639) [`0115784`](https://github.com/namehash/ensnode/commit/0115784f15bb775f0e0dc6dd197376724cb37add) Thanks [@shrugs](https://github.com/shrugs)! - fix private package tagging
+
+- [#640](https://github.com/namehash/ensnode/pull/640) [`e4ab45b`](https://github.com/namehash/ensnode/commit/e4ab45bd3ef3fa6e8071393f625eaf5e615b5a0b) Thanks [@shrugs](https://github.com/shrugs)! - fix changeset publish once again
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.22.0
+  - @ensnode/utils@0.22.0
+  - @ensnode/ensrainbow-sdk@0.22.0
+  - @ensnode/ponder-metadata@0.22.0
+  - @ensnode/ponder-schema@0.22.0
+  - @ensnode/ponder-subgraph@0.22.0
+
+## 0.21.0
+
+### Minor Changes
+
+- [#637](https://github.com/namehash/ensnode/pull/637) [`ca1222b`](https://github.com/namehash/ensnode/commit/ca1222b6a63e25108081d0120b6ad28f4454bf60) Thanks [@shrugs](https://github.com/shrugs)! - fix changeset publish
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.21.0
+  - @ensnode/utils@0.21.0
+  - @ensnode/ensrainbow-sdk@0.21.0
+  - @ensnode/ponder-metadata@0.21.0
+  - @ensnode/ponder-schema@0.21.0
+  - @ensnode/ponder-subgraph@0.21.0
+
+## 0.20.0
+
+### Minor Changes
+
+- [#635](https://github.com/namehash/ensnode/pull/635) [`6dd9699`](https://github.com/namehash/ensnode/commit/6dd969915cd74350af3b68fb88e12ebdefc56dfb) Thanks [@shrugs](https://github.com/shrugs)! - fix issue with selecting schema name other than 'public'
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ens-deployments@0.20.0
+  - @ensnode/utils@0.20.0
+  - @ensnode/ensrainbow-sdk@0.20.0
+  - @ensnode/ponder-metadata@0.20.0
+  - @ensnode/ponder-schema@0.20.0
+  - @ensnode/ponder-subgraph@0.20.0
+
+## 0.19.4
+
+### Patch Changes
+
+- Updated dependencies [[`829d50f`](https://github.com/namehash/ensnode/commit/829d50f6b2ea1f49276a8cb614b082c80aea760d)]:
+  - @ensnode/utils@0.19.4
+  - @ensnode/ensrainbow-sdk@0.19.4
+  - @ensnode/ens-deployments@0.19.4
+  - @ensnode/ponder-metadata@0.19.4
+  - @ensnode/ponder-schema@0.19.4
+  - @ensnode/ponder-subgraph@0.19.4
+
+## 0.19.3
+
+### Patch Changes
+
+- Updated dependencies [[`387c7c2`](https://github.com/namehash/ensnode/commit/387c7c24c5a7e76c2145799962b3537ed000b6c4)]:
+  - @ensnode/utils@0.19.3
+  - @ensnode/ensrainbow-sdk@0.19.3
+  - @ensnode/ens-deployments@0.19.3
+  - @ensnode/ponder-metadata@0.19.3
+  - @ensnode/ponder-schema@0.19.3
+  - @ensnode/ponder-subgraph@0.19.3
+
+## 0.19.2
+
+### Patch Changes
+
+- Updated dependencies [[`396607e`](https://github.com/namehash/ensnode/commit/396607e08532e22b2367b2b4b1a2962983924e81)]:
+  - @ensnode/utils@0.19.2
+  - @ensnode/ensrainbow-sdk@0.19.2
+  - @ensnode/ens-deployments@0.19.2
+  - @ensnode/ponder-metadata@0.19.2
+  - @ensnode/ponder-schema@0.19.2
+  - @ensnode/ponder-subgraph@0.19.2
+
+## 0.19.1
+
+### Patch Changes
+
+- Updated dependencies [[`7ef8b05`](https://github.com/namehash/ensnode/commit/7ef8b0502945339d6cdbf496f1fb26cc7f1d02a2)]:
+  - @ensnode/ponder-metadata@0.19.1
+  - @ensnode/ens-deployments@0.19.1
+  - @ensnode/utils@0.19.1
+  - @ensnode/ensrainbow-sdk@0.19.1
+  - @ensnode/ponder-schema@0.19.1
+  - @ensnode/ponder-subgraph@0.19.1
+
+## 0.19.0
+
+### Minor Changes
+
+- [#607](https://github.com/namehash/ensnode/pull/607) [`b477584`](https://github.com/namehash/ensnode/commit/b477584c0ab9645214ced764b50224af6a636ffa) Thanks [@shrugs](https://github.com/shrugs)! - Rename root plugin to subgraph
+
+- [#532](https://github.com/namehash/ensnode/pull/532) [`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be) Thanks [@shrugs](https://github.com/shrugs)! - the great naming terminology refactor
+
+### Patch Changes
+
+- Updated dependencies [[`b477584`](https://github.com/namehash/ensnode/commit/b477584c0ab9645214ced764b50224af6a636ffa), [`7e0c78d`](https://github.com/namehash/ensnode/commit/7e0c78d8218519421b923e84723867e3e0ba76be)]:
+  - @ensnode/ens-deployments@0.19.0
+  - @ensnode/ensrainbow-sdk@0.19.0
+  - @ensnode/utils@0.19.0
+  - @ensnode/ponder-metadata@0.19.0
+  - @ensnode/ponder-schema@0.19.0
+  - @ensnode/ponder-subgraph@0.19.0
+
 ## 0.18.0
 
 ### Patch Changes

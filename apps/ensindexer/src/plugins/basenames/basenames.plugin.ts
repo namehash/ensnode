@@ -1,12 +1,14 @@
 import { createConfig } from "ponder";
 
-import { DEPLOYMENT_CONFIG } from "@/lib/globals";
+import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
 import {
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
+  validateContractConfigs,
 } from "@/lib/plugin-helpers";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
@@ -14,9 +16,14 @@ import { PluginName } from "@ensnode/utils";
  * the shared Subgraph-compatible indexing logic.
  */
 export const pluginName = PluginName.Basenames;
+export const requiredDatasources = [DatasourceName.Basenames];
 
-const { chain, contracts } = DEPLOYMENT_CONFIG[pluginName];
+// extract the chain and contract configs for Basenames Datasource in order to build ponder config
+const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Basenames];
 const namespace = makePluginNamespace(pluginName);
+
+// validate runtime contract config
+validateContractConfigs(pluginName, contracts);
 
 export const config = createConfig({
   networks: networksConfigForChain(chain),
@@ -24,12 +31,6 @@ export const config = createConfig({
     [namespace("Registry")]: {
       network: networkConfigForContract(chain, contracts.Registry),
       abi: contracts.Registry.abi,
-    },
-    [namespace("Resolver")]: {
-      network: networkConfigForContract(chain, contracts.Resolver),
-      abi: contracts.Resolver.abi,
-      // index Resolver by event signatures, not address
-      filter: contracts.Resolver.filter,
     },
     [namespace("BaseRegistrar")]: {
       network: networkConfigForContract(chain, contracts.BaseRegistrar),
@@ -43,17 +44,19 @@ export const config = createConfig({
       network: networkConfigForContract(chain, contracts.RegistrarController),
       abi: contracts.RegistrarController.abi,
     },
+    Resolver: {
+      network: networkConfigForContract(chain, contracts.Resolver),
+      abi: contracts.Resolver.abi,
+    },
   },
 });
 
 export const activate = activateHandlers({
   pluginName,
-  // the shared Registrar handler in this plugin indexes direct subnames of '.base.eth'
-  registrarManagedName: "base.eth",
   namespace,
   handlers: [
     import("./handlers/Registry"),
     import("./handlers/Registrar"),
-    import("./handlers/Resolver"),
+    import("../shared/Resolver"),
   ],
 });

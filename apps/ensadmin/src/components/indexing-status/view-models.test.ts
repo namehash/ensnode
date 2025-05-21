@@ -30,13 +30,13 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        ACTIVE_PLUGINS: [PluginName.Root],
+        ACTIVE_PLUGINS: [PluginName.Subgraph],
         DATABASE_SCHEMA: "public",
         ENS_DEPLOYMENT_CHAIN: "ens-test-env",
       });
 
       expect(result).toEqual([
-        { label: "Active Plugins", value: [PluginName.Root] },
+        { label: "Active Plugins", value: [PluginName.Subgraph] },
         { label: "ENS Deployment Chain", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);
@@ -50,7 +50,7 @@ describe("View Models", () => {
       const mainnetStatus = ensNodeNetworkStatus[mainnet.id];
       const baseStatus = ensNodeNetworkStatus[base.id];
 
-      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus)).toEqual({
+      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus, "mainnet")).toEqual({
         networkStatuses: [
           {
             name: "Ethereum",
@@ -96,7 +96,7 @@ describe("View Models", () => {
     it("should return the correct view model", () => {
       expect(
         networkIndexingStatusViewModel(
-          `${base.id}`,
+          `${base.name}`,
           {
             latestSafeBlock: {
               number: 333,

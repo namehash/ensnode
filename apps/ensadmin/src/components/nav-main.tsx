@@ -34,9 +34,21 @@ export function NavMain({
   const pathname = usePathname();
 
   const appendQueryParams = (url: string) => {
+    if (pathname.startsWith("/inspector") && !url.startsWith("/inspector")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("strategy");
+      params.delete("name");
+
+      if (params.toString()) {
+        const separator = url.includes("?") ? "&" : "?";
+        return `${url}${separator}${params.toString()}`;
+      }
+
+      return url;
+    }
+
     if (searchParams && searchParams.toString()) {
       const separator = url.includes("?") ? "&" : "?";
-
       return `${url}${separator}${searchParams.toString()}`;
     }
 
@@ -51,7 +63,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Index</SidebarGroupLabel>
+      <SidebarGroupLabel>Services</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const hasItems = item.items && item.items.length > 0;
