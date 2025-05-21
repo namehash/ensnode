@@ -86,23 +86,9 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.HealError;
       }
 
-      // Check if the label has a label set prefix
-      // Format expected: "labelSetNumber:actualLabel"
-      // Only split by the first colon
       const { labelSet: labelSetNumber, label: actualLabel } = label;
 
-      // Parse the label set number
-      // const labelSetNumber = parseInt(labelSetStr, 10);
-      // if (isNaN(labelSetNumber)) {
-      //   logger.error(`Invalid label set number: "${labelSetStr}"`);
-      //   return {
-      //     status: StatusCode.Error,
-      //     error: "Internal server error",
-      //     errorCode: ErrorCode.ServerError,
-      //   } satisfies EnsRainbow.HealError;
-      // }
-
-      // Only return the label if its set number is less than or equal to highest_label_set
+      // Only return the label if its label set number is less than or equal to highest_label_set
       if (labelSetNumber > highestLabelSet) {
         logger.info(
           `Label set ${labelSetNumber} for ${labelHash} exceeds highest_label_set ${highestLabelSet}`,

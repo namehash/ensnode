@@ -214,14 +214,7 @@ export class ENSRainbowDB {
       // Verify schema version
       await dbInstance.validateSchemaVersion();
 
-      // Check if HIGHEST_LABEL_SET exists, initialize it if not
-      //TODO: move to method
-      try {
-        await dbInstance.getHighestLabelSet();
-      } catch (error) {
-        logger.warn("Highest label set not found, initializing to 0");
-      }
-      //TODO validate lite?
+      await dbInstance.validate({ lite: true });
 
       return dbInstance;
     } catch (error) {
@@ -427,11 +420,6 @@ export class ENSRainbowDB {
       return null;
     }
 
-    // Validate the label format (must have a label set prefix)
-    //TODO: remove
-    // if (!label.includes(':')) {
-    //   logger.warn(`Label with missing set prefix found: "${label}"`);
-    // }
     return splitLabelString(label);
   }
 
@@ -635,21 +623,21 @@ export class ENSRainbowDB {
     try {
       const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
       // Only log the count if we pass validation later
+
+      // --- Lite Mode Completion ---
+      if (isLiteMode) {
+        // Lite mode passed basic checks
+        // const precalculatedCount = await this.getPrecalculatedRainbowRecordCount(); // Already checked existence
+        logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
+        logger.info("\nLite validation successful! Basic checks passed.");
+        return true;
+      }
     } catch (error) {
       const errorMsg = generatePurgeErrorMessage(
         `Database is in an invalid state: failed to get precalculated rainbow record count key: ${error}`,
       );
       logger.error(errorMsg);
       return false;
-    }
-
-    // --- Lite Mode Completion ---
-    if (isLiteMode) {
-      // Lite mode passed basic checks
-      const precalculatedCount = await this.getPrecalculatedRainbowRecordCount(); // Already checked existence
-      logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
-      logger.info("\nLite validation successful! Basic checks passed.");
-      return true;
     }
 
     // --- Full Validation (Requires iterating through records) ---
@@ -826,7 +814,7 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Adds a rainbow record to the database.
+   * Adds a rainbow record to the database. Labelhash is computed from the label.
    *
    * @param label The label to add (without label set prefix)
    * @param labelSet The label set number to associate with this label
