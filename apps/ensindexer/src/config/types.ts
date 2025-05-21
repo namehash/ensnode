@@ -7,8 +7,7 @@ import type { PluginName } from "@ensnode/utils";
  */
 export interface RpcConfig {
   /**
-   * The RPC endpoint URL for the chain.
-   * Example: "https://eth-mainnet.g.alchemy.com/v2/..."
+   * The RPC endpoint URL for the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
    * For nominal indexing behavior, must be an endpoint with high rate limits.
    *
    * Invariants:
@@ -39,10 +38,10 @@ export interface ENSIndexerConfig {
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).
-   * https://ensnode.io/ensadmin/overview/what-is-ensadmin
+   * @see https://ensnode.io/ensadmin/overview/what-is-ensadmin
    *
-   * The ENSNode root api route `/` redirects to `ensAdminUrl`, configuring ENSAdmin with an entry
-   * for this instance of ENSNode, identified by {@link ENSIndexerConfig.ensNodePublicUrl}.
+   * The ENSNode root api route `/` redirects to {@link ensAdminUrl}, configuring
+   * ENSAdmin with an entry for this instance of ENSNode, identified by {@link ensNodePublicUrl}.
    *
    * Invariants:
    * - The URL must be a valid URL (localhost urls are allowed)
@@ -60,10 +59,9 @@ export interface ENSIndexerConfig {
   ensNodePublicUrl: string;
 
   /**
-   * An ENSRainbow API Endpoint (ex: http://localhost:3223).
-   *
-   * ENSIndexer uses ENSRainbow to 'heal' unknown labelhashes.
-   * https://ensnode.io/ensrainbow/overview/what-is-ensrainbow
+   * An ENSRainbow API Endpoint (ex: http://localhost:3223). ENSIndexer uses ENSRainbow to 'heal'
+   * unknown labelhashes.
+   * @see https://ensnode.io/ensrainbow/overview/what-is-ensrainbow
    *
    * For best performance, ENSRainbow should be colocated with ENSIndexer and use private/internal
    * networking to minimize latency.
@@ -77,9 +75,9 @@ export interface ENSIndexerConfig {
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
    * tables in this schema.
    *
-   * The `ponderDatabaseSchema` must be unique per running instance of ENSIndexer (ponder will
+   * The {@link ponderDatabaseSchema} must be unique per running instance of ENSIndexer (ponder will
    * enforce this with database locks). If multiple instances of ENSIndexer with the same
-   * `ponderDatabaseSchema` are running, only the first will successfully acquire the lock and begin
+   * {@link ponderDatabaseSchema} are running, only the first will successfully acquire the lock and begin
    * indexing: the rest will crash.
    *
    * If an ENSIndexer instance with the same configuration (including `ponderDatabaseSchema`) is
@@ -89,7 +87,7 @@ export interface ENSIndexerConfig {
    * Many clients can read from this Postgres schema during or after indexing.
    *
    * Read more about database schema rules here:
-   * https://ponder.sh/docs/api-reference/database#database-schema-rules
+   * @see https://ponder.sh/docs/api-reference/database#database-schema-rules
    *
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema identifier.
@@ -101,8 +99,8 @@ export interface ENSIndexerConfig {
    *
    * Invariants:
    * - A set of valid {@link PluginName}s with at least one value
-   * - For each plugin, it should be available on the specified {@link ENSIndexerConfig.ensDeploymentChain}
-   * - For each plugin specified, a valid {@link ENSIndexerConfig.rpcConfigs} entry is required for
+   * - For each plugin, it should be available on the specified {@link ensDeploymentChain}
+   * - For each plugin specified, a valid {@link rpcConfigs} entry is required for
    *   each chain the plugin indexes
    */
   plugins: PluginName[];
@@ -156,6 +154,8 @@ export interface ENSIndexerConfig {
    * - if defined, startBlock must be an integer greater than 0
    * - if defined, endBlock must be an integer greater than 0
    * - if defined, endBlock must be greater than startBlock
+   * - if either `startBlock` or `endBlock` are defined, the number of indexed chains described
+   *   by {@link plugins} must be 1
    */
   globalBlockrange: Blockrange;
 }
