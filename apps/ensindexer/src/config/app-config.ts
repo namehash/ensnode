@@ -1,9 +1,5 @@
 import { ENSIndexerConfigSchema } from "@/config/config.schema";
-import {
-  ENSIndexerConfig,
-  ENSIndexerEnvironment,
-  RawChainConfig,
-} from "@/config/types";
+import { ENSIndexerConfig, ENSIndexerEnvironment, RawChainConfig } from "@/config/types";
 import { z } from "zod/v4";
 
 /**
@@ -33,8 +29,7 @@ export function getChainsFromEnv(): Record<number, RawChainConfig> {
     const chainId = Number(match[1]);
 
     // Optionally get the rate limit for this chain, if set.
-    const rpcMaxRequestsPerSecond =
-      process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
 
     chains[chainId] = {
       // The value for each RPC_URL_{chainId} is used as the rpcEndpointUrl.
@@ -85,15 +80,12 @@ function parseEnvironment(): ENSIndexerEnvironment {
  * required environment variables, correct formats, or logical consistency) is handled
  * separately by dedicated validation utilities elsewhere in the codebase.
  */
-function buildConfigFromEnvironment(
-  environment: ENSIndexerEnvironment
-): ENSIndexerConfig {
+function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
   const parsed = ENSIndexerConfigSchema.safeParse(environment);
 
   if (!parsed.success) {
     throw new Error(
-      "Failed to parse environment configuration: " +
-        getValidationErrors(parsed.error.issues)
+      "Failed to parse environment configuration: " + getValidationErrors(parsed.error.issues),
     );
   }
 
