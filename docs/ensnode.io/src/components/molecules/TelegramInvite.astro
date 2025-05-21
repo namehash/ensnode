@@ -8,32 +8,32 @@ import MobileTelegramBanner from "../../assets/telegram_mobile_image.svg";
 import { ENSNodeLogoLight } from "../atoms/logos/ENSNodeLogoLight";
 
 const buttonStyles =
-  "transition text-sm leading-4 rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-2 px-4 bg-black text-white border-black hover:bg-[#272727] pl-[11px] py-[9px] pr-[13px] gap-2";
-const headerStyles = "text-lg leading-8 font-semibold text-black";
+  "transition text-sm leading-4 rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-2 px-4 pl-[11px] py-[9px] pr-[13px] gap-2";
+const headerStyles = "text-lg leading-8 font-semibold";
 const baseContainerStyles = "flex flex-col flex-nowrap justify-center items-center";
 ---
 
 <aside class={cc([baseContainerStyles,"gap-5"])}>
-    <div class={cc([baseContainerStyles, "gap-5 py-8 max-w-[270px] rounded-xl border border-gray-200 px-4"])}>
+    <div class={cc([baseContainerStyles, "gap-5 py-8 max-w-[270px] rounded-xl border px-4", "spread-the-word"])}>
         <ENSNodeLogoLight className="w-[52px] h-auto"/>
         <div class={cc([baseContainerStyles, "gap-2"])}>
             <h3 class={headerStyles}>Spread the word</h3>
-            <Balancer as="p" className="text-center text-sm leading-6 font-normal text-gray-500">Your star helps us reach more developers and fuels our open-source mission</Balancer>
+            <Balancer as="p" className="text-center text-sm leading-6 font-normal">Your star helps us reach more developers and fuels our open-source mission</Balancer>
         </div>
         <a href="https://github.com/namehash/ensnode" target="_blank" rel="noopener noreferrer"><button class={buttonStyles} style={{fontSize: "14px", fontWeight: "500"}}><GithubIcon className="w-4 h-auto"/> Star on GitHub</button></a>
     </div>
-    <div class="bg-[linear-gradient(90deg,_#F9FAFB_0%,_#F3F5F7_100%)] max-w-[270px] w-full h-fit flex flex-col justify-center items-center flex-nowrap gap-8 pt-8 rounded-xl overflow-hidden">
+    <div class={cc(["telegram-container", "max-w-[270px] w-full h-fit flex flex-col justify-center items-center flex-nowrap gap-8 pt-8 rounded-xl overflow-hidden"])}>
         <div class={cc([baseContainerStyles, "w-full h-fit gap-5 px-4" ])}>
             <div class={cc([baseContainerStyles, "gap-2"])}>
                 <Balancer
-                        as="h2"
+                        as="h3"
                         className={cc([headerStyles, "self-stretch text-center"])}
                 >
                     Become a part of our community in Telegram
                 </Balancer>
                 <Balancer
                         as="p"
-                        className="text-sm leading-6 font-normal text-gray-500 text-center"
+                        className="text-sm leading-6 font-normal text-center"
                 >
                     Get updates, technical support, and connect with our team building the multichain future.
                 </Balancer>
@@ -47,3 +47,33 @@ const baseContainerStyles = "flex flex-col flex-nowrap justify-center items-cent
         />
     </div>
 </aside>
+
+<style>
+    h3 {
+        color: var(--sl-color-white);
+    }
+
+    p {
+        color: var(--sl-color-gray-2);
+    }
+
+    .spread-the-word {
+        background-color: var(--sl-color-black);
+        border-color: var(--sl-color-gray-6);
+    }
+
+    .telegram-container {
+        background-image: linear-gradient(90deg, #F9FAFB 0%, #F3F5F7 100%);
+    }
+
+    button {
+        color: var(--sl-color-black);
+        background-color: var(--sl-color-white);
+        border-color: var(--sl-color-white);
+    }
+
+    button:hover{
+        background-color: #272727;
+    }
+
+</style>
