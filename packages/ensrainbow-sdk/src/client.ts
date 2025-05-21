@@ -16,11 +16,11 @@ export namespace EnsRainbow {
      *   Note: If one of these parameters is provided, both must be provided.
      */
     heal(
-      labelHash: LabelHash, 
-      options?: { 
-        label_set?: number; 
+      labelHash: LabelHash,
+      options?: {
+        label_set?: number;
         namespace?: string;
-      }
+      },
     ): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
@@ -243,11 +243,11 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * ```
    */
   async heal(
-    labelHash: LabelHash, 
-    options?: { 
-      label_set?: number; 
+    labelHash: LabelHash,
+    options?: {
+      label_set?: number;
       namespace?: string;
-    }
+    },
   ): Promise<EnsRainbow.HealResponse> {
     const cachedResult = this.cache.get(labelHash);
 
