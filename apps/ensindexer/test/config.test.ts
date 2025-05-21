@@ -350,11 +350,11 @@ describe("config", () => {
     it("returns the chains if it is a valid object", async () => {
       vi.stubEnv("RPC_URL_1", "https://eth-mainnet.g.alchemy.com/v2/1234");
       const config = await getConfig();
-      expect(config.indexedChains).toEqual({
+      expect(config.rpcConfigs).toEqual({
         1: {
-          rpcEndpointUrl: "https://eth-mainnet.g.alchemy.com/v2/1234",
+          url: "https://eth-mainnet.g.alchemy.com/v2/1234",
           // default value
-          rpcMaxRequestsPerSecond: 50,
+          maxRequestsPerSecond: 50,
         },
       });
     });
@@ -369,13 +369,13 @@ describe("config", () => {
     it("returns the RPC_REQUEST_RATE_LIMIT_1 if it is a valid number", async () => {
       vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", "100");
       const config = await getConfig();
-      expect(config.indexedChains[1]!.rpcMaxRequestsPerSecond).toBe(100);
+      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(100);
     });
 
     it("returns the default RPC_REQUEST_RATE_LIMIT_1 if it is not set", async () => {
       vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", undefined);
       const config = await getConfig();
-      expect(config.indexedChains[1]!.rpcMaxRequestsPerSecond).toBe(50);
+      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(50);
     });
   });
 

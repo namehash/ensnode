@@ -1,6 +1,6 @@
 import { ENSIndexerConfigSchema } from "@/config/config.schema";
-import { ENSIndexerConfig, ENSIndexerEnvironment, RawChainConfig } from "@/config/types";
-import { prettifyError, z } from "zod/v4";
+import { ENSIndexerConfig, ENSIndexerEnvironment, RawRpcConfig } from "@/config/types";
+import { prettifyError } from "zod/v4";
 
 /**
  * Extracts dynamic chain configuration from environment variables.
@@ -13,8 +13,8 @@ import { prettifyError, z } from "zod/v4";
  *
  * This function returns a raw chain config which is not yet validated against the zod schema.
  */
-export function getChainsFromEnv(): Record<number, RawChainConfig> {
-  const chains: Record<number, RawChainConfig> = {};
+export function getRpcConfigsFromEnv(): Record<number, RawRpcConfig> {
+  const rpcConfigs: Record<number, RawRpcConfig> = {};
 
   Object.entries(process.env).forEach(([key, value]) => {
     // Only match keys like "RPC_URL_1", "RPC_URL_10", etc. (digits only after the underscore)
@@ -28,28 +28,18 @@ export function getChainsFromEnv(): Record<number, RawChainConfig> {
     // - Example: "RPC_URL_SOMESTRING" will NOT match, so no risk of NaN from non-numeric IDs.
     const chainId = Number(match[1]);
 
-    // Optionally get the rate limit for this chain, if set.
-    const rpcMaxRequestsPerSecond = process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`];
+    if (Number.isNaN(chainId)) throw new Error(`${key} parsed chainId was NaN!`);
 
-    chains[chainId] = {
-      // The value for each RPC_URL_{chainId} is used as the rpcEndpointUrl.
-      rpcEndpointUrl: value,
-      // Note: rpcMaxRequestsPerSecond is typed as string!!!
-      // Type coercion is handled later by zod validation in the actual config.
-      rpcMaxRequestsPerSecond: rpcMaxRequestsPerSecond,
+    rpcConfigs[chainId] = {
+      url: value,
+      maxRequestsPerSecond: process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`],
     };
   });
 
-  return chains;
+  return rpcConfigs;
 }
 
-function getValidationErrors(issues: z.core.$ZodIssue[]) {
-  // loop over and concatenate the messages. precede with a line break due
-  // to the way ponder prints errors
-  return `\n` + issues.map((issue) => issue.message).join("\n");
-}
-
-// loads the relevant environment variables in the shape of the zod schema
+// loads the relevant environment variables into the input shape of the zod schema
 function parseEnvironment(): ENSIndexerEnvironment {
   return {
     port: process.env.PORT,
@@ -65,7 +55,7 @@ function parseEnvironment(): ENSIndexerEnvironment {
       startBlock: process.env.START_BLOCK,
       endBlock: process.env.END_BLOCK,
     },
-    indexedChains: getChainsFromEnv(),
+    rpcConfigs: getRpcConfigsFromEnv(),
   };
 }
 

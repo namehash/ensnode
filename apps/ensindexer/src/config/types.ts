@@ -1,3 +1,4 @@
+import { Blockrange } from "@/lib/types";
 import type { ENSDeployments } from "@ensnode/ens-deployments";
 import type { PluginName } from "@ensnode/utils";
 
@@ -7,7 +8,7 @@ import type { PluginName } from "@ensnode/utils";
  * Invariants:
  * - The keys (chainId) must be an integer
  */
-export interface ChainConfig {
+export interface RpcConfig {
   /**
    * The RPC endpoint URL for the chain.
    * Example: "https://eth-mainnet.g.alchemy.com/v2/..."
@@ -16,7 +17,7 @@ export interface ChainConfig {
    * Invariants:
    * - The URL must be a valid URL (localhost urls are allowed)
    */
-  rpcEndpointUrl: string;
+  url: string;
 
   /**
    * The maximum number of RPC requests per second allowed for this chain.
@@ -26,15 +27,7 @@ export interface ChainConfig {
    * Invariants:
    * - The value must be an integer greater than 0
    */
-  rpcMaxRequestsPerSecond: number;
-}
-
-export interface GlobalBlockrange {
-  // Invariant - Must be undefined or an integer greater than 0
-  startBlock?: number;
-
-  // Invariant - Must be undefined or an integer greater than 0
-  endBlock?: number;
+  maxRequestsPerSecond: number;
 }
 
 /**
@@ -73,7 +66,7 @@ export interface ENSIndexerConfig {
    * - endBlock must be an integer greater than 0 or undefined
    * - endBlock must be greater than or equal to startBlock
    */
-  globalBlockrange: GlobalBlockrange;
+  globalBlockrange: Blockrange;
 
   /**
    * The ENSIndexer public service URL
@@ -130,7 +123,7 @@ export interface ENSIndexerConfig {
    * Invariants:
    * - A set of valid {@link PluginName}s with at least one value
    * - For each plugin, it should be valid within the specified {@link ENSIndexerConfig.ensDeployment}
-   * - For each plugin specified, a valid {@link ENSIndexerConfig.indexedChains} entry is required
+   * - For each plugin specified, a valid {@link ENSIndexerConfig.rpcConfigs} entry is required
    */
   plugins: PluginName[];
 
@@ -178,7 +171,7 @@ export interface ENSIndexerConfig {
    *   indexedChains object which is ensured by the validateChainConfigs
    *   function in `validations.ts` and not part of the schema validation here.
    */
-  indexedChains: Record<number, ChainConfig>;
+  rpcConfigs: Record<number, RpcConfig>;
 
   /**
    * The database connection string for the indexer if present. When undefined
@@ -199,9 +192,9 @@ export interface ENSIndexerConfig {
  * rpcMaxRequestsPerSecond is optional and will be undefined if the
  * RPC_REQUEST_RATE_LIMIT_<chainId> environment variable is not set.
  */
-export interface RawChainConfig {
-  rpcEndpointUrl: string;
-  rpcMaxRequestsPerSecond: string | undefined;
+export interface RawRpcConfig {
+  url: string;
+  maxRequestsPerSecond: string | undefined;
 }
 
 /**
@@ -226,5 +219,5 @@ export interface ENSIndexerEnvironment {
     startBlock: string | undefined;
     endBlock: string | undefined;
   };
-  indexedChains: Record<number, RawChainConfig>;
+  rpcConfigs: Record<number, RawRpcConfig>;
 }

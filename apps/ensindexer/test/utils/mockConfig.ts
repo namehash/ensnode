@@ -1,28 +1,10 @@
 import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/config/config.schema";
-import { ChainConfig, ENSIndexerConfig } from "@/config/types";
+import { ENSIndexerConfig } from "@/config/types";
+import { deepClone } from "@/lib/lib-helpers";
 import { PluginName } from "@ensnode/utils";
 import { vi } from "vitest";
 
-// Internal helper to deep clone configuration objects
-function deepClone<T>(obj: T): T {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) => deepClone(item)) as any;
-  }
-
-  const clonedObj = {} as T;
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      clonedObj[key] = deepClone(obj[key]);
-    }
-  }
-  return clonedObj;
-}
-
-// Default, non-exported mock configuration template
+// default, non-exported mock configuration template
 const _defaultMockConfig: ENSIndexerConfig = {
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   ensDeploymentChain: "mainnet",
@@ -33,22 +15,22 @@ const _defaultMockConfig: ENSIndexerConfig = {
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: DEFAULT_PORT,
-  indexedChains: {},
+  rpcConfigs: {},
   globalBlockrange: {
     startBlock: undefined,
     endBlock: undefined,
   },
 };
 
-// This will hold the current, mutable configuration for tests
+// the current, mutable ENSIndexerConfig for tests
 let currentMockConfig: ENSIndexerConfig;
 
 /**
  * Resets the currentMockConfig object to a deep copy of the default values.
  * This is crucial for test isolation.
+ *
+ * ENSURE THAT THIS IS CALLED FOR EACH NEW TEST IN beforeEach()
  */
-// ENSURE THAT THIS IS CALLED FOR EACH NEW TEST!!!
-// ADD IT TO YOUR beforeEach() METHOD
 export function resetMockConfig() {
   currentMockConfig = deepClone(_defaultMockConfig);
 }
@@ -80,12 +62,10 @@ export function setupConfigMock() {
       },
       rpcMaxRequestsPerSecond: vi.fn(
         (chainId: number) =>
-          currentMockConfig.indexedChains[chainId]?.rpcMaxRequestsPerSecond ||
-          DEFAULT_RPC_RATE_LIMIT,
+          currentMockConfig.rpcConfigs[chainId]?.maxRequestsPerSecond || DEFAULT_RPC_RATE_LIMIT,
       ),
       rpcEndpointUrl: vi.fn(
-        (chainId: number) =>
-          currentMockConfig.indexedChains[chainId]?.rpcEndpointUrl || "http://localhost:8545",
+        (chainId: number) => currentMockConfig.rpcConfigs[chainId]?.url || "http://localhost:8545",
       ),
       // Use a getter for the default export as well
       get default() {
@@ -127,8 +107,8 @@ export function setupConfigMock() {
         get: () => currentMockConfig.globalBlockrange,
         enumerable: true,
       },
-      indexedChains: {
-        get: () => currentMockConfig.indexedChains,
+      rpcConfigs: {
+        get: () => currentMockConfig.rpcConfigs,
         enumerable: true,
       },
     });
@@ -157,18 +137,15 @@ export function updateMockConfig(updates: Partial<ENSIndexerConfig>) {
  * @param endBlock Optional end block
  */
 export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
-  currentMockConfig.globalBlockrange = {
-    startBlock,
-    endBlock,
-  };
+  updateMockConfig({ globalBlockrange: { startBlock, endBlock } });
 }
 
 /**
  * Configures a chain in the current mock config
  *
  * @param chainId The chain ID to configure
- * @param rpcEndpointUrl The RPC endpoint URL for the chain
- * @param rpcMaxRequestsPerSecond The maximum requests per second (defaults to 50)
+ * @param url The RPC endpoint URL for the chain
+ * @param maxRequestsPerSecond The maximum requests per second (defaults to 50)
  *
  * @example
  * // Add mainnet configuration
@@ -177,37 +154,11 @@ export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
  * // Add base chain configuration
  * setChainConfig(8453, "https://base-mainnet.g.alchemy.com/v2/5678");
  */
-export function setChainConfig(
-  chainId: number,
-  rpcEndpointUrl: string,
-  rpcMaxRequestsPerSecond: number = 50,
-) {
-  if (!currentMockConfig.indexedChains) {
-    currentMockConfig.indexedChains = {};
-  }
-
-  currentMockConfig.indexedChains[chainId] = {
-    rpcEndpointUrl,
-    rpcMaxRequestsPerSecond,
-  };
-}
-
-/**
- * Removes a chain configuration from the current mock config
- *
- * @param chainId The chain ID to remove
- */
-export function removeChainConfig(chainId: number) {
-  if (currentMockConfig.indexedChains && currentMockConfig.indexedChains[chainId]) {
-    delete currentMockConfig.indexedChains[chainId];
-  }
-}
-
-/**
- * Gets a copy of the current chain configurations
- *
- * @returns Record of chain configurations by chain ID
- */
-export function getChainConfigs(): Record<number, ChainConfig> {
-  return { ...currentMockConfig.indexedChains };
+export function setChainConfig(chainId: number, url: string, maxRequestsPerSecond: number = 50) {
+  updateMockConfig({
+    rpcConfigs: {
+      ...(currentMockConfig.rpcConfigs || {}),
+      [chainId]: { url, maxRequestsPerSecond },
+    },
+  });
 }

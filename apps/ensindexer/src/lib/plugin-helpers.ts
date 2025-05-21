@@ -117,13 +117,13 @@ export function networksConfigForChain(config: ENSIndexerConfig, chainId: number
       // all instead of throwing an error here which will only flag a single missing RPC URL.
       // The code which does that validation is the `validateChainConfigs` function in
       // `src/config/validations.ts`.
-      transport: http(config.indexedChains[chainId]?.rpcEndpointUrl),
+      transport: http(config.rpcConfigs[chainId]?.url),
       // This can only return undefined if there is no RPC url for the chain. This
       // means the `validateChainConfigs` function in `src/config/validations.ts` will
       // throw an error so we don't need to handle undefined here with a default.
       // That is already handled in our schema validation so when the RPC url is added
       // this will not be undefined.
-      maxRequestsPerSecond: config.indexedChains[chainId]?.rpcMaxRequestsPerSecond,
+      maxRequestsPerSecond: config.rpcConfigs[chainId]?.maxRequestsPerSecond,
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
       ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies NetworkConfig,

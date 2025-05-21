@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { resetMockConfig, setGlobalBlockrange, setupConfigMock } from "./utils/mockConfig";
 
 // Set up the mock before importing modules that depend on config
@@ -16,7 +16,6 @@ describe("ponder helpers", () => {
   describe("constrainContractBlockrange", () => {
     describe("without global range", () => {
       beforeEach(() => {
-        // Set empty blockrange
         setGlobalBlockrange(undefined, undefined);
       });
 
@@ -33,7 +32,6 @@ describe("ponder helpers", () => {
 
     describe("with global range", () => {
       beforeEach(() => {
-        // Set end block only
         setGlobalBlockrange(undefined, 1234);
       });
 
@@ -48,7 +46,6 @@ describe("ponder helpers", () => {
       });
 
       it("should use contract start block if later than global start", () => {
-        // Update the global blockrange
         setGlobalBlockrange(10, 1234);
 
         const config = constrainContractBlockrange(20);
@@ -56,7 +53,6 @@ describe("ponder helpers", () => {
       });
 
       it("should use global start block if later than contract start", () => {
-        // Update the global blockrange
         setGlobalBlockrange(30, 1234);
 
         const config = constrainContractBlockrange(20);

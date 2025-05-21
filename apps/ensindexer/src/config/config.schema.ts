@@ -25,7 +25,7 @@ const parseBlockNumber = (envVarKey: string) =>
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
-const parseRpcEndpointUrl = () =>
+const parseRpcUrl = () =>
   z.url({
     error:
       "RPC_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
@@ -40,8 +40,8 @@ const parseRpcMaxRequestsPerSecond = () =>
 
 const parseChainConfig = () =>
   z.object({
-    rpcEndpointUrl: parseRpcEndpointUrl(),
-    rpcMaxRequestsPerSecond: parseRpcMaxRequestsPerSecond(),
+    url: parseRpcUrl(),
+    maxRequestsPerSecond: parseRpcMaxRequestsPerSecond(),
   });
 
 const parseEnsDeploymentChain = () =>
@@ -55,7 +55,7 @@ const parseEnsDeploymentChain = () =>
     })
     .default(DEFAULT_DEPLOYMENT);
 
-const parseGlobalBlockrange = () =>
+const parseBlockrange = () =>
   z
     .object({
       startBlock: parseBlockNumber("START_BLOCK"),
@@ -141,7 +141,7 @@ const parseEnsRainbowEndpointUrl = () =>
       "ENSRAINBOW_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
   });
 
-const parseIndexedChains = () =>
+const parseRpcConfigs = () =>
   z.record(z.string().transform(Number), parseChainConfig(), {
     error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
   });
@@ -171,7 +171,7 @@ const parseDatabaseUrl = () =>
 export const ENSIndexerConfigSchema = z
   .object({
     ensDeploymentChain: parseEnsDeploymentChain(),
-    globalBlockrange: parseGlobalBlockrange(),
+    globalBlockrange: parseBlockrange(),
     ensNodePublicUrl: parseEnsNodePublicUrl(),
     ensAdminUrl: parseEnsAdminUrl(),
     ponderDatabaseSchema: parsePonderDatabaseSchema(),
@@ -179,7 +179,7 @@ export const ENSIndexerConfigSchema = z
     healReverseAddresses: parseHealReverseAddresses(),
     port: parsePort(),
     ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
-    indexedChains: parseIndexedChains(),
+    rpcConfigs: parseRpcConfigs(),
     databaseUrl: parseDatabaseUrl(),
   })
   // Invariant: specified plugins' datasources are available in the specified ensDeploymentChain's ENSDeployment
@@ -215,7 +215,7 @@ export const ENSIndexerConfigSchema = z
       }
     }
   })
-  // Invariant: indexedChains is specified for each indexed chain
+  // Invariant: rpcConfig is specified for each indexed chain
   .check((ctx) => {
     const { value: config } = ctx;
 
@@ -227,7 +227,7 @@ export const ENSIndexerConfigSchema = z
       for (const datasourceName of datasourceNames) {
         const { chain } = deployment[datasourceName];
 
-        if (!config.indexedChains[chain.id]) {
+        if (!config.rpcConfigs[chain.id]) {
           ctx.issues.push({
             code: "custom",
             input: config,
