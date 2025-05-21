@@ -22,9 +22,7 @@ import ethereumLogoUrl from "../../assets/ethereum-logo.svg";
 import lineaLogoUrl from "../../assets/linea-logo.svg";
 import optimismLogoUrl from "../../assets/optimism-logo.svg";
 
-const getGroupLabelStyle = (
-  position: "top" | "bottom" = "top"
-): React.CSSProperties => ({
+const getGroupLabelStyle = (position: "top" | "bottom" = "top"): React.CSSProperties => ({
   position: "absolute",
   left: "50%",
   transform: "translateX(-50%)",
@@ -419,17 +417,15 @@ const nodeTypes = {
 
 const EnsFlowDiagram: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(
-    initialNodes.filter((node) => node.id !== "postgres-db")
+    initialNodes.filter((node) => node.id !== "postgres-db"),
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
-    initialEdges.filter(
-      (edge) => edge.id !== "e-postgres-indexer-bidirectional"
-    )
+    initialEdges.filter((edge) => edge.id !== "e-postgres-indexer-bidirectional"),
   );
 
   const onConnect = useCallback(
     (params: any) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    [setEdges],
   );
 
   const handleNodesChange = useCallback(
@@ -440,7 +436,7 @@ const EnsFlowDiagram: React.FC = () => {
         console.log("EDGES_JSON:", JSON.stringify(edges, null, 2));
       }, 0);
     },
-    [onNodesChange, nodes, edges]
+    [onNodesChange, nodes, edges],
   );
 
   const handleEdgesChange = useCallback(
@@ -451,7 +447,7 @@ const EnsFlowDiagram: React.FC = () => {
         console.log("EDGES_JSON:", JSON.stringify(edges, null, 2));
       }, 0);
     },
-    [onEdgesChange, nodes, edges]
+    [onEdgesChange, nodes, edges],
   );
 
   return (
