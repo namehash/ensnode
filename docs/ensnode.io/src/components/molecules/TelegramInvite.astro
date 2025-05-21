@@ -27,13 +27,13 @@ const baseContainerStyles = "flex flex-col flex-nowrap justify-center items-cent
             <div class={cc([baseContainerStyles, "gap-2"])}>
                 <Balancer
                         as="h2"
-                        className="self-stretch text-[19px] leading-[26px] font-semibold text-black text-center"
+                        className={cc([headerStyles, "self-stretch text-center"])}
                 >
                     Become a part of our community in Telegram
                 </Balancer>
                 <Balancer
                         as="p"
-                        className="text-[15px] leading-[26px] font-normal text-gray-500 text-center"
+                        className="text-sm leading-6 font-normal text-gray-500 text-center"
                 >
                     Get updates, technical support, and connect with our team building the multichain future.
                 </Balancer>
