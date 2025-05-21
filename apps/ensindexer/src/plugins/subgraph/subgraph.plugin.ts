@@ -19,7 +19,7 @@ const deployment = getENSDeployment(appConfig.ensDeploymentChain);
 const { chain, contracts } = deployment[DatasourceName.Root];
 
 export const config = createConfig({
-  networks: networksConfigForChain(appConfig, chain.id),
+  networks: networksConfigForChain(chain.id),
   contracts: {
     [namespace("RegistryOld")]: {
       network: networkConfigForContract(chain, contracts.RegistryOld),

@@ -2,7 +2,7 @@ import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
-import { ENSIndexerConfig } from "@/config/types";
+import config from "@/config/app-config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
@@ -105,25 +105,17 @@ export const activateHandlers =
   };
 
 /**
- * Defines a ponder#NetworksConfig for a single, specific chain.
+ * Builds a ponder#NetworksConfig for a single, specific chain.
  */
-export function networksConfigForChain(config: ENSIndexerConfig, chainId: number) {
+export function networksConfigForChain(chainId: number) {
+  // NOTE: config.rpcConfigs[chainId] is guaranteed to exist, see config.schema.ts
+  const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
+
   return {
     [chainId.toString()]: {
       chainId: chainId,
-      // This may return undefined if the RPC URL is not configured for the chain.
-      // This is intentional to allow us to aggregate all the RPC URLs that are missing in a
-      // later validation step allowing us to throw a helpful error message aggregating them
-      // all instead of throwing an error here which will only flag a single missing RPC URL.
-      // The code which does that validation is the `validateChainConfigs` function in
-      // `src/config/validations.ts`.
-      transport: http(config.rpcConfigs[chainId]?.url),
-      // This can only return undefined if there is no RPC url for the chain. This
-      // means the `validateChainConfigs` function in `src/config/validations.ts` will
-      // throw an error so we don't need to handle undefined here with a default.
-      // That is already handled in our schema validation so when the RPC url is added
-      // this will not be undefined.
-      maxRequestsPerSecond: config.rpcConfigs[chainId]?.maxRequestsPerSecond,
+      transport: http(url),
+      maxRequestsPerSecond,
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
       ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies NetworkConfig,
@@ -131,7 +123,7 @@ export function networksConfigForChain(config: ENSIndexerConfig, chainId: number
 }
 
 /**
- * Defines a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
+ * Builds a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(

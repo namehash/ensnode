@@ -7,11 +7,11 @@ import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-d
 import { PluginName } from "@ensnode/utils";
 import { Address, isAddress } from "viem";
 
-export const DEFAULT_RPC_RATE_LIMIT = 50;
+export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
-export const DEFAULT_DEPLOYMENT = "mainnet";
+export const DEFAULT_ENS_DEPLOYMENT_CHAIN = "mainnet";
 
 const parseBlockNumber = (envVarKey: string) =>
   z.coerce
@@ -48,7 +48,7 @@ const parseEnsDeploymentChain = () =>
         ).join(", ")}`;
       },
     })
-    .default(DEFAULT_DEPLOYMENT);
+    .default(DEFAULT_ENS_DEPLOYMENT_CHAIN);
 
 const parseBlockrange = () =>
   z

@@ -1,7 +1,7 @@
 import { ENSIndexerEnvironment } from "@/config/types";
 import { buildConfigFromEnvironment, getRpcConfigsFromEnv } from "@/lib/lib-config";
 
-// format the relevant environment variables into the input shape of the zod schema
+// format the relevant environment variables into the shape of an ENSIndexerEnvironment
 const environment = {
   port: process.env.PORT,
   ponderDatabaseSchema: process.env.DATABASE_SCHEMA,

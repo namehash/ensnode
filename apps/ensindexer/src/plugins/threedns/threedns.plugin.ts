@@ -21,8 +21,8 @@ const { chain: base, contracts: baseContracts } = deployment[DatasourceName.Thre
 
 export const config = createConfig({
   networks: {
-    ...networksConfigForChain(appConfig, optimism.id),
-    ...networksConfigForChain(appConfig, base.id),
+    ...networksConfigForChain(optimism.id),
+    ...networksConfigForChain(base.id),
   },
   contracts: {
     [namespace("ThreeDNSToken")]: {
