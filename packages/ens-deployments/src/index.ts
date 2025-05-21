@@ -8,7 +8,7 @@ import sepolia from "./sepolia";
 export * from "./lib/types";
 
 /**
- * Note that here, we define the global ENSDeploymentGlobalType type based of mainnet (which fully
+ * Note that here, we define the global ENSDeploymentGlobalType type based off mainnet (which fully
  * specifies all plugin configs). This type will be used to cast each specific ENSDeployment type
  * to the global type in order to ensure that at type-check-time and in `ALL_PLUGINS` every plugin's
  * `config` has valid values (and therefore its type can continue to be inferred).
@@ -51,3 +51,17 @@ export const ENSDeployments = {
   holesky,
   "ens-test-env": ensTestEnv,
 } as const satisfies Record<ENSDeploymentChain, ENSDeployment>;
+
+/**
+ * Returns the ENS deployment configuration for the specified deployment chain.
+ *
+ * This function takes a deployment chain identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * and returns the corresponding ENS deployment configuration. The returned configuration is cast to the
+ * global deployment type to ensure type safety and consistency across all deployments.
+ *
+ * @param ensDeploymentChain - The deployment chain identifier
+ * @returns The ENS deployment configuration for the specified chain
+ */
+
+export const getENSDeployment = (ensDeploymentChain: keyof typeof ENSDeployments) =>
+  ENSDeployments[ensDeploymentChain] as ENSDeploymentGlobalType;

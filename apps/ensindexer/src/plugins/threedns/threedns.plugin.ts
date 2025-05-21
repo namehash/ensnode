@@ -7,20 +7,17 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
-/**
- * The ThreeDNS plugin describes indexing behavior for the ThreeDNSOptimism & ThreeDNSBase Datasources.
- */
+// contruct a unique contract namespace for this plugin
 export const pluginName = PluginName.ThreeDNS;
-export const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase];
-const { chain: optimism, contracts: optimismContracts } =
-  appConfig.selectedEnsDeployment[DatasourceName.ThreeDNSOptimism];
-const { chain: base, contracts: baseContracts } =
-  appConfig.selectedEnsDeployment[DatasourceName.ThreeDNSBase];
-
 const namespace = makePluginNamespace(pluginName);
+
+const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+const { chain: optimism, contracts: optimismContracts } =
+  deployment[DatasourceName.ThreeDNSOptimism];
+const { chain: base, contracts: baseContracts } = deployment[DatasourceName.ThreeDNSBase];
 
 export const config = createConfig({
   networks: {

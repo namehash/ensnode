@@ -1,6 +1,5 @@
 import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/config/config.schema";
 import { ChainConfig, ENSIndexerConfig } from "@/config/types";
-import { ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 import { vi } from "vitest";
 
@@ -27,11 +26,10 @@ function deepClone<T>(obj: T): T {
 const _defaultMockConfig: ENSIndexerConfig = {
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   ensDeploymentChain: "mainnet",
-  selectedEnsDeployment: ENSDeployments.mainnet,
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",
-  plugins: new Set([PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames]),
+  plugins: [PluginName.Subgraph, PluginName.Basenames, PluginName.Lineanames],
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: true,
   port: DEFAULT_PORT,

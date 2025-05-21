@@ -2,7 +2,6 @@ import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
-import config from "@/config/app-config";
 import { ENSIndexerConfig } from "@/config/types";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
@@ -40,54 +39,6 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
   ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
     return `${pluginName}/${contractName}`;
   };
-}
-
-/**
- * Returns a list of 1 or more distinct active plugins based on the `ACTIVE_PLUGINS` environment variable.
- *
- * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
- * names. The function returns the plugins that are included in the list.
- *
- * @throws if invalid plugins are requested
- * @throws if activated plugins' `requiredDatasources` are not available in the set of `availableDatasourceNames`
- *
- * @param availablePlugins a list of all available plugins
- * @param requestedPluginNames list of user-requested plugin names
- * @param availableDatasourceNames is a list of available DatasourceNames
- * @returns the active plugins
- */
-export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
-  availablePlugins: readonly PLUGIN[],
-  requestedPluginNames: Set<PluginName>,
-  availableDatasourceNames: DatasourceName[],
-): PLUGIN[] {
-  // filter allPlugins by those that the user requested
-  const activePlugins = availablePlugins.filter((plugin) =>
-    requestedPluginNames.has(plugin.pluginName),
-  );
-
-  // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
-  for (const plugin of activePlugins) {
-    const hasRequiredDatasources = plugin.requiredDatasources.every((datasourceName) =>
-      availableDatasourceNames.includes(datasourceName),
-    );
-
-    if (!hasRequiredDatasources) {
-      throw new Error(
-        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${
-          config.ensDeploymentChain
-        } deployment. ${
-          plugin.pluginName
-        } specifies dependent datasources: ${plugin.requiredDatasources.join(
-          ", ",
-        )}, but available datasources in the ${
-          config.ensDeploymentChain
-        } deployment are: ${availableDatasourceNames.join(", ")}.`,
-      );
-    }
-  }
-
-  return activePlugins;
 }
 
 // Helper type to merge multiple types into one

@@ -7,19 +7,16 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
-/**
- * The Lineanames plugin describes indexing behavior for the Lineanames ENS Datasource, leveraging
- * the shared Subgraph-compatible indexing logic.
- */
+// contruct a unique contract namespace for this plugin
 export const pluginName = PluginName.Lineanames;
-export const requiredDatasources = [DatasourceName.Lineanames];
+const namespace = makePluginNamespace(pluginName);
 
 // extract the chain and contract configs for Lineanames Datasource in order to build ponder config
-const { chain, contracts } = appConfig.selectedEnsDeployment[DatasourceName.Lineanames];
-const namespace = makePluginNamespace(pluginName);
+const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+const { chain, contracts } = deployment[DatasourceName.Lineanames];
 
 export const config = createConfig({
   networks: networksConfigForChain(appConfig, chain.id),

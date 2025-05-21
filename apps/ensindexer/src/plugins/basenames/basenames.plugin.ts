@@ -7,19 +7,16 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
-/**
- * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging
- * the shared Subgraph-compatible indexing logic.
- */
+// contruct a unique contract namespace for this plugin
 export const pluginName = PluginName.Basenames;
-export const requiredDatasources = [DatasourceName.Basenames];
+const namespace = makePluginNamespace(pluginName);
 
 // extract the chain and contract configs for Basenames Datasource in order to build ponder config
-const { chain, contracts } = appConfig.selectedEnsDeployment[DatasourceName.Basenames];
-const namespace = makePluginNamespace(pluginName);
+const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+const { chain, contracts } = deployment[DatasourceName.Basenames];
 
 export const config = createConfig({
   networks: networksConfigForChain(appConfig, chain.id),

@@ -1,5 +1,5 @@
-import { type ENSDeploymentGlobalType, ENSDeployments } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import type { ENSDeployments } from "@ensnode/ens-deployments";
+import type { PluginName } from "@ensnode/utils";
 
 /**
  * Configuration for a single blockchain network (chain) used by ENSIndexer.
@@ -47,13 +47,6 @@ export interface ENSIndexerConfig {
    * (see `@ensnode/ens-deployments` for available deployments)
    */
   ensDeploymentChain: keyof typeof ENSDeployments;
-
-  /**
-   * The selected ENS Deployment for the indexer which could be "mainnet", "sepolia", etc.
-   *
-   * (see `@ensnode/ens-deployments` for available deployments)
-   */
-  selectedEnsDeployment: ENSDeploymentGlobalType;
 
   /**
    * This is purely a testing configuration and should NOT be used in production.
@@ -108,37 +101,38 @@ export interface ENSIndexerConfig {
    */
   ensAdminUrl: string;
 
-  /*
-   * This is a namespace for the tables that the indexer will create to store indexed data.
-   * It should be a string that is unique to the running indexer instance.
+  /**
+   * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
+   * tables in this schema.
    *
-   * Keeping the database schema unique to the indexer instance is important to
-   * 1) speed up indexing after a restart
-   * 2) prevent data corruption from multiple indexer app instances writing state
-   *    concurrently to the same db schema
+   * The `ponderDatabaseSchema` must be unique per running instance of ENSIndexer (ponder will
+   * enforce this with database locks). If multiple instances of ENSIndexer with the same
+   * `ponderDatabaseSchema` are running, only the first will successfully acquire the lock and begin
+   * indexing: the rest will crash.
    *
-   * No two indexer instances can use the same database schema at the same time.
+   * If an ENSIndexer instance with the same configuration (including `ponderDatabaseSchema`) is
+   * started, and it successfully acquires the lock on this schema, it will continue indexing from
+   * the current state.
+   *
+   * Many clients can read from this Postgres schema during or after indexing.
    *
    * Read more about database schema rules here:
    * https://ponder.sh/docs/api-reference/database#database-schema-rules
    *
-   * Invariant: Must be a valid non-empty string
+   * Invariant: Must be a non-empty string that is a valid Postgres database schema identifier.
    */
   ponderDatabaseSchema: string;
 
   /**
    * Identify which indexer plugins to activate (see `src/plugins` for available plugins)
-   * This is a set of one or more available plugin names.
+   * This is a set of one or more available {@link PluginName}s.
    *
    * Invariants:
-   * - A set of valid plugin names with at least one value
-   * - For any requested plugin, the config will have a key for chainId in the
-   *   indexedChains object. In that indexedChains object, the config will have a
-   *   rpcEndpointUrl that is defined for that chainId and a rpcMaxRequestsPerSecond
-   *   that is defined for that chainId. This is ensured by the validateChainConfigs
-   *   function in `validations.ts` and not part of the schema validation here.
+   * - A set of valid {@link PluginName}s with at least one value
+   * - For each plugin, it should be valid within the specified {@link ENSIndexerConfig.ensDeployment}
+   * - For each plugin specified, a valid {@link ENSIndexerConfig.indexedChains} entry is required
    */
-  plugins: Set<PluginName>;
+  plugins: PluginName[];
 
   /**
    * A feature flag to enable or disable healing of addr.reverse subnames.

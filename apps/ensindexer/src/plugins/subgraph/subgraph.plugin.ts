@@ -7,19 +7,16 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
-/**
- * The Subgraph plugin describes indexing behavior for the 'Root' Datasource, in alignment with the
- * legacy ENS Subgraph indexing logic.
- */
+// contruct a unique contract namespace for this plugin
 export const pluginName = PluginName.Subgraph;
-export const requiredDatasources = [DatasourceName.Root];
+const namespace = makePluginNamespace(pluginName);
 
 // extract the chain and contract configs for root Datasource in order to build ponder config
-const { chain, contracts } = appConfig.selectedEnsDeployment[DatasourceName.Root];
-const namespace = makePluginNamespace(pluginName);
+const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+const { chain, contracts } = deployment[DatasourceName.Root];
 
 export const config = createConfig({
   networks: networksConfigForChain(appConfig, chain.id),

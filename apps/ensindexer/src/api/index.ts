@@ -66,7 +66,7 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: Array.from(config.plugins).join(","),
+      ACTIVE_PLUGINS: config.plugins.join(","),
       DATABASE_SCHEMA: config.ponderDatabaseSchema,
       ENS_DEPLOYMENT_CHAIN: config.ensDeploymentChain,
     },

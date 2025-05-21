@@ -1,6 +1,6 @@
 import { ENSIndexerConfigSchema } from "@/config/config.schema";
 import { ENSIndexerConfig, ENSIndexerEnvironment, RawChainConfig } from "@/config/types";
-import { z } from "zod/v4";
+import { prettifyError, z } from "zod/v4";
 
 /**
  * Extracts dynamic chain configuration from environment variables.
@@ -74,18 +74,13 @@ function parseEnvironment(): ENSIndexerEnvironment {
  *
  * This function then validates the config against the zod schema ensuring that the config
  * meets all type checks and invariants.
- *
- * **Note:** This function does **not** perform deep validation of the configuration values
- * beyond basic type checks and presence. Comprehensive validation (such as checking for
- * required environment variables, correct formats, or logical consistency) is handled
- * separately by dedicated validation utilities elsewhere in the codebase.
  */
 function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
   const parsed = ENSIndexerConfigSchema.safeParse(environment);
 
   if (!parsed.success) {
     throw new Error(
-      "Failed to parse environment configuration: " + getValidationErrors(parsed.error.issues),
+      "Failed to parse environment configuration: \n" + prettifyError(parsed.error) + "\n",
     );
   }
 

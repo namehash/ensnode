@@ -57,7 +57,7 @@ describe("config", () => {
       expect(config.ensNodePublicUrl).toBe("http://localhost:42069");
       expect(config.ensAdminUrl).toBe("https://admin.ensnode.io");
       expect(config.ponderDatabaseSchema).toBe("ensnode");
-      expect(config.plugins).toEqual(new Set(["subgraph"]));
+      expect(config.plugins).toEqual(["subgraph"]);
       expect(config.healReverseAddresses).toBe(true);
       expect(config.port).toBe(3000);
       expect(config.ensRainbowEndpointUrl).toBe("https://api.ensrainbow.io");
@@ -362,13 +362,13 @@ describe("config", () => {
     it("returns the ACTIVE_PLUGINS if it is a valid array", async () => {
       process.env.ACTIVE_PLUGINS = "subgraph,basenames";
       const config = await getFreshConfig();
-      expect(config.plugins).toEqual(new Set(["subgraph", "basenames"]));
+      expect(config.plugins).toEqual(["subgraph", "basenames"]);
     });
 
     it("returns a single plugin if only one is provided", async () => {
       process.env.ACTIVE_PLUGINS = "basenames"; // Already set in BASE_ENV as "subgraph"
       const config = await getFreshConfig();
-      expect(config.plugins).toEqual(new Set(["basenames"]));
+      expect(config.plugins).toEqual(["basenames"]);
     });
 
     it("throws if ACTIVE_PLUGINS is an empty string", async () => {

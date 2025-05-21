@@ -1,8 +1,16 @@
-import { validateContractConfigs } from "@/config/validations";
-import { type ENSDeploymentGlobalType, ENSDeployments } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { z } from "zod/v4";
+
+import { uniq } from "@/lib/lib-helpers";
+import { PLUGIN_REQUIRED_DATASOURCES } from "@/plugins";
+import {
+  ContractConfig,
+  DatasourceName,
+  ENSDeployments,
+  getENSDeployment,
+} from "@ensnode/ens-deployments";
+import { PluginName } from "@ensnode/utils";
+import { Address, isAddress } from "viem";
 
 export const DEFAULT_RPC_RATE_LIMIT = 50;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
@@ -40,7 +48,7 @@ const parseEnsDeploymentChain = () =>
   z
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
-        return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
+        return `Invalid ENS_DEPLOYMENT_CHAIN. Supported ENS deployment chains are: ${Object.keys(
           ENSDeployments,
         ).join(", ")}`;
       },
@@ -104,10 +112,9 @@ const parsePlugins = () =>
           ).join(", ")}`,
         }),
     )
-    .refine((arr) => arr.length === new Set(arr).size, {
+    .refine((arr) => arr.length === uniq(arr).length, {
       error: "ACTIVE_PLUGINS cannot contain duplicate values",
-    })
-    .transform((arr) => new Set(arr));
+    });
 
 const parseHealReverseAddresses = () =>
   z
@@ -161,32 +168,6 @@ const parseDatabaseUrl = () =>
     },
   );
 
-const parseSelectedEnsDeployment = () => z.custom<ENSDeploymentGlobalType>();
-
-/**
- * This function performs invariant checks on the configuration after the schema
- * has been validated against the zod schema. Here there are more complex checks
- * beyond the zod schema that we can perform to ensure the configuration is valid.
- *
- * Any checks which test multiple fields and their relationships should be performed
- * here.
- *
- * Invariants:
- * - Each plugin has a correct address defined for each contract
- *
- *  @throws {Error} If the configuration is invalid.
- *  @param config - The configuration to check.
- * @returns `true` if the configuration is valid, otherwise an error is thrown.
- */
-const schemaInvariantChecks = (config: z.infer<typeof ENSIndexerConfigSchema>) => {
-  // Invariant for each plugin to check all contracts have a correct address defined
-  config.plugins.forEach((plugin) => {
-    validateContractConfigs(plugin, config);
-  });
-
-  return true;
-};
-
 export const ENSIndexerConfigSchema = z
   .object({
     ensDeploymentChain: parseEnsDeploymentChain(),
@@ -200,13 +181,119 @@ export const ENSIndexerConfigSchema = z
     ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
     indexedChains: parseIndexedChains(),
     databaseUrl: parseDatabaseUrl(),
-    selectedEnsDeployment: parseSelectedEnsDeployment(),
   })
-  // Add selectedEnsDeployment to the config after as it's a derived value
-  .transform((config) => ({
-    ...config,
-    selectedEnsDeployment: ENSDeployments[config.ensDeploymentChain] as ENSDeploymentGlobalType,
-  }))
-  .refine(schemaInvariantChecks, {
-    error: "Invalid configuration. Please check your config file and try again.",
+  // Invariant: specified plugins' datasources are available in the specified ensDeploymentChain's ENSDeployment
+  .check((ctx) => {
+    const { value: config } = ctx;
+
+    const deployment = getENSDeployment(config.ensDeploymentChain);
+    const allPluginNames = Object.keys(PLUGIN_REQUIRED_DATASOURCES) as PluginName[];
+    const availableDatasourceNames = Object.keys(deployment) as DatasourceName[];
+    const activePluginNames = allPluginNames.filter((pluginName) =>
+      config.plugins.includes(pluginName),
+    );
+
+    // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
+    for (const pluginName of activePluginNames) {
+      const requiredDatasources = PLUGIN_REQUIRED_DATASOURCES[pluginName];
+      const hasRequiredDatasources = requiredDatasources.every((datasourceName) =>
+        availableDatasourceNames.includes(datasourceName),
+      );
+
+      if (!hasRequiredDatasources) {
+        ctx.issues.push({
+          code: "custom",
+          input: config,
+          message: `Requested plugin '${pluginName}' cannot be activated for the ${
+            config.ensDeploymentChain
+          } deployment. ${pluginName} specifies dependent datasources: [${requiredDatasources.join(
+            ", ",
+          )}], but available datasources in the ${
+            config.ensDeploymentChain
+          } deployment are: [${availableDatasourceNames.join(", ")}].`,
+        });
+      }
+    }
+  })
+  // Invariant: indexedChains is specified for each indexed chain
+  .check((ctx) => {
+    const { value: config } = ctx;
+
+    const deployment = getENSDeployment(config.ensDeploymentChain);
+
+    for (const pluginName of config.plugins) {
+      const datasourceNames = PLUGIN_REQUIRED_DATASOURCES[pluginName];
+
+      for (const datasourceName of datasourceNames) {
+        const { chain } = deployment[datasourceName];
+
+        if (!config.indexedChains[chain.id]) {
+          ctx.issues.push({
+            code: "custom",
+            input: config,
+            message: `Plugin '${pluginName}' indexes chain with id ${chain.id} but RPC_URL_${chain.id} is not specified.`,
+          });
+        }
+      }
+    }
+  })
+  // Invariant: if a global blockrange is defined, only one network is indexed
+  .check((ctx) => {
+    const { value: config } = ctx;
+    const { globalBlockrange } = config;
+
+    if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
+      const deployment = getENSDeployment(config.ensDeploymentChain);
+      const indexedChainIds = uniq(
+        config.plugins
+          .flatMap((pluginName) => PLUGIN_REQUIRED_DATASOURCES[pluginName])
+          .map((datasourceName) => deployment[datasourceName])
+          .map((datasource) => datasource.chain.id),
+      );
+
+      if (indexedChainIds.length > 1) {
+        ctx.issues.push({
+          code: "custom",
+          input: config,
+          message: `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
+
+  ENS_DEPLOYMENT_CHAIN=${config.ensDeploymentChain}
+  ACTIVE_PLUGINS=${config.plugins.join(",")}
+  START_BLOCK=${globalBlockrange.startBlock || "n/a"}
+  END_BLOCK=${globalBlockrange.endBlock || "n/a"}
+
+  The usage you're most likely interested in is:
+    ENS_DEPLOYMENT_CHAIN=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
+  which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
+
+  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
+        });
+      }
+    }
+  })
+  // Invariant: if ens-test-env is the ensDeploymentChain, ensure that its Datasources provide addresses
+  .check((ctx) => {
+    const { value: config } = ctx;
+
+    const deployment = getENSDeployment(config.ensDeploymentChain);
+    for (const datasourceName of Object.keys(deployment) as DatasourceName[]) {
+      const { contracts } = deployment[datasourceName];
+
+      // invariant: `contracts` must provide valid addresses if a filter is not provided
+      const hasAddresses = Object.values(contracts)
+        .filter((contractConfig) => "address" in contractConfig) // only ContractConfigs with `address` defined
+        .every((contractConfig) => isAddress(contractConfig.address as Address)); // must be a valid `Address`
+
+      if (!hasAddresses) {
+        throw new Error(
+          `The ENSDeployment '${
+            config.ensDeploymentChain
+          }' datasource '${datasourceName}' does not define valid addresses. This occurs if the address property of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
+
+ENS_DEPLOYMENT_CHAIN=${config.ensDeploymentChain}
+NEXT_PUBLIC_DEPLOYMENT_ADDRESSES=${process.env.NEXT_PUBLIC_DEPLOYMENT_ADDRESSES || "undefined"}
+DEPLOYMENT_ADDRESSES=${process.env.DEPLOYMENT_ADDRESSES || "undefined"}`,
+        );
+      }
+    }
   });
