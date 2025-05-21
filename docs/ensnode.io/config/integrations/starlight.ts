@@ -95,22 +95,26 @@ export function starlight(): AstroIntegration {
                   label: "What is ENSIndexer?",
                   link: "/ensindexer",
                 },
+                {
+                  label: "What data is indexed?",
+                  link: "/ensindexer/indexed-data",
+                },
               ],
             },
             {
               label: "Technical Reference",
               items: [
                 {
-                  label: "Architecture",
-                  link: "ensindexer/technical-reference/architecture",
-                },
-                {
-                  label: "Plugin System",
-                  link: "ensindexer/technical-reference/plugin-system",
+                  label: "Core Concepts",
+                  link: "ensindexer/technical-reference/core-concepts",
                 },
                 {
                   label: "Data Model",
                   link: "ensindexer/technical-reference/data-model",
+                },
+                {
+                  label: "Plugin System",
+                  link: "ensindexer/technical-reference/plugin-system",
                 },
                 {
                   label: "Plugins",

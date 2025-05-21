@@ -18,6 +18,8 @@ Before understanding how plugins work, it's important to understand the concept 
 
 A deployment is a collection of data sources. For example, the mainnet deployment includes all data sources. The `holesky` deployment only includes the `Root` data source which are the ENS contracts on `holesky`.
 
+If you haven't read over the [core concepts](/ensindexer/technical-reference/core-concepts) yet, it is recommend doing so to get a better understanding of deployments and data sources.
+
 ### Plugin Definition
 
 An ENSIndexer plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function). A plugin has a relationship between at least one data source. For example, the threedns plugin has a relationship with 2 data sources: `ThreeDNSOptimism` and `ThreeDNSBase` and it indexes data from both of those chains.
@@ -50,10 +52,10 @@ When ENSIndexer is run, the configs for all of the active plugins (those selecte
 
 ## Available Plugins
 
-- [Subgraph Plugin](/technical-reference/plugins/subgraph)
-- [Base Names Plugin](/technical-reference/plugins/base-names)
-- [Linea Names Plugin](/technical-reference/plugins/linea-names)
-- [3DNS Plugin](/technical-reference/plugins/3dns)
+- [Subgraph Plugin](plugins/subgraph)
+- [Base Names Plugin](plugins/base-names)
+- [Linea Names Plugin](plugins/linea-names)
+- [ThreeDNS Plugin](plugins/three-dns)
 
 
 ## Configuring plugins
@@ -65,8 +67,3 @@ AVAILABLE_PLUGINS=subgraph,basenames,lineanames,threedns
 ```
 
 will activate all plugins
-
-## TODO
-
-- Anatomy of a plugin (so handlers have namespaced handlers, relationship between data sources etc)
-- Maybe some dev docs around writing handlers. This was the questions i had and still kind of have around handlers in development and maybe this should wait until i do the handler story i was going to pick up.

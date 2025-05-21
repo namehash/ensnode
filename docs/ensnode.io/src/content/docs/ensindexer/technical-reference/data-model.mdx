@@ -6,13 +6,20 @@ sidebar:
   order: 2
 ---
 
+## Subgraph Data Model
+
 Since the ENSNode data model is based on the ENS subgraph, it inherits the same data model to maintain backwards compatibility. This is for entities indexed with the `subgraph` plugin. The data model is not optimal but to provide backwards compatibility with the subgraph, we must inherit the data model.
 
 Other plugins have their own data models and are not based on the subgraph since they index data that is not available in the subgraph.
 
+The subgraph's codebase is not exhaustively documented or trivially readable. In some cases we've decided to simplify the implementation (ensuring accuracy via [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools)) and in others we've elected to match the subgraph's logic closer to 1:1.
+
+In general, however, each handler is written in a more ponder-native way, using ponder's drizzle-inspired entity CRUD apis, rather than the subgraph's active-record-inspired api. It uses minimial branched or nested logic, resulting in code that is much more readable. Along the way we've also documented the purpose of these handlers more exhaustively, which should promote understanding and readability.
+
+
 ## Handlers
 
-Handlers are responsible for indexing data from specific data sources. They listen to on-chain events from various contracts and transform the data into a structured format which is stored in the database.
+Handlers are responsible for indexing data from specific data sources. They listen to on-chain events from various contracts and transform the data into a structured format. This structured data is then stored in a PostgreSQL database, within a schema specified by the `DATABASE_SCHEMA` environment variable (e.g., `DATABASE_SCHEMA=production`). The connection to the PostgreSQL instance is configured via the `DATABASE_URL` environment variable.
 
 Each plugin has its own handlers but there is a concept of shared handlers which are used by multiple plugins since there is overlap between events from different data sources (and thus plugins).
 
@@ -20,10 +27,12 @@ Each plugin has its own handlers but there is a concept of shared handlers which
 
 Since `ENSNode` exposes a GraphQL API, you can query the data model directly to query for exactly what you need from the data model.
 
+The graphql api is available at `/graphql` of any `ENSIndexer` instance for example the hosted instance is available at [https://api.mainnet.ensnode.io/graphql](https://api.mainnet.ensnode.io/graphql).
+
 ## Schema evolution
 
-With most backend systems that involve a database, there is normally a concept of migrations which are defined as SQL scripts and applied to the database in order. With `ENSNode` there is no concept of migrations. In fact, whenever a change is made to the data model, the whole state of the database is recreated from scratch by indexing the whole chain. This is a fundamental design decision in the `ponder` framework (and also most indexing frameworks).
+With most backend systems that involve a database, there is normally a concept of migrations which are defined as SQL scripts and applied to the database in order. With `ENSIndexer` there is no concept of migrations. In fact, whenever a change is made to the data model, the whole state of the database is recreated from scratch by indexing the whole chain. This is a fundamental design decision in the `ponder` framework (and also most indexing frameworks) since the code IS the schema.
 
-## TODO
+## Database
 
-- Possibly add an entity relationships diagram, but ideally generated from the schema so it auto updates when the schema changes.
+ENSIndexer utilizes a PostgreSQL database to store all indexed data. As mentioned in the "Handlers" section, the specific schema used within this database is configurable via the `DATABASE_SCHEMA` environment variable, and the connection details are provided through `DATABASE_URL`. This allows for flexibility in managing and isolating data for different ENSIndexer instances.

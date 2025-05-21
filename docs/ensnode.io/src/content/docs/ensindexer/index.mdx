@@ -10,11 +10,18 @@ import { LinkCard } from '@astrojs/starlight/components';
 
 ### What is Indexing?
 
-Indexing is a data collection process that is used to collect data from blockchains and store it in a database. This data is usually exposed via APIs which can be accessed by applications and developers to build new applications and provide the data their applications need to users.
+Blockchains store data securely, but this data isn't inherently optimized for quick searching or complex queries. Retrieving specific information directly from a blockchain node can be slow and inefficient, making it difficult to build responsive decentralized applications (dApps) that rely on timely on-chain data.
+
+**Indexing** solves this problem. It's a process where a specialized tool, an **indexer**, systematically:
+1.  **Extracts** raw data (like transactions and smart contract events) from blockchain nodes.
+2.  **Transforms** this data into a structured and easily queryable format.
+3.  **Loads** it into an optimized database (ENSIndexer uses Postgres).
+
+This indexed data is then typically exposed via APIs (often GraphQL), allowing developers to efficiently query and retrieve the blockchain information needed to power their dApps, without the performance bottlenecks of direct node interaction. In short, indexers make blockchain data accessible and usable.
 
 ### What is ENSIndexer?
 
-**ENSIndexer** is an indexer application which aims to be a one-stop-shop for all ENS data. It is a [Ponder](https://ponder.sh) app that indexes ENS contracts across multiple chains. It processes events from each relevant chain and transforms the data, storing it in your Postgres database. It provides a GraphQL API for querying the data. The end goal for ENSIndexer is to support developers who need to use ENS data in their applications without them having to worry about the underlying data storage and retrieval logic.
+**ENSIndexer** is an indexer application which aims to be a one-stop-shop for all ENS data. It is a [Ponder](https://ponder.sh) app that indexes ENS contracts across multiple chains. It processes events from each relevant chain and transforms the data, storing it in a Postgres database. It provides a GraphQL API for querying the data. The end goal for ENSIndexer is to support developers who need to use ENS data in their applications without them having to worry about the underlying data storage and retrieval logic.
 
 Previously, developers would have to use the ENS Subgraph to query ENS data. This had various limitations and inefficiencies which ENSIndexer is addressing. ENSIndexer is already backwards compatible with the [ENS Subgraph](../docs/concepts/what-is-the-ens-subgraph), so you can use it as a drop-in replacement! To get started, refer to the [ENSNode Quickstart page](/docs).
 
@@ -24,33 +31,39 @@ While ENSIndexer can be run independently in certain scenarios, it is designed t
 
 ### What data does ENSIndexer index?
 
-ENSIndexer indexes the following data:
+ENSIndexer provides comprehensive coverage of the ENS ecosystem by indexing a wide array of data points. This includes:
 
-ENS Protocol Data:
-- ENS names
-- ENS domains
-- ENS subdomains
+*   **Core ENS Protocol Operations:** Such as domain registrations, renewals, transfers, and ownership changes.
+*   **Resolver Data & Configurations:** Including address records, text records, content hashes, public keys, and DNS integration data.
+*   **ENS Name Wrapper Functionality:** Covering the wrapping and unwrapping of names, fuse management, and expiry extensions.
+*   **Support for Multiple Chains and Implementations:** Including Ethereum Mainnet, Base Name Service, Linea Name Service, and 3DNS.
 
-This is just the start of what ENSIndexer can do.
+For a detailed breakdown of specific data and event types indexed by ENSIndexer, please refer to the dedicated page:
+
+<LinkCard
+  title="Detailed Indexed Data"
+  description="Explore the comprehensive list of data indexed by ENSIndexer."
+  href="/ensindexer/indexed-data/"
+/>
 
 ### What else does ENSIndexer do?
 
-ENSIndexer is built with extensibility in mind. This means that it is designed to be easily extended to support new chains, new ENS registries, and new data sources.
+ENSIndexer is built with extensibility at its core, primarily through a [**plugin system**](http://localhost:4321/ensindexer/technical-reference/plugin-system). This architecture allows for the seamless introduction of new plugins to support additional data sources, new ENS-compatible registries, and even entirely new blockchains. As the ENS ecosystem and the broader web3 landscape evolve, new plugins can be developed and integrated to expand ENSIndexer's data coverage.
 
-Soon
+Soon, we anticipate introducing plugins for:
 
 - ENSv2 Data
 - Market data for traded ENS names on third party marketplaces
 
 ### How do I get data from ENSIndexer?
 
-Host your own or use the hosted instance.
+You can either host your own instance of ENSIndexer or use the hosted instance.
 
-ENSIndexer provides a GraphQL API for querying the data. You can find the API reference [here](/ensindexer/usage/api-reference).
+ENSIndexer provides a GraphQL API for querying the data. Check the quickstart guide [here](/docs) and the [API documentation](/docs/usage/api/).
 
 ### Technical Architecture
 
-To learn more about the technical architecture of ENSIndexer, please refer to the [Technical Architecture](/ensindexer/usage/technical-architecture) section. Some concepts which are important to understand are the plugin system, ponder,
+To learn more about the technical architecture of ENSIndexer, please refer to the [core concepts](/ensindexer/technical-reference/core-concepts) section.
 
 ## Configuration
 

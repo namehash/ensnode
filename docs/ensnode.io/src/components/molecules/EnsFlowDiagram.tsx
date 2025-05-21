@@ -9,7 +9,6 @@ import ReactFlow, {
   MarkerType,
   type FitViewOptions,
   Handle,
-  type NodeProps,
   type NodeChange,
   type EdgeChange,
 } from "reactflow";
@@ -22,7 +21,6 @@ import baseLogoUrl from "../../assets/base-logo.svg";
 import ethereumLogoUrl from "../../assets/ethereum-logo.svg";
 import lineaLogoUrl from "../../assets/linea-logo.svg";
 import optimismLogoUrl from "../../assets/optimism-logo.svg";
-import postgresLogoUrl from "../../assets/placeholder.svg";
 
 const getGroupLabelStyle = (
   position: "top" | "bottom" = "top"
@@ -58,6 +56,12 @@ const CustomIndexerNode = ({ data }: { data: { label: JSX.Element } }) => {
         type="target"
         position={Position.Top}
         id="indexer-target-top"
+        style={{ background: "#555", width: "8px", height: "8px" }}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="indexer-target-left"
         style={{ background: "#555", width: "8px", height: "8px" }}
       />
 
@@ -104,48 +108,13 @@ const initialNodes: Node[] = [
     data: { label: "ENS Node", labelPosition: "top" },
     position: { x: 100, y: 50 },
     style: {
-      width: 500,
-      height: 340,
+      width: 1140,
+      height: 200,
       backgroundColor: "rgba(0, 128, 255, 0.1)",
       border: "1px solid #0080FF",
       borderRadius: "8px",
       padding: "10px",
     },
-  },
-  {
-    id: "postgres-db",
-    type: "default",
-    data: {
-      label: (
-        <div style={{ textAlign: "center" }}>
-          Postgres
-          <br />
-          <img
-            src={postgresLogoUrl.src}
-            alt="Postgres Database"
-            style={{
-              display: "block",
-              marginLeft: "auto",
-              marginRight: "auto",
-              width: "50px",
-              height: "50px",
-              marginTop: "10px",
-            }}
-          />
-        </div>
-      ),
-    },
-    position: { x: 205, y: 10 },
-    parentNode: "ens-node-parent",
-    extent: "parent",
-    style: {
-      width: 90,
-      height: 90,
-      backgroundColor: "#F5F5DC",
-      margin: "10px",
-    },
-    sourcePosition: Position.Bottom,
-    targetPosition: Position.Bottom,
   },
   {
     id: "ens-admin",
@@ -157,7 +126,7 @@ const initialNodes: Node[] = [
           <br />
           <img
             src={ensadminLogoUrl.src}
-            alt="ENS Admin Placeholder"
+            alt="ENS Admin"
             style={{
               display: "block",
               marginLeft: "auto",
@@ -170,15 +139,16 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 20, y: 150 },
+    position: { x: 0, y: 20 },
     parentNode: "ens-node-parent",
     extent: "parent",
     style: {
-      width: 130,
-      height: 130,
+      width: 200,
+      height: 150,
       backgroundColor: "#ADD8E6",
       margin: "10px",
     },
+    sourcePosition: Position.Right,
   },
   {
     id: "ens-indexer",
@@ -190,7 +160,7 @@ const initialNodes: Node[] = [
           <br />
           <img
             src={ensindexerLogoUrl.src}
-            alt="ENS Indexer Placeholder"
+            alt="ENS Indexer Logo"
             style={{
               display: "block",
               marginLeft: "auto",
@@ -203,17 +173,17 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 175, y: 150 },
+    position: { x: 455, y: 20 },
     parentNode: "ens-node-parent",
     extent: "parent",
     style: {
-      width: 130,
-      height: 130,
+      width: 200,
+      height: 150,
       backgroundColor: "#ADD8E6",
       margin: "10px",
+      border: "1px solid #555",
     },
-    sourcePosition: Position.Top,
-    targetPosition: Position.Top,
+    targetPosition: Position.Left,
   },
   {
     id: "ens-rainbow",
@@ -225,7 +195,7 @@ const initialNodes: Node[] = [
           <br />
           <img
             src={ensrainbowLogoUrl.src}
-            alt="ENS Rainbow Placeholder"
+            alt="ENS Rainbow"
             style={{
               display: "block",
               marginLeft: "auto",
@@ -238,15 +208,16 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 330, y: 150 },
+    position: { x: 910, y: 20 },
     parentNode: "ens-node-parent",
     extent: "parent",
     style: {
-      width: 130,
-      height: 130,
+      width: 200,
+      height: 150,
       backgroundColor: "#ADD8E6",
       margin: "10px",
     },
+    targetPosition: Position.Left,
   },
   {
     id: "chain-nodes-parent",
@@ -254,7 +225,7 @@ const initialNodes: Node[] = [
     data: { label: "Blockchain Nodes", labelPosition: "bottom" },
     position: { x: 100, y: 650 },
     style: {
-      width: 500,
+      width: 1140,
       height: 200,
       backgroundColor: "rgba(0, 255, 128, 0.1)",
       border: "1px solid #00FF80",
@@ -278,7 +249,7 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 15, y: 50 },
+    position: { x: 148, y: 50 },
     parentNode: "chain-nodes-parent",
     extent: "parent",
     style: {
@@ -304,7 +275,7 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 130, y: 50 },
+    position: { x: 396, y: 50 },
     parentNode: "chain-nodes-parent",
     extent: "parent",
     style: {
@@ -330,7 +301,7 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 245, y: 50 },
+    position: { x: 644, y: 50 },
     parentNode: "chain-nodes-parent",
     extent: "parent",
     style: {
@@ -356,7 +327,7 @@ const initialNodes: Node[] = [
         </div>
       ),
     },
-    position: { x: 360, y: 50 },
+    position: { x: 892, y: 50 },
     parentNode: "chain-nodes-parent",
     extent: "parent",
     style: {
@@ -375,7 +346,8 @@ const initialEdges: Edge[] = [
     sourceHandle: "idx-src-eth",
     target: "ethereum-node",
     markerEnd: { type: MarkerType.ArrowClosed },
-    label: "subgraph",
+    label: "fetches data",
+    labelStyle: { textAnchor: "middle", dominantBaseline: "central" },
     animated: true,
     style: { stroke: "#000", strokeWidth: 2 },
   },
@@ -385,7 +357,8 @@ const initialEdges: Edge[] = [
     sourceHandle: "idx-src-op",
     target: "optimism-node",
     markerEnd: { type: MarkerType.ArrowClosed },
-    label: "threedns",
+    label: "fetches data",
+    labelStyle: { textAnchor: "middle", dominantBaseline: "central" },
     animated: true,
     style: { stroke: "#000", strokeWidth: 2 },
   },
@@ -395,7 +368,8 @@ const initialEdges: Edge[] = [
     sourceHandle: "idx-src-base",
     target: "base-node",
     markerEnd: { type: MarkerType.ArrowClosed },
-    label: "basenames",
+    label: "fetches data",
+    labelStyle: { textAnchor: "middle", dominantBaseline: "central" },
     animated: true,
     style: { stroke: "#000", strokeWidth: 2 },
   },
@@ -405,19 +379,30 @@ const initialEdges: Edge[] = [
     sourceHandle: "idx-src-linea",
     target: "linear-node",
     markerEnd: { type: MarkerType.ArrowClosed },
-    label: "lineanames",
+    label: "fetches data",
+    labelStyle: { textAnchor: "middle", dominantBaseline: "central" },
     animated: true,
     style: { stroke: "#000", strokeWidth: 2 },
   },
   {
-    id: "e-postgres-indexer-bidirectional",
-    source: "postgres-db",
-    target: "ens-indexer",
-    sourceHandle: null,
-    targetHandle: "indexer-target-top",
+    id: "e-indexer-rainbow",
+    source: "ens-indexer",
+    sourceHandle: "idx-src-rainbow",
+    target: "ens-rainbow",
     markerEnd: { type: MarkerType.ArrowClosed },
-    markerStart: { type: MarkerType.ArrowClosed },
-    label: "read/write",
+    label: "fetched healed labels",
+    labelStyle: { textAnchor: "middle", dominantBaseline: "central" },
+    animated: true,
+    style: { stroke: "#000", strokeWidth: 2 },
+  },
+  {
+    id: "e-admin-indexer",
+    source: "ens-admin",
+    target: "ens-indexer",
+    targetHandle: "indexer-target-left",
+    markerEnd: { type: MarkerType.ArrowClosed },
+    label: "visualises status",
+    labelStyle: { textAnchor: "middle", dominantBaseline: "central" },
     animated: true,
     style: { stroke: "#000", strokeWidth: 2 },
   },
@@ -432,71 +417,15 @@ const nodeTypes = {
   customIndexer: CustomIndexerNode,
 };
 
-const ResizableNode = (props: NodeProps) => {
-  const nodeRef = useRef<HTMLDivElement>(null);
-
-  const onMouseDown = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const startWidth = nodeRef.current?.offsetWidth || 0;
-    const startHeight = nodeRef.current?.offsetHeight || 0;
-
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      const newWidth = Math.max(60, startWidth + moveEvent.clientX - startX);
-      const newHeight = Math.max(60, startHeight + moveEvent.clientY - startY);
-      if (nodeRef.current) {
-        nodeRef.current.style.width = `${newWidth}px`;
-        nodeRef.current.style.height = `${newHeight}px`;
-      }
-    };
-
-    const onMouseUp = () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-  };
-
-  return (
-    <div
-      ref={nodeRef}
-      style={{
-        ...props.style,
-        position: "relative",
-        background: "#fff",
-        border: props.selected ? "2px solid #007bff" : "1px solid #bbb",
-        borderRadius: 6,
-        minWidth: 60,
-        minHeight: 60,
-        boxSizing: "border-box",
-        overflow: "visible",
-      }}
-    >
-      {props.data.label}
-      <div
-        style={{
-          position: "absolute",
-          right: 0,
-          bottom: 0,
-          width: 16,
-          height: 16,
-          background: "#007bff",
-          borderRadius: "0 0 6px 0",
-          cursor: "nwse-resize",
-          zIndex: 10,
-        }}
-        onMouseDown={onMouseDown}
-      />
-    </div>
-  );
-};
-
 const EnsFlowDiagram: React.FC = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    initialNodes.filter((node) => node.id !== "postgres-db")
+  );
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    initialEdges.filter(
+      (edge) => edge.id !== "e-postgres-indexer-bidirectional"
+    )
+  );
 
   const onConnect = useCallback(
     (params: any) => setEdges((eds) => addEdge(params, eds)),
