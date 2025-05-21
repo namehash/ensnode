@@ -65,7 +65,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
       <Card className="w-full flex flex-col gap-2">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Indexing Stats</span>
+            <span>Indexed Chains</span>
           </CardTitle>
         </CardHeader>
 
