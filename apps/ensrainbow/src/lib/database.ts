@@ -211,12 +211,11 @@ export class ENSRainbowDB {
       await db.open();
       const dbInstance = new ENSRainbowDB(db, dataDir);
 
-      // Verify schema version
-      await dbInstance.validateSchemaVersion();
+      if (await dbInstance.validate({ lite: true })) {
+        return dbInstance;
+      }
 
-      await dbInstance.validate({ lite: true });
-
-      return dbInstance;
+      throw new Error("Database validation failed");
     } catch (error) {
       if (error instanceof Error && error.message.includes("does not exist")) {
         logger.error(`No database found at ${dataDir}`);

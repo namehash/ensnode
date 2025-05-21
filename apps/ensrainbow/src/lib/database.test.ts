@@ -532,6 +532,11 @@ describe("ENSRainbowDB.open", () => {
   it("should successfully open an existing database", async () => {
     // First create a database
     const db = await ENSRainbowDB.create(tempDir);
+    await db.setDatabaseSchemaVersion(SCHEMA_VERSION);
+    await db.setNamespace("test-namespace");
+    await db.setHighestLabelSet(0);
+    await db.markIngestionFinished();
+    await db.setPrecalculatedRainbowRecordCount(1);
     await db.close();
 
     // Then try to open it
@@ -552,9 +557,7 @@ describe("ENSRainbowDB.open", () => {
     await db.close();
 
     // Try to open it - should throw error due to schema mismatch
-    await expect(ENSRainbowDB.open(tempDir)).rejects.toThrow(
-      "Database schema version mismatch: expected=3, actual=4",
-    );
+    await expect(ENSRainbowDB.open(tempDir)).rejects.toThrow("Database validation failed");
   });
 });
 
@@ -586,6 +589,9 @@ describe("ENSRainbowDB.openOrCreate", () => {
     const db = await ENSRainbowDB.create(tempDir);
     await db.addRainbowRecord("test", 0);
     await db.setPrecalculatedRainbowRecordCount(1);
+    await db.setNamespace("test-namespace");
+    await db.setHighestLabelSet(0);
+    await db.markIngestionFinished();
     await db.close();
 
     // Then try to open it with openOrCreate
