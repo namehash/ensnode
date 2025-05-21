@@ -113,9 +113,13 @@ describe("config", () => {
     it("throws if START_BLOCK > END_BLOCK", async () => {
       vi.stubEnv("START_BLOCK", "100");
       vi.stubEnv("END_BLOCK", "50");
-      await expect(getConfig()).rejects.toThrow(
-        /END_BLOCK must be greater than or equal to START_BLOCK/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/must be greater than/i);
+    });
+
+    it("throws if START_BLOCK == END_BLOCK", async () => {
+      vi.stubEnv("START_BLOCK", "100");
+      vi.stubEnv("END_BLOCK", "100");
+      await expect(getConfig()).rejects.toThrow(/must be greater than/i);
     });
   });
 

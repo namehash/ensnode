@@ -58,10 +58,8 @@ const parseBlockrange = () =>
     })
     .refine(
       (val) =>
-        val.startBlock === undefined ||
-        val.endBlock === undefined ||
-        val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
+        val.startBlock === undefined || val.endBlock === undefined || val.endBlock > val.startBlock,
+      { error: "END_BLOCK must be greater than START_BLOCK." },
     );
 
 const parseEnsNodePublicUrl = () =>
