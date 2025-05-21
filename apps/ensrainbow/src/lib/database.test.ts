@@ -179,7 +179,6 @@ describe("Database", () => {
         await db.addRainbowRecord(label, 0);
         await db.setNamespace("test-namespace");
         await db.setHighestLabelSet(0);
-        // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
         // Don't set any ingestion status
 
@@ -199,9 +198,8 @@ describe("Database", () => {
         await db.addRainbowRecord(label, 0);
         await db.setHighestLabelSet(0);
         await db.markIngestionFinished();
-        // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
-        // Don't set any ingestion status
+        // Don't set namespace
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -219,9 +217,7 @@ describe("Database", () => {
         await db.addRainbowRecord(label, 0);
         await db.setNamespace("test-namespace");
         await db.markIngestionFinished();
-        // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
-        // Don't set any ingestion status
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -239,9 +235,7 @@ describe("Database", () => {
         await db.addRainbowRecord(label, 0);
         await db.setNamespace("test-namespace");
         await db.setHighestLabelSet(0);
-        // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
-        // Mark ingestion as done
         await db.markIngestionFinished();
 
         const isValid = await db.validate();

@@ -27,11 +27,15 @@ describe("Validate Command", () => {
     try {
       // Add a valid record
       const label = "vitalik";
-      await db.addRainbowRecord(label, 0);
       await db.setPrecalculatedRainbowRecordCount(1);
+      await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
       await db.markIngestionFinished();
+      await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
       await db.setNamespace("test-namespace");
+      await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
       await db.setHighestLabelSet(0);
+      await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
+      await db.addRainbowRecord(label, 0);
       await db.close();
 
       await expect(validateCommand({ dataDir: tempDir })).resolves.not.toThrow();

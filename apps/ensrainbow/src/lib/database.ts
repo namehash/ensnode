@@ -186,16 +186,14 @@ export class ENSRainbowDB {
    * Opens an existing ENSRainbowDB instance.
    * This function:
    * 1. Opens an existing LevelDB database at the specified directory
-   * 2. Initializes an ENSRainbowDB instance with the database
-   * 3. Verifies the database schema version matches the expected version
+   * 2. Verifies the database
    *
-   * If the schema version doesn't match the expected version, an error is thrown
-   * to prevent operations on an incompatible database.
+   * If the database is not valid, an error is thrown to prevent operations on an incompatible database.
    *
    * @throws Error in the following cases:
    * - If the database directory does not exist
    * - If the database is locked by another process
-   * - If the schema version doesn't match the expected version
+   * - If the database is not valid
    * - If there are insufficient permissions to read the database
    */
   public static async open(dataDir: string): Promise<ENSRainbowDB> {
@@ -317,6 +315,7 @@ export class ENSRainbowDB {
   /**
    * Get the current highest label set number
    * @returns The current highest label set number, or 0 if not set yet
+   * @throws Error if the highest label set is not set
    */
   public async getHighestLabelSet(): Promise<number> {
     const labelSet = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET);
@@ -329,6 +328,7 @@ export class ENSRainbowDB {
   /**
    * Set the highest label set number directly
    * @param labelSet The label set number to set
+   * @throws Error if the label set is not a valid non-negative integer
    */
   public async setHighestLabelSet(labelSet: number): Promise<void> {
     if (!Number.isInteger(labelSet) || labelSet < 0) {
@@ -340,6 +340,7 @@ export class ENSRainbowDB {
   /**
    * Increment the highest label set number and return the new value
    * @returns The new highest label set number after incrementing
+   * @throws Error if the highest label set is not set
    */
   public async incrementHighestLabelSet(): Promise<number> {
     const currentValue = await this.getHighestLabelSet();
@@ -364,6 +365,7 @@ export class ENSRainbowDB {
   /**
    * Set the namespace in the database
    * @param namespace The namespace string to set
+   * @throws Error if the namespace is empty
    */
   public async setNamespace(namespace: string): Promise<void> {
     if (!namespace) {
@@ -405,7 +407,7 @@ export class ENSRainbowDB {
    * Retrieves a label from the database by its labelHash.
    *
    * @param labelHash The ByteArray labelHash to look up
-   * @returns The label as a string if found, null if not found
+   * @returns The labelSet and label as a string if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
   public async getLabel(labelHash: ByteArray): Promise<{ labelSet: number; label: string } | null> {
@@ -626,7 +628,6 @@ export class ENSRainbowDB {
       // --- Lite Mode Completion ---
       if (isLiteMode) {
         // Lite mode passed basic checks
-        // const precalculatedCount = await this.getPrecalculatedRainbowRecordCount(); // Already checked existence
         logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
         logger.info("\nLite validation successful! Basic checks passed.");
         return true;
@@ -668,12 +669,13 @@ export class ENSRainbowDB {
       }
 
       // --- Value Validation (Label Format & Set Number) ---
+
       const firstColonIndex = value.indexOf(":");
       let recordLabelSet: number | null = null;
 
       // If there's no colon or it's the first character, the format is invalid
       if (firstColonIndex <= 0) {
-        logger.error(`Invalid label format (missing set number prefix): "${value}"`);
+        logger.error(`Invalid label format (missing labelSet number prefix): "${value}"`);
         invalidLabelFormats++;
       } else {
         // Try to parse using the splitLabelString function

@@ -5,7 +5,7 @@ import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
 
 import packageJson from "@/../package.json";
-import { ENSRainbowDB, SCHEMA_VERSION } from "@/lib/database";
+import { ENSRainbowDB, SCHEMA_VERSION, parseNonNegativeInteger } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { logger } from "@/utils/logger";
 
@@ -53,11 +53,10 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     let namespace: string | undefined = undefined;
 
     if (highestLabelSetParam !== undefined && namespaceParam !== undefined) {
-      const parsed = parseInt(highestLabelSetParam, 10);
-      if (!isNaN(parsed) && parsed >= 0) {
-        labelSet = parsed;
+      try {
+        labelSet = parseNonNegativeInteger(highestLabelSetParam);
         namespace = namespaceParam;
-      } else {
+      } catch (error) {
         logger.warn(`Invalid label_set parameter: ${highestLabelSetParam}`);
         return c.json(
           {
