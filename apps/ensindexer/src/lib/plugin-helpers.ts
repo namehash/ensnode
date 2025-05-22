@@ -2,8 +2,7 @@ import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
-import config from "@/config/app-config";
-import { ENSIndexerConfig } from "@/config/types";
+import config from "@/config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
@@ -40,54 +39,6 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
   ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
     return `${pluginName}/${contractName}`;
   };
-}
-
-/**
- * Returns a list of 1 or more distinct active plugins based on the `ACTIVE_PLUGINS` environment variable.
- *
- * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
- * names. The function returns the plugins that are included in the list.
- *
- * @throws if invalid plugins are requested
- * @throws if activated plugins' `requiredDatasources` are not available in the set of `availableDatasourceNames`
- *
- * @param availablePlugins a list of all available plugins
- * @param requestedPluginNames list of user-requested plugin names
- * @param availableDatasourceNames is a list of available DatasourceNames
- * @returns the active plugins
- */
-export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
-  availablePlugins: readonly PLUGIN[],
-  requestedPluginNames: Set<PluginName>,
-  availableDatasourceNames: DatasourceName[],
-): PLUGIN[] {
-  // filter allPlugins by those that the user requested
-  const activePlugins = availablePlugins.filter((plugin) =>
-    requestedPluginNames.has(plugin.pluginName),
-  );
-
-  // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
-  for (const plugin of activePlugins) {
-    const hasRequiredDatasources = plugin.requiredDatasources.every((datasourceName) =>
-      availableDatasourceNames.includes(datasourceName),
-    );
-
-    if (!hasRequiredDatasources) {
-      throw new Error(
-        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${
-          config.ensDeploymentChain
-        } deployment. ${
-          plugin.pluginName
-        } specifies dependent datasources: ${plugin.requiredDatasources.join(
-          ", ",
-        )}, but available datasources in the ${
-          config.ensDeploymentChain
-        } deployment are: ${availableDatasourceNames.join(", ")}.`,
-      );
-    }
-  }
-
-  return activePlugins;
 }
 
 // Helper type to merge multiple types into one
@@ -154,25 +105,22 @@ export const activateHandlers =
   };
 
 /**
- * Defines a ponder#NetworksConfig for a single, specific chain.
+ * Builds a ponder#NetworksConfig for a single, specific chain.
  */
-export function networksConfigForChain(config: ENSIndexerConfig, chainId: number) {
+export function networksConfigForChain(chainId: number) {
+  if (!config.rpcConfigs[chainId]) {
+    throw new Error(
+      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
+    );
+  }
+
+  const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
+
   return {
     [chainId.toString()]: {
       chainId: chainId,
-      // This may return undefined if the RPC URL is not configured for the chain.
-      // This is intentional to allow us to aggregate all the RPC URLs that are missing in a
-      // later validation step allowing us to throw a helpful error message aggregating them
-      // all instead of throwing an error here which will only flag a single missing RPC URL.
-      // The code which does that validation is the `validateChainConfigs` function in
-      // `src/config/validations.ts`.
-      transport: http(config.indexedChains[chainId]?.rpcEndpointUrl),
-      // This can only return undefined if there is no RPC url for the chain. This
-      // means the `validateChainConfigs` function in `src/config/validations.ts` will
-      // throw an error so we don't need to handle undefined here with a default.
-      // That is already handled in our schema validation so when the RPC url is added
-      // this will not be undefined.
-      maxRequestsPerSecond: config.indexedChains[chainId]?.rpcMaxRequestsPerSecond,
+      transport: http(url),
+      maxRequestsPerSecond,
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
       ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies NetworkConfig,
@@ -180,7 +128,7 @@ export function networksConfigForChain(config: ENSIndexerConfig, chainId: number
 }
 
 /**
- * Defines a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
+ * Builds a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(

@@ -1,14 +1,25 @@
-import { validateContractConfigs } from "@/config/validations";
-import { type ENSDeploymentGlobalType, ENSDeployments } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
 import { parse as parseConnectionString } from "pg-connection-string";
-import { z } from "zod/v4";
+import { prettifyError, z } from "zod/v4";
 
-export const DEFAULT_RPC_RATE_LIMIT = 50;
-export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
-export const DEFAULT_PORT = 42069;
-export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
-export const DEFAULT_DEPLOYMENT = "mainnet";
+import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
+import {
+  invariant_globalBlockrange,
+  invariant_requiredDatasources,
+  invariant_rpcConfigsSpecifiedForIndexedChains,
+  invariant_validContractConfigs,
+} from "@/config/validations";
+import {
+  DEFAULT_ENSADMIN_URL,
+  DEFAULT_ENS_DEPLOYMENT_CHAIN,
+  DEFAULT_HEAL_REVERSE_ADDRESSES,
+  DEFAULT_PORT,
+  DEFAULT_RPC_RATE_LIMIT,
+} from "@/lib/lib-config";
+import { uniq } from "@/lib/lib-helpers";
+import { PLUGIN_REQUIRED_DATASOURCES } from "@/plugins";
+import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
+import { PluginName } from "@ensnode/utils";
+import { Address, isAddress } from "viem";
 
 const parseBlockNumber = (envVarKey: string) =>
   z.coerce
@@ -17,7 +28,7 @@ const parseBlockNumber = (envVarKey: string) =>
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
-const parseRpcEndpointUrl = () =>
+const parseRpcUrl = () =>
   z.url({
     error:
       "RPC_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
@@ -32,22 +43,22 @@ const parseRpcMaxRequestsPerSecond = () =>
 
 const parseChainConfig = () =>
   z.object({
-    rpcEndpointUrl: parseRpcEndpointUrl(),
-    rpcMaxRequestsPerSecond: parseRpcMaxRequestsPerSecond(),
+    url: parseRpcUrl(),
+    maxRequestsPerSecond: parseRpcMaxRequestsPerSecond(),
   });
 
 const parseEnsDeploymentChain = () =>
   z
     .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
       error: (issue) => {
-        return `Invalid ENS_DEPLOYMENT_CHAIN. Supported chains are: ${Object.keys(
+        return `Invalid ENS_DEPLOYMENT_CHAIN. Supported ENS deployment chains are: ${Object.keys(
           ENSDeployments,
         ).join(", ")}`;
       },
     })
-    .default(DEFAULT_DEPLOYMENT);
+    .default(DEFAULT_ENS_DEPLOYMENT_CHAIN);
 
-const parseGlobalBlockrange = () =>
+const parseBlockrange = () =>
   z
     .object({
       startBlock: parseBlockNumber("START_BLOCK"),
@@ -55,10 +66,8 @@ const parseGlobalBlockrange = () =>
     })
     .refine(
       (val) =>
-        val.startBlock === undefined ||
-        val.endBlock === undefined ||
-        val.startBlock <= val.endBlock,
-      { error: "END_BLOCK must be greater than or equal to START_BLOCK." },
+        val.startBlock === undefined || val.endBlock === undefined || val.endBlock > val.startBlock,
+      { error: "END_BLOCK must be greater than START_BLOCK." },
     );
 
 const parseEnsNodePublicUrl = () =>
@@ -104,10 +113,9 @@ const parsePlugins = () =>
           ).join(", ")}`,
         }),
     )
-    .refine((arr) => arr.length === new Set(arr).size, {
+    .refine((arr) => arr.length === uniq(arr).length, {
       error: "ACTIVE_PLUGINS cannot contain duplicate values",
-    })
-    .transform((arr) => new Set(arr));
+    });
 
 const parseHealReverseAddresses = () =>
   z
@@ -134,7 +142,7 @@ const parseEnsRainbowEndpointUrl = () =>
       "ENSRAINBOW_URL must be a valid URL string (e.g., http://localhost:8080 or https://example.com).",
   });
 
-const parseIndexedChains = () =>
+const parseRpcConfigs = () =>
   z.record(z.string().transform(Number), parseChainConfig(), {
     error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
   });
@@ -161,36 +169,10 @@ const parseDatabaseUrl = () =>
     },
   );
 
-const parseSelectedEnsDeployment = () => z.custom<ENSDeploymentGlobalType>();
-
-/**
- * This function performs invariant checks on the configuration after the schema
- * has been validated against the zod schema. Here there are more complex checks
- * beyond the zod schema that we can perform to ensure the configuration is valid.
- *
- * Any checks which test multiple fields and their relationships should be performed
- * here.
- *
- * Invariants:
- * - Each plugin has a correct address defined for each contract
- *
- *  @throws {Error} If the configuration is invalid.
- *  @param config - The configuration to check.
- * @returns `true` if the configuration is valid, otherwise an error is thrown.
- */
-const schemaInvariantChecks = (config: z.infer<typeof ENSIndexerConfigSchema>) => {
-  // Invariant for each plugin to check all contracts have a correct address defined
-  config.plugins.forEach((plugin) => {
-    validateContractConfigs(plugin, config);
-  });
-
-  return true;
-};
-
-export const ENSIndexerConfigSchema = z
+const ENSIndexerConfigSchema = z
   .object({
     ensDeploymentChain: parseEnsDeploymentChain(),
-    globalBlockrange: parseGlobalBlockrange(),
+    globalBlockrange: parseBlockrange(),
     ensNodePublicUrl: parseEnsNodePublicUrl(),
     ensAdminUrl: parseEnsAdminUrl(),
     ponderDatabaseSchema: parsePonderDatabaseSchema(),
@@ -198,15 +180,28 @@ export const ENSIndexerConfigSchema = z
     healReverseAddresses: parseHealReverseAddresses(),
     port: parsePort(),
     ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
-    indexedChains: parseIndexedChains(),
+    rpcConfigs: parseRpcConfigs(),
     databaseUrl: parseDatabaseUrl(),
-    selectedEnsDeployment: parseSelectedEnsDeployment(),
   })
-  // Add selectedEnsDeployment to the config after as it's a derived value
-  .transform((config) => ({
-    ...config,
-    selectedEnsDeployment: ENSDeployments[config.ensDeploymentChain] as ENSDeploymentGlobalType,
-  }))
-  .refine(schemaInvariantChecks, {
-    error: "Invalid configuration. Please check your config file and try again.",
-  });
+  .check(invariant_requiredDatasources)
+  .check(invariant_rpcConfigsSpecifiedForIndexedChains)
+  .check(invariant_globalBlockrange)
+  .check(invariant_validContractConfigs);
+
+/**
+ * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
+ *
+ * This function then validates the config against the zod schema ensuring that the config
+ * meets all type checks and invariants.
+ */
+export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
+  const parsed = ENSIndexerConfigSchema.safeParse(environment);
+
+  if (!parsed.success) {
+    throw new Error(
+      "Failed to parse environment configuration: \n" + prettifyError(parsed.error) + "\n",
+    );
+  }
+
+  return parsed.data;
+}

@@ -1,31 +1,32 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config/app-config";
+import { default as appConfig } from "@/config";
 import {
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
- * The ThreeDNS plugin describes indexing behavior for the ThreeDNSOptimism & ThreeDNSBase Datasources.
+ * The ThreeDNS plugin describes indexing behavior for 3DNSToken on both Optimism and Base.
  */
 export const pluginName = PluginName.ThreeDNS;
-export const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase];
-const { chain: optimism, contracts: optimismContracts } =
-  appConfig.selectedEnsDeployment[DatasourceName.ThreeDNSOptimism];
-const { chain: base, contracts: baseContracts } =
-  appConfig.selectedEnsDeployment[DatasourceName.ThreeDNSBase];
 
+// contruct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
+
+const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+const { chain: optimism, contracts: optimismContracts } =
+  deployment[DatasourceName.ThreeDNSOptimism];
+const { chain: base, contracts: baseContracts } = deployment[DatasourceName.ThreeDNSBase];
 
 export const config = createConfig({
   networks: {
-    ...networksConfigForChain(appConfig, optimism.id),
-    ...networksConfigForChain(appConfig, base.id),
+    ...networksConfigForChain(optimism.id),
+    ...networksConfigForChain(base.id),
   },
   contracts: {
     [namespace("ThreeDNSToken")]: {

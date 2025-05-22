@@ -1,7 +1,7 @@
 import type { Event } from "ponder:registry";
 import { PublicClient } from "viem";
 
-import config from "@/config/app-config";
+import config from "@/config";
 import { Blockrange } from "@/lib/types";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
