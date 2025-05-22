@@ -108,7 +108,12 @@ export const activateHandlers =
  * Builds a ponder#NetworksConfig for a single, specific chain.
  */
 export function networksConfigForChain(chainId: number) {
-  // NOTE: config.rpcConfigs[chainId] is guaranteed to exist, see app-config.schema.ts
+  if (!config.rpcConfigs[chainId]) {
+    throw new Error(
+      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
+    );
+  }
+
   const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
 
   return {
