@@ -125,7 +125,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
           <div className="flex items-center gap-2">
             <div className="flex flex-row justify-start items-center gap-2">
               <p className="font-semibold text-left">{network.name}</p>
-              {chainIcons[network.name]}
+              {chainIcons[network.name as chainName]}
             </div>
           </div>
         </div>
