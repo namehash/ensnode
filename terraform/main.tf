@@ -31,7 +31,7 @@ module "holesky_ensindexer" {
   source     = "./modules/ensindexer"
   depends_on = [null_resource.health_check]
   #Indexer specific envs
-  domain_name            = local.domain_name
+  base_domain_name            = local.domain_name
   subdomain_prefix         = "holesky.${local.default_environment}"
   ensnode_version        = var.ensnode_version
   heal_reverse_addresses = local.heal_reverse_addresses
