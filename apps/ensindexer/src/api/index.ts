@@ -6,7 +6,7 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
-import config from "@/config/app-config";
+import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {

@@ -1,4 +1,4 @@
-import config from "@/config/app-config";
+import config from "@/config";
 import { ENSIndexerConfig } from "@/config/types";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import type { MergedTypes } from "@/lib/plugin-helpers";

@@ -1,6 +1,6 @@
-import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/config/config.schema";
+import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerConfig } from "@/config/types";
-import { buildConfigFromEnvironment } from "@/lib/lib-config";
+import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
 import { deepClone } from "@/lib/lib-helpers";
 import { vi } from "vitest";
 
@@ -55,7 +55,7 @@ resetMockConfig();
  * import { theModule } from '@/the-module';
  */
 export function setupConfigMock() {
-  vi.mock("@/config/app-config", () => {
+  vi.mock("@/config", () => {
     const module = {
       getConfig: vi.fn(() => currentMockConfig),
       // Use a getter for 'config' to ensure it always returns the latest currentMockConfig

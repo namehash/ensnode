@@ -1,6 +1,6 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config/app-config";
+import { default as appConfig } from "@/config";
 import {
   activateHandlers,
   makePluginNamespace,

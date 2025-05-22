@@ -2,7 +2,7 @@ import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
-import config from "@/config/app-config";
+import config from "@/config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
@@ -108,7 +108,7 @@ export const activateHandlers =
  * Builds a ponder#NetworksConfig for a single, specific chain.
  */
 export function networksConfigForChain(chainId: number) {
-  // NOTE: config.rpcConfigs[chainId] is guaranteed to exist, see config.schema.ts
+  // NOTE: config.rpcConfigs[chainId] is guaranteed to exist, see app-config.schema.ts
   const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
 
   return {

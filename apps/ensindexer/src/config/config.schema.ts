@@ -1,17 +1,19 @@
 import { parse as parseConnectionString } from "pg-connection-string";
-import { z } from "zod/v4";
+import { prettifyError, z } from "zod/v4";
 
+import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
+import {
+  DEFAULT_ENSADMIN_URL,
+  DEFAULT_ENS_DEPLOYMENT_CHAIN,
+  DEFAULT_HEAL_REVERSE_ADDRESSES,
+  DEFAULT_PORT,
+  DEFAULT_RPC_RATE_LIMIT,
+} from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
 import { PLUGIN_REQUIRED_DATASOURCES } from "@/plugins";
 import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 import { Address, isAddress } from "viem";
-
-export const DEFAULT_RPC_RATE_LIMIT = 500;
-export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
-export const DEFAULT_PORT = 42069;
-export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
-export const DEFAULT_ENS_DEPLOYMENT_CHAIN = "mainnet";
 
 const parseBlockNumber = (envVarKey: string) =>
   z.coerce
@@ -161,7 +163,7 @@ const parseDatabaseUrl = () =>
     },
   );
 
-export const ENSIndexerConfigSchema = z
+const ENSIndexerConfigSchema = z
   .object({
     ensDeploymentChain: parseEnsDeploymentChain(),
     globalBlockrange: parseBlockrange(),
@@ -290,3 +292,21 @@ DEPLOYMENT_ADDRESSES=${process.env.DEPLOYMENT_ADDRESSES || "undefined"}`,
       }
     }
   });
+
+/**
+ * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
+ *
+ * This function then validates the config against the zod schema ensuring that the config
+ * meets all type checks and invariants.
+ */
+export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
+  const parsed = ENSIndexerConfigSchema.safeParse(environment);
+
+  if (!parsed.success) {
+    throw new Error(
+      "Failed to parse environment configuration: \n" + prettifyError(parsed.error) + "\n",
+    );
+  }
+
+  return parsed.data;
+}

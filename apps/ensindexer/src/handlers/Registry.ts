@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
-import config from "@/config/app-config";
+import config from "@/config";
 import {
   type LabelHash,
   type Node,

@@ -1,4 +1,10 @@
-import { DEFAULT_RPC_RATE_LIMIT } from "@/config/config.schema";
+import {
+  DEFAULT_ENSADMIN_URL,
+  DEFAULT_ENS_DEPLOYMENT_CHAIN,
+  DEFAULT_HEAL_REVERSE_ADDRESSES,
+  DEFAULT_PORT,
+  DEFAULT_RPC_RATE_LIMIT,
+} from "@/lib/lib-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -19,7 +25,7 @@ const BASE_ENV = {
 describe("config", () => {
   async function getConfig() {
     vi.resetModules(); // Reset module cache
-    const configModule = await import("@/config/app-config");
+    const configModule = await import("@/config");
     return configModule.default;
   }
 
@@ -166,7 +172,7 @@ describe("config", () => {
     it("returns the default ENSADMIN_URL if it is not set", async () => {
       vi.stubEnv("ENSADMIN_URL", undefined);
       const config = await getConfig();
-      expect(config.ensAdminUrl).toBe("https://admin.ensnode.io");
+      expect(config.ensAdminUrl).toBe(DEFAULT_ENSADMIN_URL);
     });
   });
 
@@ -225,7 +231,7 @@ describe("config", () => {
     it("returns the default PORT if it is not set", async () => {
       vi.stubEnv("PORT", undefined);
       const config = await getConfig();
-      expect(config.port).toBe(42069);
+      expect(config.port).toBe(DEFAULT_PORT);
     });
 
     it("throws if PORT is not a number", async () => {
@@ -267,10 +273,10 @@ describe("config", () => {
       expect(config.healReverseAddresses).toBe(true);
     });
 
-    it("returns the default (true) if HEAL_REVERSE_ADDRESSES is not set", async () => {
+    it("returns the default if HEAL_REVERSE_ADDRESSES is not set", async () => {
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", undefined);
       const config = await getConfig();
-      expect(config.healReverseAddresses).toBe(true);
+      expect(config.healReverseAddresses).toBe(DEFAULT_HEAL_REVERSE_ADDRESSES);
     });
 
     it("throws if HEAL_REVERSE_ADDRESSES is an invalid string value", async () => {
@@ -292,7 +298,7 @@ describe("config", () => {
     it("returns the default ENS_DEPLOYMENT_CHAIN if it is not set", async () => {
       vi.stubEnv("ENS_DEPLOYMENT_CHAIN", undefined);
       const config = await getConfig();
-      expect(config.ensDeploymentChain).toBe("mainnet");
+      expect(config.ensDeploymentChain).toBe(DEFAULT_ENS_DEPLOYMENT_CHAIN);
     });
 
     it("throws if ENS_DEPLOYMENT_CHAIN is an invalid string value", async () => {

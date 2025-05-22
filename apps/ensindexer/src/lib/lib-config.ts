@@ -1,6 +1,10 @@
-import { ENSIndexerConfigSchema } from "@/config/config.schema";
-import { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfigEnvironment } from "@/config/types";
-import { prettifyError } from "zod/v4";
+import type { RpcConfigEnvironment } from "@/config/types";
+
+export const DEFAULT_RPC_RATE_LIMIT = 500;
+export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
+export const DEFAULT_PORT = 42069;
+export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
+export const DEFAULT_ENS_DEPLOYMENT_CHAIN = "mainnet";
 
 /**
  * Extracts dynamic chain configuration from environment variables.
@@ -37,22 +41,4 @@ export function getRpcConfigsFromEnv(): Record<number, RpcConfigEnvironment> {
   });
 
   return rpcConfigs;
-}
-
-/**
- * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
- *
- * This function then validates the config against the zod schema ensuring that the config
- * meets all type checks and invariants.
- */
-export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
-  const parsed = ENSIndexerConfigSchema.safeParse(environment);
-
-  if (!parsed.success) {
-    throw new Error(
-      "Failed to parse environment configuration: \n" + prettifyError(parsed.error) + "\n",
-    );
-  }
-
-  return parsed.data;
 }

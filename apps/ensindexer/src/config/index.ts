@@ -1,5 +1,6 @@
+import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerEnvironment } from "@/config/types";
-import { buildConfigFromEnvironment, getRpcConfigsFromEnv } from "@/lib/lib-config";
+import { getRpcConfigsFromEnv } from "@/lib/lib-config";
 
 // format the relevant environment variables into the shape of an ENSIndexerEnvironment
 const environment = {
