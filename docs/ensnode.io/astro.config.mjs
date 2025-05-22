@@ -1,5 +1,4 @@
 import react from "@astrojs/react";
-import mdx from '@astrojs/mdx';
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
@@ -8,7 +7,7 @@ import { starlight } from "./config/integrations/starlight";
 
 export default defineConfig({
   site: "https://ensnode.io",
-  integrations: [starlight(), sitemap(), react(), mdx({jsxImportSource: 'react'})],
+  integrations: [starlight(), sitemap(), react()],
   vite: {
     ssr: {
       noExternal: ["@namehash/namekit-react"],

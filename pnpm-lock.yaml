@@ -370,9 +370,6 @@ importers:
 
   docs/ensnode.io:
     dependencies:
-      '@astrojs/mdx':
-        specifier: ^4.2.6
-        version: 4.2.6(astro@5.7.11(@types/node@22.15.3)(idb-keyval@6.2.1)(jiti@2.4.2)(lightningcss@1.29.2)(rollup@4.40.0)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0))
       '@astrojs/react':
         specifier: 'catalog:'
         version: 4.2.0(@types/node@22.15.3)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(jiti@2.4.2)(lightningcss@1.29.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tsx@4.19.3)(yaml@2.7.0)
