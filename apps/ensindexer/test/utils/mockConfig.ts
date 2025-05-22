@@ -55,67 +55,11 @@ resetMockConfig();
  * import { theModule } from '@/the-module';
  */
 export function setupConfigMock() {
-  vi.mock("@/config", () => {
-    const module = {
-      getConfig: vi.fn(() => currentMockConfig),
-      // Use a getter for 'config' to ensure it always returns the latest currentMockConfig
-      get config() {
-        return currentMockConfig;
-      },
-      rpcMaxRequestsPerSecond: vi.fn(
-        (chainId: number) =>
-          currentMockConfig.rpcConfigs[chainId]?.maxRequestsPerSecond || DEFAULT_RPC_RATE_LIMIT,
-      ),
-      rpcEndpointUrl: vi.fn(
-        (chainId: number) => currentMockConfig.rpcConfigs[chainId]?.url || "http://localhost:8545",
-      ),
-      // Use a getter for the default export as well
-      get default() {
-        return currentMockConfig;
-      },
-    };
-    // Define named exports as getters pointing to currentMockConfig properties
-    Object.defineProperties(module, {
-      ensDeploymentChain: {
-        get: () => currentMockConfig.ensDeploymentChain,
-        enumerable: true,
-      },
-      ensNodePublicUrl: {
-        get: () => currentMockConfig.ensNodePublicUrl,
-        enumerable: true,
-      },
-      ensAdminUrl: {
-        get: () => currentMockConfig.ensAdminUrl,
-        enumerable: true,
-      },
-      ponderDatabaseSchema: {
-        get: () => currentMockConfig.ponderDatabaseSchema,
-        enumerable: true,
-      },
-      plugins: {
-        get: () => currentMockConfig.plugins,
-        enumerable: true,
-      },
-      healReverseAddresses: {
-        get: () => currentMockConfig.healReverseAddresses,
-        enumerable: true,
-      },
-      port: { get: () => currentMockConfig.port, enumerable: true },
-      ensRainbowEndpointUrl: {
-        get: () => currentMockConfig.ensRainbowEndpointUrl,
-        enumerable: true,
-      },
-      globalBlockrange: {
-        get: () => currentMockConfig.globalBlockrange,
-        enumerable: true,
-      },
-      rpcConfigs: {
-        get: () => currentMockConfig.rpcConfigs,
-        enumerable: true,
-      },
-    });
-    return module;
-  });
+  vi.mock("@/config", () => ({
+    get default() {
+      return currentMockConfig;
+    },
+  }));
 }
 
 /**
