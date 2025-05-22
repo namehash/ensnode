@@ -4,6 +4,12 @@ import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
+import { BaseChainIcon } from "@/components/icons/BaseChainIcon";
+import { EthereumIcon } from "@/components/icons/EthereumIcon";
+import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
+import { EthereumTestNetIcon } from "@/components/icons/EthereumTestNetIcon";
+import { LineaChainIcon } from "@/components/icons/LineaChainIcon";
+import { formatRelativeTime } from "@/components/recent-registrations";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
@@ -22,12 +28,6 @@ import {
   ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
-import {BaseChainIcon} from "@/components/icons/BaseChainIcon";
-import {EthereumIcon} from "@/components/icons/EthereumIcon";
-import {LineaChainIcon} from "@/components/icons/LineaChainIcon";
-import {EthereumTestNetIcon} from "@/components/icons/EthereumTestNetIcon";
-import {EthereumLocalIcon} from "@/components/icons/EthereumLocalIcon";
-import {formatRelativeTime} from "@/components/recent-registrations";
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
@@ -92,7 +92,14 @@ interface NetworkIndexingStatsCardProps {
   network: NetworkStatusViewModel;
 }
 
-type chainName = "Base" | "OP Mainnet" | "Ethereum" | "Linea Mainnet" | "Sepolia" | "Anvil" | "Holesky";
+type chainName =
+  | "Base"
+  | "OP Mainnet"
+  | "Ethereum"
+  | "Linea Mainnet"
+  | "Sepolia"
+  | "Anvil"
+  | "Holesky";
 
 /**
  * Component to display network indexing stats for a single network.
@@ -101,14 +108,14 @@ type chainName = "Base" | "OP Mainnet" | "Ethereum" | "Linea Mainnet" | "Sepolia
  */
 function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
   const { network } = props;
-  const chainIcons : Record<chainName, React.ReactNode> = {
-    "Base": <BaseChainIcon width={18} height={18}/>,
-    "OP Mainnet": <BaseChainIcon width={16} height={16}/>,
-    "Linea Mainnet": <LineaChainIcon width={18} height={18}/>,
-    "Sepolia": <EthereumTestNetIcon width={18} height={18}/>,
-    "Anvil": <EthereumLocalIcon width={18} height={18}/>,
-    "Holesky": <EthereumTestNetIcon width={18} height={18}/>,
-    "Ethereum": <EthereumIcon width={18} height={18}/>
+  const chainIcons: Record<chainName, React.ReactNode> = {
+    Base: <BaseChainIcon width={18} height={18} />,
+    "OP Mainnet": <BaseChainIcon width={16} height={16} />,
+    "Linea Mainnet": <LineaChainIcon width={18} height={18} />,
+    Sepolia: <EthereumTestNetIcon width={18} height={18} />,
+    Anvil: <EthereumLocalIcon width={18} height={18} />,
+    Holesky: <EthereumTestNetIcon width={18} height={18} />,
+    Ethereum: <EthereumIcon width={18} height={18} />,
   };
 
   return (
@@ -155,7 +162,10 @@ function BlockStats({ label, block }: BlockSatsProps) {
 
   let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString());
 
-  if (block.timestamp <= Math.floor(Date.now() / 1000) || calculatedRelativeTime === "less than a minute ago"){
+  if (
+    block.timestamp <= Math.floor(Date.now() / 1000) ||
+    calculatedRelativeTime === "less than a minute ago"
+  ) {
     calculatedRelativeTime = "just now";
   }
 
