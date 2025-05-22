@@ -17,14 +17,14 @@ variable "railway_region" {
 }
 
 # DNS variables
-variable "domain_name" {
+variable "base_domain_name" {
   type        = string
-  description = "Root DNS domain (e.g. 'example.com' or 'namehash.io')."
+  description = "Base DNS domain (e.g. 'example.com' or 'namehash.io'). Combine with subdomain_prefix to build full domain name."
 }
 
-variable "subdomain_name" {
+variable "subdomain_prefix" {
   type        = string
-  description = "Subdomain prefix (e.g. 'mainnet.green' or 'staging')."
+  description = "Subdomain prefix (e.g. 'mainnet.green' or 'staging'). Combine with base_domain_name to build full domain name."
 }
 
 # ENSIndexer variables
@@ -47,7 +47,7 @@ variable "database_schema" {
 variable "active_plugins" {
   type = string
 }
-variable "deployment_chain" {
+variable "ens_deployment_chain" {
   type = string
 }
 

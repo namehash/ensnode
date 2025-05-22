@@ -10,8 +10,16 @@ import { LinkCard } from '@astrojs/starlight/components';
 This guide will help you deploy ENSNode using Terraform to Railway. The Terraform configuration provides a complete infrastructure setup including database, ENSIndexer, ENSRainbow, and other required services.
 
 :::note[Important]
-These Terraform scripts are currently specific to ENSNode instances hosted by NameHash Labs. While these scripts provide a good starting point for deploying your own ENSNode instance, you will need to make modifications to suit your specific deployment needs.
+These Terraform scripts are currently specific to ENSNode instances hosted by NameHash Labs. While these scripts provide a good starting point for deploying your own ENSNode instance, you will need to make modifications to suit your specific deployment needs. We plan to generalize these scripts in the future to better support community deployments.
 :::
+
+<LinkCard
+  title="Example Terraform Configuration"
+  description="View the example Terraform configuration on GitHub."
+  title="Terraform Configuration"
+  description="View the complete Terraform configuration on GitHub."
+  href="https://github.com/namehash/ensnode/tree/main/terraform"
+/>
 
 ## Prerequisites
 
@@ -40,11 +48,13 @@ ensnode_version  = "latest"  # or specific version
 
 The Terraform configuration sets up the following components:
 
-- Railway project and environment
-- PostgreSQL database
-- ENSIndexer services
-- ENSRainbow service
-- DNS configuration
+- Railway
+  - Railway project and environment
+  - PostgreSQL database
+  - ENSIndexer services
+  - ENSRainbow service
+- AWS
+  - DNS configuration
 
 ## Deployment Steps
 
@@ -70,9 +80,3 @@ To destroy the infrastructure:
 ```bash
 terraform destroy
 ```
-
-<LinkCard
-  title="Terraform Configuration"
-  description="View the complete Terraform configuration on GitHub."
-  href="https://github.com/namehash/ensnode/tree/main/terraform"
-/>

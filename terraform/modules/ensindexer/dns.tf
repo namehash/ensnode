@@ -1,10 +1,10 @@
 locals {
-  full_ensindexer_hostname   = "indexer.${var.subdomain_name}.${var.domain_name}"
-  full_ensindexer_api_hostname     = "api.${var.subdomain_name}.${var.domain_name}"
+  full_ensindexer_hostname   = "indexer.${var.subdomain_prefix}.${var.base_domain_name}"
+  full_ensindexer_api_hostname     = "api.${var.subdomain_prefix}.${var.base_domain_name}"
 }
 
 data "aws_route53_zone" "ensnode" {
-  name         = "${var.domain_name}."
+  name         = "${var.base_domain_name}."
   private_zone = false
 }
 

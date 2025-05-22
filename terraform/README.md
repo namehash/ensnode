@@ -4,7 +4,7 @@
 
 ## Infrastructure Overview
 
-This Terraform configuration manages the infrastructure for ENSNode deployments, primarily focusing on AWS resources. The infrastructure includes:
+This Terraform configuration manages the infrastructure for ENSNode deployments. The infrastructure includes:
 
 ### AWS Resources
 - DNS configuration and management

@@ -1,6 +1,6 @@
 locals {
   application_port   = 80
-  request_rate_limit = "1000"
+  rpc_request_rate_limit  = "1000"
   rpc_url_1          = var.mainnet_rpc_url
   rpc_url_17000      = var.holesky_rpc_url
   rpc_url_8453       = var.base_rpc_url
@@ -16,6 +16,9 @@ resource "railway_service" "ensindexer" {
   region       = var.railway_region
 }
 
+# Instance of ENSIndexer started in Ponder's "serve" mode. This mode causes the ENSIndexer instance to skip the execution of any indexing logic and instead to exclusively focus on the responsibility of serving the main "public-facing" API endpoints for the overall ENSNode deployment. 
+# This division of "start" vs "serve" responsibilities between ENSIndexer instances ensures API availability continues uninterrupted for the overall ENSNode deployment through ensnode-api even if an indexing error in ensindexer causes it to crash. 
+# The following docs explain more about Ponder's "start" vs "serve" modes: https://ponder.sh/docs/api-reference/ponder-cli#serve.
 resource "railway_service" "ensindexer_api" {
   name         = "ensindexer_api"
   source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
@@ -34,15 +37,23 @@ resource "railway_variable_collection" "ensindexer" {
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_1"
-      value = local.request_rate_limit
+      value = local.rpc_request_rate_limit 
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_59144"
-      value = local.request_rate_limit
+      value = local.rpc_request_rate_limit 
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_8453"
-      value = local.request_rate_limit
+      value = local.rpc_request_rate_limit 
+    },
+    {
+      name  = "RPC_REQUEST_RATE_LIMIT_17000"
+      value = local.rpc_request_rate_limit 
+    },
+    {
+      name  = "RPC_REQUEST_RATE_LIMIT_10"
+      value = local.rpc_request_rate_limit 
     },
     {
       name  = "RPC_URL_1"
@@ -82,7 +93,7 @@ resource "railway_variable_collection" "ensindexer" {
     },
     {
       name  = "ENS_DEPLOYMENT_CHAIN"
-      value = var.deployment_chain
+      value = var.ens_deployment_chain
     },
     {
       name  = "HEAL_REVERSE_ADDRESSES"
@@ -107,15 +118,23 @@ resource "railway_variable_collection" "ensindexer_api" {
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_1"
-      value = local.request_rate_limit
+      value = local.rpc_request_rate_limit 
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_59144"
-      value = local.request_rate_limit
+      value = local.rpc_request_rate_limit 
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_8453"
-      value = local.request_rate_limit
+      value = local.rpc_request_rate_limit 
+    },
+    {
+      name  = "RPC_REQUEST_RATE_LIMIT_17000"
+      value = local.rpc_request_rate_limit 
+    },
+    {
+      name  = "RPC_REQUEST_RATE_LIMIT_10"
+      value = local.rpc_request_rate_limit 
     },
     {
       name  = "RPC_URL_1"
@@ -155,7 +174,7 @@ resource "railway_variable_collection" "ensindexer_api" {
     },
     {
       name  = "ENS_DEPLOYMENT_CHAIN"
-      value = var.deployment_chain
+      value = var.ens_deployment_chain
     },
     {
       name  = "HEAL_REVERSE_ADDRESSES"
