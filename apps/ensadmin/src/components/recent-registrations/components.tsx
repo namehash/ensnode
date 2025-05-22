@@ -172,7 +172,7 @@ export function RecentRegistrations() {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          <span>Latest .eth registrations</span>
+          <span>Latest indexed registrations</span>
           {currentIndexingDate && (
             <div className="flex items-center gap-1.5">
               <Clock size={16} className="text-blue-600" />

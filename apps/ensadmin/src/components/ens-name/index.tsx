@@ -78,7 +78,7 @@ export function ENSName({
         className="flex items-center gap-1 text-blue-600 hover:underline"
         title={address}
       >
-        <span className={ensName ? "font-medium" : "font-mono text-xs"}>
+        <span className="font-medium">
           {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
         </span>
         {showExternalLink && <ExternalLink size={14} className="inline-block" />}
