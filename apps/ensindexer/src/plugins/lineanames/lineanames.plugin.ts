@@ -10,8 +10,13 @@ import {
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
-// contruct a unique contract namespace for this plugin
+/**
+ * The Lineanames plugin describes indexing behavior for the Lineanames ENS Datasource, leveraging
+ * the shared Subgraph-compatible indexing logic.
+ */
 export const pluginName = PluginName.Lineanames;
+
+// contruct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
 // extract the chain and contract configs for Lineanames Datasource in order to build ponder config

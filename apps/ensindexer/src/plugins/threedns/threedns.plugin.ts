@@ -10,8 +10,12 @@ import {
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
-// contruct a unique contract namespace for this plugin
+/**
+ * The ThreeDNS plugin describes indexing behavior for 3DNSToken on both Optimism and Base.
+ */
 export const pluginName = PluginName.ThreeDNS;
+
+// contruct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
 const deployment = getENSDeployment(appConfig.ensDeploymentChain);

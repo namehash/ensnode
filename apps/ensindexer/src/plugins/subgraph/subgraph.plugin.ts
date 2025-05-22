@@ -10,8 +10,13 @@ import {
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
-// contruct a unique contract namespace for this plugin
+/**
+ * The Subgraph plugin describes indexing behavior for the 'Root' Datasource, in alignment with the
+ * legacy ENS Subgraph indexing logic.
+ */
 export const pluginName = PluginName.Subgraph;
+
+// contruct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
 // extract the chain and contract configs for root Datasource in order to build ponder config
