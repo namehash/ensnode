@@ -8,7 +8,7 @@ import { Balancer } from "react-wrap-balancer";
 import error_code from "../assets/404.svg";
 import skies_image from "../assets/404_clouds_image.png";
 import mobile_skies_image from "../assets/404_mobile_clouds_image.png";
-import SecondaryButtonIsland from "../components/atoms/SecondaryButtonIsland";
+import ButtonIsland from "../components/atoms/ButtonIsland";
 import StaticHeader from "../components/molecules/StaticHeader.astro";
 
 const verticalAlignmentBase = "flex flex-col flex-nowrap justify-center items-center";
@@ -75,7 +75,7 @@ const verticalAlignmentBase = "flex flex-col flex-nowrap justify-center items-ce
                 <h3 class="text-center text-black text-2xl sm:text-4xl leading-8 sm:leading-10 font-semibold sm:font-bold">Page not found</h3>
                 <Balancer as="p" className="text-center text-gray-500 text-base sm:text-sm leading-6 font-normal">We can’t seem to find the page you’re looking for</Balancer>
             </div>
-            <SecondaryButtonIsland text="Back to homepage" size="medium"
+            <ButtonIsland text="Back to homepage" size="medium" variant="secondary"
                                    style=`px-[17px] py-[9px]`
                                    linkData={{
                                        link: "/",
