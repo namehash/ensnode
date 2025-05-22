@@ -1,6 +1,7 @@
 // <?xml version="1.0" encoding="UTF-8"?>
 // <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 // Creator: CorelDRAW 2019 (64-Bit)
+// xmlns:Xodm="http://www.corel.com/coreldraw/odm/2003"
 
 import React from "react";
 
@@ -10,7 +11,6 @@ export const EthereumTestNetIcon = (props: React.SVGProps<SVGSVGElement>) => (
          fillRule="evenodd" clipRule="evenodd"
          viewBox="0 0 784.37 1277.39"
          xmlnsXlink="http://www.w3.org/1999/xlink"
-         xmlnsxodm="http://www.corel.com/coreldraw/odm/2003"
          {...props}
     >
         <g id="Layer_x0020_1">
