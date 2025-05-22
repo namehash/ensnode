@@ -1,5 +1,5 @@
 variable "railway_token" {
-  type = string
+  type        = string
   description = "API token generated for account workspace. Visit https://railway.com/account/tokens"
 }
 

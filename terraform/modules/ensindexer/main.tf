@@ -1,12 +1,12 @@
 locals {
-  application_port   = 80
-  rpc_request_rate_limit  = "1000"
-  rpc_url_1          = var.mainnet_rpc_url
-  rpc_url_17000      = var.holesky_rpc_url
-  rpc_url_8453       = var.base_rpc_url
-  rpc_url_59144      = var.linea_rpc_url
-  rpc_url_11155111   = var.sepolia_rpc_url
-  rpc_url_10         = var.optimism_rpc_url
+  application_port       = 80
+  rpc_request_rate_limit = "1000"
+  rpc_url_1              = var.mainnet_rpc_url
+  rpc_url_17000          = var.holesky_rpc_url
+  rpc_url_8453           = var.base_rpc_url
+  rpc_url_59144          = var.linea_rpc_url
+  rpc_url_11155111       = var.sepolia_rpc_url
+  rpc_url_10             = var.optimism_rpc_url
 }
 
 resource "railway_service" "ensindexer" {
@@ -37,23 +37,23 @@ resource "railway_variable_collection" "ensindexer" {
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_1"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_59144"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_8453"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_17000"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_10"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_URL_1"
@@ -118,23 +118,23 @@ resource "railway_variable_collection" "ensindexer_api" {
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_1"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_59144"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_8453"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_17000"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_REQUEST_RATE_LIMIT_10"
-      value = local.rpc_request_rate_limit 
+      value = local.rpc_request_rate_limit
     },
     {
       name  = "RPC_URL_1"

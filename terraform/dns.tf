@@ -1,16 +1,16 @@
 locals {
-  ensrainbow_domain = "ensrainbow.${local.default_environment}.${local.domain_name}"
+  ensrainbow_domain = "ensrainbow.${local.railway_environment}.${local.base_domain_name}"
 }
 
 data "aws_route53_zone" "ensnode" {
-  name         = "${local.domain_name}."
+  name         = "${local.base_domain_name}."
   private_zone = false
 }
 
 resource "railway_custom_domain" "ensrainbow" {
-  domain                 = local.ensrainbow_domain
+  domain         = local.ensrainbow_domain
   environment_id = railway_project.this.default_environment.id
-  service_id             = railway_service.ensrainbow.id
+  service_id     = railway_service.ensrainbow.id
 }
 
 resource "aws_route53_record" "ensrainbow" {

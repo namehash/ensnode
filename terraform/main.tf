@@ -1,10 +1,10 @@
 locals {
-  # Default Railway environment name. Used also for DNS records creation for ENSIndexers and ENSRainbow
-  default_environment = "terraform-test"
-  # Domain name Used for DNS records creation for ENSIndexers and ENSRainbow
-  # DNS records are named following given naming pattern indexer.${default_environment}.${domain_name}
+  # Default Railway environment name. Also influences the domain name for ENSIndexer and ENSRainbow.
+  railway_environment = "terraform-test"
+  # Base domain name used for ENSIndexer and ENSRainbow DNS records
+  # DNS records for ENSIndexer are assigned using the following naming pattern indexer.${default_environment}.${domain_name}
   # Example indexer.holesky.terraform-test.ensnode.io
-  domain_name         = "ensnode.io"
+  base_domain_name = "ensnode.io"
   # US East Metal - Railway regions: https://docs.railway.com/reference/regions
   railway_region         = "us-east4-eqdc4a"
   heal_reverse_addresses = "false"
@@ -15,7 +15,7 @@ locals {
 resource "railway_project" "this" {
   name = "TerraformTest"
   default_environment = {
-    name = local.default_environment
+    name = local.railway_environment
   }
 }
 
@@ -24,15 +24,15 @@ module "database" {
   railway_region         = local.railway_region
   railway_token          = var.railway_token
   railway_project_id     = railway_project.this.id
-  railway_environment_id = railway_project.this.default_environment.id
+  railway_environment_id = railway_project.this.railway_environment.id
 }
 
 module "holesky_ensindexer" {
   source     = "./modules/ensindexer"
   depends_on = [null_resource.health_check]
   #Indexer specific envs
-  base_domain_name            = local.domain_name
-  subdomain_prefix         = "holesky.${local.default_environment}"
+  base_domain_name       = local.base_domain_name
+  subdomain_prefix       = "holesky.${local.railway_environment}"
   ensnode_version        = var.ensnode_version
   heal_reverse_addresses = local.heal_reverse_addresses
   ensrainbow_url         = "http://$${{${railway_service.ensrainbow.name}.RAILWAY_PRIVATE_DOMAIN}}:8080"

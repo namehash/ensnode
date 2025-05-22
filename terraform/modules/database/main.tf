@@ -1,8 +1,8 @@
 locals {
-  pg_host                = "postgres.railway.internal"
-  pg_port                = "5432"
-  pg_user                = "postgres"
-  pg_database            = "postgres"
+  pg_host     = "postgres.railway.internal"
+  pg_port     = "5432"
+  pg_user     = "postgres"
+  pg_database = "postgres"
   # Increase shared memory for this container on Railway from the default (64MB) to 512MB.
   railway_shm_size_bytes = "512000000"
   database_url           = "postgresql://${local.pg_user}:${random_string.pg_password.result}@${local.pg_host}:${local.pg_port}/${local.pg_database}"
