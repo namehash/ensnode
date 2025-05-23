@@ -16,6 +16,7 @@ export function starlight(): AstroIntegration {
     customCss: [
       "./src/styles/globals.css",
       "./src/styles/pagination.css",
+      "./src/styles/sidebar.css",
       "@fontsource/inter/100.css",
       "@fontsource/inter/200.css",
       "@fontsource/inter/300.css",
@@ -27,7 +28,7 @@ export function starlight(): AstroIntegration {
       "@fontsource/inter/900.css",
     ],
     plugins: [
-      starlightLlmsTxt(),
+      // starlightLlmsTxt(),
       starlightSidebarTopics([
         {
           label: "ENSNode",
@@ -93,6 +94,34 @@ export function starlight(): AstroIntegration {
                 {
                   label: "What is ENSIndexer?",
                   link: "/ensindexer",
+                },
+                {
+                  label: "What data is indexed?",
+                  link: "/ensindexer/indexed-data",
+                },
+              ],
+            },
+            {
+              label: "Technical Reference",
+              items: [
+                {
+                  label: "Core Concepts",
+                  link: "ensindexer/technical-reference/core-concepts",
+                },
+                {
+                  label: "Data Model",
+                  link: "ensindexer/technical-reference/data-model",
+                },
+                {
+                  label: "Plugin System",
+                  link: "ensindexer/technical-reference/plugin-system",
+                },
+                {
+                  label: "Plugins",
+                  collapsed: false,
+                  autogenerate: {
+                    directory: "ensindexer/technical-reference/plugins",
+                  },
                 },
               ],
             },

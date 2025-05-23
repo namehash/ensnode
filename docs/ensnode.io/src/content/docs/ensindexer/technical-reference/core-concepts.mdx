@@ -1,0 +1,131 @@
+---
+title: Core Concepts
+description: Technical architecture and implementation details of ENSIndexer
+sidebar:
+  label: Core Concepts
+  order: 1
+---
+
+## Core Concepts
+
+ENSIndexer's architecture is built upon several key concepts that enable its modularity, extensibility, and ability to handle the diverse and evolving ENS ecosystem. Understanding these concepts is crucial for comprehending how ENSIndexer processes and serves ENS data.
+
+### 1. ENS Deployments
+
+- **What it is:** An **ENS Deployment** represents a single, unified, and logically independent ENS namespace. While its root contracts (like the main ENS Registry) reside on a specific blockchain (referred to as the `ENSDeploymentChain`), a single deployment can encompass data sources distributed across multiple other blockchains or even off-chain systems. All these disparate sources contribute to the same overarching ENS name hierarchy.
+<br />
+- **How it works:** For example, the canonical `mainnet` ENS Deployment has its root Registry on Ethereum mainnet. However, it also includes data for `.base.eth` names (whose contracts are on the Base network) and `.linea.eth` names (from the Linea network). Despite being on different chains, these are all part of the single `mainnet` ENS Deployment. Testnet deployments like `holesky` or "sepolia" are entirely separate ENS namespaces. ENSIndexer is configured to operate against one specific `ENSDeployment` at a time.
+
+There are 4 deployments:
+
+- `mainnet`
+- `sepolia`
+- `holesky`
+- `ens-test-env` (local testing environment)
+
+### 2. Data Sources
+
+- **What it is:** A **Data Source** is a specific source of ENS-related data that ENSIndexer can process. This refers to a set of smart contracts on a particular blockchain that interact with the ENS protocol. However, in future it could conceptually extend to off-chain APIs. Data sources are used by plugins and a plugin can have multiple data sources (we will cover plugins later).
+<br />
+- **How it works:** Each data source provides the necessary information for ENSIndexer (via Ponder) to monitor events and fetch data, including contract addresses, ABIs, and the chain they reside on. For instance, `DatasourceName.Basenames` points to the contracts on the Base network responsible for `.base.eth` names. An `ENSDeployment` is composed of one or more such data sources.
+<br />
+- **Relevant Types & Code:**
+- **`DatasourceName`**: An enum in `packages/ens-deployments/src/lib/types.ts` that provides unique identifiers for data sources:
+        ```typescript
+        // packages/ens-deployments/src/lib/types.ts
+        export enum DatasourceName {
+            Root = "root",
+            Basenames = "basenames",
+            Lineanames = "lineanames",
+            ThreeDNSOptimism = "threedns-optimism",
+            ThreeDNSBase = "threedns-base",
+        }
+        ```
+<br />        
+- **`Datasource`**: An interface in `packages/ens-deployments/src/lib/types.ts` defining the structure of a data source. It includes:
+        *   `chain: Chain`: The `viem` chain object representing the blockchain. This includes the rpc url for the chain which comes from the environment variables.
+        *   `contracts: Record<string, ContractConfig>`: A mapping of contract names to their configurations.
+        ```typescript
+        // packages/ens-deployments/src/lib/types.ts
+        export interface Datasource {
+          chain: Chain;
+          contracts: Record<string, ContractConfig>;
+        }
+        ```
+<br />
+- **`ContractConfig`**: Defined in `packages/ens-deployments/src/lib/types.ts`, this type specifies a contract's `abi`, `address` (or an event `filter` to discover it), and `startBlock`. It's a subset of Ponder's contract configuration and this is where the contracts are defined for each datasource.
+        ```typescript
+        // packages/ens-deployments/src/lib/types.ts
+        export type ContractConfig =
+          | {
+              readonly abi: Abi;
+              readonly address: Address;
+              readonly filter?: never;
+              readonly startBlock: number;
+            }
+          | {
+              readonly abi: Abi;
+              readonly address?: never;
+              readonly filter: EventFilter[];
+              readonly startBlock: number;
+            };
+        ```
+
+### 3. Plugins
+
+- **What it is:** **Plugins** are optional blocks of logic (primarily handlers) which will be included if configured in the `AVAILABLE_PLUGINS` environment variables. They are modular components, each responsible for indexing data from one or more specific `Datasource`(s) within an `ENSDeployment`. They define which contracts to listen to and how to process their events. When `ENSIndexer` starts it will only activate the plugins that are configured in the `AVAILABLE_PLUGINS` environment variable. At least one plugin is required.
+<br />
+- **How it works:** When ENSIndexer starts, it will activate a set of plugins specified in the `AVAILABLE_PLUGINS` environment variable. Each plugin provides Ponder with the necessary configuration (networks, contracts, ABIs) and registers event handlers. For example, the `Lineanames` plugin focuses on the `DatasourceName.Lineanames` data source. This modularity allows users to tailor their ENSIndexer instance to only index the data they need, and it makes the system extensible to new ENS-compatible systems or chains.
+<br />
+- **Relevant Types & Code:**
+    *   **`ENSIndexerPlugin` Interface**: Defined in `apps/ensindexer/src/lib/plugin-helpers.ts`, this interface outlines the contract for any ENSIndexer plugin:
+        ```typescript
+        // apps/ensindexer/src/lib/plugin-helpers.ts
+        export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
+          pluginName: PLUGIN_NAME; // Unique identifier
+          requiredDatasources: DatasourceName[]; // Datasources this plugin depends on
+          config: CONFIG; // Ponder-compatible configuration
+          activate: () => Promise<void>; // Function to register handlers with Ponder
+        }
+        ```
+-   **Plugin Implementations**: Files like `apps/ensindexer/src/plugins/lineanames/lineanames.plugin.ts` or `apps/ensindexer/src/plugins/subgraph/subgraph.plugin.ts` provide concrete implementations of this interface.
+
+Some more information about plugins can be found in the [plugin system](./plugin-system) documentation.
+
+### 4. Handlers
+
+-   **What it is:** **Handlers** are functions that execute in response to specific smart contract events. They contain the logic for transforming event data into structured data in postgres.
+<br />
+-   **How it works:** ENSIndexer uses a two-tiered handler system:
+    - **Shared Handler Factories** (e.g., in `apps/ensindexer/src/handlers/Registry.ts`, `apps/ensindexer/src/handlers/Registrar.ts`): These are centralized modules containing reusable core indexing logic for common ENS events (like `NewOwner`, `NameRegistered`). They are "factories" (e.g., `makeRegistryHandlers`) that return a set of specific event handler functions. These factories are parameterized by `pluginName` and other contextual information (like `RegistrarManagedName`, defined in `apps/ensindexer/src/lib/types.ts` to specify the parent name a registrar manages, e.g., `.eth` or `.linea.eth`), allowing the shared logic to be adapted for different plugin contexts.
+    - **Plugin-Specific Handlers** (e.g., in `apps/ensindexer/src/plugins/lineanames/handlers/Registry.ts`): Each plugin has its own handler files. These import the shared handler factories and then use Ponder's `ponder.on()` API to register the tailored, shared handler functions for the plugin's specific (and namespaced) contracts and events. This layer is also where any "quirks" or unique data transformations for a particular data source are handled before calling the shared logic.
+-   **Interaction:** When a relevant on-chain event occurs, Ponder triggers the appropriate plugin-specific handler. This handler might perform some initial processing or data adaptation and then delegates to the corresponding function from the shared handler factory, which executes the main database update logic.
+
+By combining these concepts, ENSIndexer achieves a flexible and powerful architecture capable of indexing complex, multi-chain ENS deployments in a maintainable and extensible manner.
+
+## API Layer
+
+ENSIndexer exposes three distinct API endpoints:
+
+1. **Subgraph-Compatible GraphQL** (`/subgraph`)
+
+   - Implements the ENS Subgraph schema and query patterns
+   - Enables gradual migration from existing Subgraph implementations
+   - Maintains compatibility with `ensjs` client library — just replace
+
+2. **Native Ponder GraphQL** (`/graphql`)
+
+   - Auto-generated GraphQL API from Ponder schema
+   - More efficient query patterns than Subgraph API, particularly for pagination
+
+3. **Ponder Client API** (`/sql/*`)
+   - SQL-based alternative to GraphQL
+   - End-to-end type inference
+   - Support for live updates
+   - Optimized for client application integration
+
+## Label Healing with ENSRainbow
+
+ENSIndexer depends on ENSRainbow at runtime to handle the healing of unknown labels. This parallels the ENS Subgraph's reliance on the graph-node's `ens.nameByHash` function.
+
+Additionally, reverse addresses can be healed by configuring `HEAL_REVERSE_ADDRESSES` in the environment variables of `ENSIndexer`.
