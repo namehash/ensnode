@@ -2,23 +2,16 @@ import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/utils";
 
-import { makeRegistryHandlers } from "@/handlers/Registry";
+import {
+  handleNewOwner,
+  handleNewResolver,
+  handleNewTTL,
+  handleTransfer,
+} from "@/handlers/Registry";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-export default function ({
-  pluginName,
-  namespace,
-}: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
-  const {
-    handleNewOwner, //
-    handleNewResolver,
-    handleNewTTL,
-    handleTransfer,
-  } = makeRegistryHandlers({
-    pluginName,
-  });
-
+export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
   ponder.on(namespace("Registry:setup"), setupRootNode);
   ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));
   ponder.on(namespace("Registry:NewResolver"), handleNewResolver);

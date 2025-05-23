@@ -13,6 +13,7 @@ const environment = {
   ensNodePublicUrl: process.env.ENSNODE_PUBLIC_URL,
   ensAdminUrl: process.env.ENSADMIN_URL,
   healReverseAddresses: process.env.HEAL_REVERSE_ADDRESSES,
+  indexResolverRecords: process.env.INDEX_RESOLVER_RECORDS,
   globalBlockrange: {
     startBlock: process.env.START_BLOCK,
     endBlock: process.env.END_BLOCK,

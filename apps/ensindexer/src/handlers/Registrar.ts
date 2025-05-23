@@ -10,7 +10,7 @@ import {
   makeSubdomainNode,
 } from "@ensnode/utils";
 
-import { makeSharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
+import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -31,7 +31,6 @@ export const makeRegistrarHandlers = ({
   pluginName: PluginName;
   registrarManagedName: RegistrarManagedName;
 }) => {
-  const sharedEventValues = makeSharedEventValues(pluginName);
   const registrarManagedNode = namehash(registrarManagedName);
 
   async function setNamePreimage(
@@ -59,7 +58,7 @@ export const makeRegistrarHandlers = ({
     // materialize the registration's labelName as well
     await context.db
       .update(schema.registration, {
-        id: makeRegistrationId(pluginName, labelHash, node),
+        id: makeRegistrationId(labelHash, node),
       })
       .set({ labelName: label, cost });
   }
@@ -95,10 +94,10 @@ export const makeRegistrarHandlers = ({
       const name = validLabel ? `${validLabel}.${registrarManagedName}` : undefined;
 
       // NOTE: because the mainnet ENS contract _always_ emit Registry#NewOwner _before_
-      // Registrar#NameRegistered, the subgraph logic expects a domain entity to exist here.
+      // Registrar#NameRegistered, the subgraph logic _requires_ a domain entity to exist here.
       //
       // Basenames, however, supports the concept of 'preminting' a domain using a `registerOnly`
-      // method which avoids actually registering the name in the Registry and emitting NewOwner.
+      // method which avoids actually registering the name in the Registry and avoids emitting NewOwner.
       // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/src/L2/BaseRegistrar.sol#L248
       // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/script/premint/Premint.s.sol#L36
       //
@@ -132,7 +131,7 @@ export const makeRegistrarHandlers = ({
 
       // upsert registration
       // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L64
-      const registrationId = makeRegistrationId(pluginName, labelHash, node);
+      const registrationId = makeRegistrationId(labelHash, node);
       await upsertRegistration(context, {
         id: registrationId,
         // NOTE: always set domainId (cannot be null), but for preminted names the relationship will be null
@@ -196,7 +195,7 @@ export const makeRegistrarHandlers = ({
       const { labelHash, expires } = event.args;
 
       const node = makeSubdomainNode(labelHash, registrarManagedNode);
-      const id = makeRegistrationId(pluginName, labelHash, node);
+      const id = makeRegistrationId(labelHash, node);
 
       // update Registration expiry
       await context.db.update(schema.registration, { id }).set({ expiryDate: expires });
@@ -225,7 +224,7 @@ export const makeRegistrarHandlers = ({
       await upsertAccount(context, to);
 
       const node = makeSubdomainNode(labelHash, registrarManagedNode);
-      const id = makeRegistrationId(pluginName, labelHash, node);
+      const id = makeRegistrationId(labelHash, node);
 
       const registration = await context.db.find(schema.registration, { id });
       if (!registration) return;

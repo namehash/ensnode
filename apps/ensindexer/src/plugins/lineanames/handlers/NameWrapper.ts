@@ -4,10 +4,7 @@ import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/utils";
 
-export default function ({
-  pluginName,
-  namespace,
-}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
+export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleNameWrapped,
     handleNameUnwrapped,
@@ -16,7 +13,6 @@ export default function ({
     handleTransferSingle,
     handleTransferBatch,
   } = makeNameWrapperHandlers({
-    pluginName,
     // the shared Registrar handlers in this plugin index direct subnames of '.linea.eth'
     registrarManagedName: "linea.eth",
   });
