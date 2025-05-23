@@ -18,36 +18,77 @@ This guide covers running ENSRainbow locally for development and contributions.
 Follow ENSNode's [contribution guide](/docs/contributing/) to prepare your workspace environment & install dependencies.
 :::
 
-### Get the Rainbow Tables
+### Get the Rainbow Table Data Files (`.ensrainbow`)
 
-Our copies of the ENS rainbow tables are stored in a public bucket. You can download either the legacy (original) or v2 (extended) dataset using the following commands:
+ENSRainbow ingests data from `.ensrainbow` files. These files contain labelhash-label pairs for a specific `NAMESPACE` and `LABEL_SET`. You can download these files using the `download-ensrainbow-files.sh` script located in `apps/ensrainbow/`.
 
-```bash
-# For legacy data
-pnpm run get-legacy-data
-
-# For v2 data
-pnpm run get-v2-data
-```
-
-These commands will:
-
-- Download the required files (rainbow tables, checksum, and MIT license)
-- Automatically verify the checksum
-- Place the files in a convenient directory for subsequent use of the ingest command
-
-### Produce Data Directory
-
-Run data ingestion and verify the number of unique label-labelhash pairs in the database:
+The script requires two arguments: `NAMESPACE` and `LABEL_SET` (a non-negative integer).
 
 ```bash
-pnpm run ingest
+# Navigate to the script directory (or call it from the monorepo root)
+cd apps/ensrainbow
+
+# Example: Download 'subgraph' namespace, label set 0 (original tables)
+./download-ensrainbow-files.sh subgraph 0
+
+# Example: Download 'searchlight' namespace, label set 0 (extended tables)
+./download-ensrainbow-files.sh searchlight 0
+
+# Example: Download 'discoveryA' namespace, label set 0 (initially empty for discovered labels)
+./download-ensrainbow-files.sh discoveryA 0
+
+# Example: Download 'testenv' namespace, label set 0 (for test environment)
+./download-ensrainbow-files.sh testenv 0
 ```
+
+This command will:
+
+- Download the specified `<NAMESPACE>-<LABEL_SET>.ensrainbow` file.
+- Download its corresponding checksum file (`.sha256sum`).
+- Download the `THE_GRAPH_LICENSE.txt` file.
+- Automatically verify the checksum of the `.ensrainbow` file.
+- Place the files in `./labelsets/<NAMESPACE>-<LABEL_SET>.ensrainbow` and `./THE_GRAPH_LICENSE.txt` respectively (relative to where `OUT_DIR` is set, default is current dir).
+
+Refer to the script for more details on output paths.
+
+### Convert Legacy SQL Data (Optional)
+
+If you have legacy rainbow tables in the `.sql.gz` format, you can convert them to the `.ensrainbow` format using the `convert` command:
+
+```bash
+# Example: Convert a legacy SQL file to subgraph-0.ensrainbow
+pnpm run convert --input-file path/to/your/ens_names.sql.gz --output-file subgraph-0.ensrainbow
+```
+This will create `subgraph-0.ensrainbow` in the current directory.
+
+### Ingest Rainbow Tables into LevelDB
+
+Once you have your `.ensrainbow` files, you can ingest them into a LevelDB database using the `ingest-ensrainbow` command.
+
+**Important Ingestion Rules:**
+
+1.  **Initial Ingestion**: The first time you ingest data into a new or empty `--data-dir`, the input `.ensrainbow` file *must* be for `LABEL_SET 0`. This initial ingestion will set the `NAMESPACE` for the entire database.
+2.  **Namespace Consistency**: All subsequent ingestions into the same `--data-dir` *must* use `.ensrainbow` files belonging to the *same* `NAMESPACE` as the initial ingest.
+3.  **Sequential Label Sets**: Each subsequent `.ensrainbow` file ingested *must* have a `LABEL_SET` that is exactly one greater than the `HIGHEST_LABEL_SET` currently stored in the database. For example, if the database contains data up to `subgraph-1.ensrainbow` (meaning `HIGHEST_LABEL_SET` is 1), the next file to ingest must be `subgraph-2.ensrainbow`.
+
+The database internally stores the `NAMESPACE` and `HIGHEST_LABEL_SET` to enforce these rules.
+
+```bash
+# Example: Initial ingest for 'subgraph' namespace, label set 0
+pnpm run ingest-ensrainbow --input-file subgraph-0.ensrainbow --data-dir ./my-subgraph-data
+
+# Example: Subsequent ingest for 'subgraph' namespace, label set 1
+# (assuming subgraph-0.ensrainbow was already ingested into ./my-subgraph-data)
+pnpm run ingest-ensrainbow --input-file subgraph-1.ensrainbow --data-dir ./my-subgraph-data
+```
+
+The `ingest-ensrainbow` command will verify the integrity of the data and update the database. If a new `.ensrainbow` file contains labelhashes already present, they are typically overridden with the new label set version. The command also recalculates and verifies the total unique label count after ingestion to ensure data integrity.
 
 ### Start ENSRainbow
 
+After ingesting data:
 ```bash
-pnpm run serve
+pnpm run serve --data-dir ./my-subgraph-data
 ```
 
 You can verify the service is running by checking the health endpoint or retrieving the label count:
@@ -58,17 +99,41 @@ curl http://localhost:3223/health
 
 # Get count of healable labels
 curl http://localhost:3223/v1/labels/count
-```
 
-Expected count as of January 30, 2024: 133,856,894 unique label-labelhash pairs
+# Heal a labelhash (basic request)
+curl http://localhost:3223/v1/heal/0xYourLabelHash
+
+# Heal a labelhash specifying namespace and label_set
+# (namespace must match DB, label_set <= HIGHEST_LABEL_SET in DB)
+curl http://localhost:3223/v1/heal/0xYourLabelHash?namespace=subgraph&label_set=1
+```
+If `namespace` and `label_set` are provided in a heal request, both must be present. The server will validate them against the database's stored namespace and highest label set.
+
+Expected count as of January 30, 2024: 133,856,894 unique 
+label-labelhash pairs
+
+### Downloading Pre-built Database Artifacts
+
+As an alternative to ingesting `.ensrainbow` files sequentially, you can download pre-built LevelDB database artifacts. These are `.tgz` archives containing a complete data directory. Use the `download-database-artifact.sh` script from `apps/ensrainbow/`.
+
+The script requires `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` (highest label set included in the artifact).
+
+```bash
+# Navigate to the script directory (or call it from the monorepo root)
+cd apps/ensrainbow
+
+# Example: Download schema v2, 'subgraph' namespace, up to label set 1
+./download-database-artifact.sh v2 subgraph 1
+```
+This will download and verify `databases/v2/subgraph-1.tgz` (relative to `OUT_DIR`). You can then extract this archive to your desired data directory (e.g., `./my-subgraph-data`) and use it with `pnpm run serve`.
 
 ## Building the Docker Image
 
-For instructions on building the ENSRainbow Docker image, see the [Building Docker Images](/ensrainbow/contributing/building) guide.
+For instructions on building the ENSRainbow Docker image, see the [Building Docker Images](/ensrainbow/contributing/building) guide. The Docker build process can leverage these pre-built database artifacts or ingest `.ensrainbow` files.
 
 <LinkCard
   title="Building ENSRainbow Docker Images"
-  description="Learn how to build the ENSRainbow Docker image"
+  description="Learn how to build the ENSRainbow Docker image with various data sources"
   href="/ensrainbow/contributing/building"
 />
 
@@ -82,42 +147,47 @@ The service handles graceful shutdown on SIGTERM and SIGINT signals (e.g., when 
 
 If you need to start fresh with the database:
 
-1. Stop any running ENSRainbow processes
-2. Delete the LevelDB data directory (default: './data')
-3. Run the ingest command again
+1. Stop any running ENSRainbow processes.
+2. Delete the LevelDB data directory (default: './data').
+3. Run the `ingest-ensrainbow` command(s) again as described in [Ingest Rainbow Tables](#ingest-rainbow-tables), or download and extract a [pre-built database artifact](#downloading-pre-built-database-artifacts).
 
 ## System Requirements
 
-### Data Ingestion Requirements (`ingest` command)
+### Data Ingestion Requirements (`convert` and `ingest-ensrainbow` commands)
 
 - **Storage**:
-  - At least 15 GB of free disk space:
-    - 6.37 GB for the compressed rainbow tables download
-    - ~7 GB for the LevelDB database after ingestion
-    - Additional temporary space during build/ingestion
-- **Memory**: At least 4 GB RAM recommended
+  - Space for downloaded `.ensrainbow` files (varies by file).
+  - ~7 GB for the LevelDB database after ingestion of a typical full dataset.
+  - Additional temporary space during build/ingestion.
+- **Memory**: At least 4 GB RAM recommended.
 
 ### API Server Requirements (`serve` command)
 
-- **Storage**: 7.61 GB for the Docker image (pre-built with LevelDB database)
-- **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance)
-- **CPU**: Minimal requirements - operates well with low CPU resources
+- **Storage**: ~7-8 GB for a typical LevelDB database. Docker image size will vary based on included data.
+- **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance).
+- **CPU**: Minimal requirements.
 
 ## Command Line Interface
 
-ENSRainbow provides a command-line interface (CLI) for managing the service. You can view detailed help for any command by adding `--help` after the command:
+ENSRainbow provides a CLI for managing the service. Add `--help` for details on any command.
 
-### Data Ingestion
-
+### Convert Legacy Data (`convert`)
+Converts legacy `.sql.gz` rainbow tables to the `.ensrainbow` format.
 ```bash
-pnpm run ingest [--input-file path/to/ens_names.sql.gz] [--data-dir path/to/db]
+pnpm run convert --input-file <path/to/ens_names.sql.gz> --output-file <NAMESPACE-LABEL_SET.ensrainbow>
 ```
+- `--input-file`: Path to the gzipped SQL dump file.
+- `--output-file`: Desired path for the output `.ensrainbow` file.
 
-- `input-file`: Path to the gzipped [SQL dump file containing ENS rainbow tables](#getting-the-rainbow-tables) (default: './ens_names.sql.gz'). Only used during data ingestion.
-- `data-dir`: Directory for the LevelDB database. If not provided, defaults to `data/`
+### Data Ingestion (`ingest-ensrainbow`)
+Ingests data from `.ensrainbow` files into the LevelDB database.
+```bash
+pnpm run ingest-ensrainbow --input-file <path/to/NAMESPACE-LABEL_SET.ensrainbow> [--data-dir path/to/db]
+```
+- `--input-file`: Path to the `.ensrainbow` file. Adheres to [ingestion rules](#ingest-rainbow-tables).
+- `--data-dir`: Directory for the LevelDB database (default: `data/`). The database stores `NAMESPACE` and `HIGHEST_LABEL_SET` metadata.
 
-### Database Validation
-
+### Database Validation (`validate`)
 ```bash
 pnpm run validate [--data-dir path/to/db] [--lite]
 ```
@@ -142,6 +212,7 @@ The process will exit with:
 
 ### Database Purge
 
+### Database Purge (`purge`)
 ```bash
 pnpm run purge [--data-dir path/to/db]
 ```
@@ -153,8 +224,8 @@ The process will exit with:
 - Code 0: Successful purge
 - Code 1: Error during purge operation
 
-### API Server
 
+### API Server (`serve`)
 ```bash
 pnpm run serve [--port 3223] [--data-dir path/to/db]
 ```
@@ -172,29 +243,38 @@ The ens-test-env project provides a test environment for ENS development. It inc
 
 To ingest the test data into ENSRainbow:
 
-```bash
-# Navigate to the ENSRainbow directory
-cd apps/ensrainbow
+1.  **Convert Test Data (if needed):**
+    If you don't have a pre-converted `testenv-0.ensrainbow` file:
+    ```bash
+    # Navigate to apps/ensrainbow or adjust paths accordingly
+    pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv-0.ensrainbow
+    ```
+    This creates `testenv-0.ensrainbow`.
 
-# Ingest the test data
-pnpm ingest --input-file test/fixtures/ens_test_env_names.sql.gz --data-dir data_ens_test_env
+2.  **Download Test Data (Alternative):**
+    Alternatively, download the pre-defined test data file:
+    ```bash
+    # In apps/ensrainbow directory
+    ./download-ensrainbow-files.sh testenv 0
+    ```
+    This will place `testenv-0.ensrainbow` in `labelsets/`. Adjust the path for the ingest command accordingly.
+
+### Ingesting Test Data
+
+```bash
+# Assuming testenv-0.ensrainbow is in the current directory or accessible by path
+pnpm run ingest-ensrainbow --input-file testenv-0.ensrainbow --data-dir data_ens_test_env
 ```
 
-### Validating the test data
-
-You can validate the ingested test data to ensure it was properly loaded:
+### Validating the Test Data
 
 ```bash
-# Validate the test data
 pnpm validate --data-dir data_ens_test_env
 ```
 
-### Running ENSRainbow with the test data
-
-After ingesting the test data, you can run ENSRainbow with the test data:
+### Running ENSRainbow with Test Data
 
 ```bash
-# Start the ENSRainbow server with the test data
 pnpm serve --data-dir data_ens_test_env --port 3223
 ```
 
@@ -217,18 +297,76 @@ docker build -f apps/ensrainbow/Dockerfile \
 docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest
 ```
 
-### Using Pre-built Docker Images
+This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
 
-Instead of building the Docker images yourself, you can also download the pre-built images directly from the GitHub Container Registry:
+Instead of building the Docker images yourself, you can also 
+download the pre-built images directly from the GitHub Container 
+Registry:
 
 ```bash
 # Pull the pre-built ENSRainbow image with test data
 docker pull ghcr.io/namehash/ensnode/ensrainbow-test:latest
 
 # Run the ENSRainbow container with the pulled image
-docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest
+docker run -p 3223:3223 ghcr.io/namehash/ensnode/
+ensrainbow-test:latest
 ```
 
-This approach is faster and more convenient as it doesn't require building the images locally.
+This approach is faster and more convenient as it doesn't require 
+building the images locally.
 
-This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
+
+### Persistent Storage with Docker
+
+The ENSRainbow Docker image (built with the combined Dockerfile) now includes an `entrypoint.sh` script that supports persistent storage for the LevelDB database. This prevents re-downloading the database every time the container starts.
+
+**How it Works:**
+
+1.  **On First Run (with an empty volume):**
+    *   The script requires `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` environment variables to be set.
+    *   It downloads the specified database artifact into `/app/apps/ensrainbow/data` (the designated data directory).
+    *   After successful download, extraction, and validation, it creates a marker file (`.ensrainbow_db_ready`) in the data directory.
+2.  **On Subsequent Runs:**
+    *   The script checks for the presence of the data directory and the marker file.
+    *   If found and the data passes a quick validation, it skips the download and uses the existing database.
+    *   If the data is missing, invalid, or the marker file isn't present, it will attempt to download it again (requiring the environment variables).
+
+**Using Docker Volumes:**
+
+To ensure the database persists even if the container is removed and recreated, you **must** mount a Docker volume to `/app/apps/ensrainbow/data` inside the container.
+
+**Example with a Host Directory:**
+
+```bash
+# Create a directory on your host machine first, e.g., ~/my_ensrainbow_data
+mkdir -p ~/my_ensrainbow_data
+
+docker run -d --name ensrainbow_persistent \
+  -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
+  -e SCHEMA_VERSION="v2" \
+  -e NAMESPACE="subgraph" \
+  -e LABEL_SET="1" \
+  -p 3223:3223 \
+  ghcr.io/namehash/ensnode/ensrainbow:latest
+```
+
+**Example with a Named Docker Volume (Recommended):**
+
+```bash
+# Create a named volume (only needs to be done once)
+docker volume create ensrainbow_db_volume
+
+docker run -d --name ensrainbow_persistent \
+  -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
+  -e SCHEMA_VERSION="v2" \
+  -e NAMESPACE="subgraph" \
+  -e LABEL_SET="1" \
+  -p 3223:3223 \
+  ghcr.io/namehash/ensnode/ensrainbow:latest
+```
+
+Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` as needed for the initial download.
+
+Using a volume ensures that your downloaded and ingested data is not lost when the container stops or is removed, saving time and bandwidth on subsequent runs.
+
+

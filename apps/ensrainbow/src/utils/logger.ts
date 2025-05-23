@@ -44,7 +44,7 @@ export function getEnvLogLevel(): LogLevel {
 }
 
 export function createLogger(level: LogLevel = DEFAULT_LOG_LEVEL): pino.Logger {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = true; //process.env.NODE_ENV === "production";
 
   return pino({
     level,
