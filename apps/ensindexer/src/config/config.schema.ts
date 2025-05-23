@@ -179,6 +179,20 @@ const parseDatabaseUrl = () =>
     },
   );
 
+const derive_subgraphCompatibility = (
+  config: Omit<ENSIndexerConfig, "subgraphCompatibility">,
+): ENSIndexerConfig => {
+  const onlySubgraphPluginActivated =
+    config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
+  const indexingBehaviorIsSubgraphCompatible =
+    !config.healReverseAddresses && !config.indexResolverRecords;
+
+  return {
+    ...config,
+    subgraphCompatibility: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
+  };
+};
+
 const ENSIndexerConfigSchema = z
   .object({
     ensDeploymentChain: parseEnsDeploymentChain(),
@@ -194,6 +208,9 @@ const ENSIndexerConfigSchema = z
     rpcConfigs: parseRpcConfigs(),
     databaseUrl: parseDatabaseUrl(),
   })
+  // inject ENSIndexerConfig.subgraphCompatibility
+  .transform(derive_subgraphCompatibility)
+  // perform invariant checks
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)

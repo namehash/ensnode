@@ -450,10 +450,50 @@ describe("config", () => {
     });
   });
 
+  describe("subgraphCompatibility", () => {
+    // start in subgraph-compatible state
+    beforeEach(() => {
+      vi.stubEnv("ACTIVE_PLUGINS", "subgraph");
+      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
+      vi.stubEnv("INDEX_RESOLVER_RECORDS", "false");
+    });
+
+    it("is true when compatible", async () => {
+      const config = await getConfig();
+      expect(config.subgraphCompatibility).toBe(true);
+    });
+
+    it("is false when ACTIVE_PLUGINS does not include subgraph", async () => {
+      vi.stubEnv("ACTIVE_PLUGINS", "basenames");
+      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      const config = await getConfig();
+      expect(config.subgraphCompatibility).toBe(false);
+    });
+
+    it("is false when ACTIVE_PLUGINS includes subgraph along with other plugins", async () => {
+      vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
+      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+      const config = await getConfig();
+      expect(config.subgraphCompatibility).toBe(false);
+    });
+
+    it("is false when HEAL_REVERSE_ADDRESSES is true", async () => {
+      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
+      const config = await getConfig();
+      expect(config.subgraphCompatibility).toBe(false);
+    });
+
+    it("is false when INDEX_RESOLVER_RECORDS is true", async () => {
+      vi.stubEnv("INDEX_RESOLVER_RECORDS", "true");
+      const config = await getConfig();
+      expect(config.subgraphCompatibility).toBe(false);
+    });
+  });
+
   describe("additional checks", () => {
     it("requires available datasources", async () => {
       vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "ens-test-env");
-      vi.stubEnv("ACTIVE_PLUGINS", "threedns");
+      vi.stubEnv("ACTIVE_PLUGINS", "basenames");
       await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
     });
 

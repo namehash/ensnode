@@ -1,29 +1,24 @@
-import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
+import config from "@/config";
+import { type LabelHash, type Node } from "@ensnode/utils";
 import type { Address } from "viem";
 
 /**
  * Makes a unique, chain-scoped resolver ID.
- * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
+ * In Subgraph-compatibility mode, no chainId prefix is used (subgraph-compat).
  *
- * @example Subgraph plugin: `${address}-${node}`
- * @example All other plugins (chain-scoped): `${chainId}-${address}-${node}`
+ * @example Subgraph-compat: `${address}-${node}`
+ * @example Otherwise (chain-scoped): `${chainId}-${address}-${node}`
  *
- * @param pluginName the plugin name
  * @param chainId the chain ID
  * @param address the resolver contract address
  * @param node the ENS node
  * @returns a unique resolver ID
  */
 
-export const makeResolverId = (
-  pluginName: PluginName,
-  chainId: number,
-  address: Address,
-  node: Node,
-) =>
+export const makeResolverId = (chainId: number, address: Address, node: Node) =>
   [
-    // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
-    pluginName === PluginName.Subgraph ? null : chainId,
+    // null out chainId prefix iff subgraph-compat, otherwise include for chain-scoping
+    config.subgraphCompatibility ? null : chainId,
     // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
     address.toLowerCase(),
     node,
@@ -33,19 +28,18 @@ export const makeResolverId = (
 
 /**
  * Makes a unique, chain-scoped event ID.
- * For Subgraph plugin events, no chainId prefix is used (subgraph-compat).
+ * In Subgraph-compatibility mode, no chainId prefix is used (subgraph-compat).
  *
- * @example Subgraph plugin: `${blockNumber}-${logIndex}(-${transferIndex})`
- * @example All other plugins (chain-scoped): `${chainId}-${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example Subgraph-compat: `${blockNumber}-${logIndex}(-${transferIndex})`
+ * @example Otherwise (chain-scoped): `${chainId}-${blockNumber}-${logIndex}(-${transferIndex})`
  *
- * @param prefix optional prefix
+ * @param chainId
  * @param blockNumber
  * @param logIndex
  * @param transferIndex
  * @returns
  */
 export const makeEventId = (
-  pluginName: PluginName,
   chainId: number,
   blockNumber: bigint,
   logIndex: number,
@@ -53,7 +47,7 @@ export const makeEventId = (
 ) =>
   [
     // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
-    pluginName === PluginName.Subgraph ? null : chainId,
+    config.subgraphCompatibility ? null : chainId,
     blockNumber.toString(),
     logIndex.toString(),
     transferIndex?.toString(),
@@ -86,13 +80,12 @@ export const makeEventId = (
  * Registration IDs issued by the ENS Subgraph. In the future we may relax exact subgraph backwards
  * compatibility and use `node` for all Registration IDs.
  *
- * @param pluginName the name of the active plugin issuing the registration
  * @param labelHash the labelHash of the name that was registered
  * @param node the node of the name that was registered
  * @returns a unique registration id
  */
-export const makeRegistrationId = (pluginName: PluginName, labelHash: LabelHash, node: Node) => {
-  if (pluginName === PluginName.Subgraph) return labelHash;
+export const makeRegistrationId = (labelHash: LabelHash, node: Node) => {
+  if (config.subgraphCompatibility) return labelHash;
   return node;
 };
 

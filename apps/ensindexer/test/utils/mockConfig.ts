@@ -14,6 +14,7 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   plugins: "subgraph",
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: "true",
+  indexResolverRecords: "true",
   port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: {

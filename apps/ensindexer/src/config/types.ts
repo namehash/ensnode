@@ -168,6 +168,19 @@ export interface ENSIndexerConfig {
    *   by {@link plugins} must be 1
    */
   globalBlockrange: Blockrange;
+
+  /**
+   * A flag derived from the built config indicating whethere ENSIndexer should operate in
+   * subgraph-compatibility mode. This flag is true if
+   * a) only the subgraph plugin is activated,
+   * b) healReverseAddresess is false, and
+   * c) indexRecordValues is false
+   *
+   * If {@link subgraphCompatibility} is true, ENSIndexer will:
+   * 1) use subgraph-compatible IDs for entities and events and
+   * 2) limit Resolver indexing behavior to subgraph indexing semantics
+   */
+  subgraphCompatibility: boolean;
 }
 
 /**
@@ -196,6 +209,7 @@ export interface ENSIndexerEnvironment {
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
+  indexResolverRecords: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;
