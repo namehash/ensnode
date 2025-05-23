@@ -63,7 +63,7 @@ const calculateDurationYears = (registrationDate: string, expiryDate: string) =>
 };
 
 // Helper function to format relative time
-const formatRelativeTime = (timestamp: string) => {
+export const formatRelativeTime = (timestamp: string) => {
   try {
     const parsedTimestamp = parseInt(timestamp);
     if (isNaN(parsedTimestamp)) {

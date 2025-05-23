@@ -4,6 +4,12 @@ import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
+import { BaseChainIcon } from "@/components/icons/BaseChainIcon";
+import { EthereumIcon } from "@/components/icons/EthereumIcon";
+import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
+import { EthereumTestNetIcon } from "@/components/icons/EthereumTestNetIcon";
+import { LineaChainIcon } from "@/components/icons/LineaChainIcon";
+import { formatRelativeTime } from "@/components/recent-registrations";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
@@ -65,11 +71,11 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
       <Card className="w-full flex flex-col gap-2">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Indexing Stats</span>
+            <span>Indexed Chains</span>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-row gap-8">
+        <CardContent className="flex flex-col min-[1300px]:flex-row gap-8">
           {globalIndexingStatusViewModel(
             networkIndexingStatusByChainId,
             ensDeploymentChain,
@@ -86,6 +92,15 @@ interface NetworkIndexingStatsCardProps {
   network: NetworkStatusViewModel;
 }
 
+type chainName =
+  | "Base"
+  | "OP Mainnet"
+  | "Ethereum"
+  | "Linea Mainnet"
+  | "Sepolia"
+  | "Anvil"
+  | "Holesky";
+
 /**
  * Component to display network indexing stats for a single network.
  * @param props
@@ -93,19 +108,32 @@ interface NetworkIndexingStatsCardProps {
  */
 function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
   const { network } = props;
+  const chainIcons: Record<chainName, React.ReactNode> = {
+    Base: <BaseChainIcon width={18} height={18} />,
+    "OP Mainnet": <BaseChainIcon width={16} height={16} />,
+    "Linea Mainnet": <LineaChainIcon width={18} height={18} />,
+    Sepolia: <EthereumTestNetIcon width={18} height={18} />,
+    Anvil: <EthereumLocalIcon width={18} height={18} />,
+    Holesky: <EthereumTestNetIcon width={18} height={18} />,
+    Ethereum: <EthereumIcon width={18} height={18} />,
+  };
 
   return (
     <Card key={network.name}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">{network.name}</span>
+            <div className="flex flex-row justify-start items-center gap-2">
+              <p className="font-semibold text-left">{network.name}</p>
+              {chainIcons[network.name as chainName]}
+            </div>
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
+          {/*TODO: Points 3 & 4 from Issue #506*/}
           <BlockStats label="Last indexed block" block={network.lastIndexedBlock} />
           <BlockStats label="Latest safe block" block={network.latestSafeBlock} />
         </div>
@@ -132,12 +160,22 @@ function BlockStats({ label, block }: BlockSatsProps) {
     );
   }
 
+  let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString());
+
+  if (
+    block.timestamp <= Math.floor(Date.now() / 1000) ||
+    calculatedRelativeTime === "less than a minute ago"
+  ) {
+    calculatedRelativeTime = "just now";
+  }
+
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
+      {/*TODO: Make these a links to block explorer (only for those chains that allow it, otherwise should remain as is)*/}
       <div className="text-lg font-semibold">{block.number ? `#${block.number}` : "N/A"}</div>
-      <div className="text-sm text-muted-foreground">
-        {block.timestamp ? intlFormat(fromUnixTime(block.timestamp)) : "N/A"}
+      <div className="text-xs text-muted-foreground">
+        {block.timestamp ? calculatedRelativeTime : "N/A"}
       </div>
     </div>
   );
