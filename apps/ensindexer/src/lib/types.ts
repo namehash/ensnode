@@ -30,4 +30,7 @@ export type RegistrarManagedName = string;
  * @docs https://ponder.sh/docs/contracts-and-networks#block-range
  * i.e. Pick<ContractConfig, 'startBlock' | 'endBlock'>
  */
-export type Blockrange = { startBlock: number | undefined; endBlock: number | undefined };
+export type Blockrange = {
+  startBlock?: number;
+  endBlock?: number;
+};
