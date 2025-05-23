@@ -177,8 +177,8 @@ export interface ENSIndexerConfig {
    * c) indexRecordValues is false
    *
    * If {@link subgraphCompatibility} is true, ENSIndexer will:
-   * 1) use subgraph-compatible IDs for entities and events and
-   * 2) limit Resolver indexing behavior to subgraph indexing semantics
+   * 1) use subgraph-compatible IDs for entities and events
+   * 2) limit indexing behavior to subgraph indexing semantics
    */
   subgraphCompatibility: boolean;
 }

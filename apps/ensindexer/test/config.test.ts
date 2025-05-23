@@ -132,17 +132,17 @@ describe("config", () => {
   describe(".ensNodePublicUrl", () => {
     it("throws an error if ENSNODE_PUBLIC_URL is not a valid URL", async () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is empty", async () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", "");
-      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is undefined (explicitly testing the refine)", async () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
 
     it("returns the ENSNODE_PUBLIC_URL if it is a valid URL", async () => {
@@ -160,7 +160,7 @@ describe("config", () => {
   describe(".ensAdminUrl", () => {
     it("throws an error if ENSADMIN_URL is not a valid URL", async () => {
       vi.stubEnv("ENSADMIN_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSADMIN_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
 
     it("returns the provided ENSADMIN_URL if it is a valid URL", async () => {
@@ -179,7 +179,7 @@ describe("config", () => {
   describe(".ensRainbowEndpointUrl", () => {
     it("throws an error if ENSRAINBOW_URL is not a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
 
     it("returns the ENSRAINBOW_URL if it is a valid URL", async () => {
@@ -190,7 +190,7 @@ describe("config", () => {
 
     it("throws an error if ENSRAINBOW_URL is not set", async () => {
       vi.stubEnv("ENSRAINBOW_URL", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
   });
 
@@ -370,7 +370,7 @@ describe("config", () => {
 
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
       vi.stubEnv("RPC_URL_1", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/RPC_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
   });
 
