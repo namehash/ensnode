@@ -8,41 +8,57 @@ ARG DATA_IMAGE_NAME="ensrainbow-data"
 
 FROM --platform=${DATA_IMAGE_PLATFORM} ghcr.io/namehash/ensnode/${DATA_IMAGE_NAME} AS ensrainbow-data
 
+# Use a slim Node.js image as the base
 FROM --platform=${TARGETPLATFORM} node:22-slim AS base
+
+# Install system dependencies required for downloading and extracting
+RUN apt-get update && apt-get install -y wget tar && rm -rf /var/lib/apt/lists/*
+
+# Set up pnpm
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+
+# Set the working directory
 WORKDIR /app
 
-###################
-## Application Deps — standard monorepo pnpm install from base
-###################
-
-FROM base AS deps
+# Copy all source files to the /app directory
+# This includes the main application and any scripts like download-database-artifact.sh
 COPY . .
+
+# Install dependencies using pnpm
+# This will install dependencies for all packages in the monorepo, including ensrainbow
+# Using --prod to only install production dependencies for a smaller image, if applicable,
+# or ensure all necessary scripts are available if not using --prod.
+# The `download-database-artifact.sh` and `entrypoint.sh` don't have separate pnpm deps,
+# but `pnpm run serve` and `pnpm run validate:lite` do.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-###################
-## App Server — runs server w/ data dir
-###################
+# Specifically for ensrainbow, ensure any build steps are done if necessary.
+# If `pnpm run serve` or `validate:lite` require a build step for ensrainbow itself:
+# WORKDIR /app/apps/ensrainbow
+# RUN pnpm run build # If there's a build script for ensrainbow itself
+# WORKDIR /app # Return to root for subsequent general commands if any
 
-FROM deps AS runner
+# Copy the entrypoint script and make it executable
+# Ensure this path is correct relative to the monorepo root during COPY
+COPY ./apps/ensrainbow/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# cwd to ensrainbow
-WORKDIR /app/apps/ensrainbow
+# Copy the download script and make it executable (if not already handled by COPY . . and permissions)
+# It's assumed to be in /app/apps/ensrainbow/download-database-artifact.sh after `COPY . .`
+RUN chmod +x /app/apps/ensrainbow/download-database-artifact.sh
 
-# copy data dir from ensrainbow-data
-COPY --from=ensrainbow-data /app/data ./data
-
-# Run a lightweight database validation to ensure the pre-built database is intact and compatible
-# This validation checks critical database integrity without performing a full validation,
-# which helps reduce container build time while still ensuring the application can start properly
-RUN pnpm run validate:lite
-
-# Set environment variables
+# Set environment variables for the application
 ENV NODE_ENV=production
-ENV PORT=3223
+# PORT will be used by entrypoint.sh, defaulting to 3223 if not set at runtime
+# SCHEMA_VERSION, NAMESPACE, LABEL_SET must be provided at runtime to the entrypoint
+
+# Default port, can be overridden by PORT env var for the entrypoint/serve command
 EXPOSE 3223
 
-# serve
-CMD ["pnpm", "run", "serve"]
+# Set the entrypoint to the new script
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# CMD is effectively handled by the exec call in entrypoint.sh
+# CMD ["pnpm", "run", "serve"] # This would be overridden by ENTRYPOINT or run by it

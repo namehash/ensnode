@@ -145,6 +145,8 @@ describe("EnsRainbowApiClient", () => {
           versionInfo: {
             version: "1.0.0",
             schema_version: 1,
+            namespace: "test-namespace",
+            highest_label_set: 123,
           },
         } satisfies EnsRainbow.VersionResponse),
     });

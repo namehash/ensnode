@@ -6,7 +6,7 @@ import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
 import { convertCommand } from "@/commands/convert-command";
-import { ingestCommand } from "@/commands/ingest-command";
+// import { ingestCommand } from "@/commands/ingest-command";
 import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
@@ -64,29 +64,29 @@ export function createCLI(options: CLIOptions = {}) {
   return yargs()
     .scriptName("ensrainbow")
     .exitProcess(exitProcess)
-    .command(
-      "ingest",
-      "Ingest labels from SQL dump into LevelDB",
-      (yargs: Argv) => {
-        return yargs
-          .option("input-file", {
-            type: "string",
-            description: "Path to the gzipped SQL dump file",
-            default: join(process.cwd(), "ens_names.sql.gz"),
-          })
-          .option("data-dir", {
-            type: "string",
-            description: "Directory to store LevelDB data",
-            default: getDefaultDataSubDir(),
-          });
-      },
-      async (argv: ArgumentsCamelCase<IngestArgs>) => {
-        await ingestCommand({
-          inputFile: argv["input-file"],
-          dataDir: argv["data-dir"],
-        });
-      },
-    )
+    // .command(
+    //   "ingest",
+    //   "Ingest labels from SQL dump into LevelDB",
+    //   (yargs: Argv) => {
+    //     return yargs
+    //       .option("input-file", {
+    //         type: "string",
+    //         description: "Path to the gzipped SQL dump file",
+    //         default: join(process.cwd(), "ens_names.sql.gz"),
+    //       })
+    //       .option("data-dir", {
+    //         type: "string",
+    //         description: "Directory to store LevelDB data",
+    //         default: getDefaultDataSubDir(),
+    //       });
+    //   },
+    //   async (argv: ArgumentsCamelCase<IngestArgs>) => {
+    //     await ingestCommand({
+    //       inputFile: argv["input-file"],
+    //       dataDir: argv["data-dir"],
+    //     });
+    //   },
+    // )
     .command(
       "ingest-ensrainbow",
       "Ingest labels from protobuf file into LevelDB",

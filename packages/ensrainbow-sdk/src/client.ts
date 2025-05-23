@@ -129,6 +129,16 @@ export namespace EnsRainbow {
      * ENSRainbow schema version.
      */
     schema_version: number;
+
+    /**
+     * ENSRainbow namespace.
+     */
+    namespace: string;
+
+    /**
+     * ENSRainbow highest label set.
+     */
+    highest_label_set: number;
   }
 
   /**

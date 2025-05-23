@@ -97,6 +97,8 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       versionInfo: {
         version: packageJson.version,
         schema_version: SCHEMA_VERSION,
+        namespace: server.getNamespace(),
+        highest_label_set: server.getHighestLabelSet(),
       },
     };
     logger.debug(`Version result:`, result);

@@ -10,6 +10,14 @@ export class ENSRainbowServer {
   private namespace!: string;
   private highestLabelSet!: number;
 
+  public getNamespace(): string {
+    return this.namespace;
+  }
+
+  public getHighestLabelSet(): number {
+    return this.highestLabelSet;
+  }
+
   private constructor(db: ENSRainbowDB) {
     this.db = db;
     // Namespace and highest label set will be set in init
