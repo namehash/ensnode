@@ -12,8 +12,8 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
 import * as rr from "./resolver-records";
 
 /**
- * These function describe the shared indexing behavior for Resolver functions across all indexed
- * chains.
+ * These functions describe the shared indexing behavior for Resolver functions across all indexed
+ * chains, compatible with subgraph indexing semantics.
  *
  * NOTE: The indexing logic in this file must use upserts because a 'Resolver' can be _any_
  * contract that emits events with the relevant signatures. The contract may not necessarily be

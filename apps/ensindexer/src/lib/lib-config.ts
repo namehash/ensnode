@@ -1,4 +1,4 @@
-import type { RpcConfigEnvironment } from "@/config/types";
+import type { ENSIndexerConfig, RpcConfigEnvironment } from "@/config/types";
 
 export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
@@ -42,4 +42,24 @@ export function getRpcConfigsFromEnv(): Record<number, RpcConfigEnvironment> {
   });
 
   return rpcConfigs;
+}
+
+export function prettyPrintConfig(config: ENSIndexerConfig) {
+  return JSON.stringify(
+    {
+      ...config,
+      databaseUrl: "*******",
+      rpcConfigs: Object.fromEntries(
+        Object.entries(config.rpcConfigs).map(([chainId, rpcConfig]) => [
+          chainId,
+          {
+            ...rpcConfig,
+            url: "*******",
+          },
+        ]),
+      ),
+    } as ENSIndexerConfig,
+    null,
+    2,
+  );
 }

@@ -1,5 +1,6 @@
 import config from "@/config";
 import { ENSIndexerConfig } from "@/config/types";
+import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import type { MergedTypes } from "@/lib/plugin-helpers";
 
@@ -67,5 +68,7 @@ setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
 ////////
+
+console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
 
 export default ponderConfig;
