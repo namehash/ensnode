@@ -1,15 +1,14 @@
 import { type Context } from "ponder:registry";
-import schema from "ponder:schema";
-import { Node } from "@ensnode/utils";
-import { type Address, Hash, type Hex, hexToBytes } from "viem";
+import schema, { ext_resolverTextRecords } from "ponder:schema";
+import { ETH_COIN_TYPE, Node } from "@ensnode/utils";
+import { type Address, Hash, type Hex, hexToBytes, isAddress, zeroAddress } from "viem";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
-import { makeResolverId } from "@/lib/ids";
+import { makeResolverId, makeResolverRecordId } from "@/lib/ids";
 import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import * as rr from "./resolver-records";
 
 /**
  * These functions describe the shared indexing behavior for Resolver functions across all indexed
@@ -20,6 +19,33 @@ import * as rr from "./resolver-records";
  * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
  * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
  */
+
+async function handleAddressRecordUpdate(
+  context: Context,
+  resolverId: string,
+  coinType: bigint,
+  address: Address,
+) {
+  const recordId = makeResolverRecordId(resolverId, coinType.toString());
+  const isDeletion = !isAddress(address) || address === zeroAddress;
+  if (isDeletion) {
+    // delete
+    await context.db.delete(ext_resolverTextRecords, { id: recordId });
+  } else {
+    // upsert
+    await context.db
+      .insert(schema.ext_resolverAddressRecords)
+      // create a new address record entity
+      .values({
+        id: recordId,
+        resolverId,
+        coinType,
+        address,
+      })
+      // or update the existing one
+      .onConflictDoUpdate({ address });
+  }
+}
 
 export async function handleAddrChanged({
   context,
@@ -52,7 +78,10 @@ export async function handleAddrChanged({
     addrId: address,
   });
 
-  if (config.indexResolverRecords) await rr.handleAddrChanged({ context, event });
+  if (config.indexResolverRecords) {
+    // AddrChanged is just AddressChanged with implicit coinType of ETH
+    await handleAddressRecordUpdate(context, id, ETH_COIN_TYPE, event.args.a);
+  }
 }
 
 export async function handleAddressChanged({
@@ -84,7 +113,9 @@ export async function handleAddressChanged({
     addr: newAddress,
   });
 
-  if (config.indexResolverRecords) await rr.handleAddressChanged({ context, event });
+  if (config.indexResolverRecords) {
+    await handleAddressRecordUpdate(context, id, event.args.coinType, event.args.newAddress);
+  }
 }
 
 export async function handleNameChanged({
@@ -110,6 +141,10 @@ export async function handleNameChanged({
     resolverId: id,
     name,
   });
+
+  if (config.indexResolverRecords) {
+    // TODO: name records
+  }
 }
 
 export async function handleABIChanged({
@@ -188,6 +223,9 @@ export async function handleTextChanged({
     .update(schema.resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
+  // NOTE: value can be undefined in the case of a LegacyPublicResolver event, and the subgraph
+  // indexes that as `null`.
+  //
   // NOTE: ponder's (viem's) event parsing produces empty string for some TextChanged events
   // (which is correct) but the subgraph records null for these instances, so we coalesce
   // falsy strings to null for compatibility
@@ -195,7 +233,7 @@ export async function handleTextChanged({
   //
   // NOTE: we also must strip null bytes in strings, which are unindexable by Postgres
   // ex: https://etherscan.io/tx/0x2eb93d872a8f3e4295ea50773c3816dcaea2541f202f650948e8d6efdcbf4599#eventlog
-  const sanitizedValue = !value ? null : stripNullBytes(value) || null;
+  const sanitizedValue = value === undefined ? null : stripNullBytes(value) || null;
 
   // log ResolverEvent
   await context.db.insert(schema.textChanged).values({
@@ -205,7 +243,38 @@ export async function handleTextChanged({
     value: sanitizedValue,
   });
 
-  if (config.indexResolverRecords) await rr.handleTextChanged({ context, event });
+  if (config.indexResolverRecords) {
+    // if value is undefined, this is a LegacyPublicResolver event, nothing to do
+    if (value === undefined) return;
+
+    const recordId = makeResolverRecordId(id, key);
+
+    // consider this a deletion iff value is exactly empty string
+    const isDeletion = value === "";
+    if (isDeletion) {
+      // delete
+      await context.db.delete(ext_resolverTextRecords, { id: recordId });
+    } else {
+      // upsert
+
+      // if no sanitized value to index, don't create a record
+      // TODO: represent null bytes correctly or stripNullBytes and store them anyway
+      //  but that's not technically correct, so idk
+      if (!sanitizedValue) return;
+
+      await context.db
+        .insert(schema.ext_resolverTextRecords)
+        // create a new text record entity
+        .values({
+          id: recordId,
+          resolverId: id,
+          key,
+          value: sanitizedValue,
+        })
+        // or update the existing one
+        .onConflictDoUpdate({ value: sanitizedValue });
+    }
+  }
 }
 
 export async function handleContenthashChanged({
@@ -397,6 +466,24 @@ export async function handleDNSRecordChanged({
           key,
           value: sanitizedValue,
         });
+
+        if (config.indexResolverRecords) {
+          // no sanitized value to index? bail
+          if (sanitizedValue === null) break;
+
+          const recordId = makeResolverRecordId(id, key);
+          await context.db
+            .insert(schema.ext_resolverTextRecords)
+            // create a new text record entity
+            .values({
+              id: recordId,
+              resolverId: id,
+              key,
+              value: sanitizedValue,
+            })
+            // or update the existing one
+            .onConflictDoUpdate({ value: sanitizedValue });
+        }
         break;
       }
       default: {
@@ -462,6 +549,11 @@ export async function handleDNSRecordDeleted({
     key,
     value: null,
   });
+
+  if (config.indexResolverRecords) {
+    const recordId = makeResolverRecordId(id, key);
+    await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
+  }
 }
 
 export async function handleDNSZonehashChanged({
@@ -471,7 +563,7 @@ export async function handleDNSZonehashChanged({
   context: Context;
   event: EventWithArgs<{ node: Node; zonehash: Hash }>;
 }) {
-  // explicitly ignored
+  // explicitly ignored / not implemented
 }
 
 export async function handleZoneCreated({
@@ -481,5 +573,5 @@ export async function handleZoneCreated({
   context: Context;
   event: EventWithArgs<{ node: Node; version: bigint }>;
 }) {
-  // explicitly ignored
+  // explicitly ignored / not implemented
 }
