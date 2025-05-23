@@ -10,7 +10,7 @@ import ENSAdminDecentralizationMobileImage from "../../assets/Decentralization.p
 import InfrastructureGapsMobileImage from "../../assets/InfrastructureGaps.png";
 import ProtocolInnovationsMobileImage from "../../assets/ProtocolInnovations.png";
 import SectionDivider from "../atoms/SectionDivider.tsx";
-import InnovationSection, { InnovationSectionProps } from "../molecules/InnovationSection.tsx";
+import InnovationSection, { type InnovationSectionProps } from "../molecules/InnovationSection.tsx";
 
 export default function InfrastructureInnovations() {
   return (

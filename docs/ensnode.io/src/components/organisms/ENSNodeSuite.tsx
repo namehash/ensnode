@@ -1,5 +1,5 @@
 import ButtonIsland, {
-  ButtonIslandProps,
+  type ButtonIslandProps,
 } from "@workspace/docs/ensnode.io/src/components/atoms/ButtonIsland.tsx";
 import { StarIcon } from "@workspace/docs/ensnode.io/src/components/atoms/icons/StarIcon.tsx";
 import cc from "classcat";
