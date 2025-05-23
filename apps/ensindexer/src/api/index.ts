@@ -2,19 +2,13 @@ import packageJson from "@/../package.json";
 
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { Context, Hono, MiddlewareHandler } from "hono";
+import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
+import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
-import {
-  ensAdminUrl,
-  ensNodePublicUrl,
-  getEnsDeploymentChain,
-  getRequestedPluginNames,
-  ponderDatabaseSchema,
-} from "@/lib/ponder-helpers";
 import {
   fetchEnsRainbowVersion,
   fetchFirstBlockToIndexByChainId,
@@ -26,11 +20,6 @@ import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
-import {
-  addDocStringsToIntrospection,
-  extendWithBaseDefinitions,
-  generateTypeDocSet,
-} from "ponder-enrich-gql-docs-middleware";
 
 const app = new Hono();
 
@@ -57,8 +46,8 @@ app.onError((error, ctx) => {
 // use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
   try {
-    const ensAdminRedirectUrl = new URL(ensAdminUrl());
-    ensAdminRedirectUrl.searchParams.set("ensnode", ensNodePublicUrl());
+    const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
+    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl);
 
     return ctx.redirect(ensAdminRedirectUrl);
   } catch (error) {
@@ -77,9 +66,9 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: getRequestedPluginNames().join(","),
-      DATABASE_SCHEMA: ponderDatabaseSchema(),
-      ENS_DEPLOYMENT_CHAIN: getEnsDeploymentChain(),
+      ACTIVE_PLUGINS: config.plugins.join(","),
+      DATABASE_SCHEMA: config.ponderDatabaseSchema,
+      ENS_DEPLOYMENT_CHAIN: config.ensDeploymentChain,
     },
     db,
     query: {

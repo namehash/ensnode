@@ -24,6 +24,11 @@ It is **extremely important** that you use a private node or private RPC endpoin
 
 **DO NOT TRY TO USE PUBLIC RPC ENDPOINTS. THEY WILL NOT WORK!!!**
 :::
+:::caution[Performance Tip: ENSRainbow Server]
+Warning: Configuring ENSIndexer to use the public ENSRainbow server (`https://api.ensrainbow.io`) will significantly slow down indexing.
+For optimal indexing performance, always colocate ENSIndexer and ENSRainbow. For example, if you are running ENSIndexer locally, you should also run a local instance of ENSRainbow and set `ENSRAINBOW_URL` to your local ENSRainbow server.
+:::
+ENSIndexer's behavior can be configured through environment variables.
 
 <Code code={envExample} lang="bash" title=".env.local.example" />
 

@@ -8,6 +8,20 @@ import sepolia from "./sepolia";
 export * from "./lib/types";
 
 /**
+ * Note that here, we define the global ENSDeploymentGlobalType type based off mainnet (which fully
+ * specifies all plugin configs). This type will be used to cast each specific ENSDeployment type
+ * to the global type in order to ensure that at type-check-time and in `ALL_PLUGINS` every plugin's
+ * `config` has valid values (and therefore its type can continue to be inferred).
+ *
+ * This means that initially upon building the
+ * plugin configs, if the user is selecting a deployment that does not fully specify every available
+ * plugin, the plugins that are not in that deployment's specification are technically pointing at
+ * the mainnet deployment. This is never an issue, however, as those plugin are filtered out
+ * (see ponder.config.ts and `getActivePlugins`) and never activated.
+ */
+export type ENSDeploymentGlobalType = typeof ENSDeployments.mainnet;
+
+/**
  * ENSDeployments maps from an ENSDeploymentChain to an ENSDeployment.
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with a distinct onchain root
@@ -37,3 +51,17 @@ export const ENSDeployments = {
   holesky,
   "ens-test-env": ensTestEnv,
 } as const satisfies Record<ENSDeploymentChain, ENSDeployment>;
+
+/**
+ * Returns the ENS deployment configuration for the specified deployment chain.
+ *
+ * This function takes a deployment chain identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * and returns the corresponding ENS deployment configuration. The returned configuration is cast to the
+ * global deployment type to ensure type safety and consistency across all deployments.
+ *
+ * @param ensDeploymentChain - The deployment chain identifier
+ * @returns The ENS deployment configuration for the specified chain
+ */
+
+export const getENSDeployment = (ensDeploymentChain: keyof typeof ENSDeployments) =>
+  ENSDeployments[ensDeploymentChain] as ENSDeploymentGlobalType;
