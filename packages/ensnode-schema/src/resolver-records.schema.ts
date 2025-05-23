@@ -13,8 +13,15 @@ import { resolver } from "./subgraph.schema";
 
 // add the additional `Resolver.records` relationship to subgraph's Resolver entity
 export const ext_resolverRelations = relations(resolver, ({ one, many }) => ({
+  // resolver has one set of (flat) record values
+  records: one(ext_resolverRecords, {
+    fields: [resolver.id],
+    references: [ext_resolverRecords.resolverId],
+  }),
+
   // resolver has many address records
   addresses: many(ext_resolverAddressRecords),
+
   // resolver has many text records
   texts: many(ext_resolverTextRecords),
 }));
@@ -70,3 +77,23 @@ export const ext_resolverTextRecordsRelations = relations(
     }),
   }),
 );
+
+// represents all of the 'flat' records attached to a Resolver (which is pairwise (Resolver contract, Node))
+export const ext_resolverRecords = onchainTable("ext_resolver_records", (t) => ({
+  // keyed by just (resolverId) because resolver:records is 1:1
+  id: t.text().primaryKey(),
+  resolverId: t.text().notNull(),
+
+  // the various flat records
+  name: t.text(),
+
+  // TODO: others
+}));
+
+export const ext_resolverRecordsRelations = relations(ext_resolverRecords, ({ one, many }) => ({
+  // belongs to resolver
+  resolver: one(resolver, {
+    fields: [ext_resolverRecords.resolverId],
+    references: [resolver.id],
+  }),
+}));

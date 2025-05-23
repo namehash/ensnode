@@ -4,7 +4,12 @@ import { ETH_COIN_TYPE, Node } from "@ensnode/utils";
 import { type Address, Hash, type Hex, hexToBytes, isAddress, zeroAddress } from "viem";
 
 import config from "@/config";
-import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import {
+  sharedEventValues,
+  upsertAccount,
+  upsertResolver,
+  upsertResolverRecords,
+} from "@/lib/db-helpers";
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeResolverId, makeResolverRecordId } from "@/lib/ids";
 import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
@@ -143,7 +148,12 @@ export async function handleNameChanged({
   });
 
   if (config.indexResolverRecords) {
-    // TODO: name records
+    await upsertResolverRecords(context, {
+      id,
+      resolverId: id,
+
+      name: name || null, // coalese falsy value into null
+    });
   }
 }
 

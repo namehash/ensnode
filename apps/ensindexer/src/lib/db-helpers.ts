@@ -19,6 +19,13 @@ export async function upsertResolver(
   return context.db.insert(schema.resolver).values(values).onConflictDoUpdate(values);
 }
 
+export async function upsertResolverRecords(
+  context: Context,
+  values: typeof schema.ext_resolverRecords.$inferInsert,
+) {
+  return context.db.insert(schema.ext_resolverRecords).values(values).onConflictDoUpdate(values);
+}
+
 export async function upsertRegistration(
   context: Context,
   values: typeof schema.registration.$inferInsert,
