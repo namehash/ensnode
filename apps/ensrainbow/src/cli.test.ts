@@ -109,29 +109,6 @@ describe("CLI", () => {
   });
 
   describe("CLI Interface", () => {
-    // describe("ingest command", () => {
-    //   it("should execute ingest command with custom data directory", async () => {
-    //     const customInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
-
-    //     await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
-
-    //     // Verify database was created by trying to validate it
-    //     await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
-    //   });
-    // });
-
-    // describe("ingest command with environment-specific data", () => {
-    // it("should successfully ingest environment-specific test data", async () => {
-    //   // Use ens-test-env test data for specialized testing
-    //   const customInputFile = join(TEST_FIXTURES_DIR, "ens_test_env_names.sql.gz");
-
-    //   await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
-
-    //   // Verify database was created and can be validated
-    //   await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
-    // });
-    // });
-
     describe("ingest command (ensrainbow)", () => {
       it("should convert SQL and ingest ensrainbow", async () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
@@ -409,7 +386,7 @@ describe("CLI", () => {
           "--data-dir",
           firstTestDir,
         ]);
-        console.log("KURWAAAAAAAAAA1");
+
         // Second ingest should fail because of namespace mismatch when using the same database
         let error1: Error | undefined;
         try {
@@ -423,13 +400,13 @@ describe("CLI", () => {
         } catch (err) {
           error1 = err as Error;
         }
-        console.log("KURWAAAAAAAAAA2");
+
         // Check that we got the expected error
         expect(error1).toBeDefined();
         expect(error1?.message).toMatch(
           /Namespace mismatch! Database namespace: test_ens_names, File namespace: different_namespace!/,
         );
-        console.log("KURWAAAAAAAAAA3");
+
         // Ingest third file fails for the same reason
         let error2: Error | undefined;
         try {
@@ -443,7 +420,7 @@ describe("CLI", () => {
         } catch (err) {
           error2 = err as Error;
         }
-        console.log("KURWAAAAAAAAAA4");
+
         // Check that we got the expected error
         expect(error2).toBeDefined();
         expect(error2?.message).toMatch(
@@ -555,20 +532,26 @@ describe("CLI", () => {
       });
     });
 
-    // describe("validate command", () => {
-    //   it("should execute validate command with custom data directory", async () => {
-    //     // First ingest some test data
-    //     const customInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
-    //     await cli.parse(["ingest", "--input-file", customInputFile, "--data-dir", testDataDir]);
+    describe("validate command", () => {
+      it("should execute validate command with custom data directory", async () => {
+        // First ingest some test data
+        const ensrainbowOutputFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
+        await cli.parse([
+          "ingest-ensrainbow",
+          "--input-file",
+          ensrainbowOutputFile,
+          "--data-dir",
+          testDataDir,
+        ]);
 
-    //     // Then validate it
-    //     await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
-    //   });
+        // Then validate it
+        await expect(cli.parse(["validate", "--data-dir", testDataDir])).resolves.not.toThrow();
+      });
 
-    //   it("should fail validation on empty/non-existent database", async () => {
-    //     await expect(cli.parse(["validate", "--data-dir", testDataDir])).rejects.toThrow();
-    //   });
-    // });
+      it("should fail validation on empty/non-existent database", async () => {
+        await expect(cli.parse(["validate", "--data-dir", testDataDir])).rejects.toThrow();
+      });
+    });
 
     describe("general CLI behavior", () => {
       it("should require a command", async () => {
