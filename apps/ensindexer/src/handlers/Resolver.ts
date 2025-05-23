@@ -3,6 +3,8 @@ import schema from "ponder:schema";
 import { Node, PluginName } from "@ensnode/utils";
 import { type Address, Hash, type Hex, hexToBytes } from "viem";
 
+import config from "@/config";
+import { makeResolverRecordHandlers } from "@/handlers/resolver-records";
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
@@ -12,15 +14,18 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
 /**
  * makes a set of shared handlers for Resolver contracts
  *
- * NOTE: Both the subgraph and this indexer use upserts in this file since a 'Resolver' can be any
+ * NOTE: The indexing logic in this file must use upserts because a 'Resolver' can be _any_
  * contract that emits events with the relevant signatures. The contract may not necessarily be
  * intended for use with ENS as a Resolver. Each indexed event could be the first one indexed for
  * a contract and its Resolver ID, so we cannot assume the Resolver entity already exists.
  *
- * @param pluginName the name of the plugin using these shared handlers
+ * NOTE: because Resolver is a chain-specific set of indexing logic, not plugin-specific, these
+ * handlers cannot have access to pluginName
  */
-export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName }) => {
+export const makeResolverHandlers = () => {
+  const pluginName = PluginName.Basenames as PluginName;
   const sharedEventValues = makeSharedEventValues(pluginName);
+  const rr = makeResolverRecordHandlers({ pluginName });
 
   return {
     async handleAddrChanged({
@@ -53,6 +58,8 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         resolverId: id,
         addrId: address,
       });
+
+      if (config.indexResolverRecords) await rr.handleAddrChanged({ context, event });
     },
 
     async handleAddressChanged({
@@ -83,6 +90,8 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         coinType,
         addr: newAddress,
       });
+
+      if (config.indexResolverRecords) await rr.handleAddressChanged({ context, event });
     },
 
     async handleNameChanged({
@@ -202,6 +211,8 @@ export const makeResolverHandlers = ({ pluginName }: { pluginName: PluginName })
         key,
         value: sanitizedValue,
       });
+
+      if (config.indexResolverRecords) await rr.handleTextChanged({ context, event });
     },
 
     async handleContenthashChanged({

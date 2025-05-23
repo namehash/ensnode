@@ -109,11 +109,21 @@ export interface ENSIndexerConfig {
    * Enable or disable healing of addr.reverse subnames, defaulting to true (DEFAULT_HEAL_REVERSE_ADDRESSES).
    * If this is set to true, ENSIndexer will attempt to heal subnames of addr.reverse.
    *
-   * Note that enabling `healReverseAddresses` results in indexed data no longer being backwards
+   * Note that enabling {@link healReverseAddresses} results in indexed data no longer being backwards
    * compatible with the ENS Subgraph. For full data-level backwards compatibility with the ENS
-   * Subgraph, `healReverseAddresses` should be `false`.
+   * Subgraph, {@link healReverseAddresses} should be `false`.
    */
   healReverseAddresses: boolean;
+
+  /**
+   * Enable or disable the indexing of Resolver record values, defaulting to true (DEFAULT_INDEX_RESOLVER_RECORDS).
+   * If this is set to true, ENSIndexer will additionall track the values of Resolver records.
+   *
+   * Note that enabling {@link indexResolverRecords} results in indexed data no longer being backwards
+   * compatible with the ENS Subgraph. For full data-level backwards compatibility with the ENS
+   * Subgraph, {@link indexResolverRecords} should be `false`.
+   */
+  indexResolverRecords: boolean;
 
   /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).

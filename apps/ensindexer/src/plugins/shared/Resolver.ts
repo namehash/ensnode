@@ -11,7 +11,7 @@ import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
  */
 let hasBeenRegistered = false;
 
-export default function ({ pluginName }: ENSIndexerPluginHandlerArgs) {
+export default function (args: ENSIndexerPluginHandlerArgs) {
   if (hasBeenRegistered) return;
   hasBeenRegistered = true;
 
@@ -30,7 +30,7 @@ export default function ({ pluginName }: ENSIndexerPluginHandlerArgs) {
     handleTextChanged,
     handleVersionChanged,
     handleZoneCreated,
-  } = makeResolverHandlers({ pluginName });
+  } = makeResolverHandlers();
 
   ponder.on("Resolver:AddrChanged", handleAddrChanged);
   ponder.on("Resolver:AddressChanged", handleAddressChanged);

@@ -12,14 +12,13 @@ import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_ENS_DEPLOYMENT_CHAIN,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
+  DEFAULT_INDEX_RESOLVER_RECORDS,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
-import { PLUGIN_REQUIRED_DATASOURCES } from "@/plugins";
-import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
-import { Address, isAddress } from "viem";
 
 const parseBlockNumber = (envVarKey: string) =>
   z.coerce
@@ -128,6 +127,17 @@ const parseHealReverseAddresses = () =>
     .transform((val) => val === "true")
     .default(DEFAULT_HEAL_REVERSE_ADDRESSES);
 
+const parseIndexResolverRecords = () =>
+  z
+    .string()
+    .pipe(
+      z.enum(["true", "false"], {
+        error: "INDEX_RESOLVER_RECORDS must be 'true' or 'false'.",
+      }),
+    )
+    .transform((val) => val === "true")
+    .default(DEFAULT_INDEX_RESOLVER_RECORDS);
+
 const parsePort = () =>
   z.coerce
     .number({ error: "PORT must be an integer." })
@@ -178,6 +188,7 @@ const ENSIndexerConfigSchema = z
     ponderDatabaseSchema: parsePonderDatabaseSchema(),
     plugins: parsePlugins(),
     healReverseAddresses: parseHealReverseAddresses(),
+    indexResolverRecords: parseIndexResolverRecords(),
     port: parsePort(),
     ensRainbowEndpointUrl: parseEnsRainbowEndpointUrl(),
     rpcConfigs: parseRpcConfigs(),

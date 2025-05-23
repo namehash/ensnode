@@ -31,7 +31,10 @@ export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["confi
    *
    * https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
    **/
-  indexingBehaviorDependencies: Pick<ENSIndexerConfig, "healReverseAddresses">;
+  indexingBehaviorDependencies: Pick<
+    ENSIndexerConfig,
+    "healReverseAddresses" | "indexResolverRecords"
+  >;
 };
 
 ////////
@@ -50,6 +53,7 @@ const ponderConfig = activePlugins.reduce(
 // inject the additional indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
   healReverseAddresses: config.healReverseAddresses,
+  indexResolverRecords: config.indexResolverRecords,
 };
 
 ////////

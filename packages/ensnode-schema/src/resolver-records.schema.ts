@@ -52,6 +52,7 @@ export const ext_resolverTextRecords = onchainTable(
     id: t.text().primaryKey(),
     resolverId: t.text().notNull(),
     key: t.text().notNull(),
+
     value: t.text().notNull(),
   }),
   (t) => ({

@@ -4,6 +4,7 @@ export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
+export const DEFAULT_INDEX_RESOLVER_RECORDS = true;
 export const DEFAULT_ENS_DEPLOYMENT_CHAIN = "mainnet";
 
 /**

@@ -95,3 +95,13 @@ export const makeRegistrationId = (pluginName: PluginName, labelHash: LabelHash,
   if (pluginName === PluginName.Subgraph) return labelHash;
   return node;
 };
+
+/**
+ * Makes a unique ID for any resolver record entity.
+ *
+ * @param resolverId the id of the resolver
+ * @param key any string value
+ * @returns a unique resolver record entity id
+ */
+export const makeResolverRecordId = (resolverId: string, key: string) =>
+  [resolverId, key].join("-");
