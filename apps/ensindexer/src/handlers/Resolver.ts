@@ -148,9 +148,13 @@ export async function handleNameChanged({
       domainId: node,
       address: event.log.address,
 
-      name: name || null, // coalese falsy value into null
+      name: name || null, // coalesce falsy value into null
     });
   }
+
+  // TODO: materialize primaryName record iff this Resolver is a known reverse Resolver
+  // and scope writes by this network's assigned coinType
+  // don't forget to coalesce falsy values into null
 }
 
 export async function handleABIChanged({

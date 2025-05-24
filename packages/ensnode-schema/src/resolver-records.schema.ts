@@ -55,10 +55,10 @@
  * CCIP-Read compliant.
  */
 
-import { index, onchainTable, relations } from "ponder";
+import { onchainTable, relations, uniqueIndex } from "ponder";
 import { resolver } from "./subgraph.schema";
 
-// add the additional `Resolver.records` relationship to subgraph's Resolver entity
+// add the additional relationships to subgraph's Resolver entity
 export const ext_resolverRelations = relations(resolver, ({ one, many }) => ({
   // resolver has many address records
   addressRecords: many(ext_resolverAddressRecords),
@@ -79,7 +79,7 @@ export const ext_resolverAddressRecords = onchainTable(
     address: t.text().notNull(),
   }),
   (t) => ({
-    byCoinType: index().on(t.id, t.coinType),
+    byCoinType: uniqueIndex().on(t.id, t.coinType),
   }),
 );
 
@@ -105,7 +105,7 @@ export const ext_resolverTextRecords = onchainTable(
     value: t.text().notNull(),
   }),
   (t) => ({
-    byKey: index().on(t.id, t.key),
+    byKey: uniqueIndex().on(t.resolverId, t.key),
   }),
 );
 
