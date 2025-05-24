@@ -1,11 +1,12 @@
 /**
  * Implements Schema Definitions for optional tracking of Resolver records. Note that in the
  * subgraph schema, a Resolver does not represent a Resolver contract, it represents the pairwise
- * relationship between a Resolver contract and a Node, i.e. it represents (Resolver, Node).
+ * relationship between a Resolver contract and a Node, i.e. (Resolver Contract, Node).
  *
- * A more accurate datamodel might be to model Resolver as a contract and a ResolverRecords entity
- * to represent the pairwise relationship between a Resolver and a Node for which it holds records.
- * This should be considered in a novel schema for ENSv2.
+ * A more accurate datamodel might be to model Resolver entity as representing the contract and a
+ * ResolverRecords entity to represent the pairwise relationship between a Resolver and a Node for
+ * which it holds records. This should be considered for future schemas that break with subgraph
+ * datamodel compatibility.
  */
 
 import { index, onchainTable, relations } from "ponder";
