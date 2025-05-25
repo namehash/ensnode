@@ -147,8 +147,8 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
-const derive_subgraphCompatibility = (
-  config: Omit<ENSIndexerConfig, "subgraphCompatibility">,
+const derive_isSubgraphCompatible = (
+  config: Omit<ENSIndexerConfig, "isSubgraphCompatible">,
 ): ENSIndexerConfig => {
   const onlySubgraphPluginActivated =
     config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
@@ -157,7 +157,7 @@ const derive_subgraphCompatibility = (
 
   return {
     ...config,
-    subgraphCompatibility: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
+    isSubgraphCompatible: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
   };
 };
 
@@ -176,8 +176,8 @@ const ENSIndexerConfigSchema = z
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
   })
-  // inject ENSIndexerConfig.subgraphCompatibility
-  .transform(derive_subgraphCompatibility)
+  // inject ENSIndexerConfig.isSubgraphCompatible
+  .transform(derive_isSubgraphCompatible)
   // perform invariant checks
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)

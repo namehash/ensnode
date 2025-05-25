@@ -424,7 +424,7 @@ export async function handleDNSRecordChanged({
   }>;
 }) {
   // subgraph explicitly ignores this event
-  if (config.subgraphCompatibility) return;
+  if (config.isSubgraphCompatible) return;
 
   // but for non-subgraph plugins, we parse the RR set data for relevant records
   const { node, name, resource, record } = event.args;
@@ -520,7 +520,7 @@ export async function handleDNSRecordDeleted({
   }>;
 }) {
   // subgraph explicitly ignores this event
-  if (config.subgraphCompatibility) return;
+  if (config.isSubgraphCompatible) return;
 
   const { node, name, resource } = event.args;
 

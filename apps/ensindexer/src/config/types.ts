@@ -170,17 +170,17 @@ export interface ENSIndexerConfig {
   globalBlockrange: Blockrange;
 
   /**
-   * A flag derived from the built config indicating whethere ENSIndexer should operate in
-   * subgraph-compatibility mode. This flag is true if
+   * A flag derived from the built config indicating whethere ENSIndexer is operating in a
+   * subgraph-compatible way. This flag is true if:
    * a) only the subgraph plugin is activated,
    * b) healReverseAddresess is false, and
    * c) indexRecordValues is false
    *
-   * If {@link subgraphCompatibility} is true, ENSIndexer will:
+   * If {@link isSubgraphCompatible} is true, ENSIndexer will:
    * 1) use subgraph-compatible IDs for entities and events
    * 2) limit indexing behavior to subgraph indexing semantics
    */
-  subgraphCompatibility: boolean;
+  isSubgraphCompatible: boolean;
 }
 
 /**

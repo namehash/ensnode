@@ -450,7 +450,7 @@ describe("config", () => {
     });
   });
 
-  describe("subgraphCompatibility", () => {
+  describe("isSubgraphCompatible", () => {
     // start in subgraph-compatible state
     beforeEach(() => {
       vi.stubEnv("ACTIVE_PLUGINS", "subgraph");
@@ -460,33 +460,33 @@ describe("config", () => {
 
     it("is true when compatible", async () => {
       const config = await getConfig();
-      expect(config.subgraphCompatibility).toBe(true);
+      expect(config.isSubgraphCompatible).toBe(true);
     });
 
     it("is false when ACTIVE_PLUGINS does not include subgraph", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", "basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       const config = await getConfig();
-      expect(config.subgraphCompatibility).toBe(false);
+      expect(config.isSubgraphCompatible).toBe(false);
     });
 
     it("is false when ACTIVE_PLUGINS includes subgraph along with other plugins", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       const config = await getConfig();
-      expect(config.subgraphCompatibility).toBe(false);
+      expect(config.isSubgraphCompatible).toBe(false);
     });
 
     it("is false when HEAL_REVERSE_ADDRESSES is true", async () => {
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
       const config = await getConfig();
-      expect(config.subgraphCompatibility).toBe(false);
+      expect(config.isSubgraphCompatible).toBe(false);
     });
 
     it("is false when INDEX_RESOLVER_RECORDS is true", async () => {
       vi.stubEnv("INDEX_RESOLVER_RECORDS", "true");
       const config = await getConfig();
-      expect(config.subgraphCompatibility).toBe(false);
+      expect(config.isSubgraphCompatible).toBe(false);
     });
   });
 

@@ -31,7 +31,7 @@ describe("ids", () => {
 
   describe("in subgraph compatibility mode", () => {
     beforeEach(() => {
-      updateMockConfig({ subgraphCompatibility: true });
+      updateMockConfig({ isSubgraphCompatible: true });
     });
 
     describe("makeResolverId", () => {
