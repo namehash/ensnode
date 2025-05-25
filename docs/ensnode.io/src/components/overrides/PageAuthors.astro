@@ -1,6 +1,6 @@
 ---
-import { Octokit } from "@octokit/rest";
 import { GITHUB_TOKEN } from "astro:env/server";
+import { Octokit } from "@octokit/rest";
 
 interface Props {
   repo: string;
@@ -21,20 +21,18 @@ let commits: any[] = [];
 let error: Error | null = null;
 let uniqueAuthors: AuthorInfo[] = [];
 
-
 const octokit = new Octokit({
   auth: GITHUB_TOKEN || undefined,
 });
 
-
 if (!GITHUB_TOKEN) {
   console.warn(
-    "Warning: GITHUB_TOKEN environment variable is not set. Using public GitHub API which has strict rate limits."
+    "Warning: GITHUB_TOKEN environment variable is not set. Using public GitHub API which has strict rate limits.",
   );
 }
 
 try {
-  const [owner, repoName] = repo.split('/');
+  const [owner, repoName] = repo.split("/");
 
   const response = await octokit.repos.listCommits({
     owner,
@@ -71,7 +69,9 @@ function filterAndRemoveDuplicates(commits: any[]): AuthorInfo[] {
     }
   }
 
-  return Array.from(map.values()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
 }
 
 const MAX_AUTHORS_TO_SHOW = 12;
@@ -90,11 +90,11 @@ const additionalAuthorsCount = uniqueAuthors.length - MAX_AUTHORS_TO_SHOW;
   <div class="page-authors">
     <p>Contributions by {hasMoreAuthors && <span class="more-authors">+{additionalAuthorsCount} more</span>}</p>
     <ul class="smol-avatar-list not-content">
-      {displayedAuthors.map(({ login, id, name, message }) => (
+      {displayedAuthors.map(({ login, id, name }) => (
         <li>
           <a
             href={`https://github.com/${login}`}
-            title={`${name || login}${message ? `: ${message}` : ''}`}
+            title={`${name || login}`}
             target="_blank"
             rel="noopener noreferrer"
           >
