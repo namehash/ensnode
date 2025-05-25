@@ -71,6 +71,8 @@ jobs:
           RPC_URL_8453: https://base.drpc.org
           RPC_URL_59144: https://linea.drpc.org
           HEALTH_CHECK_TIMEOUT: 60
+          ENSRAINBOW_URL: ${{ secrets.ENSRAINBOW_URL }}
+          ENSNODE_PUBLIC_URL: ${{ secrets.ENSNODE_PUBLIC_URL }}
         run: |
           chmod +x ./.github/scripts/run_ensindexer_healthcheck.sh
           ./.github/scripts/run_ensindexer_healthcheck.sh
