@@ -20,10 +20,11 @@ export const ext_resolverRelations = relations(resolver, ({ one, many }) => ({
   }),
 
   // resolver has many address records
-  addresses: many(ext_resolverAddressRecords),
+  addressRecords: many(ext_resolverAddressRecords),
 
   // resolver has many text records
-  texts: many(ext_resolverTextRecords),
+  // NOTE: can't use `texts` because Resolver.texts is used by subgraph schema
+  textRecords: many(ext_resolverTextRecords),
 }));
 
 export const ext_resolverAddressRecords = onchainTable(
