@@ -33,6 +33,12 @@ export enum DatasourceName {
   Lineanames = "lineanames",
   ThreeDNSOptimism = "threedns-optimism",
   ThreeDNSBase = "threedns-base",
+  ReverseResolverRoot = "reverse-resolver-root",
+  ReverseResolverBase = "reverse-resolver-base",
+  ReverseResolverLinea = "reverse-resolver-linea",
+  ReverseResolverOptimism = "reverse-resolver-optimism",
+  ReverseResolverArbitrum = "reverse-resolver-arbitrum",
+  ReverseResolverScroll = "reverse-resolver-scroll",
 }
 
 /**
@@ -90,12 +96,42 @@ export type ENSDeployment = {
   [DatasourceName.Lineanames]?: Datasource;
 
   /**
-   * The Datasource for 3DNS-Powered Names on Optimism
+   * The Datasource for 3DNS-Powered Names on Optimism, optional
    */
   [DatasourceName.ThreeDNSOptimism]?: Datasource;
 
   /**
-   * The Datasource for 3DNS-Powered Names on Base
+   * The Datasource for 3DNS-Powered Names on Base, optional.
    */
   [DatasourceName.ThreeDNSBase]?: Datasource;
+
+  /**
+   * The Datasource for Reverse Resolver on the ENS Root, optional.
+   */
+  [DatasourceName.ReverseResolverRoot]?: Datasource;
+
+  /**
+   * The Datasource for Reverse Resolver on Base, optional.
+   */
+  [DatasourceName.ReverseResolverBase]?: Datasource;
+
+  /**
+   * The Datasource for Reverse Resolver on Optimism, optional.
+   */
+  [DatasourceName.ReverseResolverOptimism]?: Datasource;
+
+  /**
+   * The Datasource for Reverse Resolver on Arbitrum, optional.
+   */
+  [DatasourceName.ReverseResolverArbitrum]?: Datasource;
+
+  /**
+   * The Datasource for Reverse Resolver on Scroll, optional.
+   */
+  [DatasourceName.ReverseResolverScroll]?: Datasource;
+
+  /**
+   * The Datasource for Reverse Resolver on Linea, optional.
+   */
+  [DatasourceName.ReverseResolverLinea]?: Datasource;
 };

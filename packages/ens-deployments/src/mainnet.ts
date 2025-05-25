@@ -1,5 +1,5 @@
 import { zeroAddress } from "viem";
-import { base, linea, mainnet, optimism } from "viem/chains";
+import { arbitrum, base, linea, mainnet, optimism, scroll } from "viem/chains";
 
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
@@ -214,6 +214,91 @@ export default {
         // NOTE: 3DNSToken on Base has a hardcoded protocol-wide Resolver at this address
         address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
         startBlock: 17522624,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on the ENS Root chain.
+   */
+  [DatasourceName.ReverseResolverRoot]: {
+    chain: mainnet,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        // https://docs.ens.domains/learn/deployments/#mainnet
+        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
+        startBlock: 16925619,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Base.
+   */
+  [DatasourceName.ReverseResolverBase]: {
+    chain: base,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
+        startBlock: 0, // TODO: set this correctly
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Optimism.
+   */
+  [DatasourceName.ReverseResolverOptimism]: {
+    chain: optimism,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
+        startBlock: 0, // TODO: set this correctly
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Arbitrum.
+   */
+  [DatasourceName.ReverseResolverArbitrum]: {
+    chain: arbitrum,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
+        startBlock: 0, // TODO: set this correctly
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Scroll.
+   */
+  [DatasourceName.ReverseResolverScroll]: {
+    chain: scroll,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
+        startBlock: 0, // TODO: set this correctly
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Linea.
+   */
+  [DatasourceName.ReverseResolverLinea]: {
+    chain: linea,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
+        startBlock: 0, // TODO: set this correctly
       },
     },
   },

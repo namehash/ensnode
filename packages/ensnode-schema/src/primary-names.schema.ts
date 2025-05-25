@@ -10,6 +10,9 @@ import { account } from "./subgraph.schema";
 export const ext_accountRelations = relations(account, ({ one, many }) => ({
   // account has many primary names
   primaryNames: many(ext_accountPrimaryNames),
+
+  // account has many avatars
+  avatars: many(ext_accountAvatars),
 }));
 
 export const ext_accountPrimaryNames = onchainTable(
@@ -24,5 +27,42 @@ export const ext_accountPrimaryNames = onchainTable(
   }),
   (t) => ({
     byCoinType: uniqueIndex().on(t.accountId, t.coinType),
+  }),
+);
+
+export const ext_accountPrimaryNamesRelations = relations(
+  ext_accountPrimaryNames,
+  ({ one, many }) => ({
+    // belongs to account
+    account: one(account, {
+      fields: [ext_accountPrimaryNames.accountId],
+      references: [account.id],
+    }),
+  }),
+);
+
+export const ext_accountAvatars = onchainTable(
+  "ext_account_avatars",
+  (t) => ({
+    // keyed by (accountId, coinType)
+    id: t.text().primaryKey(),
+    accountId: t.text().notNull(),
+    coinType: t.bigint().notNull(),
+
+    avatar: t.text().notNull(),
+  }),
+  (t) => ({
+    byCoinType: uniqueIndex().on(t.accountId, t.coinType),
+  }),
+);
+
+export const ext_accountAvatarsRelations = relations(
+  ext_accountAvatars, //
+  ({ one, many }) => ({
+    // belongs to account
+    account: one(account, {
+      fields: [ext_accountAvatars.accountId],
+      references: [account.id],
+    }),
   }),
 );

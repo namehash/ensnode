@@ -1,4 +1,11 @@
-import { sepolia } from "viem/chains";
+import {
+  arbitrumSepolia,
+  baseSepolia,
+  lineaSepolia,
+  optimismSepolia,
+  scrollSepolia,
+  sepolia,
+} from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
@@ -65,4 +72,74 @@ export default {
    * linea.eth's L1Resolver is deployed to Sepolia, but we do not index Linea Sepolia names here.
    * https://github.com/Consensys/linea-ens/tree/main/packages/linea-ens-resolver/deployments/sepolia
    */
+
+  /**
+   * The Reverse Resolver on Base.
+   */
+  [DatasourceName.ReverseResolverBase]: {
+    chain: baseSepolia,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x6533c94869d28faa8df77cc63f9e2b2d6cf77eba",
+        startBlock: 21788010,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Optimism.
+   */
+  [DatasourceName.ReverseResolverOptimism]: {
+    chain: optimismSepolia,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 23770766,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Arbitrum.
+   */
+  [DatasourceName.ReverseResolverArbitrum]: {
+    chain: arbitrumSepolia,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 123142726,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Scroll.
+   */
+  [DatasourceName.ReverseResolverScroll]: {
+    chain: scrollSepolia,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 8175276,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Linea.
+   */
+  [DatasourceName.ReverseResolverLinea]: {
+    chain: lineaSepolia,
+    contracts: {
+      Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 9267966,
+      },
+    },
+  },
 } satisfies ENSDeployment;
