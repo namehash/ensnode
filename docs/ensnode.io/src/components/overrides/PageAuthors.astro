@@ -1,40 +1,61 @@
 ---
+import { Octokit } from "@octokit/rest";
+import { GITHUB_TOKEN } from "astro:env/server";
+
 interface Props {
   repo: string;
   file: string;
 }
-const { repo, file } = Astro.props;
 
-const url = new URL(`https://api.github.com/repos/${repo}/commits`);
-
-url.searchParams.set("path", file);
-url.searchParams.set("per_page", "100");
-
-let commits = [];
-let error = null;
-try {
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "ensnode-contributors/1.0",
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`GitHub API returned ${response.status}`);
-  }
-
-  commits = await response.json();
-} catch (e) {
-  error = e;
-  console.error("Error fetching contributors:", e);
+interface AuthorInfo {
+  login: string;
+  id: number;
+  name: string;
+  date: string;
+  message: string;
 }
 
-function filterAndRemoveDuplicates(commits) {
+const { repo, file } = Astro.props;
+
+let commits: any[] = [];
+let error: Error | null = null;
+let uniqueAuthors: AuthorInfo[] = [];
+
+
+const octokit = new Octokit({
+  auth: GITHUB_TOKEN || undefined,
+});
+
+
+if (!GITHUB_TOKEN) {
+  console.warn(
+    "Warning: GITHUB_TOKEN environment variable is not set. Using public GitHub API which has strict rate limits."
+  );
+}
+
+try {
+  const [owner, repoName] = repo.split('/');
+
+  const response = await octokit.repos.listCommits({
+    owner,
+    repo: repoName,
+    path: file,
+    per_page: 100,
+  });
+
+  commits = response.data;
+
+  uniqueAuthors = filterAndRemoveDuplicates(commits);
+} catch (e) {
+  error = e instanceof Error ? e : new Error(String(e));
+  console.error("Error fetching contributors:", error);
+}
+
+function filterAndRemoveDuplicates(commits: any[]): AuthorInfo[] {
   if (!commits || !Array.isArray(commits)) return [];
 
-  const map = new Map();
+  const map = new Map<number, AuthorInfo>();
+
   for (const commit of commits) {
     const author = commit.author;
 
@@ -50,19 +71,14 @@ function filterAndRemoveDuplicates(commits) {
     }
   }
 
-  return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+  return Array.from(map.values()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
-
-const uniqueAuthors = filterAndRemoveDuplicates(commits);
 
 const MAX_AUTHORS_TO_SHOW = 12;
 const displayedAuthors = uniqueAuthors.slice(0, MAX_AUTHORS_TO_SHOW);
-
 const hasMoreAuthors = uniqueAuthors.length > MAX_AUTHORS_TO_SHOW;
 const additionalAuthorsCount = uniqueAuthors.length - MAX_AUTHORS_TO_SHOW;
 ---
-
-
 
 {error && import.meta.env.DEV && (
   <div class="page-authors error">
