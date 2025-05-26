@@ -9,7 +9,7 @@ export default function SearchKeyboardShortcut() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      class="size-5 cursor-auto hover:fill-gray-100 hover:stroke-gray-500 transition-all duration-200"
+      className="size-5 cursor-auto hover:fill-gray-100 hover:stroke-gray-500 transition-all duration-200"
     >
       <path
         strokeLinecap="round"

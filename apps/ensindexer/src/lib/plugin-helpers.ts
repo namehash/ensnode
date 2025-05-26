@@ -1,13 +1,9 @@
-import type { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
+import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
-import { http, Address, Chain, isAddress } from "viem";
+import { http, Chain } from "viem";
 
-import {
-  constrainContractBlockrange,
-  getEnsDeploymentChain,
-  rpcEndpointUrl,
-  rpcMaxRequestsPerSecond,
-} from "@/lib/ponder-helpers";
+import config from "@/config";
+import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/utils";
 
 /**
@@ -43,62 +39,6 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
   ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
     return `${pluginName}/${contractName}`;
   };
-}
-
-/**
- * Returns a list of 1 or more distinct active plugins based on the `ACTIVE_PLUGINS` environment variable.
- *
- * The `ACTIVE_PLUGINS` environment variable is a comma-separated list of plugin
- * names. The function returns the plugins that are included in the list.
- *
- * @throws if invalid plugins are requested
- * @throws if activated plugins' `requiredDatasources` are not available in the set of `availableDatasourceNames`
- *
- * @param availablePlugins a list of all available plugins
- * @param requestedPluginNames list of user-requested plugin names
- * @param availableDatasourceNames is a list of available DatasourceNames
- * @returns the active plugins
- */
-export function getActivePlugins<PLUGIN extends ENSIndexerPlugin>(
-  availablePlugins: readonly PLUGIN[],
-  requestedPluginNames: string[],
-  availableDatasourceNames: DatasourceName[],
-): PLUGIN[] {
-  if (!requestedPluginNames.length) throw new Error("Must activate at least 1 plugin.");
-
-  // validate that each of the requestedPluginNames is included in allPlugins
-  const invalidPlugins = requestedPluginNames.filter(
-    (requestedPlugin) => !availablePlugins.some((plugin) => plugin.pluginName === requestedPlugin),
-  );
-
-  if (invalidPlugins.length) {
-    // Throw an error if there are invalid plugins
-    throw new Error(
-      `Invalid plugin names found: ${invalidPlugins.join(
-        ", ",
-      )}. Please check the ACTIVE_PLUGINS environment variable.`,
-    );
-  }
-
-  // filter allPlugins by those that the user requested
-  const activePlugins = availablePlugins.filter((plugin) =>
-    requestedPluginNames.includes(plugin.pluginName),
-  );
-
-  // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
-  for (const plugin of activePlugins) {
-    const hasRequiredDatasources = plugin.requiredDatasources.every((datasourceName) =>
-      availableDatasourceNames.includes(datasourceName),
-    );
-
-    if (!hasRequiredDatasources) {
-      throw new Error(
-        `Requested plugin '${plugin.pluginName}' cannot be activated for the ${getEnsDeploymentChain()} deployment. ${plugin.pluginName} specifies dependent datasources: ${plugin.requiredDatasources.join(", ")}, but available datasources in the ${getEnsDeploymentChain()} deployment are: ${availableDatasourceNames.join(", ")}.`,
-      );
-    }
-  }
-
-  return activePlugins;
 }
 
 // Helper type to merge multiple types into one
@@ -165,22 +105,30 @@ export const activateHandlers =
   };
 
 /**
- * Defines a ponder#NetworksConfig for a single, specific chain.
+ * Builds a ponder#NetworksConfig for a single, specific chain.
  */
-export function networksConfigForChain(chain: Chain) {
+export function networksConfigForChain(chainId: number) {
+  if (!config.rpcConfigs[chainId]) {
+    throw new Error(
+      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
+    );
+  }
+
+  const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
+
   return {
-    [chain.id.toString()]: {
-      chainId: chain.id,
-      transport: http(rpcEndpointUrl(chain.id)),
-      maxRequestsPerSecond: rpcMaxRequestsPerSecond(chain.id),
-      // NOTE: disable cache on 'Anvil' chains
-      ...(chain.name === "Anvil" && { disableCache: true }),
+    [chainId.toString()]: {
+      chainId: chainId,
+      transport: http(url),
+      maxRequestsPerSecond,
+      // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
+      ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies NetworkConfig,
   };
 }
 
 /**
- * Defines a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
+ * Builds a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
@@ -223,30 +171,4 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
   const [label] = name.split(".");
 
   return [label, name];
-}
-
-/**
- * Validates runtime contract configuration.
- *
- * @param contracts - An array of contract configurations to validate
- * @throws {Error} If any contract with an address field has an invalid address format
- */
-export function validateContractConfigs<CONTRACT_CONFIGS extends Record<string, ContractConfig>>(
-  pluginName: PluginName,
-  contracts: CONTRACT_CONFIGS,
-) {
-  // invariant: `contracts` must provide valid addresses if a filter is not provided
-  //  (see packages/ens-deployments/src/ens-test-env.ts) for context
-  const hasAddresses = Object.values(contracts)
-    .filter((config) => "address" in config) // only ContractConfigs with `address` defined
-    .every((config) => isAddress(config.address as Address)); // must be a valid `Address`
-
-  if (!hasAddresses) {
-    throw new Error(
-      `The ENSDeployment '${getEnsDeploymentChain()}' provided to the '${pluginName}' plugin does not define valid addresses. This occurs if the 'address' of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
-
-Here are the contract configs we attempted to validate:
-${JSON.stringify(contracts)}`,
-    );
-  }
 }

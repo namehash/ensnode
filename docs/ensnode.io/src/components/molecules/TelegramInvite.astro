@@ -1,59 +1,79 @@
 ---
+import { GithubIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/GithubIcon";
+import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
+import cc from "classcat";
+import { Balancer } from "react-wrap-balancer";
+import TelegramBanner from "../../assets/telegram_image.svg";
+import MobileTelegramBanner from "../../assets/telegram_mobile_image.svg";
+import { ENSNodeLogoLight } from "../atoms/logos/ENSNodeLogoLight";
+
+const buttonStyles =
+  "transition text-sm leading-4 rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap underline-none py-2 px-4 pl-[11px] py-[9px] pr-[13px] gap-2";
+const headerStyles = "text-lg leading-8 font-semibold";
+const baseContainerStyles = "flex flex-col flex-nowrap justify-center items-center";
 ---
 
-<div>
-    <h3>Join us on Telegram</h3>
-    <p>Get support, share your ideas, and stay updated on the latest developments in ENSNode.</p>
-    <a class="telegram" href="https://t.me/ensnode" target="_blank" rel="noopener noreferrer">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M21.9597 4.33581C21.9435 4.26415 21.9081 4.19792 21.857 4.14382C21.806 4.08972 21.7411 4.04967 21.6689 4.02773C21.4062 3.97723 21.1343 3.99594 20.8815 4.08191C20.8815 4.08191 3.35842 10.1941 2.35765 10.8709C2.14267 11.0165 2.07017 11.1014 2.03434 11.2008C1.86102 11.686 2.40015 11.8946 2.40015 11.8946L6.91653 13.3226C6.9929 13.3359 7.07142 13.3315 7.14568 13.3097C8.17228 12.6798 17.4784 6.97509 18.0192 6.78345C18.1025 6.75919 18.1666 6.78345 18.15 6.84409C17.935 7.57588 9.89301 14.508 9.84884 14.5501C9.82733 14.5672 9.81057 14.5892 9.80009 14.6142C9.78961 14.6392 9.78575 14.6664 9.78885 14.6932L9.36721 18.9723C9.36721 18.9723 9.19055 20.3041 10.563 18.9723C11.5362 18.0271 12.4703 17.2443 12.937 16.8635C14.4902 17.9042 16.1609 19.0548 16.8817 19.6572C17.003 19.7711 17.1466 19.8601 17.3041 19.9189C17.4616 19.9776 17.6297 20.005 17.7983 19.9993C18.006 19.9747 18.201 19.8894 18.3575 19.7546C18.5139 19.6198 18.6244 19.442 18.6741 19.2448C18.6741 19.2448 21.8656 6.77375 21.9722 5.10317C21.9831 4.94145 21.9972 4.83472 21.9989 4.72232C22.0041 4.59235 21.9909 4.46231 21.9597 4.33581Z"
-            fill="currentColor"
-          />
-        </svg>
-        <span>
-            Open Telegram
-        </span>
-    </a>
-</div>
+<aside class={cc([baseContainerStyles,"gap-5"])}>
+    <div class={cc([baseContainerStyles, "gap-5 py-8 max-w-[270px] rounded-xl border px-4", "spread-the-word"])}>
+        <ENSNodeLogoLight className="w-[52px] h-auto"/>
+        <div class={cc([baseContainerStyles, "gap-2"])}>
+            <h3 class={headerStyles}>Spread the word</h3>
+            <Balancer as="p" className="text-center text-sm leading-6 font-normal">Your star helps us reach more developers and fuels our open-source mission</Balancer>
+        </div>
+        <a href="https://github.com/namehash/ensnode" target="_blank" rel="noopener noreferrer"><button class={buttonStyles} style={{fontSize: "14px", fontWeight: "500"}}><GithubIcon className="w-4 h-auto"/> Star on GitHub</button></a>
+    </div>
+    <div class={cc(["telegram-container", "max-w-[270px] w-full h-fit flex flex-col justify-center items-center flex-nowrap gap-8 pt-8 rounded-xl overflow-hidden"])}>
+        <div class={cc([baseContainerStyles, "w-full h-fit gap-5 px-4" ])}>
+            <div class={cc([baseContainerStyles, "gap-2"])}>
+                <Balancer
+                        as="h3"
+                        className={cc([headerStyles, "self-stretch text-center"])}
+                >
+                    Become a part of our community in Telegram
+                </Balancer>
+                <Balancer
+                        as="p"
+                        className="text-sm leading-6 font-normal text-center"
+                >
+                    Get updates, technical support, and connect with our team building the multichain future.
+                </Balancer>
+            </div>
+            <a href="http://t.me/ensnode" target="_blank" rel="noopener noreferrer"><button class={buttonStyles} style={{fontSize: "14px", fontWeight: "500"}}><TelegramIcon className="w-4 h-auto"/> Join our Telegram</button></a>
+        </div>
+        <img
+                class="flex w-fit h-full shri0 object-contain bg-no-repeat"
+                src={MobileTelegramBanner.src}
+                alt="Telegram Banner"
+        />
+    </div>
+</aside>
 
 <style>
-div {
-    background-color: var(--sl-color-black);
-    border-radius: 0.5rem;
-    border: 1px solid var(--sl-color-gray-5);
-    box-shadow: var(--sl-shadow-sm);
-    padding: 1rem;
-    display: grid;
-    gap: 0.5rem;
-}
-h3 {
-    color: var(--sl-color-accent);
-}
-p {
-    font-size: 0.95rem;
-    line-height: 1.55rem;
-    color: var(--sl-color-white);
-}
-a.telegram {
-    background-color: var(--sl-color-accent);
-    color: var(--sl-color-black);
-    border-radius: 0.5rem;
-    padding:  0.5rem 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-}
-a.telegram:hover {
-    color: var(--sl-color-black);
-}
+    h3 {
+        color: var(--sl-color-white);
+    }
+
+    p {
+        color: var(--sl-color-gray-2);
+    }
+
+    .spread-the-word {
+        background-color: var(--sl-color-black);
+        border-color: var(--sl-color-gray-6);
+    }
+
+    .telegram-container {
+        background-image: linear-gradient(90deg, #F9FAFB 0%, #F3F5F7 100%);
+    }
+
+    button {
+        color: var(--sl-color-black);
+        background-color: var(--sl-color-white);
+        border-color: var(--sl-color-white);
+    }
+
+    button:hover{
+        background-color: #272727;
+    }
+
 </style>
