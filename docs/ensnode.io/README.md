@@ -1,6 +1,6 @@
 # ENSNode Documentation
 
-[ensnode.io](https://ensnode.io) runs on [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build).
+[ensnode.io](https://ensnode.io) (the ENSNode docs site) runs on [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build).
 
 ## Local Development
 
