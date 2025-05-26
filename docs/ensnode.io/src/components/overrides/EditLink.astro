@@ -14,8 +14,8 @@ if (Astro.locals.starlightRoute.entry) {
   const slug = entry.slug;
   const id = entry.id;
 
-  if (entry.data?.file || entry.filePath) {
-    filePath = entry.data?.file || entry.filePath;
+  if ((entry.data as any)?.file || entry.filePath) {
+    filePath = (entry.data as any)?.file || entry.filePath;
 
     if (filePath) {
       if (!filePath.startsWith(BASE_DIR)) {
@@ -39,7 +39,6 @@ if (Astro.locals.starlightRoute.entry) {
       const docPath = slug.replace("ensrainbow/", "");
       filePath = `${CONTENT_DIR}/ensrainbow/${docPath}.mdx`;
     } else {
-      // Default case
       filePath = `${CONTENT_DIR}/${slug}.mdx`;
     }
 
@@ -53,7 +52,11 @@ if (Astro.locals.starlightRoute.entry) {
 }
 ---
 
+
 {fileExists && (
-<PageAuthors repo={REPO} file={filePath} />
+  <div>
+      <PageAuthors repo={REPO} file={filePath} />
+  </div>
 )}
+
 <Default><slot /></Default>
