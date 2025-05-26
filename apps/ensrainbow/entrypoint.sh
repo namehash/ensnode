@@ -43,7 +43,7 @@ if [ -d "${FINAL_DATA_DIR}" ] && [ -f "${MARKER_FILE}" ]; then
     else
         echo "Existing database validation failed. Will attempt to re-download."
         echo "Cleaning up existing data directory before re-download..."
-        rm -rf "${FINAL_DATA_DIR}" # Remove potentially corrupt data
+        rm -rf "${FINAL_DATA_DIR}/"* # Remove potentially corrupt data
         # The marker file is implicitly removed with FINAL_DATA_DIR
     fi
 fi
@@ -60,7 +60,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
 
     # 2. Clean up any existing data and prepare directories
     echo "Preparing directories for download..."
-    rm -rf "${FINAL_DATA_DIR}" # Ensure clean state if previous attempt failed mid-way
+    rm -rf "${FINAL_DATA_DIR}/"* # Ensure clean state if previous attempt failed mid-way
     mkdir -p "${FINAL_DATA_DIR}"
     rm -rf "${DOWNLOAD_TEMP_DIR}" # Clean up temp dir from previous runs if any
     mkdir -p "${DOWNLOAD_TEMP_DIR}"

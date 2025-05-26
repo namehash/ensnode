@@ -280,40 +280,33 @@ pnpm serve --data-dir data_ens_test_env --port 3223
 
 ### Using with Docker
 
-You can also build a Docker image with the test data:
+You can also run ENSRainbow with the test data using Docker. This involves running the standard ENSRainbow image and configuring it via environment variables to download and use the test dataset.
 
-```bash
-# Build a Docker image with the test data
-docker build -f apps/ensrainbow/Dockerfile.data \
-  --build-arg DATA_VERSION=test \
-  -t ghcr.io/namehash/ensnode/ensrainbow-test-data:latest .
+1.  **Ensure you have the standard ENSRainbow Docker image:**
+    If you haven't already, pull the latest image:
+    ```bash
+    docker pull ghcr.io/namehash/ensnode/ensrainbow:latest
+    ```
 
-# Build the ENSRainbow image with the test data
-docker build -f apps/ensrainbow/Dockerfile \
-  --build-arg DATA_IMAGE_NAME=ensrainbow-test-data \
-  -t ghcr.io/namehash/ensnode/ensrainbow-test:latest .
+2.  **Run the ENSRainbow container with test data configuration:**
+    You'll need to mount a volume for persistent storage and set the `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` environment variables to point to the test data.
+    ```bash
+    # Create a directory on your host machine for test data, e.g., ~/my_ensrainbow_test_data
+    mkdir -p ~/my_ensrainbow_test_data
 
-# Run the ENSRainbow container with the test data
-docker run -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest
-```
+    docker run -d --name ensrainbow_test_env \
+      -v ~/my_ensrainbow_test_data:/app/apps/ensrainbow/data \
+      -e SCHEMA_VERSION="v3" \
+      -e NAMESPACE="testenv" \
+      -e LABEL_SET="0" \
+      -p 3223:3223 \
+      ghcr.io/namehash/ensnode/ensrainbow:latest
+    ```
+    *   Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` if the test data parameters differ. Typically, for the standard test data, `NAMESPACE` is `testenv` and `LABEL_SET` is `0`. The `SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v2`, `v3`).
+
+This setup allows the `entrypoint.sh` script within the container to download the `testenv-0` database artifact into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
 
 This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
-
-Instead of building the Docker images yourself, you can also 
-download the pre-built images directly from the GitHub Container 
-Registry:
-
-```bash
-# Pull the pre-built ENSRainbow image with test data
-docker pull ghcr.io/namehash/ensnode/ensrainbow-test:latest
-
-# Run the ENSRainbow container with the pulled image
-docker run -p 3223:3223 ghcr.io/namehash/ensnode/
-ensrainbow-test:latest
-```
-
-This approach is faster and more convenient as it doesn't require 
-building the images locally.
 
 
 ### Persistent Storage with Docker

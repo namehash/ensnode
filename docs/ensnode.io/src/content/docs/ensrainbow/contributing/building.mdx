@@ -9,13 +9,13 @@ ENSRainbow runs as a Docker image, which includes the application server and scr
 
 **Key Data Handling Strategy:**
 
-The ENSRainbow Docker images are designed to be lightweight. The LevelDB database required for operation is **not** typically baked into the image during the build process. Instead, data is downloaded and managed at **runtime** by an `entrypoint.sh` script within the container. This process is triggered when you run the container with:
+The ENSRainbow Docker image is designed to be lightweight. The LevelDB database required for operation is **not** baked into the image during the build process. Instead, data is downloaded and managed at **runtime** by an `entrypoint.sh` script within the container. This process is triggered when you run the container with:
 1.  A Docker volume mounted to `/app/apps/ensrainbow/data` (the internal data path).
 2.  Specific environment variables set: `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET`.
 
-This approach allows for flexible data updates and management without needing to rebuild the entire application image.
+This approach allows for flexible data updates and management without needing to rebuild the application image.
 
-Pre-built images from GHCR are the recommended way to run ENSRainbow.
+The pre-built image from GHCR is the recommended way to run ENSRainbow.
 
 ## Building the Application Image (Optional)
 
@@ -26,11 +26,11 @@ If you need to build the ENSRainbow application image from source (e.g., for dev
 docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .
 ```
 
-This command builds an image containing the ENSRainbow application and the `entrypoint.sh` script responsible for runtime data provisioning. The resulting image will behave the same way as the official pre-built images regarding data handling.
+This command builds an image containing the ENSRainbow application and the `entrypoint.sh` script responsible for runtime data provisioning. The resulting image will behave the same way as the official pre-built image regarding data handling.
 
 (Note: The `apps/ensrainbow/Dockerfile` uses a multi-stage setup for build optimizations. Data handling is deferred to the `entrypoint.sh` script at runtime.)
 
-## Available Pre-built Images on GHCR
+## Available Pre-built Image on GHCR
 
 The following official image is available on GHCR and is recommended for use:
 
@@ -43,7 +43,7 @@ docker pull ghcr.io/namehash/ensnode/ensrainbow:latest
 
 ## Runtime Data Provisioning via `entrypoint.sh`
 
-All ENSRainbow application images (whether self-built or pulled from GHCR) use the `entrypoint.sh` script to manage the LevelDB data at runtime.
+The ENSRainbow application image (whether self-built or pulled from GHCR) uses the `entrypoint.sh` script to manage the LevelDB data at runtime.
 
 When the container starts:
 -   The script checks the designated data directory (mounted via a volume, typically at `/app/apps/ensrainbow/data`).
@@ -51,4 +51,4 @@ When the container starts:
 -   If data is missing, outdated, or invalid, the script will attempt to download the appropriate database artifact.
 -   A marker file (`.ensrainbow_db_ready`) is used within the data directory to indicate a successfully prepared database.
 
-This ensures that the container always runs with the correct and validated dataset. For detailed instructions on running the images with persistent storage and managing these environment variables, please refer to the [Persistent Storage with Docker section in the main contribution guide](/ensrainbow/contributing/#persistent-storage-with-docker).
+This ensures that the container always runs with the correct and validated dataset. For detailed instructions on running the image with persistent storage and managing these environment variables, please refer to the [Persistent Storage with Docker section in the main contribution guide](/ensrainbow/contributing/#persistent-storage-with-docker).
