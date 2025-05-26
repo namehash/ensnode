@@ -1,14 +1,13 @@
 import { createConfig } from "ponder";
 
-import { MERGED_ENS_DEPLOYMENT } from "@/lib/globals";
+import { default as appConfig } from "@/config";
 import {
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
-  validateContractConfigs,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
 /**
@@ -16,17 +15,16 @@ import { PluginName } from "@ensnode/utils";
  * the shared Subgraph-compatible indexing logic.
  */
 export const pluginName = PluginName.Basenames;
-export const requiredDatasources = [DatasourceName.Basenames];
 
-// extract the chain and contract configs for Basenames Datasource in order to build ponder config
-const { chain, contracts } = MERGED_ENS_DEPLOYMENT[DatasourceName.Basenames];
+// contruct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-// validate runtime contract config
-validateContractConfigs(pluginName, contracts);
+// extract the chain and contract configs for Basenames Datasource in order to build ponder config
+const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+const { chain, contracts } = deployment[DatasourceName.Basenames];
 
 export const config = createConfig({
-  networks: networksConfigForChain(chain),
+  networks: networksConfigForChain(chain.id),
   contracts: {
     [namespace("Registry")]: {
       network: networkConfigForContract(chain, contracts.Registry),

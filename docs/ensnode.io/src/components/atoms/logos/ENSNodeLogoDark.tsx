@@ -1,6 +1,6 @@
 import React from "react";
 
-export const ENSNodeLogo = (props: React.SVGProps<SVGSVGElement>) => (
+export const ENSNodeLogoDark = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="405"
     height="405"
