@@ -14,18 +14,32 @@ import { PluginName } from "@ensnode/utils";
  * The Lineanames plugin describes indexing behavior for the Lineanames ENS Datasource, leveraging
  * the shared Subgraph-compatible indexing logic.
  */
-export const pluginName = PluginName.Lineanames;
+const pluginName = PluginName.Lineanames;
 
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-export const config = {
+export default {
+  /**
+   * Activate the plugin handlers for indexing.
+   */
+  activate: activateHandlers({
+    pluginName,
+    namespace,
+    handlers: [
+      import("./handlers/Registry"),
+      import("./handlers/Registrar"),
+      import("./handlers/NameWrapper"),
+      import("../shared/Resolver"),
+    ],
+  }),
+
   /**
    * Load the plugin configuration lazily to prevent premature execution of
    * nested factory functions, i.e. to ensure that the plugin configuration
    * is only built when the plugin is activated.
    */
-  get loader() {
+  get config() {
     // extract the chain and contract configs for Lineanames Datasource in order to build ponder config
     const deployment = getENSDeployment(appConfig.ensDeploymentChain);
     const { chain, contracts } = deployment[DatasourceName.Lineanames];
@@ -56,15 +70,9 @@ export const config = {
       },
     });
   },
-};
 
-export const activate = activateHandlers({
+  /**
+   * The plugin name, used for identification.
+   */
   pluginName,
-  namespace,
-  handlers: [
-    import("./handlers/Registry"),
-    import("./handlers/Registrar"),
-    import("./handlers/NameWrapper"),
-    import("../shared/Resolver"),
-  ],
-});
+};

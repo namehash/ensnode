@@ -1,12 +1,12 @@
 import config from "@/config";
-import { ENSIndexerConfig } from "@/config/types";
+import type { ENSIndexerConfig } from "@/config/types";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import type { MergedTypes } from "@/lib/plugin-helpers";
 
-import * as basenamesPlugin from "@/plugins/basenames/basenames.plugin";
-import * as lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
-import * as subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
-import * as threednsPlugin from "@/plugins/threedns/threedns.plugin";
+import basenamesPlugin from "@/plugins/basenames/basenames.plugin";
+import lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
+import subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
+import threednsPlugin from "@/plugins/threedns/threedns.plugin";
 
 ////////
 // First, generate `MergedPonderConfig` type representing the merged types of each plugin's `config`,
@@ -21,7 +21,7 @@ export const ALL_PLUGINS = [
   threednsPlugin,
 ] as const;
 
-export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]["loader"]> & {
+export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
   /**
    * NOTE: we inject additional values (ones that change the behavior of the indexing logic) into the
    * Ponder config in order to alter the ponder-generated build id when these additional options change.
@@ -43,7 +43,7 @@ const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plu
 
 // combine each plugins' config into a MergedPonderConfig
 const ponderConfig = activePlugins.reduce(
-  (memo, plugin) => mergePonderConfigs(memo, plugin.config.loader),
+  (memo, plugin) => mergePonderConfigs(memo, plugin.config),
   {},
 ) as MergedPonderConfig;
 
