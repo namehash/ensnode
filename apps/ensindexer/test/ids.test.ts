@@ -35,7 +35,7 @@ describe("ids", () => {
     });
 
     describe("makeResolverId", () => {
-      it("should construct subgraph-compatible resolver id", () => {
+      it("should not include chain id", () => {
         expect(makeResolverId(CHAIN_ID, zeroAddress, namehash("vitalik.eth"))).toEqual(
           "0x0000000000000000000000000000000000000000-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
         );
@@ -43,7 +43,7 @@ describe("ids", () => {
     });
 
     describe("makeEventId", () => {
-      it("should not include chainId if subgraph plugin", () => {
+      it("should not include chain id", () => {
         expect(makeEventId(CHAIN_ID, 123n, 456)).toEqual("123-456");
       });
     });
@@ -59,7 +59,7 @@ describe("ids", () => {
 
   describe("not in subgraph compatibility mode", () => {
     describe("makeResolverId", () => {
-      it("should construct chain-scoped resolver id", () => {
+      it("should include chain id", () => {
         expect(makeResolverId(CHAIN_ID, zeroAddress, namehash("vitalik.eth"))).toEqual(
           "1337-0x0000000000000000000000000000000000000000-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
         );
@@ -67,7 +67,7 @@ describe("ids", () => {
     });
 
     describe("makeEventId", () => {
-      it("should construct chain-scoped event id", () => {
+      it("should include chain id", () => {
         expect(makeEventId(CHAIN_ID, 123n, 456)).toEqual("1337-123-456");
       });
     });
