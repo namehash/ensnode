@@ -2,6 +2,15 @@
 
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
+import { ENSNodeIcon } from "@/components/ensnode-icon";
+import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
+import { BaseChainIcon } from "@/components/icons/BaseChainIcon";
+import { EthereumIcon } from "@/components/icons/EthereumIcon";
+import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
+import { EthereumTestNetIcon } from "@/components/icons/EthereumTestNetIcon";
+import { LineaChainIcon } from "@/components/icons/LineaChainIcon";
+import { OptimismChainIcon } from "@/components/icons/OptimismChainIcon";
+import { ThreeDNSChainIcon } from "@/components/icons/ThreeDNSChainIcon";
 import { formatRelativeTime } from "@/components/recent-registrations";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +18,7 @@ import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { intlFormat } from "date-fns";
-import {Clock, ExternalLink} from "lucide-react";
+import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
@@ -21,15 +30,6 @@ import {
   ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
-import { ENSNodeIcon } from "@/components/ensnode-icon";
-import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
-import { BaseChainIcon } from "@/components/icons/BaseChainIcon";
-import { EthereumIcon } from "@/components/icons/EthereumIcon";
-import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
-import { EthereumTestNetIcon } from "@/components/icons/EthereumTestNetIcon";
-import { LineaChainIcon } from "@/components/icons/LineaChainIcon";
-import {OptimismChainIcon} from "@/components/icons/OptimismChainIcon";
-import {ThreeDNSChainIcon} from "@/components/icons/ThreeDNSChainIcon";
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
@@ -119,7 +119,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
     Anvil: <EthereumLocalIcon width={18} height={18} />,
     Holesky: <EthereumTestNetIcon width={18} height={18} />,
     Ethereum: <EthereumIcon width={18} height={18} />,
-    "3DNS": <ThreeDNSChainIcon width={18} height={18} />
+    "3DNS": <ThreeDNSChainIcon width={18} height={18} />,
   };
 
   return (
@@ -137,8 +137,16 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
 
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
-          <BlockStats networkName={network.name as chainName} label="Last indexed block" block={network.lastIndexedBlock} />
-          <BlockStats networkName={network.name as chainName} label="Latest safe block" block={network.latestSafeBlock} />
+          <BlockStats
+            networkName={network.name as chainName}
+            label="Last indexed block"
+            block={network.lastIndexedBlock}
+          />
+          <BlockStats
+            networkName={network.name as chainName}
+            label="Latest safe block"
+            block={network.latestSafeBlock}
+          />
         </div>
       </CardContent>
     </Card>
@@ -184,7 +192,6 @@ function BlockStats({ networkName, label, block }: BlockSatsProps) {
   );
 }
 
-
 interface BlockNumberProps {
   networkName: chainName;
   block: BlockInfo;
@@ -198,23 +205,21 @@ function BlockNumber({ networkName, block }: BlockNumberProps) {
   // for now blockexplorer.com only allows inspection of Ethereum blocks, the list may change if we switch platform or their capabilities expand
   const blockExplorerAvailableChains: chainName[] = ["Ethereum"];
 
-  if (blockExplorerAvailableChains.includes(networkName)){
+  if (blockExplorerAvailableChains.includes(networkName)) {
     return (
-        <a href={`https://www.blockexplorer.com/${networkName.toLowerCase().replace(" ", "")}/block/${block.number}/#overview`}
-           target="_blank" rel="noreferrer noopener"
-           className="text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
-        >
-          #{block.number}
-          <ExternalLink size={16} className="inline-block flex-shrink-0"/>
-        </a>
+      <a
+        href={`https://www.blockexplorer.com/${networkName.toLowerCase().replace(" ", "")}/block/${block.number}/#overview`}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
+      >
+        #{block.number}
+        <ExternalLink size={16} className="inline-block flex-shrink-0" />
+      </a>
     );
   }
 
-  return (
-      <div className="text-lg font-semibold">
-        {block.number ? `#${block?.number}` : "N/A"}
-      </div>
-  );
+  return <div className="text-lg font-semibold">{block.number ? `#${block?.number}` : "N/A"}</div>;
 }
 
 interface FallbackViewProps {
@@ -226,13 +231,13 @@ interface FallbackViewProps {
  * Component to display loading state for network indexing stats.
  */
 function NetworkIndexingStatsFallback(props: FallbackViewProps) {
-  const {placeholderCount = 3} = props;
+  const { placeholderCount = 3 } = props;
 
   return (
-      <div className="px-6">
+    <div className="px-6">
+      <div className="space-y-4">
+        <div className="h-8 bg-muted animate-pulse rounded-md w-48" />
         <div className="space-y-4">
-          <div className="h-8 bg-muted animate-pulse rounded-md w-48"/>
-          <div className="space-y-4">
           {Array.from(Array(placeholderCount).keys()).map((i) => (
             <NetworkIndexingStatsPlaceholder key={i} />
           ))}
