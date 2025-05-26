@@ -1,5 +1,19 @@
 # ensadmin
 
+## 0.27.0
+
+### Patch Changes
+
+- [#686](https://github.com/namehash/ensnode/pull/686) [`95119d2`](https://github.com/namehash/ensnode/commit/95119d29c6cffd80cf6d628487f0af82087bdc3d) Thanks [@tk-o](https://github.com/tk-o)! - Allow displaying indexing status for chains pending indexing.
+
+- [#709](https://github.com/namehash/ensnode/pull/709) [`53a80a1`](https://github.com/namehash/ensnode/commit/53a80a1893abaa6ad6f30b945c674c41a1f17399) Thanks [@danstarns](https://github.com/danstarns)! - Replace copy-pasted AI query generator functionality with its upstream dependency counter-part.
+
+- Updated dependencies [[`fcea8c1`](https://github.com/namehash/ensnode/commit/fcea8c1fbcc19b3948ecf7d1bef61c38480e8e7d)]:
+  - @ensnode/ensnode-schema@0.27.0
+  - @ensnode/ens-deployments@0.27.0
+  - @ensnode/utils@0.27.0
+  - @ensnode/ponder-metadata@0.27.0
+
 ## 0.26.0
 
 ### Minor Changes

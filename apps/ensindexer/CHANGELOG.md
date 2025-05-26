@@ -1,5 +1,39 @@
 # ensindexer
 
+## 0.27.0
+
+### Minor Changes
+
+- [#705](https://github.com/namehash/ensnode/pull/705) [`ec1d761`](https://github.com/namehash/ensnode/commit/ec1d761a78abd8f7fb5a5fd3d1e513f2244d5a73) Thanks [@shrugs](https://github.com/shrugs)! - Resolver ids are now chain-scoped for non-subgraph plugins to avoid collisions between resolver contracts with the same address on multiple chains
+
+- [#697](https://github.com/namehash/ensnode/pull/697) [`fb5b138`](https://github.com/namehash/ensnode/commit/fb5b13830c051b43bce7731ad147d7c25908ab34) Thanks [@shrugs](https://github.com/shrugs)! - ThreeDNS plugin now correctly supports TXT records and implicit resolver association
+
+- [#715](https://github.com/namehash/ensnode/pull/715) [`702721b`](https://github.com/namehash/ensnode/commit/702721be4645f8a9d4b3be0fc32b090ca94078a3) Thanks [@shrugs](https://github.com/shrugs)! - more exhaustively document basenames premint patch behavior
+
+- [#717](https://github.com/namehash/ensnode/pull/717) [`ec7f117`](https://github.com/namehash/ensnode/commit/ec7f117fa6a464b78a3b67d6dfab86b16f9240e2) Thanks [@shrugs](https://github.com/shrugs)! - update ponder dependencies to 0.10.26
+
+- [#707](https://github.com/namehash/ensnode/pull/707) [`7df65bd`](https://github.com/namehash/ensnode/commit/7df65bd7d69f21762d0817054d4f1dac4a905e95) Thanks [@shrugs](https://github.com/shrugs)! - subdomainCount field for basenames and lineanames domains is now accurate
+
+- [#719](https://github.com/namehash/ensnode/pull/719) [`cde4bae`](https://github.com/namehash/ensnode/commit/cde4baeb137bba8549b44eadb2dc9a3d8b3c894b) Thanks [@shrugs](https://github.com/shrugs)! - now explicitly strips null bytes from resolver text values rather than relying on ponder's default behavior
+
+- [#698](https://github.com/namehash/ensnode/pull/698) [`86f9f0a`](https://github.com/namehash/ensnode/commit/86f9f0a82c59a19d6a153d28f7ae601466df0a8c) Thanks [@0xBison](https://github.com/0xBison)! - centralized indexer config with zod validations
+
+- [#703](https://github.com/namehash/ensnode/pull/703) [`db9fc86`](https://github.com/namehash/ensnode/commit/db9fc86d3a5c4af1d4ec81ac810179f3bdc1b326) Thanks [@0xBison](https://github.com/0xBison)! - use default port if one isn't specified
+
+### Patch Changes
+
+- [#713](https://github.com/namehash/ensnode/pull/713) [`e44e8c6`](https://github.com/namehash/ensnode/commit/e44e8c6b89cca569393a016bee76a8894a8362db) Thanks [@tk-o](https://github.com/tk-o)! - Use transaction sender address for healing label from reverse registry.
+
+- [#749](https://github.com/namehash/ensnode/pull/749) [`7f68c87`](https://github.com/namehash/ensnode/commit/7f68c87f71107efc58ba0554c1cd9f2c3d2a4238) Thanks [@tk-o](https://github.com/tk-o)! - Fix config runtime error when running indexing for other ENS Deployment Chains than `mainnet`.
+
+- Updated dependencies [[`33c46ae`](https://github.com/namehash/ensnode/commit/33c46aef7e452daafef189ec9fef7d16ce8ceecb), [`fcea8c1`](https://github.com/namehash/ensnode/commit/fcea8c1fbcc19b3948ecf7d1bef61c38480e8e7d)]:
+  - @ensnode/ponder-subgraph@0.27.0
+  - @ensnode/ensnode-schema@0.27.0
+  - @ensnode/ens-deployments@0.27.0
+  - @ensnode/utils@0.27.0
+  - @ensnode/ensrainbow-sdk@0.27.0
+  - @ensnode/ponder-metadata@0.27.0
+
 ## 0.26.0
 
 ### Minor Changes
