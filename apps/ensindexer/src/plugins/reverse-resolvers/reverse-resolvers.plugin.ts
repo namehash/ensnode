@@ -1,7 +1,8 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config";
+import config from "@/config";
 import {
+  ENSIndexerPlugin,
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
@@ -18,10 +19,10 @@ export const pluginName = PluginName.ReverseResolvers;
 // NOTE: namespace unused because we're only indexing multi-network Resolver contracts
 const namespace = makePluginNamespace(pluginName);
 
-export default {
+export const plugin = {
   pluginName,
   get config() {
-    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+    const deployment = getENSDeployment(config.ensDeploymentChain);
     const datasources = [
       DatasourceName.ReverseResolverRoot,
       DatasourceName.ReverseResolverBase,
@@ -59,6 +60,6 @@ export default {
   activate: activateHandlers({
     pluginName,
     namespace,
-    handlers: [import("../shared/Resolver")],
+    handlers: [import("@/plugins/multi-network/Resolver")],
   }),
-};
+} as const satisfies ENSIndexerPlugin<PluginName.ReverseResolvers>;
