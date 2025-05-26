@@ -15,6 +15,10 @@ on:
         required: true
         type: string
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy-environment:
     runs-on: blacksmith-4vcpu-ubuntu-2204
@@ -27,6 +31,20 @@ jobs:
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
       RAILWAY_TEAM_TOKEN: ${{ secrets.RAILWAY_TEAM_TOKEN }}
+      # Terraform related envs
+
+      # AWS_REGION is required for aws-actions/configure-aws-credentials@v4
+      # Terraform keeps it's state inside S3 bucket. This bucket needs to be created before running Terraform apply.
+      # AWS_REGION should be the same as Terraform S3 bucket state region.
+      AWS_REGION: us-east-1
+      TF_VAR_railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      TF_VAR_mainnet_rpc_url: ${{ secrets.MAINNET_RPC_URL }}
+      TF_VAR_sepolia_rpc_url: ${{ secrets.SEPOLIA_RPC_URL }}
+      TF_VAR_holesky_rpc_url: ${{ secrets.HOLESKY_RPC_URL }}
+      TF_VAR_base_rpc_url: ${{ secrets.BASE_RPC_URL }}
+      TF_VAR_linea_rpc_url: ${{ secrets.LINEA_RPC_URL }}
+      TF_VAR_optimism_rpc_url: ${{ secrets.OPTIMISM_RPC_URL }}
+      TF_VAR_ensnode_version: ${{ inputs.tag }}
 
     steps:
       - name: Checkout repository
@@ -181,6 +199,39 @@ jobs:
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
           #ENSRAINBOW
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
+
+      # Terraform deploy - apply Terraform template everytime new deployment is introduced to either green or blue environment
+      - name: Set full permissions to execute scripts (read / write / execute)
+        working-directory: terraform
+        run: |
+          chmod 777 ./healthcheck.sh
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE}}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: terraform
 
       - uses: ./.github/actions/send_slack_notification
         with:
