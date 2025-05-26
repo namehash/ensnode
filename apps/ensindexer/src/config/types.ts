@@ -117,7 +117,8 @@ export interface ENSIndexerConfig {
 
   /**
    * Enable or disable the indexing of Resolver record values, defaulting to true (DEFAULT_INDEX_RESOLVER_RECORDS).
-   * If this is set to true, ENSIndexer will additionall track the values of Resolver records.
+   * If this is set to false, ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.
+   * If this is set to true, ENSIndexer will track both the keys and the values of Resolver records.
    *
    * Note that enabling {@link indexResolverRecords} results in indexed data no longer being backwards
    * compatible with the ENS Subgraph. For full data-level backwards compatibility with the ENS
