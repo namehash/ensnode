@@ -20,6 +20,8 @@ import { uniq } from "@/lib/lib-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/utils";
 
+const chainIdSchema = z.number().int().min(1);
+
 // parses an env string bool with strict requirement of 'true' or 'false'
 const makeEnvStringBoolSchema = (envVarKey: string) =>
   z
@@ -122,9 +124,13 @@ const PortSchema = z.coerce
 
 const EnsRainbowEndpointUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
-const RpcConfigsSchema = z.record(z.string().transform(Number), RpcConfigSchema, {
-  error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
-});
+const RpcConfigsSchema = z.record(
+  z.string().transform(Number).pipe(chainIdSchema),
+  RpcConfigSchema,
+  {
+    error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+  },
+);
 
 const DatabaseUrlSchema = z.union(
   [
