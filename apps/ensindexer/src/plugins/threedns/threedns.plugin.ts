@@ -15,36 +15,46 @@ import { PluginName } from "@ensnode/utils";
  */
 export const pluginName = PluginName.ThreeDNS;
 
-// contruct a unique contract namespace for this plugin
+// construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-const deployment = getENSDeployment(appConfig.ensDeploymentChain);
-const { chain: optimism, contracts: optimismContracts } =
-  deployment[DatasourceName.ThreeDNSOptimism];
-const { chain: base, contracts: baseContracts } = deployment[DatasourceName.ThreeDNSBase];
+export const config = {
+  /**
+   * Load the plugin configuration lazily to prevent premature execution of
+   * nested factory functions, i.e. to ensure that the plugin configuration
+   * is only built when the plugin is activated.
+   */
+  get loader() {
+    // extract the chain and contract configs for root Datasource in order to build ponder config
+    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+    const { chain: optimism, contracts: optimismContracts } =
+      deployment[DatasourceName.ThreeDNSOptimism];
+    const { chain: base, contracts: baseContracts } = deployment[DatasourceName.ThreeDNSBase];
 
-export const config = createConfig({
-  networks: {
-    ...networksConfigForChain(optimism.id),
-    ...networksConfigForChain(base.id),
-  },
-  contracts: {
-    [namespace("ThreeDNSToken")]: {
-      network: {
-        ...networkConfigForContract(optimism, optimismContracts.ThreeDNSToken),
-        ...networkConfigForContract(base, baseContracts.ThreeDNSToken),
+    return createConfig({
+      networks: {
+        ...networksConfigForChain(optimism.id),
+        ...networksConfigForChain(base.id),
       },
-      abi: optimismContracts.ThreeDNSToken.abi,
-    },
-    [namespace("Resolver")]: {
-      network: {
-        ...networkConfigForContract(optimism, optimismContracts.Resolver),
-        ...networkConfigForContract(base, baseContracts.Resolver),
+      contracts: {
+        [namespace("ThreeDNSToken")]: {
+          network: {
+            ...networkConfigForContract(optimism, optimismContracts.ThreeDNSToken),
+            ...networkConfigForContract(base, baseContracts.ThreeDNSToken),
+          },
+          abi: optimismContracts.ThreeDNSToken.abi,
+        },
+        [namespace("Resolver")]: {
+          network: {
+            ...networkConfigForContract(optimism, optimismContracts.Resolver),
+            ...networkConfigForContract(base, baseContracts.Resolver),
+          },
+          abi: optimismContracts.Resolver.abi,
+        },
       },
-      abi: optimismContracts.Resolver.abi,
-    },
+    });
   },
-});
+};
 
 export const activate = activateHandlers({
   pluginName,
