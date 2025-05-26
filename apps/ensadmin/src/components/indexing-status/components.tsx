@@ -15,8 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
-import { fromUnixTime, intlFormat } from "date-fns";
-import { Clock } from "lucide-react";
+import { intlFormat } from "date-fns";
+import {Clock, ExternalLink} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
@@ -75,7 +75,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col min-[1300px]:flex-row gap-8">
+        <CardContent className="flex flex-col lg:flex-row lg:flex-wrap gap-8">
           {globalIndexingStatusViewModel(
             networkIndexingStatusByChainId,
             ensDeploymentChain,
@@ -133,9 +133,8 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
 
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
-          {/*TODO: Points 3 & 4 from Issue #506*/}
-          <BlockStats label="Last indexed block" block={network.lastIndexedBlock} />
-          <BlockStats label="Latest safe block" block={network.latestSafeBlock} />
+          <BlockStats networkName={network.name as chainName} label="Last indexed block" block={network.lastIndexedBlock} />
+          <BlockStats networkName={network.name as chainName} label="Latest safe block" block={network.latestSafeBlock} />
         </div>
       </CardContent>
     </Card>
@@ -143,6 +142,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
 }
 
 interface BlockSatsProps {
+  networkName: string;
   label: string;
   block: BlockInfo | null;
 }
@@ -150,7 +150,7 @@ interface BlockSatsProps {
 /**
  * Component to display requested block stats.
  */
-function BlockStats({ label, block }: BlockSatsProps) {
+function BlockStats({ networkName, label, block }: BlockSatsProps) {
   if (!block) {
     return (
       <div>
@@ -172,12 +172,44 @@ function BlockStats({ label, block }: BlockSatsProps) {
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
-      {/*TODO: Make these a links to block explorer (only for those chains that allow it, otherwise should remain as is)*/}
-      <div className="text-lg font-semibold">{block.number ? `#${block.number}` : "N/A"}</div>
+      <BlockNumber block={block} networkName={networkName as chainName} />
       <div className="text-xs text-muted-foreground">
         {block.timestamp ? calculatedRelativeTime : "N/A"}
       </div>
     </div>
+  );
+}
+
+
+interface BlockNumberProps {
+  networkName: chainName;
+  block: BlockInfo;
+}
+
+/*
+Component to display a block number.
+If the chain is supported on blockexplorer.com it will display it as an external link to the block's details
+ */
+function BlockNumber({ networkName, block }: BlockNumberProps) {
+  // for now blockexplorer.com only allows inspection of Ethereum blocks, the list may change if we switch platform or their capabilities expand
+  const blockExplorerAvailableChains: chainName[] = ["Ethereum"];
+
+  if (blockExplorerAvailableChains.includes(networkName)){
+    return (
+        <a href={`https://www.blockexplorer.com/${networkName.toLowerCase().replace(" ", "")}/block/${block.number}/#overview`}
+           target="_blank" rel="noreferrer noopener"
+           className="text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
+        >
+          #{block.number}
+          <ExternalLink size={16} className="inline-block flex-shrink-0"/>
+        </a>
+    );
+  }
+
+  return (
+      <div className="text-lg font-semibold">
+        {block.number ? `#${block?.number}` : "N/A"}
+      </div>
   );
 }
 
@@ -190,13 +222,13 @@ interface FallbackViewProps {
  * Component to display loading state for network indexing stats.
  */
 function NetworkIndexingStatsFallback(props: FallbackViewProps) {
-  const { placeholderCount = 3 } = props;
+  const {placeholderCount = 3} = props;
 
   return (
-    <div className="px-6">
-      <div className="space-y-4">
-        <div className="h-8 bg-muted animate-pulse rounded-md w-48" />
+      <div className="px-6">
         <div className="space-y-4">
+          <div className="h-8 bg-muted animate-pulse rounded-md w-48"/>
+          <div className="space-y-4">
           {Array.from(Array(placeholderCount).keys()).map((i) => (
             <NetworkIndexingStatsPlaceholder key={i} />
           ))}
