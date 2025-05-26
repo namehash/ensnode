@@ -170,7 +170,7 @@ export interface ENSIndexerConfig {
   globalBlockrange: Blockrange;
 
   /**
-   * A flag derived from the built config indicating whethere ENSIndexer is operating in a
+   * A flag derived from the built config indicating whether ENSIndexer is operating in a
    * subgraph-compatible way. This flag is true if:
    * a) only the subgraph plugin is activated,
    * b) healReverseAddresess is false, and
