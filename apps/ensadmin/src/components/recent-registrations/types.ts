@@ -35,7 +35,7 @@ export interface LatestRegistration {
 export interface Registration {
   registrationDate: string;
   expiryDate: string;
-  domain: LatestRegistrationResult;
+  domain: LatestRegistration;
 }
 
 export interface RecentRegistrationsResponse {

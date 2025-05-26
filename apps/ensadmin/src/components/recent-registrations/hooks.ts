@@ -46,6 +46,8 @@ async function fetchRecentRegistrations(baseUrl: URL): Promise<RecentRegistratio
   }
 
   const data = await response.json();
+  data.data.registrations = data.data.registrations.map((elem) => ({...elem, domain:toLatestRegistration(elem.domain)}));
+
   return data.data;
 }
 
