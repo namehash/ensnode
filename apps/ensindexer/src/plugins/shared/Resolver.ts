@@ -39,7 +39,7 @@ export default function registerResolverHandlers() {
   );
   // NOTE: this DNSRecordChanged ABI spec with the included `ttl` parameter is specific to
   // 3DNS' Resolver implementation, but we include it here for theoretical completeness, were a
-  // Resolver indexed by these shared rh.handlers to emit this event.
+  // Resolver indexed by these shared handlers to emit this event.
   ponder.on(
     "Resolver:DNSRecordChanged(bytes32 indexed node, bytes name, uint16 resource, uint32 ttl, bytes record)",
     handlers.handleDNSRecordChanged,
