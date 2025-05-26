@@ -11,7 +11,7 @@ import {
   upsertResolverRecords,
 } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
-import { makeResolverId, makeResolverRecordId } from "@/lib/ids";
+import { makeKeyedResolverRecordId, makeResolverId } from "@/lib/ids";
 import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -31,7 +31,7 @@ async function handleAddressRecordUpdate(
   coinType: bigint,
   address: Address,
 ) {
-  const recordId = makeResolverRecordId(resolverId, coinType.toString());
+  const recordId = makeKeyedResolverRecordId(resolverId, coinType.toString());
   const isDeletion = !isAddress(address) || address === zeroAddress;
   if (isDeletion) {
     // delete
@@ -257,7 +257,7 @@ export async function handleTextChanged({
     // if value is undefined, this is a LegacyPublicResolver event, nothing to do
     if (value === undefined) return;
 
-    const recordId = makeResolverRecordId(id, key);
+    const recordId = makeKeyedResolverRecordId(id, key);
 
     // consider this a deletion iff value is exactly empty string
     const isDeletion = value === "";
@@ -481,7 +481,7 @@ export async function handleDNSRecordChanged({
           // no sanitized value to index? bail
           if (sanitizedValue === null) break;
 
-          const recordId = makeResolverRecordId(id, key);
+          const recordId = makeKeyedResolverRecordId(id, key);
           await context.db
             .insert(schema.ext_resolverTextRecords)
             // create a new text record entity
@@ -561,7 +561,7 @@ export async function handleDNSRecordDeleted({
   });
 
   if (config.indexResolverRecords) {
-    const recordId = makeResolverRecordId(id, key);
+    const recordId = makeKeyedResolverRecordId(id, key);
     await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
   }
 }

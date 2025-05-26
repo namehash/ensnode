@@ -90,11 +90,12 @@ export const makeRegistrationId = (labelHash: LabelHash, node: Node) => {
 };
 
 /**
- * Makes a unique ID for any resolver record entity.
+ * Makes a unique ID for any resolver record entity that is keyed beyond Node
+ * (i.e. text, address records).
  *
  * @param resolverId the id of the resolver
- * @param key any string value
+ * @param key any string value (ex: coinType.toString(), key)
  * @returns a unique resolver record entity id
  */
-export const makeResolverRecordId = (resolverId: string, key: string) =>
+export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>
   [resolverId, key].join("-");
