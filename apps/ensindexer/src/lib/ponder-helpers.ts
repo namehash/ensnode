@@ -193,15 +193,14 @@ export const createEnsRainbowVersionFetcher = () => {
   return async () => {
     try {
       const versionResponse = await client.version();
-      return {
-        version: versionResponse.versionInfo.version,
-        schema_version: versionResponse.versionInfo.schema_version,
-      };
+      return versionResponse.versionInfo;
     } catch (error) {
       console.error("Failed to fetch ENSRainbow version", error);
       return {
         version: "unknown",
         schema_version: 0,
+        namespace: "unknown",
+        highest_label_set: 0,
       };
     }
   };
