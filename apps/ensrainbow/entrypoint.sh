@@ -74,7 +74,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
       exit 1
     fi
 
-    ARTIFACT_BASENAME="${NAMESPACE}-${LABEL_SET}.tgz"
+    ARTIFACT_BASENAME="${NAMESPACE}_${LABEL_SET}.tgz"
     ARTIFACT_PATH="${DOWNLOAD_TEMP_DIR}/databases/${SCHEMA_VERSION}/${ARTIFACT_BASENAME}"
 
     if [ ! -f "$ARTIFACT_PATH" ]; then
