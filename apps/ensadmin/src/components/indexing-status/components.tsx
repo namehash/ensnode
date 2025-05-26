@@ -4,13 +4,12 @@ import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
-import { BaseChainIcon } from "@/components/icons/BaseChainIcon";
+import { BaseIcon } from "@/components/icons/BaseIcon";
 import { EthereumIcon } from "@/components/icons/EthereumIcon";
 import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
-import { EthereumTestNetIcon } from "@/components/icons/EthereumTestNetIcon";
-import { LineaChainIcon } from "@/components/icons/LineaChainIcon";
-import { OptimismChainIcon } from "@/components/icons/OptimismChainIcon";
-import { ThreeDNSChainIcon } from "@/components/icons/ThreeDNSChainIcon";
+import { EthereumTestnetIcon } from "@/components/icons/EthereumTestnetIcon";
+import { LineaIcon } from "@/components/icons/LineaIcon";
+import { OptimismIcon } from "@/components/icons/OptimismIcon";
 import { formatRelativeTime } from "@/components/recent-registrations";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,8 +100,7 @@ type chainName =
   | "Linea Mainnet"
   | "Sepolia"
   | "Anvil"
-  | "Holesky"
-  | "3DNS";
+  | "Holesky";
 
 /**
  * Component to display network indexing stats for a single network.
@@ -112,14 +110,13 @@ type chainName =
 function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
   const { network } = props;
   const chainIcons: Record<chainName, React.ReactNode> = {
-    Base: <BaseChainIcon width={18} height={18} />,
-    "OP Mainnet": <OptimismChainIcon width={16} height={16} />,
-    "Linea Mainnet": <LineaChainIcon width={18} height={18} />,
-    Sepolia: <EthereumTestNetIcon width={18} height={18} />,
+    Base: <BaseIcon width={18} height={18} />,
+    "OP Mainnet": <OptimismIcon width={16} height={16} />,
+    "Linea Mainnet": <LineaIcon width={18} height={18} />,
+    Sepolia: <EthereumTestnetIcon width={18} height={18} />,
     Anvil: <EthereumLocalIcon width={18} height={18} />,
-    Holesky: <EthereumTestNetIcon width={18} height={18} />,
-    Ethereum: <EthereumIcon width={18} height={18} />,
-    "3DNS": <ThreeDNSChainIcon width={18} height={18} />,
+    Holesky: <EthereumTestnetIcon width={18} height={18} />,
+    Ethereum: <EthereumIcon width={18} height={18} />
   };
 
   return (

@@ -1,6 +1,6 @@
 import React from "react";
 
-export const LineaChainIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const LineaIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="200"
     height="208"

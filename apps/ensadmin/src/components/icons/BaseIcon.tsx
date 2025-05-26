@@ -1,6 +1,6 @@
 import React from "react";
 
-export const BaseChainIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const BaseIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="146"
     height="146"

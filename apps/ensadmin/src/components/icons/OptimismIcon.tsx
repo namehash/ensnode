@@ -1,6 +1,6 @@
 import React from "react";
 
-export const OptimismChainIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const OptimismIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="41"
     height="41"
