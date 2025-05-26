@@ -6,11 +6,15 @@ SCHEMA_VERSION="${SCHEMA_VERSION:-}"
 NAMESPACE="${NAMESPACE:-}"
 LABEL_SET="${LABEL_SET:-}"
 PORT="${PORT:-3223}"
-DATA_DIR_NAME="data/data-${NAMESPACE}" # Name of the data directory within /app/apps/ensrainbow
+DATA_DIR_NAME="data" # Name of the data directory within /app/apps/ensrainbow
 APP_DIR="/app/apps/ensrainbow"
 FINAL_DATA_DIR="${APP_DIR}/${DATA_DIR_NAME}"
 DOWNLOAD_TEMP_DIR="/tmp/ensrainbow_download_temp"
 MARKER_FILE="${FINAL_DATA_DIR}/.ensrainbow_db_ready"
+
+# Path for the data subdirectory, relative to APP_DIR.
+# This assumes data is in ${APP_DIR}/${DATA_DIR_NAME}/data-${NAMESPACE}/
+DB_SUBDIR_PATH="${DATA_DIR_NAME}/data-${NAMESPACE}"
 
 # Ensure required variables for download are set if we might download
 if [ ! -f "${MARKER_FILE}" ]; then
@@ -37,8 +41,8 @@ cd "${APP_DIR}"
 # Check if data directory and marker file exist and if data is valid
 if [ -d "${FINAL_DATA_DIR}" ] && [ -f "${MARKER_FILE}" ]; then
     echo "Existing data directory and marker file found at ${FINAL_DATA_DIR}."
-    echo "Running database validation (lite) on existing data..."
-    if pnpm run validate:lite --data-dir "${DATA_DIR_NAME}"; then
+    echo "Running database validation (lite) on existing data in ${DB_SUBDIR_PATH}..."
+    if pnpm run validate:lite --data-dir "${DB_SUBDIR_PATH}"; then
         echo "Existing database is valid. Skipping download and extraction."
     else
         echo "Existing database validation failed. Will attempt to re-download."
@@ -102,8 +106,8 @@ if [ ! -f "${MARKER_FILE}" ]; then
     echo "Cleanup complete."
 
     # 6. Validate the newly extracted database
-    echo "Running database validation (lite) on newly extracted data..."
-    if pnpm run validate:lite --data-dir "${DATA_DIR_NAME}"; then
+    echo "Running database validation (lite) on newly extracted data in ${DB_SUBDIR_PATH}..."
+    if pnpm run validate:lite --data-dir "${DB_SUBDIR_PATH}"; then
         echo "Newly extracted database is valid."
         # Create marker file upon successful download, extraction, and validation
         echo "Creating marker file: ${MARKER_FILE}"
@@ -117,6 +121,6 @@ if [ ! -f "${MARKER_FILE}" ]; then
 fi # End of download and extraction block
 
 # 7. Start the ENSRainbow server
-echo "Starting ENSRainbow server on port ${PORT} using data from ${FINAL_DATA_DIR}..."
+echo "Starting ENSRainbow server on port ${PORT} using data from ${APP_DIR}/${DB_SUBDIR_PATH}..."
 # pnpm commands were run from APP_DIR, ensure serve also sees --data-dir correctly
-exec pnpm run serve --port "${PORT}" --data-dir "${DATA_DIR_NAME}"
+exec pnpm run serve --port "${PORT}" --data-dir "${DB_SUBDIR_PATH}"
