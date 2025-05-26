@@ -1,6 +1,6 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
-import {LatestRegistration, LatestRegistrationResult, RecentRegistrationsResponse} from "./types";
+import { LatestRegistration, LatestRegistrationResult, RecentRegistrationsResponse } from "./types";
 
 /**
  * Fetches info about the 5 most recently registered .eth domains that have been indexed.
@@ -46,7 +46,10 @@ async function fetchRecentRegistrations(baseUrl: URL): Promise<RecentRegistratio
   }
 
   const data = await response.json();
-  data.data.registrations = data.data.registrations.map((elem) => ({...elem, domain:toLatestRegistration(elem.domain)}));
+  data.data.registrations = data.data.registrations.map((elem) => ({
+    ...elem,
+    domain: toLatestRegistration(elem.domain),
+  }));
 
   return data.data;
 }
@@ -73,12 +76,14 @@ export function useRecentRegistrations(searchParams: URLSearchParams) {
  * @param graphQLResponseData - LatestRegistrationResult - GraphQL compatible representation of recently registered domain, dubed 'domain' in the query
  * @returns fetched data in new, streamlined LatestRegistration format
  */
-export function toLatestRegistration(graphQLResponseData: LatestRegistrationResult): LatestRegistration {
+export function toLatestRegistration(
+  graphQLResponseData: LatestRegistrationResult,
+): LatestRegistration {
   return {
     name: graphQLResponseData.name,
     createdAt: parseInt(graphQLResponseData.createdAt),
     expiryDate: parseInt(graphQLResponseData.expiryDate),
     owner: graphQLResponseData.owner.id,
-    ...(graphQLResponseData.wrappedOwner && {wrappedOwner: graphQLResponseData.wrappedOwner.id})
-  }
+    ...(graphQLResponseData.wrappedOwner && { wrappedOwner: graphQLResponseData.wrappedOwner.id }),
+  };
 }

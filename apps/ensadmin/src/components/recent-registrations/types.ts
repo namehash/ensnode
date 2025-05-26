@@ -28,7 +28,7 @@ export interface LatestRegistration {
   name: string;
   createdAt: number;
   expiryDate: number;
-  owner:  Address;
+  owner: Address;
   wrappedOwner?: Address;
 }
 

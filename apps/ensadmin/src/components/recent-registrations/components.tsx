@@ -139,7 +139,7 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
  * @param wrappedOwner The wrapped owner address (optional)
  * @returns The true owner address
  */
-function getTrueOwner(owner:  Address, wrappedOwner?: Address ) {
+function getTrueOwner(owner: Address, wrappedOwner?: Address) {
   // Only use wrapped owner if the owner is the NameWrapper contract
   if (wrappedOwner && isAddressEqual(owner, NAME_WRAPPER_ADDRESS)) {
     return getAddress(wrappedOwner);
