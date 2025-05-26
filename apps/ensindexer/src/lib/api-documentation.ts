@@ -199,6 +199,8 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       texts: "The set of observed text record keys for this resolver",
       coinTypes: "The set of observed SLIP-44 coin types for this resolver",
       events: "The events associated with this resolver",
+      // resolver-records.schema.ts additional properties
+      name: "the value of the name record for this resolver",
     }),
     ...generateTypeDocSetWithTypeName("resolverEvent", "a resolver event", {
       id: "Concatenation of block number and log ID",
@@ -282,5 +284,26 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       transactionID: "The transaction hash associated with the event",
       version: "The new version number of the resolver",
     }),
+    /**
+     * The following is documentation for packages/ensnode-schema/src/resolver-records.schema.ts
+     */
+    ...generateTypeDocSetWithTypeName(
+      "ext_resolverAddressRecords",
+      "address records in a Resolver for a Node",
+      {
+        id: "Unique identifier for this address record",
+        coinType: "SLIP-44 coinType for this address record",
+        address: "Value of the address record",
+      },
+    ),
+    ...generateTypeDocSetWithTypeName(
+      "ext_resolverTextRecords",
+      "text records in a Resolver for a Node",
+      {
+        id: "Unique identifier for this text record",
+        key: "Key of the text record",
+        value: "Value of the text record",
+      },
+    ),
   });
 };

@@ -4,12 +4,7 @@ import { ETH_COIN_TYPE, Node } from "@ensnode/utils";
 import { type Address, Hash, type Hex, hexToBytes, isAddress, zeroAddress } from "viem";
 
 import config from "@/config";
-import {
-  sharedEventValues,
-  upsertAccount,
-  upsertResolver,
-  upsertResolverRecords,
-} from "@/lib/db-helpers";
+import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeKeyedResolverRecordId, makeResolverId } from "@/lib/ids";
 import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
@@ -133,11 +128,12 @@ export async function handleNameChanged({
   const { node, name } = event.args;
   if (hasNullByte(name)) return;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const resolverContractAddress = event.log.address;
+  const id = makeResolverId(context.network.chainId, resolverContractAddress, node);
   await upsertResolver(context, {
     id,
     domainId: node,
-    address: event.log.address,
+    address: resolverContractAddress,
   });
 
   // log ResolverEvent
@@ -148,9 +144,10 @@ export async function handleNameChanged({
   });
 
   if (config.indexResolverRecords) {
-    await upsertResolverRecords(context, {
+    await upsertResolver(context, {
       id,
-      resolverId: id,
+      domainId: node,
+      address: resolverContractAddress,
 
       name: name || null, // coalese falsy value into null
     });
@@ -165,6 +162,7 @@ export async function handleABIChanged({
   event: EventWithArgs<{ node: Node; contentType: bigint }>;
 }) {
   const { node, contentType } = event.args;
+
   const id = makeResolverId(context.network.chainId, event.log.address, node);
 
   // upsert resolver

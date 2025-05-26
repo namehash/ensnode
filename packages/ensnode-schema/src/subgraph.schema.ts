@@ -130,6 +130,9 @@ export const resolver = onchainTable(
     // The set of observed SLIP-44 coin types for this resolver
     // NOTE: we avoid .notNull.default([]) to match subgraph behavior
     coinTypes: t.bigint().array(),
+
+    // NOTE(resolver-records): include the per-Node `name` record value
+    name: t.text(),
   }),
   (t) => ({
     idx: index().on(t.domainId),
