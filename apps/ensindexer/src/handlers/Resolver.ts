@@ -128,12 +128,11 @@ export async function handleNameChanged({
   const { node, name } = event.args;
   if (hasNullByte(name)) return;
 
-  const resolverContractAddress = event.log.address;
-  const id = makeResolverId(context.network.chainId, resolverContractAddress, node);
+  const id = makeResolverId(context.network.chainId, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
-    address: resolverContractAddress,
+    address: event.log.address,
   });
 
   // log ResolverEvent
@@ -147,7 +146,7 @@ export async function handleNameChanged({
     await upsertResolver(context, {
       id,
       domainId: node,
-      address: resolverContractAddress,
+      address: event.log.address,
 
       name: name || null, // coalese falsy value into null
     });
