@@ -362,50 +362,100 @@ Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` as needed for the initial 
 
 Using a volume ensures that your downloaded and ingested data is not lost when the container stops or is removed, saving time and bandwidth on subsequent runs.
 
+## Generating and Uploading Data Artifacts
 
-# prepare the .ensrainbow files
+:::note
+These steps are typically performed by project maintainers for releasing official ENSRainbow data artifacts. Assumes `rclone` is configured with a remote named `ENSRAINBOWR2`.
+:::
 
+### 1. Prepare `.ensrainbow` Files
 
+This section covers the conversion of source data (like SQL dumps or empty files for initial datasets) into the `.ensrainbow` format. The `time` command is used here to measure the duration of potentially long-running conversion processes.
+
+**For `subgraph` namespace (main dataset):**
+This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for the `subgraph` namespace and label set 0.
+```bash
+# Assuming ens_names.sql.gz contains the primary dataset
 time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --namespace subgraph --label-set 0
+```
 
+**For `discoveryA` namespace (initially empty for discovered labels):**
+This creates an empty `.ensrainbow` file for the `discoveryA` namespace, which might be used for labels discovered dynamically.
+```bash
 touch empty.sql
 gzip empty.sql
 time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --namespace discoveryA --label-set 0
+```
 
+**For `testenv` namespace (for testing):**
+This converts a test dataset SQL dump into an `.ensrainbow` file for the `testenv` namespace.
+```bash
 time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --namespace testenv --label-set 0
+```
 
+### 2. Upload `.ensrainbow` Files to R2 Storage
+
+After generation, these `.ensrainbow` files are uploaded to the designated cloud storage (e.g., R2 via rclone).
+```bash
 rclone copy ./subgraph_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./discoveryA_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./testenv_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
+```
 
-## calculate the checksum
+### 3. Calculate and Upload Checksums for `.ensrainbow` Files
+
+SHA256 checksums are generated for each `.ensrainbow` file to ensure data integrity. These checksum files are then uploaded.
+```bash
+# Calculate checksums
 sha256sum subgraph_0.ensrainbow > subgraph_0.ensrainbow.sha256sum
 sha256sum discoveryA_0.ensrainbow > discoveryA_0.ensrainbow.sha256sum
 sha256sum testenv_0.ensrainbow > testenv_0.ensrainbow.sha256sum
 
-upload the checksum to r2
+# Upload checksums
 rclone copy ./subgraph_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./discoveryA_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./testenv_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
+```
 
-# create db and upload
+### 4. Ingest `.ensrainbow` Files into LevelDB Databases
+
+The `.ensrainbow` files are ingested into local LevelDB instances to create the actual databases.
+```bash
 pnpm ingest-ensrainbow --input-file subgraph_0.ensrainbow --data-dir ./data-subgraph
 pnpm ingest-ensrainbow --input-file discoveryA_0.ensrainbow --data-dir ./data-discoveryA
 pnpm ingest-ensrainbow --input-file testenv_0.ensrainbow --data-dir ./data-testenv
+```
 
+### 5. Package LevelDB Databases
+
+The LevelDB data directories, now populated, are packaged into compressed `tar.gz` archives.
+```bash
 tar -czvf subgraph_0.tgz ./data-subgraph
 tar -czvf discoveryA_0.tgz ./data-discoveryA
 tar -czvf testenv_0.tgz ./data-testenv
+```
 
+### 6. Upload Database Archives to R2 Storage
+
+These database archives are uploaded to cloud storage, tagged with a schema version (e.g., `v3` in this example).
+```bash
 rclone copy ./subgraph_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
 rclone copy ./discoveryA_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
 rclone copy ./testenv_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
+```
 
+### 7. Calculate and Upload Checksums for Database Archives
+
+Finally, checksums for the database archives are calculated and uploaded to ensure their integrity.
+```bash
+# Calculate checksums
 sha256sum subgraph_0.tgz > subgraph_0.tgz.sha256sum
 sha256sum discoveryA_0.tgz > discoveryA_0.tgz.sha256sum
 sha256sum testenv_0.tgz > testenv_0.tgz.sha256sum
 
+# Upload checksums
 rclone copy ./subgraph_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
 rclone copy ./discoveryA_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
 rclone copy ./testenv_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
+```
 
