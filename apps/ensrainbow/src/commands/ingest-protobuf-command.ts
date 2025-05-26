@@ -177,7 +177,6 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                           `Label set must be exactly one higher than the current highest label set.\n` +
                           `Current highest label set: ${currentLabelSet}, File label set: ${fileLabelSet}`;
                         logger.error(msg);
-                        console.log("KURW1");
                         fileStream.destroy(new Error(msg)); // Stop processing
                         commandReject(new Error(msg));
                         return;
@@ -210,7 +209,6 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                 })
                 .then(() => {
                   logger.info("Marked ingestion as unfinished");
-                  console.log("KURW2");
                 })
                 .catch((err) => {
                   logger.error(`Failed during initialization: ${err}`);
@@ -237,7 +235,6 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                       `Label set must be exactly one higher than the current highest label set.\n` +
                       `Current highest label set: ${currentLabelSet}, File label set: ${fileLabelSet}`;
                     logger.error(msg);
-                    console.log("KURW1");
                     fileStream.destroy(new Error(msg)); // Stop processing
                     commandReject(new Error(msg));
                     return;
@@ -248,7 +245,6 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                 })
                 .then(() => {
                   logger.info("Marked ingestion as unfinished");
-                  console.log("KURW2");
                 })
                 .catch((err) => {
                   if (

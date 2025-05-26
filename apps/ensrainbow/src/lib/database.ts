@@ -410,7 +410,7 @@ export class ENSRainbowDB {
    * @returns The labelSet and label as a string if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getLabel(labelHash: ByteArray): Promise<{ labelSet: number; label: string } | null> {
+  public async getLabel(labelHash: ByteArray): Promise<{ labelSet: number; label: Label } | null> {
     // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
     if (!isRainbowRecordKey(labelHash)) {
       throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
