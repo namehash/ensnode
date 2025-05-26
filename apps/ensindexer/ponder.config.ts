@@ -5,8 +5,8 @@ import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import type { MergedTypes } from "@/lib/plugin-helpers";
 
 import basenamesPlugin from "@/plugins/basenames/basenames.plugin";
-import l2ReverseResolversPlugin from "@/plugins/l2-reverse-resolvers/l2-reverse-resolvers.plugin";
 import lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
+import reverseResolversPlugin from "@/plugins/reverse-resolvers/reverse-resolvers.plugin";
 import subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
 import threednsPlugin from "@/plugins/threedns/threedns.plugin";
 
@@ -21,7 +21,7 @@ export const ALL_PLUGINS = [
   basenamesPlugin,
   lineaNamesPlugin,
   threednsPlugin,
-  l2ReverseResolversPlugin,
+  reverseResolversPlugin,
 ] as const;
 
 export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {

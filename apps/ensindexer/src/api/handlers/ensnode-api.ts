@@ -24,12 +24,12 @@ app.get("/records", async (ctx) => {
 
   const resolverId = makeResolverId(chain.id, Resolver.address, reverseNode);
 
-  const records = await db
+  const resolver = await db
     .select()
-    .from(schema.ext_resolverRecords)
-    .where(eq(schema.ext_resolverRecords.resolverId, resolverId));
-  console.log(records);
-  return ctx.json({ records });
+    .from(schema.resolver)
+    .where(eq(schema.resolver.id, resolverId));
+  console.log(resolver);
+  return ctx.json({ resolver });
 });
 
 export default app;

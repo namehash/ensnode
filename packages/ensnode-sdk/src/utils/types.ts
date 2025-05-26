@@ -9,7 +9,7 @@ export enum PluginName {
   Basenames = "basenames",
   Lineanames = "lineanames",
   ThreeDNS = "threedns",
-  L2ReverseResolvers = "l2-reverse-resolvers",
+  ReverseResolvers = "reverse-resolvers",
 }
 
 /**
