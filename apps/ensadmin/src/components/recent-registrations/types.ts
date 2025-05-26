@@ -3,7 +3,7 @@ import type { Address } from "viem";
 /**
  * Types for the recent registrations component
  */
-export interface Domain {
+export interface LatestRegistrationResult {
   name: string;
   createdAt: string;
   expiryDate: string;
@@ -18,7 +18,7 @@ export interface Domain {
 export interface Registration {
   registrationDate: string;
   expiryDate: string;
-  domain: Domain;
+  domain: LatestRegistrationResult;
 }
 
 export interface RecentRegistrationsResponse {
