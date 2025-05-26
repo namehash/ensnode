@@ -24,7 +24,7 @@ OUT_DIR="${OUT_DIR:-.}" # Default output directory, can be overridden e.g., OUT_
 BASE_URL="https://bucket.ensrainbow.io"
 
 # Construct file names based on arguments
-DATA_FILE_BASENAME="${NAMESPACE}-${LABEL_SET}.ensrainbow"
+DATA_FILE_BASENAME="${NAMESPACE}_${LABEL_SET}.ensrainbow"
 SERVER_DATA_PATH="labelsets/${DATA_FILE_BASENAME}"
 SERVER_CHECKSUM_PATH="labelsets/${DATA_FILE_BASENAME}.sha256sum"
 SERVER_LICENSE_PATH="THE_GRAPH_LICENSE.txt" # Common license file

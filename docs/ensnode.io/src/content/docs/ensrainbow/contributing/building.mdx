@@ -1,42 +1,54 @@
 ---
-title: Building the Docker Images
+title: Building and Using ENSRainbow Docker Images
 sidebar:
   label: Building Docker Images
   order: 2
 ---
 
-ENSRainbow is split into two Docker images to minimize long-running rebuilds of the LevelDB data directory used for rainbow table lookups. The `namehash/ensnode/ensrainbow-data` image hosts the prebuilt LevelDB data at `/app/data` and `namehash/ensnode/ensrainbow` imports that directory after building the `apps/ensrainbow` project.
+ENSRainbow runs as a Docker image, which includes the application server and scripts to manage its data. Official images are hosted on GitHub Container Registry (GHCR) at `ghcr.io/namehash/ensnode/`.
 
-## ENSRainbow-data (`namehash/ensnode/ensrainbow-data`)
+**Key Data Handling Strategy:**
 
-This image downloads the source `ens_names.sql.gz` and ingests them to produce the output `/app/data` directory.
+The ENSRainbow Docker images are designed to be lightweight. The LevelDB database required for operation is **not** typically baked into the image during the build process. Instead, data is downloaded and managed at **runtime** by an `entrypoint.sh` script within the container. This process is triggered when you run the container with:
+1.  A Docker volume mounted to `/app/apps/ensrainbow/data` (the internal data path).
+2.  Specific environment variables set: `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET`.
 
-```bash
-# from the monorepo root
-docker build -f apps/ensrainbow/Dockerfile.data -t ghcr.io/namehash/ensnode/ensrainbow-data .
-```
+This approach allows for flexible data updates and management without needing to rebuild the entire application image.
 
-## ENSRainbow (`namehash/ensnode/ensrainbow`)
+Pre-built images from GHCR are the recommended way to run ENSRainbow.
 
-```bash
-# from the monorepo root
-docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow .
-```
+## Building the Application Image (Optional)
 
-## ENSRainbow-v2-data (`ghcr.io/<your-repo>/ensrainbow-v2-data`)
-
-This image includes the latest LevelDB data for rainbow table lookups. It uses the `DATA_VERSION=v2` build argument to ensure the correct version is built.
+If you need to build the ENSRainbow application image from source (e.g., for development or testing custom changes), you can use the `Dockerfile` located in the `apps/ensrainbow/` directory.
 
 ```bash
 # from the monorepo root
-docker build -f apps/ensrainbow/Dockerfile.data --build-arg DATA_VERSION=v2 -t ghcr.io/namehash/ensnode/ensrainbow-v2-data .
+docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .
 ```
 
-## ENSRainbow v2 (`ghcr.io/<your-repo>/ensrainbow-v2`)
+This command builds an image containing the ENSRainbow application and the `entrypoint.sh` script responsible for runtime data provisioning. The resulting image will behave the same way as the official pre-built images regarding data handling.
 
-This image builds the ENSRainbow v2 app and uses the `ensrainbow-v2-data` image for its data.
+(Note: The `apps/ensrainbow/Dockerfile` uses a multi-stage setup for build optimizations. Data handling is deferred to the `entrypoint.sh` script at runtime.)
 
+## Available Pre-built Images on GHCR
+
+The following official image is available on GHCR and is recommended for use:
+
+-   **`ghcr.io/namehash/ensnode/ensrainbow:latest`**: The standard ENSRainbow application image.
+
+You can pull this image using:
 ```bash
-# from the monorepo root
-docker build -f apps/ensrainbow/Dockerfile --build-arg DATA_IMAGE_NAME=ensrainbow-v2-data -t ghcr.io/namehash/ensnode/ensrainbow-v2 .
+docker pull ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
+
+## Runtime Data Provisioning via `entrypoint.sh`
+
+All ENSRainbow application images (whether self-built or pulled from GHCR) use the `entrypoint.sh` script to manage the LevelDB data at runtime.
+
+When the container starts:
+-   The script checks the designated data directory (mounted via a volume, typically at `/app/apps/ensrainbow/data`).
+-   If the correct data (matching `SCHEMA_VERSION`, `NAMESPACE`, `LABEL_SET` environment variables) is present and valid, the server starts.
+-   If data is missing, outdated, or invalid, the script will attempt to download the appropriate database artifact.
+-   A marker file (`.ensrainbow_db_ready`) is used within the data directory to indicate a successfully prepared database.
+
+This ensures that the container always runs with the correct and validated dataset. For detailed instructions on running the images with persistent storage and managing these environment variables, please refer to the [Persistent Storage with Docker section in the main contribution guide](/ensrainbow/contributing/#persistent-storage-with-docker).

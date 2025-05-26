@@ -370,3 +370,49 @@ Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` as needed for the initial 
 Using a volume ensures that your downloaded and ingested data is not lost when the container stops or is removed, saving time and bandwidth on subsequent runs.
 
 
+# prepare the .ensrainbow files
+
+
+time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --namespace subgraph --label-set 0
+
+touch empty.sql
+gzip empty.sql
+time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --namespace discoveryA --label-set 0
+
+time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --namespace testenv --label-set 0
+
+rclone copy ./subgraph_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./discoveryA_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./testenv_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
+
+## calculate the checksum
+sha256sum subgraph_0.ensrainbow > subgraph_0.ensrainbow.sha256sum
+sha256sum discoveryA_0.ensrainbow > discoveryA_0.ensrainbow.sha256sum
+sha256sum testenv_0.ensrainbow > testenv_0.ensrainbow.sha256sum
+
+upload the checksum to r2
+rclone copy ./subgraph_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./discoveryA_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./testenv_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
+
+# create db and upload
+pnpm ingest-ensrainbow --input-file subgraph_0.ensrainbow --data-dir ./data-subgraph
+pnpm ingest-ensrainbow --input-file discoveryA_0.ensrainbow --data-dir ./data-discoveryA
+pnpm ingest-ensrainbow --input-file testenv_0.ensrainbow --data-dir ./data-testenv
+
+tar -czvf subgraph_0.tgz ./data-subgraph
+tar -czvf discoveryA_0.tgz ./data-discoveryA
+tar -czvf testenv_0.tgz ./data-testenv
+
+rclone copy ./subgraph_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
+rclone copy ./discoveryA_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
+rclone copy ./testenv_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
+
+sha256sum subgraph_0.tgz > subgraph_0.tgz.sha256sum
+sha256sum discoveryA_0.tgz > discoveryA_0.tgz.sha256sum
+sha256sum testenv_0.tgz > testenv_0.tgz.sha256sum
+
+rclone copy ./subgraph_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
+rclone copy ./discoveryA_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
+rclone copy ./testenv_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
+
