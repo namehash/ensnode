@@ -77,7 +77,7 @@ export function globalIndexingStatusViewModel(
         chain.name,
         networkIndexingStatus,
         firstBlockToIndexGloballyTimestamp,
-        chain.blockExplorers.default,
+        (chain.blockExplorers && chain.blockExplorers.default),
       );
     },
   ) satisfies Array<NetworkStatusViewModel>;
