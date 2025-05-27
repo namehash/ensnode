@@ -27,7 +27,7 @@ import {
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
   ensRainbowViewModel,
-  globalIndexingStatusViewModel,
+  globalIndexingStatusViewModel, ChainBlockExplorer,
 } from "./view-models";
 
 export function IndexingStatus() {
@@ -93,14 +93,36 @@ interface NetworkIndexingStatsCardProps {
   network: NetworkStatusViewModel;
 }
 
-type chainName =
-  | "Base"
-  | "OP Mainnet"
-  | "Ethereum"
-  | "Linea Mainnet"
-  | "Sepolia"
-  | "Anvil"
-  | "Holesky";
+/**
+ * Mapping of chain's id to its icon.
+ * Based on chain definitions provided by viem @ https://github.com/wevm/viem/blob/main/src/chains/definitions
+ */
+export const chainIcons = new Map<number, React.ReactNode>(
+    [
+        [1, <EthereumIcon width={18} height={18} />],
+        [8453, <BaseIcon width={18} height={18} />],
+        [11_155_111, <EthereumTestnetIcon width={18} height={18} />],
+        [10, <OptimismIcon width={16} height={16} />],
+        [59_144, <LineaIcon width={18} height={18} />],
+        [17000, <EthereumTestnetIcon width={18} height={18} />],
+        [31_337, <EthereumLocalIcon width={18} height={18} />]
+    ]
+)
+
+/**
+ * A helper function that retrieves an icon for a given chain
+ * @param chainId
+ * @returns chain icon as a JSX
+ */
+const getIconByChainId = (chainId: number) : React.ReactNode => {
+  if (!chainIcons.has(chainId)){
+    throw new Error(
+        `Chain ID "${chainId}" doesn't have an assigned icon`,
+    );
+  }
+
+  return chainIcons.get(chainId);
+};
 
 /**
  * Component to display network indexing stats for a single network.
@@ -109,15 +131,16 @@ type chainName =
  */
 function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
   const { network } = props;
-  const chainIcons: Record<chainName, React.ReactNode> = {
-    Base: <BaseIcon width={18} height={18} />,
-    "OP Mainnet": <OptimismIcon width={16} height={16} />,
-    "Linea Mainnet": <LineaIcon width={18} height={18} />,
-    Sepolia: <EthereumTestnetIcon width={18} height={18} />,
-    Anvil: <EthereumLocalIcon width={18} height={18} />,
-    Holesky: <EthereumTestnetIcon width={18} height={18} />,
-    Ethereum: <EthereumIcon width={18} height={18} />,
-  };
+
+  let networkIcon = null;
+
+  try {
+    networkIcon = getIconByChainId(network.id);
+  }
+  catch (error){
+    console.log(error);
+    networkIcon = <></>;
+  }
 
   return (
     <Card key={network.name}>
@@ -126,7 +149,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
           <div className="flex items-center gap-2">
             <div className="flex flex-row justify-start items-center gap-2">
               <p className="font-semibold text-left">{network.name}</p>
-              {chainIcons[network.name as chainName]}
+              {networkIcon}
             </div>
           </div>
         </div>
@@ -135,12 +158,12 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
           <BlockStats
-            networkName={network.name as chainName}
+            blockExplorer={network.blockExplorer}
             label="Last indexed block"
             block={network.lastIndexedBlock}
           />
           <BlockStats
-            networkName={network.name as chainName}
+            blockExplorer={network.blockExplorer}
             label="Latest safe block"
             block={network.latestSafeBlock}
           />
@@ -150,8 +173,8 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
   );
 }
 
-interface BlockSatsProps {
-  networkName: string;
+interface BlockStatsProps {
+  blockExplorer?: ChainBlockExplorer;
   label: string;
   block: BlockInfo | null;
 }
@@ -159,7 +182,7 @@ interface BlockSatsProps {
 /**
  * Component to display requested block stats.
  */
-function BlockStats({ networkName, label, block }: BlockSatsProps) {
+function BlockStats({ blockExplorer, label, block }: BlockStatsProps) {
   if (!block) {
     return (
       <div>
@@ -178,7 +201,7 @@ function BlockStats({ networkName, label, block }: BlockSatsProps) {
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
-      <BlockNumber block={block} networkName={networkName as chainName} />
+      <BlockNumber block={block} blockExplorer={blockExplorer} />
       <div className="text-xs text-muted-foreground">
         {block.timestamp ? calculatedRelativeTime : "N/A"}
       </div>
@@ -187,22 +210,20 @@ function BlockStats({ networkName, label, block }: BlockSatsProps) {
 }
 
 interface BlockNumberProps {
-  networkName: chainName;
+  blockExplorer?: ChainBlockExplorer;
   block: BlockInfo;
 }
 
 /*
 Component to display a block number.
-If the chain is supported on blockexplorer.com it will display it as an external link to the block's details
+If the chain has a designated block explorer it will display it as an external link to the block's details
  */
-function BlockNumber({ networkName, block }: BlockNumberProps) {
-  // for now blockexplorer.com only allows inspection of Ethereum blocks, the list may change if we switch platform or their capabilities expand
-  const blockExplorerAvailableChains: chainName[] = ["Ethereum"];
+function BlockNumber({ blockExplorer, block }: BlockNumberProps) {
 
-  if (blockExplorerAvailableChains.includes(networkName)) {
+  if (blockExplorer) {
     return (
       <a
-        href={`https://www.blockexplorer.com/${networkName.toLowerCase().replace(" ", "")}/block/${block.number}/#overview`}
+        href={`${blockExplorer.url}/block/${block.number}`}
         target="_blank"
         rel="noreferrer noopener"
         className="text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"

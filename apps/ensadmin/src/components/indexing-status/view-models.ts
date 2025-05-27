@@ -16,15 +16,26 @@ export interface NetworkIndexingPhaseViewModel {
 }
 
 /**
+ * Information about chain's block explorer, matching viem's definition @ https://github.com/wevm/viem/blob/main/src/types/chain.ts#L266
+ */
+export interface ChainBlockExplorer {
+  name: string;
+  url: string;
+  apiUrl?: string | undefined;
+}
+
+/**
  * Network status view model, includes indexing phases.
  */
 export interface NetworkStatusViewModel {
+  id: number;
   name: string;
   firstBlockToIndex: BlockInfoViewModel;
   lastIndexedBlock: BlockInfoViewModel | null;
   lastSyncedBlock: BlockInfoViewModel | null;
   latestSafeBlock: BlockInfoViewModel;
   phases: Array<NetworkIndexingPhaseViewModel>;
+  blockExplorer?: ChainBlockExplorer;
 }
 
 /**
@@ -56,15 +67,20 @@ export function globalIndexingStatusViewModel(
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
   const getChainName = (chainId: number) => getChainById(ensDeploymentChain, chainId).name;
+  const getChainDefaultBlockExplorer = (chainId: number) => getChainById(ensDeploymentChain, chainId).blockExplorers.default;
 
   const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
-    ([chainId, networkIndexingStatus]) =>
-      networkIndexingStatusViewModel(
-        getChainName(parseInt(chainId, 10)),
-        networkIndexingStatus,
-        firstBlockToIndexGloballyTimestamp,
-      ),
-  ) satisfies Array<NetworkStatusViewModel>;
+    ([chainId, networkIndexingStatus]) => {
+      const chainIdAsNumber = parseInt(chainId, 10);
+
+      return networkIndexingStatusViewModel(
+          chainIdAsNumber,
+          getChainName(chainIdAsNumber),
+          networkIndexingStatus,
+          firstBlockToIndexGloballyTimestamp,
+          getChainDefaultBlockExplorer(chainIdAsNumber)
+      )
+    }) satisfies Array<NetworkStatusViewModel>;
 
   // Sort the network statuses by the first block to index timestamp
   networkStatusesViewModel.sort(
@@ -87,15 +103,19 @@ export function globalIndexingStatusViewModel(
 
 /**
  * View model for the network indexing status.
+ * @param chainId
  * @param chainName
  * @param networkStatus
  * @param firstBlockToIndexGloballyTimestamp
+ * @param chainsBlockExplorer - optional
  * @returns
  */
 export function networkIndexingStatusViewModel(
+  chainId: number,
   chainName: string,
   networkStatus: EnsNode.NetworkIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
+  chainsBlockExplorer?: ChainBlockExplorer
 ): NetworkStatusViewModel {
   const phases: NetworkStatusViewModel["phases"] = [];
 
@@ -116,12 +136,14 @@ export function networkIndexingStatusViewModel(
   });
 
   return {
+    id: chainId,
     name: chainName,
     latestSafeBlock: blockViewModel(latestSafeBlock),
     firstBlockToIndex: blockViewModel(firstBlockToIndex),
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,
     lastSyncedBlock: lastSyncedBlock ? blockViewModel(lastSyncedBlock) : null,
     phases,
+    ...(chainsBlockExplorer && {blockExplorer: chainsBlockExplorer})
   } satisfies NetworkStatusViewModel;
 }
 
