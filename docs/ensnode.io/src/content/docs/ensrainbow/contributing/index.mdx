@@ -302,7 +302,7 @@ You can also run ENSRainbow with the test data using Docker. This involves runni
       -p 3223:3223 \
       ghcr.io/namehash/ensnode/ensrainbow:latest
     ```
-    *   Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` if the test data parameters differ. Typically, for the standard test data, `NAMESPACE` is `testenv` and `LABEL_SET` is `0`. The `SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v2`, `v3`).
+    *   Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` if the test data parameters differ. Typically, for the standard test data, `NAMESPACE` is `testenv` and `LABEL_SET` is `0`. The `SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v3`).
 
 This setup allows the `entrypoint.sh` script within the container to download the `testenv-0` database artifact into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
 
@@ -363,9 +363,9 @@ mkdir -p ~/my_ensrainbow_data
 
 docker run -d --name ensrainbow_persistent \
   -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v2" \
+  -e SCHEMA_VERSION="v3" \
   -e NAMESPACE="subgraph" \
-  -e LABEL_SET="1" \
+  -e LABEL_SET="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
@@ -378,9 +378,9 @@ docker volume create ensrainbow_db_volume
 
 docker run -d --name ensrainbow_persistent \
   -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v2" \
+  -e SCHEMA_VERSION="v3" \
   -e NAMESPACE="subgraph" \
-  -e LABEL_SET="1" \
+  -e LABEL_SET="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
