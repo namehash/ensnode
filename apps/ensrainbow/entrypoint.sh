@@ -33,6 +33,7 @@ echo "Target Port: $PORT"
 echo "Application Directory: $APP_DIR"
 echo "Final Data Directory: $FINAL_DATA_DIR"
 echo "Marker File: $MARKER_FILE"
+echo "Database Directory: $DB_SUBDIR_PATH"
 echo "-------------------------"
 
 # Change to the application directory for pnpm commands
