@@ -65,7 +65,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
 
     # 2. Clean up any existing data and prepare directories
     echo "Preparing directories for download..."
-    rm -rf "${FINAL_DATA_DIR}" # Ensure clean state if previous attempt failed mid-way
+    rm -rf "${FINAL_DATA_DIR}"/* # Ensure clean state if previous attempt failed mid-way
     mkdir -p "${FINAL_DATA_DIR}"
     rm -rf "${DOWNLOAD_TEMP_DIR}" # Clean up temp dir from previous runs if any
     mkdir -p "${DOWNLOAD_TEMP_DIR}"
