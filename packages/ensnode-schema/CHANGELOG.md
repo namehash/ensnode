@@ -1,5 +1,11 @@
 # @ensnode/ensnode-schema
 
+## 0.27.0
+
+### Minor Changes
+
+- [#706](https://github.com/namehash/ensnode/pull/706) [`fcea8c1`](https://github.com/namehash/ensnode/commit/fcea8c1fbcc19b3948ecf7d1bef61c38480e8e7d) Thanks [@shrugs](https://github.com/shrugs)! - renamed @ensnode/ponder-schema to @ensnode/ensnode-schema
+
 ## 0.26.0
 
 ## 0.25.0
