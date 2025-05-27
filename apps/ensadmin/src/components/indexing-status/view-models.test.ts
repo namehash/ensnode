@@ -67,9 +67,9 @@ describe("View Models", () => {
               },
             ],
             blockExplorer: {
-              name: 'Etherscan',
-              url: 'https://etherscan.io',
-              apiUrl: 'https://api.etherscan.io/api',
+              name: "Etherscan",
+              url: "https://etherscan.io",
+              apiUrl: "https://api.etherscan.io/api",
             },
           },
           {
@@ -92,9 +92,9 @@ describe("View Models", () => {
               },
             ],
             blockExplorer: {
-              name: 'Basescan',
-              url: 'https://basescan.org',
-              apiUrl: 'https://api.basescan.org/api',
+              name: "Basescan",
+              url: "https://basescan.org",
+              apiUrl: "https://api.basescan.org/api",
             },
           },
         ],
@@ -108,7 +108,7 @@ describe("View Models", () => {
     it("should return the correct view model without block explorer", () => {
       expect(
         networkIndexingStatusViewModel(
-            base.id,
+          base.id,
           `${base.name}`,
           {
             latestSafeBlock: {
@@ -169,31 +169,31 @@ describe("View Models", () => {
 
     it("should return the correct view model with block explorer", () => {
       expect(
-          networkIndexingStatusViewModel(
-              base.id,
-              `${base.name}`,
-              {
-                latestSafeBlock: {
-                  number: 333,
-                  timestamp: 1501,
-                },
-                firstBlockToIndex: {
-                  number: 222,
-                  timestamp: 1111,
-                },
-                lastIndexedBlock: null,
-                lastSyncedBlock: {
-                  number: 272,
-                  timestamp: 1247,
-                },
-              },
-              1000,
-              {
-            name: 'Basescan',
-            url: 'https://basescan.org',
-            apiUrl: 'https://api.basescan.org/api',
-      },
-          ),
+        networkIndexingStatusViewModel(
+          base.id,
+          `${base.name}`,
+          {
+            latestSafeBlock: {
+              number: 333,
+              timestamp: 1501,
+            },
+            firstBlockToIndex: {
+              number: 222,
+              timestamp: 1111,
+            },
+            lastIndexedBlock: null,
+            lastSyncedBlock: {
+              number: 272,
+              timestamp: 1247,
+            },
+          },
+          1000,
+          {
+            name: "Basescan",
+            url: "https://basescan.org",
+            apiUrl: "https://api.basescan.org/api",
+          },
+        ),
       ).toEqual({
         id: 8453,
         name: "Base",
@@ -232,9 +232,9 @@ describe("View Models", () => {
           },
         ],
         blockExplorer: {
-          name: 'Basescan',
-          url: 'https://basescan.org',
-          apiUrl: 'https://api.basescan.org/api',
+          name: "Basescan",
+          url: "https://basescan.org",
+          apiUrl: "https://api.basescan.org/api",
         },
       } satisfies NetworkStatusViewModel);
     });

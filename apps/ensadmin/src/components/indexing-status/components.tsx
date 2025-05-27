@@ -21,13 +21,14 @@ import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
+  ChainBlockExplorer,
   GlobalIndexingStatusViewModel,
   NetworkIndexingPhaseViewModel,
   NetworkStatusViewModel,
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
   ensRainbowViewModel,
-  globalIndexingStatusViewModel, ChainBlockExplorer,
+  globalIndexingStatusViewModel,
 } from "./view-models";
 
 export function IndexingStatus() {
@@ -97,28 +98,24 @@ interface NetworkIndexingStatsCardProps {
  * Mapping of chain's id to its icon.
  * Based on chain definitions provided by viem @ https://github.com/wevm/viem/blob/main/src/chains/definitions
  */
-export const chainIcons = new Map<number, React.ReactNode>(
-    [
-        [1, <EthereumIcon width={18} height={18} />],
-        [8453, <BaseIcon width={18} height={18} />],
-        [11_155_111, <EthereumTestnetIcon width={18} height={18} />],
-        [10, <OptimismIcon width={16} height={16} />],
-        [59_144, <LineaIcon width={18} height={18} />],
-        [17000, <EthereumTestnetIcon width={18} height={18} />],
-        [31_337, <EthereumLocalIcon width={18} height={18} />]
-    ]
-)
+export const chainIcons = new Map<number, React.ReactNode>([
+  [1, <EthereumIcon width={18} height={18} />],
+  [8453, <BaseIcon width={18} height={18} />],
+  [11_155_111, <EthereumTestnetIcon width={18} height={18} />],
+  [10, <OptimismIcon width={16} height={16} />],
+  [59_144, <LineaIcon width={18} height={18} />],
+  [17000, <EthereumTestnetIcon width={18} height={18} />],
+  [31_337, <EthereumLocalIcon width={18} height={18} />],
+]);
 
 /**
  * A helper function that retrieves an icon for a given chain
  * @param chainId
  * @returns chain icon as a JSX
  */
-const getIconByChainId = (chainId: number) : React.ReactNode => {
-  if (!chainIcons.has(chainId)){
-    throw new Error(
-        `Chain ID "${chainId}" doesn't have an assigned icon`,
-    );
+const getIconByChainId = (chainId: number): React.ReactNode => {
+  if (!chainIcons.has(chainId)) {
+    throw new Error(`Chain ID "${chainId}" doesn't have an assigned icon`);
   }
 
   return chainIcons.get(chainId);
@@ -136,8 +133,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
 
   try {
     networkIcon = getIconByChainId(network.id);
-  }
-  catch (error){
+  } catch (error) {
     console.log(error);
     networkIcon = <></>;
   }
@@ -219,7 +215,6 @@ Component to display a block number.
 If the chain has a designated block explorer it will display it as an external link to the block's details
  */
 function BlockNumber({ blockExplorer, block }: BlockNumberProps) {
-
   if (blockExplorer) {
     return (
       <a

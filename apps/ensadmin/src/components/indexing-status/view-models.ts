@@ -67,20 +67,22 @@ export function globalIndexingStatusViewModel(
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
   const getChainName = (chainId: number) => getChainById(ensDeploymentChain, chainId).name;
-  const getChainDefaultBlockExplorer = (chainId: number) => getChainById(ensDeploymentChain, chainId).blockExplorers.default;
+  const getChainDefaultBlockExplorer = (chainId: number) =>
+    getChainById(ensDeploymentChain, chainId).blockExplorers.default;
 
   const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
     ([chainId, networkIndexingStatus]) => {
       const chainIdAsNumber = parseInt(chainId, 10);
 
       return networkIndexingStatusViewModel(
-          chainIdAsNumber,
-          getChainName(chainIdAsNumber),
-          networkIndexingStatus,
-          firstBlockToIndexGloballyTimestamp,
-          getChainDefaultBlockExplorer(chainIdAsNumber)
-      )
-    }) satisfies Array<NetworkStatusViewModel>;
+        chainIdAsNumber,
+        getChainName(chainIdAsNumber),
+        networkIndexingStatus,
+        firstBlockToIndexGloballyTimestamp,
+        getChainDefaultBlockExplorer(chainIdAsNumber),
+      );
+    },
+  ) satisfies Array<NetworkStatusViewModel>;
 
   // Sort the network statuses by the first block to index timestamp
   networkStatusesViewModel.sort(
@@ -115,7 +117,7 @@ export function networkIndexingStatusViewModel(
   chainName: string,
   networkStatus: EnsNode.NetworkIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
-  chainsBlockExplorer?: ChainBlockExplorer
+  chainsBlockExplorer?: ChainBlockExplorer,
 ): NetworkStatusViewModel {
   const phases: NetworkStatusViewModel["phases"] = [];
 
@@ -143,7 +145,7 @@ export function networkIndexingStatusViewModel(
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,
     lastSyncedBlock: lastSyncedBlock ? blockViewModel(lastSyncedBlock) : null,
     phases,
-    ...(chainsBlockExplorer && {blockExplorer: chainsBlockExplorer})
+    ...(chainsBlockExplorer && { blockExplorer: chainsBlockExplorer }),
   } satisfies NetworkStatusViewModel;
 }
 
