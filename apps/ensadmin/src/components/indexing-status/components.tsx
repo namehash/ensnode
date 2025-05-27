@@ -169,11 +169,10 @@ function BlockStats({ networkName, label, block }: BlockSatsProps) {
     );
   }
 
-  let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString());
+  let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString(), true);
 
   if (
-    block.timestamp <= Math.floor(Date.now() / 1000) ||
-    calculatedRelativeTime === "less than a minute ago"
+    block.timestamp >= Math.floor(Date.now() / 1000)
   ) {
     calculatedRelativeTime = "just now";
   }
