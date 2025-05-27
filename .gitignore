@@ -26,3 +26,7 @@ generated
 
 # VSCode local history plugin
 .history
+
+# Terraform
+.terraform*
+terraform.tfstate*
