@@ -14,7 +14,7 @@ MARKER_FILE="${FINAL_DATA_DIR}/ensrainbow_db_ready"
 
 # Path for the data subdirectory, relative to APP_DIR.
 # This assumes data is in ${APP_DIR}/${DATA_DIR_NAME}/data-${NAMESPACE}/
-DB_SUBDIR_PATH="${DATA_DIR_NAME}/data-${NAMESPACE}"
+DB_SUBDIR_PATH="${DATA_DIR_NAME}/data-${NAMESPACE}_${LABEL_SET}"
 
 # Ensure required variables for download are set if we might download
 if [ ! -f "${MARKER_FILE}" ]; then

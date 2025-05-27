@@ -448,18 +448,18 @@ rclone copy ./testenv_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 
 The `.ensrainbow` files are ingested into local LevelDB instances to create the actual databases.
 ```bash
-pnpm ingest-ensrainbow --input-file subgraph_0.ensrainbow --data-dir ./data-subgraph
-pnpm ingest-ensrainbow --input-file discoveryA_0.ensrainbow --data-dir ./data-discoveryA
-pnpm ingest-ensrainbow --input-file testenv_0.ensrainbow --data-dir ./data-testenv
+pnpm ingest-ensrainbow --input-file subgraph_0.ensrainbow --data-dir ./data-subgraph_0
+pnpm ingest-ensrainbow --input-file discoveryA_0.ensrainbow --data-dir ./data-discoveryA_0
+pnpm ingest-ensrainbow --input-file testenv_0.ensrainbow --data-dir ./data-testenv_0
 ```
 
 ### 5. Package LevelDB Databases
 
 The LevelDB data directories, now populated, are packaged into compressed `tar.gz` archives.
 ```bash
-tar -czvf subgraph_0.tgz ./data-subgraph
-tar -czvf discoveryA_0.tgz ./data-discoveryA
-tar -czvf testenv_0.tgz ./data-testenv
+tar -czvf subgraph_0.tgz ./data-subgraph_0
+tar -czvf discoveryA_0.tgz ./data-discoveryA_0
+tar -czvf testenv_0.tgz ./data-testenv_0
 ```
 
 ### 6. Upload Database Archives to R2 Storage
