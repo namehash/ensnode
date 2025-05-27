@@ -1,6 +1,7 @@
 import dnsPacket, { Answer } from "dns-packet";
-import { Hex, bytesToHex, bytesToString, stringToBytes } from "viem";
+import { Hex, bytesToHex, bytesToString, hexToBytes, stringToBytes } from "viem";
 
+import { stripNullBytes } from "@/lib/lib-helpers";
 import { type Label, type Name, isLabelIndexable } from "@ensnode/ensnode-sdk";
 
 /**
@@ -172,4 +173,65 @@ export function decodeTXTData(data: Buffer[]): string | null {
   }
 
   return decoded[0]!; // guaranteed to exist due to length check above
+}
+
+export function parseDnsTxtRecordArgs({
+  name,
+  resource,
+  record,
+}: {
+  name: Hex;
+  resource: number;
+  record?: Hex;
+}): { key: string | null; value: string | null } {
+  // we only index TXT records (resource id 16)
+  if (resource !== 16) return { key: null, value: null };
+
+  // parse the record's name, which is the key of the DNS record
+  const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
+
+  // invariant: recordName is always available and parsed correctly
+  if (!recordName) {
+    throw new Error(`parseDNSRecordArgs: Invalid DNSPacket, cannot parse name '${name}'.`);
+  }
+
+  // relevant keys end with .ens
+  if (!recordName.endsWith(".ens")) return { key: null, value: null };
+
+  // trim the .ens off the end to match ENS record naming
+  const key = recordName.slice(0, -4);
+
+  if (!record) return { key, value: null };
+
+  // parse the `record` parameter, which is an RRSet describing the value of the DNS record
+  const answers = parseRRSet(record);
+
+  const txtDatas = answers
+    .filter((answer) => answer.type === "TXT")
+    .map((answer) => {
+      // > When decoding, the return value will always be an array of Buffer.
+      // https://github.com/mafintosh/dns-packet
+      return decodeTXTData(answer.data as Buffer[]);
+    });
+
+  if (txtDatas.length === 0) {
+    // no txt answers??
+    console.warn(`parseDNSRecordArgs: No TXT answers found in DNS record for key '${key}'`);
+    return { key, value: null };
+  }
+
+  if (txtDatas.length > 1) {
+    console.warn(
+      `parseDNSRecordArgs: received multiple TXT answers, this is unexpected. answers = '${txtDatas.join(",")}'. Only using the first one.`,
+    );
+  }
+
+  const value = txtDatas[0]!;
+
+  // TODO(null-bytes): correctly represent null bytes here
+  const sanitizedKey = stripNullBytes(key) || null;
+  const sanitizedValue = stripNullBytes(value) || null;
+
+  // return sanitized key, value to consumers
+  return { key: sanitizedKey, value: sanitizedValue };
 }

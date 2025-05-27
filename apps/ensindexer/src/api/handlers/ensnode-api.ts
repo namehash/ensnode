@@ -17,12 +17,12 @@ app.get("/records", async (ctx) => {
   // const data = await resolveReverse("0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1");
   const {
     chain,
-    contracts: { Resolver },
+    contracts: { ReverseResolver },
   } = ENSDeployments.sepolia[DatasourceName.ReverseResolverBase];
   // TODO: use const addrReverseLabel = (address: Address): Label => ;
   const reverseNode = namehash(`${JESSE_ADDRESS.slice(2).toLowerCase()}.addr.reverse`);
 
-  const resolverId = makeResolverId(chain.id, Resolver.address, reverseNode);
+  const resolverId = makeResolverId(chain.id, ReverseResolver.address, reverseNode);
 
   const resolver = await db
     .select()

@@ -7,7 +7,7 @@ import {
   handleDNSRecordDeleted,
   handleNameChanged,
   handleTextChanged,
-} from "@/handlers/Resolver";
+} from "@/handlers/ReverseResolver";
 
 /**
  * Multi-Network ReverseResolver indexing functions should be registered exactly once, or Ponder will
