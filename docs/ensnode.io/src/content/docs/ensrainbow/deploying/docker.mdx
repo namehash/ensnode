@@ -7,17 +7,154 @@ sidebar:
 
 import { LinkCard } from '@astrojs/starlight/components';
 
+NameHash Labs publishes the latest version of ENSRainbow as a docker container. The Docker image is lightweight and downloads the required database at runtime based on environment variables.
 
-NameHash Labs publishes the latest version of ENSRainbow as a docker container. Run the container with:
+## Quick Start
+
+For a quick test setup with test data:
 
 ```bash
-docker run -d -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow:latest
+# Create a directory for persistent data storage
+mkdir -p ~/my_ensrainbow_data
+
+# Run with test environment data
+docker run -d --name ensrainbow \
+  -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
+  -e SCHEMA_VERSION="v3" \
+  -e NAMESPACE="testenv" \
+  -e LABEL_SET="0" \
+  -p 3223:3223 \
+  ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
 
 The service will be available at `http://localhost:3223`.
 
 :::note[Image Size]
-The ENSRainbow Docker image embeds a set of rainbow tables for healing unknown labels, bringing the image size to `8.6GB`.
+The ENSRainbow storage needed is from 1 MB to dozens GB depending on the namespace and label set.
+## Production Setup
+
+For ENS Subgraph compatibility use the `subgraph` namespace:
+
+```bash
+# Create a directory for persistent data storage
+mkdir -p ~/ensrainbow_production_data
+
+# Run with production data
+docker run -d --name ensrainbow_production \
+  -v ~/ensrainbow_production_data:/app/apps/ensrainbow/data \
+  -e SCHEMA_VERSION="v3" \
+  -e NAMESPACE="subgraph" \
+  -e LABEL_SET="0" \
+  -p 3223:3223 \
+  ghcr.io/namehash/ensnode/ensrainbow:latest
+```
+
+## Required Environment Variables
+
+The following environment variables are **required** for the initial database download:
+
+- **`SCHEMA_VERSION`**: Database schema version (e.g., `v3`)
+- **`NAMESPACE`**: Data namespace identifier:
+  - `subgraph` - Main production dataset from The Graph's ENS subgraph
+  - `searchlight` - Extended dataset with additional label discoveries  
+  - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
+  - `testenv` - Small test dataset for development and testing
+- **`LABEL_SET`**: Non-negative integer representing the dataset version within a namespace (e.g., `0`, `1`, `2`)
+
+## Persistent Storage
+
+:::important[Persistent Storage Required]
+You **must** mount a Docker volume to `/app/apps/ensrainbow/data` to ensure the database persists between container restarts. Without persistent storage, the database will be re-downloaded every time the container starts.
+:::
+
+### Using Named Docker Volumes (Recommended)
+
+```bash
+# Create a named volume (only needs to be done once)
+docker volume create ensrainbow_db_volume
+
+# Run with named volume
+docker run -d --name ensrainbow \
+  -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
+  -e SCHEMA_VERSION="v3" \
+  -e NAMESPACE="subgraph" \
+  -e LABEL_SET="0" \
+  -p 3223:3223 \
+  ghcr.io/namehash/ensnode/ensrainbow:latest
+```
+
+### Using Host Directories
+
+```bash
+# Create a directory on your host machine
+mkdir -p ~/ensrainbow_data
+
+# Run with host directory mount
+docker run -d --name ensrainbow \
+  -v ~/ensrainbow_data:/app/apps/ensrainbow/data \
+  -e SCHEMA_VERSION="v3" \
+  -e NAMESPACE="subgraph" \
+  -e LABEL_SET="0" \
+  -p 3223:3223 \
+  ghcr.io/namehash/ensnode/ensrainbow:latest
+```
+
+## Docker Compose
+
+To use ENSRainbow as part of a [Docker Compose](https://docs.docker.com/compose/) setup:
+
+```yml
+version: '3.8'
+
+services:
+  ensrainbow:
+    container_name: ensrainbow
+    image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    environment:
+      - SCHEMA_VERSION=v3
+      - NAMESPACE=subgraph
+      - LABEL_SET=0
+    volumes:
+      - ensrainbow_data:/app/apps/ensrainbow/data
+    ports:
+      - "3223:3223"
+    restart: unless-stopped
+
+volumes:
+  ensrainbow_data:
+```
+
+For test environment:
+
+```yml
+version: '3.8'
+
+services:
+  ensrainbow:
+    container_name: ensrainbow_test
+    image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    environment:
+      - SCHEMA_VERSION=v3
+      - NAMESPACE=testenv
+      - LABEL_SET=0
+    volumes:
+      - ensrainbow_test_data:/app/apps/ensrainbow/data
+    ports:
+      - "3223:3223"
+    restart: unless-stopped
+
+volumes:
+  ensrainbow_test_data:
+```
+
+## How Data Download Works
+
+1. **First Run**: When the container starts with an empty volume, it downloads the specified database artifact based on the environment variables
+2. **Subsequent Runs**: The container detects existing data and skips the download, using the persisted database
+3. **Data Validation**: The container validates the existing data on startup and re-downloads if corruption is detected
+
+:::tip[Port Mapping]
+The port mapping (`-p 3223:3223` or `ports` in docker-compose) is only needed if you want to access ENSRainbow from the host machine. If you're only accessing it from other containers in the same network, you can omit the port mapping.
 :::
 
 <LinkCard
@@ -25,20 +162,3 @@ The ENSRainbow Docker image embeds a set of rainbow tables for healing unknown l
   description="View the ENSRainbow configuration options"
   href="/ensrainbow/usage/configuration/"
 />
-
-## Docker Compose
-
-To use ENSRainbow as part of a [Docker Compose](https://docs.docker.com/compose/) setup, use the following service definition:
-
-```yml
-ensrainbow:
-  container_name: ensrainbow
-  image: ghcr.io/namehash/ensnode/ensrainbow:latest
-  ports:
-    - "3223:3223"
-  restart: unless-stopped
-```
-
-:::tip[Port Mapping]
-The port mapping (`-p 3223:3223` or `ports` in docker-compose) is only needed if you want to access ENSRainbow from the host machine. If you're only accessing it from other containers in the same network, you can omit the port mapping.
-:::

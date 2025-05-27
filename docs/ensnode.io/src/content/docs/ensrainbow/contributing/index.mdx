@@ -308,6 +308,33 @@ This setup allows the `entrypoint.sh` script within the container to download th
 
 This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
 
+### Environment Variables
+
+When using ENSRainbow with Docker, the following environment variables control which database artifact is downloaded and used:
+
+- **`SCHEMA_VERSION`**: The database schema version (e.g., `v3`). This determines the format and structure of the database artifacts. Use the latest available version unless you have specific compatibility requirements.
+
+- **`NAMESPACE`**: The data namespace identifier that categorizes the type of ENS data:
+  - `subgraph` - Main production dataset from The Graph's ENS subgraph
+  - `searchlight` - Extended dataset with additional label discoveries
+  - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
+  - `testenv` - Small test dataset for development and testing
+
+- **`LABEL_SET`**: A non-negative integer representing the incremental dataset version within a namespace. Label sets are sequential:
+  - `0` - Initial/base dataset for the namespace
+  - `1`, `2`, etc. - Incremental updates containing additional or updated labels
+
+**Example combinations:**
+```bash
+# Latest production data
+SCHEMA_VERSION=v3 NAMESPACE=subgraph LABEL_SET=0
+
+# Test environment data
+SCHEMA_VERSION=v3 NAMESPACE=testenv LABEL_SET=0
+
+# Extended discovery data
+SCHEMA_VERSION=v3 NAMESPACE=searchlight LABEL_SET=0
+```
 
 ### Persistent Storage with Docker
 

@@ -58,6 +58,8 @@ services:
       # NOTE: can define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
       - path: ./apps/ensrainbow/.env.local
         required: false
+    volumes:
+      - ensrainbow_data:/app/apps/ensrainbow/data
     restart: unless-stopped
 
   ensadmin:
@@ -93,4 +95,6 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  ensrainbow_data:
     driver: local
