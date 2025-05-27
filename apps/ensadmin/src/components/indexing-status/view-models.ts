@@ -66,20 +66,18 @@ export function globalIndexingStatusViewModel(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
-  const getChainName = (chainId: number) => getChainById(ensDeploymentChain, chainId).name;
-  const getChainDefaultBlockExplorer = (chainId: number) =>
-    getChainById(ensDeploymentChain, chainId).blockExplorers.default;
 
   const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
     ([chainId, networkIndexingStatus]) => {
       const chainIdAsNumber = parseInt(chainId, 10);
+      const chain = getChainById(ensDeploymentChain, chainIdAsNumber);
 
       return networkIndexingStatusViewModel(
         chainIdAsNumber,
-        getChainName(chainIdAsNumber),
+        chain.name,
         networkIndexingStatus,
         firstBlockToIndexGloballyTimestamp,
-        getChainDefaultBlockExplorer(chainIdAsNumber),
+        chain.blockExplorers.default,
       );
     },
   ) satisfies Array<NetworkStatusViewModel>;
