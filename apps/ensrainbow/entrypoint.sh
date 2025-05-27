@@ -10,7 +10,7 @@ DATA_DIR_NAME="data" # Name of the data directory within /app/apps/ensrainbow
 APP_DIR="/app/apps/ensrainbow"
 FINAL_DATA_DIR="${APP_DIR}/${DATA_DIR_NAME}"
 DOWNLOAD_TEMP_DIR="/tmp/ensrainbow_download_temp"
-MARKER_FILE="${FINAL_DATA_DIR}/.ensrainbow_db_ready"
+MARKER_FILE="${FINAL_DATA_DIR}/ensrainbow_db_ready"
 
 # Path for the data subdirectory, relative to APP_DIR.
 # This assumes data is in ${APP_DIR}/${DATA_DIR_NAME}/data-${NAMESPACE}/
@@ -65,7 +65,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
 
     # 2. Clean up any existing data and prepare directories
     echo "Preparing directories for download..."
-    rm -rf "${FINAL_DATA_DIR}/"* # Ensure clean state if previous attempt failed mid-way
+    rm -rf "${FINAL_DATA_DIR}" # Ensure clean state if previous attempt failed mid-way
     mkdir -p "${FINAL_DATA_DIR}"
     rm -rf "${DOWNLOAD_TEMP_DIR}" # Clean up temp dir from previous runs if any
     mkdir -p "${DOWNLOAD_TEMP_DIR}"
