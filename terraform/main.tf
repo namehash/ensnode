@@ -24,7 +24,7 @@ module "database" {
   railway_region         = local.railway_region
   railway_token          = var.railway_token
   railway_project_id     = railway_project.this.id
-  railway_environment_id = railway_project.this.railway_environment.id
+  railway_environment_id = railway_project.this.default_environment.id
 }
 
 module "holesky_ensindexer" {
