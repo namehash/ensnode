@@ -200,22 +200,24 @@ export async function handleTextChanged({
   // TODO(null-bytes): represent null bytes in the database correctly
   const sanitizedKey = stripNullBytes(key);
 
+  // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver event, and the subgraph
+  // indexes that as `null`.
+  //
+  // NOTE(subgraph-compat): ponder's (viem's) event parsing produces empty string for some TextChanged events
+  // (which is strictly correct) but the subgraph represents these instances as null, so we coalesce
+  // falsy strings to null for compatibility.
+  // ex: https://etherscan.io/tx/0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0#eventlog
+  //
+  // NOTE(subgraph-compat): we also must strip null bytes in strings, which are unindexable by Postgres
+  // ex: https://etherscan.io/tx/0x2eb93d872a8f3e4295ea50773c3816dcaea2541f202f650948e8d6efdcbf4599#eventlog
+  const sanitizedValue = value === undefined ? null : stripNullBytes(value) || null;
+
   // upsert new key
+  // NOTE(subgraph-compat): we insert sanitized key even if it's empty string to match subgraph behavior of implcitly
+  // stripping null bytes
   await context.db
     .update(schema.resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), sanitizedKey]) });
-
-  // NOTE: value can be undefined in the case of a LegacyPublicResolver event, and the subgraph
-  // indexes that as `null`.
-  //
-  // NOTE: ponder's (viem's) event parsing produces empty string for some TextChanged events
-  // (which is correct) but the subgraph records null for these instances, so we coalesce
-  // falsy strings to null for compatibility
-  // ex: https://etherscan.io/tx/0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0#eventlog
-  //
-  // NOTE: we also must strip null bytes in strings, which are unindexable by Postgres
-  // ex: https://etherscan.io/tx/0x2eb93d872a8f3e4295ea50773c3816dcaea2541f202f650948e8d6efdcbf4599#eventlog
-  const sanitizedValue = value === undefined ? null : stripNullBytes(value) || null;
 
   // log ResolverEvent
   await context.db.insert(schema.textChanged).values({
