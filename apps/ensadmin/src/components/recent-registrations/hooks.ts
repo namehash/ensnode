@@ -1,6 +1,11 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
-import {LatestRegistration, LatestRegistrationResult, RecentRegistrationsResponse, Registration} from "./types";
+import {
+  LatestRegistration,
+  LatestRegistrationResult,
+  RecentRegistrationsResponse,
+  Registration,
+} from "./types";
 
 /**
  * Fetches info about the 5 most recently registered .eth domains that have been indexed.
@@ -46,10 +51,16 @@ async function fetchRecentRegistrations(baseUrl: URL): Promise<RecentRegistratio
   }
 
   const data = await response.json();
-  data.data.registrations = data.data.registrations.map((latestRegistration: { registrationDate: string, expiryDate: string, domain: LatestRegistrationResult}) => ({
-    ...latestRegistration,
-    domain: toLatestRegistration(latestRegistration.domain),
-  }));
+  data.data.registrations = data.data.registrations.map(
+    (latestRegistration: {
+      registrationDate: string;
+      expiryDate: string;
+      domain: LatestRegistrationResult;
+    }) => ({
+      ...latestRegistration,
+      domain: toLatestRegistration(latestRegistration.domain),
+    }),
+  );
 
   return data.data;
 }
