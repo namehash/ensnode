@@ -71,6 +71,22 @@ export default {
         address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
         startBlock: 16925608,
       },
+      //
+      PublicResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
+        startBlock: 16925619,
+      },
+      BasenamesL1Resolver: {
+        abi: [] as const,
+        address: "0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31",
+        startBlock: 20420641,
+      },
+      LineaNamesL1Resolver: {
+        abi: [] as const,
+        address: "0xde16ee87B0C019499cEBDde29c9F7686560f679a",
+        startBlock: 20410692,
+      },
     },
   },
 
@@ -121,6 +137,11 @@ export default {
         abi: base_RegistrarController,
         address: "0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5",
         startBlock: 18619035,
+      },
+      L2Resolver: {
+        abi: ResolverConfig.abi,
+        address: "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD",
+        startBlock: 17575714,
       },
     },
   },

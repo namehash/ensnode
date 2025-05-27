@@ -1,6 +1,6 @@
 import config from "@/config";
 import { type LabelHash, type Node } from "@ensnode/ensnode-sdk";
-import type { Address } from "viem";
+import { type Address, getAddress } from "viem";
 
 /**
  * Makes a unique, chain-scoped resolver ID.
@@ -25,6 +25,27 @@ export const makeResolverId = (chainId: number, address: Address, node: Node) =>
   ]
     .filter(Boolean)
     .join("-");
+
+/**
+ * Parses a resolver ID string back into its components.
+ * Handles both subgraph-compatible and chain-scoped formats.
+ *
+ * @param resolverId The resolver ID string to parse
+ * @returns array containing chainId (null for subgraph-compat), address, and node
+ */
+export const parseResolverId = (resolverId: string): [number | null, Address, Node] => {
+  const parts = resolverId.split("-");
+
+  if (parts.length === 2) {
+    return [null, getAddress(parts[0] as Address), parts[1] as Node];
+  }
+
+  if (parts.length === 3) {
+    return [parseInt(parts[0]!), getAddress(parts[1] as Address), parts[2] as Node];
+  }
+
+  throw new Error(`Invalid resolver ID format: ${resolverId}`);
+};
 
 /**
  * Makes a unique, chain-scoped event ID.
@@ -112,3 +133,16 @@ export const makeRegistrationId = (labelHash: LabelHash, node: Node) => {
  */
 export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>
   [resolverId, key].join("-");
+
+/**
+ * Makes a unique ID for a domain-resolver relation.
+ *
+ * @example `${chainId}-${domainId}-${resolverId}`
+ *
+ * @param chainId the chain ID
+ * @param domainId the domain ID (node)
+ * @param resolverId the resolver ID
+ * @returns a unique domain-resolver relation ID
+ */
+export const makeDomainResolverRelationId = (chainId: number, domainId: Node, resolverId: string) =>
+  [chainId, domainId, resolverId].join("-");

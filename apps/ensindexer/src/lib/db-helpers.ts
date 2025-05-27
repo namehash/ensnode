@@ -26,6 +26,16 @@ export async function upsertRegistration(
   return context.db.insert(schema.registration).values(values).onConflictDoUpdate(values);
 }
 
+export async function upsertDomainResolverRelation(
+  context: Context,
+  values: typeof schema.ext_domainResolverRelation.$inferInsert,
+) {
+  return context.db
+    .insert(schema.ext_domainResolverRelation)
+    .values(values)
+    .onConflictDoUpdate(values);
+}
+
 // simplifies generating the shared event column values from the ponder Event object
 export function sharedEventValues(chainId: number, event: Omit<Event, "args">) {
   return {

@@ -14,12 +14,13 @@ import {
   sharedEventValues,
   upsertAccount,
   upsertDomain,
+  upsertDomainResolverRelation,
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import { makeRegistrationId, makeResolverId } from "@/lib/ids";
+import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
@@ -85,10 +86,7 @@ export async function handleNewOwner({
 
   if (domain) {
     // if the domain already exists, this is just an update of the owner record
-    domain = await context.db.update(schema.domain, { id: node }).set({
-      ownerId: owner,
-      resolverId, // and ensure resolver reference is set
-    });
+    domain = await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
   } else {
     // otherwise create the domain
     domain = await context.db.insert(schema.domain).values({
@@ -97,8 +95,6 @@ export async function handleNewOwner({
       parentId: parentNode,
       createdAt: event.block.timestamp,
       labelhash: labelHash,
-
-      resolverId, // and ensure resolver reference is set
 
       // NOTE: threedns has no concept of registry migration, so domains indexed by this plugin
       // are always considered 'migrated'
@@ -110,6 +106,14 @@ export async function handleNewOwner({
       .update(schema.domain, { id: parentNode })
       .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
   }
+
+  // NOTE(resolver-relations): link Domain and Resolver on this chain
+  await upsertDomainResolverRelation(context, {
+    id: makeDomainResolverRelationId(context.network.chainId, node, resolverId),
+    chainId: context.network.chainId,
+    domainId: node,
+    resolverId,
+  });
 
   // if the domain doesn't yet have a name, attempt to construct it here
   // NOTE: for threedns this occurs on non-2LD `NewOwner` events, as a 2LD registration will

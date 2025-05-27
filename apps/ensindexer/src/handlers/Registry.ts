@@ -13,9 +13,14 @@ import {
   maybeHealLabelByReverseAddress,
 } from "@ensnode/ensnode-sdk";
 
-import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
+import {
+  sharedEventValues,
+  upsertAccount,
+  upsertDomainResolverRelation,
+  upsertResolver,
+} from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import { makeResolverId } from "@/lib/ids";
+import { makeDomainResolverRelationId, makeResolverId } from "@/lib/ids";
 import { type EventWithArgs, getEnsDeploymentChainId } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 import {
@@ -307,9 +312,17 @@ export async function handleNewResolver({
   // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
   // NOTE: Resolver records are not deleted
   if (isZeroResolver) {
-    await context.db
-      .update(schema.domain, { id: node })
-      .set({ resolverId: null, resolvedAddressId: null });
+    // NOTE(resolver-relations): unlink Domain and Resolver iff this is ENS Deployment Chain
+    if (context.network.chainId === getEnsDeploymentChainId()) {
+      await context.db
+        .update(schema.domain, { id: node })
+        .set({ resolverId: null, resolvedAddressId: null });
+    }
+
+    // NOTE(resolver-relations): unlink Domain and Resolver on this chain
+    await context.db.delete(schema.ext_domainResolverRelation, {
+      id: makeDomainResolverRelationId(context.network.chainId, node, resolverId),
+    });
 
     // garbage collect newly 'empty' domain iff necessary
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
@@ -321,12 +334,23 @@ export async function handleNewResolver({
       address: resolverAddress,
     });
 
-    // update the domain to point to it, and materialize the eth addr
-    // NOTE: this implements the logic as documented here
-    // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
-    await context.db.update(schema.domain, { id: node }).set({
+    // NOTE(resolver-relations): link Domain and Resolver iff this is ENS Deployment Chain
+    if (context.network.chainId === getEnsDeploymentChainId()) {
+      // update the domain to point to it, and materialize the eth addr
+      // NOTE: this implements the logic as documented here
+      // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
+      await context.db.update(schema.domain, { id: node }).set({
+        resolverId,
+        resolvedAddressId: resolver.addrId,
+      });
+    }
+
+    // NOTE(resolver-relations): link Domain and Resolver on this chain
+    await upsertDomainResolverRelation(context, {
+      id: makeDomainResolverRelationId(context.network.chainId, node, resolverId),
+      chainId: context.network.chainId,
+      domainId: node,
       resolverId,
-      resolvedAddressId: resolver.addrId,
     });
   }
 
