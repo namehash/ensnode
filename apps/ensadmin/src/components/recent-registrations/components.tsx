@@ -71,7 +71,10 @@ export const formatRelativeTime = (timestamp: string, includeSeconds?: boolean) 
     }
 
     const date = fromUnixTime(parsedTimestamp);
-    return formatDistanceToNow(date, { addSuffix: true, includeSeconds: includeSeconds ? includeSeconds : false });
+    return formatDistanceToNow(date, {
+      addSuffix: true,
+      includeSeconds: includeSeconds ? includeSeconds : false,
+    });
   } catch (error) {
     console.error("Error formatting relative time:", error);
     return "Unknown";

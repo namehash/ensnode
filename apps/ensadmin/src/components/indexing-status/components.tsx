@@ -116,7 +116,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
     Sepolia: <EthereumTestnetIcon width={18} height={18} />,
     Anvil: <EthereumLocalIcon width={18} height={18} />,
     Holesky: <EthereumTestnetIcon width={18} height={18} />,
-    Ethereum: <EthereumIcon width={18} height={18} />
+    Ethereum: <EthereumIcon width={18} height={18} />,
   };
 
   return (
@@ -171,9 +171,7 @@ function BlockStats({ networkName, label, block }: BlockSatsProps) {
 
   let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString(), true);
 
-  if (
-    block.timestamp >= Math.floor(Date.now() / 1000)
-  ) {
+  if (block.timestamp >= Math.floor(Date.now() / 1000)) {
     calculatedRelativeTime = "just now";
   }
 
