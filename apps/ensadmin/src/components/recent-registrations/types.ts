@@ -32,6 +32,14 @@ export interface LatestRegistration {
   wrappedOwner?: Address;
 }
 
+/**
+ * Extended result of the GraphQl RecentRegistrationsQuery
+ * @params
+ * registrationDate - number - a UNIX timestamp in seconds of when the name was registered by its current owner
+ * expiryDate - number - a UNIX timestamp in seconds of when will the current owner's tenure end
+ * domain - LatestRegistration - A "pure" version of LatestRegistrationResult that streamlines data usage in RecentRegistrations component.
+ */
+
 export interface Registration {
   registrationDate: string;
   expiryDate: string;
