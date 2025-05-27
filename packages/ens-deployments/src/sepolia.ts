@@ -74,14 +74,28 @@ export default {
    */
 
   /**
+   * The Reverse Resolver on the ENS Root chain.
+   */
+  [DatasourceName.ReverseResolverRoot]: {
+    chain: sepolia,
+    contracts: {
+      ReverseResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
+        startBlock: 3790251,
+      },
+    },
+  },
+
+  /**
    * The Reverse Resolver on Base.
    */
   [DatasourceName.ReverseResolverBase]: {
     chain: baseSepolia,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
-        address: "0x6533c94869d28faa8df77cc63f9e2b2d6cf77eba",
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 21788010,
       },
     },
@@ -93,7 +107,7 @@ export default {
   [DatasourceName.ReverseResolverOptimism]: {
     chain: optimismSepolia,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 23770766,
@@ -107,7 +121,7 @@ export default {
   [DatasourceName.ReverseResolverArbitrum]: {
     chain: arbitrumSepolia,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 123142726,
@@ -121,7 +135,7 @@ export default {
   [DatasourceName.ReverseResolverScroll]: {
     chain: scrollSepolia,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 8175276,
@@ -135,7 +149,7 @@ export default {
   [DatasourceName.ReverseResolverLinea]: {
     chain: lineaSepolia,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 9267966,

@@ -48,6 +48,8 @@ import { type Label, type Name, isLabelIndexable } from "@ensnode/ensnode-sdk";
  * More information about this discussion can be found in this thread:
  * https://github.com/namehash/ensnode/issues/36
  *
+ * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/NameCoder.sol
+ *
  * TODO: replace this function with ensjs#bytesToPacket when it correctly handles these cases. See
  * ensnode commit hash bace0ab55077d9f5cd37bd9d6638c4acb16334a8 for an example implementation.
  *

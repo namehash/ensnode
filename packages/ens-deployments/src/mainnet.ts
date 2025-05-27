@@ -224,7 +224,7 @@ export default {
   [DatasourceName.ReverseResolverRoot]: {
     chain: mainnet,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         // https://docs.ens.domains/learn/deployments/#mainnet
         address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
@@ -239,10 +239,11 @@ export default {
   [DatasourceName.ReverseResolverBase]: {
     chain: base,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
-        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
+        // NOTE: this is basenames L2Resolver, NOT ENSIP-19 Compliant
+        address: "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD", // TODO: update this address
+        startBlock: 17575714,
       },
     },
   },
@@ -253,7 +254,7 @@ export default {
   [DatasourceName.ReverseResolverOptimism]: {
     chain: optimism,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
         startBlock: 0, // TODO: set this correctly
@@ -267,7 +268,7 @@ export default {
   [DatasourceName.ReverseResolverArbitrum]: {
     chain: arbitrum,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
         startBlock: 0, // TODO: set this correctly
@@ -281,7 +282,7 @@ export default {
   [DatasourceName.ReverseResolverScroll]: {
     chain: scroll,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
         startBlock: 0, // TODO: set this correctly
@@ -295,7 +296,7 @@ export default {
   [DatasourceName.ReverseResolverLinea]: {
     chain: linea,
     contracts: {
-      Resolver: {
+      ReverseResolver: {
         abi: ResolverConfig.abi,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA", // TODO: update this address
         startBlock: 0, // TODO: set this correctly

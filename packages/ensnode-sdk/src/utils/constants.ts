@@ -1,5 +1,5 @@
 import { namehash } from "viem";
-import { Node } from "./types";
+import { CoinType, EVMCoinType, Node } from "./types";
 
 export const ROOT_NODE: Node = namehash("");
 
@@ -16,4 +16,4 @@ export const REVERSE_ROOT_NODES: Set<Node> = new Set([namehash("addr.reverse")])
  *
  * @see https://docs.ens.domains/ensip/9
  */
-export const ETH_COIN_TYPE = 60n;
+export const ETH_COIN_TYPE: EVMCoinType = 60;

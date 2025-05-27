@@ -80,7 +80,7 @@ export async function handleAddrChanged({
 
   if (config.indexAdditionalResolverRecords) {
     // AddrChanged is just AddressChanged with implicit coinType of ETH
-    await handleAddressRecordUpdate(context, id, ETH_COIN_TYPE, event.args.a);
+    await handleAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), event.args.a);
   }
 }
 

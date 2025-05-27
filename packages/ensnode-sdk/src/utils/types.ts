@@ -62,4 +62,11 @@ export type Name = string;
  * @see https://docs.ens.domains/ensip/9
  * @see https://docs.ens.domains/ensip/11
  */
-export type CoinType = number;
+export type CoinType = bigint;
+
+/**
+ * An ENSIP-11 EVM Chain CoinType.
+ *
+ * @see https://docs.ens.domains/ensip/11
+ */
+export type EVMCoinType = number;
