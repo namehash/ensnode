@@ -110,7 +110,7 @@ export const makeRegistryHandlers = ({
               labelHash,
             });
 
-            // if that didn't work, try healing with the event's`owner` address
+            // if that didn't work, try healing with the event's `owner` address
             if (!healedLabel) {
               healedLabel = maybeHealLabelByReverseAddress({
                 maybeReverseAddress: event.args.owner,
@@ -153,9 +153,12 @@ export const makeRegistryHandlers = ({
 
               if (!healedLabel) {
                 // by this point, we have exhausted all options for healing the reverse address
-                // and we still don't have a valid label, so we throw an error
-                throw new Error(
-                  `Failed to heal reverse address for labelHash ${labelHash} in transaction ${event.transaction.hash}`,
+                // and we still don't have a valid label — time to log a warning
+                console.warn(
+                  `A NewOwner event for a Reverse Node on the ENS Deployment
+									Chain ID "${ensDeploymentChainId}" was emitted by
+									the Registry in tx "${event.transaction.hash}", and we failed to
+									heal reverse address for labelHash "${labelHash}".`,
                 );
               }
             }
