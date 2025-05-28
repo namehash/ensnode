@@ -63,7 +63,12 @@ const calculateDurationYears = (registrationDate: string, expiryDate: string) =>
 };
 
 // Helper function to format relative time
-export const formatRelativeTime = (timestamp: string, enforcePast=false, includeSeconds=false, conciseFormatting=false) => {
+export const formatRelativeTime = (
+  timestamp: string,
+  enforcePast = false,
+  includeSeconds = false,
+  conciseFormatting = false,
+) => {
   try {
     const parsedTimestamp = parseInt(timestamp);
     if (isNaN(parsedTimestamp)) {
@@ -77,10 +82,10 @@ export const formatRelativeTime = (timestamp: string, enforcePast=false, include
     const date = fromUnixTime(parsedTimestamp);
     const relativeTimestamp = formatDistanceToNow(date, {
       addSuffix: true,
-      includeSeconds: includeSeconds
+      includeSeconds: includeSeconds,
     });
 
-    if (conciseFormatting){
+    if (conciseFormatting) {
       return relativeTimestamp.replace("less than ", "").replace("a minute", "1 minute");
     }
 
