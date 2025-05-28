@@ -66,11 +66,7 @@ describe("View Models", () => {
                 endDate: fromUnixTime(mainnetStatus.latestSafeBlock.timestamp),
               },
             ],
-            blockExplorer: {
-              name: "Etherscan",
-              url: "https://etherscan.io",
-              apiUrl: "https://api.etherscan.io/api",
-            },
+            blockExplorerURL: "https://etherscan.io",
           },
           {
             id: 8453,
@@ -91,11 +87,7 @@ describe("View Models", () => {
                 endDate: fromUnixTime(baseStatus.latestSafeBlock.timestamp),
               },
             ],
-            blockExplorer: {
-              name: "Basescan",
-              url: "https://basescan.org",
-              apiUrl: "https://api.basescan.org/api",
-            },
+            blockExplorerURL: "https://basescan.org",
           },
         ],
         currentIndexingDate: fromUnixTime(mainnetStatus.lastIndexedBlock.timestamp),
@@ -188,11 +180,7 @@ describe("View Models", () => {
             },
           },
           1000,
-          {
-            name: "Basescan",
-            url: "https://basescan.org",
-            apiUrl: "https://api.basescan.org/api",
-          },
+          "https://basescan.org",
         ),
       ).toEqual({
         id: 8453,
@@ -231,11 +219,7 @@ describe("View Models", () => {
             endDate: fromUnixTime(1501),
           },
         ],
-        blockExplorer: {
-          name: "Basescan",
-          url: "https://basescan.org",
-          apiUrl: "https://api.basescan.org/api",
-        },
+        blockExplorerURL: "https://basescan.org",
       } satisfies NetworkStatusViewModel);
     });
   });
