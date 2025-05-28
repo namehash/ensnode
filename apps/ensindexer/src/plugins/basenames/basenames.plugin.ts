@@ -8,7 +8,7 @@ import {
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging

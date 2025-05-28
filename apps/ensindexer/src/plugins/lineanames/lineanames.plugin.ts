@@ -8,7 +8,7 @@ import {
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * The Lineanames plugin describes indexing behavior for the Lineanames ENS Datasource, leveraging

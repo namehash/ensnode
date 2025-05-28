@@ -1,4 +1,4 @@
-import type { LabelHash } from "@ensnode/utils";
+import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { describe, expect, it, vi } from "vitest";
 import { setupConfigMock } from "./utils/mockConfig";
 

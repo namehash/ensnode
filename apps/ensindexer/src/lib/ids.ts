@@ -1,4 +1,4 @@
-import { type LabelHash, type Node, PluginName } from "@ensnode/utils";
+import { type LabelHash, type Node, PluginName } from "@ensnode/ensnode-sdk";
 import type { Address } from "viem";
 
 /**

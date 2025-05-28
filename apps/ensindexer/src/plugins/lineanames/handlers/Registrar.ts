@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 
-import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/utils";
+import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";

@@ -1,7 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 
-import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/utils";
+import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 import { makeRegistryHandlers } from "@/handlers/Registry";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";

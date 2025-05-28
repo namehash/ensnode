@@ -1,5 +1,5 @@
 import { makeEventId, makeRegistrationId, makeResolverId } from "@/lib/ids";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { labelhash, namehash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 

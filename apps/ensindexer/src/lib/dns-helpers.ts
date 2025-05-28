@@ -1,7 +1,7 @@
 import dnsPacket, { Answer } from "dns-packet";
 import { Hex, bytesToHex, bytesToString, stringToBytes } from "viem";
 
-import { type Label, type Name, isLabelIndexable } from "@ensnode/utils";
+import { type Label, type Name, isLabelIndexable } from "@ensnode/ensnode-sdk";
 
 /**
  * Given a Buffer representing a DNS Packet that encodes a domain name, decodes the domain name into

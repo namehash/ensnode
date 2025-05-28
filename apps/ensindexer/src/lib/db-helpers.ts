@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import type { Address } from "viem";
 
 import { makeEventId } from "@/lib/ids";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 export async function upsertAccount(context: Context, address: Address) {
   return context.db.insert(schema.account).values({ id: address }).onConflictDoNothing();

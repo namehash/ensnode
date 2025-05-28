@@ -12,7 +12,7 @@ import {
   isLabelIndexable,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
-} from "@ensnode/utils";
+} from "@ensnode/ensnode-sdk";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";

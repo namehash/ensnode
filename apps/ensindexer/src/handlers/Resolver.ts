@@ -1,6 +1,6 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Node, PluginName } from "@ensnode/utils";
+import { Node, PluginName } from "@ensnode/ensnode-sdk";
 import { type Address, Hash, type Hex, hexToBytes } from "viem";
 
 import { makeSharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";

@@ -9,7 +9,7 @@ import {
   PluginName,
   isLabelIndexable,
   makeSubdomainNode,
-} from "@ensnode/utils";
+} from "@ensnode/ensnode-sdk";
 
 import {
   makeSharedEventValues,

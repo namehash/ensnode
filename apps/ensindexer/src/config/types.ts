@@ -1,6 +1,6 @@
 import { Blockrange } from "@/lib/types";
 import type { ENSDeployments } from "@ensnode/ens-deployments";
-import type { PluginName } from "@ensnode/utils";
+import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.

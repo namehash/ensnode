@@ -1,6 +1,6 @@
 import config from "@/config";
+import type { Label, LabelHash } from "@ensnode/ensnode-sdk";
 import { EnsRainbowApiClient, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
-import type { Label, LabelHash } from "@ensnode/utils";
 
 const ensRainbowApiClient = new EnsRainbowApiClient({
   endpointUrl: new URL(config.ensRainbowEndpointUrl),

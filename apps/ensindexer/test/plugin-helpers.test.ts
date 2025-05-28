@@ -4,7 +4,7 @@ import { setupConfigMock } from "./utils/mockConfig";
 setupConfigMock();
 
 import { makePluginNamespace } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 describe("createPluginNamespace", () => {
   it("should return a function that creates namespaced contract names", () => {
