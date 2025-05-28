@@ -12,7 +12,7 @@ import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_ENS_DEPLOYMENT_CHAIN,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_INDEX_RESOLVER_RECORDS,
+  DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -112,8 +112,9 @@ const PluginsSchema = z.coerce
 const HealReverseAddressesSchema = makeEnvStringBoolSchema("HEAL_REVERSE_ADDRESSES") //
   .default(DEFAULT_HEAL_REVERSE_ADDRESSES);
 
-const IndexResolverRecordsSchema = makeEnvStringBoolSchema("INDEX_RESOLVER_RECORDS") //
-  .default(DEFAULT_INDEX_RESOLVER_RECORDS);
+const indexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
+  "INDEX_ADDITIONAL_RESOLVER_RECORDS",
+).default(DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS);
 
 const PortSchema = z.coerce
   .number({ error: "PORT must be an integer." })
@@ -177,7 +178,7 @@ const ENSIndexerConfigSchema = z
     ponderDatabaseSchema: PonderDatabaseSchemaSchema,
     plugins: PluginsSchema,
     healReverseAddresses: HealReverseAddressesSchema,
-    indexResolverRecords: IndexResolverRecordsSchema,
+    indexAdditionalResolverRecords: indexAdditionalResolverRecordsSchema,
     port: PortSchema,
     ensRainbowEndpointUrl: EnsRainbowEndpointUrlSchema,
     rpcConfigs: RpcConfigsSchema,

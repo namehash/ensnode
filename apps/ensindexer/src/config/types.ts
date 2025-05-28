@@ -116,7 +116,7 @@ export interface ENSIndexerConfig {
   healReverseAddresses: boolean;
 
   /**
-   * Enable or disable the indexing of Resolver record values, defaulting to true (DEFAULT_INDEX_RESOLVER_RECORDS).
+   * Enable or disable the indexing of Resolver record values, defaulting to true (DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS).
    * If this is set to false, ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.
    * If this is set to true, ENSIndexer will track both the keys and the values of Resolver records.
    *
@@ -128,11 +128,11 @@ export interface ENSIndexerConfig {
    * use indexed resolver record values in their applications. Features are planned in the ENSNode
    * roadmap that will provide safe use of indexed resolver record values (in appropriate contexts).
    *
-   * Note that enabling {@link indexResolverRecords} results in indexed data becoming a _superset_ of
+   * Note that enabling {@link indexAdditionalResolverRecords} results in indexed data becoming a _superset_ of
    * the Subgraph. For exact data-level backwards compatibility with the ENS Subgraph,
-   * {@link indexResolverRecords} should be `false`.
+   * {@link indexAdditionalResolverRecords} should be `false`.
    */
-  indexResolverRecords: boolean;
+  indexAdditionalResolverRecords: boolean;
 
   /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
@@ -218,7 +218,7 @@ export interface ENSIndexerEnvironment {
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
-  indexResolverRecords: string | undefined;
+  indexAdditionalResolverRecords: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;

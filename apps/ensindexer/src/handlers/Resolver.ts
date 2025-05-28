@@ -78,7 +78,7 @@ export async function handleAddrChanged({
     addrId: address,
   });
 
-  if (config.indexResolverRecords) {
+  if (config.indexAdditionalResolverRecords) {
     // AddrChanged is just AddressChanged with implicit coinType of ETH
     await handleAddressRecordUpdate(context, id, ETH_COIN_TYPE, event.args.a);
   }
@@ -113,7 +113,7 @@ export async function handleAddressChanged({
     addr: newAddress,
   });
 
-  if (config.indexResolverRecords) {
+  if (config.indexAdditionalResolverRecords) {
     await handleAddressRecordUpdate(context, id, event.args.coinType, event.args.newAddress);
   }
 }
@@ -142,7 +142,7 @@ export async function handleNameChanged({
     name,
   });
 
-  if (config.indexResolverRecords) {
+  if (config.indexAdditionalResolverRecords) {
     await upsertResolver(context, {
       id,
       domainId: node,
@@ -250,7 +250,7 @@ export async function handleTextChanged({
     value: sanitizedValue,
   });
 
-  if (config.indexResolverRecords) {
+  if (config.indexAdditionalResolverRecords) {
     // if value is undefined, this is a LegacyPublicResolver event, nothing to do
     if (value === undefined) return;
 
@@ -474,7 +474,7 @@ export async function handleDNSRecordChanged({
           value: sanitizedValue,
         });
 
-        if (config.indexResolverRecords) {
+        if (config.indexAdditionalResolverRecords) {
           // no sanitized value to index? bail
           if (sanitizedValue === null) break;
 
@@ -557,7 +557,7 @@ export async function handleDNSRecordDeleted({
     value: null,
   });
 
-  if (config.indexResolverRecords) {
+  if (config.indexAdditionalResolverRecords) {
     const recordId = makeKeyedResolverRecordId(id, key);
     await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
   }

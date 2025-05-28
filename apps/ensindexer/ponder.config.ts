@@ -34,7 +34,7 @@ export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["confi
    **/
   indexingBehaviorDependencies: Pick<
     ENSIndexerConfig,
-    "healReverseAddresses" | "indexResolverRecords"
+    "healReverseAddresses" | "indexAdditionalResolverRecords"
   >;
 };
 
@@ -54,7 +54,7 @@ const ponderConfig = activePlugins.reduce(
 // inject the additional indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
   healReverseAddresses: config.healReverseAddresses,
-  indexResolverRecords: config.indexResolverRecords,
+  indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
 };
 
 ////////

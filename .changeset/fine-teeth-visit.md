@@ -2,4 +2,4 @@
 "ensindexer": minor
 ---
 
-added optional indexResolverRecords runtime flag to allow the indexing of resolver record values
+added optional indexAdditionalResolverRecords runtime flag to allow the indexing of additional resolver record values

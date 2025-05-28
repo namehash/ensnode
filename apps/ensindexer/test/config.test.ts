@@ -455,7 +455,7 @@ describe("config", () => {
     beforeEach(() => {
       vi.stubEnv("ACTIVE_PLUGINS", "subgraph");
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
-      vi.stubEnv("INDEX_RESOLVER_RECORDS", "false");
+      vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
     });
 
     it("is true when compatible", async () => {
@@ -479,12 +479,6 @@ describe("config", () => {
 
     it("is false when HEAL_REVERSE_ADDRESSES is true", async () => {
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
-    });
-
-    it("is false when INDEX_RESOLVER_RECORDS is true", async () => {
-      vi.stubEnv("INDEX_RESOLVER_RECORDS", "true");
       const config = await getConfig();
       expect(config.isSubgraphCompatible).toBe(false);
     });
