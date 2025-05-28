@@ -4,12 +4,7 @@ import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
-import { BaseIcon } from "@/components/icons/BaseIcon";
-import { EthereumIcon } from "@/components/icons/EthereumIcon";
-import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
-import { EthereumTestnetIcon } from "@/components/icons/EthereumTestnetIcon";
-import { LineaIcon } from "@/components/icons/LineaIcon";
-import { OptimismIcon } from "@/components/icons/OptimismIcon";
+import {ChainIcon} from "@/components/icons/ChainIcon";
 import { formatRelativeTime } from "@/components/recent-registrations";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,57 +90,21 @@ interface NetworkIndexingStatsCardProps {
 }
 
 /**
- * Mapping of chain's id to its icon.
- * Based on chain definitions provided by viem @ https://github.com/wevm/viem/blob/main/src/chains/definitions
- */
-export const chainIcons = new Map<number, React.ReactNode>([
-  [1, <EthereumIcon width={18} height={18} />],
-  [8453, <BaseIcon width={18} height={18} />],
-  [11_155_111, <EthereumTestnetIcon width={18} height={18} />],
-  [10, <OptimismIcon width={16} height={16} />],
-  [59_144, <LineaIcon width={18} height={18} />],
-  [17000, <EthereumTestnetIcon width={18} height={18} />],
-  [31_337, <EthereumLocalIcon width={18} height={18} />],
-]);
-
-/**
- * A helper function that retrieves an icon for a given chain
- * @param chainId
- * @returns chain icon as a JSX
- */
-const getIconByChainId = (chainId: number): React.ReactNode => {
-  if (!chainIcons.has(chainId)) {
-    throw new Error(`Chain ID "${chainId}" doesn't have an assigned icon`);
-  }
-
-  return chainIcons.get(chainId);
-};
-
-/**
- * Component to display network indexing stats for a single network.
+ * Component to display indexing stats for a chain.
  * @param props
  * @returns
  */
 function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
   const { network } = props;
 
-  let networkIcon = null;
-
-  try {
-    networkIcon = getIconByChainId(network.id);
-  } catch (error) {
-    console.log(error);
-    networkIcon = <></>;
-  }
-
   return (
-    <Card key={network.name}>
+    <Card key={`Chain#${network.id}`}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex flex-row justify-start items-center gap-2">
               <p className="font-semibold text-left">{network.name}</p>
-              {networkIcon}
+              <ChainIcon chainId={network.id} />
             </div>
           </div>
         </div>
