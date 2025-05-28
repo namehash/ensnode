@@ -200,7 +200,7 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       coinTypes: "The set of observed SLIP-44 coin types for this resolver",
       events: "The events associated with this resolver",
       // resolver-records.schema.ts additional properties
-      name: "the value of the name record for this resolver",
+      name: "the value of the reverse-resolution name() record for this resolver",
     }),
     ...generateTypeDocSetWithTypeName("resolverEvent", "a resolver event", {
       id: "Concatenation of block number and log ID",

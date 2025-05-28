@@ -93,8 +93,21 @@ export const makeRegistrationId = (labelHash: LabelHash, node: Node) => {
  * Makes a unique ID for any resolver record entity that is keyed beyond Node
  * (i.e. text, address records).
  *
- * @param resolverId the id of the resolver
- * @param key any string value (ex: coinType.toString(), key)
+ * See comment in packages/ensnode-schema/src/subgraph.schema.ts for additional context.
+ *
+ * @example
+ * ```ts
+ * // For address records in a Resolver, use coinType as key
+ * makeKeyedResolverRecordId(resolverId, coinType.toString())
+ * // => "0x123...-60" // for ETH (coinType 60)
+ *
+ * // For text records in a Resolver, use the text key
+ * makeKeyedResolverRecordId(resolverId, "avatar")
+ * // => "0x123...-avatar"
+ * ```
+ *
+ * @param resolverId the id of the resolver entity
+ * @param key the unique id of the resolver record within a resolverId
  * @returns a unique resolver record entity id
  */
 export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>

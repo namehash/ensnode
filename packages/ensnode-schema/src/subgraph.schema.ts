@@ -131,7 +131,8 @@ export const resolver = onchainTable(
     // NOTE: we avoid .notNull.default([]) to match subgraph behavior
     coinTypes: t.bigint().array(),
 
-    // NOTE(resolver-records): include the per-Node `name` record value
+    // NOTE(resolver-records): include the value of the reverse-resolution name() record
+    // https://docs.ens.domains/ensip/3
     name: t.text(),
   }),
   (t) => ({

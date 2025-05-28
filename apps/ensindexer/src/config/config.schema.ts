@@ -128,7 +128,7 @@ const RpcConfigsSchema = z.record(
   z.string().transform(Number).pipe(chainIdSchema),
   RpcConfigSchema,
   {
-    error: "Chains configuration must be an object mapping numeric chain IDs to their configs.",
+    error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
   },
 );
 
@@ -153,13 +153,14 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
-const derive_isSubgraphCompatible = (
-  config: Omit<ENSIndexerConfig, "isSubgraphCompatible">,
-): ENSIndexerConfig => {
+const derive_isSubgraphCompatible = <
+  CONFIG extends Pick<ENSIndexerConfig, "plugins" | "healReverseAddresses">,
+>(
+  config: CONFIG,
+): CONFIG & { isSubgraphCompatible: boolean } => {
   const onlySubgraphPluginActivated =
     config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
-  const indexingBehaviorIsSubgraphCompatible =
-    !config.healReverseAddresses && !config.indexResolverRecords;
+  const indexingBehaviorIsSubgraphCompatible = !config.healReverseAddresses;
 
   return {
     ...config,

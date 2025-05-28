@@ -120,9 +120,17 @@ export interface ENSIndexerConfig {
    * If this is set to false, ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.
    * If this is set to true, ENSIndexer will track both the keys and the values of Resolver records.
    *
-   * Note that enabling {@link indexResolverRecords} results in indexed data no longer being backwards
-   * compatible with the ENS Subgraph. For full data-level backwards compatibility with the ENS
-   * Subgraph, {@link indexResolverRecords} should be `false`.
+   * WARNING: Special care must be taken when interacting with indexed resolver record values. It is
+   * unsafe to naively assume that indexed resolver record values are equivalent to the resolver
+   * record values that would be returned through dynamic lookups via the ENS protocol. For example,
+   * if a resolver implements CCIP-Read, the resolver records may not be discoverable through
+   * onchain indexing. This feature is under R&D. At this time we do not recommend anyone directly
+   * use indexed resolver record values in their applications. Features are planned in the ENSNode
+   * roadmap that will provide safe use of indexed resolver record values (in appropriate contexts).
+   *
+   * Note that enabling {@link indexResolverRecords} results in indexed data becoming a _superset_ of
+   * the Subgraph. For exact data-level backwards compatibility with the ENS Subgraph,
+   * {@link indexResolverRecords} should be `false`.
    */
   indexResolverRecords: boolean;
 
