@@ -1,4 +1,4 @@
-import { Context } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
@@ -16,8 +16,12 @@ import {
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { type EventWithArgs } from "@/lib/ponder-helpers";
+import { type EventWithArgs, getEnsDeploymentChainId } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
+import {
+  type DebugTraceTransactionSchema,
+  getAddressesFromTrace,
+} from "@/lib/trace-transaction-helpers";
 
 /**
  * shared handlers for a Registry contract
@@ -76,15 +80,123 @@ export const handleNewOwner =
         id: parentNode,
       });
 
+      const ensDeploymentChainId = getEnsDeploymentChainId();
       let healedLabel = null;
 
-      // 1. if healing label from reverse addresses is enabled, and the parent is a known
-      //    reverse node (i.e. addr.reverse), give it a go
-      if (config.healReverseAddresses && REVERSE_ROOT_NODES.has(parentNode)) {
+      // 1. if healing labels from reverse addresses is enabled, and the parent is a known
+      //    reverse node (i.e. addr.reverse), and
+      //    the event comes from the chain that is the ENS Deployment Chain,
+      //    then attempt to heal the unknown label.
+      //
+      //    Note: Based on the ENSIP-19 standard, only an ENS Deployment Chain
+      //    (such as mainnet, holesky, or sepolia) may record primary names
+      //    under the `addr.reverse` subname.
+      //    Currently, we are only healing primary names on ENS Deployment Chains.
+      //    We will add support for non-ENS Deployment Chain primary name
+      //    healing in the future.
+      if (
+        config.healReverseAddresses &&
+        REVERSE_ROOT_NODES.has(parentNode) &&
+        context.network.chainId === ensDeploymentChainId
+      ) {
+        // First, try healing with the transaction sender address.
+        // NOTE: In most cases, the transaction sender calls `setName` method
+        //    on the ENS Registry contract, which may request the ENS Reverse
+        //    Registry contract to set create a reverse address record
+        //    assigned to the transaction sender address.
+        //    Contract call:
+        //    https://etherscan.io/address/0x084b1c3c81545d370f3634392de611caabff8148#code#L106
+        //
+        //    For these transactions, the transaction sender address
+        //    is the address that is used to heal the reverse address label.
+        //
+        //    Example transaction:
+        //    https://etherscan.io/tx/0x17697f8a43a9fc2d79ea8686366f2df3814a4dd6802272c06ce92cb4b9e5dc1b
         healedLabel = maybeHealLabelByReverseAddress({
           maybeReverseAddress: event.transaction.from,
           labelHash,
         });
+
+        // If healing with sender address didn't work, try healing with the event's `owner` address.
+        // NOTE: In some cases, the transaction sender calls a proxy contract
+        //    to interact with the ENS Registry. When it happens,
+        //    the ENS Registry sees the proxy contract as the sender
+        //    (`msg.sender` value), and uses this address to create
+        //    a reverse address record.
+        //
+        //    For these transactions, the `owner` address
+        //    is the address that is used to heal the reverse address label.
+        //
+        //    Example transaction:
+        //    https://etherscan.io/tx/0xf0109fcbba1cea0d42e744c1b5b69cc4ab99d1f7b3171aee4413d0426329a6bb
+        if (!healedLabel) {
+          healedLabel = maybeHealLabelByReverseAddress({
+            maybeReverseAddress: event.args.owner,
+            labelHash,
+          });
+        }
+
+        // If previous methods for healing reverse addresses failed,
+        // try healing with one of the addresses from the transaction traces.
+        // Note: In rare cases, neither the transaction sender nor the event
+        //    owner address is used to create a reverse address record.
+        //    This can happen when transaction sender called a factory contract
+        //    to create a new contract, and that new contract is tasked with
+        //    acquiring a subdomain under the proxy managed ENS name.
+        //    In result, the new contract's address is used to create
+        //    a reverse address record. This new contract's address can only
+        //    be found in the transaction traces, as it is not the transaction
+        //    sender address and not the event's `owner` address.
+        //
+        //    For these transactions, we search the transaction's traces
+        //    for any addresses that could be used to heal the label.
+        //    The right address must be found in the traces, as all caller
+        //    addresses are included there. This is a brute-force method,
+        //    so we use it as a last resort. It requires an additional RPC call,
+        //    and parsing the traces to find all addresses involved
+        //    in the transaction.
+        //
+        //    Example transaction:
+        //    https://etherscan.io/tx/0x9a6a5156f9f1fc6b1d5551483b97930df32e802f2f9229b35572170f1111134d
+        if (!healedLabel) {
+          // The `debug_traceTransaction` RPC call is cached by Ponder.
+          // It will only be made once per transaction hash and
+          // the response will be stored in Ponder's RPC cache.
+          const traces = await context.client.request<DebugTraceTransactionSchema>({
+            method: "debug_traceTransaction",
+            params: [event.transaction.hash, { tracer: "callTracer" }],
+          });
+
+          // extract all addresses from the traces
+          const allAddressesInTransaction = getAddressesFromTrace(traces);
+
+          // iterate over all addresses in the transaction traces
+          // and try to heal the label with each address
+          for (const maybeReverseAddress of allAddressesInTransaction) {
+            healedLabel = maybeHealLabelByReverseAddress({
+              maybeReverseAddress,
+              labelHash,
+            });
+
+            if (healedLabel) {
+              // break the loop after the first successful healing
+              break;
+            }
+          }
+
+          if (!healedLabel) {
+            // by this point, we have exhausted all our strategies for healing
+            // the reverse address and we still don't have a valid label,
+            // so we throw an error to bring visibility to not achieving
+            // the expected 100% success rate
+            throw new Error(
+              `A NewOwner event for a Reverse Node on the ENS Deployment
+									Chain ID "${ensDeploymentChainId}" was emitted by
+									the Registry in tx "${event.transaction.hash}", and we failed to
+									heal reverse address for labelHash "${labelHash}".`,
+            );
+          }
+        }
       }
 
       // 2. if reverse address healing didn't work, try ENSRainbow
