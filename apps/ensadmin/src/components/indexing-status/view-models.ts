@@ -16,15 +16,6 @@ export interface NetworkIndexingPhaseViewModel {
 }
 
 /**
- * Information about chain's block explorer, matching viem's definition @ https://github.com/wevm/viem/blob/main/src/types/chain.ts#L266
- */
-export interface ChainBlockExplorer {
-  name: string;
-  url: string;
-  apiUrl?: string | undefined;
-}
-
-/**
  * Network status view model, includes indexing phases.
  */
 export interface NetworkStatusViewModel {
@@ -35,7 +26,7 @@ export interface NetworkStatusViewModel {
   lastSyncedBlock: BlockInfoViewModel | null;
   latestSafeBlock: BlockInfoViewModel;
   phases: Array<NetworkIndexingPhaseViewModel>;
-  blockExplorer?: ChainBlockExplorer;
+  blockExplorerURL?: string;
 }
 
 /**
@@ -77,7 +68,7 @@ export function globalIndexingStatusViewModel(
         chain.name,
         networkIndexingStatus,
         firstBlockToIndexGloballyTimestamp,
-        chain.blockExplorers && chain.blockExplorers.default,
+        chain.blockExplorers && chain.blockExplorers.default.url,
       );
     },
   ) satisfies Array<NetworkStatusViewModel>;
@@ -107,7 +98,7 @@ export function globalIndexingStatusViewModel(
  * @param chainName
  * @param networkStatus
  * @param firstBlockToIndexGloballyTimestamp
- * @param chainsBlockExplorer - optional
+ * @param chainsBlockExplorerURL - optional - URL to chain's default block explorer if such is available
  * @returns
  */
 export function networkIndexingStatusViewModel(
@@ -115,7 +106,7 @@ export function networkIndexingStatusViewModel(
   chainName: string,
   networkStatus: EnsNode.NetworkIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
-  chainsBlockExplorer?: ChainBlockExplorer,
+  chainsBlockExplorerURL?: string,
 ): NetworkStatusViewModel {
   const phases: NetworkStatusViewModel["phases"] = [];
 
@@ -143,7 +134,7 @@ export function networkIndexingStatusViewModel(
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,
     lastSyncedBlock: lastSyncedBlock ? blockViewModel(lastSyncedBlock) : null,
     phases,
-    ...(chainsBlockExplorer && { blockExplorer: chainsBlockExplorer }),
+    ...(chainsBlockExplorerURL && { blockExplorerURL: chainsBlockExplorerURL }),
   } satisfies NetworkStatusViewModel;
 }
 

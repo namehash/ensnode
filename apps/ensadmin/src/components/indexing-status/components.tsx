@@ -16,7 +16,6 @@ import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
-  ChainBlockExplorer,
   GlobalIndexingStatusViewModel,
   NetworkIndexingPhaseViewModel,
   NetworkStatusViewModel,
@@ -113,12 +112,12 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
           <BlockStats
-            blockExplorer={network.blockExplorer}
+            blockExplorerURL={network.blockExplorerURL}
             label="Last indexed block"
             block={network.lastIndexedBlock}
           />
           <BlockStats
-            blockExplorer={network.blockExplorer}
+            blockExplorerURL={network.blockExplorerURL}
             label="Latest safe block"
             block={network.latestSafeBlock}
           />
@@ -129,7 +128,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
 }
 
 interface BlockStatsProps {
-  blockExplorer?: ChainBlockExplorer;
+  blockExplorerURL?: string;
   label: string;
   block: BlockInfo | null;
 }
@@ -137,7 +136,7 @@ interface BlockStatsProps {
 /**
  * Component to display requested block stats.
  */
-function BlockStats({ blockExplorer, label, block }: BlockStatsProps) {
+function BlockStats({ blockExplorerURL, label, block }: BlockStatsProps) {
   if (!block) {
     return (
       <div>
@@ -147,16 +146,12 @@ function BlockStats({ blockExplorer, label, block }: BlockStatsProps) {
     );
   }
 
-  let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString(), true);
-
-  if (block.timestamp >= Math.floor(Date.now() / 1000)) {
-    calculatedRelativeTime = "just now";
-  }
+  let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString(), true, true, true);
 
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
-      <BlockNumber block={block} blockExplorer={blockExplorer} />
+      <BlockNumber block={block} blockExplorerURL={blockExplorerURL} />
       <div className="text-xs text-muted-foreground">
         {block.timestamp ? calculatedRelativeTime : "N/A"}
       </div>
@@ -165,22 +160,22 @@ function BlockStats({ blockExplorer, label, block }: BlockStatsProps) {
 }
 
 interface BlockNumberProps {
-  blockExplorer?: ChainBlockExplorer;
+  blockExplorerURL?: string;
   block: BlockInfo;
 }
 
-/*
+/**
 Component to display a block number.
 If the chain has a designated block explorer it will display it as an external link to the block's details
- */
-function BlockNumber({ blockExplorer, block }: BlockNumberProps) {
-  if (blockExplorer) {
+ **/
+function BlockNumber({ blockExplorerURL, block }: BlockNumberProps) {
+  if (blockExplorerURL !== undefined && block.number) {
     return (
       <a
-        href={`${blockExplorer.url}/block/${block.number}`}
+        href={`${blockExplorerURL}/block/${block.number}`}
         target="_blank"
         rel="noreferrer noopener"
-        className="text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
+        className="w-fit text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
       >
         #{block.number}
         <ExternalLink size={16} className="inline-block flex-shrink-0" />
