@@ -117,7 +117,7 @@ export const makeRegistryHandlers = ({
             //    Contract call:
             //    https://etherscan.io/address/0x084b1c3c81545d370f3634392de611caabff8148#code#L106
             //
-            //    For these transaction, the transaction sender address
+            //    For these transactions, the transaction sender address
             //    is the address that is used to heal the reverse address label.
             //
             //    Example transaction:
@@ -144,12 +144,6 @@ export const makeRegistryHandlers = ({
                 maybeReverseAddress: event.args.owner,
                 labelHash,
               });
-
-              if (healedLabel) {
-                console.log(
-                  `Found a healed label: ${healedLabel} with event owner: ${event.args.owner} of tx ${event.transaction.hash}`,
-                );
-              }
             }
 
             // If previous methods for healing reverse addresses failed,
