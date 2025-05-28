@@ -1,12 +1,8 @@
 import { type Address, type Hash, type Hex, getAddress } from "viem";
 
 /**
- * Options for the `debug_traceTransaction` RPC method.
- **/
-type DebugTraceTransactionOptions = CallTracerOptions;
-
-/**
- * Options for the `callTracer` tracer.
+ * Options for the `callTracer` tracer. This tracer is used to enlist
+ * all internal calls made during a transaction.
  *
  * @link https://geth.ethereum.org/docs/developers/evm-tracing/built-in-tracers#call-tracer
  */
@@ -22,7 +18,7 @@ type CallTracerOptions = {
 };
 
 /**
- * Schema for the `debug_traceTransaction` method in Viem RPC client.
+ * Schema for the `debug_traceTransaction` method to be called with Ponder RPC client.
  * This schema defines the parameters and return type.
  *
  * @see https://viem.sh/docs/contract/tracing.html#tracetransaction
@@ -31,8 +27,8 @@ export type DebugTraceTransactionSchema = {
   Parameters: [
     // Hash of the transaction to be traced
     hash: Hash,
-    // Options for the call
-    options?: DebugTraceTransactionOptions,
+    // Options for the call tracer
+    options: CallTracerOptions,
   ];
   ReturnType: Trace;
 };
