@@ -75,4 +75,10 @@ console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
 
 if (process.env.PONDER_LOG_LEVEL === "debug") console.log(JSON.stringify(ponderConfig));
 
+// Object.values(ponderConfig.contracts).forEach((contract) =>
+//   Object.entries(contract.network).forEach(([chainId, contractNetwork]) => {
+//     (contractNetwork.endBlock as any) = "latest";
+//   }),
+// );
+
 export default ponderConfig;

@@ -31,8 +31,7 @@ export const ext_domainResolverRelation = onchainTable(
     resolverId: t.text().notNull(),
   }),
   (t) => ({
-    byChainAndDomain: uniqueIndex().on(t.chainId, t.domainId),
-    byChainAndResolver: uniqueIndex().on(t.chainId, t.resolverId),
+    uniqueBy: uniqueIndex().on(t.chainId, t.resolverId, t.domainId),
   }),
 );
 
