@@ -49,10 +49,16 @@
  *   + has many `textRecords` for a Node (by key) (see ENSIP-5)
  *     - see ResolverTextRecord below
  *
- * NOTE: These additional record values still do NOT allow the caller to confidently resolve records
- * for names without following Forward Resolution according to the ENS protocol: a direct query for
- * the indexed values of a names's Resolver and retrieval of its values is not ENSIP-10 nor
- * CCIP-Read compliant.
+ * Terminology Note:
+ * - 'Subgraph Indexed Record Values' — `addr`, `contenthash`
+ * - 'Additionally Indexed Record Values' — `name`, `addressRecords`, `textRecords`
+ * - 'Active Resolver Record Values' — the actual record values retrieved by following the ENS protocol
+ *   specifications for forward resolutuon, including ENSIP-10 and CCIP-Read.
+ *
+ * NOTE: These additionally indexed record values still do NOT allow the caller to confidently resolve
+ * records for names without following Forward Resolution according to the ENS protocol: a direct query
+ * for the indexed values of a names's Resolver and retrieval of its values from the database is not
+ * ENSIP-10 nor CCIP-Read compliant.
  */
 
 import { index, onchainTable, relations } from "ponder";
