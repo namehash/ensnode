@@ -39,6 +39,9 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "zod": "catalog:"
+  },
   "peerDependencies": {
     "viem": "^catalog:"
   },
