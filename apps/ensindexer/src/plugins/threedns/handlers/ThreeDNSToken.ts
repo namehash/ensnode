@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import {
   handleABIChanged,

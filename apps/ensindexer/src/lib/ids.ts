@@ -1,5 +1,5 @@
 import config from "@/config";
-import { type LabelHash, type Node } from "@ensnode/utils";
+import { type LabelHash, type Node } from "@ensnode/ensnode-sdk";
 import type { Address } from "viem";
 
 /**

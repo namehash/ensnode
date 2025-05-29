@@ -1,6 +1,6 @@
 import { type Context } from "ponder:registry";
-import schema, { ext_resolverTextRecords } from "ponder:schema";
-import { ETH_COIN_TYPE, Node } from "@ensnode/utils";
+import schema from "ponder:schema";
+import { ETH_COIN_TYPE, Node } from "@ensnode/ensnode-sdk";
 import { type Address, Hash, type Hex, hexToBytes, isAddress, zeroAddress } from "viem";
 
 import config from "@/config";
@@ -30,7 +30,7 @@ async function handleAddressRecordUpdate(
   const isDeletion = !isAddress(address) || address === zeroAddress;
   if (isDeletion) {
     // delete
-    await context.db.delete(ext_resolverTextRecords, { id: recordId });
+    await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
   } else {
     // upsert
     await context.db
@@ -260,7 +260,7 @@ export async function handleTextChanged({
     const isDeletion = value === "";
     if (isDeletion) {
       // delete
-      await context.db.delete(ext_resolverTextRecords, { id: recordId });
+      await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
     } else {
       // upsert
 

@@ -8,7 +8,7 @@ import {
   PluginName,
   isLabelIndexable,
   makeSubdomainNode,
-} from "@ensnode/utils";
+} from "@ensnode/ensnode-sdk";
 
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";

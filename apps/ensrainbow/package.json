@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@ensnode/ensrainbow-sdk": "workspace:*",
-    "@ensnode/utils": "workspace:*",
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@hono/node-server": "^1.4.1",
     "classic-level": "^1.4.1",
     "hono": "catalog:",

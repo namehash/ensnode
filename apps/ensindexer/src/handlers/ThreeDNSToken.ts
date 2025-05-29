@@ -3,7 +3,12 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
 
-import { type LabelHash, type Node, isLabelIndexable, makeSubdomainNode } from "@ensnode/utils";
+import {
+  type LabelHash,
+  type Node,
+  isLabelIndexable,
+  makeSubdomainNode,
+} from "@ensnode/ensnode-sdk";
 
 import {
   sharedEventValues,

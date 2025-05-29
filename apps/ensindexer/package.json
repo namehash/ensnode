@@ -29,7 +29,7 @@
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
-    "@ensnode/utils": "workspace:*",
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@types/dns-packet": "^5.6.5",
     "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",

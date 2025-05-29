@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { type Node, uint256ToHex32 } from "@ensnode/utils";
+import { type Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";

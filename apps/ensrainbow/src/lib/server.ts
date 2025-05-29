@@ -3,7 +3,7 @@ import { ByteArray } from "viem";
 
 import { ENSRainbowDB } from "@/lib/database";
 import { logger } from "@/utils/logger";
-import { LabelHash } from "@ensnode/utils";
+import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;

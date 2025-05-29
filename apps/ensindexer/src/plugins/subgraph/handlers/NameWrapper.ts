@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {

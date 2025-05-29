@@ -18,7 +18,7 @@ import {
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 const chainIdSchema = z.number().int().min(1);
 

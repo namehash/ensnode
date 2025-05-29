@@ -1,5 +1,5 @@
 import { DatasourceName } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Maps from a plugin to its required Datasources.

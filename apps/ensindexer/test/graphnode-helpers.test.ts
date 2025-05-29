@@ -1,4 +1,4 @@
-import type { LabelHash } from "@ensnode/utils";
+import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { describe, expect, it } from "vitest";
 import { setupConfigMock } from "./utils/mockConfig";
 setupConfigMock(); // setup config mock before importing dependent modules
