@@ -217,6 +217,7 @@ export function parseDnsTxtRecordArgs({
   if (txtDatas.length === 0) {
     // no txt answers??
     console.warn(`parseDNSRecordArgs: No TXT answers found in DNS record for key '${key}'`);
+    // TODO: should be invariant?
     return { key, value: null };
   }
 

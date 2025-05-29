@@ -505,7 +505,7 @@ describe("config", () => {
     });
   });
 
-  it("reverse-resolvers plugin requires indexAdditionalResolverRecords to be true", async () => {
+  it("reverse-resolvers plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be true", async () => {
     vi.stubEnv("ACTIVE_PLUGINS", "reverse-resolvers");
     vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
     vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
@@ -515,8 +515,6 @@ describe("config", () => {
     vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
     vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
 
-    await expect(getConfig()).rejects.toThrow(
-      /the plugin will index ReverseResolver contracts but not their records/i,
-    );
+    await expect(getConfig()).rejects.toThrow(/requires INDEX_ADDITIONAL_RESOLVER_RECORDS/i);
   });
 });

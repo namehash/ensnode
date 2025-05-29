@@ -2,6 +2,9 @@ import { mainnet } from "viem/chains";
 import { ETH_COIN_TYPE } from "./constants";
 import { CoinType, EVMCoinType } from "./types";
 
+// https://docs.ens.domains/ensip/11#specification
+export const EVM_BIT = 1 << 31;
+
 /**
  * Derives the coinType for a given chain id according to ENSIP-11.
  *
@@ -45,6 +48,10 @@ export function toEVMCoinType(coinType: CoinType): EVMCoinType {
  * @returns true if the coinType is a valid EVM coinType, false otherwise
  */
 export function isEVMCoinType(coinType: CoinType): boolean {
-  if (coinType > BigInt(Number.MAX_SAFE_INTEGER)) return false; // not an EVMCoinType
-  return true;
+  try {
+    const evmCoinType = toEVMCoinType(coinType); // throws if not EMVCoinType-compatible
+    return chainIdForCoinType(evmCoinType) !== 0 || evmCoinType === EVM_BIT;
+  } catch {
+    return false;
+  }
 }

@@ -213,8 +213,8 @@ export async function handleTextChanged({
   const sanitizedValue = value === undefined ? null : stripNullBytes(value) || null;
 
   // upsert new key
-  // NOTE(subgraph-compat): we insert sanitized key even if it's empty string to match subgraph behavior of implcitly
-  // stripping null bytes
+  // NOTE(subgraph-compat): we insert sanitized key even if it's empty string to match subgraph behavior
+  // of implicitly stripping null bytes
   await context.db
     .update(schema.resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), sanitizedKey]) });

@@ -87,6 +87,14 @@ export async function handleNewOwner({
   if (domain) {
     // if the domain already exists, this is just an update of the owner record
     domain = await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
+
+    // NOTE(resolver-relations): link Domain and Resolver on this chain
+    await upsertDomainResolverRelation(context, {
+      id: makeDomainResolverRelationId(context.network.chainId, node),
+      chainId: context.network.chainId,
+      domainId: node,
+      resolverId,
+    });
   } else {
     // otherwise create the domain
     domain = await context.db.insert(schema.domain).values({
@@ -106,14 +114,6 @@ export async function handleNewOwner({
       .update(schema.domain, { id: parentNode })
       .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
   }
-
-  // NOTE(resolver-relations): link Domain and Resolver on this chain
-  await upsertDomainResolverRelation(context, {
-    id: makeDomainResolverRelationId(context.network.chainId, node),
-    chainId: context.network.chainId,
-    domainId: node,
-    resolverId,
-  });
 
   // if the domain doesn't yet have a name, attempt to construct it here
   // NOTE: for threedns this occurs on non-2LD `NewOwner` events, as a 2LD registration will

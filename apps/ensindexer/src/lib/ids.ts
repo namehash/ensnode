@@ -29,6 +29,7 @@ export const makeResolverId = (chainId: number, address: Address, node: Node) =>
 /**
  * Parses a resolver ID string back into its components.
  * Handles both subgraph-compatible and chain-scoped formats.
+ * Checksums the address.
  *
  * @param resolverId The resolver ID string to parse
  * @returns array containing chainId (null for subgraph-compat), address, and node

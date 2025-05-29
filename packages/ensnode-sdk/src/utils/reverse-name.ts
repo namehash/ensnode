@@ -1,9 +1,7 @@
 import { Address, toHex } from "viem";
+import { EVM_BIT } from "./coin-type";
 import { ETH_COIN_TYPE } from "./constants";
 import { CoinType, Label, Name } from "./types";
-
-// https://docs.ens.domains/ensip/11#specification
-const EVM_BIT = 1 << 31;
 
 const SLUG_ETH = "addr"; // <=> COIN_TYPE_ETH
 const SLUG_DEFAULT = "default"; // <=> EVM_BIT
