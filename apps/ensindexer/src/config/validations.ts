@@ -140,9 +140,8 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
   ) {
     ctx.issues.push({
       code: "custom",
-      continue: true,
       input: config,
-      message: `The 'reverse-resolvers' plugin is active but indexAdditionalResolverRecords is false. This means the plugin will index ReverseResolver contracts but not their records, which may not be what you want. Consider setting indexAdditionalResolverRecords=true if you want to index the actual resolver records.`,
+      message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
     });
   }
 }
