@@ -1,8 +1,9 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.lib.json",
   "compilerOptions": {
-    "lib": ["ES2020", "DOM"]
+    "lib": ["ES2020", "DOM"],
+    "rootDir": "."
   },
-  "include": ["./**/*.ts"],
+  "include": ["**/*.ts"],
   "exclude": ["dist"]
 }

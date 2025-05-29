@@ -1,5 +1,5 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
-import { ENSIndexerConfig } from "@/config/types";
+import type { ENSIndexerConfig } from "@/config/types";
 import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
 import { deepClone } from "@/lib/lib-helpers";
 import { vi } from "vitest";
