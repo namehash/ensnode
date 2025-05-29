@@ -1,4 +1,4 @@
-import type { ENSIndexerPublicConfig, ENSIndexerPublicEnvironment } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -61,7 +61,19 @@ export interface RpcConfigEnvironment {
  * This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
-export interface ENSIndexerEnvironment extends ENSIndexerPublicEnvironment {
+export interface ENSIndexerEnvironment {
+  port: string | undefined;
+  ponderDatabaseSchema: string | undefined;
   databaseUrl: string | undefined;
+  ensDeploymentChain: string | undefined;
+  plugins: string | undefined;
+  ensRainbowEndpointUrl: string | undefined;
+  ensNodePublicUrl: string | undefined;
+  ensAdminUrl: string | undefined;
+  healReverseAddresses: string | undefined;
+  globalBlockrange: {
+    startBlock: string | undefined;
+    endBlock: string | undefined;
+  };
   rpcConfigs: Record<number, RpcConfigEnvironment>;
 }

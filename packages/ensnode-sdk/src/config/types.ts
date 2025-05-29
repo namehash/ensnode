@@ -125,29 +125,6 @@ export interface ENSIndexerPublicConfig {
 }
 
 /**
- * Represents the raw, unvalidated public configuration values for the ENSIndexer application.
- *
- * Keys correspond to the configuration parameter names, and all values are
- * strings or undefined, reflecting their state in `process.env` or in `JSON.parse` result.
- * This interface is intended to be the source type which then gets
- * mapped/parsed into a structured configuration object like `ENSIndexerPublicConfig`.
- */
-export interface ENSIndexerPublicEnvironment {
-  port: string | undefined;
-  ponderDatabaseSchema: string | undefined;
-  ensDeploymentChain: string | undefined;
-  plugins: string | undefined;
-  ensRainbowEndpointUrl: string | undefined;
-  ensNodePublicUrl: string | undefined;
-  ensAdminUrl: string | undefined;
-  healReverseAddresses: string | undefined;
-  globalBlockrange: {
-    startBlock: string | undefined;
-    endBlock: string | undefined;
-  };
-}
-
-/**
  * Describes a ponder-compatible blockrange with optional start and end blocks, minus 'latest' support.
  * An undefined start block indicates indexing from block 0, and undefined end block indicates
  * indexing in perpetuity (realtime).
