@@ -486,7 +486,7 @@ describe("config", () => {
 
   describe("additional checks", () => {
     it("requires available datasources", async () => {
-      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "holesky");
+      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "holesky"); // no basenames datasource on holesky
       vi.stubEnv("ACTIVE_PLUGINS", "basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
