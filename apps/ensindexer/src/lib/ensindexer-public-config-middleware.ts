@@ -1,5 +1,6 @@
 import { buildPublicConfig } from "@/config/config.schema";
 import type { ENSIndexerConfig } from "@/config/types";
+import { jsonStringifyReplacer } from "@ensnode/ensnode-sdk";
 import type { Context } from "hono";
 
 /**
@@ -9,11 +10,11 @@ export function createEnsIndexerPublicConfigMiddleware(config: ENSIndexerConfig)
   return async function ensIndexerPublicConfigMiddleware(c: Context) {
     const publicConfig = buildPublicConfig(config);
 
-    // TODO: ensure the public config value can be safely serialized into JSON
-    // For example, public config may include bigint values, and functions.
-    const serializedPublicConfig = JSON.stringify(publicConfig);
+    // stringify publicConfig object with safe jsonStringifyReplacer handler
+    const publicConfigStringified = JSON.stringify(publicConfig, jsonStringifyReplacer);
 
+    // make the client aware of JSON-formatted response
     c.header("Content-Type", "application/json");
-    return c.body(serializedPublicConfig);
+    return c.text(publicConfigStringified);
   };
 }
