@@ -44,10 +44,7 @@ describe("ids", () => {
     describe("makeDomainResolverRelationId", () => {
       it("should create a unique ID with chain ID, domain ID, and resolver ID", () => {
         const domainId = namehash("vitalik.eth");
-        const resolverId = makeResolverId(CHAIN_ID, zeroAddress, domainId);
-        expect(makeDomainResolverRelationId(CHAIN_ID, domainId, resolverId)).toEqual(
-          `${CHAIN_ID}-${domainId}-${resolverId}`,
-        );
+        expect(makeDomainResolverRelationId(CHAIN_ID, domainId)).toEqual(`${CHAIN_ID}-${domainId}`);
       });
     });
   });

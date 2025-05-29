@@ -135,14 +135,13 @@ export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>
   [resolverId, key].join("-");
 
 /**
- * Makes a unique ID for a domain-resolver relation.
+ * Makes a unique ID for a domain-resolver relation on a given chain.
  *
- * @example `${chainId}-${domainId}-${resolverId}`
+ * @example `${chainId}-${domainId}`
  *
  * @param chainId the chain ID
  * @param domainId the domain ID (node)
- * @param resolverId the resolver ID
  * @returns a unique domain-resolver relation ID
  */
-export const makeDomainResolverRelationId = (chainId: number, domainId: Node, resolverId: string) =>
-  [chainId, domainId, resolverId].join("-");
+export const makeDomainResolverRelationId = (chainId: number, domainId: Node) =>
+  [chainId, domainId].join("-");

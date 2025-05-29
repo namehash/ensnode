@@ -3,44 +3,14 @@ import config from "@/config";
 import { makeResolverId, parseResolverId } from "@/lib/ids";
 import { getEnsDeploymentChainId } from "@/lib/ponder-helpers";
 import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
-import {
-  type CoinType,
-  ETH_COIN_TYPE,
-  type Name,
-  Node,
-  evmCoinTypeForChainId,
-  getNameHierarchy,
-} from "@ensnode/ensnode-sdk";
-import { Address, Chain, getAddress, isAddressEqual, namehash, toHex } from "viem";
-import { base, linea, mainnet } from "viem/chains";
+import { type CoinType, type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
+import { Address, namehash } from "viem";
 
 const deployment = getENSDeployment(config.ensDeploymentChain);
 const ensDeploymentChainId = getEnsDeploymentChainId();
 
 // all Resolver contracts share the same abi
 const RESOLVER_ABI = ENSDeployments.mainnet.root.contracts.Resolver.abi;
-
-const JESSE_NAME = "jesse.base.eth";
-const JESSE_NAME_ENCODED = Buffer.from([
-  // jesse
-  5, 106, 101, 115, 115, 101,
-  // base
-  4, 98, 97, 115, 101,
-  // eth
-  3, 101, 116, 104,
-  // root
-  0,
-]);
-
-// console.log(JESSE_NAME, JESSE_NAME_ENCODED, toHex(JESSE_NAME_ENCODED));
-
-// console.log(
-//   await resolveForward(JESSE_NAME, {
-//     name: true,
-//     addresses: [BigInt(ETH_COIN_TYPE), BigInt(coinTypeForChainId(base.id))],
-//     texts: ["name", "description", "avatar", "com.twitter"],
-//   }),
-// );
 
 // TODO: implement based on config (& ponder indexing status?)
 const isChainIndexed = (chainId: number) => true;
@@ -130,6 +100,8 @@ export async function resolveForward(
   // TODO: should likely acquire a "most recently indexed" blockNumber or blockHash for this operation
   // and use that to fix any rpc calls made in this context
 
+  console.log("resolveForward", { name, selection, chainId });
+
   const node: Node = namehash(name);
 
   //////////////////////////////////////////////////
@@ -153,6 +125,8 @@ export async function resolveForward(
 
   const { activeResolver, requiresWildcardSupport } = await identifyActiveResolver(name, chainId);
 
+  console.log("identifyActiveResolver", { activeResolver, requiresWildcardSupport });
+
   if (!activeResolver) {
     // TODO: return empty response?
     throw new Error(`No active resolver found for name '${name}' on chain id ${chainId}.`);
@@ -173,6 +147,8 @@ export async function resolveForward(
   if (isOffchainLookupResolver) {
     // NOTE: KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId] is guaranteed to exist via check above
     const deferredToChainId = KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId]![activeResolver];
+
+    console.log("deferring to chain ", { deferredToChainId });
 
     // can short-circuit CCIP-Read and defer resolution to the specified chainId
     return resolveForward(name, selection, deferredToChainId);
@@ -221,6 +197,8 @@ export async function resolveForward(
       `The active resolver for '${name}' _must_ be a wildcard-capable IExtendedResolver, but ${activeResolver} on chain id ${chainId} did not respond correctly to supportsInterface(___).`,
     );
   }
+
+  console.log("forwardResolve: CCIP-Read (TODO)");
 
   // 2.2 For each record to resolve call Resolver.resolve()
   // NOTE: If extended resolver, resolver.resolve(name, data), otherwise just resolver.call(data)
@@ -296,20 +274,26 @@ async function identifyActiveResolver(
   // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
   const names = getNameHierarchy(name);
 
+  console.log(` identifyActiveResolver: ${names.join(", ")} on chain ${chainId}`);
+
   // 2. compute node of each via namehash
   const nodes = names.map((name) => namehash(name) as Node);
 
+  console.log(` identifyActiveResolver: ${nodes.join(", ")}`);
+
   // 3. for each domain, find its associated resolver (only on the specified chain)
-  const domains = await db.query.ext_domainResolverRelation.findMany({
+  const domainResolverRelations = await db.query.ext_domainResolverRelation.findMany({
     where: (drr, { inArray, and, eq }) =>
       and(
         inArray(drr.domainId, nodes), // find Relations for the following Domains
         eq(drr.chainId, chainId), // exclusively on the requested chainId
       ),
-    columns: { resolverId: true }, // retrieve resolverId
+    columns: { chainId: true, domainId: true, resolverId: true }, // retrieve resolverId
   });
 
-  for (const [i, domain] of domains.entries()) {
+  console.log(" identifyActiveResolver", domainResolverRelations);
+
+  for (const [i, domain] of domainResolverRelations.entries()) {
     if (domain.resolverId !== null) {
       const [, resolverAddress] = parseResolverId(domain.resolverId);
       return { requiresWildcardSupport: i !== 0, activeResolver: resolverAddress };

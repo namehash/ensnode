@@ -20,18 +20,19 @@ export const ext_resolverRelations_resolver_relations = relations(resolver, ({ o
   domainRelations: many(ext_domainResolverRelation),
 }));
 
-// tracks which domains delegate to which resolvers on which chains
+// tracks resolver values in the Registry by domain on a specific chain
 export const ext_domainResolverRelation = onchainTable(
   "ext_domain_resolver_relations",
   (t) => ({
-    // keyed by (chainId, domainId, resolverId)
+    // keyed by (chainId, domainId)
     id: t.text().primaryKey(),
     chainId: t.integer().notNull(),
     domainId: t.text().notNull(),
+
     resolverId: t.text().notNull(),
   }),
   (t) => ({
-    uniqueBy: uniqueIndex().on(t.chainId, t.resolverId, t.domainId),
+    byChainIdAndDomain: uniqueIndex().on(t.chainId, t.domainId),
   }),
 );
 

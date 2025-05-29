@@ -321,7 +321,7 @@ export async function handleNewResolver({
 
     // NOTE(resolver-relations): unlink Domain and Resolver on this chain
     await context.db.delete(schema.ext_domainResolverRelation, {
-      id: makeDomainResolverRelationId(context.network.chainId, node, resolverId),
+      id: makeDomainResolverRelationId(context.network.chainId, node),
     });
 
     // garbage collect newly 'empty' domain iff necessary
@@ -347,9 +347,10 @@ export async function handleNewResolver({
 
     // NOTE(resolver-relations): link Domain and Resolver on this chain
     await upsertDomainResolverRelation(context, {
-      id: makeDomainResolverRelationId(context.network.chainId, node, resolverId),
+      id: makeDomainResolverRelationId(context.network.chainId, node),
       chainId: context.network.chainId,
       domainId: node,
+
       resolverId,
     });
   }
