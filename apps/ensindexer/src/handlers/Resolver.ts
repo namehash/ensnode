@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { ETH_COIN_TYPE, Node } from "@ensnode/ensnode-sdk";
-import { type Address, Hash, type Hex, hexToBytes, isAddress, zeroAddress } from "viem";
+import { type Address, Hash, type Hex } from "viem";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";

@@ -45,20 +45,26 @@
  *     - see 'NOTE(resolver-records)' in subgraph.schema.ts
  *   + has many `addressRecords` for a Node (by coinType) (see ENSIP-9)
  *     - see ResolverAddressRecord below
- *     - NOTE: _does_ represent the implcit coinType of 60 for the `addr` record, if set
+ *     - NOTE: _does_ represent the implicit coinType of 60 for the `addr` record, if set
  *   + has many `textRecords` for a Node (by key) (see ENSIP-5)
  *     - see ResolverTextRecord below
  *
- * NOTE: These additional record values still do NOT allow the caller to confidently resolve records
- * for names without following Forward Resolution according to the ENS protocol: a direct query for
- * the indexed values of a names's Resolver and retrieval of its values is not ENSIP-10 nor
- * CCIP-Read compliant.
+ * Terminology Note:
+ * - 'Subgraph Indexed Record Values' — `addr`, `contenthash`
+ * - 'Additionally Indexed Record Values' — `name`, `addressRecords`, `textRecords`
+ * - 'Active Resolver Record Values' — the actual record values retrieved by following the ENS protocol
+ *   specifications for forward resolutuon, including ENSIP-10 and CCIP-Read.
+ *
+ * NOTE: These additionally indexed record values still do NOT allow the caller to confidently resolve
+ * records for names without following Forward Resolution according to the ENS protocol: a direct query
+ * for the indexed values of a names's Resolver and retrieval of its values from the database is not
+ * ENSIP-10 nor CCIP-Read compliant.
  */
 
 import { onchainTable, relations, uniqueIndex } from "ponder";
 import { resolver } from "./subgraph.schema";
 
-// add the additional relationships to subgraph's Resolver entity
+// add the additional `Resolver.records` relationship to subgraph's Resolver entity
 export const ext_resolverRecords_resolver_relations = relations(resolver, ({ one, many }) => ({
   // resolver has many address records
   addressRecords: many(ext_resolverAddressRecords),
@@ -79,7 +85,7 @@ export const ext_resolverAddressRecords = onchainTable(
     address: t.text().notNull(),
   }),
   (t) => ({
-    byCoinType: uniqueIndex().on(t.id, t.coinType),
+    byResolverIdAndCoinType: uniqueIndex().on(t.resolverId, t.coinType),
   }),
 );
 
@@ -105,7 +111,7 @@ export const ext_resolverTextRecords = onchainTable(
     value: t.text().notNull(),
   }),
   (t) => ({
-    byKey: uniqueIndex().on(t.resolverId, t.key),
+    byResolverIdAndKey: uniqueIndex().on(t.resolverId, t.key),
   }),
 );
 

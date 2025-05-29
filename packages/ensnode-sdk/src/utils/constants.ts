@@ -1,5 +1,5 @@
 import { namehash } from "viem";
-import { CoinType, EVMCoinType, Node } from "./types";
+import { EVMCoinType, Node } from "./types";
 
 export const ROOT_NODE: Node = namehash("");
 

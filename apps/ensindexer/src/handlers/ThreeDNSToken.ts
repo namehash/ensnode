@@ -109,7 +109,7 @@ export async function handleNewOwner({
 
   // NOTE(resolver-relations): link Domain and Resolver on this chain
   await upsertDomainResolverRelation(context, {
-    id: makeDomainResolverRelationId(context.network.chainId, node, resolverId),
+    id: makeDomainResolverRelationId(context.network.chainId, node),
     chainId: context.network.chainId,
     domainId: node,
     resolverId,

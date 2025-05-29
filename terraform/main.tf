@@ -6,11 +6,41 @@ locals {
   # Example indexer.holesky.terraform-test.ensnode.io
   base_domain_name = "ensnode.io"
   # US East Metal - Railway regions: https://docs.railway.com/reference/regions
-  railway_region         = "us-east4-eqdc4a"
-  heal_reverse_addresses = "false"
-  index_additional_resolver_records = "false"
-  active_plugins         = "subgraph"
-  ens_deployment_chain   = "holesky"
+  railway_region = "us-east4-eqdc4a"
+  ensindexer_instances = {
+    holesky = {
+      subdomain_prefix       = "holesky.${local.railway_environment}"
+      database_schema        = "holeskySchema-${var.ensnode_version}"
+      active_plugins         = "subgraph"
+      ens_deployment_chain   = "holesky"
+      heal_reverse_addresses = "false"
+      index_additional_resolver_records = "false"
+    }
+    sepolia = {
+      subdomain_prefix       = "sepolia.${local.railway_environment}"
+      database_schema        = "sepoliaSchema-${var.ensnode_version}"
+      active_plugins         = "subgraph"
+      ens_deployment_chain   = "sepolia"
+      heal_reverse_addresses = "false"
+      index_additional_resolver_records = "false"
+    }
+    mainnet = {
+      subdomain_prefix       = "mainnet.${local.railway_environment}"
+      database_schema        = "mainnetSchema-${var.ensnode_version}"
+      active_plugins         = "subgraph"
+      ens_deployment_chain   = "mainnet"
+      heal_reverse_addresses = "false"
+      index_additional_resolver_records = "false"
+    }
+    alpha = {
+      subdomain_prefix       = "alpha.${local.railway_environment}"
+      database_schema        = "alphaSchema-${var.ensnode_version}"
+      active_plugins         = "subgraph,basenames,lineanames,threedns"
+      ens_deployment_chain   = "mainnet"
+      heal_reverse_addresses = "true"
+      index_additional_resolver_records = "true"
+    }
+  }
 }
 
 resource "railway_project" "this" {
@@ -28,19 +58,25 @@ module "database" {
   railway_environment_id = railway_project.this.default_environment.id
 }
 
-module "holesky_ensindexer" {
-  source     = "./modules/ensindexer"
+module "ensindexer" {
+  source   = "./modules/ensindexer"
+  for_each = local.ensindexer_instances
+
   depends_on = [null_resource.health_check]
-  #Indexer specific envs
-  base_domain_name       = local.base_domain_name
-  subdomain_prefix       = "holesky.${local.railway_environment}"
-  ensnode_version        = var.ensnode_version
-  heal_reverse_addresses = local.heal_reverse_addresses
-  index_additional_resolver_records = local.index_additional_resolver_records
-  ensrainbow_url         = "http://$${{${railway_service.ensrainbow.name}.RAILWAY_PRIVATE_DOMAIN}}:8080"
-  database_schema        = "holeskySchema-${var.ensnode_version}"
-  active_plugins         = local.active_plugins
-  ens_deployment_chain   = local.ens_deployment_chain
+
+  # Instance-specific configuration
+  subdomain_prefix                  = each.value.subdomain_prefix
+  database_schema                   = each.value.database_schema
+  active_plugins                    = each.active_plugins
+  ens_deployment_chain              = each.ens_deployment_chain
+  heal_reverse_addresses            = each.heal_reverse_addresses
+  index_additional_resolver_records = each.index_additional_resolver_records
+
+  # Common configuration (spread operator merges the map)
+  base_domain_name = local.base_domain_name
+  ensnode_version  = var.ensnode_version
+  ensrainbow_url   = "http://$${{${railway_service.ensrainbow.name}.RAILWAY_PRIVATE_DOMAIN}}:8080"
+
   #Common envs
   railway_region         = local.railway_region
   railway_token          = var.railway_token

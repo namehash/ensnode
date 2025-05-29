@@ -8,6 +8,7 @@ import { client, graphql as ponderGraphQL } from "ponder";
 
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
+import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
   fetchEnsRainbowVersion,
@@ -21,6 +22,8 @@ import {
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
 import ensNodeApi from "./handlers/ensnode-api";
+
+const schemaWithoutExtensions = filterSchemaExtensions(schema);
 
 const app = new Hono();
 
@@ -85,12 +88,12 @@ app.get(
 app.route("/api", ensNodeApi);
 
 // use ponder client support
-app.use("/sql/*", client({ db, schema }));
+app.use("/sql/*", client({ db, schema: schemaWithoutExtensions }));
 
 // use ponder middleware at `/ponder` with description injection
 app.use("/ponder", fixContentLengthMiddleware);
 app.use("/ponder", makeApiDocumentationMiddleware("/ponder"));
-app.use("/ponder", ponderGraphQL({ db, schema }));
+app.use("/ponder", ponderGraphQL({ db, schema: schemaWithoutExtensions }));
 
 // use our custom graphql middleware at /subgraph with description injection
 app.use("/subgraph", fixContentLengthMiddleware);
@@ -100,7 +103,7 @@ app.use(
   subgraphGraphQL({
     db,
     graphqlSchema: buildSubgraphGraphQLSchema({
-      schema,
+      schema: schemaWithoutExtensions,
       // provide the schema with ponder's internal metadata to power _meta
       metadataProvider: makePonderMetdataProvider({ db, publicClients }),
       // describes the polymorphic (interface) relationships in the schema

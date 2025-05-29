@@ -100,7 +100,7 @@ resource "railway_variable_collection" "ensindexer" {
       value = var.heal_reverse_addresses
     },
     {
-      name  = "INDEX_ADDITION_RESOLVER_RECORDS"
+      name  = "INDEX_ADDITIONAL_RESOLVER_RECORDS"
       value = var.index_additional_resolver_records
     },
     {
@@ -185,7 +185,7 @@ resource "railway_variable_collection" "ensindexer_api" {
       value = var.heal_reverse_addresses
     },
     {
-      name  = "INDEX_ADDITION_RESOLVER_RECORDS"
+      name  = "INDEX_ADDITIONAL_RESOLVER_RECORDS"
       value = var.index_additional_resolver_records
     },
     {
