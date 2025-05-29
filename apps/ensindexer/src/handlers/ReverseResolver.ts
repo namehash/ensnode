@@ -1,8 +1,7 @@
 import { type Context } from "ponder:registry";
-import { ETH_COIN_TYPE, Node } from "@ensnode/utils";
+import { ETH_COIN_TYPE, Node } from "@ensnode/ensnode-sdk";
 import { type Address, type Hex } from "viem";
 
-import config from "@/config";
 import { upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
@@ -42,10 +41,8 @@ export async function handleAddrChanged({
     address: event.log.address,
   });
 
-  if (config.indexResolverRecords) {
-    // AddrChanged is just AddressChanged with implicit coinType of ETH
-    await handleResolverAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), event.args.a);
-  }
+  // AddrChanged is just AddressChanged with implicit coinType of ETH
+  await handleResolverAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), event.args.a);
 }
 
 export async function handleAddressChanged({
@@ -64,9 +61,7 @@ export async function handleAddressChanged({
     address: event.log.address,
   });
 
-  if (config.indexResolverRecords) {
-    await handleResolverAddressRecordUpdate(context, id, coinType, newAddress);
-  }
+  await handleResolverAddressRecordUpdate(context, id, coinType, newAddress);
 }
 
 export async function handleNameChanged({
@@ -85,9 +80,7 @@ export async function handleNameChanged({
     address: event.log.address,
   });
 
-  if (config.indexResolverRecords) {
-    await handleResolverNameUpdate(context, id, name);
-  }
+  await handleResolverNameUpdate(context, id, name);
 }
 
 export async function handleTextChanged({
@@ -110,9 +103,7 @@ export async function handleTextChanged({
     address: event.log.address,
   });
 
-  if (config.indexResolverRecords) {
-    await handleResolverTextRecordUpdate(context, id, key, value);
-  }
+  await handleResolverTextRecordUpdate(context, id, key, value);
 }
 
 export async function handleDNSRecordChanged({
@@ -141,9 +132,7 @@ export async function handleDNSRecordChanged({
     address: event.log.address,
   });
 
-  if (config.indexResolverRecords) {
-    await handleResolverTextRecordUpdate(context, id, key, value);
-  }
+  await handleResolverTextRecordUpdate(context, id, key, value);
 }
 
 export async function handleDNSRecordDeleted({
@@ -171,7 +160,5 @@ export async function handleDNSRecordDeleted({
     address: event.log.address,
   });
 
-  if (config.indexResolverRecords) {
-    await handleResolverTextRecordUpdate(context, id, key, null);
-  }
+  await handleResolverTextRecordUpdate(context, id, key, null);
 }

@@ -59,7 +59,7 @@ import { onchainTable, relations, uniqueIndex } from "ponder";
 import { resolver } from "./subgraph.schema";
 
 // add the additional relationships to subgraph's Resolver entity
-export const ext_resolverRelations = relations(resolver, ({ one, many }) => ({
+export const ext_resolverRecords_resolver_relations = relations(resolver, ({ one, many }) => ({
   // resolver has many address records
   addressRecords: many(ext_resolverAddressRecords),
 

@@ -8,9 +8,9 @@ import {
   ETH_COIN_TYPE,
   type Name,
   Node,
-  coinTypeForChainId,
+  evmCoinTypeForChainId,
   getNameHierarchy,
-} from "@ensnode/utils";
+} from "@ensnode/ensnode-sdk";
 import { Address, Chain, getAddress, isAddressEqual, namehash, toHex } from "viem";
 import { base, linea, mainnet } from "viem/chains";
 

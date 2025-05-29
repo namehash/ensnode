@@ -5,7 +5,7 @@ import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
-  invariant_reverseResolversPluginNeedsIndexResolverRecords,
+  invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "@/config/validations";
@@ -192,7 +192,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)
   .check(invariant_validContractConfigs)
-  .check(invariant_reverseResolversPluginNeedsIndexResolverRecords);
+  .check(invariant_reverseResolversPluginNeedsResolverRecords);
 
 /**
  * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object

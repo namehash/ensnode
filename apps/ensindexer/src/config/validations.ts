@@ -128,18 +128,21 @@ DEPLOYMENT_ADDRESSES=${process.env.DEPLOYMENT_ADDRESSES || "undefined"}`,
   }
 }
 
-// Invariant: If ReverseResolvers plugin is active, and indexReverseRecords is false, warn the user
-export function invariant_reverseResolversPluginNeedsIndexResolverRecords(
+// Invariant: ReverseResolvers plugin requires indexAdditionalResolverRecords
+export function invariant_reverseResolversPluginNeedsResolverRecords(
   ctx: z.core.ParsePayload<ENSIndexerConfig>,
 ) {
   const { value: config } = ctx;
 
-  if (config.plugins.includes(PluginName.ReverseResolvers) && !config.indexResolverRecords) {
+  if (
+    config.plugins.includes(PluginName.ReverseResolvers) &&
+    !config.indexAdditionalResolverRecords
+  ) {
     ctx.issues.push({
       code: "custom",
       continue: true,
       input: config,
-      message: `The 'reverse-resolvers' plugin is active but indexResolverRecords is false. This means the plugin will index ReverseResolver contracts but not their records, which may not be what you want. Consider setting indexResolverRecords=true if you want to index the actual resolver records.`,
+      message: `The 'reverse-resolvers' plugin is active but indexAdditionalResolverRecords is false. This means the plugin will index ReverseResolver contracts but not their records, which may not be what you want. Consider setting indexAdditionalResolverRecords=true if you want to index the actual resolver records.`,
     });
   }
 }

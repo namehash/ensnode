@@ -513,7 +513,7 @@ describe("config", () => {
     vi.stubEnv("RPC_URL_42161", VALID_RPC_URL);
     vi.stubEnv("RPC_URL_534352", VALID_RPC_URL);
     vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
-    vi.stubEnv("INDEX_RESOLVER_RECORDS", "false");
+    vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
 
     await expect(getConfig()).rejects.toThrow(
       /the plugin will index ReverseResolver contracts but not their records/i,

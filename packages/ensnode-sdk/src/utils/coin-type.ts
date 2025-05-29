@@ -2,9 +2,6 @@ import { mainnet } from "viem/chains";
 import { ETH_COIN_TYPE } from "./constants";
 import { CoinType, EVMCoinType } from "./types";
 
-// https://docs.ens.domains/ensip/11#specification
-const EVM_BIT = 1 << 31;
-
 /**
  * Derives the coinType for a given chain id according to ENSIP-11.
  *
@@ -14,7 +11,7 @@ const EVM_BIT = 1 << 31;
  * @param chainId
  * @returns ENSIP-11 CoinType
  */
-export const coinTypeForChainId = (chainId: number): EVMCoinType => {
+export const evmCoinTypeForChainId = (chainId: number): EVMCoinType => {
   if (chainId === mainnet.id) return ETH_COIN_TYPE;
   return 0x80000000 | (chainId >>> 0);
 };

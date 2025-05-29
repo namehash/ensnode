@@ -9,7 +9,7 @@ import {
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Describes the indexing behavior for every known ENSIP-19 L2 Reverse Resolver.

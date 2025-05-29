@@ -9,13 +9,13 @@ import { onchainTable, relations, uniqueIndex } from "ponder";
 import { domain, resolver } from "./subgraph.schema";
 
 // add the additional relationships to subgraph's Domain entity
-export const ext_domainRelations = relations(domain, ({ one, many }) => ({
+export const ext_resolverRelations_domain_relations = relations(domain, ({ one, many }) => ({
   // domain has many resolver relations
   resolverRelations: many(ext_domainResolverRelation),
 }));
 
 // add the additional relationships to subgraph's Resolver entity
-export const ext_resolverRelations = relations(resolver, ({ one, many }) => ({
+export const ext_resolverRelations_resolver_relations = relations(resolver, ({ one, many }) => ({
   // resolver has many domain relations
   domainRelations: many(ext_domainResolverRelation),
 }));
