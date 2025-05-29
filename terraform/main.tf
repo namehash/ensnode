@@ -8,6 +8,7 @@ locals {
   # US East Metal - Railway regions: https://docs.railway.com/reference/regions
   railway_region         = "us-east4-eqdc4a"
   heal_reverse_addresses = "false"
+  index_additional_resolver_records = "false"
   active_plugins         = "subgraph"
   ens_deployment_chain   = "holesky"
 }
@@ -35,6 +36,7 @@ module "holesky_ensindexer" {
   subdomain_prefix       = "holesky.${local.railway_environment}"
   ensnode_version        = var.ensnode_version
   heal_reverse_addresses = local.heal_reverse_addresses
+  index_additional_resolver_records = local.index_additional_resolver_records
   ensrainbow_url         = "http://$${{${railway_service.ensrainbow.name}.RAILWAY_PRIVATE_DOMAIN}}:8080"
   database_schema        = "holeskySchema-${var.ensnode_version}"
   active_plugins         = local.active_plugins

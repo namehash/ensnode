@@ -37,6 +37,9 @@ variable "ensnode_version" {
 variable "heal_reverse_addresses" {
   type = string
 }
+variable "index_additional_resolver_records" {
+  type = string
+}
 
 variable "ensrainbow_url" {
   type = string
