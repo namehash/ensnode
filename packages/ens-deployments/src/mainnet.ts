@@ -72,6 +72,11 @@ export default {
         startBlock: 16925608,
       },
       //
+      LegacyPublicResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+        startBlock: 9412610,
+      },
       PublicResolver: {
         abi: ResolverConfig.abi,
         address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",

@@ -1,10 +1,18 @@
-import { db } from "ponder:api";
+import { db, publicClients } from "ponder:api";
 import config from "@/config";
 import { makeResolverId, parseResolverId } from "@/lib/ids";
+import {
+  IndexedResolverRecords,
+  ResolverRecordsResponse,
+  ResolverRecordsSelection,
+  makeEmptyResolverRecordsResponse,
+  makeRecordsResponseFromIndexedRecords,
+  makeRecordsResponseFromResolveResults,
+} from "@/lib/lib-resolution";
 import { getEnsDeploymentChainId } from "@/lib/ponder-helpers";
 import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
-import { type CoinType, type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
-import { Address, namehash } from "viem";
+import { type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
+import { Address, encodeFunctionData, namehash } from "viem";
 
 const deployment = getENSDeployment(config.ensDeploymentChain);
 const ensDeploymentChainId = getEnsDeploymentChainId();
@@ -19,8 +27,8 @@ const isChainIndexed = (chainId: number) => true;
  * A mapping of Resolver Addresses on a given chain to the chain they defer resolution to.
  *
  * These resolvers must abide the following pattern:
- * 1. They _always_ emit OffchainLookup to a well-defined CCIP-Read Gateway
- * 2. The CCIP-Read Gateway exclusively sources the data necessary to process CCIP-Read Requests from
+ * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway
+ * 2. That CCIP-Read Gateway exclusively sources the data necessary to process CCIP-Read Requests from
  *   the indicated L2.
  *
  * TODO: these relationships could/should be encoded in an ENSIP
@@ -40,48 +48,27 @@ const KNOWN_OFFCHAIN_LOOKUP_RESOLVERS: Record<number, Record<Address, number>> =
  *
  * These resolvers must abide the following pattern:
  * 1. Onchain: all information necessary for resolution is stored on-chain, and
- * 2. Static: All resolution is 'static' in that it is a simple return of the emitted values.
+ * 2. Static: All resolve() calls resolve to the exact value previously emitted by the Resolver in
+ *    its events (i.e. no post-processing or other logic, a simple return of the on-chain data).
  *
  * TODO: these relationships could/should be encoded in an ENSIP
  */
 const KNOWN_ONCHAIN_STATIC_RESOLVERS: Record<number, Address[]> = {
   // on the ENS Deployment Chain
   [deployment.root.chain.id]: [
-    // the Root PublicResolver is a fully on-chain Resolver
+    // the Root LegacyPublicResolver is an Onchain Static Resolver
+    // TODO: re-enable
+    deployment[DatasourceName.Root].contracts.LegacyPublicResolver.address,
+    // the Root PublicResolver is an Onchain Static Resolver
     deployment[DatasourceName.Root].contracts.PublicResolver.address,
   ],
   // on the Basenames chain
   [deployment.basenames.chain.id]: [
-    // the Basenames L2Resolver is a fully on-chain Resolver
+    // the Basenames L2Resolver is an Onchain Static Resolver
     deployment[DatasourceName.Basenames].contracts.L2Resolver.address,
   ],
   // TODO: Linea
 };
-
-/**
- * Encodes a selection of Resolver records in the context of a specific Node.
- */
-export interface ResolverRecordsSelection {
-  // TODO: support legacy addr() record?
-  // whether to fetch the addr record
-  // addr?: boolean;
-  // whether to fetch the name record
-  name?: boolean;
-  // which coinTypes to fetch address records for
-  addresses?: CoinType[];
-  // which keys to fetch text records for
-  texts?: string[];
-  // TODO: include others as/if necessary
-}
-
-// TODO: document
-export interface ResolverRecordsResponse {
-  // TODO: support legacy addr record?
-  // addr: string | null;
-  name: string | null;
-  addresses: { coinType: bigint; address: string | null }[];
-  texts: { key: string; value: string | null }[];
-}
 
 /**
  * Implements Forward Resolution of an ENS name, for a selection of records, on a specified chainId.
@@ -89,14 +76,15 @@ export interface ResolverRecordsResponse {
  *
  * @param name the ENS name to resolve
  * @param selection selection specifying which records to resolve
+ * @param chainId optional, the chain id from which to resolve records
  *
  * TODO: document with example
  */
-export async function resolveForward(
+export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: Name,
-  selection: ResolverRecordsSelection,
+  selection: SELECTION,
   chainId: number = ensDeploymentChainId,
-): Promise<ResolverRecordsResponse | null> {
+): Promise<ResolverRecordsResponse<SELECTION>> {
   // TODO: should likely acquire a "most recently indexed" blockNumber or blockHash for this operation
   // and use that to fix any rpc calls made in this context
 
@@ -123,13 +111,13 @@ export async function resolveForward(
   // 1. Identify the active resolver for the name on the specified chain.
   //////////////////////////////////////////////////
 
-  const { activeResolver, requiresWildcardSupport } = await identifyActiveResolver(name, chainId);
+  const { activeResolver, requiresWildcardSupport } = await findResolver(name, chainId);
 
-  console.log("identifyActiveResolver", { activeResolver, requiresWildcardSupport });
+  console.log("findResolver", { activeResolver, requiresWildcardSupport });
 
   if (!activeResolver) {
-    // TODO: return empty response?
-    throw new Error(`No active resolver found for name '${name}' on chain id ${chainId}.`);
+    // we're unable to find an active resolver for this name, return empty response
+    return makeEmptyResolverRecordsResponse(selection);
   }
 
   //////////////////////////////////////////////////
@@ -139,10 +127,9 @@ export async function resolveForward(
   //////////////////////////////////////////////////
   // CCIP-Read Short-Circuit for Indexed Chains:
   //   If the activeResolver is a known OffchainLookup Resolver that exclusively defers record
-  //   resolution to a fully on-chain source, we can short-circuit and continue resolving the
-  //   requested records directly from that chain.
+  //   resolution to an indexed L2, we can short-circuit and continue resolving the requested records
+  //   directly from that chain.
   //////////////////////////////////////////////////
-
   const isOffchainLookupResolver = !!KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId]?.[activeResolver];
   if (isOffchainLookupResolver) {
     // NOTE: KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId] is guaranteed to exist via check above
@@ -156,8 +143,10 @@ export async function resolveForward(
 
   //////////////////////////////////////////////////
   // Known On-Chain Resolvers
-  //   If 1) activeResolver is an on-chain only resolver for this chainId, and 2) ENSIndexer indexes
-  //   this chainId we can retrieve records directly from the database.
+  //   If:
+  //    1) activeResolver on this chain is an Onchain Static Resolver, and
+  //    2) ENSIndexer indexes this chain,
+  //   then we can retrieve records directly from the database.
   //////////////////////////////////////////////////
   const isOnchainStaticResolver = KNOWN_ONCHAIN_STATIC_RESOLVERS[chainId]?.includes(activeResolver);
   if (isOnchainStaticResolver && isChainIndexed(chainId)) {
@@ -175,57 +164,85 @@ export async function resolveForward(
       );
     }
 
-    // TODO: reformat into an ResolverRecordsResponse
-
     // format into RecordsResponse and return
-    return {
-      name: resolver.name,
-      // TODO: addressRecords/textRecords typings not inferred from drizzle.query — why?
-      addresses: (resolver as any).addressRecords as ResolverRecordsResponse["addresses"],
-      texts: (resolver as any).textRecords as ResolverRecordsResponse["texts"],
-    } satisfies ResolverRecordsResponse;
+    // TODO: drizzle types not inferred correctly for addressRecords/textRecords
+    return makeRecordsResponseFromIndexedRecords(selection, resolver as IndexedResolverRecords);
   }
 
-  // otherwise, must execute Resolver code to determine what to do
+  // otherwise, must execute resolve() to determine what to do
+
+  // Invariant: the only chainIds we should be seeing at this point are those that ENSIndexer is
+  // actively indexing.
+  if (!publicClients[chainId]) {
+    throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
+  }
 
   // 2.1 requireResolver() — validate behavior
   // TODO: implement ERC165 check on this resolver
-  const isExtendedResolver = true;
+  const isExtendedResolver = await supportsENSIP10Interface(chainId, activeResolver);
   if (!isExtendedResolver && requiresWildcardSupport) {
     // requires exact match if not extended resolver
+    // TODO: should this return empty response instead?
     throw new Error(
       `The active resolver for '${name}' _must_ be a wildcard-capable IExtendedResolver, but ${activeResolver} on chain id ${chainId} did not respond correctly to supportsInterface(___).`,
     );
   }
 
-  console.log("forwardResolve: CCIP-Read (TODO)");
-
   // 2.2 For each record to resolve call Resolver.resolve()
   // NOTE: If extended resolver, resolver.resolve(name, data), otherwise just resolver.call(data)
+  const ResolverContract = { abi: RESOLVER_ABI, address: activeResolver } as const;
+  const resolveResponses = await publicClients[chainId]!.multicall({
+    allowFailure: true,
+    contracts: calls.map((call) => {
+      // NOTE: ENSIP-10
+      if (requiresWildcardSupport) {
+        return {
+          ...ResolverContract,
+          functionName: "resolve",
+          args: [name, encodeFunctionData({ abi: RESOLVER_ABI, ...call })],
+        };
+      }
 
-  // 3. Perform CCIP-Read for each OffchainLookup call
-  // NOTE: implement x-batch-gateway:true behavior from viem for local gateway batching
-  // and execute viem#ccipRequest
+      return {
+        ...ResolverContract,
+        ...call,
+      };
+    }),
+  });
 
-  // 4. Execute the CCIP-Read Callback for each necessary OffchainLookup call
-  // TODO: can this be skipped/cached for well-known resolvers?
-  //   - can be skipped for Base, all it does is gateway server signature verification
-  // TODO: can we skip the
+  console.log("forwardResolve: resolve()", resolveResponses);
+
+  const results = await Promise.all(
+    resolveResponses.map((response, i) => {
+      // 3. Perform CCIP-Read for each OffchainLookup response
+      // NOTE: implement x-batch-gateway:true behavior from viem for local gateway batching
+      // and execute viem#ccipRequest
+
+      // TODO: can one batch against a single gateway (with multicall?)
+
+      // 4. Execute the CCIP-Read Callback for each necessary OffchainLookup call
+      // TODO: can this be skipped/cached for well-known resolvers?
+      //   - can be skipped for Base, all it does is gateway server signature verification
+
+      // NOTE: calls[i]! must exist
+      return { ...calls[i]!, response };
+    }),
+  );
 
   // 5. Return record values
-  return null;
+  return makeRecordsResponseFromResolveResults(selection, results);
 }
 
 // builds an array of calls from a ResolverRecordsSelection
 function makeResolveCalls(node: Node, selection: ResolverRecordsSelection) {
   return [
     // TODO: legacy addr record?
-    // selection.addr && ({ functionName: "addr", args: [node] } as const),
+    // selection.addr && ({ functionName: "addr(bytes32)", args: [node] } as const),
     selection.name && ({ functionName: "name", args: [node] } as const),
     ...(selection.addresses ?? []).map(
       (coinType) =>
         ({
-          functionName: "address",
+          functionName: "addr",
           args: [node, coinType],
         }) as const,
     ),
@@ -243,7 +260,8 @@ function makeResolveCalls(node: Node, selection: ResolverRecordsSelection) {
 }
 
 /**
- * Identifies the active resolver for a given ENS name by traversing the name hierarchy.
+ * Identifies the active resolver for a given ENS name, following ENSIP-10. This function parallels
+ * UniversalResolver#findResolver.
  *
  * @param name - The ENS name to find the resolver for
  * @returns The resolver ID if found, null otherwise
@@ -254,7 +272,7 @@ function makeResolveCalls(node: Node, selection: ResolverRecordsSelection) {
  * // Returns: "0x123..." or null if no resolver found
  * ```
  */
-async function identifyActiveResolver(
+async function findResolver(
   name: Name,
   chainId: number,
 ): Promise<
@@ -318,14 +336,16 @@ async function identifyActiveResolver(
   return { activeResolver: null, requiresWildcardSupport: undefined };
 }
 
-function makeEmptyResolverRecordsResponse(
-  selection: ResolverRecordsSelection,
-): ResolverRecordsResponse {
-  // TODO: map selection to an empty response that uses null for all values
-  // TODO: some typescript magic here for selected fields
-  return {
-    name: null,
-    addresses: (selection.addresses ?? []).map((coinType) => ({ coinType, address: null })),
-    texts: (selection.texts ?? []).map((key) => ({ key, value: null })),
-  };
+async function supportsENSIP10Interface(chainId: number, resolverAddress: Address) {
+  // NOTE: publicClients[chainId] guaranteed to exist
+  const supportsInterface = await publicClients[chainId]!.readContract({
+    abi: RESOLVER_ABI,
+    functionName: "supportsInterface",
+    address: resolverAddress,
+    // ENSIP-10 Wildcard Resolution interface selector
+    // see https://docs.ens.domains/ensip/10
+    args: ["0x9061b923"],
+  });
+
+  return supportsInterface;
 }
