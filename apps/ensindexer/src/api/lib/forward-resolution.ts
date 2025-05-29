@@ -274,6 +274,10 @@ async function identifyActiveResolver(
   // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
   const names = getNameHierarchy(name);
 
+  if (names.length === 0) {
+    throw new Error(`identifyActiveResolver: Invalid name provided: '${name}'`);
+  }
+
   console.log(` identifyActiveResolver: ${names.join(", ")} on chain ${chainId}`);
 
   // 2. compute node of each via namehash
@@ -291,12 +295,23 @@ async function identifyActiveResolver(
     columns: { chainId: true, domainId: true, resolverId: true }, // retrieve resolverId
   });
 
+  // sort into the same order as `nodes`
+  domainResolverRelations.sort((a, b) =>
+    nodes.indexOf(a.domainId as Node) > nodes.indexOf(b.domainId as Node) ? 1 : -1,
+  );
+
   console.log(" identifyActiveResolver", domainResolverRelations);
 
-  for (const [i, domain] of domainResolverRelations.entries()) {
-    if (domain.resolverId !== null) {
-      const [, resolverAddress] = parseResolverId(domain.resolverId);
-      return { requiresWildcardSupport: i !== 0, activeResolver: resolverAddress };
+  for (const drr of domainResolverRelations) {
+    // find the first one with a resolver
+    if (drr.resolverId !== null) {
+      // parse out its address
+      const [, resolverAddress] = parseResolverId(drr.resolverId);
+      return {
+        // this resolver must have wildcard support iff it was not for the first node in our hierarchy
+        requiresWildcardSupport: drr.domainId !== nodes[0],
+        activeResolver: resolverAddress,
+      };
     }
   }
 
