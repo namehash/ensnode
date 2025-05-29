@@ -207,12 +207,12 @@ export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): 
 }
 
 /**
- * Turns ENSIndexer config into its public counterpart for ENSNode clients to use.
+ * Builds ENSIndexer Public Config for ENSNode clients to use.
  *
  * @param config ENSIndexer config object
  * @returns ENSIndexer public config object
  */
-export function intoPublicConfig(config: ENSIndexerConfig): ENSIndexerPublicConfig {
+export function buildPublicConfig(config: ENSIndexerConfig): ENSIndexerPublicConfig {
   // extract `databaseUrl` and `rpcConfigs`, the rest of the config is the public config
   const { databaseUrl, rpcConfigs, ...publicConfig } = config;
 
