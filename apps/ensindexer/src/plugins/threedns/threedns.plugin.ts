@@ -19,7 +19,7 @@ const pluginName = PluginName.ThreeDNS;
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-export const plugin = {
+export default {
   pluginName,
   get config() {
     // extract the chain and contract configs for root Datasource in order to build ponder config

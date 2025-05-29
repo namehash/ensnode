@@ -20,7 +20,7 @@ const pluginName = PluginName.Basenames;
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-export const plugin = {
+export default {
   pluginName,
   get config() {
     // extract the chain and contract configs for Basenames Datasource in order to build ponder config

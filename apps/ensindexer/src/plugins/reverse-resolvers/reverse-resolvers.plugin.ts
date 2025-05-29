@@ -30,7 +30,7 @@ const REVERSE_RESOLVER_DATASOURCE_NAMES = [
   // DatasourceName.ReverseResolverLinea,
 ] as const;
 
-export const plugin = {
+export default {
   pluginName,
   get config() {
     const deployment = getENSDeployment(config.ensDeploymentChain);

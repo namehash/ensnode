@@ -4,11 +4,11 @@ import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import type { MergedTypes } from "@/lib/plugin-helpers";
 
-import { plugin as basenamesPlugin } from "@/plugins/basenames/basenames.plugin";
-import { plugin as lineaNamesPlugin } from "@/plugins/lineanames/lineanames.plugin";
-import { plugin as reverseResolversPlugin } from "@/plugins/reverse-resolvers/reverse-resolvers.plugin";
-import { plugin as subgraphPlugin } from "@/plugins/subgraph/subgraph.plugin";
-import { plugin as threednsPlugin } from "@/plugins/threedns/threedns.plugin";
+import basenamesPlugin from "@/plugins/basenames/basenames.plugin";
+import lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
+import reverseResolversPlugin from "@/plugins/reverse-resolvers/reverse-resolvers.plugin";
+import subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
+import threednsPlugin from "@/plugins/threedns/threedns.plugin";
 
 ////////
 // First, generate `MergedPonderConfig` type representing the merged types of each plugin's `config`,
