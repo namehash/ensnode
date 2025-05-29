@@ -1,7 +1,8 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
+import { derive_indexedChainIds, derive_isSubgraphCompatible } from "@/config/derived-params";
+import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
@@ -18,7 +19,7 @@ import {
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { type ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
 
 const chainIdSchema = z.number().int().min(1);
 
@@ -154,29 +155,6 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
-const derive_isSubgraphCompatible = <
-  CONFIG extends Pick<
-    ENSIndexerConfig,
-    "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords"
-  >,
->(
-  config: CONFIG,
-): CONFIG & { isSubgraphCompatible: boolean } => {
-  // 1. only the subgraph plugin is active
-  const onlySubgraphPluginActivated =
-    config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
-
-  // 2. healReverseAddresses = false
-  // 3. indexAdditionalResolverRecords = false
-  const indexingBehaviorIsSubgraphCompatible =
-    !config.healReverseAddresses && !config.indexAdditionalResolverRecords;
-
-  return {
-    ...config,
-    isSubgraphCompatible: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
-  };
-};
-
 const ENSIndexerConfigSchema = z
   .object({
     ensDeploymentChain: EnsDeploymentChainSchema,
@@ -192,13 +170,16 @@ const ENSIndexerConfigSchema = z
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
   })
-  // inject ENSIndexerConfig.isSubgraphCompatible
-  .transform(derive_isSubgraphCompatible)
   // perform invariant checks
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)
-  .check(invariant_validContractConfigs);
+  .check(invariant_validContractConfigs)
+  // inject derived config params
+  // NOTE: all invariants were enforced by that time so we can
+  //    safely project parsed config parameters into derived ones
+  .transform(derive_isSubgraphCompatible)
+  .transform(derive_indexedChainIds);
 
 /**
  * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
@@ -216,4 +197,17 @@ export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): 
   }
 
   return parsed.data;
+}
+
+/**
+ * Builds ENSIndexer Public Config for ENSNode clients to use.
+ *
+ * @param config ENSIndexer config object
+ * @returns ENSIndexer public config object
+ */
+export function buildPublicConfig(config: ENSIndexerConfig): ENSIndexerPublicConfig {
+  // extract `databaseUrl` and `rpcConfigs`, the rest of the config is the public config
+  const { databaseUrl, rpcConfigs, ...publicConfig } = config;
+
+  return publicConfig;
 }

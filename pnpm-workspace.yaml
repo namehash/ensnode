@@ -17,6 +17,7 @@ catalog:
   vitest: ^3.1.1
   ponder: 0.10.28
   tsup: ^8.3.6
+  zod: 3.25.36
   "@astrojs/react": ^4.2.0
   "@astrojs/tailwind": ^6.0.0
   "astro-font": ^1.0.0
