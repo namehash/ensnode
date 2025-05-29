@@ -64,7 +64,4 @@ export const ENSDeployments = {
  */
 
 export const getENSDeployment = (ensDeploymentChain: keyof typeof ENSDeployments) =>
-  ({
-    ...ENSDeployments.mainnet,
-    ...ENSDeployments[ensDeploymentChain],
-  }) as ENSDeploymentGlobalType;
+  ENSDeployments[ensDeploymentChain] as ENSDeploymentGlobalType;

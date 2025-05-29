@@ -486,8 +486,9 @@ describe("config", () => {
 
   describe("additional checks", () => {
     it("requires available datasources", async () => {
-      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "ens-test-env");
+      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "holesky");
       vi.stubEnv("ACTIVE_PLUGINS", "basenames");
+      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
     });
 
@@ -504,7 +505,7 @@ describe("config", () => {
     });
   });
 
-  it("warns when reverse-resolvers plugin is active but indexResolverRecords is false", async () => {
+  it("reverse-resolvers plugin requires indexAdditionalResolverRecords to be true", async () => {
     vi.stubEnv("ACTIVE_PLUGINS", "reverse-resolvers");
     vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
     vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
