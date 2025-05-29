@@ -3,7 +3,12 @@ import schema from "ponder:schema";
 
 import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
-import { makeRegistryHandlers } from "@/handlers/Registry";
+import {
+  handleNewOwner,
+  handleNewResolver,
+  handleNewTTL,
+  handleTransfer,
+} from "@/handlers/Registry";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
@@ -20,19 +25,7 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({
-  pluginName,
-  namespace,
-}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
-  const {
-    handleNewOwner, //
-    handleNewResolver,
-    handleNewTTL,
-    handleTransfer,
-  } = makeRegistryHandlers({
-    pluginName,
-  });
-
+export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   ponder.on(namespace("RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers

@@ -3,7 +3,6 @@ import schema from "ponder:schema";
 import type { Address } from "viem";
 
 import { makeEventId } from "@/lib/ids";
-import { PluginName } from "@ensnode/ensnode-sdk";
 
 export async function upsertAccount(context: Context, address: Address) {
   return context.db.insert(schema.account).values({ id: address }).onConflictDoNothing();
@@ -28,12 +27,10 @@ export async function upsertRegistration(
 }
 
 // simplifies generating the shared event column values from the ponder Event object
-export function makeSharedEventValues(pluginName: PluginName) {
-  return function sharedEventValues(chainId: number, event: Omit<Event, "args">) {
-    return {
-      id: makeEventId(pluginName, chainId, event.block.number, event.log.logIndex),
-      blockNumber: event.block.number,
-      transactionID: event.transaction.hash,
-    };
+export function sharedEventValues(chainId: number, event: Omit<Event, "args">) {
+  return {
+    id: makeEventId(chainId, event.block.number, event.log.logIndex),
+    blockNumber: event.block.number,
+    transactionID: event.transaction.hash,
   };
 }

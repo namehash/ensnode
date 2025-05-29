@@ -71,6 +71,7 @@ export interface ENSIndexerEnvironment {
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
+  indexAdditionalResolverRecords: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;
