@@ -7,10 +7,13 @@ import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { Address, isAddress } from "viem";
 
-// Invariant: specified plugins' datasources are available in the specified ensDeploymentChain's ENSDeployment
-export function invariant_requiredDatasources(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
-  const { value: config } = ctx;
+type ZodContext<T> = z.core.ParsePayload<T>;
 
+// Invariant: specified plugins' datasources are available in the specified ensDeploymentChain's ENSDeployment
+export function invariant_requiredDatasources(
+  ctx: ZodContext<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">>,
+) {
+  const config = ctx.value;
   const deployment = getENSDeployment(config.ensDeploymentChain);
   const allPluginNames = Object.keys(PLUGIN_REQUIRED_DATASOURCES) as PluginName[];
   const availableDatasourceNames = Object.keys(deployment) as DatasourceName[];
@@ -43,9 +46,9 @@ export function invariant_requiredDatasources(ctx: z.core.ParsePayload<ENSIndexe
 
 // Invariant: rpcConfig is specified for each indexed chain
 export function invariant_rpcConfigsSpecifiedForIndexedChains(
-  ctx: z.core.ParsePayload<ENSIndexerConfig>,
+  ctx: ZodContext<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins" | "rpcConfigs">>,
 ) {
-  const { value: config } = ctx;
+  const config = ctx.value;
 
   const deployment = getENSDeployment(config.ensDeploymentChain);
 
@@ -67,8 +70,10 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 }
 
 // Invariant: if a global blockrange is defined, only one network is indexed
-export function invariant_globalBlockrange(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
-  const { value: config } = ctx;
+export function invariant_globalBlockrange(
+  ctx: ZodContext<Pick<ENSIndexerConfig, "ensDeploymentChain" | "globalBlockrange" | "plugins">>,
+) {
+  const config = ctx.value;
   const { globalBlockrange } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
@@ -102,8 +107,10 @@ export function invariant_globalBlockrange(ctx: z.core.ParsePayload<ENSIndexerCo
 }
 
 // Invariant: all contracts have a valid ContractConfig defined
-export function invariant_validContractConfigs(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
-  const { value: config } = ctx;
+export function invariant_validContractConfigs(
+  ctx: ZodContext<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">>,
+) {
+  const config = ctx.value;
 
   const deployment = getENSDeployment(config.ensDeploymentChain);
   for (const datasourceName of Object.keys(deployment) as DatasourceName[]) {
