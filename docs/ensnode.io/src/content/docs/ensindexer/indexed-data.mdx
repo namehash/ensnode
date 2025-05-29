@@ -1,0 +1,48 @@
+---
+title: Detailed Indexed Data
+description: A comprehensive look at the data indexed by ENSIndexer.
+sidebar:
+  label: Indexed Data
+  order: 2
+---
+
+:::note
+The specific data points and event types indexed by ENSIndexer can evolve. The best way to explore the currently available data and its structure is by inspecting the GraphQL schema via the GraphiQL playground.
+
+You can access the playground at:
+- Public instance: [https://api.mainnet.ensnode.io/graphql](https://api.mainnet.ensnode.io/graphql)
+- Local instance (if running ENSIndexer locally): [http://localhost:42069/graphql](http://localhost:42069/graphql)
+:::
+
+### What data does ENSIndexer index?
+
+ENSIndexer provides comprehensive coverage of the ENS ecosystem by indexing:
+
+**Core ENS Protocol Operations:**
+*   **Domain Lifecycle:** Registrations (including those with initial records), renewals, and transfers of domain names across various registrar contracts (e.g., `BaseRegistrar`, `EthRegistrarController`).
+*   **Ownership & Control:** Changes in domain ownership (`NewOwner`), direct name transfers (`Transfer`), updates to resolver configurations (`NewResolver`), and Time-To-Live (TTL) settings (`NewTTL`) within the core ENS registries.
+
+**Resolver Data & Configurations:** This includes comprehensive data from ENS resolvers, such as:
+*   **Address Records:** Resolution of names to cryptocurrency addresses for various chains (e.g., ETH, BTC via `AddrChanged`, `AddressChanged`).
+*   **Text Records:** Metadata associated with names, like avatars, social media profiles, email addresses, and descriptions (`TextChanged`).
+*   **Content Hashes:** Links to decentralized web content hosted on platforms like IPFS or Swarm (`ContenthashChanged`).
+*   **Public Keys:** Cryptographic public keys associated with names (`PubkeyChanged`).
+*   **DNS Integration:** Management of DNS records, zone hashes, and zone creation within ENS, enabling DNS data to be served from ENS (`DNSRecordChanged`, `DNSRecordDeleted`, `DNSZonehashChanged`, `ZoneCreated`).
+*   **Other Resolver Information:** Includes reverse resolution records (`NameChanged`), interface discovery for contract capabilities (`InterfaceChanged`), authorization settings for record management (`AuthorisationChanged`), and resolver versioning.
+
+**ENS Name Wrapper Functionality:**
+*   Indexing of operations related to the ENS Name Wrapper (ERC-1155 standard), including:
+    *   Wrapping of existing ENS names into NFTs (`NameWrapped`).
+    *   Unwrapping of NFT names back to their original state (`NameUnwrapped`).
+    *   Management of permissions and restrictions (fuses) on wrapped names (`FusesSet`).
+    *   Extension of expiry dates for wrapped names (`ExpiryExtended`).
+    *   Transfers of wrapped names (`TransferSingle`, `TransferBatch`).
+
+**Support for Multiple Chains and Implementations:**
+ENSIndexer is built to process data from various ENS-compatible systems and forks across different blockchains (which have varying implementations of the ENS protocol). This includes:
+*   **Ethereum Mainnet ENS:** Comprehensive indexing of current ENS contracts as well as historical data from legacy registry and registrar contracts (`RegistryOld`, `EthRegistrarControllerOld`).
+*   **Base Name Service:** Full support for all `.base.eth` domains from the ENS deployment on the Base L2 network.
+*   **Linea Name Service:** Full support for all `.linea.eth` domains from the ENS deployment on the Linea L2 network.
+*   **3DNS Token Service:** Indexing of the 3DNS naming system - `.box`, `.xyz` domains and more.
+
+This is just the start of what ENSIndexer can do.
