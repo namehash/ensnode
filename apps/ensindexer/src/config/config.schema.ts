@@ -155,13 +155,21 @@ const DatabaseUrlSchema = z.union(
 );
 
 const derive_isSubgraphCompatible = <
-  CONFIG extends Pick<ENSIndexerConfig, "plugins" | "healReverseAddresses">,
+  CONFIG extends Pick<
+    ENSIndexerConfig,
+    "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords"
+  >,
 >(
   config: CONFIG,
 ): CONFIG & { isSubgraphCompatible: boolean } => {
+  // 1. only the subgraph plugin is active
   const onlySubgraphPluginActivated =
     config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
-  const indexingBehaviorIsSubgraphCompatible = !config.healReverseAddresses;
+
+  // 2. healReverseAddresses = false
+  // 3. indexAdditionalResolverRecords = false
+  const indexingBehaviorIsSubgraphCompatible =
+    !config.healReverseAddresses && !config.indexAdditionalResolverRecords;
 
   return {
     ...config,

@@ -45,7 +45,7 @@
  *     - see 'NOTE(resolver-records)' in subgraph.schema.ts
  *   + has many `addressRecords` for a Node (by coinType) (see ENSIP-9)
  *     - see ResolverAddressRecord below
- *     - NOTE: _does_ represent the implcit coinType of 60 for the `addr` record, if set
+ *     - NOTE: _does_ represent the implicit coinType of 60 for the `addr` record, if set
  *   + has many `textRecords` for a Node (by key) (see ENSIP-5)
  *     - see ResolverTextRecord below
  *
