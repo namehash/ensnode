@@ -1,7 +1,8 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
+import { derive_indexedChainIds } from "@/config/derived-params";
+import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
@@ -17,7 +18,7 @@ import {
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { type ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
 
 const parseBlockNumber = (envVarKey: string) =>
   z.coerce
@@ -184,7 +185,8 @@ const ENSIndexerConfigSchema = z
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)
-  .check(invariant_validContractConfigs);
+  .check(invariant_validContractConfigs)
+  .transform(derive_indexedChainIds);
 
 /**
  * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
@@ -202,4 +204,17 @@ export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): 
   }
 
   return parsed.data;
+}
+
+/**
+ * Turns ENSIndexer config into its public counterpart for ENSNode clients to use.
+ *
+ * @param config ENSIndexer config object
+ * @returns ENSIndexer public config object
+ */
+export function intoPublicConfig(config: ENSIndexerConfig): ENSIndexerPublicConfig {
+  // extract `databaseUrl` and `rpcConfigs`, the rest of the config is the public config
+  const { databaseUrl, rpcConfigs, ...publicConfig } = config;
+
+  return publicConfig;
 }
