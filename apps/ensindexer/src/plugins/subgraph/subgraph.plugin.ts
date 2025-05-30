@@ -69,7 +69,7 @@ const subgraphPlugin = {
   activate: activateHandlers({
     pluginName,
     namespace,
-    handlers: [
+    handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),
       import("./handlers/NameWrapper"),

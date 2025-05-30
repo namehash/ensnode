@@ -89,10 +89,10 @@ export const activateHandlers =
     handlers,
     ...args
   }: ENSIndexerPluginHandlerArgs<PLUGIN_NAME> & {
-    handlers: Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
+    handlers: () => Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
   }) =>
   async () => {
-    await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
+    await Promise.all(handlers()).then((modules) => modules.map((m) => m.default(args)));
   };
 
 const POSSIBLE_PREFIXES = [

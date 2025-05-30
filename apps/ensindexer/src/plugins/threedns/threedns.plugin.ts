@@ -59,7 +59,7 @@ const threednsPlugin = {
   activate: activateHandlers({
     pluginName,
     namespace,
-    handlers: [import("./handlers/ThreeDNSToken")],
+    handlers: () => [import("./handlers/ThreeDNSToken")],
   }),
 
   /**
