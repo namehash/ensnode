@@ -98,57 +98,51 @@ describe("config", () => {
 
     it("throws if START_BLOCK is negative", async () => {
       vi.stubEnv("START_BLOCK", "-1");
-      await expect(() => getConfig()).rejects.toThrow(/START_BLOCK must be a positive integer/i);
+      await expect(getConfig()).rejects.toThrow(/START_BLOCK must be a positive integer/i);
     });
 
     it("throws if END_BLOCK is negative", async () => {
       vi.stubEnv("END_BLOCK", "-5");
-      await expect(() => getConfig()).rejects.toThrow(/END_BLOCK must be a positive integer/i);
+      await expect(getConfig()).rejects.toThrow(/END_BLOCK must be a positive integer/i);
     });
 
     it("throws if START_BLOCK is not a number", async () => {
       vi.stubEnv("START_BLOCK", "foo");
-      await expect(() => getConfig()).rejects.toThrow(/START_BLOCK must be a positive integer/i);
+      await expect(getConfig()).rejects.toThrow(/START_BLOCK must be a positive integer/i);
     });
 
     it("throws if END_BLOCK is not a number", async () => {
       vi.stubEnv("END_BLOCK", "bar");
-      await expect(() => getConfig()).rejects.toThrow(/END_BLOCK must be a positive integer/i);
+      await expect(getConfig()).rejects.toThrow(/END_BLOCK must be a positive integer/i);
     });
 
     it("throws if START_BLOCK > END_BLOCK", async () => {
       vi.stubEnv("START_BLOCK", "100");
       vi.stubEnv("END_BLOCK", "50");
-      await expect(() => getConfig()).rejects.toThrow(/must be greater than/i);
+      await expect(getConfig()).rejects.toThrow(/must be greater than/i);
     });
 
     it("throws if START_BLOCK == END_BLOCK", async () => {
       vi.stubEnv("START_BLOCK", "100");
       vi.stubEnv("END_BLOCK", "100");
-      await expect(() => getConfig()).rejects.toThrow(/must be greater than/i);
+      await expect(getConfig()).rejects.toThrow(/must be greater than/i);
     });
   });
 
   describe(".ensNodePublicUrl", () => {
     it("throws an error if ENSNODE_PUBLIC_URL is not a valid URL", async () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", "invalid url");
-      await expect(() => getConfig()).rejects.toThrow(
-        /ENSNODE_PUBLIC_URL must be a valid URL string/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is empty", async () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", "");
-      await expect(() => getConfig()).rejects.toThrow(
-        /ENSNODE_PUBLIC_URL must be a valid URL string/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
     });
 
     it("throws an error if ENSNODE_PUBLIC_URL is undefined (explicitly testing the refine)", async () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", undefined);
-      await expect(() => getConfig()).rejects.toThrow(
-        /ENSNODE_PUBLIC_URL must be a valid URL string/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
     });
 
     it("returns the ENSNODE_PUBLIC_URL if it is a valid URL", async () => {
@@ -166,7 +160,7 @@ describe("config", () => {
   describe(".ensAdminUrl", () => {
     it("throws an error if ENSADMIN_URL is not a valid URL", async () => {
       vi.stubEnv("ENSADMIN_URL", "invalid url");
-      await expect(() => getConfig()).rejects.toThrow(/ENSADMIN_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/ENSADMIN_URL must be a valid URL string/i);
     });
 
     it("returns the provided ENSADMIN_URL if it is a valid URL", async () => {
@@ -185,7 +179,7 @@ describe("config", () => {
   describe(".ensRainbowEndpointUrl", () => {
     it("throws an error if ENSRAINBOW_URL is not a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "invalid url");
-      await expect(() => getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
     });
 
     it("returns the ENSRAINBOW_URL if it is a valid URL", async () => {
@@ -196,7 +190,7 @@ describe("config", () => {
 
     it("throws an error if ENSRAINBOW_URL is not set", async () => {
       vi.stubEnv("ENSRAINBOW_URL", undefined);
-      await expect(() => getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
     });
   });
 
@@ -209,19 +203,19 @@ describe("config", () => {
 
     it("throws an error when DATABASE_SCHEMA is not set", async () => {
       vi.stubEnv("DATABASE_SCHEMA", undefined);
-      await expect(() => getConfig()).rejects.toThrow(/DATABASE_SCHEMA is required/);
+      await expect(getConfig()).rejects.toThrow(/DATABASE_SCHEMA is required/);
     });
 
     it("throws an error when DATABASE_SCHEMA is empty", async () => {
       vi.stubEnv("DATABASE_SCHEMA", "");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         /DATABASE_SCHEMA is required and cannot be an empty string/,
       );
     });
 
     it("throws an error when DATABASE_SCHEMA is only whitespace", async () => {
       vi.stubEnv("DATABASE_SCHEMA", "   ");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         /DATABASE_SCHEMA is required and cannot be an empty string/,
       );
     });
@@ -242,33 +236,27 @@ describe("config", () => {
 
     it("throws if PORT is not a number", async () => {
       vi.stubEnv("PORT", "not-a-port");
-      await expect(() => getConfig()).rejects.toThrow(/PORT must be an integer/i);
+      await expect(getConfig()).rejects.toThrow(/PORT must be an integer/i);
     });
 
     it("throws if PORT is not an integer", async () => {
       vi.stubEnv("PORT", "3000.5");
-      await expect(() => getConfig()).rejects.toThrow(/PORT must be an integer/i);
+      await expect(getConfig()).rejects.toThrow(/PORT must be an integer/i);
     });
 
     it("throws if PORT is less than 1", async () => {
       vi.stubEnv("PORT", "0");
-      await expect(() => getConfig()).rejects.toThrow(
-        /PORT must be an integer between 1 and 65535/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/PORT must be an integer between 1 and 65535/i);
     });
 
     it("throws if PORT is a negative number", async () => {
       vi.stubEnv("PORT", "-100");
-      await expect(() => getConfig()).rejects.toThrow(
-        /PORT must be an integer between 1 and 65535/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/PORT must be an integer between 1 and 65535/i);
     });
 
     it("throws if PORT is greater than 65535", async () => {
       vi.stubEnv("PORT", "65536");
-      await expect(() => getConfig()).rejects.toThrow(
-        /PORT must be an integer between 1 and 65535/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/PORT must be an integer between 1 and 65535/i);
     });
   });
 
@@ -293,7 +281,7 @@ describe("config", () => {
 
     it("throws if HEAL_REVERSE_ADDRESSES is an invalid string value", async () => {
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "not-a-boolean");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         /HEAL_REVERSE_ADDRESSES must be 'true' or 'false'/i,
       );
     });
@@ -315,7 +303,7 @@ describe("config", () => {
 
     it("throws if ENS_DEPLOYMENT_CHAIN is an invalid string value", async () => {
       vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "not-a-chain");
-      await expect(() => getConfig()).rejects.toThrow(/Invalid ENS_DEPLOYMENT_CHAIN/i);
+      await expect(getConfig()).rejects.toThrow(/Invalid ENS_DEPLOYMENT_CHAIN/i);
     });
   });
 
@@ -336,37 +324,35 @@ describe("config", () => {
 
     it("throws if ACTIVE_PLUGINS is an empty string", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", "");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
     it("throws if ACTIVE_PLUGINS consists only of commas or whitespace", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", " ,,  ,");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
     it("throws if ACTIVE_PLUGINS consists of non-existent plugins", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", "some,nonexistent,plugins");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
     it("throws if ACTIVE_PLUGINS is not set (undefined)", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", undefined);
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
     it("throws if ACTIVE_PLUGINS contains duplicate values", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames,subgraph");
-      await expect(() => getConfig()).rejects.toThrow(
-        /ACTIVE_PLUGINS cannot contain duplicate values/i,
-      );
+      await expect(getConfig()).rejects.toThrow(/ACTIVE_PLUGINS cannot contain duplicate values/i);
     });
   });
 
@@ -384,7 +370,7 @@ describe("config", () => {
 
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
       vi.stubEnv("RPC_URL_1", "invalid url");
-      await expect(() => getConfig()).rejects.toThrow(/RPC_URL_\* must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/RPC_URL_\* must be a valid URL string/i);
     });
   });
 
@@ -425,28 +411,28 @@ describe("config", () => {
 
     it("throws an error if DATABASE_URL is empty", async () => {
       vi.stubEnv("DATABASE_URL", "");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
       );
     });
 
     it("throws an error if DATABASE_URL is not a valid postgres connection string", async () => {
       vi.stubEnv("DATABASE_URL", "not-a-postgres-connection-string");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
       );
     });
 
     it("throws an error if DATABASE_URL uses the wrong protocol", async () => {
       vi.stubEnv("DATABASE_URL", "mysql://user:password@localhost:3306/mydb");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
       );
     });
 
     it("throws an error if DATABASE_URL is missing required components", async () => {
       vi.stubEnv("DATABASE_URL", "postgresql://localhost:5432");
-      await expect(() => getConfig()).rejects.toThrow(
+      await expect(getConfig()).rejects.toThrow(
         "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
       );
     });
@@ -502,19 +488,19 @@ describe("config", () => {
     it("requires available datasources", async () => {
       vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "ens-test-env");
       vi.stubEnv("ACTIVE_PLUGINS", "basenames");
-      await expect(() => getConfig()).rejects.toThrow(/specifies dependent datasources/i);
+      await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
     });
 
     it("requires rpc url for indexed chains", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
-      await expect(() => getConfig()).rejects.toThrow(/RPC_URL_\d+ is not specified/i);
+      await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+ is not specified/i);
     });
 
     it("cannot constrain blockrange with multiple networks", async () => {
       vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       vi.stubEnv("END_BLOCK", "1");
-      await expect(() => getConfig()).rejects.toThrow(/multiple networks/i);
+      await expect(getConfig()).rejects.toThrow(/multiple networks/i);
     });
   });
 });
