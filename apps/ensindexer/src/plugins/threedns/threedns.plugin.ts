@@ -1,13 +1,13 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config";
+import appConfig from "@/config";
 import {
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -18,7 +18,7 @@ const pluginName = PluginName.ThreeDNS;
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-export default {
+const threednsPlugin = {
   /**
    * Activate the plugin handlers for indexing.
    */
@@ -34,11 +34,11 @@ export default {
    * is only built when the plugin is activated.
    */
   get config() {
+    const { ensDeployment } = appConfig;
     // extract the chain and contract configs for root Datasource in order to build ponder config
-    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
     const { chain: optimism, contracts: optimismContracts } =
-      deployment[DatasourceName.ThreeDNSOptimism];
-    const { chain: base, contracts: baseContracts } = deployment[DatasourceName.ThreeDNSBase];
+      ensDeployment[DatasourceName.ThreeDNSOptimism];
+    const { chain: base, contracts: baseContracts } = ensDeployment[DatasourceName.ThreeDNSBase];
 
     return createConfig({
       networks: {
@@ -69,3 +69,5 @@ export default {
    */
   pluginName,
 };
+
+export default threednsPlugin;

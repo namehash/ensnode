@@ -1,13 +1,13 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config";
+import appConfig from "@/config";
 import {
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -19,7 +19,7 @@ const pluginName = PluginName.Lineanames;
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-export default {
+const lineanamesPlugin = {
   /**
    * Activate the plugin handlers for indexing.
    */
@@ -40,9 +40,9 @@ export default {
    * is only built when the plugin is activated.
    */
   get config() {
+    const { ensDeployment } = appConfig;
     // extract the chain and contract configs for Lineanames Datasource in order to build ponder config
-    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
-    const { chain, contracts } = deployment[DatasourceName.Lineanames];
+    const { chain, contracts } = ensDeployment[DatasourceName.Lineanames];
 
     return createConfig({
       networks: networksConfigForChain(chain.id),
@@ -76,3 +76,5 @@ export default {
    */
   pluginName,
 };
+
+export default lineanamesPlugin;

@@ -1,13 +1,13 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config";
+import appConfig from "@/config";
 import {
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -19,7 +19,7 @@ const pluginName = PluginName.Subgraph;
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-export default {
+const subgraphPlugin = {
   /**
    * Activate the plugin handlers for indexing.
    */
@@ -40,9 +40,9 @@ export default {
    * is only built when the plugin is activated.
    */
   get config() {
+    const { ensDeployment } = appConfig;
     // extract the chain and contract configs for root Datasource in order to build ponder config
-    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
-    const { chain, contracts } = deployment[DatasourceName.Root];
+    const { chain, contracts } = ensDeployment[DatasourceName.Root];
 
     return createConfig({
       networks: networksConfigForChain(chain.id),
@@ -84,3 +84,5 @@ export default {
    */
   pluginName,
 };
+
+export default subgraphPlugin;
