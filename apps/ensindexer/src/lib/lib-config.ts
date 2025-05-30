@@ -59,7 +59,7 @@ export function prettyPrintConfig(config: ENSIndexerConfig) {
         ]),
       ),
     } as ENSIndexerConfig,
-    null,
+    (key: string, value: unknown) => (key === "abi" ? `(truncated ABI output)` : value),
     2,
   );
 }

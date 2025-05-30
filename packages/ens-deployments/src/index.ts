@@ -63,5 +63,5 @@ export const ENSDeployments = {
  * @returns The ENS deployment configuration for the specified chain
  */
 
-export const getENSDeployment = (ensDeploymentChain: keyof typeof ENSDeployments) =>
+export const getENSDeployment = (ensDeploymentChain: ENSDeploymentChain) =>
   ENSDeployments[ensDeploymentChain] as ENSDeploymentGlobalType;

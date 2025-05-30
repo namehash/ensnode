@@ -1,8 +1,8 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { derive_isSubgraphCompatible } from "@/config/derived-params";
-import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
+import { derive_ensDeployment, derive_isSubgraphCompatible } from "@/config/derived-params";
+import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
@@ -178,6 +178,7 @@ const ENSIndexerConfigSchema = z
   // inject derived config params
   // NOTE: all invariants were enforced by that time so we can
   //    safely project parsed config parameters into derived ones
+  .transform(derive_ensDeployment)
   .transform(derive_isSubgraphCompatible);
 
 /**

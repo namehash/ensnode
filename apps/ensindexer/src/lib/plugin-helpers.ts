@@ -1,9 +1,5 @@
-import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
-import type { NetworkConfig } from "ponder";
-import { http, Chain } from "viem";
-
-import config from "@/config";
-import { constrainContractBlockrange } from "@/lib/ponder-helpers";
+import type { ENSIndexerConfig } from "@/config/types";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -41,11 +37,6 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
   };
 }
 
-// Helper type to merge multiple types into one
-export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
-  ? R
-  : never;
-
 /**
  * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  */
@@ -65,7 +56,7 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
    * An ENSIndexerPlugin must return a Ponder Config.
    * https://ponder.sh/docs/contracts-and-networks
    */
-  config: CONFIG;
+  createPluginConfig(appConfig: ENSIndexerConfig): CONFIG;
 
   /**
    * An `activate` handler that should load a plugin's handlers that eventually execute `ponder.on`
@@ -103,45 +94,6 @@ export const activateHandlers =
   async () => {
     await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
   };
-
-/**
- * Builds a ponder#NetworksConfig for a single, specific chain.
- */
-export function networksConfigForChain(chainId: number) {
-  if (!config.rpcConfigs[chainId]) {
-    throw new Error(
-      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
-    );
-  }
-
-  const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
-
-  return {
-    [chainId.toString()]: {
-      chainId: chainId,
-      transport: http(url),
-      maxRequestsPerSecond,
-      // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
-      ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
-    } satisfies NetworkConfig,
-  };
-}
-
-/**
- * Builds a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
- * indexing range by the globally configured blockrange.
- */
-export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
-  chain: Chain,
-  contractConfig: CONTRACT_CONFIG,
-) {
-  return {
-    [chain.id.toString()]: {
-      address: contractConfig.address, // provide per-network address if available
-      ...constrainContractBlockrange(contractConfig.startBlock), // per-network blockrange
-    },
-  };
-}
 
 const POSSIBLE_PREFIXES = [
   "data:application/json;base64,",
