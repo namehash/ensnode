@@ -1,9 +1,9 @@
 import type { Event } from "ponder:registry";
-import { PublicClient } from "viem";
+import { Address, PublicClient } from "viem";
 
 import config from "@/config";
 import { Blockrange } from "@/lib/types";
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { ContractConfig, ENSDeployments } from "@ensnode/ens-deployments";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 
@@ -238,4 +238,18 @@ export async function createStartBlockByChainIdMap(
   }
 
   return startBlockNumbers;
+}
+
+export function mergeContractConfigs<CONTRACTS extends ContractConfig[]>(contracts: CONTRACTS) {
+  if (contracts.length === 0) throw new Error("Cannot merge 0 ContractConfigs");
+  const addresses = contracts
+    .map((contract) => contract.address)
+    .filter((address): address is Address => !!address);
+  const startBlocks = contracts.map((contract) => contract.startBlock);
+
+  return {
+    abi: contracts[0]!.abi,
+    startBlock: Math.min(...startBlocks),
+    address: addresses,
+  };
 }

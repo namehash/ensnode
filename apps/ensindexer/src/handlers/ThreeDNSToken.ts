@@ -33,7 +33,7 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
   // https://ponder.sh/docs/indexing/read-contract-data#multiple-networks
   return context.client.readContract({
     abi: context.contracts["threedns/ThreeDNSToken"].abi,
-    address: context.contracts["threedns/ThreeDNSToken"].address,
+    address: context.contracts["threedns/ThreeDNSToken"].address! as Address,
     functionName: "uri",
     args: [tokenId],
   });
@@ -69,18 +69,15 @@ export async function handleNewOwner({
   const node = makeSubdomainNode(labelHash, parentNode);
   let domain = await context.db.find(schema.domain, { id: node });
 
-  // in ThreeDNS there's a hard-coded Resolver that all domains use
-  const resolverId = makeResolverId(
-    context.network.chainId,
-    // NetworkConfig#address is `Address | undefined`, but we know this is defined for 3DNS' Resolver
-    context.contracts["threedns/Resolver"].address!,
-    node,
-  );
+  // NetworkConfig#address is `Address | undefined`, but we know this is defined for 3DNS' Resolver
+  const resolverAddress = context.contracts["threedns/Resolver"].address! as Address;
 
+  // in ThreeDNS there's a hard-coded Resolver that all domains use
   // so upsert the resolver record and link Domain.resolverId below
+  const resolverId = makeResolverId(context.network.chainId, resolverAddress, node);
   await upsertResolver(context, {
     id: resolverId,
-    address: context.contracts["threedns/Resolver"].address!,
+    address: resolverAddress,
     domainId: node,
   });
 

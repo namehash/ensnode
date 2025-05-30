@@ -1,5 +1,6 @@
 import { makeRecordsResponseFromIndexedRecords } from "@/lib/lib-resolution";
 import type { IndexedResolverRecords, ResolverRecordsSelection } from "@/lib/lib-resolution";
+import { CoinType } from "@ensdomains/address-encoder";
 import { describe, expect, it } from "vitest";
 
 describe("lib-resolution", () => {
@@ -8,7 +9,7 @@ describe("lib-resolution", () => {
       name: "test.eth",
       addressRecords: [
         { coinType: 60n, address: "0x123" },
-        { coinType: 23n, address: "0x456" },
+        { coinType: 1001n, address: "0x456" },
       ],
       textRecords: [
         { key: "com.twitter", value: "@test" },
@@ -23,12 +24,12 @@ describe("lib-resolution", () => {
     });
 
     it("should return address records when requested", () => {
-      const selection: ResolverRecordsSelection = { addresses: [60n, 23n] };
+      const selection: ResolverRecordsSelection = { addresses: [60, 1001] };
       const result = makeRecordsResponseFromIndexedRecords(selection, mockRecords);
       expect(result).toEqual({
         addresses: {
-          "60": "0x123",
-          "23": "0x456",
+          60: "0x123",
+          1001: "0x456",
         },
       });
     });
@@ -46,13 +47,13 @@ describe("lib-resolution", () => {
 
     it("should return null for missing records", () => {
       const selection: ResolverRecordsSelection = {
-        addresses: [999n],
+        addresses: [1 as CoinType],
         texts: ["missing"],
       };
       const result = makeRecordsResponseFromIndexedRecords(selection, mockRecords);
       expect(result).toEqual({
         addresses: {
-          "999": null,
+          1: null,
         },
         texts: {
           missing: null,
@@ -63,14 +64,14 @@ describe("lib-resolution", () => {
     it("should handle multiple record types in one selection", () => {
       const selection: ResolverRecordsSelection = {
         name: true,
-        addresses: [60n],
+        addresses: [60],
         texts: ["com.twitter"],
       };
       const result = makeRecordsResponseFromIndexedRecords(selection, mockRecords);
       expect(result).toEqual({
         name: { name: "test.eth" },
         addresses: {
-          "60": "0x123",
+          60: "0x123",
         },
         texts: {
           "com.twitter": "@test",

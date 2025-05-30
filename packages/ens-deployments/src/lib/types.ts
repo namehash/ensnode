@@ -63,7 +63,7 @@ export interface EventFilter {
 export type ContractConfig =
   | {
       readonly abi: Abi;
-      readonly address: Address;
+      readonly address: Address | Address[];
       readonly filter?: never;
       readonly startBlock: number;
     }

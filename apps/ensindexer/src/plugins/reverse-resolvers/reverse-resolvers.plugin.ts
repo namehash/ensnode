@@ -8,6 +8,7 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { mergeContractConfigs } from "@/lib/ponder-helpers";
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
@@ -53,7 +54,11 @@ export default {
           network: datasources.reduce(
             (memo, datasource) => ({
               ...memo,
-              ...networkConfigForContract(datasource.chain, datasource.contracts.ReverseResolver),
+              ...networkConfigForContract(
+                datasource.chain,
+                // treat all contract configs in this ReverseResolver* Datasource as ReverseResolvers
+                mergeContractConfigs(Object.values(datasource.contracts)),
+              ),
             }),
             {},
           ),

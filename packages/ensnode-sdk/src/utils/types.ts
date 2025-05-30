@@ -53,20 +53,3 @@ export type EncodedLabelHash = `[${string}]`;
  * ex: vitalik.eth
  */
 export type Name = string;
-
-/**
- * A SLIP-44 Identifier representing a specific coin.
- *
- * @see https://en.bitcoin.it/wiki/BIP_0044
- * @see https://github.com/satoshilabs/slips/blob/master/slip-0044.md
- * @see https://docs.ens.domains/ensip/9
- * @see https://docs.ens.domains/ensip/11
- */
-export type CoinType = bigint;
-
-/**
- * An ENSIP-11 EVM Chain CoinType.
- *
- * @see https://docs.ens.domains/ensip/11
- */
-export type EVMCoinType = number;

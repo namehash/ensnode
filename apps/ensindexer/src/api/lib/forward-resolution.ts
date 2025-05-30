@@ -12,7 +12,7 @@ import {
 import { getEnsDeploymentChainId } from "@/lib/ponder-helpers";
 import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
 import { type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
-import { Address, encodeFunctionData, namehash } from "viem";
+import { Address, ccipRequest, encodeFunctionData, namehash } from "viem";
 
 const deployment = getENSDeployment(config.ensDeploymentChain);
 const ensDeploymentChainId = getEnsDeploymentChainId();
@@ -37,7 +37,7 @@ const KNOWN_OFFCHAIN_LOOKUP_RESOLVERS: Record<number, Record<Address, number>> =
   // on the ENS Deployment Chain
   [deployment.root.chain.id]: {
     // the Basenames L1Resolver defers to Base chain
-    [deployment.root.contracts.BasenamesL1Resolver.address]: deployment.basenames.chain.id,
+    // [deployment.root.contracts.BasenamesL1Resolver.address]: deployment.basenames.chain.id,
     // the LineaNames L1Resolver defers to Linea chain
     [deployment.root.contracts.LineaNamesL1Resolver.address]: deployment.lineanames.chain.id,
   },
@@ -57,17 +57,38 @@ const KNOWN_ONCHAIN_STATIC_RESOLVERS: Record<number, Address[]> = {
   // on the ENS Deployment Chain
   [deployment.root.chain.id]: [
     // the Root LegacyPublicResolver is an Onchain Static Resolver
-    // TODO: re-enable
     deployment[DatasourceName.Root].contracts.LegacyPublicResolver.address,
     // the Root PublicResolver is an Onchain Static Resolver
+    // NOTE: this is also the ENSIP-11 ReverseResolver
     deployment[DatasourceName.Root].contracts.PublicResolver.address,
   ],
   // on the Basenames chain
   [deployment.basenames.chain.id]: [
     // the Basenames L2Resolver is an Onchain Static Resolver
     deployment[DatasourceName.Basenames].contracts.L2Resolver.address,
+    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
+    deployment[DatasourceName.ReverseResolverBase].contracts.ReverseResolver.address,
   ],
-  // TODO: Linea
+  // on Linea chain
+  [deployment.lineanames.chain.id]: [
+    // TODO: additional Linea Onchain Static Resolver? like a PublicResolver equivalent
+    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
+    deployment[DatasourceName.ReverseResolverLinea].contracts.ReverseResolver.address,
+  ],
+  // on Optimism chain
+  [deployment["reverse-resolver-optimism"].chain.id]: [
+    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
+    deployment[DatasourceName.ReverseResolverOptimism].contracts.ReverseResolver.address,
+  ],
+  // on Arbitrum chain
+  [deployment["reverse-resolver-arbitrum"].chain.id]: [
+    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
+    deployment[DatasourceName.ReverseResolverArbitrum].contracts.ReverseResolver.address,
+  ],
+  [deployment["reverse-resolver-scroll"].chain.id]: [
+    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
+    deployment[DatasourceName.ReverseResolverScroll].contracts.ReverseResolver.address,
+  ],
 };
 
 /**
@@ -79,16 +100,23 @@ const KNOWN_ONCHAIN_STATIC_RESOLVERS: Record<number, Address[]> = {
  * @param chainId optional, the chain id from which to resolve records
  *
  * TODO: document with example
+ * TODO: tracing/status with reporting to consumer
  */
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: Name,
   selection: SELECTION,
   chainId: number = ensDeploymentChainId,
 ): Promise<ResolverRecordsResponse<SELECTION>> {
-  // TODO: should likely acquire a "most recently indexed" blockNumber or blockHash for this operation
-  // and use that to fix any rpc calls made in this context
-
   console.log("resolveForward", { name, selection, chainId });
+
+  // TODO: need to manage state drift between ENSIndexer and RPC
+  // could acquire a "most recently indexed" blockNumber or blockHash for this operation based on
+  // ponder indexing status and use that to fix any rpc calls made in this context BUT there's still
+  // multiple separate reads to the ENSIndexer schemas so state drift is somewhat unavoidable without
+  // locking writes during reads which seems like a really bad idea.
+  //
+  // but honestly the state drift is at max 1 block on L1 and a block or two on an L2, it's pretty negligible,
+  // so maybe we just ignore this issue entirely
 
   const node: Node = namehash(name);
 
@@ -150,6 +178,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   //////////////////////////////////////////////////
   const isOnchainStaticResolver = KNOWN_ONCHAIN_STATIC_RESOLVERS[chainId]?.includes(activeResolver);
   if (isOnchainStaticResolver && isChainIndexed(chainId)) {
+    console.log("fetching from index");
     const resolverId = makeResolverId(chainId, activeResolver, node);
     const resolver = await db.query.resolver.findFirst({
       where: (resolver, { eq }) => eq(resolver.id, resolverId),
@@ -169,10 +198,11 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     return makeRecordsResponseFromIndexedRecords(selection, resolver as IndexedResolverRecords);
   }
 
-  // otherwise, must execute resolve() to determine what to do
+  // NOTE: from here, _must_ execute EVM code to be compliant with ENS Protocol.
+  // i.e. must execute resolve() to retrieve active record values
 
-  // Invariant: the only chainIds we should be seeing at this point are those that ENSIndexer is
-  // actively indexing.
+  // Invariant: the only chainIds we should be resolving records one at this point are those that
+  // ENSIndexer is actively indexing.
   if (!publicClients[chainId]) {
     throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
   }
@@ -190,21 +220,22 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
   // 2.2 For each record to resolve call Resolver.resolve()
   // NOTE: If extended resolver, resolver.resolve(name, data), otherwise just resolver.call(data)
-  const ResolverContract = { abi: RESOLVER_ABI, address: activeResolver } as const;
   const resolveResponses = await publicClients[chainId]!.multicall({
     allowFailure: true,
     contracts: calls.map((call) => {
       // NOTE: ENSIP-10
       if (requiresWildcardSupport) {
         return {
-          ...ResolverContract,
+          abi: RESOLVER_ABI,
+          address: activeResolver,
           functionName: "resolve",
           args: [name, encodeFunctionData({ abi: RESOLVER_ABI, ...call })],
         };
       }
 
       return {
-        ...ResolverContract,
+        abi: RESOLVER_ABI,
+        address: activeResolver,
         ...call,
       };
     }),
@@ -213,12 +244,16 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   console.log("forwardResolve: resolve()", resolveResponses);
 
   const results = await Promise.all(
-    resolveResponses.map((response, i) => {
+    resolveResponses.map(async (response, i) => {
       // 3. Perform CCIP-Read for each OffchainLookup response
       // NOTE: implement x-batch-gateway:true behavior from viem for local gateway batching
       // and execute viem#ccipRequest
 
-      // TODO: can one batch against a single gateway (with multicall?)
+      // try {
+      //   responses[i] = await ccipRequest({})
+      // } catch (err) {
+      //   responses[i] = encodeError(err as CcipRequestErrorType)
+      // }
 
       // 4. Execute the CCIP-Read Callback for each necessary OffchainLookup call
       // TODO: can this be skipped/cached for well-known resolvers?
@@ -243,7 +278,7 @@ function makeResolveCalls(node: Node, selection: ResolverRecordsSelection) {
       (coinType) =>
         ({
           functionName: "addr",
-          args: [node, coinType],
+          args: [node, BigInt(coinType)],
         }) as const,
     ),
     ...(selection.texts ?? []).map(
@@ -337,15 +372,20 @@ async function findResolver(
 }
 
 async function supportsENSIP10Interface(chainId: number, resolverAddress: Address) {
-  // NOTE: publicClients[chainId] guaranteed to exist
-  const supportsInterface = await publicClients[chainId]!.readContract({
-    abi: RESOLVER_ABI,
-    functionName: "supportsInterface",
-    address: resolverAddress,
-    // ENSIP-10 Wildcard Resolution interface selector
-    // see https://docs.ens.domains/ensip/10
-    args: ["0x9061b923"],
-  });
+  try {
+    // NOTE: publicClients[chainId] guaranteed to exist
+    const supportsInterface = await publicClients[chainId]!.readContract({
+      abi: RESOLVER_ABI,
+      functionName: "supportsInterface",
+      address: resolverAddress,
+      // ENSIP-10 Wildcard Resolution interface selector
+      // see https://docs.ens.domains/ensip/10
+      args: ["0x9061b923"],
+    });
 
-  return supportsInterface;
+    return supportsInterface;
+  } catch {
+    // this call reverted for whatever reason — this contract does not support the interface
+    return false;
+  }
 }

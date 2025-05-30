@@ -1,22 +1,38 @@
 import { resolveForward } from "@/api/lib/forward-resolution";
+import { resolveReverse } from "@/api/lib/reverse-resolution";
 import { ResolverRecordsSelection } from "@/lib/lib-resolution";
+import { CoinType } from "@ensdomains/address-encoder";
+import { evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
 import { Context, Hono } from "hono";
+import { Address } from "viem";
+import { base, mainnet } from "viem/chains";
 
+// TODO: replace with zod schema or validator
 function buildSelectionFromQueryParams(c: Context) {
-  const selection: ResolverRecordsSelection = {};
+  const selection: Partial<ResolverRecordsSelection> = {};
+
   if (c.req.query("name") === "true") {
     selection.name = true;
   }
 
   if (c.req.query("addresses")) {
-    selection.addresses = c.req.query("addresses")!.split(",").map(BigInt) ?? [];
+    selection.addresses = (c.req.query("addresses")!.split(",").map(Number) as CoinType[]) ?? [];
   }
 
   if (c.req.query("texts")) {
     selection.texts = c.req.query("texts")?.split(",") ?? [];
   }
+
   return selection;
 }
+
+console.log(
+  await resolveForward("jesse.base.eth", {
+    name: true,
+    addresses: [evmChainIdToCoinType(mainnet.id), evmChainIdToCoinType(base.id)],
+    texts: ["com.twitter", "description"],
+  }),
+);
 
 const app = new Hono();
 
@@ -44,6 +60,25 @@ app.get("/forward/:name", async (c) => {
     const result = await resolveForward(name, selection);
     return c.json(result);
   } catch (error) {
+    console.error(error);
+    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
+  }
+});
+
+app.get("/reverse/:address", async (c) => {
+  try {
+    // TODO: correctly parse/validate with zod
+    const address = c.req.param("address") as Address;
+    if (!address) {
+      return c.json({ error: "address parameter is required" }, 400);
+    }
+
+    const chainId = c.req.query("chainId") ? Number(c.req.query("chainId")) : 1;
+
+    const result = await resolveReverse(address, chainId);
+    return c.json(result);
+  } catch (error) {
+    console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });

@@ -1,4 +1,5 @@
-import { CoinType } from "@ensnode/ensnode-sdk";
+import { CoinType } from "@ensdomains/address-encoder";
+import { bigintToCoinType } from "@ensnode/ensnode-sdk";
 import { MulticallResponse } from "viem";
 
 // TODO: replace with some sort of inferred typing from dizzle
@@ -17,16 +18,19 @@ export interface ResolverRecordsSelection {
   // addr?: boolean;
   // whether to fetch the name record
   name?: boolean;
+
   // which coinTypes to fetch address records for
   addresses?: CoinType[];
+
   // which keys to fetch text records for
   texts?: string[];
+
   // TODO: include others as/if necessary
 }
 
 type ResolverRecordsResponseBase = {
-  name: { name: string | null };
-  addresses: Record<string, string | null>;
+  name: string | null;
+  addresses: Record<CoinType, string | null>;
   texts: Record<string, string | null>;
 };
 
@@ -36,36 +40,29 @@ type ResolverRecordsResponseBase = {
  * ```typescript
  * const selection = {
  *   name: true,
- *   addresses: [60n, 23n] as const,
- *   texts: ["com.twitter", "avatar"] as const,
- * } satisfies ResolverRecordsSelection;
+ *   addresses: [60],
+ *   texts: ["com.twitter", "avatar"],
+ * } as const satisfies ResolverRecordsSelection;
  *
  * type Response = ResolverRecordsResponse<typeof selection>;
  *
  * // results in the following type
  * type Response = {
- *     name: string | null;
- *     addresses: Record<"60" | "23", string | null>;
- *     texts: Record<"com.twitter" | "avatar", string | null>;
+ *   readonly name: string | null;
+ *   readonly addresses: Record<"60", string | null>;
+ *   readonly texts: Record<"avatar" | "com.twitter", string | null>;
  * }
  * ```
  */
 export type ResolverRecordsResponse<T extends ResolverRecordsSelection = ResolverRecordsSelection> =
   {
     [K in keyof T as T[K] extends true | any[] ? K : never]: K extends "addresses"
-      ? {
-          addresses: Record<
-            `${T["addresses"] extends readonly CoinType[] ? T["addresses"][number] : never}`,
-            string | null
-          >;
-        }
+      ? Record<
+          `${T["addresses"] extends readonly CoinType[] ? T["addresses"][number] : never}`,
+          string | null
+        >
       : K extends "texts"
-        ? {
-            texts: Record<
-              T["texts"] extends readonly string[] ? T["texts"][number] : never,
-              string | null
-            >;
-          }
+        ? Record<T["texts"] extends readonly string[] ? T["texts"][number] : never, string | null>
         : ResolverRecordsResponseBase[K & keyof ResolverRecordsResponseBase];
   };
 
@@ -89,8 +86,9 @@ export function makeRecordsResponseFromIndexedRecords<SELECTION extends Resolver
   if (selection.addresses) {
     response.addresses = selection.addresses.reduce(
       (memo, coinType) => {
-        memo[coinType.toString()] =
-          records.addressRecords.find((r) => r.coinType === coinType)?.address || null;
+        memo[coinType] =
+          records.addressRecords.find((r) => bigintToCoinType(r.coinType) === coinType)?.address ||
+          null;
         return memo;
       },
       {} as ResolverRecordsResponseBase["addresses"],
@@ -119,7 +117,7 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
   if (selection.name) {
     const nameResult = results.find(({ functionName }) => functionName === "name");
     const name = (nameResult?.response.result as string | null) || null;
-    response.name = { name };
+    response.name = name;
   }
 
   if (selection.addresses) {
@@ -128,7 +126,7 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
         const addressRecord = results.find(
           ({ functionName, args }) => functionName === "addr" && args[1] === coinType,
         );
-        memo[coinType.toString()] = (addressRecord?.response.result as string | null) || null;
+        memo[coinType] = (addressRecord?.response.result as string | null) || null;
         return memo;
       },
       {} as ResolverRecordsResponseBase["addresses"],

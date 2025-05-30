@@ -1,11 +1,7 @@
-import { Address, toHex } from "viem";
-import { EVM_BIT } from "./coin-type";
-import { ETH_COIN_TYPE } from "./constants";
-import { CoinType, Label, Name } from "./types";
-
-const SLUG_ETH = "addr"; // <=> COIN_TYPE_ETH
-const SLUG_DEFAULT = "default"; // <=> EVM_BIT
-const TLD_REVERSE = "reverse";
+import { CoinType } from "@ensdomains/address-encoder";
+import { Address } from "viem";
+import { ETH_COIN_TYPE, EVM_BIT } from "./constants";
+import { Label, Name } from "./types";
 
 /**
  * Gets the Label used for subnames of "addr.reverse" used for reverse lookups of `address` as per
@@ -35,14 +31,14 @@ export function reverseName(address: Address, coinType: CoinType): Name {
 
   const middle = (() => {
     switch (coinType) {
-      case BigInt(ETH_COIN_TYPE):
-        return SLUG_ETH;
-      case BigInt(EVM_BIT):
-        return SLUG_DEFAULT;
+      case ETH_COIN_TYPE:
+        return "addr";
+      case EVM_BIT:
+        return "default";
       default:
-        return toHex(coinType);
+        return coinType.toString(16); // hex string, sans 0x prefix
     }
   })();
 
-  return `${label}.${middle}.${TLD_REVERSE}`;
+  return `${label}.${middle}.reverse`;
 }
