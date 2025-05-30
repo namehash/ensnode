@@ -1,6 +1,11 @@
 import type { ENSIndexerConfig } from "@/config/types";
-import { networkConfigForContract, networksConfigForChain } from "@/lib/plugin-config-helpers";
-import { type ENSIndexerPlugin, activateHandlers, makePluginNamespace } from "@/lib/plugin-helpers";
+import {
+  type ENSIndexerPlugin,
+  activateHandlers,
+  makePluginNamespace,
+  networkConfigForContract,
+  networksConfigForChain,
+} from "@/lib/plugin-helpers";
 import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig } from "ponder";
