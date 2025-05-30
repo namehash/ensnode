@@ -36,7 +36,7 @@ export interface ENSIndexerConfig {
   /**
    * The ENS Deployment that ENSIndexer is targeting, defaulting to 'mainnet' (DEFAULT_ENS_DEPLOYMENT_CHAIN).
    *
-   * See {@link ensDeploymentChain} for available deployment chains.
+   * See {@link ENSDeploymentChain} for available deployment chains.
    */
   ensDeploymentChain: ENSDeploymentChain;
 
