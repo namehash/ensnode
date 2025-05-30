@@ -7,8 +7,13 @@ import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { Address, isAddress } from "viem";
 
+// type alias to highlight the input param of Zod's check() method
+type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
+
 // Invariant: specified plugins' datasources are available in the specified ensDeploymentChain's ENSDeployment
-export function invariant_requiredDatasources(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
+export function invariant_requiredDatasources(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">>,
+) {
   const { value: config } = ctx;
 
   const deployment = getENSDeployment(config.ensDeploymentChain);
@@ -43,7 +48,7 @@ export function invariant_requiredDatasources(ctx: z.core.ParsePayload<ENSIndexe
 
 // Invariant: rpcConfig is specified for each indexed chain
 export function invariant_rpcConfigsSpecifiedForIndexedChains(
-  ctx: z.core.ParsePayload<ENSIndexerConfig>,
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins" | "rpcConfigs">>,
 ) {
   const { value: config } = ctx;
 
@@ -67,7 +72,11 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 }
 
 // Invariant: if a global blockrange is defined, only one network is indexed
-export function invariant_globalBlockrange(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
+export function invariant_globalBlockrange(
+  ctx: ZodCheckFnInput<
+    Pick<ENSIndexerConfig, "globalBlockrange" | "ensDeploymentChain" | "plugins">
+  >,
+) {
   const { value: config } = ctx;
   const { globalBlockrange } = config;
 
@@ -102,7 +111,9 @@ export function invariant_globalBlockrange(ctx: z.core.ParsePayload<ENSIndexerCo
 }
 
 // Invariant: all contracts have a valid ContractConfig defined
-export function invariant_validContractConfigs(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
+export function invariant_validContractConfigs(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain">>,
+) {
   const { value: config } = ctx;
 
   const deployment = getENSDeployment(config.ensDeploymentChain);
