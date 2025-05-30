@@ -1,4 +1,5 @@
 import type { ENSIndexerConfig } from "@/config/types";
+import { type ENSDeploymentGlobalType, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -24,5 +25,19 @@ export const derive_isSubgraphCompatible = <
   return {
     ...config,
     isSubgraphCompatible: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
+  };
+};
+
+/**
+ * Derived `ensDeployment` config param based on validated ENSIndexerConfig object.
+ */
+export const derive_ensDeployment = <CONFIG extends Pick<ENSIndexerConfig, "ensDeploymentChain">>(
+  config: CONFIG,
+): CONFIG & { ensDeployment: ENSDeploymentGlobalType } => {
+  const ensDeployment = getENSDeployment(config.ensDeploymentChain);
+
+  return {
+    ...config,
+    ensDeployment,
   };
 };
