@@ -1,6 +1,7 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
+import { derive_isSubgraphCompatible } from "@/config/derived-params";
 import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
@@ -154,29 +155,6 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
-const derive_isSubgraphCompatible = <
-  CONFIG extends Pick<
-    ENSIndexerConfig,
-    "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords"
-  >,
->(
-  config: CONFIG,
-): CONFIG & { isSubgraphCompatible: boolean } => {
-  // 1. only the subgraph plugin is active
-  const onlySubgraphPluginActivated =
-    config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
-
-  // 2. healReverseAddresses = false
-  // 3. indexAdditionalResolverRecords = false
-  const indexingBehaviorIsSubgraphCompatible =
-    !config.healReverseAddresses && !config.indexAdditionalResolverRecords;
-
-  return {
-    ...config,
-    isSubgraphCompatible: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
-  };
-};
-
 const ENSIndexerConfigSchema = z
   .object({
     ensDeploymentChain: EnsDeploymentChainSchema,
@@ -192,13 +170,15 @@ const ENSIndexerConfigSchema = z
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
   })
-  // inject ENSIndexerConfig.isSubgraphCompatible
-  .transform(derive_isSubgraphCompatible)
   // perform invariant checks
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)
-  .check(invariant_validContractConfigs);
+  .check(invariant_validContractConfigs)
+  // inject derived config params
+  // NOTE: all invariants were enforced by that time so we can
+  //    safely project parsed config parameters into derived ones
+  .transform(derive_isSubgraphCompatible);
 
 /**
  * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
