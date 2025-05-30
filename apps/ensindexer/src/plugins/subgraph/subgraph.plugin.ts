@@ -94,6 +94,6 @@ const subgraphPlugin = {
 
   /** A list of required datasources for the plugin */
   requiredDatasources,
-} as ENSIndexerPlugin<PluginName.Subgraph, PluginConfig>;
+} as const satisfies ENSIndexerPlugin<PluginName.Subgraph, PluginConfig>;
 
 export default subgraphPlugin;

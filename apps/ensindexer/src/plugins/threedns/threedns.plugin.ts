@@ -79,6 +79,6 @@ const threednsPlugin = {
 
   /** A list of required datasources for the plugin */
   requiredDatasources,
-} as ENSIndexerPlugin<PluginName.ThreeDNS, PluginConfig>;
+} as const satisfies ENSIndexerPlugin<PluginName.ThreeDNS, PluginConfig>;
 
 export default threednsPlugin;

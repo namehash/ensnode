@@ -59,7 +59,7 @@ function createPluginConfig(appConfig: ENSIndexerConfig) {
 // construct a specific type for plugin configuration
 type PluginConfig = ReturnType<typeof createPluginConfig>;
 
-const lineanamesPlugin = {
+export default {
   /**
    * Activate the plugin handlers for indexing.
    */
@@ -86,6 +86,4 @@ const lineanamesPlugin = {
 
   /** A list of required datasources for the plugin */
   requiredDatasources,
-} as ENSIndexerPlugin<PluginName.Lineanames, PluginConfig>;
-
-export default lineanamesPlugin;
+} as const satisfies ENSIndexerPlugin<PluginName.Lineanames, PluginConfig>;
