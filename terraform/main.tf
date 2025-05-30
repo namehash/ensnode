@@ -9,35 +9,39 @@ locals {
   railway_region = "us-east4-eqdc4a"
   ensindexer_instances = {
     holesky = {
-      subdomain_prefix       = "holesky.${local.railway_environment}"
-      database_schema        = "holeskySchema-${var.ensnode_version}"
-      active_plugins         = "subgraph"
-      ens_deployment_chain   = "holesky"
-      heal_reverse_addresses = "false"
+      instance_name                     = "holesky"
+      subdomain_prefix                  = "holesky.${local.railway_environment}"
+      database_schema                   = "holeskySchema-${var.ensnode_version}"
+      active_plugins                    = "subgraph"
+      ens_deployment_chain              = "holesky"
+      heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
     sepolia = {
-      subdomain_prefix       = "sepolia.${local.railway_environment}"
-      database_schema        = "sepoliaSchema-${var.ensnode_version}"
-      active_plugins         = "subgraph"
-      ens_deployment_chain   = "sepolia"
-      heal_reverse_addresses = "false"
+      instance_name                     = "sepolia"
+      subdomain_prefix                  = "sepolia.${local.railway_environment}"
+      database_schema                   = "sepoliaSchema-${var.ensnode_version}"
+      active_plugins                    = "subgraph"
+      ens_deployment_chain              = "sepolia"
+      heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
     mainnet = {
-      subdomain_prefix       = "mainnet.${local.railway_environment}"
-      database_schema        = "mainnetSchema-${var.ensnode_version}"
-      active_plugins         = "subgraph"
-      ens_deployment_chain   = "mainnet"
-      heal_reverse_addresses = "false"
+      instance_name                     = "mainnet"
+      subdomain_prefix                  = "mainnet.${local.railway_environment}"
+      database_schema                   = "mainnetSchema-${var.ensnode_version}"
+      active_plugins                    = "subgraph"
+      ens_deployment_chain              = "mainnet"
+      heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
     alpha = {
-      subdomain_prefix       = "alpha.${local.railway_environment}"
-      database_schema        = "alphaSchema-${var.ensnode_version}"
-      active_plugins         = "subgraph,basenames,lineanames,threedns"
-      ens_deployment_chain   = "mainnet"
-      heal_reverse_addresses = "true"
+      instance_name                     = "alpha"
+      subdomain_prefix                  = "alpha.${local.railway_environment}"
+      database_schema                   = "alphaSchema-${var.ensnode_version}"
+      active_plugins                    = "subgraph,basenames,lineanames,threedns"
+      ens_deployment_chain              = "mainnet"
+      heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
     }
   }
@@ -64,12 +68,13 @@ module "ensindexer" {
 
   depends_on = [null_resource.health_check]
   # Instance-specific configuration
+  instance_name                     = each.value.instance_name
   subdomain_prefix                  = each.value.subdomain_prefix
   database_schema                   = each.value.database_schema
-  active_plugins                    = each.active_plugins
-  ens_deployment_chain              = each.ens_deployment_chain
-  heal_reverse_addresses            = each.heal_reverse_addresses
-  index_additional_resolver_records = each.index_additional_resolver_records
+  active_plugins                    = each.value.active_plugins
+  ens_deployment_chain              = each.value.ens_deployment_chain
+  heal_reverse_addresses            = each.value.heal_reverse_addresses
+  index_additional_resolver_records = each.value.index_additional_resolver_records
 
   # Common configuration (spread operator merges the map)
   base_domain_name = local.base_domain_name

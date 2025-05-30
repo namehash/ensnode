@@ -10,7 +10,7 @@ locals {
 }
 
 resource "railway_service" "ensindexer" {
-  name         = "ensindexer"
+  name         = "ensindexer_${var.instance_name}"
   source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
   project_id   = var.railway_project_id
   region       = var.railway_region
@@ -20,7 +20,7 @@ resource "railway_service" "ensindexer" {
 # This division of "start" vs "serve" responsibilities between ENSIndexer instances ensures API availability continues uninterrupted for the overall ENSNode deployment through ensnode-api even if an indexing error in ensindexer causes it to crash.
 # The following docs explain more about Ponder's "start" vs "serve" modes: https://ponder.sh/docs/api-reference/ponder-cli#serve.
 resource "railway_service" "ensindexer_api" {
-  name         = "ensindexer_api"
+  name         = "ensindexer_api_${var.instance_name}"
   source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
   project_id   = var.railway_project_id
   region       = var.railway_region
@@ -74,6 +74,10 @@ resource "railway_variable_collection" "ensindexer" {
     {
       name  = "RPC_URL_10"
       value = local.rpc_url_10
+    },
+    {
+      name  = "RPC_URL_11155111"
+      value = local.rpc_url_11155111
     },
     {
       name  = "ENSNODE_PUBLIC_URL"
@@ -159,6 +163,10 @@ resource "railway_variable_collection" "ensindexer_api" {
     {
       name  = "RPC_URL_10"
       value = local.rpc_url_10
+    },
+    {
+      name  = "RPC_URL_11155111"
+      value = local.rpc_url_11155111
     },
     {
       name  = "ENSNODE_PUBLIC_URL"
