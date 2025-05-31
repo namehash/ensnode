@@ -486,8 +486,9 @@ describe("config", () => {
 
   describe("additional checks", () => {
     it("requires available datasources", async () => {
-      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "ens-test-env");
+      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "holesky"); // no basenames datasource on holesky
       vi.stubEnv("ACTIVE_PLUGINS", "basenames");
+      vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
     });
 
@@ -502,5 +503,18 @@ describe("config", () => {
       vi.stubEnv("END_BLOCK", "1");
       await expect(getConfig()).rejects.toThrow(/multiple networks/i);
     });
+  });
+
+  it("reverse-resolvers plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be true", async () => {
+    vi.stubEnv("ACTIVE_PLUGINS", "reverse-resolvers");
+    vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_42161", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_534352", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
+    vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
+
+    await expect(getConfig()).rejects.toThrow(/requires INDEX_ADDITIONAL_RESOLVER_RECORDS/i);
   });
 });

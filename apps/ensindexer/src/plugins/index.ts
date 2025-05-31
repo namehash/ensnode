@@ -19,4 +19,12 @@ export const PLUGIN_REQUIRED_DATASOURCES = {
   [PluginName.Basenames]: [DatasourceName.Basenames],
   [PluginName.Lineanames]: [DatasourceName.Lineanames],
   [PluginName.ThreeDNS]: [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase],
+  [PluginName.ReverseResolvers]: [
+    DatasourceName.ReverseResolverRoot,
+    DatasourceName.ReverseResolverBase,
+    DatasourceName.ReverseResolverOptimism,
+    DatasourceName.ReverseResolverArbitrum,
+    DatasourceName.ReverseResolverScroll,
+    DatasourceName.ReverseResolverLinea,
+  ],
 };

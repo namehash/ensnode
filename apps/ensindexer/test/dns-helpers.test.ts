@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
+import {
+  decodeDNSPacketBytes,
+  decodeTXTData,
+  parseDnsTxtRecordArgs,
+  parseRRSet,
+} from "@/lib/dns-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import dnsPacket, { TxtAnswer } from "dns-packet";
 import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog
-const {
-  args: { record },
-} = decodeEventLog({
+const { args } = decodeEventLog({
   abi: ENSDeployments.mainnet["threedns-base"].contracts.Resolver.abi,
   topics: [
     "0xaaac3b4b3e6807b5b4585562beabaa2de9bd07db514a1eba2c11d1af5b9d9dc7",
@@ -19,10 +22,13 @@ const {
   eventName: "DNSRecordChanged",
 });
 
+const PARSED_KEY = "com.twitter";
+const PARSED_VALUE = "0xTko";
+
 describe("dns-helpers", () => {
   describe("parseRRSet", () => {
     it("correctly parses Hex RRSet to single TXT answer", () => {
-      const answers = parseRRSet(record);
+      const answers = parseRRSet(args.record);
       expect(answers.length).toBe(1);
       expect(((answers[0] as TxtAnswer).data as Buffer[]).length).toBe(1);
     });
@@ -37,13 +43,13 @@ describe("dns-helpers", () => {
   });
 
   describe("decodeTXTData", () => {
-    const DATA = (parseRRSet(record)[0] as TxtAnswer).data as Buffer[];
+    const DATA = (parseRRSet(args.record)[0] as TxtAnswer).data as Buffer[];
     it("correctly decodes TXT data", () => {
-      expect(decodeTXTData(DATA)).toBe("0xTko");
+      expect(decodeTXTData(DATA)).toBe(PARSED_VALUE);
     });
 
     it("ignores multiple records", () => {
-      expect(decodeTXTData([DATA[0]!, Buffer.from("")])).toBe("0xTko");
+      expect(decodeTXTData([DATA[0]!, Buffer.from("")])).toBe(PARSED_VALUE);
     });
 
     it("returns null if no records", () => {
@@ -74,6 +80,33 @@ describe("dns-helpers", () => {
         "12333221",
         "12333221.eth",
       ]);
+    });
+  });
+
+  describe("parseDnsTxtRecordArgs", () => {
+    it("should parse just key if no record", () => {
+      expect(parseDnsTxtRecordArgs({ ...args, record: undefined })).toEqual({
+        key: PARSED_KEY,
+        value: null,
+      });
+    });
+
+    it("should parse just key if empty record", () => {
+      expect(parseDnsTxtRecordArgs({ ...args, record: "0x" })).toEqual({
+        key: PARSED_KEY,
+        value: null,
+      });
+    });
+
+    it("should handle malformed record", () => {
+      expect(parseDnsTxtRecordArgs({ ...args, record: zeroHash })).toEqual({
+        key: PARSED_KEY,
+        value: null,
+      });
+    });
+
+    it("should parse args correctly", () => {
+      expect(parseDnsTxtRecordArgs(args)).toEqual({ key: PARSED_KEY, value: PARSED_VALUE });
     });
   });
 });

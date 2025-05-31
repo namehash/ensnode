@@ -1,4 +1,4 @@
-import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
+import { ContractConfig } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
@@ -54,12 +54,6 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
    * A unique plugin name for identification
    */
   pluginName: PLUGIN_NAME;
-
-  /**
-   * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of ACTIVE_PLUGINS are valid for a given ENS_DEPLOYMENT_CHAIN
-   */
-  requiredDatasources: DatasourceName[];
 
   /**
    * An ENSIndexerPlugin must return a Ponder Config.
