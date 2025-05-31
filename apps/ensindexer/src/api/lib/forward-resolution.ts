@@ -1,5 +1,6 @@
 import { db, publicClients } from "ponder:api";
 import config from "@/config";
+import { encodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeResolverId, parseResolverId } from "@/lib/ids";
 import {
   IndexedResolverRecords,
@@ -12,7 +13,20 @@ import {
 import { getEnsDeploymentChainId } from "@/lib/ponder-helpers";
 import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
 import { type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
-import { Address, ccipRequest, encodeFunctionData, namehash } from "viem";
+import {
+  Address,
+  bytesToHex,
+  bytesToString,
+  decodeAbiParameters,
+  encodeFunctionData,
+  getAbiItem,
+  hexToString,
+  isAddress,
+  namehash,
+  size,
+  toHex,
+  zeroHash,
+} from "viem";
 
 const deployment = getENSDeployment(config.ensDeploymentChain);
 const ensDeploymentChainId = getEnsDeploymentChainId();
@@ -219,53 +233,63 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   }
 
   // 2.2 For each record to resolve call Resolver.resolve()
-  // NOTE: If extended resolver, resolver.resolve(name, data), otherwise just resolver.call(data)
-  const resolveResponses = await publicClients[chainId]!.multicall({
-    allowFailure: true,
-    contracts: calls.map((call) => {
-      // NOTE: ENSIP-10
+  // NOTE: viem#readContract implements CCIP-Read, so we get that behavior for free
+  // NOTE: viem#multicall doesn't implement CCIP-Read so maybe this can be optimized
+  const ResolverContract = { abi: RESOLVER_ABI, address: activeResolver } as const;
+  const results = await Promise.all(
+    calls.map(async (call) => {
+      // NOTE: ENSIP-10 —  If extended resolver, resolver.resolve(name, data)
       if (requiresWildcardSupport) {
-        return {
-          abi: RESOLVER_ABI,
-          address: activeResolver,
+        const value = await publicClients[chainId]!.readContract({
+          ...ResolverContract,
           functionName: "resolve",
-          args: [name, encodeFunctionData({ abi: RESOLVER_ABI, ...call })],
-        };
+          args: [
+            toHex(encodeDNSPacketBytes(name)), // DNS-encode `name` for resolve()
+            encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
+          ],
+        });
+
+        // ENSIP-10 resolve() always returns bytes that need to be decoded
+        const results = decodeAbiParameters(
+          getAbiItem({ abi: RESOLVER_ABI, name: call.functionName, args: call.args }).outputs,
+          value,
+        );
+
+        // NOTE: type-guaranteed to have at least 1 result (because each abi item's outputs.length > 0)
+        const result = results[0];
+
+        // futher interpret the results
+        switch (call.functionName) {
+          // make sure address is valid (i.e. specifically not empty bytes)
+          case "addr":
+            return isAddress(result) ? result : null;
+          // coalesce falsy string values to null
+          case "name":
+          case "text":
+            return result || null;
+        }
       }
 
-      return {
-        abi: RESOLVER_ABI,
-        address: activeResolver,
-        ...call,
-      };
-    }),
-  });
-
-  console.log("forwardResolve: resolve()", resolveResponses);
-
-  const results = await Promise.all(
-    resolveResponses.map(async (response, i) => {
-      // 3. Perform CCIP-Read for each OffchainLookup response
-      // NOTE: implement x-batch-gateway:true behavior from viem for local gateway batching
-      // and execute viem#ccipRequest
-
-      // try {
-      //   responses[i] = await ccipRequest({})
-      // } catch (err) {
-      //   responses[i] = encodeError(err as CcipRequestErrorType)
-      // }
-
-      // 4. Execute the CCIP-Read Callback for each necessary OffchainLookup call
-      // TODO: can this be skipped/cached for well-known resolvers?
-      //   - can be skipped for Base, all it does is gateway server signature verification
-
-      // NOTE: calls[i]! must exist
-      return { ...calls[i]!, response };
+      // discrimminate against the `functionName` type so the inferred types of `readContract` are
+      // accurate
+      switch (call.functionName) {
+        case "name":
+          return publicClients[chainId]!.readContract({ ...ResolverContract, ...call });
+        case "addr":
+          return publicClients[chainId]!.readContract({ ...ResolverContract, ...call });
+        case "text":
+          return publicClients[chainId]!.readContract({ ...ResolverContract, ...call });
+      }
     }),
   );
 
+  console.log("forwardResolve: resolve()", results);
+
+  // interleave calls and results
+  const callsWithResults = calls.map((call, i) => ({ ...call, result: results[i] }));
+
   // 5. Return record values
-  return makeRecordsResponseFromResolveResults(selection, results);
+  return makeRecordsResponseFromResolveResults(selection, callsWithResults);
 }
 
 // builds an array of calls from a ResolverRecordsSelection

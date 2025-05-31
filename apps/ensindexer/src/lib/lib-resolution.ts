@@ -110,13 +110,13 @@ export function makeRecordsResponseFromIndexedRecords<SELECTION extends Resolver
 
 export function makeRecordsResponseFromResolveResults<SELECTION extends ResolverRecordsSelection>(
   selection: SELECTION,
-  results: { functionName: string; args: readonly unknown[]; response: MulticallResponse }[],
+  results: { functionName: string; args: readonly unknown[]; result: unknown }[],
 ) {
   const response: Partial<ResolverRecordsResponse<any>> = {};
 
   if (selection.name) {
     const nameResult = results.find(({ functionName }) => functionName === "name");
-    const name = (nameResult?.response.result as string | null) || null;
+    const name = (nameResult?.result as string | null) || null;
     response.name = name;
   }
 
@@ -124,9 +124,10 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
     response.addresses = selection.addresses.reduce(
       (memo, coinType) => {
         const addressRecord = results.find(
-          ({ functionName, args }) => functionName === "addr" && args[1] === coinType,
+          ({ functionName, args }) =>
+            functionName === "addr" && bigintToCoinType(args[1] as bigint) === coinType,
         );
-        memo[coinType] = (addressRecord?.response.result as string | null) || null;
+        memo[coinType] = (addressRecord?.result as string | null) || null;
         return memo;
       },
       {} as ResolverRecordsResponseBase["addresses"],
@@ -139,7 +140,7 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
         const textRecord = results.find(
           ({ functionName, args }) => functionName === "text" && args[1] === key,
         );
-        memo[key] = (textRecord?.response.result as string | null) || null;
+        memo[key] = (textRecord?.result as string | null) || null;
         return memo;
       },
       {} as ResolverRecordsResponseBase["texts"],
