@@ -67,7 +67,7 @@ function createPluginConfig(appConfig: ENSIndexerConfig) {
 // construct a specific type for plugin configuration
 type PluginConfig = ReturnType<typeof createPluginConfig>;
 
-const subgraphPlugin = {
+export default {
   /**
    * Activate the plugin handlers for indexing.
    */
@@ -95,5 +95,3 @@ const subgraphPlugin = {
   /** A list of required datasources for the plugin */
   requiredDatasources,
 } as const satisfies ENSIndexerPlugin<PluginName.Subgraph, PluginConfig>;
-
-export default subgraphPlugin;

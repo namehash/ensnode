@@ -57,7 +57,7 @@ function createPluginConfig(appConfig: ENSIndexerConfig) {
 // construct a specific type for plugin configuration
 type PluginConfig = ReturnType<typeof createPluginConfig>;
 
-const threednsPlugin = {
+export default {
   /**
    * Activate the plugin handlers for indexing.
    */
@@ -80,5 +80,3 @@ const threednsPlugin = {
   /** A list of required datasources for the plugin */
   requiredDatasources,
 } as const satisfies ENSIndexerPlugin<PluginName.ThreeDNS, PluginConfig>;
-
-export default threednsPlugin;
