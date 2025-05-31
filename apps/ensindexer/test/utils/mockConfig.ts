@@ -57,7 +57,7 @@ resetMockConfig();
  */
 export function setupConfigMock() {
   vi.mock("@/config", () => ({
-    get default() {
+    config() {
       return currentMockConfig;
     },
   }));

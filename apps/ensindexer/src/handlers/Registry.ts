@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
-import config from "@/config";
+import { config } from "@/config";
 import {
   type LabelHash,
   type Node,
@@ -95,7 +95,7 @@ export const handleNewOwner =
       //    We will add support for non-ENS Deployment Chain primary name
       //    healing in the future.
       if (
-        config.healReverseAddresses &&
+        config().healReverseAddresses &&
         REVERSE_ROOT_NODES.has(parentNode) &&
         context.network.chainId === ensDeploymentChainId
       ) {

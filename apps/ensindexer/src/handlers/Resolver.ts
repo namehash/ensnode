@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { ETH_COIN_TYPE, Node } from "@ensnode/ensnode-sdk";
 import { type Address, Hash, type Hex, hexToBytes, isAddress, zeroAddress } from "viem";
 
-import config from "@/config";
+import { config } from "@/config";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { makeKeyedResolverRecordId, makeResolverId } from "@/lib/ids";
@@ -78,7 +78,7 @@ export async function handleAddrChanged({
     addrId: address,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (config().indexAdditionalResolverRecords) {
     // AddrChanged is just AddressChanged with implicit coinType of ETH
     await handleAddressRecordUpdate(context, id, ETH_COIN_TYPE, event.args.a);
   }
@@ -113,7 +113,7 @@ export async function handleAddressChanged({
     addr: newAddress,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (config().indexAdditionalResolverRecords) {
     await handleAddressRecordUpdate(context, id, event.args.coinType, event.args.newAddress);
   }
 }
@@ -142,7 +142,7 @@ export async function handleNameChanged({
     name,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (config().indexAdditionalResolverRecords) {
     await upsertResolver(context, {
       id,
       domainId: node,
@@ -250,7 +250,7 @@ export async function handleTextChanged({
     value: sanitizedValue,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (config().indexAdditionalResolverRecords) {
     // if value is undefined, this is a LegacyPublicResolver event, nothing to do
     if (value === undefined) return;
 
@@ -421,7 +421,7 @@ export async function handleDNSRecordChanged({
   }>;
 }) {
   // subgraph explicitly ignores this event
-  if (config.isSubgraphCompatible) return;
+  if (config().isSubgraphCompatible) return;
 
   // but for non-subgraph plugins, we parse the RR set data for relevant records
   const { node, name, resource, record } = event.args;
@@ -474,7 +474,7 @@ export async function handleDNSRecordChanged({
           value: sanitizedValue,
         });
 
-        if (config.indexAdditionalResolverRecords) {
+        if (config().indexAdditionalResolverRecords) {
           // no sanitized value to index? bail
           if (sanitizedValue === null) break;
 
@@ -517,7 +517,7 @@ export async function handleDNSRecordDeleted({
   }>;
 }) {
   // subgraph explicitly ignores this event
-  if (config.isSubgraphCompatible) return;
+  if (config().isSubgraphCompatible) return;
 
   const { node, name, resource } = event.args;
 
@@ -557,7 +557,7 @@ export async function handleDNSRecordDeleted({
     value: null,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (config().indexAdditionalResolverRecords) {
     const recordId = makeKeyedResolverRecordId(id, key);
     await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
   }

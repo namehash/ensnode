@@ -1,7 +1,8 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config";
+import { config } from "@/config";
 import {
+  ENSIndexerPlugin,
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
@@ -16,6 +17,11 @@ import { PluginName } from "@ensnode/ensnode-sdk";
  */
 const pluginName = PluginName.Lineanames;
 
+/**
+ * Datasources required by Lineanames plugin.
+ */
+const requiredDatasources = [DatasourceName.Lineanames];
+
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
@@ -26,7 +32,7 @@ export default {
   activate: activateHandlers({
     pluginName,
     namespace,
-    handlers: [
+    handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),
       import("./handlers/NameWrapper"),
@@ -41,7 +47,7 @@ export default {
    */
   get config() {
     // extract the chain and contract configs for Lineanames Datasource in order to build ponder config
-    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+    const deployment = getENSDeployment(config().ensDeploymentChain);
     const { chain, contracts } = deployment[DatasourceName.Lineanames];
 
     return createConfig({
@@ -75,4 +81,9 @@ export default {
    * The plugin name, used for identification.
    */
   pluginName,
-};
+
+  /**
+   * The plugin required datasources, used for validation.
+   */
+  requiredDatasources,
+} as const satisfies ENSIndexerPlugin<PluginName.Lineanames>;
