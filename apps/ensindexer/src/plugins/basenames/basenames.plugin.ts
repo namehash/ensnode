@@ -1,14 +1,14 @@
-import { createConfig } from "ponder";
-
-import { default as appConfig } from "@/config";
+import type { ENSIndexerConfig } from "@/config/types";
 import {
+  type ENSIndexerPlugin,
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
+import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig } from "ponder";
 
 /**
  * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging
@@ -16,8 +16,48 @@ import { PluginName } from "@ensnode/ensnode-sdk";
  */
 const pluginName = PluginName.Basenames;
 
+// enlist datasources used within createPluginConfig function
+// useful for config validation
+const requiredDatasources = [DatasourceName.Basenames];
+
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
+
+// config object factory used to derive PluginConfig type
+function createPluginConfig(appConfig: ENSIndexerConfig) {
+  const { ensDeployment } = appConfig;
+  // extract the chain and contract configs for Basenames Datasource in order to build ponder config
+  const { chain, contracts } = ensDeployment[DatasourceName.Basenames];
+
+  return createConfig({
+    networks: networksConfigForChain(chain.id),
+    contracts: {
+      [namespace("Registry")]: {
+        network: networkConfigForContract(chain, contracts.Registry),
+        abi: contracts.Registry.abi,
+      },
+      [namespace("BaseRegistrar")]: {
+        network: networkConfigForContract(chain, contracts.BaseRegistrar),
+        abi: contracts.BaseRegistrar.abi,
+      },
+      [namespace("EARegistrarController")]: {
+        network: networkConfigForContract(chain, contracts.EARegistrarController),
+        abi: contracts.EARegistrarController.abi,
+      },
+      [namespace("RegistrarController")]: {
+        network: networkConfigForContract(chain, contracts.RegistrarController),
+        abi: contracts.RegistrarController.abi,
+      },
+      Resolver: {
+        network: networkConfigForContract(chain, contracts.Resolver),
+        abi: contracts.Resolver.abi,
+      },
+    },
+  });
+}
+
+// construct a specific type for plugin configuration
+type PluginConfig = ReturnType<typeof createPluginConfig>;
 
 export default {
   /**
@@ -26,7 +66,7 @@ export default {
   activate: activateHandlers({
     pluginName,
     namespace,
-    handlers: [
+    handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),
       import("../shared/Resolver"),
@@ -38,40 +78,11 @@ export default {
    * nested factory functions, i.e. to ensure that the plugin configuration
    * is only built when the plugin is activated.
    */
-  get config() {
-    // extract the chain and contract configs for Basenames Datasource in order to build ponder config
-    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
-    const { chain, contracts } = deployment[DatasourceName.Basenames];
+  createPluginConfig,
 
-    return createConfig({
-      networks: networksConfigForChain(chain.id),
-      contracts: {
-        [namespace("Registry")]: {
-          network: networkConfigForContract(chain, contracts.Registry),
-          abi: contracts.Registry.abi,
-        },
-        [namespace("BaseRegistrar")]: {
-          network: networkConfigForContract(chain, contracts.BaseRegistrar),
-          abi: contracts.BaseRegistrar.abi,
-        },
-        [namespace("EARegistrarController")]: {
-          network: networkConfigForContract(chain, contracts.EARegistrarController),
-          abi: contracts.EARegistrarController.abi,
-        },
-        [namespace("RegistrarController")]: {
-          network: networkConfigForContract(chain, contracts.RegistrarController),
-          abi: contracts.RegistrarController.abi,
-        },
-        Resolver: {
-          network: networkConfigForContract(chain, contracts.Resolver),
-          abi: contracts.Resolver.abi,
-        },
-      },
-    });
-  },
-
-  /**
-   * The plugin name, used for identification.
-   */
+  /** The plugin name, used for identification */
   pluginName,
-};
+
+  /** A list of required datasources for the plugin */
+  requiredDatasources,
+} as const satisfies ENSIndexerPlugin<PluginName.Basenames, PluginConfig>;

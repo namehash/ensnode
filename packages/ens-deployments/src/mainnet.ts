@@ -1,4 +1,3 @@
-import { zeroAddress } from "viem";
 import { base, linea, mainnet, optimism } from "viem/chains";
 
 import { DatasourceName, type ENSDeployment } from "./lib/types";

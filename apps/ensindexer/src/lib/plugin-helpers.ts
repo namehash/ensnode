@@ -1,10 +1,11 @@
-import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
-import type { NetworkConfig } from "ponder";
-import { http, Chain } from "viem";
-
 import config from "@/config";
+import type { ENSIndexerConfig } from "@/config/types";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
+import { getRequiredDatasourceNames } from "@/plugins";
+import { ContractConfig, Datasource, DatasourceName } from "@ensnode/ens-deployments";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
+import { NetworkConfig } from "ponder";
+import { http, Chain } from "viem";
 
 /**
  * A factory function that returns a function to create a namespaced contract name for Ponder handlers.
@@ -41,11 +42,6 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
   };
 }
 
-// Helper type to merge multiple types into one
-export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
-  ? R
-  : never;
-
 /**
  * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  */
@@ -65,7 +61,7 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
    * An ENSIndexerPlugin must return a Ponder Config.
    * https://ponder.sh/docs/contracts-and-networks
    */
-  config: CONFIG;
+  createPluginConfig(appConfig: ENSIndexerConfig): CONFIG;
 
   /**
    * An `activate` handler that should load a plugin's handlers that eventually execute `ponder.on`
@@ -98,11 +94,43 @@ export const activateHandlers =
     handlers,
     ...args
   }: ENSIndexerPluginHandlerArgs<PLUGIN_NAME> & {
-    handlers: Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
+    handlers: () => Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
   }) =>
   async () => {
-    await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
+    await Promise.all(handlers()).then((modules) => modules.map((m) => m.default(args)));
   };
+
+/**
+ * Get a list of unique datasources for selected plugin names.
+ * @param pluginNames
+ * @returns
+ */
+export function getDatasources(pluginNames: PluginName[]): Datasource[] {
+  const { ensDeployment } = config;
+  const requiredDatasourceNames = getRequiredDatasourceNames(pluginNames);
+  const ensDeploymentDatasources = Object.entries(ensDeployment) as Array<
+    [DatasourceName, Datasource]
+  >;
+  const datasources = {} as Record<DatasourceName, Datasource>;
+
+  for (let [datasourceName, datasource] of ensDeploymentDatasources) {
+    if (requiredDatasourceNames.includes(datasourceName)) {
+      datasources[datasourceName] = datasource;
+    }
+  }
+
+  return Object.values(datasources);
+}
+
+/**
+ * Get a list of unique indexed chain IDs for selected plugin names.
+ */
+export function getIndexedChainIds(pluginNames: PluginName[]): number[] {
+  const datasources = getDatasources(pluginNames);
+  const indexedChainIds = datasources.map((datasource) => datasource.chain.id);
+
+  return indexedChainIds;
+}
 
 /**
  * Builds a ponder#NetworksConfig for a single, specific chain.
