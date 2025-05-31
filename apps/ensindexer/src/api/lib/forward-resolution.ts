@@ -51,7 +51,7 @@ const KNOWN_OFFCHAIN_LOOKUP_RESOLVERS: Record<number, Record<Address, number>> =
   // on the ENS Deployment Chain
   [deployment.root.chain.id]: {
     // the Basenames L1Resolver defers to Base chain
-    // [deployment.root.contracts.BasenamesL1Resolver.address]: deployment.basenames.chain.id,
+    [deployment.root.contracts.BasenamesL1Resolver.address]: deployment.basenames.chain.id,
     // the LineaNames L1Resolver defers to Linea chain
     [deployment.root.contracts.LineaNamesL1Resolver.address]: deployment.lineanames.chain.id,
   },
