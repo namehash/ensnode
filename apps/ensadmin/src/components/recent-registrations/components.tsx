@@ -63,15 +63,33 @@ const calculateDurationYears = (registrationDate: string, expiryDate: string) =>
 };
 
 // Helper function to format relative time
-const formatRelativeTime = (timestamp: string) => {
+export const formatRelativeTime = (
+  timestamp: string,
+  enforcePast = false,
+  includeSeconds = false,
+  conciseFormatting = false,
+) => {
   try {
     const parsedTimestamp = parseInt(timestamp);
     if (isNaN(parsedTimestamp)) {
       return "Unknown";
     }
 
+    if (enforcePast && parsedTimestamp >= Math.floor(Date.now() / 1000)) {
+      return "just now";
+    }
+
     const date = fromUnixTime(parsedTimestamp);
-    return formatDistanceToNow(date, { addSuffix: true });
+    const relativeTimestamp = formatDistanceToNow(date, {
+      addSuffix: true,
+      includeSeconds: includeSeconds,
+    });
+
+    if (conciseFormatting) {
+      return relativeTimestamp.replace("less than ", "").replace("a minute", "1 minute");
+    }
+
+    return relativeTimestamp;
   } catch (error) {
     console.error("Error formatting relative time:", error);
     return "Unknown";

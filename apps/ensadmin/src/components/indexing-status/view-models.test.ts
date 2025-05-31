@@ -53,6 +53,7 @@ describe("View Models", () => {
       expect(globalIndexingStatusViewModel(ensNodeNetworkStatus, "mainnet")).toEqual({
         networkStatuses: [
           {
+            id: 1,
             name: "Ethereum",
             latestSafeBlock: blockViewModel(mainnetStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(mainnetStatus.firstBlockToIndex),
@@ -65,8 +66,10 @@ describe("View Models", () => {
                 endDate: fromUnixTime(mainnetStatus.latestSafeBlock.timestamp),
               },
             ],
+            blockExplorerURL: "https://etherscan.io",
           },
           {
+            id: 8453,
             name: "Base",
             latestSafeBlock: blockViewModel(baseStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(baseStatus.firstBlockToIndex),
@@ -84,6 +87,7 @@ describe("View Models", () => {
                 endDate: fromUnixTime(baseStatus.latestSafeBlock.timestamp),
               },
             ],
+            blockExplorerURL: "https://basescan.org",
           },
         ],
         currentIndexingDate: fromUnixTime(mainnetStatus.lastIndexedBlock.timestamp),
@@ -93,9 +97,10 @@ describe("View Models", () => {
   });
 
   describe("networkIndexingStatusViewModel", () => {
-    it("should return the correct view model", () => {
+    it("should return the correct view model without block explorer", () => {
       expect(
         networkIndexingStatusViewModel(
+          base.id,
           `${base.name}`,
           {
             latestSafeBlock: {
@@ -115,6 +120,7 @@ describe("View Models", () => {
           1000,
         ),
       ).toEqual({
+        id: 8453,
         name: "Base",
         latestSafeBlock: {
           number: 333,
@@ -150,6 +156,70 @@ describe("View Models", () => {
             endDate: fromUnixTime(1501),
           },
         ],
+      } satisfies NetworkStatusViewModel);
+    });
+
+    it("should return the correct view model with block explorer", () => {
+      expect(
+        networkIndexingStatusViewModel(
+          base.id,
+          `${base.name}`,
+          {
+            latestSafeBlock: {
+              number: 333,
+              timestamp: 1501,
+            },
+            firstBlockToIndex: {
+              number: 222,
+              timestamp: 1111,
+            },
+            lastIndexedBlock: null,
+            lastSyncedBlock: {
+              number: 272,
+              timestamp: 1247,
+            },
+          },
+          1000,
+          "https://basescan.org",
+        ),
+      ).toEqual({
+        id: 8453,
+        name: "Base",
+        latestSafeBlock: {
+          number: 333,
+          timestamp: 1501,
+          get date() {
+            return fromUnixTime(1501);
+          },
+        },
+        firstBlockToIndex: {
+          number: 222,
+          timestamp: 1111,
+          get date() {
+            return fromUnixTime(1111);
+          },
+        },
+        lastIndexedBlock: null,
+        lastSyncedBlock: {
+          number: 272,
+          timestamp: 1247,
+          get date() {
+            return fromUnixTime(1247);
+          },
+        },
+        phases: [
+          {
+            state: "queued",
+            startDate: fromUnixTime(1000),
+            endDate: fromUnixTime(1111),
+          },
+          {
+            state: "indexing",
+            startDate: fromUnixTime(1111),
+            endDate: fromUnixTime(1501),
+          },
+        ],
+        blockExplorerURL: "https://basescan.org",
       } satisfies NetworkStatusViewModel);
     });
   });
