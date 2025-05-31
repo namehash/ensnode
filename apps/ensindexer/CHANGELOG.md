@@ -1,5 +1,25 @@
 # ensindexer
 
+## 0.28.0
+
+### Minor Changes
+
+- [#750](https://github.com/namehash/ensnode/pull/750) [`48022d6`](https://github.com/namehash/ensnode/commit/48022d6416c0e34453cbca7a35ec69ec722066b8) Thanks [@tk-o](https://github.com/tk-o)! - Heal reverse addresses for events coming from one of the ENS Deployment Chains.
+
+- [#746](https://github.com/namehash/ensnode/pull/746) [`9aeaccd`](https://github.com/namehash/ensnode/commit/9aeaccd1034b970dc3a770a349292e65ba53cd2d) Thanks [@shrugs](https://github.com/shrugs)! - added optional indexAdditionalResolverRecords runtime flag to allow the indexing of additional resolver record values
+
+- [#756](https://github.com/namehash/ensnode/pull/756) [`af2cb03`](https://github.com/namehash/ensnode/commit/af2cb0314bcfc1b5a523670eae558b040407156b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed @ensnode/utils to @ensnode/ensnode-sdk.
+
+### Patch Changes
+
+- Updated dependencies [[`9aeaccd`](https://github.com/namehash/ensnode/commit/9aeaccd1034b970dc3a770a349292e65ba53cd2d), [`af2cb03`](https://github.com/namehash/ensnode/commit/af2cb0314bcfc1b5a523670eae558b040407156b)]:
+  - @ensnode/ensnode-schema@0.28.0
+  - @ensnode/ensrainbow-sdk@0.28.0
+  - @ensnode/ensnode-sdk@0.28.0
+  - @ensnode/ponder-metadata@0.28.0
+  - @ensnode/ens-deployments@0.28.0
+  - @ensnode/ponder-subgraph@0.28.0
+
 ## 0.27.0
 
 ### Minor Changes
