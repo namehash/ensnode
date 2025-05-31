@@ -1,5 +1,17 @@
 # ensrainbow
 
+## 0.28.0
+
+### Minor Changes
+
+- [#756](https://github.com/namehash/ensnode/pull/756) [`af2cb03`](https://github.com/namehash/ensnode/commit/af2cb0314bcfc1b5a523670eae558b040407156b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed @ensnode/utils to @ensnode/ensnode-sdk.
+
+### Patch Changes
+
+- Updated dependencies [[`af2cb03`](https://github.com/namehash/ensnode/commit/af2cb0314bcfc1b5a523670eae558b040407156b)]:
+  - @ensnode/ensrainbow-sdk@0.28.0
+  - @ensnode/ensnode-sdk@0.28.0
+
 ## 0.27.0
 
 ### Patch Changes

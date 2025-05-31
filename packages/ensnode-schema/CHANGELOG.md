@@ -1,5 +1,11 @@
 # @ensnode/ensnode-schema
 
+## 0.28.0
+
+### Minor Changes
+
+- [#746](https://github.com/namehash/ensnode/pull/746) [`9aeaccd`](https://github.com/namehash/ensnode/commit/9aeaccd1034b970dc3a770a349292e65ba53cd2d) Thanks [@shrugs](https://github.com/shrugs)! - addded resolver record value entities to schema
+
 ## 0.27.0
 
 ### Minor Changes
