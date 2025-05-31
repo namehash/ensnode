@@ -75,6 +75,8 @@ const KNOWN_ONCHAIN_STATIC_RESOLVERS: Record<number, Address[]> = {
     // the Root PublicResolver is an Onchain Static Resolver
     // NOTE: this is also the ENSIP-11 ReverseResolver
     deployment[DatasourceName.Root].contracts.PublicResolver.address,
+    // the Root LegacyDefaultReverseResolver is an Onchain Static Resolver
+    deployment[DatasourceName.ReverseResolverRoot].contracts.LegacyDefaultReverseResolver.address,
   ],
   // on the Basenames chain
   [deployment.basenames.chain.id]: [
