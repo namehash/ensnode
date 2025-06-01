@@ -98,10 +98,10 @@ export const activateHandlers =
     handlers,
     ...args
   }: ENSIndexerPluginHandlerArgs<PLUGIN_NAME> & {
-    handlers: () => Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
+    handlers: Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
   }) =>
   async () => {
-    await Promise.all(handlers()).then((modules) => modules.map((m) => m.default(args)));
+    await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
   };
 
 /**
@@ -110,7 +110,9 @@ export const activateHandlers =
 export function networksConfigForChain(chainId: number) {
   if (!config().rpcConfigs[chainId]) {
     throw new Error(
-      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config().rpcConfigs).join(", ")}].`,
+      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(
+        config().rpcConfigs,
+      ).join(", ")}].`,
     );
   }
 
