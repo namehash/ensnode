@@ -1,6 +1,6 @@
 ---
 "ensindexer": patch
-"ensrainbow": major
+"ensrainbow": minor
 "@docs/ensnode": patch
 ---
 
