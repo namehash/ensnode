@@ -2,7 +2,7 @@ import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
 import type { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
-import { config } from "@/config";
+import config from "@/config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 
@@ -108,15 +108,15 @@ export const activateHandlers =
  * Builds a ponder#NetworksConfig for a single, specific chain.
  */
 export function networksConfigForChain(chainId: number) {
-  if (!config().rpcConfigs[chainId]) {
+  if (!config.rpcConfigs[chainId]) {
     throw new Error(
       `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(
-        config().rpcConfigs,
+        config.rpcConfigs,
       ).join(", ")}].`,
     );
   }
 
-  const { url, maxRequestsPerSecond } = config().rpcConfigs[chainId]!;
+  const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
 
   return {
     [chainId.toString()]: {

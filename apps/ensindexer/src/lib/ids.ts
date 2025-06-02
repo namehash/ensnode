@@ -1,4 +1,4 @@
-import { config } from "@/config";
+import config from "@/config";
 import { type LabelHash, type Node } from "@ensnode/ensnode-sdk";
 import type { Address } from "viem";
 
@@ -18,7 +18,7 @@ import type { Address } from "viem";
 export const makeResolverId = (chainId: number, address: Address, node: Node) =>
   [
     // null out chainId prefix iff subgraph-compat, otherwise include for chain-scoping
-    config().isSubgraphCompatible ? null : chainId,
+    config.isSubgraphCompatible ? null : chainId,
     // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
     address.toLowerCase(),
     node,
@@ -47,7 +47,7 @@ export const makeEventId = (
 ) =>
   [
     // null out chainId prefix iff subgraph plugin, otherwise include for chain-scoping
-    config().isSubgraphCompatible ? null : chainId,
+    config.isSubgraphCompatible ? null : chainId,
     blockNumber.toString(),
     logIndex.toString(),
     transferIndex?.toString(),
@@ -85,7 +85,7 @@ export const makeEventId = (
  * @returns a unique registration id
  */
 export const makeRegistrationId = (labelHash: LabelHash, node: Node) => {
-  if (config().isSubgraphCompatible) return labelHash;
+  if (config.isSubgraphCompatible) return labelHash;
   return node;
 };
 

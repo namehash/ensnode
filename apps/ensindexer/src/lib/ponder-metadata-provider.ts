@@ -3,7 +3,7 @@ import packageJson from "@/../package.json";
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 
-import { config } from "@/config";
+import config from "@/config";
 import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
@@ -22,7 +22,7 @@ export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdF
 export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
 
 // setup prometheus metrics fetching
-export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config().port);
+export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.port);
 
 export const makePonderMetdataProvider = ({
   db,
@@ -55,7 +55,7 @@ export const makePonderMetdataProvider = ({
    * @returns the block info fetched from the public client
    */
   const getLastIndexedDeploymentChainBlock = async () => {
-    const ponderStatus = await queryPonderStatus(config().ponderDatabaseSchema, db);
+    const ponderStatus = await queryPonderStatus(config.ponderDatabaseSchema, db);
     const chainStatus = ponderStatus.find(
       (status) => status.network_name === ensDeploymentChainId.toString(),
     );
@@ -76,7 +76,7 @@ export const makePonderMetdataProvider = ({
    * @returns The Ponder build ID
    */
   const getPonderBuildId = async (): Promise<string> => {
-    const meta = await queryPonderMeta(config().ponderDatabaseSchema, db);
+    const meta = await queryPonderMeta(config.ponderDatabaseSchema, db);
 
     return meta.build_id;
   };

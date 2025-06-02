@@ -1,4 +1,4 @@
-import { config } from "@/config";
+import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
 import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
@@ -43,7 +43,7 @@ export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["confi
 ////////
 
 // filter all plugins by those activated by the config
-const activePlugins = ALL_PLUGINS.filter((plugin) => config().plugins.includes(plugin.pluginName));
+const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plugin.pluginName));
 
 // combine each plugins' config into a MergedPonderConfig
 const ponderConfig = activePlugins.reduce(
@@ -53,8 +53,8 @@ const ponderConfig = activePlugins.reduce(
 
 // inject the additional indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
-  healReverseAddresses: config().healReverseAddresses,
-  indexAdditionalResolverRecords: config().indexAdditionalResolverRecords,
+  healReverseAddresses: config.healReverseAddresses,
+  indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
 };
 
 ////////

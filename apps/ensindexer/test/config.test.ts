@@ -26,7 +26,7 @@ describe("config", () => {
   async function getConfig() {
     vi.resetModules(); // Reset module cache
     const configModule = await import("@/config");
-    return configModule.config();
+    return configModule.default;
   }
 
   beforeEach(() => {

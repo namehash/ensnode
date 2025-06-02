@@ -1,6 +1,6 @@
 import { createConfig } from "ponder";
 
-import { config } from "@/config";
+import config from "@/config";
 import {
   ENSIndexerPlugin,
   activateHandlers,
@@ -28,7 +28,7 @@ const namespace = makePluginNamespace(pluginName);
 // plugin config factory function
 const pluginConfig = () => {
   // extract the chain and contract configs for Basenames Datasource in order to build ponder config
-  const deployment = getENSDeployment(config().ensDeploymentChain);
+  const deployment = getENSDeployment(config.ensDeploymentChain);
   const { chain, contracts } = deployment[DatasourceName.Basenames];
 
   return createConfig({
