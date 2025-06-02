@@ -251,6 +251,9 @@ importers:
 
   apps/ensindexer:
     dependencies:
+      '@ensdomains/address-encoder':
+        specifier: ^1.1.2
+        version: 1.1.2
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(zod@3.25.7)
@@ -545,6 +548,10 @@ importers:
         version: 5.7.3
 
   packages/ensnode-sdk:
+    dependencies:
+      '@ensdomains/address-encoder':
+        specifier: ^1.1.2
+        version: 1.1.2
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -1065,6 +1072,9 @@ packages:
 
   '@ensdomains/address-encoder@1.1.1':
     resolution: {integrity: sha512-yg7s+suCuKRhaGsgLu57W/jxIs/Lnqs/SU7jT7UwS4ATSnW94jbUCbmyyZ82CQwKsmwaUE8uYvvVb4N6lfz29A==}
+
+  '@ensdomains/address-encoder@1.1.2':
+    resolution: {integrity: sha512-x+uUZbtvtWDh23dLH/U//re0s9v341tFB6SJeUElkQ31O3jkoUh3jvgnx+NxiohWW6JWW6QrXS4kigxuvwbi2A==}
 
   '@ensdomains/content-hash@3.1.0-rc.1':
     resolution: {integrity: sha512-OzdkXgdFmduzcJKU4KRkkJkQHnm5p7m7FkX8k+bHOEoOIzc0ueGT/Jay4nnb60wNk1wSHRmzY+hHBMpFDiGReg==}
@@ -8350,6 +8360,12 @@ snapshots:
       '@scure/base': 1.2.4
 
   '@ensdomains/address-encoder@1.1.1':
+    dependencies:
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/base': 1.2.4
+
+  '@ensdomains/address-encoder@1.1.2':
     dependencies:
       '@noble/curves': 1.8.1
       '@noble/hashes': 1.7.1

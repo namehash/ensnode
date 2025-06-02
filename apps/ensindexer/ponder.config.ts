@@ -6,6 +6,7 @@ import type { MergedTypes } from "@/lib/plugin-helpers";
 
 import basenamesPlugin from "@/plugins/basenames/basenames.plugin";
 import lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
+import reverseResolversPlugin from "@/plugins/reverse-resolvers/reverse-resolvers.plugin";
 import subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
 import threednsPlugin from "@/plugins/threedns/threedns.plugin";
 
@@ -20,6 +21,7 @@ export const ALL_PLUGINS = [
   basenamesPlugin,
   lineaNamesPlugin,
   threednsPlugin,
+  reverseResolversPlugin,
 ] as const;
 
 export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
@@ -70,5 +72,6 @@ setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 ////////
 
 console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
+if (process.env.PONDER_LOG_LEVEL === "debug") console.log(JSON.stringify(ponderConfig));
 
 export default ponderConfig;

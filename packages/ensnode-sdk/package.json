@@ -50,5 +50,8 @@
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@ensdomains/address-encoder": "^1.1.2"
   }
 }

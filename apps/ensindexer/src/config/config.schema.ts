@@ -5,6 +5,7 @@ import { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
+  invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "@/config/validations";
@@ -161,7 +162,7 @@ const derive_isSubgraphCompatible = <
   >,
 >(
   config: CONFIG,
-): CONFIG & { isSubgraphCompatible: boolean } => {
+) => {
   // 1. only the subgraph plugin is active
   const onlySubgraphPluginActivated =
     config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
@@ -198,7 +199,8 @@ const ENSIndexerConfigSchema = z
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)
-  .check(invariant_validContractConfigs);
+  .check(invariant_validContractConfigs)
+  .check(invariant_reverseResolversPluginNeedsResolverRecords);
 
 /**
  * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object

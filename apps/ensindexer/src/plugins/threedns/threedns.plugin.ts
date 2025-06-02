@@ -1,7 +1,8 @@
 import { createConfig } from "ponder";
 
-import { default as appConfig } from "@/config";
+import config from "@/config";
 import {
+  ENSIndexerPlugin,
   activateHandlers,
   makePluginNamespace,
   networkConfigForContract,
@@ -19,23 +20,11 @@ const pluginName = PluginName.ThreeDNS;
 const namespace = makePluginNamespace(pluginName);
 
 export default {
-  /**
-   * Activate the plugin handlers for indexing.
-   */
-  activate: activateHandlers({
-    pluginName,
-    namespace,
-    handlers: [import("./handlers/ThreeDNSToken")],
-  }),
-
-  /**
-   * Load the plugin configuration lazily to prevent premature execution of
-   * nested factory functions, i.e. to ensure that the plugin configuration
-   * is only built when the plugin is activated.
-   */
+  pluginName,
   get config() {
     // extract the chain and contract configs for root Datasource in order to build ponder config
-    const deployment = getENSDeployment(appConfig.ensDeploymentChain);
+    const deployment = getENSDeployment(config.ensDeploymentChain);
+
     const { chain: optimism, contracts: optimismContracts } =
       deployment[DatasourceName.ThreeDNSOptimism];
     const { chain: base, contracts: baseContracts } = deployment[DatasourceName.ThreeDNSBase];
@@ -63,9 +52,9 @@ export default {
       },
     });
   },
-
-  /**
-   * The plugin name, used for identification.
-   */
-  pluginName,
-};
+  activate: activateHandlers({
+    pluginName,
+    namespace,
+    handlers: [import("./handlers/ThreeDNSToken")],
+  }),
+} as const satisfies ENSIndexerPlugin<PluginName.ThreeDNS>;

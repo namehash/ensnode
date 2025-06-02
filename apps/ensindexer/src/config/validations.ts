@@ -127,3 +127,21 @@ DEPLOYMENT_ADDRESSES=${process.env.DEPLOYMENT_ADDRESSES || "undefined"}`,
     }
   }
 }
+
+// Invariant: ReverseResolvers plugin requires indexAdditionalResolverRecords
+export function invariant_reverseResolversPluginNeedsResolverRecords(
+  ctx: z.core.ParsePayload<ENSIndexerConfig>,
+) {
+  const { value: config } = ctx;
+
+  if (
+    config.plugins.includes(PluginName.ReverseResolvers) &&
+    !config.indexAdditionalResolverRecords
+  ) {
+    ctx.issues.push({
+      code: "custom",
+      input: config,
+      message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
+    });
+  }
+}
