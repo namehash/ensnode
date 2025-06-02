@@ -4,9 +4,7 @@ import HeroInstallCommand from "../molecules/HeroInstallCommand.tsx";
 
 export default function Hero() {
   const healedLabels = 258728012;
-  const healedLabelsArray = Array.from(String(healedLabels), (num) =>
-    Number(num)
-  );
+  const healedLabelsArray = Array.from(String(healedLabels), (num) => Number(num));
   const counterNumberStyles =
     "flex flex-col justify-center items-center w-6 sm:w-[52px] h-9 sm:h-[72px] rounded sm:rounded-lg border border-gray-200 text-lg sm:text-2xl leading-7 font-bold bg-white";
 
@@ -80,10 +78,7 @@ export default function Hero() {
               );
             } else {
               return (
-                <div
-                  key={`healedNameCounter${idx}`}
-                  className={counterNumberStyles}
-                >
+                <div key={`healedNameCounter${idx}`} className={counterNumberStyles}>
                   {elem}
                 </div>
               );
