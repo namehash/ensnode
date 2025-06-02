@@ -30,3 +30,6 @@ generated
 # Terraform
 .terraform*
 terraform.tfstate*
+
+# ENSRainbow data
+apps/ensrainbow/data

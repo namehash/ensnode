@@ -50,5 +50,3 @@ EXPOSE 3223
 # Set the entrypoint to the new script
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-# CMD is effectively handled by the exec call in entrypoint.sh
-# CMD ["pnpm", "run", "serve"] # This would be overridden by ENTRYPOINT or run by it
