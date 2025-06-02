@@ -39,11 +39,16 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "zod": "catalog:"
+  },
   "peerDependencies": {
+    "@ensnode/ens-deployments": "workspace:*",
     "viem": "^catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
+    "@ensnode/ens-deployments": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "tsup": "^8.3.6",

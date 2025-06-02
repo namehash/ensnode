@@ -1,5 +1,8 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.ponder.json",
   "include": ["./**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "rootDir": "."
+  }
 }

@@ -8,6 +8,7 @@ import { client, graphql as ponderGraphQL } from "ponder";
 
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
+import { createEnsIndexerPublicConfigMiddleware } from "@/lib/ensindexer-public-config-middleware";
 import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
@@ -59,6 +60,9 @@ app.use("/", async (ctx) => {
     throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
   }
 });
+
+// allow accessing the ENSNode public configuration
+app.get("/config", createEnsIndexerPublicConfigMiddleware(config));
 
 // use ENSNode middleware at /metadata
 app.get(
