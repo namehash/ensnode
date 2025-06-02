@@ -61,7 +61,7 @@ download_with_progress() {
     echo "Source URL: $url"
     echo "Destination: $output_path"
 
-    if wget -nv -O "$output_path" "$url"; then
+    if wget --progress=dot:giga -O "$output_path" "$url"; then
         echo "Successfully downloaded $description."
         echo ""
     else
