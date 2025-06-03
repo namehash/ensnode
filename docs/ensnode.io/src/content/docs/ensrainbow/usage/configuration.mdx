@@ -8,5 +8,40 @@ ENSRainbow can be configured via environment variables.
 
 ## Environment Variables
 
+### Server Configuration
+
 - `PORT`: Server port (default: 3223)
 - `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
+
+### Data Management (Docker Only)
+
+The following environment variables are required when running ENSRainbow with Docker for initial database download:
+
+- **`SCHEMA_VERSION`**: Database schema version (e.g., `v3`). Use the latest available version unless you have specific compatibility requirements.
+
+- **`NAMESPACE`**: Data namespace identifier that categorizes the type of ENS data:
+  - `subgraph` - Main production dataset from The Graph's ENS subgraph
+  - `searchlight` - Extended dataset with additional label discoveries
+  - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
+  - `testenv` - Small test dataset for development and testing
+
+- **`LABEL_SET`**: Non-negative integer representing the incremental dataset version within a namespace. Label sets are sequential:
+  - `0` - Initial/base dataset for the namespace
+  - `1`, `2`, etc. - Incremental updates containing additional or updated labels
+
+### Example Combinations
+
+```bash
+# Latest production data
+SCHEMA_VERSION=v3 NAMESPACE=subgraph LABEL_SET=0
+
+# Test environment data  
+SCHEMA_VERSION=v3 NAMESPACE=testenv LABEL_SET=0
+
+# Extended discovery data
+SCHEMA_VERSION=v3 NAMESPACE=searchlight LABEL_SET=0
+```
+
+:::note[Environment Variables Usage]
+The data management environment variables (`SCHEMA_VERSION`, `NAMESPACE`, `LABEL_SET`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate database artifact on first run.
+:::
