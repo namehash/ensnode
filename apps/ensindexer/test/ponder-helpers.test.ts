@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { resetMockConfig, setGlobalBlockrange, setupConfigMock } from "./utils/mockConfig";
+setupConfigMock(); // setup config mock before importing dependent modules
 
-// Set up the mock before importing modules that depend on config
-setupConfigMock();
-
-// Now safely import the modules being tested
 import { constrainContractBlockrange, createStartBlockByChainIdMap } from "@/lib/ponder-helpers";
 
 describe("ponder helpers", () => {

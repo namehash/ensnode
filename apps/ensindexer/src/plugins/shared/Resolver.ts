@@ -1,7 +1,21 @@
 import { ponder } from "ponder:registry";
 
-import { makeResolverHandlers } from "@/handlers/Resolver";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import {
+  handleABIChanged,
+  handleAddrChanged,
+  handleAddressChanged,
+  handleAuthorisationChanged,
+  handleContenthashChanged,
+  handleDNSRecordChanged,
+  handleDNSRecordDeleted,
+  handleDNSZonehashChanged,
+  handleInterfaceChanged,
+  handleNameChanged,
+  handlePubkeyChanged,
+  handleTextChanged,
+  handleVersionChanged,
+  handleZoneCreated,
+} from "@/handlers/Resolver";
 
 /**
  * Shared Resolver indexing functions should be registered exactly once, or Ponder will complain about
@@ -11,26 +25,9 @@ import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
  */
 let hasBeenRegistered = false;
 
-export default function ({ pluginName }: ENSIndexerPluginHandlerArgs) {
+export default function registerResolverHandlers() {
   if (hasBeenRegistered) return;
   hasBeenRegistered = true;
-
-  const {
-    handleABIChanged,
-    handleAddrChanged,
-    handleAddressChanged,
-    handleAuthorisationChanged,
-    handleContenthashChanged,
-    handleDNSRecordChanged,
-    handleDNSRecordDeleted,
-    handleDNSZonehashChanged,
-    handleInterfaceChanged,
-    handleNameChanged,
-    handlePubkeyChanged,
-    handleTextChanged,
-    handleVersionChanged,
-    handleZoneCreated,
-  } = makeResolverHandlers({ pluginName });
 
   ponder.on("Resolver:AddrChanged", handleAddrChanged);
   ponder.on("Resolver:AddressChanged", handleAddressChanged);

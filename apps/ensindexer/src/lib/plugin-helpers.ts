@@ -4,7 +4,7 @@ import { http, Chain } from "viem";
 
 import config from "@/config";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
-import { Label, Name, PluginName } from "@ensnode/utils";
+import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * A factory function that returns a function to create a namespaced contract name for Ponder handlers.

@@ -4,7 +4,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
 import { PLUGIN_REQUIRED_DATASOURCES } from "@/plugins";
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { Address, isAddress } from "viem";
 
 // Invariant: specified plugins' datasources are available in the specified ensDeploymentChain's ENSDeployment

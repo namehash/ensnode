@@ -1,5 +1,6 @@
 import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
+import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import type { MergedTypes } from "@/lib/plugin-helpers";
 
@@ -31,7 +32,10 @@ export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["confi
    *
    * https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
    **/
-  indexingBehaviorDependencies: Pick<ENSIndexerConfig, "healReverseAddresses">;
+  indexingBehaviorDependencies: Pick<
+    ENSIndexerConfig,
+    "healReverseAddresses" | "indexAdditionalResolverRecords"
+  >;
 };
 
 ////////
@@ -50,6 +54,7 @@ const ponderConfig = activePlugins.reduce(
 // inject the additional indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
   healReverseAddresses: config.healReverseAddresses,
+  indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
 };
 
 ////////
@@ -63,5 +68,7 @@ setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
 ////////
+
+console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
 
 export default ponderConfig;
