@@ -1,5 +1,4 @@
 import { Button, Link } from "@namehash/namekit-react";
-import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
 import BeforeAfterSlider from "../molecules/BeforeAfterSlider.tsx";
 import HeroInstallCommand from "../molecules/HeroInstallCommand.tsx";
 
