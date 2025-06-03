@@ -16,8 +16,7 @@ import { createConfig } from "ponder";
  */
 const pluginName = PluginName.Basenames;
 
-// enlist datasources used within createPluginConfig function
-// useful for config validation
+// Define the Datasources required by the plugin
 const requiredDatasources = [DatasourceName.Basenames];
 
 // construct a unique contract namespace for this plugin
@@ -26,7 +25,7 @@ const namespace = makePluginNamespace(pluginName);
 // config object factory used to derive PluginConfig type
 function createPluginConfig(appConfig: ENSIndexerConfig) {
   const { ensDeployment } = appConfig;
-  // extract the chain and contract configs for Basenames Datasource in order to build ponder config
+  // depending on the ENS Deployment, the chain and contracts for the Basenames Datasource can vary. For example, consider how the Basenames chain and contracts chain depending on the mainnet vs sepolia ENS Deployment
   const { chain, contracts } = ensDeployment[DatasourceName.Basenames];
 
   return createConfig({
@@ -56,7 +55,7 @@ function createPluginConfig(appConfig: ENSIndexerConfig) {
   });
 }
 
-// construct a specific type for plugin configuration
+// implicitly define the type returned by createPluginConfig
 type PluginConfig = ReturnType<typeof createPluginConfig>;
 
 export default {
@@ -80,9 +79,9 @@ export default {
    */
   createPluginConfig,
 
-  /** The plugin name, used for identification */
+  /** The unique plugin name */
   pluginName,
 
-  /** A list of required datasources for the plugin */
+  /** The plugin's required Datasources */
   requiredDatasources,
 } as const satisfies ENSIndexerPlugin<PluginName.Basenames, PluginConfig>;

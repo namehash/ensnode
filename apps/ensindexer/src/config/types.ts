@@ -34,14 +34,14 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The ENS Deployment that ENSIndexer is targeting, defaulting to 'mainnet' (DEFAULT_ENS_DEPLOYMENT_CHAIN).
+   * The ENS Deployment that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_ENS_DEPLOYMENT_CHAIN).
    *
    * See {@link ENSDeploymentChain} for available deployment chains.
    */
   ensDeploymentChain: ENSDeploymentChain;
 
   /**
-   * ENSDeployment configuration, based on the `ensDeploymentChain` value.
+   * Details of the ENS Deployment on `ensDeploymentChain`.
    *
    * See {@link ENSDeployment} for the deployment type.
    */

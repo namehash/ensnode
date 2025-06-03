@@ -64,7 +64,7 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
   createPluginConfig(appConfig: ENSIndexerConfig): CONFIG;
 
   /**
-   * An `activate` handler that should load a plugin's handlers that eventually execute `ponder.on`
+   * An `activate` handler that should load the plugin's handlers that eventually execute `ponder.on`
    */
   activate: () => Promise<void>;
 }
