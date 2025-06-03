@@ -170,14 +170,50 @@ const ENSIndexerConfigSchema = z
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
   })
-  // perform invariant checks
+  /**
+   * Invariant enforcement
+   *
+   * We enforce invariants across multiple values parsed with `ENSIndexerConfigSchema`
+   * by calling `.check()` function with relevant invariant-enforcing logic.
+   * Each such function has access to config values that were already parsed.
+   * If you need to ensure certain config value permutation, say across `ensDeploymentChain`
+   * and `plugins` values, you can define the `.check()` function callback with the following
+   * input param:
+   *
+   * ```ts
+   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">>
+   * ```
+   *
+   * This way, the invariant logic can access all information it needs, while keeping room
+   * for the derived values of ENSIndexerConfig to be computed after all `.check()`s.
+   */
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)
   .check(invariant_validContractConfigs)
-  // inject derived config params
-  // NOTE: all invariants were enforced by that time so we can
-  //    safely project parsed config parameters into derived ones
+  /**
+   * Derived configuration
+   *
+   * We create new configuration parameters from the values parsed with `ENSIndexerConfigSchema`.
+   * This way, we can include complex configuration objects, for example, `ensDeployment` that was
+   * derived from `ensDeploymentChain` and relevant SDK helper method, and attach result value to
+   * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
+   * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
+   *
+   * ```ts
+   * function derive_isSubgraphCompatible<
+   *   CONFIG extends Pick<
+   *     ENSIndexerConfig,
+   *     "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords"
+   *   >,
+   *  >(config: CONFIG): CONFIG & { isSubgraphCompatible: boolean } {
+   *   return {
+   *     ...config,
+   *     isSubgraphCompatible: true // can use some complex logic to calculate the final outcome
+   *   }
+   * }
+   * ```
+   */
   .transform(derive_ensDeployment)
   .transform(derive_isSubgraphCompatible);
 

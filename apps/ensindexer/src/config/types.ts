@@ -2,7 +2,7 @@ import { Blockrange } from "@/lib/types";
 import type {
   ENSDeployment,
   ENSDeploymentChain,
-  ENSDeploymentGlobalType,
+  ENSDeploymentCommonType,
 } from "@ensnode/ens-deployments";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
@@ -45,7 +45,7 @@ export interface ENSIndexerConfig {
    *
    * See {@link ENSDeployment} for the deployment type.
    */
-  ensDeployment: ENSDeploymentGlobalType;
+  ensDeployment: ENSDeploymentCommonType;
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).

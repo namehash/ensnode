@@ -1,5 +1,5 @@
 import type { ENSIndexerConfig } from "@/config/types";
-import { type ENSDeploymentGlobalType, getENSDeployment } from "@ensnode/ens-deployments";
+import { type ENSDeploymentCommonType, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -33,7 +33,7 @@ export const derive_isSubgraphCompatible = <
  */
 export const derive_ensDeployment = <CONFIG extends Pick<ENSIndexerConfig, "ensDeploymentChain">>(
   config: CONFIG,
-): CONFIG & { ensDeployment: ENSDeploymentGlobalType } => {
+): CONFIG & { ensDeployment: ENSDeploymentCommonType } => {
   const ensDeployment = getENSDeployment(config.ensDeploymentChain);
 
   return {

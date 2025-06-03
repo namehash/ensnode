@@ -8,18 +8,18 @@ import sepolia from "./sepolia";
 export * from "./lib/types";
 
 /**
- * Note that here, we define the global ENSDeploymentGlobalType type based off mainnet (which fully
- * specifies all plugin configs). This type will be used to cast each specific ENSDeployment type
- * to the global type in order to ensure that at type-check-time and in `ALL_PLUGINS` every plugin's
- * `config` has valid values (and therefore its type can continue to be inferred).
- *
- * This means that initially upon building the
- * plugin configs, if the user is selecting a deployment that does not fully specify every available
- * plugin, the plugins that are not in that deployment's specification are technically pointing at
- * the mainnet deployment. This is never an issue, however, as those plugin are filtered out
- * (see ponder.config.ts and `getActivePlugins`) and never activated.
+ * ENSDeploymentCommonType is a helper type used for convenience when defining plugins.
+ * Note: Each plugin configuration is defined based on the `ensDeploymentChain` value from
+ * application configuration. Some ENS deployment chain (such as `sepolia`, `holesky`,
+ * or `ens-test-env`) don't require all datasources to be present, while others do
+ * (for example, the `mainnet` ENS deployment chain). All values typed with
+ * ENSDeploymentCommonType are accessed directly inside `createPonderConfig` function
+ * of each individual plugin. ENSDeploymentCommonType points to the type
+ * of the `mainnet` ENS Deployment in order to make fully typed information
+ * about all possible datasources available to every `createPonderConfig` in
+ * each plugin. It has no runtime effect.
  */
-export type ENSDeploymentGlobalType = typeof ENSDeployments.mainnet;
+export type ENSDeploymentCommonType = typeof ENSDeployments.mainnet;
 
 /**
  * ENSDeployments maps from an ENSDeploymentChain to an ENSDeployment.
@@ -64,4 +64,4 @@ export const ENSDeployments = {
  */
 
 export const getENSDeployment = (ensDeploymentChain: ENSDeploymentChain) =>
-  ENSDeployments[ensDeploymentChain] as ENSDeploymentGlobalType;
+  ENSDeployments[ensDeploymentChain] as ENSDeploymentCommonType;

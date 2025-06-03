@@ -1,8 +1,14 @@
 import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
+import { uniq } from "@/lib/lib-helpers";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { getRequiredDatasourceNames } from "@/plugins";
-import { ContractConfig, Datasource, DatasourceName } from "@ensnode/ens-deployments";
+import {
+  ContractConfig,
+  Datasource,
+  DatasourceName,
+  getENSDeployment,
+} from "@ensnode/ens-deployments";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 import { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
@@ -108,9 +114,11 @@ export const activateHandlers =
  * @param pluginNames
  * @returns
  */
-export function getDatasources(pluginNames: PluginName[]): Datasource[] {
-  const { ensDeployment } = config;
-  const requiredDatasourceNames = getRequiredDatasourceNames(pluginNames);
+export function getDatasources(
+  config: Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">,
+): Datasource[] {
+  const requiredDatasourceNames = getRequiredDatasourceNames(config.plugins);
+  const ensDeployment = getENSDeployment(config.ensDeploymentChain);
   const ensDeploymentDatasources = Object.entries(ensDeployment) as Array<
     [DatasourceName, Datasource]
   >;
@@ -128,11 +136,10 @@ export function getDatasources(pluginNames: PluginName[]): Datasource[] {
 /**
  * Get a list of unique indexed chain IDs for selected plugin names.
  */
-export function getIndexedChainIds(pluginNames: PluginName[]): number[] {
-  const datasources = getDatasources(pluginNames);
+export function getIndexedChainIds(datasources: Datasource[]): number[] {
   const indexedChainIds = datasources.map((datasource) => datasource.chain.id);
 
-  return indexedChainIds;
+  return uniq(indexedChainIds);
 }
 
 /**
