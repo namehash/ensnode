@@ -14,7 +14,7 @@ export const ALL_PLUGINS = [
 ] as const;
 
 export type AllPluginsConfig = MergedTypes<
-  ReturnType<(typeof ALL_PLUGINS)[number]["createPluginConfig"]>
+  ReturnType<(typeof ALL_PLUGINS)[number]["createPonderConfig"]>
 >;
 
 // Helper type to merge multiple types into one

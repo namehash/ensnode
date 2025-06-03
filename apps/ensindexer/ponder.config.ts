@@ -35,7 +35,7 @@ const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plu
 
 // combine each plugins' config into a MergedPonderConfig
 const ponderConfig = activePlugins.reduce(
-  (memo, plugin) => mergePonderConfigs(memo, plugin.createPluginConfig(config)),
+  (memo, plugin) => mergePonderConfigs(memo, plugin.createPonderConfig(config)),
   {},
 ) as MergedPonderConfig;
 

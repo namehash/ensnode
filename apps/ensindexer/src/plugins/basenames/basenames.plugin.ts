@@ -23,7 +23,7 @@ const requiredDatasources = [DatasourceName.Basenames];
 const namespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPluginConfig(appConfig: ENSIndexerConfig) {
+function createPonderConfig(appConfig: ENSIndexerConfig) {
   const { ensDeployment } = appConfig;
   // depending on the ENS Deployment, the chain and contracts for the Basenames Datasource can vary. For example, consider how the Basenames chain and contracts chain depending on the mainnet vs sepolia ENS Deployment
   const { chain, contracts } = ensDeployment[DatasourceName.Basenames];
@@ -55,8 +55,8 @@ function createPluginConfig(appConfig: ENSIndexerConfig) {
   });
 }
 
-// implicitly define the type returned by createPluginConfig
-type PluginConfig = ReturnType<typeof createPluginConfig>;
+// implicitly define the type returned by createPonderConfig
+type PonderConfig = ReturnType<typeof createPonderConfig>;
 
 export default {
   /**
@@ -77,11 +77,11 @@ export default {
    * nested factory functions, i.e. to ensure that the plugin configuration
    * is only built when the plugin is activated.
    */
-  createPluginConfig,
+  createPonderConfig,
 
   /** The unique plugin name */
   pluginName,
 
   /** The plugin's required Datasources */
   requiredDatasources,
-} as const satisfies ENSIndexerPlugin<PluginName.Basenames, PluginConfig>;
+} as const satisfies ENSIndexerPlugin<PluginName.Basenames, PonderConfig>;

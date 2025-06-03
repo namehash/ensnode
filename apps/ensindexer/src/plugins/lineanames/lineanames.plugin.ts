@@ -16,7 +16,7 @@ import { createConfig } from "ponder";
  */
 const pluginName = PluginName.Lineanames;
 
-// enlist datasources used within createPluginConfig function
+// enlist datasources used within createPonderConfig function
 // useful for config validation
 const requiredDatasources = [DatasourceName.Lineanames];
 
@@ -24,7 +24,7 @@ const requiredDatasources = [DatasourceName.Lineanames];
 const namespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPluginConfig(appConfig: ENSIndexerConfig) {
+function createPonderConfig(appConfig: ENSIndexerConfig) {
   const { ensDeployment } = appConfig;
   // extract the chain and contract configs for Lineanames Datasource in order to build ponder config
   const { chain, contracts } = ensDeployment[DatasourceName.Lineanames];
@@ -57,7 +57,7 @@ function createPluginConfig(appConfig: ENSIndexerConfig) {
 }
 
 // construct a specific type for plugin configuration
-type PluginConfig = ReturnType<typeof createPluginConfig>;
+type PonderConfig = ReturnType<typeof createPonderConfig>;
 
 export default {
   /**
@@ -79,11 +79,11 @@ export default {
    * nested factory functions, i.e. to ensure that the plugin configuration
    * is only built when the plugin is activated.
    */
-  createPluginConfig,
+  createPonderConfig,
 
   /** The plugin name, used for identification */
   pluginName,
 
   /** A list of required datasources for the plugin */
   requiredDatasources,
-} as const satisfies ENSIndexerPlugin<PluginName.Lineanames, PluginConfig>;
+} as const satisfies ENSIndexerPlugin<PluginName.Lineanames, PonderConfig>;

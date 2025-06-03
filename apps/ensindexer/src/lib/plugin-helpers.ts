@@ -45,7 +45,10 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
 /**
  * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  */
-export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
+export interface ENSIndexerPlugin<
+  PLUGIN_NAME extends PluginName = PluginName,
+  PONDER_CONFIG = unknown,
+> {
   /**
    * A unique plugin name for identification
    */
@@ -61,7 +64,7 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
    * An ENSIndexerPlugin must return a Ponder Config.
    * https://ponder.sh/docs/contracts-and-networks
    */
-  createPluginConfig(appConfig: ENSIndexerConfig): CONFIG;
+  createPonderConfig(appConfig: ENSIndexerConfig): PONDER_CONFIG;
 
   /**
    * An `activate` handler that should load the plugin's handlers that eventually execute `ponder.on`
