@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, RadioTower } from "lucide-react";
+import {BookCheck, Lightbulb, GraduationCap, TextSearch } from "lucide-react"; //TODO: choose one of these of propose some other icon for "Example Queries"
 import * as React from "react";
 
 import { IconENS } from "@/components/icons/ens";
@@ -40,6 +41,11 @@ const navItems = [
       },
     ],
   },
+  {
+    title: "Example Queries",
+    url: "example-queries",
+    icon: TextSearch,
+  }
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
