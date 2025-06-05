@@ -1,60 +1,67 @@
 "use client";
 
-import {SavedQuery} from "@/components/graphiql-editor";
-import {BookCheck, Lightbulb, GraduationCap, Activity, type LucideIcon} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {cn} from "@/lib/utils";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import { useExampleQueries } from "@/app/example-queries/hooks";
+import { SavedQuery } from "@/components/graphiql-editor";
+import { GraphQLIcon } from "@/components/icons/GraphQLIcon";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { Activity, BookCheck, GraduationCap, Lightbulb, type LucideIcon } from "lucide-react";
 import React from "react";
-import {useExampleQueries} from "@/app/example-queries/hooks";
-import {GraphQLIcon} from "@/components/icons/GraphQLIcon";
-
 
 //TODO: the whole text content will probably need adjustments
 //TODO: Refactor at the very end to avoid page.tsx being a 1000 lines of everything
 export default function ExampleQueriesPage() {
-    const {  selectedExampleQueryIndex, allExampleQueries, selectExampleQuery, selectedExampleQuery } = useExampleQueries();
-    return (
-        <main className="h-full w-full p-6 flex flex-col flex-nowrap justify-start items-start gap-6">
-            <header className="h-fit flex flex-col items-start justify-center">
-                <h1 className="text-2xl font-semibold">Explore use cases for GraphQL queries</h1>
-                <p className="text-sm text-muted-foreground mt-1">Discover, execute and modify the example queries to
-                    grasp the power of ENS</p>
-            </header>
-            <div className="h-fit flex flex-row flex-wrap gap-4">
-                {allExampleQueries.map((exampleQuery, idx) =>
-                    <Button key={`ExampleQuery${exampleQuery.id}`}
-                            variant={selectedExampleQueryIndex === idx ? "default" : "outline"}
-                            className={cn(
-                                "justify-start gap-2 h-fit box-border py-2 pl-2 pr-3 max-w-[456px]",
-                                selectedExampleQueryIndex === idx
-                                    ? "bg-primary ring-2 ring-primary/20"
-                                    : "hover:bg-muted",
-                            )}
-                            onClick={() => selectExampleQuery(idx)}>
-                        <exampleQuery.icon style={{width: "20px", height: "auto"}}/>
-                        <div className="text-left min-w-[275px]">
-                            <h1 className="font-medium">{exampleQuery.name}</h1>
-                            <p className={cn("text-xs", "text-muted-foreground")}>{exampleQuery.shortDescription}</p>
-                        </div>
-                    </Button>
-                )}
+  const { selectedExampleQueryIndex, allExampleQueries, selectExampleQuery, selectedExampleQuery } =
+    useExampleQueries();
+  return (
+    <main className="h-full w-full p-6 flex flex-col flex-nowrap justify-start items-start gap-6">
+      <header className="h-fit flex flex-col items-start justify-center">
+        <h1 className="text-2xl font-semibold">Explore use cases for GraphQL queries</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Discover, execute and modify the example queries to grasp the power of ENS
+        </p>
+      </header>
+      <div className="h-fit flex flex-row flex-wrap gap-4">
+        {allExampleQueries.map((exampleQuery, idx) => (
+          <Button
+            key={`ExampleQuery${exampleQuery.id}`}
+            variant={selectedExampleQueryIndex === idx ? "default" : "outline"}
+            className={cn(
+              "justify-start gap-2 h-fit box-border py-2 pl-2 pr-3 max-w-[456px]",
+              selectedExampleQueryIndex === idx
+                ? "bg-primary ring-2 ring-primary/20"
+                : "hover:bg-muted",
+            )}
+            onClick={() => selectExampleQuery(idx)}
+          >
+            <exampleQuery.icon style={{ width: "20px", height: "auto" }} />
+            <div className="text-left min-w-[275px]">
+              <h1 className="font-medium">{exampleQuery.name}</h1>
+              <p className={cn("text-xs", "text-muted-foreground")}>
+                {exampleQuery.shortDescription}
+              </p>
             </div>
-                <Card className="w-full">
-                    <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
-                        <CardTitle className="text-xl">Query Code</CardTitle>
-                        <Button>Open in GraphiQL editor <GraphQLIcon style={{width: "20px", height: "auto"}} /></Button>
-                    </CardHeader>
-                    <CardContent className="flex flex-row flex-nowrap justify-between items-start gap-6">
-            <pre className="p-4 rounded-lg bg-muted font-mono text-xs whitespace-pre overflow-x-auto overflow-y-auto h-[190px] w-2/3">
-              {selectedExampleQuery.query}
-            </pre>
-                        <div className="w-1/3">
-                            <h2 className="text-xl font-semibold mb-1">What does it do?</h2>
-                            <p className="text-sm overflow-y-auto">{selectedExampleQuery.longDescription}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-        </main>
-    );
+          </Button>
+        ))}
+      </div>
+      <Card className="w-full">
+        <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle className="text-xl">Query Code</CardTitle>
+          <Button>
+            Open in GraphiQL editor <GraphQLIcon style={{ width: "20px", height: "auto" }} />
+          </Button>
+        </CardHeader>
+        <CardContent className="flex flex-row flex-nowrap justify-between items-start gap-6">
+          <pre className="p-4 rounded-lg bg-muted font-mono text-xs whitespace-pre overflow-x-auto overflow-y-auto h-[190px] w-2/3">
+            {selectedExampleQuery.query}
+          </pre>
+          <div className="w-1/3">
+            <h2 className="text-xl font-semibold mb-1">What does it do?</h2>
+            <p className="text-sm overflow-y-auto">{selectedExampleQuery.longDescription}</p>
+          </div>
+        </CardContent>
+      </Card>
+    </main>
+  );
 }
