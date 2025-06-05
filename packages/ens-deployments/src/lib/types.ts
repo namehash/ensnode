@@ -33,6 +33,7 @@ export enum DatasourceName {
   Lineanames = "lineanames",
   ThreeDNSOptimism = "threedns-optimism",
   ThreeDNSBase = "threedns-base",
+  EFPRoot = "efp-root",
 }
 
 /**
@@ -98,4 +99,9 @@ export type ENSDeployment = {
    * The Datasource for 3DNS-Powered Names on Base
    */
   [DatasourceName.ThreeDNSBase]?: Datasource;
+
+  /**
+   * The Datasource for Ethereum Follow Protocol Root
+   */
+  [DatasourceName.EFPRoot]?: Datasource;
 };

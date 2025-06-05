@@ -110,13 +110,13 @@ export const activateHandlers =
   };
 
 /**
- * Get a list of unique datasources for selected plugin names.
+ * Get a dictionary of datasources for selected plugin names.
  * @param pluginNames
  * @returns
  */
 export function getDatasources(
   config: Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">,
-): Datasource[] {
+): Record<DatasourceName, Datasource> {
   const requiredDatasourceNames = getRequiredDatasourceNames(config.plugins);
   const ensDeployment = getENSDeployment(config.ensDeploymentChain);
   const ensDeploymentDatasources = Object.entries(ensDeployment) as Array<
@@ -130,7 +130,7 @@ export function getDatasources(
     }
   }
 
-  return Object.values(datasources);
+  return datasources;
 }
 
 /**

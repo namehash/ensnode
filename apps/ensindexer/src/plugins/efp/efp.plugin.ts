@@ -1,5 +1,7 @@
 /**
- * The ThreeDNS plugin describes indexing behavior for 3DNSToken on both Optimism and Base.
+ * The EFP plugin describes indexing behavior for the Ethereum Follow Protocol.
+ *
+ * NOTE: this is an early version of the experimental EFP plugin and is not complete or production ready.
  */
 
 import type { ENSIndexerConfig } from "@/config/types";
@@ -14,10 +16,10 @@ import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig } from "ponder";
 
-const pluginName = PluginName.ThreeDNS;
+const pluginName = PluginName.EFP;
 
 // Define the Datasources required by the plugin
-const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase];
+const requiredDatasources = [DatasourceName.EFPRoot];
 
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
@@ -25,30 +27,15 @@ const namespace = makePluginNamespace(pluginName);
 // config object factory used to derive PonderConfig type
 function createPonderConfig(appConfig: ENSIndexerConfig) {
   const { ensDeployment } = appConfig;
-  // extract the chain and contract configs for root Datasource in order to build ponder config
-  const { chain: optimism, contracts: optimismContracts } =
-    ensDeployment[DatasourceName.ThreeDNSOptimism];
-  const { chain: base, contracts: baseContracts } = ensDeployment[DatasourceName.ThreeDNSBase];
+  // extract the chain and contract configs for the EFP root Datasource in order to build ponder config
+  const { chain, contracts } = ensDeployment[DatasourceName.EFPRoot];
 
   return createConfig({
-    networks: {
-      ...networksConfigForChain(optimism.id),
-      ...networksConfigForChain(base.id),
-    },
+    networks: networksConfigForChain(chain.id),
     contracts: {
-      [namespace("ThreeDNSToken")]: {
-        network: {
-          ...networkConfigForContract(optimism, optimismContracts.ThreeDNSToken),
-          ...networkConfigForContract(base, baseContracts.ThreeDNSToken),
-        },
-        abi: optimismContracts.ThreeDNSToken.abi,
-      },
-      [namespace("Resolver")]: {
-        network: {
-          ...networkConfigForContract(optimism, optimismContracts.Resolver),
-          ...networkConfigForContract(base, baseContracts.Resolver),
-        },
-        abi: optimismContracts.Resolver.abi,
+      [namespace("EFPListRegistry")]: {
+        network: networkConfigForContract(chain, contracts.EFPListRegistry),
+        abi: contracts.EFPListRegistry.abi,
       },
     },
   });
@@ -64,7 +51,7 @@ export default {
   activate: activateHandlers({
     pluginName,
     namespace,
-    handlers: () => [import("./handlers/ThreeDNSToken")],
+    handlers: () => [import("./handlers/EFPListRegistry")],
   }),
 
   /**
@@ -79,4 +66,4 @@ export default {
 
   /** The plugin's required Datasources */
   requiredDatasources,
-} as const satisfies ENSIndexerPlugin<PluginName.ThreeDNS, PonderConfig>;
+} as const satisfies ENSIndexerPlugin<PluginName.EFP, PonderConfig>;

@@ -2,6 +2,7 @@ import { uniq } from "@/lib/lib-helpers";
 import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import basenamesPlugin from "./basenames/basenames.plugin";
+import efpPlugin from "./efp/efp.plugin";
 import lineaNamesPlugin from "./lineanames/lineanames.plugin";
 import subgraphPlugin from "./subgraph/subgraph.plugin";
 import threednsPlugin from "./threedns/threedns.plugin";
@@ -11,6 +12,7 @@ export const ALL_PLUGINS = [
   basenamesPlugin,
   lineaNamesPlugin,
   threednsPlugin,
+  efpPlugin,
 ] as const;
 
 export type AllPluginsConfig = MergedTypes<

@@ -1,8 +1,10 @@
-import { sepolia } from "viem/chains";
+import { baseSepolia, sepolia } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
 import { DatasourceName, type ENSDeployment } from "./lib/types";
 
+// ABIs for the EFP Datasource
+import EFPListRegistry from "./abis/efp/EFPListRegistry";
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
@@ -60,9 +62,27 @@ export default {
     },
   },
   /**
-   * The Sepolia ENSDeployment has no known Datasource for Basenames.
+   * NOTE:
    *
-   * linea.eth's L1Resolver is deployed to Sepolia, but we do not index Linea Sepolia names here.
-   * https://github.com/Consensys/linea-ens/tree/main/packages/linea-ens-resolver/deployments/sepolia
+   *    The Sepolia ENSDeployment has no known Datasource for Basenames.
+   *
+   *    linea.eth's L1Resolver is deployed to Sepolia, but we do not index Linea Sepolia names here.
+   *    https://github.com/Consensys/linea-ens/tree/main/packages/linea-ens-resolver/deployments/sepolia
    */
+
+  /**
+   * The Root EFP Datasource.
+   * Based on the list of EFP testnet deployments:
+   * https://docs.efp.app/production/deployments/
+   */
+  [DatasourceName.EFPRoot]: {
+    chain: baseSepolia,
+    contracts: {
+      EFPListRegistry: {
+        abi: EFPListRegistry,
+        address: "0xDdD39d838909bdFF7b067a5A42DC92Ad4823a26d",
+        startBlock: 14930823,
+      },
+    },
+  },
 } satisfies ENSDeployment;
