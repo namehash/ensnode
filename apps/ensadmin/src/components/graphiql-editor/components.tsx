@@ -7,7 +7,7 @@ import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
-import { useMemo } from "react";
+import {useEffect, useMemo} from "react";
 import { useGraphiQLEditor } from "./hooks";
 import { type SavedQuery, savedQueriesPlugin } from "./plugins/saved-queries";
 
@@ -90,6 +90,38 @@ export function SubgraphGraphiQLEditor(props: GraphiQLEditorProps) {
         plugins={plugins}
       />
     </section>
+  );
+}
+
+//TODO: this is all very rudimentary - just for the sake of trying things out, will be dropped or streamlined later!
+interface ExampleShowcaseProps extends GraphiQLEditorProps{
+  query: string;
+  variables?: string;
+}
+
+/**
+ * A GraphiQL editor for Example Queries subpage.
+ */
+export function ExampleQueriesGraphiQLEditor(props: ExampleShowcaseProps) {
+  const graphiqlEditor = useGraphiQLEditor();
+
+  useEffect(() => {
+    if (props.variables) {
+      graphiqlEditor.actions.setQueryAndVariables(props.query, props.variables);
+    }
+    else {
+      graphiqlEditor.actions.setQuery(props.query);
+    }
+  }, []);
+
+  return (
+      <section className="flex flex-col flex-1">
+        <GraphiQLEditor
+            {...props}
+            query={graphiqlEditor.state.query}
+            variables={graphiqlEditor.state.variables}
+        />
+      </section>
   );
 }
 

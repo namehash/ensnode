@@ -43,7 +43,7 @@ const navItems = [
   },
   {
     title: "Example Queries",
-    url: "example-queries",
+    url: "/example-queries",
     icon: TextSearch,
   },
 ];

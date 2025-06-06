@@ -1,13 +1,12 @@
 "use client";
 
 import { useExampleQueries } from "@/app/example-queries/hooks";
-import { SavedQuery } from "@/components/graphiql-editor";
 import { GraphQLIcon } from "@/components/icons/GraphQLIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Activity, BookCheck, GraduationCap, Lightbulb, type LucideIcon } from "lucide-react";
 import React from "react";
+import Link from "next/link";
 
 //TODO: the whole text content will probably need adjustments
 //TODO: Refactor at the very end to avoid page.tsx being a 1000 lines of everything
@@ -48,8 +47,11 @@ export default function ExampleQueriesPage() {
       <Card className="w-full">
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl">Query Code</CardTitle>
-          <Button>
-            Open in GraphiQL editor <GraphQLIcon style={{ width: "20px", height: "auto" }} />
+            {/*TODO: for now it is a very rudimentary test of how things could work - will surely be polished dropped later*/}
+          <Button asChild>
+              <Link href={`/example-queries/example-editor?query=${selectedExampleQuery.query}&variables=${selectedExampleQuery.variables}`} target="_self">
+                  Open in GraphiQL editor <GraphQLIcon style={{ width: "20px", height: "auto" }} />
+              </Link>
           </Button>
         </CardHeader>
         <CardContent className="flex flex-row flex-nowrap justify-between items-start gap-6">

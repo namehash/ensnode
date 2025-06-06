@@ -7,15 +7,15 @@ interface ExampleQuery extends SavedQuery {
   /**
    * Short query description for list of examples
    */
-  shortDescription: string;
+  shortDescription: string; //TODO: could be renamed to sth like "catchphrase"
   /**
-   * Short query description for "Query Code" panel
+   * More detailed query description for "Query Code" panel
    */
-  longDescription: string;
+  longDescription: string; //TODO: if the above is renamed, this could be just "description"
   icon: LucideIcon;
 }
 
-//TODO: make this hook inject chosen query into GraphiQL editor in Subgraph-style panel
+//TODO: make this hook inject chosen query into GraphiQL editor in Subgraph-style panel - or figure out some sensible alternative
 export function useExampleQueries() {
   const [selectedExampleQueryIndex, selectExampleQuery] = useState(0);
 
