@@ -5,8 +5,8 @@ import { GraphQLIcon } from "@/components/icons/GraphQLIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import React from "react";
 import Link from "next/link";
+import React from "react";
 
 //TODO: the whole text content will probably need adjustments
 //TODO: Refactor at the very end to avoid page.tsx being a 1000 lines of everything
@@ -47,11 +47,14 @@ export default function ExampleQueriesPage() {
       <Card className="w-full">
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl">Query Code</CardTitle>
-            {/*TODO: for now it is a very rudimentary test of how things could work - will surely be polished dropped later*/}
+          {/*TODO: for now it is a very rudimentary test of how things could work - will surely be polished dropped later*/}
           <Button asChild>
-              <Link href={`/example-queries/example-editor?query=${selectedExampleQuery.query}&variables=${selectedExampleQuery.variables}`} target="_self">
-                  Open in GraphiQL editor <GraphQLIcon style={{ width: "20px", height: "auto" }} />
-              </Link>
+            <Link
+              href={`/example-queries/example-editor?query=${selectedExampleQuery.query}&variables=${selectedExampleQuery.variables}`}
+              target="_self"
+            >
+              Open in GraphiQL editor <GraphQLIcon style={{ width: "20px", height: "auto" }} />
+            </Link>
           </Button>
         </CardHeader>
         <CardContent className="flex flex-row flex-nowrap justify-between items-start gap-6">
