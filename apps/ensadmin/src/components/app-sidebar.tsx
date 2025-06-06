@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, RadioTower } from "lucide-react";
+import { BookCheck, GraduationCap, Lightbulb, TextSearch } from "lucide-react"; //TODO: choose one of these of propose some other icon for "Example Queries"
 import * as React from "react";
 
 import { IconENS } from "@/components/icons/ens";
@@ -39,6 +40,11 @@ const navItems = [
         url: "/ponder-client-api",
       },
     ],
+  },
+  {
+    title: "Example Queries",
+    url: "/example-queries",
+    icon: TextSearch,
   },
 ];
 
