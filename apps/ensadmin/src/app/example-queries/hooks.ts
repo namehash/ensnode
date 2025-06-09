@@ -15,7 +15,7 @@ interface ExampleQuery extends SavedQuery {
   icon: LucideIcon;
 }
 
-//TODO: make this hook inject chosen query into GraphiQL editor in Subgraph-style panel - or figure out some sensible alternative
+//TODO: make this hook inject chosen query into GraphiQL editor in Subgraph-style panel - or figure out some sensible alternative (cause the 1st proposed approach is probably wrong)
 export function useExampleQueries() {
   const [selectedExampleQueryIndex, selectExampleQuery] = useState(0);
 
@@ -52,7 +52,7 @@ export function useExampleQueries() {
           shortDescription: "Get the first 20 subnames",
           longDescription: "Get the first 20 subnames of `ens.eth` ordered by name ascending",
           icon: BookCheck,
-          query: `query ($first: Int!, $name: String!) {
+          query: `query GetSubnames($first: Int!, $name: String!) {
   domains(first: 1, where: {name: $name}) {
     subdomains(first: $first, orderBy: name, orderDirection: asc) {
       id
@@ -75,7 +75,7 @@ export function useExampleQueries() {
           longDescription:
             "Get the first 20 names owned by address `0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5` ordered by name ascending",
           icon: GraduationCap,
-          query: `query ($first: Int!, $orderDirection: OrderDirection!, $owner: String!) {
+          query: `query GetOwnedNames($first: Int!, $orderDirection: OrderDirection!, $owner: String!) {
   domains(
     first: $first
     orderBy: name

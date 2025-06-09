@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
+import ExampleQueriesDocumentationLinks from "@/app/example-queries/subcomponents/ExampleQueriesDocumentationLinks";
 
 //TODO: the whole text content will probably need adjustments
 //TODO: Refactor at the very end to avoid page.tsx being a 1000 lines of everything
@@ -15,6 +16,7 @@ export default function ExampleQueriesPage() {
     useExampleQueries();
   return (
     <main className="h-full w-full p-6 flex flex-col flex-nowrap justify-start items-start gap-6">
+      <ExampleQueriesDocumentationLinks styles="flex xl:hidden bg-gray-100 p-4 rounded-lg" />
       <header className="h-fit flex flex-col items-start justify-center">
         <h1 className="text-2xl font-semibold">Explore use cases for GraphQL queries</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -50,18 +52,25 @@ export default function ExampleQueriesPage() {
           {/*TODO: for now it is a very rudimentary test of how things could work - will surely be polished dropped later*/}
           <Button asChild>
             <Link
-              href={`/example-queries/example-editor?query=${selectedExampleQuery.query}&variables=${selectedExampleQuery.variables}`}
+              href={{
+                  pathname: "/example-queries/example-editor",
+                  query: {
+                      query: `${selectedExampleQuery.query}`,
+                      variables: `${selectedExampleQuery.variables}`
+                  }
+              }
+              }
               target="_self"
             >
               Open in GraphiQL editor <GraphQLIcon style={{ width: "20px", height: "auto" }} />
             </Link>
           </Button>
         </CardHeader>
-        <CardContent className="flex flex-row flex-nowrap justify-between items-start gap-6">
-          <pre className="p-4 rounded-lg bg-muted font-mono text-xs whitespace-pre overflow-x-auto overflow-y-auto h-[190px] w-2/3">
+        <CardContent className="flex flex-col lg:flex-row flex-nowrap justify-between items-start gap-6">
+          <pre className="p-4 rounded-lg bg-muted font-mono text-xs whitespace-pre overflow-x-auto overflow-y-auto h-[190px] w-full lg:w-2/3">
             {selectedExampleQuery.query}
           </pre>
-          <div className="w-1/3">
+          <div className="w-full lg:w-1/3">
             <h2 className="text-xl font-semibold mb-1">What does it do?</h2>
             <p className="text-sm overflow-y-auto">{selectedExampleQuery.longDescription}</p>
           </div>

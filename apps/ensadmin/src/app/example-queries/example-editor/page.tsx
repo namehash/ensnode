@@ -1,6 +1,7 @@
 import { ExampleQueriesGraphiQLEditor } from "@/components/graphiql-editor";
 import { defaultEnsNodeUrl } from "@/lib/env";
 
+//TODO: this type is defined many times across multiple pages (I assume to avoid exporting) but maybe we can unify it?
 type PageProps = {
   searchParams: Promise<{
     [key: string]: string | string[] | undefined;
@@ -9,8 +10,6 @@ type PageProps = {
 
 export default async function ExampleQueryEditor({ searchParams }: PageProps) {
   const { ensnode = defaultEnsNodeUrl(), query, variables } = await searchParams;
-
-  console.log("Test", await searchParams);
 
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
