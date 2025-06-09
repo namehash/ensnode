@@ -157,6 +157,10 @@ ENSRainbow heals unknown ENS names: it provides a simple API to recover labels f
 
 ## Packages
 
+### [`packages/ensnode-sdk`](packages/ensnode-sdk)
+
+Software Development Kit for interacting with ENSNode services and data. Includes common utilities used across ENSNode applications.
+
 ### [`packages/ens-deployments`](packages/ens-deployments)
 
 Convenient catalog of ENS deployments including chain, contract addresses, start blocks, and event filters.
@@ -164,10 +168,6 @@ Convenient catalog of ENS deployments including chain, contract addresses, start
 ### [`packages/ensrainbow-sdk`](packages/ensrainbow-sdk)
 
 TypeScript library for interacting with the [ENSRainbow API](apps/ensrainbow).
-
-### [`packages/ensnode-utils`](packages/ensnode-utils)
-
-Common utilities used across ENSNode applications
 
 ### [`packages/ensnode-schema`](packages/ensnode-schema)
 

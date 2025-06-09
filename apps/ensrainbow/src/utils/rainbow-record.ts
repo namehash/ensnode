@@ -1,5 +1,5 @@
+import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
-import type { LabelHash } from "@ensnode/utils";
 import { ByteArray } from "viem";
 
 export interface RainbowRecord {

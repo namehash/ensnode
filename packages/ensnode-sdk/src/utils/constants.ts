@@ -10,3 +10,10 @@ export const ROOT_NODE: Node = namehash("");
  * See apps/ensindexer/src/handlers/Registry.ts for context.
  */
 export const REVERSE_ROOT_NODES: Set<Node> = new Set([namehash("addr.reverse")]);
+
+/**
+ * The ETH coinType.
+ *
+ * @see https://docs.ens.domains/ensip/9
+ */
+export const ETH_COIN_TYPE = 60n;

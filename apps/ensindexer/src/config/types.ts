@@ -1,6 +1,10 @@
 import { Blockrange } from "@/lib/types";
-import type { ENSDeployments } from "@ensnode/ens-deployments";
-import type { PluginName } from "@ensnode/utils";
+import type {
+  ENSDeployment,
+  ENSDeploymentChain,
+  ENSDeploymentCommonType,
+} from "@ensnode/ens-deployments";
+import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -30,11 +34,18 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The ENS Deployment that ENSIndexer is targeting, defaulting to 'mainnet' (DEFAULT_ENS_DEPLOYMENT_CHAIN).
+   * The ENS Deployment that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_ENS_DEPLOYMENT_CHAIN).
    *
-   * See {@link ENSDeployments} for available deployments.
+   * See {@link ENSDeploymentChain} for available deployment chains.
    */
-  ensDeploymentChain: keyof typeof ENSDeployments;
+  ensDeploymentChain: ENSDeploymentChain;
+
+  /**
+   * Details of the ENS Deployment on `ensDeploymentChain`.
+   *
+   * See {@link ENSDeployment} for the deployment type.
+   */
+  ensDeployment: ENSDeploymentCommonType;
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).
@@ -109,11 +120,30 @@ export interface ENSIndexerConfig {
    * Enable or disable healing of addr.reverse subnames, defaulting to true (DEFAULT_HEAL_REVERSE_ADDRESSES).
    * If this is set to true, ENSIndexer will attempt to heal subnames of addr.reverse.
    *
-   * Note that enabling `healReverseAddresses` results in indexed data no longer being backwards
+   * Note that enabling {@link healReverseAddresses} results in indexed data no longer being backwards
    * compatible with the ENS Subgraph. For full data-level backwards compatibility with the ENS
-   * Subgraph, `healReverseAddresses` should be `false`.
+   * Subgraph, {@link healReverseAddresses} should be `false`.
    */
   healReverseAddresses: boolean;
+
+  /**
+   * Enable or disable the indexing of Resolver record values, defaulting to true (DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS).
+   * If this is set to false, ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.
+   * If this is set to true, ENSIndexer will track both the keys and the values of Resolver records.
+   *
+   * WARNING: Special care must be taken when interacting with indexed resolver record values. It is
+   * unsafe to naively assume that indexed resolver record values are equivalent to the resolver
+   * record values that would be returned through dynamic lookups via the ENS protocol. For example,
+   * if a resolver implements CCIP-Read, the resolver records may not be discoverable through
+   * onchain indexing. This feature is under R&D. At this time we do not recommend anyone directly
+   * use indexed resolver record values in their applications. Features are planned in the ENSNode
+   * roadmap that will provide safe use of indexed resolver record values (in appropriate contexts).
+   *
+   * Note that enabling {@link indexAdditionalResolverRecords} results in indexed data becoming a _superset_ of
+   * the Subgraph. For exact data-level backwards compatibility with the ENS Subgraph,
+   * {@link indexAdditionalResolverRecords} should be `false`.
+   */
+  indexAdditionalResolverRecords: boolean;
 
   /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
@@ -158,6 +188,19 @@ export interface ENSIndexerConfig {
    *   by {@link plugins} must be 1
    */
   globalBlockrange: Blockrange;
+
+  /**
+   * A flag derived from the built config indicating whether ENSIndexer is operating in a
+   * subgraph-compatible way. This flag is true if:
+   * a) only the subgraph plugin is activated,
+   * b) healReverseAddresess is false, and
+   * c) indexRecordValues is false
+   *
+   * If {@link isSubgraphCompatible} is true, ENSIndexer will:
+   * 1) use subgraph-compatible IDs for entities and events
+   * 2) limit indexing behavior to subgraph indexing semantics
+   */
+  isSubgraphCompatible: boolean;
 }
 
 /**
@@ -186,6 +229,7 @@ export interface ENSIndexerEnvironment {
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
+  indexAdditionalResolverRecords: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;

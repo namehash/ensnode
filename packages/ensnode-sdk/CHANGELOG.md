@@ -1,4 +1,4 @@
-# @ensnode/utils
+# @ensnode/ensnode-sdk
 
 ## 0.27.0
 

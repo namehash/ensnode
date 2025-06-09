@@ -3,9 +3,9 @@ import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { type Node, PluginName, uint256ToHex32 } from "@ensnode/utils";
+import { type Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
-import { makeSharedEventValues, upsertAccount } from "@/lib/db-helpers";
+import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
@@ -43,17 +43,13 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 /**
  * makes a set of shared handlers for the NameWrapper contract
  *
- * @param pluginName the name of the plugin using these shared handlers
  * @param registrarManagedName the name that the Registrar that NameWrapper interacts with registers subnames of
  */
 export const makeNameWrapperHandlers = ({
-  pluginName,
   registrarManagedName,
 }: {
-  pluginName: PluginName;
   registrarManagedName: RegistrarManagedName;
 }) => {
-  const sharedEventValues = makeSharedEventValues(pluginName);
   const registrarManagedNode = namehash(registrarManagedName);
 
   async function handleTransfer(
@@ -260,7 +256,6 @@ export const makeNameWrapperHandlers = ({
         context,
         event,
         makeEventId(
-          pluginName,
           context.network.chainId,
           event.block.number,
           event.log.logIndex,
@@ -284,7 +279,6 @@ export const makeNameWrapperHandlers = ({
           context,
           event,
           makeEventId(
-            pluginName,
             context.network.chainId,
             event.block.number,
             event.log.logIndex,
