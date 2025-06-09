@@ -18,6 +18,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
+import {Registration} from "@/components/recent-registrations/types";
 
 // Helper function to safely format dates
 const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
@@ -135,18 +136,16 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
  * Determines the true owner of a domain.
  * If the owner is the NameWrapper contract, returns the wrapped owner instead.
  *
- * @param owner The owner address
- * @param wrappedOwner The wrapped owner address (optional)
- * @returns The true owner address
+ * @param registration - Extended data associated with Registration event
  */
-function getTrueOwner(owner: Address, wrappedOwner?: Address) {
+function getTrueOwner(registration: Registration) {
   // Only use wrapped owner if the owner is the NameWrapper contract
-  if (wrappedOwner && isAddressEqual(owner, NAME_WRAPPER_ADDRESS)) {
-    return getAddress(wrappedOwner);
+  if (registration.registration.wrappedOwner && isAddressEqual(registration.registration.owner, NAME_WRAPPER_ADDRESS)) {
+    return getAddress(registration.registration.wrappedOwner);
   }
 
   // Otherwise, use the regular owner
-  return getAddress(owner);
+  return getAddress(registration.registration.owner);
 }
 
 export function RecentRegistrations() {
@@ -211,15 +210,15 @@ export function RecentRegistrations() {
             <TableBody>
               {isClient &&
                 recentRegistrationsQuery.data?.registrations.map((registration) => (
-                  <TableRow key={registration.domain.name}>
+                  <TableRow key={registration.registration.name}>
                     <TableCell className="font-medium">
                       <a
-                        href={getEnsAppUrlForName(registration.domain.name)}
+                        href={getEnsAppUrlForName(registration.registration.name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-blue-600 hover:underline"
                       >
-                        {registration.domain.name}
+                        {registration.registration.name}
                         <ExternalLink size={14} className="inline-block" />
                       </a>
                     </TableCell>
@@ -235,10 +234,7 @@ export function RecentRegistrations() {
                     <TableCell>
                       {indexedChainId ? (
                         <ENSName
-                          address={getTrueOwner(
-                            registration.domain.owner,
-                            registration.domain.wrappedOwner,
-                          )}
+                          address={getTrueOwner(registration)}
                           chainId={indexedChainId}
                           showAvatar={true}
                         />

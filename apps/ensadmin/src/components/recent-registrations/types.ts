@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 /**
- * Types for the recent registrations component
+ * The data model returned by a GraphQL query for the latest registrations.
  */
 export interface LatestRegistrationResult {
   name: string;
@@ -16,36 +16,58 @@ export interface LatestRegistrationResult {
 }
 
 /**
-  A "pure" version of LatestRegistrationResult that streamlines data usage in RecentRegistrations component.
- @params:
- * name - string - recently registered name
- * createdAt - number - a UNIX timestamp in seconds of when the name was originally created
- * expiryDate - number - a UNIX timestamp in seconds of when will the current owner's tenure end
- * owner - Address -  owner's address
- * wrappedOwner - Address - optional - wrapped owner's address
+ Data associated with a Registration event.
  **/
 export interface LatestRegistration {
+  /**
+   * recently registered ENS name
+   */
   name: string;
+
+  /**
+   * a UNIX timestamp in seconds of when the name was originally created
+   */
   createdAt: number;
+
+  /**
+   * a UNIX timestamp in seconds of when will the current owner's tenure end
+   */
   expiryDate: number;
+
+  /**
+   * owner's address
+   */
   owner: Address;
+
+  /**
+   * wrapped owner's address
+   */
   wrappedOwner?: Address;
 }
 
 /**
- * Extended result of the GraphQl RecentRegistrationsQuery
- * @params
- * registrationDate - number - a UNIX timestamp in seconds of when the name was registered by its current owner
- * expiryDate - number - a UNIX timestamp in seconds of when will the current owner's tenure end
- * domain - LatestRegistration - A "pure" version of LatestRegistrationResult that streamlines data usage in RecentRegistrations component.
+ * Extended data associated with Registration event
  */
-
 export interface Registration {
+  /**
+   * a UNIX timestamp in seconds of when the name was registered by its current owner
+   */
   registrationDate: string;
+
+  /**
+   * a UNIX timestamp in seconds of when will the current owner's tenure end
+   */
   expiryDate: string;
-  domain: LatestRegistration;
+
+  /**
+   * Data associated with a Registration event.
+   */
+  registration: LatestRegistration;
 }
 
+/**
+ * Data about 5 most recent registrations
+ */
 export interface RecentRegistrationsResponse {
   registrations: Registration[];
 }

@@ -52,13 +52,13 @@ async function fetchRecentRegistrations(baseUrl: URL): Promise<RecentRegistratio
 
   const data = await response.json();
   data.data.registrations = data.data.registrations.map(
-    (latestRegistration: {
+    (graphQLQueryResult: {
       registrationDate: string;
       expiryDate: string;
       domain: LatestRegistrationResult;
     }) => ({
-      ...latestRegistration,
-      domain: toLatestRegistration(latestRegistration.domain),
+      ...graphQLQueryResult,
+      registration: toLatestRegistration(graphQLQueryResult.domain),
     }),
   );
 
