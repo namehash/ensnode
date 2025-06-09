@@ -9,7 +9,7 @@ import Link from "next/link";
 import React from "react";
 
 interface ExampleQueriesContentProps {
-  ensNodeInstanceURL: string;
+  ensNodeInstanceURL: string | URL;
 }
 
 export function ExampleQueriesContent({ ensNodeInstanceURL }: ExampleQueriesContentProps) {
