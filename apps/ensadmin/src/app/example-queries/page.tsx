@@ -1,7 +1,7 @@
+import { ExampleQueriesContent } from "@/app/example-queries/components/ExampleQueriesContent";
 import ExampleQueriesDocumentationLinks from "@/app/example-queries/components/ExampleQueriesDocumentationLinks";
 import { defaultEnsNodeUrl } from "@/lib/env";
 import React from "react";
-import {ExampleQueriesContent} from "@/app/example-queries/components/ExampleQueriesContent";
 
 type PageProps = {
   searchParams: Promise<{
@@ -12,7 +12,6 @@ type PageProps = {
 //TODO: the whole text content will probably need adjustments
 //TODO: Refactor at the very end to avoid page.tsx being a 1000 lines of everything (partially done)
 export default async function ExampleQueriesPage({ searchParams }: PageProps) {
-
   const { ensnode = defaultEnsNodeUrl() } = await searchParams;
 
   const baseEnsnodeUrl = Array.isArray(ensnode)
@@ -30,7 +29,7 @@ export default async function ExampleQueriesPage({ searchParams }: PageProps) {
           Discover, execute and modify the example queries to grasp the power of ENS
         </p>
       </header>
-    <ExampleQueriesContent  ensNodeInstanceURL={baseEnsnodeUrl}/>
+      <ExampleQueriesContent ensNodeInstanceURL={baseEnsnodeUrl} />
     </main>
   );
 }
