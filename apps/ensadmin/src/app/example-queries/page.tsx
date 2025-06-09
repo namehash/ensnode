@@ -5,15 +5,31 @@ import ExampleQueriesDocumentationLinks from "@/app/example-queries/subcomponent
 import { GraphQLIcon } from "@/components/icons/GraphQLIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { defaultEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
 
+type PageProps = {
+  searchParams: Promise<{
+    [key: string]: string | string[] | undefined;
+  }>;
+};
+
 //TODO: the whole text content will probably need adjustments
 //TODO: Refactor at the very end to avoid page.tsx being a 1000 lines of everything
-export default function ExampleQueriesPage() {
+export default async function ExampleQueriesPage({ searchParams }: PageProps) {
   const { selectedExampleQueryIndex, allExampleQueries, selectExampleQuery, selectedExampleQuery } =
     useExampleQueries();
+
+  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
+
+  const baseEnsnodeUrl = Array.isArray(ensnode)
+    ? ensnode[0]
+    : typeof ensnode === "string"
+      ? ensnode
+      : defaultEnsNodeUrl();
+
   return (
     <main className="h-full w-full p-6 flex flex-col flex-nowrap justify-start items-start gap-6">
       <ExampleQueriesDocumentationLinks styles="flex xl:hidden bg-gray-100 p-4 rounded-lg" />
@@ -55,6 +71,7 @@ export default function ExampleQueriesPage() {
               href={{
                 pathname: "/example-queries/example-editor",
                 query: {
+                  ensnode: `${baseEnsnodeUrl}`,
                   query: `${selectedExampleQuery.query}`,
                   variables: `${selectedExampleQuery.variables}`,
                 },
