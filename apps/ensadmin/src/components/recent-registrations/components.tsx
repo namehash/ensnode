@@ -3,6 +3,7 @@
 import { ENSName } from "@/components/ens-name";
 import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
+import { Registration } from "@/components/recent-registrations/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -18,7 +19,6 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
-import {Registration} from "@/components/recent-registrations/types";
 
 // Helper function to safely format dates
 const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
@@ -140,7 +140,10 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
  */
 function getTrueOwner(registration: Registration) {
   // Only use wrapped owner if the owner is the NameWrapper contract
-  if (registration.registration.wrappedOwner && isAddressEqual(registration.registration.owner, NAME_WRAPPER_ADDRESS)) {
+  if (
+    registration.registration.wrappedOwner &&
+    isAddressEqual(registration.registration.owner, NAME_WRAPPER_ADDRESS)
+  ) {
     return getAddress(registration.registration.wrappedOwner);
   }
 
