@@ -1,13 +1,13 @@
 "use client";
 
 import { useExampleQueries } from "@/app/example-queries/hooks";
+import ExampleQueriesDocumentationLinks from "@/app/example-queries/subcomponents/ExampleQueriesDocumentationLinks";
 import { GraphQLIcon } from "@/components/icons/GraphQLIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
-import ExampleQueriesDocumentationLinks from "@/app/example-queries/subcomponents/ExampleQueriesDocumentationLinks";
 
 //TODO: the whole text content will probably need adjustments
 //TODO: Refactor at the very end to avoid page.tsx being a 1000 lines of everything
@@ -53,13 +53,12 @@ export default function ExampleQueriesPage() {
           <Button asChild>
             <Link
               href={{
-                  pathname: "/example-queries/example-editor",
-                  query: {
-                      query: `${selectedExampleQuery.query}`,
-                      variables: `${selectedExampleQuery.variables}`
-                  }
-              }
-              }
+                pathname: "/example-queries/example-editor",
+                query: {
+                  query: `${selectedExampleQuery.query}`,
+                  variables: `${selectedExampleQuery.variables}`,
+                },
+              }}
               target="_self"
             >
               Open in GraphiQL editor <GraphQLIcon style={{ width: "20px", height: "auto" }} />
