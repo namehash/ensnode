@@ -86,7 +86,7 @@ export default {
      * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
      * the forward resolution of data associated with subnames of 'basetest.eth' to an offchain
      * gateway server operated by Coinbase that uses the following subregistry contracts on
-     * Base as its source of truth.
+     * Base Sepolia as its source of truth.
      *
      * The owner of 'basetest.eth' in the ENS Registry on the Sepolia "ENS deployment"
      * (e.g. Coinbase) has the ability to change this configuration at any time.
@@ -137,7 +137,7 @@ export default {
      * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
      * the forward resolution of data associated with subnames of 'linea-sepolia.eth' to an offchain
      * gateway server operated by Consensys that uses the following subregistry contracts on
-     * Linea as its source of truth.
+     * Linea Sepolia as its source of truth.
      *
      * The owner of 'linea-sepolia.eth' in the ENS Registry on the Sepolia "ENS deployment"
      * (e.g. Consensys) has the ability to change this configuration at any time.
@@ -154,7 +154,7 @@ export default {
       },
       Resolver: {
         ...ResolverConfig,
-        startBlock: 2395094, // based on startBlock of Registry on Linea
+        startBlock: 2395094, // based on startBlock of Registry on Linea Sepolia
       },
       BaseRegistrar: {
         abi: linea_BaseRegistrar,
