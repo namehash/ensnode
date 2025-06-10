@@ -3,8 +3,8 @@ import { ponder } from "ponder:registry";
 import config from "@/config";
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
-import { getRegistrarManagedName } from "@/plugins/lineanames/lib/registrar-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
+import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 export default function ({
   pluginName,
