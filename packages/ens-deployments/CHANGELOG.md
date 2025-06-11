@@ -1,5 +1,15 @@
 # @ensnode/ens-deployments
 
+## 0.28.0
+
+### Minor Changes
+
+- [#772](https://github.com/namehash/ensnode/pull/772) [`a41cc26`](https://github.com/namehash/ensnode/commit/a41cc26bbef49768f398780d67e4caeca7b22fb1) Thanks [@NickSneo](https://github.com/NickSneo)! - Enable indexing with Lineanames and Basenames for the `sepolia` ENS Deployment Chain.
+
+### Patch Changes
+
+- [#779](https://github.com/namehash/ensnode/pull/779) [`e30289e`](https://github.com/namehash/ensnode/commit/e30289e5292a991638fd55cc04d663dc97ecb30a) Thanks [@tk-o](https://github.com/tk-o)! - Fix references across monorepo dependencies.
+
 ## 0.27.0
 
 ## 0.26.0
