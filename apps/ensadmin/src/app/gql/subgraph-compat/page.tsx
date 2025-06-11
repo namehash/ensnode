@@ -29,6 +29,29 @@ const savedQueries = [
     ),
   },
   {
+    operationName: "getDomainsWithPagination",
+    id: "1a",
+    name: "Get Domains with Pagination",
+    category: "Domain",
+    query: `query GetDomainsWithPagination($first: Int!, $skip: Int) {
+  domains(orderBy: createdAt, orderDirection: asc, first: $first, skip: $skip) {
+    id
+    name
+    expiryDate
+    createdAt
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        first: 10,
+        skip: 20,
+      },
+      null,
+      2,
+    ),
+  },
+  {
     operationName: "getDomainByNamehash",
     id: "2",
     name: "Get Domain by Namehash",
