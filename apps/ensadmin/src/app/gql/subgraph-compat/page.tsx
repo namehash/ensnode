@@ -829,7 +829,8 @@ const savedQueries = [
     variables: JSON.stringify(
       {
         id: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df", // ens.eth
-        resolverId: "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41-0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df", // ENS: Public Resolver 2
+        resolverId:
+          "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41-0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df", // ENS: Public Resolver 2
       },
       null,
       2,
