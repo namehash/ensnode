@@ -893,6 +893,51 @@ const savedQueries = [
       2,
     ),
   },
+  {
+    operationName: "getHistoricalResolverRecords",
+    id: "20",
+    name: "Get Historical Resolver Records Evolution",
+    category: "Resolver",
+    query: `query GetHistoricalResolverRecords($ensName: String!) {
+  domains(where: { name: $ensName }) {
+    id
+    name
+    newResolvers {
+      resolverId
+      blockNumber
+      transactionID
+      resolver {
+        address
+        textChangeds {
+          key
+          value
+          blockNumber
+          transactionID
+        }
+        multicoinAddrChangeds {
+          coinType
+          addr
+          blockNumber
+          transactionID
+        }
+        contenthashChangeds {
+          hash
+          blockNumber
+          transactionID
+        }
+      }
+    }
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        ensName: "ens.eth",
+      },
+      null,
+      2,
+    ),
+  },
 ] satisfies Array<SavedQuery>;
 
 export default async function SubgraphGraphQLPage({ searchParams }: PageProps) {
