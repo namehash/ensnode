@@ -65,6 +65,12 @@ jobs:
       # be rate limits hit but we do not care for those.
       - name: Run ENSIndexer runtime integrity checks
         env:
+          # Note on managing below configuration with GitHub:
+          # If we decide to have these inline values replaced with GitHub managed ones,
+          # we’d need to use GitHub Repository Variables to allow workflow runs
+          # against forked repositories. Using GitHub Repository Secrets won't work,
+          # as secrets can only be provided to workflows running against
+          # the very repository they were defined on.
           ACTIVE_PLUGINS: subgraph,basenames,lineanames,threedns
           RPC_URL_1: https://eth.drpc.org
           RPC_URL_10: https://optimism.drpc.org
