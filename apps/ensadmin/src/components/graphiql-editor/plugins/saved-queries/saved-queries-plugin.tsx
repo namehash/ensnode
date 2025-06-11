@@ -9,7 +9,7 @@ import "./saved-queries-plugin.css";
 export interface SavedQuery {
   id: string;
   name: string;
-  category: string;
+  category?: string;
 
   /**
    * The GraphQL query.
