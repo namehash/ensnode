@@ -20,22 +20,18 @@ These hosted instances are provided free of charge to the ENS community, and whi
 The key differences between these hosted deployments is the ENS deployment being indexed (mainnet vs a testnet) and the list of ENSNode plugins that are activated. See the table below for details.
 Main difference from client perspective is chain being indexed and list of plugins being handled. Here is the table listing differences between those.
 
-<table>
-    <thead>
-    <tr>
-        <th></th>
-        <th><strong>ENSNode 'Alpha'</strong></th>
-    </tr>
-    </thead>
+### Alpha-style Deployments
+
+These ENSNode instances focus on pushing the boundaries of what's possible with ENSNode.
+
+#### ENSNode 'Alpha'
+<table style={{marginTop: "0"}}>
     <tbody>
     <tr>
-        <td>ENSNode</td>
-        <td><a href="https://api.alpha.ensnode.io">https://api.alpha.ensnode.io</a></td>
-    </tr>
-    <tr>
-        <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
-        <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io">
+        <td style={{verticalAlign: "middle", paddingTop: "25px"}}>Hosted at</td>
+        <td style={{marginTop: "17px"}} class="flex flex-col min-[1180px]:flex-row justify-start min-[1180px]:items-center max-[1180px]:gap-2">
+            <a href="https://api.alpha.ensnode.io">https://api.alpha.ensnode.io</a>
+            <a class="not-content block w-fit min-[1180px]:pl-4" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io">
                 <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
                 hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
                     <svg
@@ -85,6 +81,10 @@ Main difference from client perspective is chain being indexed and list of plugi
                 </button>
             </a>
         </td>
+    </tr>
+    <tr>
+        <td style={{verticalAlign: "middle"}}>ENS Deployment</td>
+        <td>mainnet</td>
     </tr>
     <tr>
         <td>Active Plugins</td>
@@ -99,22 +99,18 @@ Main difference from client perspective is chain being indexed and list of plugi
     </tbody>
 </table>
 
-<table>
-    <thead>
-    <tr>
-        <th></th>
-        <th><strong>ENSNode 'Mainnet'</strong></th>
-    </tr>
-    </thead>
+### Subgraph-style Deployments
+
+These ENSNode instances focus on maximizing backwards compatibility with the ENS Subgraph.
+
+#### ENSNode 'Mainnet'
+<table style={{marginTop: "0"}}>
     <tbody>
     <tr>
-        <td>ENSNode</td>
-        <td><a href="https://api.mainnet.ensnode.io">https://api.mainnet.ensnode.io</a></td>
-    </tr>
-    <tr>
-        <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
-        <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io">
+        <td style={{verticalAlign: "middle", paddingTop: "24px"}}>Hosted at</td>
+        <td style={{marginTop: "18px"}} class="flex flex-col min-[1180px]:flex-row justify-start min-[1180px]:items-center max-[1170px]:gap-2">
+            <a href="https://api.mainnet.ensnode.io">https://api.mainnet.ensnode.io</a>
+            <a class="not-content block w-fit min-[1180px]:pl-4" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io">
                 <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
                 hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
                     <svg
@@ -164,6 +160,10 @@ Main difference from client perspective is chain being indexed and list of plugi
                 </button>
             </a>
         </td>
+    </tr>
+    <tr>
+        <td style={{verticalAlign: "middle"}}>ENS Deployment</td>
+        <td>mainnet</td>
     </tr>
     <tr>
         <td>Active Plugins</td>
@@ -177,23 +177,15 @@ Main difference from client perspective is chain being indexed and list of plugi
     </tr>
     </tbody>
 </table>
-<table>
 
-    <thead>
-    <tr>
-        <th></th>
-        <th><strong>ENSNode 'Sepolia'</strong></th>
-    </tr>
-    </thead>
+#### ENSNode 'Sepolia'
+<table style={{marginTop: "0"}}>
     <tbody>
     <tr>
-        <td>ENSNode</td>
-        <td><a href="https://api.sepolia.ensnode.io">https://api.sepolia.ensnode.io</a></td>
-    </tr>
-    <tr>
-        <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
-        <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io">
+        <td style={{verticalAlign: "middle", paddingTop: "25px"}}>Hosted at</td>
+        <td style={{marginTop: "18px"}} class="flex flex-col min-[1180px]:flex-row justify-start min-[1180px]:items-center max-[1170px]:gap-2">
+            <a href="https://api.sepolia.ensnode.io">https://api.sepolia.ensnode.io</a>
+            <a class="not-content block w-fit min-[1180px]:pl-4" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io">
                 <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
                 hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
                     <svg
@@ -243,6 +235,10 @@ Main difference from client perspective is chain being indexed and list of plugi
                 </button>
             </a>
         </td>
+    </tr>
+    <tr>
+        <td style={{verticalAlign: "middle"}}>ENS Deployment</td>
+        <td>sepolia</td>
     </tr>
     <tr>
         <td>Active Plugins</td>
@@ -257,22 +253,14 @@ Main difference from client perspective is chain being indexed and list of plugi
     </tbody>
 </table>
 
-<table>
-    <thead>
-    <tr>
-        <th></th>
-        <th><strong>ENSNode 'Holesky'</strong></th>
-    </tr>
-    </thead>
+#### ENSNode 'Holesky'
+<table style={{marginTop: "0"}}>
     <tbody>
     <tr>
-        <td>ENSNode</td>
-        <td><a href="https://api.holesky.ensnode.io">https://api.holesky.ensnode.io</a></td>
-    </tr>
-    <tr>
-        <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
-        <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io">
+        <td style={{verticalAlign: "middle", paddingTop: "24px"}}>Hosted at</td>
+        <td style={{marginTop: "18px"}} class="flex flex-col min-[1180px]:flex-row justify-start min-[1180px]:items-center max-[1170px]:gap-2">
+            <a href="https://api.holesky.ensnode.io">https://api.holesky.ensnode.io</a>
+            <a class="not-content block w-fit min-[1180px]:pl-4" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io">
                 <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
                 hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
                     <svg
@@ -322,6 +310,10 @@ Main difference from client perspective is chain being indexed and list of plugi
                 </button>
             </a>
         </td>
+    </tr>
+    <tr>
+        <td style={{verticalAlign: "middle"}}>ENS Deployment</td>
+        <td>holesky</td>
     </tr>
     <tr>
         <td>Active Plugins</td>
