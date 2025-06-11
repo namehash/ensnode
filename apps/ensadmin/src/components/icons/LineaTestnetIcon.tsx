@@ -13,7 +13,7 @@ export const LineaTestnetIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M20 0H0V20H20V0Z" fill="#FFB300" />
       <mask
         id="mask0_75_253"
-        style="mask-type:luminance"
+        style={{ maskType: "luminance" }}
         maskUnits="userSpaceOnUse"
         x="5"
         y="5"
