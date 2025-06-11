@@ -1,12 +1,8 @@
 import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
+import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
-import type { MergedTypes } from "@/lib/plugin-helpers";
-
-import basenamesPlugin from "@/plugins/basenames/basenames.plugin";
-import lineaNamesPlugin from "@/plugins/lineanames/lineanames.plugin";
-import subgraphPlugin from "@/plugins/subgraph/subgraph.plugin";
-import threednsPlugin from "@/plugins/threedns/threedns.plugin";
+import { ALL_PLUGINS, type AllPluginsConfig } from "@/plugins";
 
 ////////
 // First, generate `MergedPonderConfig` type representing the merged types of each plugin's `config`,
@@ -14,14 +10,7 @@ import threednsPlugin from "@/plugins/threedns/threedns.plugin";
 // of which plugins are actually active at runtime.
 ////////
 
-export const ALL_PLUGINS = [
-  subgraphPlugin,
-  basenamesPlugin,
-  lineaNamesPlugin,
-  threednsPlugin,
-] as const;
-
-export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["config"]> & {
+export type MergedPonderConfig = AllPluginsConfig & {
   /**
    * NOTE: we inject additional values (ones that change the behavior of the indexing logic) into the
    * Ponder config in order to alter the ponder-generated build id when these additional options change.
@@ -31,7 +20,10 @@ export type MergedPonderConfig = MergedTypes<(typeof ALL_PLUGINS)[number]["confi
    *
    * https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
    **/
-  indexingBehaviorDependencies: Pick<ENSIndexerConfig, "healReverseAddresses">;
+  indexingBehaviorDependencies: Pick<
+    ENSIndexerConfig,
+    "healReverseAddresses" | "indexAdditionalResolverRecords"
+  >;
 };
 
 ////////
@@ -43,13 +35,14 @@ const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plu
 
 // combine each plugins' config into a MergedPonderConfig
 const ponderConfig = activePlugins.reduce(
-  (memo, plugin) => mergePonderConfigs(memo, plugin.config),
+  (memo, plugin) => mergePonderConfigs(memo, plugin.createPonderConfig(config)),
   {},
 ) as MergedPonderConfig;
 
 // inject the additional indexing behavior dependencies
 ponderConfig.indexingBehaviorDependencies = {
   healReverseAddresses: config.healReverseAddresses,
+  indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
 };
 
 ////////
@@ -63,5 +56,7 @@ setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
 ////////
 // Finally, return the merged config for ponder to use for type inference and runtime behavior.
 ////////
+
+console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
 
 export default ponderConfig;

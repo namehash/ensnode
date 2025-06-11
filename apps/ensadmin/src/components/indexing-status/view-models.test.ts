@@ -1,4 +1,4 @@
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { base, mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";

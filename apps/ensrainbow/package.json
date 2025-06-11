@@ -1,6 +1,6 @@
 {
   "name": "ensrainbow",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "private": true,
   "type": "module",
   "description": "ENSRainbow is an ENSNode service for healing ENS labels",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@ensnode/ensrainbow-sdk": "workspace:*",
-    "@ensnode/utils": "workspace:*",
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@hono/node-server": "^1.4.1",
     "classic-level": "^1.4.1",
     "hono": "catalog:",

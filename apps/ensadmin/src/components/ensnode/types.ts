@@ -1,6 +1,6 @@
 import type { ENSDeploymentChain } from "@ensnode/ens-deployments";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
-import { PluginName } from "@ensnode/utils";
 
 /**
  * Metadata namespace for the ENS node.

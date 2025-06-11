@@ -2,25 +2,26 @@ import { z } from "zod/v4";
 
 import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
-import { PLUGIN_REQUIRED_DATASOURCES } from "@/plugins";
+import { getPlugin } from "@/plugins";
 import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
 import { Address, isAddress } from "viem";
 
+// type alias to highlight the input param of Zod's check() method
+type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
+
 // Invariant: specified plugins' datasources are available in the specified ensDeploymentChain's ENSDeployment
-export function invariant_requiredDatasources(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
+export function invariant_requiredDatasources(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">>,
+) {
   const { value: config } = ctx;
 
-  const deployment = getENSDeployment(config.ensDeploymentChain);
-  const allPluginNames = Object.keys(PLUGIN_REQUIRED_DATASOURCES) as PluginName[];
-  const availableDatasourceNames = Object.keys(deployment) as DatasourceName[];
-  const activePluginNames = allPluginNames.filter((pluginName) =>
-    config.plugins.includes(pluginName),
-  );
+  const ensDeployment = getENSDeployment(config.ensDeploymentChain);
+  const availableDatasourceNames = Object.keys(ensDeployment) as DatasourceName[];
+  const activePluginNames = config.plugins;
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
   for (const pluginName of activePluginNames) {
-    const requiredDatasources = PLUGIN_REQUIRED_DATASOURCES[pluginName];
+    const { requiredDatasources } = getPlugin(pluginName);
     const hasRequiredDatasources = requiredDatasources.every((datasourceName) =>
       availableDatasourceNames.includes(datasourceName),
     );
@@ -43,14 +44,14 @@ export function invariant_requiredDatasources(ctx: z.core.ParsePayload<ENSIndexe
 
 // Invariant: rpcConfig is specified for each indexed chain
 export function invariant_rpcConfigsSpecifiedForIndexedChains(
-  ctx: z.core.ParsePayload<ENSIndexerConfig>,
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins" | "rpcConfigs">>,
 ) {
   const { value: config } = ctx;
 
   const deployment = getENSDeployment(config.ensDeploymentChain);
 
   for (const pluginName of config.plugins) {
-    const datasourceNames = PLUGIN_REQUIRED_DATASOURCES[pluginName];
+    const datasourceNames = getPlugin(pluginName).requiredDatasources;
 
     for (const datasourceName of datasourceNames) {
       const { chain } = deployment[datasourceName];
@@ -67,7 +68,11 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 }
 
 // Invariant: if a global blockrange is defined, only one network is indexed
-export function invariant_globalBlockrange(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
+export function invariant_globalBlockrange(
+  ctx: ZodCheckFnInput<
+    Pick<ENSIndexerConfig, "globalBlockrange" | "ensDeploymentChain" | "plugins">
+  >,
+) {
   const { value: config } = ctx;
   const { globalBlockrange } = config;
 
@@ -75,7 +80,7 @@ export function invariant_globalBlockrange(ctx: z.core.ParsePayload<ENSIndexerCo
     const deployment = getENSDeployment(config.ensDeploymentChain);
     const indexedChainIds = uniq(
       config.plugins
-        .flatMap((pluginName) => PLUGIN_REQUIRED_DATASOURCES[pluginName])
+        .flatMap((pluginName) => getPlugin(pluginName).requiredDatasources)
         .map((datasourceName) => deployment[datasourceName])
         .map((datasource) => datasource.chain.id),
     );
@@ -102,7 +107,9 @@ export function invariant_globalBlockrange(ctx: z.core.ParsePayload<ENSIndexerCo
 }
 
 // Invariant: all contracts have a valid ContractConfig defined
-export function invariant_validContractConfigs(ctx: z.core.ParsePayload<ENSIndexerConfig>) {
+export function invariant_validContractConfigs(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain">>,
+) {
   const { value: config } = ctx;
 
   const deployment = getENSDeployment(config.ensDeploymentChain);

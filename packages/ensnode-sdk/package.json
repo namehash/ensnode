@@ -1,15 +1,19 @@
 {
-  "name": "@ensnode/utils",
-  "version": "0.27.0",
+  "name": "@ensnode/ensnode-sdk",
+  "version": "0.28.0",
   "type": "module",
-  "description": "A utility library for interacting with ENS data",
+  "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "packages/ensnode-utils"
+    "directory": "packages/ensnode-sdk"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-utils",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-sdk",
+  "keywords": [
+    "ENS",
+    "ENSNode"
+  ],
   "files": [
     "dist"
   ],
@@ -20,8 +24,8 @@
     "access": "public",
     "exports": {
       ".": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
       }
     },
     "main": "./dist/index.js",
@@ -36,7 +40,7 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "viem": "^catalog:"
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

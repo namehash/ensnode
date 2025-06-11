@@ -1,9 +1,11 @@
 import { ponder } from "ponder:registry";
 
-import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/utils";
+import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
@@ -26,8 +28,9 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    // the shared Registrar handlers in this plugin index direct subnames of '.base.eth'
-    registrarManagedName: "base.eth",
+    // the shared Registrar handlers in this plugin index direct subnames of
+    // the name returned from `getRegistrarManagedName` function call
+    registrarManagedName: getRegistrarManagedName(config.ensDeploymentChain, pluginName),
   });
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers

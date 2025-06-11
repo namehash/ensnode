@@ -1,11 +1,8 @@
-import type { LabelHash } from "@ensnode/utils";
-import { describe, expect, it, vi } from "vitest";
+import type { LabelHash } from "@ensnode/ensnode-sdk";
+import { describe, expect, it } from "vitest";
 import { setupConfigMock } from "./utils/mockConfig";
+setupConfigMock(); // setup config mock before importing dependent modules
 
-// Set up the mock before importing modules that depend on config
-setupConfigMock();
-
-// Now safely import the module being tested
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 
 describe("labelByLabelHash", () => {

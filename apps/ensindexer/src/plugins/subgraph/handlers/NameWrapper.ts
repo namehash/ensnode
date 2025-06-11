@@ -2,12 +2,9 @@ import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
-export default function ({
-  pluginName,
-  namespace,
-}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
+export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleExpiryExtended,
     handleFusesSet,
@@ -16,7 +13,6 @@ export default function ({
     handleTransferBatch,
     handleTransferSingle,
   } = makeNameWrapperHandlers({
-    pluginName,
     // the shared Registrar handlers in this plugin index direct subnames of '.eth'
     registrarManagedName: "eth",
   });

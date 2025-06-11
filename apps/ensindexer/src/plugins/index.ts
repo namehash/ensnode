@@ -1,22 +1,51 @@
+import { uniq } from "@/lib/lib-helpers";
 import { DatasourceName } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/utils";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import basenamesPlugin from "./basenames/basenames.plugin";
+import lineaNamesPlugin from "./lineanames/lineanames.plugin";
+import subgraphPlugin from "./subgraph/subgraph.plugin";
+import threednsPlugin from "./threedns/threedns.plugin";
+
+export const ALL_PLUGINS = [
+  subgraphPlugin,
+  basenamesPlugin,
+  lineaNamesPlugin,
+  threednsPlugin,
+] as const;
+
+export type AllPluginsConfig = MergedTypes<
+  ReturnType<(typeof ALL_PLUGINS)[number]["createPonderConfig"]>
+>;
+
+// Helper type to merge multiple types into one
+type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
+  ? R
+  : never;
 
 /**
- * Maps from a plugin to its required Datasources.
+ * Get plugin object by plugin name.
  *
- * This spec is _outside_ of the plugin spec because:
- * 1) the *.plugin.ts files need to directly export a `const` ponder config so that ponder's
- *  typechecking and type inference for stuff like event names works as expected
- * 2) this means that they have a dependency on the global ENSIndexerConfig, as that informs plugin
- *   configuration and behavior (i.e. which addresses are indexed on which chains)
- * 3) the ENSIndexerConfig requires runtime knowledge of which datasources a plugin requires to run,
- *   in order to perform validation
- * 4) therefore, to avoid a circular dependency, this spec is located outside of each individual
- *   plugin's definition and is accessible separately
+ * @see {ALL_PLUGINS} list
  */
-export const PLUGIN_REQUIRED_DATASOURCES = {
-  [PluginName.Subgraph]: [DatasourceName.Root],
-  [PluginName.Basenames]: [DatasourceName.Basenames],
-  [PluginName.Lineanames]: [DatasourceName.Lineanames],
-  [PluginName.ThreeDNS]: [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase],
-};
+export function getPlugin(pluginName: PluginName) {
+  const plugin = ALL_PLUGINS.find((plugin) => plugin.pluginName === pluginName);
+
+  if (plugin) {
+    return plugin;
+  }
+
+  // invariant: all plugins can be found by PluginName
+  throw new Error(`Plugin not found by "${pluginName} name"`);
+}
+
+/**
+ * Get a list of unique required datasource names from selected plugins.
+ * @param pluginNames A list of selected plugin names.
+ * @returns A list of unique datasource names.
+ */
+export function getRequiredDatasourceNames(pluginNames: PluginName[]): DatasourceName[] {
+  const plugins = pluginNames.map((pluginName) => getPlugin(pluginName));
+  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasources);
+
+  return uniq(requiredDatasourceNames);
+}

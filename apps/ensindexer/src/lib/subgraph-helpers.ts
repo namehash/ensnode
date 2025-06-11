@@ -1,7 +1,7 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { upsertAccount } from "@/lib/db-helpers";
-import { Node, ROOT_NODE } from "@ensnode/utils";
+import { Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
 import { zeroAddress } from "viem";
 
 /**
