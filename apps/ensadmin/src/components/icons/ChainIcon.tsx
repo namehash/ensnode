@@ -1,10 +1,12 @@
-import { anvil, base, holesky, linea, mainnet, optimism, sepolia } from "viem/chains";
+import { anvil, base, baseSepolia, holesky, linea, lineaSepolia, mainnet, optimism, sepolia } from "viem/chains";
 import { BaseIcon } from "./BaseIcon";
 import { EthereumIcon } from "./EthereumIcon";
 import { EthereumLocalIcon } from "./EthereumLocalIcon";
 import { EthereumTestnetIcon } from "./EthereumTestnetIcon";
 import { LineaIcon } from "./LineaIcon";
 import { OptimismIcon } from "./OptimismIcon";
+import {BaseTestnetIcon} from "@/components/icons/BaseTestnetIcon";
+import {LineaTestnetIcon} from "@/components/icons/LineaTestnetIcon";
 
 export interface ChainIconProps {
   chainId: number;
@@ -22,6 +24,8 @@ const chainIcons = new Map<number, React.ReactNode>([
   [linea.id, <LineaIcon width={18} height={18} />],
   [holesky.id, <EthereumTestnetIcon width={18} height={18} />],
   [anvil.id, <EthereumLocalIcon width={18} height={18} />],
+    [baseSepolia.id, <BaseTestnetIcon width={18} height={18} />],
+    [lineaSepolia.id, <LineaTestnetIcon width={18} height={18} />],
 ]);
 
 /**
