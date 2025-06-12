@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ens-deployments",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "type": "module",
   "description": "Catalog of ENS deployments, including key contract addresses and other attributes.",
   "license": "MIT",
@@ -35,7 +35,7 @@
     "lint:ci": "biome ci"
   },
   "peerDependencies": {
-    "viem": "^catalog:"
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
