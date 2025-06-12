@@ -24,6 +24,7 @@ import {
   ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
+import {ChainName} from "@/components/ui/ChainName";
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
@@ -102,7 +103,7 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex flex-row justify-start items-center gap-2">
-              <p className="font-semibold text-left">{network.name}</p>
+              <ChainName chainId={network.id} className="font-semibold text-left"></ChainName>
               <ChainIcon chainId={network.id} />
             </div>
           </div>
