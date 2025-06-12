@@ -19,12 +19,14 @@ export interface NetworkIndexingPhaseViewModel {
  * Network status view model, includes indexing phases.
  */
 export interface NetworkStatusViewModel {
+  id: number;
   name: string;
   firstBlockToIndex: BlockInfoViewModel;
   lastIndexedBlock: BlockInfoViewModel | null;
   lastSyncedBlock: BlockInfoViewModel | null;
   latestSafeBlock: BlockInfoViewModel;
   phases: Array<NetworkIndexingPhaseViewModel>;
+  blockExplorerURL?: string;
 }
 
 /**
@@ -55,15 +57,20 @@ export function globalIndexingStatusViewModel(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
-  const getChainName = (chainId: number) => getChainById(ensDeploymentChain, chainId).name;
 
   const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
-    ([chainId, networkIndexingStatus]) =>
-      networkIndexingStatusViewModel(
-        getChainName(parseInt(chainId, 10)),
+    ([chainId, networkIndexingStatus]) => {
+      const chainIdAsNumber = parseInt(chainId, 10);
+      const chain = getChainById(ensDeploymentChain, chainIdAsNumber);
+
+      return networkIndexingStatusViewModel(
+        chainIdAsNumber,
+        chain.name,
         networkIndexingStatus,
         firstBlockToIndexGloballyTimestamp,
-      ),
+        chain.blockExplorers && chain.blockExplorers.default.url,
+      );
+    },
   ) satisfies Array<NetworkStatusViewModel>;
 
   // Sort the network statuses by the first block to index timestamp
@@ -87,15 +94,19 @@ export function globalIndexingStatusViewModel(
 
 /**
  * View model for the network indexing status.
+ * @param chainId
  * @param chainName
  * @param networkStatus
  * @param firstBlockToIndexGloballyTimestamp
+ * @param chainsBlockExplorerURL - optional - URL to chain's default block explorer if such is available
  * @returns
  */
 export function networkIndexingStatusViewModel(
+  chainId: number,
   chainName: string,
   networkStatus: EnsNode.NetworkIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
+  chainsBlockExplorerURL?: string,
 ): NetworkStatusViewModel {
   const phases: NetworkStatusViewModel["phases"] = [];
 
@@ -116,12 +127,14 @@ export function networkIndexingStatusViewModel(
   });
 
   return {
+    id: chainId,
     name: chainName,
     latestSafeBlock: blockViewModel(latestSafeBlock),
     firstBlockToIndex: blockViewModel(firstBlockToIndex),
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,
     lastSyncedBlock: lastSyncedBlock ? blockViewModel(lastSyncedBlock) : null,
     phases,
+    ...(chainsBlockExplorerURL && { blockExplorerURL: chainsBlockExplorerURL }),
   } satisfies NetworkStatusViewModel;
 }
 

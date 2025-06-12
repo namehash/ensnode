@@ -4,13 +4,16 @@ import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
+import { ChainIcon } from "@/components/icons/ChainIcon";
+import { formatRelativeTime } from "@/components/recent-registrations";
+import { ChainName } from "@/components/ui/ChainName";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
-import { fromUnixTime, intlFormat } from "date-fns";
-import { Clock } from "lucide-react";
+import { intlFormat } from "date-fns";
+import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
@@ -65,11 +68,11 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
       <Card className="w-full flex flex-col gap-2">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Indexing Stats</span>
+            <span>Indexed Chains</span>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-row gap-8">
+        <CardContent className="flex flex-col lg:flex-row lg:flex-wrap gap-8">
           {globalIndexingStatusViewModel(
             networkIndexingStatusByChainId,
             ensDeploymentChain,
@@ -87,7 +90,7 @@ interface NetworkIndexingStatsCardProps {
 }
 
 /**
- * Component to display network indexing stats for a single network.
+ * Component to display indexing stats for a chain.
  * @param props
  * @returns
  */
@@ -95,26 +98,38 @@ function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
   const { network } = props;
 
   return (
-    <Card key={network.name}>
+    <Card key={`Chain#${network.id}`}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">{network.name}</span>
+            <div className="flex flex-row justify-start items-center gap-2">
+              <ChainName chainId={network.id} className="font-semibold text-left"></ChainName>
+              <ChainIcon chainId={network.id} />
+            </div>
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
-          <BlockStats label="Last indexed block" block={network.lastIndexedBlock} />
-          <BlockStats label="Latest safe block" block={network.latestSafeBlock} />
+          <BlockStats
+            blockExplorerURL={network.blockExplorerURL}
+            label="Last indexed block"
+            block={network.lastIndexedBlock}
+          />
+          <BlockStats
+            blockExplorerURL={network.blockExplorerURL}
+            label="Latest safe block"
+            block={network.latestSafeBlock}
+          />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-interface BlockSatsProps {
+interface BlockStatsProps {
+  blockExplorerURL?: string;
   label: string;
   block: BlockInfo | null;
 }
@@ -122,7 +137,7 @@ interface BlockSatsProps {
 /**
  * Component to display requested block stats.
  */
-function BlockStats({ label, block }: BlockSatsProps) {
+function BlockStats({ blockExplorerURL, label, block }: BlockStatsProps) {
   if (!block) {
     return (
       <div>
@@ -132,15 +147,44 @@ function BlockStats({ label, block }: BlockSatsProps) {
     );
   }
 
+  let calculatedRelativeTime = formatRelativeTime(block.timestamp.toString(), true, true, true);
+
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="text-lg font-semibold">{block.number ? `#${block.number}` : "N/A"}</div>
-      <div className="text-sm text-muted-foreground">
-        {block.timestamp ? intlFormat(fromUnixTime(block.timestamp)) : "N/A"}
+      <BlockNumber block={block} blockExplorerURL={blockExplorerURL} />
+      <div className="text-xs text-muted-foreground">
+        {block.timestamp ? calculatedRelativeTime : "N/A"}
       </div>
     </div>
   );
+}
+
+interface BlockNumberProps {
+  blockExplorerURL?: string;
+  block: BlockInfo;
+}
+
+/**
+Component to display a block number.
+If the chain has a designated block explorer it will display it as an external link to the block's details
+ **/
+function BlockNumber({ blockExplorerURL, block }: BlockNumberProps) {
+  if (blockExplorerURL !== undefined && block.number) {
+    return (
+      <a
+        href={`${blockExplorerURL}/block/${block.number}`}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="w-fit text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
+      >
+        #{block.number}
+        <ExternalLink size={16} className="inline-block flex-shrink-0" />
+      </a>
+    );
+  }
+
+  return <div className="text-lg font-semibold">{block.number ? `#${block?.number}` : "N/A"}</div>;
 }
 
 interface FallbackViewProps {
