@@ -93,8 +93,8 @@ export function toLatestRegistration(
   return {
     name: graphQLResponseData.name,
     createdAt: parseInt(graphQLResponseData.createdAt),
-    expiryDate: parseInt(graphQLResponseData.expiryDate),
-    owner: graphQLResponseData.owner.id,
+    expiresAt: parseInt(graphQLResponseData.expiryDate),
+    ownerInRegistry: graphQLResponseData.owner.id,
     ...(graphQLResponseData.wrappedOwner && { wrappedOwner: graphQLResponseData.wrappedOwner.id }),
   };
 }

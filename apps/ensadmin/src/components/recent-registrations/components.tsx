@@ -133,7 +133,7 @@ function Duration({
 const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
 
 /**
- * Determines the true owner of a domain.
+ * Determines the effective owner of a domain.
  * If the owner is the NameWrapper contract, returns the wrapped owner instead.
  *
  * @param registration - Extended data associated with Registration event
@@ -141,14 +141,14 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
 function getTrueOwner(registration: Registration) {
   // Only use wrapped owner if the owner is the NameWrapper contract
   if (
-    registration.registration.wrappedOwner &&
-    isAddressEqual(registration.registration.owner, NAME_WRAPPER_ADDRESS)
+    registration.registration.ownerInNameWrapper &&
+    isAddressEqual(registration.registration.ownerInRegistry, NAME_WRAPPER_ADDRESS)
   ) {
-    return getAddress(registration.registration.wrappedOwner);
+    return getAddress(registration.registration.ownerInNameWrapper);
   }
 
   // Otherwise, use the regular owner
-  return getAddress(registration.registration.owner);
+  return getAddress(registration.registration.ownerInRegistry);
 }
 
 export function RecentRegistrations() {

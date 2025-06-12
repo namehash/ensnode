@@ -28,27 +28,27 @@ describe("toLatestRegistration function", () => {
   const expectedFunctionOutput: LatestRegistration = {
     name: "empireofthesun.eth",
     createdAt: 1644045472,
-    expiryDate: 1850730911,
-    owner: "0xa33ba7bf6f2343169de5a0496cd76da8839ea3e6",
+    expiresAt: 1850730911,
+    ownerInRegistry: "0xa33ba7bf6f2343169de5a0496cd76da8839ea3e6",
   };
 
   it("should not include wrappedOwner if it's not included in the input", () => {
     const result = toLatestRegistration(latestRegistrationResultWithoutWrappedOwner);
 
-    expect(result.wrappedOwner).toBeUndefined();
+    expect(result.ownerInNameWrapper).toBeUndefined();
   });
 
   it("should include wrappedOwner if it's included in the input", () => {
     const result = toLatestRegistration(latestRegistrationResultWithWrappedOwner);
 
-    expect(result.wrappedOwner).toBeDefined();
+    expect(result.ownerInNameWrapper).toBeDefined();
   });
 
   it("should return createdAt and expiryDate timestamps as numbers", () => {
     const result = toLatestRegistration(latestRegistrationResultWithoutWrappedOwner);
 
     expect(result.createdAt).toBeTypeOf("number");
-    expect(result.expiryDate).toBeTypeOf("number");
+    expect(result.expiresAt).toBeTypeOf("number");
   });
 
   it("should not change explicit values of any field", () => {
