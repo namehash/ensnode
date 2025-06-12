@@ -6,6 +6,7 @@ import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
 import { ChainIcon } from "@/components/icons/ChainIcon";
 import { formatRelativeTime } from "@/components/recent-registrations";
+import { ChainName } from "@/components/ui/ChainName";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
@@ -24,7 +25,6 @@ import {
   ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
-import {ChainName} from "@/components/ui/ChainName";
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
