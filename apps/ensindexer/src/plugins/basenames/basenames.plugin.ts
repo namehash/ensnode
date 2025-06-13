@@ -16,13 +16,13 @@ import { createConfig } from "ponder";
 
 const pluginName = PluginName.Basenames;
 
-// Define the Datasources required by the plugin
+// Define the DatasourceNames for Datasources required by the plugin
 const requiredDatasources = [DatasourceName.Basenames];
 
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
 
-// config object factory used to derive PluginConfig type
+// config object factory used to derive PonderConfig type
 function createPonderConfig(appConfig: ENSIndexerConfig) {
   const { ensDeployment } = appConfig;
   // depending on the ENS Deployment, the chain and contracts for the Basenames Datasource can vary. For example, consider how the Basenames chain and contracts chain depending on the mainnet vs sepolia ENS Deployment
@@ -73,9 +73,9 @@ export default {
   }),
 
   /**
-   * Load the plugin configuration lazily to prevent premature execution of
-   * nested factory functions, i.e. to ensure that the plugin configuration
-   * is only built when the plugin is activated.
+   * Create the ponder configuration lazily to prevent premature execution of
+   * nested factory functions, i.e. to ensure that the ponder configuration
+   * is only created for this plugin when it is activated.
    */
   createPonderConfig,
 
