@@ -47,6 +47,20 @@ export function NavMain({
       return url;
     }
 
+    //TODO: this could easily become bloated if we used more query params on our subpages, so we could refactor it to be a switch case or some kind of mapping (this "ifology" is a temporary solution)
+    if (pathname.startsWith("/example-queries") && !url.startsWith("/example-queries")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("query");
+      params.delete("variables");
+
+      if (params.toString()) {
+        const separator = url.includes("?") ? "&" : "?";
+        return `${url}${separator}${params.toString()}`;
+      }
+
+      return url;
+    }
+
     if (searchParams && searchParams.toString()) {
       const separator = url.includes("?") ? "&" : "?";
       return `${url}${separator}${searchParams.toString()}`;
