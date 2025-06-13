@@ -3,7 +3,6 @@
 import { ENSName } from "@/components/ens-name";
 import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
-import { Registration } from "@/components/recent-registrations/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -17,10 +16,11 @@ import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Address, getAddress, isAddressEqual } from "viem";
 import { useRecentRegistrations } from "./hooks";
 
-// Helper function to safely format dates
+/**
+ * Helper function to safely format dates
+  */
 const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
   try {
     const parsedTimestamp = parseInt(timestamp);
@@ -34,7 +34,9 @@ const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
   }
 };
 
-// Helper function to calculate duration in years
+/**
+ * Helper function to calculate duration in years
+  */
 const calculateDurationYears = (registrationDate: string, expiryDate: string) => {
   try {
     const registrationTimestamp = parseInt(registrationDate);
@@ -63,7 +65,9 @@ const calculateDurationYears = (registrationDate: string, expiryDate: string) =>
   }
 };
 
-// Helper function to format relative time
+/**
+ * Helper function to format relative time
+  */
 const formatRelativeTime = (timestamp: string) => {
   try {
     const parsedTimestamp = parseInt(timestamp);
@@ -79,12 +83,16 @@ const formatRelativeTime = (timestamp: string) => {
   }
 };
 
-// Helper function to generate ENS app URL for a name
+/**
+ * Helper function to generate ENS app URL for a name
+  */
 const getEnsAppUrlForName = (name: string) => {
   return `https://app.ens.domains/${name}`;
 };
 
-// Client-only date formatter component
+/**
+ * Client-only date formatter component
+  */
 function FormattedDate({
   timestamp,
   options,
@@ -101,7 +109,9 @@ function FormattedDate({
   return <>{formattedDate}</>;
 }
 
-// Client-only relative time component
+/**
+ * Client-only relative time component
+  */
 function RelativeTime({ timestamp }: { timestamp: string }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
@@ -112,7 +122,9 @@ function RelativeTime({ timestamp }: { timestamp: string }) {
   return <>{relativeTime}</>;
 }
 
-// Client-only duration component
+/**
+ * Client-only duration component
+ */
 function Duration({
   registrationDate,
   expiryDate,
@@ -127,28 +139,6 @@ function Duration({
   }, [registrationDate, expiryDate]);
 
   return <>{duration}</>;
-}
-
-// The NameWrapper contract address
-const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
-
-/**
- * Determines the effective owner of a domain.
- * If the owner is the NameWrapper contract, returns the wrapped owner instead.
- *
- * @param registration - Extended data associated with Registration event
- */
-function getTrueOwner(registration: Registration) {
-  // Only use wrapped owner if the owner is the NameWrapper contract
-  if (
-    registration.registration.ownerInNameWrapper &&
-    isAddressEqual(registration.registration.ownerInRegistry, NAME_WRAPPER_ADDRESS)
-  ) {
-    return getAddress(registration.registration.ownerInNameWrapper);
-  }
-
-  // Otherwise, use the regular owner
-  return getAddress(registration.registration.ownerInRegistry);
 }
 
 export function RecentRegistrations() {
@@ -212,32 +202,32 @@ export function RecentRegistrations() {
             </TableHeader>
             <TableBody>
               {isClient &&
-                recentRegistrationsQuery.data?.registrations.map((registration) => (
-                  <TableRow key={registration.registration.name}>
+                recentRegistrationsQuery.data?.map((registration) => (
+                  <TableRow key={registration.name}>
                     <TableCell className="font-medium">
                       <a
-                        href={getEnsAppUrlForName(registration.registration.name)}
+                        href={getEnsAppUrlForName(registration.name)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-blue-600 hover:underline"
                       >
-                        {registration.registration.name}
+                        {registration.name}
                         <ExternalLink size={14} className="inline-block" />
                       </a>
                     </TableCell>
                     <TableCell>
-                      <RelativeTime timestamp={registration.registrationDate} />
+                      <RelativeTime timestamp={registration.registeredAt} />
                     </TableCell>
                     <TableCell>
                       <Duration
-                        registrationDate={registration.registrationDate}
-                        expiryDate={registration.expiryDate}
+                        registrationDate={registration.registeredAt}
+                        expiryDate={registration.expiresAt}
                       />
                     </TableCell>
                     <TableCell>
                       {indexedChainId ? (
                         <ENSName
-                          address={getTrueOwner(registration)}
+                          address={registration.owner}
                           chainId={indexedChainId}
                           showAvatar={true}
                         />

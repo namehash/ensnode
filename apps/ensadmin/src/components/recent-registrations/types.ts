@@ -1,40 +1,38 @@
 import type { Address } from "viem";
 
 /**
- * The data model returned by a GraphQL query for the latest registrations.
+ * Data associated with Registration event
  */
-export interface LatestRegistrationResult {
-  name: string;
-  createdAt: string;
-  expiryDate: string;
-  owner: {
-    id: Address;
-  };
-  wrappedOwner?: {
-    id: Address;
-  };
-}
+// TODO: fix the order of the fields for improved clarity
+export interface Registration {
+  /**
+   * a UNIX timestamp in seconds of when the domain was registered by its current owner
+   */
+  registeredAt: string;
 
-/**
- Data associated with a Registration event.
- **/
-//TODO: to be unified with Registration
-//TODO:Check whether these two expiryDate fields in those types always match before merging them
-export interface LatestRegistration {
+  /**
+   * a UNIX timestamp in seconds when the registration is scheduled to expire
+   */
+  expiresAt: string;
+
   /**
    * The registered ENS name
    */
   name: string;
 
+  //TODO: Do we even want to keep these two types (createdAt & expiresAt - the nested one)?
+  // We never use it in the Recent Registrations panel (but maybe they will be usefull for something else later?)
+  // If so, we have to rename the nested (inside "domain" in GQL result) expiresAt field somehow to differentiate between this one and the one in the registration itself
+  // as they hold different values (afaik for the nested one it's the outer expiresAt + grace period? cause it matches the 90 days difference that would then occur)
   /**
    * a UNIX timestamp in seconds of when the domain was originally created
    */
-  createdAt: number;
+  domainCreatedAt: string;
 
   /**
-   * a UNIX timestamp in seconds when the registration is scheduled to expire
+   * a UNIX timestamp in seconds when the registration is scheduled to expire, includes grace period
    */
-  expiresAt: number;
+  expiresAtWithGracePeriod: string;
 
   /**
    * The "true" owner of the domain in the ENS Registry.
@@ -52,32 +50,5 @@ export interface LatestRegistration {
    * TODO: Ask @lightwalker about precise definition of this field
    * TODO: (if it should be changed/expanded or swapped with ownerInRegistry's def)
    */
-  owner: Address
-}
-
-/**
- * Extended data associated with Registration event
- */
-export interface Registration {
-  /**
-   * a UNIX timestamp in seconds of when the name was registered by its current owner
-   */
-  registeredAt: string;
-
-  /**
-   * a UNIX timestamp in seconds when the registration is scheduled to expire
-   */
-  expiresAt: string;
-
-  /**
-   * Data associated with a Registration event.
-   */
-  registration: LatestRegistration;
-}
-
-/**
- * Data about 5 most recent registrations
- */
-export interface RecentRegistrationsResponse {
-  registrations: Registration[];
+  owner: Address;
 }
