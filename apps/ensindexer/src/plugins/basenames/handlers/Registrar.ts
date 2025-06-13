@@ -17,7 +17,7 @@ import { getRegistrarManagedName } from "../lib/registrar-helpers";
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
 export default function ({
-  pluginName,
+  name: pluginName,
   namespace,
 }: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
   const {
