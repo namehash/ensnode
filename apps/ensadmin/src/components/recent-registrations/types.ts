@@ -20,10 +20,6 @@ export interface Registration {
    */
   name: string;
 
-  //TODO: Do we even want to keep these two types (createdAt & expiresAt - the nested one)?
-  // We never use it in the Recent Registrations panel (but maybe they will be usefull for something else later?)
-  // If so, we have to rename the nested (inside "domain" in GQL result) expiresAt field somehow to differentiate between this one and the one in the registration itself
-  // as they hold different values (afaik for the nested one it's the outer expiresAt + grace period? cause it matches the 90 days difference that would then occur)
   /**
    * a UNIX timestamp in seconds of when the domain was originally created
    */
@@ -47,8 +43,6 @@ export interface Registration {
 
   /**
    * Effective owner of the registered domain.
-   * TODO: Ask @lightwalker about precise definition of this field
-   * TODO: (if it should be changed/expanded or swapped with ownerInRegistry's def)
    */
   owner: Address;
 }

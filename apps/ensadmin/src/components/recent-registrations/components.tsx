@@ -20,7 +20,7 @@ import { useRecentRegistrations } from "./hooks";
 
 /**
  * Helper function to safely format dates
-  */
+ */
 const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
   try {
     const parsedTimestamp = parseInt(timestamp);
@@ -36,7 +36,7 @@ const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
 
 /**
  * Helper function to calculate duration in years
-  */
+ */
 const calculateDurationYears = (registrationDate: string, expiryDate: string) => {
   try {
     const registrationTimestamp = parseInt(registrationDate);
@@ -67,7 +67,7 @@ const calculateDurationYears = (registrationDate: string, expiryDate: string) =>
 
 /**
  * Helper function to format relative time
-  */
+ */
 const formatRelativeTime = (timestamp: string) => {
   try {
     const parsedTimestamp = parseInt(timestamp);
@@ -85,14 +85,14 @@ const formatRelativeTime = (timestamp: string) => {
 
 /**
  * Helper function to generate ENS app URL for a name
-  */
+ */
 const getEnsAppUrlForName = (name: string) => {
   return `https://app.ens.domains/${name}`;
 };
 
 /**
  * Client-only date formatter component
-  */
+ */
 function FormattedDate({
   timestamp,
   options,
@@ -111,7 +111,7 @@ function FormattedDate({
 
 /**
  * Client-only relative time component
-  */
+ */
 function RelativeTime({ timestamp }: { timestamp: string }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
