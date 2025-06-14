@@ -21,82 +21,104 @@ The key differences between these hosted deployments is the ENS deployment being
 Main difference from client perspective is chain being indexed and list of plugins being handled. Here is the table listing differences between those.
 
 <table>
-    <thead>
+  <thead>
     <tr>
-        <th></th>
-        <th><strong>ENSNode 'Alpha'</strong></th>
+      <th></th>
+      <th>
+        <strong>ENSNode 'Alpha'</strong>
+      </th>
     </tr>
-    </thead>
-    <tbody>
+  </thead>
+  <tbody>
     <tr>
-        <td>ENSNode</td>
-        <td><a href="https://api.alpha.ensnode.io">https://api.alpha.ensnode.io</a></td>
-    </tr>
-    <tr>
-        <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
-        <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io">
-                <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
-                hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
-                    <svg
-                        width="26"
-                        height="26"
-                        viewBox="0 0 28 28"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path d="M2 2H26V26H2V2Z" fill="url(#paint0_radial_708_886)" />
-                        <path d="M14 6L26 26H2L14 6Z" fill="url(#paint1_linear_708_886)" />
-                        <path d="M5 21H22.9998L23.5977 22H4.40234L5 21Z" fill="#2364E8" />
-                        <path d="M8.00014 16H20L20.5991 17H7.40234L8.00014 16Z" fill="#2364E8" />
-                        <path d="M10.9997 11H16.9999L17.6014 12H10.3999L10.9997 11Z" fill="#2364E8" />
-                        <path
-                            fill-rule="evenodd"
-                            clip-rule="evenodd"
-                            d="M24 2H4C2.89543 2 2 2.89543 2 4V24C2 25.1046 2.89543 26 4 26H24C25.1046 26 26 25.1046 26 24V4C26 2.89543 25.1046 2 24 2ZM4 0C1.79086 0 0 1.79086 0 4V24C0 26.2091 1.79086 28 4 28H24C26.2091 28 28 26.2091 28 24V4C28 1.79086 26.2091 0 24 0H4Z"
-                            fill="white"
-                        />
-                        <defs>
-                            <radialGradient
-                                id="paint0_radial_708_886"
-                                cx="0"
-                                cy="0"
-                                r="1"
-                                gradientUnits="userSpaceOnUse"
-                                gradientTransform="translate(14 14) rotate(90) scale(12)"
-                            >
-                                <stop offset="0.455" stop-color="#DCE7FF" />
-                                <stop offset="1" stop-color="#A9C5FF" />
-                            </radialGradient>
-                            <linearGradient
-                                id="paint1_linear_708_886"
-                                x1="14"
-                                y1="6"
-                                x2="14"
-                                y2="26"
-                                gradientUnits="userSpaceOnUse"
-                            >
-                                <stop stop-color="#78A5FF" />
-                                <stop offset="1" stop-color="#528BFF" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    Connect with ENSAdmin
-                </button>
-            </a>
-        </td>
+      <td>ENSNode</td>
+      <td>
+        <a href="https://api.alpha.ensnode.io">https://api.alpha.ensnode.io</a>
+      </td>
     </tr>
     <tr>
-        <td>Active Plugins</td>
-        <td>subgraph, basenames, lineanames, threedns</td>
+      <td style={{ verticalAlign: "middle" }}>ENSAdmin</td>
+      <td class="not-content">
+        <a
+          class="block w-fit no-underline"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io"
+        >
+          <button
+            class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
+                hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg"
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 28 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M2 2H26V26H2V2Z" fill="url(#paint0_radial_708_886)" />
+              <path
+                d="M14 6L26 26H2L14 6Z"
+                fill="url(#paint1_linear_708_886)"
+              />
+              <path d="M5 21H22.9998L23.5977 22H4.40234L5 21Z" fill="#2364E8" />
+              <path
+                d="M8.00014 16H20L20.5991 17H7.40234L8.00014 16Z"
+                fill="#2364E8"
+              />
+              <path
+                d="M10.9997 11H16.9999L17.6014 12H10.3999L10.9997 11Z"
+                fill="#2364E8"
+              />
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M24 2H4C2.89543 2 2 2.89543 2 4V24C2 25.1046 2.89543 26 4 26H24C25.1046 26 26 25.1046 26 24V4C26 2.89543 25.1046 2 24 2ZM4 0C1.79086 0 0 1.79086 0 4V24C0 26.2091 1.79086 28 4 28H24C26.2091 28 28 26.2091 28 24V4C28 1.79086 26.2091 0 24 0H4Z"
+                fill="white"
+              />
+              <defs>
+                <radialGradient
+                  id="paint0_radial_708_886"
+                  cx="0"
+                  cy="0"
+                  r="1"
+                  gradientUnits="userSpaceOnUse"
+                  gradientTransform="translate(14 14) rotate(90) scale(12)"
+                >
+                  <stop offset="0.455" stop-color="#DCE7FF" />
+                  <stop offset="1" stop-color="#A9C5FF" />
+                </radialGradient>
+                <linearGradient
+                  id="paint1_linear_708_886"
+                  x1="14"
+                  y1="6"
+                  x2="14"
+                  y2="26"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop stop-color="#78A5FF" />
+                  <stop offset="1" stop-color="#528BFF" />
+                </linearGradient>
+              </defs>
+            </svg>
+            Connect with ENSAdmin
+          </button>
+        </a>
+      </td>
     </tr>
     <tr>
-        <td>Purpose</td>
-        <td>
-            Demonstration of ENSNode's multichain ENS indexing capability. Provides a superset of the data indexed by the ENS Subgraph. Indexes additional Resolver record values in preparation for ENS Protocol Acceleration.
-        </td>
+      <td>Active Plugins</td>
+      <td>subgraph, basenames, lineanames, threedns</td>
     </tr>
-    </tbody>
+    <tr>
+      <td>Purpose</td>
+      <td>
+        Demonstration of ENSNode's multichain ENS indexing capability. Provides
+        a superset of the data indexed by the ENS Subgraph. Indexes additional
+        Resolver record values in preparation for ENS Protocol Acceleration.
+      </td>
+    </tr>
+  </tbody>
 </table>
 
 <table>
@@ -114,7 +136,7 @@ Main difference from client perspective is chain being indexed and list of plugi
     <tr>
         <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
         <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io">
+            <a class="block w-fit no-underline" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io">
                 <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
                 hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
                     <svg
@@ -193,7 +215,7 @@ Main difference from client perspective is chain being indexed and list of plugi
     <tr>
         <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
         <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io">
+            <a class="block w-fit no-underline" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io">
                 <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
                 hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
                     <svg
@@ -255,87 +277,110 @@ Main difference from client perspective is chain being indexed and list of plugi
         </td>
     </tr>
     </tbody>
+
 </table>
 
 <table>
-    <thead>
+  <thead>
     <tr>
-        <th></th>
-        <th><strong>ENSNode 'Holesky'</strong></th>
+      <th></th>
+      <th>
+        <strong>ENSNode 'Holesky'</strong>
+      </th>
     </tr>
-    </thead>
-    <tbody>
+  </thead>
+  <tbody>
     <tr>
-        <td>ENSNode</td>
-        <td><a href="https://api.holesky.ensnode.io">https://api.holesky.ensnode.io</a></td>
-    </tr>
-    <tr>
-        <td style={{verticalAlign: "middle"}}>ENSAdmin</td>
-        <td class="not-content">
-            <a class="block w-fit" target="_blank" rel="noopener noreferrer" href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io">
-                <button class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
-                hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg">
-                    <svg
-                        width="26"
-                        height="26"
-                        viewBox="0 0 28 28"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path d="M2 2H26V26H2V2Z" fill="url(#paint0_radial_708_886)" />
-                        <path d="M14 6L26 26H2L14 6Z" fill="url(#paint1_linear_708_886)" />
-                        <path d="M5 21H22.9998L23.5977 22H4.40234L5 21Z" fill="#2364E8" />
-                        <path d="M8.00014 16H20L20.5991 17H7.40234L8.00014 16Z" fill="#2364E8" />
-                        <path d="M10.9997 11H16.9999L17.6014 12H10.3999L10.9997 11Z" fill="#2364E8" />
-                        <path
-                            fill-rule="evenodd"
-                            clip-rule="evenodd"
-                            d="M24 2H4C2.89543 2 2 2.89543 2 4V24C2 25.1046 2.89543 26 4 26H24C25.1046 26 26 25.1046 26 24V4C26 2.89543 25.1046 2 24 2ZM4 0C1.79086 0 0 1.79086 0 4V24C0 26.2091 1.79086 28 4 28H24C26.2091 28 28 26.2091 28 24V4C28 1.79086 26.2091 0 24 0H4Z"
-                            fill="white"
-                        />
-                        <defs>
-                            <radialGradient
-                                id="paint0_radial_708_886"
-                                cx="0"
-                                cy="0"
-                                r="1"
-                                gradientUnits="userSpaceOnUse"
-                                gradientTransform="translate(14 14) rotate(90) scale(12)"
-                            >
-                                <stop offset="0.455" stop-color="#DCE7FF" />
-                                <stop offset="1" stop-color="#A9C5FF" />
-                            </radialGradient>
-                            <linearGradient
-                                id="paint1_linear_708_886"
-                                x1="14"
-                                y1="6"
-                                x2="14"
-                                y2="26"
-                                gradientUnits="userSpaceOnUse"
-                            >
-                                <stop stop-color="#78A5FF" />
-                                <stop offset="1" stop-color="#528BFF" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    Connect with ENSAdmin
-                </button>
-            </a>
-        </td>
+      <td>ENSNode</td>
+      <td>
+        <a href="https://api.holesky.ensnode.io">
+          https://api.holesky.ensnode.io
+        </a>
+      </td>
     </tr>
     <tr>
-        <td>Active Plugins</td>
-        <td>subgraph</td>
+      <td style={{ verticalAlign: "middle" }}>ENSAdmin</td>
+      <td class="not-content">
+        <a
+          class="block w-fit no-underline"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://admin.ensnode.io/status?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io"
+        >
+          <button
+            class="open-in-ensadmin flex flex-row flex-nowrap justify-start items-center gap-1 min-[400px]:gap-2 transition-all button-as-child bg-[var(--sl-color-accent)]
+                hover:bg-[var(--sl-color-accent-high)] text-[var(--sl-color-black)] text-xs min-[400px]:text-base font-medium pl-1 pr-2 py-1 min-[400px]:pl-2 min-[400px]:pr-3 min-[400px]:py-2 rounded-lg"
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 28 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M2 2H26V26H2V2Z" fill="url(#paint0_radial_708_886)" />
+              <path
+                d="M14 6L26 26H2L14 6Z"
+                fill="url(#paint1_linear_708_886)"
+              />
+              <path d="M5 21H22.9998L23.5977 22H4.40234L5 21Z" fill="#2364E8" />
+              <path
+                d="M8.00014 16H20L20.5991 17H7.40234L8.00014 16Z"
+                fill="#2364E8"
+              />
+              <path
+                d="M10.9997 11H16.9999L17.6014 12H10.3999L10.9997 11Z"
+                fill="#2364E8"
+              />
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M24 2H4C2.89543 2 2 2.89543 2 4V24C2 25.1046 2.89543 26 4 26H24C25.1046 26 26 25.1046 26 24V4C26 2.89543 25.1046 2 24 2ZM4 0C1.79086 0 0 1.79086 0 4V24C0 26.2091 1.79086 28 4 28H24C26.2091 28 28 26.2091 28 24V4C28 1.79086 26.2091 0 24 0H4Z"
+                fill="white"
+              />
+              <defs>
+                <radialGradient
+                  id="paint0_radial_708_886"
+                  cx="0"
+                  cy="0"
+                  r="1"
+                  gradientUnits="userSpaceOnUse"
+                  gradientTransform="translate(14 14) rotate(90) scale(12)"
+                >
+                  <stop offset="0.455" stop-color="#DCE7FF" />
+                  <stop offset="1" stop-color="#A9C5FF" />
+                </radialGradient>
+                <linearGradient
+                  id="paint1_linear_708_886"
+                  x1="14"
+                  y1="6"
+                  x2="14"
+                  y2="26"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop stop-color="#78A5FF" />
+                  <stop offset="1" stop-color="#528BFF" />
+                </linearGradient>
+              </defs>
+            </svg>
+            Connect with ENSAdmin
+          </button>
+        </a>
+      </td>
     </tr>
     <tr>
-        <td>Purpose</td>
-        <td>
-            Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Holesky.
-        </td>
+      <td>Active Plugins</td>
+      <td>subgraph</td>
     </tr>
-    </tbody>
+    <tr>
+      <td>Purpose</td>
+      <td>
+        Demonstration of ENSNode's backwards compatibility with the ENS
+        Subgraph. Provides 1:1 Subgraph compatible data on Holesky.
+      </td>
+    </tr>
+  </tbody>
 </table>
-
 
 ## Endpoints
 
