@@ -1,0 +1,218 @@
+/* Starlight CSS File */
+@layer base, starlight, theme, components, utilities;
+
+@import "@astrojs/starlight-tailwind";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme {
+  /* Reference global design tokens */
+  --font-sans: var(--font-primary);
+  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
+
+  /* Accent colors based on global primary */
+  --color-accent-50: #f0f8fb;
+  --color-accent-100: var(--color-primary-light);
+  --color-accent-200: #9dc3d0;
+  --color-accent-300: #6ba5b8;
+  --color-accent-400: #3a87a0;
+  --color-accent-500: var(--color-primary);
+  --color-accent-600: #006699;
+  --color-accent-700: #004c77;
+  --color-accent-800: #003354;
+  --color-accent-900: #1a2f3a;
+  --color-accent-950: var(--color-primary-dark);
+
+  /* Gray colors using global neutrals */
+  --color-gray-50: #f6f6f6;
+  --color-gray-100: var(--color-border-light);
+  --color-gray-200: #d4d6d7;
+  --color-gray-300: var(--color-border);
+  --color-gray-400: #b3b7b9;
+  --color-gray-500: #8a9499;
+  --color-gray-600: #6a7479;
+  --color-gray-700: var(--color-text-primary);
+  --color-gray-800: #2a3c43;
+  --color-gray-900: #1a2c33;
+  --color-gray-950: var(--color-primary-dark);
+}
+
+/* Starlight-specific variable overrides using global tokens */
+:root {
+  /* Map Starlight variables to global design tokens */
+  --sl-font: var(--font-primary);
+  --sl-color-accent-low: var(--color-primary-light);
+  --sl-color-accent: var(--color-primary);
+  --sl-color-accent-high: var(--color-primary-dark);
+  --sl-color-text-accent: var(--color-primary);
+  --sl-color-bg-nav: var(--color-background);
+  --sl-color-white: var(--color-surface);
+  --sl-color-black: var(--color-background);
+
+  /* Gray scale mapping */
+  --sl-color-gray-1: var(--color-primary-dark);
+  --sl-color-gray-2: var(--color-text-primary);
+  --sl-color-gray-3: var(--color-text-primary);
+  --sl-color-gray-4: var(--color-text-primary);
+  --sl-color-gray-5: var(--color-border);
+  --sl-color-gray-6: var(--color-border-light);
+  --sl-color-gray-7: #f6f6f6;
+
+  /* Status colors using global tokens */
+  --sl-color-blue: var(--color-blue);
+  --sl-color-blue-high: var(--color-blue-dark);
+  --sl-color-blue-low: var(--color-blue-light);
+  --sl-color-orange: var(--color-orange);
+  --sl-color-orange-high: var(--color-orange);
+  --sl-color-orange-low: var(--color-orange-light);
+  --sl-color-purple: var(--color-purple);
+  --sl-color-purple-high: var(--color-purple);
+  --sl-color-purple-low: var(--color-purple-light);
+  --sl-color-green: var(--color-green);
+  --sl-color-green-high: var(--color-green);
+  --sl-color-green-low: var(--color-green-light);
+
+  /* Pagination and shadows using global tokens */
+  --pagination-arrow-color: var(--color-text-secondary);
+  --sl-shadow-md: var(--shadow-md);
+  --sl-shadow-sm: var(--shadow-sm);
+}
+
+/* Starlight-specific component styles */
+@media (min-width: 1484px) {
+  .page {
+    flex-direction: row;
+    max-width: var(--max-width-page);
+    margin-inline: auto;
+  }
+  nav.sidebar .sidebar-pane {
+    position: sticky;
+    height: calc(100vh - var(--sl-nav-height));
+  }
+  div.main-frame {
+    padding-inline-start: initial;
+    flex: 1;
+  }
+}
+
+site-search dialog {
+  background-color: var(--sl-color-black);
+  border-color: var(--sl-color-gray-7);
+  box-shadow: none;
+}
+
+.social-icons::after {
+  display: none;
+}
+
+.sl-link-card {
+  border-color: var(--sl-color-gray-4);
+  box-shadow: var(--sl-shadow-sm);
+}
+
+.sl-link-card:hover,
+a[rel="next"]:hover,
+a[rel="prev"]:hover {
+  background: var(--sl-color-black);
+  border-color: var(--sl-color-accent);
+}
+
+.sl-link-card:hover .icon {
+  color: var(--sl-color-accent);
+}
+
+.link-title {
+  color: var(--sl-color-accent);
+}
+
+.content-panel + .content-panel {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* Typography styles */
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4,
+.sl-markdown-content h5,
+.sl-markdown-content h6 {
+  color: var(--sl-color-accent-high);
+}
+
+.sl-markdown-content a:hover:not(:where(.not-content *)) > span {
+  color: var(--sl-color-accent);
+}
+
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) > a {
+  color: var(--sl-color-white);
+  display: inline;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.sl-markdown-content :global(.anchor-link) {
+  display: inline;
+}
+
+/* List styles using Tailwind @apply */
+.sl-markdown-content ul {
+  @apply list-disc list-inside space-y-1 ml-4 mb-4 text-gray-700;
+}
+
+.sl-markdown-content ul li::marker {
+  @apply text-accent-500;
+}
+
+/* Pagination styles */
+.pagination-links {
+  display: flex !important;
+  justify-content: space-between;
+  margin-top: 3rem;
+
+  & > a {
+    flex-basis: unset;
+    flex-grow: unset;
+    width: fit-content;
+    padding: unset;
+    border: unset;
+    box-shadow: unset;
+
+    &[rel="prev"] {
+      text-align: right;
+      margin-right: auto;
+    }
+
+    &[rel="next"] {
+      text-align: left;
+      margin-left: auto;
+    }
+
+    & > span {
+      font-size: 0.75rem;
+
+      .link-title {
+        font-size: 1rem;
+      }
+    }
+
+    & > svg {
+      align-self: self-end;
+      color: var(--pagination-arrow-color);
+      font-size: 1.25rem;
+      margin-bottom: 1px;
+    }
+  }
+
+  & > a:hover > svg {
+    color: var(--sl-color-white);
+  }
+}
+
+.open-in-ensadmin {
+  @media screen and (max-width: 400px) {
+    font-size: 14px;
+  }
+}
