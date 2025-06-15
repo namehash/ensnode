@@ -4,7 +4,7 @@ sidebar:
   order: 2
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 :::note
 This document assumes general knowledge of the ENS protocol and the ENS Subgraph.
@@ -59,7 +59,7 @@ Each plugin is an isolated ponder indexing configuration that uses the shared ha
 
 Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `eth` plugin—which didn't expect multichain or multi-source entities—, id-generating code is abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `eth` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
 
-This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — teh shared handlers derived from the subgraph which are  used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
+This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — teh shared handlers derived from the subgraph which are used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
 
 ### Plugin Definition
 
