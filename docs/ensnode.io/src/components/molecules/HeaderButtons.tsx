@@ -17,10 +17,7 @@ export default function HeaderButtons({ isScrollable }: HeaderButtonsProps) {
           className="text-black border-transparent hover:bg-black/5 transition text-base rounded-lg border font-medium inline-flex gap-2 items-center whitespace-nowrap no-underline py-2 px-4"
         >
           <p
-            className={cc([
-              "text-sm font-medium leading-6",
-              isScrollable ? "onScrollElement" : "",
-            ])}
+            className={cc(["text-sm font-medium leading-6", isScrollable ? "onScrollElement" : ""])}
           >
             Docs
           </p>
