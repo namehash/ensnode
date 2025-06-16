@@ -86,7 +86,7 @@ const additionalAuthorsCount = uniqueAuthors.length - MAX_AUTHORS_TO_SHOW;
       Contributions by
       {hasMoreAuthors && <span class="text-xs font-normal text-slate-400">+{additionalAuthorsCount} more</span>}
     </p>
-    <ul class="flex flex-wrap gap-2.5 p-px text-[var(--avatar-size)] max-w-full not-content">
+    <ul class="list-none flex flex-wrap gap-2.5 p-px text-[var(--avatar-size)] max-w-full not-content">
       {displayedAuthors.map(({ login, id, name }) => (
         <li class="w-[var(--avatar-size)] h-[var(--avatar-size)]">
           <a
