@@ -1,6 +1,6 @@
 "use client";
 
-import { ENSName } from "@/components/ens-name";
+import { Identity } from "../identity";
 import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -226,13 +226,13 @@ export function RecentRegistrations() {
                     </TableCell>
                     <TableCell>
                       {indexedChainId ? (
-                        <ENSName
+                        <Identity
                           address={registration.owner}
                           chainId={indexedChainId}
                           showAvatar={true}
                         />
                       ) : (
-                        <ENSName.Placeholder showAvatar={true} />
+                        <Identity.Placeholder showAvatar={true} />
                       )}
                     </TableCell>
                   </TableRow>

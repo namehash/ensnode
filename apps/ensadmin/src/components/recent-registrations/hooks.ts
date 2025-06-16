@@ -2,11 +2,12 @@ import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
+import {registration} from "@ensnode/ensnode-schema";
 
 /**
- * The data model returned by a GraphQL query for the latest registrations.
+ * The data model returned by a GraphQL query for registrations.
  */
-interface LatestRegistrationResult {
+interface RegistrationResult {
   registrationDate: string;
   expiryDate: string;
   domain: {
@@ -31,41 +32,38 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
  * Determines the effective owner of a domain.
  * If the owner is the NameWrapper contract, returns the wrapped owner instead.
  *
- * @param graphQLQueryResponseElement - Data associated with Registration event
+ * @param registrationResult - Data associated with Registration event
  */
-function getTrueOwner(graphQLQueryResponseElement: LatestRegistrationResult) {
+function getTrueOwner(registrationResult: RegistrationResult) {
   // Only use wrapped owner if the owner is the NameWrapper contract
-  if (isAddressEqual(graphQLQueryResponseElement.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
-    if (graphQLQueryResponseElement.domain.wrappedOwner) {
-      return getAddress(graphQLQueryResponseElement.domain.wrappedOwner.id);
+  if (isAddressEqual(registrationResult.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
+    if (registrationResult.domain.wrappedOwner) {
+      return getAddress(registrationResult.domain.wrappedOwner.id);
     }
     throw new Error("Wrapped owner is not defined 'true' owner is an ENS Name Wrapper");
   }
 
   // Otherwise, use the regular owner
-  return getAddress(graphQLQueryResponseElement.domain.owner.id);
+  return getAddress(registrationResult.domain.owner.id);
 }
 
 /**
- * Transforms a response of the GraphQL RecentRegistrationsQuery to an array of streamlined type Registration
- * @param graphQLResponseData - LatestRegistrationResult[] - GraphQL compatible representations of recently registered domains
+ * Transforms a registration object from the response of the GraphQL RecentRegistrationsQuery to an object of a streamlined type Registration
+ * @param registrationResult - RegistrationResult - GraphQL compatible representation of recently registered domain
  * @returns fetched data in Registration format
  */
-function toRegistrations(graphQLResponseData: LatestRegistrationResult[]): Registration[] {
-  return graphQLResponseData.map(
-    (registration): Registration => ({
-      registeredAt: registration.registrationDate,
-      expiresAt: registration.expiryDate,
-      name: registration.domain.name,
-      domainCreatedAt: registration.domain.createdAt,
-      expiresAtWithGracePeriod: registration.domain.expiryDate,
-      ownerInRegistry: registration.domain.owner.id,
-      owner: getTrueOwner(registration),
-      ...(registration.domain.wrappedOwner && {
-        ownerInNameWrapper: registration.domain.wrappedOwner.id,
+function toRegistration(registrationResult: RegistrationResult): Registration {
+  return {
+      registeredAt: registrationResult.registrationDate,
+      expiresAt: registrationResult.expiryDate,
+      name: registrationResult.domain.name,
+      releasesAt: registrationResult.domain.expiryDate,
+      ownerInRegistry: registrationResult.domain.owner.id,
+      owner: getTrueOwner(registrationResult),
+      ...(registrationResult.domain.wrappedOwner && {
+        ownerInNameWrapper: registrationResult.domain.wrappedOwner.id,
       }),
-    }),
-  );
+    };
 }
 
 /**
@@ -113,7 +111,7 @@ async function fetchRecentRegistrations(baseUrl: URL): Promise<Registration[]> {
 
   const data = await response.json();
 
-  return toRegistrations(data.data.registrations);
+  return data.data.registrations.map((registration) => toRegistration(registration));
 }
 
 //TODO: The number of registrations to query should be a param passed into the function. (Remove the hardcoded "5")
