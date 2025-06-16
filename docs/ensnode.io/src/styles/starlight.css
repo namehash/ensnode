@@ -8,8 +8,7 @@
 @theme {
   /* Reference global design tokens */
   --font-sans: var(--font-primary);
-  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono",
-    "Menlo", monospace;
+  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
 
   /* Accent colors based on global primary */
   --color-accent-50: #f0f8fb;
