@@ -9,7 +9,7 @@ type PageProps = {
 
 const savedQueries = [
   {
-    operationName: "getDomains",
+    operationName: "GetLatestDomains",
     id: "1",
     name: "Get Latest Domains",
     category: "Domain",
@@ -31,7 +31,42 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getDomainsWithPagination",
+    operationName: "RecentRegistrationsQuery",
+    id: "21",
+    name: "Get Recent Registrations",
+    category: "Registrar",
+    description:
+      "Retrieves the most recent domain registrations ordered by registration date in descending order. Shows registration details including expiry dates and ownership information for newly registered domains.",
+    query: `query RecentRegistrationsQuery($first: Int!) {
+  registrations(first: $first, orderBy: registrationDate, orderDirection: desc) {
+    registrationDate
+    expiryDate
+    domain {
+      id
+      name
+      labelName
+      createdAt
+      expiryDate
+      owner {
+        id
+      }
+      wrappedOwner {
+        id
+      }
+    }
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        first: 5,
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "GetDomainsWithPagination",
     id: "1a",
     name: "Get Domains with Pagination",
     category: "Domain",
@@ -56,7 +91,35 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getDomainByNamehash",
+    operationName: "allDomainsByCreationTime",
+    id: "22",
+    name: "Get All Domains with Pagination by Creation Time",
+    category: "Domain",
+    description:
+      "Retrieves domains in batches for pagination, ordered by creation time in ascending order. Excludes reverse records and null names. Use the lastCreatedAt parameter to paginate through all domains by passing the createdAt timestamp of the last domain from the previous batch.",
+    query: `query allDomainsByCreationTime($lastCreatedAt: String, $first: Int!) {
+  domains(
+    first: $first
+    where: { createdAt_gt: $lastCreatedAt, name_not_ends_with: ".addr.reverse", name_not: null }
+    orderBy: createdAt
+    orderDirection: asc
+  ) {
+    createdAt
+    name
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        lastCreatedAt: "",
+        first: 10,
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "GetDomainByNamehash",
     id: "2",
     name: "Get Domain by Namehash",
     category: "Domain",
@@ -81,7 +144,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getDomainByName",
+    operationName: "GetDomainByName",
     id: "2a",
     name: "Get Domain by Name",
     category: "Domain",
@@ -107,7 +170,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getDomainsByLabel",
+    operationName: "GetDomainsByLabel",
     id: "2c",
     name: "Get Domains by the childmost-label substring",
     category: "Domain",
@@ -154,7 +217,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getNameHistory",
+    operationName: "GetNameHistory",
     id: "4",
     name: "Get Complete Name History",
     category: "Domain",
@@ -271,7 +334,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getDomainEvents",
+    operationName: "GetDomainEvents",
     id: "5",
     name: "Get Domain Events Only",
     category: "Domain",
@@ -321,7 +384,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getResolverEvents",
+    operationName: "GetResolverEvents",
     id: "6",
     name: "Get Resolver Events Only",
     category: "Resolver",
@@ -370,7 +433,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getDomainsForAddress",
+    operationName: "GetDomainsForAddress",
     id: "7",
     name: "Get Domains for Address (owner, registrant, wrappedOwner, or resolvedAddress)",
     category: "Account",
@@ -485,7 +548,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getRegisteredDomains",
+    operationName: "GetRegisteredDomains",
     id: "9",
     name: "Get Registered Domains Only",
     category: "Account",
@@ -534,7 +597,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getNamesIncludingExpired",
+    operationName: "GetNamesIncludingExpired",
     id: "10",
     name: "Get Names Including Expired",
     category: "Account",
@@ -586,7 +649,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getSubgraphRegistrant",
+    operationName: "GetSubgraphRegistrant",
     id: "11",
     name: "Get Registrant by Labelhash", // works with ENS only?
     category: "Registrar",
@@ -616,7 +679,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getSubnames",
+    operationName: "GetSubnames",
     id: "12",
     name: "Get Subdomains",
     category: "Domain",
@@ -678,7 +741,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "searchSubnames",
+    operationName: "SearchSubnames",
     id: "13",
     name: "Search Subdomains by Label",
     category: "Domain",
@@ -735,7 +798,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getSubnamesIncludingExpired",
+    operationName: "GetSubnamesIncludingExpired",
     id: "14",
     name: "Get Subdomains Including Expired",
     category: "Domain",
@@ -783,7 +846,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getRecentSubnames",
+    operationName: "GetRecentSubnames",
     id: "15",
     name: "Get Recently Created Subdomains",
     category: "Registrar",
@@ -841,7 +904,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getSubgraphRecords",
+    operationName: "GetSubgraphRecords",
     id: "16",
     name: "Get Domain Records (Inherited Resolver)",
     category: "Resolver",
@@ -869,7 +932,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getSubgraphRecordsCustomResolver",
+    operationName: "GetSubgraphRecordsCustomResolver",
     id: "17",
     name: "Get Domain Records (Custom Resolver)",
     category: "Resolver",
@@ -902,7 +965,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getResolverDetails",
+    operationName: "GetResolverDetails",
     id: "18",
     name: "Get Resolver Details by Address",
     category: "Resolver",
@@ -929,7 +992,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getDomainTextRecords",
+    operationName: "GetDomainTextRecords",
     id: "19",
     name: "Get Domain Text Records",
     category: "Resolver",
@@ -963,7 +1026,7 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "getHistoricalResolverRecords",
+    operationName: "GetHistoricalResolverRecords",
     id: "20",
     name: "Get Historical Resolver Records Evolution",
     category: "Resolver",
@@ -1004,6 +1067,192 @@ const savedQueries = [
     variables: JSON.stringify(
       {
         ensName: "ens.eth",
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "getIndexerMetadata",
+    id: "23",
+    name: "Get Indexer Metadata",
+    category: "Meta",
+    description:
+      "Retrieves metadata information about the indexer including indexing status and current block number. Use this to check if the indexer has indexing errors and to monitor synchronization with the blockchain.",
+    query: `query getIndexerMetadata {
+  _meta {
+    hasIndexingErrors
+    block {
+      number
+    }
+  }
+}
+    `,
+    variables: JSON.stringify({}, null, 2),
+  },
+  {
+    operationName: "getResolverExists",
+    id: "24",
+    name: "Check if Resolver Exists",
+    category: "Resolver",
+    description:
+      "Checks if a specific resolver exists by its ID. The resolver ID is constructed as 'resolverAddress-namehash' where resolverAddress is the contract address and namehash is the domain's namehash. Used to verify resolver existence before operations.",
+    query: `query getResolverExists($id: String!) {
+  resolver(id: $id) {
+    id
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        id: "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41-0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df", // ENS: Public Resolver 2 + namehash("ens.eth")
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "getNameDates",
+    id: "25",
+    name: "Get Registration Data by Labelhash",
+    category: "Registrar",
+    description:
+      "Retrieves registration information for a domain using its labelhash (hash of the label without the TLD). Returns the registration date and the most recent registration transaction ID. Primarily used for .eth domains.",
+    query: `query getNameDates($id: String!) {
+  registration(id: $id) {
+    registrationDate
+  }
+  nameRegistereds(first: 1, orderBy: blockNumber, orderDirection: desc, where: { registration: $id }) {
+    transactionID
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        id: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da", // labelhash("ens")
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "getDomainWithResolver",
+    id: "26",
+    name: "Get Domain with Resolver Address",
+    category: "Domain",
+    description:
+      "Retrieves domain information including resolver address and text records. Unlike other domain queries, this specifically includes the resolver's address field along with standard domain information.",
+    query: `query getDomainWithResolver($tokenId: String!) {
+  domain(id: $tokenId) {
+    id
+    labelhash
+    name
+    createdAt
+    parent {
+      id
+    }
+    resolver {
+      texts
+      address
+    }
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        tokenId: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df", // namehash("ens.eth")
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "getEthDomainByLabelhash",
+    id: "27",
+    name: "Get ETH Domain by Labelhash",
+    category: "Domain",
+    description:
+      "Retrieves .eth domains by their labelhash under the ETH parent domain. This is specifically for finding .eth domains using their labelhash identifier.",
+    query: `query getEthDomainByLabelhash($tokenId: String!) {
+  domains(
+    where: {
+      parent: "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae"
+      labelhash: $tokenId
+    }
+  ) {
+    id
+    labelhash
+    name
+    createdAt
+    parent {
+      id
+    }
+    resolver {
+      texts
+      address
+    }
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        tokenId: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da", // labelhash("ens")
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "getRegistrationByTokenId", //similar to getSubgraphRegistrant - remove?
+    id: "28",
+    name: "Get Registration by Token ID",
+    category: "Registrar",
+    description:
+      "Retrieves registration information by token ID (labelhash), including label name, registration date, and expiry date. Ordered by registration date in descending order.",
+    query: `query getRegistrationByTokenId($tokenId: String!) {
+  registrations(
+    orderBy: registrationDate
+    orderDirection: desc
+    where: { id: $tokenId }
+  ) {
+    labelName
+    registrationDate
+    expiryDate
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        tokenId: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da", // labelhash("ens")
+      },
+      null,
+      2,
+    ),
+  },
+  {
+    operationName: "getWrappedDomain",
+    id: "29",
+    name: "Get Wrapped Domain",
+    category: "Domain",
+    description:
+      "Retrieves wrapped domain information including owner, fuses, expiry date, and domain name. Used for ENS domains that have been wrapped using the Name Wrapper contract.",
+    query: `query getWrappedDomain($tokenId: String!) {
+  wrappedDomain(id: $tokenId) {
+    id
+    owner {
+      id
+    }
+    fuses
+    expiryDate
+    domain {
+      name
+    }
+  }
+}
+    `,
+    variables: JSON.stringify(
+      {
+        tokenId: "0x2c18815bc184e0d6d1d6817e9461e713acb6f3d6c1d2092babfbad56842a4085", // namehash("$$$.eth")
       },
       null,
       2,
