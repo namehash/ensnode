@@ -3,17 +3,16 @@ import type { Address } from "viem";
 /**
  * Data associated with a Registration
  */
-// TODO: fix the order of the fields for improved clarity
 export interface Registration {
   /**
-   * a UNIX timestamp in seconds of when the domain was registered by its current owner
+   * Date object representing the registration date of the domain by its current owner.
    */
-  registeredAt: string;
+  registeredAt: Date;
 
   /**
-   * a UNIX timestamp in seconds when the registration is scheduled to expire
+   * Date object representing when the registration is scheduled to expire.
    */
-  expiresAt: string;
+  expiresAt: Date;
 
   /**
    * The registered ENS name
@@ -21,9 +20,9 @@ export interface Registration {
   name: string;
 
   /**
-   * a UNIX timestamp in seconds when the registration is scheduled to expire, includes grace period
+   * Date object representing when the registered domain will be released, including the registration duration and grace period
    */
-  releasesAt: string;
+  releasesAt: Date;
 
   /**
    * The "official" owner of the domain in the ENS Registry.

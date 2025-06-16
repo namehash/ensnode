@@ -2,7 +2,7 @@ import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
-import {registration} from "@ensnode/ensnode-schema";
+import {millisecondsInSecond} from "date-fns/constants";
 
 /**
  * The data model returned by a GraphQL query for registrations.
@@ -40,11 +40,19 @@ function getTrueOwner(registrationResult: RegistrationResult) {
     if (registrationResult.domain.wrappedOwner) {
       return getAddress(registrationResult.domain.wrappedOwner.id);
     }
-    throw new Error("Wrapped owner is not defined 'true' owner is an ENS Name Wrapper");
+    throw new Error("Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper");
   }
 
   // Otherwise, use the regular owner
   return getAddress(registrationResult.domain.owner.id);
+}
+
+function transformTimestamp(timestamp: string): Date {
+  try {
+    return new Date(parseInt(timestamp) * millisecondsInSecond);
+  } catch (error) {
+    throw new Error("Error parsing timestamp to date");
+  }
 }
 
 /**
@@ -54,10 +62,10 @@ function getTrueOwner(registrationResult: RegistrationResult) {
  */
 function toRegistration(registrationResult: RegistrationResult): Registration {
   return {
-      registeredAt: registrationResult.registrationDate,
-      expiresAt: registrationResult.expiryDate,
+      registeredAt: transformTimestamp(registrationResult.registrationDate),
+      expiresAt: transformTimestamp(registrationResult.expiryDate),
       name: registrationResult.domain.name,
-      releasesAt: registrationResult.domain.expiryDate,
+      releasesAt: transformTimestamp(registrationResult.domain.expiryDate),
       ownerInRegistry: registrationResult.domain.owner.id,
       owner: getTrueOwner(registrationResult),
       ...(registrationResult.domain.wrappedOwner && {
@@ -67,15 +75,16 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
 }
 
 /**
- * Fetches info about the 5 most recently registered .eth domains that have been indexed.
+ * Fetches info about most recently registered .eth domains that have been indexed.
  *
  * @param baseUrl ENSNode URL
- * @returns Info about the 5 most recently registered .eth domains that have been indexed.
+ * @param numberOfRegistrations number of latest registrations to be retrieved by the query
+ * @returns Info about most recently registered .eth domains that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: URL): Promise<Registration[]> {
+async function fetchRecentRegistrations(baseUrl: URL, numberOfRegistrations: number): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
-      registrations(first: 5, orderBy: registrationDate, orderDirection: desc) {
+      registrations(first: ${numberOfRegistrations}, orderBy: registrationDate, orderDirection: desc) {
         registrationDate
         expiryDate
         domain {
@@ -118,14 +127,15 @@ async function fetchRecentRegistrations(baseUrl: URL): Promise<Registration[]> {
 /**
  * Hook to fetch info about the 5 most recently registered .eth domains that have been indexed.
  * @param searchParams The URL search params including the selected ENS node URL.
+ * @param numberOfRegistrations number of latest registrations to be retrieved by the query
  * @returns React Query hook result.
  */
-export function useRecentRegistrations(searchParams: URLSearchParams) {
+export function useRecentRegistrations(searchParams: URLSearchParams, numberOfRegistrations: number) {
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
     queryKey: ["recent-registrations", ensNodeUrl],
-    queryFn: () => fetchRecentRegistrations(ensNodeUrl),
+    queryFn: () => fetchRecentRegistrations(ensNodeUrl, numberOfRegistrations),
     throwOnError(error) {
       throw new Error(`Could not fetch ENSNode data from '${ensNodeUrl}'. Cause: ${error.message}`);
     },

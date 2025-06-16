@@ -12,77 +12,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRecentRegistrations } from "./hooks";
+import {RelativeTime, FormattedDate, Duration} from "@/components/recent-registrations/utils";
+
 
 /**
- * Helper function to safely format dates
+ * Number of latest registrations to be displayed in the panel
  */
-const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
-  try {
-    const parsedTimestamp = parseInt(timestamp);
-    if (isNaN(parsedTimestamp)) {
-      return "Invalid date";
-    }
-    return intlFormat(fromUnixTime(parsedTimestamp), options);
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return "Invalid date";
-  }
-};
-
-/**
- * Helper function to calculate duration in years
- */
-const calculateDurationYears = (registrationDate: string, expiryDate: string) => {
-  try {
-    const registrationTimestamp = parseInt(registrationDate);
-    const expiryTimestamp = parseInt(expiryDate);
-
-    if (isNaN(registrationTimestamp) || isNaN(expiryTimestamp)) {
-      return "Unknown";
-    }
-
-    const registrationDate_ = fromUnixTime(registrationTimestamp);
-    const expiryDate_ = fromUnixTime(expiryTimestamp);
-    const years = differenceInYears(expiryDate_, registrationDate_);
-
-    // If less than a year, show months instead
-    if (years === 0) {
-      // Calculate months by getting the difference in milliseconds and converting to months
-      const diffInMs = expiryDate_.getTime() - registrationDate_.getTime();
-      const months = Math.floor(diffInMs / (1000 * 60 * 60 * 24 * 30));
-      return `${months} month${months !== 1 ? "s" : ""}`;
-    }
-
-    return `${years} year${years !== 1 ? "s" : ""}`;
-  } catch (error) {
-    console.error("Error calculating duration:", error);
-    return "Unknown";
-  }
-};
-
-/**
- * Helper function to format relative time
- */
-const formatRelativeTime = (timestamp: string) => {
-  try {
-    const parsedTimestamp = parseInt(timestamp);
-    if (isNaN(parsedTimestamp)) {
-      return "Unknown";
-    }
-
-    const date = fromUnixTime(parsedTimestamp);
-    return formatDistanceToNow(date, { addSuffix: true });
-  } catch (error) {
-    console.error("Error formatting relative time:", error);
-    return "Unknown";
-  }
-};
-
+const NUMBER_OF_LATEST_REGISTRATIONS = 5;
 /**
  * Helper function to generate ENS app URL for a name
  */
@@ -90,60 +30,9 @@ const getEnsAppUrlForName = (name: string) => {
   return `https://app.ens.domains/${name}`;
 };
 
-/**
- * Client-only date formatter component
- */
-function FormattedDate({
-  timestamp,
-  options,
-}: {
-  timestamp: string;
-  options: Intl.DateTimeFormatOptions;
-}) {
-  const [formattedDate, setFormattedDate] = useState<string>("");
-
-  useEffect(() => {
-    setFormattedDate(formatDate(timestamp, options));
-  }, [timestamp, options]);
-
-  return <>{formattedDate}</>;
-}
-
-/**
- * Client-only relative time component
- */
-function RelativeTime({ timestamp }: { timestamp: string }) {
-  const [relativeTime, setRelativeTime] = useState<string>("");
-
-  useEffect(() => {
-    setRelativeTime(formatRelativeTime(timestamp));
-  }, [timestamp]);
-
-  return <>{relativeTime}</>;
-}
-
-/**
- * Client-only duration component
- */
-function Duration({
-  registrationDate,
-  expiryDate,
-}: {
-  registrationDate: string;
-  expiryDate: string;
-}) {
-  const [duration, setDuration] = useState<string>("");
-
-  useEffect(() => {
-    setDuration(calculateDurationYears(registrationDate, expiryDate));
-  }, [registrationDate, expiryDate]);
-
-  return <>{duration}</>;
-}
-
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
+  const recentRegistrationsQuery = useRecentRegistrations(searchParams, NUMBER_OF_LATEST_REGISTRATIONS);
   const indexingStatus = useIndexingStatusQuery(searchParams);
   const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
@@ -171,7 +60,7 @@ export function RecentRegistrations() {
               <span className="text-sm font-medium">
                 Last indexed block on{" "}
                 <FormattedDate
-                  timestamp={(currentIndexingDate.getTime() / 1000).toString()}
+                  date={currentIndexingDate}
                   options={{
                     year: "numeric",
                     month: "short",
@@ -216,12 +105,12 @@ export function RecentRegistrations() {
                       </a>
                     </TableCell>
                     <TableCell>
-                      <RelativeTime timestamp={registration.registeredAt} />
+                      <RelativeTime date={registration.registeredAt} />
                     </TableCell>
                     <TableCell>
                       <Duration
-                        registrationDate={registration.registeredAt}
-                        expiryDate={registration.expiresAt}
+                        beginsAt={registration.registeredAt}
+                        endsAt={registration.expiresAt}
                       />
                     </TableCell>
                     <TableCell>
