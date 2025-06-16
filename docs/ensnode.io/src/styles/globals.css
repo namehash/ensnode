@@ -99,3 +99,9 @@ div.header {
 .dialog-frame button {
   visibility: hidden;
 }
+
+site-search dialog {
+  background-color: var(--sl-color-black);
+  border-color: var(--sl-color-gray-7);
+  box-shadow: none;
+}
