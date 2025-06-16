@@ -16,7 +16,7 @@ export function starlight(): AstroIntegration {
     },
     customCss: [
       "./src/styles/globals.css",
-      "./src/styles/pagination.css",
+      "./src/styles/starlight.css",
       "@fontsource/inter/100.css",
       "@fontsource/inter/200.css",
       "@fontsource/inter/300.css",

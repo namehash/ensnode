@@ -70,7 +70,7 @@ export default function GenericTooltip({
           onClick={handleOpen}
           onMouseEnter={handleOpen}
           onMouseLeave={handleClose}
-          className="cursor-auto"
+          className="cursor-auto inline-flex items-center"
         >
           {trigger}
         </Popover.Group>
