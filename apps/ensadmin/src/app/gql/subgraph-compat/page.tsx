@@ -97,7 +97,7 @@ const savedQueries = [
     category: "Domain",
     description:
       "Retrieves domains in batches for pagination, ordered by creation time in ascending order. Excludes reverse records and null names. Use the lastCreatedAt parameter to paginate through all domains by passing the createdAt timestamp of the last domain from the previous batch.",
-    query: `query allDomainsByCreationTime($lastCreatedAt: String, $first: Int!) {
+    query: `query allDomainsByCreationTime($lastCreatedAt: BigInt, $first: Int!) {
   domains(
     first: $first
     where: { createdAt_gt: $lastCreatedAt, name_not_ends_with: ".addr.reverse", name_not: null }
@@ -111,7 +111,7 @@ const savedQueries = [
     `,
     variables: JSON.stringify(
       {
-        lastCreatedAt: "",
+        lastCreatedAt: "1489206542",
         first: 10,
       },
       null,
@@ -1169,10 +1169,10 @@ const savedQueries = [
   {
     operationName: "getEthDomainByLabelhash",
     id: "27",
-    name: "Get ETH Domain by Labelhash",
+    name: "Get .eth Domain by Labelhash",
     category: "Domain",
     description:
-      "Retrieves .eth domains by their labelhash under the ETH parent domain. This is specifically for finding .eth domains using their labelhash identifier.",
+      "Retrieves .eth domains by their labelhash under the .eth parent domain. This is specifically for finding .eth domains using their labelhash identifier.",
     query: `query getEthDomainByLabelhash($tokenId: String!) {
   domains(
     where: {
