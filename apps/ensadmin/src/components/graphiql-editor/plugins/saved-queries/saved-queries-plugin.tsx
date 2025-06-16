@@ -10,6 +10,7 @@ export interface SavedQuery {
   id: string;
   name: string;
   category?: string;
+  description?: string;
 
   /**
    * The GraphQL query.
