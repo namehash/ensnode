@@ -1,9 +1,6 @@
 import { differenceInYears, formatDistanceToNow, intlFormat } from "date-fns";
 import { useEffect, useState } from "react";
 
-// TODO: these functions could be moved to /components/ui and further refactored if deemed necessary.
-//  Need to decide on their location
-
 /**
  * Client-only date formatter component
  */

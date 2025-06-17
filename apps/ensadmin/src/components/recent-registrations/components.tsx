@@ -22,6 +22,7 @@ import { useRecentRegistrations } from "./hooks";
  * Number of latest registrations to be displayed in the panel
  */
 const NUMBER_OF_LATEST_REGISTRATIONS = 5;
+
 /**
  * Helper function to generate ENS app URL for a name
  */
