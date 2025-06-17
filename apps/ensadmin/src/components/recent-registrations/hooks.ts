@@ -1,8 +1,8 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
+import { millisecondsInSecond } from "date-fns/constants";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
-import {millisecondsInSecond} from "date-fns/constants";
 
 /**
  * The data model returned by a GraphQL query for registrations.
@@ -40,7 +40,9 @@ function getTrueOwner(registrationResult: RegistrationResult) {
     if (registrationResult.domain.wrappedOwner) {
       return getAddress(registrationResult.domain.wrappedOwner.id);
     }
-    throw new Error("Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper");
+    throw new Error(
+      "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
+    );
   }
 
   // Otherwise, use the regular owner
@@ -62,16 +64,16 @@ function transformTimestamp(timestamp: string): Date {
  */
 function toRegistration(registrationResult: RegistrationResult): Registration {
   return {
-      registeredAt: transformTimestamp(registrationResult.registrationDate),
-      expiresAt: transformTimestamp(registrationResult.expiryDate),
-      name: registrationResult.domain.name,
-      releasesAt: transformTimestamp(registrationResult.domain.expiryDate),
-      ownerInRegistry: registrationResult.domain.owner.id,
-      owner: getTrueOwner(registrationResult),
-      ...(registrationResult.domain.wrappedOwner && {
-        ownerInNameWrapper: registrationResult.domain.wrappedOwner.id,
-      }),
-    };
+    registeredAt: transformTimestamp(registrationResult.registrationDate),
+    expiresAt: transformTimestamp(registrationResult.expiryDate),
+    name: registrationResult.domain.name,
+    releasesAt: transformTimestamp(registrationResult.domain.expiryDate),
+    ownerInRegistry: registrationResult.domain.owner.id,
+    owner: getTrueOwner(registrationResult),
+    ...(registrationResult.domain.wrappedOwner && {
+      ownerInNameWrapper: registrationResult.domain.wrappedOwner.id,
+    }),
+  };
 }
 
 /**
@@ -81,7 +83,10 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
  * @param numberOfRegistrations number of latest registrations to be retrieved by the query
  * @returns Info about most recently registered .eth domains that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: URL, numberOfRegistrations: number): Promise<Registration[]> {
+async function fetchRecentRegistrations(
+  baseUrl: URL,
+  numberOfRegistrations: number,
+): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${numberOfRegistrations}, orderBy: registrationDate, orderDirection: desc) {
@@ -120,7 +125,9 @@ async function fetchRecentRegistrations(baseUrl: URL, numberOfRegistrations: num
 
   const data = await response.json();
 
-  return data.data.registrations.map((registration: RegistrationResult) => toRegistration(registration));
+  return data.data.registrations.map((registration: RegistrationResult) =>
+    toRegistration(registration),
+  );
 }
 
 /**
@@ -129,7 +136,10 @@ async function fetchRecentRegistrations(baseUrl: URL, numberOfRegistrations: num
  * @param numberOfRegistrations number of latest registrations to be retrieved by the query
  * @returns React Query hook result.
  */
-export function useRecentRegistrations(searchParams: URLSearchParams, numberOfRegistrations: number) {
+export function useRecentRegistrations(
+  searchParams: URLSearchParams,
+  numberOfRegistrations: number,
+) {
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({

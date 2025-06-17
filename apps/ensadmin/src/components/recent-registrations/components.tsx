@@ -1,8 +1,8 @@
 "use client";
 
-import { Identity } from "../identity";
 import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
+import { Duration, FormattedDate, RelativeTime } from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,9 +15,8 @@ import {
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
-import {RelativeTime, FormattedDate, Duration} from "@/components/recent-registrations/utils";
-
 
 /**
  * Number of latest registrations to be displayed in the panel
@@ -32,7 +31,10 @@ const getEnsAppUrlForName = (name: string) => {
 
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const recentRegistrationsQuery = useRecentRegistrations(searchParams, NUMBER_OF_LATEST_REGISTRATIONS);
+  const recentRegistrationsQuery = useRecentRegistrations(
+    searchParams,
+    NUMBER_OF_LATEST_REGISTRATIONS,
+  );
   const indexingStatus = useIndexingStatusQuery(searchParams);
   const indexedChainId = useIndexedChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
