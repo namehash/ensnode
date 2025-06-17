@@ -120,12 +120,11 @@ async function fetchRecentRegistrations(baseUrl: URL, numberOfRegistrations: num
 
   const data = await response.json();
 
-  return data.data.registrations.map((registration) => toRegistration(registration));
+  return data.data.registrations.map((registration: RegistrationResult) => toRegistration(registration));
 }
 
-//TODO: The number of registrations to query should be a param passed into the function. (Remove the hardcoded "5")
 /**
- * Hook to fetch info about the 5 most recently registered .eth domains that have been indexed.
+ * Hook to fetch info about most recently registered .eth domains that have been indexed.
  * @param searchParams The URL search params including the selected ENS node URL.
  * @param numberOfRegistrations number of latest registrations to be retrieved by the query
  * @returns React Query hook result.
