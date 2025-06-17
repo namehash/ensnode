@@ -151,13 +151,24 @@ a[rel="prev"]:hover {
   display: inline;
 }
 
-/* List styles using Tailwind @apply */
 .sl-markdown-content ul {
-  @apply list-disc list-inside space-y-1 ml-4 mb-4 text-gray-700;
+  list-style: disc;
+  color: var(--sl-color-text);
 }
 
+.sl-markdown-content ol {
+  list-style: decimal;
+  color: var(--sl-color-text);
+}
+
+.sl-markdown-content ol li::marker,
 .sl-markdown-content ul li::marker {
-  @apply text-accent-500;
+  color: var(--sl-color-accent);
+}
+
+/* Nested ul inside ol li should have small top margin */
+.sl-markdown-content ol li ul {
+  margin-top: 0.25rem;
 }
 
 /* Pagination styles */
