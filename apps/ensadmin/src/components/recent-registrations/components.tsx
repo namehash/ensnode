@@ -12,12 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
-import {selectedEnsNodeUrl} from "@/lib/env";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
@@ -28,14 +28,14 @@ const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
  * Helper function to generate ENS app URL for a name
  */
 const getEnsAppUrlForName = (name: string) => {
-    // no explicit url encoding needed
+  // no explicit url encoding needed
   return `https://app.ens.domains/${name}`;
 };
 
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
   const recentRegistrationsQuery = useRecentRegistrations(
-      selectedEnsNodeUrl(searchParams),
+    selectedEnsNodeUrl(searchParams),
     MAX_NUMBER_OF_LATEST_REGISTRATIONS,
   );
   const indexingStatus = useIndexingStatusQuery(searchParams);

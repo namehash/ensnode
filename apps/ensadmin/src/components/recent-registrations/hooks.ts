@@ -37,7 +37,7 @@ function getEffectiveOwner(registrationResult: RegistrationResult): Address {
   if (isAddressEqual(registrationResult.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
     if (!registrationResult.domain.wrappedOwner) {
       throw new Error(
-          "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
+        "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
       );
     }
     return getAddress(registrationResult.domain.wrappedOwner.id);
@@ -72,10 +72,7 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
 /**
  * Fetches info about most recent registrations that have been indexed.
  */
-async function fetchRecentRegistrations(
-  baseUrl: URL,
-  maxResults: number,
-): Promise<Registration[]> {
+async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${maxResults}, orderBy: registrationDate, orderDirection: desc) {
@@ -125,11 +122,7 @@ async function fetchRecentRegistrations(
  * @param ensNodeURL The URL of the selected ENS node instance.
  * @param maxResults number of the maximal number of latest registrations to be retrieved by the query
  */
-export function useRecentRegistrations(
-  ensNodeURL: URL,
-  maxResults: number,
-) {
-
+export function useRecentRegistrations(ensNodeURL: URL, maxResults: number) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
     queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
