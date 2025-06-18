@@ -219,7 +219,8 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
   // Invariant: the only chainIds we should be resolving records one at this point are those that
   // ENSIndexer is actively indexing.
-  if (!publicClients[chainId]) {
+  const publicClient = publicClients[chainId];
+  if (!publicClient) {
     throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
   }
 
@@ -242,7 +243,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     calls.map(async (call) => {
       // NOTE: ENSIP-10 —  If extended resolver, resolver.resolve(name, data)
       if (requiresWildcardSupport) {
-        const value = await publicClients[chainId]!.readContract({
+        const value = await publicClient.readContract({
           ...ResolverContract,
           functionName: "resolve",
           args: [
@@ -276,19 +277,18 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       // accurate
       switch (call.functionName) {
         case "name":
-          return publicClients[chainId]!.readContract({ ...ResolverContract, ...call });
+          return publicClient.readContract({ ...ResolverContract, ...call });
         case "addr":
-          return publicClients[chainId]!.readContract({ ...ResolverContract, ...call });
+          return publicClient.readContract({ ...ResolverContract, ...call });
         case "text":
-          return publicClients[chainId]!.readContract({ ...ResolverContract, ...call });
+          return publicClient.readContract({ ...ResolverContract, ...call });
       }
     }),
   );
 
-  console.log("forwardResolve: resolve()", results);
-
   // interleave calls and results
   const callsWithResults = calls.map((call, i) => ({ ...call, result: results[i] }));
+  console.log("forwardResolve: resolve()", callsWithResults);
 
   // 5. Return record values
   return makeRecordsResponseFromResolveResults(selection, callsWithResults);
