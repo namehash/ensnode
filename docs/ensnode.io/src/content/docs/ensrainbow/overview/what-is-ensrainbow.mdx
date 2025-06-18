@@ -26,6 +26,7 @@ Key aspects of ENSRainbow include:
 *   **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable names.
 *   **Sidecar to ENSNode:** It integrates with ENSNode to provide comprehensive name data.
 *   **Improved Coverage:** Aims for a high percentage of name healing, far exceeding previous capabilities.
+*   **Flexible Data Management:** Uses a namespace and label set system for organizing different datasets and incremental updates.
 
 ##### HTTP API
 
@@ -49,6 +50,6 @@ ENSRainbow provides an official TypeScript client SDK `@ensnode/ensrainbow-sdk` 
 
 ##### Self-hosting and Deploying
 
-ENSRainbow is designed to be self-hosted and deployed by anyone and everyone.
+ENSRainbow is designed to be self-hosted and deployed by anyone and everyone. The Docker image is lightweight and downloads the required database at runtime based on your configuration.
 
 For details of how to deploy, see the [deployment guide](/ensrainbow/deploying), or for details on how to run locally, check the [contributing guide](/ensrainbow/contributing/).

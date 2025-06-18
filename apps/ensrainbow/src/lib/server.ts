@@ -7,9 +7,20 @@ import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
+  private namespace!: string;
+  private highestLabelSet!: number;
+
+  public getNamespace(): string {
+    return this.namespace;
+  }
+
+  public getHighestLabelSet(): number {
+    return this.highestLabelSet;
+  }
 
   private constructor(db: ENSRainbowDB) {
     this.db = db;
+    // Namespace and highest label set will be set in init
   }
 
   /**
@@ -25,10 +36,17 @@ export class ENSRainbowServer {
       throw new Error("Database is in an invalid state");
     }
 
+    server.namespace = await db.getNamespace();
+    server.highestLabelSet = await db.getHighestLabelSet();
+
     return server;
   }
 
-  async heal(labelHash: LabelHash): Promise<EnsRainbow.HealResponse> {
+  async heal(
+    labelHash: LabelHash,
+    highestLabelSet: number = Number.MAX_SAFE_INTEGER,
+    namespace?: string,
+  ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
       labelHashBytes = labelHashToBytes(labelHash);
@@ -42,6 +60,30 @@ export class ENSRainbowServer {
     }
 
     try {
+      // If namespace was provided, verify it matches the database namespace
+      if (namespace !== undefined) {
+        if (namespace !== this.namespace) {
+          logger.info(`Namespace mismatch: requested=${namespace}, actual=${this.namespace}`);
+          return {
+            status: StatusCode.Error,
+            error: "Namespace mismatch",
+            errorCode: ErrorCode.BadRequest,
+          } satisfies EnsRainbow.HealError;
+        }
+
+        // Verify that the highest_label_set is not greater than the current label set
+        if (highestLabelSet > this.highestLabelSet) {
+          logger.info(
+            `Requested label set ${highestLabelSet} is higher than current label set ${this.highestLabelSet}`,
+          );
+          return {
+            status: StatusCode.Error,
+            error: "Requested label set is higher than available label set",
+            errorCode: ErrorCode.BadRequest,
+          } satisfies EnsRainbow.HealError;
+        }
+      }
+
       const label = await this.db.getLabel(labelHashBytes);
       if (label === null) {
         logger.info(`Unhealable labelHash request: ${labelHash}`);
@@ -52,10 +94,26 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.HealError;
       }
 
-      logger.info(`Successfully healed labelHash ${labelHash} to label "${label}"`);
+      const { labelSet: labelSetNumber, label: actualLabel } = label;
+
+      // Only return the label if its label set number is less than or equal to highest_label_set
+      if (labelSetNumber > highestLabelSet) {
+        logger.info(
+          `Label set ${labelSetNumber} for ${labelHash} exceeds highest_label_set ${highestLabelSet}`,
+        );
+        return {
+          status: StatusCode.Error,
+          error: "Label not found",
+          errorCode: ErrorCode.NotFound,
+        } satisfies EnsRainbow.HealError;
+      }
+
+      logger.info(
+        `Successfully healed labelHash ${labelHash} to label "${actualLabel}" (set ${labelSetNumber})`,
+      );
       return {
         status: StatusCode.Success,
-        label,
+        label: actualLabel,
       } satisfies EnsRainbow.HealSuccess;
     } catch (error) {
       logger.error("Error healing label:", error);
