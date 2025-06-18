@@ -22,7 +22,7 @@ To use these configurations in your project:
 import { ENSDeployments } from "@ensnode/ens-deployments";
 import { namehash } from "viem";
 
-// access the address and abi for the root Registry on mainnet
+// access the address and abi for the root Registry on the mainnet L1 Chain
 const registryConfig = ENSDeployments.mainnet.root.contracts.Registry;
 
 // for example, querying the Registry with viem...
@@ -40,13 +40,13 @@ const vitaliksResolverAddress = await publicClient.readContract({
 
 ### ENSDeployments
 
-The primary export of `@ensnode/ens-deployments` is `ENSDeployments` which is a `Record<ENSDeploymentChain, ENSDeployment>`.
+The primary export of `@ensnode/ens-deployments` is `ENSDeployments` which is a `Record<L1Chain, ENSDeployment>`.
 
 ```ts
 import { ENSDeployments } from '@ensnode/ens-deployments';
 ```
 
-The available `ENSDeploymentChain`s are:
+The available `L1Chain`s are:
 - `mainnet`
 - `sepolia`
 - `holesky`

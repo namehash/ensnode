@@ -191,10 +191,7 @@ export const handleNewOwner =
             // so we throw an error to bring visibility to not achieving
             // the expected 100% success rate
             throw new Error(
-              `A NewOwner event for a Reverse Node on the ENS Deployment
-									Chain ID "${ensDeploymentRootChainId}" was emitted by
-									the Registry in tx "${event.transaction.hash}", and we failed to
-									heal reverse address for labelHash "${labelHash}".`,
+              `A NewOwner event for a Reverse Node in the Root ENS Deployment on Chain ID "${ensDeploymentRootChainId}" was emitted by the Registry in tx "${event.transaction.hash}", and we failed to heal reverse address for labelHash "${labelHash}".`,
             );
           }
         }

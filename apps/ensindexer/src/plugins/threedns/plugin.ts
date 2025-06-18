@@ -26,7 +26,6 @@ const namespace = makePluginNamespace(pluginName);
 // config object factory used to derive PluginConfig type
 function createPonderConfig(appConfig: ENSIndexerConfig) {
   const { ensDeployment } = appConfig;
-  // extract the chain and contract configs for root Datasource in order to build ponder config
   const { chain: optimism, contracts: optimismContracts } =
     ensDeployment[DatasourceName.ThreeDNSOptimism];
   const { chain: base, contracts: baseContracts } = ensDeployment[DatasourceName.ThreeDNSBase];

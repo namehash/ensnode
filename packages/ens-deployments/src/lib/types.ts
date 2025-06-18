@@ -1,10 +1,10 @@
 import type { Abi, Address, Chain } from "viem";
 
 /**
- * L1Chain encodes the set of chain identifiers known to provide the root Datasource of an ENSDeployment.
+ * L1Chain encodes the set of chain identifiers that act as an L1 chain for known ENS Deployments.
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with:
- * - A root Registry deployed to the "ENS Deployment" chain.
+ * - A root Registry deployed to the primary chain of the deployment.
  * - A capability to expand from that root Registry across any number of additional datasources
  *  (which may be on different chains or offchain).
  *

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
 import { ENSDeployments } from "@ensnode/ens-deployments";
-import dnsPacket, { TxtAnswer } from "dns-packet";
+import { TxtAnswer } from "dns-packet";
 import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'

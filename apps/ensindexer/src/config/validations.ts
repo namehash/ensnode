@@ -48,13 +48,13 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 ) {
   const { value: config } = ctx;
 
-  const deployment = getENSDeployment(config.l1Chain);
+  const ensDeployment = getENSDeployment(config.l1Chain);
 
   for (const pluginName of config.plugins) {
     const datasourceNames = getPlugin(pluginName).requiredDatasources;
 
     for (const datasourceName of datasourceNames) {
-      const { chain } = deployment[datasourceName];
+      const { chain } = ensDeployment[datasourceName];
 
       if (!config.rpcConfigs[chain.id]) {
         ctx.issues.push({
@@ -75,11 +75,11 @@ export function invariant_globalBlockrange(
   const { globalBlockrange } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    const deployment = getENSDeployment(config.l1Chain);
+    const ensDeployment = getENSDeployment(config.l1Chain);
     const indexedChainIds = uniq(
       config.plugins
         .flatMap((pluginName) => getPlugin(pluginName).requiredDatasources)
-        .map((datasourceName) => deployment[datasourceName])
+        .map((datasourceName) => ensDeployment[datasourceName])
         .map((datasource) => datasource.chain.id),
     );
 
@@ -110,9 +110,9 @@ export function invariant_validContractConfigs(
 ) {
   const { value: config } = ctx;
 
-  const deployment = getENSDeployment(config.l1Chain);
-  for (const datasourceName of Object.keys(deployment) as DatasourceName[]) {
-    const { contracts } = deployment[datasourceName];
+  const ensDeployment = getENSDeployment(config.l1Chain);
+  for (const datasourceName of Object.keys(ensDeployment) as DatasourceName[]) {
+    const { contracts } = ensDeployment[datasourceName];
 
     // invariant: `contracts` must provide valid addresses if a filter is not provided
     const hasAddresses = Object.values(contracts)

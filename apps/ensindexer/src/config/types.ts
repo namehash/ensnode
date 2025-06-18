@@ -30,9 +30,9 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The L1Chain that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_L1_CHAIN).
+   * The L1 Chain that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_L1_CHAIN).
    *
-   * See {@link L1Chain} for available deployment chains.
+   * See {@link L1Chain} for available L1 chains.
    */
   l1Chain: L1Chain;
 

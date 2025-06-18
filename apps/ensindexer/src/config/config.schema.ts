@@ -58,9 +58,7 @@ const RpcConfigSchema = z.object({
 const L1ChainSchema = z
   .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
     error: (issue) => {
-      return `Invalid L1_CHAIN. Supported ENS deployment chains are: ${Object.keys(
-        ENSDeployments,
-      ).join(", ")}`;
+      return `Invalid L1_CHAIN. Supported L1 Chains are: ${Object.keys(ENSDeployments).join(", ")}`;
     },
   })
   .default(DEFAULT_L1_CHAIN);

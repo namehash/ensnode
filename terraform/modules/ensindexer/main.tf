@@ -74,7 +74,7 @@ locals {
     },
     {
       name  = "L1_CHAIN"
-      value = var.ens_deployment_chain
+      value = var.l1_chain
     },
     {
       name  = "HEAL_REVERSE_ADDRESSES"

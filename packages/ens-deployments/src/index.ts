@@ -9,10 +9,11 @@ export * from "./lib/types";
 
 /**
  * ENSDeploymentCommonType is a helper type used for convenience when defining plugins.
+ *
  * Note: Each plugin configuration is defined based on the `l1Chain` value from
- * application configuration. Some ENS deployment chain (such as `sepolia`, `holesky`,
+ * application configuration. Some ENS L1 chains (such as `sepolia`, `holesky`,
  * or `ens-test-env`) don't require all datasources to be present, while others do
- * (for example, the `mainnet` ENS deployment chain). All values typed with
+ * (for example, the `mainnet` L1 chain). All values typed with
  * ENSDeploymentCommonType are accessed directly inside `createPonderConfig` function
  * of each individual plugin. ENSDeploymentCommonType points to the type
  * of the `mainnet` ENS Deployment in order to make fully typed information
@@ -22,7 +23,7 @@ export * from "./lib/types";
 export type ENSDeploymentCommonType = typeof ENSDeployments.mainnet;
 
 /**
- * ENSDeployments maps from an ENSDeploymentChain to an ENSDeployment.
+ * ENSDeployments maps from an L1Chain to an ENSDeployment.
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with a distinct onchain root
  * Registry but with the capability of spanning from that root Registry across many `Datasource`s that
@@ -53,13 +54,13 @@ export const ENSDeployments = {
 } as const satisfies Record<L1Chain, ENSDeployment>;
 
 /**
- * Returns the ENS deployment configuration for the specified deployment chain.
+ * Returns the ENSDeployment on the specified L1 chain.
  *
- * This function takes a deployment chain identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * This function takes an L1 chain identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * and returns the corresponding ENS deployment configuration. The returned configuration is cast to the
  * global deployment type to ensure type safety and consistency across all deployments.
  *
- * @param l1Chain - The deployment chain identifier
+ * @param l1Chain - The L1 chain identifier
  * @returns The ENS deployment configuration for the specified chain
  */
 

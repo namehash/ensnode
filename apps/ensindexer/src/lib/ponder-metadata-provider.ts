@@ -31,7 +31,7 @@ export const makePonderMetdataProvider = ({
   db: ReadonlyDrizzle<Record<string, unknown>>;
   publicClients: Record<string, PublicClient>;
 }): PonderMetadataProvider => {
-  // get the chain ID for the ENS deployment
+  // get the root datasource's chain ID
   const ensDeploymentRootChainId = getEnsDeploymentRootChainId();
   const availableNetworkNames = Object.keys(publicClients);
 
@@ -39,7 +39,7 @@ export const makePonderMetdataProvider = ({
     throw new Error(`Invariant: no available publicClients for constructing ponder metadata.`);
   }
 
-  // use the deployment chain's publicClient if available, otherwise warn and use first found
+  // use the deployment's root chain's publicClient if available, otherwise warn and use first found
   let publicClient = publicClients[ensDeploymentRootChainId];
   if (!publicClient) {
     const networkId = availableNetworkNames[0]!; // length check done above

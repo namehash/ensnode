@@ -3,7 +3,7 @@ import { PublicClient } from "viem";
 
 import config from "@/config";
 import { Blockrange } from "@/lib/types";
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { getENSDeployment } from "@ensnode/ens-deployments";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 
@@ -68,7 +68,7 @@ export const createEnsRainbowVersionFetcher = () => {
  * @returns the chain ID
  */
 export const getEnsDeploymentRootChainId = (): number => {
-  return ENSDeployments[config.l1Chain].root.chain.id;
+  return getENSDeployment(config.l1Chain).root.chain.id;
 };
 
 /**

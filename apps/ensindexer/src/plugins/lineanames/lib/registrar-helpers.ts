@@ -18,7 +18,7 @@ export function getRegistrarManagedName(l1Chain: L1Chain): RegistrarManagedName 
     case "holesky":
     case "ens-test-env":
       throw new Error(
-        `No registrar managed name was defined for the "${l1Chain}" L1 Chain for Linea Names.`,
+        `No registrar managed name is known for the Linea Names plugin when indexing the "${l1Chain}" L1 Chain.`,
       );
   }
 }

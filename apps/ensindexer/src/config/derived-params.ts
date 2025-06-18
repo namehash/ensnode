@@ -36,8 +36,5 @@ export const derive_ensDeployment = <CONFIG extends Pick<ENSIndexerConfig, "l1Ch
 ): CONFIG & { ensDeployment: ENSDeploymentCommonType } => {
   const ensDeployment = getENSDeployment(config.l1Chain);
 
-  return {
-    ...config,
-    ensDeployment,
-  };
+  return { ...config, ensDeployment };
 };

@@ -25,7 +25,6 @@ const namespace = makePluginNamespace(pluginName);
 // config object factory used to derive PluginConfig type
 function createPonderConfig(appConfig: ENSIndexerConfig) {
   const { ensDeployment } = appConfig;
-  // depending on the ENS Deployment, the chain and contracts for the Basenames Datasource can vary. For example, consider how the Basenames chain and contracts chain depending on the mainnet vs sepolia ENS Deployment
   const { chain, contracts } = ensDeployment[DatasourceName.Basenames];
 
   return createConfig({

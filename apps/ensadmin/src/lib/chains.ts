@@ -1,17 +1,17 @@
-import { type Datasource, ENSDeployments, type L1Chain } from "@ensnode/ens-deployments";
+import { type L1Chain, getENSDeployment } from "@ensnode/ens-deployments";
 import { type Chain } from "viem";
 
 /**
- * Get the chain by ID based on the current ENSDeployment configuration.
+ * Get a chain object by ID within the context of a specific ENSDeployment (identified by L1Chain).
  *
- * @param l1Chain - the ENSDeployment chain to get the chain for
- * @param chainId the chain ID to get the chain for
- * @returns the chain
- * @throws if the chain ID is not supported for the ENSDeployment chain
+ * @param l1Chain - the L1Chain identifying which ENSDeployment to query within
+ * @param chainId the chain ID
+ * @returns the viem#Chain object
+ * @throws if the chain ID is not supported within the selected ENSDeployment
  */
 export const getChainById = (l1Chain: L1Chain, chainId: number): Chain => {
-  const ensDeployment = ENSDeployments[l1Chain];
-  const datasources = Object.values(ensDeployment) as Array<Datasource>;
+  const ensDeployment = getENSDeployment(l1Chain);
+  const datasources = Object.values(ensDeployment);
   const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
 
   if (!datasource) {
