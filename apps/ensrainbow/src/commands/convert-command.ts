@@ -121,7 +121,7 @@ async function processRecords(
 
       // Create a protobuf message for this record
       const recordMessage = RainbowRecordType.fromObject({
-        label_hash: Buffer.from(record.labelHash),
+        labelhash: Buffer.from(record.labelHash),
         label: record.label,
       });
 

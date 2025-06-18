@@ -284,10 +284,10 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
             // Make sure we have a proper buffer for the labelHash
             let labelHashBuffer: Buffer;
-            if (Buffer.isBuffer(record.label_hash)) {
-              labelHashBuffer = record.label_hash;
+            if (Buffer.isBuffer(record.labelhash)) {
+              labelHashBuffer = record.labelhash;
             } else {
-              labelHashBuffer = Buffer.from(record.label_hash);
+              labelHashBuffer = Buffer.from(record.labelhash);
             }
 
             // Prefix the label with the actual label set number from the header
