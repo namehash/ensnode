@@ -164,7 +164,7 @@ export function RecentRegistrations() {
   const currentIndexingDate = indexingStatus.data
     ? globalIndexingStatusViewModel(
         indexingStatus.data.runtime.networkIndexingStatusByChainId,
-        indexingStatus.data.env.ENS_DEPLOYMENT_CHAIN,
+        indexingStatus.data.env.L1_CHAIN,
       ).currentIndexingDate
     : null;
 

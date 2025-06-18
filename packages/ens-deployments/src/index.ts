@@ -1,4 +1,4 @@
-import type { ENSDeployment, ENSDeploymentChain } from "./lib/types";
+import type { ENSDeployment, L1Chain } from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -9,7 +9,7 @@ export * from "./lib/types";
 
 /**
  * ENSDeploymentCommonType is a helper type used for convenience when defining plugins.
- * Note: Each plugin configuration is defined based on the `ensDeploymentChain` value from
+ * Note: Each plugin configuration is defined based on the `l1Chain` value from
  * application configuration. Some ENS deployment chain (such as `sepolia`, `holesky`,
  * or `ens-test-env`) don't require all datasources to be present, while others do
  * (for example, the `mainnet` ENS deployment chain). All values typed with
@@ -50,7 +50,7 @@ export const ENSDeployments = {
   sepolia,
   holesky,
   "ens-test-env": ensTestEnv,
-} as const satisfies Record<ENSDeploymentChain, ENSDeployment>;
+} as const satisfies Record<L1Chain, ENSDeployment>;
 
 /**
  * Returns the ENS deployment configuration for the specified deployment chain.
@@ -59,9 +59,9 @@ export const ENSDeployments = {
  * and returns the corresponding ENS deployment configuration. The returned configuration is cast to the
  * global deployment type to ensure type safety and consistency across all deployments.
  *
- * @param ensDeploymentChain - The deployment chain identifier
+ * @param l1Chain - The deployment chain identifier
  * @returns The ENS deployment configuration for the specified chain
  */
 
-export const getENSDeployment = (ensDeploymentChain: ENSDeploymentChain) =>
-  ENSDeployments[ensDeploymentChain] as ENSDeploymentCommonType;
+export const getENSDeployment = (l1Chain: L1Chain) =>
+  ENSDeployments[l1Chain] as ENSDeploymentCommonType;

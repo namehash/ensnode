@@ -1,19 +1,16 @@
 import type { RegistrarManagedName } from "@/lib/types";
-import type { ENSDeploymentChain } from "@ensnode/ens-deployments";
-import type { PluginName } from "@ensnode/ensnode-sdk";
+import type { L1Chain } from "@ensnode/ens-deployments";
 
 /**
- * Get registrar managed name for `lineanames` plugin for selected ENS Deployment Chain.
- * @param ensDeploymentChain
+ * Get registrar managed name for `lineanames` plugin for selected L1 Chain.
+ *
+ * @param l1Chain
  * @param pluginName
  * @returns registrar managed name
  * @throws an error when no registrar managed name could be returned
  */
-export function getRegistrarManagedName(
-  ensDeploymentChain: ENSDeploymentChain,
-  pluginName: PluginName.Lineanames,
-): RegistrarManagedName {
-  switch (ensDeploymentChain) {
+export function getRegistrarManagedName(l1Chain: L1Chain): RegistrarManagedName {
+  switch (l1Chain) {
     case "mainnet":
       return "linea.eth";
     case "sepolia":
@@ -21,7 +18,7 @@ export function getRegistrarManagedName(
     case "holesky":
     case "ens-test-env":
       throw new Error(
-        `No registrar managed name was defined for the "${ensDeploymentChain}" ENS Deployment Chain for ${pluginName}.`,
+        `No registrar managed name was defined for the "${l1Chain}" L1 Chain for Linea Names.`,
       );
   }
 }

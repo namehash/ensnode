@@ -85,7 +85,7 @@ function validateResponse(response: EnsNode.Metadata) {
  *
  * @param indexingStatus The ENSNode indexing status.
  * @returns The indexed chain ID or null if the status is not available.
- * @throws Error if the ENS Deployment Chain is not a supported chain.
+ * @throws Error if the L1 Chain is not supported
  */
 export function useIndexedChainId(
   indexingStatus: UseIndexingStatusQueryResult["data"],
@@ -95,5 +95,5 @@ export function useIndexedChainId(
     return undefined;
   }
 
-  return parseSupportedChainIdByName(indexingStatus.env.ENS_DEPLOYMENT_CHAIN);
+  return parseSupportedChainIdByName(indexingStatus.env.L1_CHAIN);
 }

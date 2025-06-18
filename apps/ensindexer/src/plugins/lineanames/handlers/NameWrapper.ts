@@ -20,7 +20,7 @@ export default function ({
   } = makeNameWrapperHandlers({
     // the shared Registrar handlers in this plugin index direct subnames of
     // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.ensDeploymentChain, pluginName),
+    registrarManagedName: getRegistrarManagedName(config.l1Chain),
   });
 
   ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);

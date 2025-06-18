@@ -62,7 +62,7 @@ export interface ENSIndexerPlugin<
 
   /**
    * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of ACTIVE_PLUGINS are valid for a given ENS_DEPLOYMENT_CHAIN
+   * a set of ACTIVE_PLUGINS are valid for a given L1_CHAIN
    */
   requiredDatasources: DatasourceName[];
 
@@ -115,10 +115,10 @@ export const activateHandlers =
  * @returns
  */
 export function getDatasources(
-  config: Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">,
+  config: Pick<ENSIndexerConfig, "l1Chain" | "plugins">,
 ): Datasource[] {
   const requiredDatasourceNames = getRequiredDatasourceNames(config.plugins);
-  const ensDeployment = getENSDeployment(config.ensDeploymentChain);
+  const ensDeployment = getENSDeployment(config.l1Chain);
   const ensDeploymentDatasources = Object.entries(ensDeployment) as Array<
     [DatasourceName, Datasource]
   >;

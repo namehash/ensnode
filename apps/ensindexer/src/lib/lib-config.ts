@@ -5,7 +5,7 @@ export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS = true;
-export const DEFAULT_ENS_DEPLOYMENT_CHAIN = "mainnet";
+export const DEFAULT_L1_CHAIN = "mainnet";
 
 /**
  * Extracts dynamic chain configuration from environment variables.

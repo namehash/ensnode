@@ -11,9 +11,9 @@ import {
 } from "@/config/validations";
 import {
   DEFAULT_ENSADMIN_URL,
-  DEFAULT_ENS_DEPLOYMENT_CHAIN,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
+  DEFAULT_L1_CHAIN,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -55,15 +55,15 @@ const RpcConfigSchema = z.object({
     .default(DEFAULT_RPC_RATE_LIMIT),
 });
 
-const EnsDeploymentChainSchema = z
+const L1ChainSchema = z
   .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
     error: (issue) => {
-      return `Invalid ENS_DEPLOYMENT_CHAIN. Supported ENS deployment chains are: ${Object.keys(
+      return `Invalid L1_CHAIN. Supported ENS deployment chains are: ${Object.keys(
         ENSDeployments,
       ).join(", ")}`;
     },
   })
-  .default(DEFAULT_ENS_DEPLOYMENT_CHAIN);
+  .default(DEFAULT_L1_CHAIN);
 
 const BlockrangeSchema = z
   .object({
@@ -157,7 +157,7 @@ const DatabaseUrlSchema = z.union(
 
 const ENSIndexerConfigSchema = z
   .object({
-    ensDeploymentChain: EnsDeploymentChainSchema,
+    l1Chain: L1ChainSchema,
     globalBlockrange: BlockrangeSchema,
     ensNodePublicUrl: EnsNodePublicUrlSchema,
     ensAdminUrl: EnsAdminUrlSchema,
@@ -176,12 +176,12 @@ const ENSIndexerConfigSchema = z
    * We enforce invariants across multiple values parsed with `ENSIndexerConfigSchema`
    * by calling `.check()` function with relevant invariant-enforcing logic.
    * Each such function has access to config values that were already parsed.
-   * If you need to ensure certain config value permutation, say across `ensDeploymentChain`
+   * If you need to ensure certain config value permutation, say across `l1Chain`
    * and `plugins` values, you can define the `.check()` function callback with the following
    * input param:
    *
    * ```ts
-   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">>
+   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "l1Chain" | "plugins">>
    * ```
    *
    * This way, the invariant logic can access all information it needs, while keeping room
@@ -196,7 +196,7 @@ const ENSIndexerConfigSchema = z
    *
    * We create new configuration parameters from the values parsed with `ENSIndexerConfigSchema`.
    * This way, we can include complex configuration objects, for example, `ensDeployment` that was
-   * derived from `ensDeploymentChain` and relevant SDK helper method, and attach result value to
+   * derived from `l1Chain` and relevant SDK helper method, and attach result value to
    * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
    * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
    *

@@ -63,12 +63,12 @@ export const createEnsRainbowVersionFetcher = () => {
 };
 
 /**
- * Get the ENSDeployment chain ID.
+ * Get the chain id for the root chain datasource on the selected L1 Chain.
  *
- * @returns the ENSDeployment chain ID
+ * @returns the chain ID
  */
-export const getEnsDeploymentChainId = (): number => {
-  return ENSDeployments[config.ensDeploymentChain].root.chain.id;
+export const getEnsDeploymentRootChainId = (): number => {
+  return ENSDeployments[config.l1Chain].root.chain.id;
 };
 
 /**

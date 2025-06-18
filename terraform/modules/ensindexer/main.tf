@@ -73,7 +73,7 @@ locals {
       value = var.active_plugins
     },
     {
-      name  = "ENS_DEPLOYMENT_CHAIN"
+      name  = "L1_CHAIN"
       value = var.ens_deployment_chain
     },
     {

@@ -30,7 +30,7 @@ export default function ({
     pluginName,
     // the shared Registrar handlers in this plugin index direct subnames of
     // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.ensDeploymentChain, pluginName),
+    registrarManagedName: getRegistrarManagedName(config.l1Chain),
   });
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers

@@ -16,7 +16,7 @@ import {
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { type EventWithArgs, getEnsDeploymentChainId } from "@/lib/ponder-helpers";
+import { type EventWithArgs, getEnsDeploymentRootChainId } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 import {
   type DebugTraceTransactionSchema,
@@ -80,24 +80,25 @@ export const handleNewOwner =
         id: parentNode,
       });
 
-      const ensDeploymentChainId = getEnsDeploymentChainId();
+      const ensDeploymentRootChainId = getEnsDeploymentRootChainId();
       let healedLabel = null;
 
       // 1. if healing labels from reverse addresses is enabled, and the parent is a known
       //    reverse node (i.e. addr.reverse), and
-      //    the event comes from the chain that is the ENS Deployment Chain,
+      //    the event comes from the chain that is the L1 Chain,
       //    then attempt to heal the unknown label.
       //
-      //    Note: Based on the ENSIP-19 standard, only an ENS Deployment Chain
+      //    Note: Based on the ENSIP-19 standard, only an L1 Chain
       //    (such as mainnet, holesky, or sepolia) may record primary names
       //    under the `addr.reverse` subname.
-      //    Currently, we are only healing primary names on ENS Deployment Chains.
-      //    We will add support for non-ENS Deployment Chain primary name
+      //
+      //    Currently, we are only healing primary names on L1 Chains.
+      //    We will add support for non-L1 Chain primary name
       //    healing in the future.
       if (
         config.healReverseAddresses &&
         REVERSE_ROOT_NODES.has(parentNode) &&
-        context.network.chainId === ensDeploymentChainId
+        context.network.chainId === ensDeploymentRootChainId
       ) {
         // First, try healing with the transaction sender address.
         // NOTE: In most cases, the transaction sender calls `setName` method
@@ -191,7 +192,7 @@ export const handleNewOwner =
             // the expected 100% success rate
             throw new Error(
               `A NewOwner event for a Reverse Node on the ENS Deployment
-									Chain ID "${ensDeploymentChainId}" was emitted by
+									Chain ID "${ensDeploymentRootChainId}" was emitted by
 									the Registry in tx "${event.transaction.hash}", and we failed to
 									heal reverse address for labelHash "${labelHash}".`,
             );

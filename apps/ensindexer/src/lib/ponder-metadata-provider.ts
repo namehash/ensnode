@@ -8,7 +8,7 @@ import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
   createPrometheusMetricsFetcher,
-  getEnsDeploymentChainId,
+  getEnsDeploymentRootChainId,
 } from "@/lib/ponder-helpers";
 import { PrometheusMetrics, queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata";
 import type { PonderMetadataProvider } from "@ensnode/ponder-subgraph";
@@ -32,7 +32,7 @@ export const makePonderMetdataProvider = ({
   publicClients: Record<string, PublicClient>;
 }): PonderMetadataProvider => {
   // get the chain ID for the ENS deployment
-  const ensDeploymentChainId = getEnsDeploymentChainId();
+  const ensDeploymentRootChainId = getEnsDeploymentRootChainId();
   const availableNetworkNames = Object.keys(publicClients);
 
   if (availableNetworkNames.length === 0) {
@@ -40,11 +40,11 @@ export const makePonderMetdataProvider = ({
   }
 
   // use the deployment chain's publicClient if available, otherwise warn and use first found
-  let publicClient = publicClients[ensDeploymentChainId];
+  let publicClient = publicClients[ensDeploymentRootChainId];
   if (!publicClient) {
     const networkId = availableNetworkNames[0]!; // length check done above
     console.warn(
-      `No public client available for chain '${ensDeploymentChainId}', using status of chain '${networkId}' to power 'Query._meta'.`,
+      `No public client available for chain '${ensDeploymentRootChainId}', using status of chain '${networkId}' to power 'Query._meta'.`,
     );
     publicClient = publicClients[networkId]!; // must exist
   }
@@ -57,12 +57,12 @@ export const makePonderMetdataProvider = ({
   const getLastIndexedDeploymentChainBlock = async () => {
     const ponderStatus = await queryPonderStatus(config.ponderDatabaseSchema, db);
     const chainStatus = ponderStatus.find(
-      (status) => status.network_name === ensDeploymentChainId.toString(),
+      (status) => status.network_name === ensDeploymentRootChainId.toString(),
     );
 
     if (!chainStatus || !chainStatus.block_number) {
       throw new Error(
-        `Could not find latest indexed block number for chain ID: ${ensDeploymentChainId}`,
+        `Could not find latest indexed block number for chain ID: ${ensDeploymentRootChainId}`,
       );
     }
 

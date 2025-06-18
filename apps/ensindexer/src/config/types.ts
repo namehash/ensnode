@@ -1,9 +1,5 @@
 import { Blockrange } from "@/lib/types";
-import type {
-  ENSDeployment,
-  ENSDeploymentChain,
-  ENSDeploymentCommonType,
-} from "@ensnode/ens-deployments";
+import type { ENSDeployment, ENSDeploymentCommonType, L1Chain } from "@ensnode/ens-deployments";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -34,14 +30,14 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The ENS Deployment that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_ENS_DEPLOYMENT_CHAIN).
+   * The L1Chain that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_L1_CHAIN).
    *
-   * See {@link ENSDeploymentChain} for available deployment chains.
+   * See {@link L1Chain} for available deployment chains.
    */
-  ensDeploymentChain: ENSDeploymentChain;
+  l1Chain: L1Chain;
 
   /**
-   * Details of the ENS Deployment on `ensDeploymentChain`.
+   * Details of the ENS Deployment on `l1Chain`.
    *
    * See {@link ENSDeployment} for the deployment type.
    */
@@ -110,7 +106,7 @@ export interface ENSIndexerConfig {
    *
    * Invariants:
    * - A set of valid {@link PluginName}s with at least one value
-   * - For each plugin, it should be available on the specified {@link ensDeploymentChain}
+   * - For each plugin, it should be available on the specified {@link l1Chain}
    * - For each plugin specified, a valid {@link rpcConfigs} entry is required for
    *   each chain the plugin indexes
    */
@@ -223,7 +219,7 @@ export interface ENSIndexerEnvironment {
   port: string | undefined;
   ponderDatabaseSchema: string | undefined;
   databaseUrl: string | undefined;
-  ensDeploymentChain: string | undefined;
+  l1Chain: string | undefined;
   plugins: string | undefined;
   ensRainbowEndpointUrl: string | undefined;
   ensNodePublicUrl: string | undefined;

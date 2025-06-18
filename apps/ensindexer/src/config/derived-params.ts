@@ -31,10 +31,10 @@ export const derive_isSubgraphCompatible = <
 /**
  * Derived `ensDeployment` config param based on validated ENSIndexerConfig object.
  */
-export const derive_ensDeployment = <CONFIG extends Pick<ENSIndexerConfig, "ensDeploymentChain">>(
+export const derive_ensDeployment = <CONFIG extends Pick<ENSIndexerConfig, "l1Chain">>(
   config: CONFIG,
 ): CONFIG & { ensDeployment: ENSDeploymentCommonType } => {
-  const ensDeployment = getENSDeployment(config.ensDeploymentChain);
+  const ensDeployment = getENSDeployment(config.l1Chain);
 
   return {
     ...config,

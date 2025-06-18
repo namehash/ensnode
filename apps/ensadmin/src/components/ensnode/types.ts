@@ -1,4 +1,4 @@
-import type { ENSDeploymentChain } from "@ensnode/ens-deployments";
+import type { L1Chain } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
 
@@ -9,7 +9,7 @@ import type * as PonderMetadata from "@ensnode/ponder-metadata";
 export namespace EnsNode {
   // TODO: make `EnsNodeMetadata` interface to extend from
   // `MetadataMiddlewareResponse` of ENSNode SDK package (once it's available)
-  // as it will include precise types for currently unknown-type fields (i.e. `env.ENS_DEPLOYMENT_CHAIN`)
+  // as it will include precise types for currently unknown-type fields (i.e. `env.L1_CHAIN`)
   /**
    * The status of the ENS node.
    */
@@ -18,7 +18,7 @@ export namespace EnsNode {
     env: {
       ACTIVE_PLUGINS: Array<PluginName>;
       DATABASE_SCHEMA: string;
-      ENS_DEPLOYMENT_CHAIN: ENSDeploymentChain;
+      L1_CHAIN: L1Chain;
     };
   }
 

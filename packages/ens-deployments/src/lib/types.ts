@@ -1,7 +1,7 @@
 import type { Abi, Address, Chain } from "viem";
 
 /**
- * ENSDeploymentChain encodes the set of chains known to provide the root Datasource of an ENSDeployment.
+ * L1Chain encodes the set of chain identifiers known to provide the root Datasource of an ENSDeployment.
  *
  * Each "ENS deployment" is a single, unified namespace of ENS names with:
  * - A root Registry deployed to the "ENS Deployment" chain.
@@ -12,7 +12,7 @@ import type { Abi, Address, Chain } from "viem";
  * protocol changes, running deterministic test suites, and local development.
  * https://github.com/ensdomains/ens-test-env
  */
-export type ENSDeploymentChain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
+export type L1Chain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
 
 /**
  * A Datasource describes a set of contracts on a given chain that interact with the ENS protocol.
