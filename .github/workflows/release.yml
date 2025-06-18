@@ -55,7 +55,7 @@ jobs:
         with:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
-          # Script to select app packages. ensrainbow is treated like any other app.
+          # Script to select app packages.
           script: |-
             map(
               {

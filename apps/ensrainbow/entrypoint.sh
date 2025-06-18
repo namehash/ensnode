@@ -19,7 +19,7 @@ DB_SUBDIR_PATH="${DATA_DIR_NAME}/data-${NAMESPACE}_${LABEL_SET}"
 # Ensure required variables for download are set if we might download
 if [ ! -f "${MARKER_FILE}" ]; then
   if [ -z "$SCHEMA_VERSION" ] || [ -z "$NAMESPACE" ] || [ -z "$LABEL_SET" ]; then
-    echo "Error: SCHEMA_VERSION, NAMESPACE, and LABEL_SET environment variables must be set for initial database download."
+    echo "Error: SCHEMA_VERSION, NAMESPACE, and LABEL_SET environment variables must be set for initial ENSRainbow database download."
     exit 1
   fi
 fi

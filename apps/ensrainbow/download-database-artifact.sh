@@ -142,7 +142,7 @@ fi
 
 echo ""
 echo "---------------------------------------------------"
-echo "ENS Database Artifact download and verification complete."
+echo "ENS Database Artifact download and checksum verification complete."
 echo "Schema: $SCHEMA_VERSION, Namespace: $NAMESPACE, Label Set: $LABEL_SET"
 echo "Files are located in respective subdirectories of: $OUT_DIR"
 echo "  - Data:     $TARGET_DATA_FILE_PATH"

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# This script downloads a specific ENS Rainbow labelset, its checksum, and a license file.
+# This script downloads a specific ENS Rainbow labelset, its checksum, and license file.
 # It requires NAMESPACE and LABEL_SET as command-line arguments.
 
 # Usage function
