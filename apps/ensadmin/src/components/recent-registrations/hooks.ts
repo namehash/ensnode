@@ -1,4 +1,4 @@
-import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
+import { ensAdminVersion } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
 import { millisecondsInSecond } from "date-fns/constants";
 import { Address, getAddress, isAddressEqual } from "viem";
@@ -31,18 +31,16 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
 /**
  * Determines the effective owner of a domain.
  * If the owner is the NameWrapper contract, returns the wrapped owner instead.
- *
- * @param registrationResult - Data associated with Registration event
  */
-function getTrueOwner(registrationResult: RegistrationResult) {
+function getEffectiveOwner(registrationResult: RegistrationResult): Address {
   // Only use wrapped owner if the owner is the NameWrapper contract
   if (isAddressEqual(registrationResult.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
-    if (registrationResult.domain.wrappedOwner) {
-      return getAddress(registrationResult.domain.wrappedOwner.id);
+    if (!registrationResult.domain.wrappedOwner) {
+      throw new Error(
+          "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
+      );
     }
-    throw new Error(
-      "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
-    );
+    return getAddress(registrationResult.domain.wrappedOwner.id);
   }
 
   // Otherwise, use the regular owner
@@ -66,10 +64,8 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
     expiresAt: transformTimestamp(registrationResult.expiryDate),
     name: registrationResult.domain.name,
     ownerInRegistry: registrationResult.domain.owner.id,
-    owner: getTrueOwner(registrationResult),
-    ...(registrationResult.domain.wrappedOwner && {
-      ownerInNameWrapper: registrationResult.domain.wrappedOwner.id,
-    }),
+    owner: getEffectiveOwner(registrationResult),
+    ownerInNameWrapper: registrationResult.domain.wrappedOwner?.id,
   };
 }
 
@@ -78,11 +74,11 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
  */
 async function fetchRecentRegistrations(
   baseUrl: URL,
-  numberOfRegistrations: number,
+  maxResults: number,
 ): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
-      registrations(first: ${numberOfRegistrations}, orderBy: registrationDate, orderDirection: desc) {
+      registrations(first: ${maxResults}, orderBy: registrationDate, orderDirection: desc) {
         registrationDate
         expiryDate
         domain {
@@ -126,20 +122,19 @@ async function fetchRecentRegistrations(
 /**
  * Hook to fetch info about most recently registered domains that have been indexed.
  *
- * @param searchParams The URL search params including the selected ENS node URL.
- * @param numberOfRegistrations number of latest registrations to be retrieved by the query
+ * @param ensNodeURL The URL of the selected ENS node instance.
+ * @param maxResults number of the maximal number of latest registrations to be retrieved by the query
  */
 export function useRecentRegistrations(
-  searchParams: URLSearchParams,
-  numberOfRegistrations: number,
+  ensNodeURL: URL,
+  maxResults: number,
 ) {
-  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
-    queryKey: ["recent-registrations", ensNodeUrl],
-    queryFn: () => fetchRecentRegistrations(ensNodeUrl, numberOfRegistrations),
+    queryKey: ["recent-registrations", ensNodeURL],
+    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
     throwOnError(error) {
-      throw new Error(`Could not fetch ENSNode data from '${ensNodeUrl}'. Cause: ${error.message}`);
+      throw new Error(`Could not fetch ENSNode data from '${ensNodeURL}'. Cause: ${error.message}`);
     },
   });
 }

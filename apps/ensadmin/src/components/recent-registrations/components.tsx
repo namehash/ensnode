@@ -17,11 +17,12 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
+import {selectedEnsNodeUrl} from "@/lib/env";
 
 /**
- * Number of latest registrations to be displayed in the panel
+ * Maximal number of latest registrations to be displayed in the panel
  */
-const NUMBER_OF_LATEST_REGISTRATIONS = 5;
+const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
 /**
  * Helper function to generate ENS app URL for a name
@@ -34,8 +35,8 @@ const getEnsAppUrlForName = (name: string) => {
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
   const recentRegistrationsQuery = useRecentRegistrations(
-    searchParams,
-    NUMBER_OF_LATEST_REGISTRATIONS,
+      selectedEnsNodeUrl(searchParams),
+    MAX_NUMBER_OF_LATEST_REGISTRATIONS,
   );
   const indexingStatus = useIndexingStatusQuery(searchParams);
   const indexedChainId = useIndexedChainId(indexingStatus.data);
