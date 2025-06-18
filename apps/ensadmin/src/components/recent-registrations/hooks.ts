@@ -58,16 +58,13 @@ function transformTimestamp(timestamp: string): Date {
 }
 
 /**
- * Transforms a registration object from the response of the GraphQL RecentRegistrationsQuery to an object of a streamlined type Registration
- * @param registrationResult - RegistrationResult - GraphQL compatible representation of recently registered domain
- * @returns fetched data in Registration format
+ * Transforms a RegistrationResult into a Registration
  */
 function toRegistration(registrationResult: RegistrationResult): Registration {
   return {
     registeredAt: transformTimestamp(registrationResult.registrationDate),
     expiresAt: transformTimestamp(registrationResult.expiryDate),
     name: registrationResult.domain.name,
-    releasesAt: transformTimestamp(registrationResult.domain.expiryDate),
     ownerInRegistry: registrationResult.domain.owner.id,
     owner: getTrueOwner(registrationResult),
     ...(registrationResult.domain.wrappedOwner && {
@@ -77,11 +74,7 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
 }
 
 /**
- * Fetches info about most recently registered .eth domains that have been indexed.
- *
- * @param baseUrl ENSNode URL
- * @param numberOfRegistrations number of latest registrations to be retrieved by the query
- * @returns Info about most recently registered .eth domains that have been indexed.
+ * Fetches info about most recent registrations that have been indexed.
  */
 async function fetchRecentRegistrations(
   baseUrl: URL,
@@ -131,10 +124,10 @@ async function fetchRecentRegistrations(
 }
 
 /**
- * Hook to fetch info about most recently registered .eth domains that have been indexed.
+ * Hook to fetch info about most recently registered domains that have been indexed.
+ *
  * @param searchParams The URL search params including the selected ENS node URL.
  * @param numberOfRegistrations number of latest registrations to be retrieved by the query
- * @returns React Query hook result.
  */
 export function useRecentRegistrations(
   searchParams: URLSearchParams,

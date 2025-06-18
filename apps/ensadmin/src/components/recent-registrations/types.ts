@@ -5,12 +5,12 @@ import type { Address } from "viem";
  */
 export interface Registration {
   /**
-   * Date object representing the registration date of the domain by its current owner.
+   * Date when the registration occurred.
    */
   registeredAt: Date;
 
   /**
-   * Date object representing when the registration is scheduled to expire.
+   * Date when the registration is scheduled to expire.
    */
   expiresAt: Date;
 
@@ -18,11 +18,6 @@ export interface Registration {
    * The registered ENS name
    */
   name: string;
-
-  /**
-   * Date object representing when the registered domain will be released, including the registration duration and grace period
-   */
-  releasesAt: Date;
 
   /**
    * The "official" owner of the domain in the ENS Registry.

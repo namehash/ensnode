@@ -27,6 +27,7 @@ const NUMBER_OF_LATEST_REGISTRATIONS = 5;
  * Helper function to generate ENS app URL for a name
  */
 const getEnsAppUrlForName = (name: string) => {
+    // no explicit url encoding needed
   return `https://app.ens.domains/${name}`;
 };
 
