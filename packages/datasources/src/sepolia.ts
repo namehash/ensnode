@@ -32,7 +32,7 @@ export default {
    * Addresses and Start Blocks from ENS Sepolia Subgraph Manifest
    * https://ipfs.io/ipfs/QmdDtoN9QCRsBUsyoiiUUMQPPmPp5jimUQe81828UyWLtg
    */
-  [DatasourceName.Root]: {
+  [DatasourceName.ENSRoot]: {
     chain: sepolia,
     contracts: {
       RegistryOld: {

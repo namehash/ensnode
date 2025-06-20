@@ -29,7 +29,7 @@ export interface Datasource {
  * DatasourceName encodes a unique id for each known Datasource.
  */
 export enum DatasourceName {
-  Root = "root",
+  ENSRoot = "ensroot",
   Basenames = "basenames",
   Lineanames = "lineanames",
   ThreeDNSOptimism = "threedns-optimism",
@@ -78,7 +78,7 @@ export type Datasources = {
    *
    * Required for each ENS namespace.
    */
-  [DatasourceName.Root]: Datasource;
+  [DatasourceName.ENSRoot]: Datasource;
 
   /**
    * The Datasource for Basenames, optional.

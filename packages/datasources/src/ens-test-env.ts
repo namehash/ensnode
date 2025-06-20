@@ -43,7 +43,7 @@ export default {
    * Addresses and Start Blocks from ens-test-env
    * https://github.com/ensdomains/ens-test-env/
    */
-  [DatasourceName.Root]: {
+  [DatasourceName.ENSRoot]: {
     // ens-test-env runs on a local Anvil chain with id 1337
     chain: { ...anvil, id: 1337 },
     contracts: {

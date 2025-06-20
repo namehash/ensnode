@@ -19,7 +19,7 @@ const pluginName = PluginName.Subgraph;
 
 // enlist datasources used within createPonderConfig function
 // useful for config validation
-const requiredDatasources = [DatasourceName.Root];
+const requiredDatasources = [DatasourceName.ENSRoot];
 
 // construct a unique contract namespace for this plugin
 const namespace = makePluginNamespace(pluginName);
@@ -27,7 +27,7 @@ const namespace = makePluginNamespace(pluginName);
 // config object factory used to derive PluginConfig type
 function createPonderConfig(appConfig: ENSIndexerConfig) {
   const { datasources } = appConfig;
-  const { chain, contracts } = datasources[DatasourceName.Root];
+  const { chain, contracts } = datasources[DatasourceName.ENSRoot];
 
   return createConfig({
     networks: networksConfigForChain(chain.id),

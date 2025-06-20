@@ -20,7 +20,7 @@ export default {
    * Addresses and Start Blocks from ENS Holesky Subgraph Manifest
    * https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
    */
-  [DatasourceName.Root]: {
+  [DatasourceName.ENSRoot]: {
     chain: holesky,
     contracts: {
       RegistryOld: {
