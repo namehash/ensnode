@@ -1,29 +1,29 @@
 # @ensnode/datasources
 
-This package provides contract configurations (chain, names, addresses, abis) for each known **ENS Namespace**. An ENS Namespace represents a single, unified set of ENS names with a distinct onchain `root` **Datasource** and the capability to span across multiple Datasources on different chains (and, in the future, offchain datasources).
+This package provides contract configurations (chain, names, addresses, abis) for each known **ENS Namespace**. An ENS Namespace represents a single, unified set of ENS names with a distinct onchain `ensroot` **Datasource** and the capability to span across multiple Datasources on different chains (and, in the future, offchain datasources).
 
 For example, the canonical ENS Namespace on mainnet includes:
 
-- A `root` Datasource documenting the ENS contracts on mainnet, including the `.eth` subregistry
+- A `ensroot` Datasource documenting the ENS contracts on mainnet, including the `.eth` subregistry
 - A `basenames` Datasource documenting the Basenames contracts on Base, including the `.base.eth` subregistry
 - A `lineanames` Datasource documenting the Basenames contracts on Linea, including the `.linea.eth` subregistry
 - The `threedns-optimism` and `threedns-base` Datasources documenting the 3DNS contracts on Optimism and Base, respectively
 - 🚧 Various offchain Datasources (e.g. `.cb.id`, `.uni.eth`)
 
-Each deployment is logically independent and isolated from the others: for instance, the Sepolia and Holesky testnet deployments manage a namespace that is entirely separate from the canonical mainnet deployment, and the `ens-test-env` deployment describes the contracts deployed to an _Anvil_ chain for development and testing with the [ens-test-env](https://github.com/ensdomains/ens-test-env) tool.
+Each namespace is logically independent and isolated from the others: for instance, the Sepolia and Holesky testnet namespaces manage a namespace that is entirely separate from the canonical mainnet namespace, and the `ens-test-env` namespace describes the contracts deployed to an _Anvil_ chain for development and testing with the [ens-test-env](https://github.com/ensdomains/ens-test-env) tool.
 
-This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each deployment.
+This package centralizes the contract addresses, start blocks, and other configuration needed to interact with the ENS protocol and adjacent contracts.
 
 ## Usage
 
 To use these configurations in your project:
 
 ```ts
-import { ENSDeployments } from "@ensnode/datasources";
+import { getDatasources } from "@ensnode/datasources";
 import { namehash } from "viem";
 
-// access the address and abi for the root Registry on the mainnet L1 Chain
-const registryConfig = ENSDeployments.mainnet.root.contracts.Registry;
+// access the address and abi for the ens root Registry in the canonical mainnet ENS namespace
+const registryConfig = getDatasources('mainnet').ensroot.contracts.Registry;
 
 // for example, querying the Registry with viem...
 const vitaliksResolverAddress = await publicClient.readContract({
@@ -34,30 +34,30 @@ const vitaliksResolverAddress = await publicClient.readContract({
 });
 ```
 
-[See the usage of `@ensnode/datasources` within ENSIndexer for additional context.](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/src/plugins/subgraph/subgraph.plugin.ts)
+[See the usage of `@ensnode/datasources` within ENSIndexer for additional context.](https://github.com/namehash/ensnode/blob/main/apps/ensindexer)
 
 ## Documentation
 
-### ENSDeployments
+### getDatasources(l1Chain: 'mainnet' | 'sepolia' | 'holesky' | 'ens-test-env')
 
-The primary export of `@ensnode/datasources` is `ENSDeployments` which is a `Record<L1Chain, ENSDeployment>`.
+The primary export of `@ensnode/datasources` is `getDatasources` which returns a set of `Datasources`.
 
 ```ts
-import { ENSDeployments } from '@ensnode/datasources';
+import { getDatasources } from '@ensnode/datasources';
 ```
 
 The available `L1Chain`s are:
 - `mainnet`
 - `sepolia`
 - `holesky`
-- `ens-test-env` — Represents a local testing deployment running on an Anvil chain (chain id 1337) with deterministic configurations that deliberately start at block zero for rapid testing and development. See [ens-test-env](https://github.com/ensdomains/ens-test-env) for additional context.
+- `ens-test-env` — Represents a local testing namespace running on an Anvil chain (chain id 1337) with deterministic configurations that deliberately start at block zero for rapid testing and development. See [ens-test-env](https://github.com/ensdomains/ens-test-env) for additional context.
 
-### ENSDeployment
+### Datasources
 
-Each ENS Deployment is defined as a set of **Datasources**, keyed by a unique `DatasourceName`.
+Each `Datasources` provides a set of **Datasource** entries, keyed by a unique `DatasourceName`.
 
 The available `DatasourceName`s are:
-- `root` — ENS Root Contracts
+- `ensroot` — ENS Root Contracts
 - `basenames` — Basenames
 - `lineanames` — Linea Names
 - `threedns-optimism` — 3DNS (on Optimism)

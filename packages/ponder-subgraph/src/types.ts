@@ -25,7 +25,7 @@ export interface PonderMetadataProvider {
    * Get last indexed block status
    * @returns The last indexed block status
    */
-  getLastIndexedDeploymentChainBlock(): Promise<SubgraphMetaBlock>;
+  getLastIndexedL1ChainBlock(): Promise<SubgraphMetaBlock>;
 
   /**
    * Get the Ponder build ID

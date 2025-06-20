@@ -2,8 +2,7 @@ import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
-import { getRequiredDatasourceNames } from "@/plugins";
-import { ContractConfig, Datasource, DatasourceName, getENSDeployment } from "@ensnode/datasources";
+import { ContractConfig, Datasource, DatasourceName } from "@ensnode/datasources";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 import { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
@@ -103,30 +102,6 @@ export const activateHandlers =
   async () => {
     await Promise.all(handlers()).then((modules) => modules.map((m) => m.default(args)));
   };
-
-/**
- * Get a list of unique datasources for selected plugin names.
- * @param pluginNames
- * @returns
- */
-export function getDatasources(
-  config: Pick<ENSIndexerConfig, "l1Chain" | "plugins">,
-): Datasource[] {
-  const requiredDatasourceNames = getRequiredDatasourceNames(config.plugins);
-  const ensDeployment = getENSDeployment(config.l1Chain);
-  const ensDeploymentDatasources = Object.entries(ensDeployment) as Array<
-    [DatasourceName, Datasource]
-  >;
-  const datasources = {} as Record<DatasourceName, Datasource>;
-
-  for (let [datasourceName, datasource] of ensDeploymentDatasources) {
-    if (requiredDatasourceNames.includes(datasourceName)) {
-      datasources[datasourceName] = datasource;
-    }
-  }
-
-  return Object.values(datasources);
-}
 
 /**
  * Get a list of unique indexed chain IDs for selected plugin names.

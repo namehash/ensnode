@@ -1,5 +1,5 @@
 import { Blockrange } from "@/lib/types";
-import type { ENSDeployment, ENSDeploymentCommonType, L1Chain } from "@ensnode/datasources";
+import type { CommonDatasourcesType, L1Chain, L1Chains } from "@ensnode/datasources";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -32,16 +32,16 @@ export interface ENSIndexerConfig {
   /**
    * The L1 Chain that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_L1_CHAIN).
    *
-   * See {@link L1Chain} for available L1 chains.
+   * See {@link L1Chains} for available L1 chains.
    */
   l1Chain: L1Chain;
 
   /**
-   * Details of the ENS Deployment on `l1Chain`.
+   * Details of the Datasources on `l1Chain`.
    *
-   * See {@link ENSDeployment} for the deployment type.
+   * See {@link Datasources} for additional information.
    */
-  ensDeployment: ENSDeploymentCommonType;
+  ensDeployment: CommonDatasourcesType;
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).

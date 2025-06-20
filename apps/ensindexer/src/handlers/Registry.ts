@@ -16,7 +16,7 @@ import {
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { type EventWithArgs, getEnsDeploymentRootChainId } from "@/lib/ponder-helpers";
+import { type EventWithArgs, getENSRootChainId } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 import {
   type DebugTraceTransactionSchema,
@@ -80,7 +80,7 @@ export const handleNewOwner =
         id: parentNode,
       });
 
-      const ensDeploymentRootChainId = getEnsDeploymentRootChainId();
+      const ensRootChainId = getENSRootChainId();
       let healedLabel = null;
 
       // 1. if healing labels from reverse addresses is enabled, and the parent is a known
@@ -98,7 +98,7 @@ export const handleNewOwner =
       if (
         config.healReverseAddresses &&
         REVERSE_ROOT_NODES.has(parentNode) &&
-        context.network.chainId === ensDeploymentRootChainId
+        context.network.chainId === ensRootChainId
       ) {
         // First, try healing with the transaction sender address.
         // NOTE: In most cases, the transaction sender calls `setName` method
@@ -191,7 +191,7 @@ export const handleNewOwner =
             // so we throw an error to bring visibility to not achieving
             // the expected 100% success rate
             throw new Error(
-              `A NewOwner event for a Reverse Node in the Root ENS Deployment on Chain ID "${ensDeploymentRootChainId}" was emitted by the Registry in tx "${event.transaction.hash}", and we failed to heal reverse address for labelHash "${labelHash}".`,
+              `A NewOwner event for a Reverse Node in the Root ENS Datasource on Chain ID "${ensRootChainId}" was emitted by the Registry in tx "${event.transaction.hash}", and we failed to heal reverse address for labelHash "${labelHash}".`,
             );
           }
         }

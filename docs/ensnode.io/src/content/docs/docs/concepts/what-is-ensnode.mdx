@@ -86,7 +86,7 @@ When ENSIndexer is run, the configs for all of the active plugins (those selecte
 
 This package provides configurations for each known ENS namespace. An ENS namespace represents a single, unified set of ENS names with a distinct onchain root Registry and the capability to span across multiple chains, subregistries, and offchain resources.
 
-Each namespace is logically independent - for instance, the Sepolia and Holesky testnet namespaces are entirely separate from the canonical mainnet deployment. This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each namespace.
+Each namespace is logically independent - for instance, the Sepolia and Holesky testnet namespaces are entirely separate from the canonical mainnet namespace. This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each namespace.
 
 ENSIndexer uses `@ensnode/datasources` to configure its plugins and determine which are available for a given target namespace.
 

@@ -37,15 +37,3 @@ export function getPlugin(pluginName: PluginName) {
   // invariant: all plugins can be found by PluginName
   throw new Error(`Plugin not found by "${pluginName} name"`);
 }
-
-/**
- * Get a list of unique required datasource names from selected plugins.
- * @param pluginNames A list of selected plugin names.
- * @returns A list of unique datasource names.
- */
-export function getRequiredDatasourceNames(pluginNames: PluginName[]): DatasourceName[] {
-  const plugins = pluginNames.map((pluginName) => getPlugin(pluginName));
-  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasources);
-
-  return uniq(requiredDatasourceNames);
-}

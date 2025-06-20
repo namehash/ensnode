@@ -18,7 +18,7 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
-import { ENSDeployments } from "@ensnode/datasources";
+import { L1Chains } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 const chainIdSchema = z.number().int().min(1);
@@ -56,9 +56,9 @@ const RpcConfigSchema = z.object({
 });
 
 const L1ChainSchema = z
-  .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
+  .enum(L1Chains, {
     error: (issue) => {
-      return `Invalid L1_CHAIN. Supported L1 Chains are: ${Object.keys(ENSDeployments).join(", ")}`;
+      return `Invalid L1_CHAIN. Supported L1 Chains are: ${Object.keys(L1Chains).join(", ")}`;
     },
   })
   .default(DEFAULT_L1_CHAIN);

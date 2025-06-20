@@ -1,18 +1,19 @@
 import type { Abi, Address, Chain } from "viem";
 
 /**
- * L1Chain encodes the set of chain identifiers that act as an L1 chain for known ENS Deployments.
- *
- * Each "ENS deployment" is a single, unified namespace of ENS names with:
- * - A root Registry deployed to the primary chain of the deployment.
- * - A capability to expand from that root Registry across any number of additional datasources
- *  (which may be on different chains or offchain).
- *
- * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for testing
- * protocol changes, running deterministic test suites, and local development.
- * https://github.com/ensdomains/ens-test-env
+ * L1Chains encodes the set of chain identifiers that host a well-known ENS namespace.
  */
-export type L1Chain = "mainnet" | "sepolia" | "holesky" | "ens-test-env";
+export const L1Chains = {
+  Mainnet: "mainnet",
+  Sepolia: "sepolia",
+  Holesky: "holesky",
+  EnsTestEnv: "ens-test-env",
+} as const;
+
+/**
+ * L1Chain encodes the possible values of L1Chains.
+ */
+export type L1Chain = (typeof L1Chains)[keyof typeof L1Chains];
 
 /**
  * A Datasource describes a set of contracts on a given chain that interact with the ENS protocol.
@@ -69,13 +70,13 @@ export type ContractConfig =
     };
 
 /**
- * Encodes the set of known Datasources for an "ENS Deployment".
+ * Encodes the set of known Datasources within an ENS namespace.
  */
-export type ENSDeployment = {
+export type Datasources = {
   /**
    * The Datasource for the ENS root.
    *
-   * Required for each "ENS deployment".
+   * Required for each ENS namespace.
    */
   [DatasourceName.Root]: Datasource;
 

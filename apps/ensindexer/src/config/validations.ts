@@ -3,20 +3,20 @@ import { z } from "zod/v4";
 import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
 import { getPlugin } from "@/plugins";
-import { DatasourceName, getENSDeployment } from "@ensnode/datasources";
+import { DatasourceName, getCommonDatasources } from "@ensnode/datasources";
 import { Address, isAddress } from "viem";
 
 // type alias to highlight the input param of Zod's check() method
 type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
 
-// Invariant: specified plugins' datasources are available in the specified l1Chain's ENSDeployment
+// Invariant: specified plugins' datasources are available in the specified l1Chain's Datasources
 export function invariant_requiredDatasources(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "l1Chain" | "plugins">>,
 ) {
   const { value: config } = ctx;
 
-  const ensDeployment = getENSDeployment(config.l1Chain);
-  const availableDatasourceNames = Object.keys(ensDeployment) as DatasourceName[];
+  const datasources = getCommonDatasources(config.l1Chain);
+  const availableDatasourceNames = Object.keys(datasources) as DatasourceName[];
   const activePluginNames = config.plugins;
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
@@ -32,11 +32,11 @@ export function invariant_requiredDatasources(
         input: config,
         message: `Requested plugin '${pluginName}' cannot be activated for the ${
           config.l1Chain
-        } deployment. ${pluginName} specifies dependent datasources: [${requiredDatasources.join(
+        } ENS namespace. ${pluginName} specifies dependent datasources: [${requiredDatasources.join(
           ", ",
         )}], but available datasources in the ${
           config.l1Chain
-        } deployment are: [${availableDatasourceNames.join(", ")}].`,
+        } ENS namespace are: [${availableDatasourceNames.join(", ")}].`,
       });
     }
   }
@@ -48,13 +48,13 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 ) {
   const { value: config } = ctx;
 
-  const ensDeployment = getENSDeployment(config.l1Chain);
+  const datasources = getCommonDatasources(config.l1Chain);
 
   for (const pluginName of config.plugins) {
     const datasourceNames = getPlugin(pluginName).requiredDatasources;
 
     for (const datasourceName of datasourceNames) {
-      const { chain } = ensDeployment[datasourceName];
+      const { chain } = datasources[datasourceName];
 
       if (!config.rpcConfigs[chain.id]) {
         ctx.issues.push({
@@ -75,11 +75,11 @@ export function invariant_globalBlockrange(
   const { globalBlockrange } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    const ensDeployment = getENSDeployment(config.l1Chain);
+    const datasources = getCommonDatasources(config.l1Chain);
     const indexedChainIds = uniq(
       config.plugins
         .flatMap((pluginName) => getPlugin(pluginName).requiredDatasources)
-        .map((datasourceName) => ensDeployment[datasourceName])
+        .map((datasourceName) => datasources[datasourceName])
         .map((datasource) => datasource.chain.id),
     );
 
@@ -110,9 +110,9 @@ export function invariant_validContractConfigs(
 ) {
   const { value: config } = ctx;
 
-  const ensDeployment = getENSDeployment(config.l1Chain);
-  for (const datasourceName of Object.keys(ensDeployment) as DatasourceName[]) {
-    const { contracts } = ensDeployment[datasourceName];
+  const datasources = getCommonDatasources(config.l1Chain);
+  for (const datasourceName of Object.keys(datasources) as DatasourceName[]) {
+    const { contracts } = datasources[datasourceName];
 
     // invariant: `contracts` must provide valid addresses if a filter is not provided
     const hasAddresses = Object.values(contracts)
@@ -121,9 +121,9 @@ export function invariant_validContractConfigs(
 
     if (!hasAddresses) {
       throw new Error(
-        `The ENSDeployment '${
+        `The '${
           config.l1Chain
-        }' datasource '${datasourceName}' does not define valid addresses. This occurs if the address property of any ContractConfig in the ENSDeployment is malformed (i.e. not an Address). This is only likely to occur if you are running the 'ens-test-env' ENSDeployment outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
+        }' ENS namespace's '${datasourceName}' Datasource does not define valid addresses. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a viem#Address). This is only likely to occur if you are attempting to index the 'ens-test-env' ENS namespace outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
 
 L1_CHAIN=${config.l1Chain}
 NEXT_PUBLIC_DEPLOYMENT_ADDRESSES=${process.env.NEXT_PUBLIC_DEPLOYMENT_ADDRESSES || "undefined"}

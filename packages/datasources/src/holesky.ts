@@ -1,7 +1,7 @@
 import { holesky } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceName, type ENSDeployment } from "./lib/types";
+import { DatasourceName, type Datasources } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -11,7 +11,7 @@ import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 
 /**
- * The Holesky ENSDeployment
+ * The Holesky Datasources
  */
 export default {
   /**
@@ -60,6 +60,6 @@ export default {
     },
   },
   /**
-   * The Holesky ENSDeployment has no known Datasource for Basenames or Lineanames.
+   * The Holesky ENS namespace has no known Datasource for Basenames or Lineanames.
    */
-} satisfies ENSDeployment;
+} satisfies Datasources;
