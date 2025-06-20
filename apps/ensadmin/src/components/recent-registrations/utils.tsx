@@ -1,4 +1,4 @@
-import { formatDistanceToNow, intlFormat, formatDistanceStrict } from "date-fns";
+import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { useEffect, useState } from "react";
 
 /**
