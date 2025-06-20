@@ -9,6 +9,7 @@ export enum PluginName {
   Basenames = "basenames",
   Lineanames = "lineanames",
   ThreeDNS = "threedns",
+  EFP = "efp",
 }
 
 /**
