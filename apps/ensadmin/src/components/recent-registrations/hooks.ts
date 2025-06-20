@@ -8,12 +8,12 @@ import { Registration } from "./types";
  * The data model returned by a GraphQL query for registrations.
  */
 interface RegistrationResult {
-  registrationDate: string;
-  expiryDate: string;
+  registrationDate: UnixTimestampInSeconds;
+  expiryDate: UnixTimestampInSeconds;
   domain: {
     name: string;
-    createdAt: string;
-    expiryDate: string;
+    createdAt: UnixTimestampInSeconds;
+    expiryDate: UnixTimestampInSeconds;
     owner: {
       id: Address;
     };
@@ -22,6 +22,11 @@ interface RegistrationResult {
     };
   };
 }
+
+/**
+ * Numeric string representing a Unix timestamp in seconds.
+ */
+type UnixTimestampInSeconds = string;
 
 /**
  * The NameWrapper contract address
@@ -47,11 +52,11 @@ function getEffectiveOwner(registrationResult: RegistrationResult): Address {
   return getAddress(registrationResult.domain.owner.id);
 }
 
-function transformTimestamp(timestamp: string): Date {
+function transformTimestamp(timestamp: UnixTimestampInSeconds): Date {
   try {
     return new Date(parseInt(timestamp) * millisecondsInSecond);
   } catch (error) {
-    throw new Error("Error parsing timestamp to date");
+    throw new Error(`Error parsing timestamp (${timestamp}) to date`);
   }
 }
 
