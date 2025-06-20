@@ -67,9 +67,7 @@ export const createEnsRainbowVersionFetcher = () => {
  *
  * @returns the chain ID
  */
-export const getENSRootChainId = (): number => {
-  return getDatasources(config.l1Chain).root.chain.id;
-};
+export const getENSRootChainId = () => getDatasources(config.l1Chain).ensroot.chain.id;
 
 /**
  * Creates a Prometheus metrics fetcher for the Ponder application.
