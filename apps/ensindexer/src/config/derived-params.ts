@@ -29,12 +29,12 @@ export const derive_isSubgraphCompatible = <
 };
 
 /**
- * Derived `ensDeployment` config param based on validated ENSIndexerConfig object.
+ * Derived `datasources` config param based on validated ENSIndexerConfig object.
  */
-export const derive_ensDeployment = <CONFIG extends Pick<ENSIndexerConfig, "l1Chain">>(
+export const derive_datasources = <CONFIG extends Pick<ENSIndexerConfig, "l1Chain">>(
   config: CONFIG,
-): CONFIG & { ensDeployment: CommonDatasourcesType } => {
-  const ensDeployment = getCommonDatasources(config.l1Chain);
+): CONFIG & { datasources: CommonDatasourcesType } => {
+  const datasources = getCommonDatasources(config.l1Chain);
 
-  return { ...config, ensDeployment };
+  return { ...config, datasources };
 };

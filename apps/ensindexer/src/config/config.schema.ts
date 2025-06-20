@@ -1,7 +1,7 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { derive_ensDeployment, derive_isSubgraphCompatible } from "@/config/derived-params";
+import { derive_datasources, derive_isSubgraphCompatible } from "@/config/derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
@@ -193,7 +193,7 @@ const ENSIndexerConfigSchema = z
    * Derived configuration
    *
    * We create new configuration parameters from the values parsed with `ENSIndexerConfigSchema`.
-   * This way, we can include complex configuration objects, for example, `ensDeployment` that was
+   * This way, we can include complex configuration objects, for example, `datasources` that was
    * derived from `l1Chain` and relevant SDK helper method, and attach result value to
    * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
    * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
@@ -212,7 +212,7 @@ const ENSIndexerConfigSchema = z
    * }
    * ```
    */
-  .transform(derive_ensDeployment)
+  .transform(derive_datasources)
   .transform(derive_isSubgraphCompatible);
 
 /**

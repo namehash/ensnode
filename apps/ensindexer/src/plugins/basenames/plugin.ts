@@ -24,8 +24,8 @@ const namespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { ensDeployment } = appConfig;
-  const { chain, contracts } = ensDeployment[DatasourceName.Basenames];
+  const { datasources } = appConfig;
+  const { chain, contracts } = datasources[DatasourceName.Basenames];
 
   return createConfig({
     networks: networksConfigForChain(chain.id),

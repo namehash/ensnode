@@ -41,7 +41,7 @@ export interface ENSIndexerConfig {
    *
    * See {@link Datasources} for additional information.
    */
-  ensDeployment: CommonDatasourcesType;
+  datasources: CommonDatasourcesType;
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).

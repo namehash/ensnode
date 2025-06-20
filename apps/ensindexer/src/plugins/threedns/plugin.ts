@@ -25,10 +25,10 @@ const namespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { ensDeployment } = appConfig;
+  const { datasources } = appConfig;
   const { chain: optimism, contracts: optimismContracts } =
-    ensDeployment[DatasourceName.ThreeDNSOptimism];
-  const { chain: base, contracts: baseContracts } = ensDeployment[DatasourceName.ThreeDNSBase];
+    datasources[DatasourceName.ThreeDNSOptimism];
+  const { chain: base, contracts: baseContracts } = datasources[DatasourceName.ThreeDNSBase];
 
   return createConfig({
     networks: {
