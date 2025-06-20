@@ -1,4 +1,4 @@
-import { type L1Chain, getENSDeployment } from "@ensnode/ens-deployments";
+import { type L1Chain, getENSDeployment } from "@ensnode/datasources";
 import { type Chain } from "viem";
 
 /**

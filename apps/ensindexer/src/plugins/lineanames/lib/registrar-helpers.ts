@@ -1,5 +1,5 @@
 import type { RegistrarManagedName } from "@/lib/types";
-import type { L1Chain } from "@ensnode/ens-deployments";
+import type { L1Chain } from "@ensnode/datasources";
 
 /**
  * Get registrar managed name for `lineanames` plugin for selected L1 Chain.

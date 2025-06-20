@@ -1,6 +1,6 @@
 import type { EnsNode } from "@/components/ensnode";
 import { getChainById } from "@/lib/chains";
-import { type L1Chain } from "@ensnode/ens-deployments";
+import { type L1Chain } from "@ensnode/datasources";
 import { fromUnixTime } from "date-fns";
 /**
  * Basic information about a block and its date.

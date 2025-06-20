@@ -1,4 +1,4 @@
-import type { L1Chain } from "@ensnode/ens-deployments";
+import type { L1Chain } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
 

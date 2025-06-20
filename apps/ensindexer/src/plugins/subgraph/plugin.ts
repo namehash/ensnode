@@ -11,7 +11,7 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceName } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig } from "ponder";
 

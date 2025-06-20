@@ -3,12 +3,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import { getRequiredDatasourceNames } from "@/plugins";
-import {
-  ContractConfig,
-  Datasource,
-  DatasourceName,
-  getENSDeployment,
-} from "@ensnode/ens-deployments";
+import { ContractConfig, Datasource, DatasourceName, getENSDeployment } from "@ensnode/datasources";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 import { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";

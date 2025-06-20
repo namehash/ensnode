@@ -1,5 +1,5 @@
 import type { ENSIndexerConfig } from "@/config/types";
-import { type ENSDeploymentCommonType, getENSDeployment } from "@ensnode/ens-deployments";
+import { type ENSDeploymentCommonType, getENSDeployment } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**

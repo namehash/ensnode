@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/datasources";
 import { TxtAnswer } from "dns-packet";
 import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
 

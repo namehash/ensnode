@@ -1,5 +1,5 @@
 import { Blockrange } from "@/lib/types";
-import type { ENSDeployment, ENSDeploymentCommonType, L1Chain } from "@ensnode/ens-deployments";
+import type { ENSDeployment, ENSDeploymentCommonType, L1Chain } from "@ensnode/datasources";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**

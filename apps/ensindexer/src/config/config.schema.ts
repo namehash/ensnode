@@ -18,7 +18,7 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 const chainIdSchema = z.number().int().min(1);

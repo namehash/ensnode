@@ -1,8 +1,8 @@
-# @ensnode/ens-deployments
+# @ensnode/datasources
 
-This package provides contract configurations (chain, names, addresses, abis) for each known **ENS Deployment**. An ENS Deployment represents a single, unified namespace of ENS names with a distinct onchain `root` **Datasource** and the capability to span across multiple Datasources on different chains (and, in the future, offchain datasources).
+This package provides contract configurations (chain, names, addresses, abis) for each known **ENS Namespace**. An ENS Namespace represents a single, unified set of ENS names with a distinct onchain `root` **Datasource** and the capability to span across multiple Datasources on different chains (and, in the future, offchain datasources).
 
-For example, the canonical ENS Deployment on mainnet includes:
+For example, the canonical ENS Namespace on mainnet includes:
 
 - A `root` Datasource documenting the ENS contracts on mainnet, including the `.eth` subregistry
 - A `basenames` Datasource documenting the Basenames contracts on Base, including the `.base.eth` subregistry
@@ -19,7 +19,7 @@ This package centralizes the contract addresses, start blocks, and other configu
 To use these configurations in your project:
 
 ```ts
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { ENSDeployments } from "@ensnode/datasources";
 import { namehash } from "viem";
 
 // access the address and abi for the root Registry on the mainnet L1 Chain
@@ -34,16 +34,16 @@ const vitaliksResolverAddress = await publicClient.readContract({
 });
 ```
 
-[See the usage of `@ensnode/ens-deployments` within ENSIndexer for additional context.](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/src/plugins/subgraph/subgraph.plugin.ts)
+[See the usage of `@ensnode/datasources` within ENSIndexer for additional context.](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/src/plugins/subgraph/subgraph.plugin.ts)
 
 ## Documentation
 
 ### ENSDeployments
 
-The primary export of `@ensnode/ens-deployments` is `ENSDeployments` which is a `Record<L1Chain, ENSDeployment>`.
+The primary export of `@ensnode/datasources` is `ENSDeployments` which is a `Record<L1Chain, ENSDeployment>`.
 
 ```ts
-import { ENSDeployments } from '@ensnode/ens-deployments';
+import { ENSDeployments } from '@ensnode/datasources';
 ```
 
 The available `L1Chain`s are:

@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
 import { getPlugin } from "@/plugins";
-import { DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
+import { DatasourceName, getENSDeployment } from "@ensnode/datasources";
 import { Address, isAddress } from "viem";
 
 // type alias to highlight the input param of Zod's check() method

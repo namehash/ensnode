@@ -3,7 +3,7 @@ import { PublicClient } from "viem";
 
 import config from "@/config";
 import { Blockrange } from "@/lib/types";
-import { getENSDeployment } from "@ensnode/ens-deployments";
+import { getENSDeployment } from "@ensnode/datasources";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 
