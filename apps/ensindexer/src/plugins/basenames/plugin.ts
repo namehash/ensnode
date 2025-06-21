@@ -2,17 +2,19 @@
  * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging
  * the shared Subgraph-compatible indexing logic.
  */
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig } from "ponder";
+
 import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
+  getCommonDatasource,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceNames, getCommonDatasource } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
 
 const pluginName = PluginName.Basenames;
 

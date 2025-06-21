@@ -2,6 +2,9 @@
  * The Subgraph plugin describes indexing behavior for the 'Root' Datasource, in alignment with the
  * legacy ENS Subgraph indexing logic.
  */
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig } from "ponder";
 
 import type { ENSIndexerConfig } from "@/config/types";
 import {
@@ -10,10 +13,8 @@ import {
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
+  getCommonDatasource,
 } from "@/lib/plugin-helpers";
-import { DatasourceNames, getCommonDatasource } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
 
 const pluginName = PluginName.Subgraph;
 
