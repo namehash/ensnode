@@ -49,15 +49,17 @@ export interface Datasource {
 }
 
 /**
- * DatasourceName encodes a unique id for each known Datasource.
+ * DatasourceNames encodes a unique id for each known Datasource.
  */
-export enum DatasourceName {
-  ENSRoot = "ensroot",
-  Basenames = "basenames",
-  Lineanames = "lineanames",
-  ThreeDNSOptimism = "threedns-optimism",
-  ThreeDNSBase = "threedns-base",
-}
+export const DatasourceNames = {
+  ENSRoot: "ensroot",
+  Basenames: "basenames",
+  Lineanames: "lineanames",
+  ThreeDNSOptimism: "threedns-optimism",
+  ThreeDNSBase: "threedns-base",
+} as const;
+
+export type DatasourceName = (typeof DatasourceNames)[keyof typeof DatasourceNames];
 
 /**
  * EventFilter specifies a given event's name and arguments to filter that event by.
@@ -93,33 +95,9 @@ export type ContractConfig =
     };
 
 /**
- * Encodes the set of known Datasources within an ENS namespace.
+ * Datasources encodes the set of known Datasources within an ENS namespace.
+ * The ENSRoot Datasource is required, all others are optional.
  */
 export type Datasources = {
-  /**
-   * The Datasource for the ENS root.
-   *
-   * Required for each ENS namespace.
-   */
-  [DatasourceName.ENSRoot]: Datasource;
-
-  /**
-   * The Datasource for Basenames, optional.
-   */
-  [DatasourceName.Basenames]?: Datasource;
-
-  /**
-   * The Datasource for Lineanames, optional.
-   */
-  [DatasourceName.Lineanames]?: Datasource;
-
-  /**
-   * The Datasource for 3DNS-Powered Names on Optimism
-   */
-  [DatasourceName.ThreeDNSOptimism]?: Datasource;
-
-  /**
-   * The Datasource for 3DNS-Powered Names on Base
-   */
-  [DatasourceName.ThreeDNSBase]?: Datasource;
-};
+  ensroot: Datasource;
+} & Partial<Record<Exclude<DatasourceName, "ensroot">, Datasource>>;

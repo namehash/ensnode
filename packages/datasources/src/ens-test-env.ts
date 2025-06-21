@@ -2,7 +2,7 @@ import { Address } from "viem";
 import { anvil } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceName, type Datasources } from "./lib/types";
+import { DatasourceNames, type Datasources } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -43,7 +43,7 @@ export default {
    * Addresses and Start Blocks from ens-test-env
    * https://github.com/ensdomains/ens-test-env/
    */
-  [DatasourceName.ENSRoot]: {
+  [DatasourceNames.ENSRoot]: {
     // ens-test-env runs on a local Anvil chain with id 1337
     chain: { ...anvil, id: 1337 },
     contracts: {

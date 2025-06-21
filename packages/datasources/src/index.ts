@@ -1,4 +1,4 @@
-import { DatasourceName, Datasources, ENSNamespace, ENSNamespaces } from "./lib/types";
+import { DatasourceNames, Datasources, ENSNamespace, ENSNamespaces } from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -72,7 +72,7 @@ export const getCommonDatasources = (namespace: ENSNamespace) =>
  */
 export const getDatasource = <
   N extends ENSNamespace,
-  D extends keyof ReturnType<typeof getDatasources>,
+  D extends keyof ReturnType<typeof getDatasources<N>>,
 >(
   namespace: N,
   datasourceName: D,
@@ -95,4 +95,4 @@ export const getCommonDatasource = <N extends ENSNamespace, D extends keyof Comm
  * @returns the chain ID that hosts the ENS Root
  */
 export const getENSRootChainId = (namespace: ENSNamespace) =>
-  getCommonDatasource(namespace, DatasourceName.ENSRoot).chain.id;
+  getCommonDatasource(namespace, DatasourceNames.ENSRoot).chain.id;
