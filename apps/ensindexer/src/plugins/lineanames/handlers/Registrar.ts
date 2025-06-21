@@ -18,7 +18,7 @@ const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenI
 
 export default function ({
   pluginName,
-  namespace,
+  pluginNamespace: ns,
 }: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleNameRegistered,
@@ -33,21 +33,21 @@ export default function ({
     registrarManagedName: getRegistrarManagedName(config.namespace),
   });
 
-  ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
+  ponder.on(ns("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
       event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
-  ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
+  ponder.on(ns("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewed({
       context,
       event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
-  ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
+  ponder.on(ns("BaseRegistrar:Transfer"), async ({ context, event }) => {
     await handleNameTransferred({
       context,
       event: {
@@ -57,7 +57,7 @@ export default function ({
     });
   });
 
-  ponder.on(namespace("EthRegistrarController:OwnerNameRegistered"), async ({ context, event }) => {
+  ponder.on(ns("EthRegistrarController:OwnerNameRegistered"), async ({ context, event }) => {
     await handleNameRegisteredByController({
       context,
       event: {
@@ -71,7 +71,7 @@ export default function ({
     });
   });
 
-  ponder.on(namespace("EthRegistrarController:PohNameRegistered"), async ({ context, event }) => {
+  ponder.on(ns("EthRegistrarController:PohNameRegistered"), async ({ context, event }) => {
     await handleNameRegisteredByController({
       context,
       event: {
@@ -85,7 +85,7 @@ export default function ({
     });
   });
 
-  ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
+  ponder.on(ns("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
     await handleNameRegisteredByController({
       context,
       event: {
@@ -99,5 +99,5 @@ export default function ({
     });
   });
 
-  ponder.on(namespace("EthRegistrarController:NameRenewed"), handleNameRenewedByController);
+  ponder.on(ns("EthRegistrarController:NameRenewed"), handleNameRenewedByController);
 }

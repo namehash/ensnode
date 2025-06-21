@@ -10,10 +10,10 @@ import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
+  getCommonDatasource,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
-  getCommonDatasource,
 } from "@/lib/plugin-helpers";
 
 const pluginName = PluginName.Subgraph;
@@ -23,7 +23,7 @@ const pluginName = PluginName.Subgraph;
 const requiredDatasources = [DatasourceNames.ENSRoot];
 
 // construct a unique contract namespace for this plugin
-const namespace = makePluginNamespace(pluginName);
+const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
@@ -32,27 +32,27 @@ function createPonderConfig(config: ENSIndexerConfig) {
   return createConfig({
     networks: networksConfigForChain(chain.id),
     contracts: {
-      [namespace("RegistryOld")]: {
+      [pluginNamespace("RegistryOld")]: {
         network: networkConfigForContract(chain, contracts.RegistryOld),
         abi: contracts.Registry.abi,
       },
-      [namespace("Registry")]: {
+      [pluginNamespace("Registry")]: {
         network: networkConfigForContract(chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
-      [namespace("BaseRegistrar")]: {
+      [pluginNamespace("BaseRegistrar")]: {
         network: networkConfigForContract(chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
-      [namespace("EthRegistrarControllerOld")]: {
+      [pluginNamespace("EthRegistrarControllerOld")]: {
         network: networkConfigForContract(chain, contracts.EthRegistrarControllerOld),
         abi: contracts.EthRegistrarControllerOld.abi,
       },
-      [namespace("EthRegistrarController")]: {
+      [pluginNamespace("EthRegistrarController")]: {
         network: networkConfigForContract(chain, contracts.EthRegistrarController),
         abi: contracts.EthRegistrarController.abi,
       },
-      [namespace("NameWrapper")]: {
+      [pluginNamespace("NameWrapper")]: {
         network: networkConfigForContract(chain, contracts.NameWrapper),
         abi: contracts.NameWrapper.abi,
       },
@@ -73,7 +73,7 @@ export default {
    */
   activate: activateHandlers({
     pluginName,
-    namespace,
+    pluginNamespace,
     handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),

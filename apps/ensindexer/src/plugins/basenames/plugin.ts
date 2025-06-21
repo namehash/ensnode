@@ -22,7 +22,7 @@ const pluginName = PluginName.Basenames;
 const requiredDatasources = [DatasourceNames.Basenames];
 
 // construct a unique contract namespace for this plugin
-const namespace = makePluginNamespace(pluginName);
+const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
@@ -31,19 +31,19 @@ function createPonderConfig(config: ENSIndexerConfig) {
   return createConfig({
     networks: networksConfigForChain(chain.id),
     contracts: {
-      [namespace("Registry")]: {
+      [pluginNamespace("Registry")]: {
         network: networkConfigForContract(chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
-      [namespace("BaseRegistrar")]: {
+      [pluginNamespace("BaseRegistrar")]: {
         network: networkConfigForContract(chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
-      [namespace("EARegistrarController")]: {
+      [pluginNamespace("EARegistrarController")]: {
         network: networkConfigForContract(chain, contracts.EARegistrarController),
         abi: contracts.EARegistrarController.abi,
       },
-      [namespace("RegistrarController")]: {
+      [pluginNamespace("RegistrarController")]: {
         network: networkConfigForContract(chain, contracts.RegistrarController),
         abi: contracts.RegistrarController.abi,
       },
@@ -64,7 +64,7 @@ export default {
    */
   activate: activateHandlers({
     pluginName,
-    namespace,
+    pluginNamespace,
     handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),

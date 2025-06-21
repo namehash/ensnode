@@ -83,7 +83,7 @@ export interface ENSIndexerPlugin<
  */
 export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
   pluginName: PLUGIN_NAME;
-  namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
+  pluginNamespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
 
 /**

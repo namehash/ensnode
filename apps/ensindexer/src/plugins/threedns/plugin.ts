@@ -22,7 +22,7 @@ const pluginName = PluginName.ThreeDNS;
 const requiredDatasources = [DatasourceNames.ThreeDNSOptimism, DatasourceNames.ThreeDNSBase];
 
 // construct a unique contract namespace for this plugin
-const namespace = makePluginNamespace(pluginName);
+const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
@@ -42,14 +42,14 @@ function createPonderConfig(config: ENSIndexerConfig) {
       ...networksConfigForChain(base.id),
     },
     contracts: {
-      [namespace("ThreeDNSToken")]: {
+      [pluginNamespace("ThreeDNSToken")]: {
         network: {
           ...networkConfigForContract(optimism, optimismContracts.ThreeDNSToken),
           ...networkConfigForContract(base, baseContracts.ThreeDNSToken),
         },
         abi: optimismContracts.ThreeDNSToken.abi,
       },
-      [namespace("Resolver")]: {
+      [pluginNamespace("Resolver")]: {
         network: {
           ...networkConfigForContract(optimism, optimismContracts.Resolver),
           ...networkConfigForContract(base, baseContracts.Resolver),
@@ -69,7 +69,7 @@ export default {
    */
   activate: activateHandlers({
     pluginName,
-    namespace,
+    pluginNamespace: pluginNamespace,
     handlers: () => [import("./handlers/ThreeDNSToken")],
   }),
 
