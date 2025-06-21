@@ -31,10 +31,10 @@ export const derive_isSubgraphCompatible = <
 /**
  * Derived `datasources` config param based on validated ENSIndexerConfig object.
  */
-export const derive_datasources = <CONFIG extends Pick<ENSIndexerConfig, "l1Chain">>(
+export const derive_datasources = <CONFIG extends Pick<ENSIndexerConfig, "namespace">>(
   config: CONFIG,
 ): CONFIG & { datasources: CommonDatasourcesType } => {
-  const datasources = getCommonDatasources(config.l1Chain);
+  const datasources = getCommonDatasources(config.namespace);
 
   return { ...config, datasources };
 };

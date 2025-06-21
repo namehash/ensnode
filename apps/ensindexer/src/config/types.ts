@@ -1,5 +1,5 @@
 import { Blockrange } from "@/lib/types";
-import type { CommonDatasourcesType, L1Chain, L1Chains } from "@ensnode/datasources";
+import type { CommonDatasourcesType, ENSNamespace, ENSNamespaces } from "@ensnode/datasources";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -30,14 +30,14 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The L1 Chain that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_L1_CHAIN).
+   * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_ENS_NAMESPACE).
    *
-   * See {@link L1Chains} for available L1 chains.
+   * See {@link ENSNamespaces} for available ENS namespace identifiers.
    */
-  l1Chain: L1Chain;
+  namespace: ENSNamespace;
 
   /**
-   * Details of the Datasources on `l1Chain`.
+   * The Datasources within the configured ENS namespace {@link namespace}.
    *
    * See {@link Datasources} for additional information.
    */
@@ -106,7 +106,7 @@ export interface ENSIndexerConfig {
    *
    * Invariants:
    * - A set of valid {@link PluginName}s with at least one value
-   * - For each plugin, it should be available on the specified {@link l1Chain}
+   * - For each plugin, its required datasources must be valid within {@link namespace}
    * - For each plugin specified, a valid {@link rpcConfigs} entry is required for
    *   each chain the plugin indexes
    */
@@ -219,7 +219,7 @@ export interface ENSIndexerEnvironment {
   port: string | undefined;
   ponderDatabaseSchema: string | undefined;
   databaseUrl: string | undefined;
-  l1Chain: string | undefined;
+  namespace: string | undefined;
   plugins: string | undefined;
   ensRainbowEndpointUrl: string | undefined;
   ensNodePublicUrl: string | undefined;

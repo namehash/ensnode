@@ -1,7 +1,7 @@
 import {
   DEFAULT_ENSADMIN_URL,
+  DEFAULT_ENS_NAMESPACE,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_L1_CHAIN,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -17,7 +17,7 @@ const BASE_ENV = {
   HEAL_REVERSE_ADDRESSES: "true",
   PORT: "3000",
   ENSRAINBOW_URL: "https://api.ensrainbow.io",
-  L1_CHAIN: "mainnet",
+  ENS_NAMESPACE: "mainnet",
   RPC_URL_1: VALID_RPC_URL,
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
 };
@@ -40,7 +40,7 @@ describe("config", () => {
   describe("general behavior", () => {
     it("returns a valid config object using environment variables", async () => {
       const config = await getConfig();
-      expect(config.l1Chain).toBe("mainnet");
+      expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual({ startBlock: undefined, endBlock: undefined });
       expect(config.ensNodePublicUrl).toBe("http://localhost:42069");
       expect(config.ensAdminUrl).toBe("https://admin.ensnode.io");
@@ -287,23 +287,23 @@ describe("config", () => {
     });
   });
 
-  describe(".l1Chain", () => {
-    it("returns the L1_CHAIN if set", async () => {
-      vi.stubEnv("L1_CHAIN", "sepolia");
+  describe(".namespace", () => {
+    it("returns the ENS_NAMESPACE if set", async () => {
+      vi.stubEnv("ENS_NAMESPACE", "sepolia");
       vi.stubEnv("RPC_URL_11155111", VALID_RPC_URL);
       const config = await getConfig();
-      expect(config.l1Chain).toBe("sepolia");
+      expect(config.namespace).toBe("sepolia");
     });
 
-    it("returns the default L1_CHAIN if it is not set", async () => {
-      vi.stubEnv("L1_CHAIN", undefined);
+    it("returns the default ENS_NAMESPACE if it is not set", async () => {
+      vi.stubEnv("ENS_NAMESPACE", undefined);
       const config = await getConfig();
-      expect(config.l1Chain).toBe(DEFAULT_L1_CHAIN);
+      expect(config.namespace).toBe(DEFAULT_ENS_NAMESPACE);
     });
 
-    it("throws if L1_CHAIN is an invalid string value", async () => {
-      vi.stubEnv("L1_CHAIN", "not-a-chain");
-      await expect(getConfig()).rejects.toThrow(/Invalid L1_CHAIN/i);
+    it("throws if ENS_NAMESPACE is an invalid string value", async () => {
+      vi.stubEnv("ENS_NAMESPACE", "not-a-chain");
+      await expect(getConfig()).rejects.toThrow(/Invalid ENS_NAMESPACE/i);
     });
   });
 
@@ -486,7 +486,7 @@ describe("config", () => {
 
   describe("additional checks", () => {
     it("requires available datasources", async () => {
-      vi.stubEnv("L1_CHAIN", "ens-test-env");
+      vi.stubEnv("ENS_NAMESPACE", "ens-test-env");
       vi.stubEnv("ACTIVE_PLUGINS", "basenames");
       await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
     });

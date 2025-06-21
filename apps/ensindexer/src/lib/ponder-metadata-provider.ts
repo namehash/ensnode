@@ -54,7 +54,7 @@ export const makePonderMetdataProvider = ({
    *
    * @returns the block info fetched from the public client
    */
-  const getLastIndexedL1ChainBlock = async () => {
+  const getLastIndexedENSRootChainBlock = async () => {
     const ponderStatus = await queryPonderStatus(config.ponderDatabaseSchema, db);
     const chainStatus = ponderStatus.find(
       (status) => status.network_name === ensRootChainId.toString(),
@@ -90,7 +90,7 @@ export const makePonderMetdataProvider = ({
 
   return {
     version: packageJson.version,
-    getLastIndexedL1ChainBlock,
+    getLastIndexedENSRootChainBlock,
     getPonderBuildId,
     hasIndexingErrors,
   };

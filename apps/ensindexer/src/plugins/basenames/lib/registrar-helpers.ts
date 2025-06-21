@@ -1,16 +1,16 @@
 import type { RegistrarManagedName } from "@/lib/types";
-import type { L1Chain } from "@ensnode/datasources";
+import type { ENSNamespace } from "@ensnode/datasources";
 
 /**
- * Get registrar managed name for `basenames` plugin for selected L1 Chain.
+ * Get registrar managed name for `basenames` plugin for selected ENS namespace.
  *
- * @param l1Chain
+ * @param namespace
  * @param pluginName
  * @returns registrar managed name
  * @throws an error when no registrar managed name could be returned
  */
-export function getRegistrarManagedName(l1Chain: L1Chain): RegistrarManagedName {
-  switch (l1Chain) {
+export function getRegistrarManagedName(namespace: ENSNamespace): RegistrarManagedName {
+  switch (namespace) {
     case "mainnet":
       return "base.eth";
     case "sepolia":
@@ -18,7 +18,7 @@ export function getRegistrarManagedName(l1Chain: L1Chain): RegistrarManagedName 
     case "holesky":
     case "ens-test-env":
       throw new Error(
-        `No registrar managed name is known for the Basenames plugin when indexing the "${l1Chain}" L1 Chain.`,
+        `No registrar managed name is known for the Basenames plugin within the "${namespace}" ENS namespace.`,
       );
   }
 }

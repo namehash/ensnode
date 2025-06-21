@@ -1,6 +1,6 @@
 import type { EnsNode } from "@/components/ensnode";
 import { getChainById } from "@/lib/chains";
-import { type L1Chain } from "@ensnode/datasources";
+import { type ENSNamespace } from "@ensnode/datasources";
 import { fromUnixTime } from "date-fns";
 /**
  * Basic information about a block and its date.
@@ -49,13 +49,13 @@ export interface GlobalIndexingStatusViewModel {
  */
 export function globalIndexingStatusViewModel(
   networkIndexingStatus: Record<number, EnsNode.NetworkIndexingStatus>,
-  l1Chain: L1Chain,
+  namespace: ENSNamespace,
 ): GlobalIndexingStatusViewModel {
   const indexingStartDatesAcrossNetworks = Object.values(networkIndexingStatus).map(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
-  const getChainName = (chainId: number) => getChainById(l1Chain, chainId).name;
+  const getChainName = (chainId: number) => getChainById(namespace, chainId).name;
 
   const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
     ([chainId, networkIndexingStatus]) =>
@@ -150,7 +150,7 @@ export function ensNodeDepsViewModel(deps: EnsNode.Metadata["deps"]) {
 export function ensNodeEnvViewModel(env: EnsNode.Metadata["env"]) {
   return [
     { label: "Active Plugins", value: env.ACTIVE_PLUGINS },
-    { label: "L1 Chain", value: env.L1_CHAIN },
+    { label: "ENS Namespace", value: env.ENS_NAMESPACE },
     { label: "Database Schema", value: env.DATABASE_SCHEMA },
   ] as const;
 }

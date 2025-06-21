@@ -11,7 +11,7 @@ import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 
 /**
- * The Holesky Datasources
+ * Datasources for the Holesky ENS namespace
  */
 export default {
   /**

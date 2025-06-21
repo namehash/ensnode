@@ -1,21 +1,21 @@
-import { Datasource, type L1Chain, getDatasources } from "@ensnode/datasources";
+import { Datasource, type ENSNamespace, getDatasources } from "@ensnode/datasources";
 import { type Chain } from "viem";
 
 /**
- * Get a chain object by ID within the context of a specific ENS namespace (identified by L1Chain).
+ * Get a chain object by ID within the context of a specific ENS namespace.
  *
- * @param l1Chain - the L1Chain identifying which ENS namespace to query within
+ * @param namespace - the ENS namespace identifier within which to find a chain
  * @param chainId the chain ID
  * @returns the viem#Chain object
- * @throws if the chain ID is not supported within the selected ENS namespace
+ * @throws if no Datasources are defined for chainId within the selected ENS namespace
  */
-export const getChainById = (l1Chain: L1Chain, chainId: number): Chain => {
-  const datasources = Object.values(getDatasources(l1Chain)) as Datasource[];
+export const getChainById = (namespace: ENSNamespace, chainId: number): Chain => {
+  const datasources = Object.values(getDatasources(namespace)) as Datasource[];
   const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
 
   if (!datasource) {
     throw new Error(
-      `The Chain ID "${chainId}" is not valid within the Datasources available under the "${l1Chain}" L1 Chain.`,
+      `No Datasources within the "${namespace}" ENS namespace are defined for Chain ID "${chainId}".`,
     );
   }
 

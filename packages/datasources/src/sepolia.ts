@@ -23,7 +23,7 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 
 /**
- * The Sepolia Datasources
+ * Datasources for the Sepolia ENS namespace
  */
 export default {
   /**

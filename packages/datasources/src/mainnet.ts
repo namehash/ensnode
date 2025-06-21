@@ -24,7 +24,7 @@ import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverConfig } from "./lib/resolver";
 
 /**
- * The Mainnet Datasources
+ * Datasources for the Mainnet ENS namespace
  */
 export default {
   /**

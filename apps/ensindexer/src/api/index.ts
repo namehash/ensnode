@@ -71,7 +71,7 @@ app.get(
     env: {
       ACTIVE_PLUGINS: config.plugins.join(","),
       DATABASE_SCHEMA: config.ponderDatabaseSchema,
-      L1_CHAIN: config.l1Chain,
+      ENS_NAMESPACE: config.namespace,
     },
     db,
     query: {

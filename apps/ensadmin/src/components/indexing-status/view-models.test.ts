@@ -32,12 +32,12 @@ describe("View Models", () => {
       const result = ensNodeEnvViewModel({
         ACTIVE_PLUGINS: [PluginName.Subgraph],
         DATABASE_SCHEMA: "public",
-        L1_CHAIN: "ens-test-env",
+        ENS_NAMESPACE: "ens-test-env",
       });
 
       expect(result).toEqual([
         { label: "Active Plugins", value: [PluginName.Subgraph] },
-        { label: "L1 Chain", value: "ens-test-env" },
+        { label: "ENS Namespace", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);
     });

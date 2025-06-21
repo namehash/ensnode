@@ -38,15 +38,15 @@ const vitaliksResolverAddress = await publicClient.readContract({
 
 ## Documentation
 
-### getDatasources(l1Chain: 'mainnet' | 'sepolia' | 'holesky' | 'ens-test-env')
+### getDatasources(namespace: 'mainnet' | 'sepolia' | 'holesky' | 'ens-test-env')
 
-The primary export of `@ensnode/datasources` is `getDatasources` which returns a set of `Datasources`.
+The primary export of `@ensnode/datasources` is `getDatasources` which returns a set of `Datasources` within the selected ENS namespace.
 
 ```ts
 import { getDatasources } from '@ensnode/datasources';
 ```
 
-The available `L1Chain`s are:
+The available `ENSNamespace`s are:
 - `mainnet`
 - `sepolia`
 - `holesky`

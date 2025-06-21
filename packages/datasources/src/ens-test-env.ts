@@ -17,7 +17,7 @@ const deploymentAddresses = getENSTestEnvDeploymentAddresses();
 const EMPTY_ADDRESS = "" as Address;
 
 /**
- * The ens-test-env Datasources
+ * Datasources for the ens-test-env ENS namespace
  *
  * 'ens-test-env' represents an ENS namespace running on a local Anvil chain for development of
  * ENS apps and running test suites against a deterministic deployment of the ENS protocol.

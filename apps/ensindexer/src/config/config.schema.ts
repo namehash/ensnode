@@ -11,14 +11,14 @@ import {
 } from "@/config/validations";
 import {
   DEFAULT_ENSADMIN_URL,
+  DEFAULT_ENS_NAMESPACE,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
-  DEFAULT_L1_CHAIN,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
-import { L1Chains } from "@ensnode/datasources";
+import { ENSNamespaces } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 const chainIdSchema = z.number().int().min(1);
@@ -55,13 +55,13 @@ const RpcConfigSchema = z.object({
     .default(DEFAULT_RPC_RATE_LIMIT),
 });
 
-const L1ChainSchema = z
-  .enum(L1Chains, {
+const ENSNamespaceSchema = z
+  .enum(ENSNamespaces, {
     error: (issue) => {
-      return `Invalid L1_CHAIN. Supported L1 Chains are: ${Object.keys(L1Chains).join(", ")}`;
+      return `Invalid ENS_NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaces).join(", ")}`;
     },
   })
-  .default(DEFAULT_L1_CHAIN);
+  .default(DEFAULT_ENS_NAMESPACE);
 
 const BlockrangeSchema = z
   .object({
@@ -155,7 +155,7 @@ const DatabaseUrlSchema = z.union(
 
 const ENSIndexerConfigSchema = z
   .object({
-    l1Chain: L1ChainSchema,
+    namespace: ENSNamespaceSchema,
     globalBlockrange: BlockrangeSchema,
     ensNodePublicUrl: EnsNodePublicUrlSchema,
     ensAdminUrl: EnsAdminUrlSchema,
@@ -174,12 +174,12 @@ const ENSIndexerConfigSchema = z
    * We enforce invariants across multiple values parsed with `ENSIndexerConfigSchema`
    * by calling `.check()` function with relevant invariant-enforcing logic.
    * Each such function has access to config values that were already parsed.
-   * If you need to ensure certain config value permutation, say across `l1Chain`
+   * If you need to ensure certain config value permutation, say across `namespace`
    * and `plugins` values, you can define the `.check()` function callback with the following
    * input param:
    *
    * ```ts
-   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "l1Chain" | "plugins">>
+   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins">>
    * ```
    *
    * This way, the invariant logic can access all information it needs, while keeping room
@@ -194,7 +194,7 @@ const ENSIndexerConfigSchema = z
    *
    * We create new configuration parameters from the values parsed with `ENSIndexerConfigSchema`.
    * This way, we can include complex configuration objects, for example, `datasources` that was
-   * derived from `l1Chain` and relevant SDK helper method, and attach result value to
+   * derived from `namespace` and relevant SDK helper method, and attach result value to
    * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
    * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
    *

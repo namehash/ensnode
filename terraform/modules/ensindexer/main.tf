@@ -73,7 +73,7 @@ locals {
       value = var.active_plugins
     },
     {
-      name  = "L1_CHAIN"
+      name  = "ENS_NAMESPACE"
       value = var.l1_chain
     },
     {
