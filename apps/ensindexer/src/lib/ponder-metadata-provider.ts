@@ -8,8 +8,8 @@ import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
   createPrometheusMetricsFetcher,
-  getENSRootChainId,
 } from "@/lib/ponder-helpers";
+import { getENSRootChainId } from "@ensnode/datasources";
 import { PrometheusMetrics, queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata";
 import type { PonderMetadataProvider } from "@ensnode/ponder-subgraph";
 
@@ -32,7 +32,7 @@ export const makePonderMetdataProvider = ({
   publicClients: Record<string, PublicClient>;
 }): PonderMetadataProvider => {
   // get the root datasource's chain ID
-  const ensRootChainId = getENSRootChainId();
+  const ensRootChainId = getENSRootChainId(config.namespace);
   const availableNetworkNames = Object.keys(publicClients);
 
   if (availableNetworkNames.length === 0) {

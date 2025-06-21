@@ -16,12 +16,13 @@ import {
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { type EventWithArgs, getENSRootChainId } from "@/lib/ponder-helpers";
+import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 import {
   type DebugTraceTransactionSchema,
   getAddressesFromTrace,
 } from "@/lib/trace-transaction-helpers";
+import { getENSRootChainId } from "@ensnode/datasources";
 
 /**
  * shared handlers for a Registry contract
@@ -76,11 +77,9 @@ export const handleNewOwner =
 
     // if the domain doesn't yet have a name, attempt to construct it here
     if (!domain.name) {
-      const parent = await context.db.find(schema.domain, {
-        id: parentNode,
-      });
+      const parent = await context.db.find(schema.domain, { id: parentNode });
 
-      const ensRootChainId = getENSRootChainId();
+      const ensRootChainId = getENSRootChainId(config.namespace);
       let healedLabel = null;
 
       // If healing labels from reverse addresses is enabled, the parent is a known reverse node

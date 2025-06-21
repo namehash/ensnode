@@ -58,3 +58,11 @@ export const getCommonDatasources = (namespace: ENSNamespace) =>
 export const getDatasources = <T extends ENSNamespace>(
   namespace: T,
 ): (typeof ENSNamespaceToDatasource)[T] => ENSNamespaceToDatasource[namespace];
+
+/**
+ * Get the chain id for the ENS Root Datasource within the selected ENS namespace.
+ *
+ * @returns the chain ID that hosts the ENS Root
+ */
+export const getENSRootChainId = (namespace: ENSNamespace) =>
+  getDatasources(namespace).ensroot.chain.id;
