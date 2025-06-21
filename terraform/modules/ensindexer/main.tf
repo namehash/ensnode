@@ -74,7 +74,7 @@ locals {
     },
     {
       name  = "ENS_NAMESPACE"
-      value = var.l1_chain
+      value = var.ens_namespace
     },
     {
       name  = "HEAL_REVERSE_ADDRESSES"

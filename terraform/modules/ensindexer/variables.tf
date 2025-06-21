@@ -55,7 +55,7 @@ variable "database_schema" {
 variable "active_plugins" {
   type = string
 }
-variable "l1_chain" {
+variable "ens_namespace" {
   type = string
 }
 
