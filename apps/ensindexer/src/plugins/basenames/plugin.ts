@@ -10,7 +10,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
-  getCommonDatasource,
+  getDatasourceAsCommon,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
@@ -26,7 +26,7 @@ const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain, contracts } = getCommonDatasource(config.namespace, DatasourceNames.Basenames);
+  const { chain, contracts } = getDatasourceAsCommon(config.namespace, DatasourceNames.Basenames);
 
   return createConfig({
     networks: networksConfigForChain(chain.id),

@@ -1,7 +1,7 @@
 import { baseSepolia, lineaSepolia, sepolia } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceNames, type Datasources } from "./lib/types";
+import { type DatasourceMap, DatasourceNames } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -173,4 +173,4 @@ export default {
       },
     },
   },
-} satisfies Datasources;
+} satisfies DatasourceMap;

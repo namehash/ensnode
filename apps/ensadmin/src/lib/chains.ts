@@ -1,4 +1,4 @@
-import { Datasource, type ENSNamespace, getDatasources } from "@ensnode/datasources";
+import { Datasource, type ENSNamespace, getDatasourceMap } from "@ensnode/datasources";
 import { type Chain } from "viem";
 
 /**
@@ -10,7 +10,7 @@ import { type Chain } from "viem";
  * @throws if no Datasources are defined for chainId within the selected namespace
  */
 export const getChainById = (namespace: ENSNamespace, chainId: number): Chain => {
-  const datasources = Object.values(getDatasources(namespace)) as Datasource[];
+  const datasources = Object.values(getDatasourceMap(namespace)) as Datasource[];
   const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
 
   if (!datasource) {

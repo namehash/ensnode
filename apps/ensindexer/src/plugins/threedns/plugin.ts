@@ -9,7 +9,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
-  getCommonDatasource,
+  getDatasourceAsCommon,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
@@ -26,12 +26,12 @@ const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain: optimism, contracts: optimismContracts } = getCommonDatasource(
+  const { chain: optimism, contracts: optimismContracts } = getDatasourceAsCommon(
     config.namespace,
     DatasourceNames.ThreeDNSOptimism,
   );
 
-  const { chain: base, contracts: baseContracts } = getCommonDatasource(
+  const { chain: base, contracts: baseContracts } = getDatasourceAsCommon(
     config.namespace,
     DatasourceNames.ThreeDNSBase,
   );

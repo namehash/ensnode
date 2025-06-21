@@ -1,4 +1,4 @@
-import { DatasourceNames, Datasources, ENSNamespace, ENSNamespaces } from "./lib/types";
+import { DatasourceMap, DatasourceNames, ENSNamespace } from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -7,27 +7,23 @@ import sepolia from "./sepolia";
 
 export * from "./lib/types";
 
-/**
- * A map from ENSNamespace to a set of Datasources.
- *
- * See {@link ENSNamespaces} for more information on ENS namespaces.
- */
-const ENSNamespaceToDatasource = {
+// internal map ENSNamespace -> DatasourceMap
+const ENSNamespaceToDatasourceMap = {
   mainnet,
   sepolia,
   holesky,
   "ens-test-env": ensTestEnv,
-} as const satisfies Record<ENSNamespace, Datasources>;
+} as const satisfies Record<ENSNamespace, DatasourceMap>;
 
 /**
- * Returns the Datasources within the specified namespace.
+ * Returns the DatasourceMap within the specified namespace.
  *
  * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns The Datasources for the specified namespace
+ * @returns The DatasourceMap for the specified namespace
  */
-export const getDatasources = <T extends ENSNamespace>(
+export const getDatasourceMap = <T extends ENSNamespace>(
   namespace: T,
-): (typeof ENSNamespaceToDatasource)[T] => ENSNamespaceToDatasource[namespace];
+): (typeof ENSNamespaceToDatasourceMap)[T] => ENSNamespaceToDatasourceMap[namespace];
 
 /**
  * Returns the `datasourceName` Datasource within the specified `namespace` namespace.
@@ -41,11 +37,11 @@ export const getDatasources = <T extends ENSNamespace>(
  */
 export const getDatasource = <
   N extends ENSNamespace,
-  D extends keyof ReturnType<typeof getDatasources<N>>,
+  D extends keyof ReturnType<typeof getDatasourceMap<N>>,
 >(
   namespace: N,
   datasourceName: D,
-) => getDatasources(namespace)[datasourceName];
+) => getDatasourceMap(namespace)[datasourceName];
 
 /**
  * Returns the chain id for the ENS Root Datasource within the selected namespace.

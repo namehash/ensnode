@@ -1,7 +1,7 @@
 import { holesky } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceNames, type Datasources } from "./lib/types";
+import { type DatasourceMap, DatasourceNames } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -62,4 +62,4 @@ export default {
   /**
    * The Holesky ENS namespace has no known Datasource for Basenames or Lineanames.
    */
-} satisfies Datasources;
+} satisfies DatasourceMap;

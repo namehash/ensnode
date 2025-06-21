@@ -95,9 +95,9 @@ export type ContractConfig =
     };
 
 /**
- * Datasources encodes the set of known Datasources within an ENS namespace.
- * The ENSRoot Datasource is required, all others are optional.
+ * DatasourceMap encodes the set of known Datasources within an ENS namespace, keyed by DatasourceName.
+ * The ENSRoot Datasource is required, and all others are optional.
  */
-export type Datasources = {
-  ensroot: Datasource;
+export type DatasourceMap = {
+  [DatasourceNames.ENSRoot]: Datasource;
 } & Partial<Record<Exclude<DatasourceName, "ensroot">, Datasource>>;

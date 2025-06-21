@@ -2,7 +2,7 @@ import { Address } from "viem";
 import { anvil } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceNames, type Datasources } from "./lib/types";
+import { type DatasourceMap, DatasourceNames } from "./lib/types";
 
 // ABIs for Root Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -86,4 +86,4 @@ export default {
   /**
    * The 'ens-test-env' ENS namespace does not have any other Datasources.
    */
-} satisfies Datasources;
+} satisfies DatasourceMap;
