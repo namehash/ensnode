@@ -10,7 +10,7 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/datasources";
+import { DatasourceName, getCommonDatasource } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig } from "ponder";
 
@@ -24,11 +24,16 @@ const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.Thr
 const namespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { datasources } = appConfig;
-  const { chain: optimism, contracts: optimismContracts } =
-    datasources[DatasourceName.ThreeDNSOptimism];
-  const { chain: base, contracts: baseContracts } = datasources[DatasourceName.ThreeDNSBase];
+function createPonderConfig(config: ENSIndexerConfig) {
+  const { chain: optimism, contracts: optimismContracts } = getCommonDatasource(
+    config.namespace,
+    DatasourceName.ThreeDNSOptimism,
+  );
+
+  const { chain: base, contracts: baseContracts } = getCommonDatasource(
+    config.namespace,
+    DatasourceName.ThreeDNSBase,
+  );
 
   return createConfig({
     networks: {

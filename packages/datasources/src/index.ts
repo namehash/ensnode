@@ -1,4 +1,4 @@
-import type { Datasources, ENSNamespace, ENSNamespaces } from "./lib/types";
+import { DatasourceName, Datasources, ENSNamespace, ENSNamespaces } from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -22,7 +22,7 @@ export * from "./lib/types";
  *   values expected by those plugins pass the typechecker. ENSNode ensures that non-active plugins
  *   are not executed, however, so the issue of type/value mismatch does not occur during execution.
  */
-export type CommonDatasourcesType = typeof ENSNamespaceToDatasource.mainnet;
+type CommonDatasourcesType = typeof ENSNamespaceToDatasource.mainnet;
 
 /**
  * A map from ENSNamespace to a set of Datasources.
@@ -35,6 +35,16 @@ const ENSNamespaceToDatasource = {
   holesky,
   "ens-test-env": ensTestEnv,
 } as const satisfies Record<ENSNamespace, Datasources>;
+
+/**
+ * Returns the (const) Datasources within the specified ENS namespace.
+ *
+ * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns The Datasources for the specified ENS namespace
+ */
+export const getDatasources = <T extends ENSNamespace>(
+  namespace: T,
+): (typeof ENSNamespaceToDatasource)[T] => ENSNamespaceToDatasource[namespace];
 
 /**
  * Returns the Datasources within the specified ENS namespace, cast to the CommonType.
@@ -50,19 +60,39 @@ export const getCommonDatasources = (namespace: ENSNamespace) =>
   getDatasources(namespace) as CommonDatasourcesType;
 
 /**
- * Returns the Datasources within the specified ENS namespace (as const).
+/**
+ * Returns the `datasourceName` Datasource within the specified `namespace` ENS namespace.
+ *
+ * NOTE: the typescript typechecker _will_ enforce validity. i.e. using an invalid `datasourceName`
+ * wihtin the specified `namespace` will be a type error.
  *
  * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns The Datasources for the specified ENS namespace
+ * @param datasourceName - The name of the Datasource to retrieve
+ * @returns The Datasource object for the given name within the specified namespace
  */
-export const getDatasources = <T extends ENSNamespace>(
-  namespace: T,
-): (typeof ENSNamespaceToDatasource)[T] => ENSNamespaceToDatasource[namespace];
+export const getDatasource = <
+  N extends ENSNamespace,
+  D extends keyof ReturnType<typeof getDatasources>,
+>(
+  namespace: N,
+  datasourceName: D,
+) => getDatasources(namespace)[datasourceName];
 
 /**
- * Get the chain id for the ENS Root Datasource within the selected ENS namespace.
+ * Returns the `datasourceName` Datasource within the `namespace` ENS namespace, cast as CommonType.
+ *
+ * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
+ * wihtin the specified `namespace` will have a valid return type but be undefined at runtime.
+ */
+export const getCommonDatasource = <N extends ENSNamespace, D extends keyof CommonDatasourcesType>(
+  namespace: N,
+  datasourceName: D,
+) => getCommonDatasources(namespace)[datasourceName];
+
+/**
+ * Returns the chain id for the ENS Root Datasource within the selected ENS namespace.
  *
  * @returns the chain ID that hosts the ENS Root
  */
 export const getENSRootChainId = (namespace: ENSNamespace) =>
-  getDatasources(namespace).ensroot.chain.id;
+  getCommonDatasource(namespace, DatasourceName.ENSRoot).chain.id;

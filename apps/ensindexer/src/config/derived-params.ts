@@ -1,5 +1,4 @@
 import type { ENSIndexerConfig } from "@/config/types";
-import { type CommonDatasourcesType, getCommonDatasources } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -26,15 +25,4 @@ export const derive_isSubgraphCompatible = <
     ...config,
     isSubgraphCompatible: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
   };
-};
-
-/**
- * Derived `datasources` config param based on validated ENSIndexerConfig object.
- */
-export const derive_datasources = <CONFIG extends Pick<ENSIndexerConfig, "namespace">>(
-  config: CONFIG,
-): CONFIG & { datasources: CommonDatasourcesType } => {
-  const datasources = getCommonDatasources(config.namespace);
-
-  return { ...config, datasources };
 };

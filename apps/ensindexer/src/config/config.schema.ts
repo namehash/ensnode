@@ -1,7 +1,7 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { derive_datasources, derive_isSubgraphCompatible } from "@/config/derived-params";
+import { derive_isSubgraphCompatible } from "@/config/derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
@@ -212,7 +212,6 @@ const ENSIndexerConfigSchema = z
    * }
    * ```
    */
-  .transform(derive_datasources)
   .transform(derive_isSubgraphCompatible);
 
 /**

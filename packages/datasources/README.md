@@ -19,11 +19,11 @@ This package centralizes the contract addresses, start blocks, and other configu
 To use these configurations in your project:
 
 ```ts
-import { getDatasources } from "@ensnode/datasources";
+import { getDatasource } from "@ensnode/datasources";
 import { namehash } from "viem";
 
 // access the address and abi for the ens root Registry in the canonical mainnet ENS namespace
-const registryConfig = getDatasources('mainnet').ensroot.contracts.Registry;
+const registryConfig = getDatasource('mainnet', 'ensroot').contracts.Registry;
 
 // for example, querying the Registry with viem...
 const vitaliksResolverAddress = await publicClient.readContract({
@@ -38,12 +38,21 @@ const vitaliksResolverAddress = await publicClient.readContract({
 
 ## Documentation
 
-### getDatasources(namespace: 'mainnet' | 'sepolia' | 'holesky' | 'ens-test-env')
+### getDatasource(namespace: ENSNamespace, datasourceName: DatasourceName)
 
-The primary export of `@ensnode/datasources` is `getDatasources` which returns a set of `Datasources` within the selected ENS namespace.
+The primary export of `@ensnode/datasources` is `getDatasource` which returns a selected `Datasource` within the selected ENS namespace.
 
 ```ts
-import { getDatasources } from '@ensnode/datasources';
+import { getDatasource } from '@ensnode/datasources';
+
+// get ensroot datasource relative to mainnet ENS namespace
+const { chain, contracts } = getDatasource('mainnet', 'ensroot');
+
+// get ensroot datasource relative to holesky ENS namespace
+const { chain, contracts } = getDatasource('holesky', 'ensroot');
+
+// get threedns-base datasource relative to mainnet ENS namespace
+const { chain, contracts } = getDatasource('mainnet', 'threedns-base');
 ```
 
 The available `ENSNamespace`s are:
@@ -54,7 +63,7 @@ The available `ENSNamespace`s are:
 
 ### Datasources
 
-Each `Datasources` provides a set of **Datasource** entries, keyed by a unique `DatasourceName`.
+Each `Datasources` provides a set of **Datasource** entries, keyed by a unique `DatasourceName`. A `Datasource` will only be available within an ENS namespace if it exists.
 
 The available `DatasourceName`s are:
 - `ensroot` — ENS Root Contracts

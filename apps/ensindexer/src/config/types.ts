@@ -1,5 +1,5 @@
 import { Blockrange } from "@/lib/types";
-import type { CommonDatasourcesType, ENSNamespace, ENSNamespaces } from "@ensnode/datasources";
+import type { ENSNamespace, ENSNamespaces } from "@ensnode/datasources";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -35,13 +35,6 @@ export interface ENSIndexerConfig {
    * See {@link ENSNamespaces} for available ENS namespace identifiers.
    */
   namespace: ENSNamespace;
-
-  /**
-   * The Datasources within the configured ENS namespace {@link namespace}.
-   *
-   * See {@link Datasources} for additional information.
-   */
-  datasources: CommonDatasourcesType;
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).

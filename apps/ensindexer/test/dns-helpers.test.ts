@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { decodeDNSPacketBytes, decodeTXTData, parseRRSet } from "@/lib/dns-helpers";
-import { getDatasources } from "@ensnode/datasources";
+import { getDatasource } from "@ensnode/datasources";
 import { TxtAnswer } from "dns-packet";
 import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
 
@@ -10,7 +10,7 @@ import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
 const {
   args: { record },
 } = decodeEventLog({
-  abi: getDatasources("mainnet")["threedns-base"].contracts.Resolver.abi,
+  abi: getDatasource("mainnet", "threedns-base").contracts.Resolver.abi,
   topics: [
     "0xaaac3b4b3e6807b5b4585562beabaa2de9bd07db514a1eba2c11d1af5b9d9dc7",
     "0x6470e2677db6a5bb6c69e51fce7271aeeb5f2808ea7dfdf34b703749555b3e10",

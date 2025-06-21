@@ -11,7 +11,7 @@ import {
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/datasources";
+import { DatasourceName, getCommonDatasource } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig } from "ponder";
 
@@ -25,9 +25,8 @@ const requiredDatasources = [DatasourceName.ENSRoot];
 const namespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { datasources } = appConfig;
-  const { chain, contracts } = datasources[DatasourceName.ENSRoot];
+function createPonderConfig(config: ENSIndexerConfig) {
+  const { chain, contracts } = getCommonDatasource(config.namespace, DatasourceName.ENSRoot);
 
   return createConfig({
     networks: networksConfigForChain(chain.id),
