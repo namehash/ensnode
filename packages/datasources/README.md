@@ -1,6 +1,6 @@
 # @ensnode/datasources
 
-This package provides contract configurations (chain, names, addresses, abis) for each known **ENS Namespace**. An ENS Namespace represents a single, unified set of ENS names with a distinct onchain `ensroot` **Datasource** and the capability to span across multiple Datasources on different chains (and, in the future, offchain datasources).
+This package provides contract configurations (chain, names, addresses, abis) for each known **ENS Namespace**. An ENS Namespace represents a single, unified set of ENS names with a distinct onchain `ensroot` **Datasource** and an optional set of additional **Datasource**s on different chains (and, in the future, offchain datasources).
 
 For example, the canonical ENS Namespace on mainnet includes:
 
@@ -10,9 +10,9 @@ For example, the canonical ENS Namespace on mainnet includes:
 - The `threedns-optimism` and `threedns-base` Datasources documenting the 3DNS contracts on Optimism and Base, respectively
 - 🚧 Various offchain Datasources (e.g. `.cb.id`, `.uni.eth`)
 
-Each namespace is logically independent and isolated from the others: for instance, the Sepolia and Holesky testnet namespaces manage a namespace that is entirely separate from the canonical mainnet namespace, and the `ens-test-env` namespace describes the contracts deployed to an _Anvil_ chain for development and testing with the [ens-test-env](https://github.com/ensdomains/ens-test-env) tool.
+Each ENS namespace is logically independent and isolated from the others: for instance, the `sepolia` and `holesky` testnet namespaces manage a set of names that is entirely separate from the canonical `mainnet` namespace, and have distinct `basenames` and `lineanames` **Datasources** defined.
 
-This package centralizes the contract addresses, start blocks, and other configuration needed to interact with the ENS protocol and adjacent contracts.
+The `ens-test-env` namespace describes the contracts deployed to an _Anvil_ chain for development and testing with the [ens-test-env](https://github.com/ensdomains/ens-test-env) tool.
 
 ## Usage
 
