@@ -11,10 +11,12 @@ import {
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
-  ponder.on(namespace("Registry:setup"), setupRootNode);
-  ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(namespace("Registry:NewResolver"), handleNewResolver);
-  ponder.on(namespace("Registry:NewTTL"), handleNewTTL);
-  ponder.on(namespace("Registry:Transfer"), handleTransfer);
+export default function ({
+  pluginNamespace: ns,
+}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
+  ponder.on(ns("Registry:setup"), setupRootNode);
+  ponder.on(ns("Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(ns("Registry:NewResolver"), handleNewResolver);
+  ponder.on(ns("Registry:NewTTL"), handleNewTTL);
+  ponder.on(ns("Registry:Transfer"), handleTransfer);
 }

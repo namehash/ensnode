@@ -25,7 +25,7 @@ export function getENSTestEnvDeploymentAddresses(): ENSTestEnvDeploymentAddresse
     if (!onlyAddresses) return null;
 
     return addresses;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

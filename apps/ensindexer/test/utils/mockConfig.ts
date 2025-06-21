@@ -7,7 +7,7 @@ import { vi } from "vitest";
 // default, non-exported mock configuration template
 const _defaultMockConfig = buildConfigFromEnvironment({
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
-  ensDeploymentChain: "mainnet",
+  namespace: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   ponderDatabaseSchema: "test_schema",

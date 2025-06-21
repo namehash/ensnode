@@ -2,49 +2,49 @@
  * The Lineanames plugin describes indexing behavior for the Lineanames ENS Datasource, leveraging
  * the shared Subgraph-compatible indexing logic.
  */
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig } from "ponder";
+
 import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
+  getDatasourceAsCommon,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
 
 const pluginName = PluginName.Lineanames;
 
 // enlist datasources used within createPonderConfig function
 // useful for config validation
-const requiredDatasources = [DatasourceName.Lineanames];
+const requiredDatasources = [DatasourceNames.Lineanames];
 
 // construct a unique contract namespace for this plugin
-const namespace = makePluginNamespace(pluginName);
+const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { ensDeployment } = appConfig;
-  // extract the chain and contract configs for Lineanames Datasource in order to build ponder config
-  const { chain, contracts } = ensDeployment[DatasourceName.Lineanames];
+function createPonderConfig(config: ENSIndexerConfig) {
+  const { chain, contracts } = getDatasourceAsCommon(config.namespace, DatasourceNames.Lineanames);
 
   return createConfig({
     networks: networksConfigForChain(chain.id),
     contracts: {
-      [namespace("Registry")]: {
+      [pluginNamespace("Registry")]: {
         network: networkConfigForContract(chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
-      [namespace("BaseRegistrar")]: {
+      [pluginNamespace("BaseRegistrar")]: {
         network: networkConfigForContract(chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
-      [namespace("EthRegistrarController")]: {
+      [pluginNamespace("EthRegistrarController")]: {
         network: networkConfigForContract(chain, contracts.EthRegistrarController),
         abi: contracts.EthRegistrarController.abi,
       },
-      [namespace("NameWrapper")]: {
+      [pluginNamespace("NameWrapper")]: {
         network: networkConfigForContract(chain, contracts.NameWrapper),
         abi: contracts.NameWrapper.abi,
       },
@@ -65,7 +65,7 @@ export default {
    */
   activate: activateHandlers({
     pluginName,
-    namespace,
+    pluginNamespace,
     handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),

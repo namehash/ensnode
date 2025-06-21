@@ -25,12 +25,14 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
-  ponder.on(namespace("RegistryOld:setup"), setupRootNode);
+export default function ({
+  pluginNamespace: ns,
+}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
+  ponder.on(ns("RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
-  ponder.on(namespace("RegistryOld:NewOwner"), async ({ context, event }) => {
+  ponder.on(ns("RegistryOld:NewOwner"), async ({ context, event }) => {
     const { label: labelHash, node: parentNode } = event.args;
 
     const node = makeSubdomainNode(labelHash, parentNode);
@@ -40,7 +42,7 @@ export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.S
     return handleNewOwner(false)({ context, event });
   });
 
-  ponder.on(namespace("RegistryOld:NewResolver"), async ({ context, event }) => {
+  ponder.on(ns("RegistryOld:NewResolver"), async ({ context, event }) => {
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
     const isRootNode = event.args.node === ROOT_NODE;
 
@@ -52,14 +54,14 @@ export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.S
     return handleNewResolver({ context, event });
   });
 
-  ponder.on(namespace("RegistryOld:NewTTL"), async ({ context, event }) => {
+  ponder.on(ns("RegistryOld:NewTTL"), async ({ context, event }) => {
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
     if (shouldIgnoreEvent) return;
 
     return handleNewTTL({ context, event });
   });
 
-  ponder.on(namespace("RegistryOld:Transfer"), async ({ context, event }) => {
+  ponder.on(ns("RegistryOld:Transfer"), async ({ context, event }) => {
     // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
     // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
     // of the ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
@@ -72,8 +74,8 @@ export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.S
     return handleTransfer({ context, event });
   });
 
-  ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(namespace("Registry:NewResolver"), handleNewResolver);
-  ponder.on(namespace("Registry:NewTTL"), handleNewTTL);
-  ponder.on(namespace("Registry:Transfer"), handleTransfer);
+  ponder.on(ns("Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(ns("Registry:NewResolver"), handleNewResolver);
+  ponder.on(ns("Registry:NewTTL"), handleNewTTL);
+  ponder.on(ns("Registry:Transfer"), handleTransfer);
 }

@@ -73,8 +73,8 @@ locals {
       value = var.active_plugins
     },
     {
-      name  = "ENS_DEPLOYMENT_CHAIN"
-      value = var.ens_deployment_chain
+      name  = "NAMESPACE"
+      value = var.namespace
     },
     {
       name  = "HEAL_REVERSE_ADDRESSES"

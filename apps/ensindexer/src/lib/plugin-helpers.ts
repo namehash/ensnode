@@ -2,13 +2,13 @@ import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
-import { getRequiredDatasourceNames } from "@/plugins";
 import {
   ContractConfig,
   Datasource,
   DatasourceName,
-  getENSDeployment,
-} from "@ensnode/ens-deployments";
+  ENSNamespace,
+  getDatasourceMap,
+} from "@ensnode/datasources";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 import { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
@@ -62,7 +62,7 @@ export interface ENSIndexerPlugin<
 
   /**
    * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of ACTIVE_PLUGINS are valid for a given ENS_DEPLOYMENT_CHAIN
+   * a set of ACTIVE_PLUGINS are valid for a given NAMESPACE
    */
   requiredDatasources: DatasourceName[];
 
@@ -83,7 +83,7 @@ export interface ENSIndexerPlugin<
  */
 export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
   pluginName: PLUGIN_NAME;
-  namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
+  pluginNamespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
 
 /**
@@ -108,30 +108,6 @@ export const activateHandlers =
   async () => {
     await Promise.all(handlers()).then((modules) => modules.map((m) => m.default(args)));
   };
-
-/**
- * Get a list of unique datasources for selected plugin names.
- * @param pluginNames
- * @returns
- */
-export function getDatasources(
-  config: Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">,
-): Datasource[] {
-  const requiredDatasourceNames = getRequiredDatasourceNames(config.plugins);
-  const ensDeployment = getENSDeployment(config.ensDeploymentChain);
-  const ensDeploymentDatasources = Object.entries(ensDeployment) as Array<
-    [DatasourceName, Datasource]
-  >;
-  const datasources = {} as Record<DatasourceName, Datasource>;
-
-  for (let [datasourceName, datasource] of ensDeploymentDatasources) {
-    if (requiredDatasourceNames.includes(datasourceName)) {
-      datasources[datasourceName] = datasource;
-    }
-  }
-
-  return Object.values(datasources);
-}
 
 /**
  * Get a list of unique indexed chain IDs for selected plugin names.
@@ -210,3 +186,44 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
 
   return [label, name];
 }
+
+/**
+ * CommonDatasourceMap is a helper type necessary to support runtime-conditional Ponder plugins.
+ *
+ * 1. ENSNode can be configured to index from any defined ENS namespace
+ *   (currently: mainnet, sepolia, holesky, ens-test-env), using a user-specified set of plugins.
+ * 2. Ponder's inferred type-checking requires const-typed values, and so those plugins must be able
+ *   to define their Ponder config statically, without awareness of whether they are actively executed
+ *   or not.
+ * 3. To make this work, we provide a CommonDatasourceMap, set to the typeof mainnet's DatasourceMap,
+ *   which fully defines all known (if this is ever not the case, a merged type can be used to ensure
+ *   that the CommonType has the full set of possible Datasources). Plugins can use the runtime value
+ *   returned from {@link getDatasourceMapAsCommon} and by casting it to CommonType we ensure that the
+ *   values expected by those plugins pass the typechecker. ENSNode ensures that non-active plugins
+ *   are not executed, however, so the issue of type/value mismatch does not occur during execution.
+ */
+type CommonDatasourceMap = ReturnType<typeof getDatasourceMap<"mainnet">>;
+
+/**
+ * Returns the DatasourceMap within the specified namespace, cast to the CommonType.
+ *
+ * This function takes an ENSNamespace identifier and returns the corresponding DatasourceMap.
+ * The returned datasources configuration is cast to the global CommonType to ensure that ponder's
+ * inferred typing works at type-check time. See {@link CommonDatasourceMap} for more info.
+ *
+ * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns The DatasourceMap for the specified namespace
+ */
+export const getDatasourceMapAsCommon = (namespace: ENSNamespace) =>
+  getDatasourceMap(namespace) as CommonDatasourceMap;
+
+/**
+ * Returns the `datasourceName` Datasource within the `namespace` namespace, cast as CommonType.
+ *
+ * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
+ * wihtin the specified `namespace` will have a valid return type but be undefined at runtime.
+ */
+export const getDatasourceAsCommon = <N extends ENSNamespace, D extends keyof CommonDatasourceMap>(
+  namespace: N,
+  datasourceName: D,
+) => getDatasourceMapAsCommon(namespace)[datasourceName];

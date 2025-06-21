@@ -9,7 +9,7 @@
       "ensindexer",
       "ensadmin",
       "ensrainbow",
-      "@ensnode/ens-deployments",
+      "@ensnode/datasources",
       "@ensnode/ensrainbow-sdk",
       "@ensnode/ponder-metadata",
       "@ensnode/ensnode-schema",

@@ -4,7 +4,9 @@ import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
+export default function ({
+  pluginNamespace: ns,
+}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
   const {
     handleExpiryExtended,
     handleFusesSet,
@@ -17,10 +19,10 @@ export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.S
     registrarManagedName: "eth",
   });
 
-  ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);
-  ponder.on(namespace("NameWrapper:NameUnwrapped"), handleNameUnwrapped);
-  ponder.on(namespace("NameWrapper:FusesSet"), handleFusesSet);
-  ponder.on(namespace("NameWrapper:ExpiryExtended"), handleExpiryExtended);
-  ponder.on(namespace("NameWrapper:TransferSingle"), handleTransferSingle);
-  ponder.on(namespace("NameWrapper:TransferBatch"), handleTransferBatch);
+  ponder.on(ns("NameWrapper:NameWrapped"), handleNameWrapped);
+  ponder.on(ns("NameWrapper:NameUnwrapped"), handleNameUnwrapped);
+  ponder.on(ns("NameWrapper:FusesSet"), handleFusesSet);
+  ponder.on(ns("NameWrapper:ExpiryExtended"), handleExpiryExtended);
+  ponder.on(ns("NameWrapper:TransferSingle"), handleTransferSingle);
+  ponder.on(ns("NameWrapper:TransferBatch"), handleTransferBatch);
 }

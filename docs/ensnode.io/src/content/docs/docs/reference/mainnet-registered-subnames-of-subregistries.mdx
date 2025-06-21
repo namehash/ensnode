@@ -18,7 +18,7 @@ When running ENSNode **with multiple plugins enabled**, however, the behavior of
 
 ## ENS Protocol Context
 
-Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of subregistries (i.e. `.base.eth`, `.linea.eth`) that exist in the ENS Registry on the mainnet "ENS deployment" will NOT have the forward resolution of their data delegated to the subregistry defined below. Instead their forward resolution will be managed according to the state defined in the ENS Registry.
+Based on the ENSIP-10 (Wildcard Resolution) standard, any subnames of subregistries (i.e. `.base.eth`, `.linea.eth`) that exist in the ENS Registry on the mainnet ENS namespace will NOT have the forward resolution of their data delegated to the subregistry defined below. Instead their forward resolution will be managed according to the state defined in the ENS Registry.
 
 These subnames (and any others added beneath `base.eth` or `.linea.eth` in the mainnet ENS Registry) may or may not be properly represented during indexing until futher enhancements are made to ENSNode ('v2').
 

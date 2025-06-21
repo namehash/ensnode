@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
-    "@ensnode/ens-deployments": "workspace:*",
+    "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",

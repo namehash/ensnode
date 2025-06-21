@@ -1,22 +1,21 @@
-import { type Datasource, type ENSDeploymentChain, ENSDeployments } from "@ensnode/ens-deployments";
+import { Datasource, type ENSNamespace, getDatasourceMap } from "@ensnode/datasources";
 import { type Chain } from "viem";
 
 /**
- * Get the chain by ID based on the current ENSDeployment configuration.
+ * Get a chain object by ID within the context of a specific namespace.
  *
- * @param ensDeploymentChain - the ENSDeployment chain to get the chain for
- * @param chainId the chain ID to get the chain for
- * @returns the chain
- * @throws if the chain ID is not supported for the ENSDeployment chain
+ * @param namespace - the namespace identifier within which to find a chain
+ * @param chainId the chain ID
+ * @returns the viem#Chain object
+ * @throws if no Datasources are defined for chainId within the selected namespace
  */
-export const getChainById = (ensDeploymentChain: ENSDeploymentChain, chainId: number): Chain => {
-  const ensDeployment = ENSDeployments[ensDeploymentChain];
-  const datasources = Object.values(ensDeployment) as Array<Datasource>;
+export const getChainById = (namespace: ENSNamespace, chainId: number): Chain => {
+  const datasources = Object.values(getDatasourceMap(namespace)) as Datasource[];
   const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
 
   if (!datasource) {
     throw new Error(
-      `Chain ID "${chainId}" is not supported for the "${ensDeploymentChain}" ENS Deployment Chain`,
+      `No Datasources within the "${namespace}" namespace are defined for Chain ID "${chainId}".`,
     );
   }
 
