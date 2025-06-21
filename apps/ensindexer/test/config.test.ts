@@ -1,7 +1,7 @@
 import {
   DEFAULT_ENSADMIN_URL,
-  DEFAULT_ENS_NAMESPACE,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
+  DEFAULT_NAMESPACE,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -17,7 +17,7 @@ const BASE_ENV = {
   HEAL_REVERSE_ADDRESSES: "true",
   PORT: "3000",
   ENSRAINBOW_URL: "https://api.ensrainbow.io",
-  ENS_NAMESPACE: "mainnet",
+  NAMESPACE: "mainnet",
   RPC_URL_1: VALID_RPC_URL,
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
 };
@@ -288,22 +288,22 @@ describe("config", () => {
   });
 
   describe(".namespace", () => {
-    it("returns the ENS_NAMESPACE if set", async () => {
-      vi.stubEnv("ENS_NAMESPACE", "sepolia");
+    it("returns the NAMESPACE if set", async () => {
+      vi.stubEnv("NAMESPACE", "sepolia");
       vi.stubEnv("RPC_URL_11155111", VALID_RPC_URL);
       const config = await getConfig();
       expect(config.namespace).toBe("sepolia");
     });
 
-    it("returns the default ENS_NAMESPACE if it is not set", async () => {
-      vi.stubEnv("ENS_NAMESPACE", undefined);
+    it("returns the default NAMESPACE if it is not set", async () => {
+      vi.stubEnv("NAMESPACE", undefined);
       const config = await getConfig();
-      expect(config.namespace).toBe(DEFAULT_ENS_NAMESPACE);
+      expect(config.namespace).toBe(DEFAULT_NAMESPACE);
     });
 
-    it("throws if ENS_NAMESPACE is an invalid string value", async () => {
-      vi.stubEnv("ENS_NAMESPACE", "not-a-chain");
-      await expect(getConfig()).rejects.toThrow(/Invalid ENS_NAMESPACE/i);
+    it("throws if NAMESPACE is an invalid string value", async () => {
+      vi.stubEnv("NAMESPACE", "not-a-chain");
+      await expect(getConfig()).rejects.toThrow(/Invalid NAMESPACE/i);
     });
   });
 
@@ -486,7 +486,7 @@ describe("config", () => {
 
   describe("additional checks", () => {
     it("requires available datasources", async () => {
-      vi.stubEnv("ENS_NAMESPACE", "ens-test-env");
+      vi.stubEnv("NAMESPACE", "ens-test-env");
       vi.stubEnv("ACTIVE_PLUGINS", "basenames");
       await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
     });

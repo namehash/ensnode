@@ -18,7 +18,7 @@ export function getRegistrarManagedName(namespace: ENSNamespace): RegistrarManag
     case "holesky":
     case "ens-test-env":
       throw new Error(
-        `No registrar managed name is known for the Basenames plugin within the "${namespace}" ENS namespace.`,
+        `No registrar managed name is known for the Basenames plugin within the "${namespace}" namespace.`,
       );
   }
 }

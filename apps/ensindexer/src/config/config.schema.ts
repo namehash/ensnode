@@ -11,9 +11,9 @@ import {
 } from "@/config/validations";
 import {
   DEFAULT_ENSADMIN_URL,
-  DEFAULT_ENS_NAMESPACE,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
+  DEFAULT_NAMESPACE,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -58,10 +58,10 @@ const RpcConfigSchema = z.object({
 const ENSNamespaceSchema = z
   .enum(ENSNamespaces, {
     error: (issue) => {
-      return `Invalid ENS_NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaces).join(", ")}`;
+      return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaces).join(", ")}`;
     },
   })
-  .default(DEFAULT_ENS_NAMESPACE);
+  .default(DEFAULT_NAMESPACE);
 
 const BlockrangeSchema = z
   .object({

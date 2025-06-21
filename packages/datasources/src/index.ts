@@ -37,31 +37,31 @@ const ENSNamespaceToDatasource = {
 } as const satisfies Record<ENSNamespace, Datasources>;
 
 /**
- * Returns the (const) Datasources within the specified ENS namespace.
+ * Returns the (const) Datasources within the specified namespace.
  *
  * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns The Datasources for the specified ENS namespace
+ * @returns The Datasources for the specified namespace
  */
 export const getDatasources = <T extends ENSNamespace>(
   namespace: T,
 ): (typeof ENSNamespaceToDatasource)[T] => ENSNamespaceToDatasource[namespace];
 
 /**
- * Returns the Datasources within the specified ENS namespace, cast to the CommonType.
+ * Returns the Datasources within the specified namespace, cast to the CommonType.
  *
  * This function takes an ENSNamespace identifier and returns the corresponding Datasources.
  * The returned datasources configuration is cast to the global CommonType to ensure that ponder's
  * inferred typing works at type-check time. See {@link CommonDatasourcesType} for more info.
  *
  * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns The Datasources for the specified ENS namespace
+ * @returns The Datasources for the specified namespace
  */
 export const getCommonDatasources = (namespace: ENSNamespace) =>
   getDatasources(namespace) as CommonDatasourcesType;
 
 /**
 /**
- * Returns the `datasourceName` Datasource within the specified `namespace` ENS namespace.
+ * Returns the `datasourceName` Datasource within the specified `namespace` namespace.
  *
  * NOTE: the typescript typechecker _will_ enforce validity. i.e. using an invalid `datasourceName`
  * wihtin the specified `namespace` will be a type error.
@@ -79,7 +79,7 @@ export const getDatasource = <
 ) => getDatasources(namespace)[datasourceName];
 
 /**
- * Returns the `datasourceName` Datasource within the `namespace` ENS namespace, cast as CommonType.
+ * Returns the `datasourceName` Datasource within the `namespace` namespace, cast as CommonType.
  *
  * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
  * wihtin the specified `namespace` will have a valid return type but be undefined at runtime.
@@ -90,7 +90,7 @@ export const getCommonDatasource = <N extends ENSNamespace, D extends keyof Comm
 ) => getCommonDatasources(namespace)[datasourceName];
 
 /**
- * Returns the chain id for the ENS Root Datasource within the selected ENS namespace.
+ * Returns the chain id for the ENS Root Datasource within the selected namespace.
  *
  * @returns the chain ID that hosts the ENS Root
  */

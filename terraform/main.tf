@@ -13,7 +13,7 @@ locals {
       subdomain_prefix                  = "holesky.${local.railway_environment}"
       database_schema                   = "holeskySchema-${var.ensnode_version}"
       active_plugins                    = "subgraph"
-      ens_namespace                          = "holesky"
+      namespace                          = "holesky"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
@@ -22,7 +22,7 @@ locals {
       subdomain_prefix                  = "sepolia.${local.railway_environment}"
       database_schema                   = "sepoliaSchema-${var.ensnode_version}"
       active_plugins                    = "subgraph"
-      ens_namespace                          = "sepolia"
+      namespace                          = "sepolia"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
@@ -31,7 +31,7 @@ locals {
       subdomain_prefix                  = "mainnet.${local.railway_environment}"
       database_schema                   = "mainnetSchema-${var.ensnode_version}"
       active_plugins                    = "subgraph"
-      ens_namespace                          = "mainnet"
+      namespace                          = "mainnet"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
@@ -40,7 +40,7 @@ locals {
       subdomain_prefix                  = "alpha.${local.railway_environment}"
       database_schema                   = "alphaSchema-${var.ensnode_version}"
       active_plugins                    = "subgraph,basenames,lineanames,threedns"
-      ens_namespace                          = "mainnet"
+      namespace                          = "mainnet"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
     }
@@ -72,7 +72,7 @@ module "ensindexer" {
   subdomain_prefix                  = each.value.subdomain_prefix
   database_schema                   = each.value.database_schema
   active_plugins                    = each.value.active_plugins
-  ens_namespace                          = each.value.ens_namespace
+  namespace                          = each.value.namespace
   heal_reverse_addresses            = each.value.heal_reverse_addresses
   index_additional_resolver_records = each.value.index_additional_resolver_records
 

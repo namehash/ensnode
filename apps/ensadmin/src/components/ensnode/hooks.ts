@@ -85,12 +85,12 @@ function validateResponse(response: EnsNode.Metadata) {
  *
  * @param indexingStatus The ENSNode indexing status.
  * @returns The chain ID or undefined if the status is not available.
- * @throws Error if the chain ID is not supported within the configured ENS namespace
+ * @throws Error if the chain ID is not supported within the configured namespace
  */
 export function useENSRootDatasourceChainId(
   indexingStatus: UseIndexingStatusQueryResult["data"],
 ): SupportedChainId | undefined {
   if (!indexingStatus) return undefined;
-  // TODO: this should use the ENS namespace's ensroot datasource's chain ID, not the namespace identifier itself
-  return parseSupportedChainIdByName(indexingStatus.env.ENS_NAMESPACE);
+  // TODO: this should use the namespace's ensroot datasource's chain ID, not the namespace identifier itself
+  return parseSupportedChainIdByName(indexingStatus.env.NAMESPACE);
 }

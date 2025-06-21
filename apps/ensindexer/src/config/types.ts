@@ -30,9 +30,9 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_ENS_NAMESPACE).
+   * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_NAMESPACE).
    *
-   * See {@link ENSNamespaces} for available ENS namespace identifiers.
+   * See {@link ENSNamespaces} for available namespace identifiers.
    */
   namespace: ENSNamespace;
 

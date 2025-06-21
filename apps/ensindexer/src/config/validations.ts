@@ -36,7 +36,7 @@ export function invariant_requiredDatasources(
           ", ",
         )}], but available datasources in the ${
           config.namespace
-        } ENS namespace are: [${availableDatasourceNames.join(", ")}].`,
+        } namespace are: [${availableDatasourceNames.join(", ")}].`,
       });
     }
   }
@@ -89,13 +89,13 @@ export function invariant_globalBlockrange(
         input: config,
         message: `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
 
-  ENS_NAMESPACE=${config.namespace}
+  NAMESPACE=${config.namespace}
   ACTIVE_PLUGINS=${config.plugins.join(",")}
   START_BLOCK=${globalBlockrange.startBlock || "n/a"}
   END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
   The usage you're most likely interested in is:
-    ENS_NAMESPACE=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
+    NAMESPACE=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
   In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
@@ -123,9 +123,9 @@ export function invariant_validContractConfigs(
       throw new Error(
         `The '${
           config.namespace
-        }' ENS namespace's '${datasourceName}' Datasource does not define valid addresses. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a viem#Address). This is only likely to occur if you are attempting to index the 'ens-test-env' ENS namespace outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
+        }' namespace's '${datasourceName}' Datasource does not define valid addresses. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a viem#Address). This is only likely to occur if you are attempting to index the 'ens-test-env' namespace outside of the context of the ens-test-env tool (https://github.com/ensdomains/ens-test-env). If you are activating the ens-test-env plugin and receive this error, NEXT_PUBLIC_DEPLOYMENT_ADDRESSES or DEPLOYMENT_ADDRESSES is not available in the env or is malformed.
 
-ENS_NAMESPACE=${config.namespace}
+NAMESPACE=${config.namespace}
 NEXT_PUBLIC_DEPLOYMENT_ADDRESSES=${process.env.NEXT_PUBLIC_DEPLOYMENT_ADDRESSES || "undefined"}
 DEPLOYMENT_ADDRESSES=${process.env.DEPLOYMENT_ADDRESSES || "undefined"}`,
       );

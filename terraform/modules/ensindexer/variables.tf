@@ -55,7 +55,7 @@ variable "database_schema" {
 variable "active_plugins" {
   type = string
 }
-variable "ens_namespace" {
+variable "namespace" {
   type = string
 }
 

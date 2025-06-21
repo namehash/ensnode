@@ -58,7 +58,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
   }
 
   const { networkIndexingStatusByChainId } = data.runtime;
-  const namespace = data.env.ENS_NAMESPACE;
+  const namespace = data.env.NAMESPACE;
 
   return (
     <div className="px-6">
@@ -283,7 +283,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
         <IndexingTimeline
           {...globalIndexingStatusViewModel(
             data.runtime.networkIndexingStatusByChainId,
-            data.env.ENS_NAMESPACE,
+            data.env.NAMESPACE,
           )}
         />
       </main>

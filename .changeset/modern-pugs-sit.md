@@ -4,4 +4,4 @@
 "ensadmin": minor
 ---
 
-rename the ENS_DEPLOYMENT_CHAIN configuration variable to ENS_NAMESPACE
+rename the ENS_DEPLOYMENT_CHAIN configuration variable to NAMESPACE
