@@ -7,7 +7,10 @@ export async function getStaticPaths() {
 
   return examples.map((example) => ({
     params: {
-      slug: example.data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      slug: example.data.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, ""),
     },
     props: { example: example.data },
   }));

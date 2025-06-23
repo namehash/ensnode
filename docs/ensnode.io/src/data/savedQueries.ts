@@ -87,11 +87,7 @@ export const savedQueries: SavedQuery[] = [
     name
   }
 }`,
-    variables: JSON.stringify(
-      { lastCreatedAt: "1489206542", first: 10 },
-      null,
-      2
-    ),
+    variables: JSON.stringify({ lastCreatedAt: "1489206542", first: 10 }, null, 2),
   },
   {
     operationName: "GetDomainByNamehash",
@@ -114,7 +110,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -169,11 +165,10 @@ export const savedQueries: SavedQuery[] = [
 }`,
     variables: JSON.stringify(
       {
-        labelhash:
-          "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
+        labelhash: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -289,7 +284,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -337,7 +332,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -384,7 +379,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -451,7 +446,7 @@ export const savedQueries: SavedQuery[] = [
         date: Math.floor(Date.now() / 1000),
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -497,7 +492,7 @@ export const savedQueries: SavedQuery[] = [
         date: Math.floor(Date.now() / 1000),
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -545,7 +540,7 @@ export const savedQueries: SavedQuery[] = [
         date: Math.floor(Date.now() / 1000),
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -596,7 +591,7 @@ export const savedQueries: SavedQuery[] = [
         first: 10,
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -625,7 +620,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -686,7 +681,7 @@ export const savedQueries: SavedQuery[] = [
         date: Math.floor(Date.now() / 1000),
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -742,7 +737,7 @@ export const savedQueries: SavedQuery[] = [
         date: Math.floor(Date.now() / 1000),
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -789,7 +784,7 @@ export const savedQueries: SavedQuery[] = [
         first: 10,
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -846,7 +841,7 @@ export const savedQueries: SavedQuery[] = [
         date: Math.floor(Date.now() / 1000),
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -873,7 +868,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -905,7 +900,7 @@ export const savedQueries: SavedQuery[] = [
           "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41-0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -931,7 +926,7 @@ export const savedQueries: SavedQuery[] = [
         resolverAddress: "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -963,7 +958,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -1040,7 +1035,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41-0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -1063,7 +1058,7 @@ export const savedQueries: SavedQuery[] = [
         id: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -1090,11 +1085,10 @@ export const savedQueries: SavedQuery[] = [
 }`,
     variables: JSON.stringify(
       {
-        tokenId:
-          "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
+        tokenId: "0x4e34d3a81dc3a20f71bbdf2160492ddaa17ee7e5523757d47153379c13cb46df",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -1126,11 +1120,10 @@ export const savedQueries: SavedQuery[] = [
 }`,
     variables: JSON.stringify(
       {
-        tokenId:
-          "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
+        tokenId: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -1153,11 +1146,10 @@ export const savedQueries: SavedQuery[] = [
 }`,
     variables: JSON.stringify(
       {
-        tokenId:
-          "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
+        tokenId: "0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da",
       },
       null,
-      2
+      2,
     ),
   },
   {
@@ -1182,11 +1174,10 @@ export const savedQueries: SavedQuery[] = [
 }`,
     variables: JSON.stringify(
       {
-        tokenId:
-          "0x2c18815bc184e0d6d1d6817e9461e713acb6f3d6c1d2092babfbad56842a4085",
+        tokenId: "0x2c18815bc184e0d6d1d6817e9461e713acb6f3d6c1d2092babfbad56842a4085",
       },
       null,
-      2
+      2,
     ),
   },
 ];

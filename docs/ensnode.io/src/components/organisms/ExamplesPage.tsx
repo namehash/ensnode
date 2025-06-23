@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
 import Fuse from "fuse.js";
+import React, { useState, useEffect, useMemo } from "react";
 
 interface SavedQuery {
   operationName: string;
@@ -21,16 +21,12 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("name");
-  const [filteredExamples, setFilteredExamples] =
-    useState<SavedQuery[]>(examples);
+  const [filteredExamples, setFilteredExamples] = useState<SavedQuery[]>(examples);
 
   const categories = useMemo(() => {
     const categoryMap = new Map<string, number>();
     examples.forEach((example) => {
-      categoryMap.set(
-        example.category,
-        (categoryMap.get(example.category) || 0) + 1
-      );
+      categoryMap.set(example.category, (categoryMap.get(example.category) || 0) + 1);
     });
     return Array.from(categoryMap.entries())
       .map(([name, count]) => ({ name, count }))
@@ -54,9 +50,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
     }
 
     if (selectedCategory) {
-      filtered = filtered.filter(
-        (example) => example.category === selectedCategory
-      );
+      filtered = filtered.filter((example) => example.category === selectedCategory);
     }
 
     filtered = [...filtered].sort((a, b) => {
@@ -64,9 +58,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
         case "name":
           return a.name.localeCompare(b.name);
         case "category":
-          return (
-            a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
-          );
+          return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
         case "recent":
           return parseInt(b.id) - parseInt(a.id); // Assuming higher ID = more recent
         default:
@@ -166,9 +158,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-64 flex-shrink-0">
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Categories
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
 
               <button
                 onClick={() => setSelectedCategory("")}
@@ -225,8 +215,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
                   <>Showing all {filteredExamples.length} queries</>
                 ) : (
                   <>
-                    Showing {filteredExamples.length} of {examples.length}{" "}
-                    queries
+                    Showing {filteredExamples.length} of {examples.length} queries
                     {selectedCategory && (
                       <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-[var(--color-primary)]">
                         {selectedCategory}
@@ -262,9 +251,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
                     d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.5-.9-6.172-2.172M15 21H3a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2z"
                   />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900">
-                  No queries found
-                </h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No queries found</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Try adjusting your search or filter criteria.
                 </p>
@@ -303,9 +290,7 @@ const QueryCard: React.FC<QueryCardProps> = ({ example, onOpenInENSAdmin }) => {
         </span>
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {example.name}
-      </h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{example.name}</h3>
 
       <p className="text-gray-600 text-sm mb-6 overflow-ellipsis line-clamp-3">
         {example.description}
