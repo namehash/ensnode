@@ -21,8 +21,8 @@ mkdir -p ~/my_ensrainbow_data
 docker run -d --name ensrainbow \
   -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
   -e SCHEMA_VERSION="v3" \
-  -e NAMESPACE="testenv" \
-  -e LABEL_SET="0" \
+  -e LABEL_SET_ID="testenv" \
+  -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
@@ -30,10 +30,10 @@ docker run -d --name ensrainbow \
 The service will be available at `http://localhost:3223`.
 
 :::note[Image Size]
-The ENSRainbow storage needed is from 1 MB to dozens GB depending on the namespace and label set.
+The ENSRainbow storage needed is from 1 MB to dozens GB depending on the label set ID and label set version.
 ## Production Setup
 
-For ENS Subgraph compatibility use the `subgraph` namespace:
+For ENS Subgraph compatibility use the `subgraph` label set ID:
 
 ```bash
 # Create a directory for persistent data storage
@@ -43,8 +43,8 @@ mkdir -p ~/ensrainbow_production_data
 docker run -d --name ensrainbow_production \
   -v ~/ensrainbow_production_data:/app/apps/ensrainbow/data \
   -e SCHEMA_VERSION="v3" \
-  -e NAMESPACE="subgraph" \
-  -e LABEL_SET="0" \
+  -e LABEL_SET_ID="subgraph" \
+  -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
@@ -54,12 +54,12 @@ docker run -d --name ensrainbow_production \
 The following environment variables are **required** for the initial database download:
 
 - **`SCHEMA_VERSION`**: Database schema version (e.g., `v3`)
-- **`NAMESPACE`**: Data namespace identifier:
+- **`LABEL_SET_ID`**: Data label set ID:
   - `subgraph` - Main production dataset from The Graph's ENS subgraph
-  - `searchlight` - Extended dataset with additional label discoveries  
+  - `searchlight` - Extended dataset with additional label discoveries
   - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
   - `testenv` - Small test dataset for development and testing
-- **`LABEL_SET`**: Non-negative integer representing the dataset version within a namespace (e.g., `0`, `1`, `2`)
+- **`LABEL_SET_VERSION`**: Non-negative integer representing the dataset version within a label set ID (e.g., `0`, `1`, `2`)
 
 ## Persistent Storage
 
@@ -77,8 +77,8 @@ docker volume create ensrainbow_db_volume
 docker run -d --name ensrainbow \
   -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
   -e SCHEMA_VERSION="v3" \
-  -e NAMESPACE="subgraph" \
-  -e LABEL_SET="0" \
+  -e LABEL_SET_ID="subgraph" \
+  -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
@@ -93,8 +93,8 @@ mkdir -p ~/ensrainbow_data
 docker run -d --name ensrainbow \
   -v ~/ensrainbow_data:/app/apps/ensrainbow/data \
   -e SCHEMA_VERSION="v3" \
-  -e NAMESPACE="subgraph" \
-  -e LABEL_SET="0" \
+  -e LABEL_SET_ID="subgraph" \
+  -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
@@ -112,8 +112,8 @@ services:
     image: ghcr.io/namehash/ensnode/ensrainbow:latest
     environment:
       - SCHEMA_VERSION=v3
-      - NAMESPACE=subgraph
-      - LABEL_SET=0
+      - LABEL_SET_ID=subgraph
+      - LABEL_SET_VERSION=0
     volumes:
       - ensrainbow_data:/app/apps/ensrainbow/data
     ports:
@@ -135,8 +135,8 @@ services:
     image: ghcr.io/namehash/ensnode/ensrainbow:latest
     environment:
       - SCHEMA_VERSION=v3
-      - NAMESPACE=testenv
-      - LABEL_SET=0
+      - LABEL_SET_ID=testenv
+      - LABEL_SET_VERSION=0
     volumes:
       - ensrainbow_test_data:/app/apps/ensrainbow/data
     ports:

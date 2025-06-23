@@ -19,15 +19,15 @@ export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
 export const SYSTEM_KEY_INGESTION_STATUS = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
 /**
- * Key for storing the highest label set counter
- * Stores the current label set number as a string
+ * Key for storing the highest label set version
+ * Stores the current label set version as a string
  */
-export const SYSTEM_KEY_HIGHEST_LABEL_SET = new Uint8Array([0xff, 0xff, 0xff, 0xfc]) as ByteArray;
+export const SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfc]) as ByteArray;
 /**
- * Key for storing the namespace
- * Stores the namespace identifier as a string
+ * Key for storing the label set ID
+ * Stores the label set ID as a string
  */
-export const SYSTEM_KEY_NAMESPACE = new Uint8Array([0xff, 0xff, 0xff, 0xfb]) as ByteArray;
+export const SYSTEM_KEY_LABEL_SET_ID = new Uint8Array([0xff, 0xff, 0xff, 0xfb]) as ByteArray;
 export const SCHEMA_VERSION = 3;
 
 // Ingestion status values
@@ -40,28 +40,28 @@ export const IngestionStatus = {
 export type IngestionStatus = (typeof IngestionStatus)[keyof typeof IngestionStatus];
 
 /**
- * Splits a label string into its label set number and actual label components.
+ * Splits a label string into its label set version number and actual label components.
  * Format of input is expected to be "{labelSet}:{actualLabel}"
  *
  * @param label The label string to split
- * @returns An object containing the label set number and the actual label
- * @throws Error if the label format is invalid or the label set is not a valid number
+ * @returns An object containing the label set version number and the actual label
+ * @throws Error if the label format is invalid or the label set version is not a valid number
  */
-export function splitLabelString(label: string): { labelSet: number; label: string } {
+export function splitLabelString(label: string): { labelSetVersion: number; label: string } {
   const colonIndex = label.indexOf(":");
   if (colonIndex <= 0) {
     throw new Error(`Invalid label format (missing set number prefix): "${label}"`);
   }
 
-  const labelSet = label.substring(0, colonIndex);
+  const labelSetVersion = label.substring(0, colonIndex);
   const actualLabel = label.substring(colonIndex + 1);
 
   try {
-    const labelSetNumber = parseNonNegativeInteger(labelSet);
-    return { labelSet: labelSetNumber, label: actualLabel };
+    const labelSetVersionNumber = parseNonNegativeInteger(labelSetVersion);
+    return { labelSetVersion: labelSetVersionNumber, label: actualLabel };
   } catch (error: unknown) {
     throw new Error(
-      `Invalid label set number "${labelSet}" in label "${label}": ${error instanceof Error ? error.message : String(error)}`,
+      `Invalid label set version number "${labelSetVersion}" in label "${label}": ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -77,8 +77,8 @@ export function isSystemKey(key: ByteArray): boolean {
     (byteArraysEqual(key, SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT) ||
       byteArraysEqual(key, SYSTEM_KEY_INGESTION_STATUS) ||
       byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION) ||
-      byteArraysEqual(key, SYSTEM_KEY_HIGHEST_LABEL_SET) ||
-      byteArraysEqual(key, SYSTEM_KEY_NAMESPACE))
+      byteArraysEqual(key, SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION) ||
+      byteArraysEqual(key, SYSTEM_KEY_LABEL_SET_ID))
   );
 }
 
@@ -313,16 +313,16 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Get the current highest label set number
-   * @returns The current highest label set number, or 0 if not set yet
-   * @throws Error if the highest label set is not set
+   * Get the current highest label set version
+   * @returns The current highest label set version, or 0 if not set yet
+   * @throws Error if the highest label set version is not set
    */
-  public async getHighestLabelSet(): Promise<number> {
-    const labelSet = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET);
-    if (labelSet === null) {
-      throw new Error("Highest label set not found");
+  public async getHighestLabelSetVersion(): Promise<number> {
+    const labelSetVersion = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION);
+    if (labelSetVersion === null) {
+      throw new Error("Highest label set version not found");
     }
-    return parseNonNegativeInteger(labelSet);
+    return parseNonNegativeInteger(labelSetVersion);
   }
 
   /**
@@ -330,11 +330,11 @@ export class ENSRainbowDB {
    * @param labelSet The label set number to set
    * @throws Error if the label set is not a valid non-negative integer
    */
-  public async setHighestLabelSet(labelSet: number): Promise<void> {
-    if (!Number.isInteger(labelSet) || labelSet < 0) {
-      throw new Error(`Invalid label set value: ${labelSet}`);
+  public async setHighestLabelSetVersion(labelSetVersion: number): Promise<void> {
+    if (!Number.isInteger(labelSetVersion) || labelSetVersion < 0) {
+      throw new Error(`Invalid label set version value: ${labelSetVersion}`);
     }
-    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET, labelSet.toString());
+    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, labelSetVersion.toString());
   }
 
   /**
@@ -343,35 +343,35 @@ export class ENSRainbowDB {
    * @throws Error if the highest label set is not set
    */
   public async incrementHighestLabelSet(): Promise<number> {
-    const currentValue = await this.getHighestLabelSet();
+    const currentValue = await this.getHighestLabelSetVersion();
     const newValue = currentValue + 1;
-    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET, newValue.toString());
+    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, newValue.toString());
     return newValue;
   }
 
   /**
-   * Get the namespace from the database
-   * @returns The namespace string
-   * @throws Error if the namespace is not set
+   * Get the label set ID from the database
+   * @returns The label set ID string
+   * @throws Error if the label set ID is not set
    */
-  public async getNamespace(): Promise<string> {
-    const namespace = await this.get(SYSTEM_KEY_NAMESPACE);
-    if (namespace === null) {
-      throw new Error("Database namespace is null");
+  public async getLabelSetId(): Promise<string> {
+    const labelSetId = await this.get(SYSTEM_KEY_LABEL_SET_ID);
+    if (labelSetId === null) {
+      throw new Error("Database label set ID is null");
     }
-    return namespace;
+    return labelSetId;
   }
 
   /**
-   * Set the namespace in the database
-   * @param namespace The namespace string to set
-   * @throws Error if the namespace is empty
+   * Set the label set ID in the database
+   * @param labelSetId The label set ID string to set
+   * @throws Error if the label set ID is empty
    */
-  public async setNamespace(namespace: string): Promise<void> {
-    if (!namespace) {
-      throw new Error("Namespace cannot be empty");
+  public async setLabelSetId(labelSetId: string): Promise<void> {
+    if (!labelSetId) {
+      throw new Error("Label set ID cannot be empty");
     }
-    await this.db.put(SYSTEM_KEY_NAMESPACE, namespace);
+    await this.db.put(SYSTEM_KEY_LABEL_SET_ID, labelSetId);
   }
 
   /**
@@ -407,10 +407,10 @@ export class ENSRainbowDB {
    * Retrieves a label from the database by its labelHash.
    *
    * @param labelHash The ByteArray labelHash to look up
-   * @returns The labelSet and label as a string if found, null if not found
+   * @returns The labelSetVersion and label as a string if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getLabel(labelHash: ByteArray): Promise<{ labelSet: number; label: Label } | null> {
+  public async getLabel(labelHash: ByteArray): Promise<{ labelSetVersion: number; label: Label } | null> {
     // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
     if (!isRainbowRecordKey(labelHash)) {
       throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
@@ -593,29 +593,29 @@ export class ENSRainbowDB {
       return false;
     }
 
-    // 3. Check Namespace Existence
+    // 3. Check Label Set ID Existence
     try {
-      const namespace = await this.getNamespace();
-      if (namespace === null) {
-        const errorMsg = generatePurgeErrorMessage("Database is missing the namespace identifier.");
+      const labelSetId = await this.getLabelSetId();
+      if (labelSetId === null) {
+        const errorMsg = generatePurgeErrorMessage("Database is missing the label set ID identifier.");
         logger.error(errorMsg);
         return false;
       }
-      logger.info(`Namespace verified: ${namespace}`);
+      logger.info(`Label set ID verified: ${labelSetId}`);
     } catch (error) {
-      const errorMsg = generatePurgeErrorMessage(`Error checking namespace: ${error}`);
+      const errorMsg = generatePurgeErrorMessage(`Error checking label set ID: ${error}`);
       logger.error(errorMsg);
       return false;
     }
 
     // 4. Check Highest Label Set Existence and Validity
-    let highestLabelSet: number;
+    let highestLabelSetVersion: number;
     try {
-      highestLabelSet = await this.getHighestLabelSet();
-      logger.info(`Highest label set verified: ${highestLabelSet}`);
+      highestLabelSetVersion = await this.getHighestLabelSetVersion();
+      logger.info(`Highest label set version verified: ${highestLabelSetVersion}`);
     } catch (error) {
-      // getHighestLabelSet already throws a clear error if value is invalid
-      const errorMsg = generatePurgeErrorMessage(`Error checking highest label set: ${error}`);
+      // getHighestLabelSetVersion already throws a clear error if value is invalid
+      const errorMsg = generatePurgeErrorMessage(`Error checking highest label set version: ${error}`);
       logger.error(errorMsg);
       return false;
     }
@@ -648,7 +648,7 @@ export class ENSRainbowDB {
     let invalidHashes = 0;
     let hashMismatches = 0;
     let invalidLabelFormats = 0;
-    let labelSetMismatches = 0;
+    let labelSetVersionMismatches = 0;
 
     for await (const [key, value] of this.db.iterator()) {
       // Skip keys not associated with rainbow records
@@ -671,30 +671,30 @@ export class ENSRainbowDB {
       // --- Value Validation (Label Format & Set Number) ---
 
       const firstColonIndex = value.indexOf(":");
-      let recordLabelSet: number | null = null;
+      let recordLabelSetVersion: number | null = null;
 
       // If there's no colon or it's the first character, the format is invalid
       if (firstColonIndex <= 0) {
-        logger.error(`Invalid label format (missing labelSet number prefix): "${value}"`);
+        logger.error(`Invalid label format (missing labelSetVersion number prefix): "${value}"`);
         invalidLabelFormats++;
       } else {
         // Try to parse using the splitLabelString function
         try {
           const result = splitLabelString(value);
-          recordLabelSet = result.labelSet;
+          recordLabelSetVersion = result.labelSetVersion;
         } catch (error) {
           logger.error(`Invalid label format: "${value}" - ${error}`);
           invalidLabelFormats++;
         }
       }
 
-      // Only proceed with label set comparison if the format was valid
-      if (recordLabelSet !== null) {
-        if (recordLabelSet > highestLabelSet) {
+      // Only proceed with label set version comparison if the format was valid
+      if (recordLabelSetVersion !== null) {
+        if (recordLabelSetVersion > highestLabelSetVersion) {
           logger.error(
-            `Label set mismatch for label "${value}": record set ${recordLabelSet} > highest set ${highestLabelSet}`,
+            `Label set version mismatch for label "${value}": record set ${recordLabelSetVersion} > highest set ${highestLabelSetVersion}`,
           );
-          labelSetMismatches++;
+          labelSetVersionMismatches++;
         }
       }
 
@@ -741,7 +741,7 @@ export class ENSRainbowDB {
     logger.info(`Invalid labelHash keys: ${invalidHashes}`);
     logger.info(`Labels with hash mismatches: ${hashMismatches}`);
     logger.info(`Labels with invalid format/set prefix: ${invalidLabelFormats}`);
-    logger.info(`Labels with set number > highest set: ${labelSetMismatches}`);
+    logger.info(`Labels with set number > highest set: ${labelSetVersionMismatches}`);
     if (precalculatedCount !== undefined && precalculatedCount !== rainbowRecordCount) {
       logger.error(
         `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
@@ -754,7 +754,7 @@ export class ENSRainbowDB {
       invalidHashes > 0 ||
       hashMismatches > 0 ||
       invalidLabelFormats > 0 ||
-      labelSetMismatches > 0 ||
+      labelSetVersionMismatches > 0 ||
       (precalculatedCount !== undefined && precalculatedCount !== rainbowRecordCount); // Check count mismatch if count was retrieved
 
     if (hasErrors) {
@@ -818,17 +818,17 @@ export class ENSRainbowDB {
    * Adds a rainbow record to the database. Labelhash is computed from the label.
    *
    * @param label The label to add (without label set prefix)
-   * @param labelSet The label set number to associate with this label
-   * @throws Error if labelSet is invalid
+   * @param labelSetVersion The label set version number to associate with this label
+   * @throws Error if labelSetVersion is invalid
    */
-  public async addRainbowRecord(label: string, labelSet: number): Promise<void> {
-    // Validate label set is a non-negative integer
-    if (!Number.isInteger(labelSet) || labelSet < 0) {
-      throw new Error(`Invalid label set: ${labelSet} (must be a non-negative integer)`);
+  public async addRainbowRecord(label: string, labelSetVersion: number): Promise<void> {
+    // Validate label set version is a non-negative integer
+    if (!Number.isInteger(labelSetVersion) || labelSetVersion < 0) {
+      throw new Error(`Invalid label set version: ${labelSetVersion} (must be a non-negative integer)`);
     }
 
     const key = labelHashToBytes(labelhash(label));
-    await this.db.put(key, `${labelSet}:${label}`);
+    await this.db.put(key, `${labelSetVersion}:${label}`);
   }
 }
 

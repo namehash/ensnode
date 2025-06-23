@@ -44,8 +44,8 @@ jobs:
           CONTAINER_ID=$(docker run -d \
             -v ~/my_ensrainbow_test_data:/app/apps/ensrainbow/data \
             -e SCHEMA_VERSION="v3" \
-            -e NAMESPACE="testenv" \
-            -e LABEL_SET="0" \
+            -e LABEL_SET_ID="testenv" \
+            -e LABEL_SET_VERSION="0" \
             -p 3223:3223 \
             ghcr.io/namehash/ensnode/ensrainbow:latest)
           echo "Container ID: $CONTAINER_ID"

@@ -19,8 +19,8 @@ export function createRainbowProtobufRoot(): {
   // Define the RainbowRecordCollection message type as a Type
   const RainbowRecordCollection = new protobuf.Type("RainbowRecordCollection");
   RainbowRecordCollection.add(new protobuf.Field("data_format_version", 1, "uint32"));
-  RainbowRecordCollection.add(new protobuf.Field("namespace", 2, "string"));
-  RainbowRecordCollection.add(new protobuf.Field("label_set", 3, "uint32"));
+  RainbowRecordCollection.add(new protobuf.Field("label_set_id", 2, "string"));
+  RainbowRecordCollection.add(new protobuf.Field("label_set_version", 3, "uint32"));
   RainbowRecordCollection.add(new protobuf.Field("records", 4, "RainbowRecord", "repeated"));
 
   // Add types to the root

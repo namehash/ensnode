@@ -7,20 +7,20 @@ import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private namespace!: string;
-  private highestLabelSet!: number;
+  private labelSetId!: string;
+  private highestLabelSetVersion!: number;
 
-  public getNamespace(): string {
-    return this.namespace;
+  public getLabelSetId(): string {
+    return this.labelSetId;
   }
 
-  public getHighestLabelSet(): number {
-    return this.highestLabelSet;
+  public getHighestLabelSetVersion(): number {
+    return this.highestLabelSetVersion;
   }
 
   private constructor(db: ENSRainbowDB) {
     this.db = db;
-    // Namespace and highest label set will be set in init
+    // Label set ID and highest label set version will be set in init
   }
 
   /**
@@ -36,16 +36,16 @@ export class ENSRainbowServer {
       throw new Error("Database is in an invalid state");
     }
 
-    server.namespace = await db.getNamespace();
-    server.highestLabelSet = await db.getHighestLabelSet();
+    server.labelSetId = await db.getLabelSetId();
+    server.highestLabelSetVersion = await db.getHighestLabelSetVersion();
 
     return server;
   }
 
   async heal(
     labelHash: LabelHash,
-    highestLabelSet: number = Number.MAX_SAFE_INTEGER,
-    namespace?: string,
+    highestLabelSetVersion: number = Number.MAX_SAFE_INTEGER,
+    labelSetId?: string,
   ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
@@ -60,25 +60,25 @@ export class ENSRainbowServer {
     }
 
     try {
-      // If namespace was provided, verify it matches the database namespace
-      if (namespace !== undefined) {
-        if (namespace !== this.namespace) {
-          logger.info(`Namespace mismatch: requested=${namespace}, actual=${this.namespace}`);
+      // If labelSetId was provided, verify it matches the database label set ID
+      if (labelSetId !== undefined) {
+        if (labelSetId !== this.labelSetId) {
+          logger.info(`Label set ID mismatch: requested=${labelSetId}, actual=${this.labelSetId}`);
           return {
             status: StatusCode.Error,
-            error: "Namespace mismatch",
+            error: "Label set ID mismatch",
             errorCode: ErrorCode.BadRequest,
           } satisfies EnsRainbow.HealError;
         }
 
-        // Verify that the highest_label_set is not greater than the current label set
-        if (highestLabelSet > this.highestLabelSet) {
+        // Verify that the highest_label_set_version is not greater than the current label set
+        if (highestLabelSetVersion > this.highestLabelSetVersion) {
           logger.info(
-            `Requested label set ${highestLabelSet} is higher than current label set ${this.highestLabelSet}`,
+            `Requested label set version ${highestLabelSetVersion} is higher than current label set ${this.highestLabelSetVersion}`,
           );
           return {
             status: StatusCode.Error,
-            error: "Requested label set is higher than available label set",
+            error: "Requested label set version is higher than available label set",
             errorCode: ErrorCode.BadRequest,
           } satisfies EnsRainbow.HealError;
         }
@@ -94,12 +94,12 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.HealError;
       }
 
-      const { labelSet: labelSetNumber, label: actualLabel } = label;
+      const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = label;
 
-      // Only return the label if its label set number is less than or equal to highest_label_set
-      if (labelSetNumber > highestLabelSet) {
+      // Only return the label if its label set version number is less than or equal to highest_label_set_version
+      if (labelSetVersionNumber > highestLabelSetVersion) {
         logger.info(
-          `Label set ${labelSetNumber} for ${labelHash} exceeds highest_label_set ${highestLabelSet}`,
+          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds highest_label_set_version ${highestLabelSetVersion}`,
         );
         return {
           status: StatusCode.Error,
@@ -109,7 +109,7 @@ export class ENSRainbowServer {
       }
 
       logger.info(
-        `Successfully healed labelHash ${labelHash} to label "${actualLabel}" (set ${labelSetNumber})`,
+        `Successfully healed labelHash ${labelHash} to label "${actualLabel}" (set ${labelSetVersionNumber})`,
       );
       return {
         status: StatusCode.Success,

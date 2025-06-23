@@ -38,16 +38,16 @@ Response:
 
 ### Advanced Usage with Query Parameters
 
-You can optionally specify `namespace` and `label_set` query parameters for additional validation:
+You can optionally specify `label_set_id` and `label_set_version` query parameters for additional validation:
 
 ```bash
-curl "http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc?namespace=subgraph&label_set=0"
+curl "http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc?label_set_id=subgraph&label_set_version=0"
 ```
 
 #### Query Parameters
 
-- **`namespace`** (optional): Validates that the request matches the database namespace. Must be provided together with `label_set`.
-- **`label_set`** (optional): Specifies the highest label set to accept. Only labels from sets less than or equal to this value will be returned. Must be provided together with `namespace`.
+- **`label_set_id`** (optional): Validates that the request matches the database label set id. Must be provided together with `label_set_version`.
+- **`label_set_version`** (optional): Specifies the highest label set version to accept. Only labels from sets less than or equal to this value will be returned. Must be provided together with `label_set_id`.
 
 :::note[Parameter Requirements]
 If you provide one of these parameters, you **must** provide both. The server will return a 400 error if only one parameter is provided.
@@ -74,7 +74,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   ```json
   {
     "status": "error",
-    "error": "Invalid parameters: both 'label_set' and 'namespace' must be provided together",
+    "error": "Invalid parameters: both 'label_set_id' and 'label_set_version' must be provided together",
     "errorCode": 400
   }
   ```
@@ -82,7 +82,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   ```json
   {
     "status": "error",
-    "error": "Namespace mismatch",
+    "error": "Label set id mismatch",
     "errorCode": 400
   }
   ```
@@ -90,7 +90,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   ```json
   {
     "status": "error",
-    "error": "Requested label set is higher than available label set",
+    "error": "Requested label set version is higher than available label set version",
     "errorCode": 400
   }
   ```
@@ -153,13 +153,13 @@ Success Response:
   "status": "success",
   "version": "0.1.0",
   "schema_version": 3,
-  "namespace": "subgraph",
-  "highest_label_set": 0
+  "label_set_id": "subgraph",
+  "highest_label_set_version": 0
 }
 ```
 
 The response contains:
 - `version`: The current version of ENSRainbow
 - `schema_version`: The current schema version of the database
-- `namespace`: The namespace of the loaded database
-- `highest_label_set`: The highest label set available in the database
+- `label_set_id`: The label set id of the loaded database
+- `highest_label_set_version`: The highest label set version available in the database

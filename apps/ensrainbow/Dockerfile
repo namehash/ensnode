@@ -36,7 +36,7 @@ RUN chmod +x /app/apps/ensrainbow/download-database-artifact.sh
 # Set environment variables for the application
 ENV NODE_ENV=production
 # PORT will be used by entrypoint.sh, defaulting to 3223 if not set at runtime
-# SCHEMA_VERSION, NAMESPACE, LABEL_SET must be provided at runtime to the entrypoint
+# SCHEMA_VERSION, LABEL_SET_ID, LABEL_SET_VERSION must be provided at runtime to the entrypoint
 
 # Default port, can be overridden by PORT env var for the entrypoint/serve command
 EXPOSE 3223

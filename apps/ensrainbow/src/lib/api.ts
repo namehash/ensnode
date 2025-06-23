@@ -30,38 +30,39 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     const labelhash = c.req.param("labelhash") as `0x${string}`;
 
-    // Parse the highest_label_set from query string if provided
-    const highestLabelSetParam = c.req.query("label_set");
-    const namespaceParam = c.req.query("namespace");
+    // Parse the highest_label_set_version from query string if provided
+    const highestLabelSetVersionParam = c.req.query("label_set_version");
+    const labelSetIdParam = c.req.query("label_set_id");
 
     // Both parameters must be provided together or neither should be provided
-    if ((highestLabelSetParam === undefined) !== (namespaceParam === undefined)) {
+    if ((highestLabelSetVersionParam === undefined) !== (labelSetIdParam === undefined)) {
       logger.warn(
-        `Invalid parameters: both 'label_set' and 'namespace' must be provided together or neither should be provided`,
+        `Invalid parameters: both 'label_set_version' and 'label_set_id' must be provided together or neither should be provided`,
       );
       return c.json(
         {
           status: StatusCode.Error,
-          error: "Invalid parameters: both 'label_set' and 'namespace' must be provided together",
+          error:
+            "Invalid parameters: both 'label_set_version' and 'label_set_id' must be provided together",
           errorCode: ErrorCode.BadRequest,
         },
         400,
       );
     }
 
-    let labelSet: number | undefined = undefined;
-    let namespace: string | undefined = undefined;
+    let labelSetVersion: number | undefined = undefined;
+    let labelSetId: string | undefined = undefined;
 
-    if (highestLabelSetParam !== undefined && namespaceParam !== undefined) {
+    if (highestLabelSetVersionParam !== undefined && labelSetIdParam !== undefined) {
       try {
-        labelSet = parseNonNegativeInteger(highestLabelSetParam);
-        namespace = namespaceParam;
+        labelSetVersion = parseNonNegativeInteger(highestLabelSetVersionParam);
+        labelSetId = labelSetIdParam;
       } catch (error) {
-        logger.warn(`Invalid label_set parameter: ${highestLabelSetParam}`);
+        logger.warn(`Invalid label_set_version parameter: ${highestLabelSetVersionParam}`);
         return c.json(
           {
             status: StatusCode.Error,
-            error: "Invalid label_set parameter: must be a non-negative integer",
+            error: "Invalid label_set_version parameter: must be a non-negative integer",
             errorCode: ErrorCode.BadRequest,
           },
           400,
@@ -70,9 +71,9 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     }
 
     logger.debug(
-      `Healing request for labelhash: ${labelhash}, label_set: ${labelSet}, namespace: ${namespace}`,
+      `Healing request for labelhash: ${labelhash}, label_set_version: ${labelSetVersion}, label_set_id: ${labelSetId}`,
     );
-    const result = await server.heal(labelhash, labelSet, namespace);
+    const result = await server.heal(labelhash, labelSetVersion, labelSetId);
     logger.debug(`Heal result:`, result);
     return c.json(result, result.errorCode);
   });
@@ -97,8 +98,8 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       versionInfo: {
         version: packageJson.version,
         schema_version: SCHEMA_VERSION,
-        namespace: server.getNamespace(),
-        highest_label_set: server.getHighestLabelSet(),
+        label_set_id: server.getLabelSetId(),
+        highest_label_set_version: server.getHighestLabelSetVersion(),
       },
     };
     logger.debug(`Version result:`, result);

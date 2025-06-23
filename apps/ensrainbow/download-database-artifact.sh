@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # This script downloads a specific ENS database artifact (.tgz), its checksum,
-# and a license file. It requires SCHEMA_VERSION, NAMESPACE, and LABEL_SET as
+# and a license file. It requires SCHEMA_VERSION, LABEL_SET_ID, and LABEL_SET_VERSION as
 # command-line arguments.
 
 # Usage function
 usage() {
-    echo "Usage: $0 <SCHEMA_VERSION> <NAMESPACE> <LABEL_SET>"
+    echo "Usage: $0 <SCHEMA_VERSION> <LABEL_SET_ID> <LABEL_SET_VERSION>"
     echo "Example: $0 v1 eth mainnet"
     exit 1
 }
@@ -18,15 +18,15 @@ if [ "$#" -ne 3 ]; then
 fi
 
 SCHEMA_VERSION="$1"
-NAMESPACE="$2"
-LABEL_SET="$3"
+LABEL_SET_ID="$2"
+LABEL_SET_VERSION="$3"
 
 # Configuration
 OUT_DIR="${OUT_DIR:-.}" # Default output directory, can be overridden e.g., OUT_DIR="data" ./script.sh ...
 BASE_URL="https://bucket.ensrainbow.io"
 
 # Construct file names and paths based on arguments
-DATA_FILE_BASENAME="${NAMESPACE}_${LABEL_SET}.tgz"
+DATA_FILE_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz"
 SERVER_DATA_PATH="databases/${SCHEMA_VERSION}/${DATA_FILE_BASENAME}"
 SERVER_CHECKSUM_PATH="databases/${SCHEMA_VERSION}/${DATA_FILE_BASENAME}.sha256sum"
 SERVER_LICENSE_PATH="THE_GRAPH_LICENSE.txt" # Common license file
@@ -34,8 +34,8 @@ SERVER_LICENSE_PATH="THE_GRAPH_LICENSE.txt" # Common license file
 echo "ENS Database Artifact Download Script"
 echo "-------------------------------------"
 echo "Schema Version: $SCHEMA_VERSION"
-echo "Namespace: $NAMESPACE"
-echo "Label Set: $LABEL_SET"
+echo "Label Set ID: $LABEL_SET_ID"
+echo "Label Set Version: $LABEL_SET_VERSION"
 echo "Output directory: $OUT_DIR"
 echo "Base URL: $BASE_URL"
 echo ""
@@ -143,7 +143,7 @@ fi
 echo ""
 echo "---------------------------------------------------"
 echo "ENS Database Artifact download and checksum verification complete."
-echo "Schema: $SCHEMA_VERSION, Namespace: $NAMESPACE, Label Set: $LABEL_SET"
+echo "Schema: $SCHEMA_VERSION, Label Set ID: $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION"
 echo "Files are located in respective subdirectories of: $OUT_DIR"
 echo "  - Data:     $TARGET_DATA_FILE_PATH"
 echo "  - Checksum: $TARGET_CHECKSUM_FILE_PATH"

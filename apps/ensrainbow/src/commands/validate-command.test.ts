@@ -31,9 +31,9 @@ describe("Validate Command", () => {
       await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
       await db.markIngestionFinished();
       await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
-      await db.setNamespace("test-namespace");
+      await db.setLabelSetId("test-label-set-id");
       await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
-      await db.setHighestLabelSet(0);
+      await db.setHighestLabelSetVersion(0);
       await expect(validateCommand({ dataDir: tempDir })).rejects.toThrow();
       await db.addRainbowRecord(label, 0);
       await db.close();

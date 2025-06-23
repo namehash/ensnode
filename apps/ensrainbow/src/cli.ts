@@ -50,8 +50,8 @@ interface PurgeArgs {
 interface ConvertArgs {
   "input-file": string;
   "output-file": string;
-  namespace: string;
-  "label-set": number;
+  "label-set-id": string;
+  "label-set-version": number;
 }
 
 export interface CLIOptions {
@@ -190,14 +190,14 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Path to the output protobuf file",
               default: join(process.cwd(), "rainbow-records.ensrainbow"),
             })
-            .option("namespace", {
+            .option("label-set-id", {
               type: "string",
-              description: "Namespace for the rainbow record collection",
+              description: "Label set id for the rainbow record collection",
               demandOption: true,
             })
-            .option("label-set", {
+            .option("label-set-version", {
               type: "number",
-              description: "Label set identifier for the rainbow record collection",
+              description: "Label set version for the rainbow record collection",
               demandOption: true,
             });
         },
@@ -205,8 +205,8 @@ export function createCLI(options: CLIOptions = {}) {
           await convertCommand({
             inputFile: argv["input-file"],
             outputFile: argv["output-file"],
-            namespace: argv.namespace,
-            labelSet: argv["label-set"],
+            labelSetId: argv["label-set-id"],
+            labelSetVersion: argv["label-set-version"],
           });
         },
       )

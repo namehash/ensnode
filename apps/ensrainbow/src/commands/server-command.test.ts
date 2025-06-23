@@ -25,8 +25,8 @@ describe("Server Command Tests", () => {
       // Initialize precalculated rainbow record count to be able to start server
       await db.setPrecalculatedRainbowRecordCount(0);
       await db.markIngestionFinished();
-      await db.setNamespace("test-namespace");
-      await db.setHighestLabelSet(0);
+      await db.setLabelSetId("test-label-set-id");
+      await db.setHighestLabelSetVersion(0);
       app = await createServer(db);
 
       // Start the server on a different port than what ENSRainbow defaults to
@@ -159,8 +159,8 @@ describe("Server Command Tests", () => {
       expect(data.status).toEqual(StatusCode.Success);
       expect(typeof data.versionInfo.version).toBe("string");
       expect(typeof data.versionInfo.schema_version).toBe("number");
-      expect(typeof data.versionInfo.namespace).toBe("string");
-      expect(typeof data.versionInfo.highest_label_set).toBe("number");
+      expect(typeof data.versionInfo.label_set_id).toBe("string");
+      expect(typeof data.versionInfo.highest_label_set_version).toBe("number");
     });
   });
 

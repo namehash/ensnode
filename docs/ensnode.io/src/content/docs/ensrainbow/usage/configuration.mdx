@@ -19,29 +19,29 @@ The following environment variables are required when running ENSRainbow with Do
 
 - **`SCHEMA_VERSION`**: Database schema version (e.g., `v3`). Use the latest available version unless you have specific compatibility requirements.
 
-- **`NAMESPACE`**: Data namespace identifier that categorizes the type of ENS data:
+- **`LABEL_SET_ID`**: Data namespace identifier that categorizes the type of ENS data:
   - `subgraph` - Main production dataset from The Graph's ENS subgraph
   - `searchlight` - Extended dataset with additional label discoveries
   - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
   - `testenv` - Small test dataset for development and testing
 
-- **`LABEL_SET`**: Non-negative integer representing the incremental dataset version within a namespace. Label sets are sequential:
-  - `0` - Initial/base dataset for the namespace
+- **`LABEL_SET_VERSION`**: Non-negative integer representing the incremental dataset version within a label set id. Label set versions are sequential:
+  - `0` - Initial/base dataset for the label set ID
   - `1`, `2`, etc. - Incremental updates containing additional or updated labels
 
 ### Example Combinations
 
 ```bash
 # Latest production data
-SCHEMA_VERSION=v3 NAMESPACE=subgraph LABEL_SET=0
+SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
-# Test environment data  
-SCHEMA_VERSION=v3 NAMESPACE=testenv LABEL_SET=0
+# Test environment data
+SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
 
 # Extended discovery data
-SCHEMA_VERSION=v3 NAMESPACE=searchlight LABEL_SET=0
+SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
 ```
 
 :::note[Environment Variables Usage]
-The data management environment variables (`SCHEMA_VERSION`, `NAMESPACE`, `LABEL_SET`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate database artifact on first run.
+The data management environment variables (`SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate database artifact on first run.
 :::

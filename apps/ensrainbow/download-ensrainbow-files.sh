@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # This script downloads a specific ENS Rainbow labelset, its checksum, and license file.
-# It requires NAMESPACE and LABEL_SET as command-line arguments.
+# It requires LABEL_SET_ID and LABEL_SET_VERSION as command-line arguments.
 
 # Usage function
 usage() {
-    echo "Usage: $0 <NAMESPACE> <LABEL_SET>"
+    echo "Usage: $0 <LABEL_SET_ID> <LABEL_SET_VERSION>"
     echo "Example: $0 eth mainnet"
     exit 1
 }
@@ -16,23 +16,23 @@ if [ "$#" -ne 2 ]; then
     usage
 fi
 
-NAMESPACE="$1"
-LABEL_SET="$2"
+LABEL_SET_ID="$1"
+LABEL_SET_VERSION="$2"
 
 # Configuration
-OUT_DIR="${OUT_DIR:-.}" # Default output directory, can be overridden e.g., OUT_DIR="data" ./script.sh <namespace> <label_set>
+OUT_DIR="${OUT_DIR:-.}" # Default output directory, can be overridden e.g., OUT_DIR="data" ./script.sh <label_set_id> <label_set_version>
 BASE_URL="https://bucket.ensrainbow.io"
 
 # Construct file names based on arguments
-DATA_FILE_BASENAME="${NAMESPACE}_${LABEL_SET}.ensrainbow"
+DATA_FILE_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.ensrainbow"
 SERVER_DATA_PATH="labelsets/${DATA_FILE_BASENAME}"
 SERVER_CHECKSUM_PATH="labelsets/${DATA_FILE_BASENAME}.sha256sum"
 SERVER_LICENSE_PATH="THE_GRAPH_LICENSE.txt" # Common license file
 
 echo "ENS Rainbow Labelset Download Script"
 echo "------------------------------------"
-echo "Namespace: $NAMESPACE"
-echo "Label Set: $LABEL_SET"
+echo "Label Set ID: $LABEL_SET_ID"
+echo "Label Set Version: $LABEL_SET_VERSION"
 echo "Output directory: $OUT_DIR"
 echo "Base URL: $BASE_URL"
 echo ""
@@ -144,7 +144,7 @@ fi
 echo ""
 echo "------------------------------------------"
 echo "ENS Rainbow labelset download and verification complete."
-echo "Namespace: $NAMESPACE, Label Set: $LABEL_SET"
+echo "Label Set ID: $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION"
 echo "Files are located in respective subdirectories of: $OUT_DIR"
 echo "  - Data:     $TARGET_DATA_FILE_PATH"
 echo "  - Checksum: $TARGET_CHECKSUM_FILE_PATH"

@@ -53,8 +53,8 @@ describe("Database", () => {
         await db.setPrecalculatedRainbowRecordCount(testDataLabels.length);
 
         await db.markIngestionFinished();
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
 
         const isValid = await db.validate();
         expect(isValid).toBe(true);
@@ -69,8 +69,8 @@ describe("Database", () => {
       try {
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
         await db.markIngestionFinished();
 
         // Add records using batch
@@ -93,8 +93,8 @@ describe("Database", () => {
       try {
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
         await db.markIngestionFinished();
         // Add records using batch
         const batch = db.batch();
@@ -118,8 +118,8 @@ describe("Database", () => {
         // Add record
         const label = "vitalik";
         await db.addRainbowRecord(label, 0);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
         await db.markIngestionFinished();
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -135,8 +135,8 @@ describe("Database", () => {
         // Add record
         const label = "vitalik";
         await db.addRainbowRecord(label, 0);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
         await db.markIngestionFinished();
         // Add incorrect precalculated rainbow record count
         db.setPrecalculatedRainbowRecordCount(2);
@@ -155,8 +155,8 @@ describe("Database", () => {
         // Add a valid record
         const label = "vitalik";
         await db.addRainbowRecord(label, 0);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
 
         // Set precalculated rainbow record count key
         db.setPrecalculatedRainbowRecordCount(1);
@@ -177,8 +177,8 @@ describe("Database", () => {
         // Add a valid record
         const label = "vitalik";
         await db.addRainbowRecord(label, 0);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
         db.setPrecalculatedRainbowRecordCount(1);
         // Don't set any ingestion status
 
@@ -189,17 +189,17 @@ describe("Database", () => {
       }
     });
 
-    it("should detect when namespace is not set", async () => {
+    it("should detect when label set is not set", async () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {
         // Add a valid record
         const label = "vitalik";
         await db.addRainbowRecord(label, 0);
-        await db.setHighestLabelSet(0);
+        await db.setHighestLabelSetVersion(0);
         await db.markIngestionFinished();
         db.setPrecalculatedRainbowRecordCount(1);
-        // Don't set namespace
+        // Don't set label set
 
         const isValid = await db.validate();
         expect(isValid).toBe(false);
@@ -215,7 +215,7 @@ describe("Database", () => {
         // Add a valid record
         const label = "vitalik";
         await db.addRainbowRecord(label, 0);
-        await db.setNamespace("test-namespace");
+        await db.setLabelSetId("test-label-set-id");
         await db.markIngestionFinished();
         db.setPrecalculatedRainbowRecordCount(1);
 
@@ -233,8 +233,8 @@ describe("Database", () => {
         // Add a valid record
         const label = "vitalik";
         await db.addRainbowRecord(label, 0);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
         db.setPrecalculatedRainbowRecordCount(1);
         await db.markIngestionFinished();
 
@@ -257,8 +257,8 @@ describe("Database", () => {
         await batch.write();
         await db.setPrecalculatedRainbowRecordCount(1);
         await db.markIngestionFinished();
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
 
         // Should pass in lite mode despite hash mismatch
         const isValidLite = await db.validate({ lite: true });
@@ -277,8 +277,8 @@ describe("Database", () => {
 
       try {
         await db.addRainbowRecord("test", 0);
-        await db.setNamespace("test-namespace");
-        await db.setHighestLabelSet(0);
+        await db.setLabelSetId("test-label-set-id");
+        await db.setHighestLabelSetVersion(0);
         await db.markIngestionFinished();
 
         // Should fail in lite mode due to invalid format
@@ -306,7 +306,7 @@ describe("Database", () => {
         await db.addRainbowRecord(labelWithNull, 0);
 
         const retrieved = await db.getLabel(labelHashBytes);
-        expect(retrieved).toEqual({ labelSet: 0, label: labelWithNull });
+        expect(retrieved).toEqual({ labelSetVersion: 0, label: labelWithNull });
       } finally {
         await db.close();
       }
@@ -453,8 +453,8 @@ describe("schema version", () => {
     try {
       // Set a different schema version
       await db.setDatabaseSchemaVersion(SCHEMA_VERSION + 1);
-      await db.setNamespace("test-namespace");
-      await db.setHighestLabelSet(0);
+      await db.setLabelSetId("test-label-set-id");
+      await db.setHighestLabelSetVersion(0);
       await db.markIngestionFinished();
 
       // Validation should fail due to version mismatch
@@ -527,8 +527,8 @@ describe("ENSRainbowDB.open", () => {
     // First create a database
     const db = await ENSRainbowDB.create(tempDir);
     await db.setDatabaseSchemaVersion(SCHEMA_VERSION);
-    await db.setNamespace("test-namespace");
-    await db.setHighestLabelSet(0);
+    await db.setLabelSetId("test-label-set-id");
+    await db.setHighestLabelSetVersion(0);
     await db.markIngestionFinished();
     await db.setPrecalculatedRainbowRecordCount(1);
     await db.close();
@@ -583,8 +583,8 @@ describe("ENSRainbowDB.openOrCreate", () => {
     const db = await ENSRainbowDB.create(tempDir);
     await db.addRainbowRecord("test", 0);
     await db.setPrecalculatedRainbowRecordCount(1);
-    await db.setNamespace("test-namespace");
-    await db.setHighestLabelSet(0);
+    await db.setLabelSetId("test-label-set-id");
+    await db.setHighestLabelSetVersion(0);
     await db.markIngestionFinished();
     await db.close();
 

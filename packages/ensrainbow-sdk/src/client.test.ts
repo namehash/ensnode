@@ -145,8 +145,8 @@ describe("EnsRainbowApiClient", () => {
           versionInfo: {
             version: "1.0.0",
             schema_version: 1,
-            namespace: "test-namespace",
-            highest_label_set: 123,
+            label_set_id: "test-label-set-id",
+            highest_label_set_version: 123,
           },
         } satisfies EnsRainbow.VersionResponse),
     });

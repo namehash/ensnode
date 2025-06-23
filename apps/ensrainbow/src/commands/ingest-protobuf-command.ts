@@ -62,8 +62,8 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
     // Values that will be read from the file header
     let fileVersion = 0;
-    let fileNamespace = "";
-    let fileLabelSet = -1;
+    let fileLabelSetId = "";
+    let fileLabelSetVersion = -1;
 
     // Create a way to reject the command from event handlers
     let commandReject: (reason: Error) => void;
@@ -74,7 +74,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
     logger.info("Starting ingestion from protobuf file...");
     logger.info(`Input file: ${options.inputFile}`);
     logger.info(`Data directory: ${options.dataDir}`);
-    logger.info("Version, Namespace and Label Set will be read from file header");
+    logger.info("Version, Label Set ID and Label Set Version will be read from file header");
 
     // Set up protobuf parser - need both record and collection types
     const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
@@ -129,8 +129,8 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             });
 
             fileVersion = headerObj.version;
-            fileNamespace = headerObj.namespace;
-            fileLabelSet = headerObj.label_set;
+            fileLabelSetId = headerObj.label_set_id;
+            fileLabelSetVersion = headerObj.label_set_version;
 
             // Validate version
             if (fileVersion !== CURRENT_FORMAT_VERSION) {
@@ -142,27 +142,27 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
             // Log header info
             logger.info(
-              `Read header: Version=${fileVersion}, Namespace=${fileNamespace}, Label Set=${fileLabelSet}`,
+              `Read header: Version=${fileVersion}, Label Set ID=${fileLabelSetId}, Label Set Version=${fileLabelSetVersion}`,
             );
 
             // Validate header against database state
-            logger.info(`Read header: Namespace=${fileNamespace}, Label Set=${fileLabelSet}`);
+            logger.info(`Read header: Label Set ID=${fileLabelSetId}, Label Set Version=${fileLabelSetVersion}`);
 
             // Validate the label set
             if (ingestionStatus === IngestionStatus.Unstarted) {
-              if (fileLabelSet !== 0) {
-                const msg = `Initial ingestion must use a file with label set 0, but file has label set ${fileLabelSet}!`;
+              if (fileLabelSetVersion !== 0) {
+                const msg = `Initial ingestion must use a file with label set version 0, but file has label set version ${fileLabelSetVersion}!`;
                 logger.error(msg);
                 fileStream.destroy(new Error(msg)); // Stop processing
                 return;
               }
             } else {
-              // For existing db, we need to validate namespace and label set
+              // For existing db, we need to validate label set id and label set version
               // Using .then() as we are inside a sync event handler
-              db.getNamespace()
-                .then((currentNamespace) => {
-                  if (currentNamespace !== fileNamespace) {
-                    const msg = `Namespace mismatch! Database namespace: ${currentNamespace}, File namespace: ${fileNamespace}!`;
+              db.getLabelSetId()
+                .then((currentLabelSetId) => {
+                  if (currentLabelSetId !== fileLabelSetId) {
+                    const msg = `Label set id mismatch! Database label set id: ${currentLabelSetId}, File label set id: ${fileLabelSetId}!`;
                     logger.error(msg);
                     fileStream.destroy(new Error(msg)); // Stop processing
                     commandReject(new Error(msg));
@@ -170,12 +170,12 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                   }
 
                   // Now check label set
-                  db.getHighestLabelSet()
-                    .then((currentLabelSet) => {
-                      if (fileLabelSet !== currentLabelSet! + 1) {
+                  db.getHighestLabelSetVersion()
+                    .then((currentLabelSetVersion) => {
+                      if (fileLabelSetVersion !== currentLabelSetVersion! + 1) {
                         const msg =
-                          `Label set must be exactly one higher than the current highest label set.\n` +
-                          `Current highest label set: ${currentLabelSet}, File label set: ${fileLabelSet}`;
+                          `Label set version must be exactly one higher than the current highest label set version.\n` +
+                          `Current highest label set version: ${currentLabelSetVersion}, File label set version: ${fileLabelSetVersion}`;
                         logger.error(msg);
                         fileStream.destroy(new Error(msg)); // Stop processing
                         commandReject(new Error(msg));
@@ -183,27 +183,27 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                       }
                     })
                     .catch((err) => {
-                      logger.error(`Failed to get highest label set: ${err}`);
+                      logger.error(`Failed to get highest label set version: ${err}`);
                       fileStream.destroy(err);
                     });
                 })
                 .catch((err) => {
-                  logger.error(`Failed to get namespace: ${err}`);
+                  logger.error(`Failed to get label set id: ${err}`);
                   fileStream.destroy(err);
                 });
             }
 
-            // If this is the first ingestion, set the namespace in the DB
+            // If this is the first ingestion, set the label set id in the DB
             if (ingestionStatus === IngestionStatus.Unstarted) {
               // Using .then() as we are inside a sync event handler
-              db.setNamespace(fileNamespace)
+              db.setLabelSetId(fileLabelSetId)
                 .then(() => {
-                  logger.info(`Initialized database namespace to: ${fileNamespace} from header.`);
-                  return db.setHighestLabelSet(0);
+                  logger.info(`Initialized database label set id to: ${fileLabelSetId} from header.`);
+                  return db.setHighestLabelSetVersion(0);
                 })
                 .then(() => {
                   // Initial set is 0
-                  logger.info("Initialized highest label set to: 0");
+                  logger.info("Initialized highest label set version to: 0");
                   // Mark ingestion as started after initialization
                   return db.markIngestionUnfinished();
                 })
@@ -215,25 +215,25 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                   fileStream.destroy(err);
                 });
             } else {
-              // For existing db, validate namespace and label set before marking as unfinished
-              db.getNamespace()
-                .then((currentNamespace) => {
-                  if (currentNamespace !== fileNamespace) {
-                    const msg = `Namespace mismatch! Database namespace: ${currentNamespace}, File namespace: ${fileNamespace}!`;
+              // For existing db, validate label set id and label set version before marking as unfinished
+              db.getLabelSetId()
+                .then((currentLabelSetId) => {
+                  if (currentLabelSetId !== fileLabelSetId) {
+                    const msg = `Label set id mismatch! Database label set id: ${currentLabelSetId}, File label set id: ${fileLabelSetId}!`;
                     logger.error(msg);
                     fileStream.destroy(new Error(msg)); // Stop processing
                     commandReject(new Error(msg));
                     return;
                   }
 
-                  // Now check label set
-                  return db.getHighestLabelSet();
+                  // Now check label set version
+                  return db.getHighestLabelSetVersion();
                 })
-                .then((currentLabelSet) => {
-                  if (fileLabelSet !== currentLabelSet! + 1) {
+                .then((currentLabelSetVersion) => {
+                  if (fileLabelSetVersion !== currentLabelSetVersion! + 1) {
                     const msg =
-                      `Label set must be exactly one higher than the current highest label set.\n` +
-                      `Current highest label set: ${currentLabelSet}, File label set: ${fileLabelSet}`;
+                      `Label set version must be exactly one higher than the current highest label set version.\n` +
+                      `Current highest label set version: ${currentLabelSetVersion}, File label set version: ${fileLabelSetVersion}`;
                     logger.error(msg);
                     fileStream.destroy(new Error(msg)); // Stop processing
                     commandReject(new Error(msg));
@@ -248,8 +248,8 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                 })
                 .catch((err) => {
                   if (
-                    !err.message?.includes("Namespace mismatch") &&
-                    !err.message?.includes("Label set must be exactly")
+                    !err.message?.includes("Label set id mismatch") &&
+                    !err.message?.includes("Label set version must be exactly")
                   ) {
                     logger.error(`Failed during validation: ${err}`);
                     fileStream.destroy(err);
@@ -290,8 +290,8 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
               labelHashBuffer = Buffer.from(record.labelhash);
             }
 
-            // Prefix the label with the actual label set number from the header
-            const prefixedLabel = `${fileLabelSet}:${String(record.label)}`;
+            // Prefix the label with the actual label set version number from the header
+            const prefixedLabel = `${fileLabelSetVersion}:${String(record.label)}`;
 
             // Add to database batch
             batch.put(labelHashBuffer as ByteArray, prefixedLabel);
@@ -363,8 +363,8 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             await db.setPrecalculatedRainbowRecordCount(count);
 
             // Update the highest label set with the one from the file header
-            await db.setHighestLabelSet(fileLabelSet);
-            logger.info(`Updated highest label set to: ${fileLabelSet}`);
+            await db.setHighestLabelSetVersion(fileLabelSetVersion);
+            logger.info(`Updated highest label set version to: ${fileLabelSetVersion}`);
 
             // Mark ingestion as finished
             await db.markIngestionFinished();

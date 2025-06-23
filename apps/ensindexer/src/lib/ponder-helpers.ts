@@ -54,8 +54,8 @@ export const createEnsRainbowVersionFetcher = () => {
       return {
         version: "unknown",
         schema_version: 0,
-        namespace: "unknown",
-        highest_label_set: 0,
+        label_set_id: "unknown",
+        highest_label_set_version: 0,
       };
     }
   };

@@ -20,34 +20,34 @@ Follow ENSNode's [contribution guide](/docs/contributing/) to prepare your works
 
 ### Get the Rainbow Table Data Files (`.ensrainbow`)
 
-ENSRainbow ingests data from `.ensrainbow` files. These files contain labelhash-label pairs for a specific `NAMESPACE` and `LABEL_SET`. You can download these files using the `download-ensrainbow-files.sh` script located in `apps/ensrainbow/`.
+ENSRainbow ingests data from `.ensrainbow` files. These files contain labelhash-label pairs for a specific `LABEL_SET_ID` and `LABEL_SET_VERSION`. You can download these files using the `download-ensrainbow-files.sh` script located in `apps/ensrainbow/`.
 
-The script requires two arguments: `NAMESPACE` and `LABEL_SET` (a non-negative integer).
+The script requires two arguments: `LABEL_SET_ID` and `LABEL_SET_VERSION` (a non-negative integer).
 
 ```bash
 # Navigate to the script directory (or call it from the monorepo root)
 cd apps/ensrainbow
 
-# Example: Download 'subgraph' namespace, label set 0 (original tables)
+# Example: Download 'subgraph' label set ID, label set version 0 (original tables)
 ./download-ensrainbow-files.sh subgraph 0
 
-# Example: Download 'searchlight' namespace, label set 0 (extended tables)
+# Example: Download 'searchlight' label set ID, label set version 0 (extended tables)
 ./download-ensrainbow-files.sh searchlight 0
 
-# Example: Download 'discoveryA' namespace, label set 0 (initially empty for discovered labels)
+# Example: Download 'discoveryA' label set ID, label set version 0 (initially empty for discovered labels)
 ./download-ensrainbow-files.sh discoveryA 0
 
-# Example: Download 'testenv' namespace, label set 0 (for test environment)
+# Example: Download 'testenv' label set ID, label set version 0 (for test environment)
 ./download-ensrainbow-files.sh testenv 0
 ```
 
 This command will:
 
-- Download the specified `<NAMESPACE>-<LABEL_SET>.ensrainbow` file.
+- Download the specified `<LABEL_SET_ID>-<LABEL_SET_VERSION>.ensrainbow` file.
 - Download its corresponding checksum file (`.sha256sum`).
 - Download the `THE_GRAPH_LICENSE.txt` file.
 - Automatically verify the checksum of the `.ensrainbow` file.
-- Place the files in `./labelsets/<NAMESPACE>-<LABEL_SET>.ensrainbow` and `./THE_GRAPH_LICENSE.txt` respectively (relative to where `OUT_DIR` is set, default is current dir).
+- Place the files in `./labelsets/<LABEL_SET_ID>-<LABEL_SET_VERSION>.ensrainbow` and `./THE_GRAPH_LICENSE.txt` respectively (relative to where `OUT_DIR` is set, default is current dir).
 
 Refer to the script for more details on output paths.
 
@@ -67,17 +67,17 @@ Once you have your `.ensrainbow` files, you can ingest them into a LevelDB datab
 
 **Important Ingestion Rules:**
 
-1.  **Initial Ingestion**: The first time you ingest data into a new or empty `--data-dir`, the input `.ensrainbow` file *must* be for `LABEL_SET 0`. This initial ingestion will set the `NAMESPACE` for the entire database.
-2.  **Namespace Consistency**: All subsequent ingestions into the same `--data-dir` *must* use `.ensrainbow` files belonging to the *same* `NAMESPACE` as the initial ingest.
-3.  **Sequential Label Sets**: Each subsequent `.ensrainbow` file ingested *must* have a `LABEL_SET` that is exactly one greater than the `HIGHEST_LABEL_SET` currently stored in the database. For example, if the database contains data up to `subgraph-1.ensrainbow` (meaning `HIGHEST_LABEL_SET` is 1), the next file to ingest must be `subgraph-2.ensrainbow`.
+1.  **Initial Ingestion**: The first time you ingest data into a new or empty `--data-dir`, the input `.ensrainbow` file *must* be for `LABEL_SET_VERSION 0`. This initial ingestion will set the `LABEL_SET_ID` for the entire database.
+2.  **Label Set ID Consistency**: All subsequent ingestions into the same `--data-dir` *must* use `.ensrainbow` files belonging to the *same* `LABEL_SET_ID` as the initial ingest.
+3.  **Sequential Label Set Versions**: Each subsequent `.ensrainbow` file ingested *must* have a `LABEL_SET_VERSION` that is exactly one greater than the `HIGHEST_LABEL_SET_VERSION` currently stored in the database. For example, if the database contains data up to `subgraph-1.ensrainbow` (meaning `HIGHEST_LABEL_SET_VERSION` is 1), the next file to ingest must be `subgraph-2.ensrainbow`.
 
-The database internally stores the `NAMESPACE` and `HIGHEST_LABEL_SET` to enforce these rules.
+The database internally stores the `LABEL_SET_ID` and `HIGHEST_LABEL_SET_VERSION` to enforce these rules.
 
 ```bash
-# Example: Initial ingest for 'subgraph' namespace, label set 0
+# Example: Initial ingest for 'subgraph' label set ID, label set version 0
 pnpm run ingest-ensrainbow --input-file subgraph-0.ensrainbow --data-dir ./my-subgraph-data
 
-# Example: Subsequent ingest for 'subgraph' namespace, label set 1
+# Example: Subsequent ingest for 'subgraph' label set ID, label set version 1
 # (assuming subgraph-0.ensrainbow was already ingested into ./my-subgraph-data)
 pnpm run ingest-ensrainbow --input-file subgraph-1.ensrainbow --data-dir ./my-subgraph-data
 ```
@@ -103,11 +103,11 @@ curl http://localhost:3223/v1/labels/count
 # Heal a labelhash (basic request)
 curl http://localhost:3223/v1/heal/0xYourLabelHash
 
-# Heal a labelhash specifying namespace and label_set
-# (namespace must match DB, label_set <= HIGHEST_LABEL_SET in DB)
-curl http://localhost:3223/v1/heal/0xYourLabelHash?namespace=subgraph&label_set=1
+# Heal a labelhash specifying label_set_id and label_set_version
+# (label_set_id must match DB, label_set_version <= HIGHEST_LABEL_SET_VERSION in DB)
+curl http://localhost:3223/v1/heal/0xYourLabelHash?label_set_id=subgraph&label_set_version=1
 ```
-If `namespace` and `label_set` are provided in a heal request, both must be present. The server will validate them against the database's stored namespace and highest label set.
+If `label_set_id` and `label_set_version` are provided in a heal request, both must be present. The server will validate them against the database's stored label set ID and highest label set version.
 
 Expected count as of January 30, 2024: 133,856,894 unique 
 label-labelhash pairs
@@ -116,13 +116,13 @@ label-labelhash pairs
 
 As an alternative to ingesting `.ensrainbow` files sequentially, you can download pre-built LevelDB database artifacts. These are `.tgz` archives containing a complete data directory. Use the `download-database-artifact.sh` script from `apps/ensrainbow/`.
 
-The script requires `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` (highest label set included in the artifact).
+The script requires `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` (highest label set version included in the artifact).
 
 ```bash
 # Navigate to the script directory (or call it from the monorepo root)
 cd apps/ensrainbow
 
-# Example: Download schema v2, 'subgraph' namespace, up to label set 1
+# Example: Download schema v2, 'subgraph' label set ID, up to label set version 1
 ./download-database-artifact.sh v2 subgraph 1
 ```
 This will download and verify `databases/v2/subgraph-1.tgz` (relative to `OUT_DIR`). You can then extract this archive to your desired data directory (e.g., `./my-subgraph-data`) and use it with `pnpm run serve`.
@@ -174,7 +174,7 @@ ENSRainbow provides a CLI for managing the service. Add `--help` for details on 
 ### Convert Legacy Data (`convert`)
 Converts legacy `.sql.gz` rainbow tables to the `.ensrainbow` format.
 ```bash
-pnpm run convert --input-file <path/to/ens_names.sql.gz> --output-file <NAMESPACE-LABEL_SET.ensrainbow>
+pnpm run convert --input-file <path/to/ens_names.sql.gz> --output-file <LABEL_SET_ID-LABEL_SET_VERSION.ensrainbow>
 ```
 - `--input-file`: Path to the gzipped SQL dump file.
 - `--output-file`: Desired path for the output `.ensrainbow` file.
@@ -182,10 +182,10 @@ pnpm run convert --input-file <path/to/ens_names.sql.gz> --output-file <NAMESPAC
 ### Data Ingestion (`ingest-ensrainbow`)
 Ingests data from `.ensrainbow` files into the LevelDB database.
 ```bash
-pnpm run ingest-ensrainbow --input-file <path/to/NAMESPACE-LABEL_SET.ensrainbow> [--data-dir path/to/db]
+pnpm run ingest-ensrainbow --input-file <path/to/LABEL_SET_ID-LABEL_SET_VERSION.ensrainbow> [--data-dir path/to/db]
 ```
 - `--input-file`: Path to the `.ensrainbow` file. Adheres to [ingestion rules](#ingest-rainbow-tables).
-- `--data-dir`: Directory for the LevelDB database (default: `data/`). The database stores `NAMESPACE` and `HIGHEST_LABEL_SET` metadata.
+- `--data-dir`: Directory for the LevelDB database (default: `data/`). The database stores `LABEL_SET_ID` and `HIGHEST_LABEL_SET_VERSION` metadata.
 
 ### Database Validation (`validate`)
 ```bash
@@ -289,7 +289,7 @@ You can also run ENSRainbow with the test data using Docker. This involves runni
     ```
 
 2.  **Run the ENSRainbow container with test data configuration:**
-    You'll need to mount a volume for persistent storage and set the `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` environment variables to point to the test data.
+    You'll need to mount a volume for persistent storage and set the `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` environment variables to point to the test data.
     ```bash
     # Create a directory on your host machine for test data, e.g., ~/my_ensrainbow_test_data
     mkdir -p ~/my_ensrainbow_test_data
@@ -297,12 +297,12 @@ You can also run ENSRainbow with the test data using Docker. This involves runni
     docker run -d --name ensrainbow_test_env \
       -v ~/my_ensrainbow_test_data:/app/apps/ensrainbow/data \
       -e SCHEMA_VERSION="v3" \
-      -e NAMESPACE="testenv" \
-      -e LABEL_SET="0" \
+      -e LABEL_SET_ID="testenv" \
+      -e LABEL_SET_VERSION="0" \
       -p 3223:3223 \
       ghcr.io/namehash/ensnode/ensrainbow:latest
     ```
-    *   Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` if the test data parameters differ. Typically, for the standard test data, `NAMESPACE` is `testenv` and `LABEL_SET` is `0`. The `SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v3`).
+    *   Adjust `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` if the test data parameters differ. Typically, for the standard test data, `LABEL_SET_ID` is `testenv` and `LABEL_SET_VERSION` is `0`. The `SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v3`).
 
 This setup allows the `entrypoint.sh` script within the container to download the `testenv-0` database artifact into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
 
@@ -314,26 +314,26 @@ When using ENSRainbow with Docker, the following environment variables control w
 
 - **`SCHEMA_VERSION`**: The database schema version (e.g., `v3`). This determines the format and structure of the database artifacts. Use the latest available version unless you have specific compatibility requirements.
 
-- **`NAMESPACE`**: The data namespace identifier that categorizes the type of ENS data:
+- **`LABEL_SET_ID`**: The data namespace identifier that categorizes the type of ENS data:
   - `subgraph` - Main production dataset from The Graph's ENS subgraph
   - `searchlight` - Extended dataset with additional label discoveries
   - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
   - `testenv` - Small test dataset for development and testing
 
-- **`LABEL_SET`**: A non-negative integer representing the incremental dataset version within a namespace. Label sets are sequential:
-  - `0` - Initial/base dataset for the namespace
+- **`LABEL_SET_VERSION`**: A non-negative integer representing the incremental dataset version within a label set ID. Label sets are sequential:
+  - `0` - Initial/base dataset for the label set ID
   - `1`, `2`, etc. - Incremental updates containing additional or updated labels
 
 **Example combinations:**
 ```bash
 # Latest production data
-SCHEMA_VERSION=v3 NAMESPACE=subgraph LABEL_SET=0
+SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
 # Test environment data
-SCHEMA_VERSION=v3 NAMESPACE=testenv LABEL_SET=0
+SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
 
 # Extended discovery data
-SCHEMA_VERSION=v3 NAMESPACE=searchlight LABEL_SET=0
+SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
 ```
 
 ### Persistent Storage with Docker
@@ -343,7 +343,7 @@ The ENSRainbow Docker image (built with the combined Dockerfile) now includes an
 **How it Works:**
 
 1.  **On First Run (with an empty volume):**
-    *   The script requires `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` environment variables to be set.
+    *   The script requires `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` environment variables to be set.
     *   It downloads the specified database artifact into `/app/apps/ensrainbow/data` (the designated data directory).
     *   After successful download, extraction, and validation, it creates a marker file (`.ensrainbow_db_ready`) in the data directory.
 2.  **On Subsequent Runs:**
@@ -364,8 +364,8 @@ mkdir -p ~/my_ensrainbow_data
 docker run -d --name ensrainbow_persistent \
   -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
   -e SCHEMA_VERSION="v3" \
-  -e NAMESPACE="subgraph" \
-  -e LABEL_SET="0" \
+  -e LABEL_SET_ID="subgraph" \
+  -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
@@ -379,13 +379,13 @@ docker volume create ensrainbow_db_volume
 docker run -d --name ensrainbow_persistent \
   -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
   -e SCHEMA_VERSION="v3" \
-  -e NAMESPACE="subgraph" \
-  -e LABEL_SET="0" \
+  -e LABEL_SET_ID="subgraph" \
+  -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
 
-Adjust `SCHEMA_VERSION`, `NAMESPACE`, and `LABEL_SET` as needed for the initial download.
+Adjust `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` as needed for the initial download.
 
 Using a volume ensures that your downloaded and ingested data is not lost when the container stops or is removed, saving time and bandwidth on subsequent runs.
 
@@ -399,25 +399,25 @@ These steps are typically performed by project maintainers for releasing officia
 
 This section covers the conversion of source data (like SQL dumps or empty files for initial datasets) into the `.ensrainbow` format. The `time` command is used here to measure the duration of potentially long-running conversion processes.
 
-**For `subgraph` namespace (main dataset):**
-This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for the `subgraph` namespace and label set 0.
+**For `subgraph` label set ID (main dataset):**
+This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for the `subgraph` label set ID and label set version 0.
 ```bash
 # Assuming ens_names.sql.gz contains the primary dataset
-time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --namespace subgraph --label-set 0
+time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label_set_id subgraph --label_set_version 0
 ```
 
-**For `discoveryA` namespace (initially empty for discovered labels):**
-This creates an empty `.ensrainbow` file for the `discoveryA` namespace, which might be used for labels discovered dynamically.
+**For `discoveryA` label set ID (initially empty for discovered labels):**
+This creates an empty `.ensrainbow` file for the `discoveryA` label set ID, which might be used for labels discovered dynamically.
 ```bash
 touch empty.sql
 gzip empty.sql
-time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --namespace discoveryA --label-set 0
+time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --label_set_id discoveryA --label_set_version 0
 ```
 
-**For `testenv` namespace (for testing):**
-This converts a test dataset SQL dump into an `.ensrainbow` file for the `testenv` namespace.
+**For `testenv` label set ID (for testing):**
+This converts a test dataset SQL dump into an `.ensrainbow` file for the `testenv` label set ID.
 ```bash
-time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --namespace testenv --label-set 0
+time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --label_set_id testenv --label_set_version 0
 ```
 
 ### 2. Upload `.ensrainbow` Files to R2 Storage

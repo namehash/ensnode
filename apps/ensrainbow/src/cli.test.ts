@@ -114,8 +114,8 @@ describe("CLI", () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
         const ensrainbowFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
         const ensrainbowOutputFile = join(tempDir, "test_ens_names_0.ensrainbow");
-        const namespace = "test_ens_names"; // Needed for convert
-        const labelSet = 0; // Needed for convert
+        const labelSetId = "test_ens_names"; // Needed for convert
+        const labelSetVersion = 0; // Needed for convert
 
         // Convert requires args - test with a try/catch to properly handle the rejection
         try {
@@ -129,7 +129,7 @@ describe("CLI", () => {
           // If we get here, the test should fail
           throw new Error("Expected cli.parse to throw but it didn't");
         } catch (err: any) {
-          expect(err.message).toMatch(/Missing required arguments: namespace, label-set/);
+          expect(err.message).toMatch(/Missing required arguments: label-set-id, label-set-version/);
         }
 
         // Successful convert with args
@@ -140,12 +140,12 @@ describe("CLI", () => {
           sqlInputFile,
           "--output-file",
           ensrainbowOutputFile,
-          "--namespace",
-          namespace,
-          "--label-set",
-          labelSet.toString(),
+          "--label-set-id",
+          labelSetId,
+          "--label-set-version",
+          labelSetVersion.toString(),
         ]);
-        //command: ensrainbow convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --namespace test_ens_names --label-set 0
+        //command: ensrainbow convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test_ens_names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -154,7 +154,7 @@ describe("CLI", () => {
         const ensrainbowOutputFileData = await readFile(ensrainbowOutputFile);
         expect(ensrainbowFileData).toEqual(ensrainbowOutputFileData);
 
-        // Ingest should succeed with minimal arguments - extracting namespace/labelset from the file header happens behind the scenes
+        // Ingest should succeed with minimal arguments - extracting label set id and version from the file header happens behind the scenes
         await ingestCli.parse([
           "ingest-ensrainbow",
           "--input-file",
@@ -171,8 +171,8 @@ describe("CLI", () => {
       it("should convert SQL and ingest ensrainbow ens_test_env_names", async () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "ens_test_env_names.sql.gz");
         const ensrainbowOutputFile = join(tempDir, "ens_test_env_0.ensrainbow");
-        const namespace = "ens_test_env"; // Needed for convert
-        const labelSet = 0; // Needed for convert
+        const labelSetId = "ens_test_env"; // Needed for convert
+        const labelSetVersion = 0; // Needed for convert
 
         // Convert requires args - test with a try/catch to properly handle the rejection
         try {
@@ -186,7 +186,7 @@ describe("CLI", () => {
           // If we get here, the test should fail
           throw new Error("Expected cli.parse to throw but it didn't");
         } catch (err: any) {
-          expect(err.message).toMatch(/Missing required arguments: namespace, label-set/);
+          expect(err.message).toMatch(/Missing required arguments: label-set-id, label-set-version/);
         }
 
         // Successful convert with args
@@ -197,17 +197,17 @@ describe("CLI", () => {
           sqlInputFile,
           "--output-file",
           ensrainbowOutputFile,
-          "--namespace",
-          namespace,
-          "--label-set",
-          labelSet.toString(),
+          "--label-set-id",
+          labelSetId,
+          "--label-set-version",
+          labelSetVersion.toString(),
         ]);
-        //command: ensrainbow convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --namespace test_ens_names --label-set 0
+        //command: ensrainbow convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test_ens_names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
 
-        // Ingest should succeed with minimal arguments - extracting namespace/labelset from the file header happens behind the scenes
+        // Ingest should succeed with minimal arguments - extracting label set id and version from the file header happens behind the scenes
         await ingestCli.parse([
           "ingest-ensrainbow",
           "--input-file",
@@ -224,8 +224,8 @@ describe("CLI", () => {
       it("should convert SQL to ensrainbow and not ingest if label set is not 0", async () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
         const ensrainbowOutputFile = join(tempDir, "test_ens_names_1.ensrainbow");
-        const namespace = "test_ens_names"; // Needed for convert
-        const labelSet = 1; // Needed for convert
+        const labelSetId = "test_ens_names"; // Needed for convert
+        const labelSetVersion = 1; // Needed for convert
 
         // Convert requires args - test with a try/catch to properly handle the rejection
         try {
@@ -239,7 +239,7 @@ describe("CLI", () => {
           // If we get here, the test should fail
           throw new Error("Expected cli.parse to throw but it didn't");
         } catch (err: any) {
-          expect(err.message).toMatch(/Missing required arguments: namespace, label-set/);
+          expect(err.message).toMatch(/Missing required arguments: label-set-id, label-set-version/);
         }
         const ingestCli2 = createCLI({ exitProcess: false });
         // Successful convert with args
@@ -249,10 +249,10 @@ describe("CLI", () => {
           sqlInputFile,
           "--output-file",
           ensrainbowOutputFile,
-          "--namespace",
-          namespace,
-          "--label-set",
-          labelSet.toString(),
+          "--label-set-id",
+          labelSetId,
+          "--label-set-version",
+          labelSetVersion.toString(),
         ]);
         //verify it is created
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -282,8 +282,8 @@ describe("CLI", () => {
 
         // Create an ensrainbow file with label set 2
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
-        const namespace = "test_ens_names";
-        const labelSet = 2; // Higher than 1
+        const labelSetId = "test_ens_names";
+        const labelSetVersion = 2; // Higher than 1
 
         // Successful convert with label set 2
         const convertCli = createCLI({ exitProcess: false });
@@ -293,10 +293,10 @@ describe("CLI", () => {
           sqlInputFile,
           "--output-file",
           secondInputFile,
-          "--namespace",
-          namespace,
-          "--label-set",
-          labelSet.toString(),
+          "--label-set-id",
+          labelSetId,
+          "--label-set-version",
+          labelSetVersion.toString(),
         ]);
 
         // Verify the file with label set 2 was created
@@ -329,22 +329,22 @@ describe("CLI", () => {
         // Check that we got the expected error
         expect(error).toBeDefined();
         expect(error?.message).toMatch(
-          /Label set must be exactly one higher than the current highest label set.\nCurrent highest label set: 0, File label set: 2/,
+          /Label set version must be exactly one higher than the current highest label set version.\nCurrent highest label set version: 0, File label set version: 2/,
         );
       });
 
-      it("should ingest first file successfully but reject second file with different namespace", async () => {
+      it("should ingest first file successfully but reject second file with different label set id", async () => {
         // First, ingest a valid file with label set 0
         const firstInputFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
-        const secondInputFile = join(tempDir, "different_namespace_0.ensrainbow");
-        const thirdInputFile = join(tempDir, "different_namespace_1.ensrainbow");
+        const secondInputFile = join(tempDir, "different_label_set_id_0.ensrainbow");
+        const thirdInputFile = join(tempDir, "different_label_set_id_1.ensrainbow");
 
-        // Create an ensrainbow file with different namespace
+        // Create an ensrainbow file with different label set id
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
-        const namespace = "different_namespace"; // Different from test_ens_names
-        const labelSet = 0;
+        const labelSetId = "different_label_set_id"; // Different from test_ens_names
+        const labelSetVersion = 0;
 
-        // Create second file with different namespace and label set 0
+        // Create second file with different label set id and label set version 0
         const convertCli = createCLI({ exitProcess: false });
         await convertCli.parse([
           "convert",
@@ -352,26 +352,26 @@ describe("CLI", () => {
           sqlInputFile,
           "--output-file",
           secondInputFile,
-          "--namespace",
-          namespace,
-          "--label-set",
-          labelSet.toString(),
+          "--label-set-id",
+          labelSetId,
+          "--label-set-version",
+          labelSetVersion.toString(),
         ]);
 
-        // Create third file with different namespace and label set 1
+        // Create third file with different label set id and label set version 1
         await convertCli.parse([
           "convert",
           "--input-file",
           sqlInputFile,
           "--output-file",
           thirdInputFile,
-          "--namespace",
-          namespace,
-          "--label-set",
+          "--label-set-id",
+          labelSetId,
+          "--label-set-version",
           "1",
         ]);
 
-        // Verify the file with different namespace was created
+        // Verify the file with different label set id was created
         await expect(stat(secondInputFile)).resolves.toBeDefined();
 
         // Create a separate test directory for the first ingestion
@@ -387,7 +387,7 @@ describe("CLI", () => {
           firstTestDir,
         ]);
 
-        // Second ingest should fail because of namespace mismatch when using the same database
+        // Second ingest should fail because of label set id mismatch when using the same database
         let error1: Error | undefined;
         try {
           await ingestCli.parse([
@@ -404,7 +404,7 @@ describe("CLI", () => {
         // Check that we got the expected error
         expect(error1).toBeDefined();
         expect(error1?.message).toMatch(
-          /Namespace mismatch! Database namespace: test_ens_names, File namespace: different_namespace!/,
+          /Label set id mismatch! Database label set id: test_ens_names, File label set id: different_label_set_id!/,
         );
 
         // Ingest third file fails for the same reason
@@ -424,7 +424,7 @@ describe("CLI", () => {
         // Check that we got the expected error
         expect(error2).toBeDefined();
         expect(error2?.message).toMatch(
-          /Namespace mismatch! Database namespace: test_ens_names, File namespace: different_namespace!/,
+          /Label set id mismatch! Database label set id: test_ens_names, File label set id: different_label_set_id!/,
         );
       });
     });

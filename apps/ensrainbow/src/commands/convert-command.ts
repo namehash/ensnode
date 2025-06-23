@@ -10,8 +10,8 @@ import { buildRainbowRecord } from "@/utils/rainbow-record";
 export interface ConvertCommandOptions {
   inputFile: string;
   outputFile: string;
-  namespace: string;
-  labelSet: number;
+  labelSetId: string;
+  labelSetVersion: number;
 }
 
 // Current protobuf file format version
@@ -24,8 +24,8 @@ function logInitialOptions(options: ConvertCommandOptions): void {
   logger.info("Starting conversion from SQL dump to protobuf format...");
   logger.info(`Input file: ${options.inputFile}`);
   logger.info(`Output file: ${options.outputFile}`);
-  logger.info(`Namespace: ${options.namespace}`);
-  logger.info(`Label Set: ${options.labelSet}`);
+  logger.info(`Label set id: ${options.labelSetId}`);
+  logger.info(`Label set version: ${options.labelSetVersion}`);
   logger.info(`Format Version: ${CURRENT_FORMAT_VERSION}`);
   logger.info("Output format: Header message + stream of individual records");
 }
@@ -70,20 +70,20 @@ function setupWriteStream(outputFile: string): ReturnType<typeof createWriteStre
 function writeHeader(
   outputStream: ReturnType<typeof createWriteStream>,
   RainbowRecordCollectionType: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-  namespace: string,
-  labelSet: number,
+  labelSetId: string,
+  labelSetVersion: number,
 ): void {
   const headerCollection = RainbowRecordCollectionType.fromObject({
     version: CURRENT_FORMAT_VERSION,
-    namespace: namespace,
-    label_set: labelSet,
+    label_set_id: labelSetId,
+    label_set_version: labelSetVersion,
     records: [], // Header has no records
   });
   // Encode and write the header collection with length-prefix encoding
   outputStream.write(
     Buffer.from(RainbowRecordCollectionType.encodeDelimited(headerCollection).finish()),
   );
-  logger.info("Wrote header message with version, namespace and label set.");
+  logger.info("Wrote header message with version, label set id and label set version.");
 }
 
 /**
@@ -171,13 +171,13 @@ function logSummary(processedRecords: number, invalidRecords: number, outputFile
  * Uses a streaming approach to avoid memory issues with large datasets
  *
  * The output format consists of:
- * 1. A single header message (RainbowRecordCollection) containing version, namespace and label set.
+ * 1. A single header message (RainbowRecordCollection) containing version, label set id and label set version.
  * 2. A stream of individual RainbowRecord messages, each length-prefixed.
  */
 export async function convertCommand(options: ConvertCommandOptions): Promise<void> {
   try {
-    const namespace = options.namespace;
-    const labelSet = options.labelSet;
+    const labelSetId = options.labelSetId;
+    const labelSetVersion = options.labelSetVersion;
 
     logInitialOptions(options);
 
@@ -194,7 +194,7 @@ export async function convertCommand(options: ConvertCommandOptions): Promise<vo
     const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
 
     // --- Write Header ---
-    writeHeader(outputStream, RainbowRecordCollectionType, namespace, labelSet);
+    writeHeader(outputStream, RainbowRecordCollectionType, labelSetId, labelSetVersion);
     // --- End Header ---
 
     const { processedRecords, invalidRecords } = await processRecords(

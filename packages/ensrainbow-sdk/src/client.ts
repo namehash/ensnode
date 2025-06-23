@@ -11,15 +11,15 @@ export namespace EnsRainbow {
      * Heal a labelhash to its original label
      * @param labelHash The labelhash to heal
      * @param options Optional parameters:
-     *   - label_set: Optional highest label set to accept. If provided, only labels from sets less than or equal to this value will be returned.
-     *   - namespace: Optional namespace to validate against. If provided, it must match the database namespace.
+     *   - label_set_version: Optional highest label set version to accept. If provided, only labels from sets less than or equal to this value will be returned.
+     *   - label_set_id: Optional label set ID to validate against. If provided, it must match the database label set ID.
      *   Note: If one of these parameters is provided, both must be provided.
      */
     heal(
       labelHash: LabelHash,
       options?: {
-        label_set?: number;
-        namespace?: string;
+        label_set_version?: number;
+        label_set_id?: string;
       },
     ): Promise<HealResponse>;
 
@@ -131,14 +131,14 @@ export namespace EnsRainbow {
     schema_version: number;
 
     /**
-     * ENSRainbow namespace.
+     * ENSRainbow label set ID.
      */
-    namespace: string;
+    label_set_id: string;
 
     /**
      * ENSRainbow highest label set.
      */
-    highest_label_set: number;
+    highest_label_set_version: number;
   }
 
   /**
@@ -218,8 +218,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * @param labelHash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
    * @param options Optional parameters:
-   *   - label_set: Optional highest label set to accept. If provided, only labels from sets less than or equal to this value will be returned.
-   *   - namespace: Optional namespace to validate against. If provided, it must match the database namespace.
+   *   - label_set_version: Optional highest label set version to accept. If provided, only labels from sets less than or equal to this value will be returned.
+   *   - label_set_id: Optional label set ID to validate against. If provided, it must match the database label set ID.
    *   Note: If one of these parameters is provided, both must be provided.
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
    * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
@@ -255,8 +255,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   async heal(
     labelHash: LabelHash,
     options?: {
-      label_set?: number;
-      namespace?: string;
+      label_set_version?: number;
+      label_set_id?: string;
     },
   ): Promise<EnsRainbow.HealResponse> {
     const cachedResult = this.cache.get(labelHash);
@@ -267,14 +267,14 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
 
     const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
 
-    // Add label_set as a query parameter if provided
-    if (options?.label_set !== undefined) {
-      url.searchParams.append("label_set", options.label_set.toString());
+    // Add label_set_version as a query parameter if provided
+    if (options?.label_set_version !== undefined) {
+      url.searchParams.append("label_set_version", options.label_set_version.toString());
     }
 
-    // Add namespace as a query parameter if provided
-    if (options?.namespace !== undefined) {
-      url.searchParams.append("namespace", options.namespace);
+    // Add label_set_id as a query parameter if provided
+    if (options?.label_set_id !== undefined) {
+      url.searchParams.append("label_set_id", options.label_set_id);
     }
 
     const response = await fetch(url);
