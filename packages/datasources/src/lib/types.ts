@@ -95,9 +95,10 @@ export type ContractConfig =
     };
 
 /**
- * ENSNamespace encodes a set of known Datasources, together constituting an ENS namespace.
+ * ENSNamespace encodes a set of known Datasources associated with the same ENS namespace.
  *
- * The ENSRoot Datasource is required, and all others are optional.
+ * The ENSRoot Datasource is required (this formally defines an ENS namespace). All other Datasources
+ * within the ENSNamespace are optional.
  */
 export type ENSNamespace = {
   [DatasourceNames.ENSRoot]: Datasource;
