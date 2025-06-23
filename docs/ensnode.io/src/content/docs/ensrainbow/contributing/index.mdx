@@ -403,7 +403,7 @@ This section covers the conversion of source data (like SQL dumps or empty files
 This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for the `subgraph` label set ID and label set version 0.
 ```bash
 # Assuming ens_names.sql.gz contains the primary dataset
-time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label_set_id subgraph --label_set_version 0
+time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
 ```
 
 **For `discoveryA` label set ID (initially empty for discovered labels):**
@@ -411,13 +411,13 @@ This creates an empty `.ensrainbow` file for the `discoveryA` label set ID, whic
 ```bash
 touch empty.sql
 gzip empty.sql
-time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --label_set_id discoveryA --label_set_version 0
+time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --label-set-id discoveryA --label-set-version 0
 ```
 
 **For `testenv` label set ID (for testing):**
 This converts a test dataset SQL dump into an `.ensrainbow` file for the `testenv` label set ID.
 ```bash
-time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --label_set_id testenv --label_set_version 0
+time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --label-set-id testenv --label-set-version 0
 ```
 
 ### 2. Upload `.ensrainbow` Files to R2 Storage

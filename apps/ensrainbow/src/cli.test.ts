@@ -277,7 +277,7 @@ describe("CLI", () => {
             testDataDir,
           ]),
         ).rejects.toThrow(
-          /Initial ingestion must use a file with label set 0, but file has label set 1!/,
+          /Initial ingestion must use a file with label set version 0, but file has label set version 1!/,
         ); // Check for the specific expected error
       });
 

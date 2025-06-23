@@ -128,7 +128,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
               defaults: true,
             });
 
-            fileVersion = headerObj.version;
+            fileVersion = headerObj.data_format_version;
             fileLabelSetId = headerObj.label_set_id;
             fileLabelSetVersion = headerObj.label_set_version;
 

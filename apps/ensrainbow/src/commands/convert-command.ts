@@ -74,7 +74,7 @@ function writeHeader(
   labelSetVersion: number,
 ): void {
   const headerCollection = RainbowRecordCollectionType.fromObject({
-    version: CURRENT_FORMAT_VERSION,
+    data_format_version: CURRENT_FORMAT_VERSION,
     label_set_id: labelSetId,
     label_set_version: labelSetVersion,
     records: [], // Header has no records

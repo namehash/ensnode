@@ -20,7 +20,7 @@ LABEL_SET_ID="$1"
 LABEL_SET_VERSION="$2"
 
 # Configuration
-OUT_DIR="${OUT_DIR:-.}" # Default output directory, can be overridden e.g., OUT_DIR="data" ./script.sh <label_set_id> <label_set_version>
+OUT_DIR="${OUT_DIR:-.}" # Default output directory, can be overridden e.g., OUT_DIR="data" ./script.sh <label-set-id> <label-set-version>
 BASE_URL="https://bucket.ensrainbow.io"
 
 # Construct file names based on arguments
