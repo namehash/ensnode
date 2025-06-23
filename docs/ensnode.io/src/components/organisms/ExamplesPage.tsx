@@ -69,45 +69,18 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
     setFilteredExamples(filtered);
   }, [searchTerm, selectedCategory, sortBy, examples, fuse]);
 
-  const handleOpenInENSAdmin = (query: string, variables: string) => {
-    try {
-      const baseUrl = "https://admin.ensnode.io/gql/subgraph-compat";
-      const params = new URLSearchParams({
-        query: query.trim(),
-        variables: variables.trim(),
-      });
-      const url = `${baseUrl}?${params.toString()}`;
-
-      window.open(url, "_blank", "noopener,noreferrer");
-    } catch (err) {
-      console.error("Failed to open in ENSAdmin: ", err);
-    }
-  };
-
-  const getSortLabel = (option: SortOption) => {
-    switch (option) {
-      case "name":
-        return "Name";
-      case "category":
-        return "Category";
-      case "recent":
-        return "Recent";
-      default:
-        return "Name";
-    }
-  };
-
   return (
     <div className="bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:pt-32">
-        <div className="">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Examples</h1>
-          <p className="text-xl text-gray-600">
-            Explore our collection of GraphQL queries for the ENS subgraph.
-          </p>
-        </div>
+      <div className="bg-gradient-to-b from-[#4182B8] to-[#7BAAC7] w-full flex flex-col flex-nowrap justify-center items-center bg-cover bg-center bg-no-repeat absolute top-0 inset-x-0 h-80 z-0"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:pt-32 z-10 relative">
+        <h1 className="font-bold leading-10 sm:leading-[68px] text-4xl sm:text-5xl text-white mb-2">
+          Examples
+        </h1>
+        <p className="text-xl text-white">
+          Explore our collection of GraphQL queries for the ENS subgraph.
+        </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 sticky top-14 py-8">
+        <div className="flex flex-col sm:flex-row gap-4 pt-6 pb-10">
           <div className="flex-1">
             <label htmlFor="search" className="sr-only">
               Search queries
@@ -132,7 +105,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-3 border border-primary/50 shadow-sm rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Search queries by name or description..."
               />
             </div>
@@ -146,7 +119,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
               id="sort"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="block w-full pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg bg-white"
+              className="block w-full pl-3 pr-10 py-3 text-base border border-primary/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg bg-white"
             >
               <option value="name">Sort by Name</option>
               <option value="category">Sort by Category</option>
@@ -229,11 +202,7 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
             {filteredExamples.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {filteredExamples.map((example) => (
-                  <QueryCard
-                    key={example.id}
-                    example={example}
-                    onOpenInENSAdmin={handleOpenInENSAdmin}
-                  />
+                  <QueryCard key={example.id} example={example} />
                 ))}
               </div>
             ) : (
@@ -266,10 +235,9 @@ const ExamplesPage: React.FC<ExamplesPageProps> = ({ examples }) => {
 
 interface QueryCardProps {
   example: SavedQuery;
-  onOpenInENSAdmin: (query: string, variables: string) => void;
 }
 
-const QueryCard: React.FC<QueryCardProps> = ({ example, onOpenInENSAdmin }) => {
+const QueryCard: React.FC<QueryCardProps> = ({ example }) => {
   const slugify = (text: string): string => {
     return text
       .toLowerCase()
@@ -299,10 +267,10 @@ const QueryCard: React.FC<QueryCardProps> = ({ example, onOpenInENSAdmin }) => {
       <div className="flex gap-2 mt-auto">
         <button
           onClick={handleInspect}
-          className="inline-flex justify-center items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          className="inline-flex flex-1 justify-center items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
         >
           <svg
-            className="h-4 w-4"
+            className="h-4 w-4 mr-2"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -321,14 +289,7 @@ const QueryCard: React.FC<QueryCardProps> = ({ example, onOpenInENSAdmin }) => {
               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
             />
           </svg>
-          <span className="sr-only">Inspect</span>
-        </button>
-
-        <button
-          onClick={() => onOpenInENSAdmin(example.query, example.variables)}
-          className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary)] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-        >
-          Open in ENSAdmin
+          View Details
         </button>
       </div>
     </div>
