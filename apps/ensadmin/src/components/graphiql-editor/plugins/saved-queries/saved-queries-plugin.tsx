@@ -6,9 +6,20 @@ import React from "react";
 
 import "./saved-queries-plugin.css";
 
+export enum SavedQueryCategory {
+  DOMAIN = "Domain",
+  REGISTRAR = "Registrar",
+  LABEL = "Label",
+  RESOLVER = "Resolver",
+  ACCOUNT = "Account",
+  META = "Meta",
+}
+
 export interface SavedQuery {
   id: string;
   name: string;
+  category: SavedQueryCategory;
+  description: string;
 
   /**
    * The GraphQL query.
