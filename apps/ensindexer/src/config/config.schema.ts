@@ -1,7 +1,7 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { derive_ensDeployment, derive_isSubgraphCompatible } from "@/config/derived-params";
+import { derive_isSubgraphCompatible } from "@/config/derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
   invariant_globalBlockrange,
@@ -11,14 +11,14 @@ import {
 } from "@/config/validations";
 import {
   DEFAULT_ENSADMIN_URL,
-  DEFAULT_ENS_DEPLOYMENT_CHAIN,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
+  DEFAULT_NAMESPACE,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { ENSNamespaces } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 const chainIdSchema = z.number().int().min(1);
@@ -55,15 +55,13 @@ const RpcConfigSchema = z.object({
     .default(DEFAULT_RPC_RATE_LIMIT),
 });
 
-const EnsDeploymentChainSchema = z
-  .enum(Object.keys(ENSDeployments) as [keyof typeof ENSDeployments], {
+const ENSNamespaceSchema = z
+  .enum(ENSNamespaces, {
     error: (issue) => {
-      return `Invalid ENS_DEPLOYMENT_CHAIN. Supported ENS deployment chains are: ${Object.keys(
-        ENSDeployments,
-      ).join(", ")}`;
+      return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaces).join(", ")}`;
     },
   })
-  .default(DEFAULT_ENS_DEPLOYMENT_CHAIN);
+  .default(DEFAULT_NAMESPACE);
 
 const BlockrangeSchema = z
   .object({
@@ -157,7 +155,7 @@ const DatabaseUrlSchema = z.union(
 
 const ENSIndexerConfigSchema = z
   .object({
-    ensDeploymentChain: EnsDeploymentChainSchema,
+    namespace: ENSNamespaceSchema,
     globalBlockrange: BlockrangeSchema,
     ensNodePublicUrl: EnsNodePublicUrlSchema,
     ensAdminUrl: EnsAdminUrlSchema,
@@ -176,12 +174,12 @@ const ENSIndexerConfigSchema = z
    * We enforce invariants across multiple values parsed with `ENSIndexerConfigSchema`
    * by calling `.check()` function with relevant invariant-enforcing logic.
    * Each such function has access to config values that were already parsed.
-   * If you need to ensure certain config value permutation, say across `ensDeploymentChain`
+   * If you need to ensure certain config value permutation, say across `namespace`
    * and `plugins` values, you can define the `.check()` function callback with the following
    * input param:
    *
    * ```ts
-   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">>
+   * ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins">>
    * ```
    *
    * This way, the invariant logic can access all information it needs, while keeping room
@@ -195,8 +193,8 @@ const ENSIndexerConfigSchema = z
    * Derived configuration
    *
    * We create new configuration parameters from the values parsed with `ENSIndexerConfigSchema`.
-   * This way, we can include complex configuration objects, for example, `ensDeployment` that was
-   * derived from `ensDeploymentChain` and relevant SDK helper method, and attach result value to
+   * This way, we can include complex configuration objects, for example, `datasources` that was
+   * derived from `namespace` and relevant SDK helper method, and attach result value to
    * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
    * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
    *
@@ -214,7 +212,6 @@ const ENSIndexerConfigSchema = z
    * }
    * ```
    */
-  .transform(derive_ensDeployment)
   .transform(derive_isSubgraphCompatible);
 
 /**

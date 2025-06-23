@@ -81,19 +81,16 @@ function validateResponse(response: EnsNode.Metadata) {
 }
 
 /**
- * Selects the indexed chain ID from the indexing status.
+ * Gets chainId of the ENS root Datasource
  *
  * @param indexingStatus The ENSNode indexing status.
- * @returns The indexed chain ID or null if the status is not available.
- * @throws Error if the ENS Deployment Chain is not a supported chain.
+ * @returns The chain ID or undefined if the status is not available.
+ * @throws Error if the chain ID is not supported within the configured namespace
  */
-export function useIndexedChainId(
+export function useENSRootDatasourceChainId(
   indexingStatus: UseIndexingStatusQueryResult["data"],
 ): SupportedChainId | undefined {
-  // If the status is not available, return undefined
-  if (!indexingStatus) {
-    return undefined;
-  }
-
-  return parseSupportedChainIdByName(indexingStatus.env.ENS_DEPLOYMENT_CHAIN);
+  if (!indexingStatus) return undefined;
+  // TODO: this should use the namespace's ensroot datasource's chain ID, not the namespace identifier itself
+  return parseSupportedChainIdByName(indexingStatus.env.NAMESPACE);
 }

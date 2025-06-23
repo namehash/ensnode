@@ -2,53 +2,56 @@
  * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging
  * the shared Subgraph-compatible indexing logic.
  */
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig } from "ponder";
+
 import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
+  getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
 
 const pluginName = PluginName.Basenames;
 
 // Define the Datasources required by the plugin
-const requiredDatasources = [DatasourceName.Basenames];
+const requiredDatasources = [DatasourceNames.Basenames];
 
 // construct a unique contract namespace for this plugin
-const namespace = makePluginNamespace(pluginName);
+const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { ensDeployment } = appConfig;
-  // depending on the ENS Deployment, the chain and contracts for the Basenames Datasource can vary. For example, consider how the Basenames chain and contracts chain depending on the mainnet vs sepolia ENS Deployment
-  const { chain, contracts } = ensDeployment[DatasourceName.Basenames];
+function createPonderConfig(config: ENSIndexerConfig) {
+  const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+    config.namespace,
+    DatasourceNames.Basenames,
+  );
 
   return createConfig({
-    networks: networksConfigForChain(chain.id),
+    networks: networksConfigForChain(config, chain.id),
     contracts: {
-      [namespace("Registry")]: {
-        network: networkConfigForContract(chain, contracts.Registry),
+      [pluginNamespace("Registry")]: {
+        network: networkConfigForContract(config, chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
-      [namespace("BaseRegistrar")]: {
-        network: networkConfigForContract(chain, contracts.BaseRegistrar),
+      [pluginNamespace("BaseRegistrar")]: {
+        network: networkConfigForContract(config, chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
-      [namespace("EARegistrarController")]: {
-        network: networkConfigForContract(chain, contracts.EARegistrarController),
+      [pluginNamespace("EARegistrarController")]: {
+        network: networkConfigForContract(config, chain, contracts.EARegistrarController),
         abi: contracts.EARegistrarController.abi,
       },
-      [namespace("RegistrarController")]: {
-        network: networkConfigForContract(chain, contracts.RegistrarController),
+      [pluginNamespace("RegistrarController")]: {
+        network: networkConfigForContract(config, chain, contracts.RegistrarController),
         abi: contracts.RegistrarController.abi,
       },
       Resolver: {
-        network: networkConfigForContract(chain, contracts.Resolver),
+        network: networkConfigForContract(config, chain, contracts.Resolver),
         abi: contracts.Resolver.abi,
       },
     },
@@ -64,7 +67,7 @@ export default {
    */
   activate: activateHandlers({
     pluginName,
-    namespace,
+    pluginNamespace,
     handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),

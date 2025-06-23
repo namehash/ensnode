@@ -2,63 +2,65 @@
  * The Subgraph plugin describes indexing behavior for the 'Root' Datasource, in alignment with the
  * legacy ENS Subgraph indexing logic.
  */
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig } from "ponder";
 
 import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
+  getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
 
 const pluginName = PluginName.Subgraph;
 
 // enlist datasources used within createPonderConfig function
 // useful for config validation
-const requiredDatasources = [DatasourceName.Root];
+const requiredDatasources = [DatasourceNames.ENSRoot];
 
 // construct a unique contract namespace for this plugin
-const namespace = makePluginNamespace(pluginName);
+const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { ensDeployment } = appConfig;
-  // extract the chain and contract configs for root Datasource in order to build ponder config
-  const { chain, contracts } = ensDeployment[DatasourceName.Root];
+function createPonderConfig(config: ENSIndexerConfig) {
+  const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+    config.namespace,
+    DatasourceNames.ENSRoot,
+  );
 
   return createConfig({
-    networks: networksConfigForChain(chain.id),
+    networks: networksConfigForChain(config, chain.id),
     contracts: {
-      [namespace("RegistryOld")]: {
-        network: networkConfigForContract(chain, contracts.RegistryOld),
+      [pluginNamespace("RegistryOld")]: {
+        network: networkConfigForContract(config, chain, contracts.RegistryOld),
         abi: contracts.Registry.abi,
       },
-      [namespace("Registry")]: {
-        network: networkConfigForContract(chain, contracts.Registry),
+      [pluginNamespace("Registry")]: {
+        network: networkConfigForContract(config, chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
-      [namespace("BaseRegistrar")]: {
-        network: networkConfigForContract(chain, contracts.BaseRegistrar),
+      [pluginNamespace("BaseRegistrar")]: {
+        network: networkConfigForContract(config, chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
-      [namespace("EthRegistrarControllerOld")]: {
-        network: networkConfigForContract(chain, contracts.EthRegistrarControllerOld),
+      [pluginNamespace("EthRegistrarControllerOld")]: {
+        network: networkConfigForContract(config, chain, contracts.EthRegistrarControllerOld),
         abi: contracts.EthRegistrarControllerOld.abi,
       },
-      [namespace("EthRegistrarController")]: {
-        network: networkConfigForContract(chain, contracts.EthRegistrarController),
+      [pluginNamespace("EthRegistrarController")]: {
+        network: networkConfigForContract(config, chain, contracts.EthRegistrarController),
         abi: contracts.EthRegistrarController.abi,
       },
-      [namespace("NameWrapper")]: {
-        network: networkConfigForContract(chain, contracts.NameWrapper),
+      [pluginNamespace("NameWrapper")]: {
+        network: networkConfigForContract(config, chain, contracts.NameWrapper),
         abi: contracts.NameWrapper.abi,
       },
       Resolver: {
-        network: networkConfigForContract(chain, contracts.Resolver),
+        network: networkConfigForContract(config, chain, contracts.Resolver),
         abi: contracts.Resolver.abi,
       },
     },
@@ -74,7 +76,7 @@ export default {
    */
   activate: activateHandlers({
     pluginName,
-    namespace,
+    pluginNamespace,
     handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),
