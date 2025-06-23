@@ -1,5 +1,21 @@
 # ensindexer
 
+## 0.29.0
+
+### Minor Changes
+
+- [#800](https://github.com/namehash/ensnode/pull/800) [`d5b13cc`](https://github.com/namehash/ensnode/commit/d5b13cccc7ddf1fd55813ceb92acabba94ab35f1) Thanks [@shrugs](https://github.com/shrugs)! - rename the ENS_DEPLOYMENT_CHAIN configuration variable to NAMESPACE
+
+### Patch Changes
+
+- Updated dependencies [[`d5b13cc`](https://github.com/namehash/ensnode/commit/d5b13cccc7ddf1fd55813ceb92acabba94ab35f1)]:
+  - @ensnode/datasources@0.29.0
+  - @ensnode/ensrainbow-sdk@0.29.0
+  - @ensnode/ponder-metadata@0.29.0
+  - @ensnode/ensnode-schema@0.29.0
+  - @ensnode/ponder-subgraph@0.29.0
+  - @ensnode/ensnode-sdk@0.29.0
+
 ## 0.28.0
 
 ### Minor Changes
