@@ -46,7 +46,7 @@ function getEffectiveOwner(registrationResult: RegistrationResult): Address {
   // Otherwise, use wrapped owner, if it exists
   if (!registrationResult.domain.wrappedOwner) {
     throw new Error(
-        "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
+      "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
     );
   }
 
@@ -72,7 +72,9 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
     expiresAt: unixTimestampToDate(registrationResult.expiryDate),
     name: registrationResult.domain.name,
     ownerInRegistry: getAddress(registrationResult.domain.owner.id),
-    ownerInNameWrapper: (registrationResult.domain.wrappedOwner ? getAddress(registrationResult.domain.wrappedOwner.id) : undefined),
+    ownerInNameWrapper: registrationResult.domain.wrappedOwner
+      ? getAddress(registrationResult.domain.wrappedOwner.id)
+      : undefined,
     owner: getEffectiveOwner(registrationResult),
   };
 }
@@ -135,7 +137,9 @@ export function useRecentRegistrations(ensNodeURL: URL, maxResults: number) {
     queryKey: ["recent-registrations", ensNodeURL],
     queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
     throwOnError(error) {
-      throw new Error(`Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`);
+      throw new Error(
+        `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,
+      );
     },
   });
 }
