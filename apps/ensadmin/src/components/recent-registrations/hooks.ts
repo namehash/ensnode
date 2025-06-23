@@ -5,6 +5,11 @@ import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
 
 /**
+ * An integer value (representing a Unix timestamp in seconds) formatted as a string.
+ */
+type UnixTimestampInSeconds = string;
+
+/**
  * The data model returned by a GraphQL query for registrations.
  */
 interface RegistrationResult {
@@ -24,11 +29,6 @@ interface RegistrationResult {
 }
 
 /**
- * Numeric string representing a Unix timestamp in seconds.
- */
-type UnixTimestampInSeconds = string;
-
-/**
  * The NameWrapper contract address
  */
 const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
@@ -38,26 +38,29 @@ const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
  * If the owner is the NameWrapper contract, returns the wrapped owner instead.
  */
 function getEffectiveOwner(registrationResult: RegistrationResult): Address {
-  // Only use wrapped owner if the owner is the NameWrapper contract
-  if (isAddressEqual(registrationResult.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
-    if (!registrationResult.domain.wrappedOwner) {
-      throw new Error(
-        "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
-      );
-    }
-    return getAddress(registrationResult.domain.wrappedOwner.id);
+  // Use the regular owner if it's not the NameWrapper contract
+  if (!isAddressEqual(registrationResult.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
+    return getAddress(registrationResult.domain.owner.id);
   }
 
-  // Otherwise, use the regular owner
-  return getAddress(registrationResult.domain.owner.id);
+  // Otherwise, use wrapped owner, if it exists
+  if (!registrationResult.domain.wrappedOwner) {
+    throw new Error(
+        "Wrapped owner is not defined while the 'official' owner is an ENS Name Wrapper",
+    );
+  }
+
+  return getAddress(registrationResult.domain.wrappedOwner.id);
 }
 
-function transformTimestamp(timestamp: UnixTimestampInSeconds): Date {
-  try {
-    return new Date(parseInt(timestamp) * millisecondsInSecond);
-  } catch (error) {
+function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
+  const date = new Date(parseInt(timestamp) * millisecondsInSecond);
+
+  if (isNaN(date.getTime())) {
     throw new Error(`Error parsing timestamp (${timestamp}) to date`);
   }
+
+  return date;
 }
 
 /**
@@ -65,17 +68,17 @@ function transformTimestamp(timestamp: UnixTimestampInSeconds): Date {
  */
 function toRegistration(registrationResult: RegistrationResult): Registration {
   return {
-    registeredAt: transformTimestamp(registrationResult.registrationDate),
-    expiresAt: transformTimestamp(registrationResult.expiryDate),
+    registeredAt: unixTimestampToDate(registrationResult.registrationDate),
+    expiresAt: unixTimestampToDate(registrationResult.expiryDate),
     name: registrationResult.domain.name,
-    ownerInRegistry: registrationResult.domain.owner.id,
+    ownerInRegistry: getAddress(registrationResult.domain.owner.id),
+    ownerInNameWrapper: (registrationResult.domain.wrappedOwner ? getAddress(registrationResult.domain.wrappedOwner.id) : undefined),
     owner: getEffectiveOwner(registrationResult),
-    ownerInNameWrapper: registrationResult.domain.wrappedOwner?.id,
   };
 }
 
 /**
- * Fetches info about most recent registrations that have been indexed.
+ * Fetches info about the most recent registrations that have been indexed.
  */
 async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promise<Registration[]> {
   const query = `
@@ -125,14 +128,34 @@ async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promi
  * Hook to fetch info about most recently registered domains that have been indexed.
  *
  * @param ensNodeURL The URL of the selected ENS node instance.
- * @param maxResults number of the maximal number of latest registrations to be retrieved by the query
+ * @param maxResults the max number of recent registrations to retrieve
  */
 export function useRecentRegistrations(ensNodeURL: URL, maxResults: number) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
     queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
     throwOnError(error) {
-      throw new Error(`Could not fetch ENSNode data from '${ensNodeURL}'. Cause: ${error.message}`);
+      throw new Error(`Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`);
     },
+  });
+}
+
+if (import.meta.vitest) {
+  const { describe, it, expect } = import.meta.vitest;
+
+  describe("unixTimestampToDate", () => {
+    it("should throw an exception for a non numerical input", () => {
+      const invalidTimestamp = "A1781826068";
+
+      expect(() => unixTimestampToDate(invalidTimestamp)).toThrowError(/Error parsing timestamp/);
+    });
+
+    it("should parse correct timestamp to a date object", () => {
+      const validTimestamp = "1781826068";
+      const expectedDate = new Date("2026-06-18T23:41:08.000Z");
+      const result = unixTimestampToDate(validTimestamp);
+
+      expect(result).toStrictEqual(expectedDate);
+    });
   });
 }
