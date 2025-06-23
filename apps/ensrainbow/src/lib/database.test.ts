@@ -7,9 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
 import { vi } from "vitest";
 
 import {
+  DB_SCHEMA_VERSION,
   ENSRainbowDB,
   IngestionStatus,
-  DB_SCHEMA_VERSION,
   SYSTEM_KEY_INGESTION_STATUS,
   SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
   SYSTEM_KEY_SCHEMA_VERSION,

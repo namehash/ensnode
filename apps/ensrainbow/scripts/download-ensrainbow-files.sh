@@ -27,7 +27,7 @@ BASE_URL="https://bucket.ensrainbow.io"
 DATA_FILE_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.ensrainbow"
 SERVER_DATA_PATH="labelsets/${DATA_FILE_BASENAME}"
 SERVER_CHECKSUM_PATH="labelsets/${DATA_FILE_BASENAME}.sha256sum"
-SERVER_LICENSE_PATH="THE_GRAPH_LICENSE.txt" # Common license file
+SERVER_LICENSE_PATH="labelsets/${DATA_FILE_BASENAME}.LICENSE.txt" # Common license file
 
 echo "ENS Rainbow Labelset Download Script"
 echo "------------------------------------"
@@ -41,7 +41,7 @@ echo ""
 LOCAL_LABELSET_DIR="$OUT_DIR/labelsets"
 TARGET_DATA_FILE_PATH="${LOCAL_LABELSET_DIR}/${DATA_FILE_BASENAME}"
 TARGET_CHECKSUM_FILE_PATH="${LOCAL_LABELSET_DIR}/${DATA_FILE_BASENAME}.sha256sum"
-TARGET_LICENSE_FILE_PATH="$OUT_DIR/${SERVER_LICENSE_PATH}"
+TARGET_LICENSE_FILE_PATH="${LOCAL_LABELSET_DIR}/${DATA_FILE_BASENAME}.LICENSE.txt"
 
 # Create data directories if they don't exist
 mkdir -p "$OUT_DIR" # For license file and as parent for labelset_dir

@@ -71,9 +71,12 @@ if [ ! -f "${MARKER_FILE}" ]; then
     mkdir -p "${DOWNLOAD_TEMP_DIR}"
 
     # 3. Download the database artifact
-    echo "Downloading database artifact (Schema: $DB_SCHEMA_VERSION, Label Set ID: $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION)..."
-    if ! OUT_DIR="${DOWNLOAD_TEMP_DIR}" "${APP_DIR}/download-database-artifact.sh" "$DB_SCHEMA_VERSION" "$LABEL_SET_ID" "$LABEL_SET_VERSION"; then
-      echo "Error: Failed to download database artifact."
+    echo "Downloading pre-built database from labelset server (Schema: $DB_SCHEMA_VERSION, Label Set ID: 
+    $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION)..."
+    if ! OUT_DIR="${DOWNLOAD_TEMP_DIR}" \
+        ENSRAINBOW_LABELSET_SERVER_URL="${ENSRAINBOW_LABELSET_SERVER_URL:-}" \
+        "${APP_DIR}/scripts/download-prebuilt-database.sh" "$DB_SCHEMA_VERSION" "$LABEL_SET_ID" "$LABEL_SET_VERSION"; then
+      echo "Error: Failed to download database."
       ls -R "${DOWNLOAD_TEMP_DIR}" # List contents for debugging
       rm -rf "${DOWNLOAD_TEMP_DIR}"
       exit 1

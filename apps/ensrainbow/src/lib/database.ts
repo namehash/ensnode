@@ -22,7 +22,9 @@ export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]
  * Key for storing the highest label set version
  * Stores the current label set version as a string
  */
-export const SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfc]) as ByteArray;
+export const SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION = new Uint8Array([
+  0xff, 0xff, 0xff, 0xfc,
+]) as ByteArray;
 /**
  * Key for storing the label set ID
  * Stores the label set ID as a string
@@ -410,7 +412,9 @@ export class ENSRainbowDB {
    * @returns The labelSetVersion and label as a string if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getLabel(labelHash: ByteArray): Promise<{ labelSetVersion: number; label: Label } | null> {
+  public async getLabel(
+    labelHash: ByteArray,
+  ): Promise<{ labelSetVersion: number; label: Label } | null> {
     // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
     if (!isRainbowRecordKey(labelHash)) {
       throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
@@ -597,7 +601,9 @@ export class ENSRainbowDB {
     try {
       const labelSetId = await this.getLabelSetId();
       if (labelSetId === null) {
-        const errorMsg = generatePurgeErrorMessage("Database is missing the label set ID identifier.");
+        const errorMsg = generatePurgeErrorMessage(
+          "Database is missing the label set ID identifier.",
+        );
         logger.error(errorMsg);
         return false;
       }
@@ -615,7 +621,9 @@ export class ENSRainbowDB {
       logger.info(`Highest label set version verified: ${highestLabelSetVersion}`);
     } catch (error) {
       // getHighestLabelSetVersion already throws a clear error if value is invalid
-      const errorMsg = generatePurgeErrorMessage(`Error checking highest label set version: ${error}`);
+      const errorMsg = generatePurgeErrorMessage(
+        `Error checking highest label set version: ${error}`,
+      );
       logger.error(errorMsg);
       return false;
     }
@@ -824,7 +832,9 @@ export class ENSRainbowDB {
   public async addRainbowRecord(label: string, labelSetVersion: number): Promise<void> {
     // Validate label set version is a non-negative integer
     if (!Number.isInteger(labelSetVersion) || labelSetVersion < 0) {
-      throw new Error(`Invalid label set version: ${labelSetVersion} (must be a non-negative integer)`);
+      throw new Error(
+        `Invalid label set version: ${labelSetVersion} (must be a non-negative integer)`,
+      );
     }
 
     const key = labelHashToBytes(labelhash(label));

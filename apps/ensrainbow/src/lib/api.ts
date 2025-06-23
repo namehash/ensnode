@@ -5,7 +5,7 @@ import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
 
 import packageJson from "@/../package.json";
-import { ENSRainbowDB, DB_SCHEMA_VERSION, parseNonNegativeInteger } from "@/lib/database";
+import { DB_SCHEMA_VERSION, ENSRainbowDB, parseNonNegativeInteger } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { logger } from "@/utils/logger";
 

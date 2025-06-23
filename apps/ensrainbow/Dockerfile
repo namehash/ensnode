@@ -13,25 +13,25 @@ RUN corepack enable
 WORKDIR /app
 
 # Copy all source files to the /app directory
-# This includes the main application and any scripts like download-database-artifact.sh
+# This includes the main application and any scripts like download-prebuilt-database.sh
 COPY . .
 
 # Install dependencies using pnpm
 # This will install dependencies for all packages in the monorepo, including ensrainbow
 # Using --prod to only install production dependencies for a smaller image, if applicable,
 # or ensure all necessary scripts are available if not using --prod.
-# The `download-database-artifact.sh` and `entrypoint.sh` don't have separate pnpm deps,
+# The `download-prebuilt-database.sh` and `entrypoint.sh` don't have separate pnpm deps,
 # but `pnpm run serve` and `pnpm run validate:lite` do.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # Copy the entrypoint script and make it executable
 # Ensure this path is correct relative to the monorepo root during COPY
-COPY ./apps/ensrainbow/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY ./apps/ensrainbow/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Copy the download script and make it executable (if not already handled by COPY . . and permissions)
-# It's assumed to be in /app/apps/ensrainbow/download-database-artifact.sh after `COPY . .`
-RUN chmod +x /app/apps/ensrainbow/download-database-artifact.sh
+# It's assumed to be in /app/apps/ensrainbow/scripts/download-prebuilt-database.sh after `COPY . .`
+RUN chmod +x /app/apps/ensrainbow/scripts/download-prebuilt-database.sh
 
 # Set environment variables for the application
 ENV NODE_ENV=production

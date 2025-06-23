@@ -146,7 +146,9 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             );
 
             // Validate header against database state
-            logger.info(`Read header: Label Set ID=${fileLabelSetId}, Label Set Version=${fileLabelSetVersion}`);
+            logger.info(
+              `Read header: Label Set ID=${fileLabelSetId}, Label Set Version=${fileLabelSetVersion}`,
+            );
 
             // Validate the label set
             if (ingestionStatus === IngestionStatus.Unstarted) {
@@ -198,7 +200,9 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
               // Using .then() as we are inside a sync event handler
               db.setLabelSetId(fileLabelSetId)
                 .then(() => {
-                  logger.info(`Initialized database label set id to: ${fileLabelSetId} from header.`);
+                  logger.info(
+                    `Initialized database label set id to: ${fileLabelSetId} from header.`,
+                  );
                   return db.setHighestLabelSetVersion(0);
                 })
                 .then(() => {

@@ -129,7 +129,9 @@ describe("CLI", () => {
           // If we get here, the test should fail
           throw new Error("Expected cli.parse to throw but it didn't");
         } catch (err: any) {
-          expect(err.message).toMatch(/Missing required arguments: label-set-id, label-set-version/);
+          expect(err.message).toMatch(
+            /Missing required arguments: label-set-id, label-set-version/,
+          );
         }
 
         // Successful convert with args
@@ -186,7 +188,9 @@ describe("CLI", () => {
           // If we get here, the test should fail
           throw new Error("Expected cli.parse to throw but it didn't");
         } catch (err: any) {
-          expect(err.message).toMatch(/Missing required arguments: label-set-id, label-set-version/);
+          expect(err.message).toMatch(
+            /Missing required arguments: label-set-id, label-set-version/,
+          );
         }
 
         // Successful convert with args
@@ -239,7 +243,9 @@ describe("CLI", () => {
           // If we get here, the test should fail
           throw new Error("Expected cli.parse to throw but it didn't");
         } catch (err: any) {
-          expect(err.message).toMatch(/Missing required arguments: label-set-id, label-set-version/);
+          expect(err.message).toMatch(
+            /Missing required arguments: label-set-id, label-set-version/,
+          );
         }
         const ingestCli2 = createCLI({ exitProcess: false });
         // Successful convert with args

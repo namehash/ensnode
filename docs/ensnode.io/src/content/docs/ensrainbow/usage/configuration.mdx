@@ -15,19 +15,27 @@ ENSRainbow can be configured via environment variables.
 
 ### Data Management (Docker Only)
 
-The following environment variables are required when running ENSRainbow with Docker for initial database download:
+The following environment variables are required when running ENSRainbow with Docker for initial database download and are used by the entrypoint script.
 
-- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `v3`). This is not related to the API version. This version ensures compatibility between the ENSRainbow software and the structure of its database. It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
+- **`ENSRAINBOW_LABELSET_SERVER_URL`**: The base URL of the ENSRainbow Labelset Server.
+  - **Goal**: To decentralize data sourcing. This allows any user to host their own pre-built ENSRainbow databases and configure their application to use them.
+  - **Configuration**: Set this to the base URL of your chosen server. Defaults to `https://bucket.ensrainbow.io`.
 
-- **`LABEL_SET_ID`**: Data namespace identifier that categorizes the type of ENS data:
-  - `subgraph` - Main production dataset from The Graph's ENS subgraph
-  - `searchlight` - Extended dataset with additional label discoveries
-  - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
-  - `testenv` - Small test dataset for development and testing
+- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `v3`). This is not related to the API version.
+  - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of its database.
+  - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
-- **`LABEL_SET_VERSION`**: Non-negative integer representing the incremental dataset version within a label set id. Label set versions are sequential:
-  - `0` - Initial/base dataset for the label set ID
-  - `1`, `2`, etc. - Incremental updates containing additional or updated labels
+- **`LABEL_SET_ID`**: Data namespace identifier that categorizes the type of ENS data.
+  - **Goal**: To provide different categories of data (e.g., production vs. test) from the same Docker image.
+  - **Configuration**: Choose the ID that matches your needs: 
+    - `subgraph` - Main production dataset from The Graph's ENS subgraph
+    - `searchlight` - Extended dataset with additional label discoveries
+    - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
+    - `testenv` - Small test dataset for development and testing
+
+- **`LABEL_SET_VERSION`**: A non-negative integer representing the incremental dataset version within a label set ID.
+  - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
+  - **Configuration**: Use the highest available version number for the most up-to-date data. Versions start at `0`.
 
 ### Example Combinations
 
@@ -43,5 +51,5 @@ DB_SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
 ```
 
 :::note[Environment Variables Usage]
-The data management environment variables (`DB_SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate database artifact on first run.
+The data management environment variables (`ENSRAINBOW_LABELSET_SERVER_URL`, `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate pre-built database archive on first run.
 :::
