@@ -24,12 +24,6 @@ COPY . .
 # but `pnpm run serve` and `pnpm run validate:lite` do.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# Specifically for ensrainbow, ensure any build steps are done if necessary.
-# If `pnpm run serve` or `validate:lite` require a build step for ensrainbow itself:
-# WORKDIR /app/apps/ensrainbow
-# RUN pnpm run build # If there's a build script for ensrainbow itself
-# WORKDIR /app # Return to root for subsequent general commands if any
-
 # Copy the entrypoint script and make it executable
 # Ensure this path is correct relative to the monorepo root during COPY
 COPY ./apps/ensrainbow/entrypoint.sh /usr/local/bin/entrypoint.sh
