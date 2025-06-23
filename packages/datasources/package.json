@@ -2,7 +2,7 @@
   "name": "@ensnode/datasources",
   "version": "0.28.0",
   "type": "module",
-  "description": "Catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters for ENS and adjacent contracts.",
+  "description": "Catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters.",
   "license": "MIT",
   "repository": {
     "type": "git",

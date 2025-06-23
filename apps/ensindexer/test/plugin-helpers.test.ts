@@ -1,6 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { setupConfigMock } from "./utils/mockConfig";
-setupConfigMock(); // setup config mock before importing dependent modules
 
 import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";

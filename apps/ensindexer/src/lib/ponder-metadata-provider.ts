@@ -19,7 +19,7 @@ export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdF
 );
 
 // setup ENSRainbow version fetching
-export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
+export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher(config.ensRainbowEndpointUrl);
 
 // setup prometheus metrics fetching
 export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.port);

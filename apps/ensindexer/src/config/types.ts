@@ -99,7 +99,7 @@ export interface ENSIndexerConfig {
    *
    * Invariants:
    * - A set of valid {@link PluginName}s with at least one value
-   * - For each plugin, its required datasources must be valid within {@link namespace}
+   * - For each plugin, its required datasources must be defined within the {@link namespace}
    * - For each plugin specified, a valid {@link rpcConfigs} entry is required for
    *   each chain the plugin indexes
    */

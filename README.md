@@ -163,7 +163,7 @@ Software Development Kit for interacting with ENSNode services and data. Include
 
 ### [`packages/datasources`](packages/datasources)
 
-Convenient catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters for ENS and adjacent contracts.
+Convenient catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters.
 
 ### [`packages/ensrainbow-sdk`](packages/ensrainbow-sdk)
 

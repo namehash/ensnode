@@ -29,7 +29,7 @@ export const getDatasourceMap = <T extends ENSNamespace>(
  * Returns the `datasourceName` Datasource within the specified `namespace` namespace.
  *
  * NOTE: the typescript typechecker _will_ enforce validity. i.e. using an invalid `datasourceName`
- * wihtin the specified `namespace` will be a type error.
+ * within the specified `namespace` will be a type error.
  *
  * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to retrieve

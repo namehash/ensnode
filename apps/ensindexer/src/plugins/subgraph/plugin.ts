@@ -10,7 +10,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
-  getDatasourceAsCommon,
+  getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
@@ -27,37 +27,40 @@ const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain, contracts } = getDatasourceAsCommon(config.namespace, DatasourceNames.ENSRoot);
+  const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+    config.namespace,
+    DatasourceNames.ENSRoot,
+  );
 
   return createConfig({
-    networks: networksConfigForChain(chain.id),
+    networks: networksConfigForChain(config, chain.id),
     contracts: {
       [pluginNamespace("RegistryOld")]: {
-        network: networkConfigForContract(chain, contracts.RegistryOld),
+        network: networkConfigForContract(config, chain, contracts.RegistryOld),
         abi: contracts.Registry.abi,
       },
       [pluginNamespace("Registry")]: {
-        network: networkConfigForContract(chain, contracts.Registry),
+        network: networkConfigForContract(config, chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
       [pluginNamespace("BaseRegistrar")]: {
-        network: networkConfigForContract(chain, contracts.BaseRegistrar),
+        network: networkConfigForContract(config, chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
       [pluginNamespace("EthRegistrarControllerOld")]: {
-        network: networkConfigForContract(chain, contracts.EthRegistrarControllerOld),
+        network: networkConfigForContract(config, chain, contracts.EthRegistrarControllerOld),
         abi: contracts.EthRegistrarControllerOld.abi,
       },
       [pluginNamespace("EthRegistrarController")]: {
-        network: networkConfigForContract(chain, contracts.EthRegistrarController),
+        network: networkConfigForContract(config, chain, contracts.EthRegistrarController),
         abi: contracts.EthRegistrarController.abi,
       },
       [pluginNamespace("NameWrapper")]: {
-        network: networkConfigForContract(chain, contracts.NameWrapper),
+        network: networkConfigForContract(config, chain, contracts.NameWrapper),
         abi: contracts.NameWrapper.abi,
       },
       Resolver: {
-        network: networkConfigForContract(chain, contracts.Resolver),
+        network: networkConfigForContract(config, chain, contracts.Resolver),
         abi: contracts.Resolver.abi,
       },
     },

@@ -10,7 +10,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
-  getDatasourceAsCommon,
+  getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
@@ -26,29 +26,32 @@ const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain, contracts } = getDatasourceAsCommon(config.namespace, DatasourceNames.Basenames);
+  const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+    config.namespace,
+    DatasourceNames.Basenames,
+  );
 
   return createConfig({
-    networks: networksConfigForChain(chain.id),
+    networks: networksConfigForChain(config, chain.id),
     contracts: {
       [pluginNamespace("Registry")]: {
-        network: networkConfigForContract(chain, contracts.Registry),
+        network: networkConfigForContract(config, chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
       [pluginNamespace("BaseRegistrar")]: {
-        network: networkConfigForContract(chain, contracts.BaseRegistrar),
+        network: networkConfigForContract(config, chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
       [pluginNamespace("EARegistrarController")]: {
-        network: networkConfigForContract(chain, contracts.EARegistrarController),
+        network: networkConfigForContract(config, chain, contracts.EARegistrarController),
         abi: contracts.EARegistrarController.abi,
       },
       [pluginNamespace("RegistrarController")]: {
-        network: networkConfigForContract(chain, contracts.RegistrarController),
+        network: networkConfigForContract(config, chain, contracts.RegistrarController),
         abi: contracts.RegistrarController.abi,
       },
       Resolver: {
-        network: networkConfigForContract(chain, contracts.Resolver),
+        network: networkConfigForContract(config, chain, contracts.Resolver),
         abi: contracts.Resolver.abi,
       },
     },

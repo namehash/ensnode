@@ -72,7 +72,7 @@ The available `DatasourceName`s are:
 - `threedns-optimism` — 3DNS (on Optimism)
 - `threedns-base` — 3DNS (on Base)
 
-A `Datasource` will only be available within an ENS namespace if it exists, and typescript will enforce that a valid DatasourceName is used within `getDatasource(...)`.
+A `Datasource` will only be available within an ENS namespace if it is defined, and typescript will enforce that a valid DatasourceName is used within `getDatasource(...)`.
 
 ### Datasource
 

@@ -1,7 +1,3 @@
-import config from "@/config";
-import type { ENSIndexerConfig } from "@/config/types";
-import { uniq } from "@/lib/lib-helpers";
-import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 import {
   ContractConfig,
   Datasource,
@@ -12,6 +8,10 @@ import {
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 import { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
+
+import type { ENSIndexerConfig } from "@/config/types";
+import { uniq } from "@/lib/lib-helpers";
+import { constrainContractBlockrange } from "@/lib/ponder-helpers";
 
 /**
  * A factory function that returns a function to create a namespaced contract name for Ponder handlers.
@@ -121,7 +121,7 @@ export function getIndexedChainIds(datasources: Datasource[]): number[] {
 /**
  * Builds a ponder#NetworksConfig for a single, specific chain.
  */
-export function networksConfigForChain(chainId: number) {
+export function networksConfigForChain(config: ENSIndexerConfig, chainId: number) {
   if (!config.rpcConfigs[chainId]) {
     throw new Error(
       `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
@@ -146,13 +146,14 @@ export function networksConfigForChain(chainId: number) {
  * indexing range by the globally configured blockrange.
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
+  config: ENSIndexerConfig,
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,
 ) {
   return {
     [chain.id.toString()]: {
       address: contractConfig.address, // provide per-network address if available
-      ...constrainContractBlockrange(contractConfig.startBlock), // per-network blockrange
+      ...constrainContractBlockrange(config, contractConfig.startBlock), // per-network blockrange
     },
   };
 }
@@ -188,42 +189,47 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
 }
 
 /**
- * CommonDatasourceMap is a helper type necessary to support runtime-conditional Ponder plugins.
+ * DatasourceMapFullyDefinedAtCompileTime is a helper type necessary to support runtime-conditional
+ * Ponder plugins.
  *
- * 1. ENSNode can be configured to index from any defined ENS namespace
+ * 1. ENSNode can be configured to index in the context of different ENS namespaces,
  *   (currently: mainnet, sepolia, holesky, ens-test-env), using a user-specified set of plugins.
  * 2. Ponder's inferred type-checking requires const-typed values, and so those plugins must be able
  *   to define their Ponder config statically, without awareness of whether they are actively executed
  *   or not.
- * 3. To make this work, we provide a CommonDatasourceMap, set to the typeof mainnet's DatasourceMap,
- *   which fully defines all known (if this is ever not the case, a merged type can be used to ensure
- *   that the CommonType has the full set of possible Datasources). Plugins can use the runtime value
- *   returned from {@link getDatasourceMapAsCommon} and by casting it to CommonType we ensure that the
- *   values expected by those plugins pass the typechecker. ENSNode ensures that non-active plugins
- *   are not executed, however, so the issue of type/value mismatch does not occur during execution.
+ * 3. To make this work, we provide a DatasourceMapFullyDefinedAtCompileTime, set to the typeof mainnet's DatasourceMap,
+ *   which fully defines all known Datasources (if this is ever not the case, a merged type can be used
+ *   to ensure that the CommonType has the full set of possible Datasources). Plugins can use the
+ *   runtime value returned from {@link getDatasourceMapAsFullyDefinedAtCompileTime} and by casting it to CommonType we
+ *   ensure that the values expected by those plugins pass the typechecker. ENSNode ensures that
+ *   non-active plugins are not executed, however, so the issue of type/value mismatch does not occur
+ *   during execution.
  */
-type CommonDatasourceMap = ReturnType<typeof getDatasourceMap<"mainnet">>;
+type DatasourceMapFullyDefinedAtCompileTime = ReturnType<typeof getDatasourceMap<"mainnet">>;
 
 /**
  * Returns the DatasourceMap within the specified namespace, cast to the CommonType.
  *
  * This function takes an ENSNamespace identifier and returns the corresponding DatasourceMap.
  * The returned datasources configuration is cast to the global CommonType to ensure that ponder's
- * inferred typing works at type-check time. See {@link CommonDatasourceMap} for more info.
+ * inferred typing works at type-check time. See {@link DatasourceMapFullyDefinedAtCompileTime} for more info.
  *
  * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @returns The DatasourceMap for the specified namespace
  */
-export const getDatasourceMapAsCommon = (namespace: ENSNamespace) =>
-  getDatasourceMap(namespace) as CommonDatasourceMap;
+export const getDatasourceMapAsFullyDefinedAtCompileTime = (namespace: ENSNamespace) =>
+  getDatasourceMap(namespace) as DatasourceMapFullyDefinedAtCompileTime;
 
 /**
  * Returns the `datasourceName` Datasource within the `namespace` namespace, cast as CommonType.
  *
  * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
- * wihtin the specified `namespace` will have a valid return type but be undefined at runtime.
+ * within the specified `namespace` will have a valid return type but be undefined at runtime.
  */
-export const getDatasourceAsCommon = <N extends ENSNamespace, D extends keyof CommonDatasourceMap>(
+export const getDatasourceAsFullyDefinedAtCompileTime = <
+  N extends ENSNamespace,
+  D extends keyof DatasourceMapFullyDefinedAtCompileTime,
+>(
   namespace: N,
   datasourceName: D,
-) => getDatasourceMapAsCommon(namespace)[datasourceName];
+) => getDatasourceMapAsFullyDefinedAtCompileTime(namespace)[datasourceName];

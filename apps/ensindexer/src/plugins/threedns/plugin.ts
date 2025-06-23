@@ -9,7 +9,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
-  getDatasourceAsCommon,
+  getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
@@ -26,33 +26,31 @@ const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain: optimism, contracts: optimismContracts } = getDatasourceAsCommon(
-    config.namespace,
-    DatasourceNames.ThreeDNSOptimism,
-  );
+  const { chain: optimism, contracts: optimismContracts } =
+    getDatasourceAsFullyDefinedAtCompileTime(config.namespace, DatasourceNames.ThreeDNSOptimism);
 
-  const { chain: base, contracts: baseContracts } = getDatasourceAsCommon(
+  const { chain: base, contracts: baseContracts } = getDatasourceAsFullyDefinedAtCompileTime(
     config.namespace,
     DatasourceNames.ThreeDNSBase,
   );
 
   return createConfig({
     networks: {
-      ...networksConfigForChain(optimism.id),
-      ...networksConfigForChain(base.id),
+      ...networksConfigForChain(config, optimism.id),
+      ...networksConfigForChain(config, base.id),
     },
     contracts: {
       [pluginNamespace("ThreeDNSToken")]: {
         network: {
-          ...networkConfigForContract(optimism, optimismContracts.ThreeDNSToken),
-          ...networkConfigForContract(base, baseContracts.ThreeDNSToken),
+          ...networkConfigForContract(config, optimism, optimismContracts.ThreeDNSToken),
+          ...networkConfigForContract(config, base, baseContracts.ThreeDNSToken),
         },
         abi: optimismContracts.ThreeDNSToken.abi,
       },
       [pluginNamespace("Resolver")]: {
         network: {
-          ...networkConfigForContract(optimism, optimismContracts.Resolver),
-          ...networkConfigForContract(base, baseContracts.Resolver),
+          ...networkConfigForContract(config, optimism, optimismContracts.Resolver),
+          ...networkConfigForContract(config, base, baseContracts.Resolver),
         },
         abi: optimismContracts.Resolver.abi,
       },

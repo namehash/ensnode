@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
-import { getDatasourceMapAsCommon } from "@/lib/plugin-helpers";
+import { getDatasourceMapAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
 
 // type alias to highlight the input param of Zod's check() method
@@ -16,7 +16,7 @@ export function invariant_requiredDatasources(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getDatasourceMapAsCommon(config.namespace);
+  const datasources = getDatasourceMapAsFullyDefinedAtCompileTime(config.namespace);
   const availableDatasourceNames = Object.keys(datasources) as DatasourceName[];
   const activePluginNames = config.plugins;
 
@@ -49,7 +49,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getDatasourceMapAsCommon(config.namespace);
+  const datasources = getDatasourceMapAsFullyDefinedAtCompileTime(config.namespace);
 
   for (const pluginName of config.plugins) {
     const datasourceNames = getPlugin(pluginName).requiredDatasources;
@@ -76,7 +76,7 @@ export function invariant_globalBlockrange(
   const { globalBlockrange } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    const datasources = getDatasourceMapAsCommon(config.namespace);
+    const datasources = getDatasourceMapAsFullyDefinedAtCompileTime(config.namespace);
     const indexedChainIds = uniq(
       config.plugins
         .flatMap((pluginName) => getPlugin(pluginName).requiredDatasources)
@@ -111,7 +111,7 @@ export function invariant_validContractConfigs(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getDatasourceMapAsCommon(config.namespace);
+  const datasources = getDatasourceMapAsFullyDefinedAtCompileTime(config.namespace);
   for (const datasourceName of Object.keys(datasources) as DatasourceName[]) {
     const { contracts } = datasources[datasourceName];
 
