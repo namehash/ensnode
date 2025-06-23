@@ -1,4 +1,4 @@
-import type { ENSNamespace } from "@ensnode/datasources";
+import type { ENSNamespaceId } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
 
@@ -18,7 +18,7 @@ export namespace EnsNode {
     env: {
       ACTIVE_PLUGINS: Array<PluginName>;
       DATABASE_SCHEMA: string;
-      NAMESPACE: ENSNamespace;
+      NAMESPACE: ENSNamespaceId;
     };
   }
 

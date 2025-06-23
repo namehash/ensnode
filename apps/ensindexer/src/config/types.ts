@@ -1,5 +1,5 @@
 import { Blockrange } from "@/lib/types";
-import type { ENSNamespace, ENSNamespaces } from "@ensnode/datasources";
+import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -32,9 +32,9 @@ export interface ENSIndexerConfig {
   /**
    * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_NAMESPACE).
    *
-   * See {@link ENSNamespaces} for available namespace identifiers.
+   * See {@link ENSNamespaceIds} for available namespace identifiers.
    */
-  namespace: ENSNamespace;
+  namespace: ENSNamespaceId;
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).

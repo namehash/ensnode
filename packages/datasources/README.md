@@ -38,7 +38,7 @@ const vitaliksResolverAddress = await publicClient.readContract({
 
 ## Documentation
 
-### getDatasource(namespace: ENSNamespace, datasourceName: DatasourceName)
+### getDatasource(namespaceId: ENSNamespaceId, datasourceName: DatasourceName)
 
 The primary export of `@ensnode/datasources` is `getDatasource` which returns a selected `Datasource` within the selected ENS namespace.
 
@@ -55,7 +55,7 @@ const { chain, contracts } = getDatasource('holesky', 'ensroot');
 const { chain, contracts } = getDatasource('mainnet', 'threedns-base');
 ```
 
-The available `ENSNamespace`s are:
+The available `ENSNamespaceId`s are:
 - `mainnet`
 - `sepolia`
 - `holesky`
@@ -66,11 +66,11 @@ The available `ENSNamespace`s are:
 Each ENS namespace my provide **Datasource** entries for any of the possible **DatasourceName**s:
 
 The available `DatasourceName`s are:
-- `ensroot` — ENS Root Contracts
-- `basenames` — Basenames
-- `lineanames` — Linea Names
-- `threedns-optimism` — 3DNS (on Optimism)
-- `threedns-base` — 3DNS (on Base)
+- `ensroot` — ENS Root Contracts, guaranteed to exist
+- `basenames` — Basenames, optional
+- `lineanames` — Linea Names, optional
+- `threedns-optimism` — 3DNS (on Optimism), optional
+- `threedns-base` — 3DNS (on Base), optional
 
 A `Datasource` will only be available within an ENS namespace if it is defined, and typescript will enforce that a valid DatasourceName is used within `getDatasource(...)`.
 
