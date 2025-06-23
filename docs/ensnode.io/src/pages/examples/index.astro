@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import ExamplesPage from "../../components/organisms/ExamplesPage.tsx";
+
+const examples = await getCollection("examples");
+
+// Transform the data for the React component
+const examplesData = examples.map(example => example.data);
+---
+
+<Layout title="GraphQL Query Examples">
+  <ExamplesPage examples={examplesData} client:load />
+
+  <style>
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</Layout>
