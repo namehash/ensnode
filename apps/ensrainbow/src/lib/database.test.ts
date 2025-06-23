@@ -9,7 +9,7 @@ import { vi } from "vitest";
 import {
   ENSRainbowDB,
   IngestionStatus,
-  SCHEMA_VERSION,
+  DB_SCHEMA_VERSION,
   SYSTEM_KEY_INGESTION_STATUS,
   SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
   SYSTEM_KEY_SCHEMA_VERSION,
@@ -413,7 +413,7 @@ describe("schema version", () => {
     const db = await ENSRainbowDB.create(TEST_DB_PATH);
     try {
       const version = await db.getDatabaseSchemaVersion();
-      expect(version).toBe(SCHEMA_VERSION);
+      expect(version).toBe(DB_SCHEMA_VERSION);
     } finally {
       await db.close();
       await rm(TEST_DB_PATH, { recursive: true, force: true });
@@ -424,7 +424,7 @@ describe("schema version", () => {
     const db = await ENSRainbowDB.create(TEST_DB_PATH);
     try {
       // Test setting a new version
-      const newVersion = SCHEMA_VERSION + 1;
+      const newVersion = DB_SCHEMA_VERSION + 1;
       await db.setDatabaseSchemaVersion(newVersion);
       const version = await db.getDatabaseSchemaVersion();
       expect(version).toBe(newVersion);
@@ -452,7 +452,7 @@ describe("schema version", () => {
     const db = await ENSRainbowDB.create(TEST_DB_PATH);
     try {
       // Set a different schema version
-      await db.setDatabaseSchemaVersion(SCHEMA_VERSION + 1);
+      await db.setDatabaseSchemaVersion(DB_SCHEMA_VERSION + 1);
       await db.setLabelSetId("test-label-set-id");
       await db.setHighestLabelSetVersion(0);
       await db.markIngestionFinished();
@@ -526,7 +526,7 @@ describe("ENSRainbowDB.open", () => {
   it("should successfully open an existing database", async () => {
     // First create a database
     const db = await ENSRainbowDB.create(tempDir);
-    await db.setDatabaseSchemaVersion(SCHEMA_VERSION);
+    await db.setDatabaseSchemaVersion(DB_SCHEMA_VERSION);
     await db.setLabelSetId("test-label-set-id");
     await db.setHighestLabelSetVersion(0);
     await db.markIngestionFinished();
@@ -538,7 +538,7 @@ describe("ENSRainbowDB.open", () => {
     try {
       // Check that schema version is correct
       const version = await reopenedDb.getDatabaseSchemaVersion();
-      expect(version).toBe(SCHEMA_VERSION);
+      expect(version).toBe(DB_SCHEMA_VERSION);
     } finally {
       await reopenedDb.close();
     }
@@ -547,7 +547,7 @@ describe("ENSRainbowDB.open", () => {
   it("should validate schema version when opening", async () => {
     // Create a database with a different schema version
     const db = await ENSRainbowDB.create(tempDir);
-    await db.setDatabaseSchemaVersion(SCHEMA_VERSION + 1);
+    await db.setDatabaseSchemaVersion(DB_SCHEMA_VERSION + 1);
     await db.close();
 
     // Try to open it - should throw error due to schema mismatch
@@ -572,7 +572,7 @@ describe("ENSRainbowDB.openOrCreate", () => {
     try {
       // Check schema version to confirm it's properly initialized
       const version = await db.getDatabaseSchemaVersion();
-      expect(version).toBe(SCHEMA_VERSION);
+      expect(version).toBe(DB_SCHEMA_VERSION);
     } finally {
       await db.close();
     }

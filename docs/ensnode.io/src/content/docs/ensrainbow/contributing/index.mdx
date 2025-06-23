@@ -116,7 +116,7 @@ label-labelhash pairs
 
 As an alternative to ingesting `.ensrainbow` files sequentially, you can download pre-built LevelDB database artifacts. These are `.tgz` archives containing a complete data directory. Use the `download-database-artifact.sh` script from `apps/ensrainbow/`.
 
-The script requires `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` (highest label set version included in the artifact).
+The script downloads a tarball (`.tgz`) containing the database. The script requires `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` (highest label set version included in the artifact).
 
 ```bash
 # Navigate to the script directory (or call it from the monorepo root)
@@ -289,20 +289,20 @@ You can also run ENSRainbow with the test data using Docker. This involves runni
     ```
 
 2.  **Run the ENSRainbow container with test data configuration:**
-    You'll need to mount a volume for persistent storage and set the `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` environment variables to point to the test data.
+    You'll need to mount a volume for persistent storage and set the `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` environment variables to point to the test data.
     ```bash
     # Create a directory on your host machine for test data, e.g., ~/my_ensrainbow_test_data
     mkdir -p ~/my_ensrainbow_test_data
 
     docker run -d --name ensrainbow_test_env \
       -v ~/my_ensrainbow_test_data:/app/apps/ensrainbow/data \
-      -e SCHEMA_VERSION="v3" \
+      -e DB_SCHEMA_VERSION="v3" \
       -e LABEL_SET_ID="testenv" \
       -e LABEL_SET_VERSION="0" \
       -p 3223:3223 \
       ghcr.io/namehash/ensnode/ensrainbow:latest
     ```
-    *   Adjust `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` if the test data parameters differ. Typically, for the standard test data, `LABEL_SET_ID` is `testenv` and `LABEL_SET_VERSION` is `0`. The `SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v3`).
+    *   Adjust `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` if the test data parameters differ. Typically, for the standard test data, `LABEL_SET_ID` is `testenv` and `LABEL_SET_VERSION` is `0`. The `DB_SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v3`).
 
 This setup allows the `entrypoint.sh` script within the container to download the `testenv-0` database artifact into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
 
@@ -312,7 +312,7 @@ This test environment setup is particularly useful for running ENS tests (i.e. e
 
 When using ENSRainbow with Docker, the following environment variables control which database artifact is downloaded and used:
 
-- **`SCHEMA_VERSION`**: The database schema version (e.g., `v3`). This determines the format and structure of the database artifacts. Use the latest available version unless you have specific compatibility requirements.
+- **`DB_SCHEMA_VERSION`**: The database schema version (e.g., `v3`). This determines the format and structure of the database artifacts. Use the latest available version unless you have specific compatibility requirements.
 
 - **`LABEL_SET_ID`**: The data namespace identifier that categorizes the type of ENS data:
   - `subgraph` - Main production dataset from The Graph's ENS subgraph
@@ -327,13 +327,13 @@ When using ENSRainbow with Docker, the following environment variables control w
 **Example combinations:**
 ```bash
 # Latest production data
-SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
 # Test environment data
-SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
 
 # Extended discovery data
-SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
 ```
 
 ### Persistent Storage with Docker
@@ -343,7 +343,7 @@ The ENSRainbow Docker image (built with the combined Dockerfile) now includes an
 **How it Works:**
 
 1.  **On First Run (with an empty volume):**
-    *   The script requires `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` environment variables to be set.
+    *   The script requires `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` environment variables to be set.
     *   It downloads the specified database artifact into `/app/apps/ensrainbow/data` (the designated data directory).
     *   After successful download, extraction, and validation, it creates a marker file (`.ensrainbow_db_ready`) in the data directory.
 2.  **On Subsequent Runs:**
@@ -363,7 +363,7 @@ mkdir -p ~/my_ensrainbow_data
 
 docker run -d --name ensrainbow_persistent \
   -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="v3" \
   -e LABEL_SET_ID="subgraph" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
@@ -378,14 +378,14 @@ docker volume create ensrainbow_db_volume
 
 docker run -d --name ensrainbow_persistent \
   -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="v3" \
   -e LABEL_SET_ID="subgraph" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
 
-Adjust `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` as needed for the initial download.
+Adjust `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` as needed for the initial download.
 
 Using a volume ensures that your downloaded and ingested data is not lost when the container stops or is removed, saving time and bandwidth on subsequent runs.
 

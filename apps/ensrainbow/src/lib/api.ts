@@ -5,7 +5,7 @@ import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
 
 import packageJson from "@/../package.json";
-import { ENSRainbowDB, SCHEMA_VERSION, parseNonNegativeInteger } from "@/lib/database";
+import { ENSRainbowDB, DB_SCHEMA_VERSION, parseNonNegativeInteger } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { logger } from "@/utils/logger";
 
@@ -97,7 +97,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       status: StatusCode.Success,
       versionInfo: {
         version: packageJson.version,
-        schema_version: SCHEMA_VERSION,
+        schema_version: DB_SCHEMA_VERSION,
         label_set_id: server.getLabelSetId(),
         highest_label_set_version: server.getHighestLabelSetVersion(),
       },

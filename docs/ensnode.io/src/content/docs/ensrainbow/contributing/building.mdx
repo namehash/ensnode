@@ -11,7 +11,7 @@ ENSRainbow runs as a Docker image, which includes the application server and scr
 
 The ENSRainbow Docker image is designed to be lightweight. The LevelDB database required for operation is **not** baked into the image during the build process. Instead, data is downloaded and managed at **runtime** by an `entrypoint.sh` script within the container. This process is triggered when you run the container with:
 1.  A Docker volume mounted to `/app/apps/ensrainbow/data` (the internal data path).
-2.  Specific environment variables set: `SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION`.
+2.  Specific environment variables set: `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION`.
 
 This approach allows for flexible data updates and management without needing to rebuild the application image.
 
@@ -47,7 +47,7 @@ The ENSRainbow application image (whether self-built or pulled from GHCR) uses t
 
 When the container starts:
 -   The script checks the designated data directory (mounted via a volume, typically at `/app/apps/ensrainbow/data`).
--   If the correct data (matching `SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION` environment variables) is present and valid, the server starts.
+-   If the correct data (matching `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION` environment variables) is present and valid, the server starts.
 -   If data is missing, outdated, or invalid, the script will attempt to download the appropriate database artifact.
 -   A marker file (`.ensrainbow_db_ready`) is used within the data directory to indicate a successfully prepared database.
 

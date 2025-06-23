@@ -20,7 +20,7 @@ mkdir -p ~/my_ensrainbow_data
 # Run with test environment data
 docker run -d --name ensrainbow \
   -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="v3" \
   -e LABEL_SET_ID="testenv" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
@@ -42,7 +42,7 @@ mkdir -p ~/ensrainbow_production_data
 # Run with production data
 docker run -d --name ensrainbow_production \
   -v ~/ensrainbow_production_data:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="v3" \
   -e LABEL_SET_ID="subgraph" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
@@ -53,7 +53,7 @@ docker run -d --name ensrainbow_production \
 
 The following environment variables are **required** for the initial database download:
 
-- **`SCHEMA_VERSION`**: Database schema version (e.g., `v3`)
+- **`DB_SCHEMA_VERSION`**: Database schema version (e.g., `v3`)
 - **`LABEL_SET_ID`**: Data label set ID:
   - `subgraph` - Main production dataset from The Graph's ENS subgraph
   - `searchlight` - Extended dataset with additional label discoveries
@@ -76,7 +76,7 @@ docker volume create ensrainbow_db_volume
 # Run with named volume
 docker run -d --name ensrainbow \
   -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="v3" \
   -e LABEL_SET_ID="subgraph" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
@@ -92,7 +92,7 @@ mkdir -p ~/ensrainbow_data
 # Run with host directory mount
 docker run -d --name ensrainbow \
   -v ~/ensrainbow_data:/app/apps/ensrainbow/data \
-  -e SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="v3" \
   -e LABEL_SET_ID="subgraph" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
@@ -111,7 +111,7 @@ services:
     container_name: ensrainbow
     image: ghcr.io/namehash/ensnode/ensrainbow:latest
     environment:
-      - SCHEMA_VERSION=v3
+      - DB_SCHEMA_VERSION=v3
       - LABEL_SET_ID=subgraph
       - LABEL_SET_VERSION=0
     volumes:
@@ -134,7 +134,7 @@ services:
     container_name: ensrainbow_test
     image: ghcr.io/namehash/ensnode/ensrainbow:latest
     environment:
-      - SCHEMA_VERSION=v3
+      - DB_SCHEMA_VERSION=v3
       - LABEL_SET_ID=testenv
       - LABEL_SET_VERSION=0
     volumes:

@@ -28,7 +28,7 @@ export const SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION = new Uint8Array([0xff, 0xff, 
  * Stores the label set ID as a string
  */
 export const SYSTEM_KEY_LABEL_SET_ID = new Uint8Array([0xff, 0xff, 0xff, 0xfb]) as ByteArray;
-export const SCHEMA_VERSION = 3;
+export const DB_SCHEMA_VERSION = 3;
 
 // Ingestion status values
 export const IngestionStatus = {
@@ -161,7 +161,7 @@ export class ENSRainbowDB {
       logger.info("Opening database...");
       await db.open();
       const dbInstance = new ENSRainbowDB(db, dataDir);
-      await dbInstance.setDatabaseSchemaVersion(SCHEMA_VERSION);
+      await dbInstance.setDatabaseSchemaVersion(DB_SCHEMA_VERSION);
       return dbInstance;
     } catch (error) {
       if (
@@ -516,8 +516,8 @@ export class ENSRainbowDB {
    */
   public async validateSchemaVersion(): Promise<void> {
     const schemaVersion = await this.getDatabaseSchemaVersion();
-    if (schemaVersion !== SCHEMA_VERSION) {
-      const schemaVersionMismatchError = `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`;
+    if (schemaVersion !== DB_SCHEMA_VERSION) {
+      const schemaVersionMismatchError = `Database schema version mismatch: expected=${DB_SCHEMA_VERSION}, actual=${schemaVersion}`;
       const errorMsg = generatePurgeErrorMessage(schemaVersionMismatchError);
       logger.error(errorMsg);
       // await this.close();

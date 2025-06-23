@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # This script downloads a specific ENS database artifact (.tgz), its checksum,
-# and a license file. It requires SCHEMA_VERSION, LABEL_SET_ID, and LABEL_SET_VERSION as
+# and a license file. It requires DB_SCHEMA_VERSION, LABEL_SET_ID, and LABEL_SET_VERSION as
 # command-line arguments.
 
 # Usage function
 usage() {
-    echo "Usage: $0 <SCHEMA_VERSION> <LABEL_SET_ID> <LABEL_SET_VERSION>"
+    echo "Usage: $0 <DB_SCHEMA_VERSION> <LABEL_SET_ID> <LABEL_SET_VERSION>"
     echo "Example: $0 v1 eth mainnet"
     exit 1
 }
@@ -17,7 +17,7 @@ if [ "$#" -ne 3 ]; then
     usage
 fi
 
-SCHEMA_VERSION="$1"
+DB_SCHEMA_VERSION="$1"
 LABEL_SET_ID="$2"
 LABEL_SET_VERSION="$3"
 
@@ -27,13 +27,13 @@ BASE_URL="https://bucket.ensrainbow.io"
 
 # Construct file names and paths based on arguments
 DATA_FILE_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz"
-SERVER_DATA_PATH="databases/${SCHEMA_VERSION}/${DATA_FILE_BASENAME}"
-SERVER_CHECKSUM_PATH="databases/${SCHEMA_VERSION}/${DATA_FILE_BASENAME}.sha256sum"
+SERVER_DATA_PATH="databases/${DB_SCHEMA_VERSION}/${DATA_FILE_BASENAME}"
+SERVER_CHECKSUM_PATH="databases/${DB_SCHEMA_VERSION}/${DATA_FILE_BASENAME}.sha256sum"
 SERVER_LICENSE_PATH="THE_GRAPH_LICENSE.txt" # Common license file
 
 echo "ENS Database Artifact Download Script"
 echo "-------------------------------------"
-echo "Schema Version: $SCHEMA_VERSION"
+echo "Database Schema Version: $DB_SCHEMA_VERSION"
 echo "Label Set ID: $LABEL_SET_ID"
 echo "Label Set Version: $LABEL_SET_VERSION"
 echo "Output directory: $OUT_DIR"
@@ -41,7 +41,7 @@ echo "Base URL: $BASE_URL"
 echo ""
 
 # Derived local target paths
-LOCAL_ARTIFACT_DIR_PATH="$OUT_DIR/databases/${SCHEMA_VERSION}"
+LOCAL_ARTIFACT_DIR_PATH="$OUT_DIR/databases/${DB_SCHEMA_VERSION}"
 TARGET_DATA_FILE_PATH="${LOCAL_ARTIFACT_DIR_PATH}/${DATA_FILE_BASENAME}"
 TARGET_CHECKSUM_FILE_PATH="${LOCAL_ARTIFACT_DIR_PATH}/${DATA_FILE_BASENAME}.sha256sum"
 TARGET_LICENSE_FILE_PATH="$OUT_DIR/${SERVER_LICENSE_PATH}" # License in base OUT_DIR
@@ -143,7 +143,7 @@ fi
 echo ""
 echo "---------------------------------------------------"
 echo "ENS Database Artifact download and checksum verification complete."
-echo "Schema: $SCHEMA_VERSION, Label Set ID: $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION"
+echo "Database Schema Version: $DB_SCHEMA_VERSION, Label Set ID: $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION"
 echo "Files are located in respective subdirectories of: $OUT_DIR"
 echo "  - Data:     $TARGET_DATA_FILE_PATH"
 echo "  - Checksum: $TARGET_CHECKSUM_FILE_PATH"

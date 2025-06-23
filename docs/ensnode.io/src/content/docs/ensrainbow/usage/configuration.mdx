@@ -17,7 +17,7 @@ ENSRainbow can be configured via environment variables.
 
 The following environment variables are required when running ENSRainbow with Docker for initial database download:
 
-- **`SCHEMA_VERSION`**: Database schema version (e.g., `v3`). Use the latest available version unless you have specific compatibility requirements.
+- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `v3`). This is not related to the API version. This version ensures compatibility between the ENSRainbow software and the structure of its database. It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
 - **`LABEL_SET_ID`**: Data namespace identifier that categorizes the type of ENS data:
   - `subgraph` - Main production dataset from The Graph's ENS subgraph
@@ -33,15 +33,15 @@ The following environment variables are required when running ENSRainbow with Do
 
 ```bash
 # Latest production data
-SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
 # Test environment data
-SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
 
 # Extended discovery data
-SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
 ```
 
 :::note[Environment Variables Usage]
-The data management environment variables (`SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate database artifact on first run.
+The data management environment variables (`DB_SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate database artifact on first run.
 :::

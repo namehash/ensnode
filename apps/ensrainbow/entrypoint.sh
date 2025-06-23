@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Default values (can be overridden by environment variables)
-SCHEMA_VERSION="${SCHEMA_VERSION:-}"
+DB_SCHEMA_VERSION="${DB_SCHEMA_VERSION:-}"
 LABEL_SET_ID="${LABEL_SET_ID:-}"
 LABEL_SET_VERSION="${LABEL_SET_VERSION:-}"
 PORT="${PORT:-3223}"
@@ -18,15 +18,15 @@ DB_SUBDIR_PATH="${DATA_DIR_NAME}/data-${LABEL_SET_ID}_${LABEL_SET_VERSION}"
 
 # Ensure required variables for download are set if we might download
 if [ ! -f "${MARKER_FILE}" ]; then
-  if [ -z "$SCHEMA_VERSION" ] || [ -z "$LABEL_SET_ID" ] || [ -z "$LABEL_SET_VERSION" ]; then
-    echo "Error: SCHEMA_VERSION, LABEL_SET_ID, and LABEL_SET_VERSION environment variables must be set for initial ENSRainbow database download."
+  if [ -z "$DB_SCHEMA_VERSION" ] || [ -z "$LABEL_SET_ID" ] || [ -z "$LABEL_SET_VERSION" ]; then
+    echo "Error: DB_SCHEMA_VERSION, LABEL_SET_ID, and LABEL_SET_VERSION environment variables must be set for initial ENSRainbow database download."
     exit 1
   fi
 fi
 
 echo "ENSRainbow Startup Script"
 echo "-------------------------"
-echo "Schema Version: $SCHEMA_VERSION"
+echo "Database Schema Version: $DB_SCHEMA_VERSION"
 echo "Label Set ID: $LABEL_SET_ID"
 echo "Label Set Version: $LABEL_SET_VERSION"
 echo "Target Port: $PORT"
@@ -58,8 +58,8 @@ if [ ! -f "${MARKER_FILE}" ]; then
     echo "Database not found or not ready. Proceeding with download and extraction."
 
     # 1. Ensure required variables for download are set (double check, crucial if logic path leads here)
-    if [ -z "$SCHEMA_VERSION" ] || [ -z "$LABEL_SET_ID" ] || [ -z "$LABEL_SET_VERSION" ]; then
-        echo "Critical Error: SCHEMA_VERSION, LABEL_SET_ID, and LABEL_SET_VERSION must be set to download the database."
+    if [ -z "$DB_SCHEMA_VERSION" ] || [ -z "$LABEL_SET_ID" ] || [ -z "$LABEL_SET_VERSION" ]; then
+        echo "Critical Error: DB_SCHEMA_VERSION, LABEL_SET_ID, and LABEL_SET_VERSION must be set to download the database."
         exit 1
     fi
 
@@ -71,8 +71,8 @@ if [ ! -f "${MARKER_FILE}" ]; then
     mkdir -p "${DOWNLOAD_TEMP_DIR}"
 
     # 3. Download the database artifact
-    echo "Downloading database artifact (Schema: $SCHEMA_VERSION, Label Set ID: $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION)..."
-    if ! OUT_DIR="${DOWNLOAD_TEMP_DIR}" "${APP_DIR}/download-database-artifact.sh" "$SCHEMA_VERSION" "$LABEL_SET_ID" "$LABEL_SET_VERSION"; then
+    echo "Downloading database artifact (Schema: $DB_SCHEMA_VERSION, Label Set ID: $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION)..."
+    if ! OUT_DIR="${DOWNLOAD_TEMP_DIR}" "${APP_DIR}/download-database-artifact.sh" "$DB_SCHEMA_VERSION" "$LABEL_SET_ID" "$LABEL_SET_VERSION"; then
       echo "Error: Failed to download database artifact."
       ls -R "${DOWNLOAD_TEMP_DIR}" # List contents for debugging
       rm -rf "${DOWNLOAD_TEMP_DIR}"
@@ -80,7 +80,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
     fi
 
     ARTIFACT_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz"
-    ARTIFACT_PATH="${DOWNLOAD_TEMP_DIR}/databases/${SCHEMA_VERSION}/${ARTIFACT_BASENAME}"
+    ARTIFACT_PATH="${DOWNLOAD_TEMP_DIR}/databases/${DB_SCHEMA_VERSION}/${ARTIFACT_BASENAME}"
 
     if [ ! -f "$ARTIFACT_PATH" ]; then
         echo "Error: Expected artifact file not found at $ARTIFACT_PATH after download attempt."
