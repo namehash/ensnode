@@ -1,5 +1,4 @@
 ---
-"@ensnode/ens-deployments": minor
 "ensindexer": minor
 "ensadmin": minor
 ---
