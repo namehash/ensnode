@@ -2,7 +2,7 @@
 
 import { useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
-import { Duration, FormattedDate, RelativeTime } from "@/components/recent-registrations/utils";
+import {Duration, FormattedDate, getNameWrapperAddress, RelativeTime} from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -18,6 +18,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
+import {getEnsAppUrl, getEnsMetadataUrl} from "@/components/identity/utils";
+import { useEnsName } from "wagmi";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
@@ -41,6 +43,13 @@ export function RecentRegistrations() {
   const indexingStatus = useIndexingStatusQuery(searchParams);
   const indexedChainId = useENSRootDatasourceChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
+
+  //TODO: establish the level where we would handle undefined results!!!
+  const ensAppUrl = getEnsAppUrl(indexingStatus.data.env.NAMESPACE);
+  const ensMetadataUrl = getEnsMetadataUrl(indexingStatus.data.env.NAMESPACE);
+
+  const nameWrapperAddress = getNameWrapperAddress(indexingStatus.data.env.NAMESPACE);
+  //TODO: this might be moved --> placing it here requires loads of prop drilling!
 
   useEffect(() => {
     setIsClient(true);
