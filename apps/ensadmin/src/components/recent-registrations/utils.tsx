@@ -1,6 +1,6 @@
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
+import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
-import {millisecondsInSecond} from "date-fns/constants";
 
 /**
  * Client-only date formatter component

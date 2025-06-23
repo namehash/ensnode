@@ -1,8 +1,8 @@
+import { UnixTimestampInSeconds } from "@/components/recent-registrations/utils";
 import { ensAdminVersion } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
-import {UnixTimestampInSeconds} from "@/components/recent-registrations/utils";
 
 /**
  * The data model returned by a GraphQL query for registrations.
