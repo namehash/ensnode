@@ -1,4 +1,5 @@
 import { type SavedQuery, SubgraphGraphiQLEditor } from "@/components/graphiql-editor";
+import { SavedQueryCategory } from "@/components/graphiql-editor/plugins/saved-queries";
 import { defaultEnsNodeUrl } from "@/lib/env";
 
 type PageProps = {
@@ -12,9 +13,9 @@ const savedQueries = [
     operationName: "GetLatestDomains",
     id: "1",
     name: "Get Latest Domains",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
-      "Retrieves the most recently created domains in descending order by creation time. Useful for monitoring new domain registrations and understanding recent activity on the ENS network.",
+      "Retrieves the most recently created domains in descending order by creation time.",
     query: `query GetLatestDomains($first: Int!) {
   domains(orderBy: createdAt, orderDirection: desc, first: $first) {
     name
@@ -31,13 +32,13 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "RecentRegistrationsQuery",
+    operationName: "LatestRegistrations",
     id: "21",
-    name: "Get Recent Registrations",
-    category: "Registrar",
+    name: "Get Latest Registrations",
+    category: SavedQueryCategory.REGISTRAR,
     description:
       "Retrieves the most recent domain registrations ordered by registration date in descending order. Shows registration details including expiry dates and ownership information for newly registered domains.",
-    query: `query RecentRegistrationsQuery($first: Int!) {
+    query: `query LatestRegistrations($first: Int!) {
   registrations(first: $first, orderBy: registrationDate, orderDirection: desc) {
     registrationDate
     expiryDate
@@ -69,7 +70,7 @@ const savedQueries = [
     operationName: "GetDomainsWithPagination",
     id: "1a",
     name: "Get Domains with Pagination",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Fetches domains with pagination support, ordered by creation time in ascending order. Use this when you need to iterate through all domains systematically or implement pagination in your application.",
     query: `query GetDomainsWithPagination($first: Int!, $skip: Int) {
@@ -94,7 +95,7 @@ const savedQueries = [
     operationName: "allDomainsByCreationTime",
     id: "22",
     name: "Get All Domains with Pagination by Creation Time",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves domains in batches for pagination, ordered by creation time in ascending order. Excludes reverse records and null names. Use the lastCreatedAt parameter to paginate through all domains by passing the createdAt timestamp of the last domain from the previous batch.",
     query: `query allDomainsByCreationTime($lastCreatedAt: BigInt, $first: Int!) {
@@ -122,7 +123,7 @@ const savedQueries = [
     operationName: "GetDomainByNamehash",
     id: "2",
     name: "Get Domain by Namehash",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves a specific domain using its namehash (the unique identifier for ENS names). The namehash is the cryptographic hash of the domain name.",
     query: `query GetDomainByNamehash($id: String!) {
@@ -147,9 +148,9 @@ const savedQueries = [
     operationName: "GetDomainByName",
     id: "2a",
     name: "Get Domain by Name",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
-      "Looks up a domain by its human-readable name (e.g., 'ens.eth'). This is more user-friendly than using namehash but may be slightly less efficient for programmatic access.",
+      "Looks up a domain by its human-readable name (e.g., 'ens.eth'). This is user-friendly for ad-hoc queries, but not recommended for programmatic access because names are not stable identifiers. Use the 'Get Domain by Namehash' query for reliable lookups.",
     query: `query GetDomainByName($name: String!) {
   domains(where: {name: $name}) {
     id
@@ -170,13 +171,13 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "GetDomainsByLabel",
+    operationName: "GetDomainsByChildmostLabel",
     id: "2c",
     name: "Get Domains by the childmost-label substring",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Searches for domains containing a specific substring in their label (the leftmost part of the domain name). For example, searching for 'ens' would find 'ens.eth', 'myens.eth', etc. Useful for finding related domains or performing fuzzy searches.",
-    query: `query GetDomainsByLabel($label: String!) {
+    query: `query GetDomainsByChildmostLabel($label: String!) {
   domains(where: {labelName_contains: $label}) {
     id
     name
@@ -199,7 +200,7 @@ const savedQueries = [
     operationName: "getLabelByLabelhash",
     id: "3",
     name: "Get Label by Labelhash",
-    category: "Label",
+    category: SavedQueryCategory.LABEL,
     description:
       "Reverse lookup to find the human-readable label from its labelhash. This is useful when you have a labelhash and need to determine what the actual text label is.",
     query: `query getLabelByLabelhash($labelhash: String!) {
@@ -217,13 +218,13 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "GetNameHistory",
+    operationName: "GetDomainHistory",
     id: "4",
-    name: "Get Complete Name History",
-    category: "Domain",
+    name: "Get Complete Domain History",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves the complete historical timeline of events for a domain, including ownership transfers, resolver changes, registrations, renewals, and all resolver record updates. This provides an audit trail of activities related to the domain.",
-    query: `query GetNameHistory($id: String!) {
+    query: `query GetDomainHistory($id: String!) {
   domain(id: $id) {
     name
     events {
@@ -337,7 +338,7 @@ const savedQueries = [
     operationName: "GetDomainEvents",
     id: "5",
     name: "Get Domain Events Only",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves only the domain-level events (transfers, ownership changes, wrapping events) without registration or resolver events. Use this when you're specifically interested in domain ownership and management events.",
     //events(orderBy: blockNumber, orderDirection: desc) is not working
@@ -387,7 +388,7 @@ const savedQueries = [
     operationName: "GetResolverEvents",
     id: "6",
     name: "Get Resolver Events Only",
-    category: "Resolver",
+    category: SavedQueryCategory.RESOLVER,
     description:
       "Retrieves only the resolver-related events (address changes, text record updates, contenthash changes) for a domain. Useful when you're tracking how a domain's records have been updated over time.",
     //events(orderBy: blockNumber, orderDirection: desc) is not working
@@ -436,7 +437,7 @@ const savedQueries = [
     operationName: "GetDomainsForAddress",
     id: "7",
     name: "Get Domains for Address (owner, registrant, wrappedOwner, or resolvedAddress)",
-    category: "Account",
+    category: SavedQueryCategory.ACCOUNT,
     description:
       "Finds all domains associated with an Ethereum address in any capacity - as owner, registrant, wrapped owner, or as the resolved address. Excludes reverse records and expired domains. This is a comprehensive way to find domains connected to an address.",
     query: `query GetDomainsForAddress($owner: String!, $first: Int!, $orderBy: Domain_orderBy!, $orderDirection: OrderDirection!, $date: BigInt!) {
@@ -504,7 +505,7 @@ const savedQueries = [
     operationName: "getOwnedInRegistryDomains",
     id: "8",
     name: "Get Owned In Registry Domains Only",
-    category: "Account",
+    category: SavedQueryCategory.ACCOUNT,
     description:
       "Retrieves domains where the specified address is the owner in the ENS registry (not registrant or wrapped owner). This shows domains where the address has direct control over the ENS records but may not be the original registrant.",
     query: `query getOwnedInRegistryDomains($owner: String!, $first: Int!, $date: BigInt!) {
@@ -551,7 +552,7 @@ const savedQueries = [
     operationName: "GetRegisteredDomains",
     id: "9",
     name: "Get Registered Domains Only",
-    category: "Account",
+    category: SavedQueryCategory.ACCOUNT,
     description:
       "Retrieves domains where the specified address is the original registrant (the one who initially registered the .eth domain). This shows domains the address actually purchased and registered, not just ones they received or control.",
     query: `query GetRegisteredDomains($registrant: String!, $first: Int!, $date: BigInt!) {
@@ -600,7 +601,7 @@ const savedQueries = [
     operationName: "GetNamesIncludingExpired",
     id: "10",
     name: "Get Names Including Expired",
-    category: "Account",
+    category: SavedQueryCategory.ACCOUNT,
     description:
       "Retrieves all domains associated with an address (as owner, registrant, or wrapped owner) including those that have expired. Useful for historical analysis or when you need to see the domain portfolio of an address.",
     query: `query GetNamesIncludingExpired($owner: String!, $first: Int!) {
@@ -652,7 +653,7 @@ const savedQueries = [
     operationName: "GetSubgraphRegistrant",
     id: "11",
     name: "Get Registrant by Labelhash", // works with ENS only?
-    category: "Registrar",
+    category: SavedQueryCategory.REGISTRAR,
     description:
       "Looks up registration information using a labelhash. This is primarily used for .eth domains and provides details about who registered the domain, when it was registered, when it expires, and what it cost. Note: This mainly works with .eth domains.",
     query: `query GetSubgraphRegistrant($id: String!) {
@@ -682,7 +683,7 @@ const savedQueries = [
     operationName: "GetSubnames",
     id: "12",
     name: "Get Subdomains",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves all subdomains under a given parent domain, filtering out expired domains and empty records. This is useful for exploring the subdomain hierarchy and finding active subdomains under a particular domain.",
     query: `query GetSubnames($id: String!, $first: Int!, $orderBy: Domain_orderBy!, $orderDirection: OrderDirection!, $date: BigInt!) {
@@ -744,7 +745,7 @@ const savedQueries = [
     operationName: "SearchSubnames",
     id: "13",
     name: "Search Subdomains by Label",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Searches for subdomains under a parent domain that contain a specific text string in their label. This enables fuzzy searching within a domain's subdomain space, useful for finding related or similarly named subdomains.",
     query: `query SearchSubnames($id: String!, $searchString: String!, $first: Int!, $date: BigInt!) {
@@ -801,7 +802,7 @@ const savedQueries = [
     operationName: "GetSubnamesIncludingExpired",
     id: "14",
     name: "Get Subdomains Including Expired",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves all subdomains under a parent domain, including those that have expired. This provides a complete historical view of all subdomains that have ever existed under the parent domain.",
     query: `query GetSubnamesIncludingExpired($id: String!, $first: Int!) {
@@ -846,13 +847,13 @@ const savedQueries = [
     ),
   },
   {
-    operationName: "GetRecentSubnames",
+    operationName: "GetLatestSubnames",
     id: "15",
-    name: "Get Recently Created Subdomains",
-    category: "Registrar",
+    name: "Get Latest Subdomains",
+    category: SavedQueryCategory.REGISTRAR,
     description:
       "Retrieves the most recently created subdomains under a parent domain, ordered by creation time. This is useful for monitoring new subdomain activity and tracking the growth of a domain's subdomain ecosystem.",
-    query: `query GetRecentSubnames($id: String!, $first: Int!, $date: BigInt!) {
+    query: `query GetLatestSubnames($id: String!, $first: Int!, $date: BigInt!) {
   domain(id: $id) {
     name
     subdomains(
@@ -907,7 +908,7 @@ const savedQueries = [
     operationName: "GetSubgraphRecords",
     id: "16",
     name: "Get Domain Records (Inherited Resolver)",
-    category: "Resolver",
+    category: SavedQueryCategory.RESOLVER,
     description:
       "Retrieves a domain's resolver information including the types of records it supports (text records and coin types). This uses the domain's current resolver and shows what kind of records are available for the domain.",
     query: `query GetSubgraphRecords($id: String!) {
@@ -935,7 +936,7 @@ const savedQueries = [
     operationName: "GetSubgraphRecordsCustomResolver",
     id: "17",
     name: "Get Domain Records (Custom Resolver)",
-    category: "Resolver",
+    category: SavedQueryCategory.RESOLVER,
     description:
       "Retrieves domain information along with records from a specific resolver address.",
     query: `query GetSubgraphRecordsCustomResolver($id: String!, $resolverId: String!) {
@@ -968,7 +969,7 @@ const savedQueries = [
     operationName: "GetResolverDetails",
     id: "18",
     name: "Get Resolver Details by Address",
-    category: "Resolver",
+    category: SavedQueryCategory.RESOLVER,
     description:
       "Retrieves detailed information about a resolver by its contract address. This shows the domains using this resolver and what types of records it supports.",
     query: `query GetResolverDetails($resolverAddress: String!) {
@@ -995,7 +996,7 @@ const savedQueries = [
     operationName: "GetDomainTextRecords",
     id: "19",
     name: "Get Domain Text Records",
-    category: "Resolver",
+    category: SavedQueryCategory.RESOLVER,
     description:
       "Retrieves the current text record keys for a domain and all resolver events history. The 'texts' field shows currently set text record keys, while 'events' shows all resolver events including TextChanged, ContenthashChanged, AddrChanged, and MulticoinAddrChanged.",
     //events(where: { type_in: ["TextChanged"] }, first: 20) is not working
@@ -1029,7 +1030,7 @@ const savedQueries = [
     operationName: "GetHistoricalResolverRecords",
     id: "20",
     name: "Get Historical Resolver Records Evolution",
-    category: "Resolver",
+    category: SavedQueryCategory.RESOLVER,
     description:
       "Provides a comprehensive view of how a domain's resolver records have evolved over time. This tracks resolver changes and the history of text records, address records, and contenthash changes across all resolvers the domain has used.",
     query: `query GetHistoricalResolverRecords($ensName: String!) {
@@ -1076,7 +1077,7 @@ const savedQueries = [
     operationName: "getIndexerMetadata",
     id: "23",
     name: "Get Indexer Metadata",
-    category: "Meta",
+    category: SavedQueryCategory.META,
     description:
       "Retrieves metadata information about the indexer including indexing status and current block number. Use this to check if the indexer has indexing errors and to monitor synchronization with the blockchain.",
     query: `query getIndexerMetadata {
@@ -1094,7 +1095,7 @@ const savedQueries = [
     operationName: "getResolverExists",
     id: "24",
     name: "Check if Resolver Exists",
-    category: "Resolver",
+    category: SavedQueryCategory.RESOLVER,
     description:
       "Checks if a specific resolver exists by its ID. The resolver ID is constructed as 'resolverAddress-namehash' where resolverAddress is the contract address and namehash is the domain's namehash. Used to verify resolver existence before operations.",
     query: `query getResolverExists($id: String!) {
@@ -1115,7 +1116,7 @@ const savedQueries = [
     operationName: "getNameDates",
     id: "25",
     name: "Get Registration Data by Labelhash",
-    category: "Registrar",
+    category: SavedQueryCategory.REGISTRAR,
     description:
       "Retrieves registration information for a domain using its labelhash (hash of the label without the TLD). Returns the registration date and the most recent registration transaction ID. Primarily used for .eth domains.",
     query: `query getNameDates($id: String!) {
@@ -1139,7 +1140,7 @@ const savedQueries = [
     operationName: "getDomainWithResolver",
     id: "26",
     name: "Get Domain with Resolver Address",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves domain information including resolver address and text records. Unlike other domain queries, this specifically includes the resolver's address field along with standard domain information.",
     query: `query getDomainWithResolver($tokenId: String!) {
@@ -1170,7 +1171,7 @@ const savedQueries = [
     operationName: "getEthDomainByLabelhash",
     id: "27",
     name: "Get .eth Domain by Labelhash",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves .eth domains by their labelhash under the .eth parent domain. This is specifically for finding .eth domains using their labelhash identifier.",
     query: `query getEthDomainByLabelhash($tokenId: String!) {
@@ -1206,7 +1207,7 @@ const savedQueries = [
     operationName: "getRegistrationByTokenId", //similar to getSubgraphRegistrant - remove?
     id: "28",
     name: "Get Registration by Token ID",
-    category: "Registrar",
+    category: SavedQueryCategory.REGISTRAR,
     description:
       "Retrieves registration information by token ID (labelhash), including label name, registration date, and expiry date. Ordered by registration date in descending order.",
     query: `query getRegistrationByTokenId($tokenId: String!) {
@@ -1233,7 +1234,7 @@ const savedQueries = [
     operationName: "getWrappedDomain",
     id: "29",
     name: "Get Wrapped Domain",
-    category: "Domain",
+    category: SavedQueryCategory.DOMAIN,
     description:
       "Retrieves wrapped domain information including owner, fuses, expiry date, and domain name. Used for ENS domains that have been wrapped using the Name Wrapper contract.",
     query: `query getWrappedDomain($tokenId: String!) {
