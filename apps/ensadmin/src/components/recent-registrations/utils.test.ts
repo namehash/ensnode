@@ -1,5 +1,6 @@
 import { unixTimestampToDate } from "@/components/recent-registrations/utils";
 import { describe, expect, it } from "vitest";
+
 describe("unixTimestampToDate", () => {
   it("should throw an exception for a non numerical input", () => {
     const invalidTimestamp = "A1781826068";
