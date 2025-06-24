@@ -76,8 +76,14 @@ download_with_progress() {
     local url="$1"
     local output_path="$2"
     local description="$3"
+    local is_optional="${4:-false}"
 
-    echo "Downloading $description..."
+    local type_string="Downloading"
+    if [ "$is_optional" = "true" ]; then
+        type_string="Optionally downloading"
+    fi
+
+    echo "$type_string $description..."
     echo "Source URL: $url"
     echo "Destination: $output_path"
 
@@ -85,9 +91,14 @@ download_with_progress() {
         echo "Successfully downloaded $description."
         echo ""
     else
-        echo "ERROR: Failed to download $description from $url."
         rm -f "$output_path" # Clean up partially downloaded file
-        exit 1
+        if [ "$is_optional" = "true" ]; then
+            echo "WARNING: Failed to download optional $description from $url. Continuing without it."
+            echo ""
+        else
+            echo "ERROR: Failed to download $description from $url."
+            exit 1
+        fi
     fi
 }
 
@@ -116,7 +127,7 @@ if [ -f "$TARGET_DATA_FILE_PATH" ]; then
         # Optionally, ensure license file is also present
         if [ ! -f "$TARGET_LICENSE_FILE_PATH" ]; then
             echo "License file ($TARGET_LICENSE_FILE_PATH) is missing. Downloading it..."
-            download_with_progress "$BASE_URL/$SERVER_LICENSE_PATH" "$TARGET_LICENSE_FILE_PATH" "License file ($SERVER_LICENSE_PATH)"
+            download_with_progress "$BASE_URL/$SERVER_LICENSE_PATH" "$TARGET_LICENSE_FILE_PATH" "License file ($SERVER_LICENSE_PATH)" "true"
         else
             echo "License file ($TARGET_LICENSE_FILE_PATH) already exists."
         fi
@@ -139,7 +150,7 @@ fi
 # 3. Download License File (if not already downloaded and exited above)
 # This check ensures we don't re-download if it was fetched during the "existing valid data" check.
 if [ ! -f "$TARGET_LICENSE_FILE_PATH" ]; then
-    download_with_progress "$BASE_URL/$SERVER_LICENSE_PATH" "$TARGET_LICENSE_FILE_PATH" "License file ($SERVER_LICENSE_PATH)"
+    download_with_progress "$BASE_URL/$SERVER_LICENSE_PATH" "$TARGET_LICENSE_FILE_PATH" "License file ($SERVER_LICENSE_PATH)" "true"
 else
     # This case is mostly for when data file was missing, but license might have been there from a previous partial run.
     echo "License file ($TARGET_LICENSE_FILE_PATH) already present."
