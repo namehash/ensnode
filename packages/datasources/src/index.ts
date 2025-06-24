@@ -1,4 +1,4 @@
-import { DatasourceMap, DatasourceNames, ENSNamespace } from "./lib/types";
+import { DatasourceNames, ENSNamespace, ENSNamespaceId } from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -7,46 +7,46 @@ import sepolia from "./sepolia";
 
 export * from "./lib/types";
 
-// internal map ENSNamespace -> DatasourceMap
-const ENSNamespaceToDatasourceMap = {
+// internal map ENSNamespaceId -> ENSNamespace
+const ENSNamespacesById = {
   mainnet,
   sepolia,
   holesky,
   "ens-test-env": ensTestEnv,
-} as const satisfies Record<ENSNamespace, DatasourceMap>;
+} as const satisfies Record<ENSNamespaceId, ENSNamespace>;
 
 /**
- * Returns the DatasourceMap within the specified namespace.
+ * Returns the ENSNamespace for a specified `namespaceId`.
  *
- * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns The DatasourceMap for the specified namespace
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns the ENSNamespace
  */
-export const getDatasourceMap = <T extends ENSNamespace>(
-  namespace: T,
-): (typeof ENSNamespaceToDatasourceMap)[T] => ENSNamespaceToDatasourceMap[namespace];
+export const getENSNamespace = <T extends ENSNamespaceId>(
+  namespaceId: T,
+): (typeof ENSNamespacesById)[T] => ENSNamespacesById[namespaceId];
 
 /**
- * Returns the `datasourceName` Datasource within the specified `namespace` namespace.
+ * Returns the `datasourceName` Datasource within the specified `namespaceId` namespace.
  *
  * NOTE: the typescript typechecker _will_ enforce validity. i.e. using an invalid `datasourceName`
- * within the specified `namespace` will be a type error.
+ * within the specified `namespaceId` will be a type error.
  *
- * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to retrieve
  * @returns The Datasource object for the given name within the specified namespace
  */
 export const getDatasource = <
-  N extends ENSNamespace,
-  D extends keyof ReturnType<typeof getDatasourceMap<N>>,
+  N extends ENSNamespaceId,
+  D extends keyof ReturnType<typeof getENSNamespace<N>>,
 >(
-  namespace: N,
+  namespaceId: N,
   datasourceName: D,
-) => getDatasourceMap(namespace)[datasourceName];
+) => getENSNamespace(namespaceId)[datasourceName];
 
 /**
  * Returns the chain id for the ENS Root Datasource within the selected namespace.
  *
  * @returns the chain ID that hosts the ENS Root
  */
-export const getENSRootChainId = (namespace: ENSNamespace) =>
-  getDatasource(namespace, DatasourceNames.ENSRoot).chain.id;
+export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
+  getDatasource(namespaceId, DatasourceNames.ENSRoot).chain.id;

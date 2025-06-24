@@ -2,8 +2,8 @@ import {
   ContractConfig,
   Datasource,
   DatasourceName,
-  ENSNamespace,
-  getDatasourceMap,
+  ENSNamespaceId,
+  getENSNamespace,
 } from "@ensnode/datasources";
 import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 import { NetworkConfig } from "ponder";
@@ -62,7 +62,7 @@ export interface ENSIndexerPlugin<
 
   /**
    * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of ACTIVE_PLUGINS are valid for a given NAMESPACE
+   * a set of ACTIVE_PLUGINS are valid for a given ENS Namespace
    */
   requiredDatasources: DatasourceName[];
 
@@ -189,47 +189,45 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
 }
 
 /**
- * DatasourceMapFullyDefinedAtCompileTime is a helper type necessary to support runtime-conditional
+ * ENSNamespaceFullyDefinedAtCompileTime is a helper type necessary to support runtime-conditional
  * Ponder plugins.
  *
  * 1. ENSNode can be configured to index in the context of different ENS namespaces,
  *   (currently: mainnet, sepolia, holesky, ens-test-env), using a user-specified set of plugins.
  * 2. Ponder's inferred type-checking requires const-typed values, and so those plugins must be able
- *   to define their Ponder config statically, without awareness of whether they are actively executed
- *   or not.
- * 3. To make this work, we provide a DatasourceMapFullyDefinedAtCompileTime, set to the typeof mainnet's DatasourceMap,
- *   which fully defines all known Datasources (if this is ever not the case, a merged type can be used
- *   to ensure that the CommonType has the full set of possible Datasources). Plugins can use the
- *   runtime value returned from {@link getDatasourceMapAsFullyDefinedAtCompileTime} and by casting it to CommonType we
- *   ensure that the values expected by those plugins pass the typechecker. ENSNode ensures that
- *   non-active plugins are not executed, however, so the issue of type/value mismatch does not occur
- *   during execution.
+ *   to define their Ponder config statically so the types can be inferred at compile-time, regardless
+ *   of whether the plugin's config and handler logic is loaded/executed at runtime.
+ * 3. To make this work, we provide a ENSNamespaceFullyDefinedAtCompileTime, set to the typeof mainnet's
+ *   ENSNamespace, which fully defines all known Datasources (if this is ever not the case, a merged
+ *   type can be used to ensure that this type has the full set of possible Datasources). Plugins
+ *   can use the runtime value returned from {@link getENSNamespaceAsFullyDefinedAtCompileTime} and
+ *   by casting it to ENSNamespaceFullyDefinedAtCompileTime we ensure that the values expected by
+ *   those plugins pass the typechecker. ENSNode ensures that non-active plugins are not executed,
+ *   so the issue of type/value mismatch does not occur during execution.
  */
-type DatasourceMapFullyDefinedAtCompileTime = ReturnType<typeof getDatasourceMap<"mainnet">>;
+type ENSNamespaceFullyDefinedAtCompileTime = ReturnType<typeof getENSNamespace<"mainnet">>;
 
 /**
- * Returns the DatasourceMap within the specified namespace, cast to the CommonType.
+ * Returns the ENSNamespace for the provided `namespaceId`, cast to ENSNamespaceFullyDefinedAtCompileTime.
  *
- * This function takes an ENSNamespace identifier and returns the corresponding DatasourceMap.
- * The returned datasources configuration is cast to the global CommonType to ensure that ponder's
- * inferred typing works at type-check time. See {@link DatasourceMapFullyDefinedAtCompileTime} for more info.
+ * See {@link ENSNamespaceFullyDefinedAtCompileTime} for more info.
  *
- * @param namespace - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns The DatasourceMap for the specified namespace
+ * @param namespaceId - The ENS namespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns the ENSNamespace
  */
-export const getDatasourceMapAsFullyDefinedAtCompileTime = (namespace: ENSNamespace) =>
-  getDatasourceMap(namespace) as DatasourceMapFullyDefinedAtCompileTime;
+export const getENSNamespaceAsFullyDefinedAtCompileTime = (namespaceId: ENSNamespaceId) =>
+  getENSNamespace(namespaceId) as ENSNamespaceFullyDefinedAtCompileTime;
 
 /**
- * Returns the `datasourceName` Datasource within the `namespace` namespace, cast as CommonType.
+ * Returns the `datasourceName` Datasource within the `namespaceId` namespace, cast as ENSNamespaceFullyDefinedAtCompileTime.
  *
  * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
- * within the specified `namespace` will have a valid return type but be undefined at runtime.
+ * within the specified `namespaceId` will have a valid return type but be undefined at runtime.
  */
 export const getDatasourceAsFullyDefinedAtCompileTime = <
-  N extends ENSNamespace,
-  D extends keyof DatasourceMapFullyDefinedAtCompileTime,
+  N extends ENSNamespaceId,
+  D extends keyof ENSNamespaceFullyDefinedAtCompileTime,
 >(
-  namespace: N,
+  namespaceId: N,
   datasourceName: D,
-) => getDatasourceMapAsFullyDefinedAtCompileTime(namespace)[datasourceName];
+) => getENSNamespaceAsFullyDefinedAtCompileTime(namespaceId)[datasourceName];

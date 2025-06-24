@@ -1,6 +1,6 @@
 import type { EnsNode } from "@/components/ensnode";
 import { getChainById } from "@/lib/chains";
-import { type ENSNamespace } from "@ensnode/datasources";
+import { type ENSNamespaceId } from "@ensnode/datasources";
 import { fromUnixTime } from "date-fns";
 /**
  * Basic information about a block and its date.
@@ -49,7 +49,7 @@ export interface GlobalIndexingStatusViewModel {
  */
 export function globalIndexingStatusViewModel(
   networkIndexingStatus: Record<number, EnsNode.NetworkIndexingStatus>,
-  namespace: ENSNamespace,
+  namespace: ENSNamespaceId,
 ): GlobalIndexingStatusViewModel {
   const indexingStartDatesAcrossNetworks = Object.values(networkIndexingStatus).map(
     (status) => status.firstBlockToIndex.timestamp,

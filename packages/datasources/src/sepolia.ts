@@ -1,9 +1,9 @@
 import { baseSepolia, lineaSepolia, sepolia } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { type DatasourceMap, DatasourceNames } from "./lib/types";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// ABIs for Root Datasource
+// ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
@@ -23,11 +23,11 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 
 /**
- * Datasources for the Sepolia ENS namespace
+ * The Sepolia ENSNamespace
  */
 export default {
   /**
-   * Root Datasource
+   * ENSRoot Datasource
    *
    * Addresses and Start Blocks from ENS Sepolia Subgraph Manifest
    * https://ipfs.io/ipfs/QmdDtoN9QCRsBUsyoiiUUMQPPmPp5jimUQe81828UyWLtg
@@ -173,4 +173,4 @@ export default {
       },
     },
   },
-} satisfies DatasourceMap;
+} satisfies ENSNamespace;

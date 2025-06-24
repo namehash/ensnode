@@ -1,13 +1,11 @@
+import {
+  UnixTimestampInSeconds,
+  unixTimestampToDate,
+} from "@/components/recent-registrations/utils";
 import { ensAdminVersion } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
-import { millisecondsInSecond } from "date-fns/constants";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
-
-/**
- * An integer value (representing a Unix timestamp in seconds) formatted as a string.
- */
-type UnixTimestampInSeconds = string;
 
 /**
  * The data model returned by a GraphQL query for registrations.
@@ -51,16 +49,6 @@ function getEffectiveOwner(registrationResult: RegistrationResult): Address {
   }
 
   return getAddress(registrationResult.domain.wrappedOwner.id);
-}
-
-function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
-  const date = new Date(parseInt(timestamp) * millisecondsInSecond);
-
-  if (isNaN(date.getTime())) {
-    throw new Error(`Error parsing timestamp (${timestamp}) to date`);
-  }
-
-  return date;
 }
 
 /**
@@ -141,25 +129,5 @@ export function useRecentRegistrations(ensNodeURL: URL, maxResults: number) {
         `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,
       );
     },
-  });
-}
-
-if (import.meta.vitest) {
-  const { describe, it, expect } = import.meta.vitest;
-
-  describe("unixTimestampToDate", () => {
-    it("should throw an exception for a non numerical input", () => {
-      const invalidTimestamp = "A1781826068";
-
-      expect(() => unixTimestampToDate(invalidTimestamp)).toThrowError(/Error parsing timestamp/);
-    });
-
-    it("should parse correct timestamp to a date object", () => {
-      const validTimestamp = "1781826068";
-      const expectedDate = new Date("2026-06-18T23:41:08.000Z");
-      const result = unixTimestampToDate(validTimestamp);
-
-      expect(result).toStrictEqual(expectedDate);
-    });
   });
 }

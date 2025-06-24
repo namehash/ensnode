@@ -1,4 +1,5 @@
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
+import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
 import {Address} from "viem";
 import {Datasource, DatasourceNames, ENSNamespace, ENSNamespaces, getDatasourceMap} from "@ensnode/datasources";
@@ -66,4 +67,22 @@ export function getNameWrapperAddress(namespace: ENSNamespace): Address{
   const datasource = datasources[DatasourceNames.ENSRoot];
 
   return datasource.contracts.NameWrapper.address;
+}
+
+/**
+ * An integer value (representing a Unix timestamp in seconds) formatted as a string.
+ */
+export type UnixTimestampInSeconds = string;
+
+/**
+ * Transforms a UnixTimestampInSeconds to a Date object.
+ */
+export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
+  const date = new Date(parseInt(timestamp) * millisecondsInSecond);
+
+  if (isNaN(date.getTime())) {
+    throw new Error(`Error parsing timestamp (${timestamp}) to date`);
+  }
+
+  return date;
 }

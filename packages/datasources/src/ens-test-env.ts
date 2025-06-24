@@ -2,9 +2,9 @@ import { Address } from "viem";
 import { anvil } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { type DatasourceMap, DatasourceNames } from "./lib/types";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// ABIs for Root Datasource
+// ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
@@ -17,7 +17,7 @@ const deploymentAddresses = getENSTestEnvDeploymentAddresses();
 const EMPTY_ADDRESS = "" as Address;
 
 /**
- * Datasources for the ens-test-env ENS namespace
+ * The ens-test-env ENSNamespace
  *
  * 'ens-test-env' represents an ENS namespace running on a local Anvil chain for development of
  * ENS apps and running test suites against a deterministic deployment of the ENS protocol.
@@ -38,7 +38,7 @@ const EMPTY_ADDRESS = "" as Address;
  */
 export default {
   /**
-   * Root Datasource
+   * ENSRoot Datasource
    *
    * Addresses and Start Blocks from ens-test-env
    * https://github.com/ensdomains/ens-test-env/
@@ -86,4 +86,4 @@ export default {
   /**
    * The 'ens-test-env' ENS namespace does not have any other Datasources.
    */
-} satisfies DatasourceMap;
+} satisfies ENSNamespace;
