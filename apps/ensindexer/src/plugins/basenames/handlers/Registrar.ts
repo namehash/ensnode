@@ -2,8 +2,10 @@ import { ponder } from "ponder:registry";
 
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
  * When direct subnames of base.eth are registered through the base.eth RegistrarController contract
@@ -16,7 +18,7 @@ const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenI
 
 export default function ({
   pluginName,
-  namespace,
+  pluginNamespace: ns,
 }: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
   const {
     handleNameRegistered,
@@ -26,54 +28,55 @@ export default function ({
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    // the shared Registrar handlers in this plugin index direct subnames of '.base.eth'
-    registrarManagedName: "base.eth",
+    // the shared Registrar handlers in this plugin index direct subnames of
+    // the name returned from `getRegistrarManagedName` function call
+    registrarManagedName: getRegistrarManagedName(config.namespace),
   });
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
-  ponder.on(namespace("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
+  ponder.on(ns("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
       event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
-  ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
+  ponder.on(ns("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({
       context,
       event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
-  ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
+  ponder.on(ns("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewed({
       context,
       event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
-  ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
+  ponder.on(ns("BaseRegistrar:Transfer"), async ({ context, event }) => {
     await handleNameTransferred({
       context,
       event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
-  ponder.on(namespace("EARegistrarController:NameRegistered"), async ({ context, event }) => {
+  ponder.on(ns("EARegistrarController:NameRegistered"), async ({ context, event }) => {
     await handleNameRegisteredByController({
       context,
       event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
-  ponder.on(namespace("RegistrarController:NameRegistered"), async ({ context, event }) => {
+  ponder.on(ns("RegistrarController:NameRegistered"), async ({ context, event }) => {
     await handleNameRegisteredByController({
       context,
       event: { ...event, args: { ...event.args, cost: 0n } },
     });
   });
 
-  ponder.on(namespace("RegistrarController:NameRenewed"), async ({ context, event }) => {
+  ponder.on(ns("RegistrarController:NameRenewed"), async ({ context, event }) => {
     await handleNameRenewedByController({
       context,
       event: { ...event, args: { ...event.args, cost: 0n } },

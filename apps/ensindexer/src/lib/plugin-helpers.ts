@@ -1,10 +1,17 @@
-import { ContractConfig, DatasourceName } from "@ensnode/ens-deployments";
-import type { NetworkConfig } from "ponder";
+import {
+  ContractConfig,
+  Datasource,
+  DatasourceName,
+  ENSNamespaceId,
+  getENSNamespace,
+} from "@ensnode/datasources";
+import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
+import { NetworkConfig } from "ponder";
 import { http, Chain } from "viem";
 
-import config from "@/config";
+import type { ENSIndexerConfig } from "@/config/types";
+import { uniq } from "@/lib/lib-helpers";
 import { constrainContractBlockrange } from "@/lib/ponder-helpers";
-import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * A factory function that returns a function to create a namespaced contract name for Ponder handlers.
@@ -41,15 +48,13 @@ export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: 
   };
 }
 
-// Helper type to merge multiple types into one
-export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
-  ? R
-  : never;
-
 /**
  * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  */
-export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, CONFIG = unknown> {
+export interface ENSIndexerPlugin<
+  PLUGIN_NAME extends PluginName = PluginName,
+  PONDER_CONFIG = unknown,
+> {
   /**
    * A unique plugin name for identification
    */
@@ -57,7 +62,7 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
 
   /**
    * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of ACTIVE_PLUGINS are valid for a given ENS_DEPLOYMENT_CHAIN
+   * a set of ACTIVE_PLUGINS are valid for a given ENS Namespace
    */
   requiredDatasources: DatasourceName[];
 
@@ -65,10 +70,10 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
    * An ENSIndexerPlugin must return a Ponder Config.
    * https://ponder.sh/docs/contracts-and-networks
    */
-  config: CONFIG;
+  createPonderConfig(appConfig: ENSIndexerConfig): PONDER_CONFIG;
 
   /**
-   * An `activate` handler that should load a plugin's handlers that eventually execute `ponder.on`
+   * An `activate` handler that should load the plugin's handlers that eventually execute `ponder.on`
    */
   activate: () => Promise<void>;
 }
@@ -77,8 +82,8 @@ export interface ENSIndexerPlugin<PLUGIN_NAME extends PluginName = PluginName, C
  * An ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
  */
 export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
-  pluginName: PluginName;
-  namespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
+  pluginName: PLUGIN_NAME;
+  pluginNamespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
 };
 
 /**
@@ -98,16 +103,25 @@ export const activateHandlers =
     handlers,
     ...args
   }: ENSIndexerPluginHandlerArgs<PLUGIN_NAME> & {
-    handlers: Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
+    handlers: () => Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
   }) =>
   async () => {
-    await Promise.all(handlers).then((modules) => modules.map((m) => m.default(args)));
+    await Promise.all(handlers()).then((modules) => modules.map((m) => m.default(args)));
   };
+
+/**
+ * Get a list of unique indexed chain IDs for selected plugin names.
+ */
+export function getIndexedChainIds(datasources: Datasource[]): number[] {
+  const indexedChainIds = datasources.map((datasource) => datasource.chain.id);
+
+  return uniq(indexedChainIds);
+}
 
 /**
  * Builds a ponder#NetworksConfig for a single, specific chain.
  */
-export function networksConfigForChain(chainId: number) {
+export function networksConfigForChain(config: ENSIndexerConfig, chainId: number) {
   if (!config.rpcConfigs[chainId]) {
     throw new Error(
       `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
@@ -132,13 +146,14 @@ export function networksConfigForChain(chainId: number) {
  * indexing range by the globally configured blockrange.
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
+  config: ENSIndexerConfig,
   chain: Chain,
   contractConfig: CONTRACT_CONFIG,
 ) {
   return {
     [chain.id.toString()]: {
       address: contractConfig.address, // provide per-network address if available
-      ...constrainContractBlockrange(contractConfig.startBlock), // per-network blockrange
+      ...constrainContractBlockrange(config, contractConfig.startBlock), // per-network blockrange
     },
   };
 }
@@ -172,3 +187,47 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
 
   return [label, name];
 }
+
+/**
+ * ENSNamespaceFullyDefinedAtCompileTime is a helper type necessary to support runtime-conditional
+ * Ponder plugins.
+ *
+ * 1. ENSNode can be configured to index in the context of different ENS namespaces,
+ *   (currently: mainnet, sepolia, holesky, ens-test-env), using a user-specified set of plugins.
+ * 2. Ponder's inferred type-checking requires const-typed values, and so those plugins must be able
+ *   to define their Ponder config statically so the types can be inferred at compile-time, regardless
+ *   of whether the plugin's config and handler logic is loaded/executed at runtime.
+ * 3. To make this work, we provide a ENSNamespaceFullyDefinedAtCompileTime, set to the typeof mainnet's
+ *   ENSNamespace, which fully defines all known Datasources (if this is ever not the case, a merged
+ *   type can be used to ensure that this type has the full set of possible Datasources). Plugins
+ *   can use the runtime value returned from {@link getENSNamespaceAsFullyDefinedAtCompileTime} and
+ *   by casting it to ENSNamespaceFullyDefinedAtCompileTime we ensure that the values expected by
+ *   those plugins pass the typechecker. ENSNode ensures that non-active plugins are not executed,
+ *   so the issue of type/value mismatch does not occur during execution.
+ */
+type ENSNamespaceFullyDefinedAtCompileTime = ReturnType<typeof getENSNamespace<"mainnet">>;
+
+/**
+ * Returns the ENSNamespace for the provided `namespaceId`, cast to ENSNamespaceFullyDefinedAtCompileTime.
+ *
+ * See {@link ENSNamespaceFullyDefinedAtCompileTime} for more info.
+ *
+ * @param namespaceId - The ENS namespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns the ENSNamespace
+ */
+export const getENSNamespaceAsFullyDefinedAtCompileTime = (namespaceId: ENSNamespaceId) =>
+  getENSNamespace(namespaceId) as ENSNamespaceFullyDefinedAtCompileTime;
+
+/**
+ * Returns the `datasourceName` Datasource within the `namespaceId` namespace, cast as ENSNamespaceFullyDefinedAtCompileTime.
+ *
+ * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
+ * within the specified `namespaceId` will have a valid return type but be undefined at runtime.
+ */
+export const getDatasourceAsFullyDefinedAtCompileTime = <
+  N extends ENSNamespaceId,
+  D extends keyof ENSNamespaceFullyDefinedAtCompileTime,
+>(
+  namespaceId: N,
+  datasourceName: D,
+) => getENSNamespaceAsFullyDefinedAtCompileTime(namespaceId)[datasourceName];

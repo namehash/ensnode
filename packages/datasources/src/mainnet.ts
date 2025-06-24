@@ -1,9 +1,8 @@
-import { zeroAddress } from "viem";
 import { base, linea, mainnet, optimism } from "viem/chains";
 
-import { DatasourceName, type ENSDeployment } from "./lib/types";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// ABIs for Root Datasource
+// ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
@@ -25,16 +24,16 @@ import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverConfig } from "./lib/resolver";
 
 /**
- * The Mainnet ENSDeployment
+ * The Mainnet ENSNamespace
  */
 export default {
   /**
-   * Root Datasource
+   * ENSRoot Datasource
    *
    * Addresses and Start Blocks from ENS Mainnet Subgraph Manifest
    * https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
    */
-  [DatasourceName.Root]: {
+  [DatasourceNames.ENSRoot]: {
     chain: mainnet,
     contracts: {
       RegistryOld: {
@@ -80,9 +79,9 @@ export default {
    * Addresses and Start Blocks from Basenames
    * https://github.com/base-org/basenames
    */
-  [DatasourceName.Basenames]: {
+  [DatasourceNames.Basenames]: {
     /**
-     * As of 9-Feb-2025 the Resolver for 'base.eth' in the mainnet "ENS deployment" is
+     * As of 9-Feb-2025 the Resolver for 'base.eth' in the mainnet ENS namespace is
      * 0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31.
      *
      * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
@@ -90,8 +89,8 @@ export default {
      * gateway server operated by Coinbase that uses the following subregistry contracts on
      * Base as its source of truth.
      *
-     * The owner of 'base.eth' in the ENS Registry on the mainnet "ENS deployment"
-     * (e.g. Coinbase) has the ability to change this configuration at any time.
+     * The owner of 'base.eth' in the ENS Registry in the mainnet ENS namespace (e.g. Coinbase)
+     * has the ability to change this configuration at any time.
      *
      * See the reference documentation for additional context:
      * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
@@ -131,9 +130,9 @@ export default {
    * Addresses and Start Blocks from Lineanames
    * https://github.com/Consensys/linea-ens
    */
-  [DatasourceName.Lineanames]: {
+  [DatasourceNames.Lineanames]: {
     /**
-     * As of 9-Feb-2025 the Resolver for 'linea.eth' in the mainnet "ENS deployment" is
+     * As of 9-Feb-2025 the Resolver for 'linea.eth' in the mainnet ENS namespace is
      * 0xde16ee87B0C019499cEBDde29c9F7686560f679a.
      *
      * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
@@ -141,8 +140,8 @@ export default {
      * gateway server operated by Consensys that uses the following subregistry contracts on
      * Linea as its source of truth.
      *
-     * The owner of 'linea.eth' in the ENS Registry on the mainnet "ENS deployment"
-     * (e.g. Consensys) has the ability to change this configuration at any time.
+     * The owner of 'linea.eth' in the ENS Registry in the mainnet ENS namespace (e.g. Consensys)
+     * has the ability to change this configuration at any time.
      *
      * See the reference documentation for additional context:
      * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
@@ -180,7 +179,7 @@ export default {
    * The 3DNS Datasource on Optimism.
    * https://opensea.io/collection/3dns-powered-domains
    */
-  [DatasourceName.ThreeDNSOptimism]: {
+  [DatasourceNames.ThreeDNSOptimism]: {
     chain: optimism,
     contracts: {
       ThreeDNSToken: {
@@ -201,7 +200,7 @@ export default {
    * The 3DNS Datasource on Base.
    * https://opensea.io/collection/3dns-powered-domains-base
    */
-  [DatasourceName.ThreeDNSBase]: {
+  [DatasourceNames.ThreeDNSBase]: {
     chain: base,
     contracts: {
       ThreeDNSToken: {
@@ -217,4 +216,4 @@ export default {
       },
     },
   },
-} satisfies ENSDeployment;
+} satisfies ENSNamespace;

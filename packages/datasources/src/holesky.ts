@@ -1,9 +1,9 @@
-import { sepolia } from "viem/chains";
+import { holesky } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceName, type ENSDeployment } from "./lib/types";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// ABIs for Root Datasource
+// ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
@@ -11,58 +11,55 @@ import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 
 /**
- * The Sepolia ENSDeployment
+ * The Holesky ENSNamespace
  */
 export default {
   /**
-   * Root Datasource
+   * ENSRoot Datasource
    *
-   * Addresses and Start Blocks from ENS Sepolia Subgraph Manifest
-   * https://ipfs.io/ipfs/QmdDtoN9QCRsBUsyoiiUUMQPPmPp5jimUQe81828UyWLtg
+   * Addresses and Start Blocks from ENS Holesky Subgraph Manifest
+   * https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
    */
-  [DatasourceName.Root]: {
-    chain: sepolia,
+  [DatasourceNames.ENSRoot]: {
+    chain: holesky,
     contracts: {
       RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x94f523b8261B815b87EFfCf4d18E6aBeF18d6e4b",
-        startBlock: 3702721,
+        startBlock: 801536,
       },
       Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
-        startBlock: 3702728,
+        startBlock: 801613,
       },
       Resolver: {
         ...ResolverConfig,
-        startBlock: 3702721, // ignores any Resolver events prior to `startBlock` of RegistryOld on Sepolia
+        startBlock: 801536, // ignores any Resolver events prior to `startBlock` of RegistryOld on Holeksy
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
-        startBlock: 3702731,
+        startBlock: 801686,
       },
       EthRegistrarControllerOld: {
         abi: root_EthRegistrarControllerOld,
-        address: "0x7e02892cfc2Bfd53a75275451d73cF620e793fc0",
-        startBlock: 3790197,
+        address: "0xf13fC748601fDc5afA255e9D9166EB43f603a903",
+        startBlock: 815355,
       },
       EthRegistrarController: {
         abi: root_EthRegistrarController,
-        address: "0xFED6a969AaA60E4961FCD3EBF1A2e8913ac65B72",
-        startBlock: 3790244,
+        address: "0x179Be112b24Ad4cFC392eF8924DfA08C20Ad8583",
+        startBlock: 815359,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
-        startBlock: 3790153,
+        address: "0xab50971078225D365994dc1Edcb9b7FD72Bb4862",
+        startBlock: 815127,
       },
     },
   },
   /**
-   * The Sepolia ENSDeployment has no known Datasource for Basenames.
-   *
-   * linea.eth's L1Resolver is deployed to Sepolia, but we do not index Linea Sepolia names here.
-   * https://github.com/Consensys/linea-ens/tree/main/packages/linea-ens-resolver/deployments/sepolia
+   * The Holesky ENS namespace has no known Datasource for Basenames or Lineanames.
    */
-} satisfies ENSDeployment;
+} satisfies ENSNamespace;

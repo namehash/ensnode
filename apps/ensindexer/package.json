@@ -1,6 +1,6 @@
 {
   "name": "ensindexer",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
-    "@ensnode/ens-deployments": "workspace:*",
+    "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",

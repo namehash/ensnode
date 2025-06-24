@@ -1,5 +1,19 @@
 # ensadmin
 
+## 0.28.0
+
+### Minor Changes
+
+- [#756](https://github.com/namehash/ensnode/pull/756) [`af2cb03`](https://github.com/namehash/ensnode/commit/af2cb0314bcfc1b5a523670eae558b040407156b) Thanks [@tk-o](https://github.com/tk-o)! - Renamed @ensnode/utils to @ensnode/ensnode-sdk.
+
+### Patch Changes
+
+- Updated dependencies [[`a41cc26`](https://github.com/namehash/ensnode/commit/a41cc26bbef49768f398780d67e4caeca7b22fb1), [`e30289e`](https://github.com/namehash/ensnode/commit/e30289e5292a991638fd55cc04d663dc97ecb30a), [`9aeaccd`](https://github.com/namehash/ensnode/commit/9aeaccd1034b970dc3a770a349292e65ba53cd2d), [`af2cb03`](https://github.com/namehash/ensnode/commit/af2cb0314bcfc1b5a523670eae558b040407156b)]:
+  - @ensnode/ens-deployments@0.28.0
+  - @ensnode/ensnode-sdk@0.28.0
+  - @ensnode/ensnode-schema@0.28.0
+  - @ensnode/ponder-metadata@0.28.0
+
 ## 0.27.0
 
 ### Patch Changes
