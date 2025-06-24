@@ -51,6 +51,7 @@ jobs:
 
       - name: Promote ENSAdmin Deployment
         run: |
+          chmod +x ./.github/scripts/promote_ensadmin.sh
           ./.github/scripts/promote_ensadmin.sh
 
       - name: Switch Traefik routers
