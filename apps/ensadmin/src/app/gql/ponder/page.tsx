@@ -1,4 +1,4 @@
-import { PonderGraphiQLEditor, type SavedQuery } from "@/components/graphiql-editor";
+import { PonderGraphiQLEditor } from "@/components/graphiql-editor";
 import { defaultEnsNodeUrl } from "@/lib/env";
 
 type PageProps = {
@@ -7,40 +7,16 @@ type PageProps = {
   }>;
 };
 
-const savedQueries = [
-  {
-    operationName: "getLatestDomains",
-    id: "1",
-    name: "Get Latest Domains",
-    query: `query GetLatestDomains($limit: Int!) {
-  domains(orderBy: "createdAt", orderDirection: "desc", limit: $limit) {
-    items {
-      name
-      expiryDate
-    }
-  }
-}
-    `,
-    variables: JSON.stringify(
-      {
-        limit: 5,
-      },
-      null,
-      2,
-    ),
-  },
-] satisfies Array<SavedQuery>;
-
 export default async function PonderGraphQLPage({ searchParams }: PageProps) {
   const { ensnode = defaultEnsNodeUrl() } = await searchParams;
 
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
-      ? ensnode
-      : defaultEnsNodeUrl();
+    ? ensnode
+    : defaultEnsNodeUrl();
 
   const url = new URL(`/ponder`, baseUrl).toString();
 
-  return <PonderGraphiQLEditor url={url} savedQueries={savedQueries} />;
+  return <PonderGraphiQLEditor url={url} />;
 }

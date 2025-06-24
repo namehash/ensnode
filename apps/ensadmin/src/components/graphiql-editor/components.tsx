@@ -7,38 +7,13 @@ import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
-import { useMemo } from "react";
 import { useGraphiQLEditor } from "./hooks";
-import { type SavedQuery, savedQueriesPlugin } from "./plugins/saved-queries";
-
-export type { SavedQuery };
-
-interface GraphiQLEditorProps
-  extends Omit<GraphiQLPropsWithUrl, "plugins" | "query" | "variables"> {
-  savedQueries?: Array<SavedQuery>;
-}
 
 /**
  * A GraphiQL editor for Ponder API page.
  */
-export function PonderGraphiQLEditor(props: GraphiQLEditorProps) {
+export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
   const graphiqlEditor = useGraphiQLEditor();
-
-  const plugins = useMemo(
-    () => [
-      savedQueriesPlugin({
-        queries: props.savedQueries ?? [],
-        onQuerySelect: ({ query, variables }) => {
-          if (variables) {
-            graphiqlEditor.actions.setQueryAndVariables(query, variables);
-          } else {
-            graphiqlEditor.actions.setQuery(query);
-          }
-        },
-      }),
-    ],
-    [props.savedQueries, graphiqlEditor.actions],
-  );
 
   return (
     <section className="flex flex-col flex-1">
@@ -46,7 +21,6 @@ export function PonderGraphiQLEditor(props: GraphiQLEditorProps) {
         {...props}
         query={graphiqlEditor.state.query}
         variables={graphiqlEditor.state.variables}
-        plugins={plugins}
       />
     </section>
   );
@@ -55,30 +29,17 @@ export function PonderGraphiQLEditor(props: GraphiQLEditorProps) {
 /**
  * A GraphiQL editor for Subgraph API page.
  */
-export function SubgraphGraphiQLEditor(props: GraphiQLEditorProps) {
+export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
   const graphiqlEditor = useGraphiQLEditor();
-
-  const plugins = useMemo(
-    () => [
-      savedQueriesPlugin({
-        queries: props.savedQueries ?? [],
-        onQuerySelect: ({ query, variables }) => {
-          if (variables) {
-            graphiqlEditor.actions.setQueryAndVariables(query, variables);
-          } else {
-            graphiqlEditor.actions.setQuery(query);
-          }
-        },
-      }),
-    ],
-    [props.savedQueries, graphiqlEditor.actions],
-  );
 
   return (
     <section className="flex flex-col flex-1">
       <AiQueryGeneratorForm
         onResult={({ query, variables }) => {
-          graphiqlEditor.actions.setQueryAndVariables(query, JSON.stringify(variables));
+          graphiqlEditor.actions.setQueryAndVariables(
+            query,
+            JSON.stringify(variables)
+          );
         }}
         url={props.url}
       />
@@ -87,7 +48,6 @@ export function SubgraphGraphiQLEditor(props: GraphiQLEditorProps) {
         {...props}
         query={graphiqlEditor.state.query}
         variables={graphiqlEditor.state.variables}
-        plugins={plugins}
       />
     </section>
   );
