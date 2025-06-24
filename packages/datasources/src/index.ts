@@ -1,4 +1,4 @@
-import { DatasourceNames, ENSNamespace, ENSNamespaceId } from "./lib/types";
+import { DatasourceName, ENSNamespace, ENSNamespaceId } from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -49,4 +49,4 @@ export const getDatasource = <
  * @returns the chain ID that hosts the ENS Root
  */
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
-  getDatasource(namespaceId, DatasourceNames.ENSRoot).chain.id;
+  getDatasource(namespaceId, DatasourceName.ENSRoot).chain.id;

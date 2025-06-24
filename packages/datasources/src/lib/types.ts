@@ -46,15 +46,13 @@ export interface Datasource {
 /**
  * DatasourceNames encodes a unique id for each known Datasource.
  */
-export const DatasourceNames = {
-  ENSRoot: "ensroot",
-  Basenames: "basenames",
-  Lineanames: "lineanames",
-  ThreeDNSOptimism: "threedns-optimism",
-  ThreeDNSBase: "threedns-base",
-} as const;
-
-export type DatasourceName = (typeof DatasourceNames)[keyof typeof DatasourceNames];
+export enum DatasourceName {
+  ENSRoot = "ensroot",
+  Basenames = "basenames",
+  Lineanames = "lineanames",
+  ThreeDNSOptimism = "threedns-optimism",
+  ThreeDNSBase = "threedns-base",
+}
 
 /**
  * EventFilter specifies a given event's name and arguments to filter that event by.
@@ -96,5 +94,5 @@ export type ContractConfig =
  * within the ENSNamespace are optional.
  */
 export type ENSNamespace = {
-  [DatasourceNames.ENSRoot]: Datasource;
-} & Partial<Record<Exclude<DatasourceName, "ensroot">, Datasource>>;
+  [DatasourceName.ENSRoot]: Datasource;
+} & Partial<Record<Exclude<DatasourceName, DatasourceName.ENSRoot>, Datasource>>;

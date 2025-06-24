@@ -1,7 +1,7 @@
 /**
  * The ThreeDNS plugin describes indexing behavior for 3DNSToken on both Optimism and Base.
  */
-import { DatasourceNames } from "@ensnode/datasources";
+import { DatasourceName } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig } from "ponder";
 
@@ -19,7 +19,7 @@ const pluginName = PluginName.ThreeDNS;
 
 // enlist datasources used within createPonderConfig function
 // useful for config validation
-const requiredDatasources = [DatasourceNames.ThreeDNSOptimism, DatasourceNames.ThreeDNSBase];
+const requiredDatasources = [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase];
 
 // construct a unique contract namespace for this plugin
 const pluginNamespace = makePluginNamespace(pluginName);
@@ -27,11 +27,11 @@ const pluginNamespace = makePluginNamespace(pluginName);
 // config object factory used to derive PluginConfig type
 function createPonderConfig(config: ENSIndexerConfig) {
   const { chain: optimism, contracts: optimismContracts } =
-    getDatasourceAsFullyDefinedAtCompileTime(config.namespace, DatasourceNames.ThreeDNSOptimism);
+    getDatasourceAsFullyDefinedAtCompileTime(config.namespace, DatasourceName.ThreeDNSOptimism);
 
   const { chain: base, contracts: baseContracts } = getDatasourceAsFullyDefinedAtCompileTime(
     config.namespace,
-    DatasourceNames.ThreeDNSBase,
+    DatasourceName.ThreeDNSBase,
   );
 
   return createConfig({

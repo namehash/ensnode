@@ -1,6 +1,6 @@
 import { base, linea, mainnet, optimism } from "viem/chains";
 
-import { DatasourceNames, type ENSNamespace } from "./lib/types";
+import { DatasourceName, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -33,7 +33,7 @@ export default {
    * Addresses and Start Blocks from ENS Mainnet Subgraph Manifest
    * https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
    */
-  [DatasourceNames.ENSRoot]: {
+  [DatasourceName.ENSRoot]: {
     chain: mainnet,
     contracts: {
       RegistryOld: {
@@ -79,7 +79,7 @@ export default {
    * Addresses and Start Blocks from Basenames
    * https://github.com/base-org/basenames
    */
-  [DatasourceNames.Basenames]: {
+  [DatasourceName.Basenames]: {
     /**
      * As of 9-Feb-2025 the Resolver for 'base.eth' in the mainnet ENS namespace is
      * 0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31.
@@ -130,7 +130,7 @@ export default {
    * Addresses and Start Blocks from Lineanames
    * https://github.com/Consensys/linea-ens
    */
-  [DatasourceNames.Lineanames]: {
+  [DatasourceName.Lineanames]: {
     /**
      * As of 9-Feb-2025 the Resolver for 'linea.eth' in the mainnet ENS namespace is
      * 0xde16ee87B0C019499cEBDde29c9F7686560f679a.
@@ -179,7 +179,7 @@ export default {
    * The 3DNS Datasource on Optimism.
    * https://opensea.io/collection/3dns-powered-domains
    */
-  [DatasourceNames.ThreeDNSOptimism]: {
+  [DatasourceName.ThreeDNSOptimism]: {
     chain: optimism,
     contracts: {
       ThreeDNSToken: {
@@ -200,7 +200,7 @@ export default {
    * The 3DNS Datasource on Base.
    * https://opensea.io/collection/3dns-powered-domains-base
    */
-  [DatasourceNames.ThreeDNSBase]: {
+  [DatasourceName.ThreeDNSBase]: {
     chain: base,
     contracts: {
       ThreeDNSToken: {

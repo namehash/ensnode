@@ -1,7 +1,7 @@
 import { baseSepolia, lineaSepolia, sepolia } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceNames, type ENSNamespace } from "./lib/types";
+import { DatasourceName, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -32,7 +32,7 @@ export default {
    * Addresses and Start Blocks from ENS Sepolia Subgraph Manifest
    * https://ipfs.io/ipfs/QmdDtoN9QCRsBUsyoiiUUMQPPmPp5jimUQe81828UyWLtg
    */
-  [DatasourceNames.ENSRoot]: {
+  [DatasourceName.ENSRoot]: {
     chain: sepolia,
     contracts: {
       RegistryOld: {
@@ -78,7 +78,7 @@ export default {
    * Addresses and Start Blocks from Basenames
    * https://github.com/base-org/basenames
    */
-  [DatasourceNames.Basenames]: {
+  [DatasourceName.Basenames]: {
     /**
      * As of 5-Jun-2025 the Resolver for 'basetest.eth' in the Sepolia ENS namespace is
      * 0x084D10C07EfEecD9fFc73DEb38ecb72f9eEb65aB.
@@ -129,7 +129,7 @@ export default {
    * Addresses and Start Blocks from Lineanames
    * https://github.com/Consensys/linea-ens
    */
-  [DatasourceNames.Lineanames]: {
+  [DatasourceName.Lineanames]: {
     /**
      * As of 5-Jun-2025 the Resolver for 'linea-sepolia.eth' in the Sepolia ENS namespace is
      * 0x64884ED06241c059497aEdB2C7A44CcaE6bc7937.

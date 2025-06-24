@@ -1,7 +1,7 @@
 import { holesky } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceNames, type ENSNamespace } from "./lib/types";
+import { DatasourceName, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -20,7 +20,7 @@ export default {
    * Addresses and Start Blocks from ENS Holesky Subgraph Manifest
    * https://ipfs.io/ipfs/Qmd94vseLpkUrSFvJ3GuPubJSyHz8ornhNrwEAt6pjcbex
    */
-  [DatasourceNames.ENSRoot]: {
+  [DatasourceName.ENSRoot]: {
     chain: holesky,
     contracts: {
       RegistryOld: {
