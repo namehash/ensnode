@@ -61,8 +61,8 @@ export interface ENSIndexerPlugin<
   pluginName: PLUGIN_NAME;
 
   /**
-   * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of PLUGINS are valid for a given ENS Namespace
+   * The list of DatasourceNames this plugin requires access to. ENSIndexer enforces that a plugin
+   * can only be activated if all of its required Datasources are defined on the configured ENS Namespace.
    */
   requiredDatasources: DatasourceName[];
 
