@@ -18,10 +18,9 @@ export function invariant_requiredDatasources(
 
   const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
   const availableDatasourceNames = Object.keys(datasources) as DatasourceName[];
-  const activePluginNames = config.plugins;
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
-  for (const pluginName of activePluginNames) {
+  for (const pluginName of config.plugins) {
     const { requiredDatasources } = getPlugin(pluginName);
     const hasRequiredDatasources = requiredDatasources.every((datasourceName) =>
       availableDatasourceNames.includes(datasourceName),
@@ -91,12 +90,12 @@ export function invariant_globalBlockrange(
         message: `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
 
   NAMESPACE=${config.namespace}
-  ACTIVE_PLUGINS=${config.plugins.join(",")}
+  PLUGINS=${config.plugins.join(",")}
   START_BLOCK=${globalBlockrange.startBlock || "n/a"}
   END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
   The usage you're most likely interested in is:
-    NAMESPACE=(mainnet|sepolia|holesky) ACTIVE_PLUGINS=subgraph END_BLOCK=x pnpm run start
+    NAMESPACE=(mainnet|sepolia|holesky) PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
   In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,

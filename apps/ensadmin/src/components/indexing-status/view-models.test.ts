@@ -30,7 +30,7 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        ACTIVE_PLUGINS: [PluginName.Subgraph],
+        PLUGINS: [PluginName.Subgraph],
         DATABASE_SCHEMA: "public",
         NAMESPACE: "ens-test-env",
       });

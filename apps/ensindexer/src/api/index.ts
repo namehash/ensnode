@@ -69,7 +69,7 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: config.plugins.join(","),
+      PLUGINS: config.plugins.join(","),
       DATABASE_SCHEMA: config.ponderDatabaseSchema,
       NAMESPACE: config.namespace,
     },
