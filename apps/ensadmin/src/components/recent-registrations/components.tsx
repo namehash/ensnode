@@ -1,7 +1,7 @@
 "use client";
 
 import { ENSName } from "@/components/ens-name";
-import { useIndexedChainId, useIndexingStatusQuery } from "@/components/ensnode";
+import { useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -153,7 +153,7 @@ export function RecentRegistrations() {
   const searchParams = useSearchParams();
   const recentRegistrationsQuery = useRecentRegistrations(searchParams);
   const indexingStatus = useIndexingStatusQuery(searchParams);
-  const indexedChainId = useIndexedChainId(indexingStatus.data);
+  const indexedChainId = useENSRootDatasourceChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -164,7 +164,7 @@ export function RecentRegistrations() {
   const currentIndexingDate = indexingStatus.data
     ? globalIndexingStatusViewModel(
         indexingStatus.data.runtime.networkIndexingStatusByChainId,
-        indexingStatus.data.env.ENS_DEPLOYMENT_CHAIN,
+        indexingStatus.data.env.NAMESPACE,
       ).currentIndexingDate
     : null;
 

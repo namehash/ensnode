@@ -1,9 +1,9 @@
 import { baseSepolia, lineaSepolia, sepolia } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceName, type ENSDeployment } from "./lib/types";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// ABIs for Root Datasource
+// ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
@@ -23,16 +23,16 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 
 /**
- * The Sepolia ENSDeployment
+ * The Sepolia ENSNamespace
  */
 export default {
   /**
-   * Root Datasource
+   * ENSRoot Datasource
    *
    * Addresses and Start Blocks from ENS Sepolia Subgraph Manifest
    * https://ipfs.io/ipfs/QmdDtoN9QCRsBUsyoiiUUMQPPmPp5jimUQe81828UyWLtg
    */
-  [DatasourceName.Root]: {
+  [DatasourceNames.ENSRoot]: {
     chain: sepolia,
     contracts: {
       RegistryOld: {
@@ -78,9 +78,9 @@ export default {
    * Addresses and Start Blocks from Basenames
    * https://github.com/base-org/basenames
    */
-  [DatasourceName.Basenames]: {
+  [DatasourceNames.Basenames]: {
     /**
-     * As of 5-Jun-2025 the Resolver for 'basetest.eth' in the Sepolia "ENS deployment" is
+     * As of 5-Jun-2025 the Resolver for 'basetest.eth' in the Sepolia ENS namespace is
      * 0x084D10C07EfEecD9fFc73DEb38ecb72f9eEb65aB.
      *
      * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
@@ -88,7 +88,7 @@ export default {
      * gateway server operated by Coinbase that uses the following subregistry contracts on
      * Base Sepolia as its source of truth.
      *
-     * The owner of 'basetest.eth' in the ENS Registry on the Sepolia "ENS deployment"
+     * The owner of 'basetest.eth' in the ENS Registry on the Sepolia ENS namespace
      * (e.g. Coinbase) has the ability to change this configuration at any time.
      *
      * See the reference documentation for additional context:
@@ -129,9 +129,9 @@ export default {
    * Addresses and Start Blocks from Lineanames
    * https://github.com/Consensys/linea-ens
    */
-  [DatasourceName.Lineanames]: {
+  [DatasourceNames.Lineanames]: {
     /**
-     * As of 5-Jun-2025 the Resolver for 'linea-sepolia.eth' in the Sepolia "ENS deployment" is
+     * As of 5-Jun-2025 the Resolver for 'linea-sepolia.eth' in the Sepolia ENS namespace is
      * 0x64884ED06241c059497aEdB2C7A44CcaE6bc7937.
      *
      * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
@@ -139,7 +139,7 @@ export default {
      * gateway server operated by Consensys that uses the following subregistry contracts on
      * Linea Sepolia as its source of truth.
      *
-     * The owner of 'linea-sepolia.eth' in the ENS Registry on the Sepolia "ENS deployment"
+     * The owner of 'linea-sepolia.eth' in the ENS Registry on the Sepolia ENS namespace
      * (e.g. Consensys) has the ability to change this configuration at any time.
      *
      * See the reference documentation for additional context:
@@ -173,4 +173,4 @@ export default {
       },
     },
   },
-} satisfies ENSDeployment;
+} satisfies ENSNamespace;
