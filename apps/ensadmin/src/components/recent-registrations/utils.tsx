@@ -59,7 +59,7 @@ export function Duration({
 export type UnixTimestampInSeconds = string;
 
 /**
- * Transforms a timestamp formatted as a string to a Date object.
+ * Transforms a UnixTimestampInSeconds to a Date object.
  */
 export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
   const date = new Date(parseInt(timestamp) * millisecondsInSecond);
