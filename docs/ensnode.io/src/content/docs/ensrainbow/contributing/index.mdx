@@ -44,10 +44,10 @@ cd apps/ensrainbow
 This command will:
 
 - Download the specified `<LABEL_SET_ID>-<LABEL_SET_VERSION>.ensrainbow` file.
-- Download its corresponding checksum file (`.sha256sum`).
-- Download the `THE_GRAPH_LICENSE.txt` file.
+- Download its corresponding checksum file (`<LABEL_SET_ID>-<LABEL_SET_VERSION>.ensrainbow.sha256sum`).
+- Download its corresponding `<LABEL_SET_ID>-<LABEL_SET_VERSION>.ensrainbow.LICENSE.txt` file.
 - Automatically verify the checksum of the `.ensrainbow` file.
-- Place the files in `./labelsets/<LABEL_SET_ID>-<LABEL_SET_VERSION>.ensrainbow` and `./THE_GRAPH_LICENSE.txt` respectively (relative to where `OUT_DIR` is set, default is current dir).
+- Place the files in `./labelsets/` (relative to where `OUT_DIR` is set, default is current dir).
 
 Refer to the script for more details on output paths.
 
@@ -310,19 +310,25 @@ This test environment setup is particularly useful for running ENS tests (i.e. e
 
 ### Environment Variables
 
-When using ENSRainbow with Docker, the following environment variables control which database archive is downloaded and used:
+When using ENSRainbow with Docker, the following environment variables control which pre-built ENSRainbow database archive is downloaded and used:
 
-- **`DB_SCHEMA_VERSION`**: The database schema version (e.g., `v3`). This determines the format and structure of the database archives. Use the latest available version unless you have specific compatibility requirements.
+- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `v3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
+  - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of its database.
+  - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
-- **`LABEL_SET_ID`**: The data namespace identifier that categorizes the type of ENS data:
-  - `subgraph` - Main production dataset from The Graph's ENS subgraph
-  - `searchlight` - Extended dataset with additional label discoveries
-  - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
-  - `testenv` - Small test dataset for development and testing
+- **`LABEL_SET_ID`**: The identifier for a **Label Set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
+  - **Goal**: To provide different categories of data (e.g., production vs. test) from the same Docker image.
+  - **Configuration**: Choose the ID that matches your needs: 
+    - `subgraph` - Main production dataset from The Graph's ENS subgraph
+    - `searchlight` - Extended dataset with additional label discoveries
+    - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
+    - `testenv` - Small test dataset for development and testing
 
-- **`LABEL_SET_VERSION`**: A non-negative integer representing the incremental dataset version within a label set ID. Label sets are sequential:
-  - `0` - Initial/base dataset for the label set ID
-  - `1`, `2`, etc. - Incremental updates containing additional or updated labels
+- **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
+  - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
+  - **Configuration**: Use the highest available version number for the most up-to-date data. Versions are sequential and incremental:
+    - `0` - The initial/base version of the **Label Set**.
+    - `1`, `2`, etc. - Incremental updates to the **Label Set**.
 
 **Example combinations:**
 ```bash
@@ -399,23 +405,23 @@ These steps are typically performed by project maintainers for releasing officia
 
 This section covers the conversion of source data (like SQL dumps or empty files for initial datasets) into the `.ensrainbow` format. The `time` command is used here to measure the duration of potentially long-running conversion processes.
 
-**For `subgraph` label set ID (main dataset):**
-This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for the `subgraph` label set ID and label set version 0.
+**For the `subgraph` Label Set (main dataset):**
+This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for version 0 of the `subgraph` Label Set.
 ```bash
 # Assuming ens_names.sql.gz contains the primary dataset
 time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
 ```
 
-**For `discoveryA` label set ID (initially empty for discovered labels):**
-This creates an empty `.ensrainbow` file for the `discoveryA` label set ID, which might be used for labels discovered dynamically.
+**For the `discoveryA` Label Set (initially empty for discovered labels):**
+This creates an empty `.ensrainbow` file for version 0 of the `discoveryA` Label Set, which is used for labels discovered dynamically.
 ```bash
 touch empty.sql
 gzip empty.sql
 time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --label-set-id discoveryA --label-set-version 0
 ```
 
-**For `testenv` label set ID (for testing):**
-This converts a test dataset SQL dump into an `.ensrainbow` file for the `testenv` label set ID.
+**For the `testenv` Label Set (for testing):**
+This converts a test dataset SQL dump into an `.ensrainbow` file for version 0 of the `testenv` Label Set.
 ```bash
 time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --label-set-id testenv --label-set-version 0
 ```

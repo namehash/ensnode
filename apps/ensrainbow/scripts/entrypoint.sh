@@ -70,8 +70,8 @@ if [ ! -f "${MARKER_FILE}" ]; then
     rm -rf "${DOWNLOAD_TEMP_DIR}" # Clean up temp dir from previous runs if any
     mkdir -p "${DOWNLOAD_TEMP_DIR}"
 
-    # 3. Download the database artifact
-    echo "Downloading pre-built database from labelset server (Schema: $DB_SCHEMA_VERSION, Label Set ID: 
+    # 3. Download the database archive
+    echo "Downloading pre-built ENSRainbowdatabase from labelset server (Schema: $DB_SCHEMA_VERSION, Label Set ID: 
     $LABEL_SET_ID, Label Set Version: $LABEL_SET_VERSION)..."
     if ! OUT_DIR="${DOWNLOAD_TEMP_DIR}" \
         ENSRAINBOW_LABELSET_SERVER_URL="${ENSRAINBOW_LABELSET_SERVER_URL:-}" \
@@ -82,30 +82,30 @@ if [ ! -f "${MARKER_FILE}" ]; then
       exit 1
     fi
 
-    ARTIFACT_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz"
-    ARTIFACT_PATH="${DOWNLOAD_TEMP_DIR}/databases/${DB_SCHEMA_VERSION}/${ARTIFACT_BASENAME}"
+    DB_ARCHIVE_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz"
+    DB_ARCHIVE_PATH="${DOWNLOAD_TEMP_DIR}/databases/${DB_SCHEMA_VERSION}/${DB_ARCHIVE_BASENAME}"
 
-    if [ ! -f "$ARTIFACT_PATH" ]; then
-        echo "Error: Expected artifact file not found at $ARTIFACT_PATH after download attempt."
+    if [ ! -f "$DB_ARCHIVE_PATH" ]; then
+        echo "Error: Expected database archive file not found at $DB_ARCHIVE_PATH after download attempt."
         ls -R "${DOWNLOAD_TEMP_DIR}"
         rm -rf "${DOWNLOAD_TEMP_DIR}"
         exit 1
     fi
-    echo "Database artifact downloaded to: $ARTIFACT_PATH"
+    echo "Database archive downloaded to: $DB_ARCHIVE_PATH"
 
-    # 4. Extract the artifact
-    echo "Extracting artifact..."
-    if ! tar -xzf "${ARTIFACT_PATH}" -C "${FINAL_DATA_DIR}" --strip-components=1; then
-        echo "Error: Failed to extract artifact."
-        rm -f "${ARTIFACT_PATH}"
+    # 4. Extract the database archive
+    echo "Extracting database archive..."
+    if ! tar -xzf "${DB_ARCHIVE_PATH}" -C "${FINAL_DATA_DIR}" --strip-components=1; then
+        echo "Error: Failed to extract database archive."
+        rm -f "${DB_ARCHIVE_PATH}"
         rm -rf "${DOWNLOAD_TEMP_DIR}"
         exit 1
     fi
-    echo "Artifact extracted to ${FINAL_DATA_DIR}"
+    echo "Database archive extracted to ${FINAL_DATA_DIR}"
 
     # 5. Clean up downloaded archive and temporary directory
     echo "Cleaning up downloaded files..."
-    rm -f "${ARTIFACT_PATH}"
+    rm -f "${DB_ARCHIVE_PATH}"
     rm -rf "${DOWNLOAD_TEMP_DIR}"
     echo "Cleanup complete."
 
@@ -118,7 +118,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
         touch "${MARKER_FILE}"
     else
         echo "Error: Newly extracted database validation failed! Data may be corrupted."
-        echo "Please check logs and artifact source. The marker file will not be created."
+        echo "Please check logs and database archive source. The marker file will not be created."
         # Depending on policy, you might want to exit 1 here or clean up FINAL_DATA_DIR
         exit 1 # Exit if validation fails to prevent running with bad data
     fi

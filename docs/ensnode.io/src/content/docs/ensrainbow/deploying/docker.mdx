@@ -51,15 +51,25 @@ docker run -d --name ensrainbow_production \
 
 ## Required Environment Variables
 
-The following environment variables are **required** for the initial database download:
+The following environment variables are **required** for the initial ENSRainbow database download:
 
-- **`DB_SCHEMA_VERSION`**: Database schema version (e.g., `v3`)
-- **`LABEL_SET_ID`**: Data label set ID:
-  - `subgraph` - Main production dataset from The Graph's ENS subgraph
-  - `searchlight` - Extended dataset with additional label discoveries
-  - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
-  - `testenv` - Small test dataset for development and testing
-- **`LABEL_SET_VERSION`**: Non-negative integer representing the dataset version within a label set ID (e.g., `0`, `1`, `2`)
+- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `v3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
+  - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of its database.
+  - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
+
+- **`LABEL_SET_ID`**: The identifier for a **Label Set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
+  - **Goal**: To provide different categories of data (e.g., production vs. test) from the same Docker image.
+  - **Configuration**: Choose the ID that matches your needs: 
+    - `subgraph` - Main production dataset from The Graph's ENS subgraph
+    - `searchlight` - Extended dataset with additional label discoveries
+    - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
+    - `testenv` - Small test dataset for development and testing
+
+- **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
+  - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
+  - **Configuration**: Use the highest available version number for the most up-to-date data. Versions are sequential and incremental:
+    - `0` - The initial/base version of the **Label Set**.
+    - `1`, `2`, etc. - Incremental updates to the **Label Set**.
 
 ## Persistent Storage
 
@@ -149,7 +159,7 @@ volumes:
 
 ## How Data Download Works
 
-1. **First Run**: When the container starts with an empty volume, it downloads the specified database artifact based on the environment variables
+1. **First Run**: When the container starts with an empty volume, it downloads the specified pre-built ENSRainbow database archive based on the environment variables
 2. **Subsequent Runs**: The container detects existing data and skips the download, using the persisted database
 3. **Data Validation**: The container validates the existing data on startup and re-downloads if corruption is detected
 
