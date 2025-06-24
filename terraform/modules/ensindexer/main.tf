@@ -70,7 +70,7 @@ locals {
     },
     {
       name  = "PLUGINS"
-      value = var.active_plugins
+      value = var.plugins
     },
     {
       name  = "NAMESPACE"

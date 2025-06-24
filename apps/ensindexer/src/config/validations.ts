@@ -18,10 +18,9 @@ export function invariant_requiredDatasources(
 
   const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
   const availableDatasourceNames = Object.keys(datasources) as DatasourceName[];
-  const activePluginNames = config.plugins;
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
-  for (const pluginName of activePluginNames) {
+  for (const pluginName of config.plugins) {
     const { requiredDatasources } = getPlugin(pluginName);
     const hasRequiredDatasources = requiredDatasources.every((datasourceName) =>
       availableDatasourceNames.includes(datasourceName),
