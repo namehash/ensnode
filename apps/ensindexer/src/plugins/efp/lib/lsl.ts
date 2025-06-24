@@ -3,10 +3,10 @@
  */
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import type { Address, Hex } from "viem";
+import type { Hex } from "viem";
 import { prettifyError, z } from "zod/v4";
 import { type EFPDeploymentChainId, getEFPDeploymentChainIds } from "./chains";
-import { parseEvmAddress } from "./utils";
+import { type EvmAddress, parseEvmAddress } from "./utils";
 
 /**
  * Enum defining recognized List Storage Location Types
@@ -76,7 +76,7 @@ export interface ListStorageLocationContract
   /**
    * Contract address on chainId where the EFP list records are stored.
    */
-  listRecordsAddress: Address;
+  listRecordsAddress: EvmAddress;
 
   /**
    * The 32-byte value that specifies the storage slot of the EFP list records within the listRecordsAddress contract.
@@ -267,7 +267,7 @@ const createEfpLslContractSchema = (ensNamespaceId: ENSNamespaceId) => {
       .length(40)
       .transform((v) => `0x${v}`)
       // ensure EVM address correctness and map it into lowercase for ease of equality comparisons
-      .transform((v) => parseEvmAddress(v) as Address),
+      .transform((v) => parseEvmAddress(v)),
 
     slot: z
       .string()

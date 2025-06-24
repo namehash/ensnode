@@ -8,6 +8,7 @@ import {
   parseEncodedLsl,
   validateEncodedLslContract,
 } from "@/plugins/efp/lib/lsl";
+import { parseEvmAddress } from "@/plugins/efp/lib/utils";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { describe, expect, it } from "vitest";
 
@@ -30,7 +31,7 @@ describe("EFP List Storage Location", () => {
           type: ListStorageLocationType.EVMContract,
           version: ListStorageLocationVersion.V1,
           chainId: 1,
-          listRecordsAddress: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+          listRecordsAddress: parseEvmAddress("0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef"),
           slot: 31941687331316587819122038778003974753188806173854071805743471973008610429132n,
         } satisfies ListStorageLocationContract);
       });
@@ -51,7 +52,7 @@ describe("EFP List Storage Location", () => {
           type: ListStorageLocationType.EVMContract,
           version: ListStorageLocationVersion.V1,
           chainId: 84532,
-          listRecordsAddress: "0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef",
+          listRecordsAddress: parseEvmAddress("0x5289fe5dabc021d02fddf23d4a4df96f4e0f17ef"),
           slot: 31941687331316587819122038778003974753188806173854071805743471973008610429132n,
         } satisfies ListStorageLocationContract);
       });
