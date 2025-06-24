@@ -33,6 +33,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 'Set up skopeo'
+        uses: warjiang/setup-skopeo@main
+        with:
+          version: latest
+
       - name: Print switch target
         run: |
           echo "Switching to: $TARGET_ENVIRONMENT"
@@ -41,15 +46,15 @@ jobs:
         run: |
           case "$TARGET_ENVIRONMENT" in
             "green")
-              echo "SLACK_TITLE=':large_green_circle: GREEN Environment Activated" >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=:large_green_circle: GREEN Environment Activated" >> "$GITHUB_ENV"
               echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.GREEN_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
               ;;
             "blue")
-              echo "SLACK_TITLE=':large_blue_circle: BLUE Environment Activated" >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=:large_blue_circle: BLUE Environment Activated" >> "$GITHUB_ENV"
               echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
               ;;
             *)
-              echo "SLACK_TITLE=':large_red_circle: Unrecognized environment activated" >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=:large_red_circle: Unrecognized Environment Activated" >> "$GITHUB_ENV"
           esac
 
       - name: Install redis-cli
@@ -58,6 +63,7 @@ jobs:
 
       - name: Promote ENSAdmin Deployment
         run: |
+          chmod +x ./.github/scripts/promote_ensadmin.sh
           ./.github/scripts/promote_ensadmin.sh
 
       - name: Switch Traefik routers
