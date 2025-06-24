@@ -1,0 +1,72 @@
+---
+import { ENSADMIN_GRAPHIQL_ENDPOINT } from "astro:env/client";
+
+export interface Props {
+  example: {
+    operationName: string;
+    id: string;
+    name: string;
+    category: string;
+    description: string;
+    query: string;
+    variables: string;
+  };
+}
+
+const { example } = Astro.props;
+
+const createGraphiQLUrl = (query: string, variables: string): string => {
+  try {
+    const baseUrl = ENSADMIN_GRAPHIQL_ENDPOINT;
+    const params = new URLSearchParams({
+      query: query.trim(),
+      variables: variables.trim(),
+    });
+    return `${baseUrl}?${params.toString()}`;
+  } catch (err) {
+    console.error("Failed to create GraphiQL URL: ", err);
+    return ENSADMIN_GRAPHIQL_ENDPOINT;
+  }
+};
+
+const graphiqlUrl = createGraphiQLUrl(example.query, example.variables);
+---
+
+<div data-example={JSON.stringify(example)} class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 flex flex-col p-6">
+  <div class="mb-3">
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-[var(--color-primary)]">
+      {example.category}
+    </span>
+  </div>
+
+  <h3 class="text-lg font-semibold text-gray-900 mb-2">{example.name}</h3>
+
+  <p class="text-gray-600 text-sm mb-6 overflow-ellipsis line-clamp-3">
+    {example.description}
+  </p>
+
+  <div class="flex gap-2 mt-auto">
+    <a
+      href={graphiqlUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex flex-1 justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary)] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+    >
+      <svg
+        class="h-4 w-4 mr-2"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+        ></path>
+      </svg>
+      Open in ENSAdmin
+    </a>
+  </div>
+</div>
