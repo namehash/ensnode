@@ -1,7 +1,12 @@
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { useEffect, useState } from "react";
 import {Address} from "viem";
-import {Datasource, DatasourceNames, ENSNamespace, ENSNamespaces, getDatasourceMap} from "@ensnode/datasources";
+import {
+  Datasource,
+  DatasourceNames,
+  ENSNamespaceId,
+  getENSNamespace
+} from "@ensnode/datasources";
 
 /**
  * Client-only date formatter component
@@ -57,13 +62,20 @@ export function Duration({
 /**
  Get an Address object of the NameWrapper contract from the root datasource of a specific namespace.
 
- @param namespace - the namespace identifier within which to find a root datasource
+ @param chainId the chain ID
+ @param namespaceId - the namespace identifier within which to find a root datasource
  @returns the viem#Address object
  */
-//TODO: where to sue it? I don't like the prop-drilling that would be required to pass the address from <RecentRegistrations /> to getEffectiveOwner, but what's a better way to do it?
-export function getNameWrapperAddress(namespace: ENSNamespace): Address{
-  const datasources = Object.values(getDatasourceMap(namespace)) as Datasource[];
-  const datasource = datasources[DatasourceNames.ENSRoot];
+//TODO: where to use it? I don't like the prop-drilling that would be required to pass the address from <RecentRegistrations /> to getEffectiveOwner, but what's a better way to do it?
+export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: number): Address{
+  const datasources = Object.values(getENSNamespace(namespaceId)) as Datasource[];
+  const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
+
+  if (!datasource) {
+    throw new Error(
+        `No Datasources within the "${namespaceId}" namespace are defined for Chain ID "${chainId}".`,
+    );
+  }
 
   return datasource.contracts.NameWrapper.address;
 }
