@@ -1,3 +1,4 @@
+import { ENSNamespaceId } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { base, mainnet } from "viem/chains";
@@ -32,12 +33,12 @@ describe("View Models", () => {
       const result = ensNodeEnvViewModel({
         ACTIVE_PLUGINS: [PluginName.Subgraph],
         DATABASE_SCHEMA: "public",
-        NAMESPACE: "ens-test-env",
+        NAMESPACE: ENSNamespaceId.EnsTestEnv,
       });
 
       expect(result).toEqual([
         { label: "Active Plugins", value: [PluginName.Subgraph] },
-        { label: "ENS Namespace", value: "ens-test-env" },
+        { label: "ENS Namespace", value: ENSNamespaceId.EnsTestEnv },
         { label: "Database Schema", value: "public" },
       ]);
     });
@@ -50,7 +51,7 @@ describe("View Models", () => {
       const mainnetStatus = ensNodeNetworkStatus[mainnet.id];
       const baseStatus = ensNodeNetworkStatus[base.id];
 
-      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus, "mainnet")).toEqual({
+      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus, ENSNamespaceId.Mainnet)).toEqual({
         networkStatuses: [
           {
             name: "Ethereum",
