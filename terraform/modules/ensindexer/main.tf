@@ -69,7 +69,7 @@ locals {
       value = var.database_schema
     },
     {
-      name  = "ACTIVE_PLUGINS"
+      name  = "PLUGINS"
       value = var.active_plugins
     },
     {

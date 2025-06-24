@@ -149,7 +149,7 @@ export function ensNodeDepsViewModel(deps: EnsNode.Metadata["deps"]) {
 
 export function ensNodeEnvViewModel(env: EnsNode.Metadata["env"]) {
   return [
-    { label: "Active Plugins", value: env.ACTIVE_PLUGINS },
+    { label: "Active Plugins", value: env.PLUGINS },
     { label: "ENS Namespace", value: env.NAMESPACE },
     { label: "Database Schema", value: env.DATABASE_SCHEMA },
   ] as const;

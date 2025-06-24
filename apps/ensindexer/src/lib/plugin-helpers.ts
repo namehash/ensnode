@@ -62,7 +62,7 @@ export interface ENSIndexerPlugin<
 
   /**
    * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of ACTIVE_PLUGINS are valid for a given ENS Namespace
+   * a set of PLUGINS are valid for a given ENS Namespace
    */
   requiredDatasources: DatasourceName[];
 
