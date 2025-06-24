@@ -3,7 +3,7 @@
 # Identifies the commit sha of images deployed to the incoming active env and ensures that the appropriate
 # ENSAdmin Vercel Deployment is promoted to production. This ensures exact version matching between
 # the active ENSNode and the production ENSAdmin.
-ENSADMIN_APP_NAME=admin.ensnode.io
+VERCEL_PROJECT_ID=prj_nKcHTO12hq9kcgascQMq4xokRhwp # admin.ensnode.io
 VERCEL_TEAM_SLUG=namehash
 
 set -euo pipefail
@@ -25,7 +25,7 @@ fi
 
 echo "Targeting Railway Environment: $RAILWAY_ENVIRONMENT_ID"
 
-# first, get deployed version from Railway Environment
+# first, get deployed ENSIndexer image from Railway Environment
 RAILWAY_SERVICES_OUTPUT=$(curl \
   --request POST \
   --silent \
@@ -58,7 +58,7 @@ echo "Found Commit SHA: $ENSINDEXER_COMMIT_SHA"
 
 # find the vercel deployment corresponding to that sha
 DEPLOYMENT_UID=$(curl --request GET \
-  --url "https://api.vercel.com/v6/deployments?slug=${VERCEL_TEAM_SLUG}&projectId=${VERCEL_PROJECT_ID}&app=${ENSADMIN_APP_NAME}&target=production&state=READY&sha=${ENSINDEXER_COMMIT_SHA}" \
+  --url "https://api.vercel.com/v6/deployments?slug=${VERCEL_TEAM_SLUG}&projectId=${VERCEL_PROJECT_ID}&target=production&state=READY&sha=${ENSINDEXER_COMMIT_SHA}" \
   --header "Authorization: Bearer ${VERCEL_TOKEN}" | jq -r '.deployments[0].uid')
 
 if [ -z "$DEPLOYMENT_UID" ] || [ "$DEPLOYMENT_UID" = "null" ]; then
