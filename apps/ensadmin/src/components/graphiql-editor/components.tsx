@@ -8,11 +8,11 @@ import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 import { useGraphiQLEditor } from "./hooks";
 
 const defaultQuery = `#
-# Welcome to ENSAdmin!
+# Welcome to this interactive playground for
+# ENSNode's GraphQL API!
 #
 # You can get started by typing using
 # the Explorer on the left to select the data
@@ -66,7 +66,10 @@ export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
     <section className="flex flex-col flex-1">
       <AiQueryGeneratorForm
         onResult={({ query, variables }) => {
-          graphiqlEditor.actions.setQueryAndVariables(query, JSON.stringify(variables));
+          graphiqlEditor.actions.setQueryAndVariables(
+            query,
+            JSON.stringify(variables)
+          );
         }}
         url={props.url}
       />
