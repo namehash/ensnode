@@ -39,18 +39,17 @@ const graphiqlUrl = createGraphiQLUrl(example.query, example.variables);
     </span>
   </div>
 
-  <h3 class="text-lg font-semibold text-gray-900 mb-2">{example.name}</h3>
+  <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">{example.name}</h3>
 
-  <p class="text-gray-600 text-sm mb-6 overflow-ellipsis line-clamp-3">
+  <p class="text-gray-600 text-sm mb-6 line-clamp-4">
     {example.description}
   </p>
 
-  <div class="flex gap-2 mt-auto">
     <a
       href={graphiqlUrl}
       target="_blank"
       rel="noopener noreferrer"
-      class="inline-flex flex-1 justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary)] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+      class="flex mt-auto justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary)] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
     >
       <svg
         class="h-4 w-4 mr-2"
@@ -68,5 +67,4 @@ const graphiqlUrl = createGraphiQLUrl(example.query, example.variables);
       </svg>
       Open in ENSAdmin
     </a>
-  </div>
 </div>
