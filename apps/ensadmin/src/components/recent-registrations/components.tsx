@@ -42,13 +42,16 @@ export function RecentRegistrations() {
   );
   const indexingStatus = useIndexingStatusQuery(searchParams);
   const indexedChainId = useENSRootDatasourceChainId(indexingStatus.data);
+  const namespaceId = indexingStatus.data ? indexingStatus.data.env.NAMESPACE : null; //TODO: decide on how to handle possible undefined data. Should all be handled individually like <currentIndexingDate>? Or maybe it could all be handled in a unified way?
   const [isClient, setIsClient] = useState(false);
 
-  //TODO: establish the level where we would handle undefined results!!!
-  const ensAppUrl = getEnsAppUrl(indexingStatus.data.env.NAMESPACE);
-  const ensMetadataUrl = getEnsMetadataUrl(indexingStatus.data.env.NAMESPACE);
+  // console.log("test", indexingStatus);
 
-  const nameWrapperAddress = getNameWrapperAddress(indexingStatus.data.env.NAMESPACE);
+  //TODO: establish the level where we would handle undefined results!!!
+  const ensAppUrl = getEnsAppUrl(namespaceId!);
+  const ensMetadataUrl = getEnsMetadataUrl(namespaceId!);
+
+  const nameWrapperAddress = indexingStatus.data && indexedChainId ? getNameWrapperAddress(indexingStatus.data.env.NAMESPACE, indexedChainId) : null;
   //TODO: this might be moved --> placing it here requires loads of prop drilling!
 
   useEffect(() => {

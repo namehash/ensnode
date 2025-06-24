@@ -1,12 +1,12 @@
-import { ENSNamespace } from "@ensnode/datasources";
+import {ENSNamespaceId} from "@ensnode/datasources";
 
 /**
  * Get ENS app URL for wallet address on a supported network.
  * NOTE: not every ENS deployment has an ENS app URL.
- * @param {ENSNamespace} chain
+ * @param {ENSNamespaceId} chain - ENS Namespace identifier
  * @returns ENS app URL for supported networks, otherwise undefined
  */
-export function getEnsAppUrl(chain: ENSNamespace): URL | undefined {
+export function getEnsAppUrl(chain: ENSNamespaceId): URL | undefined {
     switch (chain) {
         case "mainnet":
             return new URL(`https://app.ens.domains/`);
@@ -23,10 +23,10 @@ export function getEnsAppUrl(chain: ENSNamespace): URL | undefined {
 /**
  * Get metadata URL for a given ENS deployment
  * NOTE: not every ENS deployment has an ENS metadata URL.
- * @param {ENSNamespace} chain
+ * @param {ENSNamespaceId} chain - ENS Namespace identifier
  * @returns metadata URL for supported networks, otherwise undefined
  */
-export function getEnsMetadataUrl(chain: ENSNamespace): URL | undefined {
+export function getEnsMetadataUrl(chain: ENSNamespaceId): URL | undefined {
     switch (chain) {
         case "mainnet":
             return new URL(`https://metadata.ens.domains/mainnet/avatar/`);
