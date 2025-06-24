@@ -18,7 +18,7 @@ import {
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
-import { ENSNamespaceId } from "@ensnode/datasources";
+import { ENSNamespaceIds } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 const chainIdSchema = z.number().int().min(1);
@@ -56,9 +56,9 @@ const RpcConfigSchema = z.object({
 });
 
 const ENSNamespaceSchema = z
-  .enum(ENSNamespaceId, {
+  .enum(ENSNamespaceIds, {
     error: (issue) => {
-      return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceId).join(", ")}`;
+      return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
     },
   })
   .default(DEFAULT_NAMESPACE);

@@ -1,7 +1,7 @@
 import type { Abi, Address, Chain } from "viem";
 
 /**
- * ENSNamespaceId enum encodes the set of identifiers for well-known ENS namespaces.
+ * ENSNamespaceIds encodes the set of identifiers for well-known ENS namespaces.
  *
  * Each ENS namespace is a single, unified set of ENS names with a distinct onchain root
  * Registry (the ensroot Datasource) and the capability of spanning from that root Registry across
@@ -26,12 +26,17 @@ import type { Abi, Address, Chain } from "viem";
  * protocol changes, running deterministic test suites, and local development.
  * https://github.com/ensdomains/ens-test-env
  */
-export enum ENSNamespaceId {
-  Mainnet = "mainnet",
-  Sepolia = "sepolia",
-  Holesky = "holesky",
-  EnsTestEnv = "ens-test-env",
-}
+export const ENSNamespaceIds = {
+  Mainnet: "mainnet",
+  Sepolia: "sepolia",
+  Holesky: "holesky",
+  EnsTestEnv: "ens-test-env",
+} as const;
+
+/**
+ * ENSNamespaceId is the derived string union of possible ENS namespace identifiers.
+ */
+export type ENSNamespaceId = (typeof ENSNamespaceIds)[keyof typeof ENSNamespaceIds];
 
 /**
  * A Datasource describes a set of contracts on a given chain that interact with the ENS protocol.

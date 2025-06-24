@@ -205,9 +205,7 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
  *   those plugins pass the typechecker. ENSNode ensures that non-active plugins are not executed,
  *   so the issue of type/value mismatch does not occur during execution.
  */
-type ENSNamespaceFullyDefinedAtCompileTime = ReturnType<
-  typeof getENSNamespace<ENSNamespaceId.Mainnet>
->;
+type ENSNamespaceFullyDefinedAtCompileTime = ReturnType<typeof getENSNamespace<"mainnet">>;
 
 /**
  * Returns the ENSNamespace for the provided `namespaceId`, cast to ENSNamespaceFullyDefinedAtCompileTime.
