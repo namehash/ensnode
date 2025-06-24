@@ -1,7 +1,7 @@
 import type { Abi, Address, Chain } from "viem";
 
 /**
- * ENSNamespaces encodes the set of well-known ENS namespaces.
+ * ENSNamespaceIds encodes the set of identifiers for well-known ENS namespaces.
  *
  * Each ENS namespace is a single, unified set of ENS names with a distinct onchain root
  * Registry (the ensroot Datasource) and the capability of spanning from that root Registry across
@@ -26,7 +26,7 @@ import type { Abi, Address, Chain } from "viem";
  * protocol changes, running deterministic test suites, and local development.
  * https://github.com/ensdomains/ens-test-env
  */
-export const ENSNamespaces = {
+export const ENSNamespaceIds = {
   Mainnet: "mainnet",
   Sepolia: "sepolia",
   Holesky: "holesky",
@@ -34,9 +34,9 @@ export const ENSNamespaces = {
 } as const;
 
 /**
- * ENSNamespace is the derived string union of possible ENSNamespace values.
+ * ENSNamespaceId is the derived string union of possible ENS namespace identifiers.
  */
-export type ENSNamespace = (typeof ENSNamespaces)[keyof typeof ENSNamespaces];
+export type ENSNamespaceId = (typeof ENSNamespaceIds)[keyof typeof ENSNamespaceIds];
 
 /**
  * A Datasource describes a set of contracts on a given chain that interact with the ENS protocol.
@@ -95,9 +95,11 @@ export type ContractConfig =
     };
 
 /**
- * DatasourceMap encodes the set of known Datasources within an ENS namespace, keyed by DatasourceName.
- * The ENSRoot Datasource is required, and all others are optional.
+ * ENSNamespace encodes a set of known Datasources associated with the same ENS namespace.
+ *
+ * The ENSRoot Datasource is required (this formally defines an ENS namespace). All other Datasources
+ * within the ENSNamespace are optional.
  */
-export type DatasourceMap = {
+export type ENSNamespace = {
   [DatasourceNames.ENSRoot]: Datasource;
 } & Partial<Record<Exclude<DatasourceName, "ensroot">, Datasource>>;
