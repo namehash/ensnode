@@ -112,11 +112,11 @@ If `label_set_id` and `label_set_version` are provided in a heal request, both m
 Expected count as of January 30, 2024: 133,856,894 unique 
 label-labelhash pairs
 
-### Downloading Pre-built Database Artifacts
+### Downloading Pre-built Database Archives
 
-As an alternative to ingesting `.ensrainbow` files sequentially, you can download pre-built LevelDB database artifacts. These are `.tgz` archives containing a complete data directory. Use the `download-prebuilt-database.sh` script from `apps/ensrainbow/scripts/`.
+As an alternative to ingesting `.ensrainbow` files sequentially, you can download pre-built LevelDB database archives. These are `.tgz` archives containing a complete database directory. Use the `download-prebuilt-database.sh` script from `apps/ensrainbow/scripts/`.
 
-The script downloads a tarball (`.tgz`) containing the database. The script requires `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` (highest label set version included in the artifact).
+The script downloads a tarball (`.tgz`) containing the database. The script requires `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` (highest label set version included in the archive).
 
 ```bash
 # Navigate to the script directory (or call it from the monorepo root)
@@ -129,7 +129,7 @@ This will download and verify `databases/v2/subgraph-1.tgz` (relative to `OUT_DI
 
 ## Building the Docker Image
 
-For instructions on building the ENSRainbow Docker image, see the [Building Docker Images](/ensrainbow/contributing/building) guide. The Docker build process can leverage these pre-built database artifacts or ingest `.ensrainbow` files.
+For instructions on building the ENSRainbow Docker image, see the [Building Docker Images](/ensrainbow/contributing/building) guide. The Docker build process can leverage these pre-built database archives or ingest `.ensrainbow` files.
 
 <LinkCard
   title="Building ENSRainbow Docker Images"
@@ -149,7 +149,7 @@ If you need to start fresh with the database:
 
 1. Stop any running ENSRainbow processes.
 2. Delete the LevelDB data directory (default: './data').
-3. Run the `ingest-ensrainbow` command(s) again as described in [Ingest Rainbow Tables](#ingest-rainbow-tables), or download and extract a [pre-built database artifact](#downloading-pre-built-database-artifacts).
+3. Run the `ingest-ensrainbow` command(s) again as described in [Ingest Rainbow Tables](#ingest-rainbow-tables), or download and extract a [pre-built database archive](#downloading-pre-built-database-archives).
 
 ## System Requirements
 
@@ -302,17 +302,17 @@ You can also run ENSRainbow with the test data using Docker. This involves runni
       -p 3223:3223 \
       ghcr.io/namehash/ensnode/ensrainbow:latest
     ```
-    *   Adjust `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` if the test data parameters differ. Typically, for the standard test data, `LABEL_SET_ID` is `testenv` and `LABEL_SET_VERSION` is `0`. The `DB_SCHEMA_VERSION` should match the version of the database artifact you intend to use (e.g., `v3`).
+    *   Adjust `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` if the test data parameters differ. Typically, for the standard test data, `LABEL_SET_ID` is `testenv` and `LABEL_SET_VERSION` is `0`. The `DB_SCHEMA_VERSION` should match the version of the database archives you intend to use (e.g., `v3`).
 
-This setup allows the `entrypoint.sh` script within the container to download the `testenv-0` database artifact into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
+This setup allows the `entrypoint.sh` script within the container to download the `testenv-0` database archive into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
 
 This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
 
 ### Environment Variables
 
-When using ENSRainbow with Docker, the following environment variables control which database artifact is downloaded and used:
+When using ENSRainbow with Docker, the following environment variables control which database archive is downloaded and used:
 
-- **`DB_SCHEMA_VERSION`**: The database schema version (e.g., `v3`). This determines the format and structure of the database artifacts. Use the latest available version unless you have specific compatibility requirements.
+- **`DB_SCHEMA_VERSION`**: The database schema version (e.g., `v3`). This determines the format and structure of the database archives. Use the latest available version unless you have specific compatibility requirements.
 
 - **`LABEL_SET_ID`**: The data namespace identifier that categorizes the type of ENS data:
   - `subgraph` - Main production dataset from The Graph's ENS subgraph
@@ -344,7 +344,7 @@ The ENSRainbow Docker image (built with the combined Dockerfile) now includes an
 
 1.  **On First Run (with an empty volume):**
     *   The script requires `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` environment variables to be set.
-    *   It downloads the specified database artifact into `/app/apps/ensrainbow/data` (the designated data directory).
+    *   It downloads the specified database archive into `/app/apps/ensrainbow/data` (the designated data directory).
     *   After successful download, extraction, and validation, it creates a marker file (`.ensrainbow_db_ready`) in the data directory.
 2.  **On Subsequent Runs:**
     *   The script checks for the presence of the data directory and the marker file.
@@ -389,10 +389,10 @@ Adjust `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` as needed fo
 
 Using a volume ensures that your downloaded and ingested data is not lost when the container stops or is removed, saving time and bandwidth on subsequent runs.
 
-## Generating and Uploading Data Artifacts
+## Generating and Uploading Database Archives
 
 :::note
-These steps are typically performed by project maintainers for releasing official ENSRainbow data artifacts. Assumes `rclone` is configured with a remote named `ENSRAINBOWR2`.
+These steps are typically performed by project maintainers for releasing official pre-built ENSRainbow database archives. Assumes `rclone` is configured with a remote named `ENSRAINBOWR2`.
 :::
 
 ### 1. Prepare `.ensrainbow` Files

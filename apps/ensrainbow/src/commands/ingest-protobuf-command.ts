@@ -84,6 +84,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
     let batchSize = 0;
     let processedRecords = 0;
     const MAX_BATCH_SIZE = 10000;
+    const writePromises: Promise<void>[] = []; // To track batch write promises
 
     // Create a read stream for the protobuf file
     const fileStream = createReadStream(options.inputFile);
@@ -304,17 +305,14 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
             // Write batch if needed
             if (batchSize >= MAX_BATCH_SIZE) {
-              batch
-                .write()
-                .then(() => {
-                  batch = db.batch();
-                  batchSize = 0;
-                })
-                .catch((err) => {
-                  logger.error(`Error writing batch: ${err}`);
-                  // Consider stopping the stream here if batch writes fail
-                  // fileStream.destroy(err);
-                });
+              const writePromise = batch.write().catch((err) => {
+                logger.error(`Error writing batch: ${err}`);
+                fileStream.destroy(err);
+                throw err;
+              });
+              writePromises.push(writePromise);
+              batch = db.batch();
+              batchSize = 0;
             }
 
             // Update progress
@@ -352,6 +350,10 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                 "Stream finished but header message was not found or was incomplete.",
               );
             }
+
+            // Wait for any outstanding batch writes from the 'data' event handler to complete
+            // mitigates race condition
+            await Promise.all(writePromises);
 
             // Write any remaining entries
             if (batchSize > 0) {
