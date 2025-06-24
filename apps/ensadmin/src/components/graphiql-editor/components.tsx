@@ -66,10 +66,7 @@ export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
     <section className="flex flex-col flex-1">
       <AiQueryGeneratorForm
         onResult={({ query, variables }) => {
-          graphiqlEditor.actions.setQueryAndVariables(
-            query,
-            JSON.stringify(variables)
-          );
+          graphiqlEditor.actions.setQueryAndVariables(query, JSON.stringify(variables));
         }}
         url={props.url}
       />

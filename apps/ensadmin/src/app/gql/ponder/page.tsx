@@ -13,8 +13,8 @@ export default async function PonderGraphQLPage({ searchParams }: PageProps) {
   const baseUrl = Array.isArray(ensnode)
     ? ensnode[0]
     : typeof ensnode === "string"
-    ? ensnode
-    : defaultEnsNodeUrl();
+      ? ensnode
+      : defaultEnsNodeUrl();
 
   const url = new URL(`/ponder`, baseUrl).toString();
 

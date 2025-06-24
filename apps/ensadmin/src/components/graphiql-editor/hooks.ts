@@ -55,9 +55,7 @@ const defaultInitialState: EditorState = {
 /**
  * The hook to use the GraphiQL editor state and actions
  * */
-export function useGraphiQLEditor(
-  initialState: EditorState = defaultInitialState
-) {
+export function useGraphiQLEditor(initialState: EditorState = defaultInitialState) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return {
