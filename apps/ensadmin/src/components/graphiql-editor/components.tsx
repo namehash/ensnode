@@ -7,20 +7,42 @@ import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useGraphiQLEditor } from "./hooks";
+
+const defaultQuery = `#
+# Welcome to ENSAdmin!
+#
+# You can get started by typing using
+# the Explorer on the left to select the data
+# you want to query.
+#
+# When you are ready to execute the query,
+# please the Play icon -->
+#
+`;
 
 /**
  * A GraphiQL editor for Ponder API page.
  */
 export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const graphiqlEditor = useGraphiQLEditor();
+  const searchParams = useSearchParams();
+
+  const initialQuery = searchParams.get("query") || defaultQuery;
+  const initialVariables = searchParams.get("variables") || "";
+
+  const graphiqlEditor = useGraphiQLEditor({
+    query: initialQuery,
+    variables: initialVariables,
+  });
 
   return (
     <section className="flex flex-col flex-1">
       <GraphiQLEditor
         {...props}
-        query={graphiqlEditor.state.query}
-        variables={graphiqlEditor.state.variables}
+        query={graphiqlEditor.state.query || initialQuery}
+        variables={graphiqlEditor.state.variables || initialVariables}
       />
     </section>
   );
@@ -30,7 +52,15 @@ export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
  * A GraphiQL editor for Subgraph API page.
  */
 export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const graphiqlEditor = useGraphiQLEditor();
+  const searchParams = useSearchParams();
+
+  const initialQuery = searchParams.get("query") || defaultQuery;
+  const initialVariables = searchParams.get("variables") || "";
+
+  const graphiqlEditor = useGraphiQLEditor({
+    query: initialQuery,
+    variables: initialVariables,
+  });
 
   return (
     <section className="flex flex-col flex-1">
@@ -46,8 +76,8 @@ export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
 
       <GraphiQLEditor
         {...props}
-        query={graphiqlEditor.state.query}
-        variables={graphiqlEditor.state.variables}
+        query={graphiqlEditor.state.query || initialQuery}
+        variables={graphiqlEditor.state.variables || initialVariables}
       />
     </section>
   );

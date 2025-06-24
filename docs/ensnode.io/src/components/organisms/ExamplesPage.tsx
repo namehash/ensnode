@@ -250,6 +250,20 @@ const QueryCard: React.FC<QueryCardProps> = ({ example }) => {
     window.location.href = `/examples/${slug}`;
   };
 
+  const createGraphiQLUrl = (query: string, variables: string): string => {
+    try {
+      const baseUrl = "https://admin.ensnode.io/gql/subgraph-compat";
+      const params = new URLSearchParams({
+        query: query.trim(),
+        variables: variables.trim(),
+      });
+      return `${baseUrl}?${params.toString()}`;
+    } catch (err) {
+      console.error("Failed to create GraphiQL URL: ", err);
+      return "https://admin.ensnode.io/gql/subgraph-compat";
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 flex flex-col p-6">
       <div className="mb-3">
@@ -265,9 +279,11 @@ const QueryCard: React.FC<QueryCardProps> = ({ example }) => {
       </p>
 
       <div className="flex gap-2 mt-auto">
-        <button
-          onClick={handleInspect}
-          className="inline-flex flex-1 justify-center items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+        <a
+          href={createGraphiQLUrl(example.query, example.variables)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex flex-1 justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary)] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
         >
           <svg
             className="h-4 w-4 mr-2"
@@ -280,17 +296,11 @@ const QueryCard: React.FC<QueryCardProps> = ({ example }) => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
             />
           </svg>
-          View Details
-        </button>
+          Open in ENSAdmin
+        </a>
       </div>
     </div>
   );
