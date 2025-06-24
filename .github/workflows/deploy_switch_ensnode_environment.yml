@@ -17,6 +17,8 @@ jobs:
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -28,9 +30,28 @@ jobs:
         run: |
           echo "Switching to: $TARGET_ENVIRONMENT"
 
+      - name: Calculate env variables
+        run: |
+          case "$TARGET_ENVIRONMENT" in
+            "green")
+              echo "SLACK_TITLE=':large_green_circle: GREEN Environment Activated" >> "$GITHUB_ENV"
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.GREEN_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+              ;;
+            "blue")
+              echo "SLACK_TITLE=':large_blue_circle: BLUE Environment Activated" >> "$GITHUB_ENV"
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "SLACK_TITLE=':large_red_circle: Unrecognized environment activated" >> "$GITHUB_ENV"
+          esac
+
       - name: Install redis-cli
         run: |
           sudo apt install redis-tools
+
+      - name: Promote ENSAdmin Deployment
+        run: |
+          ./.github/scripts/promote_ensadmin.sh
 
       - name: Switch Traefik routers
         run: |
@@ -52,19 +73,6 @@ jobs:
 
           # ENSRAINBOW
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
-
-      - name: Calculate env variables
-        run: |
-          case "$TARGET_ENVIRONMENT" in
-            "green")
-              echo "SLACK_TITLE=':large_green_circle: GREEN environment activated" >> "$GITHUB_ENV"
-              ;;
-            "blue")
-              echo "SLACK_TITLE=':large_blue_circle: BLUE environment activated" >> "$GITHUB_ENV"
-              ;;
-            *)
-              echo "SLACK_TITLE=':large_red_circle: Unrecognized environment activated" >> "$GITHUB_ENV"
-          esac
 
       - uses: ./.github/actions/send_slack_notification
         with:
