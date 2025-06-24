@@ -1,7 +1,7 @@
 import { defineCollection, z } from "astro:content";
 import { docsLoader } from "@astrojs/starlight/loaders";
 import { docsSchema } from "@astrojs/starlight/schema";
-import { savedQueries, savedQuerySchema } from "./data/savedQueries";
+import { exampleQuerySchema, savedQueries } from "./data/savedQueries";
 
 const examples = defineCollection({
   loader: () =>
@@ -9,7 +9,7 @@ const examples = defineCollection({
       ...query,
       id: query.id,
     })),
-  schema: savedQuerySchema,
+  schema: exampleQuerySchema,
 });
 
 export const collections = {

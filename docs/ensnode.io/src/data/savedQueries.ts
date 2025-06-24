@@ -1,6 +1,6 @@
 import { z } from "astro:content";
 
-export const savedQueryCategorySchema = z.enum([
+export const exampleQueryCategorySchema = z.enum([
   "Domain",
   "Registrar",
   "Label",
@@ -9,28 +9,28 @@ export const savedQueryCategorySchema = z.enum([
   "Meta",
 ]);
 
-export type SavedQueryCategory = z.infer<typeof savedQueryCategorySchema>;
+export type ExampleQueryCategory = z.infer<typeof exampleQueryCategorySchema>;
 
-export const SavedQueryCategory = savedQueryCategorySchema.enum;
+export const ExampleQueryCategory = exampleQueryCategorySchema.enum;
 
-export const savedQuerySchema = z.object({
+export const exampleQuerySchema = z.object({
   operationName: z.string(),
   id: z.string(),
   name: z.string(),
-  category: savedQueryCategorySchema,
+  category: exampleQueryCategorySchema,
   description: z.string(),
   query: z.string(),
   variables: z.string(),
 });
 
-export type SavedQuery = z.infer<typeof savedQuerySchema>;
+export type SavedQuery = z.infer<typeof exampleQuerySchema>;
 
 export const savedQueries: SavedQuery[] = [
   {
     operationName: "GetLatestDomains",
     id: "1",
     name: "Get Latest Domains",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves the most recently created domains in descending order by creation time.",
     query: /* GraphQL */ `
@@ -55,7 +55,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "LatestRegistrations",
     id: "21",
     name: "Get Latest Registrations",
-    category: SavedQueryCategory.Registrar,
+    category: ExampleQueryCategory.Registrar,
     description:
       "Retrieves the most recent domain registrations ordered by registration date in descending order. Shows registration details including expiry dates and ownership information for newly registered domains.",
     query: /* GraphQL */ `
@@ -95,7 +95,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainsWithPagination",
     id: "1a",
     name: "Get Domains with Pagination",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Fetches domains with pagination support, ordered by creation time in ascending order. Use this when you need to iterate through all domains systematically or implement pagination in your application.",
     query: /* GraphQL */ `
@@ -126,7 +126,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "allDomainsByCreationTime",
     id: "22",
     name: "Get All Domains with Pagination by Creation Time",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves domains in batches for pagination, ordered by creation time in ascending order. Excludes reverse records and null names. Use the lastCreatedAt parameter to paginate through all domains by passing the createdAt timestamp of the last domain from the previous batch.",
     query: /* GraphQL */ `
@@ -159,7 +159,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainByNamehash",
     id: "2",
     name: "Get Domain by Namehash",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves a specific domain using its namehash (the unique identifier for ENS names). The namehash is the cryptographic hash of the domain name.",
     query: /* GraphQL */ `
@@ -185,7 +185,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainByName",
     id: "2a",
     name: "Get Domain by Name",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Looks up a domain by its human-readable name (e.g., 'ens.eth'). This is user-friendly for ad-hoc queries, but not recommended for programmatic access because names are not stable identifiers. Use the 'Get Domain by Namehash' query for reliable lookups.",
     query: /* GraphQL */ `
@@ -212,7 +212,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainsByChildmostLabel",
     id: "2c",
     name: "Get Domains by the childmost-label substring",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Searches for domains containing a specific substring in their label (the leftmost part of the domain name). For example, searching for 'ens' would find 'ens.eth', 'myens.eth', etc. Useful for finding related domains or performing fuzzy searches.",
     query: /* GraphQL */ `
@@ -239,7 +239,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getLabelByLabelhash",
     id: "3",
     name: "Get Label by Labelhash",
-    category: SavedQueryCategory.Label,
+    category: ExampleQueryCategory.Label,
     description:
       "Reverse lookup to find the human-readable label from its labelhash. This is useful when you have a labelhash and need to determine what the actual text label is.",
     query: /* GraphQL */ `
@@ -264,7 +264,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainHistory",
     id: "4",
     name: "Get Complete Domain History",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves the complete historical timeline of events for a domain, including ownership transfers, resolver changes, registrations, renewals, and all resolver record updates. This provides an audit trail of activities related to the domain.",
     query: /* GraphQL */ `
@@ -382,7 +382,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainEvents",
     id: "5",
     name: "Get Domain Events Only",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves only the domain-level events (transfers, ownership changes, wrapping events) without registration or resolver events. Use this when you're specifically interested in domain ownership and management events.",
     //events(orderBy: blockNumber, orderDirection: desc) is not working
@@ -433,7 +433,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetResolverEvents",
     id: "6",
     name: "Get Resolver Events Only",
-    category: SavedQueryCategory.Resolver,
+    category: ExampleQueryCategory.Resolver,
     description:
       "Retrieves only the resolver-related events (address changes, text record updates, contenthash changes) for a domain. Useful when you're tracking how a domain's records have been updated over time.",
     //events(orderBy: blockNumber, orderDirection: desc) is not working
@@ -483,7 +483,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainsForAddress",
     id: "7",
     name: "Get Domains for Address (owner, registrant, wrappedOwner, or resolvedAddress)",
-    category: SavedQueryCategory.Account,
+    category: ExampleQueryCategory.Account,
     description:
       "Finds all domains associated with an Ethereum address in any capacity - as owner, registrant, wrapped owner, or as the resolved address. Excludes reverse records and expired domains. This is a comprehensive way to find domains connected to an address.",
     query: /* GraphQL */ `
@@ -555,7 +555,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getOwnedInRegistryDomains",
     id: "8",
     name: "Get Owned In Registry Domains Only",
-    category: SavedQueryCategory.Account,
+    category: ExampleQueryCategory.Account,
     description:
       "Retrieves domains where the specified address is the owner in the ENS registry (not registrant or wrapped owner). This shows domains where the address has direct control over the ENS records but may not be the original registrant.",
     query: /* GraphQL */ `
@@ -604,7 +604,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetRegisteredDomains",
     id: "9",
     name: "Get Registered Domains Only",
-    category: SavedQueryCategory.Account,
+    category: ExampleQueryCategory.Account,
     description:
       "Retrieves domains where the specified address is the original registrant (the one who initially registered the .eth domain). This shows domains the address actually purchased and registered, not just ones they received or control.",
     query: /* GraphQL */ `
@@ -655,7 +655,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetNamesIncludingExpired",
     id: "10",
     name: "Get Names Including Expired",
-    category: SavedQueryCategory.Account,
+    category: ExampleQueryCategory.Account,
     description:
       "Retrieves all domains associated with an address (as owner, registrant, or wrapped owner) including those that have expired. Useful for historical analysis or when you need to see the domain portfolio of an address.",
     query: /* GraphQL */ `
@@ -708,7 +708,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetSubgraphRegistrant",
     id: "11",
     name: "Get Registrant by Labelhash", // works with ENS only?
-    category: SavedQueryCategory.Registrar,
+    category: ExampleQueryCategory.Registrar,
     description:
       "Looks up registration information using a labelhash. This is primarily used for .eth domains and provides details about who registered the domain, when it was registered, when it expires, and what it cost. Note: This mainly works with .eth domains.",
     query: /* GraphQL */ `
@@ -739,7 +739,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetSubnames",
     id: "12",
     name: "Get Subdomains",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves all subdomains under a given parent domain, filtering out expired domains and empty records. This is useful for exploring the subdomain hierarchy and finding active subdomains under a particular domain.",
     query: /* GraphQL */ `
@@ -803,7 +803,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "SearchSubnames",
     id: "13",
     name: "Search Subdomains by Label",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Searches for subdomains under a parent domain that contain a specific text string in their label. This enables fuzzy searching within a domain's subdomain space, useful for finding related or similarly named subdomains.",
     query: /* GraphQL */ `
@@ -861,7 +861,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetSubnamesIncludingExpired",
     id: "14",
     name: "Get Subdomains Including Expired",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves all subdomains under a parent domain, including those that have expired. This provides a complete historical view of all subdomains that have ever existed under the parent domain.",
     query: /* GraphQL */ `
@@ -910,7 +910,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetLatestSubnames",
     id: "15",
     name: "Get Latest Subdomains",
-    category: SavedQueryCategory.Registrar,
+    category: ExampleQueryCategory.Registrar,
     description:
       "Retrieves the most recently created subdomains under a parent domain, ordered by creation time. This is useful for monitoring new subdomain activity and tracking the growth of a domain's subdomain ecosystem.",
     query: /* GraphQL */ `
@@ -964,7 +964,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetSubgraphRecords",
     id: "16",
     name: "Get Domain Records (Inherited Resolver)",
-    category: SavedQueryCategory.Resolver,
+    category: ExampleQueryCategory.Resolver,
     description:
       "Retrieves a domain's resolver information including the types of records it supports (text records and coin types). This uses the domain's current resolver and shows what kind of records are available for the domain.",
     query: /* GraphQL */ `
@@ -993,7 +993,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetSubgraphRecordsCustomResolver",
     id: "17",
     name: "Get Domain Records (Custom Resolver)",
-    category: SavedQueryCategory.Resolver,
+    category: ExampleQueryCategory.Resolver,
     description:
       "Retrieves domain information along with records from a specific resolver address.",
     query: /* GraphQL */ `
@@ -1030,7 +1030,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetResolverDetails",
     id: "18",
     name: "Get Resolver Details by Address",
-    category: SavedQueryCategory.Resolver,
+    category: ExampleQueryCategory.Resolver,
     description:
       "Retrieves detailed information about a resolver by its contract address. This shows the domains using this resolver and what types of records it supports.",
     query: /* GraphQL */ `
@@ -1058,7 +1058,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetDomainTextRecords",
     id: "19",
     name: "Get Domain Text Records",
-    category: SavedQueryCategory.Resolver,
+    category: ExampleQueryCategory.Resolver,
     description:
       "Retrieves the current text record keys for a domain and all resolver events history. The 'texts' field shows currently set text record keys, while 'events' shows all resolver events including TextChanged, ContenthashChanged, AddrChanged, and MulticoinAddrChanged.",
     //events(where: { type_in: ["TextChanged"] }, first: 20) is not working
@@ -1093,7 +1093,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "GetHistoricalResolverRecords",
     id: "20",
     name: "Get Historical Resolver Records Evolution",
-    category: SavedQueryCategory.Resolver,
+    category: ExampleQueryCategory.Resolver,
     description:
       "Provides a comprehensive view of how a domain's resolver records have evolved over time. This tracks resolver changes and the history of text records, address records, and contenthash changes across all resolvers the domain has used.",
     query: /* GraphQL */ `
@@ -1141,7 +1141,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getIndexerMetadata",
     id: "23",
     name: "Get Indexer Metadata",
-    category: SavedQueryCategory.Meta,
+    category: ExampleQueryCategory.Meta,
     description:
       "Retrieves metadata information about the indexer including indexing status and current block number. Use this to check if the indexer has indexing errors and to monitor synchronization with the blockchain.",
     query: /* GraphQL */ `
@@ -1160,7 +1160,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getResolverExists",
     id: "24",
     name: "Check if Resolver Exists",
-    category: SavedQueryCategory.Resolver,
+    category: ExampleQueryCategory.Resolver,
     description:
       "Checks if a specific resolver exists by its ID. The resolver ID is constructed as 'resolverAddress-namehash' where resolverAddress is the contract address and namehash is the domain's namehash. Used to verify resolver existence before operations.",
     query: /* GraphQL */ `
@@ -1182,7 +1182,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getNameDates",
     id: "25",
     name: "Get Registration Data by Labelhash",
-    category: SavedQueryCategory.Registrar,
+    category: ExampleQueryCategory.Registrar,
     description:
       "Retrieves registration information for a domain using its labelhash (hash of the label without the TLD). Returns the registration date and the most recent registration transaction ID. Primarily used for .eth domains.",
     query: /* GraphQL */ `
@@ -1212,7 +1212,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getDomainWithResolver",
     id: "26",
     name: "Get Domain with Resolver Address",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves domain information including resolver address and text records. Unlike other domain queries, this specifically includes the resolver's address field along with standard domain information.",
     query: /* GraphQL */ `
@@ -1244,7 +1244,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getEthDomainByLabelhash",
     id: "27",
     name: "Get .eth Domain by Labelhash",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves .eth domains by their labelhash under the .eth parent domain. This is specifically for finding .eth domains using their labelhash identifier.",
     query: /* GraphQL */ `
@@ -1281,7 +1281,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getRegistrationByTokenId", //similar to getSubgraphRegistrant - remove?
     id: "28",
     name: "Get Registration by Token ID",
-    category: SavedQueryCategory.Registrar,
+    category: ExampleQueryCategory.Registrar,
     description:
       "Retrieves registration information by token ID (labelhash), including label name, registration date, and expiry date. Ordered by registration date in descending order.",
     query: /* GraphQL */ `
@@ -1309,7 +1309,7 @@ export const savedQueries: SavedQuery[] = [
     operationName: "getWrappedDomain",
     id: "29",
     name: "Get Wrapped Domain",
-    category: SavedQueryCategory.Domain,
+    category: ExampleQueryCategory.Domain,
     description:
       "Retrieves wrapped domain information including owner, fuses, expiry date, and domain name. Used for ENS domains that have been wrapped using the Name Wrapper contract.",
     query: /* GraphQL */ `

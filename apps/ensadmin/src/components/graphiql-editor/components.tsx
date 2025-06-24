@@ -19,7 +19,7 @@ const defaultQuery = `#
 # you want to query.
 #
 # When you are ready to execute the query,
-# please the Play icon -->
+# press the pink Play icon -->
 #
 `;
 
