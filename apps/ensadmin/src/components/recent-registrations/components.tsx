@@ -40,7 +40,7 @@ export function RecentRegistrations() {
   const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
   const indexedChainId = useENSRootDatasourceChainId(indexingStatusQuery.data);
 
-  const nameWrapperAddress = indexedChainId
+  const nameWrapperAddress = indexingStatusQuery.data && indexedChainId
     ? getNameWrapperAddress(indexingStatusQuery.data.env.NAMESPACE, indexedChainId)
     : null;
   //TODO: this should be moved --> placing it here requires loads of prop drilling! But otherwise, do we want to use a useQuery inside another Query? I very much doubt so
@@ -73,6 +73,7 @@ export function RecentRegistrations() {
     return <RecentRegistrationsFallback />;
   }
 
+  //TODO: This approach is a little bit trade-offish - cause we make JSX simpler but have to additionally make sure query's results are not undefined
   if (indexingStatusQuery.isError) {
     return (
       <p>
@@ -125,7 +126,7 @@ export function RecentRegistrations() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isClient &&
+            {isClient && indexingStatusQuery.data &&
               recentRegistrationsQuery.data?.map((registration) => (
                 <RegistrationRow
                   key={registration.name}
