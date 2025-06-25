@@ -1,5 +1,11 @@
 # @ensnode/ponder-subgraph
 
+## 0.29.0
+
+### Minor Changes
+
+- [#814](https://github.com/namehash/ensnode/pull/814) [`cf67799`](https://github.com/namehash/ensnode/commit/cf677992f73ef354ed57d19641d2093de23aacb4) Thanks [@shrugs](https://github.com/shrugs)! - polymorphic interface query params now work as expected
+
 ## 0.28.0
 
 ## 0.27.0
