@@ -38,18 +38,22 @@ export function RecentRegistrations() {
   const searchParams = useSearchParams();
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
   const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
-  const indexedChainId = indexingStatusQuery.data ? useENSRootDatasourceChainId(indexingStatusQuery.data) : undefined;
+  const indexedChainId = useENSRootDatasourceChainId(indexingStatusQuery.data);
 
   const nameWrapperAddress =
-        indexingStatusQuery.data && indexedChainId
+      indexedChainId
             ? getNameWrapperAddress(indexingStatusQuery.data.env.NAMESPACE, indexedChainId)
             : null;
     //TODO: this should be moved --> placing it here requires loads of prop drilling! But otherwise, do we want to use a useQuery inside another Query? I very much doubt so
     // Are there any alternatives? Maybe we could input the ENSNode.Metadata as a whole? Then we would get the nameWrapper at the very end where we actually need it?
+    // Currently (as an experiment) a brute-force'ish solution is implemented by adding the nameWrapper address as an input parameter
+    // Also where should we handle that in case of indexingStatusQuery failure this would result in an error -> in no other scenario this should be a null value
+    // Can we assume that if such thing occurs either a fallback or the error message higher up will be called?
 
   const recentRegistrationsQuery = useRecentRegistrations(
     ensNodeUrl,
     MAX_NUMBER_OF_LATEST_REGISTRATIONS,
+      nameWrapperAddress
   );
 
   const [isClient, setIsClient] = useState(false);
