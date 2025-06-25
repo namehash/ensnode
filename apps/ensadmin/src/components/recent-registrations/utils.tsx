@@ -1,22 +1,18 @@
+import { Registration } from "@/components/recent-registrations/types";
+import { Datasource, ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
+import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
-import {Address, getAddress} from "viem";
-import {
-  Datasource,
-  ENSNamespaceId,
-  getENSNamespace
-} from "@ensnode/datasources";
-import {Registration} from "@/components/recent-registrations/types";
-import {ExternalLink} from "lucide-react";
+import { Address, getAddress } from "viem";
 
 /**
  * Client-only date formatter component
  */
 export function FormattedDate({
-                                date,
-                                options,
-                              }: {
+  date,
+  options,
+}: {
   date: Date;
   options: Intl.DateTimeFormatOptions;
 }) {
@@ -46,9 +42,9 @@ export function RelativeTime({ date }: { date: Date }) {
  * Client-only duration component
  */
 export function Duration({
-                           beginsAt,
-                           endsAt,
-                         }: {
+  beginsAt,
+  endsAt,
+}: {
   beginsAt: Date;
   endsAt: Date;
 }) {
@@ -84,12 +80,12 @@ export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
  */
 //TODO: improve name and description
 //TODO: refactor the code
-function truncateLeftmostLabelIfItContainsAddress(name:string) : string {
+function truncateLeftmostLabelIfItContainsAddress(name: string): string {
   const leftmostLabel = name.split(".")[0];
 
   //if name's label is an address (ex. [ec93f85a766b60d85571efc48e4b818c800218452f9ac738f796a8fc94079a57].eth) truncate it
-  if (leftmostLabel.startsWith("[") && leftmostLabel.endsWith("]")){
-    return `${leftmostLabel.slice(0, 6)}...${name.slice(-3)}${name.split(".").slice(1).join(".")}`
+  if (leftmostLabel.startsWith("[") && leftmostLabel.endsWith("]")) {
+    return `${leftmostLabel.slice(0, 6)}...${name.slice(-3)}${name.split(".").slice(1).join(".")}`;
   }
 
   // otherwise return whole domain
@@ -113,22 +109,22 @@ interface RegistrationNameDisplayProps {
 //TODO: for now this handles the case of undefined ENS app URLs - may change depending on other TODOs
 export function RegistrationNameDisplay({ registration, ensAppUrl }: RegistrationNameDisplayProps) {
   const ensAppRegistrationPreviewUrl = ensAppUrl
-      ? new URL(registration.name, ensAppUrl)
-      : undefined;
+    ? new URL(registration.name, ensAppUrl)
+    : undefined;
 
   const displayName = truncateLeftmostLabelIfItContainsAddress(registration.name);
 
   if (ensAppRegistrationPreviewUrl) {
     return (
-        <a
-            href={ensAppRegistrationPreviewUrl.toString()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-blue-600 hover:underline"
-        >
-          {displayName}
-          <ExternalLink size={14} className="inline-block"/>
-        </a>
+      <a
+        href={ensAppRegistrationPreviewUrl.toString()}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 text-blue-600 hover:underline"
+      >
+        {displayName}
+        <ExternalLink size={14} className="inline-block" />
+      </a>
     );
   }
 
@@ -144,16 +140,15 @@ export function RegistrationNameDisplay({ registration, ensAppUrl }: Registratio
  */
 //TODO: where to use it? I don't like the prop-drilling that would be required to pass the address from <RecentRegistrations /> to getEffectiveOwner, but what's a better way to do it?
 //TODO: make sure it actually works! make sure we take the root datasource! --> Investigate how the Datasource is built once again, maybe I omitted sth earlier?
-export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: number): Address{
+export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: number): Address {
   const datasources = Object.values(getENSNamespace(namespaceId)) as Datasource[];
   const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
 
   if (!datasource) {
     throw new Error(
-        `No Datasources within the "${namespaceId}" namespace are defined for Chain ID "${chainId}".`,
+      `No Datasources within the "${namespaceId}" namespace are defined for Chain ID "${chainId}".`,
     );
   }
 
   return getAddress(datasource.contracts.NameWrapper.address);
 }
-
