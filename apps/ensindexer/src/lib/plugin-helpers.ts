@@ -300,19 +300,15 @@ export function getDatasourceConfigOptions<const DATASOURCE_NAME extends Datasou
   rpcConfigs: Record<number, RpcConfig>,
   datasourceName: DATASOURCE_NAME,
 ): DatasourceConfigOptions<DATASOURCE_NAME> {
-  // First, get the datasource object for a given `ensDeploymentChain` and `datasourceName`.
-  // const deployment = getENSDeployment(ensDeploymentChain);
-  // const datasource = deployment[datasourceName] as DeploymentForDatasource<DATASOURCE_NAME>;
+  // First, get the datasource object for a given `ensNamespaceId` and `datasourceName`.
   const datasource = getENSNamespaceAsFullyDefinedAtCompileTime(ensNamespaceId)[datasourceName];
   const chainId = datasource.chain.id;
 
   // Then, get contracts configuration from the selected datasource object.
   const contracts = datasource.contracts;
 
-  /**
-   * Networks configuration based on rpcConfigs and datasource chain ID.
-   * Used for building the plugin's ponder config object.
-   */
+  // Networks configuration based on rpcConfigs and datasource chain ID.
+  // Used for building the plugin's ponder config object.
   const networks = networksConfigForChain(chainId, rpcConfigs);
 
   // Create a getter function that allows accessing network configuration for a given `contractConfig`
