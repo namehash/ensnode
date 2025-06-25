@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {Address, getAddress} from "viem";
 import {
   Datasource,
-  DatasourceNames,
   ENSNamespaceId,
   getENSNamespace
 } from "@ensnode/datasources";
