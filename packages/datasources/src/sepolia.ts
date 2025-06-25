@@ -22,6 +22,9 @@ import { EthRegistrarController as linea_EthRegistrarController } from "./abis/l
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 
+// ABIs for the EFP Datasource
+import EFPListRegistry from "./abis/efp/EFPListRegistry";
+
 /**
  * The Sepolia ENSNamespace
  */
@@ -170,6 +173,22 @@ export default {
         abi: linea_NameWrapper,
         address: "0xF127De9E039a789806fEd4C6b1C0f3aFfeA9425e",
         startBlock: 2395202,
+      },
+    },
+  },
+
+  /**
+   * The Root EFP Datasource on the Sepolia testnet.
+   * Based on the list of EFP testnet deployments:
+   * https://docs.efp.app/production/deployments/#testnet-deployments
+   */
+  [DatasourceNames.EFPRoot]: {
+    chain: baseSepolia,
+    contracts: {
+      EFPListRegistry: {
+        abi: EFPListRegistry,
+        address: "0xDdD39d838909bdFF7b067a5A42DC92Ad4823a26d",
+        startBlock: 14930823,
       },
     },
   },

@@ -16,6 +16,7 @@ import {
   fetchPrometheusMetrics,
   makePonderMetdataProvider,
 } from "@/lib/ponder-metadata-provider";
+import { honoEFP } from "@/plugins/efp/lib/api";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
 import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
@@ -139,5 +140,8 @@ app.use(
     }),
   }),
 );
+
+// Use Hono EFP application for handling EFP-related requests
+app.route("/efp", honoEFP({ db }));
 
 export default app;
