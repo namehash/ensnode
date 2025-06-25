@@ -1,4 +1,5 @@
 import { PonderGraphiQLEditor, type SavedQuery } from "@/components/graphiql-editor";
+import { SavedQueryCategory } from "@/components/graphiql-editor/plugins/saved-queries";
 import { defaultEnsNodeUrl } from "@/lib/env";
 
 type PageProps = {
@@ -12,6 +13,8 @@ const savedQueries = [
     operationName: "getLatestDomains",
     id: "1",
     name: "Get Latest Domains",
+    category: SavedQueryCategory.DOMAIN,
+    description: "Get the latest domains",
     query: `query GetLatestDomains($limit: Int!) {
   domains(orderBy: "createdAt", orderDirection: "desc", limit: $limit) {
     items {

@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { setupConfigMock } from "./utils/mockConfig";
-setupConfigMock(); // setup config mock before importing dependent modules
 
 import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-describe("createPluginNamespace", () => {
+describe("makePluginNamespace", () => {
   it("should return a function that creates namespaced contract names", () => {
     const boxNs = makePluginNamespace("box" as PluginName);
     const subgraphNs = makePluginNamespace(PluginName.Subgraph);

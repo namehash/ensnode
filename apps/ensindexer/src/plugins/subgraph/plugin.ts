@@ -3,69 +3,71 @@
  * legacy ENS Subgraph indexing logic.
  */
 
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig } from "ponder";
+
 import type { ENSIndexerConfig } from "@/config/types";
 import {
   type ENSIndexerPlugin,
   activateHandlers,
+  getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
   networkConfigForContract,
   networksConfigForChain,
 } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
 
 const pluginName = PluginName.Subgraph;
 
-// enlist datasources used within createPonderConfig function
-// useful for config validation
-const requiredDatasources = [DatasourceName.Root];
+// Define the Datasources required by the plugin
+const requiredDatasources = [DatasourceNames.ENSRoot];
 
-// construct a unique contract namespace for this plugin
-const namespace = makePluginNamespace(pluginName);
+// Construct a unique plugin namespace to wrap contract names
+const pluginNamespace = makePluginNamespace(pluginName);
 
 // config object factory used to derive PluginConfig type
-function createPonderConfig(appConfig: ENSIndexerConfig) {
-  const { ensDeployment } = appConfig;
-  // extract the chain and contract configs for root Datasource in order to build ponder config
-  const { chain, contracts } = ensDeployment[DatasourceName.Root];
+function createPonderConfig(config: ENSIndexerConfig) {
+  const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+    config.namespace,
+    DatasourceNames.ENSRoot,
+  );
 
   return createConfig({
-    networks: networksConfigForChain(chain.id),
+    networks: networksConfigForChain(config, chain.id),
     contracts: {
-      [namespace("RegistryOld")]: {
-        network: networkConfigForContract(chain, contracts.RegistryOld),
+      [pluginNamespace("RegistryOld")]: {
+        network: networkConfigForContract(config, chain, contracts.RegistryOld),
         abi: contracts.Registry.abi,
       },
-      [namespace("Registry")]: {
-        network: networkConfigForContract(chain, contracts.Registry),
+      [pluginNamespace("Registry")]: {
+        network: networkConfigForContract(config, chain, contracts.Registry),
         abi: contracts.Registry.abi,
       },
-      [namespace("BaseRegistrar")]: {
-        network: networkConfigForContract(chain, contracts.BaseRegistrar),
+      [pluginNamespace("BaseRegistrar")]: {
+        network: networkConfigForContract(config, chain, contracts.BaseRegistrar),
         abi: contracts.BaseRegistrar.abi,
       },
-      [namespace("EthRegistrarControllerOld")]: {
-        network: networkConfigForContract(chain, contracts.EthRegistrarControllerOld),
+      [pluginNamespace("EthRegistrarControllerOld")]: {
+        network: networkConfigForContract(config, chain, contracts.EthRegistrarControllerOld),
         abi: contracts.EthRegistrarControllerOld.abi,
       },
-      [namespace("EthRegistrarController")]: {
-        network: networkConfigForContract(chain, contracts.EthRegistrarController),
+      [pluginNamespace("EthRegistrarController")]: {
+        network: networkConfigForContract(config, chain, contracts.EthRegistrarController),
         abi: contracts.EthRegistrarController.abi,
       },
-      [namespace("NameWrapper")]: {
-        network: networkConfigForContract(chain, contracts.NameWrapper),
+      [pluginNamespace("NameWrapper")]: {
+        network: networkConfigForContract(config, chain, contracts.NameWrapper),
         abi: contracts.NameWrapper.abi,
       },
       Resolver: {
-        network: networkConfigForContract(chain, contracts.Resolver),
+        network: networkConfigForContract(config, chain, contracts.Resolver),
         abi: contracts.Resolver.abi,
       },
     },
   });
 }
 
-// construct a specific type for plugin configuration
+// Implicitly define the type returned by createPluginConfig
 type PonderConfig = ReturnType<typeof createPonderConfig>;
 
 export default {
@@ -74,7 +76,7 @@ export default {
    */
   activate: activateHandlers({
     pluginName,
-    namespace,
+    pluginNamespace,
     handlers: () => [
       import("./handlers/Registry"),
       import("./handlers/Registrar"),
@@ -84,15 +86,15 @@ export default {
   }),
 
   /**
-   * Load the plugin configuration lazily to prevent premature execution of
-   * nested factory functions, i.e. to ensure that the plugin configuration
-   * is only built when the plugin is activated.
+   * Create the ponder configuration lazily to prevent premature execution of
+   * nested factory functions, i.e. to ensure that the ponder configuration
+   * is only created for this plugin when it is activated.
    */
   createPonderConfig,
 
-  /** The plugin name, used for identification */
+  /** The unique plugin name  */
   pluginName,
 
-  /** A list of required datasources for the plugin */
+  /** The plugin's required Datasources */
   requiredDatasources,
 } as const satisfies ENSIndexerPlugin<PluginName.Subgraph, PonderConfig>;

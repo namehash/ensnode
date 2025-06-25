@@ -71,7 +71,7 @@ jobs:
           # against forked repositories. Using GitHub Repository Secrets won't work,
           # as secrets can only be provided to workflows running against
           # the very repository they were defined on.
-          ACTIVE_PLUGINS: subgraph,basenames,lineanames,threedns
+          PLUGINS: subgraph,basenames,lineanames,threedns
           RPC_URL_1: https://eth.drpc.org
           RPC_URL_10: https://optimism.drpc.org
           RPC_URL_8453: https://base.drpc.org

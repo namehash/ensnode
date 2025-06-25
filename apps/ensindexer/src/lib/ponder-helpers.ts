@@ -1,9 +1,8 @@
 import type { Event } from "ponder:registry";
 import { PublicClient } from "viem";
 
-import config from "@/config";
+import type { ENSIndexerConfig } from "@/config/types";
 import { Blockrange } from "@/lib/types";
-import { ENSDeployments } from "@ensnode/ens-deployments";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 
@@ -22,6 +21,7 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
  *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
  */
 export const constrainContractBlockrange = (
+  config: Pick<ENSIndexerConfig, "globalBlockrange">,
   contractStartBlock: number | undefined = 0,
 ): Blockrange => {
   const { startBlock, endBlock } = config.globalBlockrange;
@@ -40,10 +40,10 @@ export const constrainContractBlockrange = (
  *
  * @returns A function that fetches ENSRainbow version information
  */
-export const createEnsRainbowVersionFetcher = () => {
-  const client = new EnsRainbowApiClient({
-    endpointUrl: new URL(config.ensRainbowEndpointUrl),
-  });
+export const createEnsRainbowVersionFetcher = (
+  endpointUrl: ENSIndexerConfig["ensRainbowEndpointUrl"],
+) => {
+  const client = new EnsRainbowApiClient({ endpointUrl: new URL(endpointUrl) });
 
   return async () => {
     try {
@@ -60,15 +60,6 @@ export const createEnsRainbowVersionFetcher = () => {
       };
     }
   };
-};
-
-/**
- * Get the ENSDeployment chain ID.
- *
- * @returns the ENSDeployment chain ID
- */
-export const getEnsDeploymentChainId = (): number => {
-  return ENSDeployments[config.ensDeploymentChain].root.chain.id;
 };
 
 /**

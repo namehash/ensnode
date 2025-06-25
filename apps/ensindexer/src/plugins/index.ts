@@ -1,6 +1,5 @@
-import { uniq } from "@/lib/lib-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
+
 import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugin";
@@ -30,22 +29,10 @@ type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer
 export function getPlugin(pluginName: PluginName) {
   const plugin = ALL_PLUGINS.find((plugin) => plugin.pluginName === pluginName);
 
-  if (plugin) {
-    return plugin;
+  if (!plugin) {
+    // invariant: all plugins can be found by PluginName
+    throw new Error(`Plugin not found by "${pluginName}" name.`);
   }
 
-  // invariant: all plugins can be found by PluginName
-  throw new Error(`Plugin not found by "${pluginName} name"`);
-}
-
-/**
- * Get a list of unique required datasource names from selected plugins.
- * @param pluginNames A list of selected plugin names.
- * @returns A list of unique datasource names.
- */
-export function getRequiredDatasourceNames(pluginNames: PluginName[]): DatasourceName[] {
-  const plugins = pluginNames.map((pluginName) => getPlugin(pluginName));
-  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasources);
-
-  return uniq(requiredDatasourceNames);
+  return plugin;
 }

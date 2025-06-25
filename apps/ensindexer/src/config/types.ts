@@ -1,9 +1,5 @@
 import { Blockrange } from "@/lib/types";
-import type {
-  ENSDeployment,
-  ENSDeploymentChain,
-  ENSDeploymentCommonType,
-} from "@ensnode/ens-deployments";
+import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import type { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -34,18 +30,11 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The ENS Deployment that ENSIndexer is indexing, defaulting to 'mainnet' (DEFAULT_ENS_DEPLOYMENT_CHAIN).
+   * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_NAMESPACE).
    *
-   * See {@link ENSDeploymentChain} for available deployment chains.
+   * See {@link ENSNamespaceIds} for available namespace identifiers.
    */
-  ensDeploymentChain: ENSDeploymentChain;
-
-  /**
-   * Details of the ENS Deployment on `ensDeploymentChain`.
-   *
-   * See {@link ENSDeployment} for the deployment type.
-   */
-  ensDeployment: ENSDeploymentCommonType;
+  namespace: ENSNamespaceId;
 
   /**
    * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).
@@ -110,7 +99,7 @@ export interface ENSIndexerConfig {
    *
    * Invariants:
    * - A set of valid {@link PluginName}s with at least one value
-   * - For each plugin, it should be available on the specified {@link ensDeploymentChain}
+   * - For each plugin, its required datasources must be defined within the {@link namespace}
    * - For each plugin specified, a valid {@link rpcConfigs} entry is required for
    *   each chain the plugin indexes
    */
@@ -223,7 +212,7 @@ export interface ENSIndexerEnvironment {
   port: string | undefined;
   ponderDatabaseSchema: string | undefined;
   databaseUrl: string | undefined;
-  ensDeploymentChain: string | undefined;
+  namespace: string | undefined;
   plugins: string | undefined;
   ensRainbowEndpointUrl: string | undefined;
   ensNodePublicUrl: string | undefined;

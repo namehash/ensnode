@@ -30,14 +30,14 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        ACTIVE_PLUGINS: [PluginName.Subgraph],
+        PLUGINS: [PluginName.Subgraph],
         DATABASE_SCHEMA: "public",
-        ENS_DEPLOYMENT_CHAIN: "ens-test-env",
+        NAMESPACE: "ens-test-env",
       });
 
       expect(result).toEqual([
         { label: "Active Plugins", value: [PluginName.Subgraph] },
-        { label: "ENS Deployment Chain", value: "ens-test-env" },
+        { label: "ENS Namespace", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);
     });
