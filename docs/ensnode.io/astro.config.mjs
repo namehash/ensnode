@@ -6,9 +6,11 @@ import { defineConfig, envField } from "astro/config";
 import { sitemap } from "./config/integrations/sitemap";
 import { starlight } from "./config/integrations/starlight";
 
+import icon from "astro-icon";
+
 export default defineConfig({
   site: "https://ensnode.io",
-  integrations: [starlight(), sitemap(), react(), mdx()],
+  integrations: [starlight(), sitemap(), react(), mdx(), icon()],
   vite: {
     ssr: {
       noExternal: ["@namehash/namekit-react"],
