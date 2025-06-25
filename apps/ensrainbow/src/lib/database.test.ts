@@ -208,7 +208,7 @@ describe("Database", () => {
       }
     });
 
-    it("should detect when highest label set is not set", async () => {
+    it("should detect when highest label set version is not set", async () => {
       const db = await ENSRainbowDB.create(tempDir);
 
       try {

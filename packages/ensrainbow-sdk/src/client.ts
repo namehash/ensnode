@@ -118,17 +118,17 @@ export namespace EnsRainbow {
     /**
      * ENSRainbow schema version.
      */
-    schema_version: number;
+    schemaVersion: number;
 
     /**
      * ENSRainbow label set ID.
      */
-    label_set_id: string;
+    labelSetId: string;
 
     /**
-     * ENSRainbow highest label set.
+     * ENSRainbow highest label set version.
      */
-    highest_label_set_version: number;
+    highestLabelSetVersion: number;
   }
 
   /**
@@ -346,8 +346,12 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * // {
    * //   "status": "success",
-   * //   "version": "0.1.0",
-   * //   "schema_version": 2
+   * //   "versionInfo": {
+   * //     "version": "0.1.0",
+   * //     "schemaVersion": 2,
+   * //     "labelSetId": "subgraph",
+   * //     "highestLabelSetVersion": 0
+   * //   }
    * // }
    * ```
    */

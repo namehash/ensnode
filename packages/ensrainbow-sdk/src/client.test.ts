@@ -144,9 +144,9 @@ describe("EnsRainbowApiClient", () => {
           status: StatusCode.Success,
           versionInfo: {
             version: "1.0.0",
-            schema_version: 1,
-            label_set_id: "test-label-set-id",
-            highest_label_set_version: 123,
+            schemaVersion: 1,
+            labelSetId: "test-label-set-id",
+            highestLabelSetVersion: 123,
           },
         } satisfies EnsRainbow.VersionResponse),
     });
@@ -156,7 +156,7 @@ describe("EnsRainbowApiClient", () => {
     expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.versionInfo.version === "string").toBeTruthy();
-    expect(typeof response.versionInfo.schema_version === "number").toBeTruthy();
+    expect(typeof response.versionInfo.schemaVersion === "number").toBeTruthy();
   });
 });
 

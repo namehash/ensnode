@@ -169,7 +169,7 @@ export function ensRainbowViewModel(runtime: EnsNode.Metadata["runtime"]) {
 
   // return [
   //   { label: "Version", value: runtime.ensRainbow.version },
-  //   { label: "Schema Version", value: runtime.ensRainbow.schema_version.toString() },
+  //   { label: "Schema Version", value: runtime.ensRainbow.schemaVersion.toString() },
   // ] as const;
 
   return [

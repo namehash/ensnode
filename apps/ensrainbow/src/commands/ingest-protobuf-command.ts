@@ -368,7 +368,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             const count = await db.countRainbowRecords();
             await db.setPrecalculatedRainbowRecordCount(count);
 
-            // Update the highest label set with the one from the file header
+            // Update the highest label set version with the one from the file header
             await db.setHighestLabelSetVersion(fileLabelSetVersion);
             logger.info(`Updated highest label set version to: ${fileLabelSetVersion}`);
 

@@ -70,10 +70,10 @@ export class ENSRainbowServer {
           } satisfies EnsRainbow.HealError;
         }
 
-        // Verify that the highest_label_set_version is not greater than the current label set
+        // Verify that the highestLabelSetVersion is not greater than the current label set version
         if (highestLabelSetVersion > this.highestLabelSetVersion) {
           logger.info(
-            `Requested label set version ${highestLabelSetVersion} is higher than current label set ${this.highestLabelSetVersion}`,
+            `Requested label set version ${highestLabelSetVersion} is higher than current label set version ${this.highestLabelSetVersion}`,
           );
           return {
             status: StatusCode.Error,
@@ -95,10 +95,10 @@ export class ENSRainbowServer {
 
       const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = label;
 
-      // Only return the label if its label set version number is less than or equal to highest_label_set_version
+      // Only return the label if its label set version number is less than or equal to highestLabelSetVersion
       if (labelSetVersionNumber > highestLabelSetVersion) {
         logger.info(
-          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds highest_label_set_version ${highestLabelSetVersion}`,
+          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds highestLabelSetVersion ${highestLabelSetVersion}`,
         );
         return {
           status: StatusCode.Error,

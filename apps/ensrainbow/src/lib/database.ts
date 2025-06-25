@@ -328,9 +328,9 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Set the highest label set number directly
-   * @param labelSet The label set number to set
-   * @throws Error if the label set is not a valid non-negative integer
+   * Set the highest label set version directly
+   * @param labelSetVersion The label set version to set
+   * @throws Error if the label set version is not a valid non-negative integer
    */
   public async setHighestLabelSetVersion(labelSetVersion: number): Promise<void> {
     if (!Number.isInteger(labelSetVersion) || labelSetVersion < 0) {
@@ -340,15 +340,15 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Increment the highest label set number and return the new value
-   * @returns The new highest label set number after incrementing
-   * @throws Error if the highest label set is not set
+   * Increment the highest label set version and return the new value
+   * @returns The new highest label set version after incrementing
+   * @throws Error if the highest label set version is not set
    */
-  public async incrementHighestLabelSet(): Promise<number> {
-    const currentValue = await this.getHighestLabelSetVersion();
-    const newValue = currentValue + 1;
-    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, newValue.toString());
-    return newValue;
+  public async incrementHighestLabelSetVersion(): Promise<number> {
+    const currentVersion = await this.getHighestLabelSetVersion();
+    const newVersion = currentVersion + 1;
+    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, newVersion.toString());
+    return newVersion;
   }
 
   /**
@@ -614,7 +614,7 @@ export class ENSRainbowDB {
       return false;
     }
 
-    // 4. Check Highest Label Set Existence and Validity
+    // 4. Check Highest Label Set Version Existence and Validity
     let highestLabelSetVersion: number;
     try {
       highestLabelSetVersion = await this.getHighestLabelSetVersion();
@@ -825,7 +825,7 @@ export class ENSRainbowDB {
   /**
    * Adds a rainbow record to the database. Labelhash is computed from the label.
    *
-   * @param label The label to add (without label set prefix)
+   * @param label The label to add (without label set version prefix)
    * @param labelSetVersion The label set version number to associate with this label
    * @throws Error if labelSetVersion is invalid
    */

@@ -281,17 +281,17 @@ describe("CLI", () => {
         ); // Check for the specific expected error
       });
 
-      it("should ingest first file successfully but reject second file with label set not being 1 higher than the current highest label set", async () => {
-        // First, ingest a valid file with label set 0
+      it("should ingest first file successfully but reject second file with label set version not being 1 higher than the current highest label set version", async () => {
+        // First, ingest a valid file with label set version 0
         const firstInputFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
         const secondInputFile = join(tempDir, "test_ens_names_2.ensrainbow");
 
-        // Create an ensrainbow file with label set 2
+        // Create an ensrainbow file with label set version 2
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
         const labelSetId = "test_ens_names";
         const labelSetVersion = 2; // Higher than 1
 
-        // Successful convert with label set 2
+        // Successful convert with label set version 2
         const convertCli = createCLI({ exitProcess: false });
         await convertCli.parse([
           "convert",
@@ -305,10 +305,10 @@ describe("CLI", () => {
           labelSetVersion.toString(),
         ]);
 
-        // Verify the file with label set 2 was created
+        // Verify the file with label set version 2 was created
         await expect(stat(secondInputFile)).resolves.toBeDefined();
 
-        // First ingest succeeds with label set 0
+        // First ingest succeeds with label set version 0
         const ingestCli = createCLI({ exitProcess: false });
         await ingestCli.parse([
           "ingest-ensrainbow",
@@ -318,7 +318,7 @@ describe("CLI", () => {
           testDataDir,
         ]);
 
-        // Second ingest should fail because label set > 1
+        // Second ingest should fail because label set version > 1
         let error: Error | undefined;
         try {
           await ingestCli.parse([
@@ -340,7 +340,7 @@ describe("CLI", () => {
       });
 
       it("should ingest first file successfully but reject second file with different label set id", async () => {
-        // First, ingest a valid file with label set 0
+        // First, ingest a valid file with label set version 0
         const firstInputFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
         const secondInputFile = join(tempDir, "different_label_set_id_0.ensrainbow");
         const thirdInputFile = join(tempDir, "different_label_set_id_1.ensrainbow");
@@ -383,7 +383,7 @@ describe("CLI", () => {
         // Create a separate test directory for the first ingestion
         const firstTestDir = join(tempDir, "first-ingest-dir");
 
-        // First ingest succeeds with label set 0
+        // First ingest succeeds with label set version 0
         const ingestCli = createCLI({ exitProcess: false });
         await ingestCli.parse([
           "ingest-ensrainbow",

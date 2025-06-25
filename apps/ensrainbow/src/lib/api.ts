@@ -97,9 +97,9 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       status: StatusCode.Success,
       versionInfo: {
         version: packageJson.version,
-        schema_version: DB_SCHEMA_VERSION,
-        label_set_id: server.getLabelSetId(),
-        highest_label_set_version: server.getHighestLabelSetVersion(),
+        schemaVersion: DB_SCHEMA_VERSION,
+        labelSetId: server.getLabelSetId(),
+        highestLabelSetVersion: server.getHighestLabelSetVersion(),
       },
     };
     logger.debug(`Version result:`, result);

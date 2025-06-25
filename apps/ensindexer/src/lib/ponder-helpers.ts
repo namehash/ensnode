@@ -53,9 +53,9 @@ export const createEnsRainbowVersionFetcher = (
       console.error("Failed to fetch ENSRainbow version", error);
       return {
         version: "unknown",
-        schema_version: 0,
-        label_set_id: "unknown",
-        highest_label_set_version: 0,
+        schemaVersion: 0,
+        labelSetId: "unknown",
+        highestLabelSetVersion: 0,
       };
     }
   };
