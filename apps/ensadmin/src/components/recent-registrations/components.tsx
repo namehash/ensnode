@@ -1,8 +1,9 @@
 "use client";
 
-import {EnsNode, useENSRootDatasourceChainId, useIndexingStatusQuery} from "@/components/ensnode";
+import { EnsNode, useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { getEnsAppUrl, getEnsMetadataUrl } from "@/components/identity/utils";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
+import { Registration } from "@/components/recent-registrations/types";
 import {
   Duration,
   FormattedDate,
@@ -20,14 +21,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
+import { SupportedChainId } from "@/lib/wagmi";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useEnsName } from "wagmi";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
-import {Registration} from "@/components/recent-registrations/types";
-import {SupportedChainId} from "@/lib/wagmi";
-import {useEnsName} from "wagmi";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
@@ -40,20 +40,19 @@ export function RecentRegistrations() {
   const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
   const indexedChainId = useENSRootDatasourceChainId(indexingStatusQuery.data);
 
-  const nameWrapperAddress =
-      indexedChainId
-            ? getNameWrapperAddress(indexingStatusQuery.data.env.NAMESPACE, indexedChainId)
-            : null;
-    //TODO: this should be moved --> placing it here requires loads of prop drilling! But otherwise, do we want to use a useQuery inside another Query? I very much doubt so
-    // Are there any alternatives? Maybe we could input the ENSNode.Metadata as a whole? Then we would get the nameWrapper at the very end where we actually need it?
-    // Currently (as an experiment) a brute-force'ish solution is implemented by adding the nameWrapper address as an input parameter
-    // Also where should we handle that in case of indexingStatusQuery failure this would result in an error -> in no other scenario this should be a null value
-    // Can we assume that if such thing occurs either a fallback or the error message higher up will be called?
+  const nameWrapperAddress = indexedChainId
+    ? getNameWrapperAddress(indexingStatusQuery.data.env.NAMESPACE, indexedChainId)
+    : null;
+  //TODO: this should be moved --> placing it here requires loads of prop drilling! But otherwise, do we want to use a useQuery inside another Query? I very much doubt so
+  // Are there any alternatives? Maybe we could input the ENSNode.Metadata as a whole? Then we would get the nameWrapper at the very end where we actually need it?
+  // Currently (as an experiment) a brute-force'ish solution is implemented by adding the nameWrapper address as an input parameter
+  // Also where should we handle that in case of indexingStatusQuery failure this would result in an error -> in no other scenario this should be a null value
+  // Can we assume that if such thing occurs either a fallback or the error message higher up will be called?
 
   const recentRegistrationsQuery = useRecentRegistrations(
     ensNodeUrl,
     MAX_NUMBER_OF_LATEST_REGISTRATIONS,
-      nameWrapperAddress
+    nameWrapperAddress,
   );
 
   const [isClient, setIsClient] = useState(false);
@@ -70,27 +69,27 @@ export function RecentRegistrations() {
       ).currentIndexingDate
     : null;
 
-    if (indexingStatusQuery.isLoading || recentRegistrationsQuery.isLoading) {
-        return <RecentRegistrationsFallback />;
-    }
+  if (indexingStatusQuery.isLoading || recentRegistrationsQuery.isLoading) {
+    return <RecentRegistrationsFallback />;
+  }
 
-    if (indexingStatusQuery.isError) {
-        return (
-            <p>
-                Could not fetch indexing status from selected ENSNode due to an error: $
-                {indexingStatusQuery.error.message}
-            </p>
-        );
-    }
+  if (indexingStatusQuery.isError) {
+    return (
+      <p>
+        Could not fetch indexing status from selected ENSNode due to an error: $
+        {indexingStatusQuery.error.message}
+      </p>
+    );
+  }
 
-    if (recentRegistrationsQuery.isError) {
-        return (
-            <p>
-                Could not fetch recent registrations due to an error: $
-                {recentRegistrationsQuery.error.message}
-            </p>
-        );
-    }
+  if (recentRegistrationsQuery.isError) {
+    return (
+      <p>
+        Could not fetch recent registrations due to an error: $
+        {recentRegistrationsQuery.error.message}
+      </p>
+    );
+  }
 
   return (
     <Card className="w-full">
@@ -116,80 +115,86 @@ export function RecentRegistrations() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Registered</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Owner</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isClient &&
-                recentRegistrationsQuery.data?.map((registration) => (
-                  <RegistrationRow key={registration.name} registration={registration} ensNodeMetadata={indexingStatusQuery.data} rootDatasourceChainId={indexedChainId}/>
-                ))}
-            </TableBody>
-          </Table>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Registered</TableHead>
+              <TableHead>Duration</TableHead>
+              <TableHead>Owner</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isClient &&
+              recentRegistrationsQuery.data?.map((registration) => (
+                <RegistrationRow
+                  key={registration.name}
+                  registration={registration}
+                  ensNodeMetadata={indexingStatusQuery.data}
+                  rootDatasourceChainId={indexedChainId}
+                />
+              ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
 }
 
 interface RegistrationRowProps {
-    registration: Registration;
-    ensNodeMetadata: EnsNode.Metadata;
-    rootDatasourceChainId: SupportedChainId | undefined;  //TODO: We need to be more precise here. We shouldn't be passing in any possible supported chain Id (for example, we "support" optimism, base, etc..).
-    // Instead, more specifically this should be the ENS Deployment Chain Id for the connected ENSNode instance.
+  registration: Registration;
+  ensNodeMetadata: EnsNode.Metadata;
+  rootDatasourceChainId: SupportedChainId | undefined; //TODO: We need to be more precise here. We shouldn't be passing in any possible supported chain Id (for example, we "support" optimism, base, etc..).
+  // Instead, more specifically this should be the ENS Deployment Chain Id for the connected ENSNode instance.
 }
 
-function RegistrationRow({registration, ensNodeMetadata, rootDatasourceChainId}: RegistrationRowProps){
-    const namespaceId = ensNodeMetadata.env.NAMESPACE;
+function RegistrationRow({
+  registration,
+  ensNodeMetadata,
+  rootDatasourceChainId,
+}: RegistrationRowProps) {
+  const namespaceId = ensNodeMetadata.env.NAMESPACE;
 
-    //TODO: establish the level where we would handle undefined results (ens-test-env for both + holesky for metadata)!!!
-    const ensAppUrl = getEnsAppUrl(namespaceId);
-    const ensMetadataUrl = getEnsMetadataUrl(namespaceId);
+  //TODO: establish the level where we would handle undefined results (ens-test-env for both + holesky for metadata)!!!
+  const ensAppUrl = getEnsAppUrl(namespaceId);
+  const ensMetadataUrl = getEnsMetadataUrl(namespaceId);
 
-    //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
-    // Maybe this could be joined with handling issues  mentioned above?
-    // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
+  //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
+  // Maybe this could be joined with handling issues  mentioned above?
+  // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
 
-    return (
-        <TableRow>
-            <TableCell className="font-medium">
-                <RegistrationNameDisplay registration={registration} ensAppUrl={ensAppUrl} />
-            </TableCell>
-            <TableCell>
-                <RelativeTime date={registration.registeredAt} />
-            </TableCell>
-            <TableCell>
-                <Duration
-                    beginsAt={registration.registeredAt}
-                    endsAt={registration.expiresAt}
-                />
-            </TableCell>
-            <TableCell>
-                {/*//TODO: for now we handle the issue described above here by not calling on the <Identity /> component if any of the elements is undefined*/}
-                {ensMetadataUrl && ensAppUrl && rootDatasourceChainId ? (
-                    <Identity
-                        address={registration.owner}
-                        ens={{
-                            appBaseUrl: ensAppUrl,
-                            metadataBaseUrl: ensMetadataUrl,
-                            nameQuery: useEnsName({
-                                address: registration.owner,
-                                chainId: rootDatasourceChainId,
-                            })
-                        }}
-                        showAvatar={true}
-                    />
-                ) : (
-                    <Identity.Placeholder showAvatar={true} />
-                )}
-            </TableCell>
-        </TableRow>
-    );
+  return (
+    <TableRow>
+      <TableCell className="font-medium">
+        <RegistrationNameDisplay registration={registration} ensAppUrl={ensAppUrl} />
+      </TableCell>
+      <TableCell>
+        <RelativeTime date={registration.registeredAt} />
+      </TableCell>
+      <TableCell>
+        <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
+      </TableCell>
+      <TableCell>
+        {/*//TODO: for now we handle the issue described above here by not calling on the <Identity /> component if any of the elements is undefined*/}
+        {ensMetadataUrl && ensAppUrl && rootDatasourceChainId ? (
+          <Identity
+            address={registration.owner}
+            ens={{
+              appBaseUrl: ensAppUrl,
+              metadataBaseUrl: ensMetadataUrl,
+              nameQuery: useEnsName({
+                address: registration.owner,
+                chainId: rootDatasourceChainId,
+              }),
+            }}
+            showAvatar={true}
+          />
+        ) : (
+          <Identity.Placeholder showAvatar={true} />
+        )}
+      </TableCell>
+    </TableRow>
+  );
 }
 
 function RecentRegistrationsFallback() {

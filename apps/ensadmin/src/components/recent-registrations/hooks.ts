@@ -37,8 +37,11 @@ const FALLBACK_NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe2568640
  */
 
 //TODO: for now this function handles nameWrapperAddress being possibly undefined, but that will probably change
-function getEffectiveOwner(registrationResult: RegistrationResult, nameWrapperAddress: Address | null): Address {
-  const validatedNameWrapperAddress = nameWrapperAddress || FALLBACK_NAME_WRAPPER_ADDRESS
+function getEffectiveOwner(
+  registrationResult: RegistrationResult,
+  nameWrapperAddress: Address | null,
+): Address {
+  const validatedNameWrapperAddress = nameWrapperAddress || FALLBACK_NAME_WRAPPER_ADDRESS;
   // Use the regular owner if it's not the NameWrapper contract
   if (!isAddressEqual(registrationResult.domain.owner.id, validatedNameWrapperAddress)) {
     return getAddress(registrationResult.domain.owner.id);
@@ -57,7 +60,10 @@ function getEffectiveOwner(registrationResult: RegistrationResult, nameWrapperAd
 /**
  * Transforms a RegistrationResult into a Registration
  */
-function toRegistration(registrationResult: RegistrationResult, nameWrapperAddress: Address | null): Registration {
+function toRegistration(
+  registrationResult: RegistrationResult,
+  nameWrapperAddress: Address | null,
+): Registration {
   return {
     registeredAt: unixTimestampToDate(registrationResult.registrationDate),
     expiresAt: unixTimestampToDate(registrationResult.expiryDate),
@@ -73,7 +79,11 @@ function toRegistration(registrationResult: RegistrationResult, nameWrapperAddre
 /**
  * Fetches info about the most recent registrations that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: URL, maxResults: number, nameWrapperAddress: Address | null): Promise<Registration[]> {
+async function fetchRecentRegistrations(
+  baseUrl: URL,
+  maxResults: number,
+  nameWrapperAddress: Address | null,
+): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${maxResults}, orderBy: registrationDate, orderDirection: desc) {
@@ -124,7 +134,11 @@ async function fetchRecentRegistrations(baseUrl: URL, maxResults: number, nameWr
  * @param maxResults the max number of recent registrations to retrieve
  * @param nameWrapperAddress address necessary for the determination of the effective owner of a domain
  */
-export function useRecentRegistrations(ensNodeURL: URL, maxResults: number, nameWrapperAddress: Address | null) {
+export function useRecentRegistrations(
+  ensNodeURL: URL,
+  maxResults: number,
+  nameWrapperAddress: Address | null,
+) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
     queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults, nameWrapperAddress),

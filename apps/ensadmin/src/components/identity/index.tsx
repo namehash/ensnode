@@ -3,12 +3,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { SupportedChainId } from "@/lib/wagmi";
+import { GetEnsNameData } from "@wagmi/core/query";
 import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { UseEnsNameReturnType } from "wagmi";
-import { GetEnsNameData } from "@wagmi/core/query";
 
 //TODO: add descriptions for other fields
 //TODO: the type might change after deciding where to handle possibly undefined values for ens URLs -> for now the <RegistrationRow /> & <RegistrationNameDisplay /> components handle the possibly undefined values
@@ -42,7 +42,6 @@ export function Identity({
   className = "",
 }: IdentityProps) {
   const [mounted, setMounted] = useState(false);
-
 
   // Handle client-side rendering
   useEffect(() => {
