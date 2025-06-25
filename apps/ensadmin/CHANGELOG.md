@@ -1,5 +1,21 @@
 # ensadmin
 
+## 0.29.0
+
+### Minor Changes
+
+- [#792](https://github.com/namehash/ensnode/pull/792) [`4ee9eb7`](https://github.com/namehash/ensnode/commit/4ee9eb7bcbdd3ec45704565cc4e5567237ee7238) Thanks [@shrugs](https://github.com/shrugs)! - rename the ENS_DEPLOYMENT_CHAIN configuration variable to NAMESPACE
+
+- [#780](https://github.com/namehash/ensnode/pull/780) [`3ae7bb1`](https://github.com/namehash/ensnode/commit/3ae7bb118d8a8f0de6a1fc046ca3aeff1a8637b1) Thanks [@djstrong](https://github.com/djstrong)! - add new saved GraphQL queries in ENSAdmin
+
+### Patch Changes
+
+- Updated dependencies [[`4ee9eb7`](https://github.com/namehash/ensnode/commit/4ee9eb7bcbdd3ec45704565cc4e5567237ee7238)]:
+  - @ensnode/datasources@0.29.0
+  - @ensnode/ponder-metadata@0.29.0
+  - @ensnode/ensnode-schema@0.29.0
+  - @ensnode/ensnode-sdk@0.29.0
+
 ## 0.28.0
 
 ### Minor Changes
