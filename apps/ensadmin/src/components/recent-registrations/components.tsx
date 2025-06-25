@@ -25,7 +25,6 @@ import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
 import {getEnsAppUrl, getEnsMetadataUrl} from "@/components/identity/utils";
-import { useEnsName } from "wagmi";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
