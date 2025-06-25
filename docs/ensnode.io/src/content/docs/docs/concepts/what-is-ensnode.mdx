@@ -56,7 +56,7 @@ ENSIndexer implements the core subgraph indexing logic within **shared handler f
 
 Each plugin requires two files:
 - `plugin.ts` defines the ponder indexing configuration to index a related set of datasources. See `apps/ensindexer/src/plugins/basenames/plugin.ts` and `apps/ensindexer/src/plugins/lineanames/plugin.ts` for examples.
-- `handlers.ts` gathers all ponder indexing handlers for the plugin. See `apps/ensindexer/src/plugins/basenames/handlers.ts` and `apps/ensindexer/src/plugins/lineanames/handlers.ts` for examples.
+- `event-handlers.ts` gathers all event handlers executed during Ponder indexing process for the plugin. See `apps/ensindexer/src/plugins/basenames/event-handlers.ts` and `apps/ensindexer/src/plugins/event-lineanames/handlers.ts` for examples.
 
 ### Plugin-Scoping
 

@@ -2,7 +2,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { uniq } from "@/lib/lib-helpers";
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
-import { Datasource, DatasourceName, ENSNamespace, ENSNamespaceId } from "@ensnode/datasources";
+import { Datasource, DatasourceName, ENSNamespaceId } from "@ensnode/datasources";
 import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugin";
