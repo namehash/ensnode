@@ -7,8 +7,8 @@ import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private labelSetId!: string;
-  private highestLabelSetVersion!: number;
+  private readonly labelSetId: string;
+  private readonly highestLabelSetVersion: number;
 
   public getLabelSetId(): string {
     return this.labelSetId;
@@ -18,9 +18,10 @@ export class ENSRainbowServer {
     return this.highestLabelSetVersion;
   }
 
-  private constructor(db: ENSRainbowDB) {
+  private constructor(db: ENSRainbowDB, labelSetId: string, highestLabelSetVersion: number) {
     this.db = db;
-    // Label set ID and highest label set version will be set in init
+    this.labelSetId = labelSetId;
+    this.highestLabelSetVersion = highestLabelSetVersion;
   }
 
   /**
@@ -30,16 +31,14 @@ export class ENSRainbowServer {
    * @throws Error if a "lite" validation of the database fails
    */
   public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
-    const server = new ENSRainbowServer(db);
-
     if (!(await db.validate({ lite: true }))) {
       throw new Error("Database is in an invalid state");
     }
 
-    server.labelSetId = await db.getLabelSetId();
-    server.highestLabelSetVersion = await db.getHighestLabelSetVersion();
+    const labelSetId = await db.getLabelSetId();
+    const highestLabelSetVersion = await db.getHighestLabelSetVersion();
 
-    return server;
+    return new ENSRainbowServer(db, labelSetId, highestLabelSetVersion);
   }
 
   async heal(
