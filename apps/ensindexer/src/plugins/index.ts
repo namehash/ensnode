@@ -1,8 +1,8 @@
-import type { ENSIndexerConfig } from "@/config/types";
-import { uniq } from "@/lib/lib-helpers";
-import type { ENSIndexerPluginHandler } from "@/lib/plugin-helpers";
-import { type Datasource, DatasourceName, getENSDeployment } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
+
+import { uniq } from "@/lib/lib-helpers";
+import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
+import { Datasource, DatasourceName, ENSNamespace, ENSNamespaceId } from "@ensnode/datasources";
 import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugin";
@@ -34,12 +34,12 @@ type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer
 export function getPlugin(pluginName: PluginName) {
   const plugin = ALL_PLUGINS.find((plugin) => plugin.name === pluginName);
 
-  if (plugin) {
-    return plugin;
+  if (!plugin) {
+    // invariant: all plugins can be found by PluginName
+    throw new Error(`Plugin not found by "${pluginName}" name.`);
   }
 
-  // invariant: all plugins can be found by PluginName
-  throw new Error(`Plugin not found by "${pluginName} name"`);
+  return plugin;
 }
 
 /**
@@ -54,17 +54,23 @@ export function getRequiredDatasourceNames(pluginNames: PluginName[]): Datasourc
   return uniq(requiredDatasourceNames);
 }
 
+interface GetRequiredDatasourcesArgs {
+  namespace: ENSNamespaceId;
+  plugins: PluginName[];
+}
+
 /**
  * Get a list of unique datasources for selected plugin names.
  * @param pluginNames
  * @returns
  */
-export function getRequiredDatasources(
-  config: Pick<ENSIndexerConfig, "ensDeploymentChain" | "plugins">,
-): Datasource[] {
-  const requiredDatasourceNames = getRequiredDatasourceNames(config.plugins);
-  const ensDeployment = getENSDeployment(config.ensDeploymentChain);
-  const ensDeploymentDatasources = Object.entries(ensDeployment) as Array<
+export function getRequiredDatasources({
+  namespace: ensNamespaceID,
+  plugins,
+}: GetRequiredDatasourcesArgs): Datasource[] {
+  const requiredDatasourceNames = getRequiredDatasourceNames(plugins);
+  const ensNamespace = getENSNamespaceAsFullyDefinedAtCompileTime(ensNamespaceID);
+  const ensDeploymentDatasources = Object.entries(ensNamespace) as Array<
     [DatasourceName, Datasource]
   >;
   const datasources = {} as Record<DatasourceName, Datasource>;
@@ -85,32 +91,4 @@ export function getRequiredChainIds(datasources: Datasource[]): number[] {
   const indexedChainIds = datasources.map((datasource) => datasource.chain.id);
 
   return uniq(indexedChainIds);
-}
-
-/**
- * Attach all event handlers for a plugin.
- *
- * @param plugin The ENSIndexerPlugin whose event handlers should be activated.
- */
-export async function attachPluginEventHandlers<const PLUGIN extends AllPluginsUnionType>(
-  plugin: PLUGIN,
-): Promise<void> {
-  // All plugins must have their own `event-handlers.ts` file.
-  // We need to load this file lazily for each plugin than needs to be activated.
-  // Lazy-loading is required to keep TypeScript type inference working well.
-  // If we loaded the event-handlers.ts file for any plugin using
-  // the eager-loading approach (such as regular import on the top of the file),
-  // we'd cause circular inference error in TypeScript, as any event-handlers.ts file
-  // needs to know the `ponder` object type, which includes the `AllPluginsConfig` type.
-  // The `AllPluginsConfig` type is defined in this very file, and it must stay this way.
-  const pluginEventHandlers = await import(`./${plugin.name}/event-handlers.ts`).then(
-    // Use `export default` value as an array of ENSIndexerPluginHandler functions
-    // defined for a plugin.
-    (mod) => mod.default as ENSIndexerPluginHandler[],
-  );
-
-  // Attach all event handlers for the active ENSIndexer plugin
-  for (const attachEventHandlers of pluginEventHandlers) {
-    attachEventHandlers(plugin);
-  }
 }

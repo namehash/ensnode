@@ -30,7 +30,10 @@ function attachEventHandlers() {
     ] as ENSIndexerPluginHandler[];
 
     for (const attachPluginEventHandlers of pluginEventHandlers) {
-      attachPluginEventHandlers(activePlugin);
+      attachPluginEventHandlers({
+        pluginName: activePlugin.name,
+        pluginNamespace: activePlugin.namespace,
+      });
     }
   }
 }

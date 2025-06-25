@@ -1,4 +1,4 @@
-import type { ENSDeploymentChain } from "@ensnode/ens-deployments";
+import type { ENSNamespaceId } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
 
@@ -9,16 +9,16 @@ import type * as PonderMetadata from "@ensnode/ponder-metadata";
 export namespace EnsNode {
   // TODO: make `EnsNodeMetadata` interface to extend from
   // `MetadataMiddlewareResponse` of ENSNode SDK package (once it's available)
-  // as it will include precise types for currently unknown-type fields (i.e. `env.ENS_DEPLOYMENT_CHAIN`)
+  // as it will include precise types for currently unknown-type fields (i.e. `env.NAMESPACE`)
   /**
    * The status of the ENS node.
    */
   export interface Metadata extends Omit<PonderMetadata.MetadataMiddlewareResponse, "env"> {
     // override the `env` field to include the fields required by the ENSAdmin client
     env: {
-      ACTIVE_PLUGINS: Array<PluginName>;
+      PLUGINS: Array<PluginName>;
       DATABASE_SCHEMA: string;
-      ENS_DEPLOYMENT_CHAIN: ENSDeploymentChain;
+      NAMESPACE: ENSNamespaceId;
     };
   }
 

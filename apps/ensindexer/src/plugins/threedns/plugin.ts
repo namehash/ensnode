@@ -3,16 +3,16 @@
  */
 
 import { buildPlugin } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig as createPonderConfig } from "ponder";
 
 export default buildPlugin({
   name: PluginName.ThreeDNS,
-  requiredDatasources: [DatasourceName.ThreeDNSBase, DatasourceName.ThreeDNSOptimism],
-  buildPonderConfig({ datasourceConfigOptions, namespace }) {
-    const threeDNSBase = datasourceConfigOptions(DatasourceName.ThreeDNSBase);
-    const threeDNSOptimism = datasourceConfigOptions(DatasourceName.ThreeDNSOptimism);
+  requiredDatasources: [DatasourceNames.ThreeDNSBase, DatasourceNames.ThreeDNSOptimism],
+  buildPonderConfig({ datasourceConfigOptions, pluginNamespace: ns }) {
+    const threeDNSBase = datasourceConfigOptions(DatasourceNames.ThreeDNSBase);
+    const threeDNSOptimism = datasourceConfigOptions(DatasourceNames.ThreeDNSOptimism);
 
     return createPonderConfig({
       networks: {
@@ -20,14 +20,14 @@ export default buildPlugin({
         ...threeDNSBase.networks,
       },
       contracts: {
-        [namespace("ThreeDNSToken")]: {
+        [ns("ThreeDNSToken")]: {
           network: {
             ...threeDNSOptimism.getContractNetwork(threeDNSOptimism.contracts.ThreeDNSToken),
             ...threeDNSBase.getContractNetwork(threeDNSBase.contracts.ThreeDNSToken),
           },
           abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
         },
-        [namespace("Resolver")]: {
+        [ns("Resolver")]: {
           network: {
             ...threeDNSOptimism.getContractNetwork(threeDNSOptimism.contracts.Resolver),
             ...threeDNSBase.getContractNetwork(threeDNSBase.contracts.Resolver),

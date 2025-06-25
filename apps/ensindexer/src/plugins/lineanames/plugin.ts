@@ -4,34 +4,34 @@
  */
 
 import { buildPlugin } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig as createPonderConfig } from "ponder";
 
 export default buildPlugin({
   name: PluginName.Lineanames,
-  requiredDatasources: [DatasourceName.Lineanames],
-  buildPonderConfig({ datasourceConfigOptions, namespace }) {
+  requiredDatasources: [DatasourceNames.Lineanames],
+  buildPonderConfig({ datasourceConfigOptions, pluginNamespace: ns }) {
     const { contracts, networks, getContractNetwork } = datasourceConfigOptions(
-      DatasourceName.Lineanames,
+      DatasourceNames.Lineanames,
     );
 
     return createPonderConfig({
       networks,
       contracts: {
-        [namespace("Registry")]: {
+        [ns("Registry")]: {
           network: getContractNetwork(contracts.Registry),
           abi: contracts.Registry.abi,
         },
-        [namespace("BaseRegistrar")]: {
+        [ns("BaseRegistrar")]: {
           network: getContractNetwork(contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
-        [namespace("EthRegistrarController")]: {
+        [ns("EthRegistrarController")]: {
           network: getContractNetwork(contracts.EthRegistrarController),
           abi: contracts.EthRegistrarController.abi,
         },
-        [namespace("NameWrapper")]: {
+        [ns("NameWrapper")]: {
           network: getContractNetwork(contracts.NameWrapper),
           abi: contracts.NameWrapper.abi,
         },

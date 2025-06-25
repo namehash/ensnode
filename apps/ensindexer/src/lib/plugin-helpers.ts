@@ -1,14 +1,14 @@
 import type { ENSIndexerConfig, RpcConfig } from "@/config/types";
 import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
-import type { Blockrange } from "@/lib/types";
+import { Blockrange } from "@/lib/types";
 import {
-  type ContractConfig,
+  ContractConfig,
   DatasourceName,
-  type ENSDeploymentChain,
-  getENSDeployment,
-} from "@ensnode/ens-deployments";
-import { type Label, type Name, PluginName } from "@ensnode/ensnode-sdk";
-import type { createConfig as createPonderConfig } from "ponder";
+  ENSNamespaceId,
+  getENSNamespace,
+} from "@ensnode/datasources";
+import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig as createPonderConfig } from "ponder";
 
 /**
  * A factory function that returns a function to create a namespaced contract name for Ponder handlers.
@@ -62,8 +62,25 @@ export interface ENSIndexerPlugin<
   name: PLUGIN_NAME;
 
   /**
-   * A list of DatasourceNames this plugin requires access to, necessary for determining whether
-   * a set of ACTIVE_PLUGINS are valid for a given ENS_DEPLOYMENT_CHAIN
+   * Function to prefix a contract name with the plugin's namespace.
+   *
+   * It allows multiple plugins to provide configuration for the same contract name,
+   * for example, `Registry`, and at the same time, enables creating separate event handlers
+   * for each plugin.
+   *
+   * Examples:
+   * - PluginName.Basenames
+   *   `(parameter) namespace: <"Registry">(contractName: "Registry") => "basenames/Registry"`
+   * - PluginName.Lineanames
+   *   `(parameter) namespace: <"Registry">(contractName: "Registry") => "lineanames/Registry"`
+   *
+   * For more details, see {@link makePluginNamespace}.
+   */
+  namespace: MakePluginNamespaceResult<PLUGIN_NAME>;
+
+  /**
+   * The list of DatasourceNames this plugin requires access to. ENSIndexer enforces that a plugin
+   * can only be activated if all of its required Datasources are defined on the configured ENS Namespace.
    */
   requiredDatasources: REQUIRED_DATASOURCES;
 
@@ -75,29 +92,14 @@ export interface ENSIndexerPlugin<
   getPonderConfig(
     ensIndexerConfig: ENSIndexerConfig,
   ): PonderConfigResult<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>;
-
-  /**
-   * Function to prefix a contract name with the plugin's namespace.
-   *
-   * It allows multiple plugins to provide configuration for the same contract name,
-   * for example, `Registry`, and at the same time, enables creating separate event handlers
-   * for each plugin.
-   *
-   * Examples:
-   * - PluginName.Basenames
-   *.   `(parameter) namespace: <"Registry">(contractName: "Registry") => "basenames/Registry"`
-   * - PluginName.Lineanames
-   *.   `(parameter) namespace: <"Registry">(contractName: "Registry") => "lineanames/Registry"`
-   */
-  namespace: MakePluginNamespaceResult<PLUGIN_NAME>;
 }
 
 /**
  * An ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
  */
 export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
-  name: PLUGIN_NAME;
-  namespace: MakePluginNamespaceResult<PLUGIN_NAME>;
+  pluginName: PLUGIN_NAME;
+  pluginNamespace: MakePluginNamespaceResult<PLUGIN_NAME>;
 };
 
 /**
@@ -106,6 +108,11 @@ export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginN
 export type ENSIndexerPluginHandler<PLUGIN_NAME extends PluginName = PluginName> = (
   args: ENSIndexerPluginHandlerArgs<PLUGIN_NAME>,
 ) => void;
+
+// Helper type to extract the contracts type for a given datasource name
+type ContractsForDatasource<DATASOURCE_NAME extends DatasourceName> = ReturnType<
+  typeof getENSNamespaceAsFullyDefinedAtCompileTime
+>[DATASOURCE_NAME]["contracts"];
 
 /**
  * Result type for {@link getDatasourceConfigOptions}
@@ -139,10 +146,24 @@ export interface PluginConfigOptions<
   PLUGIN_NAME extends PluginName,
   DATASOURCE_NAME extends DatasourceName,
 > {
+  /**
+   * A function to get DatasourceConfigOptions for a given datasource name.
+   * This is used to build the Ponder configuration for the plugin.
+   *
+   * @param datasourceName - The name of the datasource to get options for
+   * @returns DatasourceConfigOptions for the specified datasource
+   */
   datasourceConfigOptions(
     datasourceName: DATASOURCE_NAME,
   ): DatasourceConfigOptions<DATASOURCE_NAME>;
-  namespace: MakePluginNamespaceResult<PLUGIN_NAME>;
+
+  /**
+   * A function to create a namespaced contract name for the plugin.
+   * This is used to ensure that contract names are unique across plugins.
+   *
+   * See {@link makePluginNamespace} for more details.
+   */
+  pluginNamespace: MakePluginNamespaceResult<PLUGIN_NAME>;
 }
 
 /**
@@ -182,19 +203,6 @@ type PonderConfigResult<
 > = ReturnType<typeof createPonderConfig<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>>;
 
 /**
- * Helper type to capture specific datasource type from a given ENSDeployment.
- */
-type DeploymentForDatasource<DATASOURCE_NAME extends DatasourceName> = ReturnType<
-  typeof getENSDeployment
->[DATASOURCE_NAME];
-
-/**
- * Helper type to capture specific contracts type from a given Datasource.
- */
-type ContractsForDatasource<DATASOURCE_NAME extends DatasourceName> =
-  DeploymentForDatasource<DATASOURCE_NAME>["contracts"];
-
-/**
  * Helper type to capture a contract namespace factory type for a given plugin name.
  */
 type MakePluginNamespaceResult<PLUGIN_NAME extends PluginName> = ReturnType<
@@ -232,6 +240,50 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
 }
 
 /**
+ * ENSNamespaceFullyDefinedAtCompileTime is a helper type necessary to support runtime-conditional
+ * Ponder plugins.
+ *
+ * 1. ENSNode can be configured to index in the context of different ENS namespaces,
+ *   (currently: mainnet, sepolia, holesky, ens-test-env), using a user-specified set of plugins.
+ * 2. Ponder's inferred type-checking requires const-typed values, and so those plugins must be able
+ *   to define their Ponder config statically so the types can be inferred at compile-time, regardless
+ *   of whether the plugin's config and handler logic is loaded/executed at runtime.
+ * 3. To make this work, we provide a ENSNamespaceFullyDefinedAtCompileTime, set to the typeof mainnet's
+ *   ENSNamespace, which fully defines all known Datasources (if this is ever not the case, a merged
+ *   type can be used to ensure that this type has the full set of possible Datasources). Plugins
+ *   can use the runtime value returned from {@link getENSNamespaceAsFullyDefinedAtCompileTime} and
+ *   by casting it to ENSNamespaceFullyDefinedAtCompileTime we ensure that the values expected by
+ *   those plugins pass the typechecker. ENSNode ensures that non-active plugins are not executed,
+ *   so the issue of type/value mismatch does not occur during execution.
+ */
+type ENSNamespaceFullyDefinedAtCompileTime = ReturnType<typeof getENSNamespace<"mainnet">>;
+
+/**
+ * Returns the ENSNamespace for the provided `namespaceId`, cast to ENSNamespaceFullyDefinedAtCompileTime.
+ *
+ * See {@link ENSNamespaceFullyDefinedAtCompileTime} for more info.
+ *
+ * @param namespaceId - The ENS namespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns the ENSNamespace
+ */
+export const getENSNamespaceAsFullyDefinedAtCompileTime = (namespaceId: ENSNamespaceId) =>
+  getENSNamespace(namespaceId) as ENSNamespaceFullyDefinedAtCompileTime;
+
+/**
+ * Returns the `datasourceName` Datasource within the `namespaceId` namespace, cast as ENSNamespaceFullyDefinedAtCompileTime.
+ *
+ * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
+ * within the specified `namespaceId` will have a valid return type but be undefined at runtime.
+ */
+export const getDatasourceAsFullyDefinedAtCompileTime = <
+  N extends ENSNamespaceId,
+  D extends keyof ENSNamespaceFullyDefinedAtCompileTime,
+>(
+  namespaceId: N,
+  datasourceName: D,
+) => getENSNamespaceAsFullyDefinedAtCompileTime(namespaceId)[datasourceName];
+
+/**
  * Get Datasource Config Options for a given datasource name.
  * Used as data provider to `buildPonderConfig` function,
  * where Ponder Configuration object is built for a specific plugin.
@@ -243,18 +295,19 @@ export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name]
  * @returns
  */
 export function getDatasourceConfigOptions<const DATASOURCE_NAME extends DatasourceName>(
-  ensDeploymentChain: ENSDeploymentChain,
+  ensNamespaceId: ENSNamespaceId,
   globalBlockrange: Blockrange,
   rpcConfigs: Record<number, RpcConfig>,
   datasourceName: DATASOURCE_NAME,
 ): DatasourceConfigOptions<DATASOURCE_NAME> {
   // First, get the datasource object for a given `ensDeploymentChain` and `datasourceName`.
-  const deployment = getENSDeployment(ensDeploymentChain);
-  const datasource = deployment[datasourceName] as DeploymentForDatasource<DATASOURCE_NAME>;
+  // const deployment = getENSDeployment(ensDeploymentChain);
+  // const datasource = deployment[datasourceName] as DeploymentForDatasource<DATASOURCE_NAME>;
+  const datasource = getENSNamespaceAsFullyDefinedAtCompileTime(ensNamespaceId)[datasourceName];
   const chainId = datasource.chain.id;
 
   // Then, get contracts configuration from the selected datasource object.
-  const contracts = datasource.contracts as ContractsForDatasource<DATASOURCE_NAME>;
+  const contracts = datasource.contracts;
 
   /**
    * Networks configuration based on rpcConfigs and datasource chain ID.
@@ -298,31 +351,33 @@ export function buildPlugin<
   PONDER_CONFIG["accounts"],
   PONDER_CONFIG["blocks"]
 > {
-  const namespace = makePluginNamespace(options.name);
+  const pluginName = options.name;
+  const pluginNamespace = makePluginNamespace(pluginName);
+  const requiredDatasources = options.requiredDatasources;
 
   const getPonderConfig = (config: ENSIndexerConfig): PONDER_CONFIG => {
-    const { ensDeploymentChain, globalBlockrange, rpcConfigs } = config;
+    const { namespace: ensNamespaceId, globalBlockrange, rpcConfigs } = config;
 
     return options.buildPonderConfig({
       datasourceConfigOptions<DATASOURCE_NAME extends REQUIRED_DATASOURCES[number]>(
         datasourceName: DATASOURCE_NAME,
       ) {
         return getDatasourceConfigOptions(
-          ensDeploymentChain,
+          ensNamespaceId,
           globalBlockrange,
           rpcConfigs,
           datasourceName,
         );
       },
-      namespace,
+      pluginNamespace,
     });
   };
 
   return {
+    name: pluginName,
+    namespace: pluginNamespace,
+    requiredDatasources,
     getPonderConfig,
-    name: options.name,
-    requiredDatasources: options.requiredDatasources,
-    namespace,
   } as const satisfies ENSIndexerPlugin<
     PLUGIN_NAME,
     REQUIRED_DATASOURCES,

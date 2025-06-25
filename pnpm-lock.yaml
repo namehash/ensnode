@@ -101,9 +101,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.39.0
         version: 0.39.0
-      '@ensnode/ens-deployments':
+      '@ensnode/datasources':
         specifier: workspace:*
-        version: link:../../packages/ens-deployments
+        version: link:../../packages/datasources
       '@ensnode/ensnode-schema':
         specifier: workspace:*
         version: link:../../packages/ensnode-schema
@@ -255,9 +255,9 @@ importers:
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(zod@3.25.7)
-      '@ensnode/ens-deployments':
+      '@ensnode/datasources':
         specifier: workspace:*
-        version: link:../../packages/ens-deployments
+        version: link:../../packages/datasources
       '@ensnode/ensnode-schema':
         specifier: workspace:*
         version: link:../../packages/ensnode-schema
@@ -501,7 +501,7 @@ importers:
         specifier: 3.4.13
         version: 3.4.13(ts-node@10.9.2(@types/node@22.15.3)(typescript@5.7.3))
 
-  packages/ens-deployments:
+  packages/datasources:
     dependencies:
       '@ponder/utils':
         specifier: ^0.2.3

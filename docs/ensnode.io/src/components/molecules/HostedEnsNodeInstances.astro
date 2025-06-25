@@ -1,5 +1,5 @@
 ---
-const { instanceURL, connectWithENSAdminURL, ensDeployment, activePlugins, purpose } = Astro.props;
+const { instanceURL, connectWithENSAdminURL, namespace, plugins, purpose } = Astro.props;
 ---
 <table style={{marginTop: "0"}}>
     <tbody>
@@ -57,12 +57,12 @@ const { instanceURL, connectWithENSAdminURL, ensDeployment, activePlugins, purpo
         </td>
     </tr>
     <tr>
-        <td style={{verticalAlign: "middle"}}>ENS Deployment</td>
-        <td>{ensDeployment}</td>
+        <td style={{verticalAlign: "middle"}}>ENS Namespace</td>
+        <td>{namespace}</td>
     </tr>
     <tr>
         <td>Active Plugins</td>
-        <td>{activePlugins}</td>
+        <td>{plugins}</td>
     </tr>
     <tr>
         <td>Purpose</td>

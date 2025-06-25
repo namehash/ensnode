@@ -7,8 +7,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 export default function ({
-  name: pluginName,
-  namespace,
+  pluginNamespace: ns,
 }: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
   const {
     handleNameWrapped,
@@ -20,13 +19,13 @@ export default function ({
   } = makeNameWrapperHandlers({
     // the shared Registrar handlers in this plugin index direct subnames of
     // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.ensDeploymentChain, pluginName),
+    registrarManagedName: getRegistrarManagedName(config.namespace),
   });
 
-  ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);
-  ponder.on(namespace("NameWrapper:NameUnwrapped"), handleNameUnwrapped);
-  ponder.on(namespace("NameWrapper:FusesSet"), handleFusesSet);
-  ponder.on(namespace("NameWrapper:ExpiryExtended"), handleExpiryExtended);
-  ponder.on(namespace("NameWrapper:TransferSingle"), handleTransferSingle);
-  ponder.on(namespace("NameWrapper:TransferBatch"), handleTransferBatch);
+  ponder.on(ns("NameWrapper:NameWrapped"), handleNameWrapped);
+  ponder.on(ns("NameWrapper:NameUnwrapped"), handleNameUnwrapped);
+  ponder.on(ns("NameWrapper:FusesSet"), handleFusesSet);
+  ponder.on(ns("NameWrapper:ExpiryExtended"), handleExpiryExtended);
+  ponder.on(ns("NameWrapper:TransferSingle"), handleTransferSingle);
+  ponder.on(ns("NameWrapper:TransferBatch"), handleTransferBatch);
 }

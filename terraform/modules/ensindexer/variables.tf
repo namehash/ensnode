@@ -52,10 +52,10 @@ variable "ensrainbow_url" {
 variable "database_schema" {
   type = string
 }
-variable "active_plugins" {
+variable "plugins" {
   type = string
 }
-variable "ens_deployment_chain" {
+variable "namespace" {
   type = string
 }
 

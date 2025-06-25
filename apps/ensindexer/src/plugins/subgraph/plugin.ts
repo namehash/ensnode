@@ -4,42 +4,42 @@
  */
 
 import { buildPlugin } from "@/lib/plugin-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
+import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig as createPonderConfig } from "ponder";
 
 export default buildPlugin({
   name: PluginName.Subgraph,
-  requiredDatasources: [DatasourceName.Root],
-  buildPonderConfig({ datasourceConfigOptions, namespace }) {
+  requiredDatasources: [DatasourceNames.ENSRoot],
+  buildPonderConfig({ datasourceConfigOptions, pluginNamespace: ns }) {
     const { contracts, networks, getContractNetwork } = datasourceConfigOptions(
-      DatasourceName.Root,
+      DatasourceNames.ENSRoot,
     );
 
     return createPonderConfig({
       networks,
       contracts: {
-        [namespace("RegistryOld")]: {
+        [ns("RegistryOld")]: {
           network: getContractNetwork(contracts.RegistryOld),
           abi: contracts.Registry.abi,
         },
-        [namespace("Registry")]: {
+        [ns("Registry")]: {
           network: getContractNetwork(contracts.Registry),
           abi: contracts.Registry.abi,
         },
-        [namespace("BaseRegistrar")]: {
+        [ns("BaseRegistrar")]: {
           network: getContractNetwork(contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
-        [namespace("EthRegistrarControllerOld")]: {
+        [ns("EthRegistrarControllerOld")]: {
           network: getContractNetwork(contracts.EthRegistrarControllerOld),
           abi: contracts.EthRegistrarControllerOld.abi,
         },
-        [namespace("EthRegistrarController")]: {
+        [ns("EthRegistrarController")]: {
           network: getContractNetwork(contracts.EthRegistrarController),
           abi: contracts.EthRegistrarController.abi,
         },
-        [namespace("NameWrapper")]: {
+        [ns("NameWrapper")]: {
           network: getContractNetwork(contracts.NameWrapper),
           abi: contracts.NameWrapper.abi,
         },
