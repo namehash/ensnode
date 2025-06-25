@@ -29,13 +29,12 @@ type UseIndexingStatusQueryResult = UseQueryResult<EnsNode.Metadata, Error>;
 
 /**
  * Hook to fetch the indexing status of the ENS node.
- * @param searchParams The URL search params including the selected ENS node URL.
+ * @param {URL} ensNodeUrl the selected ENS node URL.
  * @returns React Query hook result.
  */
 export function useIndexingStatusQuery(
-  searchParams: URLSearchParams,
+    ensNodeUrl: URL,
 ): UseIndexingStatusQueryResult {
-  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
 
   return useQuery({
     queryKey: ["indexing-status", ensNodeUrl],

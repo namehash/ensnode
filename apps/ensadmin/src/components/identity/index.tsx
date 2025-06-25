@@ -7,22 +7,23 @@ import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { useEnsName } from "wagmi";
+import { UseEnsNameReturnType } from "wagmi";
+import { GetEnsNameData } from "@wagmi/core/query";
 
 //TODO: add descriptions for other fields
-//TODO: the tyoe might change after deciding where to handle possibly undefined values for ens URLs
+//TODO: the type might change after deciding where to handle possibly undefined values for ens URLs -> for now the <RegistrationRow /> & <RegistrationNameDisplay /> components handle the possibly undefined values
 interface IdentityProps {
   address: Address;
-  chainId: SupportedChainId; //TODO: We need to be more precise here. We shouldn't be passing in any possible supported chain Id (for example, we "support" optimism, base, etc..).
-  // Instead, more specifically this should be the ENS Deployment Chain Id for the connected ENSNode instance.
   /**
    * ENS related values
    */
   ens: {
     /** ENS Web application base URL */
-    appBaseUrl: URL | undefined;
+    appBaseUrl: URL;
     /** ENS metadata base URL */
-    metadataBaseUrl: URL | undefined;
+    metadataBaseUrl: URL;
+    /** ENS name query object */
+    nameQuery: UseEnsNameReturnType<GetEnsNameData>;
   };
   showAvatar?: boolean;
   showExternalLink?: boolean;
@@ -35,7 +36,6 @@ interface IdentityProps {
  */
 export function Identity({
   address,
-  chainId,
   ens,
   showAvatar = false,
   showExternalLink = true,
@@ -43,17 +43,6 @@ export function Identity({
 }: IdentityProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Use the ENS name hook from wagmi
-  const {
-    data: ensName,
-    isLoading,
-    isError,
-  } = useEnsName({
-    address,
-    chainId,
-  });
-  //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
-  // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
 
   // Handle client-side rendering
   useEffect(() => {
@@ -64,22 +53,22 @@ export function Identity({
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   // If not mounted yet (server-side), or still loading, show a skeleton
-  if (!mounted || isLoading) {
+  if (!mounted || ens.nameQuery.isLoading) {
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
   // If there is an error, show the truncated address
-  if (isError) {
+  if (ens.nameQuery.isError) {
     return <span className="font-mono text-xs">{truncatedAddress}</span>;
   }
 
+  const ensName = ens.nameQuery.data;
+
   // Get ENS app Name Preview URL
-  const ensAppNamePreviewUrl =
-    ens.appBaseUrl && ensName ? new URL(ensName, ens.appBaseUrl) : undefined;
+  const ensAppNamePreviewUrl = ensName ? new URL(ensName, ens.appBaseUrl) : undefined;
 
   // Get ENS avatar URL
-  const ensAvatarUrl =
-    ens.metadataBaseUrl && ensName ? new URL(ensName, ens.metadataBaseUrl) : undefined;
+  const ensAvatarUrl = ensName ? new URL(ensName, ens.metadataBaseUrl) : undefined;
 
   // Display name (ENS name or truncated address)
   const displayName = ensName || truncatedAddress;

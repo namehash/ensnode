@@ -139,7 +139,6 @@ export function RegistrationNameDisplay({ registration, ensAppUrl }: Registratio
  @returns the viem#Address object
  */
 //TODO: where to use it? I don't like the prop-drilling that would be required to pass the address from <RecentRegistrations /> to getEffectiveOwner, but what's a better way to do it?
-//TODO: make sure it actually works! make sure we take the root datasource! --> Investigate how the Datasource is built once again, maybe I omitted sth earlier?
 export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: number): Address {
   const datasources = Object.values(getENSNamespace(namespaceId)) as Datasource[];
   const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
@@ -149,6 +148,8 @@ export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: numb
       `No Datasources within the "${namespaceId}" namespace are defined for Chain ID "${chainId}".`,
     );
   }
+  //TODO: make sure it actually works! make sure we take the root datasource! --> Investigate how the Datasource is built once again, maybe I omitted sth earlier?
   //TODO: make sure that this will be a root datasource, otherwise there is no guarantee of NameWrapper existing
+  // -> should be guaranteed by the fact that the chainId is provided by useENSRootDatasourceChainId hook, but the typecheck doesn't know this
   return getAddress(datasource.contracts.NameWrapper.address);
 }
