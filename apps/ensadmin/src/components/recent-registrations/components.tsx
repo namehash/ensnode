@@ -2,7 +2,13 @@
 
 import { useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
-import {Duration, FormattedDate, getNameWrapperAddress, RelativeTime} from "@/components/recent-registrations/utils";
+import {
+    Duration,
+    FormattedDate,
+    getNameWrapperAddress,
+    RegistrationNameDisplay,
+    RelativeTime
+} from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -52,7 +58,9 @@ export function RecentRegistrations() {
   const ensMetadataUrl = getEnsMetadataUrl(namespaceId!);
 
   const nameWrapperAddress = indexingStatus.data && indexedChainId ? getNameWrapperAddress(indexingStatus.data.env.NAMESPACE, indexedChainId) : null;
-  //TODO: this might be moved --> placing it here requires loads of prop drilling!
+  //TODO: this might be moved --> placing it here requires loads of prop drilling! But otherwise, do we want to use a useQuery inside another Query? I very much doubt so
+
+  console.log("NW address", nameWrapperAddress);
 
   useEffect(() => {
     setIsClient(true);
@@ -111,15 +119,7 @@ export function RecentRegistrations() {
                 recentRegistrationsQuery.data?.map((registration) => (
                   <TableRow key={registration.name}>
                     <TableCell className="font-medium">
-                      <a
-                        href={getEnsAppUrlForName(registration.name)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline w-fit"
-                      >
-                        {registration.name}
-                        <ExternalLink size={14} className="inline-block" />
-                      </a>
+                      <RegistrationNameDisplay registration={registration} ensAppUrl={ensAppUrl} />
                     </TableCell>
                     <TableCell>
                       <RelativeTime date={registration.registeredAt} />
@@ -135,6 +135,10 @@ export function RecentRegistrations() {
                         <Identity
                           address={registration.owner}
                           chainId={indexedChainId}
+                          ens={{
+                              appBaseUrl: ensAppUrl,
+                              metadataBaseUrl: ensMetadataUrl,
+                          }}
                           showAvatar={true}
                         />
                       ) : (
