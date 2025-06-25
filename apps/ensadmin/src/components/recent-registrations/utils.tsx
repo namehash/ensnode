@@ -149,6 +149,6 @@ export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: numb
       `No Datasources within the "${namespaceId}" namespace are defined for Chain ID "${chainId}".`,
     );
   }
-
+  //TODO: make sure that this will be a root datasource, otherwise there is no guarantee of NameWrapper existing
   return getAddress(datasource.contracts.NameWrapper.address);
 }
