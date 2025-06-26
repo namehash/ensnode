@@ -73,7 +73,7 @@ export function RecentRegistrations() {
     return <RecentRegistrationsFallback />;
   }
 
-  //TODO: This approach is a little bit trade-offish - cause we make JSX simpler but have to additionally make sure query's results are not undefined
+  //TODO: This approach is a little bit trade-offish - cause we make JSX simpler but have to additionally make sure query's results are not undefined in the final return JSX
   if (indexingStatusQuery.isError) {
     return (
       <p>
@@ -144,30 +144,19 @@ export function RecentRegistrations() {
 
 interface RegistrationRowProps {
   registration: Registration;
-  ensNodeMetadata: EnsNode.Metadata;
-  rootDatasourceChainId: SupportedChainId | undefined; //TODO: We need to be more precise here. We shouldn't be passing in any possible supported chain Id (for example, we "support" optimism, base, etc..).
-  // Instead, more specifically this should be the ENS Deployment Chain Id for the connected ENSNode instance.
+  ensNodeMetadata: EnsNode.Metadata; //TODO: maybe we could just inject only namespaceId here? Not 100% sure which option is better, but I like the current one more cause it seems cleaner, less over-engineered, (more invariants friendly?)
 }
 
 function RegistrationRow({
   registration,
   ensNodeMetadata,
-  rootDatasourceChainId,
 }: RegistrationRowProps) {
   const namespaceId = ensNodeMetadata.env.NAMESPACE;
-
-  //TODO: establish the level where we would handle undefined results (ens-test-env for both + holesky for metadata)!!!
-  const ensAppUrl = getEnsAppUrl(namespaceId);
-  const ensMetadataUrl = getEnsMetadataUrl(namespaceId);
-
-  //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
-  // Maybe this could be joined with handling issues  mentioned above?
-  // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
 
   return (
     <TableRow>
       <TableCell className="font-medium">
-        <RegistrationNameDisplay registration={registration} ensAppUrl={ensAppUrl} />
+        <RegistrationNameDisplay registration={registration} ensAppUrl={getEnsAppUrl(namespaceId)} />
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} />
@@ -176,23 +165,11 @@ function RegistrationRow({
         <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
       </TableCell>
       <TableCell>
-        {/*//TODO: for now we handle the issue described above here by not calling on the <Identity /> component if any of the elements is undefined*/}
-        {ensMetadataUrl && ensAppUrl && rootDatasourceChainId ? (
           <Identity
             address={registration.owner}
-            ens={{
-              appBaseUrl: ensAppUrl,
-              metadataBaseUrl: ensMetadataUrl,
-              nameQuery: useEnsName({
-                address: registration.owner,
-                chainId: rootDatasourceChainId,
-              }),
-            }}
+            ensNamespaceId={namespaceId}
             showAvatar={true}
           />
-        ) : (
-          <Identity.Placeholder showAvatar={true} />
-        )}
       </TableCell>
     </TableRow>
   );

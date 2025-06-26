@@ -2,29 +2,18 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SupportedChainId } from "@/lib/wagmi";
-import { GetEnsNameData } from "@wagmi/core/query";
 import { cx } from "class-variance-authority";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { UseEnsNameReturnType } from "wagmi";
+import {ENSNamespaceId, ENSNamespaceIds, getENSRootChainId} from "@ensnode/datasources";
+import {getEnsAppUrl, getEnsMetadataUrl} from "@/components/identity/utils";
+import {useEnsName} from "wagmi";
 
-//TODO: add descriptions for other fields
-//TODO: the type might change after deciding where to handle possibly undefined values for ens URLs -> for now the <RegistrationRow /> & <RegistrationNameDisplay /> components handle the possibly undefined values
+//TODO: add descriptions for type's fields
 interface IdentityProps {
   address: Address;
-  /**
-   * ENS related values
-   */
-  ens: {
-    /** ENS Web application base URL */
-    appBaseUrl: URL;
-    /** ENS metadata base URL */
-    metadataBaseUrl: URL;
-    /** ENS name query object */
-    nameQuery: UseEnsNameReturnType<GetEnsNameData>;
-  };
+  ensNamespaceId: ENSNamespaceId;
   showAvatar?: boolean;
   showExternalLink?: boolean;
   className?: string;
@@ -36,7 +25,7 @@ interface IdentityProps {
  */
 export function Identity({
   address,
-  ens,
+  ensNamespaceId,
   showAvatar = false,
   showExternalLink = true,
   className = "",
@@ -51,23 +40,43 @@ export function Identity({
   // Truncate address for display
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
+  //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
+  // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
+  // is that an alright solution? - duplicates code with error of the query, but that seems necessary for our current predicament - allows us to avoid some additional if-ology when calling the wagmi hook
+  if (ensNamespaceId === ENSNamespaceIds.EnsTestEnv) {
+    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+  }
+
+  //TODO: establish the level where we would handle undefined results (ens-test-env for both + holesky for metadata)!!!
+  //TODO: not sure about using "ens" in the names, since all we do is basically ens (efp is another topic ;))
+  const ensAppBaseUrl = getEnsAppUrl(ensNamespaceId);
+  const ensMetadataBaseUrl = getEnsMetadataUrl(ensNamespaceId);
+  const chainId = getENSRootChainId(ensNamespaceId);
+
+  // Use the ENS name hook from wagmi
+  const { data: ensName, isLoading, isError } = useEnsName({
+    address,
+    chainId,
+  });
+
+
   // If not mounted yet (server-side), or still loading, show a skeleton
-  if (!mounted || ens.nameQuery.isLoading) {
+  if (!mounted || isLoading) {
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
   // If there is an error, show the truncated address
-  if (ens.nameQuery.isError) {
+  if (isError) {
     return <span className="font-mono text-xs">{truncatedAddress}</span>;
   }
 
-  const ensName = ens.nameQuery.data;
+  //TODO: Currently this is where the possibly undefined values of URLs are being handled
 
   // Get ENS app Name Preview URL
-  const ensAppNamePreviewUrl = ensName ? new URL(ensName, ens.appBaseUrl) : undefined;
+  const ensAppNamePreviewUrl = ensName && ensAppBaseUrl ? new URL(ensName, ensAppBaseUrl) : undefined;
 
   // Get ENS avatar URL
-  const ensAvatarUrl = ensName ? new URL(ensName, ens.metadataBaseUrl) : undefined;
+  const ensAvatarUrl = ensName && ensMetadataBaseUrl ? new URL(ensName, ensMetadataBaseUrl) : undefined;
 
   // Display name (ENS name or truncated address)
   const displayName = ensName || truncatedAddress;
