@@ -58,8 +58,8 @@ export const createEnsRainbowVersionFetcher = (
         version: "unknown",
         schemaVersion: 0,
         labelSet: {
-          id: "unknown",
-          version: 0,
+          labelSetId: "unknown",
+          highestLabelSetVersion: 0,
         },
       };
     }
