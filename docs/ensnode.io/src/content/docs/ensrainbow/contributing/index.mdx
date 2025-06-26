@@ -37,8 +37,8 @@ cd apps/ensrainbow
 # Example: Download 'discoveryA' label set ID, label set version 0 (initially empty for discovered labels)
 ./scripts/download-ensrainbow-files.sh discoveryA 0
 
-# Example: Download 'testenv' label set ID, label set version 0 (for test environment)
-./scripts/download-ensrainbow-files.sh testenv 0
+# Example: Download 'ens-test-env' label set ID, label set version 0 (for test environment)
+./scripts/download-ensrainbow-files.sh ens-test-env 0
 ```
 
 This command will:
@@ -244,26 +244,26 @@ The ens-test-env project provides a test environment for ENS development. It inc
 To ingest the test data into ENSRainbow:
 
 1.  **Convert Test Data (if needed):**
-    If you don't have a pre-converted `testenv-0.ensrainbow` file:
+    If you don't have a pre-converted `ens-test-env-0.ensrainbow` file:
     ```bash
     # Navigate to apps/ensrainbow or adjust paths accordingly
-    pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv-0.ensrainbow
+    pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env-0.ensrainbow
     ```
-    This creates `testenv-0.ensrainbow`.
+    This creates `ens-test-env-0.ensrainbow`.
 
 2.  **Download Test Data (Alternative):**
     Alternatively, download the pre-defined test data file:
     ```bash
     # In apps/ensrainbow directory
-    ./scripts/download-ensrainbow-files.sh testenv 0
+    ./scripts/download-ensrainbow-files.sh ens-test-env 0
     ```
-    This will place `testenv-0.ensrainbow` in `labelsets/`. Adjust the path for the ingest command accordingly.
+    This will place `ens-test-env-0.ensrainbow` in `labelsets/`. Adjust the path for the ingest command accordingly.
 
 ### Ingesting Test Data
 
 ```bash
-# Assuming testenv-0.ensrainbow is in the current directory or accessible by path
-pnpm run ingest-ensrainbow --input-file testenv-0.ensrainbow --data-dir data_ens_test_env
+# Assuming ens-test-env-0.ensrainbow is in the current directory or accessible by path
+pnpm run ingest-ensrainbow --input-file ens-test-env-0.ensrainbow --data-dir data_ens_test_env
 ```
 
 ### Validating the Test Data
@@ -296,15 +296,15 @@ You can also run ENSRainbow with the test data using Docker. This involves runni
 
     docker run -d --name ensrainbow_test_env \
       -v ~/my_ensrainbow_test_data:/app/apps/ensrainbow/data \
-      -e DB_SCHEMA_VERSION="v3" \
-      -e LABEL_SET_ID="testenv" \
+      -e DB_SCHEMA_VERSION="3" \
+      -e LABEL_SET_ID="ens-test-env" \
       -e LABEL_SET_VERSION="0" \
       -p 3223:3223 \
       ghcr.io/namehash/ensnode/ensrainbow:latest
     ```
-    *   Adjust `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` if the test data parameters differ. Typically, for the standard test data, `LABEL_SET_ID` is `testenv` and `LABEL_SET_VERSION` is `0`. The `DB_SCHEMA_VERSION` should match the version of the database archives you intend to use (e.g., `v3`).
+    *   Adjust `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION` if the test data parameters differ. Typically, for the standard test data, `LABEL_SET_ID` is `ens-test-env` and `LABEL_SET_VERSION` is `0`. The `DB_SCHEMA_VERSION` should match the version of the database archives you intend to use (e.g., `3`).
 
-This setup allows the `entrypoint.sh` script within the container to download the `testenv-0` database archive into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
+This setup allows the `entrypoint.sh` script within the container to download the `ens-test-env-0` database archive into the mounted volume on its first run. Subsequent runs will reuse the data from the volume.
 
 This test environment setup is particularly useful for running ENS tests (i.e. ens-test-env) that require label healing capabilities without needing the full production dataset.
 
@@ -312,7 +312,7 @@ This test environment setup is particularly useful for running ENS tests (i.e. e
 
 When using ENSRainbow with Docker, the following environment variables control which pre-built ENSRainbow database archive is downloaded and used:
 
-- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `v3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
+- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
   - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of its database.
   - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
@@ -322,7 +322,7 @@ When using ENSRainbow with Docker, the following environment variables control w
     - `subgraph` - Main production dataset from The Graph's ENS subgraph
     - `searchlight` - Extended dataset with additional label discoveries
     - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
-    - `testenv` - Small test dataset for development and testing
+    - `tesens-test-envtenv` - Small test dataset for development and testing
 
 - **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
   - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
@@ -333,13 +333,13 @@ When using ENSRainbow with Docker, the following environment variables control w
 **Example combinations:**
 ```bash
 # Latest production data
-DB_SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
 # Test environment data
-DB_SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=ens-test-env LABEL_SET_VERSION=0
 
 # Extended discovery data
-DB_SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
 ```
 
 ### Persistent Storage with Docker
@@ -369,7 +369,7 @@ mkdir -p ~/my_ensrainbow_data
 
 docker run -d --name ensrainbow_persistent \
   -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
-  -e DB_SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="3" \
   -e LABEL_SET_ID="subgraph" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
@@ -384,7 +384,7 @@ docker volume create ensrainbow_db_volume
 
 docker run -d --name ensrainbow_persistent \
   -v ensrainbow_db_volume:/app/apps/ensrainbow/data \
-  -e DB_SCHEMA_VERSION="v3" \
+  -e DB_SCHEMA_VERSION="3" \
   -e LABEL_SET_ID="subgraph" \
   -e LABEL_SET_VERSION="0" \
   -p 3223:3223 \
@@ -420,10 +420,10 @@ gzip empty.sql
 time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --label-set-id discoveryA --label-set-version 0
 ```
 
-**For the `testenv` Label Set (for testing):**
-This converts a test dataset SQL dump into an `.ensrainbow` file for version 0 of the `testenv` Label Set.
+**For the `ens-test-env` Label Set (for testing):**
+This converts a test dataset SQL dump into an `.ensrainbow` file for version 0 of the `ens-test-env` Label Set.
 ```bash
-time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file testenv_0.ensrainbow --label-set-id testenv --label-set-version 0
+time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env --label-set-version 0
 ```
 
 ### 2. Upload `.ensrainbow` Files to R2 Storage
@@ -432,7 +432,7 @@ After generation, these `.ensrainbow` files are uploaded to the designated cloud
 ```bash
 rclone copy ./subgraph_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./discoveryA_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
-rclone copy ./testenv_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./ens-test-env_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 ```
 
 ### 3. Calculate and Upload Checksums for `.ensrainbow` Files
@@ -442,12 +442,12 @@ SHA256 checksums are generated for each `.ensrainbow` file to ensure data integr
 # Calculate checksums
 sha256sum subgraph_0.ensrainbow > subgraph_0.ensrainbow.sha256sum
 sha256sum discoveryA_0.ensrainbow > discoveryA_0.ensrainbow.sha256sum
-sha256sum testenv_0.ensrainbow > testenv_0.ensrainbow.sha256sum
+sha256sum ens-test-env_0.ensrainbow > ens-test-env_0.ensrainbow.sha256sum
 
 # Upload checksums
 rclone copy ./subgraph_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./discoveryA_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
-rclone copy ./testenv_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./ens-test-env_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 ```
 
 ### 4. Ingest `.ensrainbow` Files into LevelDB Databases
@@ -456,7 +456,7 @@ The `.ensrainbow` files are ingested into local LevelDB instances to create the 
 ```bash
 pnpm ingest-ensrainbow --input-file subgraph_0.ensrainbow --data-dir ./data-subgraph_0
 pnpm ingest-ensrainbow --input-file discoveryA_0.ensrainbow --data-dir ./data-discoveryA_0
-pnpm ingest-ensrainbow --input-file testenv_0.ensrainbow --data-dir ./data-testenv_0
+pnpm ingest-ensrainbow --input-file ens-test-env_0.ensrainbow --data-dir ./data-ens-test-env_0
 ```
 
 ### 5. Package LevelDB Databases
@@ -465,16 +465,16 @@ The LevelDB data directories, now populated, are packaged into compressed `tar.g
 ```bash
 tar -czvf subgraph_0.tgz ./data-subgraph_0
 tar -czvf discoveryA_0.tgz ./data-discoveryA_0
-tar -czvf testenv_0.tgz ./data-testenv_0
+tar -czvf ens-test-env_0.tgz ./data-ens-test-env_0
 ```
 
 ### 6. Upload Database Archives to R2 Storage
 
-These database archives are uploaded to cloud storage, tagged with a schema version (e.g., `v3` in this example).
+These database archives are uploaded to cloud storage, tagged with a schema version (e.g., `3` in this example).
 ```bash
-rclone copy ./subgraph_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
-rclone copy ./discoveryA_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
-rclone copy ./testenv_0.tgz ENSRAINBOWR2:ensrainbow/databases/v3/
+rclone copy ./subgraph_0.tgz ENSRAINBOWR2:ensrainbow/databases/3/
+rclone copy ./discoveryA_0.tgz ENSRAINBOWR2:ensrainbow/databases/3/
+rclone copy ./ens-test-env_0.tgz ENSRAINBOWR2:ensrainbow/databases/3/
 ```
 
 ### 7. Calculate and Upload Checksums for Database Archives
@@ -484,11 +484,11 @@ Finally, checksums for the database archives are calculated and uploaded to ensu
 # Calculate checksums
 sha256sum subgraph_0.tgz > subgraph_0.tgz.sha256sum
 sha256sum discoveryA_0.tgz > discoveryA_0.tgz.sha256sum
-sha256sum testenv_0.tgz > testenv_0.tgz.sha256sum
+sha256sum ens-test-env_0.tgz > ens-test-env_0.tgz.sha256sum
 
 # Upload checksums
-rclone copy ./subgraph_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
-rclone copy ./discoveryA_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
-rclone copy ./testenv_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/v3/
+rclone copy ./subgraph_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/3/
+rclone copy ./discoveryA_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/3/
+rclone copy ./ens-test-env_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/3/
 ```
 

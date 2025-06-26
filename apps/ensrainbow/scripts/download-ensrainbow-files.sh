@@ -6,11 +6,11 @@ set -euo pipefail
 #
 # Goal & Motivation:
 # This script downloads a specific ENSRainbow labelset file, which contains
-# a set of ENS names for a particular purpose or from a specific source (e.g., 'testenv', 'subgraph').
+# a set of ENS names for a particular purpose or from a specific source (e.g., 'ens-test-env', 'subgraph').
 # These labelsets are used by the ENSRainbow application for populating its database and healing labelhashes.
 #
 # The labelsets are identified by:
-#   - LABEL_SET_ID: The "namespace" or category of the data (e.g., 'testenv').
+#   - LABEL_SET_ID: The "namespace" or category of the data (e.g., 'ens-test-env').
 #   - LABEL_SET_VERSION: An incremental version for a given label set.
 #
 # This script requires these two identifiers as command-line arguments to

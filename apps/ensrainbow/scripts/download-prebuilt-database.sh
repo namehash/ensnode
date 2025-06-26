@@ -13,7 +13,7 @@ set -euo pipefail
 #
 # The database is versioned using a three-part system:
 #   - DB_SCHEMA_VERSION: The physical layout/structure of the database.
-#   - LABEL_SET_ID: The "namespace" or category of the data (e.g., 'testenv').
+#   - LABEL_SET_ID: The "namespace" or category of the data (e.g., 'ens-test-env').
 #   - LABEL_SET_VERSION: An incremental version for a given label set.
 #
 # This script requires these three identifiers as command-line arguments to

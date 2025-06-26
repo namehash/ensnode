@@ -21,7 +21,7 @@ The following environment variables are required when running ENSRainbow with Do
   - **Goal**: To decentralize data sourcing. This allows any user to host their own pre-built ENSRainbow databases and configure their application to use them.
   - **Configuration**: Set this to the base URL of your chosen server. Defaults to `https://bucket.ensrainbow.io`.
 
-- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `v3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
+- **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
   - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of its database.
   - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
@@ -31,7 +31,7 @@ The following environment variables are required when running ENSRainbow with Do
     - `subgraph` - Main production dataset from The Graph's ENS subgraph
     - `searchlight` - Extended dataset with additional label discoveries
     - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
-    - `testenv` - Small test dataset for development and testing
+    - `ens-test-env` - Small test dataset for development and testing
 
 - **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
   - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
@@ -43,13 +43,13 @@ The following environment variables are required when running ENSRainbow with Do
 
 ```bash
 # Latest production data
-DB_SCHEMA_VERSION=v3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
 # Test environment data
-DB_SCHEMA_VERSION=v3 LABEL_SET_ID=testenv LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=ens-test-env LABEL_SET_VERSION=0
 
 # Extended discovery data
-DB_SCHEMA_VERSION=v3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
 ```
 
 :::note[Environment Variables Usage]
