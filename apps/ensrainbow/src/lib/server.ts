@@ -80,8 +80,8 @@ export class ENSRainbowServer {
         }
       }
 
-      const label = await this.db.getLabel(labelHashBytes);
-      if (label === null) {
+      const rainbowRecordValue = await this.db.getRainbowRecordValue(labelHashBytes);
+      if (rainbowRecordValue === null) {
         logger.info(`Unhealable labelHash request: ${labelHash}`);
         return {
           status: StatusCode.Error,
@@ -90,7 +90,7 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.HealError;
       }
 
-      const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = label;
+      const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = rainbowRecordValue;
 
       // Only return the label if its label set version number is less than or equal to highestLabelSetVersion
       if (

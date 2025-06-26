@@ -3,7 +3,13 @@ import { ClassicLevel } from "classic-level";
 import { ByteArray, Hex, labelhash } from "viem";
 
 import { logger } from "@/utils/logger";
+import { parseNonNegativeInteger } from "@/utils/parsing";
 import { Label } from "@ensnode/ensnode-sdk";
+import {
+  type RainbowRecordValue,
+  buildEncodedRainbowRecordValue,
+  decodeEncodedRainbowRecordValue,
+} from "./rainbow-record";
 
 // System keys must have a byte length different from 32 to avoid collisions with labelHashes
 export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
@@ -40,33 +46,6 @@ export const IngestionStatus = {
 } as const;
 
 export type IngestionStatus = (typeof IngestionStatus)[keyof typeof IngestionStatus];
-
-/**
- * Splits a label string into its label set version number and actual label components.
- * Format of input is expected to be "{labelSet}:{actualLabel}"
- *
- * @param label The label string to split
- * @returns An object containing the label set version number and the actual label
- * @throws Error if the label format is invalid or the label set version is not a valid number
- */
-export function splitLabelString(label: string): { labelSetVersion: number; label: string } {
-  const colonIndex = label.indexOf(":");
-  if (colonIndex <= 0) {
-    throw new Error(`Invalid label format (missing set number prefix): "${label}"`);
-  }
-
-  const labelSetVersion = label.substring(0, colonIndex);
-  const actualLabel = label.substring(colonIndex + 1);
-
-  try {
-    const labelSetVersionNumber = parseNonNegativeInteger(labelSetVersion);
-    return { labelSetVersion: labelSetVersionNumber, label: actualLabel };
-  } catch (error: unknown) {
-    throw new Error(
-      `Invalid label set version number "${labelSetVersion}" in label "${label}": ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-}
 
 /**
  * Checks if a key is a system key (one of the special keys used for database metadata).
@@ -406,26 +385,24 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Retrieves a label from the database by its labelHash.
+   * Retrieves a rainbow record value from the database by its labelHash.
    *
    * @param labelHash The ByteArray labelHash to look up
-   * @returns The labelSetVersion and label as a string if found, null if not found
+   * @returns A RainbowRecordValue object if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getLabel(
-    labelHash: ByteArray,
-  ): Promise<{ labelSetVersion: number; label: Label } | null> {
+  public async getRainbowRecordValue(labelHash: ByteArray): Promise<RainbowRecordValue | null> {
     // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
     if (!isRainbowRecordKey(labelHash)) {
       throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
     }
 
-    const label = await this.get(labelHash);
-    if (label === null) {
+    const encodedRainbowRecordValue = await this.get(labelHash);
+    if (encodedRainbowRecordValue === null) {
       return null;
     }
 
-    return splitLabelString(label);
+    return decodeEncodedRainbowRecordValue(encodedRainbowRecordValue);
   }
 
   /**
@@ -677,45 +654,35 @@ export class ENSRainbowDB {
       }
 
       // --- Value Validation (Label Format & Set Number) ---
-
-      const firstColonIndex = value.indexOf(":");
-      let recordLabelSetVersion: number | null = null;
-
-      // If there's no colon or it's the first character, the format is invalid
-      if (firstColonIndex <= 0) {
-        logger.error(`Invalid label format (missing labelSetVersion number prefix): "${value}"`);
+      let rainbowRecordValue: RainbowRecordValue | null = null;
+      try {
+        rainbowRecordValue = decodeEncodedRainbowRecordValue(value);
+      } catch (error) {
+        logger.error(`Invalid label format: "${value}" - ${error}`);
         invalidLabelFormats++;
-      } else {
-        // Try to parse using the splitLabelString function
-        try {
-          const result = splitLabelString(value);
-          recordLabelSetVersion = result.labelSetVersion;
-        } catch (error) {
-          logger.error(`Invalid label format: "${value}" - ${error}`);
-          invalidLabelFormats++;
-        }
       }
 
-      // Only proceed with label set version comparison if the format was valid
-      if (recordLabelSetVersion !== null) {
-        if (recordLabelSetVersion > highestLabelSetVersion) {
+      if (rainbowRecordValue) {
+        // Only proceed with further checks if decoding was successful
+
+        // Label set version comparison
+        if (rainbowRecordValue.labelSetVersion > highestLabelSetVersion) {
           logger.error(
-            `Label set version mismatch for label "${value}": record set ${recordLabelSetVersion} > highest set ${highestLabelSetVersion}`,
+            `Label set version mismatch for label "${value}": record set ${rainbowRecordValue.labelSetVersion} > highest set ${highestLabelSetVersion}`,
           );
           labelSetVersionMismatches++;
         }
-      }
 
-      // --- Key-Value Validation (Hash Match) ---
-      const actualLabel = value.substring(firstColonIndex + 1);
-      const computedHash = labelHashToBytes(labelhash(actualLabel));
-      if (!byteArraysEqual(computedHash, key)) {
-        logger.error(
-          `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
-            computedHash,
-          ).toString("hex")}`,
-        );
-        hashMismatches++;
+        // Key-Value Validation (Hash Match)
+        const computedHash = labelHashToBytes(labelhash(rainbowRecordValue.label));
+        if (!byteArraysEqual(computedHash, key)) {
+          logger.error(
+            `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
+              computedHash,
+            ).toString("hex")}`,
+          );
+          hashMismatches++;
+        }
       }
     }
 
@@ -830,62 +797,12 @@ export class ENSRainbowDB {
    * @throws Error if labelSetVersion is invalid
    */
   public async addRainbowRecord(label: string, labelSetVersion: number): Promise<void> {
-    // Validate label set version is a non-negative integer
-    if (!Number.isInteger(labelSetVersion) || labelSetVersion < 0) {
-      throw new Error(
-        `Invalid label set version: ${labelSetVersion} (must be a non-negative integer)`,
-      );
-    }
-
+    const encodedValue = buildEncodedRainbowRecordValue(label, labelSetVersion);
     const key = labelHashToBytes(labelhash(label));
-    await this.db.put(key, `${labelSetVersion}:${label}`);
+    await this.db.put(key, encodedValue);
   }
 }
 
 export function byteArraysEqual(a: ByteArray, b: ByteArray): boolean {
   return a.length === b.length && a.every((val, i) => val === b[i]);
-}
-
-/**
- * Parses a string into a non-negative integer.
- * @param input The string to parse
- * @returns The parsed non-negative integer
- * @throws Error if the input is not a valid non-negative integer
- */
-export function parseNonNegativeInteger(maybeNumber: string): number {
-  const trimmed = maybeNumber.trim();
-
-  // Check for empty strings
-  if (!trimmed) {
-    throw new Error("Input cannot be empty");
-  }
-
-  // Check for -0
-  if (trimmed === "-0") {
-    throw new Error("Negative zero is not a valid non-negative integer");
-  }
-
-  const num = Number(maybeNumber);
-
-  // Check if it's not a number
-  if (Number.isNaN(num)) {
-    throw new Error(`"${maybeNumber}" is not a valid number`);
-  }
-
-  // Check if it's not finite
-  if (!Number.isFinite(num)) {
-    throw new Error(`"${maybeNumber}" is not a finite number`);
-  }
-
-  // Check if it's not an integer
-  if (!Number.isInteger(num)) {
-    throw new Error(`"${maybeNumber}" is not an integer`);
-  }
-
-  // Check if it's negative
-  if (num < 0) {
-    throw new Error(`"${maybeNumber}" is not a non-negative integer`);
-  }
-
-  return num;
 }
