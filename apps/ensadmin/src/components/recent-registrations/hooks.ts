@@ -27,7 +27,7 @@ interface RegistrationResult {
 }
 
 /**
- * The NameWrapper contract address
+ * The NameWrapper contract address of mainnet chain
  */
 const FALLBACK_NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
 
@@ -82,8 +82,7 @@ function toRegistration(
 async function fetchRecentRegistrations(
   baseUrl: URL,
   maxResults: number,
-  nameWrapperAddress: Address | null,
-): Promise<Registration[]> {
+): Promise<RegistrationResult[]> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${maxResults}, orderBy: registrationDate, orderDirection: desc) {
@@ -122,9 +121,7 @@ async function fetchRecentRegistrations(
 
   const data = await response.json();
 
-  return data.data.registrations.map((registration: RegistrationResult) =>
-    toRegistration(registration, nameWrapperAddress),
-  );
+  return data.data.registrations;
 }
 
 /**
@@ -141,7 +138,9 @@ export function useRecentRegistrations(
 ) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
-    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults, nameWrapperAddress),
+    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
+    // Select the registrations from the response
+    select: (data) => data.map((registration: RegistrationResult) => toRegistration(registration, nameWrapperAddress)),
     throwOnError(error) {
       throw new Error(
         `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,

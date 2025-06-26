@@ -1,5 +1,9 @@
 import { Registration } from "@/components/recent-registrations/types";
-import { Datasource, ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
+import {
+  DatasourceNames,
+  ENSNamespaceId,
+  getDatasource
+} from "@ensnode/datasources";
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { ExternalLink } from "lucide-react";
@@ -138,18 +142,13 @@ export function RegistrationNameDisplay({ registration, ensAppUrl }: Registratio
  @param namespaceId - the namespace identifier within which to find a root datasource
  @returns the viem#Address object
  */
-//TODO: where to use it? I don't like the prop-drilling that would be required to pass the address from <RecentRegistrations /> to getEffectiveOwner, but what's a better way to do it?
 export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: number): Address {
-  const datasources = Object.values(getENSNamespace(namespaceId)) as Datasource[];
-  const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
+  const datasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
 
-  if (!datasource) {
-    throw new Error(
-      `No Datasources within the "${namespaceId}" namespace are defined for Chain ID "${chainId}".`,
-    );
+  // always request NameWrapper address from root datasource otherwise not throw error
+  if (datasource.chain.id !== chainId){
+    throw new Error(`Chain of id=${chainId} is not a namespace's root datasource's chain`)
   }
-  //TODO: make sure it actually works! make sure we take the root datasource! --> Investigate how the Datasource is built once again, maybe I omitted sth earlier?
-  //TODO: make sure that this will be a root datasource, otherwise there is no guarantee of NameWrapper existing
-  // -> should be guaranteed by the fact that the chainId is provided by useENSRootDatasourceChainId hook, but the typecheck doesn't know this
+
   return getAddress(datasource.contracts.NameWrapper.address);
 }

@@ -9,6 +9,7 @@ import type { Address } from "viem";
 import {ENSNamespaceId, ENSNamespaceIds, getENSRootChainId} from "@ensnode/datasources";
 import {getEnsAppUrl, getEnsMetadataUrl} from "@/components/identity/utils";
 import {useEnsName} from "wagmi";
+import {useEnsApp} from "@/components/identity/hooks";
 
 //TODO: add descriptions for type's fields
 interface IdentityProps {
@@ -59,6 +60,8 @@ export function Identity({
     chainId,
   });
 
+  // const ensAppData = useEnsApp(ensNamespaceId, address); a WIP
+
 
   // If not mounted yet (server-side), or still loading, show a skeleton
   if (!mounted || isLoading) {
@@ -76,7 +79,7 @@ export function Identity({
   const ensAppNamePreviewUrl = ensName && ensAppBaseUrl ? new URL(ensName, ensAppBaseUrl) : undefined;
 
   // Get ENS avatar URL
-  const ensAvatarUrl = ensName && ensMetadataBaseUrl ? new URL(ensName, ensMetadataBaseUrl) : undefined;
+  const ensAvatarUrl = ensName && ensMetadataBaseUrl ? new URL(ensName, ensMetadataBaseUrl) : undefined; //TODO: wrap in one hook (namespaceId and ensName as inputs), that would possibly return a final URL or undefined - that would streamline the component
 
   // Display name (ENS name or truncated address)
   const displayName = ensName || truncatedAddress;

@@ -41,5 +41,3 @@ export function getEnsMetadataUrl(chain: ENSNamespaceId): URL | undefined {
   }
 }
 
-//TODO: should these functions be placed elsewhere (imo current placement is good + it matches with PR #476)
-//TODO: Should these functions be handling the errors and undefined results? Or maybe the <Identity /> component should handle it? --> for now the <RegistrationRow /> & <RegistrationNameDisplay /> components handle the possibly undefined values

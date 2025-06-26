@@ -132,7 +132,6 @@ export function RecentRegistrations() {
                   key={registration.name}
                   registration={registration}
                   ensNodeMetadata={indexingStatusQuery.data}
-                  rootDatasourceChainId={indexedChainId}
                 />
               ))}
           </TableBody>
