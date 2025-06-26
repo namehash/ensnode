@@ -15,7 +15,7 @@ export interface ConvertCommandOptions {
 }
 
 // Current protobuf file format version
-export const CURRENT_FORMAT_VERSION = 1;
+export const CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION = 1;
 
 /**
  * Logs the initial options for the conversion process.
@@ -26,7 +26,7 @@ function logInitialOptions(options: ConvertCommandOptions): void {
   logger.info(`Output file: ${options.outputFile}`);
   logger.info(`Label set id: ${options.labelSetId}`);
   logger.info(`Label set version: ${options.labelSetVersion}`);
-  logger.info(`Format Version: ${CURRENT_FORMAT_VERSION}`);
+  logger.info(`Format Version: ${CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION}`);
   logger.info("Output format: Header message + stream of individual records");
 }
 
@@ -74,7 +74,7 @@ function writeHeader(
   labelSetVersion: number,
 ): void {
   const headerCollection = RainbowRecordCollectionType.fromObject({
-    data_format_version: CURRENT_FORMAT_VERSION,
+    ensrainbow_file_format_version: CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
     label_set_id: labelSetId,
     label_set_version: labelSetVersion,
     records: [], // Header has no records

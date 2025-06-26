@@ -6,6 +6,7 @@ import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
 import { vi } from "vitest";
 
+import { parseNonNegativeInteger } from "@/utils/parsing";
 import {
   DB_SCHEMA_VERSION,
   ENSRainbowDB,
@@ -15,7 +16,6 @@ import {
   SYSTEM_KEY_SCHEMA_VERSION,
   isRainbowRecordKey,
   isSystemKey,
-  parseNonNegativeInteger,
 } from "./database";
 
 describe("Database", () => {
@@ -305,7 +305,7 @@ describe("Database", () => {
         // Add record
         await db.addRainbowRecord(labelWithNull, 0);
 
-        const retrieved = await db.getLabel(labelHashBytes);
+        const retrieved = await db.getRainbowRecordValue(labelHashBytes);
         expect(retrieved).toEqual({ labelSetVersion: 0, label: labelWithNull });
       } finally {
         await db.close();

@@ -3,7 +3,7 @@ import ProgressBar from "progress";
 import protobuf from "protobufjs";
 import { ByteArray } from "viem";
 
-import { CURRENT_FORMAT_VERSION } from "@/commands/convert-command";
+import { CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION } from "@/commands/convert-command";
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { logger } from "@/utils/logger";
 import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
@@ -129,12 +129,12 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
               defaults: true,
             });
 
-            fileVersion = headerObj.data_format_version;
+            fileVersion = headerObj.ensrainbow_file_format_version;
             fileLabelSetId = headerObj.label_set_id;
             fileLabelSetVersion = headerObj.label_set_version;
 
             // Validate version
-            if (fileVersion !== CURRENT_FORMAT_VERSION) {
+            if (fileVersion !== CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION) {
               const msg = `File format version ${fileVersion} is not supported. Update your application to the latest version.`;
               logger.error(msg);
               fileStream.destroy(new Error(msg)); // Stop processing

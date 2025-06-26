@@ -22,16 +22,16 @@ The following environment variables are required when running ENSRainbow with Do
   - **Configuration**: Set this to the base URL of your chosen server. Defaults to `https://bucket.ensrainbow.io`.
 
 - **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
-  - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of its database.
+  - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of downloaded database files that are prebuilt for startup-time optimizations.
   - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
 - **`LABEL_SET_ID`**: The identifier for a **Label Set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
-  - **Goal**: To provide different categories of data (e.g., production vs. test) from the same Docker image.
-  - **Configuration**: Choose the ID that matches your needs: 
+  - **Goal**: To enable the extensible definition of new label sets (e.g., subgraph vs. production vs. test).
+  - **Configuration**: Choose the label set ID that matches your needs: 
     - `subgraph` - Main production dataset from The Graph's ENS subgraph
     - `searchlight` - Extended dataset with additional label discoveries
     - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
-    - `ens-test-env` - Small test dataset for development and testing
+    - `ens-test-env` - Small test dataset for development and testing. It is perfectly aligned with the set of labels expected by the [ens-test-env](https://github.com/ensdomains/ens-test-env).
 
 - **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
   - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.

@@ -18,7 +18,9 @@ export function createRainbowProtobufRoot(): {
 
   // Define the RainbowRecordCollection message type as a Type
   const RainbowRecordCollection = new protobuf.Type("RainbowRecordCollection");
-  RainbowRecordCollection.add(new protobuf.Field("data_format_version", 1, "uint32"));
+  // This version refers to the schema of the .ensrainbow protobuf file itself.
+  // It is distinct from DB_SCHEMA_VERSION, which versions the physical LevelDB database schema.
+  RainbowRecordCollection.add(new protobuf.Field("ensrainbow_file_format_version", 1, "uint32"));
   RainbowRecordCollection.add(new protobuf.Field("label_set_id", 2, "string"));
   RainbowRecordCollection.add(new protobuf.Field("label_set_version", 3, "uint32"));
   RainbowRecordCollection.add(new protobuf.Field("records", 4, "RainbowRecord", "repeated"));
