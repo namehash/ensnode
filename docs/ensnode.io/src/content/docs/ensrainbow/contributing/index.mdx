@@ -37,7 +37,7 @@ cd apps/ensrainbow
 # Example: Download 'discoveryA' label set ID, label set version 0 (initially empty for discovered labels)
 ./scripts/download-ensrainbow-files.sh discoveryA 0
 
-# Example: Download 'ens-test-env' label set ID, label set version 0 (for test environment)
+# Example: Download 'ens-test-env' label set ID, label set version 0 (for the ens-test-env)
 ./scripts/download-ensrainbow-files.sh ens-test-env 0
 ```
 
@@ -335,7 +335,7 @@ When using ENSRainbow with Docker, the following environment variables control w
 # Latest production data
 DB_SCHEMA_VERSION=3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
-# Test environment data
+# The ens-test-env data
 DB_SCHEMA_VERSION=3 LABEL_SET_ID=ens-test-env LABEL_SET_VERSION=0
 
 # Extended discovery data

@@ -17,7 +17,7 @@ For a quick test setup with test data:
 # Create a directory for persistent data storage
 mkdir -p ~/my_ensrainbow_data
 
-# Run with test environment data
+# Run with the ens-test-env data
 docker run -d --name ensrainbow \
   -v ~/my_ensrainbow_data:/app/apps/ensrainbow/data \
   -e DB_SCHEMA_VERSION="3" \
@@ -134,7 +134,7 @@ volumes:
   ensrainbow_data:
 ```
 
-For ens-test-env:
+For the ens-test-env:
 
 ```yml
 version: '3.8'

@@ -305,7 +305,7 @@ describe("Database", () => {
         // Add record
         await db.addRainbowRecord(labelWithNull, 0);
 
-        const retrieved = await db.getRainbowRecordValue(labelHashBytes);
+        const retrieved = await db.getVersionedRainbowRecord(labelHashBytes);
         expect(retrieved).toEqual({ labelSetVersion: 0, label: labelWithNull });
       } finally {
         await db.close();

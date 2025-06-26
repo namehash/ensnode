@@ -6,9 +6,9 @@ import { logger } from "@/utils/logger";
 import { parseNonNegativeInteger } from "@/utils/parsing";
 import { Label } from "@ensnode/ensnode-sdk";
 import {
-  type RainbowRecordValue,
-  buildEncodedRainbowRecordValue,
-  decodeEncodedRainbowRecordValue,
+  type VersionedRainbowRecord,
+  buildEncodedVersionedRainbowRecord,
+  decodeEncodedVersionedRainbowRecord,
 } from "./rainbow-record";
 
 // System keys must have a byte length different from 32 to avoid collisions with labelHashes
@@ -385,24 +385,26 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Retrieves a rainbow record value from the database by its labelHash.
+   * Retrieves a versioned rainbow record from the database by its labelHash.
    *
    * @param labelHash The ByteArray labelHash to look up
-   * @returns A RainbowRecordValue object if found, null if not found
+   * @returns A VersionedRainbowRecord object if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getRainbowRecordValue(labelHash: ByteArray): Promise<RainbowRecordValue | null> {
+  public async getVersionedRainbowRecord(
+    labelHash: ByteArray,
+  ): Promise<VersionedRainbowRecord | null> {
     // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
     if (!isRainbowRecordKey(labelHash)) {
       throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
     }
 
-    const encodedRainbowRecordValue = await this.get(labelHash);
-    if (encodedRainbowRecordValue === null) {
+    const encodedVersionedRainbowRecord = await this.get(labelHash);
+    if (encodedVersionedRainbowRecord === null) {
       return null;
     }
 
-    return decodeEncodedRainbowRecordValue(encodedRainbowRecordValue);
+    return decodeEncodedVersionedRainbowRecord(encodedVersionedRainbowRecord);
   }
 
   /**
@@ -654,27 +656,27 @@ export class ENSRainbowDB {
       }
 
       // --- Value Validation (Label Format & Set Number) ---
-      let rainbowRecordValue: RainbowRecordValue | null = null;
+      let versionedRainbowRecord: VersionedRainbowRecord | null = null;
       try {
-        rainbowRecordValue = decodeEncodedRainbowRecordValue(value);
+        versionedRainbowRecord = decodeEncodedVersionedRainbowRecord(value);
       } catch (error) {
         logger.error(`Invalid label format: "${value}" - ${error}`);
         invalidLabelFormats++;
       }
 
-      if (rainbowRecordValue) {
+      if (versionedRainbowRecord) {
         // Only proceed with further checks if decoding was successful
 
         // Label set version comparison
-        if (rainbowRecordValue.labelSetVersion > highestLabelSetVersion) {
+        if (versionedRainbowRecord.labelSetVersion > highestLabelSetVersion) {
           logger.error(
-            `Label set version mismatch for label "${value}": record set ${rainbowRecordValue.labelSetVersion} > highest set ${highestLabelSetVersion}`,
+            `Label set version mismatch for label "${value}": record set ${versionedRainbowRecord.labelSetVersion} > highest set ${highestLabelSetVersion}`,
           );
           labelSetVersionMismatches++;
         }
 
         // Key-Value Validation (Hash Match)
-        const computedHash = labelHashToBytes(labelhash(rainbowRecordValue.label));
+        const computedHash = labelHashToBytes(labelhash(versionedRainbowRecord.label));
         if (!byteArraysEqual(computedHash, key)) {
           logger.error(
             `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
@@ -797,7 +799,7 @@ export class ENSRainbowDB {
    * @throws Error if labelSetVersion is invalid
    */
   public async addRainbowRecord(label: string, labelSetVersion: number): Promise<void> {
-    const encodedValue = buildEncodedRainbowRecordValue(label, labelSetVersion);
+    const encodedValue = buildEncodedVersionedRainbowRecord(label, labelSetVersion);
     const key = labelHashToBytes(labelhash(label));
     await this.db.put(key, encodedValue);
   }
