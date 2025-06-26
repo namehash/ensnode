@@ -7,7 +7,7 @@ sidebar:
 
 import { LinkCard } from '@astrojs/starlight/components';
 
-NameHash Labs publishes the latest version of ENSRainbow as a docker container. The Docker image is lightweight and downloads the required database at runtime based on environment variables.
+NameHash Labs publishes the latest version of ENSRainbow as a docker container. The Docker image is lightweight and downloads the requested database at runtime based on environment variables.
 
 ## Quick Start
 
@@ -33,7 +33,7 @@ The service will be available at `http://localhost:3223`.
 The ENSRainbow storage needed is from 1 MB to dozens GB depending on the label set ID and label set version.
 ## Production Setup
 
-For ENS Subgraph compatibility use the `subgraph` label set ID:
+For full ENS Subgraph backward compatibility use the `subgraph` label set ID:
 
 ```bash
 # Create a directory for persistent data storage

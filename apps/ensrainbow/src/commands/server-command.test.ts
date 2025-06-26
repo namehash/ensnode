@@ -159,8 +159,8 @@ describe("Server Command Tests", () => {
       expect(data.status).toEqual(StatusCode.Success);
       expect(typeof data.versionInfo.version).toBe("string");
       expect(typeof data.versionInfo.schemaVersion).toBe("number");
-      expect(typeof data.versionInfo.labelSetId).toBe("string");
-      expect(typeof data.versionInfo.highestLabelSetVersion).toBe("number");
+      expect(typeof data.versionInfo.labelSet.labelSetId).toBe("string");
+      expect(typeof data.versionInfo.labelSet.highestLabelSetVersion).toBe("number");
     });
   });
 

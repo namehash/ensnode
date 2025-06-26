@@ -1,4 +1,12 @@
-import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensnode/ensrainbow-sdk";
+import {
+  type EnsRainbow,
+  type EnsRainbowClientLabelSet,
+  type EnsRainbowServerLabelSet,
+  ErrorCode,
+  StatusCode,
+  labelHashToBytes,
+  validateSupportedLabelSet,
+} from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 
 import { ENSRainbowDB } from "@/lib/database";
@@ -7,21 +15,19 @@ import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private readonly labelSetId: string;
-  private readonly highestLabelSetVersion: number;
+  private readonly serverLabelSet: EnsRainbowServerLabelSet;
 
   public getLabelSetId(): string {
-    return this.labelSetId;
+    return this.serverLabelSet.labelSetId;
   }
 
   public getHighestLabelSetVersion(): number {
-    return this.highestLabelSetVersion;
+    return this.serverLabelSet.highestLabelSetVersion;
   }
 
-  private constructor(db: ENSRainbowDB, labelSetId: string, highestLabelSetVersion: number) {
+  private constructor(db: ENSRainbowDB, serverLabelSet: EnsRainbowServerLabelSet) {
     this.db = db;
-    this.labelSetId = labelSetId;
-    this.highestLabelSetVersion = highestLabelSetVersion;
+    this.serverLabelSet = serverLabelSet;
   }
 
   /**
@@ -38,13 +44,12 @@ export class ENSRainbowServer {
     const labelSetId = await db.getLabelSetId();
     const highestLabelSetVersion = await db.getHighestLabelSetVersion();
 
-    return new ENSRainbowServer(db, labelSetId, highestLabelSetVersion);
+    return new ENSRainbowServer(db, { labelSetId, highestLabelSetVersion });
   }
 
   async heal(
     labelHash: LabelHash,
-    highestLabelSetVersion: number = Number.MAX_SAFE_INTEGER,
-    labelSetId?: string,
+    clientLabelSet?: EnsRainbowClientLabelSet,
   ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
@@ -59,25 +64,17 @@ export class ENSRainbowServer {
     }
 
     try {
-      // If labelSetId was provided, verify it matches the database label set ID
-      if (labelSetId !== undefined) {
-        if (labelSetId !== this.labelSetId) {
-          logger.info(`Label set ID mismatch: requested=${labelSetId}, actual=${this.labelSetId}`);
-          return {
-            status: StatusCode.Error,
-            error: "Label set ID mismatch",
-            errorCode: ErrorCode.BadRequest,
-          } satisfies EnsRainbow.HealError;
-        }
-
-        // Verify that the highestLabelSetVersion is not greater than the current label set version
-        if (highestLabelSetVersion > this.highestLabelSetVersion) {
+      // If client provided a label set, validate it against the server's
+      if (clientLabelSet) {
+        try {
+          validateSupportedLabelSet(this.serverLabelSet, clientLabelSet);
+        } catch (error) {
           logger.info(
-            `Requested label set version ${highestLabelSetVersion} is higher than current label set version ${this.highestLabelSetVersion}`,
+            `Label set mismatch: requested=${clientLabelSet.labelSetId}, actual=${this.serverLabelSet.labelSetId}`,
           );
           return {
             status: StatusCode.Error,
-            error: "Requested label set version is higher than available label set",
+            error: "Label set mismatch",
             errorCode: ErrorCode.BadRequest,
           } satisfies EnsRainbow.HealError;
         }
@@ -96,9 +93,12 @@ export class ENSRainbowServer {
       const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = label;
 
       // Only return the label if its label set version number is less than or equal to highestLabelSetVersion
-      if (labelSetVersionNumber > highestLabelSetVersion) {
+      if (
+        clientLabelSet?.labelSetVersion !== undefined &&
+        labelSetVersionNumber > clientLabelSet.labelSetVersion
+      ) {
         logger.info(
-          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds highestLabelSetVersion ${highestLabelSetVersion}`,
+          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds highestLabelSetVersion ${clientLabelSet.labelSetVersion}`,
         );
         return {
           status: StatusCode.Error,

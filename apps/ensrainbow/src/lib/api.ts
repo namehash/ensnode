@@ -1,5 +1,10 @@
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
-import { ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
+import {
+  type EnsRainbow,
+  EnsRainbowClientLabelSet,
+  ErrorCode,
+  StatusCode,
+  buildEnsRainbowClientLabelSet,
+} from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
@@ -30,50 +35,47 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
     const labelhash = c.req.param("labelhash") as `0x${string}`;
 
-    // Parse the highest_label_set_version from query string if provided
-    const highestLabelSetVersionParam = c.req.query("label_set_version");
+    const labelSetVersionParam = c.req.query("label_set_version");
     const labelSetIdParam = c.req.query("label_set_id");
 
-    // Both parameters must be provided together or neither should be provided
-    if ((highestLabelSetVersionParam === undefined) !== (labelSetIdParam === undefined)) {
-      logger.warn(
-        `Invalid parameters: both 'label_set_version' and 'label_set_id' must be provided together or neither should be provided`,
-      );
+    let labelSetVersion: number | undefined = undefined;
+    try {
+      labelSetVersion = labelSetVersionParam
+        ? parseNonNegativeInteger(labelSetVersionParam)
+        : undefined;
+    } catch (error) {
+      logger.warn(`Invalid label_set_version parameter: ${labelSetVersionParam}`);
       return c.json(
         {
           status: StatusCode.Error,
-          error:
-            "Invalid parameters: both 'label_set_version' and 'label_set_id' must be provided together",
+          error: "Invalid label_set_version parameter: must be a non-negative integer",
           errorCode: ErrorCode.BadRequest,
         },
         400,
       );
     }
 
-    let labelSetVersion: number | undefined = undefined;
-    let labelSetId: string | undefined = undefined;
-
-    if (highestLabelSetVersionParam !== undefined && labelSetIdParam !== undefined) {
-      try {
-        labelSetVersion = parseNonNegativeInteger(highestLabelSetVersionParam);
-        labelSetId = labelSetIdParam;
-      } catch (error) {
-        logger.warn(`Invalid label_set_version parameter: ${highestLabelSetVersionParam}`);
-        return c.json(
-          {
-            status: StatusCode.Error,
-            error: "Invalid label_set_version parameter: must be a non-negative integer",
-            errorCode: ErrorCode.BadRequest,
-          },
-          400,
-        );
-      }
+    let clientLabelSet: EnsRainbowClientLabelSet | undefined = undefined;
+    try {
+      clientLabelSet = buildEnsRainbowClientLabelSet(labelSetIdParam, labelSetVersion);
+    } catch (error) {
+      logger.warn(error);
+      return c.json(
+        {
+          status: StatusCode.Error,
+          error: error instanceof Error ? error.message : "An unknown error occurred",
+          errorCode: ErrorCode.BadRequest,
+        },
+        400,
+      );
     }
 
     logger.debug(
-      `Healing request for labelhash: ${labelhash}, label_set_version: ${labelSetVersion}, label_set_id: ${labelSetId}`,
+      `Healing request for labelhash: ${labelhash}, with labelSet: ${JSON.stringify(
+        clientLabelSet,
+      )}`,
     );
-    const result = await server.heal(labelhash, labelSetVersion, labelSetId);
+    const result = await server.heal(labelhash, clientLabelSet);
     logger.debug(`Heal result:`, result);
     return c.json(result, result.errorCode);
   });
@@ -98,8 +100,10 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       versionInfo: {
         version: packageJson.version,
         schemaVersion: DB_SCHEMA_VERSION,
-        labelSetId: server.getLabelSetId(),
-        highestLabelSetVersion: server.getHighestLabelSetVersion(),
+        labelSet: {
+          labelSetId: server.getLabelSetId(),
+          highestLabelSetVersion: server.getHighestLabelSetVersion(),
+        },
       },
     };
     logger.debug(`Version result:`, result);

@@ -51,6 +51,9 @@ export const createEnsRainbowVersionFetcher = (
       return versionResponse.versionInfo;
     } catch (error) {
       console.error("Failed to fetch ENSRainbow version", error);
+
+      // TODO: Improve error handling here when we advance the strict schema
+      // handling for how ENSIndexer exposes its public config through an API.
       return {
         version: "unknown",
         schemaVersion: 0,

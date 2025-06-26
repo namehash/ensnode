@@ -1,7 +1,7 @@
 # Use a slim Node.js image as the base
 FROM --platform=${TARGETPLATFORM} node:22-slim AS base
 
-# Install system dependencies required for downloading and extracting
+# Install system dependencies required for downloading and extracting .ensrainbow files
 RUN apt-get update && apt-get install -y wget tar && rm -rf /var/lib/apt/lists/*
 
 # Set up pnpm

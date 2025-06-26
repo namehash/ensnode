@@ -1,5 +1,10 @@
 import { type Cache, Label, type LabelHash, LruCache } from "@ensnode/ensnode-sdk";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
+import {
+  type EnsRainbowClientLabelSet,
+  type EnsRainbowServerLabelSet,
+  buildEnsRainbowClientLabelSet,
+} from "./utils/labelset";
 
 export namespace EnsRainbow {
   export type ApiClientOptions = EnsRainbowApiClientOptions;
@@ -121,14 +126,9 @@ export namespace EnsRainbow {
     schemaVersion: number;
 
     /**
-     * ENSRainbow label set ID.
+     * ENSRainbow label set.
      */
-    labelSetId: string;
-
-    /**
-     * ENSRainbow highest label set version.
-     */
-    highestLabelSetVersion: number;
+    labelSet: EnsRainbowServerLabelSet;
   }
 
   /**
@@ -154,16 +154,12 @@ export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;
 
   /**
-   * Optional label set ID to validate against. If provided, it must match the database label set ID.
-   * When `labelSetId` is provided, `labelSetVersion` must also be provided.
-   */
-  labelSetId?: string;
-
-  /**
-   * Optional highest label set version to accept. If provided, only labels from sets less than or equal to this value will be returned.
+   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to use. If provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow server is using a compatible label set. If not provided no specific labelSetId validation will be performed during heal operations.
+   * If `labelSetId` is provided without `labelSetVersion`, the server will use the latest available version.
+   * If `labelSetVersion` is provided, only labels from sets less than or equal to this value will be returned.
    * When `labelSetVersion` is provided, `labelSetId` must also be provided.
    */
-  labelSetVersion?: number;
+  labelSet?: EnsRainbowClientLabelSet;
 }
 
 /**
@@ -198,17 +194,16 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   }
 
   constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
+    const { labelSet, ...rest } = options;
+    const newLabelSet = labelSet
+      ? buildEnsRainbowClientLabelSet(labelSet.labelSetId, labelSet.labelSetVersion)
+      : undefined;
+
     this.options = {
       ...EnsRainbowApiClient.defaultOptions(),
-      ...options,
+      ...rest,
+      ...(newLabelSet ? { labelSet: newLabelSet } : {}),
     };
-
-    if (
-      (this.options.labelSetId !== undefined && this.options.labelSetVersion === undefined) ||
-      (this.options.labelSetId === undefined && this.options.labelSetVersion !== undefined)
-    ) {
-      throw new Error("Both labelSetId and labelSetVersion must be provided, or neither.");
-    }
 
     this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
       this.options.cacheCapacity,
@@ -267,13 +262,16 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
 
     // Add label_set_version as a query parameter if provided
-    if (this.options.labelSetVersion !== undefined) {
-      url.searchParams.append("label_set_version", this.options.labelSetVersion.toString());
+    if (this.options.labelSet?.labelSetVersion !== undefined) {
+      url.searchParams.append(
+        "label_set_version",
+        this.options.labelSet.labelSetVersion.toString(),
+      );
     }
 
     // Add label_set_id as a query parameter if provided
-    if (this.options.labelSetId !== undefined) {
-      url.searchParams.append("label_set_id", this.options.labelSetId);
+    if (this.options.labelSet?.labelSetId !== undefined) {
+      url.searchParams.append("label_set_id", this.options.labelSet.labelSetId);
     }
 
     const response = await fetch(url);
@@ -349,8 +347,10 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * //   "versionInfo": {
    * //     "version": "0.1.0",
    * //     "schemaVersion": 2,
-   * //     "labelSetId": "subgraph",
-   * //     "highestLabelSetVersion": 0
+   * //     "labelSet": {
+   * //       "labelSetId": "subgraph",
+   * //       "labelSetVersion": 0
+   * //     }
    * //   }
    * // }
    * ```
@@ -371,8 +371,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const deepCopy = {
       cacheCapacity: this.options.cacheCapacity,
       endpointUrl: new URL(this.options.endpointUrl.href),
-      labelSetId: this.options.labelSetId,
-      labelSetVersion: this.options.labelSetVersion,
+      labelSet: this.options.labelSet ? { ...this.options.labelSet } : undefined,
     } satisfies EnsRainbowApiClientOptions;
 
     return Object.freeze(deepCopy);
