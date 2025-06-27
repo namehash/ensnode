@@ -1,17 +1,18 @@
 "use client";
 
+import { NameDisplay } from "@/components/recent-registrations/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ENSNamespaceId,
+  ENSNamespaceIds,
+  getENSRootChainId,
+  getEnsNameAvatarUrl,
+} from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import {
-  ENSNamespaceId,
-  ENSNamespaceIds, getEnsNameAvatarUrl,
-  getENSRootChainId
-} from "@ensnode/datasources";
-import {useEnsName} from "wagmi";
-import {NameDisplay} from "@/components/recent-registrations/utils";
+import { useEnsName } from "wagmi";
 
 //TODO: add descriptions for type's fields
 interface IdentityProps {
@@ -53,9 +54,13 @@ export function Identity({
   const chainId = getENSRootChainId(ensNamespaceId);
 
   // Use the ENS name hook from wagmi
-  const { data: ensName, isLoading, isError } = useEnsName({
+  const {
+    data: ensName,
+    isLoading,
+    isError,
+  } = useEnsName({
     address,
-    chainId
+    chainId,
   });
 
   // If not mounted yet (server-side), or still loading, show a skeleton
@@ -86,7 +91,11 @@ export function Identity({
       )}
       {/*TODO: previously we linked to owners even if they didn't have a primary name set, should we keep doing it? (Current version comes from PR #476 where we didn't do that)*/}
       {ensName ? (
-        <NameDisplay namespaceId={ensNamespaceId} ensName={ensName} showExternalLink={showExternalLink}/>
+        <NameDisplay
+          namespaceId={ensNamespaceId}
+          ensName={ensName}
+          showExternalLink={showExternalLink}
+        />
       ) : (
         <span className={ensName ? "font-medium" : "font-mono text-xs"}>{displayName}</span>
       )}

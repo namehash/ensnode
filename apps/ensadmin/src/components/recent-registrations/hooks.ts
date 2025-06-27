@@ -3,10 +3,10 @@ import {
   unixTimestampToDate,
 } from "@/components/recent-registrations/utils";
 import { ensAdminVersion } from "@/lib/env";
+import { ENSNamespaceId, getNameWrapperAddress } from "@ensnode/datasources";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
-import {ENSNamespaceId, getNameWrapperAddress} from "@ensnode/datasources";
 
 /**
  * The data model returned by a GraphQL query for registrations.
@@ -134,7 +134,8 @@ export function useRecentRegistrations(
     queryKey: ["recent-registrations", ensNodeURL],
     queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
     // Select the registrations from the response
-    select: (data): Registration[] => data.map((registration: RegistrationResult) => toRegistration(registration, namespaceId)),
+    select: (data): Registration[] =>
+      data.map((registration: RegistrationResult) => toRegistration(registration, namespaceId)),
     throwOnError(error) {
       throw new Error(
         `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,

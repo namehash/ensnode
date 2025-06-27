@@ -19,12 +19,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
+import { getEnsAppUrl } from "@ensnode/datasources";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
-import {getEnsAppUrl} from "@ensnode/datasources";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
@@ -39,7 +39,7 @@ export function RecentRegistrations() {
   // TODO: Also where should we handle that in case of indexingStatusQuery failure this would result in an error -> in no other scenario the namespaceId should be a null value
   //  Can we assume that if such thing occurs either a fallback or the error message higher up will be called?
   //  Or should we perform a validation similar to the view-model below?
-    //TODO: because of the need for the namespaceId inside recent registrations hook, it becomes dependent on the useIndexingStatus query which is bad
+  //TODO: because of the need for the namespaceId inside recent registrations hook, it becomes dependent on the useIndexingStatus query which is bad
   const namespaceId = indexingStatusQuery.data ? indexingStatusQuery.data.env.NAMESPACE : null;
 
   const recentRegistrationsQuery = useRecentRegistrations(
@@ -119,7 +119,8 @@ export function RecentRegistrations() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isClient && indexingStatusQuery.data &&
+            {isClient &&
+              indexingStatusQuery.data &&
               recentRegistrationsQuery.data?.map((registration) => (
                 <RegistrationRow
                   key={registration.name}
@@ -139,16 +140,17 @@ interface RegistrationRowProps {
   ensNodeMetadata: EnsNode.Metadata; //TODO: maybe we could just inject only namespaceId here? Not 100% sure which option is better, but I like the current one more cause it seems cleaner, less over-engineered, (more invariants friendly?)
 }
 
-function RegistrationRow({
-  registration,
-  ensNodeMetadata,
-}: RegistrationRowProps) {
+function RegistrationRow({ registration, ensNodeMetadata }: RegistrationRowProps) {
   const namespaceId = ensNodeMetadata.env.NAMESPACE;
 
   return (
     <TableRow>
       <TableCell>
-        <NameDisplay namespaceId={namespaceId} ensName={registration.name} showExternalLink={true}/>
+        <NameDisplay
+          namespaceId={namespaceId}
+          ensName={registration.name}
+          showExternalLink={true}
+        />
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} />
@@ -157,11 +159,7 @@ function RegistrationRow({
         <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
       </TableCell>
       <TableCell>
-          <Identity
-            address={registration.owner}
-            ensNamespaceId={namespaceId}
-            showAvatar={true}
-          />
+        <Identity address={registration.owner} ensNamespaceId={namespaceId} showAvatar={true} />
       </TableCell>
     </TableRow>
   );

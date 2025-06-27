@@ -1,7 +1,4 @@
-import {
-  ENSNamespaceId,
-  getEnsNameDetailsUrl
-} from "@ensnode/datasources";
+import { ENSNamespaceId, getEnsNameDetailsUrl } from "@ensnode/datasources";
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { ExternalLink } from "lucide-react";
@@ -77,7 +74,7 @@ export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
 }
 
 interface NameDisplayProps {
-  namespaceId: ENSNamespaceId
+  namespaceId: ENSNamespaceId;
   ensName: string;
   showExternalLink?: boolean;
 }
@@ -89,7 +86,7 @@ interface NameDisplayProps {
 
 //TODO: consider a different name
 //TODO: should probably be moved to /identity or somewhere else
-export function NameDisplay({ ensName, namespaceId, showExternalLink}: NameDisplayProps) {
+export function NameDisplay({ ensName, namespaceId, showExternalLink }: NameDisplayProps) {
   const ensAppNameDetailsUrl = getEnsNameDetailsUrl(namespaceId, ensName);
 
   if (ensAppNameDetailsUrl) {
