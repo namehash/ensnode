@@ -90,3 +90,5 @@ export function useENSRootDatasourceChainId(
   // TODO: this should use the namespace's ensroot datasource's chain ID, not the namespace identifier itself
   return parseSupportedChainIdByName(indexingStatus.env.NAMESPACE);
 }
+
+//TODO: isn't this a duplication of getENSRootChainId from the datasources package?

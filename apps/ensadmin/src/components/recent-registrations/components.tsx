@@ -1,15 +1,13 @@
 "use client";
 
-import { EnsNode, useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
-import { getEnsAppUrl, getEnsMetadataUrl } from "@/components/identity/utils";
+import { EnsNode, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Registration } from "@/components/recent-registrations/types";
 import {
   Duration,
   FormattedDate,
-  RegistrationNameDisplay,
+  NameDisplay,
   RelativeTime,
-  getNameWrapperAddress,
 } from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,13 +19,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import { SupportedChainId } from "@/lib/wagmi";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useEnsName } from "wagmi";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
+import {getEnsAppUrl} from "@ensnode/datasources";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
@@ -38,21 +35,17 @@ export function RecentRegistrations() {
   const searchParams = useSearchParams();
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
   const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
-  const indexedChainId = useENSRootDatasourceChainId(indexingStatusQuery.data);
 
-  const nameWrapperAddress = indexingStatusQuery.data && indexedChainId
-    ? getNameWrapperAddress(indexingStatusQuery.data.env.NAMESPACE, indexedChainId)
-    : null;
-  //TODO: this should be moved --> placing it here requires loads of prop drilling! But otherwise, do we want to use a useQuery inside another Query? I very much doubt so
-  // Are there any alternatives? Maybe we could input the ENSNode.Metadata as a whole? Then we would get the nameWrapper at the very end where we actually need it?
-  // Currently (as an experiment) a brute-force'ish solution is implemented by adding the nameWrapper address as an input parameter
-  // Also where should we handle that in case of indexingStatusQuery failure this would result in an error -> in no other scenario this should be a null value
-  // Can we assume that if such thing occurs either a fallback or the error message higher up will be called?
+  // TODO: Also where should we handle that in case of indexingStatusQuery failure this would result in an error -> in no other scenario the namespaceId should be a null value
+  //  Can we assume that if such thing occurs either a fallback or the error message higher up will be called?
+  //  Or should we perform a validation similar to the view-model below?
+    //TODO: because of the need for the namespaceId inside recent registrations hook, it becomes dependent on the useIndexingStatus query which is bad
+  const namespaceId = indexingStatusQuery.data ? indexingStatusQuery.data.env.NAMESPACE : null;
 
   const recentRegistrationsQuery = useRecentRegistrations(
     ensNodeUrl,
     MAX_NUMBER_OF_LATEST_REGISTRATIONS,
-    nameWrapperAddress,
+    namespaceId,
   );
 
   const [isClient, setIsClient] = useState(false);
@@ -154,8 +147,8 @@ function RegistrationRow({
 
   return (
     <TableRow>
-      <TableCell className="font-medium">
-        <RegistrationNameDisplay registration={registration} ensAppUrl={getEnsAppUrl(namespaceId)} />
+      <TableCell>
+        <NameDisplay namespaceId={namespaceId} ensName={registration.name} showExternalLink={true}/>
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} />

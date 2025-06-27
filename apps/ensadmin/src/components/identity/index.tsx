@@ -3,13 +3,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cx } from "class-variance-authority";
-import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import {ENSNamespaceId, ENSNamespaceIds, getENSRootChainId} from "@ensnode/datasources";
-import {getEnsAppUrl, getEnsMetadataUrl} from "@/components/identity/utils";
+import {
+  ENSNamespaceId,
+  ENSNamespaceIds, getEnsNameAvatarUrl,
+  getENSRootChainId
+} from "@ensnode/datasources";
 import {useEnsName} from "wagmi";
-import {useEnsApp} from "@/components/identity/hooks";
+import {NameDisplay} from "@/components/recent-registrations/utils";
 
 //TODO: add descriptions for type's fields
 interface IdentityProps {
@@ -48,20 +50,13 @@ export function Identity({
     return <span className="font-mono text-xs">{truncatedAddress}</span>;
   }
 
-  //TODO: establish the level where we would handle undefined results (ens-test-env for both + holesky for metadata)!!!
-  //TODO: not sure about using "ens" in the names, since all we do is basically ens (efp is another topic ;))
-  const ensAppBaseUrl = getEnsAppUrl(ensNamespaceId);
-  const ensMetadataBaseUrl = getEnsMetadataUrl(ensNamespaceId);
   const chainId = getENSRootChainId(ensNamespaceId);
 
   // Use the ENS name hook from wagmi
   const { data: ensName, isLoading, isError } = useEnsName({
     address,
-    chainId,
+    chainId
   });
-
-  // const ensAppData = useEnsApp(ensNamespaceId, address); a WIP
-
 
   // If not mounted yet (server-side), or still loading, show a skeleton
   if (!mounted || isLoading) {
@@ -73,13 +68,8 @@ export function Identity({
     return <span className="font-mono text-xs">{truncatedAddress}</span>;
   }
 
-  //TODO: Currently this is where the possibly undefined values of URLs are being handled
-
-  // Get ENS app Name Preview URL
-  const ensAppNamePreviewUrl = ensName && ensAppBaseUrl ? new URL(ensName, ensAppBaseUrl) : undefined;
-
   // Get ENS avatar URL
-  const ensAvatarUrl = ensName && ensMetadataBaseUrl ? new URL(ensName, ensMetadataBaseUrl) : undefined; //TODO: wrap in one hook (namespaceId and ensName as inputs), that would possibly return a final URL or undefined - that would streamline the component
+  const ensAvatarUrl = ensName ? getEnsNameAvatarUrl(ensNamespaceId, ensName) : undefined;
 
   // Display name (ENS name or truncated address)
   const displayName = ensName || truncatedAddress;
@@ -94,18 +84,9 @@ export function Identity({
           </AvatarFallback>
         </Avatar>
       )}
-      {/*TODO: previously we linked to owners even if they didn't have a primary name set, should we keep doing it?*/}
-      {ensAppNamePreviewUrl ? (
-        <a
-          href={ensAppNamePreviewUrl.toString()}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 text-blue-600 hover:underline"
-          title={address}
-        >
-          <span className={ensName ? "font-medium" : "font-mono text-xs"}>{displayName}</span>
-          {showExternalLink && <ExternalLink size={14} className="inline-block" />}
-        </a>
+      {/*TODO: previously we linked to owners even if they didn't have a primary name set, should we keep doing it? (Current version comes from PR #476 where we didn't do that)*/}
+      {ensName ? (
+        <NameDisplay namespaceId={ensNamespaceId} ensName={ensName} showExternalLink={showExternalLink}/>
       ) : (
         <span className={ensName ? "font-medium" : "font-mono text-xs"}>{displayName}</span>
       )}

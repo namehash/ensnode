@@ -1,14 +1,11 @@
-import { Registration } from "@/components/recent-registrations/types";
 import {
-  DatasourceNames,
   ENSNamespaceId,
-  getDatasource
+  getEnsNameDetailsUrl
 } from "@ensnode/datasources";
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Address, getAddress } from "viem";
 
 /**
  * Client-only date formatter component
@@ -79,28 +76,10 @@ export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
   return date;
 }
 
-/**
- * Truncates a name's leftmost label if it's made of an address
- */
-//TODO: improve name and description
-//TODO: refactor the code
-function truncateLeftmostLabelIfItContainsAddress(name: string): string {
-  const leftmostLabel = name.split(".")[0];
-
-  //if name's label is an address (ex. [ec93f85a766b60d85571efc48e4b818c800218452f9ac738f796a8fc94079a57].eth) truncate it
-  if (leftmostLabel.startsWith("[") && leftmostLabel.endsWith("]")) {
-    return `${leftmostLabel.slice(0, 6)}...${name.slice(-3)}${name.split(".").slice(1).join(".")}`;
-  }
-
-  // otherwise return whole domain
-  return name;
-}
-
-interface RegistrationNameDisplayProps {
-  // NOTE: not every ENS namespace has an ENS app URL
-  ensAppUrl: URL | undefined;
-
-  registration: Registration;
+interface NameDisplayProps {
+  namespaceId: ENSNamespaceId
+  ensName: string;
+  showExternalLink?: boolean;
 }
 
 /**
@@ -109,46 +88,23 @@ interface RegistrationNameDisplayProps {
  */
 
 //TODO: consider a different name
-//TODO: should probably be moved to /identity
-//TODO: for now this handles the case of undefined ENS app URLs - may change depending on other TODOs
-export function RegistrationNameDisplay({ registration, ensAppUrl }: RegistrationNameDisplayProps) {
-  const ensAppRegistrationPreviewUrl = ensAppUrl
-    ? new URL(registration.name, ensAppUrl)
-    : undefined;
+//TODO: should probably be moved to /identity or somewhere else
+export function NameDisplay({ ensName, namespaceId, showExternalLink}: NameDisplayProps) {
+  const ensAppNameDetailsUrl = getEnsNameDetailsUrl(namespaceId, ensName);
 
-  const displayName = truncateLeftmostLabelIfItContainsAddress(registration.name);
-
-  if (ensAppRegistrationPreviewUrl) {
+  if (ensAppNameDetailsUrl) {
     return (
       <a
-        href={ensAppRegistrationPreviewUrl.toString()}
+        href={ensAppNameDetailsUrl.toString()}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1 text-blue-600 hover:underline"
+        className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
       >
-        {displayName}
-        <ExternalLink size={14} className="inline-block" />
+        {ensName}
+        {showExternalLink && <ExternalLink size={14} className="inline-block" />}
       </a>
     );
   }
 
-  return <span>{displayName}</span>;
-}
-
-/**
- Get an Address object of the NameWrapper contract from the root datasource of a specific namespace.
-
- @param chainId the chain ID
- @param namespaceId - the namespace identifier within which to find a root datasource
- @returns the viem#Address object
- */
-export function getNameWrapperAddress(namespaceId: ENSNamespaceId, chainId: number): Address {
-  const datasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
-
-  // always request NameWrapper address from root datasource otherwise not throw error
-  if (datasource.chain.id !== chainId){
-    throw new Error(`Chain of id=${chainId} is not a namespace's root datasource's chain`)
-  }
-
-  return getAddress(datasource.contracts.NameWrapper.address);
+  return <span className="font-medium">{ensName}</span>;
 }
