@@ -6,6 +6,12 @@ import ProgressBar from "progress";
 import { logger } from "@/utils/logger";
 import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
 import { buildRainbowRecord } from "@/utils/rainbow-record";
+import {
+  buildLabelSetId,
+  type LabelSetId,
+  buildLabelSetVersion,
+  type LabelSetVersion,
+} from "@ensnode/ensrainbow-sdk";
 
 export interface ConvertCommandOptions {
   inputFile: string;
@@ -70,8 +76,8 @@ function setupWriteStream(outputFile: string): ReturnType<typeof createWriteStre
 function writeHeader(
   outputStream: ReturnType<typeof createWriteStream>,
   RainbowRecordCollectionType: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-  labelSetId: string,
-  labelSetVersion: number,
+  labelSetId: LabelSetId,
+  labelSetVersion: LabelSetVersion,
 ): void {
   const headerCollection = RainbowRecordCollectionType.fromObject({
     ensrainbow_file_format_version: CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
@@ -176,10 +182,10 @@ function logSummary(processedRecords: number, invalidRecords: number, outputFile
  */
 export async function convertCommand(options: ConvertCommandOptions): Promise<void> {
   try {
-    const labelSetId = options.labelSetId;
-    const labelSetVersion = options.labelSetVersion;
+    const labelSetId = buildLabelSetId(options.labelSetId);
+    const labelSetVersion = buildLabelSetVersion(options.labelSetVersion);
 
-    logInitialOptions(options);
+    logInitialOptions({ ...options, labelSetId });
 
     // Set up progress bar
     const bar = setupProgressBar();

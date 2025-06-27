@@ -6,6 +6,8 @@ import {
   StatusCode,
   labelHashToBytes,
   validateSupportedLabelSet,
+  type LabelSetId,
+  type LabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 
@@ -17,11 +19,11 @@ export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
   private readonly serverLabelSet: EnsRainbowServerLabelSet;
 
-  public getLabelSetId(): string {
+  public getLabelSetId(): LabelSetId {
     return this.serverLabelSet.labelSetId;
   }
 
-  public getHighestLabelSetVersion(): number {
+  public getHighestLabelSetVersion(): LabelSetVersion {
     return this.serverLabelSet.highestLabelSetVersion;
   }
 
@@ -49,7 +51,7 @@ export class ENSRainbowServer {
 
   async heal(
     labelHash: LabelHash,
-    clientLabelSet?: EnsRainbowClientLabelSet,
+    clientLabelSet: EnsRainbowClientLabelSet,
   ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
@@ -64,22 +66,19 @@ export class ENSRainbowServer {
     }
 
     try {
-      // If client provided a label set, validate it against the server's
-      if (clientLabelSet) {
-        try {
-          validateSupportedLabelSet(this.serverLabelSet, clientLabelSet);
-        } catch (error) {
-          logger.info(
-            `Label set mismatch: requested=${clientLabelSet.labelSetId}, actual=${this.serverLabelSet.labelSetId}`,
-          );
-          return {
-            status: StatusCode.Error,
-            error: "Label set mismatch",
-            errorCode: ErrorCode.BadRequest,
-          } satisfies EnsRainbow.HealError;
-        }
-      }
+      validateSupportedLabelSet(this.serverLabelSet, clientLabelSet);
+    } catch (error) {
+      logger.info(
+        `Label set mismatch: requested=${clientLabelSet.labelSetId}, actual=${this.serverLabelSet.labelSetId}`,
+      );
+      return {
+        status: StatusCode.Error,
+        error: "Label set mismatch",
+        errorCode: ErrorCode.BadRequest,
+      } satisfies EnsRainbow.HealError;
+    }
 
+    try {
       const versionedRainbowRecord = await this.db.getVersionedRainbowRecord(labelHashBytes);
       if (versionedRainbowRecord === null) {
         logger.info(`Unhealable labelHash request: ${labelHash}`);
@@ -92,13 +91,13 @@ export class ENSRainbowServer {
 
       const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = versionedRainbowRecord;
 
-      // Only return the label if its label set version number is less than or equal to highestLabelSetVersion
+      // Only return the label if its label set version is less than or equal to the client's requested labelSetVersion
       if (
-        clientLabelSet?.labelSetVersion !== undefined &&
+        clientLabelSet.labelSetVersion !== undefined &&
         labelSetVersionNumber > clientLabelSet.labelSetVersion
       ) {
         logger.info(
-          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds highestLabelSetVersion ${clientLabelSet.labelSetVersion}`,
+          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds client's requested labelSetVersion ${clientLabelSet.labelSetVersion}`,
         );
         return {
           status: StatusCode.Error,

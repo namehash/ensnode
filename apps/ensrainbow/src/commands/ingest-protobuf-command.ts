@@ -7,6 +7,12 @@ import { CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION } from "@/commands/convert-comma
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { logger } from "@/utils/logger";
 import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
+import {
+  buildLabelSetId,
+  type LabelSetId,
+  buildLabelSetVersion,
+  type LabelSetVersion,
+} from "@ensnode/ensrainbow-sdk";
 
 export interface IngestProtobufCommandOptions {
   inputFile: string;
@@ -62,8 +68,8 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
     // Values that will be read from the file header
     let fileVersion = 0;
-    let fileLabelSetId = "";
-    let fileLabelSetVersion = -1;
+    let fileLabelSetId: LabelSetId;
+    let fileLabelSetVersion: LabelSetVersion;
 
     // Create a way to reject the command from event handlers
     let commandReject: (reason: Error) => void;
@@ -130,8 +136,24 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             });
 
             fileVersion = headerObj.ensrainbow_file_format_version;
-            fileLabelSetId = headerObj.label_set_id;
-            fileLabelSetVersion = headerObj.label_set_version;
+            try {
+              fileLabelSetId = buildLabelSetId(headerObj.label_set_id);
+            } catch (e) {
+              const msg = `Invalid label set ID in file header: ${(e as Error).message}`;
+              logger.error(msg);
+              fileStream.destroy(new Error(msg)); // Stop processing
+              return;
+            }
+            try {
+              fileLabelSetVersion = buildLabelSetVersion(headerObj.label_set_version);
+            } catch (e) {
+              const msg = `Invalid label set version in file header: ${
+                (e as Error).message
+              }`;
+              logger.error(msg);
+              fileStream.destroy(new Error(msg)); // Stop processing
+              return;
+            }
 
             // Validate version
             if (fileVersion !== CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION) {

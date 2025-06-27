@@ -1,39 +1,93 @@
 /**
- * Represents the label set information provided by an ENSRainbow server.
+ * A label set ID identifies a set of labels that can be used for deterministic healing.
+ * A label set allows clients to deterministically heal their state against a server, ensuring that both are operating on the same version of data.
+ *
+ * It is guaranteed to be 1 to 50 characters long and contain only lowercase letters (a-z) and hyphens (-).
  */
-export interface EnsRainbowServerLabelSet {
-  labelSetId: string;
-  highestLabelSetVersion: number;
+export type LabelSetId = string;
+
+/**
+ * Builds a valid LabelSetId from a string.
+ * @param maybeLabelSetId - The string to validate and convert to a LabelSetId.
+ * @returns A valid LabelSetId.
+ * @throws If the input string is not a valid LabelSetId.
+ */
+export function buildLabelSetId(maybeLabelSetId: string): LabelSetId {
+  if (typeof maybeLabelSetId !== "string") {
+    throw new Error("LabelSetId must be a string.");
+  }
+  if (maybeLabelSetId.length < 1 || maybeLabelSetId.length > 50) {
+    throw new Error("LabelSetId must be between 1 and 50 characters long.");
+  }
+  if (!/^[a-z-]+$/.test(maybeLabelSetId)) {
+    throw new Error(
+      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
+    );
+  }
+  return maybeLabelSetId;
 }
 
 /**
- * Represents the label set preferences of an ENSRainbow client.
+ * A label set version identifies a specific version of a label set. It allows clients to request data from a specific snapshot in time, ensuring deterministic results.
+ *
+ * It is guaranteed to be a non-negative integer.
+ */
+export type LabelSetVersion = number;
+
+/**
+ * Builds a valid LabelSetVersion from a number.
+ * @param maybeLabelSetVersion - The number to validate and convert to a LabelSetVersion.
+ * @returns A valid LabelSetVersion.
+ * @throws If the input number is not a valid LabelSetVersion.
+ */
+export function buildLabelSetVersion(
+  maybeLabelSetVersion: number,
+): LabelSetVersion {
+  if (
+    typeof maybeLabelSetVersion !== "number" ||
+    !Number.isInteger(maybeLabelSetVersion) ||
+    maybeLabelSetVersion < 0
+  ) {
+    throw new Error("LabelSetVersion must be a non-negative integer.");
+  }
+  return maybeLabelSetVersion;
+}
+
+/**
+ * The state of label sets managed by an ENSRainbow server.
+ */
+export interface EnsRainbowServerLabelSet {
+  labelSetId: LabelSetId;
+  highestLabelSetVersion: LabelSetVersion;
+}
+
+/**
+ * The label set preferences of an ENSRainbow client.
  */
 export interface EnsRainbowClientLabelSet {
   /**
    * Optional label set ID that the ENSRainbow server is expected to use. If provided, heal operations will validate the ENSRainbow server is using this labelSetId.
-   * If provided without `labelSetVersion`, the server will use the latest available version.
    * Required if `labelSetVersion` is defined.
    */
-  labelSetId?: string;
+  labelSetId?: LabelSetId;
 
   /**
-   * Optional highest label set version to accept. If provided, only labels from sets less than or equal to this value will be returned.
-   * When `labelSetVersion` is provided, `labelSetId` must also be provided.
+   * Optional highest label set version of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests additional label set versions greater than this value. If provided, only labels from label set versions less than or equal to this value will be returned. If not provided, the server will use the latest available version.
+   * When `labelSetVersion` is defined, `labelSetId` must also be defined.
    */
-  labelSetVersion?: number;
+  labelSetVersion?: LabelSetVersion;
 }
 
 /**
- * Builds a validated EnsRainbowClientLabelSet object.
+ * Builds an EnsRainbowClientLabelSet.
  * @param labelSetId - The label set ID.
  * @param labelSetVersion - The label set version.
  * @returns A valid EnsRainbowClientLabelSet object.
  * @throws If `labelSetVersion` is provided without `labelSetId`.
  */
 export function buildEnsRainbowClientLabelSet(
-  labelSetId?: string,
-  labelSetVersion?: number,
+  labelSetId?: LabelSetId,
+  labelSetVersion?: LabelSetVersion,
 ): EnsRainbowClientLabelSet {
   if (labelSetVersion !== undefined && labelSetId === undefined) {
     throw new Error("When a labelSetVersion is provided, labelSetId must also be provided.");
@@ -50,7 +104,7 @@ export function buildEnsRainbowClientLabelSet(
  */
 export function validateSupportedLabelSet(
   serverSet: EnsRainbowServerLabelSet,
-  clientSet: EnsRainbowClientLabelSet = {},
+  clientSet: EnsRainbowClientLabelSet,
 ): void {
   if (clientSet.labelSetId === undefined) {
     // Client did not specify a label set, so any server set is acceptable.

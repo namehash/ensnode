@@ -12,6 +12,7 @@ import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
 import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
+import { buildLabelSetId, buildLabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
@@ -195,11 +196,13 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Label set id for the rainbow record collection",
               demandOption: true,
             })
+            .coerce("label-set-id", buildLabelSetId)
             .option("label-set-version", {
               type: "number",
               description: "Label set version for the rainbow record collection",
               demandOption: true,
-            });
+            })
+            .coerce("label-set-version", buildLabelSetVersion);
         },
         async (argv: ArgumentsCamelCase<ConvertArgs>) => {
           await convertCommand({

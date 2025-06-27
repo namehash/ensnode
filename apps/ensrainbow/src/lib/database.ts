@@ -6,6 +6,12 @@ import { logger } from "@/utils/logger";
 import { parseNonNegativeInteger } from "@/utils/parsing";
 import { Label } from "@ensnode/ensnode-sdk";
 import {
+  type LabelSetId,
+  buildLabelSetId,
+  type LabelSetVersion,
+  buildLabelSetVersion,
+} from "@ensnode/ensrainbow-sdk";
+import {
   type VersionedRainbowRecord,
   buildEncodedVersionedRainbowRecord,
   decodeEncodedVersionedRainbowRecord,
@@ -298,12 +304,12 @@ export class ENSRainbowDB {
    * @returns The current highest label set version, or 0 if not set yet
    * @throws Error if the highest label set version is not set
    */
-  public async getHighestLabelSetVersion(): Promise<number> {
+  public async getHighestLabelSetVersion(): Promise<LabelSetVersion> {
     const labelSetVersion = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION);
     if (labelSetVersion === null) {
       throw new Error("Highest label set version not found");
     }
-    return parseNonNegativeInteger(labelSetVersion);
+    return buildLabelSetVersion(parseNonNegativeInteger(labelSetVersion));
   }
 
   /**
@@ -311,10 +317,7 @@ export class ENSRainbowDB {
    * @param labelSetVersion The label set version to set
    * @throws Error if the label set version is not a valid non-negative integer
    */
-  public async setHighestLabelSetVersion(labelSetVersion: number): Promise<void> {
-    if (!Number.isInteger(labelSetVersion) || labelSetVersion < 0) {
-      throw new Error(`Invalid label set version value: ${labelSetVersion}`);
-    }
+  public async setHighestLabelSetVersion(labelSetVersion: LabelSetVersion): Promise<void> {
     await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, labelSetVersion.toString());
   }
 
@@ -323,7 +326,7 @@ export class ENSRainbowDB {
    * @returns The new highest label set version after incrementing
    * @throws Error if the highest label set version is not set
    */
-  public async incrementHighestLabelSetVersion(): Promise<number> {
+  public async incrementHighestLabelSetVersion(): Promise<LabelSetVersion> {
     const currentVersion = await this.getHighestLabelSetVersion();
     const newVersion = currentVersion + 1;
     await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, newVersion.toString());
@@ -335,12 +338,12 @@ export class ENSRainbowDB {
    * @returns The label set ID string
    * @throws Error if the label set ID is not set
    */
-  public async getLabelSetId(): Promise<string> {
+  public async getLabelSetId(): Promise<LabelSetId> {
     const labelSetId = await this.get(SYSTEM_KEY_LABEL_SET_ID);
     if (labelSetId === null) {
       throw new Error("Database label set ID is null");
     }
-    return labelSetId;
+    return buildLabelSetId(labelSetId);
   }
 
   /**
@@ -348,10 +351,7 @@ export class ENSRainbowDB {
    * @param labelSetId The label set ID string to set
    * @throws Error if the label set ID is empty
    */
-  public async setLabelSetId(labelSetId: string): Promise<void> {
-    if (!labelSetId) {
-      throw new Error("Label set ID cannot be empty");
-    }
+  public async setLabelSetId(labelSetId: LabelSetId): Promise<void> {
     await this.db.put(SYSTEM_KEY_LABEL_SET_ID, labelSetId);
   }
 
@@ -594,7 +594,7 @@ export class ENSRainbowDB {
     }
 
     // 4. Check Highest Label Set Version Existence and Validity
-    let highestLabelSetVersion: number;
+    let highestLabelSetVersion: LabelSetVersion;
     try {
       highestLabelSetVersion = await this.getHighestLabelSetVersion();
       logger.info(`Highest label set version verified: ${highestLabelSetVersion}`);
@@ -798,7 +798,7 @@ export class ENSRainbowDB {
    * @param labelSetVersion The label set version number to associate with this label
    * @throws Error if labelSetVersion is invalid
    */
-  public async addRainbowRecord(label: string, labelSetVersion: number): Promise<void> {
+  public async addRainbowRecord(label: string, labelSetVersion: LabelSetVersion): Promise<void> {
     const encodedValue = buildEncodedVersionedRainbowRecord(label, labelSetVersion);
     const key = labelHashToBytes(labelhash(label));
     await this.db.put(key, encodedValue);

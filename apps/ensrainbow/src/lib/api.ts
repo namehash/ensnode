@@ -4,6 +4,10 @@ import {
   ErrorCode,
   StatusCode,
   buildEnsRainbowClientLabelSet,
+  buildLabelSetId,
+  type LabelSetId,
+  type LabelSetVersion,
+  buildLabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
@@ -39,11 +43,12 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     const labelSetVersionParam = c.req.query("label_set_version");
     const labelSetIdParam = c.req.query("label_set_id");
 
-    let labelSetVersion: number | undefined = undefined;
+    let labelSetVersion: LabelSetVersion | undefined;
     try {
-      labelSetVersion = labelSetVersionParam
-        ? parseNonNegativeInteger(labelSetVersionParam)
-        : undefined;
+      if (labelSetVersionParam) {
+        const parsedVersion = parseNonNegativeInteger(labelSetVersionParam);
+        labelSetVersion = buildLabelSetVersion(parsedVersion);
+      }
     } catch (error) {
       logger.warn(`Invalid label_set_version parameter: ${labelSetVersionParam}`);
       return c.json(
@@ -56,9 +61,12 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       );
     }
 
-    let clientLabelSet: EnsRainbowClientLabelSet | undefined = undefined;
+    let clientLabelSet: EnsRainbowClientLabelSet;
     try {
-      clientLabelSet = buildEnsRainbowClientLabelSet(labelSetIdParam, labelSetVersion);
+      const labelSetId: LabelSetId | undefined = labelSetIdParam
+        ? buildLabelSetId(labelSetIdParam)
+        : undefined;
+      clientLabelSet = buildEnsRainbowClientLabelSet(labelSetId, labelSetVersion);
     } catch (error) {
       logger.warn(error);
       return c.json(

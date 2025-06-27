@@ -1,5 +1,9 @@
 import { parseNonNegativeInteger } from "@/utils/parsing";
 import { Label } from "@ensnode/ensnode-sdk";
+import {
+  type LabelSetVersion,
+  buildLabelSetVersion,
+} from "@ensnode/ensrainbow-sdk";
 
 /**
  * Represents a decoded versioned rainbow record.
@@ -10,7 +14,7 @@ import { Label } from "@ensnode/ensnode-sdk";
  */
 export interface VersionedRainbowRecord {
   label: Label;
-  labelSetVersion: number;
+  labelSetVersion: LabelSetVersion;
 }
 
 /**
@@ -30,13 +34,8 @@ export type EncodedVersionedRainbowRecord = string;
  */
 export function buildEncodedVersionedRainbowRecord(
   label: string,
-  labelSetVersion: number,
+  labelSetVersion: LabelSetVersion,
 ): EncodedVersionedRainbowRecord {
-  if (!Number.isInteger(labelSetVersion) || labelSetVersion < 0) {
-    throw new Error(
-      `Invalid label set version: ${labelSetVersion} (must be a non-negative integer)`,
-    );
-  }
   return `${labelSetVersion}:${label}`;
 }
 
@@ -58,15 +57,15 @@ export function decodeEncodedVersionedRainbowRecord(
     );
   }
 
-  const labelSetVersionStr = encodedVersionedRainbowRecord.substring(0, colonIndex);
+  const maybeLabelSetVersion = encodedVersionedRainbowRecord.substring(0, colonIndex);
   const label = encodedVersionedRainbowRecord.substring(colonIndex + 1);
 
   try {
-    const labelSetVersion = parseNonNegativeInteger(labelSetVersionStr);
+    const labelSetVersion = buildLabelSetVersion(parseNonNegativeInteger(maybeLabelSetVersion));
     return { labelSetVersion, label };
   } catch (error: unknown) {
     throw new Error(
-      `Invalid label set version number "${labelSetVersionStr}" in encoded versioned rainbow record "${encodedVersionedRainbowRecord}": ${
+      `Invalid label set version number "${maybeLabelSetVersion}" in encoded versioned rainbow record "${encodedVersionedRainbowRecord}": ${
         error instanceof Error ? error.message : String(error)
       }`,
     );

@@ -11,8 +11,10 @@ import {
   DB_SCHEMA_VERSION,
   ENSRainbowDB,
   IngestionStatus,
+  SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION,
   SYSTEM_KEY_INGESTION_STATUS,
   SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
+  SYSTEM_KEY_LABEL_SET_ID,
   SYSTEM_KEY_SCHEMA_VERSION,
   isRainbowRecordKey,
   isSystemKey,
@@ -288,6 +290,34 @@ describe("Database", () => {
         // Should fail in full validation mode
         const isValidFull = await db.validate();
         expect(isValidFull).toBe(false);
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should throw an error if labelSetId in db is invalid", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+      try {
+        const batch = db.batch();
+        batch.put(SYSTEM_KEY_LABEL_SET_ID, "Invalid Label Set ID");
+        await batch.write();
+        await expect(db.getLabelSetId()).rejects.toThrow(
+          "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
+        );
+      } finally {
+        await db.close();
+      }
+    });
+
+    it("should throw an error if highestLabelSetVersion in db is invalid", async () => {
+      const db = await ENSRainbowDB.create(tempDir);
+      try {
+        const batch = db.batch();
+        batch.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, "-1");
+        await batch.write();
+        await expect(db.getHighestLabelSetVersion()).rejects.toThrow(
+          "LabelSetVersion must be a non-negative integer.",
+        );
       } finally {
         await db.close();
       }
