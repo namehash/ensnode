@@ -152,7 +152,7 @@ describe("EnsRainbowApiClient", () => {
           status: StatusCode.Success,
           versionInfo: {
             version: "1.0.0",
-            schemaVersion: 1,
+            dbSchemaVersion: 1,
             labelSet: {
               labelSetId: "test-label-set-id",
               highestLabelSetVersion: 123,
@@ -166,7 +166,7 @@ describe("EnsRainbowApiClient", () => {
     expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.versionInfo.version === "string").toBeTruthy();
-    expect(typeof response.versionInfo.schemaVersion === "number").toBeTruthy();
+    expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();
   });
 });
 

@@ -309,18 +309,6 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Increment the highest label set version and return the new value
-   * @returns The new highest label set version after incrementing
-   * @throws Error if the highest label set version is not set
-   */
-  public async incrementHighestLabelSetVersion(): Promise<LabelSetVersion> {
-    const { highestLabelSetVersion: currentVersion } = await this.getLabelSet();
-    const newVersion = currentVersion + 1;
-    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, newVersion.toString());
-    return newVersion;
-  }
-
-  /**
    * Get the label set from the database
    * @returns The label set
    * @throws Error if the label set ID or highest label set version is not set
@@ -775,9 +763,8 @@ export class ENSRainbowDB {
   /**
    * Adds a rainbow record to the database. Labelhash is computed from the label.
    *
-   * @param label The label to add (without label set version prefix)
+   * @param label The label to add
    * @param labelSetVersion The label set version number to associate with this label
-   * @throws Error if labelSetVersion is invalid
    */
   public async addRainbowRecord(label: string, labelSetVersion: LabelSetVersion): Promise<void> {
     const encodedValue = buildEncodedVersionedRainbowRecord(label, labelSetVersion);

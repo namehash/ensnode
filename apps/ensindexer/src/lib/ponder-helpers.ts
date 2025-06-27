@@ -56,7 +56,7 @@ export const createEnsRainbowVersionFetcher = (
       // handling for how ENSIndexer exposes its public config through an API.
       return {
         version: "unknown",
-        schemaVersion: 0,
+        dbSchemaVersion: 0,
         labelSet: {
           labelSetId: "unknown",
           highestLabelSetVersion: 0,

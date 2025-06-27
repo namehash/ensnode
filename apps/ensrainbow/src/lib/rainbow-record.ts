@@ -6,14 +6,12 @@ import {
 } from "@ensnode/ensrainbow-sdk";
 
 /**
- * Represents a decoded versioned rainbow record.
- *
- * It contains the original label and the label set version it belongs to.
- * This is the structured representation of the data stored as a string
- * in the database for each rainbow record.
+ * A versioned rainbow record.
  */
 export interface VersionedRainbowRecord {
+  /** The original label string */
   label: Label;
+  /** The label set version this record belongs to */
   labelSetVersion: LabelSetVersion;
 }
 
@@ -25,12 +23,10 @@ export type EncodedVersionedRainbowRecord = string;
 
 /**
  * Builds an encoded versioned rainbow record string from a label and its set version.
- * Performs validation on the label set version.
  *
  * @param label The label string.
  * @param labelSetVersion The label set version number.
  * @returns The encoded versioned rainbow record string.
- * @throws Error if labelSetVersion is not a non-negative integer.
  */
 export function buildEncodedVersionedRainbowRecord(
   label: string,

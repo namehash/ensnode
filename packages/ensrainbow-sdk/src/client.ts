@@ -123,7 +123,7 @@ export namespace EnsRainbow {
     /**
      * ENSRainbow database schema version.
      */
-    schemaVersion: number;
+    dbSchemaVersion: number;
 
     /**
      * The EnsRainbowServerLabelSet managed by the ENSRainbow server.
@@ -350,7 +350,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * //   "status": "success",
    * //   "versionInfo": {
    * //     "version": "0.1.0",
-   * //     "schemaVersion": 2,
+   * //     "dbSchemaVersion": 2,
    * //     "labelSet": {
    * //       "labelSetId": "subgraph",
    * //       "labelSetVersion": 0

@@ -152,14 +152,17 @@ Success Response:
 {
   "status": "success",
   "version": "0.1.0",
-  "schemaVersion": 3,
-  "labelSetId": "subgraph",
-  "highestLabelSetVersion": 0
+  "dbSchemaVersion": 3,
+  "labelSet": {
+    "labelSetId": "subgraph",
+    "highestLabelSetVersion": 0
+  }
 }
 ```
 
 The response contains:
 - `version`: The current version of ENSRainbow
-- `schemaVersion`: The current schema version of the database
+- `dbSchemaVersion`: The current schema version of the database
+- `labelSet`: The label set of the loaded database
 - `labelSetId`: The label set id of the loaded database
 - `highestLabelSetVersion`: The highest label set version available in the database
