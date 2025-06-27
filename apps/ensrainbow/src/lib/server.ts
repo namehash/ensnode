@@ -17,7 +17,7 @@ import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  public readonly serverLabelSet: EnsRainbowServerLabelSet;
+  private readonly serverLabelSet: EnsRainbowServerLabelSet;
 
   private constructor(db: ENSRainbowDB, serverLabelSet: EnsRainbowServerLabelSet) {
     this.db = db;
@@ -38,6 +38,14 @@ export class ENSRainbowServer {
     const serverLabelSet = await db.getLabelSet();
 
     return new ENSRainbowServer(db, serverLabelSet);
+  }
+
+  /**
+   * Returns the full server label set object
+   * @returns The server's label set configuration
+   */
+  public getServerLabelSet(): EnsRainbowServerLabelSet {
+    return this.serverLabelSet;
   }
 
   async heal(

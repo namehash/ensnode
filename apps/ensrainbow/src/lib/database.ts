@@ -299,8 +299,6 @@ export class ENSRainbowDB {
     await this.db.put(SYSTEM_KEY_INGESTION_STATUS, IngestionStatus.Finished);
   }
 
-
-
   /**
    * Set the highest label set version directly
    * @param labelSetVersion The label set version to set
@@ -321,8 +319,6 @@ export class ENSRainbowDB {
     await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, newVersion.toString());
     return newVersion;
   }
-
-
 
   /**
    * Get the label set from the database
