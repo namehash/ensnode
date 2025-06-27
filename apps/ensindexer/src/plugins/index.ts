@@ -1,8 +1,5 @@
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import { uniq } from "@/lib/lib-helpers";
-import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
-import { Datasource, DatasourceName, ENSNamespaceId } from "@ensnode/datasources";
 import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugin";
@@ -17,9 +14,11 @@ export const ALL_PLUGINS = [
 
 type AllPluginsUnionType = (typeof ALL_PLUGINS)[number];
 
-// Helper type to let enable correct typing for the default-exported value from ponder.config.ts.
+// Helper type to enable correct typing for the default-exported value from ponder.config.ts.
 // It helps to keep TypeScript types working well for all plugins (regardless if active or not).
-export type AllPluginsConfig = MergedTypes<ReturnType<AllPluginsUnionType["getPonderConfig"]>>;
+export type AllPluginsMergedConfig = MergedTypes<
+  ReturnType<AllPluginsUnionType["createPonderConfig"]>
+>;
 
 // Helper type to merge multiple types into one
 type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
@@ -40,55 +39,4 @@ export function getPlugin(pluginName: PluginName) {
   }
 
   return plugin;
-}
-
-/**
- * Get a list of unique required datasource names from selected plugins.
- * @param pluginNames A list of selected plugin names.
- * @returns A list of unique datasource names.
- */
-export function getRequiredDatasourceNames(pluginNames: PluginName[]): DatasourceName[] {
-  const plugins = pluginNames.map((pluginName) => getPlugin(pluginName));
-  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasources);
-
-  return uniq(requiredDatasourceNames);
-}
-
-interface GetRequiredDatasourcesArgs {
-  namespace: ENSNamespaceId;
-  plugins: PluginName[];
-}
-
-/**
- * Get a list of unique datasources for selected plugin names.
- * @param pluginNames
- * @returns
- */
-export function getRequiredDatasources({
-  namespace: ensNamespaceID,
-  plugins,
-}: GetRequiredDatasourcesArgs): Datasource[] {
-  const requiredDatasourceNames = getRequiredDatasourceNames(plugins);
-  const ensNamespace = getENSNamespaceAsFullyDefinedAtCompileTime(ensNamespaceID);
-  const ensDeploymentDatasources = Object.entries(ensNamespace) as Array<
-    [DatasourceName, Datasource]
-  >;
-  const datasources = {} as Record<DatasourceName, Datasource>;
-
-  for (let [datasourceName, datasource] of ensDeploymentDatasources) {
-    if (requiredDatasourceNames.includes(datasourceName)) {
-      datasources[datasourceName] = datasource;
-    }
-  }
-
-  return Object.values(datasources);
-}
-
-/**
- * Get a list of unique indexed chain IDs for selected plugin names.
- */
-export function getRequiredChainIds(datasources: Datasource[]): number[] {
-  const indexedChainIds = datasources.map((datasource) => datasource.chain.id);
-
-  return uniq(indexedChainIds);
 }

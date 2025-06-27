@@ -1,17 +1,19 @@
+import { attachSharedResolverHandlers } from "@/plugins/shared/Resolver";
+import { attachLineanamesNameWrapperEventHandlers } from "./handlers/NameWrapper";
+import { attachLineanamesRegistrarEventHandlers } from "./handlers/Registrar";
+import { attachLineanamesRegistryEventHandlers } from "./handlers/Registry";
+
 /**
- * A list of callbacks attaching event handlers for the `lineanames` plugin.
- * The event handlers will be attached only if the plugin set as active
- * in the ENSIndexerConfig.
+ * Attach plugin's event handlers for indexing.
+ *
+ * Note: this function is called when the plugin is active.
  */
+export function attachLineanamesPluginEventHandlers() {
+  // Leverage the shared Subgraph-compatible indexing logic.
+  attachSharedResolverHandlers();
 
-import attachResolverHandlers from "@/plugins/shared/Resolver";
-import attachNameWrapperHandlers from "./handlers/NameWrapper";
-import attachRegistrarHandlers from "./handlers/Registrar";
-import attachRegistryHandlers from "./handlers/Registry";
-
-export default [
-  attachResolverHandlers,
-  attachNameWrapperHandlers,
-  attachRegistrarHandlers,
-  attachRegistryHandlers,
-];
+  // Apply Lineanames-specific indexing logic.
+  attachLineanamesNameWrapperEventHandlers();
+  attachLineanamesRegistrarEventHandlers();
+  attachLineanamesRegistryEventHandlers();
+}

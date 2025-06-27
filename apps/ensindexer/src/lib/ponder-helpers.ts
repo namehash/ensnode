@@ -15,19 +15,18 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 /**
  * Given a contract's start block, returns a block range describing a start and end block
  * that maintains validity within the global blockrange. The returned start block will always be
- * defined, but if no end block is specified, the returned end block will be undefined, indicating
- * that ponder should index the contract in perpetuity.
+ * defined, but if no end block is specified, the returned end block will be undefined.
  *
- * @param globalBlockrange global blockrange configuration
+ * @param blockrange a Blockrange
  * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
  * @returns the start and end blocks, contrained to the provided `start` and `end`
  *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
  */
 export const constrainBlockrange = (
-  globalBlockrange: Blockrange,
+  blockrange: Blockrange,
   contractStartBlock: number | undefined = 0,
 ): Blockrange => {
-  const { startBlock, endBlock } = globalBlockrange;
+  const { startBlock, endBlock } = blockrange;
 
   const isEndConstrained = endBlock !== undefined;
   const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
@@ -277,10 +276,14 @@ export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>
   globalBlockrange: Blockrange,
   contractConfig: CONTRACT_CONFIG,
 ) {
+  // Ponder will index the contract in perpetuity if endBlock is `undefined`
+  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractConfig.startBlock);
+
   return {
     [chainId.toString()]: {
       address: contractConfig.address, // provide per-network address if available
-      ...constrainBlockrange(globalBlockrange, contractConfig.startBlock), // per-network blockrange
+      startBlock,
+      endBlock,
     },
   };
 }

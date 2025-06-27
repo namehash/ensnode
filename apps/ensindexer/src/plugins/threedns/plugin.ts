@@ -2,37 +2,70 @@
  * The ThreeDNS plugin describes indexing behavior for 3DNSToken on both Optimism and Base.
  */
 
-import { buildPlugin } from "@/lib/plugin-helpers";
+import {
+  buildPlugin,
+  getDatasourceAsFullyDefinedAtCompileTime,
+  makePluginNamespace,
+} from "@/lib/plugin-helpers";
+import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig as createPonderConfig } from "ponder";
+import * as ponder from "ponder";
 
 export default buildPlugin({
   name: PluginName.ThreeDNS,
-  requiredDatasources: [DatasourceNames.ThreeDNSBase, DatasourceNames.ThreeDNSOptimism],
-  buildPonderConfig({ datasourceConfigOptions, pluginNamespace: ns }) {
-    const threeDNSBase = datasourceConfigOptions(DatasourceNames.ThreeDNSBase);
-    const threeDNSOptimism = datasourceConfigOptions(DatasourceNames.ThreeDNSOptimism);
+  requiredDatasourceNames: [DatasourceNames.ThreeDNSBase, DatasourceNames.ThreeDNSOptimism],
+  createPonderConfig(ensIndexerConfig) {
+    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
+      ensIndexerConfig.namespace,
+      DatasourceNames.ThreeDNSBase,
+    );
+    const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
+      ensIndexerConfig.namespace,
+      DatasourceNames.ThreeDNSOptimism,
+    );
+    const ns = makePluginNamespace(PluginName.ThreeDNS);
 
-    return createPonderConfig({
+    // ABI for the ThreeDNSToken contract is the same on both chains, so we can use one.
+    const threeDNSTokenAbi = threeDNSOptimism.contracts.ThreeDNSToken.abi;
+    // ABI for the Resolver contract is the same on both chains, so we can use one.
+    const resolverAbi = threeDNSOptimism.contracts.Resolver.abi;
+
+    return ponder.createConfig({
       networks: {
-        ...threeDNSOptimism.networks,
-        ...threeDNSBase.networks,
+        ...networksConfigForChain(threeDNSOptimism.chain.id, ensIndexerConfig.rpcConfigs),
+        ...networksConfigForChain(threeDNSBase.chain.id, ensIndexerConfig.rpcConfigs),
       },
       contracts: {
         [ns("ThreeDNSToken")]: {
           network: {
-            ...threeDNSOptimism.getContractNetwork(threeDNSOptimism.contracts.ThreeDNSToken),
-            ...threeDNSBase.getContractNetwork(threeDNSBase.contracts.ThreeDNSToken),
+            ...networkConfigForContract(
+              threeDNSOptimism.chain.id,
+              ensIndexerConfig.globalBlockrange,
+              threeDNSOptimism.contracts.ThreeDNSToken,
+            ),
+            ...networkConfigForContract(
+              threeDNSBase.chain.id,
+              ensIndexerConfig.globalBlockrange,
+              threeDNSBase.contracts.ThreeDNSToken,
+            ),
           },
-          abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
+          abi: threeDNSTokenAbi,
         },
         [ns("Resolver")]: {
           network: {
-            ...threeDNSOptimism.getContractNetwork(threeDNSOptimism.contracts.Resolver),
-            ...threeDNSBase.getContractNetwork(threeDNSBase.contracts.Resolver),
+            ...networkConfigForContract(
+              threeDNSOptimism.chain.id,
+              ensIndexerConfig.globalBlockrange,
+              threeDNSOptimism.contracts.Resolver,
+            ),
+            ...networkConfigForContract(
+              threeDNSBase.chain.id,
+              ensIndexerConfig.globalBlockrange,
+              threeDNSBase.contracts.Resolver,
+            ),
           },
-          abi: threeDNSOptimism.contracts.Resolver.abi,
+          abi: resolverAbi,
         },
       },
     });

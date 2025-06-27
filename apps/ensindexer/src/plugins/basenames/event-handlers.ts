@@ -1,11 +1,17 @@
+import { attachSharedResolverHandlers } from "@/plugins/shared/Resolver";
+import { attachBasenamesRegistrarEventHandlers } from "./handlers/Registrar";
+import { attachBasenamesRegistryEventHandlers } from "./handlers/Registry";
+
 /**
- * A list of callbacks attaching event handlers for the `basenames` plugin.
- * The event handlers will be attached only if the plugin set as active
- * in the ENSIndexerConfig.
+ * Attach plugin's event handlers for indexing.
+ *
+ * Note: this function is called when the plugin is active.
  */
+export function attachBasenamesPluginEventHandlers() {
+  // Leverage the shared Subgraph-compatible indexing logic.
+  attachSharedResolverHandlers();
 
-import attachResolverHandlers from "@/plugins/shared/Resolver";
-import attachRegistrarHandlers from "./handlers/Registrar";
-import attachRegistryHandlers from "./handlers/Registry";
-
-export default [attachResolverHandlers, attachRegistrarHandlers, attachRegistryHandlers];
+  // Apply Basenames-specific indexing logic.
+  attachBasenamesRegistrarEventHandlers();
+  attachBasenamesRegistryEventHandlers();
+}

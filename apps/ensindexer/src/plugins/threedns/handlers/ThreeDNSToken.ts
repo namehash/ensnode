@@ -24,12 +24,15 @@ import {
   handleRegistrationExtended,
   handleTransfer,
 } from "@/handlers/ThreeDNSToken";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-export default function ({
-  pluginNamespace: ns,
-}: ENSIndexerPluginHandlerArgs<PluginName.ThreeDNS>) {
+export function attachThreeDNSTokenEventHandlers() {
+  const pluginName = PluginName.ThreeDNS;
+
+  // create a namespace for the plugin events to avoid conflicts with other plugins
+  const ns = makePluginNamespace(pluginName);
+
   ///
   /// ThreeDNSToken Handlers
   ///

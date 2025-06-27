@@ -2,13 +2,16 @@ import { ponder } from "ponder:registry";
 
 import config from "@/config";
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
-export default function ({
-  pluginNamespace: ns,
-}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
+/**
+ * Attach a set of event handlers for indexing process.
+ */
+export function attachLineanamesNameWrapperEventHandlers() {
+  const pluginName = PluginName.Lineanames;
+
   const {
     handleNameWrapped,
     handleNameUnwrapped,
@@ -21,6 +24,9 @@ export default function ({
     // the name returned from `getRegistrarManagedName` function call
     registrarManagedName: getRegistrarManagedName(config.namespace),
   });
+
+  // create a namespace for the plugin events to avoid conflicts with other plugins
+  const ns = makePluginNamespace(pluginName);
 
   ponder.on(ns("NameWrapper:NameWrapped"), handleNameWrapped);
   ponder.on(ns("NameWrapper:NameUnwrapped"), handleNameUnwrapped);

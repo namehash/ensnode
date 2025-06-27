@@ -25,7 +25,10 @@ import {
  */
 let hasBeenRegistered = false;
 
-export default function registerResolverHandlers() {
+/**
+ * Attach a set of event handlers for indexing process.
+ */
+export function attachSharedResolverHandlers() {
   if (hasBeenRegistered) return;
   hasBeenRegistered = true;
 

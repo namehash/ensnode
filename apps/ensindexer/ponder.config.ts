@@ -2,9 +2,8 @@ import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
 import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
-import { ALL_PLUGINS, type AllPluginsConfig } from "@/plugins";
-import { prepareEventHandlersToBeAttached } from "@/plugins/event-listeners";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
+import { attachPluginEventHandlers } from "@/plugins/event-handlers";
 
 ////////
 // First, generate `MergedPonderConfig` type representing the merged types of each plugin's `config`,
@@ -12,7 +11,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 // of which plugins are actually active at runtime.
 ////////
 
-export type MergedPonderConfig = AllPluginsConfig & {
+export type MergedPonderConfig = AllPluginsMergedConfig & {
   /**
    * NOTE: we inject additional values (ones that change the behavior of the indexing logic) into the
    * Ponder config in order to alter the ponder-generated build id when these additional options change.
@@ -37,7 +36,7 @@ const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plu
 
 // combine each plugins' config into a MergedPonderConfig
 const mergedPonderConfig = activePlugins.reduce(
-  (memo, plugin) => mergePonderConfigs(memo, plugin.getPonderConfig(config)),
+  (memo, plugin) => mergePonderConfigs(memo, plugin.createPonderConfig(config)),
   {},
 ) as MergedPonderConfig;
 
@@ -48,24 +47,19 @@ mergedPonderConfig.indexingBehaviorDependencies = {
 };
 
 ////////
-// Activate the active plugins' handlers, which register indexing handlers with Ponder.
+// Attach event handlers for each of the active plugins.
 ////////
-function attachPluginEventHandlers(pluginName: PluginName) {
-  // get the function that attaches event handlers for the plugin
-  const attachPluginEventHandlers = prepareEventHandlersToBeAttached(pluginName);
 
-  // execute the function to attach the event handlers
-  attachPluginEventHandlers();
-}
-
-// NOTE: we explicitly delay the execution of this function for 1 tick, to avoid a race condition
+// NOTE: we delay attaching plugin event handlers for 1 tick to avoid a race condition
 // within ponder internals related to the schema name and drizzle-orm
-setTimeout(() => config.plugins.forEach((plugin) => attachPluginEventHandlers(plugin)), 0);
-
-////////
-// Finally, return the MergedPonderConfig for Ponder to use for type inference and runtime behavior.
-////////
+setTimeout(
+  () => activePlugins.forEach((activePlugin) => attachPluginEventHandlers(activePlugin.name)),
+  0,
+);
 
 console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
 
+////////
+// Finally, export the MergedPonderConfig for Ponder to use for type inference and runtime behavior.
+////////
 export default mergedPonderConfig;

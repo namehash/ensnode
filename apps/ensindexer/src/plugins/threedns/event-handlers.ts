@@ -1,9 +1,11 @@
+import { attachThreeDNSTokenEventHandlers } from "./handlers/ThreeDNSToken";
+
 /**
- * A list of callbacks attaching event handlers for the `threedns` plugin.
- * The event handlers will be attached only if the plugin set as active
- * in the ENSIndexerConfig.
+ * Attach plugin's event handlers for indexing.
+ *
+ * Note: this function is called when the plugin is active.
  */
-
-import attachThreeDNSTokenHandlers from "./handlers/ThreeDNSToken";
-
-export default [attachThreeDNSTokenHandlers];
+export function attachThreeDNSPluginEventHandlers() {
+  // Apply ThreeDNS-specific indexing logic.
+  attachThreeDNSTokenEventHandlers();
+}

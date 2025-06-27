@@ -9,7 +9,7 @@ import {
   handleNewTTL,
   handleTransfer,
 } from "@/handlers/Registry";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
@@ -25,9 +25,15 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
   return domain?.isMigrated ?? false;
 }
 
-export default function ({
-  pluginNamespace: ns,
-}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
+/**
+ * Attach a set of event handlers for indexing process.
+ */
+export function attachSubgraphRegistryEventHandlers() {
+  const pluginName = PluginName.Subgraph;
+
+  // create a namespace for the plugin events to avoid conflicts with other plugins
+  const ns = makePluginNamespace(pluginName);
+
   ponder.on(ns("RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers

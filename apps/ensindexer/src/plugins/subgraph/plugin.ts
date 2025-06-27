@@ -1,50 +1,86 @@
 /**
- * The Subgraph plugin describes indexing behavior for the 'Root' Datasource, in alignment with the
+ * The Subgraph plugin describes indexing behavior for the 'ENSRoot' Datasource, in alignment with the
  * legacy ENS Subgraph indexing logic.
  */
 
-import { buildPlugin } from "@/lib/plugin-helpers";
+import {
+  buildPlugin,
+  getDatasourceAsFullyDefinedAtCompileTime,
+  makePluginNamespace,
+} from "@/lib/plugin-helpers";
+import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig as createPonderConfig } from "ponder";
+import * as ponder from "ponder";
 
 export default buildPlugin({
   name: PluginName.Subgraph,
-  requiredDatasources: [DatasourceNames.ENSRoot],
-  buildPonderConfig({ datasourceConfigOptions, pluginNamespace: ns }) {
-    const { contracts, networks, getContractNetwork } = datasourceConfigOptions(
+  requiredDatasourceNames: [DatasourceNames.ENSRoot],
+  createPonderConfig(ensIndexerConfig) {
+    const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+      ensIndexerConfig.namespace,
       DatasourceNames.ENSRoot,
     );
+    const ns = makePluginNamespace(PluginName.Subgraph);
 
-    return createPonderConfig({
-      networks,
+    return ponder.createConfig({
+      networks: networksConfigForChain(chain.id, ensIndexerConfig.rpcConfigs),
       contracts: {
         [ns("RegistryOld")]: {
-          network: getContractNetwork(contracts.RegistryOld),
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.RegistryOld,
+          ),
           abi: contracts.Registry.abi,
         },
         [ns("Registry")]: {
-          network: getContractNetwork(contracts.Registry),
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.Registry,
+          ),
           abi: contracts.Registry.abi,
         },
         [ns("BaseRegistrar")]: {
-          network: getContractNetwork(contracts.BaseRegistrar),
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.BaseRegistrar,
+          ),
           abi: contracts.BaseRegistrar.abi,
         },
         [ns("EthRegistrarControllerOld")]: {
-          network: getContractNetwork(contracts.EthRegistrarControllerOld),
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.EthRegistrarControllerOld,
+          ),
           abi: contracts.EthRegistrarControllerOld.abi,
         },
         [ns("EthRegistrarController")]: {
-          network: getContractNetwork(contracts.EthRegistrarController),
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.EthRegistrarController,
+          ),
           abi: contracts.EthRegistrarController.abi,
         },
         [ns("NameWrapper")]: {
-          network: getContractNetwork(contracts.NameWrapper),
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.NameWrapper,
+          ),
           abi: contracts.NameWrapper.abi,
         },
+        // We use a shared Subgraph-compatible Resolver ABI, hence we don't need apply any contract namespace here for the plugin
         Resolver: {
-          network: getContractNetwork(contracts.Resolver),
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.Resolver,
+          ),
           abi: contracts.Resolver.abi,
         },
       },
