@@ -40,9 +40,9 @@ export function makePluginNamespace<const PluginNameType extends PluginName>(
    *
    * Note: we use templated type here to ensure that the output type follow the literal value from the function input.
    */
-  return function pluginNamespace<const CONTRACT_NAME extends string>(
-    contractName: CONTRACT_NAME,
-  ): `${PluginNameType}/${CONTRACT_NAME}` {
+  return function pluginNamespace<const ContractNameType extends string>(
+    contractName: ContractNameType,
+  ): `${PluginNameType}/${ContractNameType}` {
     return `${pluginName}/${contractName}` as const;
   };
 }
