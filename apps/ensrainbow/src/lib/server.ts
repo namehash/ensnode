@@ -17,15 +17,7 @@ import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private readonly serverLabelSet: EnsRainbowServerLabelSet;
-
-  public getLabelSetId(): LabelSetId {
-    return this.serverLabelSet.labelSetId;
-  }
-
-  public getHighestLabelSetVersion(): LabelSetVersion {
-    return this.serverLabelSet.highestLabelSetVersion;
-  }
+  public readonly serverLabelSet: EnsRainbowServerLabelSet;
 
   private constructor(db: ENSRainbowDB, serverLabelSet: EnsRainbowServerLabelSet) {
     this.db = db;
@@ -43,10 +35,9 @@ export class ENSRainbowServer {
       throw new Error("Database is in an invalid state");
     }
 
-    const labelSetId = await db.getLabelSetId();
-    const highestLabelSetVersion = await db.getHighestLabelSetVersion();
+    const serverLabelSet = await db.getLabelSet();
 
-    return new ENSRainbowServer(db, { labelSetId, highestLabelSetVersion });
+    return new ENSRainbowServer(db, serverLabelSet);
   }
 
   async heal(

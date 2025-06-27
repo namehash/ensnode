@@ -300,7 +300,7 @@ describe("Database", () => {
         const batch = db.batch();
         batch.put(SYSTEM_KEY_LABEL_SET_ID, "Invalid Label Set ID");
         await batch.write();
-        await expect(db.getLabelSetId()).rejects.toThrow(
+        await expect(db.getLabelSet()).rejects.toThrow(
           "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
         );
       } finally {
@@ -312,9 +312,10 @@ describe("Database", () => {
       const db = await ENSRainbowDB.create(tempDir);
       try {
         const batch = db.batch();
+        batch.put(SYSTEM_KEY_LABEL_SET_ID, "test-label-set-id");
         batch.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, "-1");
         await batch.write();
-        await expect(db.getHighestLabelSetVersion()).rejects.toThrow(
+        await expect(db.getLabelSet()).rejects.toThrow(
           'Invalid label set version: -1: "-1" is not a non-negative integer',
         );
       } finally {

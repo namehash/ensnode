@@ -468,7 +468,7 @@ describe("CLI", () => {
         await serverPromise;
       });
 
-      it.only("should respect PORT environment variable", async () => {
+      it("should respect PORT environment variable", async () => {
         const customPort = 5115;
         process.env.PORT = customPort.toString();
 

@@ -5,6 +5,7 @@ import { ByteArray, Hex, labelhash } from "viem";
 import { logger } from "@/utils/logger";
 import { Label } from "@ensnode/ensnode-sdk";
 import {
+  EnsRainbowServerLabelSet,
   type LabelSetId,
   type LabelSetVersion,
   buildLabelSetId,
@@ -298,18 +299,7 @@ export class ENSRainbowDB {
     await this.db.put(SYSTEM_KEY_INGESTION_STATUS, IngestionStatus.Finished);
   }
 
-  /**
-   * Get the current highest label set version
-   * @returns The current highest label set version, or 0 if not set yet
-   * @throws Error if the highest label set version is not set
-   */
-  public async getHighestLabelSetVersion(): Promise<LabelSetVersion> {
-    const labelSetVersion = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION);
-    if (labelSetVersion === null) {
-      throw new Error("Highest label set version not found");
-    }
-    return buildLabelSetVersion(labelSetVersion);
-  }
+
 
   /**
    * Set the highest label set version directly
@@ -326,23 +316,35 @@ export class ENSRainbowDB {
    * @throws Error if the highest label set version is not set
    */
   public async incrementHighestLabelSetVersion(): Promise<LabelSetVersion> {
-    const currentVersion = await this.getHighestLabelSetVersion();
+    const { highestLabelSetVersion: currentVersion } = await this.getLabelSet();
     const newVersion = currentVersion + 1;
     await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, newVersion.toString());
     return newVersion;
   }
 
+
+
   /**
-   * Get the label set ID from the database
-   * @returns The label set ID string
-   * @throws Error if the label set ID is not set
+   * Get the label set from the database
+   * @returns The label set
+   * @throws Error if the label set ID or highest label set version is not set
    */
-  public async getLabelSetId(): Promise<LabelSetId> {
-    const labelSetId = await this.get(SYSTEM_KEY_LABEL_SET_ID);
-    if (labelSetId === null) {
+  public async getLabelSet(): Promise<EnsRainbowServerLabelSet> {
+    const labelSetIdStr = await this.get(SYSTEM_KEY_LABEL_SET_ID);
+    if (labelSetIdStr === null) {
       throw new Error("Database label set ID is null");
     }
-    return buildLabelSetId(labelSetId);
+    const labelSetId = buildLabelSetId(labelSetIdStr);
+
+    const labelSetVersionStr = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION);
+    if (labelSetVersionStr === null) {
+      throw new Error("Highest label set version not found");
+    }
+    const highestLabelSetVersion = buildLabelSetVersion(labelSetVersionStr);
+    return {
+      labelSetId,
+      highestLabelSetVersion,
+    };
   }
 
   /**
@@ -575,33 +577,17 @@ export class ENSRainbowDB {
       return false;
     }
 
-    // 3. Check Label Set ID Existence
-    try {
-      const labelSetId = await this.getLabelSetId();
-      if (labelSetId === null) {
-        const errorMsg = generatePurgeErrorMessage(
-          "Database is missing the label set ID identifier.",
-        );
-        logger.error(errorMsg);
-        return false;
-      }
-      logger.info(`Label set ID verified: ${labelSetId}`);
-    } catch (error) {
-      const errorMsg = generatePurgeErrorMessage(`Error checking label set ID: ${error}`);
-      logger.error(errorMsg);
-      return false;
-    }
-
-    // 4. Check Highest Label Set Version Existence and Validity
+    // 3. Check Label Set ID and Highest Label Set Version Existence and Validity
+    let labelSetId: LabelSetId;
     let highestLabelSetVersion: LabelSetVersion;
     try {
-      highestLabelSetVersion = await this.getHighestLabelSetVersion();
+      const labelSet = await this.getLabelSet();
+      labelSetId = labelSet.labelSetId;
+      highestLabelSetVersion = labelSet.highestLabelSetVersion;
+      logger.info(`Label set ID verified: ${labelSetId}`);
       logger.info(`Highest label set version verified: ${highestLabelSetVersion}`);
     } catch (error) {
-      // getHighestLabelSetVersion already throws a clear error if value is invalid
-      const errorMsg = generatePurgeErrorMessage(
-        `Error checking highest label set version: ${error}`,
-      );
+      const errorMsg = generatePurgeErrorMessage(`Error checking label set: ${error}`);
       logger.error(errorMsg);
       return false;
     }

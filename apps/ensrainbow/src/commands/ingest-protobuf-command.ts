@@ -182,36 +182,28 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             } else {
               // For existing db, we need to validate label set id and label set version
               // Using .then() as we are inside a sync event handler
-              db.getLabelSetId()
-                .then((currentLabelSetId) => {
-                  if (currentLabelSetId !== fileLabelSetId) {
-                    const msg = `Label set id mismatch! Database label set id: ${currentLabelSetId}, File label set id: ${fileLabelSetId}!`;
+              db.getLabelSet()
+                .then((currentLabelSet) => {
+                  if (currentLabelSet.labelSetId !== fileLabelSetId) {
+                    const msg = `Label set id mismatch! Database label set id: ${currentLabelSet.labelSetId}, File label set id: ${fileLabelSetId}!`;
                     logger.error(msg);
                     fileStream.destroy(new Error(msg)); // Stop processing
                     commandReject(new Error(msg));
                     return;
                   }
 
-                  // Now check label set
-                  db.getHighestLabelSetVersion()
-                    .then((currentLabelSetVersion) => {
-                      if (fileLabelSetVersion !== currentLabelSetVersion! + 1) {
-                        const msg =
-                          `Label set version must be exactly one higher than the current highest label set version.\n` +
-                          `Current highest label set version: ${currentLabelSetVersion}, File label set version: ${fileLabelSetVersion}`;
-                        logger.error(msg);
-                        fileStream.destroy(new Error(msg)); // Stop processing
-                        commandReject(new Error(msg));
-                        return;
-                      }
-                    })
-                    .catch((err) => {
-                      logger.error(`Failed to get highest label set version: ${err}`);
-                      fileStream.destroy(err);
-                    });
+                  if (fileLabelSetVersion !== currentLabelSet.highestLabelSetVersion + 1) {
+                    const msg =
+                      `Label set version must be exactly one higher than the current highest label set version.\n` +
+                      `Current highest label set version: ${currentLabelSet.highestLabelSetVersion}, File label set version: ${fileLabelSetVersion}`;
+                    logger.error(msg);
+                    fileStream.destroy(new Error(msg)); // Stop processing
+                    commandReject(new Error(msg));
+                    return;
+                  }
                 })
                 .catch((err) => {
-                  logger.error(`Failed to get label set id: ${err}`);
+                  logger.error(`Failed to get label set: ${err}`);
                   fileStream.destroy(err);
                 });
             }
@@ -241,24 +233,20 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
                 });
             } else {
               // For existing db, validate label set id and label set version before marking as unfinished
-              db.getLabelSetId()
-                .then((currentLabelSetId) => {
-                  if (currentLabelSetId !== fileLabelSetId) {
-                    const msg = `Label set id mismatch! Database label set id: ${currentLabelSetId}, File label set id: ${fileLabelSetId}!`;
+              db.getLabelSet()
+                .then((currentLabelSet) => {
+                  if (currentLabelSet.labelSetId !== fileLabelSetId) {
+                    const msg = `Label set id mismatch! Database label set id: ${currentLabelSet.labelSetId}, File label set id: ${fileLabelSetId}!`;
                     logger.error(msg);
                     fileStream.destroy(new Error(msg)); // Stop processing
                     commandReject(new Error(msg));
                     return;
                   }
 
-                  // Now check label set version
-                  return db.getHighestLabelSetVersion();
-                })
-                .then((currentLabelSetVersion) => {
-                  if (fileLabelSetVersion !== currentLabelSetVersion! + 1) {
+                  if (fileLabelSetVersion !== currentLabelSet.highestLabelSetVersion + 1) {
                     const msg =
                       `Label set version must be exactly one higher than the current highest label set version.\n` +
-                      `Current highest label set version: ${currentLabelSetVersion}, File label set version: ${fileLabelSetVersion}`;
+                      `Current highest label set version: ${currentLabelSet.highestLabelSetVersion}, File label set version: ${fileLabelSetVersion}`;
                     logger.error(msg);
                     fileStream.destroy(new Error(msg)); // Stop processing
                     commandReject(new Error(msg));

@@ -108,8 +108,8 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
         version: packageJson.version,
         schemaVersion: DB_SCHEMA_VERSION,
         labelSet: {
-          labelSetId: server.getLabelSetId(),
-          highestLabelSetVersion: server.getHighestLabelSetVersion(),
+          labelSetId: server.serverLabelSet.labelSetId,
+          highestLabelSetVersion: server.serverLabelSet.highestLabelSetVersion,
         },
       },
     };
