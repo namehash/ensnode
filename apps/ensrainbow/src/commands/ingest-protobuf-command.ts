@@ -8,10 +8,10 @@ import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { logger } from "@/utils/logger";
 import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
 import {
-  buildLabelSetId,
   type LabelSetId,
-  buildLabelSetVersion,
   type LabelSetVersion,
+  buildLabelSetId,
+  buildLabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
 
 export interface IngestProtobufCommandOptions {
@@ -147,9 +147,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             try {
               fileLabelSetVersion = buildLabelSetVersion(headerObj.label_set_version);
             } catch (e) {
-              const msg = `Invalid label set version in file header: ${
-                (e as Error).message
-              }`;
+              const msg = `Invalid label set version in file header: ${(e as Error).message}`;
               logger.error(msg);
               fileStream.destroy(new Error(msg)); // Stop processing
               return;

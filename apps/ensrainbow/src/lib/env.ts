@@ -1,7 +1,7 @@
 import { join } from "path";
+import { parseNonNegativeInteger } from "@ensnode/ensrainbow-sdk";
 
 import { logger } from "@/utils/logger";
-import { parseNonNegativeInteger } from "@/utils/parsing";
 
 export const getDefaultDataSubDir = () => join(process.cwd(), "data");
 

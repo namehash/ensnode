@@ -49,9 +49,7 @@ describe("buildLabelSetId", () => {
   });
 
   it("should throw an error for a non-string input", () => {
-    expect(() => buildLabelSetId(123 as any)).toThrow(
-      "LabelSetId must be a string.",
-    );
+    expect(() => buildLabelSetId(123 as any)).toThrow("LabelSetId must be a string.");
   });
 });
 
@@ -73,9 +71,13 @@ describe("buildLabelSetVersion", () => {
     );
   });
 
-  it("should throw an error for a non-number input", () => {
-    expect(() => buildLabelSetVersion("1" as any)).toThrow(
-      "LabelSetVersion must be a non-negative integer.",
+  it("should return a valid label set version for a string input", () => {
+    expect(buildLabelSetVersion("1")).toBe(1);
+  });
+
+  it("should throw an error for a non-number/non-string input", () => {
+    expect(() => buildLabelSetVersion({} as any)).toThrow(
+      "LabelSetVersion must be a number or string.",
     );
   });
 });

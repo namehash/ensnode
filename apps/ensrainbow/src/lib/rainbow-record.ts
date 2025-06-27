@@ -1,8 +1,8 @@
-import { parseNonNegativeInteger } from "@/utils/parsing";
 import { Label } from "@ensnode/ensnode-sdk";
 import {
   type LabelSetVersion,
   buildLabelSetVersion,
+  parseNonNegativeInteger,
 } from "@ensnode/ensrainbow-sdk";
 
 /**
@@ -61,7 +61,7 @@ export function decodeEncodedVersionedRainbowRecord(
   const label = encodedVersionedRainbowRecord.substring(colonIndex + 1);
 
   try {
-    const labelSetVersion = buildLabelSetVersion(parseNonNegativeInteger(maybeLabelSetVersion));
+    const labelSetVersion = buildLabelSetVersion(maybeLabelSetVersion);
     return { labelSetVersion, label };
   } catch (error: unknown) {
     throw new Error(

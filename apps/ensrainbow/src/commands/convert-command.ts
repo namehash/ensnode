@@ -6,18 +6,13 @@ import ProgressBar from "progress";
 import { logger } from "@/utils/logger";
 import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
 import { buildRainbowRecord } from "@/utils/rainbow-record";
-import {
-  buildLabelSetId,
-  type LabelSetId,
-  buildLabelSetVersion,
-  type LabelSetVersion,
-} from "@ensnode/ensrainbow-sdk";
+import { type LabelSetId, type LabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
 export interface ConvertCommandOptions {
   inputFile: string;
   outputFile: string;
-  labelSetId: string;
-  labelSetVersion: number;
+  labelSetId: LabelSetId;
+  labelSetVersion: LabelSetVersion;
 }
 
 // Current protobuf file format version
@@ -32,7 +27,7 @@ function logInitialOptions(options: ConvertCommandOptions): void {
   logger.info(`Output file: ${options.outputFile}`);
   logger.info(`Label set id: ${options.labelSetId}`);
   logger.info(`Label set version: ${options.labelSetVersion}`);
-  logger.info(`Format Version: ${CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION}`);
+  logger.info(`.ensrainbow File Format Version: ${CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION}`);
   logger.info("Output format: Header message + stream of individual records");
 }
 
@@ -182,10 +177,9 @@ function logSummary(processedRecords: number, invalidRecords: number, outputFile
  */
 export async function convertCommand(options: ConvertCommandOptions): Promise<void> {
   try {
-    const labelSetId = buildLabelSetId(options.labelSetId);
-    const labelSetVersion = buildLabelSetVersion(options.labelSetVersion);
+    const { labelSetId, labelSetVersion } = options;
 
-    logInitialOptions({ ...options, labelSetId });
+    logInitialOptions(options);
 
     // Set up progress bar
     const bar = setupProgressBar();

@@ -12,7 +12,12 @@ import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
 import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
-import { buildLabelSetId, buildLabelSetVersion } from "@ensnode/ensrainbow-sdk";
+import {
+  type LabelSetId,
+  type LabelSetVersion,
+  buildLabelSetId,
+  buildLabelSetVersion,
+} from "@ensnode/ensrainbow-sdk";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
@@ -51,8 +56,8 @@ interface PurgeArgs {
 interface ConvertArgs {
   "input-file": string;
   "output-file": string;
-  "label-set-id": string;
-  "label-set-version": number;
+  "label-set-id": LabelSetId;
+  "label-set-version": LabelSetVersion;
 }
 
 export interface CLIOptions {

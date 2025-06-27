@@ -1,20 +1,19 @@
 import { tmpdir } from "os";
 import { join } from "path";
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk";
+import { labelHashToBytes, parseNonNegativeInteger } from "@ensnode/ensrainbow-sdk";
 import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
 import { vi } from "vitest";
 
-import { parseNonNegativeInteger } from "@/utils/parsing";
 import {
   DB_SCHEMA_VERSION,
   ENSRainbowDB,
   IngestionStatus,
   SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION,
   SYSTEM_KEY_INGESTION_STATUS,
-  SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
   SYSTEM_KEY_LABEL_SET_ID,
+  SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
   SYSTEM_KEY_SCHEMA_VERSION,
   isRainbowRecordKey,
   isSystemKey,
@@ -316,7 +315,7 @@ describe("Database", () => {
         batch.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, "-1");
         await batch.write();
         await expect(db.getHighestLabelSetVersion()).rejects.toThrow(
-          "LabelSetVersion must be a non-negative integer.",
+          'Invalid label set version: -1: "-1" is not a non-negative integer',
         );
       } finally {
         await db.close();

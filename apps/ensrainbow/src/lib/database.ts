@@ -3,12 +3,11 @@ import { ClassicLevel } from "classic-level";
 import { ByteArray, Hex, labelhash } from "viem";
 
 import { logger } from "@/utils/logger";
-import { parseNonNegativeInteger } from "@/utils/parsing";
 import { Label } from "@ensnode/ensnode-sdk";
 import {
   type LabelSetId,
-  buildLabelSetId,
   type LabelSetVersion,
+  buildLabelSetId,
   buildLabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
 import {
@@ -309,7 +308,7 @@ export class ENSRainbowDB {
     if (labelSetVersion === null) {
       throw new Error("Highest label set version not found");
     }
-    return buildLabelSetVersion(parseNonNegativeInteger(labelSetVersion));
+    return buildLabelSetVersion(labelSetVersion);
   }
 
   /**
@@ -455,7 +454,7 @@ export class ENSRainbowDB {
     }
 
     try {
-      const count = parseNonNegativeInteger(countStr);
+      const count = buildLabelSetVersion(countStr);
       return count;
     } catch (error) {
       throw new Error(
@@ -487,7 +486,7 @@ export class ENSRainbowDB {
     }
 
     try {
-      return parseNonNegativeInteger(versionStr);
+      return buildLabelSetVersion(versionStr);
     } catch (error) {
       throw new Error(`Invalid schema version in database: ${versionStr}`);
     }
@@ -800,8 +799,7 @@ export class ENSRainbowDB {
    */
   public async addRainbowRecord(label: string, labelSetVersion: LabelSetVersion): Promise<void> {
     const encodedValue = buildEncodedVersionedRainbowRecord(label, labelSetVersion);
-    const key = labelHashToBytes(labelhash(label));
-    await this.db.put(key, encodedValue);
+    await this.db.put(labelHashToBytes(labelhash(label)), encodedValue);
   }
 }
 

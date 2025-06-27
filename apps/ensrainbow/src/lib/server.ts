@@ -3,11 +3,11 @@ import {
   type EnsRainbowClientLabelSet,
   type EnsRainbowServerLabelSet,
   ErrorCode,
+  type LabelSetId,
+  type LabelSetVersion,
   StatusCode,
   labelHashToBytes,
   validateSupportedLabelSet,
-  type LabelSetId,
-  type LabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 
@@ -97,7 +97,7 @@ export class ENSRainbowServer {
         labelSetVersionNumber > clientLabelSet.labelSetVersion
       ) {
         logger.info(
-          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds client's requested labelSetVersion ${clientLabelSet.labelSetVersion}`,
+          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds client's requested label set version ${clientLabelSet.labelSetVersion}`,
         );
         return {
           status: StatusCode.Error,

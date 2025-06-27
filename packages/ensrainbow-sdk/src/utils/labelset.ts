@@ -1,3 +1,5 @@
+import { parseNonNegativeInteger } from "./parsing";
+
 /**
  * A label set ID identifies a set of labels that can be used for deterministic healing.
  * A label set allows clients to deterministically heal their state against a server, ensuring that both are operating on the same version of data.
@@ -21,7 +23,7 @@ export function buildLabelSetId(maybeLabelSetId: string): LabelSetId {
   }
   if (!/^[a-z-]+$/.test(maybeLabelSetId)) {
     throw new Error(
-      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
+      `LabelSetId can only contain lowercase letters (a-z) and hyphens (-). LabelSetId: ${maybeLabelSetId}`,
     );
   }
   return maybeLabelSetId;
@@ -35,22 +37,33 @@ export function buildLabelSetId(maybeLabelSetId: string): LabelSetId {
 export type LabelSetVersion = number;
 
 /**
- * Builds a valid LabelSetVersion from a number.
- * @param maybeLabelSetVersion - The number to validate and convert to a LabelSetVersion.
+ * Builds a valid LabelSetVersion from a number or string.
+ * @param maybeLabelSetVersion - The number or string to validate and convert to a LabelSetVersion.
  * @returns A valid LabelSetVersion.
- * @throws If the input number is not a valid LabelSetVersion.
+ * @throws If the input is not a valid LabelSetVersion.
  */
-export function buildLabelSetVersion(
-  maybeLabelSetVersion: number,
-): LabelSetVersion {
-  if (
-    typeof maybeLabelSetVersion !== "number" ||
-    !Number.isInteger(maybeLabelSetVersion) ||
-    maybeLabelSetVersion < 0
-  ) {
-    throw new Error("LabelSetVersion must be a non-negative integer.");
+export function buildLabelSetVersion(maybeLabelSetVersion: number | string): LabelSetVersion {
+  let versionNumber: number;
+  if (typeof maybeLabelSetVersion === "string") {
+    try {
+      versionNumber = parseNonNegativeInteger(maybeLabelSetVersion);
+    } catch (error) {
+      throw new Error(
+        `Invalid label set version: ${maybeLabelSetVersion}: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+    }
+  } else if (typeof maybeLabelSetVersion === "number") {
+    if (maybeLabelSetVersion < 0 || !Number.isInteger(maybeLabelSetVersion)) {
+      throw new Error(`LabelSetVersion must be a non-negative integer.`);
+    }
+    versionNumber = maybeLabelSetVersion;
+  } else {
+    throw new Error(`LabelSetVersion must be a number or string.`);
   }
-  return maybeLabelSetVersion;
+
+  return versionNumber;
 }
 
 /**

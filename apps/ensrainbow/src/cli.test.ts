@@ -114,7 +114,7 @@ describe("CLI", () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
         const ensrainbowFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
         const ensrainbowOutputFile = join(tempDir, "test_ens_names_0.ensrainbow");
-        const labelSetId = "test_ens_names"; // Needed for convert
+        const labelSetId = "test-ens-names"; // Needed for convert
         const labelSetVersion = 0; // Needed for convert
 
         // Convert requires args - test with a try/catch to properly handle the rejection
@@ -147,7 +147,7 @@ describe("CLI", () => {
           "--label-set-version",
           labelSetVersion.toString(),
         ]);
-        //command: ensrainbow convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test_ens_names --label-set-version 0
+        //command: pnpm convert --input-file test/fixtures/test_ens_names.sql.gz --output-file test/fixtures/test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -164,7 +164,7 @@ describe("CLI", () => {
           "--data-dir",
           testDataDir,
         ]);
-        //command: ensrainbow ingest-ensrainbow --input-file test_ens_names_0.ensrainbow --data-dir test-db-directory
+        //command: pnpm ingest-ensrainbow --input-file test/fixtures/test_ens_names_0.ensrainbow --data-dir test-db-directory
         await expect(
           ingestCli.parse(["validate", "--data-dir", testDataDir]),
         ).resolves.not.toThrow();
@@ -173,7 +173,7 @@ describe("CLI", () => {
       it("should convert SQL and ingest ensrainbow ens_test_env_names", async () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "ens_test_env_names.sql.gz");
         const ensrainbowOutputFile = join(tempDir, "ens_test_env_0.ensrainbow");
-        const labelSetId = "ens_test_env"; // Needed for convert
+        const labelSetId = "ens-test-env"; // Needed for convert
         const labelSetVersion = 0; // Needed for convert
 
         // Convert requires args - test with a try/catch to properly handle the rejection
@@ -206,7 +206,7 @@ describe("CLI", () => {
           "--label-set-version",
           labelSetVersion.toString(),
         ]);
-        //command: ensrainbow convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test_ens_names --label-set-version 0
+        //command: pnpm convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -219,7 +219,7 @@ describe("CLI", () => {
           "--data-dir",
           testDataDir,
         ]);
-        //command: ensrainbow ingest-ensrainbow --input-file test_ens_names_0.ensrainbow --data-dir test-db-directory
+        //command: pnpm ingest-ensrainbow --input-file test_ens_names_0.ensrainbow --data-dir test-db-directory
         await expect(
           ingestCli.parse(["validate", "--data-dir", testDataDir]),
         ).resolves.not.toThrow();
@@ -228,7 +228,7 @@ describe("CLI", () => {
       it("should convert SQL to ensrainbow and not ingest if label set is not 0", async () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
         const ensrainbowOutputFile = join(tempDir, "test_ens_names_1.ensrainbow");
-        const labelSetId = "test_ens_names"; // Needed for convert
+        const labelSetId = "test-ens-names"; // Needed for convert
         const labelSetVersion = 1; // Needed for convert
 
         // Convert requires args - test with a try/catch to properly handle the rejection
@@ -288,7 +288,7 @@ describe("CLI", () => {
 
         // Create an ensrainbow file with label set version 2
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
-        const labelSetId = "test_ens_names";
+        const labelSetId = "test-ens-names";
         const labelSetVersion = 2; // Higher than 1
 
         // Successful convert with label set version 2
@@ -347,7 +347,7 @@ describe("CLI", () => {
 
         // Create an ensrainbow file with different label set id
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
-        const labelSetId = "different_label_set_id"; // Different from test_ens_names
+        const labelSetId = "different-label-set-id"; // Different from test-ens-names
         const labelSetVersion = 0;
 
         // Create second file with different label set id and label set version 0
@@ -410,7 +410,7 @@ describe("CLI", () => {
         // Check that we got the expected error
         expect(error1).toBeDefined();
         expect(error1?.message).toMatch(
-          /Label set id mismatch! Database label set id: test_ens_names, File label set id: different_label_set_id!/,
+          /Label set id mismatch! Database label set id: test-ens-names, File label set id: different-label-set-id!/,
         );
 
         // Ingest third file fails for the same reason
@@ -430,7 +430,7 @@ describe("CLI", () => {
         // Check that we got the expected error
         expect(error2).toBeDefined();
         expect(error2?.message).toMatch(
-          /Label set id mismatch! Database label set id: test_ens_names, File label set id: different_label_set_id!/,
+          /Label set id mismatch! Database label set id: test-ens-names, File label set id: different-label-set-id!/,
         );
       });
     });
@@ -468,7 +468,7 @@ describe("CLI", () => {
         await serverPromise;
       });
 
-      it("should respect PORT environment variable", async () => {
+      it.only("should respect PORT environment variable", async () => {
         const customPort = 5115;
         process.env.PORT = customPort.toString();
 

@@ -2,11 +2,11 @@ import {
   type EnsRainbow,
   EnsRainbowClientLabelSet,
   ErrorCode,
+  type LabelSetId,
+  type LabelSetVersion,
   StatusCode,
   buildEnsRainbowClientLabelSet,
   buildLabelSetId,
-  type LabelSetId,
-  type LabelSetVersion,
   buildLabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
@@ -17,7 +17,6 @@ import packageJson from "@/../package.json";
 import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { logger } from "@/utils/logger";
-import { parseNonNegativeInteger } from "@/utils/parsing";
 
 /**
  * Creates and configures an ENS Rainbow api
@@ -46,8 +45,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     let labelSetVersion: LabelSetVersion | undefined;
     try {
       if (labelSetVersionParam) {
-        const parsedVersion = parseNonNegativeInteger(labelSetVersionParam);
-        labelSetVersion = buildLabelSetVersion(parsedVersion);
+        labelSetVersion = buildLabelSetVersion(labelSetVersionParam);
       }
     } catch (error) {
       logger.warn(`Invalid label_set_version parameter: ${labelSetVersionParam}`);
