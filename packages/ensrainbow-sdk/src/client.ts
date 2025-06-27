@@ -1,5 +1,10 @@
 import { type Cache, Label, type LabelHash, LruCache } from "@ensnode/ensnode-sdk";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
+import {
+  type EnsRainbowClientLabelSet,
+  type EnsRainbowServerLabelSet,
+  buildEnsRainbowClientLabelSet,
+} from "./utils/labelset";
 
 export namespace EnsRainbow {
   export type ApiClientOptions = EnsRainbowApiClientOptions;
@@ -7,6 +12,10 @@ export namespace EnsRainbow {
   export interface ApiClient {
     count(): Promise<CountResponse>;
 
+    /**
+     * Heal a labelhash to its original label
+     * @param labelHash The labelhash to heal
+     */
     heal(labelHash: LabelHash): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
@@ -112,9 +121,14 @@ export namespace EnsRainbow {
     version: string;
 
     /**
-     * ENSRainbow schema version.
+     * ENSRainbow database schema version.
      */
-    schema_version: number;
+    dbSchemaVersion: number;
+
+    /**
+     * The EnsRainbowServerLabelSet managed by the ENSRainbow server.
+     */
+    labelSet: EnsRainbowServerLabelSet;
   }
 
   /**
@@ -138,6 +152,14 @@ export interface EnsRainbowApiClientOptions {
    * The URL of an ENSRainbow API endpoint.
    */
   endpointUrl: URL;
+
+  /**
+   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to support. If provided, enables deterministic heal results across time, such that only labels from label set versions less than or equal to this value will be returned. Therefore, even if the ENSRainbow server later ingests additional label set versions greater than this value, the results returned across time can be deterministic. If provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow server manages a compatible label set. If not provided no specific labelSetId validation will be performed during heal operations.
+   * If `labelSetId` is provided without `labelSetVersion`, the server will use the latest available version.
+   * If `labelSetVersion` is defined, only labels from sets less than or equal to this value will be returned.
+   * When `labelSetVersion` is defined, `labelSetId` must also be defined.
+   */
+  labelSet?: EnsRainbowClientLabelSet;
 }
 
 /**
@@ -168,13 +190,23 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      labelSet: buildEnsRainbowClientLabelSet(undefined, undefined),
     };
   }
 
   constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
+    const { labelSet: optionsLabelSet, ...rest } = options;
+    const defaultOptions = EnsRainbowApiClient.defaultOptions();
+
+    const copiedLabelSet = buildEnsRainbowClientLabelSet(
+      optionsLabelSet?.labelSetId,
+      optionsLabelSet?.labelSetVersion,
+    );
+
     this.options = {
-      ...EnsRainbowApiClient.defaultOptions(),
-      ...options,
+      ...defaultOptions,
+      ...rest,
+      labelSet: copiedLabelSet,
     };
 
     this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
@@ -231,7 +263,22 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
       return cachedResult;
     }
 
-    const response = await fetch(new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl));
+    const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
+
+    // Add label_set_id as a query parameter if provided
+    if (this.options.labelSet?.labelSetId !== undefined) {
+      url.searchParams.append("label_set_id", this.options.labelSet.labelSetId);
+    }
+
+    // Add label_set_version as a query parameter if provided
+    if (this.options.labelSet?.labelSetVersion !== undefined) {
+      url.searchParams.append(
+        "label_set_version",
+        this.options.labelSet.labelSetVersion.toString(),
+      );
+    }
+
+    const response = await fetch(url);
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
@@ -301,8 +348,14 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * // {
    * //   "status": "success",
-   * //   "version": "0.1.0",
-   * //   "schema_version": 2
+   * //   "versionInfo": {
+   * //     "version": "0.1.0",
+   * //     "dbSchemaVersion": 2,
+   * //     "labelSet": {
+   * //       "labelSetId": "subgraph",
+   * //       "labelSetVersion": 0
+   * //     }
+   * //   }
    * // }
    * ```
    */
@@ -322,6 +375,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const deepCopy = {
       cacheCapacity: this.options.cacheCapacity,
       endpointUrl: new URL(this.options.endpointUrl.href),
+      labelSet: this.options.labelSet ? { ...this.options.labelSet } : undefined,
     } satisfies EnsRainbowApiClientOptions;
 
     return Object.freeze(deepCopy);

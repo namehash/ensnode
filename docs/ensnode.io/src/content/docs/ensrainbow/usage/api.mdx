@@ -15,6 +15,8 @@ Response: `{"status":"ok"}`
 
 ## Heal Label
 
+### Basic Usage
+
 ```bash
 curl http://localhost:3223/v1/heal/0x[labelHash]
 ```
@@ -34,6 +36,23 @@ Response:
 }
 ```
 
+### Advanced Usage with Query Parameters
+
+You can optionally specify `label_set_id` and `label_set_version` query parameters for additional validation:
+
+```bash
+curl "http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc?label_set_id=subgraph&label_set_version=0"
+```
+
+#### Query Parameters
+
+- **`label_set_id`** (optional): Validates that the request matches the database label set id. Must be provided together with `label_set_version`.
+- **`label_set_version`** (optional): Specifies the highest label set of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests additional label set versions greater than this value. If provided, only labels from label set versions less than or equal to this value will be returned.
+
+:::note[Parameter Requirements]
+If you provide one of these parameters, you **must** provide both. The server will return a 400 error if only one parameter is provided.
+:::
+
 Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
 
 - Labels may or may not be ENS-normalized
@@ -42,12 +61,36 @@ Note on returned labels: The service returns labels exactly as they appear in th
 
 #### Error Responses
 
-- `400 Bad Request`: When the labelHash parameter is missing or invalid
+- `400 Bad Request`: When the labelHash parameter is missing or invalid, or when query parameters are incorrectly specified
 
   ```json
   {
     "status": "error",
     "error": "Invalid labelHash - must be a valid hex string",
+    "errorCode": 400
+  }
+  ```
+
+  ```json
+  {
+    "status": "error",
+    "error": "Invalid parameters: both 'label_set_id' and 'label_set_version' must be provided together",
+    "errorCode": 400
+  }
+  ```
+
+  ```json
+  {
+    "status": "error",
+    "error": "Label set id mismatch",
+    "errorCode": 400
+  }
+  ```
+
+  ```json
+  {
+    "status": "error",
+    "error": "Requested label set version is higher than available label set version",
     "errorCode": 400
   }
   ```
@@ -109,10 +152,17 @@ Success Response:
 {
   "status": "success",
   "version": "0.1.0",
-  "schema_version": 2
+  "dbSchemaVersion": 3,
+  "labelSet": {
+    "labelSetId": "subgraph",
+    "highestLabelSetVersion": 0
+  }
 }
 ```
 
 The response contains:
 - `version`: The current version of ENSRainbow
-- `schema_version`: The current schema version of the database
+- `dbSchemaVersion`: The current schema version of the database
+- `labelSet`: The label set of the loaded database
+- `labelSetId`: The label set id of the loaded database
+- `highestLabelSetVersion`: The highest label set version available in the database
