@@ -29,6 +29,10 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      labelSet: {
+        labelSetId: undefined,
+        labelSetVersion: undefined,
+      },
     } satisfies EnsRainbowApiClientOptions);
   });
 
@@ -42,6 +46,10 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
+      labelSet: {
+        labelSetId: undefined,
+        labelSetVersion: undefined,
+      },
     } satisfies EnsRainbowApiClientOptions);
   });
 

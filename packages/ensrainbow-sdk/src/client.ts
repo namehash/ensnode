@@ -190,19 +190,23 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      labelSet: buildEnsRainbowClientLabelSet(undefined, undefined),
     };
   }
 
   constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
-    const { labelSet, ...rest } = options;
-    const newLabelSet = labelSet
-      ? buildEnsRainbowClientLabelSet(labelSet.labelSetId, labelSet.labelSetVersion)
-      : undefined;
+    const { labelSet: optionsLabelSet, ...rest } = options;
+    const defaultOptions = EnsRainbowApiClient.defaultOptions();
+
+    const copiedLabelSet = buildEnsRainbowClientLabelSet(
+      optionsLabelSet?.labelSetId,
+      optionsLabelSet?.labelSetVersion,
+    );
 
     this.options = {
-      ...EnsRainbowApiClient.defaultOptions(),
+      ...defaultOptions,
       ...rest,
-      ...(newLabelSet ? { labelSet: newLabelSet } : {}),
+      labelSet: copiedLabelSet,
     };
 
     this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
@@ -261,17 +265,17 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
 
     const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
 
+    // Add label_set_id as a query parameter if provided
+    if (this.options.labelSet?.labelSetId !== undefined) {
+      url.searchParams.append("label_set_id", this.options.labelSet.labelSetId);
+    }
+
     // Add label_set_version as a query parameter if provided
     if (this.options.labelSet?.labelSetVersion !== undefined) {
       url.searchParams.append(
         "label_set_version",
         this.options.labelSet.labelSetVersion.toString(),
       );
-    }
-
-    // Add label_set_id as a query parameter if provided
-    if (this.options.labelSet?.labelSetId !== undefined) {
-      url.searchParams.append("label_set_id", this.options.labelSet.labelSetId);
     }
 
     const response = await fetch(url);
