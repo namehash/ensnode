@@ -3,6 +3,7 @@ import {
   unixTimestampToDate,
 } from "@/components/recent-registrations/utils";
 import { ensAdminVersion } from "@/lib/env";
+import { ENSNamespaceId, getNameWrapperAddress } from "@ensnode/datasources";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
@@ -27,17 +28,16 @@ interface RegistrationResult {
 }
 
 /**
- * The NameWrapper contract address
- */
-const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
-
-/**
  * Determines the effective owner of a domain.
  * If the owner is the NameWrapper contract, returns the wrapped owner instead.
  */
-function getEffectiveOwner(registrationResult: RegistrationResult): Address {
+function getEffectiveOwner(
+  registrationResult: RegistrationResult,
+  namespaceId: ENSNamespaceId | null,
+): Address {
+  const nameWrapperAddress = getNameWrapperAddress(namespaceId);
   // Use the regular owner if it's not the NameWrapper contract
-  if (!isAddressEqual(registrationResult.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
+  if (!isAddressEqual(registrationResult.domain.owner.id, nameWrapperAddress)) {
     return getAddress(registrationResult.domain.owner.id);
   }
 
@@ -54,7 +54,10 @@ function getEffectiveOwner(registrationResult: RegistrationResult): Address {
 /**
  * Transforms a RegistrationResult into a Registration
  */
-function toRegistration(registrationResult: RegistrationResult): Registration {
+function toRegistration(
+  registrationResult: RegistrationResult,
+  namespaceId: ENSNamespaceId | null,
+): Registration {
   return {
     registeredAt: unixTimestampToDate(registrationResult.registrationDate),
     expiresAt: unixTimestampToDate(registrationResult.expiryDate),
@@ -63,14 +66,17 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
     ownerInNameWrapper: registrationResult.domain.wrappedOwner
       ? getAddress(registrationResult.domain.wrappedOwner.id)
       : undefined,
-    owner: getEffectiveOwner(registrationResult),
+    owner: getEffectiveOwner(registrationResult, namespaceId),
   };
 }
 
 /**
  * Fetches info about the most recent registrations that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promise<Registration[]> {
+async function fetchRecentRegistrations(
+  baseUrl: URL,
+  maxResults: number,
+): Promise<RegistrationResult[]> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${maxResults}, orderBy: registrationDate, orderDirection: desc) {
@@ -109,21 +115,27 @@ async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promi
 
   const data = await response.json();
 
-  return data.data.registrations.map((registration: RegistrationResult) =>
-    toRegistration(registration),
-  );
+  return data.data.registrations;
 }
 
 /**
  * Hook to fetch info about most recently registered domains that have been indexed.
  *
  * @param ensNodeURL The URL of the selected ENS node instance.
- * @param maxResults the max number of recent registrations to retrieve
+ * @param maxResults The max number of recent registrations to retrieve
+ * @param namespaceId The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  */
-export function useRecentRegistrations(ensNodeURL: URL, maxResults: number) {
+export function useRecentRegistrations(
+  ensNodeURL: URL,
+  maxResults: number,
+  namespaceId: ENSNamespaceId | null, //TODO: it would be optimal if it was not nullable, but idk yet how to achieve this (dependency on the other hook)
+) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
     queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
+    // Select the registrations from the response
+    select: (data): Registration[] =>
+      data.map((registration: RegistrationResult) => toRegistration(registration, namespaceId)),
     throwOnError(error) {
       throw new Error(
         `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,

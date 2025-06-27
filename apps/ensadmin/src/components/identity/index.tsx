@@ -1,17 +1,23 @@
 "use client";
 
+import { NameDisplay } from "@/components/recent-registrations/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SupportedChainId } from "@/lib/wagmi";
+import {
+  ENSNamespaceId,
+  ENSNamespaceIds,
+  getENSRootChainId,
+  getEnsNameAvatarUrl,
+} from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
-import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { useEnsName } from "wagmi";
 
+//TODO: add descriptions for type's fields
 interface IdentityProps {
   address: Address;
-  chainId: SupportedChainId;
+  ensNamespaceId: ENSNamespaceId;
   showAvatar?: boolean;
   showExternalLink?: boolean;
   className?: string;
@@ -19,70 +25,80 @@ interface IdentityProps {
 
 /**
  * Component to display an ENS name for an Ethereum address.
- * Falls back to a truncated address if no ENS name is found.
+ * It can display an avatar if available, a link to the ENS name, or a truncated address.
  */
 export function Identity({
   address,
-  chainId,
+  ensNamespaceId,
   showAvatar = false,
   showExternalLink = true,
   className = "",
 }: IdentityProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Use the ENS name hook from wagmi
-  const { data: ensName, isLoading } = useEnsName({
-    address,
-    chainId,
-  });
-
   // Handle client-side rendering
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Generate ENS app URL
-  const ensAppUrl = `https://app.ens.domains/${address}`;
-
   // Truncate address for display
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
-  // Display name (ENS name or truncated address)
-  const displayName = ensName || truncatedAddress;
+  //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
+  // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
+  // is that an alright solution? - duplicates code with error of the query, but that seems necessary for our current predicament - allows us to avoid some additional if-ology when calling the wagmi hook
+  if (ensNamespaceId === ENSNamespaceIds.EnsTestEnv) {
+    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+  }
 
-  // If not mounted yet (server-side), show a skeleton
-  if (!mounted) {
+  const chainId = getENSRootChainId(ensNamespaceId);
+
+  // Use the ENS name hook from wagmi
+  const {
+    data: ensName,
+    isLoading,
+    isError,
+  } = useEnsName({
+    address,
+    chainId,
+  });
+
+  // If not mounted yet (server-side), or still loading, show a skeleton
+  if (!mounted || isLoading) {
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
+
+  // If there is an error, show the truncated address
+  if (isError) {
+    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+  }
+
+  // Get ENS avatar URL
+  const ensAvatarUrl = ensName ? getEnsNameAvatarUrl(ensNamespaceId, ensName) : undefined;
+
+  // Display name (ENS name or truncated address)
+  const displayName = ensName || truncatedAddress;
 
   return (
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && (
         <Avatar className="h-6 w-6">
-          {ensName && (
-            <AvatarImage
-              src={`https://metadata.ens.domains/mainnet/avatar/${ensName}`}
-              alt={ensName}
-            />
-          )}
+          {ensAvatarUrl && ensName && <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />}
           <AvatarFallback className="text-xs">
             {displayName.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       )}
-
-      <a
-        href={ensAppUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1 text-blue-600 hover:underline"
-        title={address}
-      >
-        <span className="font-medium">
-          {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
-        </span>
-        {showExternalLink && <ExternalLink size={14} className="inline-block" />}
-      </a>
+      {/*TODO: previously we linked to owners even if they didn't have a primary name set, should we keep doing it? (Current version comes from PR #476 where we didn't do that)*/}
+      {ensName ? (
+        <NameDisplay
+          namespaceId={ensNamespaceId}
+          ensName={ensName}
+          showExternalLink={showExternalLink}
+        />
+      ) : (
+        <span className={ensName ? "font-medium" : "font-mono text-xs"}>{displayName}</span>
+      )}
     </div>
   );
 }

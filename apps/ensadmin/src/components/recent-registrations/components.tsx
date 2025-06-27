@@ -1,8 +1,14 @@
 "use client";
 
-import { useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
+import { EnsNode, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
-import { Duration, FormattedDate, RelativeTime } from "@/components/recent-registrations/utils";
+import { Registration } from "@/components/recent-registrations/types";
+import {
+  Duration,
+  FormattedDate,
+  NameDisplay,
+  RelativeTime,
+} from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -13,7 +19,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import { Clock, ExternalLink } from "lucide-react";
+import { getEnsAppUrl } from "@ensnode/datasources";
+import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
@@ -24,22 +31,23 @@ import { useRecentRegistrations } from "./hooks";
  */
 const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
-/**
- * Helper function to generate ENS app URL for a name
- */
-const getEnsAppUrlForName = (name: string) => {
-  // no explicit url encoding needed
-  return `https://app.ens.domains/${name}`;
-};
-
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
+  const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
+
+  // TODO: Also where should we handle that in case of indexingStatusQuery failure this would result in an error -> in no other scenario the namespaceId should be a null value
+  //  Can we assume that if such thing occurs either a fallback or the error message higher up will be called?
+  //  Or should we perform a validation similar to the view-model below?
+  //TODO: because of the need for the namespaceId inside recent registrations hook, it becomes dependent on the useIndexingStatus query which is bad
+  const namespaceId = indexingStatusQuery.data ? indexingStatusQuery.data.env.NAMESPACE : null;
+
   const recentRegistrationsQuery = useRecentRegistrations(
-    selectedEnsNodeUrl(searchParams),
+    ensNodeUrl,
     MAX_NUMBER_OF_LATEST_REGISTRATIONS,
+    namespaceId,
   );
-  const indexingStatus = useIndexingStatusQuery(searchParams);
-  const indexedChainId = useENSRootDatasourceChainId(indexingStatus.data);
+
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -47,12 +55,35 @@ export function RecentRegistrations() {
   }, []);
 
   // Get the current indexing date from the indexing status
-  const currentIndexingDate = indexingStatus.data
+  const currentIndexingDate = indexingStatusQuery.data
     ? globalIndexingStatusViewModel(
-        indexingStatus.data.runtime.networkIndexingStatusByChainId,
-        indexingStatus.data.env.NAMESPACE,
+        indexingStatusQuery.data.runtime.networkIndexingStatusByChainId,
+        indexingStatusQuery.data.env.NAMESPACE,
       ).currentIndexingDate
     : null;
+
+  if (indexingStatusQuery.isLoading || recentRegistrationsQuery.isLoading) {
+    return <RecentRegistrationsFallback />;
+  }
+
+  //TODO: This approach is a little bit trade-offish - cause we make JSX simpler but have to additionally make sure query's results are not undefined in the final return JSX
+  if (indexingStatusQuery.isError) {
+    return (
+      <p>
+        Could not fetch indexing status from selected ENSNode due to an error: $
+        {indexingStatusQuery.error.message}
+      </p>
+    );
+  }
+
+  if (recentRegistrationsQuery.isError) {
+    return (
+      <p>
+        Could not fetch recent registrations due to an error: $
+        {recentRegistrationsQuery.error.message}
+      </p>
+    );
+  }
 
   return (
     <Card className="w-full">
@@ -78,64 +109,59 @@ export function RecentRegistrations() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {recentRegistrationsQuery.isLoading ? (
-          <RecentRegistrationsFallback />
-        ) : recentRegistrationsQuery.error ? (
-          <div className="text-destructive">
-            Error loading recent registrations: {(recentRegistrationsQuery.error as Error).message}
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Registered</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Owner</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isClient &&
-                recentRegistrationsQuery.data?.map((registration) => (
-                  <TableRow key={registration.name}>
-                    <TableCell className="font-medium">
-                      <a
-                        href={getEnsAppUrlForName(registration.name)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline w-fit"
-                      >
-                        {registration.name}
-                        <ExternalLink size={14} className="inline-block" />
-                      </a>
-                    </TableCell>
-                    <TableCell>
-                      <RelativeTime date={registration.registeredAt} />
-                    </TableCell>
-                    <TableCell>
-                      <Duration
-                        beginsAt={registration.registeredAt}
-                        endsAt={registration.expiresAt}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {indexedChainId ? (
-                        <Identity
-                          address={registration.owner}
-                          chainId={indexedChainId}
-                          showAvatar={true}
-                        />
-                      ) : (
-                        <Identity.Placeholder showAvatar={true} />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        )}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Registered</TableHead>
+              <TableHead>Duration</TableHead>
+              <TableHead>Owner</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isClient &&
+              indexingStatusQuery.data &&
+              recentRegistrationsQuery.data?.map((registration) => (
+                <RegistrationRow
+                  key={registration.name}
+                  registration={registration}
+                  ensNodeMetadata={indexingStatusQuery.data}
+                />
+              ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
+  );
+}
+
+interface RegistrationRowProps {
+  registration: Registration;
+  ensNodeMetadata: EnsNode.Metadata; //TODO: maybe we could just inject only namespaceId here? Not 100% sure which option is better, but I like the current one more cause it seems cleaner, less over-engineered, (more invariants friendly?)
+}
+
+function RegistrationRow({ registration, ensNodeMetadata }: RegistrationRowProps) {
+  const namespaceId = ensNodeMetadata.env.NAMESPACE;
+
+  return (
+    <TableRow>
+      <TableCell>
+        <NameDisplay
+          namespaceId={namespaceId}
+          ensName={registration.name}
+          showExternalLink={true}
+        />
+      </TableCell>
+      <TableCell>
+        <RelativeTime date={registration.registeredAt} />
+      </TableCell>
+      <TableCell>
+        <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
+      </TableCell>
+      <TableCell>
+        <Identity address={registration.owner} ensNamespaceId={namespaceId} showAvatar={true} />
+      </TableCell>
+    </TableRow>
   );
 }
 

@@ -1,5 +1,7 @@
+import { ENSNamespaceId, getEnsNameDetailsUrl } from "@ensnode/datasources";
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
+import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /**
@@ -69,4 +71,37 @@ export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
   }
 
   return date;
+}
+
+interface NameDisplayProps {
+  namespaceId: ENSNamespaceId;
+  ensName: string;
+  showExternalLink?: boolean;
+}
+
+/**
+ * Component to display an ENS registration.
+ * It can display a link to the ENS name, or just the name if the ENS namespace has no dedicated ENS App.
+ */
+
+//TODO: consider a different name
+//TODO: should probably be moved to /identity or somewhere else
+export function NameDisplay({ ensName, namespaceId, showExternalLink }: NameDisplayProps) {
+  const ensAppNameDetailsUrl = getEnsNameDetailsUrl(namespaceId, ensName);
+
+  if (ensAppNameDetailsUrl) {
+    return (
+      <a
+        href={ensAppNameDetailsUrl.toString()}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+      >
+        {ensName}
+        {showExternalLink && <ExternalLink size={14} className="inline-block" />}
+      </a>
+    );
+  }
+
+  return <span className="font-medium">{ensName}</span>;
 }

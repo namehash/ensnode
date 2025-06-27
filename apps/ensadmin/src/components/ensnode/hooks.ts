@@ -29,14 +29,10 @@ type UseIndexingStatusQueryResult = UseQueryResult<EnsNode.Metadata, Error>;
 
 /**
  * Hook to fetch the indexing status of the ENS node.
- * @param searchParams The URL search params including the selected ENS node URL.
+ * @param {URL} ensNodeUrl the selected ENS node URL.
  * @returns React Query hook result.
  */
-export function useIndexingStatusQuery(
-  searchParams: URLSearchParams,
-): UseIndexingStatusQueryResult {
-  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
-
+export function useIndexingStatusQuery(ensNodeUrl: URL): UseIndexingStatusQueryResult {
   return useQuery({
     queryKey: ["indexing-status", ensNodeUrl],
     queryFn: () => fetchEnsNodeStatus(ensNodeUrl),
@@ -94,3 +90,5 @@ export function useENSRootDatasourceChainId(
   // TODO: this should use the namespace's ensroot datasource's chain ID, not the namespace identifier itself
   return parseSupportedChainIdByName(indexingStatus.env.NAMESPACE);
 }
+
+//TODO: isn't this a duplication of getENSRootChainId from the datasources package?
