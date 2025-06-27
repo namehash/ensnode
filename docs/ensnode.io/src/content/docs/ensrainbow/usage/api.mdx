@@ -47,7 +47,7 @@ curl "http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2
 #### Query Parameters
 
 - **`label_set_id`** (optional): Validates that the request matches the database label set id. Must be provided together with `label_set_version`.
-- **`label_set_version`** (optional): Specifies the highest label set version to accept. Only labels from sets less than or equal to this value will be returned. Must be provided together with `label_set_id`.
+- **`label_set_version`** (optional): Specifies the highest label set of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests additional label set versions greater than this value. If provided, only labels from label set versions less than or equal to this value will be returned.
 
 :::note[Parameter Requirements]
 If you provide one of these parameters, you **must** provide both. The server will return a 400 error if only one parameter is provided.

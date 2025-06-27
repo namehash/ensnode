@@ -155,7 +155,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
             // Validate version
             if (fileVersion !== CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION) {
-              const msg = `File format version ${fileVersion} is not supported. Update your application to the latest version.`;
+              const msg = `.ensrainbow File format version ${fileVersion} is not supported. Update your application to the latest version.`;
               logger.error(msg);
               fileStream.destroy(new Error(msg)); // Stop processing
               return;

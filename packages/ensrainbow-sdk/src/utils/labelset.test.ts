@@ -102,7 +102,7 @@ describe("buildEnsRainbowClientLabelSet", () => {
 
   it("should throw an error if labelSetVersion is provided without labelSetId", () => {
     expect(() => buildEnsRainbowClientLabelSet(undefined, 0)).toThrow(
-      "When a labelSetVersion is provided, labelSetId must also be provided.",
+      "When a labelSetVersion is defined, labelSetId must also be defined.",
     );
   });
 });

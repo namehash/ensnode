@@ -121,12 +121,12 @@ export namespace EnsRainbow {
     version: string;
 
     /**
-     * ENSRainbow schema version.
+     * ENSRainbow database schema version.
      */
     schemaVersion: number;
 
     /**
-     * ENSRainbow label set.
+     * The EnsRainbowServerLabelSet managed by the ENSRainbow server.
      */
     labelSet: EnsRainbowServerLabelSet;
   }
@@ -154,10 +154,10 @@ export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;
 
   /**
-   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to use. If provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow server is using a compatible label set. If not provided no specific labelSetId validation will be performed during heal operations.
+   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to support. If provided, enables deterministic heal results across time, such that only labels from label set versions less than or equal to this value will be returned. Therefore, even if the ENSRainbow server later ingests additional label set versions greater than this value, the results returned across time can be deterministic. If provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow server manages a compatible label set. If not provided no specific labelSetId validation will be performed during heal operations.
    * If `labelSetId` is provided without `labelSetVersion`, the server will use the latest available version.
-   * If `labelSetVersion` is provided, only labels from sets less than or equal to this value will be returned.
-   * When `labelSetVersion` is provided, `labelSetId` must also be provided.
+   * If `labelSetVersion` is defined, only labels from sets less than or equal to this value will be returned.
+   * When `labelSetVersion` is defined, `labelSetId` must also be defined.
    */
   labelSet?: EnsRainbowClientLabelSet;
 }

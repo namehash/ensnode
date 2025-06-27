@@ -96,14 +96,14 @@ export interface EnsRainbowClientLabelSet {
  * @param labelSetId - The label set ID.
  * @param labelSetVersion - The label set version.
  * @returns A valid EnsRainbowClientLabelSet object.
- * @throws If `labelSetVersion` is provided without `labelSetId`.
+ * @throws If `labelSetVersion` is defined without `labelSetId`.
  */
 export function buildEnsRainbowClientLabelSet(
   labelSetId?: LabelSetId,
   labelSetVersion?: LabelSetVersion,
 ): EnsRainbowClientLabelSet {
   if (labelSetVersion !== undefined && labelSetId === undefined) {
-    throw new Error("When a labelSetVersion is provided, labelSetId must also be provided.");
+    throw new Error("When a labelSetVersion is defined, labelSetId must also be defined.");
   }
 
   return { labelSetId, labelSetVersion };

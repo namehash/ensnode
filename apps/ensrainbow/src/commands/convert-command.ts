@@ -15,7 +15,7 @@ export interface ConvertCommandOptions {
   labelSetVersion: LabelSetVersion;
 }
 
-// Current protobuf file format version
+// Current .ensrainbow protobuf file format version
 export const CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION = 1;
 
 /**
