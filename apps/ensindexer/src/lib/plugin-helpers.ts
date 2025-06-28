@@ -1,17 +1,8 @@
-import {
-  ContractConfig,
-  Datasource,
-  DatasourceName,
-  ENSNamespaceId,
-  getENSNamespace,
-} from "@ensnode/datasources";
-import { Label, Name, PluginName } from "@ensnode/ensnode-sdk";
-import { NetworkConfig } from "ponder";
-import { http, Chain } from "viem";
-
 import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
-import { constrainContractBlockrange } from "@/lib/ponder-helpers";
+import { DatasourceName, ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import { createConfig as createPonderConfig } from "ponder";
 
 /**
  * A factory function that returns a function to create a namespaced contract name for Ponder handlers.
@@ -34,159 +25,81 @@ import { constrainContractBlockrange } from "@/lib/ponder-helpers";
  * subgraphNamespace("Registry"); // returns "subgraph/Registry"
  * basenamesNamespace("Registry"); // returns "basenames/Registry"
  * ```
+ *
+ * Note: we use templated type here to ensure that the output type follow the literal value from the function input.
  */
-export function makePluginNamespace<PLUGIN_NAME extends PluginName>(pluginName: PLUGIN_NAME) {
+export function makePluginNamespace<const PluginNameType extends PluginName>(
+  pluginName: PluginNameType,
+) {
   if (/[.:]/.test(pluginName)) {
     throw new Error("Reserved character: Plugin namespace prefix cannot contain '.' or ':'");
   }
 
-  /** Creates a namespaced contract name */
-  return function pluginNamespace<CONTRACT_NAME extends string>(
-    contractName: CONTRACT_NAME,
-  ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
-    return `${pluginName}/${contractName}`;
+  /**
+   * Creates a namespaced contract name
+   *
+   * Note: we use templated type here to ensure that the output type follow the literal value from the function input.
+   */
+  return function pluginNamespace<const ContractNameType extends string>(
+    contractName: ContractNameType,
+  ): `${PluginNameType}/${ContractNameType}` {
+    return `${pluginName}/${contractName}` as const;
   };
 }
 
 /**
  * Describes an ENSIndexerPlugin used within the ENSIndexer project.
+ *
+ * Note: all templated types have been use to bind types derived from plugin's
+ * config literals and make them available for proper type inference.
  */
 export interface ENSIndexerPlugin<
-  PLUGIN_NAME extends PluginName = PluginName,
-  PONDER_CONFIG = unknown,
+  PluginNameType extends PluginName = PluginName,
+  RequiredDatasourceNamesType extends readonly DatasourceName[] = DatasourceName[],
+  PonderChainsType extends object = {},
+  PonderContractsType extends object = {},
+  PonderAccountsType extends object = {},
+  PonderBlocksType extends object = {},
 > {
   /**
-   * A unique plugin name for identification
+   * The plugin's unique name.
    */
-  pluginName: PLUGIN_NAME;
+  name: PluginNameType;
 
   /**
    * The list of DatasourceNames this plugin requires access to. ENSIndexer enforces that a plugin
    * can only be activated if all of its required Datasources are defined on the configured ENS Namespace.
    */
-  requiredDatasources: DatasourceName[];
+  requiredDatasourceNames: RequiredDatasourceNamesType;
 
   /**
-   * An ENSIndexerPlugin must return a Ponder Config.
-   * https://ponder.sh/docs/contracts-and-networks
+   * Create Ponder Config for the plugin.
+   *
+   * @param {ENSIndexerConfig} ensIndexerConfig
    */
-  createPonderConfig(appConfig: ENSIndexerConfig): PONDER_CONFIG;
-
-  /**
-   * An `activate` handler that should load the plugin's handlers that eventually execute `ponder.on`
-   */
-  activate: () => Promise<void>;
+  createPonderConfig(
+    ensIndexerConfig: ENSIndexerConfig,
+  ): PonderConfigResult<
+    PonderChainsType,
+    PonderContractsType,
+    PonderAccountsType,
+    PonderBlocksType
+  >;
 }
 
 /**
- * An ENSIndexerPlugin's handlers are provided runtime information about their respective plugin.
- */
-export type ENSIndexerPluginHandlerArgs<PLUGIN_NAME extends PluginName = PluginName> = {
-  pluginName: PLUGIN_NAME;
-  pluginNamespace: ReturnType<typeof makePluginNamespace<PLUGIN_NAME>>;
-};
-
-/**
- * An ENSIndexerPlugin accepts ENSIndexerPluginHandlerArgs and registers ponder event handlers.
- */
-export type ENSIndexerPluginHandler<PLUGIN_NAME extends PluginName> = (
-  args: ENSIndexerPluginHandlerArgs<PLUGIN_NAME>,
-) => void;
-
-/**
- * A helper function for defining an ENSIndexerPlugin's `activate()` function.
+ * Helper type to capture the return type of `createPonderConfig` with its `const` inferred generics.
+ * This is the exact shape of a Ponder config.
  *
- * Given a set of handler file imports, returns a function that executes them with the provided args.
+ * Note: all templated types have been use to bind types derived from the `createPonderConfig`'s input params
+ * and make them available for proper type inference in the `createPonderConfig` caller's scope.
  */
-export const activateHandlers =
-  <PLUGIN_NAME extends PluginName>({
-    handlers,
-    ...args
-  }: ENSIndexerPluginHandlerArgs<PLUGIN_NAME> & {
-    handlers: () => Promise<{ default: ENSIndexerPluginHandler<PLUGIN_NAME> }>[];
-  }) =>
-  async () => {
-    await Promise.all(handlers()).then((modules) => modules.map((m) => m.default(args)));
-  };
-
-/**
- * Get a list of unique indexed chain IDs for selected plugin names.
- */
-export function getIndexedChainIds(datasources: Datasource[]): number[] {
-  const indexedChainIds = datasources.map((datasource) => datasource.chain.id);
-
-  return uniq(indexedChainIds);
-}
-
-/**
- * Builds a ponder#NetworksConfig for a single, specific chain.
- */
-export function networksConfigForChain(config: ENSIndexerConfig, chainId: number) {
-  if (!config.rpcConfigs[chainId]) {
-    throw new Error(
-      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(config.rpcConfigs).join(", ")}].`,
-    );
-  }
-
-  const { url, maxRequestsPerSecond } = config.rpcConfigs[chainId]!;
-
-  return {
-    [chainId.toString()]: {
-      chainId: chainId,
-      transport: http(url),
-      maxRequestsPerSecond,
-      // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
-      ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
-    } satisfies NetworkConfig,
-  };
-}
-
-/**
- * Builds a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
- * indexing range by the globally configured blockrange.
- */
-export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
-  config: ENSIndexerConfig,
-  chain: Chain,
-  contractConfig: CONTRACT_CONFIG,
-) {
-  return {
-    [chain.id.toString()]: {
-      address: contractConfig.address, // provide per-network address if available
-      ...constrainContractBlockrange(config, contractConfig.startBlock), // per-network blockrange
-    },
-  };
-}
-
-const POSSIBLE_PREFIXES = [
-  "data:application/json;base64,",
-  "data:application/json;_base64,", // idk, sometimes 3dns returns this malformed prefix
-];
-
-/**
- * Parses a base64-encoded JSON metadata URI to extract the label and name.
- *
- * @param uri - The base64-encoded JSON metadata URI string
- * @returns A tuple containing [label, name] if parsing succeeds, or [null, null] if it fails
- */
-export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name] | [null, null] {
-  if (!POSSIBLE_PREFIXES.some((prefix) => uri.startsWith(prefix))) {
-    // console.error("Invalid tokenURI format:", uri);
-    return [null, null];
-  }
-
-  const base64String = POSSIBLE_PREFIXES.reduce((memo, prefix) => memo.replace(prefix, ""), uri);
-  const jsonString = Buffer.from(base64String, "base64").toString("utf-8");
-  const metadata = JSON.parse(jsonString);
-
-  // trim the . off the end of the fqdn
-  const name = metadata?.name?.slice(0, -1);
-  if (!name) return [null, null];
-
-  const [label] = name.split(".");
-
-  return [label, name];
-}
+type PonderConfigResult<
+  CHAINS extends object = {},
+  CONTRACTS extends object = {},
+  ACCOUNTS extends object = {},
+  BLOCKS extends object = {},
+> = ReturnType<typeof createPonderConfig<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>>;
 
 /**
  * ENSNamespaceFullyDefinedAtCompileTime is a helper type necessary to support runtime-conditional
@@ -231,3 +144,60 @@ export const getDatasourceAsFullyDefinedAtCompileTime = <
   namespaceId: N,
   datasourceName: D,
 ) => getENSNamespaceAsFullyDefinedAtCompileTime(namespaceId)[datasourceName];
+
+/**
+ * Options type for `buildPlugin` function input.
+ */
+export interface BuildPluginOptions<
+  PluginNameType extends PluginName,
+  RequiredDatasourceNamesType extends readonly DatasourceName[],
+  // This generic will capture the exact PonderConfigResult, including the inferred types.
+  PonderConfigResultType extends PonderConfigResult,
+> {
+  /** The unique plugin name */
+  name: PluginNameType;
+
+  /** The plugin's required Datasources */
+  requiredDatasourceNames: RequiredDatasourceNamesType;
+
+  /**
+   * Create the ponder configuration lazily to prevent premature execution of
+   * nested factory functions, i.e. to ensure that the ponder configuration
+   * is only created for this plugin when it is activated.
+   */
+  createPonderConfig(ensIndexerConfig: ENSIndexerConfig): PonderConfigResultType;
+}
+
+/**
+ * Builds an ENSIndexerPlugin for ENSIndexer.
+ *
+ * This function simplifies building an ENSIndexerPlugin.
+ *
+ * The special type system logic is used when building the MergedPonderConfig that is required by Ponder.
+ */
+export function buildPlugin<
+  PluginNameType extends PluginName,
+  PluginRequiredDatasourceNamesType extends readonly DatasourceName[],
+  PonderConfigResultType extends PonderConfigResult,
+>(
+  options: BuildPluginOptions<
+    PluginNameType,
+    PluginRequiredDatasourceNamesType,
+    PonderConfigResultType
+  >,
+): ENSIndexerPlugin<
+  PluginNameType,
+  PluginRequiredDatasourceNamesType,
+  PonderConfigResultType["networks"],
+  PonderConfigResultType["contracts"],
+  PonderConfigResultType["accounts"],
+  PonderConfigResultType["blocks"]
+> {
+  return options;
+}
+
+export function getRequiredDatasourceNames(plugins: ENSIndexerPlugin[]): DatasourceName[] {
+  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasourceNames);
+
+  return uniq(requiredDatasourceNames);
+}

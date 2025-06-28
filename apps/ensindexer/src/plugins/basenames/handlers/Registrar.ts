@@ -4,7 +4,7 @@ import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk
 
 import config from "@/config";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
@@ -16,10 +16,12 @@ import { getRegistrarManagedName } from "../lib/registrar-helpers";
  */
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-export default function ({
-  pluginName,
-  pluginNamespace: ns,
-}: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
+/**
+ * Attach a set of event handlers for indexing process.
+ */
+export function attachBasenamesRegistrarEventHandlers() {
+  const pluginName = PluginName.Basenames;
+
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -32,6 +34,9 @@ export default function ({
     // the name returned from `getRegistrarManagedName` function call
     registrarManagedName: getRegistrarManagedName(config.namespace),
   });
+
+  // create a namespace for the plugin events to avoid conflicts with other plugins
+  const ns = makePluginNamespace(pluginName);
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(ns("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {

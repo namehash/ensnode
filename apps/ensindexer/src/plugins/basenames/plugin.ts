@@ -1,91 +1,72 @@
 /**
- * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource, leveraging
- * the shared Subgraph-compatible indexing logic.
+ * The Basenames plugin describes indexing behavior for the Basenames ENS Datasource.
  */
 
-import { DatasourceNames } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
-
-import type { ENSIndexerConfig } from "@/config/types";
 import {
-  type ENSIndexerPlugin,
-  activateHandlers,
+  buildPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
-  networkConfigForContract,
-  networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import * as ponder from "ponder";
 
-const pluginName = PluginName.Basenames;
+export default buildPlugin({
+  name: PluginName.Basenames,
+  requiredDatasourceNames: [DatasourceNames.Basenames],
+  createPonderConfig(ensIndexerConfig) {
+    const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+      ensIndexerConfig.namespace,
+      DatasourceNames.Basenames,
+    );
+    const ns = makePluginNamespace(PluginName.Basenames);
 
-// Define the Datasources required by the plugin
-const requiredDatasources = [DatasourceNames.Basenames];
-
-// Construct a unique plugin namespace to wrap contract names
-const pluginNamespace = makePluginNamespace(pluginName);
-
-// config object factory used to derive PluginConfig type
-function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
-    config.namespace,
-    DatasourceNames.Basenames,
-  );
-
-  return createConfig({
-    networks: networksConfigForChain(config, chain.id),
-    contracts: {
-      [pluginNamespace("Registry")]: {
-        network: networkConfigForContract(config, chain, contracts.Registry),
-        abi: contracts.Registry.abi,
+    return ponder.createConfig({
+      networks: networksConfigForChain(chain.id, ensIndexerConfig.rpcConfigs),
+      contracts: {
+        [ns("Registry")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.Registry,
+          ),
+          abi: contracts.Registry.abi,
+        },
+        [ns("BaseRegistrar")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.BaseRegistrar,
+          ),
+          abi: contracts.BaseRegistrar.abi,
+        },
+        [ns("EARegistrarController")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.EARegistrarController,
+          ),
+          abi: contracts.EARegistrarController.abi,
+        },
+        [ns("RegistrarController")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.RegistrarController,
+          ),
+          abi: contracts.RegistrarController.abi,
+        },
+        // We use a shared Subgraph-compatible Resolver ABI, hence we don't need apply any contract namespace here for the plugin
+        Resolver: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.Resolver,
+          ),
+          abi: contracts.Resolver.abi,
+        },
       },
-      [pluginNamespace("BaseRegistrar")]: {
-        network: networkConfigForContract(config, chain, contracts.BaseRegistrar),
-        abi: contracts.BaseRegistrar.abi,
-      },
-      [pluginNamespace("EARegistrarController")]: {
-        network: networkConfigForContract(config, chain, contracts.EARegistrarController),
-        abi: contracts.EARegistrarController.abi,
-      },
-      [pluginNamespace("RegistrarController")]: {
-        network: networkConfigForContract(config, chain, contracts.RegistrarController),
-        abi: contracts.RegistrarController.abi,
-      },
-      Resolver: {
-        network: networkConfigForContract(config, chain, contracts.Resolver),
-        abi: contracts.Resolver.abi,
-      },
-    },
-  });
-}
-
-// Implicitly define the type returned by createPonderConfig
-type PonderConfig = ReturnType<typeof createPonderConfig>;
-
-export default {
-  /**
-   * Activate the plugin handlers for indexing.
-   */
-  activate: activateHandlers({
-    pluginName,
-    pluginNamespace,
-    handlers: () => [
-      import("./handlers/Registry"),
-      import("./handlers/Registrar"),
-      import("../shared/Resolver"),
-    ],
-  }),
-
-  /**
-   * Create the ponder configuration lazily to prevent premature execution of
-   * nested factory functions, i.e. to ensure that the ponder configuration
-   * is only created for this plugin when it is activated.
-   */
-  createPonderConfig,
-
-  /** The unique plugin name */
-  pluginName,
-
-  /** The plugin's required Datasources */
-  requiredDatasources,
-} as const satisfies ENSIndexerPlugin<PluginName.Basenames, PonderConfig>;
+    });
+  },
+});

@@ -21,8 +21,8 @@ export function invariant_requiredDatasources(
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
   for (const pluginName of config.plugins) {
-    const { requiredDatasources } = getPlugin(pluginName);
-    const hasRequiredDatasources = requiredDatasources.every((datasourceName) =>
+    const { requiredDatasourceNames } = getPlugin(pluginName);
+    const hasRequiredDatasources = requiredDatasourceNames.every((datasourceName) =>
       availableDatasourceNames.includes(datasourceName),
     );
 
@@ -32,7 +32,7 @@ export function invariant_requiredDatasources(
         input: config,
         message: `Requested plugin '${pluginName}' cannot be activated for the ${
           config.namespace
-        } ENS namespace. ${pluginName} specifies dependent datasources: [${requiredDatasources.join(
+        } ENS namespace. ${pluginName} specifies dependent datasources: [${requiredDatasourceNames.join(
           ", ",
         )}], but available datasources in the ${
           config.namespace
@@ -51,7 +51,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
   const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
 
   for (const pluginName of config.plugins) {
-    const datasourceNames = getPlugin(pluginName).requiredDatasources;
+    const datasourceNames = getPlugin(pluginName).requiredDatasourceNames;
 
     for (const datasourceName of datasourceNames) {
       const { chain } = datasources[datasourceName];
@@ -78,7 +78,7 @@ export function invariant_globalBlockrange(
     const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
     const indexedChainIds = uniq(
       config.plugins
-        .flatMap((pluginName) => getPlugin(pluginName).requiredDatasources)
+        .flatMap((pluginName) => getPlugin(pluginName).requiredDatasourceNames)
         .map((datasourceName) => datasources[datasourceName])
         .map((datasource) => datasource.chain.id),
     );

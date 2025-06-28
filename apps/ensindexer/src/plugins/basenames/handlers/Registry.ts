@@ -8,12 +8,17 @@ import {
   handleNewTTL,
   handleTransfer,
 } from "@/handlers/Registry";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-export default function ({
-  pluginNamespace: ns,
-}: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
+/**
+ * Attach a set of event handlers for indexing process.
+ */
+export function attachBasenamesRegistryEventHandlers() {
+  const pluginName = PluginName.Basenames;
+  // create a namespace for the plugin events to avoid conflicts with other plugins
+  const ns = makePluginNamespace(pluginName);
+
   ponder.on(ns("Registry:setup"), setupRootNode);
   ponder.on(ns("Registry:NewOwner"), handleNewOwner(true));
   ponder.on(ns("Registry:NewResolver"), handleNewResolver);

@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { makePluginNamespace } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
@@ -13,10 +13,12 @@ import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
  */
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-export default function ({
-  pluginName,
-  pluginNamespace: ns,
-}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
+/**
+ * Attach a set of event handlers for indexing process.
+ */
+export function attachSubgraphRegistrarEventHandlers() {
+  const pluginName = PluginName.Subgraph;
+
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -28,6 +30,9 @@ export default function ({
     // the shared Registrar handlers in this plugin index direct subnames of '.eth'
     registrarManagedName: "eth",
   });
+
+  // create a namespace for the plugin events to avoid conflicts with other plugins
+  const ns = makePluginNamespace(pluginName);
 
   ponder.on(ns("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
     await handleNameRegistered({

@@ -2,7 +2,8 @@ import config from "@/config";
 import type { ENSIndexerConfig } from "@/config/types";
 import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
-import { ALL_PLUGINS, type AllPluginsConfig } from "@/plugins";
+import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
+import { attachPluginEventHandlers } from "@/plugins/event-handlers";
 
 ////////
 // First, generate `MergedPonderConfig` type representing the merged types of each plugin's `config`,
@@ -10,7 +11,7 @@ import { ALL_PLUGINS, type AllPluginsConfig } from "@/plugins";
 // of which plugins are actually active at runtime.
 ////////
 
-export type MergedPonderConfig = AllPluginsConfig & {
+export type MergedPonderConfig = AllPluginsMergedConfig & {
   /**
    * NOTE: we inject additional values (ones that change the behavior of the indexing logic) into the
    * Ponder config in order to alter the ponder-generated build id when these additional options change.
@@ -31,32 +32,34 @@ export type MergedPonderConfig = AllPluginsConfig & {
 ////////
 
 // filter all plugins by those activated by the config
-const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plugin.pluginName));
+const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plugin.name));
 
 // combine each plugins' config into a MergedPonderConfig
-const ponderConfig = activePlugins.reduce(
+const mergedPonderConfig = activePlugins.reduce(
   (memo, plugin) => mergePonderConfigs(memo, plugin.createPonderConfig(config)),
   {},
 ) as MergedPonderConfig;
 
 // inject the additional indexing behavior dependencies
-ponderConfig.indexingBehaviorDependencies = {
+mergedPonderConfig.indexingBehaviorDependencies = {
   healReverseAddresses: config.healReverseAddresses,
   indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
 };
 
 ////////
-// Activate the active plugins' handlers, which register indexing handlers with Ponder.
+// Attach event handlers for each of the active plugins.
 ////////
 
-// NOTE: we explicitly delay the execution of this function for 1 tick, to avoid a race condition
+// NOTE: we delay attaching plugin event handlers for 1 tick to avoid a race condition
 // within ponder internals related to the schema name and drizzle-orm
-setTimeout(() => activePlugins.map((plugin) => plugin.activate()), 0);
-
-////////
-// Finally, return the merged config for ponder to use for type inference and runtime behavior.
-////////
+setTimeout(
+  () => activePlugins.forEach((activePlugin) => attachPluginEventHandlers(activePlugin.name)),
+  0,
+);
 
 console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
 
-export default ponderConfig;
+////////
+// Finally, export the MergedPonderConfig for Ponder to use for type inference and runtime behavior.
+////////
+export default mergedPonderConfig;

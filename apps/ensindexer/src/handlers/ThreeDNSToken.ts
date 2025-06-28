@@ -20,7 +20,7 @@ import {
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId, makeResolverId } from "@/lib/ids";
-import { parseLabelAndNameFromOnChainMetadata } from "@/lib/plugin-helpers";
+import { parseLabelAndNameFromOnChainMetadata } from "@/lib/lib-json-metadata";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 

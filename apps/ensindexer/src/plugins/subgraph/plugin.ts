@@ -1,100 +1,89 @@
 /**
- * The Subgraph plugin describes indexing behavior for the 'Root' Datasource, in alignment with the
+ * The Subgraph plugin describes indexing behavior for the 'ENSRoot' Datasource, in alignment with the
  * legacy ENS Subgraph indexing logic.
  */
 
-import { DatasourceNames } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
-
-import type { ENSIndexerConfig } from "@/config/types";
 import {
-  type ENSIndexerPlugin,
-  activateHandlers,
+  buildPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
-  networkConfigForContract,
-  networksConfigForChain,
 } from "@/lib/plugin-helpers";
+import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+import * as ponder from "ponder";
 
-const pluginName = PluginName.Subgraph;
+export default buildPlugin({
+  name: PluginName.Subgraph,
+  requiredDatasourceNames: [DatasourceNames.ENSRoot],
+  createPonderConfig(ensIndexerConfig) {
+    const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
+      ensIndexerConfig.namespace,
+      DatasourceNames.ENSRoot,
+    );
+    const ns = makePluginNamespace(PluginName.Subgraph);
 
-// Define the Datasources required by the plugin
-const requiredDatasources = [DatasourceNames.ENSRoot];
-
-// Construct a unique plugin namespace to wrap contract names
-const pluginNamespace = makePluginNamespace(pluginName);
-
-// config object factory used to derive PluginConfig type
-function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
-    config.namespace,
-    DatasourceNames.ENSRoot,
-  );
-
-  return createConfig({
-    networks: networksConfigForChain(config, chain.id),
-    contracts: {
-      [pluginNamespace("RegistryOld")]: {
-        network: networkConfigForContract(config, chain, contracts.RegistryOld),
-        abi: contracts.Registry.abi,
+    return ponder.createConfig({
+      networks: networksConfigForChain(chain.id, ensIndexerConfig.rpcConfigs),
+      contracts: {
+        [ns("RegistryOld")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.RegistryOld,
+          ),
+          abi: contracts.Registry.abi,
+        },
+        [ns("Registry")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.Registry,
+          ),
+          abi: contracts.Registry.abi,
+        },
+        [ns("BaseRegistrar")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.BaseRegistrar,
+          ),
+          abi: contracts.BaseRegistrar.abi,
+        },
+        [ns("EthRegistrarControllerOld")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.EthRegistrarControllerOld,
+          ),
+          abi: contracts.EthRegistrarControllerOld.abi,
+        },
+        [ns("EthRegistrarController")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.EthRegistrarController,
+          ),
+          abi: contracts.EthRegistrarController.abi,
+        },
+        [ns("NameWrapper")]: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.NameWrapper,
+          ),
+          abi: contracts.NameWrapper.abi,
+        },
+        // We use a shared Subgraph-compatible Resolver ABI, hence we don't need apply any contract namespace here for the plugin
+        Resolver: {
+          network: networkConfigForContract(
+            chain.id,
+            ensIndexerConfig.globalBlockrange,
+            contracts.Resolver,
+          ),
+          abi: contracts.Resolver.abi,
+        },
       },
-      [pluginNamespace("Registry")]: {
-        network: networkConfigForContract(config, chain, contracts.Registry),
-        abi: contracts.Registry.abi,
-      },
-      [pluginNamespace("BaseRegistrar")]: {
-        network: networkConfigForContract(config, chain, contracts.BaseRegistrar),
-        abi: contracts.BaseRegistrar.abi,
-      },
-      [pluginNamespace("EthRegistrarControllerOld")]: {
-        network: networkConfigForContract(config, chain, contracts.EthRegistrarControllerOld),
-        abi: contracts.EthRegistrarControllerOld.abi,
-      },
-      [pluginNamespace("EthRegistrarController")]: {
-        network: networkConfigForContract(config, chain, contracts.EthRegistrarController),
-        abi: contracts.EthRegistrarController.abi,
-      },
-      [pluginNamespace("NameWrapper")]: {
-        network: networkConfigForContract(config, chain, contracts.NameWrapper),
-        abi: contracts.NameWrapper.abi,
-      },
-      Resolver: {
-        network: networkConfigForContract(config, chain, contracts.Resolver),
-        abi: contracts.Resolver.abi,
-      },
-    },
-  });
-}
-
-// Implicitly define the type returned by createPluginConfig
-type PonderConfig = ReturnType<typeof createPonderConfig>;
-
-export default {
-  /**
-   * Activate the plugin handlers for indexing.
-   */
-  activate: activateHandlers({
-    pluginName,
-    pluginNamespace,
-    handlers: () => [
-      import("./handlers/Registry"),
-      import("./handlers/Registrar"),
-      import("./handlers/NameWrapper"),
-      import("../shared/Resolver"),
-    ],
-  }),
-
-  /**
-   * Create the ponder configuration lazily to prevent premature execution of
-   * nested factory functions, i.e. to ensure that the ponder configuration
-   * is only created for this plugin when it is activated.
-   */
-  createPonderConfig,
-
-  /** The unique plugin name  */
-  pluginName,
-
-  /** The plugin's required Datasources */
-  requiredDatasources,
-} as const satisfies ENSIndexerPlugin<PluginName.Subgraph, PonderConfig>;
+    });
+  },
+});
