@@ -60,6 +60,10 @@ jobs:
           redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-api-router/service "${TARGET_ENVIRONMENT}-mainnet-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-indexer-router/service "${TARGET_ENVIRONMENT}-mainnet-indexer"
 
+          # ALPHA-SEPOLIA
+          redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-sepolia-api-router/service "${TARGET_ENVIRONMENT}-alpha-sepolia-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-alpha-sepolia-indexer"
+
           # SEPOLIA
           redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
