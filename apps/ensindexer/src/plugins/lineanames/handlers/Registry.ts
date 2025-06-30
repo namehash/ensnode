@@ -12,7 +12,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
 /**
- * Attach a set of event handlers for indexing process.
+ * Registers event handlers with Ponder.
  */
 export function attachLineanamesRegistryEventHandlers() {
   const pluginName = PluginName.Lineanames;

@@ -14,7 +14,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
 /**
- * Attach a set of event handlers for indexing process.
+ * Registers event handlers with Ponder.
  */
 export function attachSubgraphRegistrarEventHandlers() {
   const pluginName = PluginName.Subgraph;

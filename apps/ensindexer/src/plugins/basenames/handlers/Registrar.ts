@@ -17,7 +17,7 @@ import { getRegistrarManagedName } from "../lib/registrar-helpers";
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
 /**
- * Attach a set of event handlers for indexing process.
+ * Registers event handlers with Ponder.
  */
 export function attachBasenamesRegistrarEventHandlers() {
   const pluginName = PluginName.Basenames;

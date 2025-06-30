@@ -7,7 +7,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
- * Attach a set of event handlers for indexing process.
+ * Registers event handlers with Ponder.
  */
 export function attachLineanamesNameWrapperEventHandlers() {
   const pluginName = PluginName.Lineanames;

@@ -26,7 +26,7 @@ import {
 let hasBeenRegistered = false;
 
 /**
- * Attach a set of event handlers for indexing process.
+ * Registers event handlers with Ponder.
  */
 export function attachSharedResolverHandlers() {
   if (hasBeenRegistered) return;

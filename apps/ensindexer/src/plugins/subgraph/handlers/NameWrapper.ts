@@ -5,7 +5,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
- * Attach a set of event handlers for indexing process.
+ * Registers event handlers with Ponder.
  */
 export function attachSubgraphNameWrapperEventHandlers() {
   const pluginName = PluginName.Subgraph;

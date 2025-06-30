@@ -26,7 +26,7 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
 }
 
 /**
- * Attach a set of event handlers for indexing process.
+ * Registers event handlers with Ponder.
  */
 export function attachSubgraphRegistryEventHandlers() {
   const pluginName = PluginName.Subgraph;
