@@ -85,7 +85,7 @@ function validateResponse(response: EnsNode.Metadata) {
  * @throws Error if the chain ID is not supported within the configured namespace
  */
 
-//TODO: should we change the return value?
+//TODO: should we change the return value (and then remove SupportedChainId type totally) ?
 export function useENSRootDatasourceChainId(
   indexingStatus: UseIndexingStatusQueryResult["data"],
 ): SupportedChainId | undefined {
