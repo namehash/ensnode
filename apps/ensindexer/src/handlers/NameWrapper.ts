@@ -91,7 +91,7 @@ export const makeNameWrapperHandlers = ({
 
     // log DomainEvent
     await context.db.insert(schema.wrappedTransfer).values({
-      ...sharedEventValues(context.network.chainId, event),
+      ...sharedEventValues(context.chain.id, event),
       id: eventId, // NOTE: override the shared id in this case, to account for TransferBatch
       domainId: node,
       ownerId: to,
@@ -147,7 +147,7 @@ export const makeNameWrapperHandlers = ({
 
       // log DomainEvent
       await context.db.insert(schema.nameWrapped).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         domainId: node,
         name,
         fuses,
@@ -183,7 +183,7 @@ export const makeNameWrapperHandlers = ({
 
       // log DomainEvent
       await context.db.insert(schema.nameUnwrapped).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         domainId: node,
         ownerId: owner,
       });
@@ -211,7 +211,7 @@ export const makeNameWrapperHandlers = ({
 
       // log DomainEvent
       await context.db.insert(schema.fusesSet).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         domainId: node,
         fuses,
       });
@@ -238,7 +238,7 @@ export const makeNameWrapperHandlers = ({
 
       // log DomainEvent
       await context.db.insert(schema.expiryExtended).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         domainId: node,
         expiryDate: expiry,
       });
@@ -256,7 +256,7 @@ export const makeNameWrapperHandlers = ({
         context,
         event,
         makeEventId(
-          context.network.chainId,
+          context.chain.id,
           event.block.number,
           event.log.logIndex,
           0, // transferIndex
@@ -278,12 +278,7 @@ export const makeNameWrapperHandlers = ({
         await handleTransfer(
           context,
           event,
-          makeEventId(
-            context.network.chainId,
-            event.block.number,
-            event.log.logIndex,
-            transferIndex,
-          ),
+          makeEventId(context.chain.id, event.block.number, event.log.logIndex, transferIndex),
           tokenId,
           to,
         );

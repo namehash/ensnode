@@ -145,7 +145,7 @@ export const makeRegistrarHandlers = ({
 
       // log RegistrationEvent
       await context.db.insert(schema.nameRegistered).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         registrationId,
         registrantId: owner,
         expiryDate: expires,
@@ -208,7 +208,7 @@ export const makeRegistrarHandlers = ({
 
       // log RegistrationEvent
       await context.db.insert(schema.nameRenewed).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         expiryDate: expires,
       });
@@ -236,7 +236,7 @@ export const makeRegistrarHandlers = ({
 
       // log RegistrationEvent
       await context.db.insert(schema.nameTransferred).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         newOwnerId: to,
       });
