@@ -31,10 +31,10 @@ export default defineConfig({
         access: "secret",
         optional: true,
       }),
-      ENSADMIN_GRAPHIQL_ENDPOINT: envField.string({
+      ENSADMIN_URL: envField.string({
         context: "client",
         access: "public",
-        default: "https://admin.ensnode.io/gql/subgraph-compat",
+        default: "https://admin.ensnode.io",
       }),
     },
   },

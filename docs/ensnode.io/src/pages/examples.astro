@@ -22,7 +22,7 @@ const categories = Array.from(categoryMap.entries())
     <div class="bg-gradient-to-b from-[#4182B8] to-[#7BAAC7] w-full flex flex-col flex-nowrap justify-center items-center bg-cover bg-center bg-no-repeat absolute top-0 inset-x-0 h-80 z-0"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8 xl:pt-32 z-10 relative">
       <h1 class="font-bold leading-10 sm:leading-[68px] text-4xl sm:text-5xl text-white mb-2">
-        Example Data Requests
+        Example ENS Data Requests
       </h1>
       <p class="md:text-xl text-white">
         Explore our collection of example ENSNode GraphQL queries.
@@ -31,7 +31,7 @@ const categories = Array.from(categoryMap.entries())
       <div class="flex flex-col sm:flex-row gap-4 pt-6 pb-10">
         <div class="flex-1">
           <label for="search" class="sr-only">
-            Search queries
+            Search examples
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -203,9 +203,6 @@ const categories = Array.from(categoryMap.entries())
         const filteredText = filteredExamples.length === 1 ? 'example' : 'examples';
         const totalText = examples.length === 1 ? 'example' : 'examples';
         let countText = `Showing ${filteredExamples.length} ${filteredText} of ${examples.length} ${totalText}`;
-        if (selectedCategory) {
-          countText += ` in ${selectedCategory}`;
-        }
         resultsCount.textContent = countText;
       }
 

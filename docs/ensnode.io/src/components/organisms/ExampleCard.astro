@@ -1,5 +1,5 @@
 ---
-import { ENSADMIN_GRAPHIQL_ENDPOINT } from "astro:env/client";
+import { ENSADMIN_URL } from "astro:env/client";
 import { Icon } from "astro-icon/components";
 
 export interface Props {
@@ -18,15 +18,13 @@ const { example } = Astro.props;
 
 const createGraphiQLUrl = (query: string, variables: string): string => {
   try {
-    const baseUrl = ENSADMIN_GRAPHIQL_ENDPOINT;
-    const params = new URLSearchParams({
-      query: query.trim(),
-      variables: variables.trim(),
-    });
-    return `${baseUrl}?${params.toString()}`;
+    const url = new URL("/gql/subgraph-compat", ENSADMIN_URL);
+    url.searchParams.set("query", query.trim());
+    url.searchParams.set("variables", variables.trim());
+    return url.toString();
   } catch (err) {
     console.error("Failed to create GraphiQL URL: ", err);
-    return ENSADMIN_GRAPHIQL_ENDPOINT;
+    return new URL("/gql/subgraph-compat", ENSADMIN_URL).toString();
   }
 };
 

@@ -47,7 +47,7 @@ function reducer(state: EditorState, action: Action) {
   }
 }
 
-/** The initial state of the GraphiQL editor */
+/** The default initial state of the GraphiQL editor */
 const defaultInitialState: EditorState = {
   query: "",
 };

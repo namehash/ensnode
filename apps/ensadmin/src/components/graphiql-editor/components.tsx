@@ -14,11 +14,11 @@ const defaultQuery = `#
 # Welcome to this interactive playground for
 # ENSNode's GraphQL API!
 #
-# You can get started by typing using
+# You can get started by typing your query here or by using
 # the Explorer on the left to select the data
 # you want to query.
 #
-# When you are ready to execute the query,
+# When you are ready to execute your query,
 # press the pink Play icon -->
 #
 `;
