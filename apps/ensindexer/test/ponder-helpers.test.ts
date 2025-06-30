@@ -1,48 +1,43 @@
 import { describe, expect, it } from "vitest";
 
-import { constrainContractBlockrange, createStartBlockByChainIdMap } from "@/lib/ponder-helpers";
+import { constrainBlockrange, createStartBlockByChainIdMap } from "@/lib/ponder-helpers";
+import { Blockrange } from "@/lib/types";
 
-const UNDEFINED_BLOCKRANGE = { globalBlockrange: { startBlock: undefined, endBlock: undefined } };
-const BLOCKRANGE_WITH_END = { globalBlockrange: { startBlock: undefined, endBlock: 1234 } };
+const UNDEFINED_BLOCKRANGE = { startBlock: undefined, endBlock: undefined } satisfies Blockrange;
+const BLOCKRANGE_WITH_END = { startBlock: undefined, endBlock: 1234 } satisfies Blockrange;
 
 describe("ponder helpers", () => {
-  describe("constrainContractBlockrange", () => {
+  describe("constrainBlockrange", () => {
     describe("without global range", () => {
       it("should return valid startBlock and endBlock", () => {
-        const range = constrainContractBlockrange(UNDEFINED_BLOCKRANGE, 5);
+        const range = constrainBlockrange(UNDEFINED_BLOCKRANGE, 5);
         expect(range).toEqual({ startBlock: 5, endBlock: undefined });
       });
 
       it("should handle undefined contractStartBlock", () => {
-        const range = constrainContractBlockrange(UNDEFINED_BLOCKRANGE, undefined);
+        const range = constrainBlockrange(UNDEFINED_BLOCKRANGE, undefined);
         expect(range).toEqual({ startBlock: 0, endBlock: undefined });
       });
     });
 
     describe("with global range", () => {
       it("should respect global end block", () => {
-        const config = constrainContractBlockrange(BLOCKRANGE_WITH_END, 5);
+        const config = constrainBlockrange(BLOCKRANGE_WITH_END, 5);
         expect(config).toEqual({ startBlock: 5, endBlock: 1234 });
       });
 
       it("should handle undefined contract start block", () => {
-        const config = constrainContractBlockrange(BLOCKRANGE_WITH_END, undefined);
+        const config = constrainBlockrange(BLOCKRANGE_WITH_END, undefined);
         expect(config).toEqual({ startBlock: 0, endBlock: 1234 });
       });
 
       it("should use contract start block if later than global start", () => {
-        const config = constrainContractBlockrange(
-          { globalBlockrange: { startBlock: 10, endBlock: 1234 } },
-          20,
-        );
+        const config = constrainBlockrange({ startBlock: 10, endBlock: 1234 }, 20);
         expect(config).toEqual({ startBlock: 20, endBlock: 1234 });
       });
 
       it("should use global start block if later than contract start", () => {
-        const config = constrainContractBlockrange(
-          { globalBlockrange: { startBlock: 30, endBlock: 1234 } },
-          20,
-        );
+        const config = constrainBlockrange({ startBlock: 30, endBlock: 1234 }, 20);
         expect(config).toEqual({ startBlock: 30, endBlock: 1234 });
       });
     });

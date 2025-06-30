@@ -52,9 +52,11 @@ ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS 
 
 ## Plugins
 
-ENSIndexer implements the core subgraph indexing logic within **shared event handler functions** that mirror their subgraph counterpart. These shared event handlers functions are in `apps/ensindexer/src/handlers/*.ts`. The `subgraph` plugin then implements subgraph-compatible logic 1:1, primarily relying on the shared handlers, and its implementation can be found in `apps/ensindexer/src/plugins/subgraph/plugin.ts`.
+ENSIndexer implements the indexing logic for each plugin inside event handlers. Event handlers may optionally be shared across plugins. For example, see the shared event handler functions in `apps/ensindexer/src/handlers/*.ts` which are shared by multiple plugins such as the `subgraph`, `basenames`, and `lineanames` plugins.
 
-Each plugin is the ponder indexing configuration that uses plugin-specific event handlers (which may include the shared event handler functions) to index a related set of datasources. See `apps/ensindexer/src/plugins/base/plugin.ts` and `apps/ensindexer/src/plugins/linea/plugin.ts` for examples.
+Each plugin requires two files:
+- `plugin.ts` defines the plugin's overall indexing configuration. See `apps/ensindexer/src/plugins/basenames/plugin.ts` and `apps/ensindexer/src/plugins/lineanames/plugin.ts` for examples.
+- `event-handlers.ts` defines the plugin's event handlers executed during the indexing process. See `apps/ensindexer/src/plugins/basenames/event-handlers.ts` and `apps/ensindexer/src/plugins/lineanames/event-handlers.ts` for examples.
 
 ### Plugin-Scoping
 

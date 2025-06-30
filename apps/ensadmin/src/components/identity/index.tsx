@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { useEnsName } from "wagmi";
 
-interface ENSNameProps {
+interface IdentityProps {
   address: Address;
   chainId: SupportedChainId;
   showAvatar?: boolean;
@@ -21,13 +21,13 @@ interface ENSNameProps {
  * Component to display an ENS name for an Ethereum address.
  * Falls back to a truncated address if no ENS name is found.
  */
-export function ENSName({
+export function Identity({
   address,
   chainId,
   showAvatar = false,
   showExternalLink = true,
   className = "",
-}: ENSNameProps) {
+}: IdentityProps) {
   const [mounted, setMounted] = useState(false);
 
   // Use the ENS name hook from wagmi
@@ -52,7 +52,7 @@ export function ENSName({
 
   // If not mounted yet (server-side), show a skeleton
   if (!mounted) {
-    return <EnsNamePlaceholder showAvatar={showAvatar} className={className} />;
+    return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
   return (
@@ -86,11 +86,11 @@ export function ENSName({
     </div>
   );
 }
-ENSName.Placeholder = EnsNamePlaceholder;
+Identity.Placeholder = IdentityPlaceholder;
 
-interface ENSNamePlaceholderProps extends Pick<ENSNameProps, "showAvatar" | "className"> {}
+interface IdentityPlaceholderProps extends Pick<IdentityProps, "showAvatar" | "className"> {}
 
-function EnsNamePlaceholder({ showAvatar = false, className = "" }: ENSNamePlaceholderProps) {
+function IdentityPlaceholder({ showAvatar = false, className = "" }: IdentityPlaceholderProps) {
   return (
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && <Skeleton className="h-6 w-6 rounded-full" />}
