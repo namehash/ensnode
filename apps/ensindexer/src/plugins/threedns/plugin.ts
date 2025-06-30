@@ -7,7 +7,7 @@ import {
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
-import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
+import { chainConfigForContract, chainConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
@@ -28,20 +28,20 @@ export default createPlugin({
     );
 
     return ponder.createConfig({
-      networks: {
-        ...networksConfigForChain(config.rpcConfigs, threeDNSOptimism.chain.id),
-        ...networksConfigForChain(config.rpcConfigs, threeDNSBase.chain.id),
+      chains: {
+        ...chainConnectionConfig(config.rpcConfigs, threeDNSOptimism.chain.id),
+        ...chainConnectionConfig(config.rpcConfigs, threeDNSBase.chain.id),
       },
       contracts: {
         // multi-network ThreeDNSToken indexing config
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
-          network: {
-            ...networkConfigForContract(
+          chain: {
+            ...chainConfigForContract(
               config.globalBlockrange,
               threeDNSOptimism.chain.id,
               threeDNSOptimism.contracts.ThreeDNSToken,
             ),
-            ...networkConfigForContract(
+            ...chainConfigForContract(
               config.globalBlockrange,
               threeDNSBase.chain.id,
               threeDNSBase.contracts.ThreeDNSToken,
@@ -52,13 +52,13 @@ export default createPlugin({
         },
         // multi-network ThreeDNS-specific Resolver indexing config
         [namespaceContract(pluginName, "Resolver")]: {
-          network: {
-            ...networkConfigForContract(
+          chain: {
+            ...chainConfigForContract(
               config.globalBlockrange,
               threeDNSOptimism.chain.id,
               threeDNSOptimism.contracts.Resolver,
             ),
-            ...networkConfigForContract(
+            ...chainConfigForContract(
               config.globalBlockrange,
               threeDNSBase.chain.id,
               threeDNSBase.contracts.Resolver,

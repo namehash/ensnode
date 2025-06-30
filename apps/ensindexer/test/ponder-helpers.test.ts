@@ -48,23 +48,23 @@ describe("ponder helpers", () => {
       const partialPonderConfig = {
         contracts: {
           "subgraph/Registrar": {
-            network: {
-              "1": { startBlock: 444_444_444 },
+            chain: {
+              "1": { id: 1, startBlock: 444_444_444 },
             },
           },
           "subgraph/Registry": {
-            network: {
-              "1": { startBlock: 444_444_333 },
+            chain: {
+              "1": { id: 1, startBlock: 444_444_333 },
             },
           },
           "basenames/Registrar": {
-            network: {
-              "8453": { startBlock: 1_799_433 },
+            chain: {
+              "8453": { id: 8453, startBlock: 1_799_433 },
             },
           },
           "basenames/Registry": {
-            network: {
-              "8453": { startBlock: 1_799_430 },
+            chain: {
+              "8453": { id: 8453, startBlock: 1_799_430 },
             },
           },
         },

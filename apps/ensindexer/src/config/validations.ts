@@ -67,7 +67,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
   }
 }
 
-// Invariant: if a global blockrange is defined, only one network is indexed
+// Invariant: if a global blockrange is defined, only one chain is indexed
 export function invariant_globalBlockrange(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "globalBlockrange" | "namespace" | "plugins">>,
 ) {
@@ -87,7 +87,7 @@ export function invariant_globalBlockrange(
       ctx.issues.push({
         code: "custom",
         input: config,
-        message: `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
+        message: `ENSIndexer's behavior when indexing _multiple chains_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
 
   NAMESPACE=${config.namespace}
   PLUGINS=${config.plugins.join(",")}
@@ -98,7 +98,7 @@ export function invariant_globalBlockrange(
     NAMESPACE=(mainnet|sepolia|holesky) PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
-  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
+  In the future, indexing multiple chains with chain-specific blockrange constraints may be possible.`,
       });
     }
   }

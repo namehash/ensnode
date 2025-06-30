@@ -163,7 +163,7 @@ export function createPlugin<
 ): ENSIndexerPlugin<
   PLUGIN_NAME,
   REQUIRED_DATASOURCE_NAMES,
-  PONDER_CONFIG_RESULT["networks"],
+  PONDER_CONFIG_RESULT["chains"],
   PONDER_CONFIG_RESULT["contracts"],
   PONDER_CONFIG_RESULT["accounts"],
   PONDER_CONFIG_RESULT["blocks"]
