@@ -11,7 +11,7 @@ import {
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { useEnsName } from "wagmi";
+import {useEnsName, UseEnsNameReturnType} from "wagmi";
 
 //TODO: add descriptions for type's fields
 interface IdentityProps {
@@ -54,7 +54,7 @@ export function Identity({
     data: ensName,
     isLoading,
     isError,
-  } = useEnsName({
+  }: UseEnsNameReturnType<string> = useEnsName({
     address,
     chainId: ensRootChainId,
   });

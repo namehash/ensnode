@@ -14,15 +14,14 @@ interface AvatarProps {
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-    AvatarProps,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
 >(({ className, namespaceId, name, ...props }, ref) => {
     // Get ENS avatar URL
     const ensAvatarUrl = name ? getEnsNameAvatarUrl(namespaceId, name) : null;
-    const handleAvatarImageFetchFailure = (event) => {
+    const handleAvatarImageFetchFailure = (event: React.SyntheticEvent<HTMLImageElement>) => {
         //TODO: Is such fallback idea alright? Or should we aim to display AvatarFallback no matter what error we encounter?
         // Or maybe the image could be something more appropriate?
-        event.target.src = fallbackImage.src;
+        event.currentTarget.src = fallbackImage.src;
     }
     return (
         <AvatarPrimitive.Root

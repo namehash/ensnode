@@ -33,7 +33,7 @@ interface RegistrationResult {
  */
 function getEffectiveOwner(
   registrationResult: RegistrationResult,
-  namespaceId: ENSNamespaceId | null,
+  namespaceId: ENSNamespaceId,
 ): Address {
   const nameWrapperAddress = getNameWrapperAddress(namespaceId);
   // Use the regular owner if it's not the NameWrapper contract
@@ -56,7 +56,7 @@ function getEffectiveOwner(
  */
 function toRegistration(
   registrationResult: RegistrationResult,
-  namespaceId: ENSNamespaceId | null,
+  namespaceId: ENSNamespaceId,
 ): Registration {
   return {
     registeredAt: unixTimestampToDate(registrationResult.registrationDate),
@@ -76,7 +76,7 @@ function toRegistration(
 async function fetchRecentRegistrations(
   baseUrl: URL,
   maxResults: number,
-  namespaceId: ENSNamespaceId | null, //TODO: it would be optimal if it was not nullable, but idk yet how to achieve this (dependency on the other hook)
+  namespaceId: ENSNamespaceId,
 ): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
@@ -131,7 +131,7 @@ async function fetchRecentRegistrations(
 export function useRecentRegistrations(
   ensNodeURL: URL,
   maxResults: number,
-  namespaceId: ENSNamespaceId | null, //TODO: it would be optimal if it was not nullable, but idk yet how to achieve this (dependency on the other hook)
+  namespaceId: ENSNamespaceId, //TODO: it cannot be nullable, but idk yet how to achieve this (dependency on the other hook)
 ) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
