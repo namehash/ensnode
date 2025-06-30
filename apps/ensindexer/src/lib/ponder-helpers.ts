@@ -1,11 +1,12 @@
 import type { Event } from "ponder:registry";
-import { http, PublicClient } from "viem";
+import { PublicClient } from "viem";
+import * as z from "zod/v4";
 
-import { ENSIndexerConfig, RpcConfig } from "@/config/types";
+import { ENSIndexerConfig } from "@/config/types";
 import { Blockrange } from "@/lib/types";
 import { ContractConfig } from "@ensnode/datasources";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
-import type { BlockInfo } from "@ensnode/ponder-metadata";
+import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 import type { ChainConfig } from "ponder";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
@@ -78,13 +79,64 @@ export function createPrometheusMetricsFetcher(
 ): () => Promise<string> {
   /**
    * Fetches the Prometheus metrics from the Ponder application endpoint.
-   * @param {number} ponderApplicationPort
    * @returns Prometheus metrics as a text string
    */
   return async function fetchPrometheusMetrics(): Promise<string> {
     const response = await fetch(`http://localhost:${ponderApplicationPort}/metrics`);
 
     return response.text();
+  };
+}
+
+/**
+ * Ponder Data Schemas
+ *
+ * These schemas allow data validation with Zod.
+ */
+const PonderDataSchema = {
+  get Block() {
+    return z.object({
+      number: z.number().int().min(1),
+      timestamp: z.number().int().min(1),
+    });
+  },
+
+  get ChainId() {
+    return z.number().int().min(1);
+  },
+
+  get Status() {
+    return z.record(
+      z.string().transform(Number).pipe(PonderDataSchema.ChainId),
+      z.object({
+        id: PonderDataSchema.ChainId,
+        block: PonderDataSchema.Block,
+      }),
+    );
+  },
+};
+
+/**
+ * Creates Ponder Status fetcher for the Ponder application.
+ *
+ * It's a workaround for the lack of an internal API allowing to access
+ * Ponder Status metrics for the Ponder application.
+ *
+ * @param ponderApplicationPort the port the Ponder application is served at
+ * @returns fetcher function
+ */
+export function createPonderStatusFetcher(
+  ponderApplicationPort: number,
+): () => Promise<PonderStatus> {
+  /**
+   * Fetches the Ponder Ponder status from the Ponder application endpoint.
+   * @returns Parsed Ponder Status object.
+   */
+  return async function fetchPonderStatus() {
+    const response = await fetch(`http://localhost:${ponderApplicationPort}/status`);
+    const responseData = await response.json();
+
+    return PonderDataSchema.Status.parse(responseData) satisfies PonderStatus;
   };
 }
 

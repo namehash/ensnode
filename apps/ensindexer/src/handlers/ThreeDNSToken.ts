@@ -28,8 +28,8 @@ import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subg
  * Gets the `uri` for a given tokenId using the relevant ThreeDNSToken from `context`
  */
 const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<string> => {
-  // ThreeDNSToken is network-specific in ponder multi-network usage
-  // https://ponder.sh/docs/indexing/read-contract-data#multiple-networks
+  // ThreeDNSToken is chain-specific in ponder multi-chain usage
+  // https://ponder.sh/docs/indexing/read-contracts#multiple-chains
   return context.client.readContract({
     abi: context.contracts["threedns/ThreeDNSToken"].abi,
     address: context.contracts["threedns/ThreeDNSToken"].address,
