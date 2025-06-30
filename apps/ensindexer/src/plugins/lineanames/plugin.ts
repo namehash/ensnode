@@ -25,7 +25,7 @@ export default createPlugin({
     );
 
     return ponder.createConfig({
-      networks: networksConfigForChain(config, chain.id),
+      networks: networksConfigForChain(config.rpcConfigs, chain.id),
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
           network: networkConfigForContract(chain.id, config.globalBlockrange, contracts.Registry),
@@ -55,7 +55,7 @@ export default createPlugin({
           ),
           abi: contracts.NameWrapper.abi,
         },
-        // NOTE: shared Resolver definition/implementation
+        // NOTE: shared (non-namespaced) Resolver definition/implementation (see plugins/shared/Resolver.ts)
         Resolver: {
           network: networkConfigForContract(chain.id, config.globalBlockrange, contracts.Resolver),
           abi: contracts.Resolver.abi,

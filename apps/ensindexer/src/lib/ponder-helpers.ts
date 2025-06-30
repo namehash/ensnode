@@ -239,7 +239,7 @@ export async function createStartBlockByChainIdMap(
  * @returns ponder#NetworksConfig
  */
 export function networksConfigForChain(
-  { rpcConfigs }: Pick<ENSIndexerConfig, "rpcConfigs">,
+  rpcConfigs: ENSIndexerConfig["rpcConfigs"],
   chainId: number,
 ) {
   if (!rpcConfigs[chainId]) {

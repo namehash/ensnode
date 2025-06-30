@@ -16,28 +16,24 @@ const pluginName = PluginName.ThreeDNS;
 
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: [DatasourceNames.ThreeDNSBase, DatasourceNames.ThreeDNSOptimism],
+  requiredDatasourceNames: [DatasourceNames.ThreeDNSOptimism, DatasourceNames.ThreeDNSBase],
   createPonderConfig(config) {
-    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ThreeDNSBase,
-    );
     const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
       config.namespace,
       DatasourceNames.ThreeDNSOptimism,
     );
-
-    // ABI for the ThreeDNSToken contract is the same on both chains, so we can use one.
-    const threeDNSTokenAbi = threeDNSOptimism.contracts.ThreeDNSToken.abi;
-    // ABI for the Resolver contract is the same on both chains, so we can use one.
-    const resolverAbi = threeDNSOptimism.contracts.Resolver.abi;
+    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ThreeDNSBase,
+    );
 
     return ponder.createConfig({
       networks: {
-        ...networksConfigForChain(config, threeDNSOptimism.chain.id),
-        ...networksConfigForChain(config, threeDNSBase.chain.id),
+        ...networksConfigForChain(config.rpcConfigs, threeDNSOptimism.chain.id),
+        ...networksConfigForChain(config.rpcConfigs, threeDNSBase.chain.id),
       },
       contracts: {
+        // multi-network ThreeDNSToken indexing config
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           network: {
             ...networkConfigForContract(
@@ -51,9 +47,9 @@ export default createPlugin({
               threeDNSBase.contracts.ThreeDNSToken,
             ),
           },
-          abi: threeDNSTokenAbi,
+          abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
         },
-        // NOTE: ThreeDNS-specific Resolver definition/implementation
+        // multi-network ThreeDNS-specific Resolver indexing config
         [namespaceContract(pluginName, "Resolver")]: {
           network: {
             ...networkConfigForContract(
@@ -67,7 +63,7 @@ export default createPlugin({
               threeDNSBase.contracts.Resolver,
             ),
           },
-          abi: resolverAbi,
+          abi: threeDNSOptimism.contracts.Resolver.abi,
         },
       },
     });
