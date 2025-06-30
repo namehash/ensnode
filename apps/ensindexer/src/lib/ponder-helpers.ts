@@ -265,15 +265,15 @@ export function networksConfigForChain(
  * Builds a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
  * indexing range by the globally configured blockrange.
  *
- * @param {number} chainId
  * @param {Blockrange} globalBlockrange
+ * @param {number} chainId
  * @param {ContractConfig} contractConfig
  *
  * @returns network configuration based on the contract
  */
 export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
-  chainId: number,
   globalBlockrange: Blockrange,
+  chainId: number,
   contractConfig: CONTRACT_CONFIG,
 ) {
   // Ponder will index the contract in perpetuity if endBlock is `undefined`

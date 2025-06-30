@@ -37,13 +37,13 @@ export default createPlugin({
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           network: {
             ...networkConfigForContract(
-              threeDNSOptimism.chain.id,
               config.globalBlockrange,
+              threeDNSOptimism.chain.id,
               threeDNSOptimism.contracts.ThreeDNSToken,
             ),
             ...networkConfigForContract(
-              threeDNSBase.chain.id,
               config.globalBlockrange,
+              threeDNSBase.chain.id,
               threeDNSBase.contracts.ThreeDNSToken,
             ),
           },
@@ -53,13 +53,13 @@ export default createPlugin({
         [namespaceContract(pluginName, "Resolver")]: {
           network: {
             ...networkConfigForContract(
-              threeDNSOptimism.chain.id,
               config.globalBlockrange,
+              threeDNSOptimism.chain.id,
               threeDNSOptimism.contracts.Resolver,
             ),
             ...networkConfigForContract(
-              threeDNSBase.chain.id,
               config.globalBlockrange,
+              threeDNSBase.chain.id,
               threeDNSBase.contracts.Resolver,
             ),
           },

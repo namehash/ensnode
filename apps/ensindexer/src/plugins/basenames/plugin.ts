@@ -27,36 +27,36 @@ export default createPlugin({
       networks: networksConfigForChain(config.rpcConfigs, chain.id),
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
-          network: networkConfigForContract(chain.id, config.globalBlockrange, contracts.Registry),
+          network: networkConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),
           abi: contracts.Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
           network: networkConfigForContract(
-            chain.id,
             config.globalBlockrange,
+            chain.id,
             contracts.BaseRegistrar,
           ),
           abi: contracts.BaseRegistrar.abi,
         },
         [namespaceContract(pluginName, "EARegistrarController")]: {
           network: networkConfigForContract(
-            chain.id,
             config.globalBlockrange,
+            chain.id,
             contracts.EARegistrarController,
           ),
           abi: contracts.EARegistrarController.abi,
         },
         [namespaceContract(pluginName, "RegistrarController")]: {
           network: networkConfigForContract(
-            chain.id,
             config.globalBlockrange,
+            chain.id,
             contracts.RegistrarController,
           ),
           abi: contracts.RegistrarController.abi,
         },
         // NOTE: shared (non-namespaced) Resolver definition/implementation (see plugins/shared/Resolver.ts)
         Resolver: {
-          network: networkConfigForContract(chain.id, config.globalBlockrange, contracts.Resolver),
+          network: networkConfigForContract(config.globalBlockrange, chain.id, contracts.Resolver),
           abi: contracts.Resolver.abi,
         },
       },
