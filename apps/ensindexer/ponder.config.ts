@@ -50,6 +50,14 @@ setTimeout(
 );
 
 ////////
+// Set indexing order strategy
+////////
+
+// NOTE: Ponder v0.11 has been useing the `multichain` strategy by default. ENSIndexer requires
+// deterministic order of events processing which is guaranteed by Ponder's `omnichain` strategy.
+ponderConfig.ordering = "omnichain";
+
+////////
 // Export the ponderConfig for Ponder to use for type inference and runtime behavior.
 ////////
 
