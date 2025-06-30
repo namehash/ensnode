@@ -9,8 +9,7 @@ export async function upsertAccount(context: Context, address: Address) {
 }
 
 export async function upsertDomain(context: Context, values: typeof schema.domain.$inferInsert) {
-  // Ponder won't allow calling `onConflictDoUpdate` when the primary key is on the list of fields to be update:Add commentMore actions
-  // we extract the `id` record from `values` object, and only use the `otherValues` object for updates.
+  // Remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.domain).values(values).onConflictDoUpdate(otherValues);
@@ -20,8 +19,7 @@ export async function upsertResolver(
   context: Context,
   values: typeof schema.resolver.$inferInsert,
 ) {
-  // Ponder won't allow calling `onConflictDoUpdate` when the primary key is on the list of fields to be update:
-  // we extract the `id` record from `values` object, and only use the `otherValues` object for updates.
+  // Remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.resolver).values(values).onConflictDoUpdate(otherValues);
@@ -31,8 +29,7 @@ export async function upsertRegistration(
   context: Context,
   values: typeof schema.registration.$inferInsert,
 ) {
-  // Ponder won't allow calling `onConflictDoUpdate` when the primary key is on the list of fields to be update:Add commentMore actions
-  // we extract the `id` record from `values` object, and only use the `otherValues` object for updates.
+  // Remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.registration).values(values).onConflictDoUpdate(otherValues);
