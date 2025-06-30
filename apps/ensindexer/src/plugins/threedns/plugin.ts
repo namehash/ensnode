@@ -47,6 +47,7 @@ export default createPlugin({
               threeDNSBase.contracts.ThreeDNSToken,
             ),
           },
+          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
           abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
         },
         // multi-network ThreeDNS-specific Resolver indexing config
@@ -63,6 +64,7 @@ export default createPlugin({
               threeDNSBase.contracts.Resolver,
             ),
           },
+          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
           abi: threeDNSOptimism.contracts.Resolver.abi,
         },
       },
