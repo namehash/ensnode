@@ -8,7 +8,7 @@ import {
   handleNewTTL,
   handleTransfer,
 } from "@/handlers/Registry";
-import { makePluginNamespace } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
 /**
@@ -17,12 +17,9 @@ import { setupRootNode } from "@/lib/subgraph-helpers";
 export function attachLineanamesRegistryEventHandlers() {
   const pluginName = PluginName.Lineanames;
 
-  // create a namespace for the plugin events to avoid conflicts with other plugins
-  const ns = makePluginNamespace(pluginName);
-
-  ponder.on(ns("Registry:setup"), setupRootNode);
-  ponder.on(ns("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(ns("Registry:NewResolver"), handleNewResolver);
-  ponder.on(ns("Registry:NewTTL"), handleNewTTL);
-  ponder.on(ns("Registry:Transfer"), handleTransfer);
+  ponder.on(namespaceContract(pluginName, "Registry:setup"), setupRootNode);
+  ponder.on(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(namespaceContract(pluginName, "Registry:NewResolver"), handleNewResolver);
+  ponder.on(namespaceContract(pluginName, "Registry:NewTTL"), handleNewTTL);
+  ponder.on(namespaceContract(pluginName, "Registry:Transfer"), handleTransfer);
 }

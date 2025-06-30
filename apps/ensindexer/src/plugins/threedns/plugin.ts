@@ -5,15 +5,17 @@
 import {
   createPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
-  makePluginNamespace,
+  namespaceContract,
 } from "@/lib/plugin-helpers";
 import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
 
+const pluginName = PluginName.ThreeDNS;
+
 export default createPlugin({
-  name: PluginName.ThreeDNS,
+  name: pluginName,
   requiredDatasourceNames: [DatasourceNames.ThreeDNSBase, DatasourceNames.ThreeDNSOptimism],
   createPonderConfig(ensIndexerConfig) {
     const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
@@ -24,7 +26,6 @@ export default createPlugin({
       ensIndexerConfig.namespace,
       DatasourceNames.ThreeDNSOptimism,
     );
-    const ns = makePluginNamespace(PluginName.ThreeDNS);
 
     // ABI for the ThreeDNSToken contract is the same on both chains, so we can use one.
     const threeDNSTokenAbi = threeDNSOptimism.contracts.ThreeDNSToken.abi;
@@ -37,7 +38,7 @@ export default createPlugin({
         ...networksConfigForChain(threeDNSBase.chain.id, ensIndexerConfig.rpcConfigs),
       },
       contracts: {
-        [ns("ThreeDNSToken")]: {
+        [namespaceContract(pluginName, "ThreeDNSToken")]: {
           network: {
             ...networkConfigForContract(
               threeDNSOptimism.chain.id,
@@ -52,7 +53,8 @@ export default createPlugin({
           },
           abi: threeDNSTokenAbi,
         },
-        [ns("Resolver")]: {
+        // NOTE: ThreeDNS-specific Resolver definition/implementation
+        [namespaceContract(pluginName, "Resolver")]: {
           network: {
             ...networkConfigForContract(
               threeDNSOptimism.chain.id,

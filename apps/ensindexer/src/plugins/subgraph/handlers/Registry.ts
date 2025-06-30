@@ -9,12 +9,12 @@ import {
   handleNewTTL,
   handleTransfer,
 } from "@/handlers/Registry";
-import { makePluginNamespace } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains
-// that have been migrated to the new registry. We encode this logic here, ignoring
+// that have been migrated to the new registry. We encode this logic in this file, ignoring
 // RegistryOld events when the domain in question has already been registered in or migrated to the
 // (new) Registry.
 
@@ -31,14 +31,11 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
 export function attachSubgraphRegistryEventHandlers() {
   const pluginName = PluginName.Subgraph;
 
-  // create a namespace for the plugin events to avoid conflicts with other plugins
-  const ns = makePluginNamespace(pluginName);
-
-  ponder.on(ns("RegistryOld:setup"), setupRootNode);
+  ponder.on(namespaceContract(pluginName, "RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
-  ponder.on(ns("RegistryOld:NewOwner"), async ({ context, event }) => {
+  ponder.on(namespaceContract(pluginName, "RegistryOld:NewOwner"), async ({ context, event }) => {
     const { label: labelHash, node: parentNode } = event.args;
 
     const node = makeSubdomainNode(labelHash, parentNode);
@@ -48,26 +45,29 @@ export function attachSubgraphRegistryEventHandlers() {
     return handleNewOwner(false)({ context, event });
   });
 
-  ponder.on(ns("RegistryOld:NewResolver"), async ({ context, event }) => {
-    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
-    const isRootNode = event.args.node === ROOT_NODE;
+  ponder.on(
+    namespaceContract(pluginName, "RegistryOld:NewResolver"),
+    async ({ context, event }) => {
+      const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
+      const isRootNode = event.args.node === ROOT_NODE;
 
-    // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L246
-    // NOTE: the subgraph must include an exception here for the root node because it starts out
-    // shouldIgnoreEvent: true, but we definitely still want to handle NewResolver events for it.
-    if (shouldIgnoreEvent && !isRootNode) return;
+      // inverted logic of https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L246
+      // NOTE: the subgraph must include an exception here for the root node because it starts out
+      // shouldIgnoreEvent: true, but we definitely still want to handle NewResolver events for it.
+      if (shouldIgnoreEvent && !isRootNode) return;
 
-    return handleNewResolver({ context, event });
-  });
+      return handleNewResolver({ context, event });
+    },
+  );
 
-  ponder.on(ns("RegistryOld:NewTTL"), async ({ context, event }) => {
+  ponder.on(namespaceContract(pluginName, "RegistryOld:NewTTL"), async ({ context, event }) => {
     const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
     if (shouldIgnoreEvent) return;
 
     return handleNewTTL({ context, event });
   });
 
-  ponder.on(ns("RegistryOld:Transfer"), async ({ context, event }) => {
+  ponder.on(namespaceContract(pluginName, "RegistryOld:Transfer"), async ({ context, event }) => {
     // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
     // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
     // of the ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
@@ -80,8 +80,8 @@ export function attachSubgraphRegistryEventHandlers() {
     return handleTransfer({ context, event });
   });
 
-  ponder.on(ns("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(ns("Registry:NewResolver"), handleNewResolver);
-  ponder.on(ns("Registry:NewTTL"), handleNewTTL);
-  ponder.on(ns("Registry:Transfer"), handleTransfer);
+  ponder.on(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(namespaceContract(pluginName, "Registry:NewResolver"), handleNewResolver);
+  ponder.on(namespaceContract(pluginName, "Registry:NewTTL"), handleNewTTL);
+  ponder.on(namespaceContract(pluginName, "Registry:Transfer"), handleTransfer);
 }

@@ -5,27 +5,28 @@
 import {
   createPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
-  makePluginNamespace,
+  namespaceContract,
 } from "@/lib/plugin-helpers";
 import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
 
+const pluginName = PluginName.Basenames;
+
 export default createPlugin({
-  name: PluginName.Basenames,
+  name: pluginName,
   requiredDatasourceNames: [DatasourceNames.Basenames],
   createPonderConfig(ensIndexerConfig) {
     const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
       ensIndexerConfig.namespace,
       DatasourceNames.Basenames,
     );
-    const ns = makePluginNamespace(PluginName.Basenames);
 
     return ponder.createConfig({
       networks: networksConfigForChain(chain.id, ensIndexerConfig.rpcConfigs),
       contracts: {
-        [ns("Registry")]: {
+        [namespaceContract(pluginName, "Registry")]: {
           network: networkConfigForContract(
             chain.id,
             ensIndexerConfig.globalBlockrange,
@@ -33,7 +34,7 @@ export default createPlugin({
           ),
           abi: contracts.Registry.abi,
         },
-        [ns("BaseRegistrar")]: {
+        [namespaceContract(pluginName, "BaseRegistrar")]: {
           network: networkConfigForContract(
             chain.id,
             ensIndexerConfig.globalBlockrange,
@@ -41,7 +42,7 @@ export default createPlugin({
           ),
           abi: contracts.BaseRegistrar.abi,
         },
-        [ns("EARegistrarController")]: {
+        [namespaceContract(pluginName, "EARegistrarController")]: {
           network: networkConfigForContract(
             chain.id,
             ensIndexerConfig.globalBlockrange,
@@ -49,7 +50,7 @@ export default createPlugin({
           ),
           abi: contracts.EARegistrarController.abi,
         },
-        [ns("RegistrarController")]: {
+        [namespaceContract(pluginName, "RegistrarController")]: {
           network: networkConfigForContract(
             chain.id,
             ensIndexerConfig.globalBlockrange,
@@ -57,7 +58,7 @@ export default createPlugin({
           ),
           abi: contracts.RegistrarController.abi,
         },
-        // We use a shared Subgraph-compatible Resolver ABI, hence we don't need apply any contract namespace here for the plugin
+        // NOTE: shared Resolver definition/implementation
         Resolver: {
           network: networkConfigForContract(
             chain.id,

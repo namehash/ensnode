@@ -4,7 +4,7 @@ import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk
 
 import config from "@/config";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
-import { makePluginNamespace } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
@@ -35,56 +35,71 @@ export function attachBasenamesRegistrarEventHandlers() {
     registrarManagedName: getRegistrarManagedName(config.namespace),
   });
 
-  // create a namespace for the plugin events to avoid conflicts with other plugins
-  const ns = makePluginNamespace(pluginName);
-
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
-  ponder.on(ns("BaseRegistrar:NameRegisteredWithRecord"), async ({ context, event }) => {
-    await handleNameRegistered({
-      context,
-      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
-    });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "BaseRegistrar:NameRegisteredWithRecord"),
+    async ({ context, event }) => {
+      await handleNameRegistered({
+        context,
+        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+      });
+    },
+  );
 
-  ponder.on(ns("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
-    await handleNameRegistered({
-      context,
-      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
-    });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
+    async ({ context, event }) => {
+      await handleNameRegistered({
+        context,
+        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+      });
+    },
+  );
 
-  ponder.on(ns("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewed({
-      context,
-      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
-    });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "BaseRegistrar:NameRenewed"),
+    async ({ context, event }) => {
+      await handleNameRenewed({
+        context,
+        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+      });
+    },
+  );
 
-  ponder.on(ns("BaseRegistrar:Transfer"), async ({ context, event }) => {
+  ponder.on(namespaceContract(pluginName, "BaseRegistrar:Transfer"), async ({ context, event }) => {
     await handleNameTransferred({
       context,
       event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
     });
   });
 
-  ponder.on(ns("EARegistrarController:NameRegistered"), async ({ context, event }) => {
-    await handleNameRegisteredByController({
-      context,
-      event: { ...event, args: { ...event.args, cost: 0n } },
-    });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "EARegistrarController:NameRegistered"),
+    async ({ context, event }) => {
+      await handleNameRegisteredByController({
+        context,
+        event: { ...event, args: { ...event.args, cost: 0n } },
+      });
+    },
+  );
 
-  ponder.on(ns("RegistrarController:NameRegistered"), async ({ context, event }) => {
-    await handleNameRegisteredByController({
-      context,
-      event: { ...event, args: { ...event.args, cost: 0n } },
-    });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "RegistrarController:NameRegistered"),
+    async ({ context, event }) => {
+      await handleNameRegisteredByController({
+        context,
+        event: { ...event, args: { ...event.args, cost: 0n } },
+      });
+    },
+  );
 
-  ponder.on(ns("RegistrarController:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewedByController({
-      context,
-      event: { ...event, args: { ...event.args, cost: 0n } },
-    });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "RegistrarController:NameRenewed"),
+    async ({ context, event }) => {
+      await handleNameRenewedByController({
+        context,
+        event: { ...event, args: { ...event.args, cost: 0n } },
+      });
+    },
+  );
 }

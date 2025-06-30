@@ -5,7 +5,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 import { createConfig as createPonderConfig } from "ponder";
 
 /**
- * A factory function that returns a function to create a namespaced contract name for Ponder handlers.
+ * Creates a namespaced contract name for Ponder handlers.
  *
  * Ponder config requires a flat dictionary of contract config entires, where each entry has its
  * unique name and set of EVM event names derived from the contract's ABI. Ponder will use contract
@@ -15,34 +15,27 @@ import { createConfig as createPonderConfig } from "ponder";
  *
  * However, because plugins within ENSIndexer may use the same contract/event names, an additional
  * namespace prefix is required to distinguish between contracts having the same name, with different
- * implementations. The strong typing is helpful and necessary for Ponder's auto-generated types to apply.
+ * implementations.
+ *
+ * NOTE: uses const generic typing for const inference at compile-time, necessry for ponder's
+ * inferred handler typings.
  *
  * @example
  * ```ts
- * const subgraphNamespace = makePluginNamespace(PluginName.Subgraph);
- * const basenamesNamespace = makePluginNamespace(PluginName.Basenames);
- *
- * subgraphNamespace("Registry"); // returns "subgraph/Registry"
- * basenamesNamespace("Registry"); // returns "basenames/Registry"
+ * namespaceContract(PluginName.Subgraph, "Registry"); // returns "subgraph/Registry"
+ * namespaceContract(PluginName.Basenames, "Registry"); // returns "basenames/Registry");
  * ```
  *
- * Note: we use templated type here to ensure that the output type follow the literal value from the function input.
  */
-export function makePluginNamespace<const PLUGIN_NAME extends PluginName>(pluginName: PLUGIN_NAME) {
-  if (/[.:]/.test(pluginName)) {
+export function namespaceContract<const PREFIX extends string, const CONTRACT_NAME extends string>(
+  prefix: PREFIX,
+  contractName: CONTRACT_NAME,
+): `${PREFIX}/${CONTRACT_NAME}` {
+  if (/[.:]/.test(prefix)) {
     throw new Error("Reserved character: Plugin namespace prefix cannot contain '.' or ':'");
   }
 
-  /**
-   * Creates a namespaced contract name
-   *
-   * Note: we use templated type here to ensure that the output type follow the literal value from the function input.
-   */
-  return function pluginNamespace<const CONTRACT_NAME extends string>(
-    contractName: CONTRACT_NAME,
-  ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
-    return `${pluginName}/${contractName}` as const;
-  };
+  return `${prefix}/${contractName}` as const;
 }
 
 /**

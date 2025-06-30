@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
-import { makePluginNamespace } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
@@ -22,13 +22,10 @@ export function attachSubgraphNameWrapperEventHandlers() {
     registrarManagedName: "eth",
   });
 
-  // create a namespace for the plugin events to avoid conflicts with other plugins
-  const ns = makePluginNamespace(pluginName);
-
-  ponder.on(ns("NameWrapper:NameWrapped"), handleNameWrapped);
-  ponder.on(ns("NameWrapper:NameUnwrapped"), handleNameUnwrapped);
-  ponder.on(ns("NameWrapper:FusesSet"), handleFusesSet);
-  ponder.on(ns("NameWrapper:ExpiryExtended"), handleExpiryExtended);
-  ponder.on(ns("NameWrapper:TransferSingle"), handleTransferSingle);
-  ponder.on(ns("NameWrapper:TransferBatch"), handleTransferBatch);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:FusesSet"), handleFusesSet);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:ExpiryExtended"), handleExpiryExtended);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferSingle"), handleTransferSingle);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferBatch"), handleTransferBatch);
 }
