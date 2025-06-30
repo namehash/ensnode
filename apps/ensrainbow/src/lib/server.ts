@@ -3,8 +3,6 @@ import {
   type EnsRainbowClientLabelSet,
   type EnsRainbowServerLabelSet,
   ErrorCode,
-  type LabelSetId,
-  type LabelSetVersion,
   StatusCode,
   labelHashToBytes,
   validateSupportedLabelSetAndVersion,
@@ -12,6 +10,7 @@ import {
 import { ByteArray } from "viem";
 
 import { ENSRainbowDB } from "@/lib/database";
+import { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { logger } from "@/utils/logger";
 import { LabelHash } from "@ensnode/ensnode-sdk";
 
@@ -51,6 +50,21 @@ export class ENSRainbowServer {
     return this.serverLabelSet;
   }
 
+  /**
+   * Determines if a versioned rainbow record should be treated as unhealable
+   * based on the client's label set version requirements.
+   */
+  private needToSimulateAsUnhealable(
+    versionedRainbowRecord: VersionedRainbowRecord,
+    clientLabelSet: EnsRainbowClientLabelSet,
+  ): boolean {
+    // Only return the label if its label set version is less than or equal to the client's requested labelSetVersion
+    return (
+      clientLabelSet.labelSetVersion !== undefined &&
+      versionedRainbowRecord.labelSetVersion > clientLabelSet.labelSetVersion
+    );
+  }
+
   async heal(
     labelHash: LabelHash,
     clientLabelSet: EnsRainbowClientLabelSet,
@@ -80,7 +94,10 @@ export class ENSRainbowServer {
 
     try {
       const versionedRainbowRecord = await this.db.getVersionedRainbowRecord(labelHashBytes);
-      if (versionedRainbowRecord === null) {
+      if (
+        versionedRainbowRecord === null ||
+        this.needToSimulateAsUnhealable(versionedRainbowRecord, clientLabelSet)
+      ) {
         logger.info(`Unhealable labelHash request: ${labelHash}`);
         return {
           status: StatusCode.Error,
@@ -90,21 +107,6 @@ export class ENSRainbowServer {
       }
 
       const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = versionedRainbowRecord;
-
-      // Only return the label if its label set version is less than or equal to the client's requested labelSetVersion
-      if (
-        clientLabelSet.labelSetVersion !== undefined &&
-        labelSetVersionNumber > clientLabelSet.labelSetVersion
-      ) {
-        logger.info(
-          `Label set version ${labelSetVersionNumber} for ${labelHash} exceeds client's requested label set version ${clientLabelSet.labelSetVersion}`,
-        );
-        return {
-          status: StatusCode.Error,
-          error: "Label not found",
-          errorCode: ErrorCode.NotFound,
-        } satisfies EnsRainbow.HealError;
-      }
 
       logger.info(
         `Successfully healed labelHash ${labelHash} to label "${actualLabel}" (set ${labelSetVersionNumber})`,

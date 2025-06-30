@@ -68,7 +68,16 @@ export function buildLabelSetVersion(maybeLabelSetVersion: number | string): Lab
  * The state of label sets managed by an ENSRainbow server.
  */
 export interface EnsRainbowServerLabelSet {
+  /**
+   * The label set ID of healing data provided by the ENSRainbow server.
+   */
   labelSetId: LabelSetId;
+
+  /**
+   * The highest label set version available on the ENSRainbow server for the current
+   * label set ID. This represents the most recent version of the label set that the
+   * server has ingested and can provide label healing results for.
+   */
   highestLabelSetVersion: LabelSetVersion;
 }
 
