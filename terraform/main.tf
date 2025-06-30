@@ -44,6 +44,16 @@ locals {
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
     }
+
+    alpha-sepolia = {
+      instance_name                     = "alpha-sepolia"
+      subdomain_prefix                  = "alpha-sepolia.${local.railway_environment}"
+      database_schema                   = "alphaSepoliaSchema-${var.ensnode_version}"
+      plugins                           = "subgraph,basenames,lineanames"
+      namespace                         = "sepolia"
+      heal_reverse_addresses            = "true"
+      index_additional_resolver_records = "true"
+    }
   }
 }
 

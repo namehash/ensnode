@@ -73,6 +73,9 @@ jobs:
               #MAINNET
               echo "MAINNET_API_SVC_ID="${{ secrets.GREEN_MAINNET_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "MAINNET_INDEXER_SVC_ID="${{ secrets.GREEN_MAINNET_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+              #ALPHA-SEPOLIA
+              echo "ALPHA_SEPOLIA_API_SVC_ID="${{ secrets.GREEN_ALPHA_SEPOLIA_API_SVC_ID }} >> "$GITHUB_ENV"
+              echo "ALPHA_SEPOLIA_INDEXER_SVC_ID="${{ secrets.GREEN_ALPHA_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
               #SEPOLIA
               echo "SEPOLIA_API_SVC_ID="${{ secrets.GREEN_SEPOLIA_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "SEPOLIA_INDEXER_SVC_ID="${{ secrets.GREEN_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
@@ -92,6 +95,9 @@ jobs:
               #MAINNET
               echo "MAINNET_API_SVC_ID="${{ secrets.BLUE_MAINNET_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "MAINNET_INDEXER_SVC_ID="${{ secrets.BLUE_MAINNET_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+              #ALPHA-SEPOLIA
+              echo "ALPHA_SEPOLIA_API_SVC_ID="${{ secrets.BLUE_ALPHA_SEPOLIA_API_SVC_ID }} >> "$GITHUB_ENV"
+              echo "ALPHA_SEPOLIA_INDEXER_SVC_ID="${{ secrets.BLUE_ALPHA_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
               #SEPOLIA
               echo "SEPOLIA_API_SVC_ID="${{ secrets.BLUE_SEPOLIA_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "SEPOLIA_INDEXER_SVC_ID="${{ secrets.BLUE_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
@@ -138,6 +144,9 @@ jobs:
           #MAINNET
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #ALPHA-SEPOLIA
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #SEPOLIA
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
@@ -167,6 +176,7 @@ jobs:
 
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA_DATABASE_SCHEMA" "alphaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "MAINNET_DATABASE_SCHEMA" "mainnetSchema${TAG}"
+          set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_DATABASE_SCHEMA" "alphaSepoliaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_DATABASE_SCHEMA" "sepoliaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "HOLESKY_DATABASE_SCHEMA" "holeskySchema${TAG}"
 
@@ -191,6 +201,9 @@ jobs:
           #MAINNET
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}
+          #ALPHA-SEPOLIA
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID}
           #SEPOLIA
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}
