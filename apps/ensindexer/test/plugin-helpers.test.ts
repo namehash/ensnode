@@ -13,7 +13,7 @@ describe("plugin helpers", () => {
 
     it("should throw if invalid characters", () => {
       expect(() => namespaceContract("subgraph.test", "Registry")).toThrowError(/reserved/i);
-      expect(() => namespaceContract("subgraph:test", "Registry")).toThrowError(/reserved/i);
+      expect(() => namespaceContract("subgraph", "Registry:test")).toThrowError(/reserved/i);
     });
   });
 });

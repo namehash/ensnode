@@ -32,7 +32,11 @@ export function namespaceContract<const PREFIX extends string, const CONTRACT_NA
   contractName: CONTRACT_NAME,
 ): `${PREFIX}/${CONTRACT_NAME}` {
   if (/[.:]/.test(prefix)) {
-    throw new Error("Reserved character: Plugin namespace prefix cannot contain '.' or ':'");
+    throw new Error("Reserved character: Contract namespace prefix cannot contain '.' or ':'");
+  }
+
+  if (/[.:]/.test(contractName)) {
+    throw new Error("Reserved character: Contract name cannot contain '.' or ':'");
   }
 
   return `${prefix}/${contractName}` as const;
