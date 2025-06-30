@@ -134,6 +134,11 @@ export function ponderMetadata<
         }
       }
 
+      const firstBlockToIndex = await query.firstBlockToIndexByChainId(
+        publicClientChainId,
+        publicClient,
+      );
+
       // mapping ponder status for current chain
       const ponderStatusForChain = Object.values(ponderStatus).find(
         (ponderStatusEntry) => ponderStatusEntry.id === publicClientChainId,
@@ -142,17 +147,24 @@ export function ponderMetadata<
       // mapping last indexed block if available
       let lastIndexedBlock: BlockInfo | null = null;
       if (ponderStatusForChain) {
-        lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForChain.block);
+        // Since Ponder 0.11, the `block` value in the PonderStatus object
+        // is always provided. It represents either the very first block to be indexed
+        // or the last block that has been indexed.
+        //
+        // We compare the first block to be indexed (from ponder.config.ts)
+        // with the block value from the PonderStatus object (from `GET /status` response).
+        // We only set the `lastIndexedBlock` value if the `block` from the PonderStatus object
+        // is not the same as the `firstBlockToIndex`.
+        if (firstBlockToIndex.number < ponderStatusForChain.block.number) {
+          lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForChain.block);
+        }
       }
 
       networkIndexingStatusByChainId[publicClientChainId] = {
         lastSyncedBlock,
         lastIndexedBlock,
         latestSafeBlock,
-        firstBlockToIndex: await query.firstBlockToIndexByChainId(
-          publicClientChainId,
-          publicClient,
-        ),
+        firstBlockToIndex,
       } satisfies NetworkIndexingStatus;
     }
 
