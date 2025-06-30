@@ -10,6 +10,7 @@ import {
   type LabelSetVersion,
   buildLabelSetId,
   buildLabelSetVersion,
+  parseNonNegativeInteger,
 } from "@ensnode/ensrainbow-sdk";
 import {
   type VersionedRainbowRecord,
@@ -302,7 +303,6 @@ export class ENSRainbowDB {
   /**
    * Set the highest label set version directly
    * @param labelSetVersion The label set version to set
-   * @throws Error if the label set version is not a valid non-negative integer
    */
   public async setHighestLabelSetVersion(labelSetVersion: LabelSetVersion): Promise<void> {
     await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, labelSetVersion.toString());
@@ -316,13 +316,13 @@ export class ENSRainbowDB {
   public async getLabelSet(): Promise<EnsRainbowServerLabelSet> {
     const labelSetIdStr = await this.get(SYSTEM_KEY_LABEL_SET_ID);
     if (labelSetIdStr === null) {
-      throw new Error("Database label set ID is null");
+      throw new Error("Label set ID not found in the database");
     }
     const labelSetId = buildLabelSetId(labelSetIdStr);
 
     const labelSetVersionStr = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION);
     if (labelSetVersionStr === null) {
-      throw new Error("Highest label set version not found");
+      throw new Error("Highest label set version not found in the database");
     }
     const highestLabelSetVersion = buildLabelSetVersion(labelSetVersionStr);
     return {
@@ -440,7 +440,7 @@ export class ENSRainbowDB {
     }
 
     try {
-      const count = buildLabelSetVersion(countStr);
+      const count = parseNonNegativeInteger(countStr);
       return count;
     } catch (error) {
       throw new Error(
@@ -472,7 +472,7 @@ export class ENSRainbowDB {
     }
 
     try {
-      return buildLabelSetVersion(versionStr);
+      return parseNonNegativeInteger(versionStr);
     } catch (error) {
       throw new Error(`Invalid schema version in database: ${versionStr}`);
     }
@@ -562,21 +562,19 @@ export class ENSRainbowDB {
     }
 
     // 3. Check Label Set ID and Highest Label Set Version Existence and Validity
-    let labelSetId: LabelSetId;
-    let highestLabelSetVersion: LabelSetVersion;
+    let labelSet: EnsRainbowServerLabelSet;
     try {
-      const labelSet = await this.getLabelSet();
-      labelSetId = labelSet.labelSetId;
-      highestLabelSetVersion = labelSet.highestLabelSetVersion;
-      logger.info(`Label set ID verified: ${labelSetId}`);
-      logger.info(`Highest label set version verified: ${highestLabelSetVersion}`);
+      labelSet = await this.getLabelSet();
+      logger.info(
+        `Label set verified - ID: ${labelSet.labelSetId}, highest version: ${labelSet.highestLabelSetVersion}`,
+      );
     } catch (error) {
       const errorMsg = generatePurgeErrorMessage(`Error checking label set: ${error}`);
       logger.error(errorMsg);
       return false;
     }
 
-    // 5. Check Precalculated Count Existence (even in lite mode, the key should exist)
+    // 4. Check Precalculated Count Existence (even in lite mode, the key should exist)
     try {
       const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
       // Only log the count if we pass validation later
@@ -637,9 +635,9 @@ export class ENSRainbowDB {
         // Only proceed with further checks if decoding was successful
 
         // Label set version comparison
-        if (versionedRainbowRecord.labelSetVersion > highestLabelSetVersion) {
+        if (versionedRainbowRecord.labelSetVersion > labelSet.highestLabelSetVersion) {
           logger.error(
-            `Label set version mismatch for label "${value}": record set ${versionedRainbowRecord.labelSetVersion} > highest set ${highestLabelSetVersion}`,
+            `Label set version mismatch for label "${value}": record set ${versionedRainbowRecord.labelSetVersion} > highest set ${labelSet.highestLabelSetVersion}`,
           );
           labelSetVersionMismatches++;
         }

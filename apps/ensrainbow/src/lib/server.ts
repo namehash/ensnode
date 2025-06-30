@@ -31,6 +31,9 @@ export class ENSRainbowServer {
    * @throws Error if a "lite" validation of the database fails
    */
   public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
+    // Using the Factory method pattern to workaround the limitation of Javascript not supporting `await` within a constructor.
+    // We do all async work in this `init` function and then make the synchronous call to the constructor when ready.
+
     if (!(await db.validate({ lite: true }))) {
       throw new Error("Database is in an invalid state");
     }
@@ -41,7 +44,7 @@ export class ENSRainbowServer {
   }
 
   /**
-   * Returns the full server label set object
+   * Returns the server's EnsRainbowServerLabelSet.
    * @returns The server's label set configuration
    */
   public getServerLabelSet(): EnsRainbowServerLabelSet {

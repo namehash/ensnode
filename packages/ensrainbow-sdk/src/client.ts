@@ -93,7 +93,8 @@ export namespace EnsRainbow {
 
   export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success, never> {
     status: typeof StatusCode.Success;
-    /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
+    /** The total count of labels that can be healed by the ENSRainbow instance. Always a
+     * non-negative integer. */
     count: number;
     timestamp: string;
     error?: never;
@@ -154,9 +155,18 @@ export interface EnsRainbowApiClientOptions {
   endpointUrl: URL;
 
   /**
-   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to support. If provided, enables deterministic heal results across time, such that only labels from label set versions less than or equal to this value will be returned. Therefore, even if the ENSRainbow server later ingests additional label set versions greater than this value, the results returned across time can be deterministic. If provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow server manages a compatible label set. If not provided no specific labelSetId validation will be performed during heal operations.
-   * If `labelSetId` is provided without `labelSetVersion`, the server will use the latest available version.
-   * If `labelSetVersion` is defined, only labels from sets less than or equal to this value will be returned.
+   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to
+   * support. If provided, enables deterministic heal results across time, such that only
+   * labels from label set versions less than or equal to this value will be returned.
+   * Therefore, even if the ENSRainbow server later ingests additional label set versions
+   * greater than this value, the results returned across time can be deterministic. If
+   * provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow
+   * server manages a compatible label set. If not provided no specific labelSetId validation
+   * will be performed during heal operations.
+   * If `labelSetId` is provided without `labelSetVersion`, the server will use the latest
+   * available version.
+   * If `labelSetVersion` is defined, only labels from sets less than or equal to this value
+   * will be returned.
    * When `labelSetVersion` is defined, `labelSetId` must also be defined.
    */
   labelSet?: EnsRainbowClientLabelSet;
@@ -190,7 +200,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
-      labelSet: buildEnsRainbowClientLabelSet(undefined, undefined),
+      labelSet: buildEnsRainbowClientLabelSet(),
     };
   }
 
@@ -226,8 +236,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * @param labelHash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts,
+   * CORS violations, or Invalid URLs
    * @example
    * ```typescript
    * const response = await client.heal(
@@ -291,9 +301,10 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   /**
    * Get Count of Healable Labels
    *
-   * @returns a `CountResponse` indicating the result and the timestamp of the request and the number of healable labels if successful
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
+   * @returns a `CountResponse` indicating the result and the timestamp of the request and the
+   * number of healable labels if successful
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts,
+   * CORS violations, or Invalid URLs
    * @example
    *
    * const response = await client.count();
@@ -315,8 +326,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
 
   /**
    *
-   * Simple verification that the service is running, either in your local setup or for the provided hosted instance
-   *
+   * Simple verification that the service is running, either in your local setup or for the
+   * provided hosted instance.
    * @returns a status of ENS Rainbow service
    * @example
    *
@@ -338,8 +349,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * Get the version information of the ENSRainbow service
    *
    * @returns the version information of the ENSRainbow service
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
+   * @throws if the request fails due to network failures, DNS lookup failures, request
+   * timeouts, CORS violations, or invalid URLs
    * @example
    * ```typescript
    * const response = await client.version();

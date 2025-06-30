@@ -47,10 +47,6 @@ describe("buildLabelSetId", () => {
       "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
     );
   });
-
-  it("should throw an error for a non-string input", () => {
-    expect(() => buildLabelSetId(123 as any)).toThrow("LabelSetId must be a string.");
-  });
 });
 
 describe("buildLabelSetVersion", () => {
@@ -71,14 +67,20 @@ describe("buildLabelSetVersion", () => {
     );
   });
 
-  it("should return a valid label set version for a string input", () => {
-    expect(buildLabelSetVersion("1")).toBe(1);
+  it("should throw an error for NaN", () => {
+    expect(() => buildLabelSetVersion(NaN)).toThrow(
+      "LabelSetVersion must be a non-negative integer.",
+    );
   });
 
-  it("should throw an error for a non-number/non-string input", () => {
-    expect(() => buildLabelSetVersion({} as any)).toThrow(
-      "LabelSetVersion must be a number or string.",
+  it("should throw an error for Infinity", () => {
+    expect(() => buildLabelSetVersion(Infinity)).toThrow(
+      "LabelSetVersion must be a non-negative integer.",
     );
+  });
+
+  it("should return a valid label set version for a string input", () => {
+    expect(buildLabelSetVersion("1")).toBe(1);
   });
 });
 
