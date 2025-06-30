@@ -234,14 +234,14 @@ export async function createStartBlockByChainIdMap(
 }
 
 /**
- * Builds a ponder#NetworksConfig for a single, specific chain.
+ * Builds a ponder#NetworksConfig for a single, specific chain in the context a the ENSIndexerConfig
  *
- * @param {number} chainId
- * @param rpcConfigs a dictionary of RPC configurations, grouped by chainId
- *
- * @returns networks configuration
+ * @returns ponder#NetworksConfig
  */
-export function networksConfigForChain(chainId: number, rpcConfigs: Record<number, RpcConfig>) {
+export function networksConfigForChain(
+  { rpcConfigs }: Pick<ENSIndexerConfig, "rpcConfigs">,
+  chainId: number,
+) {
   if (!rpcConfigs[chainId]) {
     throw new Error(
       `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,

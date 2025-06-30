@@ -18,27 +18,23 @@ const pluginName = PluginName.Lineanames;
 export default createPlugin({
   name: pluginName,
   requiredDatasourceNames: [DatasourceNames.Lineanames],
-  createPonderConfig(ensIndexerConfig) {
+  createPonderConfig(config) {
     const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
-      ensIndexerConfig.namespace,
+      config.namespace,
       DatasourceNames.Lineanames,
     );
 
     return ponder.createConfig({
-      networks: networksConfigForChain(chain.id, ensIndexerConfig.rpcConfigs),
+      networks: networksConfigForChain(config, chain.id),
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
-          network: networkConfigForContract(
-            chain.id,
-            ensIndexerConfig.globalBlockrange,
-            contracts.Registry,
-          ),
+          network: networkConfigForContract(chain.id, config.globalBlockrange, contracts.Registry),
           abi: contracts.Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
           network: networkConfigForContract(
             chain.id,
-            ensIndexerConfig.globalBlockrange,
+            config.globalBlockrange,
             contracts.BaseRegistrar,
           ),
           abi: contracts.BaseRegistrar.abi,
@@ -46,7 +42,7 @@ export default createPlugin({
         [namespaceContract(pluginName, "EthRegistrarController")]: {
           network: networkConfigForContract(
             chain.id,
-            ensIndexerConfig.globalBlockrange,
+            config.globalBlockrange,
             contracts.EthRegistrarController,
           ),
           abi: contracts.EthRegistrarController.abi,
@@ -54,18 +50,14 @@ export default createPlugin({
         [namespaceContract(pluginName, "NameWrapper")]: {
           network: networkConfigForContract(
             chain.id,
-            ensIndexerConfig.globalBlockrange,
+            config.globalBlockrange,
             contracts.NameWrapper,
           ),
           abi: contracts.NameWrapper.abi,
         },
         // NOTE: shared Resolver definition/implementation
         Resolver: {
-          network: networkConfigForContract(
-            chain.id,
-            ensIndexerConfig.globalBlockrange,
-            contracts.Resolver,
-          ),
+          network: networkConfigForContract(chain.id, config.globalBlockrange, contracts.Resolver),
           abi: contracts.Resolver.abi,
         },
       },

@@ -17,13 +17,13 @@ const pluginName = PluginName.ThreeDNS;
 export default createPlugin({
   name: pluginName,
   requiredDatasourceNames: [DatasourceNames.ThreeDNSBase, DatasourceNames.ThreeDNSOptimism],
-  createPonderConfig(ensIndexerConfig) {
+  createPonderConfig(config) {
     const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
-      ensIndexerConfig.namespace,
+      config.namespace,
       DatasourceNames.ThreeDNSBase,
     );
     const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
-      ensIndexerConfig.namespace,
+      config.namespace,
       DatasourceNames.ThreeDNSOptimism,
     );
 
@@ -34,20 +34,20 @@ export default createPlugin({
 
     return ponder.createConfig({
       networks: {
-        ...networksConfigForChain(threeDNSOptimism.chain.id, ensIndexerConfig.rpcConfigs),
-        ...networksConfigForChain(threeDNSBase.chain.id, ensIndexerConfig.rpcConfigs),
+        ...networksConfigForChain(config, threeDNSOptimism.chain.id),
+        ...networksConfigForChain(config, threeDNSBase.chain.id),
       },
       contracts: {
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           network: {
             ...networkConfigForContract(
               threeDNSOptimism.chain.id,
-              ensIndexerConfig.globalBlockrange,
+              config.globalBlockrange,
               threeDNSOptimism.contracts.ThreeDNSToken,
             ),
             ...networkConfigForContract(
               threeDNSBase.chain.id,
-              ensIndexerConfig.globalBlockrange,
+              config.globalBlockrange,
               threeDNSBase.contracts.ThreeDNSToken,
             ),
           },
@@ -58,12 +58,12 @@ export default createPlugin({
           network: {
             ...networkConfigForContract(
               threeDNSOptimism.chain.id,
-              ensIndexerConfig.globalBlockrange,
+              config.globalBlockrange,
               threeDNSOptimism.contracts.Resolver,
             ),
             ...networkConfigForContract(
               threeDNSBase.chain.id,
-              ensIndexerConfig.globalBlockrange,
+              config.globalBlockrange,
               threeDNSBase.contracts.Resolver,
             ),
           },
