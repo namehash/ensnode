@@ -28,9 +28,7 @@ import { createConfig as createPonderConfig } from "ponder";
  *
  * Note: we use templated type here to ensure that the output type follow the literal value from the function input.
  */
-export function makePluginNamespace<const PluginNameType extends PluginName>(
-  pluginName: PluginNameType,
-) {
+export function makePluginNamespace<const PLUGIN_NAME extends PluginName>(pluginName: PLUGIN_NAME) {
   if (/[.:]/.test(pluginName)) {
     throw new Error("Reserved character: Plugin namespace prefix cannot contain '.' or ':'");
   }
@@ -40,9 +38,9 @@ export function makePluginNamespace<const PluginNameType extends PluginName>(
    *
    * Note: we use templated type here to ensure that the output type follow the literal value from the function input.
    */
-  return function pluginNamespace<const ContractNameType extends string>(
-    contractName: ContractNameType,
-  ): `${PluginNameType}/${ContractNameType}` {
+  return function pluginNamespace<const CONTRACT_NAME extends string>(
+    contractName: CONTRACT_NAME,
+  ): `${PLUGIN_NAME}/${CONTRACT_NAME}` {
     return `${pluginName}/${contractName}` as const;
   };
 }
@@ -50,49 +48,39 @@ export function makePluginNamespace<const PluginNameType extends PluginName>(
 /**
  * Describes an ENSIndexerPlugin used within the ENSIndexer project.
  *
- * Note: all templated types have been use to bind types derived from plugin's
- * config literals and make them available for proper type inference.
+ * NOTE: uses generic typings to capture inferred const types for inference.
  */
 export interface ENSIndexerPlugin<
-  PluginNameType extends PluginName = PluginName,
-  RequiredDatasourceNamesType extends readonly DatasourceName[] = DatasourceName[],
-  PonderChainsType extends object = {},
-  PonderContractsType extends object = {},
-  PonderAccountsType extends object = {},
-  PonderBlocksType extends object = {},
+  PLUGIN_NAME extends PluginName = PluginName,
+  REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[] = DatasourceName[],
+  CHAINS extends object = {},
+  CONTRACTS extends object = {},
+  ACCOUNTS extends object = {},
+  BLOCKS extends object = {},
 > {
   /**
    * The plugin's unique name.
    */
-  name: PluginNameType;
+  name: PLUGIN_NAME;
 
   /**
    * The list of DatasourceNames this plugin requires access to. ENSIndexer enforces that a plugin
    * can only be activated if all of its required Datasources are defined on the configured ENS Namespace.
    */
-  requiredDatasourceNames: RequiredDatasourceNamesType;
+  requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES;
 
   /**
    * Create Ponder Config for the plugin.
    *
-   * @param {ENSIndexerConfig} ensIndexerConfig
+   * @param {ENSIndexerConfig} config
    */
   createPonderConfig(
-    ensIndexerConfig: ENSIndexerConfig,
-  ): PonderConfigResult<
-    PonderChainsType,
-    PonderContractsType,
-    PonderAccountsType,
-    PonderBlocksType
-  >;
+    config: ENSIndexerConfig,
+  ): PonderConfigResult<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>;
 }
 
 /**
  * Helper type to capture the return type of `createPonderConfig` with its `const` inferred generics.
- * This is the exact shape of a Ponder config.
- *
- * Note: all templated types have been use to bind types derived from the `createPonderConfig`'s input params
- * and make them available for proper type inference in the `createPonderConfig` caller's scope.
  */
 type PonderConfigResult<
   CHAINS extends object = {},
@@ -147,51 +135,45 @@ export const getDatasourceAsFullyDefinedAtCompileTime = <
 
 /**
  * Options type for `buildPlugin` function input.
+ *
+ * NOTE: uses generic typings to capture inferred const types for inference.
  */
 export interface BuildPluginOptions<
-  PluginNameType extends PluginName,
-  RequiredDatasourceNamesType extends readonly DatasourceName[],
-  // This generic will capture the exact PonderConfigResult, including the inferred types.
-  PonderConfigResultType extends PonderConfigResult,
+  PLUGIN_NAME extends PluginName,
+  REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[],
+  PONDER_CONFIG_RESULT extends PonderConfigResult,
 > {
   /** The unique plugin name */
-  name: PluginNameType;
+  name: PLUGIN_NAME;
 
   /** The plugin's required Datasources */
-  requiredDatasourceNames: RequiredDatasourceNamesType;
+  requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES;
 
   /**
    * Create the ponder configuration lazily to prevent premature execution of
    * nested factory functions, i.e. to ensure that the ponder configuration
    * is only created for this plugin when it is activated.
    */
-  createPonderConfig(ensIndexerConfig: ENSIndexerConfig): PonderConfigResultType;
+  createPonderConfig(config: ENSIndexerConfig): PONDER_CONFIG_RESULT;
 }
 
 /**
- * Builds an ENSIndexerPlugin for ENSIndexer.
- *
- * This function simplifies building an ENSIndexerPlugin.
- *
- * The special type system logic is used when building the MergedPonderConfig that is required by Ponder.
+ * Creates an ENSIndexerPlugin for ENSIndexer. Is a simple factory for the provided `options`
+ * but enforces type correctness of `options` and captures inferred const types for inference.
  */
-export function buildPlugin<
-  PluginNameType extends PluginName,
-  PluginRequiredDatasourceNamesType extends readonly DatasourceName[],
-  PonderConfigResultType extends PonderConfigResult,
+export function createPlugin<
+  PLUGIN_NAME extends PluginName,
+  REQUIRED_DATASOURCE_NAMES extends readonly DatasourceName[],
+  PONDER_CONFIG_RESULT extends PonderConfigResult,
 >(
-  options: BuildPluginOptions<
-    PluginNameType,
-    PluginRequiredDatasourceNamesType,
-    PonderConfigResultType
-  >,
+  options: BuildPluginOptions<PLUGIN_NAME, REQUIRED_DATASOURCE_NAMES, PONDER_CONFIG_RESULT>,
 ): ENSIndexerPlugin<
-  PluginNameType,
-  PluginRequiredDatasourceNamesType,
-  PonderConfigResultType["networks"],
-  PonderConfigResultType["contracts"],
-  PonderConfigResultType["accounts"],
-  PonderConfigResultType["blocks"]
+  PLUGIN_NAME,
+  REQUIRED_DATASOURCE_NAMES,
+  PONDER_CONFIG_RESULT["networks"],
+  PONDER_CONFIG_RESULT["contracts"],
+  PONDER_CONFIG_RESULT["accounts"],
+  PONDER_CONFIG_RESULT["blocks"]
 > {
   return options;
 }

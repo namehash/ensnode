@@ -3,7 +3,7 @@
  */
 
 import {
-  buildPlugin,
+  createPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
   makePluginNamespace,
 } from "@/lib/plugin-helpers";
@@ -12,7 +12,7 @@ import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
 
-export default buildPlugin({
+export default createPlugin({
   name: PluginName.Basenames,
   requiredDatasourceNames: [DatasourceNames.Basenames],
   createPonderConfig(ensIndexerConfig) {
