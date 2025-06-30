@@ -25,7 +25,10 @@ import {
  */
 let hasBeenRegistered = false;
 
-export default function registerResolverHandlers() {
+/**
+ * Registers event handlers with Ponder.
+ */
+export function attachSharedResolverHandlers() {
   if (hasBeenRegistered) return;
   hasBeenRegistered = true;
 
