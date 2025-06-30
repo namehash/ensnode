@@ -1,7 +1,8 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
-import { SupportedChainId, parseSupportedChainIdByName } from "@/lib/wagmi";
+import { SupportedChainId } from "@/lib/wagmi";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { EnsNode } from "./types";
+import {getENSRootChainId} from "@ensnode/datasources";
 
 /**
  * Fetches the ENSNode status.
@@ -83,12 +84,12 @@ function validateResponse(response: EnsNode.Metadata) {
  * @returns The chain ID or undefined if the status is not available.
  * @throws Error if the chain ID is not supported within the configured namespace
  */
+
+//TODO: should we change the return value?
 export function useENSRootDatasourceChainId(
   indexingStatus: UseIndexingStatusQueryResult["data"],
 ): SupportedChainId | undefined {
   if (!indexingStatus) return undefined;
-  // TODO: this should use the namespace's ensroot datasource's chain ID, not the namespace identifier itself
-  return parseSupportedChainIdByName(indexingStatus.env.NAMESPACE);
-}
 
-//TODO: isn't this a duplication of getENSRootChainId from the datasources package?
+  return getENSRootChainId(indexingStatus.env.NAMESPACE);
+}

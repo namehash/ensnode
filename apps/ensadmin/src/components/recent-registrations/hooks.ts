@@ -76,7 +76,8 @@ function toRegistration(
 async function fetchRecentRegistrations(
   baseUrl: URL,
   maxResults: number,
-): Promise<RegistrationResult[]> {
+  namespaceId: ENSNamespaceId | null, //TODO: it would be optimal if it was not nullable, but idk yet how to achieve this (dependency on the other hook)
+): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${maxResults}, orderBy: registrationDate, orderDirection: desc) {
@@ -115,7 +116,9 @@ async function fetchRecentRegistrations(
 
   const data = await response.json();
 
-  return data.data.registrations;
+  return data.data.registrations.map((registration: RegistrationResult) =>
+      toRegistration(registration, namespaceId),
+  );
 }
 
 /**
@@ -132,10 +135,7 @@ export function useRecentRegistrations(
 ) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
-    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
-    // Select the registrations from the response
-    select: (data): Registration[] =>
-      data.map((registration: RegistrationResult) => toRegistration(registration, namespaceId)),
+    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults, namespaceId),
     throwOnError(error) {
       throw new Error(
         `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,

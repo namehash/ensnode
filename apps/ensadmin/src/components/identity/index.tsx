@@ -1,13 +1,12 @@
 "use client";
 
-import { NameDisplay } from "@/components/recent-registrations/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {AddressDisplay, NameDisplay} from "@/components/recent-registrations/utils";
+import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ENSNamespaceId,
   ENSNamespaceIds,
   getENSRootChainId,
-  getEnsNameAvatarUrl,
 } from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
@@ -17,7 +16,7 @@ import { useEnsName } from "wagmi";
 //TODO: add descriptions for type's fields
 interface IdentityProps {
   address: Address;
-  ensNamespaceId: ENSNamespaceId;
+  namespaceId: ENSNamespaceId;
   showAvatar?: boolean;
   showExternalLink?: boolean;
   className?: string;
@@ -29,7 +28,7 @@ interface IdentityProps {
  */
 export function Identity({
   address,
-  ensNamespaceId,
+  namespaceId,
   showAvatar = false,
   showExternalLink = true,
   className = "",
@@ -41,17 +40,14 @@ export function Identity({
     setMounted(true);
   }, []);
 
-  // Truncate address for display
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-
   //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
   // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
   // is that an alright solution? - duplicates code with error of the query, but that seems necessary for our current predicament - allows us to avoid some additional if-ology when calling the wagmi hook
-  if (ensNamespaceId === ENSNamespaceIds.EnsTestEnv) {
-    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+  if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
+    return <AddressDisplay namespaceId={namespaceId} address={address}/>;
   }
 
-  const chainId = getENSRootChainId(ensNamespaceId);
+  const ensRootChainId = getENSRootChainId(namespaceId);
 
   // Use the ENS name hook from wagmi
   const {
@@ -60,7 +56,7 @@ export function Identity({
     isError,
   } = useEnsName({
     address,
-    chainId,
+    chainId: ensRootChainId,
   });
 
   // If not mounted yet (server-side), or still loading, show a skeleton
@@ -68,36 +64,22 @@ export function Identity({
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
-  // If there is an error, show the truncated address
+  // If there is an error, show the address
   if (isError) {
-    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+    return <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={true} />;
   }
-
-  // Get ENS avatar URL
-  const ensAvatarUrl = ensName ? getEnsNameAvatarUrl(ensNamespaceId, ensName) : undefined;
-
-  // Display name (ENS name or truncated address)
-  const displayName = ensName || truncatedAddress;
 
   return (
     <div className={cx("flex items-center gap-2", className)}>
-      {showAvatar && (
-        <Avatar className="h-6 w-6">
-          {ensAvatarUrl && ensName && <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />}
-          <AvatarFallback className="text-xs">
-            {displayName.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
-      {/*TODO: previously we linked to owners even if they didn't have a primary name set, should we keep doing it? (Current version comes from PR #476 where we didn't do that)*/}
+      {showAvatar && <Avatar className="h-6 w-6" namespaceId={namespaceId} name={ensName} />}
       {ensName ? (
         <NameDisplay
-          namespaceId={ensNamespaceId}
-          ensName={ensName}
+          namespaceId={namespaceId}
+          name={ensName}
           showExternalLink={showExternalLink}
         />
       ) : (
-        <span className={ensName ? "font-medium" : "font-mono text-xs"}>{displayName}</span>
+          <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={true}/>
       )}
     </div>
   );

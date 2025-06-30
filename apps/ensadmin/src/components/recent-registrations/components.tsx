@@ -148,7 +148,7 @@ function RegistrationRow({ registration, ensNodeMetadata }: RegistrationRowProps
       <TableCell>
         <NameDisplay
           namespaceId={namespaceId}
-          ensName={registration.name}
+          name={registration.name}
           showExternalLink={true}
         />
       </TableCell>
@@ -159,7 +159,7 @@ function RegistrationRow({ registration, ensNodeMetadata }: RegistrationRowProps
         <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
       </TableCell>
       <TableCell>
-        <Identity address={registration.owner} ensNamespaceId={namespaceId} showAvatar={true} />
+        <Identity address={registration.owner} namespaceId={namespaceId} showAvatar={true} />
       </TableCell>
     </TableRow>
   );

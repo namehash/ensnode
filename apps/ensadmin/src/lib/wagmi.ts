@@ -40,15 +40,3 @@ export type SupportedChainId = (typeof config.chains)[number]["id"];
  * @param name
  * @returns
  */
-export function parseSupportedChainIdByName(name: string): SupportedChainId {
-  switch (name.toLowerCase()) {
-    case "mainnet":
-      return mainnet.id;
-    case "sepolia":
-      return sepolia.id;
-    case "holesky":
-      return holesky.id;
-    default:
-      throw new Error(`Unsupported chain name: ${name}`);
-  }
-}
