@@ -1,5 +1,6 @@
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import type { MergedTypes } from "@/lib/lib-helpers";
 import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugin";
@@ -12,18 +13,14 @@ export const ALL_PLUGINS = [
   threednsPlugin,
 ] as const;
 
-type AllPluginsUnionType = (typeof ALL_PLUGINS)[number];
-
-// Helper type to enable correct typing for the default-exported value from ponder.config.ts.
-// It helps to keep TypeScript types working well for all plugins (regardless if active or not).
+/**
+ * Helper type representing the merged Ponder config of all possible ENSIndexerPlugins. This
+ * ensures that the inferred types of each Ponder config are available at compile-time to Ponder,
+ * which uses it to power type inference in event handlers.
+ */
 export type AllPluginsMergedConfig = MergedTypes<
-  ReturnType<AllPluginsUnionType["createPonderConfig"]>
+  ReturnType<(typeof ALL_PLUGINS)[number]["createPonderConfig"]>
 >;
-
-// Helper type to merge multiple types into one
-type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
-  ? R
-  : never;
 
 /**
  * Get plugin object by plugin name.

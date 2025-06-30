@@ -23,3 +23,10 @@ export function deepClone<T>(obj: T): T {
   }
   return clonedObj;
 }
+
+/**
+ * Helper type to merge multiple types into one.
+ */
+export type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
+  ? R
+  : never;
