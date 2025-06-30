@@ -5,7 +5,7 @@ import {
   buildEnsRainbowClientLabelSet,
   buildLabelSetId,
   buildLabelSetVersion,
-  validateSupportedLabelSet,
+  validateSupportedLabelSetAndVersion,
 } from "./labelset";
 
 describe("buildLabelSetId", () => {
@@ -114,12 +114,12 @@ describe("validateSupportedLabelSet", () => {
   };
 
   it("should not throw if client set is empty", () => {
-    expect(() => validateSupportedLabelSet(serverSet, {})).not.toThrow();
+    expect(() => validateSupportedLabelSetAndVersion(serverSet, {})).not.toThrow();
   });
 
   it("should not throw if labelSetIds match and client has no version", () => {
     const clientSet: EnsRainbowClientLabelSet = { labelSetId: "subgraph" };
-    expect(() => validateSupportedLabelSet(serverSet, clientSet)).not.toThrow();
+    expect(() => validateSupportedLabelSetAndVersion(serverSet, clientSet)).not.toThrow();
   });
 
   it("should not throw if labelSetIds match and client version is supported", () => {
@@ -127,7 +127,7 @@ describe("validateSupportedLabelSet", () => {
       labelSetId: "subgraph",
       labelSetVersion: 1,
     };
-    expect(() => validateSupportedLabelSet(serverSet, clientSet)).not.toThrow();
+    expect(() => validateSupportedLabelSetAndVersion(serverSet, clientSet)).not.toThrow();
   });
 
   it("should not throw if client version is lower than server version", () => {
@@ -135,12 +135,12 @@ describe("validateSupportedLabelSet", () => {
       labelSetId: "subgraph",
       labelSetVersion: 0,
     };
-    expect(() => validateSupportedLabelSet(serverSet, clientSet)).not.toThrow();
+    expect(() => validateSupportedLabelSetAndVersion(serverSet, clientSet)).not.toThrow();
   });
 
   it("should throw if labelSetIds do not match", () => {
     const clientSet: EnsRainbowClientLabelSet = { labelSetId: "other" };
-    expect(() => validateSupportedLabelSet(serverSet, clientSet)).toThrow(
+    expect(() => validateSupportedLabelSetAndVersion(serverSet, clientSet)).toThrow(
       'Server label set ID "subgraph" does not match client\'s requested label set ID "other".',
     );
   });
@@ -150,7 +150,7 @@ describe("validateSupportedLabelSet", () => {
       labelSetId: "subgraph",
       labelSetVersion: 2,
     };
-    expect(() => validateSupportedLabelSet(serverSet, clientSet)).toThrow(
+    expect(() => validateSupportedLabelSetAndVersion(serverSet, clientSet)).toThrow(
       'Server highest label set version 1 is less than client\'s requested version 2 for label set ID "subgraph".',
     );
   });

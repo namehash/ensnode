@@ -2,9 +2,11 @@ import { parseNonNegativeInteger } from "./parsing";
 
 /**
  * A label set ID identifies a set of labels that can be used for deterministic healing.
- * A label set allows clients to deterministically heal their state against a server, ensuring that both are operating on the same version of data.
+ * A label set allows clients to deterministically heal their state against a server, 
+ * ensuring that both are operating on the same version of data.
  *
- * It is guaranteed to be 1 to 50 characters long and contain only lowercase letters (a-z) and hyphens (-).
+ * It is guaranteed to be 1 to 50 characters long and contain only lowercase letters (a-z) 
+ * and hyphens (-).
  */
 export type LabelSetId = string;
 
@@ -30,7 +32,8 @@ export function buildLabelSetId(maybeLabelSetId: string): LabelSetId {
 }
 
 /**
- * A label set version identifies a specific version of a label set. It allows clients to request data from a specific snapshot in time, ensuring deterministic results.
+ * A label set version identifies a specific version of a label set. It allows clients to 
+ * request data from a specific snapshot in time, ensuring deterministic results.
  *
  * It is guaranteed to be a non-negative integer.
  */
@@ -79,13 +82,18 @@ export interface EnsRainbowServerLabelSet {
  */
 export interface EnsRainbowClientLabelSet {
   /**
-   * Optional label set ID that the ENSRainbow server is expected to use. If provided, heal operations will validate the ENSRainbow server is using this labelSetId.
+   * Optional label set ID that the ENSRainbow server is expected to use. If provided, heal
+   * operations will validate the ENSRainbow server is using this labelSetId. 
    * Required if `labelSetVersion` is defined.
    */
   labelSetId?: LabelSetId;
 
   /**
-   * Optional highest label set version of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests additional label set versions greater than this value. If provided, only labels from label set versions less than or equal to this value will be returned. If not provided, the server will use the latest available version.
+   * Optional highest label set version of label set id to query. Enables deterministic heal 
+   * results across time even if the ENSRainbow server ingests additional label set versions 
+   * greater than this value. If provided, only labels from label set versions less than or 
+   * equal to this value will be returned. If not provided, the server will use the latest 
+   * available version.
    * When `labelSetVersion` is defined, `labelSetId` must also be defined.
    */
   labelSetVersion?: LabelSetVersion;
@@ -115,7 +123,7 @@ export function buildEnsRainbowClientLabelSet(
  * @param clientSet - The label set requested by the client.
  * @throws If the server set is not compatible with the client set.
  */
-export function validateSupportedLabelSet(
+export function validateSupportedLabelSetAndVersion(
   serverSet: EnsRainbowServerLabelSet,
   clientSet: EnsRainbowClientLabelSet,
 ): void {

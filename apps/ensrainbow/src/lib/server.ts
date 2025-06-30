@@ -7,7 +7,7 @@ import {
   type LabelSetVersion,
   StatusCode,
   labelHashToBytes,
-  validateSupportedLabelSet,
+  validateSupportedLabelSetAndVersion,
 } from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 
@@ -65,14 +65,12 @@ export class ENSRainbowServer {
     }
 
     try {
-      validateSupportedLabelSet(this.serverLabelSet, clientLabelSet);
+      validateSupportedLabelSetAndVersion(this.serverLabelSet, clientLabelSet);
     } catch (error) {
-      logger.info(
-        `Label set mismatch: requested=${clientLabelSet.labelSetId}, actual=${this.serverLabelSet.labelSetId}`,
-      );
+      logger.info((error as Error).message);
       return {
         status: StatusCode.Error,
-        error: "Label set mismatch",
+        error: (error as Error).message,
         errorCode: ErrorCode.BadRequest,
       } satisfies EnsRainbow.HealError;
     }
