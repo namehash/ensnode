@@ -234,9 +234,12 @@ export async function createStartBlockByChainIdMap(
 }
 
 /**
- * Builds a ponder#NetworksConfig for a single, specific chain in the context a the ENSIndexerConfig
+/**
+ * Builds a ponder#NetworksConfig for a single, specific chain in the context of the ENSIndexerConfig.
  *
- * @returns ponder#NetworksConfig
+ * @param rpcConfigs - The RPC configuration object from ENSIndexerConfig, keyed by chain ID.
+ * @param chainId - The numeric chain ID for which to build the network config.
+ * @returns a ponder#NetworksConfig
  */
 export function networksConfigForChain(
   rpcConfigs: ENSIndexerConfig["rpcConfigs"],
