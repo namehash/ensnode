@@ -12,7 +12,7 @@ describe("ENSRainbowServer", () => {
         labelSetVersion: 5,
       };
       const clientLabelSet: EnsRainbowClientLabelSet = {
-        labelSetId: "test-id",
+        labelSetId: "test",
         // labelSetVersion is undefined
       };
 
@@ -30,7 +30,7 @@ describe("ENSRainbowServer", () => {
         labelSetVersion: 3,
       };
       const clientLabelSet: EnsRainbowClientLabelSet = {
-        labelSetId: "test-id",
+        labelSetId: "test",
         labelSetVersion: 5,
       };
 
@@ -48,7 +48,7 @@ describe("ENSRainbowServer", () => {
         labelSetVersion: 5,
       };
       const clientLabelSet: EnsRainbowClientLabelSet = {
-        labelSetId: "test-id",
+        labelSetId: "test",
         labelSetVersion: 5,
       };
 
@@ -66,7 +66,7 @@ describe("ENSRainbowServer", () => {
         labelSetVersion: 7,
       };
       const clientLabelSet: EnsRainbowClientLabelSet = {
-        labelSetId: "test-id",
+        labelSetId: "test",
         labelSetVersion: 5,
       };
 
@@ -84,7 +84,7 @@ describe("ENSRainbowServer", () => {
         labelSetVersion: 0,
       };
       const clientLabelSet: EnsRainbowClientLabelSet = {
-        labelSetId: "test-id",
+        labelSetId: "test",
         labelSetVersion: 0,
       };
 
@@ -102,7 +102,7 @@ describe("ENSRainbowServer", () => {
         labelSetVersion: 1,
       };
       const clientLabelSet: EnsRainbowClientLabelSet = {
-        labelSetId: "test-id",
+        labelSetId: "test",
         labelSetVersion: 0,
       };
 
