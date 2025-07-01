@@ -1,27 +1,25 @@
 import { ponder } from "ponder:registry";
 
+import config from "@/config";
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-/**
- * Registers event handlers with Ponder.
- */
-export function attachSubgraphNameWrapperEventHandlers() {
-  const pluginName = PluginName.Subgraph;
+const pluginName = PluginName.Subgraph;
 
-  const {
-    handleExpiryExtended,
-    handleFusesSet,
-    handleNameUnwrapped,
-    handleNameWrapped,
-    handleTransferBatch,
-    handleTransferSingle,
-  } = makeNameWrapperHandlers({
-    // the shared Registrar handlers in this plugin index direct subnames of '.eth'
-    registrarManagedName: "eth",
-  });
+const {
+  handleExpiryExtended,
+  handleFusesSet,
+  handleNameUnwrapped,
+  handleNameWrapped,
+  handleTransferBatch,
+  handleTransferSingle,
+} = makeNameWrapperHandlers({
+  // the shared Registrar handlers in this plugin index direct subnames of '.eth'
+  registrarManagedName: "eth",
+});
 
+if (config.plugins.includes(pluginName)) {
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);
   ponder.on(namespaceContract(pluginName, "NameWrapper:FusesSet"), handleFusesSet);

@@ -2,6 +2,7 @@ import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import {
   handleNewOwner,
   handleNewResolver,
@@ -11,12 +12,9 @@ import {
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-/**
- * Registers event handlers with Ponder.
- */
-export function attachBasenamesRegistryEventHandlers() {
-  const pluginName = PluginName.Basenames;
+const pluginName = PluginName.Basenames;
 
+if (config.plugins.includes(pluginName)) {
   ponder.on(namespaceContract(pluginName, "Registry:setup"), setupRootNode);
   ponder.on(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));
   ponder.on(namespaceContract(pluginName, "Registry:NewResolver"), handleNewResolver);

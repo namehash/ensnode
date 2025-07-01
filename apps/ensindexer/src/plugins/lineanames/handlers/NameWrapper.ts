@@ -6,25 +6,22 @@ import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
-/**
- * Registers event handlers with Ponder.
- */
-export function attachLineanamesNameWrapperEventHandlers() {
-  const pluginName = PluginName.Lineanames;
+const pluginName = PluginName.Lineanames;
 
-  const {
-    handleNameWrapped,
-    handleNameUnwrapped,
-    handleFusesSet,
-    handleExpiryExtended,
-    handleTransferSingle,
-    handleTransferBatch,
-  } = makeNameWrapperHandlers({
-    // the shared Registrar handlers in this plugin index direct subnames of
-    // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.namespace),
-  });
+const {
+  handleNameWrapped,
+  handleNameUnwrapped,
+  handleFusesSet,
+  handleExpiryExtended,
+  handleTransferSingle,
+  handleTransferBatch,
+} = makeNameWrapperHandlers({
+  // the shared Registrar handlers in this plugin index direct subnames of
+  // the name returned from `getRegistrarManagedName` function call
+  registrarManagedName: getRegistrarManagedName(config.namespace),
+});
 
+if (config.plugins.includes(pluginName)) {
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);
   ponder.on(namespaceContract(pluginName, "NameWrapper:FusesSet"), handleFusesSet);

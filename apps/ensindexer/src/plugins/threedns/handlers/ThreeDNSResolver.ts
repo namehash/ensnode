@@ -2,6 +2,7 @@ import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import {
   handleABIChanged,
   handleAddrChanged,
@@ -20,9 +21,9 @@ import {
 } from "@/handlers/Resolver";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
-export function attachThreeDNSResolverEventHandlers() {
-  const pluginName = PluginName.ThreeDNS;
+const pluginName = PluginName.ThreeDNS;
 
+if (config.plugins.includes(pluginName)) {
   ponder.on(namespaceContract(pluginName, "Resolver:AddrChanged"), handleAddrChanged);
   ponder.on(namespaceContract(pluginName, "Resolver:AddressChanged"), handleAddressChanged);
   ponder.on(namespaceContract(pluginName, "Resolver:NameChanged"), handleNameChanged);

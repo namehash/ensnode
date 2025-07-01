@@ -1,6 +1,7 @@
 import { ponder } from "ponder:registry";
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
@@ -13,24 +14,21 @@ import { namespaceContract } from "@/lib/plugin-helpers";
  */
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-/**
- * Registers event handlers with Ponder.
- */
-export function attachSubgraphRegistrarEventHandlers() {
-  const pluginName = PluginName.Subgraph;
+const pluginName = PluginName.Subgraph;
 
-  const {
-    handleNameRegistered,
-    handleNameRegisteredByController,
-    handleNameRenewedByController,
-    handleNameRenewed,
-    handleNameTransferred,
-  } = makeRegistrarHandlers({
-    pluginName,
-    // the shared Registrar handlers in this plugin index direct subnames of '.eth'
-    registrarManagedName: "eth",
-  });
+const {
+  handleNameRegistered,
+  handleNameRegisteredByController,
+  handleNameRenewedByController,
+  handleNameRenewed,
+  handleNameTransferred,
+} = makeRegistrarHandlers({
+  pluginName,
+  // the shared Registrar handlers in this plugin index direct subnames of '.eth'
+  registrarManagedName: "eth",
+});
 
+if (config.plugins.includes(pluginName)) {
   ponder.on(
     namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {

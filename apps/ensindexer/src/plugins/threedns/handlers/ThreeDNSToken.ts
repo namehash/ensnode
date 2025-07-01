@@ -2,6 +2,7 @@ import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import {
   handleNewOwner,
   handleRegistrationCreated,
@@ -11,9 +12,9 @@ import {
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-export function attachThreeDNSTokenEventHandlers() {
-  const pluginName = PluginName.ThreeDNS;
+const pluginName = PluginName.ThreeDNS;
 
+if (config.plugins.includes(pluginName)) {
   ponder.on(namespaceContract(pluginName, "ThreeDNSToken:setup"), setupRootNode);
   ponder.on(namespaceContract(pluginName, "ThreeDNSToken:NewOwner"), handleNewOwner);
   ponder.on(namespaceContract(pluginName, "ThreeDNSToken:Transfer"), handleTransfer);

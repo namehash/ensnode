@@ -16,25 +16,22 @@ import { getRegistrarManagedName } from "../lib/registrar-helpers";
  */
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-/**
- * Registers event handlers with Ponder.
- */
-export function attachLineanamesRegistrarEventHandlers() {
-  const pluginName = PluginName.Lineanames;
+const pluginName = PluginName.Lineanames;
 
-  const {
-    handleNameRegistered,
-    handleNameRegisteredByController,
-    handleNameRenewedByController,
-    handleNameRenewed,
-    handleNameTransferred,
-  } = makeRegistrarHandlers({
-    pluginName,
-    // the shared Registrar handlers in this plugin index direct subnames of
-    // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.namespace),
-  });
+const {
+  handleNameRegistered,
+  handleNameRegisteredByController,
+  handleNameRenewedByController,
+  handleNameRenewed,
+  handleNameTransferred,
+} = makeRegistrarHandlers({
+  pluginName,
+  // the shared Registrar handlers in this plugin index direct subnames of
+  // the name returned from `getRegistrarManagedName` function call
+  registrarManagedName: getRegistrarManagedName(config.namespace),
+});
 
+if (config.plugins.includes(pluginName)) {
   ponder.on(
     namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {

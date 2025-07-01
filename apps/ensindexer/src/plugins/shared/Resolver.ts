@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 
+import config from "@/config";
 import {
   handleABIChanged,
   handleAddrChanged,
@@ -16,22 +17,15 @@ import {
   handleVersionChanged,
   handleZoneCreated,
 } from "@/handlers/Resolver";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
-/**
- * Shared Resolver indexing functions should be registered exactly once, or Ponder will complain about
- * multiple indexing functions being registered for these events. This boolean allows this
- * ENSIndexerPluginHandler to be idempotent — many plugins can call it, but only one will succeed,
- * which is enough to correctly register multi-network Resolver indexing handlers.
- */
-let hasBeenRegistered = false;
+const PLUGINS_THAT_USE_SHARED_RESOLVERS = [
+  PluginName.Subgraph,
+  PluginName.Basenames,
+  PluginName.Lineanames,
+];
 
-/**
- * Registers event handlers with Ponder.
- */
-export function attachSharedResolverHandlers() {
-  if (hasBeenRegistered) return;
-  hasBeenRegistered = true;
-
+if (config.plugins.some((pluginName) => PLUGINS_THAT_USE_SHARED_RESOLVERS.includes(pluginName))) {
   ponder.on("Resolver:AddrChanged", handleAddrChanged);
   ponder.on("Resolver:AddressChanged", handleAddressChanged);
   ponder.on("Resolver:NameChanged", handleNameChanged);
