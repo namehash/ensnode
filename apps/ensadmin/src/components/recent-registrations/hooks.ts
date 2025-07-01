@@ -131,7 +131,7 @@ async function fetchRecentRegistrations(
 export function useRecentRegistrations(
   ensNodeURL: URL,
   maxResults: number,
-  namespaceId: ENSNamespaceId, //TODO: it cannot be nullable, but idk yet how to achieve this (dependency on the other hook)
+  namespaceId: ENSNamespaceId,
 ) {
   return useQuery({
     queryKey: ["recent-registrations", ensNodeURL],
