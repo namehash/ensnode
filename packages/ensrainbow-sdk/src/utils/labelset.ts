@@ -69,7 +69,7 @@ export function buildLabelSetVersion(maybeLabelSetVersion: number | string): Lab
  */
 export interface EnsRainbowServerLabelSet {
   /**
-   * The label set ID of healing data provided by the ENSRainbow server.
+   * The LabelSetId managed by the ENSRainbow server.
    */
   labelSetId: LabelSetId;
 
