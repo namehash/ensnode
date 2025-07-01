@@ -3,7 +3,6 @@ import type { ENSIndexerConfig } from "@/config/types";
 import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
-import { attachPluginEventHandlers } from "@/plugins/event-handlers";
 
 ////////
 // Log ENSIndexerConfig for debugging.
@@ -37,17 +36,6 @@ const ponderConfig = activePlugins.reduce(
   healReverseAddresses: config.healReverseAddresses,
   indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
 } satisfies Pick<ENSIndexerConfig, "healReverseAddresses" | "indexAdditionalResolverRecords">;
-
-////////
-// Attach event handlers for each of the active plugins.
-////////
-
-// NOTE: we delay attaching plugin event handlers for 1 tick to avoid a race condition
-// within ponder internals related to the schema name and drizzle-orm
-setTimeout(
-  () => activePlugins.forEach((activePlugin) => attachPluginEventHandlers(activePlugin.name)),
-  0,
-);
 
 ////////
 // Set indexing order strategy

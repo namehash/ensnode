@@ -28,7 +28,7 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
 /**
  * Registers event handlers with Ponder.
  */
-export function attachSubgraphRegistryEventHandlers() {
+export default function () {
   const pluginName = PluginName.Subgraph;
 
   ponder.on(namespaceContract(pluginName, "RegistryOld:setup"), setupRootNode);
