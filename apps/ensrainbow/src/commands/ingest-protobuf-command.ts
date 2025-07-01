@@ -13,6 +13,7 @@ import {
   buildLabelSetId,
   buildLabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
+import { getErrorMessage } from "@/utils/error-utils";
 
 export interface IngestProtobufCommandOptions {
   inputFile: string;
@@ -139,7 +140,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             try {
               fileLabelSetId = buildLabelSetId(headerObj.label_set_id);
             } catch (e) {
-              const msg = `Invalid label set ID in file header: ${(e as Error).message}`;
+              const msg = `Invalid label set ID in file header: ${getErrorMessage(e)} `;
               logger.error(msg);
               fileStream.destroy(new Error(msg)); // Stop processing
               return;
@@ -147,7 +148,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             try {
               fileLabelSetVersion = buildLabelSetVersion(headerObj.label_set_version);
             } catch (e) {
-              const msg = `Invalid label set version in file header: ${(e as Error).message}`;
+              const msg = `Invalid label set version in file header: ${getErrorMessage(e)}`;
               logger.error(msg);
               fileStream.destroy(new Error(msg)); // Stop processing
               return;

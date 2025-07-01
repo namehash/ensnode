@@ -12,6 +12,7 @@ import { ByteArray } from "viem";
 import { ENSRainbowDB } from "@/lib/database";
 import { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { logger } from "@/utils/logger";
+import { getErrorMessage } from "@/utils/error-utils";
 import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
@@ -54,7 +55,7 @@ export class ENSRainbowServer {
    * Determines if a versioned rainbow record should be treated as unhealable
    * based on the client's label set version requirements.
    */
-  private needToSimulateAsUnhealable(
+  public static needToSimulateAsUnhealable(
     versionedRainbowRecord: VersionedRainbowRecord,
     clientLabelSet: EnsRainbowClientLabelSet,
   ): boolean {
@@ -76,7 +77,7 @@ export class ENSRainbowServer {
       const defaultErrorMsg = "Invalid labelHash - must be a valid hex string";
       return {
         status: StatusCode.Error,
-        error: (error as Error).message ?? defaultErrorMsg,
+        error: getErrorMessage(error) ?? defaultErrorMsg,
         errorCode: ErrorCode.BadRequest,
       } satisfies EnsRainbow.HealError;
     }
@@ -84,10 +85,10 @@ export class ENSRainbowServer {
     try {
       validateSupportedLabelSetAndVersion(this.serverLabelSet, clientLabelSet);
     } catch (error) {
-      logger.info((error as Error).message);
+      logger.info(getErrorMessage(error));
       return {
         status: StatusCode.Error,
-        error: (error as Error).message,
+        error: getErrorMessage(error),
         errorCode: ErrorCode.BadRequest,
       } satisfies EnsRainbow.HealError;
     }
@@ -96,7 +97,7 @@ export class ENSRainbowServer {
       const versionedRainbowRecord = await this.db.getVersionedRainbowRecord(labelHashBytes);
       if (
         versionedRainbowRecord === null ||
-        this.needToSimulateAsUnhealable(versionedRainbowRecord, clientLabelSet)
+        ENSRainbowServer.needToSimulateAsUnhealable(versionedRainbowRecord, clientLabelSet)
       ) {
         logger.info(`Unhealable labelHash request: ${labelHash}`);
         return {

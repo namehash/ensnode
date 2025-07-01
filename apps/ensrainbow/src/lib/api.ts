@@ -17,6 +17,7 @@ import packageJson from "@/../package.json";
 import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { logger } from "@/utils/logger";
+import { getErrorMessage } from "@/utils/error-utils";
 
 /**
  * Creates and configures an ENS Rainbow api
@@ -70,7 +71,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       return c.json(
         {
           status: StatusCode.Error,
-          error: error instanceof Error ? error.message : "An unknown error occurred",
+          error: getErrorMessage(error),
           errorCode: ErrorCode.BadRequest,
         },
         400,

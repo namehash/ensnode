@@ -17,6 +17,7 @@ import {
   buildEncodedVersionedRainbowRecord,
   decodeEncodedVersionedRainbowRecord,
 } from "./rainbow-record";
+import { getErrorMessage } from "@/utils/error-utils";
 
 // System keys must have a byte length different from 32 to avoid collisions with labelHashes
 export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
@@ -532,7 +533,7 @@ export class ENSRainbowDB {
       ingestionStatus = await this.getIngestionStatus();
     } catch (e) {
       const errorMsg = generatePurgeErrorMessage(
-        `Database has an unknown ingestion status: ${e instanceof Error ? e.message : String(e)}`,
+        `Database has an unknown ingestion status: ${getErrorMessage(e)}`,
       );
       logger.error(errorMsg);
       return false;

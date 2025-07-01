@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/utils/error-utils";
 import { Label } from "@ensnode/ensnode-sdk";
 import {
   type LabelSetVersion,
@@ -61,9 +62,7 @@ export function decodeEncodedVersionedRainbowRecord(
     return { labelSetVersion, label };
   } catch (error: unknown) {
     throw new Error(
-      `Invalid label set version number "${maybeLabelSetVersion}" in encoded versioned rainbow record "${encodedVersionedRainbowRecord}": ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      `Invalid label set version number "${maybeLabelSetVersion}" in encoded versioned rainbow record "${encodedVersionedRainbowRecord}": ${getErrorMessage(error)}`,
     );
   }
 }
