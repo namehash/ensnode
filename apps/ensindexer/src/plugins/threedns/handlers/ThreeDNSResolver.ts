@@ -20,7 +20,10 @@ import {
 } from "@/handlers/Resolver";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
-export function attachThreeDNSResolverEventHandlers() {
+/**
+ * Registers event handlers with Ponder.
+ */
+export default function () {
   const pluginName = PluginName.ThreeDNS;
 
   ponder.on(namespaceContract(pluginName, "Resolver:AddrChanged"), handleAddrChanged);
