@@ -13,6 +13,7 @@ import {
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
+import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { RegistrarManagedName } from "@/lib/types";
 
@@ -93,24 +94,35 @@ export const makeRegistrarHandlers = ({
       // undefined value means no change to the name
       const name = validLabel ? `${validLabel}.${registrarManagedName}` : undefined;
 
-      // NOTE: because the mainnet ENS contract _always_ emit Registry#NewOwner _before_
-      // Registrar#NameRegistered, the subgraph logic _requires_ a domain entity to exist here.
+      // NOTE(preminted-names): The mainnet ENS Registrar(s) _always_ register a node with the ENS
+      // registry (emitting Registry#NewOwner) before emitting Registrar#NameRegistered.
       //
-      // Basenames, however, supports the concept of 'preminting' a domain using a `registerOnly`
-      // method which avoids actually registering the name in the Registry and avoids emitting NewOwner.
+      // As part of the subgraph semantics, the Domain entity is created within RegistryNewOwner,
+      // and that Domain entity is expected to exist during the execution of subsequent Registrar
+      // event handlers. This invariant is valid for the mainnet ENS contracts, which always register
+      // names with the Registry and emit the events as expected.
+      //
+      // This becomes an issue only because some plugins (Basenames, Lineanames) support the concept
+      // of 'preminting' a domain.
+      //
+      // These 'preminted' domains are reserved in the Registrar (emitting Registrar#NameRegistered)
+      // but a subname is NOT created in the Registry (which therefore does not emit Registry#NewOwner).
       // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/src/L2/BaseRegistrar.sol#L248
       // https://github.com/base/basenames/blob/d00f71d822394cfaeab5aa7aded8225ef1292acc/script/premint/Premint.s.sol#L36
       //
       // Because of this, preminted names emit just the Transfer and Registrar#NameRegisteredWithRecord events.
       // ex: https://basescan.org/tx/0xa61fc930ecf12cfaf247b315c9af50196d86f4276ed1cb93fee48b58a370cc25#eventlog
       //
+      // Preminted names are not 'real' ENS names — they do not exist in the Registry, and so we do
+      // not create a Domain entity for them.
+      //
       // To allow this shared Registrar handler logic work for each of these two patterns, we allow
-      // for just the creation of the Registration, skipping the domain.update, but only for the
-      // Basenames plugin. If/when these 'preminted' names are actually registered in the future,
-      // they will emit NewOwner as expected.
+      // for the skipping of domain updates in Registrar event handlers, but only for plugins
+      // that implement 'preminting'. If/when these 'preminted' names are actually registered in the future,
+      // they will emit NewOwner as expected and the Domain entity will exist as normal.
       let domain = await context.db.find(schema.domain, { id: node });
       if (domain) {
-        // update of domain's registrant & expiryDate if it exists
+        // the Domain exists, update its registrant and expiry
         await context.db.update(schema.domain, { id: node }).set({
           registrantId: owner,
           expiryDate: expires + GRACE_PERIOD_SECONDS,
@@ -119,11 +131,10 @@ export const makeRegistrarHandlers = ({
         });
       } else {
         // invariant: if the domain does not exist, this must be a `registerOnly` 'preminted' name
-        // in either the `basenames` plugin, or the `lineanames` plugin,
-        // otherwise panic
-        if ([PluginName.Basenames, PluginName.Lineanames].includes(pluginName) === false) {
+        // in a plugin that explicitly supports preminted names, otherwise panic
+        if (!pluginSupportsPremintedNames(pluginName)) {
           throw new Error(
-            `Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist. This indicates that a name was registered in the Registrar but _not_ in the ENS Registry (i.e. 'preminted'). Currently this is only supported on Basenames and Lineanames, but this occurred in plugin '${pluginName}'.`,
+            `Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not exist for node ${node}. This indicates that a name was registered in the Registrar but _not_ in the ENS Registry (i.e. 'preminted'). Currently this is only supported on Basenames and Lineanames, but this occurred in plugin '${pluginName}'.`,
           );
         }
 
@@ -201,10 +212,29 @@ export const makeRegistrarHandlers = ({
       // update Registration expiry
       await context.db.update(schema.registration, { id }).set({ expiryDate: expires });
 
-      // update Domain expiry
-      await context.db
-        .update(schema.domain, { id: node })
-        .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
+      // NOTE(preminted-names): 'preminted' names (names that are regsitered in a Registrar but
+      // NOT registered in the ENS Registry) can be renewed, extending their expiry in the Registrar.
+      //
+      // In the event that the Domain entity does not exist, this must be a preminted name, and
+      // we enforce that this codepath can only execute in the context of plugins whose indexed
+      // contracts implement 'preminting' names.
+      const domain = await context.db.find(schema.domain, { id: node });
+      if (domain) {
+        // the Domain exists, update its expiry
+        await context.db
+          .update(schema.domain, { id: node })
+          .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
+      } else {
+        // invariant: if the domain does not exist, this must be a `renew()` of a 'preminted' name
+        // in a plugin that explicitly supports preminted names, otherwise panic
+        if (!pluginSupportsPremintedNames(pluginName)) {
+          throw new Error(
+            `Invariant: Registrar#NameRenewed was emitted and a Domain entity does not exist for node ${node}. This indicates that a name was registered in the Registrar but _not_ in the ENS Registry (i.e. 'preminted'). Currently this is only supported on Basenames and Lineanames, but this occurred in plugin '${pluginName}'.`,
+          );
+        }
+
+        // implicit: avoid updating the domain entity (that does not exist) for 'preminted' names
+      }
 
       // log RegistrationEvent
       await context.db.insert(schema.nameRenewed).values({
@@ -230,9 +260,30 @@ export const makeRegistrarHandlers = ({
       const registration = await context.db.find(schema.registration, { id });
       if (!registration) return;
 
-      // update registrants
+      // update registration registrant
       await context.db.update(schema.registration, { id }).set({ registrantId: to });
-      await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
+
+      // NOTE(preminted-names): 'preminted' names (names that are regsitered in a Registrar but
+      // NOT registered in the ENS Registry) can be transferred, updating the registrant.
+      //
+      // In the event that the Domain entity does not exist, this must be a preminted name, and
+      // we enforce that this codepath can only execute in the context of plugins whose indexed
+      // contracts implement 'preminting' names.
+      const domain = await context.db.find(schema.domain, { id: node });
+      if (domain) {
+        // the Domain exists, update its registrant
+        await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
+      } else {
+        // invariant: if the domain does not exist, this must be a transfer of a 'preminted' name
+        // in a plugin that explicitly supports preminted names, otherwise panic
+        if (!pluginSupportsPremintedNames(pluginName)) {
+          throw new Error(
+            `Invariant: Registrar#Transfer was emitted and a Domain entity does not exist for node ${node}. This indicates that a name was registered in the Registrar but _not_ in the ENS Registry (i.e. 'preminted'). Currently this is only supported on Basenames and Lineanames, but this occurred in plugin '${pluginName}'.`,
+          );
+        }
+
+        // implicit: avoid updating the domain entity (that does not exist) for 'preminted' names
+      }
 
       // log RegistrationEvent
       await context.db.insert(schema.nameTransferred).values({
