@@ -1,8 +1,14 @@
 "use client";
 
-import { useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
+import { EnsNode, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
-import { Duration, FormattedDate, RelativeTime } from "@/components/recent-registrations/utils";
+import { Registration } from "@/components/recent-registrations/types";
+import {
+  Duration,
+  FormattedDate,
+  NameDisplay,
+  RelativeTime,
+} from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -13,7 +19,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import { Clock, ExternalLink } from "lucide-react";
+import {ENSNamespaceId, getEnsAppUrl} from "@ensnode/datasources";
+import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
@@ -24,22 +31,15 @@ import { useRecentRegistrations } from "./hooks";
  */
 const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
+//TODO: improve description
 /**
- * Helper function to generate ENS app URL for a name
+ * Main component of the 'Latest indexed registrations' panel
  */
-const getEnsAppUrlForName = (name: string) => {
-  // no explicit url encoding needed
-  return `https://app.ens.domains/${name}`;
-};
-
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const recentRegistrationsQuery = useRecentRegistrations(
-    selectedEnsNodeUrl(searchParams),
-    MAX_NUMBER_OF_LATEST_REGISTRATIONS,
-  );
-  const indexingStatus = useIndexingStatusQuery(searchParams);
-  const indexedChainId = useENSRootDatasourceChainId(indexingStatus.data);
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
+  const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
+
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -47,12 +47,25 @@ export function RecentRegistrations() {
   }, []);
 
   // Get the current indexing date from the indexing status
-  const currentIndexingDate = indexingStatus.data
+  const currentIndexingDate = indexingStatusQuery.data
     ? globalIndexingStatusViewModel(
-        indexingStatus.data.runtime.networkIndexingStatusByChainId,
-        indexingStatus.data.env.NAMESPACE,
+        indexingStatusQuery.data.runtime.networkIndexingStatusByChainId,
+        indexingStatusQuery.data.env.NAMESPACE,
       ).currentIndexingDate
     : null;
+
+  if (indexingStatusQuery.isLoading) {
+    return <RegistrationsFallback />;
+  }
+
+  if (indexingStatusQuery.isError) {
+    return (
+      <p>
+        Could not fetch indexing status from selected ENSNode due to an error: $
+        {indexingStatusQuery.error.message}
+      </p>
+    );
+  }
 
   return (
     <Card className="w-full">
@@ -78,75 +91,106 @@ export function RecentRegistrations() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {recentRegistrationsQuery.isLoading ? (
-          <RecentRegistrationsFallback />
-        ) : recentRegistrationsQuery.error ? (
-          <div className="text-destructive">
-            Error loading recent registrations: {(recentRegistrationsQuery.error as Error).message}
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Registered</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Owner</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isClient &&
-                recentRegistrationsQuery.data?.map((registration) => (
-                  <TableRow key={registration.name}>
-                    <TableCell className="font-medium">
-                      <a
-                        href={getEnsAppUrlForName(registration.name)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline w-fit"
-                      >
-                        {registration.name}
-                        <ExternalLink size={14} className="inline-block" />
-                      </a>
-                    </TableCell>
-                    <TableCell>
-                      <RelativeTime date={registration.registeredAt} />
-                    </TableCell>
-                    <TableCell>
-                      <Duration
-                        beginsAt={registration.registeredAt}
-                        endsAt={registration.expiresAt}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {indexedChainId ? (
-                        <Identity
-                          address={registration.owner}
-                          chainId={indexedChainId}
-                          showAvatar={true}
-                        />
-                      ) : (
-                        <Identity.Placeholder showAvatar={true} />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        )}
+          {isClient && indexingStatusQuery.data && <RegistrationsList  ensNodeMetadata={indexingStatusQuery.data} ensNodeUrl={ensNodeUrl}/>}
       </CardContent>
     </Card>
   );
 }
 
-function RecentRegistrationsFallback() {
+interface RegistrationsListProps {
+    ensNodeUrl: URL
+    ensNodeMetadata: EnsNode.Metadata;
+}
+
+//TODO: improve description
+/**
+ * Displays all registrations
+ *
+ * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
+ * @param ensNodeUrl URL of currently selected ENSNode instance
+ */
+function RegistrationsList({ensNodeMetadata, ensNodeUrl}: RegistrationsListProps){
+    const namespaceId = ensNodeMetadata.env.NAMESPACE;
+
+    const recentRegistrationsQuery = useRecentRegistrations(
+        ensNodeUrl,
+        MAX_NUMBER_OF_LATEST_REGISTRATIONS,
+        namespaceId,
+    );
+
+    if (recentRegistrationsQuery.isLoading) {
+        return <RegistrationsFallback />;
+    }
+
+    if (recentRegistrationsQuery.isError) {
+        return (
+            <p>
+                Could not fetch recent registrations due to an error: $
+                {recentRegistrationsQuery.error.message}
+            </p>
+        );
+    }
+
+    return (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Registered</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Owner</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {recentRegistrationsQuery.data?.map((registration) => (
+                    <RegistrationRow
+                        key={registration.name}
+                        registration={registration}
+                        namespaceId={namespaceId}/>
+                ))}
+            </TableBody>
+        </Table>
+    );
+}
+
+
+
+interface RegistrationRowProps {
+  registration: Registration;
+  namespaceId: ENSNamespaceId;
+}
+
+//TODO: improve description
+/**
+ * Displays the data of a single registration
+ */
+function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
+  return (
+    <TableRow>
+      <TableCell>
+        <NameDisplay
+          namespaceId={namespaceId}
+          name={registration.name}
+          showExternalLink={true}
+        />
+      </TableCell>
+      <TableCell>
+        <RelativeTime date={registration.registeredAt} />
+      </TableCell>
+      <TableCell>
+        <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
+      </TableCell>
+      <TableCell>
+        <Identity address={registration.owner} namespaceId={namespaceId} showAvatar={true} />
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function RegistrationsFallback() {
   return (
     <div className="animate-pulse space-y-4">
-      <div className="h-10 bg-muted rounded w-full"></div>
-      <div className="h-10 bg-muted rounded w-full"></div>
-      <div className="h-10 bg-muted rounded w-full"></div>
-      <div className="h-10 bg-muted rounded w-full"></div>
-      <div className="h-10 bg-muted rounded w-full"></div>
+        {[...Array(MAX_NUMBER_OF_LATEST_REGISTRATIONS)].map((_, idx) => <div key={`registrationFallback#${idx}`} className="h-10 bg-muted rounded w-full"></div>)}
     </div>
   );
 }

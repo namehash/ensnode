@@ -1,17 +1,22 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {AddressDisplay, NameDisplay} from "@/components/recent-registrations/utils";
+import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SupportedChainId } from "@/lib/wagmi";
+import {
+  ENSNamespaceId,
+  ENSNamespaceIds,
+  getENSRootChainId,
+} from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
-import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { useEnsName } from "wagmi";
+import {useEnsName, UseEnsNameReturnType} from "wagmi";
 
+//TODO: add descriptions for type's fields
 interface IdentityProps {
   address: Address;
-  chainId: SupportedChainId;
+  namespaceId: ENSNamespaceId;
   showAvatar?: boolean;
   showExternalLink?: boolean;
   className?: string;
@@ -19,70 +24,63 @@ interface IdentityProps {
 
 /**
  * Component to display an ENS name for an Ethereum address.
- * Falls back to a truncated address if no ENS name is found.
+ * It can display an avatar if available, a link to the ENS name, or a truncated address.
  */
 export function Identity({
   address,
-  chainId,
+  namespaceId,
   showAvatar = false,
   showExternalLink = true,
   className = "",
 }: IdentityProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Use the ENS name hook from wagmi
-  const { data: ensName, isLoading } = useEnsName({
-    address,
-    chainId,
-  });
-
   // Handle client-side rendering
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Generate ENS app URL
-  const ensAppUrl = `https://app.ens.domains/${address}`;
+  //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
+  // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
+  // is that an alright solution? - duplicates code with error of the query, but that seems necessary for our current predicament - allows us to avoid some additional if-ology when calling the wagmi hook
+  if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
+    return <AddressDisplay namespaceId={namespaceId} address={address}/>;
+  }
 
-  // Truncate address for display
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const ensRootChainId = getENSRootChainId(namespaceId);
 
-  // Display name (ENS name or truncated address)
-  const displayName = ensName || truncatedAddress;
+  // Use the ENS name hook from wagmi
+  const {
+    data: ensName,
+    isLoading,
+    isError,
+  }: UseEnsNameReturnType<string> = useEnsName({
+    address,
+    chainId: ensRootChainId,
+  });
 
-  // If not mounted yet (server-side), show a skeleton
-  if (!mounted) {
+  // If not mounted yet (server-side), or still loading, show a skeleton
+  if (!mounted || isLoading) {
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
+  }
+
+  // If there is an error, show the address
+  if (isError) {
+    return <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={true} />;
   }
 
   return (
     <div className={cx("flex items-center gap-2", className)}>
-      {showAvatar && (
-        <Avatar className="h-6 w-6">
-          {ensName && (
-            <AvatarImage
-              src={`https://metadata.ens.domains/mainnet/avatar/${ensName}`}
-              alt={ensName}
-            />
-          )}
-          <AvatarFallback className="text-xs">
-            {displayName.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+      {showAvatar && <Avatar className="h-6 w-6" namespaceId={namespaceId} name={ensName} />}
+      {ensName ? (
+        <NameDisplay
+          namespaceId={namespaceId}
+          name={ensName}
+          showExternalLink={showExternalLink}
+        />
+      ) : (
+          <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={true}/>
       )}
-
-      <a
-        href={ensAppUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1 text-blue-600 hover:underline"
-        title={address}
-      >
-        <span className="font-medium">
-          {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
-        </span>
-        {showExternalLink && <ExternalLink size={14} className="inline-block" />}
-      </a>
     </div>
   );
 }

@@ -1,6 +1,9 @@
+import {ENSNamespaceId, getAddressDetailsUrl, getEnsNameDetailsUrl} from "@ensnode/datasources";
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
+import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
+import {Address} from "viem";
 
 /**
  * Client-only date formatter component
@@ -69,4 +72,64 @@ export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
   }
 
   return date;
+}
+
+interface NameDisplayProps {
+  namespaceId: ENSNamespaceId;
+  name: string;
+  showExternalLink?: boolean;
+}
+
+/**
+ * Component to display an ENS name.
+ * It can display a link to the name details page on ENS app, or just the name if the ENS namespace has no dedicated ENS App.
+ */
+//TODO: should probably be moved to /identity or somewhere else
+export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplayProps) {
+  const ensAppNameDetailsUrl = getEnsNameDetailsUrl(namespaceId, name);
+
+  if (ensAppNameDetailsUrl) {
+    return (
+      <a
+        href={ensAppNameDetailsUrl.toString()}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+      >
+        {name}
+        {showExternalLink && <ExternalLink size={14} className="inline-block" />}
+      </a>
+    );
+  }
+
+  return <span className="font-medium">{name}</span>;
+}
+
+interface AddressDisplayProps {
+  namespaceId: ENSNamespaceId;
+  address: Address;
+  showExternalLink?: boolean;
+}
+
+export function AddressDisplay({ address, namespaceId, showExternalLink }: AddressDisplayProps) {
+  // Truncate address for display
+  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+  const ensAppAddressDetailsUrl = getAddressDetailsUrl(namespaceId, address);
+
+  if (ensAppAddressDetailsUrl) {
+    return (
+        <a
+            href={ensAppAddressDetailsUrl.toString()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+        >
+          {truncatedAddress}
+          {showExternalLink && <ExternalLink size={14} className="inline-block" />}
+        </a>
+    );
+  }
+
+  return <span className="font-mono text-xs">{truncatedAddress}</span>;
 }

@@ -1,9 +1,10 @@
-import { DatasourceNames, ENSNamespace, ENSNamespaceId } from "./lib/types";
+import {DatasourceNames, ENSNamespace, ENSNamespaceId, ENSNamespaceIds} from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
 import mainnet from "./mainnet";
 import sepolia from "./sepolia";
+import {Address} from "viem";
 
 export * from "./lib/types";
 
@@ -50,3 +51,81 @@ export const getDatasource = <
  */
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
   getDatasource(namespaceId, DatasourceNames.ENSRoot).chain.id;
+
+
+/**
+ * Returns the Address of the NameWrapper contract within the requested namespace.
+ *
+ * @returns the viem#Address object
+ */
+export const getNameWrapperAddress = (namespaceId: ENSNamespaceId): Address =>
+    getDatasource(namespaceId, DatasourceNames.ENSRoot).contracts.NameWrapper.address;
+
+/**
+ * Get ENS app URL for wallet address on a supported chain.
+ *
+ * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
+ * @returns ENS app URL for supported chains, or null if an ENS namespace doesn't have a specified ENS app
+ */
+export function getEnsAppUrl(namespaceId: ENSNamespaceId): URL | null{
+  switch (namespaceId) {
+    case ENSNamespaceIds.Mainnet:
+      return new URL(`https://app.ens.domains/`);
+    case ENSNamespaceIds.Sepolia:
+      return new URL(`https://sepolia.app.ens.domains/`);
+    case ENSNamespaceIds.Holesky:
+      return new URL(`https://holesky.app.ens.domains/`);
+    case ENSNamespaceIds.EnsTestEnv:
+      // ens-test-env runs on a local chain and is not supported by app.ens.domains
+      return null;
+  }
+}
+
+/**
+ * Get the avatar image URL for a given ENS Namespace and name
+ *
+ * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
+ * @param {string} name - ENS name that we perform the lookup for
+ * @returns avatar image URL for supported chains, otherwise null
+ */
+export function getEnsNameAvatarUrl(namespaceId: ENSNamespaceId, name: string): URL | null {
+  switch (namespaceId) {
+    case ENSNamespaceIds.Mainnet:
+      return new URL(name, `https://metadata.ens.domains/mainnet/avatar/`);
+    case ENSNamespaceIds.Sepolia:
+      return new URL(name, `https://metadata.ens.domains/sepolia/avatar/`);
+    case ENSNamespaceIds.Holesky:
+      // metadata.ens.domains doesn't currently support holesky
+      return null;
+    case ENSNamespaceIds.EnsTestEnv:
+      // ens-test-env runs on a local chain and is not supported by metadata.ens.domains
+      return null;
+  }
+}
+
+/**
+ * Get the URL of the name details page in ENS app for a given name and ENS Namespace.
+ *
+ * @returns full Ens app URL for supported chains, otherwise null
+ */
+export function getEnsNameDetailsUrl(namespaceId: ENSNamespaceId, name: string): URL | null {
+  const baseUrl = getEnsAppUrl(namespaceId);
+
+  return baseUrl ? new URL(name, baseUrl): null;
+}
+
+/**
+ * Get the URL of the address details page in ENS app for a given address and ENS Namespace.
+ *
+ * @returns full Ens app URL for supported chains, otherwise null
+ */
+//TODO: is it alright to declare this as a separate function or should we make <getEnsNameDetailsUrl> more generic?
+// For the sake of clarity I prefer the current version
+export function getAddressDetailsUrl(namespaceId: ENSNamespaceId, address: Address): URL | null {
+  const baseUrl = getEnsAppUrl(namespaceId);
+
+  return baseUrl ? new URL(address, baseUrl): null;
+}
+
+
+

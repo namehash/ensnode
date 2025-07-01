@@ -25,7 +25,8 @@ import {
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
-  const indexingStatus = useIndexingStatusQuery(searchParams);
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
+  const indexingStatus = useIndexingStatusQuery(ensNodeUrl);
 
   return (
     <section className="flex flex-col gap-6 py-6">
