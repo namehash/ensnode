@@ -1,7 +1,7 @@
 import { rm } from "fs/promises";
 
-import { logger } from "@/utils/logger";
 import { getErrorMessage } from "@/utils/error-utils";
+import { logger } from "@/utils/logger";
 
 export interface PurgeCommandOptions {
   dataDir: string;

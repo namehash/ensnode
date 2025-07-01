@@ -2,6 +2,7 @@ import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
 import { ByteArray, Hex, labelhash } from "viem";
 
+import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 import { Label } from "@ensnode/ensnode-sdk";
 import {
@@ -17,7 +18,6 @@ import {
   buildEncodedVersionedRainbowRecord,
   decodeEncodedVersionedRainbowRecord,
 } from "./rainbow-record";
-import { getErrorMessage } from "@/utils/error-utils";
 
 // System keys must have a byte length different from 32 to avoid collisions with labelHashes
 export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([

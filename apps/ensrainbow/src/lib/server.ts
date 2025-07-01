@@ -11,8 +11,8 @@ import { ByteArray } from "viem";
 
 import { ENSRainbowDB } from "@/lib/database";
 import { VersionedRainbowRecord } from "@/lib/rainbow-record";
-import { logger } from "@/utils/logger";
 import { getErrorMessage } from "@/utils/error-utils";
+import { logger } from "@/utils/logger";
 import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
@@ -53,7 +53,7 @@ export class ENSRainbowServer {
 
   /**
    * Determines if a versioned rainbow record should be treated as unhealable
-   * based on the client's label set version requirements.
+   * based on the client's label set version requirements, ignoring the label set ID.
    */
   public static needToSimulateAsUnhealable(
     versionedRainbowRecord: VersionedRainbowRecord,

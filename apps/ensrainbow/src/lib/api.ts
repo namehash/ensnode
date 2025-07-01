@@ -16,8 +16,8 @@ import { cors } from "hono/cors";
 import packageJson from "@/../package.json";
 import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
-import { logger } from "@/utils/logger";
 import { getErrorMessage } from "@/utils/error-utils";
+import { logger } from "@/utils/logger";
 
 /**
  * Creates and configures an ENS Rainbow api

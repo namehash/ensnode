@@ -5,6 +5,7 @@ import { ByteArray } from "viem";
 
 import { CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION } from "@/commands/convert-command";
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
+import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
 import {
@@ -13,7 +14,6 @@ import {
   buildLabelSetId,
   buildLabelSetVersion,
 } from "@ensnode/ensrainbow-sdk";
-import { getErrorMessage } from "@/utils/error-utils";
 
 export interface IngestProtobufCommandOptions {
   inputFile: string;
