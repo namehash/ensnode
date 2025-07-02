@@ -11,7 +11,7 @@ const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
  * These resolvers must abide the following pattern:
  * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway
  * 2. That CCIP-Read Gateway exclusively sources the data necessary to process CCIP-Read Requests from
- *   the indicated L2.
+ *   the indicated chain.
  *
  * We build this object at runtime based on conditionally available Datasources.
  *

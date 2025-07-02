@@ -31,7 +31,7 @@ import {
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
-// all Resolver contracts share the same abi, so just grab one
+// for our purposes here, all Resolver contracts share the same abi, so just grab one from datasources
 const RESOLVER_ABI = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot).contracts
   .Resolver.abi;
 

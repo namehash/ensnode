@@ -85,7 +85,7 @@ export const makeEventId = (
  * form a unique Registration id.
  *
  * Because ENSIndexer supports indexing multiple Registrar contracts via plugins
- * (currently using the shared handlers modelled after the Subgraph's indexing logic), however,
+ * (cu ndlers modelled after the Subgraph's indexing logic), however,
  * additional Registration entities may be created. A unique ID other than labelHash is necessary,
  * otherwise Registration entities for the same label would collide.
  *

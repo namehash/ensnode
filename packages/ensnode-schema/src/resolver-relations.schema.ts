@@ -10,7 +10,7 @@ import { domain, resolver } from "./subgraph.schema";
 
 // add the additional relationships to subgraph's Domain entity
 export const ext_resolverRelations_domain_relations = relations(domain, ({ one, many }) => ({
-  // domain has many resolver relations
+  // domain has many resolver relations (i.e. one per chain, see above)
   resolverRelations: many(ext_domainResolverRelation),
 }));
 
@@ -20,7 +20,7 @@ export const ext_resolverRelations_resolver_relations = relations(resolver, ({ o
   domainRelations: many(ext_domainResolverRelation),
 }));
 
-// tracks resolver values in the Registry by domain on a specific chain
+// tracks Domain-Resolver relationships by chainId (see above)
 export const ext_domainResolverRelation = onchainTable(
   "ext_domain_resolver_relations",
   (t) => ({
