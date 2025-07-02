@@ -53,8 +53,8 @@ describe("View Models", () => {
       expect(globalIndexingStatusViewModel(ensNodeChainStatus, "mainnet")).toEqual({
         chainStatuses: [
           {
-            id: 1,
-            name: "Ethereum",
+            chainId: 1,
+            chainName: "Ethereum",
             latestSafeBlock: blockViewModel(mainnetStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(mainnetStatus.firstBlockToIndex),
             lastIndexedBlock: blockViewModel(mainnetStatus.lastIndexedBlock),
@@ -68,8 +68,8 @@ describe("View Models", () => {
             ],
           },
           {
-            id: 8453,
-            name: "Base",
+            chainId: 8453,
+            chainName: "Base",
             latestSafeBlock: blockViewModel(baseStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(baseStatus.firstBlockToIndex),
             lastIndexedBlock: null,
@@ -98,9 +98,9 @@ describe("View Models", () => {
     it("should return the correct view model", () => {
       expect(
         chainIndexingStatusViewModel(
-          base.id,
           `${base.name}`,
           {
+            chainId: base.id,
             latestSafeBlock: {
               number: 333,
               timestamp: 1501,
@@ -118,8 +118,8 @@ describe("View Models", () => {
           1000,
         ),
       ).toEqual({
-        id: 8453,
-        name: "Base",
+        chainId: 8453,
+        chainName: "Base",
         latestSafeBlock: {
           number: 333,
           timestamp: 1501,
@@ -162,6 +162,7 @@ describe("View Models", () => {
 function testEnsNodeChainStatus() {
   return {
     [mainnet.id]: {
+      chainId: mainnet.id,
       firstBlockToIndex: {
         number: 17,
         timestamp: 1000,
@@ -181,6 +182,7 @@ function testEnsNodeChainStatus() {
     },
 
     [base.id]: {
+      chainId: base.id,
       firstBlockToIndex: {
         number: 222,
         timestamp: 1111,

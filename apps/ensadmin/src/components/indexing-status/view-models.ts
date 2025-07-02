@@ -19,8 +19,8 @@ export interface ChainIndexingPhaseViewModel {
  * Chain status view model, includes indexing phases.
  */
 export interface ChainStatusViewModel {
-  id: number;
-  name: string;
+  chainId: number;
+  chainName: string;
   firstBlockToIndex: BlockInfoViewModel;
   lastIndexedBlock: BlockInfoViewModel | null;
   lastSyncedBlock: BlockInfoViewModel | null;
@@ -58,18 +58,12 @@ export function globalIndexingStatusViewModel(
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossChains);
   const getChainName = (chainId: number) => getChainById(namespace, chainId).name;
 
-  const chainStatusesViewModel = Object.entries(chainIndexingStatuses).map(
-    ([chainIdKey, chainIndexingStatus]) => {
-      // map string representation of chainId into a number
-      const chainId = parseInt(chainIdKey, 10);
-
-      return chainIndexingStatusViewModel(
-        chainId,
-        getChainName(chainId),
-        chainIndexingStatus,
-        firstBlockToIndexGloballyTimestamp,
-      );
-    },
+  const chainStatusesViewModel = Object.values(chainIndexingStatuses).map((chainIndexingStatus) =>
+    chainIndexingStatusViewModel(
+      getChainName(chainIndexingStatus.chainId),
+      chainIndexingStatus,
+      firstBlockToIndexGloballyTimestamp,
+    ),
   ) satisfies Array<ChainStatusViewModel>;
 
   // Sort the chain statuses by the first block to index timestamp
@@ -94,21 +88,20 @@ export function globalIndexingStatusViewModel(
 /**
  * View model for the chain indexing status.
  *
- * @param chainId
  * @param chainName
  * @param chainStatus
  * @param firstBlockToIndexGloballyTimestamp
  * @returns
  */
 export function chainIndexingStatusViewModel(
-  chainId: number,
   chainName: string,
   chainStatus: EnsNode.ChainIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
 ): ChainStatusViewModel {
   const phases: ChainStatusViewModel["phases"] = [];
 
-  const { lastIndexedBlock, lastSyncedBlock, latestSafeBlock, firstBlockToIndex } = chainStatus;
+  const { lastIndexedBlock, lastSyncedBlock, latestSafeBlock, firstBlockToIndex, chainId } =
+    chainStatus;
 
   if (firstBlockToIndex.timestamp > firstBlockToIndexGloballyTimestamp) {
     phases.push({
@@ -125,8 +118,8 @@ export function chainIndexingStatusViewModel(
   });
 
   return {
-    id: chainId,
-    name: chainName,
+    chainId,
+    chainName,
     latestSafeBlock: blockViewModel(latestSafeBlock),
     firstBlockToIndex: blockViewModel(firstBlockToIndex),
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,

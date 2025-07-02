@@ -72,7 +72,7 @@ function ChainIndexingStats(props: ChainIndexingStatsProps) {
         <CardContent className="flex flex-row gap-8">
           {globalIndexingStatusViewModel(chainIndexingStatuses, namespace).chainStatuses.map(
             (chainStatus) => (
-              <ChainIndexingStatsCard key={chainStatus.name} chainStatus={chainStatus} />
+              <ChainIndexingStatsCard key={chainStatus.chainId} chainStatus={chainStatus} />
             ),
           )}
         </CardContent>
@@ -94,11 +94,11 @@ function ChainIndexingStatsCard(props: ChainIndexingStatsCardProps) {
   const { chainStatus } = props;
 
   return (
-    <Card key={chainStatus.name}>
+    <Card key={chainStatus.chainId}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">{chainStatus.name}</span>
+            <span className="font-semibold">{chainStatus.chainName}</span>
           </div>
         </div>
       </CardHeader>
@@ -434,7 +434,7 @@ export function IndexingTimeline({
         <div className="space-y-6">
           {chainStatuses.map((chainStatus) => (
             <ChainIndexingStatus
-              key={chainStatus.name}
+              key={chainStatus.chainId}
               currentIndexingDate={currentIndexingDate}
               chainStatus={chainStatus}
               timelineStart={timelineStart}
@@ -479,17 +479,17 @@ function ChainIndexingStatus(props: ChainIndexingStatusProps) {
   const currentIndexingPhase = currentPhase(currentIndexingDate, chainStatus);
 
   return (
-    <div key={chainStatus.name} className="flex items-center">
+    <div key={chainStatus.chainId} className="flex items-center">
       {/* Chain label */}
       <div className="w-24 pr-3 text-sm font-medium flex flex-col">
-        <span>{chainStatus.name}</span>
+        <span>{chainStatus.chainName}</span>
       </div>
 
       {/* Chain timeline bar */}
       <div className="relative flex-1 h-6">
         {chainStatus.phases.map((phase) => (
           <ChainIndexingPhase
-            key={`${chainStatus.name}-${phase.state}`}
+            key={`${chainStatus.chainId}-${phase.state}`}
             phase={phase}
             isActive={phase === currentIndexingPhase}
             timelineStart={timelineStart}

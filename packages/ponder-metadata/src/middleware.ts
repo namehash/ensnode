@@ -143,6 +143,7 @@ export function ponderMetadata<
       }
 
       chainIndexingStatuses[indexedChainId] = {
+        chainId: indexedChainId,
         lastSyncedBlock,
         lastIndexedBlock,
         latestSafeBlock,
