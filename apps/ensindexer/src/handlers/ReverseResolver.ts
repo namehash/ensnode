@@ -36,7 +36,7 @@ export async function handleAddrChanged({
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -56,7 +56,7 @@ export async function handleAddressChanged({
 }) {
   const { node, coinType, newAddress } = event.args;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -75,7 +75,7 @@ export async function handleNameChanged({
 }) {
   const { node, name } = event.args;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -98,7 +98,7 @@ export async function handleTextChanged({
   }>;
 }) {
   const { node, key, value } = event.args;
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -127,7 +127,7 @@ export async function handleDNSRecordChanged({
   // no key to operate over? no-op
   if (!key) return;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -155,7 +155,7 @@ export async function handleDNSRecordDeleted({
   // no key to operate over? no-op
   if (!key) return;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,

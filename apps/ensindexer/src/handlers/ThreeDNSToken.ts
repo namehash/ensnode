@@ -21,7 +21,7 @@ import {
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
-import { parseLabelAndNameFromOnChainMetadata } from "@/lib/plugin-helpers";
+import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 
@@ -29,8 +29,8 @@ import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subg
  * Gets the `uri` for a given tokenId using the relevant ThreeDNSToken from `context`
  */
 const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<string> => {
-  // ThreeDNSToken is network-specific in ponder multi-network usage
-  // https://ponder.sh/docs/indexing/read-contract-data#multiple-networks
+  // ThreeDNSToken is chain-specific in ponder multi-chain usage
+  // https://ponder.sh/docs/indexing/read-contracts#multiple-chains
   return context.client.readContract({
     abi: context.contracts["threedns/ThreeDNSToken"].abi,
     address: context.contracts["threedns/ThreeDNSToken"].address! as Address,
@@ -74,7 +74,7 @@ export async function handleNewOwner({
 
   // in ThreeDNS there's a hard-coded Resolver that all domains use
   // so upsert the resolver record and link Domain.resolverId below
-  const resolverId = makeResolverId(context.network.chainId, resolverAddress, node);
+  const resolverId = makeResolverId(context.chain.id, resolverAddress, node);
   await upsertResolver(context, {
     id: resolverId,
     address: resolverAddress,
@@ -87,8 +87,8 @@ export async function handleNewOwner({
 
     // NOTE(resolver-relations): link Domain and Resolver on this chain
     await upsertDomainResolverRelation(context, {
-      id: makeDomainResolverRelationId(context.network.chainId, node),
-      chainId: context.network.chainId,
+      id: makeDomainResolverRelationId(context.chain.id, node),
+      chainId: context.chain.id,
       domainId: node,
       resolverId,
     });
@@ -144,7 +144,7 @@ export async function handleNewOwner({
 
   // log DomainEvent
   await context.db.insert(schema.newOwner).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     parentDomainId: parentNode,
     domainId: node,
     ownerId: owner,
@@ -172,7 +172,7 @@ export async function handleTransfer({
 
   // log DomainEvent
   await context.db.insert(schema.transfer).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ownerId: owner,
   });
@@ -254,7 +254,7 @@ export async function handleRegistrationCreated({
 
   // log RegistrationEvent
   await context.db.insert(schema.nameRegistered).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     registrationId,
     registrantId: registrant,
     expiryDate: expiry,
@@ -281,7 +281,7 @@ export async function handleRegistrationExtended({
 
   // log RegistratioEvent
   await context.db.insert(schema.nameRenewed).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     registrationId,
     expiryDate: newExpiry,
   });

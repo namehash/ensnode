@@ -1,5 +1,5 @@
 export { ponderMetadata, type MetadataMiddlewareResponse } from "./middleware";
-export { queryPonderMeta, queryPonderStatus } from "./db-helpers";
+export { queryPonderMeta } from "./db-helpers";
 export type { PonderMetadataMiddlewareResponse } from "./types/api";
-export type { BlockInfo, NetworkIndexingStatus } from "./types/common";
+export type { BlockInfo, ChainIndexingStatus, PonderStatus } from "./types/common";
 export { PrometheusMetrics } from "./prometheus-metrics";

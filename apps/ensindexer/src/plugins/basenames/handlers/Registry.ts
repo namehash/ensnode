@@ -8,13 +8,18 @@ import {
   handleNewTTL,
   handleTransfer,
 } from "@/handlers/Registry";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Basenames>) {
-  ponder.on(namespace("Registry:setup"), setupRootNode);
-  ponder.on(namespace("Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(namespace("Registry:NewResolver"), handleNewResolver);
-  ponder.on(namespace("Registry:NewTTL"), handleNewTTL);
-  ponder.on(namespace("Registry:Transfer"), handleTransfer);
+/**
+ * Registers event handlers with Ponder.
+ */
+export default function () {
+  const pluginName = PluginName.Basenames;
+
+  ponder.on(namespaceContract(pluginName, "Registry:setup"), setupRootNode);
+  ponder.on(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(namespaceContract(pluginName, "Registry:NewResolver"), handleNewResolver);
+  ponder.on(namespaceContract(pluginName, "Registry:NewTTL"), handleNewTTL);
+  ponder.on(namespaceContract(pluginName, "Registry:Transfer"), handleTransfer);
 }

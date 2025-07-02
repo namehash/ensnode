@@ -28,6 +28,11 @@ variable "subdomain_prefix" {
 }
 
 # ENSIndexer variables
+variable "instance_name" {
+  type = string
+  description = "Unique name for ensindexer to guarantee Railway instance name uniqueness"
+}
+
 variable "database_url" {
   type = string
 }
@@ -47,10 +52,10 @@ variable "ensrainbow_url" {
 variable "database_schema" {
   type = string
 }
-variable "active_plugins" {
+variable "plugins" {
   type = string
 }
-variable "ens_deployment_chain" {
+variable "namespace" {
   type = string
 }
 

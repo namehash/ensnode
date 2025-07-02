@@ -11,19 +11,20 @@ import {
 
 /**
  * Multi-Network ReverseResolver indexing functions should be registered exactly once, or Ponder will
- * complain about multiple indexing functions being registered for these events. This boolean allows this
- * ENSIndexerPluginHandler to be idempotent — many plugins can call it, but only one will succeed,
- * which is enough to correctly register multi-network Resolver indexing handlers.
+ * complain about multiple indexing functions being registered for these events. This boolean allows
+ * this function to be idempotent — many plugins can call it, but only one will succeed, which is
+ * enough to correctly register multi-network Resolver indexing handlers.
  */
 let hasBeenRegistered = false;
 
-export default function registerReverseResolverHandlers() {
+export default function attachReverseResolverHandlers() {
   if (hasBeenRegistered) return;
   hasBeenRegistered = true;
 
   ponder.on("ReverseResolver:AddrChanged", handleAddrChanged);
   ponder.on("ReverseResolver:AddressChanged", handleAddressChanged);
   ponder.on("ReverseResolver:NameChanged", handleNameChanged);
+
   ponder.on(
     "ReverseResolver:TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
     handleTextChanged,

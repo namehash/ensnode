@@ -27,7 +27,7 @@ export async function handleResolverAddressRecordUpdate(
   const isDeletion = !isAddress(address) || address === zeroAddress;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
+    await context.db.delete(schema.ext_resolverAddressRecords, { id: recordId });
   } else {
     // upsert
     await context.db

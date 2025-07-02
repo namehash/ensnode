@@ -1,0 +1,51 @@
+{
+  "name": "@ensnode/datasources",
+  "version": "0.28.0",
+  "type": "module",
+  "description": "Catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/datasources"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/datasources",
+  "keywords": [
+    "ENS",
+    "ENSNode"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "lint:ci": "biome ci"
+  },
+  "peerDependencies": {
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "viem": "catalog:"
+  },
+  "dependencies": {
+    "@ponder/utils": "catalog:"
+  }
+}

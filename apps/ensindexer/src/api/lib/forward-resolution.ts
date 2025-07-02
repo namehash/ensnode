@@ -1,4 +1,6 @@
 import { db, publicClients } from "ponder:api";
+import { KNOWN_OFFCHAIN_LOOKUP_RESOLVERS } from "@/api/lib/known-offchain-lookup-resolvers";
+import { KNOWN_ONCHAIN_STATIC_RESOLVERS } from "@/api/lib/known-onchain-static-resolvers";
 import config from "@/config";
 import { encodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeResolverId, parseResolverId } from "@/lib/ids";
@@ -10,102 +12,32 @@ import {
   makeRecordsResponseFromIndexedRecords,
   makeRecordsResponseFromResolveResults,
 } from "@/lib/lib-resolution";
-import { getEnsDeploymentChainId } from "@/lib/ponder-helpers";
-import { DatasourceName, ENSDeployments, getENSDeployment } from "@ensnode/ens-deployments";
+import {
+  DatasourceNames,
+  ENSNamespaceIds,
+  getDatasource,
+  getENSNamespace,
+  getENSRootChainId,
+} from "@ensnode/datasources";
 import { type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
 import {
   Address,
-  bytesToHex,
-  bytesToString,
   decodeAbiParameters,
   encodeFunctionData,
   getAbiItem,
-  hexToString,
   isAddress,
   namehash,
-  size,
   toHex,
-  zeroHash,
 } from "viem";
 
-const deployment = getENSDeployment(config.ensDeploymentChain);
-const ensDeploymentChainId = getEnsDeploymentChainId();
+const ensRootChainId = getENSRootChainId(config.namespace);
 
-// all Resolver contracts share the same abi
-const RESOLVER_ABI = ENSDeployments.mainnet.root.contracts.Resolver.abi;
+// all Resolver contracts share the same abi, so just grab one
+const RESOLVER_ABI = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot).contracts
+  .Resolver.abi;
 
 // TODO: implement based on config (& ponder indexing status?)
 const isChainIndexed = (chainId: number) => true;
-
-/**
- * A mapping of Resolver Addresses on a given chain to the chain they defer resolution to.
- *
- * These resolvers must abide the following pattern:
- * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway
- * 2. That CCIP-Read Gateway exclusively sources the data necessary to process CCIP-Read Requests from
- *   the indicated L2.
- *
- * TODO: these relationships could/should be encoded in an ENSIP
- */
-const KNOWN_OFFCHAIN_LOOKUP_RESOLVERS: Record<number, Record<Address, number>> = {
-  // on the ENS Deployment Chain
-  [deployment.root.chain.id]: {
-    // the Basenames L1Resolver defers to Base chain
-    [deployment.root.contracts.BasenamesL1Resolver.address]: deployment.basenames.chain.id,
-    // the LineaNames L1Resolver defers to Linea chain
-    [deployment.root.contracts.LineaNamesL1Resolver.address]: deployment.lineanames.chain.id,
-  },
-};
-
-/**
- * A mapping of chain id to addresses that are known Onchain Static Resolvers
- *
- * These resolvers must abide the following pattern:
- * 1. Onchain: all information necessary for resolution is stored on-chain, and
- * 2. Static: All resolve() calls resolve to the exact value previously emitted by the Resolver in
- *    its events (i.e. no post-processing or other logic, a simple return of the on-chain data).
- *
- * TODO: these relationships could/should be encoded in an ENSIP
- */
-const KNOWN_ONCHAIN_STATIC_RESOLVERS: Record<number, Address[]> = {
-  // on the ENS Deployment Chain
-  [deployment.root.chain.id]: [
-    // the Root LegacyPublicResolver is an Onchain Static Resolver
-    deployment[DatasourceName.Root].contracts.LegacyPublicResolver.address,
-    // the Root PublicResolver is an Onchain Static Resolver
-    // NOTE: this is also the ENSIP-11 ReverseResolver
-    deployment[DatasourceName.Root].contracts.PublicResolver.address,
-    // the Root LegacyDefaultReverseResolver is an Onchain Static Resolver
-    deployment[DatasourceName.ReverseResolverRoot].contracts.LegacyDefaultReverseResolver.address,
-  ],
-  // on the Basenames chain
-  [deployment.basenames.chain.id]: [
-    // the Basenames L2Resolver is an Onchain Static Resolver
-    deployment[DatasourceName.Basenames].contracts.L2Resolver.address,
-    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
-    deployment[DatasourceName.ReverseResolverBase].contracts.ReverseResolver.address,
-  ],
-  // on Linea chain
-  [deployment.lineanames.chain.id]: [
-    // TODO: additional Linea Onchain Static Resolver? like a PublicResolver equivalent
-    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
-    deployment[DatasourceName.ReverseResolverLinea].contracts.ReverseResolver.address,
-  ],
-  // on Optimism chain
-  [deployment["reverse-resolver-optimism"].chain.id]: [
-    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
-    deployment[DatasourceName.ReverseResolverOptimism].contracts.ReverseResolver.address,
-  ],
-  // on Arbitrum chain
-  [deployment["reverse-resolver-arbitrum"].chain.id]: [
-    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
-    deployment[DatasourceName.ReverseResolverArbitrum].contracts.ReverseResolver.address,
-  ],
-  [deployment["reverse-resolver-scroll"].chain.id]: [
-    // the ENSIP-11 ReverseResolver is an Onchain Static Resolver
-    deployment[DatasourceName.ReverseResolverScroll].contracts.ReverseResolver.address,
-  ],
-};
 
 /**
  * Implements Forward Resolution of an ENS name, for a selection of records, on a specified chainId.
@@ -121,7 +53,7 @@ const KNOWN_ONCHAIN_STATIC_RESOLVERS: Record<number, Address[]> = {
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: Name,
   selection: SELECTION,
-  chainId: number = ensDeploymentChainId,
+  chainId: number = ensRootChainId,
 ): Promise<ResolverRecordsResponse<SELECTION>> {
   console.log("resolveForward", { name, selection, chainId });
 

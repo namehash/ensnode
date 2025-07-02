@@ -30,17 +30,18 @@
   "pnpm": {
     "overrides": {
       "@astrojs/prism>prismjs": "1.30.0",
+      "@astrojs/react>vite": "6.2.7",
       "@babel/runtime": "7.26.10",
       "@babel/helpers": "7.26.10",
       "@graphiql/react>@headlessui/react": "2.2.0",
-      "astro>vite": "6.2.7",
-      "@astrojs/react>vite": "6.2.7",
-      "vitest>vite": "6.2.7",
       "astro>esbuild": "0.25.0",
+      "astro>vite": "6.2.7",
+      "minimatch@9.0.5>brace-expansion": "2.0.2",
       "tsup>esbuild": "0.25.0",
       "tsx>esbuild": "0.25.0",
+      "vite": "^6.2.7",
       "vite>esbuild": "0.25.0",
-      "vite": "^6.2.7"
+      "vitest>vite": "6.2.7"
     },
     "ignoredBuiltDependencies": [
       "bun"

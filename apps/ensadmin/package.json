@@ -1,6 +1,6 @@
 {
   "name": "ensadmin",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "private": true,
   "type": "module",
   "description": "Explore the ENS Protocol like never before",
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@ensnode/ens-deployments": "workspace:*",
+    "@ensnode/datasources": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",

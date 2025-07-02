@@ -1,30 +1,41 @@
-import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import type { MergedTypes } from "@/lib/lib-helpers";
+import basenamesPlugin from "./basenames/plugin";
+import lineaNamesPlugin from "./lineanames/plugin";
+import reverseResolversPlugin from "./reverse-resolvers/plugin";
+import subgraphPlugin from "./subgraph/plugin";
+import threednsPlugin from "./threedns/plugin";
+
+export const ALL_PLUGINS = [
+  subgraphPlugin,
+  basenamesPlugin,
+  lineaNamesPlugin,
+  threednsPlugin,
+  reverseResolversPlugin,
+] as const;
+
 /**
- * Maps from a plugin to its required Datasources.
- *
- * This spec is _outside_ of the plugin spec because:
- * 1) the *.plugin.ts files need to directly export a `const` ponder config so that ponder's
- *  typechecking and type inference for stuff like event names works as expected
- * 2) this means that they have a dependency on the global ENSIndexerConfig, as that informs plugin
- *   configuration and behavior (i.e. which addresses are indexed on which chains)
- * 3) the ENSIndexerConfig requires runtime knowledge of which datasources a plugin requires to run,
- *   in order to perform validation
- * 4) therefore, to avoid a circular dependency, this spec is located outside of each individual
- *   plugin's definition and is accessible separately
+ * Helper type representing the merged Ponder config of all possible ENSIndexerPlugins. This
+ * ensures that the inferred types of each Ponder config are available at compile-time to Ponder,
+ * which uses it to power type inference in event handlers.
  */
-export const PLUGIN_REQUIRED_DATASOURCES = {
-  [PluginName.Subgraph]: [DatasourceName.Root],
-  [PluginName.Basenames]: [DatasourceName.Basenames],
-  [PluginName.Lineanames]: [DatasourceName.Lineanames],
-  [PluginName.ThreeDNS]: [DatasourceName.ThreeDNSOptimism, DatasourceName.ThreeDNSBase],
-  [PluginName.ReverseResolvers]: [
-    DatasourceName.ReverseResolverRoot,
-    DatasourceName.ReverseResolverBase,
-    DatasourceName.ReverseResolverOptimism,
-    DatasourceName.ReverseResolverArbitrum,
-    DatasourceName.ReverseResolverScroll,
-    DatasourceName.ReverseResolverLinea,
-  ],
-};
+export type AllPluginsMergedConfig = MergedTypes<
+  ReturnType<(typeof ALL_PLUGINS)[number]["createPonderConfig"]>
+>;
+
+/**
+ * Get plugin object by plugin name.
+ *
+ * @see {ALL_PLUGINS} list
+ */
+export function getPlugin(pluginName: PluginName) {
+  const plugin = ALL_PLUGINS.find((plugin) => plugin.name === pluginName);
+
+  if (!plugin) {
+    // invariant: all plugins can be found by PluginName
+    throw new Error(`Plugin not found by "${pluginName}" name.`);
+  }
+
+  return plugin;
+}

@@ -35,7 +35,7 @@ export async function handleAddrChanged({
   const { a: address, node } = event.args;
   await upsertAccount(context, address);
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -51,7 +51,7 @@ export async function handleAddrChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.addrChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     addrId: address,
   });
@@ -71,7 +71,7 @@ export async function handleAddressChanged({
 }) {
   const { node, coinType, newAddress } = event.args;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -85,7 +85,7 @@ export async function handleAddressChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.multicoinAddrChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     coinType,
     addr: newAddress,
@@ -106,7 +106,7 @@ export async function handleNameChanged({
   const { node, name } = event.args;
   if (hasNullByte(name)) return;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -115,7 +115,7 @@ export async function handleNameChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.nameChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     name,
   });
@@ -134,7 +134,7 @@ export async function handleABIChanged({
 }) {
   const { node, contentType } = event.args;
 
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
 
   // upsert resolver
   await upsertResolver(context, {
@@ -145,7 +145,7 @@ export async function handleABIChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.abiChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     contentType,
   });
@@ -159,7 +159,7 @@ export async function handlePubkeyChanged({
   event: EventWithArgs<{ node: Node; x: Hex; y: Hex }>;
 }) {
   const { node, x, y } = event.args;
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
 
   // upsert resolver
   await upsertResolver(context, {
@@ -170,7 +170,7 @@ export async function handlePubkeyChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.pubkeyChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     x,
     y,
@@ -190,7 +190,7 @@ export async function handleTextChanged({
   }>;
 }) {
   const { node, key, value } = event.args;
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -221,7 +221,7 @@ export async function handleTextChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.textChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key: sanitizedKey,
     value: sanitizedValue,
@@ -240,7 +240,7 @@ export async function handleContenthashChanged({
   event: EventWithArgs<{ node: Node; hash: Hash }>;
 }) {
   const { node, hash } = event.args;
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -250,7 +250,7 @@ export async function handleContenthashChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.contenthashChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     hash,
   });
@@ -264,7 +264,7 @@ export async function handleInterfaceChanged({
   event: EventWithArgs<{ node: Node; interfaceID: Hex; implementer: Hex }>;
 }) {
   const { node, interfaceID, implementer } = event.args;
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   await upsertResolver(context, {
     id,
     domainId: node,
@@ -273,7 +273,7 @@ export async function handleInterfaceChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.interfaceChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     interfaceID,
     implementer,
@@ -293,7 +293,7 @@ export async function handleAuthorisationChanged({
   }>;
 }) {
   const { node, owner, target, isAuthorised } = event.args;
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
 
   await upsertResolver(context, {
     id,
@@ -303,7 +303,7 @@ export async function handleAuthorisationChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.authorisationChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     owner,
     target,
@@ -320,7 +320,7 @@ export async function handleVersionChanged({
   event: EventWithArgs<{ node: Node; newVersion: bigint }>;
 }) {
   const { node, newVersion } = event.args;
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
 
   // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
   const domain = await context.db.find(schema.domain, { id: node });
@@ -342,7 +342,7 @@ export async function handleVersionChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.versionChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     version: newVersion,
   });
@@ -379,7 +379,7 @@ export async function handleDNSRecordChanged({
   if (!key) return;
 
   // upsert Resolver entity
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -393,7 +393,7 @@ export async function handleDNSRecordChanged({
 
   // log ResolverEvent
   await context.db.insert(schema.textChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key,
     value,
@@ -425,7 +425,7 @@ export async function handleDNSRecordDeleted({
   if (!key) return;
 
   // upsert Resolver entity
-  const id = makeResolverId(context.network.chainId, event.log.address, node);
+  const id = makeResolverId(context.chain.id, event.log.address, node);
   const resolver = await upsertResolver(context, {
     id,
     domainId: node,
@@ -439,7 +439,7 @@ export async function handleDNSRecordDeleted({
 
   // log ResolverEvent
   await context.db.insert(schema.textChanged).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key,
     value: null,

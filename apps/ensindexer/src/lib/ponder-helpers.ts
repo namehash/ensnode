@@ -1,11 +1,15 @@
 import type { Event } from "ponder:registry";
-import { Address, PublicClient } from "viem";
 
-import config from "@/config";
-import { Blockrange } from "@/lib/types";
-import { ContractConfig, ENSDeployments } from "@ensnode/ens-deployments";
+import type { ChainConfig } from "ponder";
+import { Address, PublicClient } from "viem";
+import * as z from "zod/v4";
+
+import { ContractConfig } from "@ensnode/datasources";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
-import type { BlockInfo } from "@ensnode/ponder-metadata";
+import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
+
+import { ENSIndexerConfig } from "@/config/types";
+import { Blockrange } from "@/lib/types";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -14,17 +18,18 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 /**
  * Given a contract's start block, returns a block range describing a start and end block
  * that maintains validity within the global blockrange. The returned start block will always be
- * defined, but if no end block is specified, the returned end block will be undefined, indicating
- * that ponder should index the contract in perpetuity.
+ * defined, but if no end block is specified, the returned end block will be undefined.
  *
+ * @param blockrange a Blockrange
  * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
  * @returns the start and end blocks, contrained to the provided `start` and `end`
  *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
  */
-export const constrainContractBlockrange = (
+export const constrainBlockrange = (
+  blockrange: Blockrange,
   contractStartBlock: number | undefined = 0,
 ): Blockrange => {
-  const { startBlock, endBlock } = config.globalBlockrange;
+  const { startBlock, endBlock } = blockrange;
 
   const isEndConstrained = endBlock !== undefined;
   const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
@@ -40,10 +45,10 @@ export const constrainContractBlockrange = (
  *
  * @returns A function that fetches ENSRainbow version information
  */
-export const createEnsRainbowVersionFetcher = () => {
-  const client = new EnsRainbowApiClient({
-    endpointUrl: new URL(config.ensRainbowEndpointUrl),
-  });
+export const createEnsRainbowVersionFetcher = (
+  endpointUrl: ENSIndexerConfig["ensRainbowEndpointUrl"],
+) => {
+  const client = new EnsRainbowApiClient({ endpointUrl: new URL(endpointUrl) });
 
   return async () => {
     try {
@@ -63,15 +68,6 @@ export const createEnsRainbowVersionFetcher = () => {
 };
 
 /**
- * Get the ENSDeployment chain ID.
- *
- * @returns the ENSDeployment chain ID
- */
-export const getEnsDeploymentChainId = (): number => {
-  return ENSDeployments[config.ensDeploymentChain].root.chain.id;
-};
-
-/**
  * Creates a Prometheus metrics fetcher for the Ponder application.
  *
  * It's a workaround for the lack of an internal API allowing to access
@@ -85,7 +81,6 @@ export function createPrometheusMetricsFetcher(
 ): () => Promise<string> {
   /**
    * Fetches the Prometheus metrics from the Ponder application endpoint.
-   * @param {number} ponderApplicationPort
    * @returns Prometheus metrics as a text string
    */
   return async function fetchPrometheusMetrics(): Promise<string> {
@@ -96,10 +91,74 @@ export function createPrometheusMetricsFetcher(
 }
 
 /**
+ * Ponder Data Schemas
+ *
+ * These schemas allow data validation with Zod.
+ */
+const PonderDataSchema = {
+  get Block() {
+    return z.object({
+      number: z.number().int().min(1),
+      timestamp: z.number().int().min(1),
+    });
+  },
+
+  get ChainId() {
+    return z.number().int().min(1);
+  },
+
+  get Status() {
+    return z.record(
+      z.string().transform(Number).pipe(PonderDataSchema.ChainId),
+      z.object({
+        id: PonderDataSchema.ChainId,
+        block: PonderDataSchema.Block,
+      }),
+    );
+  },
+};
+
+/**
+ * Creates Ponder Status fetcher for the Ponder application.
+ *
+ * It's a workaround for the lack of an internal API allowing to access
+ * Ponder Status metrics for the Ponder application.
+ *
+ * @param ponderApplicationPort the port the Ponder application is served at
+ * @returns fetcher function
+ */
+export function createPonderStatusFetcher(
+  ponderApplicationPort: number,
+): () => Promise<PonderStatus> {
+  /**
+   * Fetches the Ponder Ponder status from the Ponder application endpoint.
+   * @returns Parsed Ponder Status object.
+   */
+  return async function fetchPonderStatus() {
+    const response = await fetch(`http://localhost:${ponderApplicationPort}/status`);
+    const responseData = await response.json();
+
+    return PonderDataSchema.Status.parse(responseData) satisfies PonderStatus;
+  };
+}
+
+/**
+ * Ponder contracts configuration including block range.
+ */
+interface PonderContractBlockConfig {
+  contracts: Record<
+    string,
+    {
+      chain: Record<string, { id: ChainConfig["id"] } & Blockrange>;
+    }
+  >;
+}
+
+/**
  * Creates a first block to index fetcher for the given ponder configuration.
  */
 export function createFirstBlockToIndexByChainIdFetcher(
-  ponderConfig: Promise<PartialPonderConfig>,
+  ponderConfig: Promise<PonderContractBlockConfig>,
 ) {
   /**
    * Fetches the first block to index for the requested chain ID.
@@ -151,30 +210,6 @@ export function createFirstBlockToIndexByChainIdFetcher(
 }
 
 /**
- * Partial configuration for the Ponder app including contracts configuration.
- */
-interface PartialPonderConfig {
-  // contracts configuration
-  contracts: Record<string, PartialPonderContractConfig>;
-}
-
-/**
- * Partial configuration for the Ponder app including specific contract's networks configuration.
- */
-interface PartialPonderContractConfig<ChainId extends number = number> {
-  // network configuration for each chain ID
-  network: Record<ChainId, PonderNetworkConfig>;
-}
-
-/**
- * Partial network configuration for a contract configuration.
- */
-interface PonderNetworkConfig {
-  // start block number for the network
-  startBlock?: number;
-}
-
-/**
  * Get start block number for each chain ID.
  *
  * @returns start block number for each chain ID.
@@ -183,23 +218,23 @@ interface PonderNetworkConfig {
  * const ponderConfig = {
  *  contracts: {
  *   "subgraph/Registrar": {
- *     network: {
- *       "1": { startBlock: 444_444_444 }
+ *     chain: {
+ *       "1": { id: 1, startBlock: 444_444_444 }
  *      }
  *   },
  *   "subgraph/Registry": {
- *     network: {
- *       "1": { startBlock: 444_444_333 }
+ *     chain: {
+ *       "1": { id: 1, startBlock: 444_444_333 }
  *      }
  *   },
  *   "basenames/Registrar": {
- *     network: {
- *       "8453": { startBlock: 1_799_433 }
+ *     chain: {
+ *       "8453": { id: 8453, startBlock: 1_799_433 }
  *     }
  *   },
  *   "basenames/Registry": {
- *     network: {
- *       "8453": { startBlock: 1_799_430 }
+ *     chain: {
+ *       "8453": { id: 8453, startBlock: 1_799_430 }
  *     }
  *   }
  * };
@@ -216,19 +251,19 @@ interface PonderNetworkConfig {
  * ```
  */
 export async function createStartBlockByChainIdMap(
-  ponderConfig: Promise<PartialPonderConfig>,
+  ponderConfig: Promise<PonderContractBlockConfig>,
 ): Promise<Record<number, number>> {
-  const config = Object.values((await ponderConfig).contracts);
+  const contractsConfig = Object.values((await ponderConfig).contracts);
 
   const startBlockNumbers: Record<number, number> = {};
 
   // go through each contract configuration
-  for (const contractConfig of config) {
-    // and then through each network configuration for the contract
-    for (const contractNetworkConfig of Object.entries(contractConfig.network)) {
+  for (const contractConfig of contractsConfig) {
+    // and then through each chain configuration for the contract
+    for (const contractChainConfig of Object.values(contractConfig.chain)) {
       // map string to number
-      const chainId = Number(contractNetworkConfig[0]);
-      const startBlock = contractNetworkConfig[1].startBlock || 0;
+      const chainId = contractChainConfig.id;
+      const startBlock = contractChainConfig.startBlock || 0;
 
       // update the start block number for the chain ID if it's lower than the current one
       if (!startBlockNumbers[chainId] || startBlock < startBlockNumbers[chainId]) {
@@ -240,14 +275,80 @@ export async function createStartBlockByChainIdMap(
   return startBlockNumbers;
 }
 
+/**
+/**
+ * Builds a ponder#Config["chains"] for a single, specific chain in the context of the ENSIndexerConfig.
+ *
+ * @param rpcConfigs - The RPC configuration object from ENSIndexerConfig, keyed by chain ID.
+ * @param chainId - The numeric chain ID for which to build the chain config.
+ * @returns a ponder#Config["chains"]
+ */
+export function chainsConnectionConfig(
+  rpcConfigs: ENSIndexerConfig["rpcConfigs"],
+  chainId: number,
+) {
+  const rpcConfig = rpcConfigs[chainId];
+
+  if (!rpcConfig) {
+    throw new Error(
+      `chainsConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,
+    );
+  }
+
+  return {
+    [chainId.toString()]: {
+      id: chainId,
+      rpc: rpcConfig.url,
+      maxRequestsPerSecond: rpcConfig.maxRequestsPerSecond,
+      // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
+      ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
+    } satisfies ChainConfig,
+  };
+}
+
+/**
+ * Builds a `ponder#ContractConfig['chain']` given a contract's config, constraining the contract's
+ * indexing range by the globally configured blockrange.
+ *
+ * @param {Blockrange} globalBlockrange
+ * @param {number} chainId
+ * @param {ContractConfig} contractConfig
+ *
+ * @returns network configuration based on the contract
+ */
+export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
+  globalBlockrange: Blockrange,
+  chainId: number,
+  contractConfig: CONTRACT_CONFIG,
+) {
+  // Ponder will index the contract in perpetuity if endBlock is `undefined`
+  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractConfig.startBlock);
+
+  return {
+    [chainId.toString()]: {
+      address: contractConfig.address, // provide per-network address if available
+      id: chainId,
+      startBlock,
+      endBlock,
+    },
+  };
+}
+
+/**
+ * Merges a set of ContractConfigs representing contracts at specific addresses on the same chain.
+ * Uses the lowest startBlock to ensure all events are indexed.
+ */
 export function mergeContractConfigs<CONTRACTS extends ContractConfig[]>(contracts: CONTRACTS) {
   if (contracts.length === 0) throw new Error("Cannot merge 0 ContractConfigs");
+
   const addresses = contracts
     .map((contract) => contract.address)
     .filter((address): address is Address => !!address);
+
   const startBlocks = contracts.map((contract) => contract.startBlock);
 
   return {
+    // just use the first's ABI, they're all identical, no need to mergeAbis
     abi: contracts[0]!.abi,
     startBlock: Math.min(...startBlocks),
     address: addresses,

@@ -119,10 +119,11 @@ export const makeRegistrarHandlers = ({
         });
       } else {
         // invariant: if the domain does not exist, this must be a `registerOnly` 'preminted' name
-        // in the Basenames plugin, otherwise panic
-        if (pluginName !== PluginName.Basenames) {
+        // in either the `basenames` plugin, or the `lineanames` plugin,
+        // otherwise panic
+        if ([PluginName.Basenames, PluginName.Lineanames].includes(pluginName) === false) {
           throw new Error(
-            `Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist. This indicates that a name was registered in the Registrar but _not_ in the ENS Registry (i.e. 'preminted'). Currently this is only supported on Basenames, but this occurred in plugin '${pluginName}'.`,
+            `Invariant: Registrar#NameRegistered was emitted before Registry#NewOwner and a Domain entity does not yet exist. This indicates that a name was registered in the Registrar but _not_ in the ENS Registry (i.e. 'preminted'). Currently this is only supported on Basenames and Lineanames, but this occurred in plugin '${pluginName}'.`,
           );
         }
 
@@ -144,7 +145,7 @@ export const makeRegistrarHandlers = ({
 
       // log RegistrationEvent
       await context.db.insert(schema.nameRegistered).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         registrationId,
         registrantId: owner,
         expiryDate: expires,
@@ -207,7 +208,7 @@ export const makeRegistrarHandlers = ({
 
       // log RegistrationEvent
       await context.db.insert(schema.nameRenewed).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         expiryDate: expires,
       });
@@ -235,7 +236,7 @@ export const makeRegistrarHandlers = ({
 
       // log RegistrationEvent
       await context.db.insert(schema.nameTransferred).values({
-        ...sharedEventValues(context.network.chainId, event),
+        ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         newOwnerId: to,
       });

@@ -3,13 +3,13 @@ import { fromUnixTime } from "date-fns";
 import { base, mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
 import {
+  type ChainStatusViewModel,
   type GlobalIndexingStatusViewModel,
-  type NetworkStatusViewModel,
   blockViewModel,
+  chainIndexingStatusViewModel,
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
   globalIndexingStatusViewModel,
-  networkIndexingStatusViewModel,
 } from "./view-models";
 
 describe("View Models", () => {
@@ -30,14 +30,14 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        ACTIVE_PLUGINS: [PluginName.Subgraph],
+        PLUGINS: [PluginName.Subgraph],
         DATABASE_SCHEMA: "public",
-        ENS_DEPLOYMENT_CHAIN: "ens-test-env",
+        NAMESPACE: "ens-test-env",
       });
 
       expect(result).toEqual([
         { label: "Active Plugins", value: [PluginName.Subgraph] },
-        { label: "ENS Deployment Chain", value: "ens-test-env" },
+        { label: "ENS Namespace", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);
     });
@@ -45,15 +45,16 @@ describe("View Models", () => {
 
   describe("globalIndexingStatusViewModel", () => {
     it("should return the correct view model", () => {
-      const ensNodeNetworkStatus = testEnsNodeNetworkStatus();
+      const ensNodeChainStatus = testEnsNodeChainStatus();
 
-      const mainnetStatus = ensNodeNetworkStatus[mainnet.id];
-      const baseStatus = ensNodeNetworkStatus[base.id];
+      const mainnetStatus = ensNodeChainStatus[mainnet.id];
+      const baseStatus = ensNodeChainStatus[base.id];
 
-      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus, "mainnet")).toEqual({
-        networkStatuses: [
+      expect(globalIndexingStatusViewModel(ensNodeChainStatus, "mainnet")).toEqual({
+        chainStatuses: [
           {
-            name: "Ethereum",
+            chainId: 1,
+            chainName: "Ethereum",
             latestSafeBlock: blockViewModel(mainnetStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(mainnetStatus.firstBlockToIndex),
             lastIndexedBlock: blockViewModel(mainnetStatus.lastIndexedBlock),
@@ -67,7 +68,8 @@ describe("View Models", () => {
             ],
           },
           {
-            name: "Base",
+            chainId: 8453,
+            chainName: "Base",
             latestSafeBlock: blockViewModel(baseStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(baseStatus.firstBlockToIndex),
             lastIndexedBlock: null,
@@ -92,12 +94,13 @@ describe("View Models", () => {
     });
   });
 
-  describe("networkIndexingStatusViewModel", () => {
+  describe("chainIndexingStatusViewModel", () => {
     it("should return the correct view model", () => {
       expect(
-        networkIndexingStatusViewModel(
+        chainIndexingStatusViewModel(
           `${base.name}`,
           {
+            chainId: base.id,
             latestSafeBlock: {
               number: 333,
               timestamp: 1501,
@@ -115,7 +118,8 @@ describe("View Models", () => {
           1000,
         ),
       ).toEqual({
-        name: "Base",
+        chainId: 8453,
+        chainName: "Base",
         latestSafeBlock: {
           number: 333,
           timestamp: 1501,
@@ -150,14 +154,15 @@ describe("View Models", () => {
             endDate: fromUnixTime(1501),
           },
         ],
-      } satisfies NetworkStatusViewModel);
+      } satisfies ChainStatusViewModel);
     });
   });
 });
 
-function testEnsNodeNetworkStatus() {
+function testEnsNodeChainStatus() {
   return {
     [mainnet.id]: {
+      chainId: mainnet.id,
       firstBlockToIndex: {
         number: 17,
         timestamp: 1000,
@@ -177,6 +182,7 @@ function testEnsNodeNetworkStatus() {
     },
 
     [base.id]: {
+      chainId: base.id,
       firstBlockToIndex: {
         number: 222,
         timestamp: 1111,

@@ -7,10 +7,11 @@ import config from "@/config";
 import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
+  createPonderStatusFetcher,
   createPrometheusMetricsFetcher,
-  getEnsDeploymentChainId,
 } from "@/lib/ponder-helpers";
-import { PrometheusMetrics, queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata";
+import { getENSRootChainId } from "@ensnode/datasources";
+import { PrometheusMetrics, queryPonderMeta } from "@ensnode/ponder-metadata";
 import type { PonderMetadataProvider } from "@ensnode/ponder-subgraph";
 
 // setup block indexing status fetching
@@ -19,32 +20,35 @@ export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdF
 );
 
 // setup ENSRainbow version fetching
-export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher();
+export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher(config.ensRainbowEndpointUrl);
 
 // setup prometheus metrics fetching
 export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.port);
 
-export const makePonderMetdataProvider = ({
+// setup Ponder Status fetching
+export const fetchPonderStatus = createPonderStatusFetcher(config.port);
+
+export const makePonderMetadataProvider = ({
   db,
   publicClients,
 }: {
   db: ReadonlyDrizzle<Record<string, unknown>>;
   publicClients: Record<string, PublicClient>;
 }): PonderMetadataProvider => {
-  // get the chain ID for the ENS deployment
-  const ensDeploymentChainId = getEnsDeploymentChainId();
+  // get the root datasource's chain ID
+  const ensRootChainId = getENSRootChainId(config.namespace);
   const availableNetworkNames = Object.keys(publicClients);
 
   if (availableNetworkNames.length === 0) {
     throw new Error(`Invariant: no available publicClients for constructing ponder metadata.`);
   }
 
-  // use the deployment chain's publicClient if available, otherwise warn and use first found
-  let publicClient = publicClients[ensDeploymentChainId];
+  // use the root chain's publicClient if available, otherwise warn and use first found
+  let publicClient = publicClients[ensRootChainId];
   if (!publicClient) {
     const networkId = availableNetworkNames[0]!; // length check done above
     console.warn(
-      `No public client available for chain '${ensDeploymentChainId}', using status of chain '${networkId}' to power 'Query._meta'.`,
+      `No public client available for chain '${ensRootChainId}', using status of chain '${networkId}' to power 'Query._meta'.`,
     );
     publicClient = publicClients[networkId]!; // must exist
   }
@@ -54,20 +58,18 @@ export const makePonderMetdataProvider = ({
    *
    * @returns the block info fetched from the public client
    */
-  const getLastIndexedDeploymentChainBlock = async () => {
-    const ponderStatus = await queryPonderStatus(config.ponderDatabaseSchema, db);
-    const chainStatus = ponderStatus.find(
-      (status) => status.network_name === ensDeploymentChainId.toString(),
+  const getLastIndexedENSRootChainBlock = async () => {
+    const ponderStatus = await fetchPonderStatus();
+    const chainStatus = Object.values(ponderStatus).find(
+      (ponderStatusForChain) => ponderStatusForChain.id === ensRootChainId,
     );
 
-    if (!chainStatus || !chainStatus.block_number) {
-      throw new Error(
-        `Could not find latest indexed block number for chain ID: ${ensDeploymentChainId}`,
-      );
+    if (!chainStatus || !chainStatus.block.number) {
+      throw new Error(`Could not find latest indexed block number for chain ID: ${ensRootChainId}`);
     }
 
     return publicClient.getBlock({
-      blockNumber: BigInt(chainStatus.block_number),
+      blockNumber: BigInt(chainStatus.block.number),
     });
   };
 
@@ -92,7 +94,7 @@ export const makePonderMetdataProvider = ({
 
   return {
     version: packageJson.version,
-    getLastIndexedDeploymentChainBlock,
+    getLastIndexedENSRootChainBlock,
     getPonderBuildId,
     hasIndexingErrors,
   };
