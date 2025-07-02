@@ -176,3 +176,10 @@ export function getRequiredDatasourceNames(plugins: ENSIndexerPlugin[]): Datasou
 
   return uniq(requiredDatasourceNames);
 }
+
+/**
+ * Determines whether a plugin supports 'preminted' names. See `apps/ensindexer/src/handlers/Registrar.ts`
+ * for further discussion.
+ */
+export const pluginSupportsPremintedNames = (pluginName: PluginName) =>
+  [PluginName.Basenames, PluginName.Lineanames].includes(pluginName);
