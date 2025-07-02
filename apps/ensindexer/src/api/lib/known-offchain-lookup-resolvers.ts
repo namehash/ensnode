@@ -28,9 +28,9 @@ export const KNOWN_OFFCHAIN_LOOKUP_RESOLVERS: Record<number, Record<Address, num
       }),
 
     // the LineaNames L1Resolver defers to Linea chain
-    ...(!!ensNamespace.ensroot.contracts.LineaNamesL1Resolver &&
+    ...(!!ensNamespace.ensroot.contracts.LineanamesL1Resolver &&
       !!ensNamespace.lineanames && {
-        [ensNamespace.ensroot.contracts.LineaNamesL1Resolver.address as Address]:
+        [ensNamespace.ensroot.contracts.LineanamesL1Resolver.address as Address]:
           ensNamespace.lineanames.chain.id,
       }),
   },
