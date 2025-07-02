@@ -51,6 +51,7 @@ function getEnsDeploymentRpcUrl(namespaceId: ENSNamespaceId): URL {
 // Create wagmi config with supported namespaces
 
 //TODO: check with @tko what he meant in his PR comment there ("Try applying ens-deployments package config:")
+// -> basically to do what tko proposed in the PR comment, to use chains declared in ensnode/datasources package and not directly from viem (that would make a nicer dependency)
 export const config = createConfig({
   chains: [mainnet, sepolia, holesky, anvil],
   transports: {

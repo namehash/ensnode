@@ -76,21 +76,3 @@ function validateResponse(response: EnsNode.Metadata) {
     );
   }
 }
-
-/**
- * Gets chainId of the ENS root Datasource
- *
- * @param indexingStatus The ENSNode indexing status.
- * @returns The chain ID or undefined if the status is not available.
- * @throws Error if the chain ID is not supported within the configured namespace
- */
-
-//TODO: should we change the return value (and then remove SupportedChainId type totally)?
-// Also this is currently causing a typecheck error so --> FIXME
-export function useENSRootDatasourceChainId(
-  indexingStatus: UseIndexingStatusQueryResult["data"],
-): SupportedChainId | undefined {
-  if (!indexingStatus) return undefined;
-
-  return getENSRootChainId(indexingStatus.env.NAMESPACE);
-}

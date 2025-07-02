@@ -40,9 +40,9 @@ export function Identity({
     setMounted(true);
   }, []);
 
-  //TODO: if the ENS deployment chain is the ens-test-env, we should not make use of the useEnsName hook at all and instead just always show the truncated address and not look up the primary name.
-  // We should document that we'll need to come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this.
-  // is that an alright solution? - duplicates code with error of the query, but that seems necessary for our current predicament - allows us to avoid some additional if-ology when calling the wagmi hook
+
+  // TODO: come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this (for ens-test-env).
+  // if the ENS deployment chain is the ens-test-env, we should just always show the truncated address and not look up the primary name.
   if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
     return <AddressDisplay namespaceId={namespaceId} address={address}/>;
   }

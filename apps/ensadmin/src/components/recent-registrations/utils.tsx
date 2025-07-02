@@ -82,7 +82,7 @@ interface NameDisplayProps {
 
 /**
  * Component to display an ENS name.
- * It can display a link to the name details page on ENS app, or just the name if the ENS namespace has no dedicated ENS App.
+ * It displays a link to the name details page on ENS app, or just the name if the ENS namespace has no dedicated ENS App.
  */
 //TODO: should probably be moved to /identity or somewhere else
 export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplayProps) {
@@ -111,6 +111,10 @@ interface AddressDisplayProps {
   showExternalLink?: boolean;
 }
 
+/**
+ * Component to display a truncated address.
+ * It displays a link to the address details page on ENS app, or just the address if the ENS namespace has no dedicated ENS App.
+ */
 export function AddressDisplay({ address, namespaceId, showExternalLink }: AddressDisplayProps) {
   // Truncate address for display
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
