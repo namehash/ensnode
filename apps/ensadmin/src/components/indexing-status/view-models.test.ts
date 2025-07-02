@@ -66,7 +66,6 @@ describe("View Models", () => {
                 endDate: fromUnixTime(mainnetStatus.latestSafeBlock.timestamp),
               },
             ],
-            blockExplorerURL: "https://etherscan.io",
           },
           {
             chainId: 8453,
@@ -87,7 +86,6 @@ describe("View Models", () => {
                 endDate: fromUnixTime(baseStatus.latestSafeBlock.timestamp),
               },
             ],
-            blockExplorerURL: "https://basescan.org",
           },
         ],
         currentIndexingDate: fromUnixTime(mainnetStatus.lastIndexedBlock.timestamp),
@@ -97,7 +95,7 @@ describe("View Models", () => {
   });
 
   describe("chainIndexingStatusViewModel", () => {
-    it("should return the correct view model without block explorer", () => {
+    it("should return the correct view model", () => {
       expect(
         chainIndexingStatusViewModel(
           `${base.name}`,
@@ -156,70 +154,6 @@ describe("View Models", () => {
             endDate: fromUnixTime(1501),
           },
         ],
-      } satisfies ChainStatusViewModel);
-    });
-
-    it("should return the correct view model with block explorer", () => {
-      expect(
-        chainIndexingStatusViewModel(
-          base.id,
-          `${base.name}`,
-          {
-            latestSafeBlock: {
-              number: 333,
-              timestamp: 1501,
-            },
-            firstBlockToIndex: {
-              number: 222,
-              timestamp: 1111,
-            },
-            lastIndexedBlock: null,
-            lastSyncedBlock: {
-              number: 272,
-              timestamp: 1247,
-            },
-          },
-          1000,
-          "https://basescan.org",
-        ),
-      ).toEqual({
-        chainId: 8453,
-        chainName: "Base",
-        latestSafeBlock: {
-          number: 333,
-          timestamp: 1501,
-          get date() {
-            return fromUnixTime(1501);
-          },
-        },
-        firstBlockToIndex: {
-          number: 222,
-          timestamp: 1111,
-          get date() {
-            return fromUnixTime(1111);
-          },
-        },
-        lastIndexedBlock: null,
-        lastSyncedBlock: {
-          number: 272,
-          timestamp: 1247,
-          get date() {
-            return fromUnixTime(1247);
-          },
-        },
-        phases: [
-          {
-            state: "queued",
-            startDate: fromUnixTime(1000),
-            endDate: fromUnixTime(1111),
-          },
-          {
-            state: "indexing",
-            startDate: fromUnixTime(1111),
-            endDate: fromUnixTime(1501),
-          },
-        ],
-        blockExplorerURL: "https://basescan.org",
       } satisfies ChainStatusViewModel);
     });
   });

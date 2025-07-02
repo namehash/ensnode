@@ -11,12 +11,12 @@ import {
   optimism,
   sepolia,
 } from "viem/chains";
-import { BaseIcon } from "./BaseIcon";
-import { EthereumIcon } from "./EthereumIcon";
-import { EthereumLocalIcon } from "./EthereumLocalIcon";
-import { EthereumTestnetIcon } from "./EthereumTestnetIcon";
-import { LineaIcon } from "./LineaIcon";
-import { OptimismIcon } from "./OptimismIcon";
+import { BaseIcon } from "../icons/BaseIcon";
+import { EthereumIcon } from "../icons/EthereumIcon";
+import { EthereumLocalIcon } from "../icons/EthereumLocalIcon";
+import { EthereumTestnetIcon } from "../icons/EthereumTestnetIcon";
+import { LineaIcon } from "../icons/LineaIcon";
+import { OptimismIcon } from "../icons/OptimismIcon";
 
 export interface ChainIconProps {
   chainId: number;
@@ -42,7 +42,6 @@ const chainIcons = new Map<number, React.ReactNode>([
  * Renders an icon based on the provided chain ID.
  */
 export function ChainIcon({ chainId }: ChainIconProps) {
-  // TODO: decide on using Map object vs. switch case (dependent on developement plans)
   if (!chainIcons.has(chainId)) {
     return <></>;
     //TODO: decide what to do with unknown chain IDs

@@ -26,7 +26,6 @@ export interface ChainStatusViewModel {
   lastSyncedBlock: BlockInfoViewModel | null;
   latestSafeBlock: BlockInfoViewModel;
   phases: Array<ChainIndexingPhaseViewModel>;
-  blockExplorerURL?: string;
 }
 
 /**
@@ -47,24 +46,24 @@ export interface GlobalIndexingStatusViewModel {
  * View model for the global indexing status. Includes chain status view models.
  *
  * @param chainIndexingStatuses
+ * @param namespaceId ENS namespace identifier
  * @returns
  */
 export function globalIndexingStatusViewModel(
   chainIndexingStatuses: Record<number, EnsNode.ChainIndexingStatus>,
-  namespace: ENSNamespaceId,
+  namespaceId: ENSNamespaceId,
 ): GlobalIndexingStatusViewModel {
   const indexingStartDatesAcrossChains = Object.values(chainIndexingStatuses).map(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossChains);
-  const getChainName = (chainId: number) => getChainById(namespace, chainId).name;
+  const getChainName = (chainId: number) => getChainById(namespaceId, chainId).name;
 
   const chainStatusesViewModel = Object.values(chainIndexingStatuses).map((chainIndexingStatus) =>
     chainIndexingStatusViewModel(
       getChainName(chainIndexingStatus.chainId),
       chainIndexingStatus,
       firstBlockToIndexGloballyTimestamp,
-        chain.blockExplorers && chain.blockExplorers.default.url,
     ),
   ) satisfies Array<ChainStatusViewModel>;
 
@@ -129,7 +128,6 @@ export function chainIndexingStatusViewModel(
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,
     lastSyncedBlock: lastSyncedBlock ? blockViewModel(lastSyncedBlock) : null,
     phases,
-      ...(chainsBlockExplorerURL && { blockExplorerURL: chainsBlockExplorerURL }),
   } satisfies ChainStatusViewModel;
 }
 

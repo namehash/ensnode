@@ -24,12 +24,25 @@ export function FormattedDate({
 /**
  * Client-only relative time component
  */
-export function RelativeTime({ date }: { date: Date }) {
+export function RelativeTime({
+  date,
+  enforcePast = false,
+  includeSeconds = false,
+  conciseFormatting = false,
+}: { date: Date; enforcePast?: boolean; includeSeconds?: boolean; conciseFormatting?: boolean }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
-    setRelativeTime(formatDistanceToNow(date, { addSuffix: true }));
+    setRelativeTime(formatDistanceToNow(date, { addSuffix: true, includeSeconds: includeSeconds }));
   }, [date]);
+
+  if (enforcePast && date.getTime() >= Date.now()) {
+    return <>just now</>;
+  }
+
+  if (conciseFormatting) {
+    return <>{relativeTime.replace("less than ", "").replace("a minute", "1 minute")}</>;
+  }
 
   return <>{relativeTime}</>;
 }
