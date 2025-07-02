@@ -21,7 +21,7 @@ export interface BlockInfo {
 }
 
 /**
- * Chain indexing status for a chain.
+ * Indexing status for a chain.
  */
 export interface ChainIndexingStatus {
   /** Chain ID of the indexed chain */
