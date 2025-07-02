@@ -21,7 +21,7 @@ describe("lib-resolution", () => {
     it("should return name record when requested", () => {
       const selection: ResolverRecordsSelection = { name: true };
       const result = makeRecordsResponseFromIndexedRecords(selection, mockRecords);
-      expect(result).toEqual({ name: { name: "test.eth" } });
+      expect(result).toEqual({ name: "test.eth" });
     });
 
     it("should return address records when requested", () => {
@@ -70,7 +70,7 @@ describe("lib-resolution", () => {
       };
       const result = makeRecordsResponseFromIndexedRecords(selection, mockRecords);
       expect(result).toEqual({
-        name: { name: "test.eth" },
+        name: "test.eth",
         addresses: {
           60: "0x123",
         },
