@@ -286,7 +286,7 @@ export function chainConnectionConfig(rpcConfigs: ENSIndexerConfig["rpcConfigs"]
 
   if (!chainRpcConfig) {
     throw new Error(
-      `buildPonderChainConfig called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,
+      `chainConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,
     );
   }
 
