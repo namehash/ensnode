@@ -1,11 +1,12 @@
 import type { Event } from "ponder:registry";
-import { PublicClient } from "viem";
+import { http, PublicClient } from "viem";
 
-import config from "@/config";
+import { ENSIndexerConfig, RpcConfig } from "@/config/types";
 import { Blockrange } from "@/lib/types";
-import { ENSDeployments } from "@ensnode/ens-deployments";
+import { ContractConfig } from "@ensnode/datasources";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
+import type { NetworkConfig } from "ponder";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -14,17 +15,18 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 /**
  * Given a contract's start block, returns a block range describing a start and end block
  * that maintains validity within the global blockrange. The returned start block will always be
- * defined, but if no end block is specified, the returned end block will be undefined, indicating
- * that ponder should index the contract in perpetuity.
+ * defined, but if no end block is specified, the returned end block will be undefined.
  *
+ * @param blockrange a Blockrange
  * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
  * @returns the start and end blocks, contrained to the provided `start` and `end`
  *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
  */
-export const constrainContractBlockrange = (
+export const constrainBlockrange = (
+  blockrange: Blockrange,
   contractStartBlock: number | undefined = 0,
 ): Blockrange => {
-  const { startBlock, endBlock } = config.globalBlockrange;
+  const { startBlock, endBlock } = blockrange;
 
   const isEndConstrained = endBlock !== undefined;
   const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
@@ -40,10 +42,10 @@ export const constrainContractBlockrange = (
  *
  * @returns A function that fetches ENSRainbow version information
  */
-export const createEnsRainbowVersionFetcher = () => {
-  const client = new EnsRainbowApiClient({
-    endpointUrl: new URL(config.ensRainbowEndpointUrl),
-  });
+export const createEnsRainbowVersionFetcher = (
+  endpointUrl: ENSIndexerConfig["ensRainbowEndpointUrl"],
+) => {
+  const client = new EnsRainbowApiClient({ endpointUrl: new URL(endpointUrl) });
 
   return async () => {
     try {
@@ -60,15 +62,6 @@ export const createEnsRainbowVersionFetcher = () => {
       };
     }
   };
-};
-
-/**
- * Get the ENSDeployment chain ID.
- *
- * @returns the ENSDeployment chain ID
- */
-export const getEnsDeploymentChainId = (): number => {
-  return ENSDeployments[config.ensDeploymentChain].root.chain.id;
 };
 
 /**
@@ -238,4 +231,62 @@ export async function createStartBlockByChainIdMap(
   }
 
   return startBlockNumbers;
+}
+
+/**
+/**
+ * Builds a ponder#NetworksConfig for a single, specific chain in the context of the ENSIndexerConfig.
+ *
+ * @param rpcConfigs - The RPC configuration object from ENSIndexerConfig, keyed by chain ID.
+ * @param chainId - The numeric chain ID for which to build the network config.
+ * @returns a ponder#NetworksConfig
+ */
+export function networksConfigForChain(
+  rpcConfigs: ENSIndexerConfig["rpcConfigs"],
+  chainId: number,
+) {
+  if (!rpcConfigs[chainId]) {
+    throw new Error(
+      `networksConfigForChain called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,
+    );
+  }
+
+  const { url, maxRequestsPerSecond } = rpcConfigs[chainId]!;
+
+  return {
+    [chainId.toString()]: {
+      chainId: chainId,
+      transport: http(url),
+      maxRequestsPerSecond,
+      // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
+      ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
+    } satisfies NetworkConfig,
+  };
+}
+
+/**
+ * Builds a `ponder#ContractConfig['network']` given a contract's config, constraining the contract's
+ * indexing range by the globally configured blockrange.
+ *
+ * @param {Blockrange} globalBlockrange
+ * @param {number} chainId
+ * @param {ContractConfig} contractConfig
+ *
+ * @returns network configuration based on the contract
+ */
+export function networkConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
+  globalBlockrange: Blockrange,
+  chainId: number,
+  contractConfig: CONTRACT_CONFIG,
+) {
+  // Ponder will index the contract in perpetuity if endBlock is `undefined`
+  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractConfig.startBlock);
+
+  return {
+    [chainId.toString()]: {
+      address: contractConfig.address, // provide per-network address if available
+      startBlock,
+      endBlock,
+    },
+  };
 }

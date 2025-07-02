@@ -1,7 +1,7 @@
 import {
   DEFAULT_ENSADMIN_URL,
-  DEFAULT_ENS_DEPLOYMENT_CHAIN,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
+  DEFAULT_NAMESPACE,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -13,11 +13,11 @@ const BASE_ENV = {
   ENSNODE_PUBLIC_URL: "http://localhost:42069",
   ENSADMIN_URL: "https://admin.ensnode.io",
   DATABASE_SCHEMA: "ensnode",
-  ACTIVE_PLUGINS: "subgraph",
+  PLUGINS: "subgraph",
   HEAL_REVERSE_ADDRESSES: "true",
   PORT: "3000",
   ENSRAINBOW_URL: "https://api.ensrainbow.io",
-  ENS_DEPLOYMENT_CHAIN: "mainnet",
+  NAMESPACE: "mainnet",
   RPC_URL_1: VALID_RPC_URL,
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
 };
@@ -40,7 +40,7 @@ describe("config", () => {
   describe("general behavior", () => {
     it("returns a valid config object using environment variables", async () => {
       const config = await getConfig();
-      expect(config.ensDeploymentChain).toBe("mainnet");
+      expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual({ startBlock: undefined, endBlock: undefined });
       expect(config.ensNodePublicUrl).toBe("http://localhost:42069");
       expect(config.ensAdminUrl).toBe("https://admin.ensnode.io");
@@ -287,72 +287,72 @@ describe("config", () => {
     });
   });
 
-  describe(".ensDeploymentChain", () => {
-    it("returns the ENS_DEPLOYMENT_CHAIN if set", async () => {
-      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "sepolia");
+  describe(".namespace", () => {
+    it("returns the NAMESPACE if set", async () => {
+      vi.stubEnv("NAMESPACE", "sepolia");
       vi.stubEnv("RPC_URL_11155111", VALID_RPC_URL);
       const config = await getConfig();
-      expect(config.ensDeploymentChain).toBe("sepolia");
+      expect(config.namespace).toBe("sepolia");
     });
 
-    it("returns the default ENS_DEPLOYMENT_CHAIN if it is not set", async () => {
-      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", undefined);
+    it("returns the default NAMESPACE if it is not set", async () => {
+      vi.stubEnv("NAMESPACE", undefined);
       const config = await getConfig();
-      expect(config.ensDeploymentChain).toBe(DEFAULT_ENS_DEPLOYMENT_CHAIN);
+      expect(config.namespace).toBe(DEFAULT_NAMESPACE);
     });
 
-    it("throws if ENS_DEPLOYMENT_CHAIN is an invalid string value", async () => {
-      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "not-a-chain");
-      await expect(getConfig()).rejects.toThrow(/Invalid ENS_DEPLOYMENT_CHAIN/i);
+    it("throws if NAMESPACE is an invalid string value", async () => {
+      vi.stubEnv("NAMESPACE", "not-a-chain");
+      await expect(getConfig()).rejects.toThrow(/Invalid NAMESPACE/i);
     });
   });
 
   describe(".plugins", () => {
-    it("returns the ACTIVE_PLUGINS if it is a valid array", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
+    it("returns the PLUGINS if it is a valid array", async () => {
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       const config = await getConfig();
       expect(config.plugins).toEqual(["subgraph", "basenames"]);
     });
 
     it("returns a single plugin if only one is provided", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "basenames");
+      vi.stubEnv("PLUGINS", "basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       const config = await getConfig();
       expect(config.plugins).toEqual(["basenames"]);
     });
 
-    it("throws if ACTIVE_PLUGINS is an empty string", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "");
+    it("throws if PLUGINS is an empty string", async () => {
+      vi.stubEnv("PLUGINS", "");
       await expect(getConfig()).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
-    it("throws if ACTIVE_PLUGINS consists only of commas or whitespace", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", " ,,  ,");
+    it("throws if PLUGINS consists only of commas or whitespace", async () => {
+      vi.stubEnv("PLUGINS", " ,,  ,");
       await expect(getConfig()).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
-    it("throws if ACTIVE_PLUGINS consists of non-existent plugins", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "some,nonexistent,plugins");
+    it("throws if PLUGINS consists of non-existent plugins", async () => {
+      vi.stubEnv("PLUGINS", "some,nonexistent,plugins");
       await expect(getConfig()).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
-    it("throws if ACTIVE_PLUGINS is not set (undefined)", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", undefined);
+    it("throws if PLUGINS is not set (undefined)", async () => {
+      vi.stubEnv("PLUGINS", undefined);
       await expect(getConfig()).rejects.toThrow(
-        /ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name/i,
+        /PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
     });
 
-    it("throws if ACTIVE_PLUGINS contains duplicate values", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames,subgraph");
-      await expect(getConfig()).rejects.toThrow(/ACTIVE_PLUGINS cannot contain duplicate values/i);
+    it("throws if PLUGINS contains duplicate values", async () => {
+      vi.stubEnv("PLUGINS", "subgraph,basenames,subgraph");
+      await expect(getConfig()).rejects.toThrow(/PLUGINS cannot contain duplicate values/i);
     });
   });
 
@@ -453,7 +453,7 @@ describe("config", () => {
   describe("isSubgraphCompatible", () => {
     // start in subgraph-compatible state
     beforeEach(() => {
-      vi.stubEnv("ACTIVE_PLUGINS", "subgraph");
+      vi.stubEnv("PLUGINS", "subgraph");
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
       vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
     });
@@ -463,15 +463,15 @@ describe("config", () => {
       expect(config.isSubgraphCompatible).toBe(true);
     });
 
-    it("is false when ACTIVE_PLUGINS does not include subgraph", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "basenames");
+    it("is false when PLUGINS does not include subgraph", async () => {
+      vi.stubEnv("PLUGINS", "basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       const config = await getConfig();
       expect(config.isSubgraphCompatible).toBe(false);
     });
 
-    it("is false when ACTIVE_PLUGINS includes subgraph along with other plugins", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
+    it("is false when PLUGINS includes subgraph along with other plugins", async () => {
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       const config = await getConfig();
       expect(config.isSubgraphCompatible).toBe(false);
@@ -486,18 +486,18 @@ describe("config", () => {
 
   describe("additional checks", () => {
     it("requires available datasources", async () => {
-      vi.stubEnv("ENS_DEPLOYMENT_CHAIN", "ens-test-env");
-      vi.stubEnv("ACTIVE_PLUGINS", "basenames");
+      vi.stubEnv("NAMESPACE", "ens-test-env");
+      vi.stubEnv("PLUGINS", "basenames");
       await expect(getConfig()).rejects.toThrow(/specifies dependent datasources/i);
     });
 
     it("requires rpc url for indexed chains", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
       await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+ is not specified/i);
     });
 
     it("cannot constrain blockrange with multiple networks", async () => {
-      vi.stubEnv("ACTIVE_PLUGINS", "subgraph,basenames");
+      vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       vi.stubEnv("END_BLOCK", "1");
       await expect(getConfig()).rejects.toThrow(/multiple networks/i);

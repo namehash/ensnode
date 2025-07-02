@@ -640,7 +640,7 @@ export function buildGraphQLSchema({
     resolve: async (_source, _args) => {
       try {
         const [lastIndexedBlock, hasIndexingErrors, ponderBuildId] = await Promise.all([
-          metadataProvider.getLastIndexedDeploymentChainBlock(),
+          metadataProvider.getLastIndexedENSRootChainBlock(),
           metadataProvider.hasIndexingErrors(),
           metadataProvider.getPonderBuildId(),
         ]);
@@ -1078,32 +1078,30 @@ function getIntersectionTableSchema(
   // NOTE: it's important that this table's dbName is intersection_table, as that is what the
   //   UNION ALL subquery is aliased to later
   // TODO: can we use drizzle's .with or something to avoid the magic string?
-  const intersectionTable = pgTable("intersection_table", (t) => {
-    function getColumnBuilder(column: Column) {
+  const intersectionTable = pgTable("intersection_table", (t) =>
+    commonColumnNames.reduce<Record<string, PgColumnBuilderBase>>((memo, columnName) => {
+      const column = baseColumns[columnName]!;
       const sqlType = column.getSQLType();
+      const snakeCaseColumnName = toSnakeCase(column.name);
 
-      // special case for bigint which returns "numeric(78)"
-      if (sqlType === "numeric(78)") {
-        return t.numeric({ precision: 78 });
-      }
-
-      // handle standard types, removing any parameters from the SQLType
-      // @ts-expect-error we know it is a valid key now
-      const built = t[sqlType.split("(")[0]]();
+      let newColumn: any =
+        sqlType === "numeric(78)"
+          ? // special case for bigint whose sqltype is "numeric(78)"
+            t.numeric(snakeCaseColumnName, { precision: 78 })
+          : // handle standard types, removing any parameters from the SQLType
+            // @ts-expect-error we know the key is valid and this is callable
+            t[sqlType.split("(")[0]! as keyof typeof t](snakeCaseColumnName);
 
       // include .primaryKey if necessary
-      return column.primary ? built.primaryKey() : built;
-    }
+      newColumn = column.primary ? newColumn.primaryKey() : newColumn;
 
-    const columnMap: Record<string, PgColumnBuilderBase> = {};
+      // include notNull
+      newColumn = newColumn.notNull(column.notNull);
 
-    for (const columnName of commonColumnNames) {
-      const baseColumn = baseColumns[columnName]!;
-      columnMap[columnName] = getColumnBuilder(baseColumn).notNull(baseColumn.notNull);
-    }
-
-    return columnMap;
-  });
+      memo[columnName] = newColumn;
+      return memo;
+    }, {}),
+  );
 
   // define the relationships for this table by cloning the common relationships
   const intersectionTableRelations = relations(intersectionTable, ({ one }) =>
@@ -1153,13 +1151,12 @@ function buildUnionAllQuery(
     // build select object with nulls for missing columns, manually casting them to the correct type
     const selectAllColumnsIncludingNulls = allColumnNames.reduce((memo, columnName) => {
       const column = allColumns[columnName]!;
-      const dbColumnName = table.columns[columnName]
-        ? toSnakeCase(table.columns[columnName].name)
-        : "NULL";
+      const snakeCaseColumnName = toSnakeCase(column.name);
+      const dbColumnName = table.columns[columnName] ? snakeCaseColumnName : "NULL";
 
       return {
         ...memo,
-        [columnName]: sql.raw(`${dbColumnName}::${column.getSQLType()}`).as(column.name),
+        [columnName]: sql.raw(`${dbColumnName}::${column.getSQLType()}`).as(snakeCaseColumnName),
       };
     }, {});
 

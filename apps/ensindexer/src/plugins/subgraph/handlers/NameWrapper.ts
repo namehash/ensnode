@@ -1,10 +1,15 @@
 import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
+/**
+ * Registers event handlers with Ponder.
+ */
+export function attachSubgraphNameWrapperEventHandlers() {
+  const pluginName = PluginName.Subgraph;
+
   const {
     handleExpiryExtended,
     handleFusesSet,
@@ -17,10 +22,10 @@ export default function ({ namespace }: ENSIndexerPluginHandlerArgs<PluginName.S
     registrarManagedName: "eth",
   });
 
-  ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);
-  ponder.on(namespace("NameWrapper:NameUnwrapped"), handleNameUnwrapped);
-  ponder.on(namespace("NameWrapper:FusesSet"), handleFusesSet);
-  ponder.on(namespace("NameWrapper:ExpiryExtended"), handleExpiryExtended);
-  ponder.on(namespace("NameWrapper:TransferSingle"), handleTransferSingle);
-  ponder.on(namespace("NameWrapper:TransferBatch"), handleTransferBatch);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:FusesSet"), handleFusesSet);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:ExpiryExtended"), handleExpiryExtended);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferSingle"), handleTransferSingle);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferBatch"), handleTransferBatch);
 }

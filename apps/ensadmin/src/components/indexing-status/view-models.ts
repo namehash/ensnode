@@ -1,6 +1,6 @@
 import type { EnsNode } from "@/components/ensnode";
 import { getChainById } from "@/lib/chains";
-import { type ENSDeploymentChain } from "@ensnode/ens-deployments";
+import { type ENSNamespaceId } from "@ensnode/datasources";
 import { fromUnixTime } from "date-fns";
 /**
  * Basic information about a block and its date.
@@ -9,76 +9,71 @@ export interface BlockInfoViewModel extends EnsNode.BlockInfo {
   get date(): Date;
 }
 
-export interface NetworkIndexingPhaseViewModel {
+export interface ChainIndexingPhaseViewModel {
   state: "queued" | "indexing";
   startDate: Date;
   endDate: Date;
 }
 
 /**
- * Network status view model, includes indexing phases.
+ * Chain status view model, includes indexing phases.
  */
-export interface NetworkStatusViewModel {
-  id: number;
-  name: string;
+export interface ChainStatusViewModel {
+  chainId: number;
+  chainName: string;
   firstBlockToIndex: BlockInfoViewModel;
   lastIndexedBlock: BlockInfoViewModel | null;
   lastSyncedBlock: BlockInfoViewModel | null;
   latestSafeBlock: BlockInfoViewModel;
-  phases: Array<NetworkIndexingPhaseViewModel>;
+  phases: Array<ChainIndexingPhaseViewModel>;
   blockExplorerURL?: string;
 }
 
 /**
- * Global indexing status view model, includes network status view models.
+ * Global indexing status view model, includes chain status view models.
  */
 export interface GlobalIndexingStatusViewModel {
-  /** list of network status view models */
-  networkStatuses: Array<NetworkStatusViewModel>;
+  /** list of chain status view models */
+  chainStatuses: Array<ChainStatusViewModel>;
 
   /** indexing starts at */
   indexingStartsAt: Date;
 
-  /** latest indexed block date across all networks */
+  /** latest indexed block date across all chains */
   currentIndexingDate: Date | null;
 }
 
 /**
- * View model for the global indexing status. Includes network status view models.
+ * View model for the global indexing status. Includes chain status view models.
  *
- * @param networkIndexingStatus
+ * @param chainIndexingStatuses
  * @returns
  */
 export function globalIndexingStatusViewModel(
-  networkIndexingStatus: Record<number, EnsNode.NetworkIndexingStatus>,
-  ensDeploymentChain: ENSDeploymentChain,
+  chainIndexingStatuses: Record<number, EnsNode.ChainIndexingStatus>,
+  namespace: ENSNamespaceId,
 ): GlobalIndexingStatusViewModel {
-  const indexingStartDatesAcrossNetworks = Object.values(networkIndexingStatus).map(
+  const indexingStartDatesAcrossChains = Object.values(chainIndexingStatuses).map(
     (status) => status.firstBlockToIndex.timestamp,
   );
-  const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossNetworks);
+  const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossChains);
+  const getChainName = (chainId: number) => getChainById(namespace, chainId).name;
 
-  const networkStatusesViewModel = Object.entries(networkIndexingStatus).map(
-    ([chainId, networkIndexingStatus]) => {
-      const chainIdAsNumber = parseInt(chainId, 10);
-      const chain = getChainById(ensDeploymentChain, chainIdAsNumber);
-
-      return networkIndexingStatusViewModel(
-        chainIdAsNumber,
-        chain.name,
-        networkIndexingStatus,
-        firstBlockToIndexGloballyTimestamp,
+  const chainStatusesViewModel = Object.values(chainIndexingStatuses).map((chainIndexingStatus) =>
+    chainIndexingStatusViewModel(
+      getChainName(chainIndexingStatus.chainId),
+      chainIndexingStatus,
+      firstBlockToIndexGloballyTimestamp,
         chain.blockExplorers && chain.blockExplorers.default.url,
-      );
-    },
-  ) satisfies Array<NetworkStatusViewModel>;
+    ),
+  ) satisfies Array<ChainStatusViewModel>;
 
-  // Sort the network statuses by the first block to index timestamp
-  networkStatusesViewModel.sort(
+  // Sort the chain statuses by the first block to index timestamp
+  chainStatusesViewModel.sort(
     (a, b) => a.firstBlockToIndex.timestamp - b.firstBlockToIndex.timestamp,
   );
 
-  const lastIndexedBlockDates = networkStatusesViewModel
+  const lastIndexedBlockDates = chainStatusesViewModel
     .filter((n) => Boolean(n.lastIndexedBlock))
     .map((n) => n.lastIndexedBlock!.timestamp);
 
@@ -86,31 +81,31 @@ export function globalIndexingStatusViewModel(
     lastIndexedBlockDates.length > 0 ? fromUnixTime(Math.max(...lastIndexedBlockDates)) : null;
 
   return {
-    networkStatuses: networkStatusesViewModel,
+    chainStatuses: chainStatusesViewModel,
     indexingStartsAt: fromUnixTime(firstBlockToIndexGloballyTimestamp),
     currentIndexingDate,
   };
 }
 
 /**
- * View model for the network indexing status.
- * @param chainId
+ * View model for the chain indexing status.
+ *
  * @param chainName
- * @param networkStatus
+ * @param chainStatus
  * @param firstBlockToIndexGloballyTimestamp
  * @param chainsBlockExplorerURL - optional - URL to chain's default block explorer if such is available
  * @returns
  */
-export function networkIndexingStatusViewModel(
-  chainId: number,
+export function chainIndexingStatusViewModel(
   chainName: string,
-  networkStatus: EnsNode.NetworkIndexingStatus,
+  chainStatus: EnsNode.ChainIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
   chainsBlockExplorerURL?: string,
-): NetworkStatusViewModel {
-  const phases: NetworkStatusViewModel["phases"] = [];
+): ChainStatusViewModel {
+  const phases: ChainStatusViewModel["phases"] = [];
 
-  const { lastIndexedBlock, lastSyncedBlock, latestSafeBlock, firstBlockToIndex } = networkStatus;
+  const { lastIndexedBlock, lastSyncedBlock, latestSafeBlock, firstBlockToIndex, chainId } =
+    chainStatus;
 
   if (firstBlockToIndex.timestamp > firstBlockToIndexGloballyTimestamp) {
     phases.push({
@@ -127,15 +122,15 @@ export function networkIndexingStatusViewModel(
   });
 
   return {
-    id: chainId,
-    name: chainName,
+    chainId,
+    chainName,
     latestSafeBlock: blockViewModel(latestSafeBlock),
     firstBlockToIndex: blockViewModel(firstBlockToIndex),
     lastIndexedBlock: lastIndexedBlock ? blockViewModel(lastIndexedBlock) : null,
     lastSyncedBlock: lastSyncedBlock ? blockViewModel(lastSyncedBlock) : null,
     phases,
-    ...(chainsBlockExplorerURL && { blockExplorerURL: chainsBlockExplorerURL }),
-  } satisfies NetworkStatusViewModel;
+      ...(chainsBlockExplorerURL && { blockExplorerURL: chainsBlockExplorerURL }),
+  } satisfies ChainStatusViewModel;
 }
 
 /**
@@ -162,8 +157,8 @@ export function ensNodeDepsViewModel(deps: EnsNode.Metadata["deps"]) {
 
 export function ensNodeEnvViewModel(env: EnsNode.Metadata["env"]) {
   return [
-    { label: "Active Plugins", value: env.ACTIVE_PLUGINS },
-    { label: "ENS Deployment Chain", value: env.ENS_DEPLOYMENT_CHAIN },
+    { label: "Active Plugins", value: env.PLUGINS },
+    { label: "ENS Namespace", value: env.NAMESPACE },
     { label: "Database Schema", value: env.DATABASE_SCHEMA },
   ] as const;
 }

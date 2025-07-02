@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
@@ -13,10 +13,12 @@ import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
  */
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
-export default function ({
-  pluginName,
-  namespace,
-}: ENSIndexerPluginHandlerArgs<PluginName.Subgraph>) {
+/**
+ * Registers event handlers with Ponder.
+ */
+export function attachSubgraphRegistrarEventHandlers() {
+  const pluginName = PluginName.Subgraph;
+
   const {
     handleNameRegistered,
     handleNameRegisteredByController,
@@ -29,33 +31,39 @@ export default function ({
     registrarManagedName: "eth",
   });
 
-  ponder.on(namespace("BaseRegistrar:NameRegistered"), async ({ context, event }) => {
-    await handleNameRegistered({
-      context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
+  ponder.on(
+    namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
+    async ({ context, event }) => {
+      await handleNameRegistered({
+        context,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            labelHash: tokenIdToLabelHash(event.args.id),
+          },
         },
-      },
-    });
-  });
+      });
+    },
+  );
 
-  ponder.on(namespace("BaseRegistrar:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewed({
-      context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          labelHash: tokenIdToLabelHash(event.args.id),
+  ponder.on(
+    namespaceContract(pluginName, "BaseRegistrar:NameRenewed"),
+    async ({ context, event }) => {
+      await handleNameRenewed({
+        context,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            labelHash: tokenIdToLabelHash(event.args.id),
+          },
         },
-      },
-    });
-  });
+      });
+    },
+  );
 
-  ponder.on(namespace("BaseRegistrar:Transfer"), async ({ context, event }) => {
+  ponder.on(namespaceContract(pluginName, "BaseRegistrar:Transfer"), async ({ context, event }) => {
     const { tokenId, from, to } = event.args;
     await handleNameTransferred({
       context,
@@ -70,31 +78,43 @@ export default function ({
     });
   });
 
-  ponder.on(namespace("EthRegistrarControllerOld:NameRegistered"), async ({ context, event }) => {
-    // the old registrar controller just had `cost` param
-    await handleNameRegisteredByController({ context, event });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "EthRegistrarControllerOld:NameRegistered"),
+    async ({ context, event }) => {
+      // the old registrar controller just had `cost` param
+      await handleNameRegisteredByController({ context, event });
+    },
+  );
 
-  ponder.on(namespace("EthRegistrarControllerOld:NameRenewed"), async ({ context, event }) => {
-    // the old registrar controller just had `cost` param
-    await handleNameRenewedByController({ context, event });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "EthRegistrarControllerOld:NameRenewed"),
+    async ({ context, event }) => {
+      // the old registrar controller just had `cost` param
+      await handleNameRenewedByController({ context, event });
+    },
+  );
 
-  ponder.on(namespace("EthRegistrarController:NameRegistered"), async ({ context, event }) => {
-    await handleNameRegisteredByController({
-      context,
-      event: {
-        ...event,
-        args: {
-          ...event.args,
-          // the new registrar controller uses baseCost + premium to compute cost
-          cost: event.args.baseCost + event.args.premium,
+  ponder.on(
+    namespaceContract(pluginName, "EthRegistrarController:NameRegistered"),
+    async ({ context, event }) => {
+      await handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            // the new registrar controller uses baseCost + premium to compute cost
+            cost: event.args.baseCost + event.args.premium,
+          },
         },
-      },
-    });
-  });
+      });
+    },
+  );
 
-  ponder.on(namespace("EthRegistrarController:NameRenewed"), async ({ context, event }) => {
-    await handleNameRenewedByController({ context, event });
-  });
+  ponder.on(
+    namespaceContract(pluginName, "EthRegistrarController:NameRenewed"),
+    async ({ context, event }) => {
+      await handleNameRenewedByController({ context, event });
+    },
+  );
 }

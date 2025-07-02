@@ -13,10 +13,14 @@ on:
 
 jobs:
   switch-environment:
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    # NOTE: this needs to run on GH runner because of some obscure skopeo permissions thing
+    runs-on: ubuntu-latest
+    name: Switch Environment to ${{ inputs.target }}
     env:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       REDIS_URL: ${{ secrets.TRAEFIK_REDIS_URL }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -24,19 +28,29 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Print switch target
+      - name: Calculate env variables
         run: |
-          echo "Switching to: $TARGET_ENVIRONMENT"
+          case "$TARGET_ENVIRONMENT" in
+            "green")
+              echo "SLACK_TITLE=:large_green_circle: GREEN Environment Activated" >> "$GITHUB_ENV"
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.GREEN_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+              ;;
+            "blue")
+              echo "SLACK_TITLE=:large_blue_circle: BLUE Environment Activated" >> "$GITHUB_ENV"
+              echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "SLACK_TITLE=:large_red_circle: Unrecognized Environment Activated" >> "$GITHUB_ENV"
+          esac
 
-      - name: Install redis-cli
+      - name: Promote ENSAdmin Vercel Deployment
+        run: |
+          chmod +x ./.github/scripts/promote_ensadmin.sh
+          ./.github/scripts/promote_ensadmin.sh
+
+      - name: Switch Traefik Routing
         run: |
           sudo apt install redis-tools
-
-      - name: Switch Traefik routers
-        run: |
-          # SEPOLIA
-          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
-          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
 
           # ALPHA
           redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-api-router/service "${TARGET_ENVIRONMENT}-alpha-api"
@@ -46,6 +60,14 @@ jobs:
           redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-api-router/service "${TARGET_ENVIRONMENT}-mainnet-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/mainnet-indexer-router/service "${TARGET_ENVIRONMENT}-mainnet-indexer"
 
+          # ALPHA-SEPOLIA
+          redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-sepolia-api-router/service "${TARGET_ENVIRONMENT}-alpha-sepolia-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-alpha-sepolia-indexer"
+
+          # SEPOLIA
+          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
+
           # HOLESKY
           redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-api-router/service "${TARGET_ENVIRONMENT}-holesky-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/holesky-indexer-router/service "${TARGET_ENVIRONMENT}-holesky-indexer"
@@ -53,20 +75,8 @@ jobs:
           # ENSRAINBOW
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
 
-      - name: Calculate env variables
-        run: |
-          case "$TARGET_ENVIRONMENT" in
-            "green")
-              echo "SLACK_TITLE=':large_green_circle: GREEN environment activated" >> "$GITHUB_ENV"
-              ;;
-            "blue")
-              echo "SLACK_TITLE=':large_blue_circle: BLUE environment activated" >> "$GITHUB_ENV"
-              ;;
-            *)
-              echo "SLACK_TITLE=':large_red_circle: Unrecognized environment activated" >> "$GITHUB_ENV"
-          esac
-
-      - uses: ./.github/actions/send_slack_notification
+      - name: Send Slack Notification
+        uses: ./.github/actions/send_slack_notification
         with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: ${{ env.SLACK_TITLE }}

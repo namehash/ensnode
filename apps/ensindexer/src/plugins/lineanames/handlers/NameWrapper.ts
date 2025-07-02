@@ -2,14 +2,16 @@ import { ponder } from "ponder:registry";
 
 import config from "@/config";
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
-import { ENSIndexerPluginHandlerArgs } from "@/lib/plugin-helpers";
+import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
-export default function ({
-  pluginName,
-  namespace,
-}: ENSIndexerPluginHandlerArgs<PluginName.Lineanames>) {
+/**
+ * Registers event handlers with Ponder.
+ */
+export function attachLineanamesNameWrapperEventHandlers() {
+  const pluginName = PluginName.Lineanames;
+
   const {
     handleNameWrapped,
     handleNameUnwrapped,
@@ -20,13 +22,13 @@ export default function ({
   } = makeNameWrapperHandlers({
     // the shared Registrar handlers in this plugin index direct subnames of
     // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.ensDeploymentChain, pluginName),
+    registrarManagedName: getRegistrarManagedName(config.namespace),
   });
 
-  ponder.on(namespace("NameWrapper:NameWrapped"), handleNameWrapped);
-  ponder.on(namespace("NameWrapper:NameUnwrapped"), handleNameUnwrapped);
-  ponder.on(namespace("NameWrapper:FusesSet"), handleFusesSet);
-  ponder.on(namespace("NameWrapper:ExpiryExtended"), handleExpiryExtended);
-  ponder.on(namespace("NameWrapper:TransferSingle"), handleTransferSingle);
-  ponder.on(namespace("NameWrapper:TransferBatch"), handleTransferBatch);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:FusesSet"), handleFusesSet);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:ExpiryExtended"), handleExpiryExtended);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferSingle"), handleTransferSingle);
+  ponder.on(namespaceContract(pluginName, "NameWrapper:TransferBatch"), handleTransferBatch);
 }

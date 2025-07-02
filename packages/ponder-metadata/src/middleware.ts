@@ -9,7 +9,7 @@ import type {
   PonderMetadataMiddlewareOptions,
   PonderMetadataMiddlewareResponse,
 } from "./types/api";
-import type { BlockInfo, NetworkIndexingStatus, PonderBlockStatus } from "./types/common";
+import type { BlockInfo, ChainIndexingStatus, PonderBlockStatus } from "./types/common";
 
 /**
  * Ponder Metadata types definition.
@@ -37,8 +37,8 @@ interface PonderMetadataModule {
      **/
     codebaseBuildId: string;
 
-    /** Network indexing status by chain ID */
-    networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus>;
+    /** Chain indexing statuses by chain ID */
+    chainIndexingStatuses: { [chainId: number]: ChainIndexingStatus };
 
     /** ENSRainbow version info */
     ensRainbow?: EnsRainbow.VersionInfo;
@@ -67,7 +67,7 @@ export function ponderMetadata<
     const ponderStatus = await queryPonderStatus(env.DATABASE_SCHEMA, db);
     const metrics = PrometheusMetrics.parse(await query.prometheusMetrics());
 
-    const networkIndexingStatusByChainId: Record<number, NetworkIndexingStatus> = {};
+    const chainIndexingStatuses: Record<number, ChainIndexingStatus> = {};
 
     for (const indexedChainId of indexedChainIds) {
       const publicClient = publicClients[indexedChainId];
@@ -132,22 +132,23 @@ export function ponderMetadata<
       }
 
       // mapping ponder status for current network
-      const ponderStatusForNetwork = ponderStatus.find(
+      const ponderStatusForChain = ponderStatus.find(
         (ponderStatusEntry) => ponderStatusEntry.network_name === network,
       );
 
       // mapping last indexed block if available
       let lastIndexedBlock: BlockInfo | null = null;
-      if (ponderStatusForNetwork) {
-        lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForNetwork);
+      if (ponderStatusForChain) {
+        lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForChain);
       }
 
-      networkIndexingStatusByChainId[indexedChainId] = {
+      chainIndexingStatuses[indexedChainId] = {
+        chainId: indexedChainId,
         lastSyncedBlock,
         lastIndexedBlock,
         latestSafeBlock,
         firstBlockToIndex: await query.firstBlockToIndexByChainId(indexedChainId, publicClient),
-      } satisfies NetworkIndexingStatus;
+      } satisfies ChainIndexingStatus;
     }
 
     // mapping ponder app build id if available
@@ -177,7 +178,7 @@ export function ponderMetadata<
       env,
       runtime: {
         codebaseBuildId: formatTextMetricValue(ponderAppBuildId),
-        networkIndexingStatusByChainId,
+        chainIndexingStatuses,
         ensRainbow: ensRainbowVersionInfo,
       },
     } satisfies MetadataMiddlewareResponse;
@@ -196,17 +197,17 @@ export function ponderMetadata<
  * @throws {HTTPException} if the response is in an invalid state
  */
 function validateResponse(response: MetadataMiddlewareResponse): void {
-  const { networkIndexingStatusByChainId } = response.runtime;
+  const { chainIndexingStatuses } = response.runtime;
 
-  if (Object.keys(networkIndexingStatusByChainId).length === 0) {
+  if (Object.keys(chainIndexingStatuses).length === 0) {
     throw new HTTPException(500, {
-      message: "No network indexing status found",
+      message: "No chain indexing status found",
     });
   }
 
-  if (Object.values(networkIndexingStatusByChainId).some((n) => n.firstBlockToIndex === null)) {
+  if (Object.values(chainIndexingStatuses).some((n) => n.firstBlockToIndex === null)) {
     throw new HTTPException(500, {
-      message: "Failed to fetch first block to index for some networks",
+      message: "Failed to fetch first block to index for some chains",
     });
   }
 }

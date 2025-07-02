@@ -1,10 +1,10 @@
-import { uniq } from "@/lib/lib-helpers";
-import { DatasourceName } from "@ensnode/ens-deployments";
 import { PluginName } from "@ensnode/ensnode-sdk";
-import basenamesPlugin from "./basenames/basenames.plugin";
-import lineaNamesPlugin from "./lineanames/lineanames.plugin";
-import subgraphPlugin from "./subgraph/subgraph.plugin";
-import threednsPlugin from "./threedns/threedns.plugin";
+
+import type { MergedTypes } from "@/lib/lib-helpers";
+import basenamesPlugin from "./basenames/plugin";
+import lineaNamesPlugin from "./lineanames/plugin";
+import subgraphPlugin from "./subgraph/plugin";
+import threednsPlugin from "./threedns/plugin";
 
 export const ALL_PLUGINS = [
   subgraphPlugin,
@@ -13,14 +13,14 @@ export const ALL_PLUGINS = [
   threednsPlugin,
 ] as const;
 
-export type AllPluginsConfig = MergedTypes<
+/**
+ * Helper type representing the merged Ponder config of all possible ENSIndexerPlugins. This
+ * ensures that the inferred types of each Ponder config are available at compile-time to Ponder,
+ * which uses it to power type inference in event handlers.
+ */
+export type AllPluginsMergedConfig = MergedTypes<
   ReturnType<(typeof ALL_PLUGINS)[number]["createPonderConfig"]>
 >;
-
-// Helper type to merge multiple types into one
-type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
-  ? R
-  : never;
 
 /**
  * Get plugin object by plugin name.
@@ -28,24 +28,12 @@ type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer
  * @see {ALL_PLUGINS} list
  */
 export function getPlugin(pluginName: PluginName) {
-  const plugin = ALL_PLUGINS.find((plugin) => plugin.pluginName === pluginName);
+  const plugin = ALL_PLUGINS.find((plugin) => plugin.name === pluginName);
 
-  if (plugin) {
-    return plugin;
+  if (!plugin) {
+    // invariant: all plugins can be found by PluginName
+    throw new Error(`Plugin not found by "${pluginName}" name.`);
   }
 
-  // invariant: all plugins can be found by PluginName
-  throw new Error(`Plugin not found by "${pluginName} name"`);
-}
-
-/**
- * Get a list of unique required datasource names from selected plugins.
- * @param pluginNames A list of selected plugin names.
- * @returns A list of unique datasource names.
- */
-export function getRequiredDatasourceNames(pluginNames: PluginName[]): DatasourceName[] {
-  const plugins = pluginNames.map((pluginName) => getPlugin(pluginName));
-  const requiredDatasourceNames = plugins.flatMap((plugin) => plugin.requiredDatasources);
-
-  return uniq(requiredDatasourceNames);
+  return plugin;
 }

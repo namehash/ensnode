@@ -2,9 +2,9 @@ import { Address } from "viem";
 import { anvil } from "viem/chains";
 
 import { ResolverConfig } from "./lib/resolver";
-import { DatasourceName, type ENSDeployment } from "./lib/types";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
-// ABIs for Root Datasource
+// ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
@@ -17,13 +17,13 @@ const deploymentAddresses = getENSTestEnvDeploymentAddresses();
 const EMPTY_ADDRESS = "" as Address;
 
 /**
- * The ens-test-env ENSDeployment
+ * The ens-test-env ENSNamespace
  *
- * 'ens-test-env' represents an "ENS deployment" running on a local Anvil chain for development of
+ * 'ens-test-env' represents an ENS namespace running on a local Anvil chain for development of
  * ENS apps and running test suites against a deterministic deployment of the ENS protocol.
  * https://github.com/ensdomains/ens-test-env
  *
- * The 'ens-test-env' ENSDeployment is only relevant in the context of apps that use the ens-test-env
+ * These 'ens-test-env' Datasources are only relevant in the context of apps that use the ens-test-env
  * tool (i.e. ensjs and ens-app-v3) and it depends on the addresses of the contracts deployed by
  * that app (each app deploys the ENS protocol to slightly different addresses).
  *
@@ -32,18 +32,18 @@ const EMPTY_ADDRESS = "" as Address;
  * app and may change over time.
  *
  * If the addresses are not available in the environment, we use empty string as a mock to ensure
- * type-correctness: consumers of this ens-test-env deployment, if using outside of the context
+ * type-correctness: consumers of these ens-test-env Datasources, if using outside of the context
  * of the ens-test-env tool, should validate that an Address is provided, or they may experience
  * undefined runtime behavior.
  */
 export default {
   /**
-   * Root Datasource
+   * ENSRoot Datasource
    *
    * Addresses and Start Blocks from ens-test-env
    * https://github.com/ensdomains/ens-test-env/
    */
-  [DatasourceName.Root]: {
+  [DatasourceNames.ENSRoot]: {
     // ens-test-env runs on a local Anvil chain with id 1337
     chain: { ...anvil, id: 1337 },
     contracts: {
@@ -84,6 +84,6 @@ export default {
     },
   },
   /**
-   * The 'ens-test-env' ENSDeployment does not have a Basenames or Lineanames Datasource.
+   * The 'ens-test-env' ENS namespace does not have any other Datasources.
    */
-} satisfies ENSDeployment;
+} satisfies ENSNamespace;
