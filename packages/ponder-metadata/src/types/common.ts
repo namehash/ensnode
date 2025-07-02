@@ -21,9 +21,9 @@ export interface BlockInfo {
 }
 
 /**
- * Network indexing status for a chain.
+ * Chain indexing status for a chain.
  */
-export interface NetworkIndexingStatus {
+export interface ChainIndexingStatus {
   /**
    * First block required to be indexed during the historical sync.
    */

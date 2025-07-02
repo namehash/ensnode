@@ -3,13 +3,13 @@ import { fromUnixTime } from "date-fns";
 import { base, mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
 import {
+  type ChainStatusViewModel,
   type GlobalIndexingStatusViewModel,
-  type NetworkStatusViewModel,
   blockViewModel,
+  chainIndexingStatusViewModel,
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
   globalIndexingStatusViewModel,
-  networkIndexingStatusViewModel,
 } from "./view-models";
 
 describe("View Models", () => {
@@ -45,14 +45,15 @@ describe("View Models", () => {
 
   describe("globalIndexingStatusViewModel", () => {
     it("should return the correct view model", () => {
-      const ensNodeNetworkStatus = testEnsNodeNetworkStatus();
+      const ensNodeChainStatus = testEnsNodeChainStatus();
 
-      const mainnetStatus = ensNodeNetworkStatus[mainnet.id];
-      const baseStatus = ensNodeNetworkStatus[base.id];
+      const mainnetStatus = ensNodeChainStatus[mainnet.id];
+      const baseStatus = ensNodeChainStatus[base.id];
 
-      expect(globalIndexingStatusViewModel(ensNodeNetworkStatus, "mainnet")).toEqual({
-        networkStatuses: [
+      expect(globalIndexingStatusViewModel(ensNodeChainStatus, "mainnet")).toEqual({
+        chainStatuses: [
           {
+            id: 1,
             name: "Ethereum",
             latestSafeBlock: blockViewModel(mainnetStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(mainnetStatus.firstBlockToIndex),
@@ -67,6 +68,7 @@ describe("View Models", () => {
             ],
           },
           {
+            id: 8453,
             name: "Base",
             latestSafeBlock: blockViewModel(baseStatus.latestSafeBlock),
             firstBlockToIndex: blockViewModel(baseStatus.firstBlockToIndex),
@@ -92,10 +94,11 @@ describe("View Models", () => {
     });
   });
 
-  describe("networkIndexingStatusViewModel", () => {
+  describe("chainIndexingStatusViewModel", () => {
     it("should return the correct view model", () => {
       expect(
-        networkIndexingStatusViewModel(
+        chainIndexingStatusViewModel(
+          base.id,
           `${base.name}`,
           {
             latestSafeBlock: {
@@ -115,6 +118,7 @@ describe("View Models", () => {
           1000,
         ),
       ).toEqual({
+        id: 8453,
         name: "Base",
         latestSafeBlock: {
           number: 333,
@@ -150,12 +154,12 @@ describe("View Models", () => {
             endDate: fromUnixTime(1501),
           },
         ],
-      } satisfies NetworkStatusViewModel);
+      } satisfies ChainStatusViewModel);
     });
   });
 });
 
-function testEnsNodeNetworkStatus() {
+function testEnsNodeChainStatus() {
   return {
     [mainnet.id]: {
       firstBlockToIndex: {

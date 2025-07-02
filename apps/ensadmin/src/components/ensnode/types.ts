@@ -28,7 +28,7 @@ export namespace EnsNode {
   export type BlockInfo = PonderMetadata.BlockInfo;
 
   /**
-   * Network indexing status for a chain.
+   * Chain indexing status for a chain.
    */
-  export type NetworkIndexingStatus = PonderMetadata.NetworkIndexingStatus;
+  export type ChainIndexingStatus = PonderMetadata.ChainIndexingStatus;
 }
