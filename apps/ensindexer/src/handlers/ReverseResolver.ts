@@ -15,7 +15,7 @@ import {
 /**
  * These are ReverseResolver-specific handler functions. They're stripped-down versions of the
  * normal Resolver handlers (which will get run for any Resolvers used as Reverse Resolvers as well),
- * indended to index just the values of the Resolver contracts used as ReverseResolvers in order
+ * intended to index just the values of the Resolver contracts used as ReverseResolvers in order
  * to power Protocol Acceleration for ENSIP-19 L2 Reverse Resolver Records like `name` and `avatar`.
  *
  * They specifically:

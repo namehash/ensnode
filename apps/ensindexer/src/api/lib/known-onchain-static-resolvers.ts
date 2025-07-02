@@ -12,6 +12,8 @@ const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
  * 1. Onchain: all information necessary for resolution is stored on-chain, and
  * 2. Static: All resolve() calls resolve to the exact value previously emitted by the Resolver in
  *    its events (i.e. no post-processing or other logic, a simple return of the on-chain data).
+ * 3. Its behavior is unlikely to change (i.e. the contract is not upgradable or is unlikely to be
+ *   upgraded in a way that violates principles 1. or 2.).
  *
  * We build this object at runtime based on conditionally available Datasources.
  *

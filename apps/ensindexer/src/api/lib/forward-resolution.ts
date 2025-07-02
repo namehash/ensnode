@@ -102,11 +102,12 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   //////////////////////////////////////////////////
   // CCIP-Read Short-Circuit for Indexed Chains:
   //   If the activeResolver is a known OffchainLookup Resolver that exclusively defers record
-  //   resolution to an indexed L2, we can short-circuit and continue resolving the requested records
-  //   directly from that chain.
+  //   resolution to an indexed chain, we can short-circuit and continue resolving the requested
+  //   records directly from that chain.
   //////////////////////////////////////////////////
-  const isOffchainLookupResolver = !!KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId]?.[activeResolver];
-  if (isOffchainLookupResolver) {
+  const isKnownOffchainLookupResolver =
+    !!KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId]?.[activeResolver];
+  if (isKnownOffchainLookupResolver) {
     // NOTE: KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId] is guaranteed to exist via check above
     const deferredToChainId = KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId]![activeResolver];
 

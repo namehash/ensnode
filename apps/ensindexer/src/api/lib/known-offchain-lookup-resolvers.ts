@@ -12,6 +12,8 @@ const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
  * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway
  * 2. That CCIP-Read Gateway exclusively sources the data necessary to process CCIP-Read Requests from
  *   the indicated chain.
+ * 3. Its behavior is unlikely to change (i.e. the contract is not upgradable or is unlikely to be
+ *   upgraded in a way that violates principles 1. or 2.).
  *
  * We build this object at runtime based on conditionally available Datasources.
  *
