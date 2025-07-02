@@ -80,7 +80,7 @@ export function makeRecordsResponseFromIndexedRecords<SELECTION extends Resolver
   const response: Partial<ResolverRecordsResponse<any>> = {};
 
   if (selection.name) {
-    response.name = { name: records.name };
+    response.name = records.name;
   }
 
   if (selection.addresses) {

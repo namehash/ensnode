@@ -1,7 +1,7 @@
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { ResolverRecordsResponse, ResolverRecordsSelection } from "@/lib/lib-resolution";
 import { EVM_BIT, evmChainIdToCoinType, reverseName } from "@ensnode/ensnode-sdk";
-import { Address, Chain, isAddressEqual } from "viem";
+import { Address, Chain, isAddress, isAddressEqual } from "viem";
 
 const REVERSE_SELECTION = {
   name: true,
@@ -33,11 +33,17 @@ export async function resolveReverse(
 
   // Step 11 — Resolve address record for the given coinType
   const { addresses } = await resolveForward(records.name, { addresses: [coinType] });
-  const resolvedAddress = addresses[coinType] as Address;
+  const resolvedAddress = addresses[coinType];
 
-  // Step 12 — Check that resolvedAddress matches address
-  if (isAddressEqual(resolvedAddress, address)) return records;
+  // if there's no resolvedAddress, no Primary Name
+  if (!resolvedAddress) return null;
 
-  // Step 13 — Otherwise, no Primary Name for this address
-  return null;
+  // if the resolvedAddress is not an EVM address, no Primary Name
+  if (!isAddress(resolvedAddress)) return null;
+
+  // Step 12 & 13 — Check that resolvedAddress matches address
+  if (!isAddressEqual(resolvedAddress, address)) return null;
+
+  // The records are valid for this address
+  return records;
 }

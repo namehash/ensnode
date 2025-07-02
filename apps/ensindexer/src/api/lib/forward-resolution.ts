@@ -16,7 +16,6 @@ import {
   DatasourceNames,
   ENSNamespaceIds,
   getDatasource,
-  getENSNamespace,
   getENSRootChainId,
 } from "@ensnode/datasources";
 import { type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
