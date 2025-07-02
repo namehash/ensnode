@@ -549,8 +549,8 @@ function ChainIndexingStatus(props: ChainIndexingStatusProps) {
   return (
     <div key={chainStatus.chainId} className="flex items-center">
       {/* Chain label */}
-      <div className="w-24 pr-3 text-sm font-medium flex flex-col">
-        <span>{chainStatus.chainName}</span>
+      <div className="w-24 pr-3 flex flex-col">
+        <ChainName chainId={chainStatus.chainId} className="text-sm font-medium"></ChainName>
       </div>
 
       {/* Chain timeline bar */}
