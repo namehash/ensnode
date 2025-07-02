@@ -23,7 +23,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ensdomains/address-encoder": "^1.1.2",
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",

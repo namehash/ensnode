@@ -1,9 +1,10 @@
+import type { CoinType } from "@ensnode/ensnode-sdk";
+import { Context, Hono } from "hono";
+import { Address } from "viem";
+
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
 import { ResolverRecordsSelection } from "@/lib/lib-resolution";
-import { CoinType } from "@ensdomains/address-encoder";
-import { Context, Hono } from "hono";
-import { Address } from "viem";
 
 // TODO: replace with zod schema or validator
 function buildSelectionFromQueryParams(c: Context) {

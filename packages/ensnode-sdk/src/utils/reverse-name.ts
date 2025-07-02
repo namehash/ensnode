@@ -1,7 +1,6 @@
-import { CoinType } from "@ensdomains/address-encoder";
 import { Address } from "viem";
 import { ETH_COIN_TYPE, EVM_BIT } from "./constants";
-import { Label, Name } from "./types";
+import { CoinType, Label, Name } from "./types";
 
 /**
  * Gets the Label used for subnames of "addr.reverse" used for reverse lookups of `address` as per
@@ -25,7 +24,6 @@ export const addrReverseLabel = (address: Address): Label => address.slice(2).to
  * reverseName("0x1234...", BigInt(0x1234)) // "1234...0x1234.reverse"
  * ```
  */
-
 export function reverseName(address: Address, coinType: CoinType): Name {
   const label = addrReverseLabel(address);
 

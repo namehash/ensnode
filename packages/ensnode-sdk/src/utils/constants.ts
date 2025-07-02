@@ -1,6 +1,5 @@
-import { CoinType, EvmCoinType } from "@ensdomains/address-encoder";
 import { namehash } from "viem";
-import { Node } from "./types";
+import type { CoinType, EvmCoinType, Node } from "./types";
 
 export const ROOT_NODE: Node = namehash("");
 

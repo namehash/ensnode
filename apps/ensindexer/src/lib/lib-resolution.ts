@@ -1,6 +1,4 @@
-import { CoinType } from "@ensdomains/address-encoder";
-import { bigintToCoinType } from "@ensnode/ensnode-sdk";
-import { MulticallResponse } from "viem";
+import { type CoinType, bigintToCoinType } from "@ensnode/ensnode-sdk";
 
 // TODO: replace with some sort of inferred typing from dizzle
 export interface IndexedResolverRecords {

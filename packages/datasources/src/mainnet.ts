@@ -85,12 +85,12 @@ export default {
         startBlock: 16925619,
       },
       BasenamesL1Resolver: {
-        abi: [] as const,
+        abi: ResolverConfig.abi,
         address: "0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31",
         startBlock: 20420641,
       },
       LineanamesL1Resolver: {
-        abi: [] as const,
+        abi: ResolverConfig.abi,
         address: "0xde16ee87B0C019499cEBDde29c9F7686560f679a",
         startBlock: 20410692,
       },
