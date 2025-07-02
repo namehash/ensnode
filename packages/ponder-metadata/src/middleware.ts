@@ -94,7 +94,7 @@ export function ponderMetadata<
 
         if (!block) {
           throw new Error(
-            `Failed to fetch block metadata for block number ${blockNumber} for "${publicClientChainId}" chain ID`,
+            `Failed to fetch block metadata for block number ${blockNumber} on chain ID "${publicClientChainId}"`,
           );
         }
 
@@ -108,7 +108,7 @@ export function ponderMetadata<
 
       if (!latestSafeBlockData) {
         throw new HTTPException(500, {
-          message: `Failed to fetch latest safe block for "${publicClientChainId}" chain ID`,
+          message: `Failed to fetch latest safe block for chain ID "${publicClientChainId}"`,
         });
       }
 
@@ -156,7 +156,7 @@ export function ponderMetadata<
         // We only set the `lastIndexedBlock` value if the `block` from the PonderStatus object
         // is not the same as the `firstBlockToIndex`.
         if (firstBlockToIndex.number < ponderStatusForChain.block.number) {
-          lastIndexedBlock = ponderBlockInfoToBlockMetadata(ponderStatusForChain.block);
+          lastIndexedBlock = ponderStatusForChain.block;
         }
       }
 
@@ -237,22 +237,4 @@ function validateResponse(response: MetadataMiddlewareResponse): void {
  */
 function formatTextMetricValue(value?: string): string {
   return value ?? "unknown";
-}
-
-/**
- * Converts a Ponder block status to a block info object.
- **/
-function ponderBlockInfoToBlockMetadata(block: Partial<BlockInfo> | undefined): BlockInfo | null {
-  if (!block) {
-    return null;
-  }
-
-  if (!block.number || !block.timestamp) {
-    return null;
-  }
-
-  return {
-    number: block.number,
-    timestamp: block.timestamp,
-  };
 }
