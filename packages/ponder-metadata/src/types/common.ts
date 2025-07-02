@@ -28,9 +28,12 @@ export interface PonderStatus {
 }
 
 /**
- * Network indexing status for a chain.
+ * Indexing status for a chain.
  */
-export interface NetworkIndexingStatus {
+export interface ChainIndexingStatus {
+  /** Chain ID of the indexed chain */
+  chainId: number;
+
   /**
    * First block required to be indexed during the historical sync.
    */
