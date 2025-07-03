@@ -31,9 +31,8 @@ import {NameDisplay} from "@/components/identity/utils";
  */
 const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
-//TODO: improve description
 /**
- * Main component of the 'Latest indexed registrations' panel
+ * Displays a list of most recently indexed registrations and a date of most recently indexed block
  */
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
@@ -102,9 +101,8 @@ interface RegistrationsListProps {
     ensNodeMetadata: EnsNode.Metadata;
 }
 
-//TODO: improve description
 /**
- * Displays all registrations
+ * Displays recently indexed registrations as a table
  *
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  * @param ensNodeUrl URL of currently selected ENSNode instance
@@ -160,9 +158,8 @@ interface RegistrationRowProps {
   namespaceId: ENSNamespaceId;
 }
 
-//TODO: improve description
 /**
- * Displays the data of a single registration
+ * Displays the data of a single recently indexed registration
  */
 function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
