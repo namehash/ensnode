@@ -6,8 +6,6 @@ sidebar:
   order: 2
 ---
 
-import { Callout } from '@astrojs/starlight/components';
-
 # Introduction
 
 This page defines the **core terminology** used throughout the ENSRainbow code-base and documentation, and explains **how the data is organised** inside an ENSRainbow instance.  Skim through it before diving into the code – it will save you a lot of context-switching later 🚀.
@@ -153,9 +151,7 @@ This handshake ensures both parties interpret every heal operation against the *
 | `GET /health` | Liveness probe for orchestration. | `{ status: "ok" }` |
 | `GET /version` | Server & database schema info plus `EnsRainbowServerLabelSet`. | `VersionInfo` |
 
-<Callout type="tip">
 Pin `labelSetVersion` in your client if you need **deterministic results** across time.
-</Callout>
 
 ### Example Requests
 
