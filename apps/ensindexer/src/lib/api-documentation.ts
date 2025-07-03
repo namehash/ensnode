@@ -305,5 +305,22 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
         value: "Value of the text record",
       },
     ),
+    /**
+     * The following is documentation for packages/ensnode-schema/src/efp.schema.ts
+     */
+    ...generateTypeDocSetWithTypeName("efp_listToken", "EFP List Token", {
+      id: "Unique token ID for an EFP List Token",
+      owner: "The address of the current owner of the EFP List Token  (always lowercase)",
+      lslId:
+        "Value of `EncodedLsl` type (optional, lowercase if present). Stores the ID of the List Storage Location. If the List Storage Location was never created or not in a recognized format, this field value will be `null`.",
+    }),
+    ...generateTypeDocSetWithTypeName("efp_listStorageLocation", "EFP List Storage Location", {
+      id: "ListStorageLocation ID, an `EncodedLsl` value (always lowercase).",
+      chainId:
+        "EVM chain ID of the chain where the EFP list records are stored, an `EFPDeploymentChainId` value.",
+      listRecordsAddress:
+        "Contract address on chainId where the EFP list records are stored  (always lowercase).",
+      slot: "A unique identifier within the List Storage Location, distinguishes between multiple EFP lists stored in the same `EFPListRecords` smart contract by serving as the key in mappings for list operations and metadata.",
+    }),
   });
 };
