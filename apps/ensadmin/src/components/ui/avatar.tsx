@@ -2,7 +2,7 @@
 
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
-import fallbackImage from "../../assets/ensIcon.svg";
+import BoringAvatar from "boring-avatars";
 
 import { cn } from "@/lib/utils";
 import {ENSNamespaceId, getNameAvatarUrl} from "@ensnode/datasources";
@@ -17,19 +17,15 @@ const Avatar = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
 >(({ className, namespaceId, name, ...props }, ref) => {
     // Get ENS avatar URL
-    const ensAvatarUrl = name ? getNameAvatarUrl(namespaceId, name) : null;
-    const handleAvatarImageFetchFailure = (event: React.SyntheticEvent<HTMLImageElement>) => {
-        //TODO: Is such fallback idea alright? Or should we aim to display AvatarFallback no matter what error we encounter?
-        // Or maybe the image could be something more appropriate?
-        event.currentTarget.src = fallbackImage.src;
-    }
+    const ensAvatarUrl = name ? getNameAvatarUrl(name, namespaceId) : null;
     return (
         <AvatarPrimitive.Root
             ref={ref}
             className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
             {...props}
         >
-            {ensAvatarUrl ? <AvatarImage src={ensAvatarUrl.toString()} alt={name!} onError={handleAvatarImageFetchFailure} /> : <AvatarFallback />}
+            {ensAvatarUrl ? (<AvatarImage src={ensAvatarUrl.toString()} alt={name!} />) : null}
+            <AvatarFallback name={name} />
         </AvatarPrimitive.Root>
     );
 });
@@ -38,29 +34,35 @@ Avatar.displayName = AvatarPrimitive.Root.displayName;
 const AvatarImage = React.forwardRef<
     HTMLImageElement,
     React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, alt, onError, ...props }, ref) => (
-    <img
+>(({ className, onError, ...props }, ref) => (
+    <AvatarPrimitive.Image
         ref={ref}
         className={cn("aspect-square h-full w-full", className)}
-        onError={onError}
-        alt={alt}
         {...props}
     />
 ));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
+interface AvatarFallbackProps {
+    name?: string;
+}
+
+const RNG_LIMIT_FOR_FALLBACK_AVATAR = 2048;
+
 const AvatarFallback = React.forwardRef<
     React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className,
-    )}
-    {...props}
-  />
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & AvatarFallbackProps
+>(({ className, name, ...props }, ref) => (
+    <AvatarPrimitive.Fallback
+        ref={ref}
+        className={cn(
+            "flex h-full w-full items-center justify-center rounded-full bg-muted",
+            className,
+        )}
+        {...props}
+    >
+        <BoringAvatar  name={name ? name : (Math.random() * RNG_LIMIT_FOR_FALLBACK_AVATAR).toString()} colors={["#093c52", "#006699", "#0080bc", "#6ba5b8", "#9dc3d0"]} variant="marble"/>
+    </AvatarPrimitive.Fallback>
 ));
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 

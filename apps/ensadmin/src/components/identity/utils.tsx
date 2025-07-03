@@ -13,7 +13,7 @@ interface NameDisplayProps {
  * Optionally provides a link to the name details page on the ENS Manager App. If not, or if the ENS namespace has no known ENS Manager App, just displays the name (without link).
  */
 export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplayProps) {
-    const ensAppNameDetailsUrl = getNameDetailsUrl(namespaceId, name);
+    const ensAppNameDetailsUrl = getNameDetailsUrl(name, namespaceId);
 
     if (!ensAppNameDetailsUrl) {
         return <span className="font-medium">{name}</span>;
@@ -46,7 +46,7 @@ export function AddressDisplay({ address, namespaceId, showExternalLink }: Addre
     // Truncate address for display
     const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
-    const ensAppAddressDetailsUrl = getAddressDetailsUrl(namespaceId, address);
+    const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
     if (!ensAppAddressDetailsUrl) {
         return <span className="font-mono text-xs">{truncatedAddress}</span>;

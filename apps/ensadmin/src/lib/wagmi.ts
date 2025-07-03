@@ -18,7 +18,7 @@ function getEnsDeploymentRpcUrl(namespaceId: ENSNamespaceId): URL {
 
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
-      envVarName = `NEXT_PUBLIC_RPC_URL_1`; //TODO: Won't these changes break anything?
+      envVarName = `NEXT_PUBLIC_RPC_URL_1`;
       envVarValue = process.env.NEXT_PUBLIC_RPC_URL_1;
       break;
     case ENSNamespaceIds.Sepolia:
