@@ -29,6 +29,10 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      labelSet: {
+        labelSetId: undefined,
+        labelSetVersion: undefined,
+      },
     } satisfies EnsRainbowApiClientOptions);
   });
 
@@ -42,6 +46,10 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
+      labelSet: {
+        labelSetId: undefined,
+        labelSetVersion: undefined,
+      },
     } satisfies EnsRainbowApiClientOptions);
   });
 
@@ -144,7 +152,11 @@ describe("EnsRainbowApiClient", () => {
           status: StatusCode.Success,
           versionInfo: {
             version: "1.0.0",
-            schema_version: 1,
+            dbSchemaVersion: 1,
+            labelSet: {
+              labelSetId: "test-label-set-id",
+              highestLabelSetVersion: 123,
+            },
           },
         } satisfies EnsRainbow.VersionResponse),
     });
@@ -154,7 +166,7 @@ describe("EnsRainbowApiClient", () => {
     expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.versionInfo.version === "string").toBeTruthy();
-    expect(typeof response.versionInfo.schema_version === "number").toBeTruthy();
+    expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();
   });
 });
 

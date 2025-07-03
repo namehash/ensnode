@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/utils/error-utils";
 import pino, { LevelWithSilent } from "pino";
 
 export type LogLevel = LevelWithSilent;
@@ -36,7 +37,7 @@ export function getEnvLogLevel(): LogLevel {
   try {
     return parseLogLevel(envLogLevel);
   } catch (error: unknown) {
-    const errorMessage = `Environment variable error: (LOG_LEVEL): ${error instanceof Error ? error.message : String(error)}`;
+    const errorMessage = `Environment variable error: (LOG_LEVEL): ${getErrorMessage(error)}`;
     // Log error to console since we can't use logger yet
     console.error(errorMessage);
     throw new Error(errorMessage);
