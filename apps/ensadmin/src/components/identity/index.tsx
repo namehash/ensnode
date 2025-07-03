@@ -23,7 +23,7 @@ interface IdentityProps {
 }
 
 /**
- * Component to display an ENS name for an Ethereum address.
+ * Displays an ENS identity (name, avatar, etc.) for an Ethereum address on the provided ENS namespace.
  * It can display an avatar if available, a link to the ENS name, or a truncated address.
  */
 export function Identity({
@@ -41,9 +41,11 @@ export function Identity({
   }, []);
 
 
-  // TODO: come back to this later after introducing a mechanism for ENSNode to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this (for ens-test-env).
-  // if the ENS deployment chain is the ens-test-env, we should just always show the truncated address and not look up the primary name.
+  // if the ENS namespace is the ens-test-env, always show the truncated address and not look up the primary name.
   if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
+    // TODO: come back to this later after introducing a mechanism for ENSNode
+    //  to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this (for ens-test-env).
+
     return <AddressDisplay namespaceId={namespaceId} address={address}/>;
   }
 

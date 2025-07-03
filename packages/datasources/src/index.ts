@@ -62,10 +62,10 @@ export const getNameWrapperAddress = (namespaceId: ENSNamespaceId): Address =>
     getDatasource(namespaceId, DatasourceNames.ENSRoot).contracts.NameWrapper.address;
 
 /**
- * Get ENS app URL for wallet address on a supported chain.
+ * Get the ENS Manager App URL for the provided namespace.
  *
  * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @returns ENS app URL for supported chains, or null if an ENS namespace doesn't have a specified ENS app
+ * @returns ENS Manager App URL for the provided namespace, or null if the provided namespace doesn't have a known ENS Manager App
  */
 export function getEnsAppUrl(namespaceId: ENSNamespaceId): URL | null{
   switch (namespaceId) {
@@ -82,11 +82,11 @@ export function getEnsAppUrl(namespaceId: ENSNamespaceId): URL | null{
 }
 
 /**
- * Get the avatar image URL for a given ENS Namespace and name
+ * Get the avatar image URL for a name on the given ENS Namespace
  *
  * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @param {string} name - ENS name that we perform the lookup for
- * @returns avatar image URL for supported chains, otherwise null
+ * @param {string} name - ENS name to get the avatar image URL for
+ * @returns avatar image URL for the name on the given ENS Namespace, or null if the avatar image URL is not known
  */
 export function getEnsNameAvatarUrl(namespaceId: ENSNamespaceId, name: string): URL | null {
   switch (namespaceId) {
@@ -104,9 +104,9 @@ export function getEnsNameAvatarUrl(namespaceId: ENSNamespaceId, name: string): 
 }
 
 /**
- * Get the URL of the name details page in ENS app for a given name and ENS Namespace.
+ * Get the URL of the name details page in ENS Manager App for a given name and ENS Namespace.
  *
- * @returns full Ens app URL for supported chains, otherwise null
+ * @returns URL to the name details page in the ENS Manager App for a given name and ENS Namespace, or null if this URL is not known
  */
 export function getEnsNameDetailsUrl(namespaceId: ENSNamespaceId, name: string): URL | null {
   const baseUrl = getEnsAppUrl(namespaceId);
@@ -115,17 +115,12 @@ export function getEnsNameDetailsUrl(namespaceId: ENSNamespaceId, name: string):
 }
 
 /**
- * Get the URL of the address details page in ENS app for a given address and ENS Namespace.
+ * Get the URL of the address details page in ENS Manager App for a given address and ENS Namespace.
  *
- * @returns full Ens app URL for supported chains, otherwise null
+ * @returns URL to the address details page in the ENS Manager App for a given address and ENS Namespace, or null if this URL is not known
  */
-//TODO: is it alright to declare this as a separate function or should we make <getEnsNameDetailsUrl> more generic?
-// For the sake of clarity I prefer the current version
 export function getAddressDetailsUrl(namespaceId: ENSNamespaceId, address: Address): URL | null {
   const baseUrl = getEnsAppUrl(namespaceId);
 
   return baseUrl ? new URL(address, baseUrl): null;
 }
-
-
-
