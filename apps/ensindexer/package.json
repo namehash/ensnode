@@ -31,6 +31,7 @@
     "@ensnode/ponder-subgraph": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@types/dns-packet": "^5.6.5",
+    "date-fns": "catalog:",
     "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",
     "hono": "catalog:",

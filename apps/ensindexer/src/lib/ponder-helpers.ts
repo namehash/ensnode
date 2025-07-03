@@ -1,8 +1,9 @@
 import type { Event } from "ponder:registry";
-import { PublicClient } from "viem";
+import type { PublicClient } from "viem";
 import * as z from "zod/v4";
 
 import { ENSIndexerConfig } from "@/config/types";
+import { uniq } from "@/lib/lib-helpers";
 import { Blockrange } from "@/lib/types";
 import { ContractConfig } from "@ensnode/datasources";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
@@ -327,4 +328,29 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
       endBlock,
     },
   };
+}
+
+/**
+ * Get a list of unique chain IDs for provided public clients.
+ *
+ * @param publicClients
+ * @returns A list of unique chain IDs
+ */
+export function getPublicClientChainIds(publicClients: {
+  [chainName: string]: PublicClient;
+}): number[] {
+  const publicClientsChainIds = [] as number[];
+
+  for (const [chainName, publicClient] of Object.entries(publicClients)) {
+    // invariant: public client includes the "chain" object
+    if (!publicClient.chain) {
+      throw new Error(
+        `Public client for the chain name "${chainName}" must include the "chain" object`,
+      );
+    }
+
+    publicClientsChainIds.push(publicClient.chain.id);
+  }
+
+  return uniq(publicClientsChainIds);
 }

@@ -19,6 +19,7 @@ const environment = {
     endBlock: process.env.END_BLOCK,
   },
   rpcConfigs: getRpcConfigsFromEnv(),
+  realtimeIndexingGapThreshold: process.env.REALTIME_INDEXING_GAP_THRESHOLD,
 } satisfies ENSIndexerEnvironment;
 
 // build, validate, and export the ENSIndexerConfig

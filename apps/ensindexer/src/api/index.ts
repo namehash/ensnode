@@ -17,6 +17,7 @@ import {
   fetchPrometheusMetrics,
   makePonderMetadataProvider,
 } from "@/lib/ponder-metadata-provider";
+import { uptimeMonitoring } from "@/lib/uptime-monitoring-middleware";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
 import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
@@ -79,6 +80,18 @@ app.get(
       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
       prometheusMetrics: fetchPrometheusMetrics,
       ensRainbowVersion: fetchEnsRainbowVersion,
+      ponderStatus: fetchPonderStatus,
+    },
+    publicClients,
+  }),
+);
+
+// HTTP endpoint for uptime monitoring toolkit
+app.get(
+  "/amirealtime",
+  uptimeMonitoring({
+    realtimeIndexingGapThreshold: config.realtimeIndexingGapThreshold,
+    query: {
       ponderStatus: fetchPonderStatus,
     },
     publicClients,
