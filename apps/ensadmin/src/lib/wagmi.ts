@@ -30,8 +30,8 @@ function getEnsDeploymentRpcUrl(namespaceId: ENSNamespaceId): URL {
       envVarValue = process.env.NEXT_PUBLIC_RPC_URL_17000;
       break;
     case ENSNamespaceIds.EnsTestEnv:
-      envVarName = `NEXT_PUBLIC_RPC_URL_31337`;
-      envVarValue = process.env.NEXT_PUBLIC_RPC_URL_31337;
+      envVarName = `NEXT_PUBLIC_RPC_URL_1337`;
+      envVarValue = process.env.NEXT_PUBLIC_RPC_URL_1337;
       break;
     default:
       throw new Error(`Unsupported ENS namespace: ${namespaceId}`);
