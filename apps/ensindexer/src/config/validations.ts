@@ -150,3 +150,20 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
     });
   }
 }
+
+// Invariant: experimental_resolution requires ReverseResolvers plugin
+export function invariant_ExperimentalResolutionNeedsReverseResolversPlugin(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "experimental_resolution">>,
+) {
+  const { value: config } = ctx;
+
+  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
+
+  if (config.experimental_resolution && !reverseResolversPluginActive) {
+    ctx.issues.push({
+      code: "custom",
+      input: config,
+      message: `EXPERIMENTAL_RESOLUTION requires the reverse-resolvers plugin to be active.`,
+    });
+  }
+}
