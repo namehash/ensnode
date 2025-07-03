@@ -94,10 +94,9 @@ export interface EnsRainbowClientLabelSet {
 
   /**
    * Optional highest label set version of label set id to query. Enables deterministic heal
-   * results across time even if the ENSRainbow server ingests additional label set versions
-   * greater than this value. If provided, only labels from label set versions less than or
-   * equal to this value will be returned. If not provided, the server will use the latest
-   * available version.
+   * results across time even if the ENSRainbow server ingests label sets with greater versions
+   * than this value. If provided, only labels from label sets with versions less than or equal to this
+   * value will be returned. If not provided, the server will use the latest available version.
    * When `labelSetVersion` is defined, `labelSetId` must also be defined.
    */
   labelSetVersion?: LabelSetVersion;

@@ -157,9 +157,9 @@ export interface EnsRainbowApiClientOptions {
   /**
    * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to
    * support. If provided, enables deterministic heal results across time, such that only
-   * labels from label set versions less than or equal to this value will be returned.
-   * Therefore, even if the ENSRainbow server later ingests additional label set versions
-   * greater than this value, the results returned across time can be deterministic. If
+   * labels from label sets with versions less than or equal to this value will be returned.
+   * Therefore, even if the ENSRainbow server later ingests label sets with greater versions
+   * than this value, the results returned across time can be deterministic. If
    * provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow
    * server manages a compatible label set. If not provided no specific labelSetId validation
    * will be performed during heal operations.
