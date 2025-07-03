@@ -1,6 +1,6 @@
 "use client";
 
-import {AddressDisplay, NameDisplay} from "@/components/recent-registrations/utils";
+import {AddressDisplay, NameDisplay} from "./utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import {useEnsName, UseEnsNameReturnType} from "wagmi";
 
-//TODO: add descriptions for type's fields
 interface IdentityProps {
   address: Address;
   namespaceId: ENSNamespaceId;
@@ -68,7 +67,7 @@ export function Identity({
 
   // If there is an error, show the address
   if (isError) {
-    return <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={true} />;
+    return <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={showExternalLink} />;
   }
 
   return (
@@ -81,7 +80,7 @@ export function Identity({
           showExternalLink={showExternalLink}
         />
       ) : (
-          <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={true}/>
+          <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={showExternalLink}/>
       )}
     </div>
   );

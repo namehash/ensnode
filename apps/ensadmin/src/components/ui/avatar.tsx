@@ -5,7 +5,7 @@ import * as React from "react";
 import fallbackImage from "../../assets/ensIcon.svg";
 
 import { cn } from "@/lib/utils";
-import {ENSNamespaceId, getEnsNameAvatarUrl} from "@ensnode/datasources";
+import {ENSNamespaceId, getNameAvatarUrl} from "@ensnode/datasources";
 
 interface AvatarProps {
     namespaceId: ENSNamespaceId;
@@ -17,7 +17,7 @@ const Avatar = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
 >(({ className, namespaceId, name, ...props }, ref) => {
     // Get ENS avatar URL
-    const ensAvatarUrl = name ? getEnsNameAvatarUrl(namespaceId, name) : null;
+    const ensAvatarUrl = name ? getNameAvatarUrl(namespaceId, name) : null;
     const handleAvatarImageFetchFailure = (event: React.SyntheticEvent<HTMLImageElement>) => {
         //TODO: Is such fallback idea alright? Or should we aim to display AvatarFallback no matter what error we encounter?
         // Or maybe the image could be something more appropriate?

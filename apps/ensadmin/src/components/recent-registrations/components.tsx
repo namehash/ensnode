@@ -6,7 +6,6 @@ import { Registration } from "@/components/recent-registrations/types";
 import {
   Duration,
   FormattedDate,
-  NameDisplay,
   RelativeTime,
 } from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,12 +18,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import {ENSNamespaceId, getEnsAppUrl} from "@ensnode/datasources";
+import {ENSNamespaceId} from "@ensnode/datasources";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
+import {NameDisplay} from "@/components/identity/utils";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
