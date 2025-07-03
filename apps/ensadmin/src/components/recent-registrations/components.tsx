@@ -1,13 +1,10 @@
 "use client";
 
 import { EnsNode, useIndexingStatusQuery } from "@/components/ensnode";
+import { NameDisplay } from "@/components/identity/utils";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Registration } from "@/components/recent-registrations/types";
-import {
-  Duration,
-  FormattedDate,
-  RelativeTime,
-} from "@/components/recent-registrations/utils";
+import { Duration, FormattedDate, RelativeTime } from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -18,13 +15,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import {ENSNamespaceId} from "@ensnode/datasources";
+import { ENSNamespaceId } from "@ensnode/datasources";
 import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
-import {NameDisplay} from "@/components/identity/utils";
 
 /**
  * Maximal number of latest registrations to be displayed in the panel
@@ -90,15 +86,17 @@ export function RecentRegistrations() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-          {isClient && indexingStatusQuery.data && <RegistrationsList  ensNodeMetadata={indexingStatusQuery.data} ensNodeUrl={ensNodeUrl}/>}
+        {isClient && indexingStatusQuery.data && (
+          <RegistrationsList ensNodeMetadata={indexingStatusQuery.data} ensNodeUrl={ensNodeUrl} />
+        )}
       </CardContent>
     </Card>
   );
 }
 
 interface RegistrationsListProps {
-    ensNodeUrl: URL
-    ensNodeMetadata: EnsNode.Metadata;
+  ensNodeUrl: URL;
+  ensNodeMetadata: EnsNode.Metadata;
 }
 
 /**
@@ -107,51 +105,50 @@ interface RegistrationsListProps {
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  * @param ensNodeUrl URL of currently selected ENSNode instance
  */
-function RegistrationsList({ensNodeMetadata, ensNodeUrl}: RegistrationsListProps){
-    const namespaceId = ensNodeMetadata.env.NAMESPACE;
+function RegistrationsList({ ensNodeMetadata, ensNodeUrl }: RegistrationsListProps) {
+  const namespaceId = ensNodeMetadata.env.NAMESPACE;
 
-    const recentRegistrationsQuery = useRecentRegistrations(
-        ensNodeUrl,
-        MAX_NUMBER_OF_LATEST_REGISTRATIONS,
-        namespaceId,
-    );
+  const recentRegistrationsQuery = useRecentRegistrations(
+    ensNodeUrl,
+    MAX_NUMBER_OF_LATEST_REGISTRATIONS,
+    namespaceId,
+  );
 
-    if (recentRegistrationsQuery.isLoading) {
-        return <RegistrationsFallback />;
-    }
+  if (recentRegistrationsQuery.isLoading) {
+    return <RegistrationsFallback />;
+  }
 
-    if (recentRegistrationsQuery.isError) {
-        return (
-            <p>
-                Could not fetch recent registrations due to an error: $
-                {recentRegistrationsQuery.error.message}
-            </p>
-        );
-    }
-
+  if (recentRegistrationsQuery.isError) {
     return (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Registered</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Owner</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {recentRegistrationsQuery.data?.map((registration) => (
-                    <RegistrationRow
-                        key={registration.name}
-                        registration={registration}
-                        namespaceId={namespaceId}/>
-                ))}
-            </TableBody>
-        </Table>
+      <p>
+        Could not fetch recent registrations due to an error: $
+        {recentRegistrationsQuery.error.message}
+      </p>
     );
+  }
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Registered</TableHead>
+          <TableHead>Duration</TableHead>
+          <TableHead>Owner</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {recentRegistrationsQuery.data?.map((registration) => (
+          <RegistrationRow
+            key={registration.name}
+            registration={registration}
+            namespaceId={namespaceId}
+          />
+        ))}
+      </TableBody>
+    </Table>
+  );
 }
-
-
 
 interface RegistrationRowProps {
   registration: Registration;
@@ -165,11 +162,7 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
     <TableRow>
       <TableCell>
-        <NameDisplay
-          namespaceId={namespaceId}
-          name={registration.name}
-          showExternalLink={true}
-        />
+        <NameDisplay namespaceId={namespaceId} name={registration.name} showExternalLink={true} />
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} />
@@ -187,7 +180,9 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
 function RegistrationsFallback() {
   return (
     <div className="animate-pulse space-y-4">
-        {[...Array(MAX_NUMBER_OF_LATEST_REGISTRATIONS)].map((_, idx) => <div key={`registrationFallback#${idx}`} className="h-10 bg-muted rounded w-full"></div>)}
+      {[...Array(MAX_NUMBER_OF_LATEST_REGISTRATIONS)].map((_, idx) => (
+        <div key={`registrationFallback#${idx}`} className="h-10 bg-muted rounded w-full"></div>
+      ))}
     </div>
   );
 }

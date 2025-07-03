@@ -1,9 +1,9 @@
-import {ENSNamespaceId, getAddressDetailsUrl, getNameDetailsUrl} from "@ensnode/datasources";
+import { ENSNamespaceId, getAddressDetailsUrl, getNameDetailsUrl } from "@ensnode/datasources";
 import { formatDistanceStrict, formatDistanceToNow, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
-import {Address} from "viem";
+import { Address } from "viem";
 
 /**
  * Client-only date formatter component

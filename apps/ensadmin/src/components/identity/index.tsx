@@ -1,17 +1,13 @@
 "use client";
 
-import {AddressDisplay, NameDisplay} from "./utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  getENSRootChainId,
-} from "@ensnode/datasources";
+import { ENSNamespaceId, ENSNamespaceIds, getENSRootChainId } from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import {useEnsName, UseEnsNameReturnType} from "wagmi";
+import { UseEnsNameReturnType, useEnsName } from "wagmi";
+import { AddressDisplay, NameDisplay } from "./utils";
 
 interface IdentityProps {
   address: Address;
@@ -39,13 +35,12 @@ export function Identity({
     setMounted(true);
   }, []);
 
-
   // if the ENS namespace is the ens-test-env, always show the truncated address and not look up the primary name.
   if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
     // TODO: come back to this later after introducing a mechanism for ENSNode
     //  to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this (for ens-test-env).
 
-    return <AddressDisplay namespaceId={namespaceId} address={address}/>;
+    return <AddressDisplay namespaceId={namespaceId} address={address} />;
   }
 
   const ensRootChainId = getENSRootChainId(namespaceId);
@@ -67,20 +62,26 @@ export function Identity({
 
   // If there is an error, show the address
   if (isError) {
-    return <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={showExternalLink} />;
+    return (
+      <AddressDisplay
+        namespaceId={namespaceId}
+        address={address}
+        showExternalLink={showExternalLink}
+      />
+    );
   }
 
   return (
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && <Avatar className="h-6 w-6" namespaceId={namespaceId} name={ensName} />}
       {ensName ? (
-        <NameDisplay
+        <NameDisplay namespaceId={namespaceId} name={ensName} showExternalLink={showExternalLink} />
+      ) : (
+        <AddressDisplay
           namespaceId={namespaceId}
-          name={ensName}
+          address={address}
           showExternalLink={showExternalLink}
         />
-      ) : (
-          <AddressDisplay namespaceId={namespaceId} address={address} showExternalLink={showExternalLink}/>
       )}
     </div>
   );

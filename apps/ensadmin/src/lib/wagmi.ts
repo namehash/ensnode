@@ -1,8 +1,8 @@
+import { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import { http } from "viem";
 import { anvil, holesky, mainnet, sepolia } from "viem/chains";
 import { createConfig } from "wagmi";
 import { parseUrl } from "./env";
-import {ENSNamespaceId, ENSNamespaceIds} from "@ensnode/datasources";
 
 /**
  * Get RPC URLs from environment variables for a requested ENS namespace.

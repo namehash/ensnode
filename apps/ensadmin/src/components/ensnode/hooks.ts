@@ -1,8 +1,8 @@
 import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
 import { SupportedChainId } from "@/lib/wagmi";
+import { getENSRootChainId } from "@ensnode/datasources";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { EnsNode } from "./types";
-import {getENSRootChainId} from "@ensnode/datasources";
 
 /**
  * Fetches the ENSNode status.

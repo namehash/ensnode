@@ -117,7 +117,7 @@ async function fetchRecentRegistrations(
   const data = await response.json();
 
   return data.data.registrations.map((registration: RegistrationResult) =>
-      toRegistration(registration, namespaceId),
+    toRegistration(registration, namespaceId),
   );
 }
 
