@@ -8,7 +8,7 @@ import {
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
-import { networkConfigForContract, networksConfigForChain } from "@/lib/ponder-helpers";
+import { chainConfigForContract, chainConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
@@ -25,30 +25,24 @@ export default createPlugin({
     );
 
     return ponder.createConfig({
-      networks: networksConfigForChain(config.rpcConfigs, chain.id),
+      chains: {
+        ...chainConnectionConfig(config.rpcConfigs, chain.id),
+      },
       contracts: {
         [namespaceContract(pluginName, "RegistryOld")]: {
-          network: networkConfigForContract(
-            config.globalBlockrange,
-            chain.id,
-            contracts.RegistryOld,
-          ),
+          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.RegistryOld),
           abi: contracts.Registry.abi,
         },
         [namespaceContract(pluginName, "Registry")]: {
-          network: networkConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),
+          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),
           abi: contracts.Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
-          network: networkConfigForContract(
-            config.globalBlockrange,
-            chain.id,
-            contracts.BaseRegistrar,
-          ),
+          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
         [namespaceContract(pluginName, "EthRegistrarControllerOld")]: {
-          network: networkConfigForContract(
+          chain: chainConfigForContract(
             config.globalBlockrange,
             chain.id,
             contracts.EthRegistrarControllerOld,
@@ -56,7 +50,7 @@ export default createPlugin({
           abi: contracts.EthRegistrarControllerOld.abi,
         },
         [namespaceContract(pluginName, "EthRegistrarController")]: {
-          network: networkConfigForContract(
+          chain: chainConfigForContract(
             config.globalBlockrange,
             chain.id,
             contracts.EthRegistrarController,
@@ -64,16 +58,12 @@ export default createPlugin({
           abi: contracts.EthRegistrarController.abi,
         },
         [namespaceContract(pluginName, "NameWrapper")]: {
-          network: networkConfigForContract(
-            config.globalBlockrange,
-            chain.id,
-            contracts.NameWrapper,
-          ),
+          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.NameWrapper),
           abi: contracts.NameWrapper.abi,
         },
         // NOTE: shared (non-namespaced) Resolver definition/implementation (see plugins/shared/Resolver.ts)
         Resolver: {
-          network: networkConfigForContract(config.globalBlockrange, chain.id, contracts.Resolver),
+          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Resolver),
           abi: contracts.Resolver.abi,
         },
       },

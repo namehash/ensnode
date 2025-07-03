@@ -7,10 +7,11 @@ import config from "@/config";
 import {
   createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
+  createPonderStatusFetcher,
   createPrometheusMetricsFetcher,
 } from "@/lib/ponder-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
-import { PrometheusMetrics, queryPonderMeta, queryPonderStatus } from "@ensnode/ponder-metadata";
+import { PrometheusMetrics, queryPonderMeta } from "@ensnode/ponder-metadata";
 import type { PonderMetadataProvider } from "@ensnode/ponder-subgraph";
 
 // setup block indexing status fetching
@@ -24,7 +25,10 @@ export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher(config.ensR
 // setup prometheus metrics fetching
 export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.port);
 
-export const makePonderMetdataProvider = ({
+// setup Ponder Status fetching
+export const fetchPonderStatus = createPonderStatusFetcher(config.port);
+
+export const makePonderMetadataProvider = ({
   db,
   publicClients,
 }: {
@@ -55,17 +59,17 @@ export const makePonderMetdataProvider = ({
    * @returns the block info fetched from the public client
    */
   const getLastIndexedENSRootChainBlock = async () => {
-    const ponderStatus = await queryPonderStatus(config.ponderDatabaseSchema, db);
-    const chainStatus = ponderStatus.find(
-      (status) => status.network_name === ensRootChainId.toString(),
+    const ponderStatus = await fetchPonderStatus();
+    const chainStatus = Object.values(ponderStatus).find(
+      (ponderStatusForChain) => ponderStatusForChain.id === ensRootChainId,
     );
 
-    if (!chainStatus || !chainStatus.block_number) {
+    if (!chainStatus || !chainStatus.block.number) {
       throw new Error(`Could not find latest indexed block number for chain ID: ${ensRootChainId}`);
     }
 
     return publicClient.getBlock({
-      blockNumber: BigInt(chainStatus.block_number),
+      blockNumber: BigInt(chainStatus.block.number),
     });
   };
 

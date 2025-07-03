@@ -50,13 +50,19 @@ ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS 
    - Bring-your-own Postgres
    - Bring-your-own ENSRainbow
 
+## Execution Order
+
+ENSIndexer is a Ponder application, so its execution order is that of a Ponder application. First the `ponder.config.ts` is executed, and then `ponder.schema.ts` and finally all files in `src/` are executed in order to register indexing event handlers via `ponder.on`.
+
+We place all of our application code into the `src/` directory, so it's all eligible for hot-reloading, and event handler registration occurs in each plugin's `event-handlers.ts` file.
+
 ## Plugins
 
 ENSIndexer implements the indexing logic for each plugin inside event handlers. Event handlers may optionally be shared across plugins. For example, see the shared event handler functions in `apps/ensindexer/src/handlers/*.ts` which are shared by multiple plugins such as the `subgraph`, `basenames`, and `lineanames` plugins.
 
 Each plugin requires two files:
 - `plugin.ts` defines the plugin's overall indexing configuration. See `apps/ensindexer/src/plugins/basenames/plugin.ts` and `apps/ensindexer/src/plugins/lineanames/plugin.ts` for examples.
-- `event-handlers.ts` defines the plugin's event handlers executed during the indexing process. See `apps/ensindexer/src/plugins/basenames/event-handlers.ts` and `apps/ensindexer/src/plugins/lineanames/event-handlers.ts` for examples.
+- `event-handlers.ts` registers the event handler functions with Ponder at runtime. See `apps/ensindexer/src/plugins/basenames/event-handlers.ts` and `apps/ensindexer/src/plugins/lineanames/event-handlers.ts` for examples.
 
 ### Plugin-Scoping
 
@@ -64,25 +70,21 @@ Because plugins indexing subregistries use the shared handlers and may clobber e
 
 This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — teh shared handlers derived from the subgraph which are used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
 
-### Plugin Definition
-
-An ENSIndexer plugin is defined by its Ponder config (network & contracts & abis & such) and the ponder handler registration code that it executes at runtime (via the `activate` function).
-
 ### Ponder Plugin Integration
 
 #### Contract Namespace
 
-Ponder, by default, does not have the concept of plugins — it assumes that a config is static and that all contract names are known at compile-time. In ENSIndexer, multiple plugins reference contracts of the same name, and further namespacing is required. We namespace each contract by the Registry's `Subname` to avoid collisions (see `apps/ensindexer/src/lib/plugin-helpers.ts` for reference).
+Ponder, by default, does not have the concept of plugins — it assumes that a config is static and that all contract names are known at compile-time. In ENSIndexer, multiple plugins reference contracts of the same name, and further namespacing is required. We namespace plugin-specific contract definitions with a prefix (namely `PluginName`) to avoid collisions (see `apps/ensindexer/src/lib/plugin-helpers.ts` for reference).
 
 #### Contract & Event Typing
 
 Ponder uses the type information of contracts and their abis in the provided config to power the `ponder.on('MyContract:MyEvent', ...)` api, including inferred types for contract names, event names, and event arguments.
 
-In order to replicate this experience with plugins selected at runtime, we use some creative typing in `apps/ensindexer/ponder.config.ts` to merge the possible plugin types for Ponder. With this approach we have full type inference for contract and event names/args across the app regardless of which plugins are activated at runtime.
+In order to replicate this experience with plugins selected at runtime, we use some creative typing in `apps/ensindexer/src/plugins/index.ts` to merge the possible plugin types for Ponder. With this approach we have full type inference for contract and event names/args across the app regardless of which plugins are activated at runtime.
 
 #### Plugin Execution
 
-When ENSIndexer is run, the configs for all of the active plugins (those selected by the user) are merged and ponder runs in `omnichain` (soon: `multichain`) mode to produce the resulting index.
+When ENSIndexer is run, the configs for all of the active plugins (those selected by the user) are merged and ponder runs in `omnichain` (perhaps later: `multichain`) mode to produce the resulting index. The relevant event handlers are attached in each plugin's `event-handlers.ts` which conditionally executes if the plugin is activated in the ENSIndexerConfig.
 
 ## @ensnode/datasources
 

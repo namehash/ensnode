@@ -9,7 +9,7 @@ import { getRegistrarManagedName } from "../lib/registrar-helpers";
 /**
  * Registers event handlers with Ponder.
  */
-export function attachLineanamesNameWrapperEventHandlers() {
+export default function () {
   const pluginName = PluginName.Lineanames;
 
   const {

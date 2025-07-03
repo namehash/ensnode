@@ -30,26 +30,26 @@ const mergePonderConfigsWithResolverBlockrange = deepmergeCustom({
     }
   },
   mergeOthers: (values, utils, meta) => {
-    // matches keyPath = [ 'contracts', 'Resolver', 'networks', '1', 'startBlock' ]
+    // matches keyPath = [ 'contracts', 'Resolver', 'chain', '1', 'startBlock' ]
     if (
       meta &&
       meta.keyPath.length === 5 && // check depth
       meta.keyPath[0] === "contracts" &&
       meta.keyPath[1] === "Resolver" &&
-      meta.keyPath[2] === "network" &&
+      meta.keyPath[2] === "chain" &&
       meta.keyPath[4] === "startBlock"
     ) {
       // if so, do custom 'minimum startBlock' logic
       return Math.min(...(values as unknown as number[]));
     }
 
-    // matches keyPath = [ 'contracts', 'Resolver', 'networks', '1', 'endBlock' ]
+    // matches keyPath = [ 'contracts', 'Resolver', 'chain', '1', 'endBlock' ]
     if (
       meta &&
       meta.keyPath.length === 5 && // check depth
       meta.keyPath[0] === "contracts" &&
       meta.keyPath[1] === "Resolver" &&
-      meta.keyPath[2] === "network" &&
+      meta.keyPath[2] === "chain" &&
       meta.keyPath[4] === "endBlock"
     ) {
       // if so, do custom 'maximum endBlock' logic

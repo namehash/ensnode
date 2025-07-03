@@ -14,7 +14,7 @@ import { setupRootNode } from "@/lib/subgraph-helpers";
 /**
  * Registers event handlers with Ponder.
  */
-export function attachLineanamesRegistryEventHandlers() {
+export default function () {
   const pluginName = PluginName.Lineanames;
 
   ponder.on(namespaceContract(pluginName, "Registry:setup"), setupRootNode);

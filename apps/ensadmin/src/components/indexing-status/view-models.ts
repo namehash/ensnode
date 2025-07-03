@@ -77,7 +77,7 @@ export function globalIndexingStatusViewModel(
     .map((n) => n.lastIndexedBlock!.timestamp);
 
   const currentIndexingDate =
-    lastIndexedBlockDates.length > 0 ? fromUnixTime(Math.max(...lastIndexedBlockDates)) : null;
+    lastIndexedBlockDates.length > 0 ? fromUnixTime(Math.min(...lastIndexedBlockDates)) : null;
 
   return {
     chainStatuses: chainStatusesViewModel,

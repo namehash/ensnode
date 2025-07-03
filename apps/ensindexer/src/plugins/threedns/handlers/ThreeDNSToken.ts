@@ -11,7 +11,10 @@ import {
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
-export function attachThreeDNSTokenEventHandlers() {
+/**
+ * Registers event handlers with Ponder.
+ */
+export default function () {
   const pluginName = PluginName.ThreeDNS;
 
   ponder.on(namespaceContract(pluginName, "ThreeDNSToken:setup"), setupRootNode);
