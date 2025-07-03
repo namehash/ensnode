@@ -1,9 +1,10 @@
 import { db, publicClients } from "ponder:api";
-import { KNOWN_OFFCHAIN_LOOKUP_RESOLVERS } from "@/api/lib/known-offchain-lookup-resolvers";
-import { KNOWN_ONCHAIN_STATIC_RESOLVERS } from "@/api/lib/known-onchain-static-resolvers";
+import { findResolver } from "@/api/lib/find-resolver";
+import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
+import { getKnownOnchainStaticResolverAddresses } from "@/api/lib/known-onchain-static-resolver";
 import config from "@/config";
 import { encodeDNSPacketBytes } from "@/lib/dns-helpers";
-import { makeResolverId, parseResolverId } from "@/lib/ids";
+import { makeResolverId } from "@/lib/ids";
 import {
   IndexedResolverRecords,
   ResolverRecordsResponse,
@@ -18,7 +19,7 @@ import {
   getDatasource,
   getENSRootChainId,
 } from "@ensnode/datasources";
-import { type Name, Node, getNameHierarchy } from "@ensnode/ensnode-sdk";
+import { type Name, Node, PluginName } from "@ensnode/ensnode-sdk";
 import {
   Address,
   decodeAbiParameters,
@@ -31,16 +32,28 @@ import {
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
-// for our purposes here, all Resolver contracts share the same abi, so just grab one from datasources
+// for all relevant eth_calls here, all Resolver contracts share the same abi, so just grab one from
+// @ensnode/datasources that is guaranted to exist
 const RESOLVER_ABI = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot).contracts
   .Resolver.abi;
 
-// TODO: implement based on config (& ponder indexing status?)
-const isChainIndexed = (chainId: number) => true;
+/**
+ * Determines whether, for a given chain, all Resolver Record Values are indexed.
+ *
+ * @param chainId
+ * @returns
+ */
+const resolverRecordsAreIndexedOnChain = (chainId: number) => {
+  // config.indexAdditionalResolverRecords must be true, or we should defer to the chain
+  if (!config.indexAdditionalResolverRecords) return false;
+
+  // TODO: determine if the Resolver/ReverseResolver
+  // ideally can do so using the generated ponder config...
+  return true;
+};
 
 /**
  * Implements Forward Resolution of an ENS name, for a selection of records, on a specified chainId.
- * TODO: could implement forward for Name | Address and if address perform primary name resolution + verification and continue on
  *
  * @param name the ENS name to resolve
  * @param selection selection specifying which records to resolve
@@ -65,6 +78,9 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // but honestly the state drift is at max 1 block on L1 and a block or two on an L2, it's pretty negligible,
   // so maybe we just ignore this issue entirely
 
+  // TODO: if name not normalized, throw error
+  // TODO: need to handle encoded label hashes in name, yeah?
+
   const node: Node = namehash(name);
 
   //////////////////////////////////////////////////
@@ -83,49 +99,47 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   }
 
   //////////////////////////////////////////////////
-  // 1. Identify the active resolver for the name on the specified chain.
+  // 1. Identify the active resolver for the name on the specified chain. This requires
   //////////////////////////////////////////////////
 
-  const { activeResolver, requiresWildcardSupport } = await findResolver(name, chainId);
+  const { activeResolver, requiresWildcardSupport } = await findResolver(chainId, name);
 
   console.log("findResolver", { activeResolver, requiresWildcardSupport });
 
-  if (!activeResolver) {
-    // we're unable to find an active resolver for this name, return empty response
-    return makeEmptyResolverRecordsResponse(selection);
-  }
+  // we're unable to find an active resolver for this name, return empty response
+  if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
 
   //////////////////////////////////////////////////
   // 2. _resolveBatch with activeResolver, w/ ENSIP-10 Wildcard Resolution support
   //////////////////////////////////////////////////
 
   //////////////////////////////////////////////////
-  // CCIP-Read Short-Circuit for Indexed Chains:
-  //   If the activeResolver is a known OffchainLookup Resolver that exclusively defers record
-  //   resolution to an indexed chain, we can short-circuit and continue resolving the requested
-  //   records directly from that chain.
+  // CCIP-Read Short-Circuit:
+  //   If:
+  //    1) the activeResolver is a Known OffchainLookup Resolver, and
+  //    2) the plugin it defers resolution to is active,
+  //   then we can short-circuit the CCIP-Read and continue resolving the requested records directly
+  //   from the data indexed by that plugin.
   //////////////////////////////////////////////////
-  const isKnownOffchainLookupResolver =
-    !!KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId]?.[activeResolver];
-  if (isKnownOffchainLookupResolver) {
-    // NOTE: KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId] is guaranteed to exist via check above
-    const deferredToChainId = KNOWN_OFFCHAIN_LOOKUP_RESOLVERS[chainId]![activeResolver];
+  const defers = possibleKnownOffchainLookupResolverDefersTo(chainId, activeResolver);
+  if (defers && config.plugins.includes(defers.pluginName)) {
+    console.log("deferring", defers);
 
-    console.log("deferring to chain ", { deferredToChainId });
-
-    // can short-circuit CCIP-Read and defer resolution to the specified chainId
-    return resolveForward(name, selection, deferredToChainId);
+    // can short-circuit CCIP-Read and defer resolution to the specified chainId with the knowledge
+    // that ENSIndexer is actively indexing the necessary plugin on the specified chain.
+    return resolveForward(name, selection, defers.chainId);
   }
 
   //////////////////////////////////////////////////
-  // Known On-Chain Resolvers
+  // Known On-Chain Static Resolvers
   //   If:
-  //    1) activeResolver on this chain is an Onchain Static Resolver, and
-  //    2) ENSIndexer indexes this chain,
+  //    1) activeResolver is a Known Onchain Static Resolver on this chain, and
+  //    2) ENSIndexer indexes records for all Resolver contracts on this chain,
   //   then we can retrieve records directly from the database.
   //////////////////////////////////////////////////
-  const isOnchainStaticResolver = KNOWN_ONCHAIN_STATIC_RESOLVERS[chainId]?.includes(activeResolver);
-  if (isOnchainStaticResolver && isChainIndexed(chainId)) {
+  const isKnownOnchainStaticResolver =
+    getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
+  if (isKnownOnchainStaticResolver && resolverRecordsAreIndexedOnChain(chainId)) {
     console.log("fetching from index");
     const resolverId = makeResolverId(chainId, activeResolver, node);
     const resolver = await db.query.resolver.findFirst({
@@ -250,83 +264,6 @@ function makeResolveCalls(node: Node, selection: ResolverRecordsSelection) {
     // filter out falsy values, excluding them from the inferred type
     (call): call is Exclude<typeof call, undefined | null | false> => !!call,
   );
-}
-
-/**
- * Identifies the active resolver for a given ENS name, following ENSIP-10. This function parallels
- * UniversalResolver#findResolver.
- *
- * @param name - The ENS name to find the resolver for
- * @returns The resolver ID if found, null otherwise
- *
- * @example
- * ```ts
- * const resolverId = await identifyActiveResolver("sub.example.eth")
- * // Returns: "0x123..." or null if no resolver found
- * ```
- */
-async function findResolver(
-  name: Name,
-  chainId: number,
-): Promise<
-  | {
-      activeResolver: null;
-      requiresWildcardSupport: undefined;
-    }
-  | { requiresWildcardSupport: boolean; activeResolver: Address }
-> {
-  // Invariant: the specified chain must be actively indexed by ENSIndexer
-  if (!isChainIndexed(chainId)) {
-    throw new Error(
-      `Invariant: chainId ${chainId} is not actively indexed by ENSIndexer and it is unable to identify an active resolver for the name '${name}'.`,
-    );
-  }
-
-  // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
-  const names = getNameHierarchy(name);
-
-  if (names.length === 0) {
-    throw new Error(`identifyActiveResolver: Invalid name provided: '${name}'`);
-  }
-
-  console.log(` identifyActiveResolver: ${names.join(", ")} on chain ${chainId}`);
-
-  // 2. compute node of each via namehash
-  const nodes = names.map((name) => namehash(name) as Node);
-
-  console.log(` identifyActiveResolver: ${nodes.join(", ")}`);
-
-  // 3. for each domain, find its associated resolver (only on the specified chain)
-  const domainResolverRelations = await db.query.ext_domainResolverRelation.findMany({
-    where: (drr, { inArray, and, eq }) =>
-      and(
-        inArray(drr.domainId, nodes), // find Relations for the following Domains
-        eq(drr.chainId, chainId), // exclusively on the requested chainId
-      ),
-    columns: { chainId: true, domainId: true, resolverId: true }, // retrieve resolverId
-  });
-
-  // sort into the same order as `nodes`
-  domainResolverRelations.sort((a, b) =>
-    nodes.indexOf(a.domainId as Node) > nodes.indexOf(b.domainId as Node) ? 1 : -1,
-  );
-
-  console.log(" identifyActiveResolver", domainResolverRelations);
-
-  for (const drr of domainResolverRelations) {
-    // find the first one with a resolver
-    if (drr.resolverId !== null) {
-      // parse out its address
-      const [, resolverAddress] = parseResolverId(drr.resolverId);
-      return {
-        // this resolver must have wildcard support iff it was not for the first node in our hierarchy
-        requiresWildcardSupport: drr.domainId !== nodes[0],
-        activeResolver: resolverAddress,
-      };
-    }
-  }
-
-  return { activeResolver: null, requiresWildcardSupport: undefined };
 }
 
 async function supportsENSIP10Interface(chainId: number, resolverAddress: Address) {

@@ -9,6 +9,7 @@ import { EthRegistrarController as root_EthRegistrarController } from "./abis/ro
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
@@ -72,6 +73,11 @@ export default {
         abi: root_NameWrapper,
         address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
         startBlock: 16925608,
+      },
+      UniversalResolver: {
+        abi: root_UniversalResolver,
+        address: "0xaBd80E8a13596fEeA40Fd26fD6a24c3fe76F05fB",
+        startBlock: 22671701,
       },
       //
       LegacyPublicResolver: {
