@@ -47,10 +47,11 @@ const resolverRecordsAreIndexedOnChain = (chainId: number) => {
   // config.indexAdditionalResolverRecords must be true, or we should defer to the chain
   if (!config.indexAdditionalResolverRecords) return false;
 
-  // TODO: determine if the Resolver/ReverseResolver
-  // ideally can do so using the generated ponder config...
-  // or perhaps we should restructure the reverse-resolvers plugin to just `resolution` or `all-resolvers`
-  // and enforce that it's tracking
+  // TODO: determine if Resolver/ReverseResolver contracts on the specified chain are actively indexed
+  // perhaps can query the generated ponder config...
+  // perhaps should restructure the reverse-resolvers plugin to just `resolution` or `all-resolvers`
+  // and enforce that it's tracking all resolvers on all chains, including reverse resolvers, which
+  // aren't special at all, they're just specific resolvers
   return true;
 };
 
@@ -61,7 +62,26 @@ const resolverRecordsAreIndexedOnChain = (chainId: number) => {
  * @param selection selection specifying which records to resolve
  * @param chainId optional, the chain id from which to resolve records
  *
- * TODO: document with example
+ * @example
+ * await resolveForward("jesse.base.eth", {
+ *   name: true,
+ *   addresses: [evmChainIdToCoinType(mainnet.id), evmChainIdToCoinType(base.id)],
+ *   texts: ["com.twitter", "description"],
+ * })
+ *
+ * // results in
+ * {
+ *   name: { name: 'jesse.base.eth' },
+ *   addresses: {
+ *     60: '0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1',
+ *     2147492101: null
+ *   },
+ *   texts: {
+ *     'com.twitter': 'jessepollak',
+ *     description: 'base.eth builder #001'
+ *   }
+ * }
+ *
  * TODO: tracing/status with reporting to consumer
  */
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
