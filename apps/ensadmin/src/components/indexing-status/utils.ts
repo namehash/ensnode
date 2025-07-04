@@ -1,3 +1,6 @@
+import { getChainById } from "@/lib/chains";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import { BlockInfo } from "@ensnode/ponder-metadata";
 import { ChainIndexingPhaseViewModel, ChainStatusViewModel } from "./view-models";
 
 /**
