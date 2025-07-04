@@ -6,25 +6,34 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { ENSNamespaceId, getNameAvatarUrl } from "@ensnode/datasources";
+import {Address} from "viem";
 
 interface AvatarProps {
   namespaceId: ENSNamespaceId;
   name?: string;
+  address?: Address;
 }
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
->(({ className, namespaceId, name, ...props }, ref) => {
+>(({ name, address, className, namespaceId, ...props }, ref) => {
   const ensAvatarUrl = name ? getNameAvatarUrl(name, namespaceId) : null;
+
+  const fallbackValue = address?.toString() || name;
+
+  if (!fallbackValue) {
+    throw new Error("The Avatar component needs either name or address");
+  }
+
   return (
     <AvatarPrimitive.Root
       ref={ref}
       className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
       {...props}
     >
-      {ensAvatarUrl ? <AvatarImage src={ensAvatarUrl.toString()} alt={name!} /> : null}
-      <AvatarFallback name={name} />
+      {ensAvatarUrl ? <AvatarImage src={ensAvatarUrl.toString()} alt={fallbackValue} /> : null}
+      <AvatarFallback avatarGenerator={fallbackValue} />
     </AvatarPrimitive.Root>
   );
 });
@@ -42,15 +51,13 @@ const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<H
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 interface AvatarFallbackProps {
-  name?: string;
+  avatarGenerator: string;
 }
-
-const RNG_LIMIT_FOR_FALLBACK_AVATAR = 2048;
 
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & AvatarFallbackProps
->(({ className, name, ...props }, ref) => (
+>(({ className, avatarGenerator, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
@@ -60,7 +67,7 @@ const AvatarFallback = React.forwardRef<
     {...props}
   >
     <BoringAvatar
-      name={name ? name : (Math.random() * RNG_LIMIT_FOR_FALLBACK_AVATAR).toString()}
+      name={avatarGenerator}
       colors={["#093c52", "#006699", "#0080bc", "#6ba5b8", "#9dc3d0"]}
       variant="marble"
     />
