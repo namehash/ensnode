@@ -25,7 +25,7 @@ export default createPlugin({
     );
 
     return ponder.createConfig({
-      chains: { ...chainsConnectionConfig(config.rpcConfigs, chain.id) },
+      chains: chainsConnectionConfig(config.rpcConfigs, chain.id),
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),

@@ -1,4 +1,4 @@
-import { ContractConfig, DatasourceNames } from "@ensnode/datasources";
+import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { ChainConfig, createConfig } from "ponder";
 
