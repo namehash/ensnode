@@ -33,7 +33,7 @@ export default createPlugin({
         ...chainsConnectionConfig(config.rpcConfigs, threeDNSBase.chain.id),
       },
       contracts: {
-        // multi-network ThreeDNSToken indexing config
+        // multi-chain ThreeDNSToken indexing config
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           chain: {
             ...chainConfigForContract(
@@ -47,10 +47,10 @@ export default createPlugin({
               threeDNSBase.contracts.ThreeDNSToken,
             ),
           },
-          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
+          // NOTE: abi is identical in a multi-chain ponder config, just use Optimism's here
           abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
         },
-        // multi-network ThreeDNS-specific Resolver indexing config
+        // multi-chain ThreeDNS-specific Resolver indexing config
         [namespaceContract(pluginName, "Resolver")]: {
           chain: {
             ...chainConfigForContract(
@@ -64,7 +64,7 @@ export default createPlugin({
               threeDNSBase.contracts.Resolver,
             ),
           },
-          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
+          // NOTE: abi is identical in a multi-chain ponder config, just use Optimism's here
           abi: threeDNSOptimism.contracts.Resolver.abi,
         },
       },

@@ -10,14 +10,14 @@ import {
 } from "@/handlers/ReverseResolver";
 
 /**
- * Multi-Network ReverseResolver indexing functions should be registered exactly once, or Ponder will
+ * Multi-chain ReverseResolver indexing functions should be registered exactly once, or Ponder will
  * complain about multiple indexing functions being registered for these events. This boolean allows
  * this function to be idempotent — many plugins can call it, but only one will succeed, which is
- * enough to correctly register multi-network Resolver indexing handlers.
+ * enough to correctly register multi-chain Resolver indexing handlers.
  */
 let hasBeenRegistered = false;
 
-export default function attachReverseResolverHandlers() {
+export default function attach_SharedMultichainReverseResolverHandlers() {
   if (hasBeenRegistered) return;
   hasBeenRegistered = true;
 

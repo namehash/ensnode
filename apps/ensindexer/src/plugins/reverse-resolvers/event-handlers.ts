@@ -1,9 +1,9 @@
 import config from "@/config";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import attachReverseResolverHandlers from "@/plugins/multi-network/ReverseResolver";
+import attach_SharedMultichainReverseResolverHandlers from "@/plugins/multi-chain/ReverseResolver";
 
 // conditionally attach event handlers when Ponder executes this file
 if (config.plugins.includes(PluginName.ReverseResolvers)) {
-  attachReverseResolverHandlers();
+  attach_SharedMultichainReverseResolverHandlers();
 }

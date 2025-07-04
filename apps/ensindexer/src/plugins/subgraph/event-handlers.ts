@@ -1,7 +1,7 @@
 import config from "@/config";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import attach_SharedResolverHandlers from "@/plugins/multi-network/Resolver";
+import attach_SharedMultichainResolverHandlers from "@/plugins/multi-chain/Resolver";
 
 import attach_NameWrapper from "./handlers/NameWrapper";
 import attach_Registrar from "./handlers/Registrar";
@@ -13,5 +13,5 @@ if (config.plugins.includes(PluginName.Subgraph)) {
   attach_Registrar();
   attach_Registry();
 
-  attach_SharedResolverHandlers();
+  attach_SharedMultichainResolverHandlers();
 }

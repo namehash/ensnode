@@ -45,7 +45,7 @@ export default createPlugin({
         ),
 
       contracts: {
-        // a single multi-network ReverseResolver ContractConfig
+        // a single multi-chain ReverseResolver ContractConfig
         ReverseResolver: {
           // each chain's ReverseResolver gets a `chain` entry via `chainConfigForContract`
           chain: datasources.reduce((memo, datasource) => {

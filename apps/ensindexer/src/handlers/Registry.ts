@@ -301,7 +301,7 @@ export async function handleNewResolver({
         .set({ resolverId: null, resolvedAddressId: null });
     }
 
-    // NOTE(resolver-relations): unlink multi-network-compatible Domain and Resolver on this chain
+    // NOTE(resolver-relations): unlink multi-chain-compatible Domain and Resolver on this chain
     await context.db.delete(schema.ext_domainResolverRelation, {
       id: makeDomainResolverRelationId(context.chain.id, node),
     });
@@ -326,7 +326,7 @@ export async function handleNewResolver({
       });
     }
 
-    // NOTE(resolver-relations): link multi-network-compatible Domain and Resolver on this chain
+    // NOTE(resolver-relations): link multi-chain-compatible Domain and Resolver on this chain
     await upsertDomainResolverRelation(context, {
       id: makeDomainResolverRelationId(context.chain.id, node),
       chainId: context.chain.id,

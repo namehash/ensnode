@@ -22,7 +22,7 @@ import {
  * 1) upsert the Account and Resolver entities, and
  * 2) index the relevant Resolver records emitted by these events.
  *
- * They avoid inserting events, as that's handled by the multi-network Resolver handlers if a plugin
+ * They avoid inserting events, as that's handled by the multi-chain Resolver handlers if a plugin
  * activates them.
  */
 
