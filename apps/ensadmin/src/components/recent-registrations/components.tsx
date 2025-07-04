@@ -50,7 +50,7 @@ export function RecentRegistrations() {
     : null;
 
   if (indexingStatusQuery.isLoading) {
-    return <RegistrationsFallback />;
+    return <RegistrationsFallback numberOfRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
   }
 
   if (indexingStatusQuery.isError) {
@@ -87,7 +87,7 @@ export function RecentRegistrations() {
       </CardHeader>
       <CardContent>
         {isClient && indexingStatusQuery.data && (
-          <RegistrationsList ensNodeMetadata={indexingStatusQuery.data} ensNodeUrl={ensNodeUrl} />
+          <RegistrationsList ensNodeMetadata={indexingStatusQuery.data} ensNodeUrl={ensNodeUrl} numberOfLoadingRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />
         )}
       </CardContent>
     </Card>
@@ -97,6 +97,7 @@ export function RecentRegistrations() {
 interface RegistrationsListProps {
   ensNodeUrl: URL;
   ensNodeMetadata: EnsNode.Metadata;
+  numberOfLoadingRows: number;
 }
 
 /**
@@ -105,7 +106,7 @@ interface RegistrationsListProps {
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  * @param ensNodeUrl URL of currently selected ENSNode instance
  */
-function RegistrationsList({ ensNodeMetadata, ensNodeUrl }: RegistrationsListProps) {
+function RegistrationsList({ ensNodeMetadata, ensNodeUrl, numberOfLoadingRows }: RegistrationsListProps) {
   const namespaceId = ensNodeMetadata.env.NAMESPACE;
 
   const recentRegistrationsQuery = useRecentRegistrations(
@@ -115,7 +116,7 @@ function RegistrationsList({ ensNodeMetadata, ensNodeUrl }: RegistrationsListPro
   );
 
   if (recentRegistrationsQuery.isLoading) {
-    return <RegistrationsFallback />;
+    return <RegistrationsFallback numberOfRows={numberOfLoadingRows}/>;
   }
 
   if (recentRegistrationsQuery.isError) {
@@ -162,7 +163,7 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
     <TableRow>
       <TableCell>
-        <NameDisplay namespaceId={namespaceId} name={registration.name} showExternalLink={true} />
+        <NameDisplay name={registration.name} namespaceId={namespaceId} showExternalLink={true} />
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} />
@@ -177,10 +178,10 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   );
 }
 
-function RegistrationsFallback() {
+function RegistrationsFallback(numberOfRows: number) {
   return (
     <div className="animate-pulse space-y-4">
-      {[...Array(MAX_NUMBER_OF_LATEST_REGISTRATIONS)].map((_, idx) => (
+      {[...Array(numberOfRows)].map((_, idx) => (
         <div key={`registrationFallback#${idx}`} className="h-10 bg-muted rounded w-full"></div>
       ))}
     </div>

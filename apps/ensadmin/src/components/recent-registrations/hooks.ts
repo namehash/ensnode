@@ -74,7 +74,7 @@ function toRegistration(
  * Fetches info about the most recent registrations that have been indexed.
  */
 async function fetchRecentRegistrations(
-  baseUrl: URL,
+  ensNodeUrl: URL,
   maxResults: number,
   namespaceId: ENSNamespaceId,
 ): Promise<Registration[]> {
@@ -100,7 +100,7 @@ async function fetchRecentRegistrations(
     }
   `;
 
-  const response = await fetch(new URL(`/subgraph`, baseUrl), {
+  const response = await fetch(new URL(`/subgraph`, ensNodeUrl), {
     method: "POST",
     headers: {
       "content-type": "application/json",

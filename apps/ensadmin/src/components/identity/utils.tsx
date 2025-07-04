@@ -3,8 +3,8 @@ import { ExternalLink } from "lucide-react";
 import { Address } from "viem";
 
 interface NameDisplayProps {
-  namespaceId: ENSNamespaceId;
   name: string;
+  namespaceId: ENSNamespaceId;
   showExternalLink?: boolean;
 }
 
@@ -34,8 +34,8 @@ export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplay
 }
 
 interface AddressDisplayProps {
-  namespaceId: ENSNamespaceId;
   address: Address;
+  namespaceId: ENSNamespaceId;
   showExternalLink?: boolean;
 }
 

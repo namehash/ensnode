@@ -42,7 +42,7 @@ export function Identity({
   if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
     // TODO: come back to this later only when ENSNode exposes its own APIs for primary name lookups
 
-    return <AddressDisplay namespaceId={namespaceId} address={address} />;
+    return <AddressDisplay address={address} namespaceId={namespaceId} />;
   }
 
   const ensRootChainId = getENSRootChainId(namespaceId);
@@ -66,8 +66,8 @@ export function Identity({
   if (isError) {
     return (
       <AddressDisplay
-        namespaceId={namespaceId}
         address={address}
+        namespaceId={namespaceId}
         showExternalLink={showExternalLink}
       />
     );
@@ -77,11 +77,11 @@ export function Identity({
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && <Avatar className="h-6 w-6" namespaceId={namespaceId} name={ensName} />}
       {ensName ? (
-        <NameDisplay namespaceId={namespaceId} name={ensName} showExternalLink={showExternalLink} />
+        <NameDisplay name={ensName} namespaceId={namespaceId} showExternalLink={showExternalLink} />
       ) : (
         <AddressDisplay
-          namespaceId={namespaceId}
           address={address}
+          namespaceId={namespaceId}
           showExternalLink={showExternalLink}
         />
       )}
