@@ -1,34 +1,12 @@
-import { type CoinType, bigintToCoinType } from "@ensnode/ensnode-sdk";
+import { ResolveCallsAndResults } from "@/api/lib/resolve-calls-and-results";
+import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
+import { CoinType, bigintToCoinType } from "@ensnode/ensnode-sdk";
 
 // TODO: replace with some sort of inferred typing from dizzle
 export interface IndexedResolverRecords {
   name: string | null;
   addressRecords: { coinType: bigint; address: string }[];
   textRecords: { key: string; value: string }[];
-}
-
-/**
- * Encodes a selection of Resolver records in the context of a specific Name.
- */
-export interface ResolverRecordsSelection {
-  // TODO: support legacy addr() record?
-
-  /**
-   * Whether to fetch the name's `name` record.
-   */
-  name?: boolean;
-
-  /**
-   * Which coinTypes to fetch address records for.
-   */
-  addresses?: CoinType[];
-
-  /**
-   * Which keys to fetch text records for.
-   */
-  texts?: string[];
-
-  // TODO: include others as/if necessary
 }
 
 type ResolverRecordsResponseBase = {
@@ -124,12 +102,12 @@ export function makeRecordsResponseFromIndexedRecords<SELECTION extends Resolver
 
 export function makeRecordsResponseFromResolveResults<SELECTION extends ResolverRecordsSelection>(
   selection: SELECTION,
-  results: { functionName: string; args: readonly unknown[]; result: unknown }[],
-) {
+  results: ResolveCallsAndResults<SELECTION>,
+): ResolverRecordsResponse<SELECTION> {
   const response: Partial<ResolverRecordsResponse<any>> = {};
 
   if (selection.name) {
-    const nameResult = results.find(({ functionName }) => functionName === "name");
+    const nameResult = results.find(({ call: { functionName } }) => functionName === "name");
     const name = (nameResult?.result as string | null) || null;
     response.name = name;
   }
@@ -138,7 +116,7 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
     response.addresses = selection.addresses.reduce(
       (memo, coinType) => {
         const addressRecord = results.find(
-          ({ functionName, args }) =>
+          ({ call: { functionName, args } }) =>
             functionName === "addr" && bigintToCoinType(args[1] as bigint) === coinType,
         );
         memo[coinType] = (addressRecord?.result as string | null) || null;
@@ -152,7 +130,7 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
     response.texts = selection.texts.reduce(
       (memo, key) => {
         const textRecord = results.find(
-          ({ functionName, args }) => functionName === "text" && args[1] === key,
+          ({ call: { functionName, args } }) => functionName === "text" && args[1] === key,
         );
         memo[key] = (textRecord?.result as string | null) || null;
         return memo;

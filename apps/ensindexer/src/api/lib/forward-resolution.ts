@@ -1,18 +1,4 @@
 import { db, publicClients } from "ponder:api";
-import { findResolver } from "@/api/lib/find-resolver";
-import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
-import { getKnownOnchainStaticResolverAddresses } from "@/api/lib/known-onchain-static-resolver";
-import { areResolverRecordsAreIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
-import config from "@/config";
-import { makeResolverId } from "@/lib/ids";
-import {
-  IndexedResolverRecords,
-  ResolverRecordsResponse,
-  ResolverRecordsSelection,
-  makeEmptyResolverRecordsResponse,
-  makeRecordsResponseFromIndexedRecords,
-  makeRecordsResponseFromResolveResults,
-} from "@/lib/lib-resolution";
 import {
   DatasourceNames,
   ENSNamespaceIds,
@@ -20,16 +6,28 @@ import {
   getENSRootChainId,
 } from "@ensnode/datasources";
 import { type Name, Node } from "@ensnode/ensnode-sdk";
+import { Address, namehash } from "viem";
+
+import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
+import { findResolver } from "@/api/lib/find-resolver";
+import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
+import { getKnownOnchainStaticResolverAddresses } from "@/api/lib/known-onchain-static-resolver";
 import {
-  Address,
-  decodeAbiParameters,
-  encodeFunctionData,
-  getAbiItem,
-  isAddress,
-  namehash,
-  toHex,
-} from "viem";
-import { packetToBytes } from "viem/ens";
+  executeResolveCalls,
+  interpretRawCallsAndResults,
+  makeResolveCalls,
+} from "@/api/lib/resolve-calls-and-results";
+import { areResolverRecordsAreIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
+import {
+  IndexedResolverRecords,
+  ResolverRecordsResponse,
+  makeEmptyResolverRecordsResponse,
+  makeRecordsResponseFromIndexedRecords,
+  makeRecordsResponseFromResolveResults,
+} from "@/api/lib/resolver-records-response";
+import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
+import config from "@/config";
+import { makeResolverId } from "@/lib/ids";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
@@ -183,115 +181,33 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   }
 
   // 2.1 requireResolver() — validate behavior
-  const isExtendedResolver = await supportsENSIP10Interface(chainId, activeResolver);
+  const isExtendedResolver = await supportsENSIP10Interface({
+    address: activeResolver,
+    publicClient,
+  });
+
   if (!isExtendedResolver && requiresWildcardSupport) {
     // requires exact match if not extended resolver
     // TODO: should this return empty response instead?
     throw new Error(
-      `The active resolver for '${name}' (which was located via ${activeName}) _must_ be a wildcard-capable IExtendedResolver, but ${activeResolver} on chain id ${chainId} did not respond correctly to supportsInterface(___).`,
+      `The active resolver for '${name}' (via '${activeName}') _must_ be a wildcard-capable IExtendedResolver, but ${activeResolver} on chain id ${chainId} did not respond correctly to ENSIP-10 Wildcard Resolution supportsInterface().`,
     );
   }
 
-  // 2.2 For each record to resolve call Resolver.resolve()
-  // NOTE: viem#readContract implements CCIP-Read, so we get that behavior for free
-  // NOTE: viem#multicall doesn't implement CCIP-Read so maybe this can be optimized further
-  const ResolverContract = { abi: RESOLVER_ABI, address: activeResolver } as const;
-  const results = await Promise.all(
-    calls.map(async (call) => {
-      // NOTE: ENSIP-10 —  If extended resolver, resolver.resolve(name, data)
-      if (requiresWildcardSupport) {
-        const value = await publicClient.readContract({
-          ...ResolverContract,
-          functionName: "resolve",
-          args: [
-            toHex(packetToBytes(name)), // DNS-encode `name` for resolve()
-            encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
-          ],
-        });
+  // 2.2 Execute each record's call against the active Resolver
+  const rawResults = await executeResolveCalls<SELECTION>({
+    name,
+    resolverAddress: activeResolver,
+    requiresWildcardSupport,
+    calls,
+    publicClient,
+  });
 
-        // ENSIP-10 resolve() always returns bytes that need to be decoded
-        const results = decodeAbiParameters(
-          getAbiItem({ abi: RESOLVER_ABI, name: call.functionName, args: call.args }).outputs,
-          value,
-        );
+  // interpret the results beyond simple return values
+  const results = interpretRawCallsAndResults(rawResults);
 
-        // NOTE: type-guaranteed to have at least 1 result (because each abi item's outputs.length > 0)
-        const result = results[0];
-
-        // futher interpret the results
-        switch (call.functionName) {
-          // make sure address is valid (i.e. specifically not empty bytes)
-          case "addr":
-            return isAddress(result) ? result : null;
-          // coalesce falsy string values to null
-          case "name":
-          case "text":
-            return result || null;
-        }
-      }
-
-      // if not extended resolver, resolve directly
-      // NOTE: discrimminate against the `functionName` type to correctly infer return types
-      switch (call.functionName) {
-        case "name":
-          return publicClient.readContract({ ...ResolverContract, ...call });
-        case "addr":
-          return publicClient.readContract({ ...ResolverContract, ...call });
-        case "text":
-          return publicClient.readContract({ ...ResolverContract, ...call });
-      }
-    }),
-  );
-
-  // interleave calls and results
-  const callsWithResults = calls.map((call, i) => ({ ...call, result: results[i] }));
-  console.log("↳ resolve:", callsWithResults);
+  console.log(" ↳ executeResolveCalls:", results);
 
   // 5. Return record values
-  return makeRecordsResponseFromResolveResults(selection, callsWithResults);
-}
-
-// builds an array of calls from a ResolverRecordsSelection
-function makeResolveCalls(node: Node, selection: ResolverRecordsSelection) {
-  return [
-    // TODO: legacy addr record?
-    // selection.addr && ({ functionName: "addr(bytes32)", args: [node] } as const),
-    selection.name && ({ functionName: "name", args: [node] } as const),
-    ...(selection.addresses ?? []).map(
-      (coinType) =>
-        ({
-          functionName: "addr",
-          args: [node, BigInt(coinType)],
-        }) as const,
-    ),
-    ...(selection.texts ?? []).map(
-      (key) =>
-        ({
-          functionName: "text",
-          args: [node, key],
-        }) as const,
-    ),
-  ].filter(
-    // filter out falsy values, excluding them from the inferred type
-    (call): call is Exclude<typeof call, undefined | null | false> => !!call,
-  );
-}
-
-async function supportsENSIP10Interface(chainId: number, resolverAddress: Address) {
-  try {
-    // NOTE: publicClients[chainId] guaranteed to exist
-    const supportsInterface = await publicClients[chainId]!.readContract({
-      abi: RESOLVER_ABI,
-      functionName: "supportsInterface",
-      address: resolverAddress,
-      // ENSIP-10 Wildcard Resolution interface selector
-      // see https://docs.ens.domains/ensip/10
-      args: ["0x9061b923"],
-    });
-
-    return supportsInterface;
-  } catch {
-    // this call reverted for whatever reason — this contract does not support the interface
-    return false;
-  }
+  return makeRecordsResponseFromResolveResults(selection, results);
 }
