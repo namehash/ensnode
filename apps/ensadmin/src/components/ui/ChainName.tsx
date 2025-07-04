@@ -37,7 +37,7 @@ const chainNames = new Map<number, string>([
 export function getChainName(chainId: number): string {
   const chainName = chainNames.get(chainId);
 
-  if (chainName) {
+  if (!chainName) {
     throw new Error(`Chain ID "${chainId}" doesn't have an assigned name`);
   }
 
