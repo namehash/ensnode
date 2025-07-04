@@ -9,12 +9,14 @@ import { parseResolverId } from "@/lib/ids";
 
 type FindResolverResult =
   | {
+      activeName: null;
       activeResolver: null;
       requiresWildcardSupport: undefined;
     }
-  | { requiresWildcardSupport: boolean; activeResolver: Address };
+  | { activeName: Name; requiresWildcardSupport: boolean; activeResolver: Address };
 
 const NULL_RESULT: FindResolverResult = {
+  activeName: null,
   activeResolver: null,
   requiresWildcardSupport: undefined,
 };
@@ -63,7 +65,7 @@ async function findResolverWithUniversalResolver(
     },
   } = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 
-  const [activeResolver, , offset] = await publicClients[chainId]!.readContract({
+  const [activeResolver, , _offset] = await publicClients[chainId]!.readContract({
     address,
     abi,
     functionName: "findResolver",
@@ -72,7 +74,24 @@ async function findResolverWithUniversalResolver(
 
   if (isAddressEqual(activeResolver, zeroAddress)) return NULL_RESULT;
 
+  // will never occur, exclusively for the type checking...
+  if (_offset > Number.MAX_SAFE_INTEGER) {
+    throw new Error(
+      `Invariant: UniversalResolver returned an offset (${_offset}) larger than MAX_SAFE_INTEGER.`,
+    );
+  }
+  const offset = Number(_offset);
+
+  const names = getNameHierarchy(name);
+  const activeName = names[offset];
+  if (!activeName) {
+    throw new Error(
+      `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the set of possible names in the hierarchy.`,
+    );
+  }
+
   return {
+    activeName,
     activeResolver,
     // this resolver must have wildcard support if it was not the 0th offset
     requiresWildcardSupport: offset > 0,
@@ -132,10 +151,22 @@ async function findResolverWithIndex(chainId: number, name: Name): Promise<FindR
       // check here to encode that explicitly.
       if (isAddressEqual(resolverAddress, zeroAddress)) continue;
 
+      // map the drr's domainId (node) back to its name in `names`
+      const offset = nodes.indexOf(drr.domainId as Node);
+      const activeName = names[offset];
+
+      // will never occur, exlusively for typechecking
+      if (!activeName) {
+        throw new Error(
+          `Invariant(findResolverWithIndex): activeName could not be determined names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's domainId: ${drr.domainId}.`,
+        );
+      }
+
       return {
+        activeName,
         activeResolver: resolverAddress,
-        // this resolver must have wildcard support iff it was not for the first node in our hierarchy
-        requiresWildcardSupport: drr.domainId !== nodes[0],
+        // this resolver must have wildcard support if it was not for the first node in our hierarchy
+        requiresWildcardSupport: offset > 0,
       };
     }
   }

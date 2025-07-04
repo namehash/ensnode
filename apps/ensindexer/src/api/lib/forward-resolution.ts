@@ -107,7 +107,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // 1. Identify the active resolver for the name on the specified chain. This requires
   //////////////////////////////////////////////////
 
-  const { activeResolver, requiresWildcardSupport } = await findResolver(chainId, name);
+  const { activeName, activeResolver, requiresWildcardSupport } = await findResolver(chainId, name);
 
   // we're unable to find an active resolver for this name, return empty response
   if (!activeResolver) {
@@ -188,7 +188,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     // requires exact match if not extended resolver
     // TODO: should this return empty response instead?
     throw new Error(
-      `The active resolver for '${name}' _must_ be a wildcard-capable IExtendedResolver, but ${activeResolver} on chain id ${chainId} did not respond correctly to supportsInterface(___).`,
+      `The active resolver for '${name}' (which was located via ${activeName}) _must_ be a wildcard-capable IExtendedResolver, but ${activeResolver} on chain id ${chainId} did not respond correctly to supportsInterface(___).`,
     );
   }
 
