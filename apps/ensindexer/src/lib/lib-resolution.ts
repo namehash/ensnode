@@ -8,27 +8,43 @@ export interface IndexedResolverRecords {
 }
 
 /**
- * Encodes a selection of Resolver records in the context of a specific Node.
+ * Encodes a selection of Resolver records in the context of a specific Name.
  */
 export interface ResolverRecordsSelection {
   // TODO: support legacy addr() record?
-  // whether to fetch the addr record
-  // addr?: boolean;
-  // whether to fetch the name record
+
+  /**
+   * Whether to fetch the name's `name` record.
+   */
   name?: boolean;
 
-  // which coinTypes to fetch address records for
+  /**
+   * Which coinTypes to fetch address records for.
+   */
   addresses?: CoinType[];
 
-  // which keys to fetch text records for
+  /**
+   * Which keys to fetch text records for.
+   */
   texts?: string[];
 
   // TODO: include others as/if necessary
 }
 
 type ResolverRecordsResponseBase = {
+  /**
+   * The name record.
+   */
   name: string | null;
+
+  /**
+   * Address records, keyed by CoinType.
+   */
   addresses: Record<CoinType, string | null>;
+
+  /**
+   * Text records, keyed by key.
+   */
   texts: Record<string, string | null>;
 };
 
