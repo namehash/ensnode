@@ -98,15 +98,11 @@ async function findResolverWithIndex(chainId: number, name: Name): Promise<FindR
   const names = getNameHierarchy(name);
 
   if (names.length === 0) {
-    throw new Error(`identifyActiveResolver: Invalid name provided: '${name}'`);
+    throw new Error(`findResolverWithIndex: Invalid name provided: '${name}'`);
   }
-
-  console.log(` identifyActiveResolver: ${names.join(", ")} on chain ${chainId}`);
 
   // 2. compute node of each via namehash
   const nodes = names.map((name) => namehash(name) as Node);
-
-  console.log(` identifyActiveResolver: ${nodes.join(", ")}`);
 
   // 3. for each domain, find its associated resolver (only on the specified chain)
   const domainResolverRelations = await db.query.ext_domainResolverRelation.findMany({
@@ -118,13 +114,12 @@ async function findResolverWithIndex(chainId: number, name: Name): Promise<FindR
     columns: { chainId: true, domainId: true, resolverId: true }, // retrieve resolverId
   });
 
-  // sort into the same order as `nodes`
+  // sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
   domainResolverRelations.sort((a, b) =>
     nodes.indexOf(a.domainId as Node) > nodes.indexOf(b.domainId as Node) ? 1 : -1,
   );
 
-  console.log(" identifyActiveResolver", domainResolverRelations);
-
+  // 4. iterate up the hierarchy and return the first valid resolver
   for (const drr of domainResolverRelations) {
     // find the first one with a resolver
     if (drr.resolverId !== null) {
@@ -145,5 +140,6 @@ async function findResolverWithIndex(chainId: number, name: Name): Promise<FindR
     }
   }
 
+  // 5. unable to find an active resolver
   return NULL_RESULT;
 }

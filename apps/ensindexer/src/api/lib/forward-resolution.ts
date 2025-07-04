@@ -19,7 +19,7 @@ import {
   getDatasource,
   getENSRootChainId,
 } from "@ensnode/datasources";
-import { type Name, Node, PluginName } from "@ensnode/ensnode-sdk";
+import { type Name, Node } from "@ensnode/ensnode-sdk";
 import {
   Address,
   decodeAbiParameters,
@@ -49,6 +49,8 @@ const resolverRecordsAreIndexedOnChain = (chainId: number) => {
 
   // TODO: determine if the Resolver/ReverseResolver
   // ideally can do so using the generated ponder config...
+  // or perhaps we should restructure the reverse-resolvers plugin to just `resolution` or `all-resolvers`
+  // and enforce that it's tracking
   return true;
 };
 
@@ -67,7 +69,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   selection: SELECTION,
   chainId: number = ensRootChainId,
 ): Promise<ResolverRecordsResponse<SELECTION>> {
-  console.log("resolveForward", { name, selection, chainId });
+  console.log(`— resolveForward(${name}, ${JSON.stringify(selection)}, ${chainId})`);
 
   // TODO: need to manage state drift between ENSIndexer and RPC
   // could acquire a "most recently indexed" blockNumber or blockHash for this operation based on
@@ -104,10 +106,13 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
   const { activeResolver, requiresWildcardSupport } = await findResolver(chainId, name);
 
-  console.log("findResolver", { activeResolver, requiresWildcardSupport });
-
   // we're unable to find an active resolver for this name, return empty response
-  if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
+  if (!activeResolver) {
+    console.log(` ↳ findResolver: no active resolver, returning empty response`);
+    return makeEmptyResolverRecordsResponse(selection);
+  }
+
+  console.log(` ↳ findResolver: ${activeResolver}, Requires Wildcard? ${requiresWildcardSupport}`);
 
   //////////////////////////////////////////////////
   // 2. _resolveBatch with activeResolver, w/ ENSIP-10 Wildcard Resolution support
@@ -123,7 +128,9 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   //////////////////////////////////////////////////
   const defers = possibleKnownOffchainLookupResolverDefersTo(chainId, activeResolver);
   if (defers && config.plugins.includes(defers.pluginName)) {
-    console.log("deferring", defers);
+    console.log(
+      ` ↳  ${chainId}:${activeResolver} is Known Offchain Lookup Resolver, deferring to ${defers.pluginName} on chain ${defers.chainId}`,
+    );
 
     // can short-circuit CCIP-Read and defer resolution to the specified chainId with the knowledge
     // that ENSIndexer is actively indexing the necessary plugin on the specified chain.
@@ -140,7 +147,9 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   const isKnownOnchainStaticResolver =
     getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
   if (isKnownOnchainStaticResolver && resolverRecordsAreIndexedOnChain(chainId)) {
-    console.log("fetching from index");
+    console.log(
+      ` ↳ ${chainId}:${activeResolver} is a Known Onchain Static Resolver, retrieving records ENSIndexer`,
+    );
     const resolverId = makeResolverId(chainId, activeResolver, node);
     const resolver = await db.query.resolver.findFirst({
       where: (resolver, { eq }) => eq(resolver.id, resolverId),
@@ -163,15 +172,14 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // NOTE: from here, _must_ execute EVM code to be compliant with ENS Protocol.
   // i.e. must execute resolve() to retrieve active record values
 
-  // Invariant: the only chainIds we should be resolving records one at this point are those that
-  // ENSIndexer is actively indexing.
+  // Invariant: the only chainIds we should be resolving records on at this point are those that
+  // ENSIndexer has an rpcConfig for (i.e. is actively indexing).
   const publicClient = publicClients[chainId];
   if (!publicClient) {
     throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
   }
 
   // 2.1 requireResolver() — validate behavior
-  // TODO: implement ERC165 check on this resolver
   const isExtendedResolver = await supportsENSIP10Interface(chainId, activeResolver);
   if (!isExtendedResolver && requiresWildcardSupport) {
     // requires exact match if not extended resolver
@@ -183,7 +191,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
   // 2.2 For each record to resolve call Resolver.resolve()
   // NOTE: viem#readContract implements CCIP-Read, so we get that behavior for free
-  // NOTE: viem#multicall doesn't implement CCIP-Read so maybe this can be optimized
+  // NOTE: viem#multicall doesn't implement CCIP-Read so maybe this can be optimized further
   const ResolverContract = { abi: RESOLVER_ABI, address: activeResolver } as const;
   const results = await Promise.all(
     calls.map(async (call) => {
@@ -219,8 +227,8 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
         }
       }
 
-      // discrimminate against the `functionName` type so the inferred types of `readContract` are
-      // accurate
+      // if not extended resolver, resolve directly
+      // NOTE: discrimminate against the `functionName` type to correctly infer return types
       switch (call.functionName) {
         case "name":
           return publicClient.readContract({ ...ResolverContract, ...call });
@@ -234,7 +242,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
   // interleave calls and results
   const callsWithResults = calls.map((call, i) => ({ ...call, result: results[i] }));
-  console.log("forwardResolve: resolve()", callsWithResults);
+  console.log("↳ resolve:", callsWithResults);
 
   // 5. Return record values
   return makeRecordsResponseFromResolveResults(selection, callsWithResults);
