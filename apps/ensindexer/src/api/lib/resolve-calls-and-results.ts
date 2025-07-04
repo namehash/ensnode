@@ -2,12 +2,14 @@ import type { Name, Node } from "@ensnode/ensnode-sdk";
 import {
   type Address,
   type PublicClient,
+  RpcRequestError,
   decodeAbiParameters,
   encodeFunctionData,
   getAbiItem,
   getAddress,
   isAddress,
   isAddressEqual,
+  size,
   toHex,
   zeroAddress,
 } from "viem";
@@ -37,11 +39,11 @@ export type ResolveCallsAndRawResults<SELECTION extends ResolverRecordsSelection
   call: ResolveCalls<SELECTION>[number];
   result: ResolveCalls<SELECTION>[number] extends { functionName: infer FN }
     ? FN extends "name"
-      ? string
+      ? string | null
       : FN extends "addr"
-        ? string
+        ? string | null
         : FN extends "text"
-          ? string
+          ? string | null
           : unknown
     : unknown;
 }>;
@@ -113,6 +115,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
   const ResolverContract = { abi: RESOLVER_ABI, address: resolverAddress } as const;
+
   return await Promise.all(
     calls.map(async (call) => {
       // NOTE: ENSIP-10 —  If extended resolver, resolver.resolve(name, data)
@@ -125,6 +128,17 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
             encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
           ],
         });
+
+        // console.log(
+        //   call.functionName,
+        //   toHex(packetToBytes(name)),
+        //   encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
+        // );
+
+        if (size(value) === 0) {
+          // resolve() returned empty bytes or reverted
+          return { call, result: null };
+        }
 
         // ENSIP-10 resolve() always returns bytes that need to be decoded
         const results = decodeAbiParameters(
@@ -164,6 +178,9 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
   callsAndRawResults: ResolveCallsAndRawResults<SELECTION>,
 ): ResolveCallsAndResults<SELECTION> {
   return callsAndRawResults.map(({ call, result }) => {
+    // pass along null results, nothing to do
+    if (result === null) return { call, result };
+
     switch (call.functionName) {
       // make sure address is valid (i.e. specifically not empty bytes)
       case "addr": {
