@@ -186,7 +186,7 @@ interface BlockNumberProps {
 }
 
 /**
- * Component to display a block number.
+ * Displays the block number for a BlockInfo.
  *
  * Optionally provides a link to the block details page on the chain's designated block explorer page.
  * If the chain has no known block explorer, just displays the block number (without link).
@@ -548,7 +548,7 @@ function ChainIndexingStatus(props: ChainIndexingStatusProps) {
 
   return (
     <div key={chainStatus.chainId} className="flex items-center">
-      {/* Chain label */}
+      {/* ChainName label */}
       <div className="w-24 pr-3 flex flex-col">
         <ChainName chainId={chainStatus.chainId} className="text-sm font-medium"></ChainName>
       </div>

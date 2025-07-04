@@ -23,8 +23,8 @@ export interface ChainIconProps {
 }
 
 /**
- * Mapping of chain's id to its icon.
- * Based on standards organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
+ * Mapping of chain id to chain icon.
+ * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
 const chainIcons = new Map<number, React.ReactNode>([
   [mainnet.id, <EthereumIcon width={18} height={18} />],
@@ -39,14 +39,11 @@ const chainIcons = new Map<number, React.ReactNode>([
 ]);
 
 /**
- * Renders an icon based on the provided chain ID.
+ * Renders an icon for the provided chain ID.
  */
 export function ChainIcon({ chainId }: ChainIconProps) {
   if (!chainIcons.has(chainId)) {
-    return <></>;
-    //TODO: decide what to do with unknown chain IDs
-    // return empty fragment or perhaps
-    // throw new Error(`Chain ID "${chainId}" doesn't have an assigned icon`);
+    throw new Error(`Chain ID "${chainId}" doesn't have an assigned icon`);
   }
 
   return chainIcons.get(chainId);

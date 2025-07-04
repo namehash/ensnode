@@ -16,11 +16,10 @@ export interface ChainNameProps {
 }
 
 /**
- * Mapping of chain's id to its prettified name.
- * Based on standards organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
+ * Mapping of chain id to prettified chain name.
+ * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
 const chainNames = new Map<number, string>([
-  //TODO: these prettified versions of names will probably change to better accommodate our needs
   [mainnet.id, "Ethereum"],
   [base.id, "Base"],
   [sepolia.id, "Ethereum Sepolia"],
@@ -33,11 +32,11 @@ const chainNames = new Map<number, string>([
 ]);
 
 /**
- * Renders a prettified chain name based on the provided chain ID.
+ * Renders a prettified chain name for the provided chain ID.
  */
 export function ChainName({ chainId, className }: ChainNameProps) {
   if (!chainNames.has(chainId)) {
-    throw new Error(`Chain ID "${chainId}" doesn't have an assigned icon`);
+    throw new Error(`Chain ID "${chainId}" doesn't have an assigned name`);
   }
 
   return <p className={className}>{chainNames.get(chainId)}</p>;
