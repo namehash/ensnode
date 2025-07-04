@@ -87,7 +87,11 @@ export function RecentRegistrations() {
       </CardHeader>
       <CardContent>
         {isClient && indexingStatusQuery.data && (
-          <RegistrationsList ensNodeMetadata={indexingStatusQuery.data} ensNodeUrl={ensNodeUrl} numberOfLoadingRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />
+          <RegistrationsList
+            ensNodeMetadata={indexingStatusQuery.data}
+            ensNodeUrl={ensNodeUrl}
+            numberOfLoadingRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS}
+          />
         )}
       </CardContent>
     </Card>
@@ -106,7 +110,11 @@ interface RegistrationsListProps {
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  * @param ensNodeUrl URL of currently selected ENSNode instance
  */
-function RegistrationsList({ ensNodeMetadata, ensNodeUrl, numberOfLoadingRows }: RegistrationsListProps) {
+function RegistrationsList({
+  ensNodeMetadata,
+  ensNodeUrl,
+  numberOfLoadingRows,
+}: RegistrationsListProps) {
   const namespaceId = ensNodeMetadata.env.NAMESPACE;
 
   const recentRegistrationsQuery = useRecentRegistrations(
@@ -116,7 +124,7 @@ function RegistrationsList({ ensNodeMetadata, ensNodeUrl, numberOfLoadingRows }:
   );
 
   if (recentRegistrationsQuery.isLoading) {
-    return <RegistrationsListLoading numberOfRows={numberOfLoadingRows}/>;
+    return <RegistrationsListLoading numberOfRows={numberOfLoadingRows} />;
   }
 
   if (recentRegistrationsQuery.isError) {
