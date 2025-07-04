@@ -16,7 +16,6 @@ const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
 >(({ className, namespaceId, name, ...props }, ref) => {
-  // Get ENS avatar URL
   const ensAvatarUrl = name ? getNameAvatarUrl(name, namespaceId) : null;
   return (
     <AvatarPrimitive.Root

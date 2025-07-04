@@ -19,7 +19,10 @@ interface IdentityProps {
 
 /**
  * Displays an ENS identity (name, avatar, etc.) for an Ethereum address on the provided ENS namespace.
- * It can display an avatar if available, a link to the ENS name, or a truncated address.
+ *
+ * If the provided address has a primary name set, displays that primary name and links to the profile for that name.
+ * Else, if the provided address doesn't have a primary name, displays the truncated address and links to the profile for that address.
+ * Also, optionally displays an avatar image and external link.
  */
 export function Identity({
   address,
@@ -37,15 +40,14 @@ export function Identity({
 
   // if the ENS namespace is the ens-test-env, always show the truncated address and not look up the primary name.
   if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
-    // TODO: come back to this later after introducing a mechanism for ENSNode
-    //  to optionally pass an RPC endpoint ENSAdmin for it to make lookups such as this (for ens-test-env).
+    // TODO: come back to this later only when ENSNode exposes its own APIs for primary name lookups
 
     return <AddressDisplay namespaceId={namespaceId} address={address} />;
   }
 
   const ensRootChainId = getENSRootChainId(namespaceId);
 
-  // Use the ENS name hook from wagmi
+  // Lookup the primary name for address using wagmi
   const {
     data: ensName,
     isLoading,
@@ -60,7 +62,7 @@ export function Identity({
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
-  // If there is an error, show the address
+  // If there is an error looking up the primary name, fallback to showing the address
   if (isError) {
     return (
       <AddressDisplay

@@ -28,7 +28,7 @@ import { useRecentRegistrations } from "./hooks";
 const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
 /**
- * Displays a list of most recently indexed registrations and a date of most recently indexed block
+ * Displays a list of most recently indexed registrations and the date of the most recently indexed block
  */
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
@@ -156,7 +156,7 @@ interface RegistrationRowProps {
 }
 
 /**
- * Displays the data of a single recently indexed registration
+ * Displays the data of a single Registration within a row
  */
 function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (

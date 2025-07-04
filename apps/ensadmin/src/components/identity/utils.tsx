@@ -9,8 +9,9 @@ interface NameDisplayProps {
 }
 
 /**
- * Component to display an ENS name.
- * Optionally provides a link to the name details page on the ENS Manager App. If not, or if the ENS namespace has no known ENS Manager App, just displays the name (without link).
+ * Displays an ENS name.
+ * If the ENS namespace has a known ENS Manager App, includes a link to the view the profile associated with the name within that ENS namespace.
+ * Optionally shows an external link icon.
  */
 export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplayProps) {
   const ensAppNameDetailsUrl = getNameDetailsUrl(name, namespaceId);
@@ -39,8 +40,9 @@ interface AddressDisplayProps {
 }
 
 /**
- * Component to display a truncated address.
- * It displays a link to the address details page on ENS app, or just the address if the ENS namespace has no dedicated ENS App.
+ * Displays a truncated address.
+ * If the ENS namespace has a known ENS Manager App, includes a link to the view details of the address within that ENS namespace.
+ * Optionally shows an external link icon.
  */
 export function AddressDisplay({ address, namespaceId, showExternalLink }: AddressDisplayProps) {
   // Truncate address for display

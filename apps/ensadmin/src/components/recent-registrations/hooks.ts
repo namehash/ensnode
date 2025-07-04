@@ -29,7 +29,7 @@ interface RegistrationResult {
 
 /**
  * Determines the effective owner of a domain.
- * If the owner is the NameWrapper contract, returns the wrapped owner instead.
+ * If the owner is the NameWrapper contract with the specified ENS namespace, returns the wrapped owner instead.
  */
 function getEffectiveOwner(
   registrationResult: RegistrationResult,
