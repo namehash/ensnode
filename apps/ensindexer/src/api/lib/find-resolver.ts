@@ -131,8 +131,10 @@ async function findResolverWithIndex(chainId: number, name: Name): Promise<FindR
       // parse out its address
       const { address: resolverAddress } = parseResolverId(drr.resolverId);
 
-      // if the name has its resolver set to the zeroAddress, skip it and continue traversing the name
-      // hierarchy
+      // NOTE: this zeroAddress check is not strictly necessary, as ENSIndexer encodes a zeroAddress
+      // resolver as the _absence_ of a Domain-Resolver relation, so there is no case where a
+      // Domain-Resolver relation exists and the resolverAddress is zeroAddress, but we include this
+      // check here to encode that explicitly.
       if (isAddressEqual(resolverAddress, zeroAddress)) continue;
 
       return {
