@@ -50,7 +50,7 @@ export function RecentRegistrations() {
     : null;
 
   if (indexingStatusQuery.isLoading) {
-    return <RegistrationsFallback numberOfRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
+    return <RegistrationsListLoading numberOfRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
   }
 
   if (indexingStatusQuery.isError) {
@@ -116,7 +116,7 @@ function RegistrationsList({ ensNodeMetadata, ensNodeUrl, numberOfLoadingRows }:
   );
 
   if (recentRegistrationsQuery.isLoading) {
-    return <RegistrationsFallback numberOfRows={numberOfLoadingRows}/>;
+    return <RegistrationsListLoading numberOfRows={numberOfLoadingRows}/>;
   }
 
   if (recentRegistrationsQuery.isError) {
@@ -178,11 +178,11 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   );
 }
 
-function RegistrationsFallback(numberOfRows: number) {
+function RegistrationsListLoading(numberOfRows: number) {
   return (
     <div className="animate-pulse space-y-4">
       {[...Array(numberOfRows)].map((_, idx) => (
-        <div key={`registrationFallback#${idx}`} className="h-10 bg-muted rounded w-full"></div>
+        <div key={`registrationListLoading#${idx}`} className="h-10 bg-muted rounded w-full"></div>
       ))}
     </div>
   );

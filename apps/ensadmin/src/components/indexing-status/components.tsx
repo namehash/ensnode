@@ -50,7 +50,7 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
   const { data, isLoading } = props.indexingStatus;
 
   if (isLoading) {
-    return <NetworkIndexingStatsFallback />;
+    return <NetworkIndexingStatsLoading />;
   }
 
   if (!data) {
@@ -144,7 +144,7 @@ function BlockStats({ label, block }: BlockSatsProps) {
   );
 }
 
-interface FallbackViewProps {
+interface LoadingViewProps {
   /** Number of placeholders to display. */
   placeholderCount?: number;
 }
@@ -152,7 +152,7 @@ interface FallbackViewProps {
 /**
  * Component to display loading state for network indexing stats.
  */
-function NetworkIndexingStatsFallback(props: FallbackViewProps) {
+function NetworkIndexingStatsLoading(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -202,7 +202,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
   const currentEnsNodeUrl = selectedEnsNodeUrl(searchParams);
 
   if (indexingStatus.isLoading) {
-    return <NetworkIndexingTimelineFallback />;
+    return <NetworkIndexingTimelineLoading />;
   }
 
   if (indexingStatus.error) {
@@ -323,7 +323,7 @@ function InlineSummaryItem(props: InlineSummaryItemProps) {
 /**
  * Component to display loading state for the network indexing timeline.
  */
-function NetworkIndexingTimelineFallback(props: FallbackViewProps) {
+function NetworkIndexingTimelineLoading(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -579,7 +579,7 @@ function NetworkIndexingPhase({
 /**
  * Component to display loading state for the indexing timeline.
  */
-function IndexingTimelineFallback(props: FallbackViewProps) {
+function IndexingTimelineLoading(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
