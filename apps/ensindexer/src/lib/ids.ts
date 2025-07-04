@@ -32,17 +32,27 @@ export const makeResolverId = (chainId: number, address: Address, node: Node) =>
  * Checksums the address.
  *
  * @param resolverId The resolver ID string to parse
- * @returns array containing chainId (null for subgraph-compat), address, and node
+ * @returns object describing each segment of the resolver ID
  */
-export const parseResolverId = (resolverId: string): [number | null, Address, Node] => {
+export const parseResolverId = (
+  resolverId: string,
+): { chainId: number | null; address: Address; node: Node } => {
   const parts = resolverId.split("-");
 
   if (parts.length === 2) {
-    return [null, getAddress(parts[0] as Address), parts[1] as Node];
+    return {
+      chainId: null,
+      address: getAddress(parts[0] as Address),
+      node: parts[1] as Node,
+    };
   }
 
   if (parts.length === 3) {
-    return [parseInt(parts[0]!), getAddress(parts[1] as Address), parts[2] as Node];
+    return {
+      chainId: parseInt(parts[0]!),
+      address: getAddress(parts[1] as Address),
+      node: parts[2] as Node,
+    };
   }
 
   throw new Error(`Invalid resolver ID format: ${resolverId}`);

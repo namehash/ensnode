@@ -129,7 +129,7 @@ async function findResolverWithIndex(chainId: number, name: Name): Promise<FindR
     // find the first one with a resolver
     if (drr.resolverId !== null) {
       // parse out its address
-      const [, resolverAddress] = parseResolverId(drr.resolverId);
+      const { address: resolverAddress } = parseResolverId(drr.resolverId);
 
       // if the name has its resolver set to the zeroAddress, skip it and continue traversing the name
       // hierarchy

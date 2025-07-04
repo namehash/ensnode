@@ -66,7 +66,7 @@ describe("ids", () => {
       it("should parse subgraph-compatible format", () => {
         const node = namehash("vitalik.eth");
         const resolverId = makeResolverId(CHAIN_ID, zeroAddress, node);
-        expect(parseResolverId(resolverId)).toEqual([null, zeroAddress, node]);
+        expect(parseResolverId(resolverId)).toEqual({ chainId: null, address: zeroAddress, node });
       });
     });
 
@@ -98,7 +98,11 @@ describe("ids", () => {
       it("should parse chain-scoped format", () => {
         const node = namehash("vitalik.eth");
         const resolverId = makeResolverId(CHAIN_ID, zeroAddress, node);
-        expect(parseResolverId(resolverId)).toEqual([CHAIN_ID, zeroAddress, node]);
+        expect(parseResolverId(resolverId)).toEqual({
+          chainId: CHAIN_ID,
+          address: zeroAddress,
+          node,
+        });
       });
     });
 
