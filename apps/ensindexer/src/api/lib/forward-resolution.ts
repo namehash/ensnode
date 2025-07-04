@@ -2,6 +2,7 @@ import { db, publicClients } from "ponder:api";
 import { findResolver } from "@/api/lib/find-resolver";
 import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
 import { getKnownOnchainStaticResolverAddresses } from "@/api/lib/known-onchain-static-resolver";
+import { areResolverRecordsAreIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
 import config from "@/config";
 import { makeResolverId } from "@/lib/ids";
 import {
@@ -36,24 +37,6 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 // @ensnode/datasources that is guaranted to exist
 const RESOLVER_ABI = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot).contracts
   .Resolver.abi;
-
-/**
- * Determines whether, for a given chain, all Resolver Record Values are indexed.
- *
- * @param chainId
- * @returns
- */
-const resolverRecordsAreIndexedOnChain = (chainId: number) => {
-  // config.indexAdditionalResolverRecords must be true, or we should defer to the chain
-  if (!config.indexAdditionalResolverRecords) return false;
-
-  // TODO: determine if Resolver/ReverseResolver contracts on the specified chain are actively indexed
-  // perhaps can query the generated ponder config...
-  // perhaps should restructure the reverse-resolvers plugin to just `resolution` or `all-resolvers`
-  // and enforce that it's tracking all resolvers on all chains, including reverse resolvers, which
-  // aren't special at all, they're just specific resolvers
-  return true;
-};
 
 /**
  * Implements Forward Resolution of an ENS name, for a selection of records, on a specified chainId.
@@ -166,7 +149,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   //////////////////////////////////////////////////
   const isKnownOnchainStaticResolver =
     getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
-  if (isKnownOnchainStaticResolver && resolverRecordsAreIndexedOnChain(chainId)) {
+  if (isKnownOnchainStaticResolver && areResolverRecordsAreIndexedOnChain(chainId)) {
     console.log(
       ` ↳ ${chainId}:${activeResolver} is a Known Onchain Static Resolver, retrieving records ENSIndexer`,
     );
