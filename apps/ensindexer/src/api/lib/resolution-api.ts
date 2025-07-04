@@ -56,6 +56,15 @@ app.get("/forward/:name", async (c) => {
   }
 });
 
+/**
+ * Example queries for /reverse:
+ *
+ * 1. ENSIP-19 Primary Name Lookup (for ENS Root Chain coinType, or default)
+ * GET /reverse/0x1234...abcd
+ *
+ * 2. ENSIP-19 Multichain Primary Name (for specific Chain (e.g., Optimism), or default)
+ * GET /reverse/0x1234...abcd?chainId=10
+ */
 app.get("/reverse/:address", async (c) => {
   try {
     // TODO: correctly parse/validate with zod
@@ -73,6 +82,16 @@ app.get("/reverse/:address", async (c) => {
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
+
+/**
+ * Example queries for /universal:
+ *
+ * 1. Universal resolution for an address:
+ * GET /universal/0x1234...abcd?name=true&addresses=60&texts=avatar
+ *
+ * 2. Universal resolution for a name:
+ * GET /universal/example.eth?name=true&addresses=60,0&texts=avatar,com.twitter
+ */
 
 app.get("/universal/:addressOrName", async (c) => {
   try {

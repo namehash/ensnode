@@ -7,6 +7,11 @@ import { Address, isAddress } from "viem";
 /**
  * Performs forward resolution of `selection` for `addressOrName`, performing reverse resolution
  * for the `addressOrName` if necessary.
+ *
+ * TODO: chain-specific reverse resolution
+ * TODO: include reverse-resolution results in response so consumer gets access to primary name and
+ * forward records in a single request. perhaps just merge them actually, that'd be nice. a
+ * mergeResolverRecordsResponse might be a helpful util
  */
 export async function resolveUniversal<SELECTION extends ResolverRecordsSelection>(
   addressOrName: Address | Name,

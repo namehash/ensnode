@@ -24,16 +24,20 @@ export async function resolveReverse(
   // Step 8 — Determine if name record exists
   if (!records.name) {
     // Step 9 — Resolve default records if necessary
+    // TODO: perhaps this could be optimistically fetched in parallel to above, ensure that coinType
+    // is set correctly for whichever records ends up being used
     coinType = EVM_BIT;
     records = await resolveForward(reverseName(address, coinType), REVERSE_SELECTION);
   }
 
-  // Step 10 — if no name record, there is no Primary Name for this address
+  // Step 10 — If no name record, there is no Primary Name for this address
   if (!records.name) return null;
 
   // Step 11 — Resolve address record for the given coinType
   const { addresses } = await resolveForward(records.name, { addresses: [coinType] });
   const resolvedAddress = addresses[coinType];
+
+  // Steps 12-13 — Check resolvedAddress validity
 
   // if there's no resolvedAddress, no Primary Name
   if (!resolvedAddress) return null;
@@ -41,9 +45,9 @@ export async function resolveReverse(
   // if the resolvedAddress is not an EVM address, no Primary Name
   if (!isAddress(resolvedAddress)) return null;
 
-  // Step 12 & 13 — Check that resolvedAddress matches address
+  // if resolvedAddress does not match expected address, no Primary Name
   if (!isAddressEqual(resolvedAddress, address)) return null;
 
-  // The records are valid for this address
+  // finally, the records are valid for this address
   return records;
 }
