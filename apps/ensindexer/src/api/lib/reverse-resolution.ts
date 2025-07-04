@@ -1,7 +1,9 @@
-import { resolveForward } from "@/api/lib/forward-resolution";
-import { ResolverRecordsResponse, ResolverRecordsSelection } from "@/lib/lib-resolution";
 import { EVM_BIT, evmChainIdToCoinType, reverseName } from "@ensnode/ensnode-sdk";
 import { Address, Chain, isAddress, isAddressEqual } from "viem";
+
+import { resolveForward } from "@/api/lib/forward-resolution";
+import { ResolverRecordsResponse } from "@/api/lib/resolver-records-response";
+import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 
 const REVERSE_SELECTION = {
   name: true,

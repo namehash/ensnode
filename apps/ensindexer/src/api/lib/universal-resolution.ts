@@ -1,8 +1,10 @@
-import { resolveForward } from "@/api/lib/forward-resolution";
-import { resolveReverse } from "@/api/lib/reverse-resolution";
-import { ResolverRecordsSelection, makeEmptyResolverRecordsResponse } from "@/lib/lib-resolution";
 import { Name } from "@ensnode/ensnode-sdk";
 import { Address, isAddress } from "viem";
+
+import { resolveForward } from "@/api/lib/forward-resolution";
+import { makeEmptyResolverRecordsResponse } from "@/api/lib/resolver-records-response";
+import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
+import { resolveReverse } from "@/api/lib/reverse-resolution";
 
 /**
  * Performs forward resolution of `selection` for `addressOrName`, performing reverse resolution
