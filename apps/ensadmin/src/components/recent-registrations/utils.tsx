@@ -29,16 +29,19 @@ export function FormattedDate({
  * @param conciseFormatting - if true removes prefixes from the base result
  */
 export function parseRelativeTime(
-    date: Date,
-    enforcePast = false,
-    includeSeconds = false,
-    conciseFormatting = false,
-) : string {
+  date: Date,
+  enforcePast = false,
+  includeSeconds = false,
+  conciseFormatting = false,
+): string {
   if (enforcePast && date.getTime() >= Date.now()) {
     return "just now";
   }
 
-  const relativeTime = formatDistanceToNow(date, { addSuffix: true, includeSeconds: includeSeconds });
+  const relativeTime = formatDistanceToNow(date, {
+    addSuffix: true,
+    includeSeconds: includeSeconds,
+  });
 
   if (conciseFormatting) {
     return relativeTime.replace("less than ", "").replace("a minute", "1 minute");

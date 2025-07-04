@@ -1,8 +1,8 @@
 import type { EnsNode } from "@/components/ensnode";
+import { getChainName } from "@/components/ui/ChainName";
 import { getChainById } from "@/lib/chains";
 import { type ENSNamespaceId } from "@ensnode/datasources";
 import { fromUnixTime } from "date-fns";
-import { getChainName } from "@/components/ui/ChainName";
 /**
  * Basic information about a block and its date.
  */
@@ -60,10 +60,7 @@ export function globalIndexingStatusViewModel(
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossChains);
 
   const chainStatusesViewModel = Object.values(chainIndexingStatuses).map((chainIndexingStatus) =>
-    chainIndexingStatusViewModel(
-      chainIndexingStatus,
-      firstBlockToIndexGloballyTimestamp,
-    ),
+    chainIndexingStatusViewModel(chainIndexingStatus, firstBlockToIndexGloballyTimestamp),
   ) satisfies Array<ChainStatusViewModel>;
 
   // Sort the chain statuses by the first block to index timestamp

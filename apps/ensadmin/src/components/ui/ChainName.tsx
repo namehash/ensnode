@@ -47,4 +47,6 @@ export function getChainName(chainId: number): string {
 /**
  * Renders a prettified chain name for the provided chain ID.
  */
-export const ChainName = ({ chainId, className }: ChainNameProps) => <p className={className}>{getChainName(chainId)}</p>;
+export const ChainName = ({ chainId, className }: ChainNameProps) => (
+  <p className={className}>{getChainName(chainId)}</p>
+);

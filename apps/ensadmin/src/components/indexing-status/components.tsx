@@ -11,15 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
+import { getBlockExplorerUrlForBlock } from "@ensnode/datasources";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import {
-  currentPhase,
-  generateYearMarkers,
-  getTimelinePosition,
-} from "./utils";
+import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
   ChainIndexingPhaseViewModel,
   ChainStatusViewModel,
@@ -29,7 +26,6 @@ import {
   ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
-import {getBlockExplorerUrlForBlock} from "@ensnode/datasources";
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
@@ -80,10 +76,7 @@ function ChainIndexingStats(props: ChainIndexingStatsProps) {
         <CardContent className="flex flex-row gap-8">
           {globalIndexingStatusViewModel(chainIndexingStatuses, namespace).chainStatuses.map(
             (chainStatus) => (
-              <ChainIndexingStatsCard
-                key={chainStatus.chainId}
-                chainStatus={chainStatus}
-              />
+              <ChainIndexingStatsCard key={chainStatus.chainId} chainStatus={chainStatus} />
             ),
           )}
         </CardContent>
