@@ -3,7 +3,6 @@ import { findResolver } from "@/api/lib/find-resolver";
 import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
 import { getKnownOnchainStaticResolverAddresses } from "@/api/lib/known-onchain-static-resolver";
 import config from "@/config";
-import { encodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
 import {
   IndexedResolverRecords,
@@ -29,6 +28,7 @@ import {
   namehash,
   toHex,
 } from "viem";
+import { packetToBytes } from "viem/ens";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
@@ -221,7 +221,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
           ...ResolverContract,
           functionName: "resolve",
           args: [
-            toHex(encodeDNSPacketBytes(name)), // DNS-encode `name` for resolve()
+            toHex(packetToBytes(name)), // DNS-encode `name` for resolve()
             encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
           ],
         });

@@ -155,16 +155,6 @@ export function parseRRSet(record: Hex) {
   return decodedRecords;
 }
 
-export function encodeDNSPacketBytes(value: string) {
-  const parts = value.split(".");
-  const encodedParts = parts.map((part) => {
-    const partBuffer = Buffer.from(part);
-    return Buffer.concat([Buffer.from([partBuffer.length]), partBuffer]);
-  });
-
-  return Buffer.concat([...encodedParts, Buffer.from([0])]);
-}
-
 export function decodeTXTData(data: Buffer[]): string | null {
   // decode to string
   const decoded = data.map((buf) => buf.toString());
