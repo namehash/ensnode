@@ -18,7 +18,7 @@ import { EthereumTestnetIcon } from "../icons/EthereumTestnetIcon";
 import { LineaIcon } from "../icons/LineaIcon";
 import { OptimismIcon } from "../icons/OptimismIcon";
 
-export interface ChainIconProps {
+interface ChainIconProps {
   chainId: number;
 }
 

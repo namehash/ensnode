@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
-import { ENSNamespaceId } from "@ensnode/datasources";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
@@ -19,7 +18,6 @@ import { useSearchParams } from "next/navigation";
 import {
   currentPhase,
   generateYearMarkers,
-  getBlockExplorerUrl,
   getTimelinePosition,
 } from "./utils";
 import {
@@ -31,6 +29,7 @@ import {
   ensRainbowViewModel,
   globalIndexingStatusViewModel,
 } from "./view-models";
+import {getBlockExplorerUrlForBlock} from "@ensnode/datasources";
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
@@ -84,7 +83,6 @@ function ChainIndexingStats(props: ChainIndexingStatsProps) {
               <ChainIndexingStatsCard
                 key={chainStatus.chainId}
                 chainStatus={chainStatus}
-                namespaceId={namespace}
               />
             ),
           )}
@@ -95,7 +93,6 @@ function ChainIndexingStats(props: ChainIndexingStatsProps) {
 }
 
 interface ChainIndexingStatsCardProps {
-  namespaceId: ENSNamespaceId;
   chainStatus: ChainStatusViewModel;
 }
 
@@ -104,7 +101,7 @@ interface ChainIndexingStatsCardProps {
  * @param ChainIdexingStatsCardProps
  * @returns
  */
-function ChainIndexingStatsCard({ namespaceId, chainStatus }: ChainIndexingStatsCardProps) {
+function ChainIndexingStatsCard({ chainStatus }: ChainIndexingStatsCardProps) {
   return (
     <Card key={`Chain#${chainStatus.chainId}`}>
       <CardHeader>
@@ -124,13 +121,11 @@ function ChainIndexingStatsCard({ namespaceId, chainStatus }: ChainIndexingStats
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
           <BlockStats
-            namespaceId={namespaceId}
             chainId={chainStatus.chainId}
             label="Last indexed block"
             block={chainStatus.lastIndexedBlock}
           />
           <BlockStats
-            namespaceId={namespaceId}
             chainId={chainStatus.chainId}
             label="Latest safe block"
             block={chainStatus.latestSafeBlock}
@@ -142,7 +137,6 @@ function ChainIndexingStatsCard({ namespaceId, chainStatus }: ChainIndexingStats
 }
 
 interface BlockStatsProps {
-  namespaceId: ENSNamespaceId;
   chainId: number;
   label: string;
   block: BlockInfo | null;
@@ -151,7 +145,7 @@ interface BlockStatsProps {
 /**
  * Component to display requested block stats.
  */
-function BlockStats({ namespaceId, chainId, label, block }: BlockStatsProps) {
+function BlockStats({ chainId, label, block }: BlockStatsProps) {
   // return a fallback for undefined block
   if (!block) {
     return (
@@ -166,7 +160,7 @@ function BlockStats({ namespaceId, chainId, label, block }: BlockStatsProps) {
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
-      <BlockNumber namespaceId={namespaceId} block={block} chainId={chainId} />
+      <BlockNumber block={block} chainId={chainId} />
       <div className="text-xs text-muted-foreground">
         <RelativeTime
           date={unixTimestampToDate(block.timestamp.toString())}
@@ -180,7 +174,6 @@ function BlockStats({ namespaceId, chainId, label, block }: BlockStatsProps) {
 }
 
 interface BlockNumberProps {
-  namespaceId: ENSNamespaceId;
   chainId: number;
   block: BlockInfo;
 }
@@ -191,8 +184,8 @@ interface BlockNumberProps {
  * Optionally provides a link to the block details page on the chain's designated block explorer page.
  * If the chain has no known block explorer, just displays the block number (without link).
  **/
-function BlockNumber({ namespaceId, chainId, block }: BlockNumberProps) {
-  const blockExplorerUrl = getBlockExplorerUrl(namespaceId, chainId, block);
+function BlockNumber({ chainId, block }: BlockNumberProps) {
+  const blockExplorerUrl = getBlockExplorerUrlForBlock(chainId, block.number);
   if (blockExplorerUrl) {
     return (
       <a

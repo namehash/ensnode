@@ -22,6 +22,32 @@ export function FormattedDate({
 }
 
 /**
+ * Parses a date object to a relative distance between such date and now
+ *
+ * @param enforcePast - if true, won't allow the result to relate to the future
+ * @param includeSeconds - if true makes the base result consider seconds
+ * @param conciseFormatting - if true removes prefixes from the base result
+ */
+export function parseRelativeTime(
+    date: Date,
+    enforcePast = false,
+    includeSeconds = false,
+    conciseFormatting = false,
+) : string {
+  if (enforcePast && date.getTime() >= Date.now()) {
+    return "just now";
+  }
+
+  const relativeTime = formatDistanceToNow(date, { addSuffix: true, includeSeconds: includeSeconds });
+
+  if (conciseFormatting) {
+    return relativeTime.replace("less than ", "").replace("a minute", "1 minute");
+  }
+
+  return relativeTime;
+}
+
+/**
  * Client-only relative time component
  */
 export function RelativeTime({
@@ -33,16 +59,8 @@ export function RelativeTime({
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
-    setRelativeTime(formatDistanceToNow(date, { addSuffix: true, includeSeconds: includeSeconds }));
+    setRelativeTime(parseRelativeTime(date, enforcePast, includeSeconds, conciseFormatting));
   }, [date]);
-
-  if (enforcePast && date.getTime() >= Date.now()) {
-    return <>just now</>;
-  }
-
-  if (conciseFormatting) {
-    return <>{relativeTime.replace("less than ", "").replace("a minute", "1 minute")}</>;
-  }
 
   return <>{relativeTime}</>;
 }

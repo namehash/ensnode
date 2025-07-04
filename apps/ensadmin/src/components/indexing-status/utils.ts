@@ -75,16 +75,3 @@ export function currentPhase(
 
   return chainStatus.phases[0];
 }
-
-export function getBlockExplorerUrl(
-  namespaceId: ENSNamespaceId,
-  chainId: number,
-  block: BlockInfo,
-): URL | null {
-  const chainBlockExplorer = getChainById(namespaceId, chainId).blockExplorers;
-
-  if (!chainBlockExplorer) {
-    return null;
-  }
-  return new URL(`block/${block.number}`, chainBlockExplorer.default.url);
-}

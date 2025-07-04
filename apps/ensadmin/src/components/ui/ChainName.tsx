@@ -10,7 +10,7 @@ import {
   sepolia,
 } from "viem/chains";
 
-export interface ChainNameProps {
+interface ChainNameProps {
   chainId: number;
   className: string;
 }
@@ -32,12 +32,19 @@ const chainNames = new Map<number, string>([
 ]);
 
 /**
- * Renders a prettified chain name for the provided chain ID.
+ * Returns a prettified chain name for the provided chain ID.
  */
-export function ChainName({ chainId, className }: ChainNameProps) {
-  if (!chainNames.has(chainId)) {
+export function getChainName(chainId: number): string {
+  const chainName = chainNames.get(chainId);
+
+  if (chainName) {
     throw new Error(`Chain ID "${chainId}" doesn't have an assigned name`);
   }
 
-  return <p className={className}>{chainNames.get(chainId)}</p>;
+  return chainName;
 }
+
+/**
+ * Renders a prettified chain name for the provided chain ID.
+ */
+export const ChainName = ({ chainId, className }: ChainNameProps) => <p className={className}>{getChainName(chainId)}</p>;

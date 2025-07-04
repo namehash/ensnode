@@ -2,6 +2,7 @@ import type { EnsNode } from "@/components/ensnode";
 import { getChainById } from "@/lib/chains";
 import { type ENSNamespaceId } from "@ensnode/datasources";
 import { fromUnixTime } from "date-fns";
+import { getChainName } from "@/components/ui/ChainName";
 /**
  * Basic information about a block and its date.
  */
@@ -57,11 +58,9 @@ export function globalIndexingStatusViewModel(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossChains);
-  const getChainName = (chainId: number) => getChainById(namespaceId, chainId).name;
 
   const chainStatusesViewModel = Object.values(chainIndexingStatuses).map((chainIndexingStatus) =>
     chainIndexingStatusViewModel(
-      getChainName(chainIndexingStatus.chainId),
       chainIndexingStatus,
       firstBlockToIndexGloballyTimestamp,
     ),
@@ -89,22 +88,20 @@ export function globalIndexingStatusViewModel(
 /**
  * View model for the chain indexing status.
  *
- * @param chainName
  * @param chainStatus
  * @param firstBlockToIndexGloballyTimestamp
- * @param chainsBlockExplorerURL - optional - URL to chain's default block explorer if such is available
  * @returns
  */
 export function chainIndexingStatusViewModel(
-  chainName: string,
   chainStatus: EnsNode.ChainIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
-  chainsBlockExplorerURL?: string,
 ): ChainStatusViewModel {
   const phases: ChainStatusViewModel["phases"] = [];
 
   const { lastIndexedBlock, lastSyncedBlock, latestSafeBlock, firstBlockToIndex, chainId } =
     chainStatus;
+
+  const chainName = getChainName(chainId);
 
   if (firstBlockToIndex.timestamp > firstBlockToIndexGloballyTimestamp) {
     phases.push({
