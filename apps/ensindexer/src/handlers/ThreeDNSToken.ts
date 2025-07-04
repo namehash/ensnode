@@ -1,7 +1,16 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+import {
+  Address,
+  Hex,
+  hexToBigInt,
+  hexToBytes,
+  isAddress,
+  labelhash,
+  zeroAddress,
+  zeroHash,
+} from "viem";
 
 import {
   type LabelHash,
@@ -33,6 +42,7 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
   // https://ponder.sh/docs/indexing/read-contracts#multiple-chains
   return context.client.readContract({
     abi: context.contracts["threedns/ThreeDNSToken"].abi,
+    // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
     address: context.contracts["threedns/ThreeDNSToken"].address! as Address,
     functionName: "uri",
     args: [tokenId],
@@ -69,7 +79,7 @@ export async function handleNewOwner({
   const node = makeSubdomainNode(labelHash, parentNode);
   let domain = await context.db.find(schema.domain, { id: node });
 
-  // NetworkConfig#address is `Address | undefined`, but we know this is defined for 3DNS' Resolver
+  // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
   const resolverAddress = context.contracts["threedns/Resolver"].address! as Address;
 
   // in ThreeDNS there's a hard-coded Resolver that all domains use
