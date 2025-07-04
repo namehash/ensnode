@@ -7,7 +7,7 @@ import {
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainConnectionConfig } from "@/lib/ponder-helpers";
+import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
@@ -29,11 +29,11 @@ export default createPlugin({
 
     return ponder.createConfig({
       chains: {
-        ...chainConnectionConfig(config.rpcConfigs, threeDNSOptimism.chain.id),
-        ...chainConnectionConfig(config.rpcConfigs, threeDNSBase.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, threeDNSOptimism.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, threeDNSBase.chain.id),
       },
       contracts: {
-        // multi-network ThreeDNSToken indexing config
+        // multi-chain ThreeDNSToken indexing config
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           chain: {
             ...chainConfigForContract(
@@ -47,10 +47,10 @@ export default createPlugin({
               threeDNSBase.contracts.ThreeDNSToken,
             ),
           },
-          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
+          // NOTE: abi is identical in a multi-chain ponder config, just use Optimism's here
           abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
         },
-        // multi-network ThreeDNS-specific Resolver indexing config
+        // multi-chain ThreeDNS-specific Resolver indexing config
         [namespaceContract(pluginName, "Resolver")]: {
           chain: {
             ...chainConfigForContract(
@@ -64,7 +64,7 @@ export default createPlugin({
               threeDNSBase.contracts.Resolver,
             ),
           },
-          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
+          // NOTE: abi is identical in a multi-chain ponder config, just use Optimism's here
           abi: threeDNSOptimism.contracts.Resolver.abi,
         },
       },

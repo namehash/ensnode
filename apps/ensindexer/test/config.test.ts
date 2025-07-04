@@ -503,4 +503,17 @@ describe("config", () => {
       await expect(getConfig()).rejects.toThrow(/multiple chains/i);
     });
   });
+
+  it("reverse-resolvers plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be true", async () => {
+    vi.stubEnv("PLUGINS", "reverse-resolvers");
+    vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_42161", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_534352", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
+    vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
+
+    await expect(getConfig()).rejects.toThrow(/requires INDEX_ADDITIONAL_RESOLVER_RECORDS/i);
+  });
 });

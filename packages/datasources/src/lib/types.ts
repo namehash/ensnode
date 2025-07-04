@@ -57,6 +57,12 @@ export const DatasourceNames = {
   Lineanames: "lineanames",
   ThreeDNSOptimism: "threedns-optimism",
   ThreeDNSBase: "threedns-base",
+  ReverseResolverRoot: "reverse-resolver-root",
+  ReverseResolverBase: "reverse-resolver-base",
+  ReverseResolverLinea: "reverse-resolver-linea",
+  ReverseResolverOptimism: "reverse-resolver-optimism",
+  ReverseResolverArbitrum: "reverse-resolver-arbitrum",
+  ReverseResolverScroll: "reverse-resolver-scroll",
 } as const;
 
 export type DatasourceName = (typeof DatasourceNames)[keyof typeof DatasourceNames];
@@ -76,14 +82,14 @@ export interface EventFilter {
  * one should filter the chain for. This type is intentionally a subset of Ponder's ContractConfig.
  *
  * @param abi - the ABI of the contract
- * @param address - (optional) address of the contract
+ * @param address - (optional) Address of the contract or Address[] of each contract to be indexed
  * @param filter - (optional) array of event signatures to filter the log by
  * @param startBlock - block number the contract was deployed in
  */
 export type ContractConfig =
   | {
       readonly abi: Abi;
-      readonly address: Address;
+      readonly address: Address | Address[];
       readonly filter?: never;
       readonly startBlock: number;
     }
