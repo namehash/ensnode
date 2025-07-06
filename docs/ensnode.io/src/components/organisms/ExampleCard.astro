@@ -1,17 +1,10 @@
 ---
 import { ENSADMIN_URL } from "astro:env/client";
 import { Icon } from "astro-icon/components";
+import type { SavedQuery } from "../../data/savedQueries";
 
 export interface Props {
-  example: {
-    operationName: string;
-    id: string;
-    name: string;
-    category: string;
-    description: string;
-    query: string;
-    variables: string;
-  };
+  example: SavedQuery;
 }
 
 const { example } = Astro.props;

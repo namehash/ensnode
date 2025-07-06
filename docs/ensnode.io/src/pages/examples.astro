@@ -47,22 +47,7 @@ const categories = Array.from(categoryMap.entries())
             />
           </div>
         </div>
-
-        <div class="sm:w-48">
-          <label for="sort" class="sr-only">
-            Sort by
-          </label>
-          <select
-            id="sort"
-            class="block w-full px-3 py-3 border border-[var(--color-border)] shadow-sm rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0"
-          >
-            <option value="name">Sort by Name</option>
-            <option value="category">Sort by Category</option>
-            <option value="recent">Sort by Recent</option>
-          </select>
-        </div>
-        </div>
-
+      </div>
 
       <div class="flex flex-col lg:flex-row gap-8">
         <div class="lg:w-64 flex-shrink-0">
@@ -143,7 +128,6 @@ const categories = Array.from(categoryMap.entries())
 
     let filteredExamples = [...examples];
     let selectedCategory = '';
-    let sortBy = 'name';
     let searchTerm = '';
 
     const fuse = new Fuse(examples, {
@@ -153,7 +137,6 @@ const categories = Array.from(categoryMap.entries())
     });
 
     const searchInput = document.getElementById('search') as HTMLInputElement;
-    const sortSelect = document.getElementById('sort') as HTMLSelectElement;
     const allCategoriesBtn = document.getElementById('all-categories-btn') as HTMLButtonElement;
     const categoryBtns = document.querySelectorAll('.category-btn') as NodeListOf<HTMLButtonElement>;
     const clearFilterBtn = document.getElementById('clear-filter-btn') as HTMLButtonElement;
@@ -173,19 +156,7 @@ const categories = Array.from(categoryMap.entries())
         filtered = filtered.filter(example => example.category === selectedCategory);
       }
 
-      // Apply sorting
-      filtered = [...filtered].sort((a, b) => {
-        switch (sortBy) {
-          case 'name':
-            return a.name.localeCompare(b.name);
-          case 'category':
-            return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
-          case 'recent':
-            return parseInt(b.id) - parseInt(a.id);
-          default:
-            return 0;
-        }
-      });
+      filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
 
       filteredExamples = filtered;
 
@@ -243,13 +214,6 @@ const categories = Array.from(categoryMap.entries())
     searchInput.addEventListener('input', (e) => {
       if (e.target) {
         searchTerm = (e.target as HTMLInputElement).value;
-      }
-      updateDisplay();
-    });
-
-    sortSelect.addEventListener('change', (e) => {
-      if (e.target) {
-        sortBy = (e.target as HTMLSelectElement).value;
       }
       updateDisplay();
     });
