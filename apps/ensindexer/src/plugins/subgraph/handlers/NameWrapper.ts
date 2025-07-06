@@ -7,7 +7,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 /**
  * Registers event handlers with Ponder.
  */
-export function attachSubgraphNameWrapperEventHandlers() {
+export default function () {
   const pluginName = PluginName.Subgraph;
 
   const {

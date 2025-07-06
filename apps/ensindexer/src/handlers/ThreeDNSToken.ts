@@ -28,8 +28,8 @@ import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subg
  * Gets the `uri` for a given tokenId using the relevant ThreeDNSToken from `context`
  */
 const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<string> => {
-  // ThreeDNSToken is network-specific in ponder multi-network usage
-  // https://ponder.sh/docs/indexing/read-contract-data#multiple-networks
+  // ThreeDNSToken is chain-specific in ponder multi-chain usage
+  // https://ponder.sh/docs/indexing/read-contracts#multiple-chains
   return context.client.readContract({
     abi: context.contracts["threedns/ThreeDNSToken"].abi,
     address: context.contracts["threedns/ThreeDNSToken"].address,
@@ -70,7 +70,7 @@ export async function handleNewOwner({
 
   // in ThreeDNS there's a hard-coded Resolver that all domains use
   const resolverId = makeResolverId(
-    context.network.chainId,
+    context.chain.id,
     // NetworkConfig#address is `Address | undefined`, but we know this is defined for 3DNS' Resolver
     context.contracts["threedns/Resolver"].address!,
     node,
@@ -143,7 +143,7 @@ export async function handleNewOwner({
 
   // log DomainEvent
   await context.db.insert(schema.newOwner).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     parentDomainId: parentNode,
     domainId: node,
     ownerId: owner,
@@ -171,7 +171,7 @@ export async function handleTransfer({
 
   // log DomainEvent
   await context.db.insert(schema.transfer).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ownerId: owner,
   });
@@ -253,7 +253,7 @@ export async function handleRegistrationCreated({
 
   // log RegistrationEvent
   await context.db.insert(schema.nameRegistered).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     registrationId,
     registrantId: registrant,
     expiryDate: expiry,
@@ -280,7 +280,7 @@ export async function handleRegistrationExtended({
 
   // log RegistratioEvent
   await context.db.insert(schema.nameRenewed).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     registrationId,
     expiryDate: newExpiry,
   });

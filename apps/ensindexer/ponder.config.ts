@@ -3,7 +3,6 @@ import type { ENSIndexerConfig } from "@/config/types";
 import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
-import { attachPluginEventHandlers } from "@/plugins/event-handlers";
 
 ////////
 // Log ENSIndexerConfig for debugging.
@@ -39,15 +38,13 @@ const ponderConfig = activePlugins.reduce(
 } satisfies Pick<ENSIndexerConfig, "healReverseAddresses" | "indexAdditionalResolverRecords">;
 
 ////////
-// Attach event handlers for each of the active plugins.
+// Set indexing order strategy
 ////////
 
-// NOTE: we delay attaching plugin event handlers for 1 tick to avoid a race condition
-// within ponder internals related to the schema name and drizzle-orm
-setTimeout(
-  () => activePlugins.forEach((activePlugin) => attachPluginEventHandlers(activePlugin.name)),
-  0,
-);
+// NOTE: Ponder uses the `multichain` strategy by default, so we enforce `omnichain` ordering here.
+// ENSIndexer may be able to support multichain event ordering in the future, with additional testing,
+// but for simplicity only omnichain is currently supported at the moment.
+ponderConfig.ordering = "omnichain";
 
 ////////
 // Export the ponderConfig for Ponder to use for type inference and runtime behavior.

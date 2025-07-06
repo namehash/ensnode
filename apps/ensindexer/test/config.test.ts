@@ -496,11 +496,11 @@ describe("config", () => {
       await expect(getConfig()).rejects.toThrow(/RPC_URL_\d+ is not specified/i);
     });
 
-    it("cannot constrain blockrange with multiple networks", async () => {
+    it("cannot constrain blockrange with multiple chains", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       vi.stubEnv("END_BLOCK", "1");
-      await expect(getConfig()).rejects.toThrow(/multiple networks/i);
+      await expect(getConfig()).rejects.toThrow(/multiple chains/i);
     });
   });
 });

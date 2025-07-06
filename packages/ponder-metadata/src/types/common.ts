@@ -1,15 +1,4 @@
 /**
- * Basic information about a block in the Ponder status.
- */
-export interface PonderBlockStatus {
-  /** block number if available */
-  block_number: number | null;
-
-  /** block timestamp if available */
-  block_timestamp: number | null;
-}
-
-/**
  * Basic information about a block.
  */
 export interface BlockInfo {
@@ -21,9 +10,30 @@ export interface BlockInfo {
 }
 
 /**
- * Network indexing status for a chain.
+ * Ponder Status type
+ *
+ * It's a type of value returned by the `GET /status` endpoint on ponder server.
+ *
+ * Akin to:
+ * https://github.com/ponder-sh/ponder/blob/8c012a3/packages/client/src/index.ts#L13-L18
  */
-export interface NetworkIndexingStatus {
+export interface PonderStatus {
+  [chainName: string]: {
+    /** @var id Chain ID */
+    id: number;
+
+    /** @var block Last Indexed Block data */
+    block: BlockInfo;
+  };
+}
+
+/**
+ * Indexing status for a chain.
+ */
+export interface ChainIndexingStatus {
+  /** Chain ID of the indexed chain */
+  chainId: number;
+
   /**
    * First block required to be indexed during the historical sync.
    */

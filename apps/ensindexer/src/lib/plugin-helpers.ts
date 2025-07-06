@@ -163,7 +163,7 @@ export function createPlugin<
 ): ENSIndexerPlugin<
   PLUGIN_NAME,
   REQUIRED_DATASOURCE_NAMES,
-  PONDER_CONFIG_RESULT["networks"],
+  PONDER_CONFIG_RESULT["chains"],
   PONDER_CONFIG_RESULT["contracts"],
   PONDER_CONFIG_RESULT["accounts"],
   PONDER_CONFIG_RESULT["blocks"]
@@ -176,3 +176,10 @@ export function getRequiredDatasourceNames(plugins: ENSIndexerPlugin[]): Datasou
 
   return uniq(requiredDatasourceNames);
 }
+
+/**
+ * Determines whether a plugin supports 'preminted' names. See `apps/ensindexer/src/handlers/Registrar.ts`
+ * for further discussion.
+ */
+export const pluginSupportsPremintedNames = (pluginName: PluginName) =>
+  [PluginName.Basenames, PluginName.Lineanames].includes(pluginName);

@@ -16,7 +16,7 @@ const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenI
 /**
  * Registers event handlers with Ponder.
  */
-export function attachSubgraphRegistrarEventHandlers() {
+export default function () {
   const pluginName = PluginName.Subgraph;
 
   const {

@@ -38,17 +38,17 @@ describe("mergePonderConfigs", () => {
   });
 });
 
-it("should use the minimum startBlock and maxium endBlock for Resolver contracts", () => {
+it("should use the minimum startBlock and maximum endBlock for Resolver contracts", () => {
   const target = {
-    contracts: { Resolver: { network: { "1": { startBlock: 1, endBlock: 1 } } } },
+    contracts: { Resolver: { chain: { "1": { startBlock: 1, endBlock: 1 } } } },
   };
   const source = {
-    contracts: { Resolver: { network: { "1": { startBlock: 2, endBlock: 2 } } } },
+    contracts: { Resolver: { chain: { "1": { startBlock: 2, endBlock: 2 } } } },
   };
   expect(mergePonderConfigs(target, source)).toEqual({
     contracts: {
       Resolver: {
-        network: {
+        chain: {
           "1": {
             startBlock: 1,
             endBlock: 2,
