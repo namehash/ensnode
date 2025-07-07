@@ -81,7 +81,7 @@ export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
         variables: responseJson.variables,
       };
     },
-    [url]
+    [url],
   );
 
   const aiQueryGeneratorMutation = useMutation({
