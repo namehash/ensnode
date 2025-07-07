@@ -41,7 +41,7 @@ export function possibleKnownOffchainLookupResolverDefersTo(
     if (basenamesL1ResolverAddress && isAddressEqual(resolverAddress, basenamesL1ResolverAddress)) {
       return {
         pluginName: PluginName.Basenames,
-        chainId: ensNamespace.lineanames?.chain.id,
+        chainId: ensNamespace.basenames?.chain.id,
       };
     }
 
