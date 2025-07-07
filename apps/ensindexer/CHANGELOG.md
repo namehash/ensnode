@@ -1,5 +1,27 @@
 # ensindexer
 
+## 0.29.0
+
+### Minor Changes
+
+- [#775](https://github.com/namehash/ensnode/pull/775) [`f4d6a6e`](https://github.com/namehash/ensnode/commit/f4d6a6e51b3ea063ef5eb5a8744e6a79a3b595c2) Thanks [@tk-o](https://github.com/tk-o)! - Apply a unified way of building plugins with the `buildPlugin` function.
+
+- [#792](https://github.com/namehash/ensnode/pull/792) [`4ee9eb7`](https://github.com/namehash/ensnode/commit/4ee9eb7bcbdd3ec45704565cc4e5567237ee7238) Thanks [@shrugs](https://github.com/shrugs)! - rename the ENS_DEPLOYMENT_CHAIN configuration variable to NAMESPACE
+
+- [#818](https://github.com/namehash/ensnode/pull/818) [`2f9f357`](https://github.com/namehash/ensnode/commit/2f9f35780def5a6696263cf2e10d4ec4f89194f5) Thanks [@tk-o](https://github.com/tk-o)! - Update Ponder version to `0.11`.
+
+- [#808](https://github.com/namehash/ensnode/pull/808) [`1f29c5d`](https://github.com/namehash/ensnode/commit/1f29c5d646d3d90df4c0351243baf2380a8fded7) Thanks [@shrugs](https://github.com/shrugs)! - ACTIVE_PLUGINS is now PLUGINS
+
+### Patch Changes
+
+- Updated dependencies [[`2f9f357`](https://github.com/namehash/ensnode/commit/2f9f35780def5a6696263cf2e10d4ec4f89194f5), [`cf67799`](https://github.com/namehash/ensnode/commit/cf677992f73ef354ed57d19641d2093de23aacb4), [`4ee9eb7`](https://github.com/namehash/ensnode/commit/4ee9eb7bcbdd3ec45704565cc4e5567237ee7238), [`fdc6eef`](https://github.com/namehash/ensnode/commit/fdc6eefbf870a8451e40e56de2fb424bfc85ba7f)]:
+  - @ensnode/ponder-metadata@0.29.0
+  - @ensnode/datasources@0.29.0
+  - @ensnode/ponder-subgraph@0.29.0
+  - @ensnode/ensrainbow-sdk@0.29.0
+  - @ensnode/ensnode-schema@0.29.0
+  - @ensnode/ensnode-sdk@0.29.0
+
 ## 0.28.0
 
 ### Minor Changes

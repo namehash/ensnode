@@ -47,15 +47,15 @@ function reducer(state: EditorState, action: Action) {
   }
 }
 
-/** The initial state of the GraphiQL editor */
-const initialState: EditorState = {
+/** The default initial state of the GraphiQL editor */
+const defaultInitialState: EditorState = {
   query: "",
 };
 
 /**
  * The hook to use the GraphiQL editor state and actions
  * */
-export function useGraphiQLEditor() {
+export function useGraphiQLEditor(initialState: EditorState = defaultInitialState) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return {

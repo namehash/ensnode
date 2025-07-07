@@ -1,5 +1,13 @@
 # @ensnode/ens-deployments
 
+## 0.29.0
+
+### Minor Changes
+
+- [#818](https://github.com/namehash/ensnode/pull/818) [`2f9f357`](https://github.com/namehash/ensnode/commit/2f9f35780def5a6696263cf2e10d4ec4f89194f5) Thanks [@tk-o](https://github.com/tk-o)! - Update Ponder version to `0.11`.
+
+- [#792](https://github.com/namehash/ensnode/pull/792) [`4ee9eb7`](https://github.com/namehash/ensnode/commit/4ee9eb7bcbdd3ec45704565cc4e5567237ee7238) Thanks [@shrugs](https://github.com/shrugs)! - renamed @ensnode/ens-deployments to @ensnode/datasources
+
 ## 0.28.0
 
 ### Minor Changes
