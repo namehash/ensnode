@@ -57,6 +57,7 @@ export const DatasourceNames = {
   Lineanames: "lineanames",
   ThreeDNSOptimism: "threedns-optimism",
   ThreeDNSBase: "threedns-base",
+  EFPRoot: "efp-root",
 } as const;
 
 export type DatasourceName = (typeof DatasourceNames)[keyof typeof DatasourceNames];

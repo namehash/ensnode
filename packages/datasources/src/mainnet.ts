@@ -23,6 +23,9 @@ import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverConfig } from "./lib/resolver";
 
+// ABIs for the EFP Datasource
+import EFPListRegistry from "./abis/efp/EFPListRegistry";
+
 /**
  * The Mainnet ENSNamespace
  */
@@ -213,6 +216,22 @@ export default {
         // NOTE: 3DNSToken on Base has a hardcoded protocol-wide Resolver at this address
         address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
         startBlock: 17522624,
+      },
+    },
+  },
+
+  /**
+   * The Root EFP Datasource.
+   * Based on the list of EFP deployments:
+   * https://docs.efp.app/production/deployments/
+   */
+  [DatasourceNames.EFPRoot]: {
+    chain: base,
+    contracts: {
+      EFPListRegistry: {
+        abi: EFPListRegistry,
+        address: "0x0E688f5DCa4a0a4729946ACbC44C792341714e08",
+        startBlock: 20197231,
       },
     },
   },
