@@ -22,8 +22,9 @@ const Avatar = React.forwardRef<
 
   const fallbackValue = address?.toString() || name;
 
-  if (!fallbackValue) {
-    throw new Error("The Avatar component needs either name or address");
+  // enforce that exactly 1 of address or name are passed, never both, never none.
+  if (!fallbackValue || (name && address)) {
+    throw new Error("The Avatar component needs exactly one of a name or address");
   }
 
   return (
@@ -33,7 +34,7 @@ const Avatar = React.forwardRef<
       {...props}
     >
       {ensAvatarUrl ? <AvatarImage src={ensAvatarUrl.toString()} alt={fallbackValue} /> : null}
-      <AvatarFallback avatarGenerator={fallbackValue} />
+      <AvatarFallback randomAvatarGenerationSeed={fallbackValue} />
     </AvatarPrimitive.Root>
   );
 });
@@ -51,13 +52,13 @@ const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<H
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 interface AvatarFallbackProps {
-  avatarGenerator: string;
+  randomAvatarGenerationSeed: string;
 }
 
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & AvatarFallbackProps
->(({ className, avatarGenerator, ...props }, ref) => (
+>(({ className, randomAvatarGenerationSeed, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
@@ -67,7 +68,7 @@ const AvatarFallback = React.forwardRef<
     {...props}
   >
     <BoringAvatar
-      name={avatarGenerator}
+      name={randomAvatarGenerationSeed}
       colors={["#093c52", "#006699", "#0080bc", "#6ba5b8", "#9dc3d0"]}
       variant="marble"
     />

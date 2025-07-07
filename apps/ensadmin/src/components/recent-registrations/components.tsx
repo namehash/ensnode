@@ -28,7 +28,7 @@ import { useRecentRegistrations } from "./hooks";
 const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
 /**
- * Displays a list of most recently indexed registrations and the date of the most recently indexed block
+ * Displays a list of the most recently indexed registrations and the date of the most recently indexed block
  */
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
@@ -50,7 +50,7 @@ export function RecentRegistrations() {
     : null;
 
   if (indexingStatusQuery.isLoading) {
-    return <RegistrationsListLoading numberOfRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
+    return <RegistrationsListLoading rowCount={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
   }
 
   if (indexingStatusQuery.isError) {
@@ -90,7 +90,7 @@ export function RecentRegistrations() {
           <RegistrationsList
             ensNodeMetadata={indexingStatusQuery.data}
             ensNodeUrl={ensNodeUrl}
-            numberOfLoadingRows={MAX_NUMBER_OF_LATEST_REGISTRATIONS}
+            maxRecords={MAX_NUMBER_OF_LATEST_REGISTRATIONS}
           />
         )}
       </CardContent>
@@ -101,7 +101,7 @@ export function RecentRegistrations() {
 interface RegistrationsListProps {
   ensNodeUrl: URL;
   ensNodeMetadata: EnsNode.Metadata;
-  numberOfLoadingRows: number;
+  maxRecords: number;
 }
 
 /**
@@ -113,18 +113,18 @@ interface RegistrationsListProps {
 function RegistrationsList({
   ensNodeMetadata,
   ensNodeUrl,
-  numberOfLoadingRows,
+  maxRecords,
 }: RegistrationsListProps) {
   const namespaceId = ensNodeMetadata.env.NAMESPACE;
 
   const recentRegistrationsQuery = useRecentRegistrations(
     ensNodeUrl,
-    MAX_NUMBER_OF_LATEST_REGISTRATIONS,
+    maxRecords,
     namespaceId,
   );
 
   if (recentRegistrationsQuery.isLoading) {
-    return <RegistrationsListLoading numberOfRows={numberOfLoadingRows} />;
+    return <RegistrationsListLoading rowCount={maxRecords} />;
   }
 
   if (recentRegistrationsQuery.isError) {
@@ -186,10 +186,10 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   );
 }
 
-function RegistrationsListLoading(numberOfRows: number) {
+function RegistrationsListLoading(rowCount: number) {
   return (
     <div className="animate-pulse space-y-4">
-      {[...Array(numberOfRows)].map((_, idx) => (
+      {[...Array(rowCount)].map((_, idx) => (
         <div key={`registrationListLoading#${idx}`} className="h-10 bg-muted rounded w-full"></div>
       ))}
     </div>

@@ -134,7 +134,7 @@ export function useRecentRegistrations(
   namespaceId: ENSNamespaceId,
 ) {
   return useQuery({
-    queryKey: ["recent-registrations", ensNodeURL],
+    queryKey: [ensNodeURL, namespaceId, "recent-registrations", maxResults],
     queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults, namespaceId),
     throwOnError(error) {
       throw new Error(
