@@ -1,7 +1,8 @@
-import { db, publicClients } from "ponder:api";
+import { db } from "ponder:api";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { type Name, Node } from "@ensnode/ensnode-sdk";
 import { http, createPublicClient, namehash } from "viem";
+import { normalize } from "viem/ens";
 
 import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
 import { findResolver } from "@/api/lib/find-resolver";
@@ -23,7 +24,6 @@ import {
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import config from "@/config";
 import { makeResolverId } from "@/lib/ids";
-import { replaceBigInts } from "ponder";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
@@ -72,7 +72,12 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // but honestly the state drift is at max 1 block on L1 and a block or two on an L2, it's pretty negligible,
   // so maybe we just ignore this issue entirely
 
-  // TODO: if name not normalized, throw error
+  const normalizedName = normalize(name);
+  if (name !== normalizedName) {
+    throw new Error(`Name "${name}" must be normalized ("${normalizedName}").`);
+  }
+
+  // TODO: more name normalization logic (return values of `name` record for example)
   // TODO: need to handle encoded label hashes in name, yeah?
 
   const node: Node = namehash(name);
@@ -196,7 +201,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     // requires exact match if not extended resolver
     // TODO: should this return empty response instead?
     throw new Error(
-      `The active resolver for '${name}' (via '${activeName}') _must_ be a wildcard-capable IExtendedResolver, but ${activeResolver} on chain id ${chainId} did not respond correctly to ENSIP-10 Wildcard Resolution supportsInterface().`,
+      `The active resolver for '${name}' _must_ be a wildcard-capable IExtendedResolver, but ${chainId}:${activeResolver} (via '${activeName}') did not respond correctly to ENSIP-10 Wildcard Resolution supportsInterface().`,
     );
   }
 
