@@ -4,7 +4,7 @@ import { prettifyError, z } from "zod/v4";
 import { derive_isSubgraphCompatible } from "@/config/derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
-  invariant_ExperimentalResolutionNeedsReverseResolversPlugin,
+  invariant_experimentalResolutionNeedsReverseResolversPlugin,
   invariant_globalBlockrange,
   invariant_requiredDatasources,
   invariant_reverseResolversPluginNeedsResolverRecords,
@@ -198,7 +198,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_globalBlockrange)
   .check(invariant_validContractConfigs)
   .check(invariant_reverseResolversPluginNeedsResolverRecords)
-  .check(invariant_ExperimentalResolutionNeedsReverseResolversPlugin)
+  .check(invariant_experimentalResolutionNeedsReverseResolversPlugin)
   /**
    * Derived configuration
    *

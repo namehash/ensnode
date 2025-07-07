@@ -1,16 +1,7 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import {
-  Address,
-  Hex,
-  hexToBigInt,
-  hexToBytes,
-  isAddress,
-  labelhash,
-  zeroAddress,
-  zeroHash,
-} from "viem";
+import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
   type LabelHash,

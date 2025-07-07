@@ -2,4 +2,4 @@
 "ensindexer": minor
 ---
 
-add forward/reverse resolution apis gated being EXPERIMENTAL_RESOLUTION config flag
+add forward/reverse resolution apis gated behind an EXPERIMENTAL_RESOLUTION config flag

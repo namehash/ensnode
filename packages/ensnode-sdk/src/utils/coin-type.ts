@@ -11,7 +11,7 @@ export const evmChainIdToCoinType = (chainId: number) => {
 
 export const bigintToCoinType = (value: bigint) => {
   if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error(`'${value}' cannot represent a CoinType, it is too large.`);
+    throw new Error(`'${value}' cannot represent as CoinType, it is too large.`);
   }
 
   return Number(value) as CoinType;

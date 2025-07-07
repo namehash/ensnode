@@ -12,8 +12,7 @@ import {
 /**
  * Multi-chain ReverseResolver indexing functions should be registered exactly once, or Ponder will
  * complain about multiple indexing functions being registered for these events. This boolean allows
- * this function to be idempotent — many plugins can call it, but only one will succeed, which is
- * enough to correctly register multi-chain Resolver indexing handlers.
+ * this function to be idempotent — many plugins can call it, but only the first will take effect.
  */
 let hasBeenRegistered = false;
 

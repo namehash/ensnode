@@ -152,7 +152,7 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
 }
 
 // Invariant: experimental_resolution requires ReverseResolvers plugin
-export function invariant_ExperimentalResolutionNeedsReverseResolversPlugin(
+export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "experimental_resolution">>,
 ) {
   const { value: config } = ctx;

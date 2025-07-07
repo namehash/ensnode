@@ -78,8 +78,13 @@ export interface EventFilter {
 
 /**
  * Defines the abi, address, filter, and startBlock of a contract relevant to a Datasource.
- * A contract is located onchain either by a static `address` or the event signatures (`filter`)
- * one should filter the chain for. This type is intentionally a subset of Ponder's ContractConfig.
+ *
+ * A contract is located onchain either by
+ *  1. a single Address in `address`,
+ *  2. a set of Address[] in `address`,
+ *  3. or a set of event signatures in `filter`.
+ *
+ * This type is intentionally a subset of Ponder's ContractConfig.
  *
  * @param abi - the ABI of the contract
  * @param address - (optional) Address of the contract or Address[] of each contract to be indexed
@@ -89,7 +94,13 @@ export interface EventFilter {
 export type ContractConfig =
   | {
       readonly abi: Abi;
-      readonly address: Address | Address[];
+      readonly address: Address;
+      readonly filter?: never;
+      readonly startBlock: number;
+    }
+  | {
+      readonly abi: Abi;
+      readonly address: Address[];
       readonly filter?: never;
       readonly startBlock: number;
     }
