@@ -1,6 +1,7 @@
 import { db } from "ponder:api";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { type Name, Node } from "@ensnode/ensnode-sdk";
+import { replaceBigInts } from "ponder";
 import { http, createPublicClient, namehash } from "viem";
 import { normalize } from "viem/ens";
 
@@ -178,7 +179,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
   //////////////////////////////////////////////////
   // 3. Execute each record's call against the active Resolver.
-  //    NOTE: from here, _must_ execute EVM code to be compliant with ENS Protocol.
+  //    NOTE: from here, MUST execute EVM code to be compliant with ENS Protocol.
   //    i.e. must execute resolve() to retrieve active record values
   //////////////////////////////////////////////////
 
@@ -201,7 +202,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     // requires exact match if not extended resolver
     // TODO: should this return empty response instead?
     throw new Error(
-      `The active resolver for '${name}' _must_ be a wildcard-capable IExtendedResolver, but ${chainId}:${activeResolver} (via '${activeName}') did not respond correctly to ENSIP-10 Wildcard Resolution supportsInterface().`,
+      `The active resolver for '${name}' MUST be a wildcard-capable IExtendedResolver, but ${chainId}:${activeResolver} (via '${activeName}') did not respond correctly to ENSIP-10 Wildcard Resolution supportsInterface().`,
     );
   }
 
