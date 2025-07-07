@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
         destination: "/api/subgraph",
         permanent: true,
       },
+      {
+        source: "/gql/ponder",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
 };
