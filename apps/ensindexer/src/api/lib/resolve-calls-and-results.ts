@@ -115,7 +115,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
 
   return await Promise.all(
     calls.map(async (call) => {
-      // NOTE: ENSIP-10 —  If extended resolver, resolver.resolve(name, data)
+      // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
       if (requiresWildcardSupport) {
         const value = await publicClient.readContract({
           ...ResolverContract,
@@ -126,16 +126,8 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
           ],
         });
 
-        // console.log(
-        //   call.functionName,
-        //   toHex(packetToBytes(name)),
-        //   encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
-        // );
-
-        if (size(value) === 0) {
-          // resolve() returned empty bytes or reverted
-          return { call, result: null };
-        }
+        // if resolve() returned empty bytes or reverted, coalece to null
+        if (size(value) === 0) return { call, result: null };
 
         // ENSIP-10 resolve() always returns bytes that need to be decoded
         const results = decodeAbiParameters(
@@ -143,14 +135,14 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
           value,
         );
 
-        // NOTE: type-guaranteed to have at least 1 result (because each abi item's outputs.length > 0)
-        const result = results[0];
-        return { call, result };
+        // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length > 0)
+        return { call, result: results[0] };
       }
 
       // if not extended resolver, resolve directly
-      // NOTE: discrimminate against the `functionName` type to correctly infer argument types,
-      // otherwise typescript complains about `call` not matching the expected types of the `readContract`
+      // NOTE: discrimminate against the `functionName` type, otherwise typescript complains about
+      // `call` not matching the expected types of the `readContract` arguments. also helpfully
+      // infers the return type of `readContract` matches the result type of each `call`
       switch (call.functionName) {
         case "name":
           return {
@@ -192,9 +184,10 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
         }
 
         // otherwise, it's not an EVM address, so we coerce falsy string values to null
+        // but otherwise return it as-is
         return { call, result: result || null };
       }
-      // coalesce falsy string values to null
+      // for name and text recods, just coalesce falsy string values to null
       case "name":
       case "text":
         return { call, result: result || null };

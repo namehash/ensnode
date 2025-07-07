@@ -1,7 +1,7 @@
 import { db, publicClients } from "ponder:api";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { type Name, Node } from "@ensnode/ensnode-sdk";
-import { namehash } from "viem";
+import { http, createPublicClient, namehash } from "viem";
 
 import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
 import { findResolver } from "@/api/lib/find-resolver";
@@ -171,19 +171,22 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     ` ↳ ❌ ${chainId}:${activeResolver} is NOT a Known Onchain Static Resolver — continuing`,
   );
 
-  // NOTE: from here, _must_ execute EVM code to be compliant with ENS Protocol.
-  // i.e. must execute resolve() to retrieve active record values
+  //////////////////////////////////////////////////
+  // 3. Execute each record's call against the active Resolver.
+  //    NOTE: from here, _must_ execute EVM code to be compliant with ENS Protocol.
+  //    i.e. must execute resolve() to retrieve active record values
+  //////////////////////////////////////////////////
 
-  // Invariant: the only chainIds we should be resolving records on at this point are those that
-  // ENSIndexer has an rpcConfig for (i.e. is actively indexing).
-  // TODO: we probably want to get our own publicClient using rpcConfig instead of using ponder's
-  // because it's a noisy logger and we don't actually want caching enabled for these calls
-  const publicClient = publicClients[chainId];
-  if (!publicClient) {
+  // Invariant: ENSIndexer must have an rpcConfig for the `chainId` we're calling resolve() on.
+  const rpcConfig = config.rpcConfigs[chainId];
+  if (!rpcConfig) {
     throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
   }
 
-  // 2.1 requireResolver() — validate behavior
+  // create an un-cached publicClient
+  const publicClient = createPublicClient({ transport: http(rpcConfig.url) });
+
+  // requireResolver() — validate behavior
   const isExtendedResolver = await supportsENSIP10Interface({
     address: activeResolver,
     publicClient,
@@ -197,7 +200,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     );
   }
 
-  // 2.2 Execute each record's call against the active Resolver
+  // execute each record's call against the active Resolver
   const rawResults = await executeResolveCalls<SELECTION>({
     name,
     resolverAddress: activeResolver,
@@ -214,6 +217,6 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     results.map((result) => JSON.stringify(replaceBigInts(result, (v) => String(v)))).join("\n"),
   );
 
-  // 5. Return record values
+  // return record values
   return makeRecordsResponseFromResolveResults(selection, results);
 }
