@@ -33,7 +33,7 @@ const navItems = [
     items: [
       {
         title: "Subgraph (GraphQL)",
-        url: "/gql/subgraph-compat",
+        url: "/api/subgraph",
       },
       {
         title: "Ponder Client",

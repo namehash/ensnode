@@ -51,7 +51,7 @@ export interface AiQueryGeneratorProps {
 export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
   const createAiGeneratedQuery = useCallback(
     async (prompt: string) => {
-      const requestUrl = new URL("/gql/api", window.location.origin);
+      const requestUrl = new URL("/api/ai", window.location.origin);
 
       requestUrl.searchParams.set("prompt", prompt);
       requestUrl.searchParams.set("gqlApiUrl", url);
@@ -81,7 +81,7 @@ export function AiQueryGeneratorForm({ onResult, url }: AiQueryGeneratorProps) {
         variables: responseJson.variables,
       };
     },
-    [url],
+    [url]
   );
 
   const aiQueryGeneratorMutation = useMutation({
