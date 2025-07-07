@@ -1,5 +1,4 @@
 ---
-import { ENSADMIN_URL } from "astro:env/client";
 import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
 
@@ -61,7 +60,7 @@ import heroImage from "../assets/hero_skies_image.png";
 </head>
 <body>
 <slot/>
-<Footer client:load ensadminUrl={ENSADMIN_URL} />
+<Footer />
 </body>
 </html>
 

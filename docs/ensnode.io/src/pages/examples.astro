@@ -44,6 +44,7 @@ const categories = Array.from(categoryMap.entries())
               type="text"
               class="block w-full pl-10 pr-3 py-3 border border-[var(--color-border)] shadow-sm rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0"
               placeholder="Search examples by name or description..."
+              autocomplete="off"
             />
           </div>
         </div>
@@ -51,7 +52,7 @@ const categories = Array.from(categoryMap.entries())
 
       <div class="flex flex-col lg:flex-row gap-8">
         <div class="lg:w-64 flex-shrink-0">
-          <div class="bg-white rounded-md border border-gray-200 p-6">
+          <div class="bg-white rounded-md border border-gray-200 p-6 sticky top-24">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
 
             <button
@@ -176,7 +177,7 @@ const categories = Array.from(categoryMap.entries())
       } else {
         const filteredText = filteredExamples.length === 1 ? 'example' : 'examples';
         const totalText = examples.length === 1 ? 'example' : 'examples';
-        let countText = `Showing ${filteredExamples.length} ${filteredText} of ${examples.length} ${totalText}`;
+        let countText = `Showing ${filteredExamples.length} of ${examples.length} ${totalText}`;
         resultsCount.textContent = countText;
       }
 

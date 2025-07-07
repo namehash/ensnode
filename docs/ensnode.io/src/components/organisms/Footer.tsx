@@ -8,7 +8,7 @@ import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms
 import { TwitterIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TwitterIcon.tsx";
 import { NameHashLabsLogo } from "@workspace/docs/ensrainbow.io/src/components/atoms/logos/NameHashLabsLogo.tsx";
 
-const getFooterProducts = (ensadminUrl: string) => [
+const footerProducts = [
   {
     name: "ENSNode",
     href: "https://ensnode.io/",
@@ -19,7 +19,7 @@ const getFooterProducts = (ensadminUrl: string) => [
   },
   {
     name: "ENSAdmin",
-    href: ensadminUrl,
+    href: "https://ensadmin.io",
   },
   {
     name: "ENSv2 Referral Programs",
@@ -63,12 +63,10 @@ const footerResources = [
 ];
 
 type FooterProps = {
-  ensadminUrl: string;
   additionalStyles?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
 
-export default function Footer({ ensadminUrl, ...props }: FooterProps) {
-  const footerProducts = getFooterProducts(ensadminUrl);
+export default function Footer({ ...props }: FooterProps) {
   return (
     <section
       className="lg:px-[50px] px-5 flex items-center justify-center w-full border-t border-gray-200"
