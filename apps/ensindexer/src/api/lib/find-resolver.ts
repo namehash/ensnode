@@ -36,7 +36,7 @@ export async function findResolver(chainId: number, name: Name) {
   // if the Subgraph plugin is not active, then we don't have Domain-Resolver relationships
   // for the ENSRoot Chain
   if (!config.plugins.includes(PluginName.Subgraph)) {
-    // use the UniversalResolver on the ENSRoot Chain
+    // query the UniversalResolver on the ENSRoot Chain (via RPC)
     return findResolverWithUniversalResolver(chainId, name);
   }
 
@@ -46,16 +46,18 @@ export async function findResolver(chainId: number, name: Name) {
 }
 
 /**
- * Gets the resolverAddress for the specified `name` using the UniversalResolver on the ENSRoot.
+ * Queries the resolverAddress for the specified `name` using the UniversalResolver on the ENSRoot
+ * via RPC.
  */
 async function findResolverWithUniversalResolver(
   chainId: number,
   name: Name,
 ): Promise<FindResolverResult> {
+  const ensRootChainId = getENSRootChainId(config.namespace);
   // Invariant: This must be the ENS Root Chain
-  if (chainId !== getENSRootChainId(config.namespace)) {
+  if (chainId !== ensRootChainId) {
     throw new Error(
-      `Invariant: findResolverWithUniversalResolver called in the context of a chainId "${chainId}" for which there is no UniversalResolver.`,
+      `Invariant: findResolverWithUniversalResolver called in the context of a chainId "${chainId}" this is not the ENS Root Chain ("${ensRootChainId}").`,
     );
   }
 

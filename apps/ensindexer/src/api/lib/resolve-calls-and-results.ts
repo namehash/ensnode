@@ -2,7 +2,6 @@ import type { Name, Node } from "@ensnode/ensnode-sdk";
 import {
   type Address,
   type PublicClient,
-  RpcRequestError,
   decodeAbiParameters,
   encodeFunctionData,
   getAbiItem,
@@ -72,8 +71,6 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
   selection: SELECTION,
 ) {
   return [
-    // TODO: legacy addr record?
-    // selection.addr && ({ functionName: "addr(bytes32)", args: [node] } as const),
     selection.name && ({ functionName: "name", args: [node] } as const),
     ...(selection.addresses ?? []).map(
       (coinType) =>
@@ -99,7 +96,7 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
  * Execute a set of ResolveCalls against the provided `resolverAddress`.
  *
  * NOTE: viem#readContract implements CCIP-Read, so we get that behavior for free
- * NOTE: viem#multicall doesn't implement CCIP-Read so maybe this can be optimized further
+ * NOTE: viem#multicall _doesn't_ implement CCIP-Read so maybe this can be optimized further
  */
 export async function executeResolveCalls<SELECTION extends ResolverRecordsSelection>({
   name,
@@ -152,7 +149,8 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
       }
 
       // if not extended resolver, resolve directly
-      // NOTE: discrimminate against the `functionName` type to correctly infer return types
+      // NOTE: discrimminate against the `functionName` type to correctly infer argument types,
+      // otherwise typescript complains about `call` not matching the expected types of the `readContract`
       switch (call.functionName) {
         case "name":
           return {

@@ -2,10 +2,10 @@ import { CoinType, Name } from "@ensnode/ensnode-sdk";
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
+import { resolveAutomatic } from "@/api/lib/automatic-resolution";
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
-import { resolveUniversal } from "@/api/lib/universal-resolution";
 
 // TODO: replace with zod schema or validator
 function buildSelectionFromQueryParams(c: Context) {
@@ -85,16 +85,16 @@ app.get("/reverse/:address", async (c) => {
 });
 
 /**
- * Example queries for /universal:
+ * Example queries for /auto:
  *
- * 1. Universal resolution for an address:
- * GET /universal/0x1234...abcd?name=true&addresses=60&texts=avatar
+ * 1. Auto resolution for an address:
+ * GET /auto/0x1234...abcd?name=true&addresses=60&texts=avatar
  *
- * 2. Universal resolution for a name:
- * GET /universal/example.eth?name=true&addresses=60,0&texts=avatar,com.twitter
+ * 2. Auto resolution for a name:
+ * GET /auto/example.eth?name=true&addresses=60,0&texts=avatar,com.twitter
  */
 
-app.get("/universal/:addressOrName", async (c) => {
+app.get("/auto/:addressOrName", async (c) => {
   try {
     // TODO: correctly parse/validate with zod
     const addressOrName = c.req.param("addressOrName") as Address | Name;
@@ -104,7 +104,7 @@ app.get("/universal/:addressOrName", async (c) => {
 
     const selection = buildSelectionFromQueryParams(c);
 
-    const result = await resolveUniversal(addressOrName, selection);
+    const result = await resolveAutomatic(addressOrName, selection);
     return c.json(result);
   } catch (error) {
     console.error(error);

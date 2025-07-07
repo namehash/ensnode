@@ -15,7 +15,7 @@ describe("names", () => {
       expect(getNameHierarchy(name)).toEqual(expected);
     });
 
-    it("should handle empty string", () => {
+    it("should handle empty string (root node)", () => {
       const name = "";
       const expected = [""];
       expect(getNameHierarchy(name)).toEqual(expected);

@@ -15,7 +15,7 @@ import { resolveReverse } from "@/api/lib/reverse-resolution";
  * forward records in a single request. perhaps just merge them actually, that'd be nice. a
  * mergeResolverRecordsResponse might be a helpful util
  */
-export async function resolveUniversal<SELECTION extends ResolverRecordsSelection>(
+export async function resolveAutomatic<SELECTION extends ResolverRecordsSelection>(
   addressOrName: Address | Name,
   selection: SELECTION,
 ) {

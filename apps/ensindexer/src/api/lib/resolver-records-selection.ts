@@ -4,10 +4,11 @@ import { CoinType } from "@ensnode/ensnode-sdk";
  * Encodes a selection of Resolver records in the context of a specific Name.
  */
 export interface ResolverRecordsSelection {
-  // TODO: support legacy addr() record?
-
   /**
-   * Whether to fetch the name's `name` record.
+   * Whether to fetch the name's `name` record. This value is primarily used in the context of
+   * Reverse Resolution.
+   *
+   * @see https://docs.ens.domains/ensip/19/#reverse-resolution
    */
   name?: boolean;
 

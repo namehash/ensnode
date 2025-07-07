@@ -12,7 +12,7 @@ import {
   interpretRawCallsAndResults,
   makeResolveCalls,
 } from "@/api/lib/resolve-calls-and-results";
-import { areResolverRecordsAreIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
+import { areResolverRecordsIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
 import {
   IndexedResolverRecords,
   ResolverRecordsResponse,
@@ -93,7 +93,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   }
 
   //////////////////////////////////////////////////
-  // 1. Identify the active resolver for the name on the specified chain. This requires
+  // 1. Identify the active resolver for the name on the specified chain.
   //////////////////////////////////////////////////
 
   const { activeName, activeResolver, requiresWildcardSupport } = await findResolver(chainId, name);
@@ -144,7 +144,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   //////////////////////////////////////////////////
   const isKnownOnchainStaticResolver =
     getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
-  if (isKnownOnchainStaticResolver && areResolverRecordsAreIndexedOnChain(chainId)) {
+  if (isKnownOnchainStaticResolver && areResolverRecordsIndexedOnChain(chainId)) {
     console.log(
       ` ↳ ✅ ${chainId}:${activeResolver} is a Known Onchain Static Resolver — retrieving records from ENSIndexer`,
     );
