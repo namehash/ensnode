@@ -25,6 +25,11 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/gql/subgraph-compat",
+        destination: "/api/subgraph",
+        permanent: true,
+      },
     ];
   },
 };
