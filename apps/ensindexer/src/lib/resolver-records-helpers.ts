@@ -10,11 +10,10 @@ export async function handleResolverNameUpdate(
   name: string | null,
 ) {
   // TODO(null-bytes): represent null bytes correctly
-  const sanitizedName = name !== null ? stripNullBytes(name) : null;
+  // NOTE: additionally coalesce falsy values (empty string) into null
+  const sanitizedName = name === null ? null : stripNullBytes(name) || null;
 
-  await context.db.update(schema.resolver, { id: resolverId }).set({
-    name: sanitizedName || null, // additionally coalesce falsy values (empty string) into null
-  });
+  await context.db.update(schema.resolver, { id: resolverId }).set({ name: sanitizedName });
 }
 
 export async function handleResolverAddressRecordUpdate(

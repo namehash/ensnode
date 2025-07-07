@@ -264,11 +264,14 @@ export default {
         address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
         startBlock: 16925619,
       },
-      LegacyDefaultReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
-        startBlock: 9380501,
-      },
+      // NOTE: the LegacyDefaultReverseResolver does NOT emit events (NameChanged or TextChanged),
+      // and is effectively unindexable for the purposes of Reverse Resolution. We document it here
+      // for completeness, and explicity do not index it.
+      // LegacyDefaultReverseResolver: {
+      //   abi: ResolverConfig.abi,
+      //   address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
+      //   startBlock: 9380501,
+      // },
     },
   },
 

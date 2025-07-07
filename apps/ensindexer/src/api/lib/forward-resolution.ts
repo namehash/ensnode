@@ -60,9 +60,13 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: Name,
   selection: SELECTION,
-  chainId: number = ensRootChainId,
+  options: { chainId?: number; accelerate?: boolean } = {},
 ): Promise<ResolverRecordsResponse<SELECTION>> {
-  console.log(`— resolveForward(${name}, ${JSON.stringify(selection)}, ${chainId})`);
+  const { chainId = ensRootChainId, accelerate = true } = options;
+
+  console.log(
+    `— resolveForward(${name}, ${JSON.stringify(selection)}, ${JSON.stringify(options)})`,
+  );
 
   // TODO: need to manage state drift between ENSIndexer and RPC
   // could acquire a "most recently indexed" blockNumber or blockHash for this operation based on
@@ -107,11 +111,13 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // we're unable to find an active resolver for this name, return empty response
   if (!activeResolver) {
     console.log(` ❌ findResolver: no active resolver, returning empty response`);
-    return makeEmptyResolverRecordsResponse(selection);
+    const response = makeEmptyResolverRecordsResponse(selection);
+    console.log(` ↳ ➡️ ${JSON.stringify(response)}`);
+    return response;
   }
 
   console.log(
-    ` ↳ findResolver: ${chainId}:${activeResolver}, Requires Wildcard? ${requiresWildcardSupport ? "✅" : "❌"}`,
+    ` ↳ findResolver: ${chainId}:${activeResolver} (via ${activeName}), Requires Wildcard? ${requiresWildcardSupport ? "YES" : "NO"}`,
   );
 
   //////////////////////////////////////////////////
@@ -126,20 +132,25 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   //   then we can short-circuit the CCIP-Read and continue resolving the requested records directly
   //   from the data indexed by that plugin.
   //////////////////////////////////////////////////
-  const defers = possibleKnownOffchainLookupResolverDefersTo(chainId, activeResolver);
-  if (defers && config.plugins.includes(defers.pluginName)) {
+  if (accelerate) {
+    const defers = possibleKnownOffchainLookupResolverDefersTo(chainId, activeResolver);
+    if (defers && !!defers.chainId && config.plugins.includes(defers.pluginName)) {
+      console.log(
+        ` ↳ ✅ ${chainId}:${activeResolver} is a Known Offchain Lookup Resolver — deferring to ${defers.pluginName} on chain ${defers.chainId}`,
+      );
+
+      // can short-circuit CCIP-Read and defer resolution to the specified chainId with the knowledge
+      // that ENSIndexer is actively indexing the necessary plugin on the specified chain.
+      return resolveForward(name, selection, {
+        ...options,
+        chainId: defers.chainId,
+      });
+    }
+
     console.log(
-      ` ↳ ✅ ${chainId}:${activeResolver} is a Known Offchain Lookup Resolver — deferring to ${defers.pluginName} on chain ${defers.chainId}`,
+      ` ↳ ❌ ${chainId}:${activeResolver} is NOT a Known Offchain Lookup Resolver — continuing`,
     );
-
-    // can short-circuit CCIP-Read and defer resolution to the specified chainId with the knowledge
-    // that ENSIndexer is actively indexing the necessary plugin on the specified chain.
-    return resolveForward(name, selection, defers.chainId);
   }
-
-  console.log(
-    ` ↳ ❌ ${chainId}:${activeResolver} is NOT a Known Offchain Lookup Resolver — continuing`,
-  );
 
   //////////////////////////////////////////////////
   // Known On-Chain Static Resolvers
@@ -148,34 +159,41 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   //    2) ENSIndexer indexes records for all Resolver contracts on this chain,
   //   then we can retrieve records directly from the database.
   //////////////////////////////////////////////////
-  const isKnownOnchainStaticResolver =
-    getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
-  if (isKnownOnchainStaticResolver && areResolverRecordsIndexedOnChain(chainId)) {
-    console.log(
-      ` ↳ ✅ ${chainId}:${activeResolver} is a Known Onchain Static Resolver — retrieving records from ENSIndexer`,
-    );
-    const resolverId = makeResolverId(chainId, activeResolver, node);
-    const resolver = await db.query.resolver.findFirst({
-      where: (resolver, { eq }) => eq(resolver.id, resolverId),
-      columns: { name: true },
-      with: { addressRecords: true, textRecords: true },
-    });
-
-    // Invariant, resolver must exist here
-    if (!resolver) {
-      throw new Error(
-        `Invariant: chain ${chainId} is indexed and active resolver ${activeResolver} was identified, but no resolver exists with id ${resolverId}.`,
+  if (accelerate) {
+    const isKnownOnchainStaticResolver =
+      getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
+    if (isKnownOnchainStaticResolver && areResolverRecordsIndexedOnChain(chainId)) {
+      console.log(
+        ` ↳ ✅ ${chainId}:${activeResolver} is a Known Onchain Static Resolver — retrieving records from ENSIndexer`,
       );
+      const resolverId = makeResolverId(chainId, activeResolver, node);
+      const resolver = await db.query.resolver.findFirst({
+        where: (resolver, { eq }) => eq(resolver.id, resolverId),
+        columns: { name: true },
+        with: { addressRecords: true, textRecords: true },
+      });
+
+      // Invariant, resolver must exist here
+      if (!resolver) {
+        throw new Error(
+          `Invariant: chain ${chainId} is indexed and active resolver ${activeResolver} was identified, but no resolver exists with id ${resolverId}.`,
+        );
+      }
+
+      // format into RecordsResponse and return
+      const response = makeRecordsResponseFromIndexedRecords(
+        selection,
+        // TODO: drizzle types not inferred correctly for addressRecords/textRecords
+        resolver as IndexedResolverRecords,
+      );
+      console.log(` ↳ ➡️ ${JSON.stringify(response)}`);
+      return response;
     }
 
-    // format into RecordsResponse and return
-    // TODO: drizzle types not inferred correctly for addressRecords/textRecords
-    return makeRecordsResponseFromIndexedRecords(selection, resolver as IndexedResolverRecords);
+    console.log(
+      ` ↳ ❌ ${chainId}:${activeResolver} is NOT a Known Onchain Static Resolver — continuing`,
+    );
   }
-
-  console.log(
-    ` ↳ ❌ ${chainId}:${activeResolver} is NOT a Known Onchain Static Resolver — continuing`,
-  );
 
   //////////////////////////////////////////////////
   // 3. Execute each record's call against the active Resolver.
@@ -215,14 +233,15 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
     publicClient,
   });
 
+  console.log(
+    ` ↳ ✅ RawResults:\n  ${rawResults.map((result) => JSON.stringify(replaceBigInts(result, (v) => String(v)))).join("\n  ")}`,
+  );
+
   // interpret the results beyond simple return values
   const results = interpretRawCallsAndResults(rawResults);
 
-  console.log(
-    " ↳ ✅ ResolveCallsAndResults:",
-    results.map((result) => JSON.stringify(replaceBigInts(result, (v) => String(v)))).join("\n"),
-  );
-
   // return record values
-  return makeRecordsResponseFromResolveResults(selection, results);
+  const response = makeRecordsResponseFromResolveResults(selection, results);
+  console.log(` ↳ ➡️ ${JSON.stringify(response)}`);
+  return response;
 }

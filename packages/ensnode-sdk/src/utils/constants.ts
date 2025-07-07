@@ -19,8 +19,8 @@ export const REVERSE_ROOT_NODES: Set<Node> = new Set([namehash("addr.reverse")])
 export const ETH_COIN_TYPE: CoinType = 60;
 
 /**
- * ENSIP-19 'EVM_BIT' representing the 'default' coinType for EVM chains in ENS.
+ * ENSIP-19 EVM CoinType representing the 'default' coinType for EVM chains in ENS.
  *
- * @see https://github.com/ensdomains/ens-contracts/blob/0c95e9b8d46c1344eff5d9ebe5fdb7657d9427d3/contracts/utils/ENSIP19.sol#L9
+ * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  */
-export const EVM_BIT = (1 << 31) as EvmCoinType;
+export const DEFAULT_EVM_COIN_TYPE = 0x8000_0000 as EvmCoinType;

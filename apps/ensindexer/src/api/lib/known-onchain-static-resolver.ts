@@ -29,10 +29,6 @@ export function getKnownOnchainStaticResolverAddresses(chainId: number): Address
       // the Root PublicResolver is an Onchain Static Resolver
       // NOTE: this is also the ENSIP-11 ReverseResolver
       ensNamespace.ensroot.contracts.PublicResolver?.address as Address,
-
-      // the Root LegacyDefaultReverseResolver is an Onchain Static Resolver
-      ensNamespace["reverse-resolver-root"]?.contracts.LegacyDefaultReverseResolver
-        ?.address as Address,
     ].filter(Boolean);
   }
 

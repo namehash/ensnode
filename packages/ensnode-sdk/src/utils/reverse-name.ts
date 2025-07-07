@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { ETH_COIN_TYPE, EVM_BIT } from "./constants";
+import { DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./constants";
 import { CoinType, Label, Name } from "./types";
 
 /**
@@ -33,7 +33,7 @@ export function reverseName(address: Address, coinType: CoinType): Name {
     switch (coinType) {
       case ETH_COIN_TYPE:
         return "addr";
-      case EVM_BIT:
+      case DEFAULT_EVM_COIN_TYPE:
         return "default";
       default:
         return coinType.toString(16); // hex string, sans 0x prefix

@@ -3,6 +3,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
+import { replaceBigInts } from "ponder";
 
 ////////
 // Log ENSIndexerConfig for debugging.

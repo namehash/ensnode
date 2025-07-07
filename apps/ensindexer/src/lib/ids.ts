@@ -20,7 +20,8 @@ export const makeResolverId = (chainId: number, address: Address, node: Node) =>
     // null out chainId prefix iff subgraph-compat, otherwise include for chain-scoping
     config.isSubgraphCompatible ? null : chainId,
     // NOTE(subgraph-compat): subgraph uses lowercase address here, otherwise keep checksummed
-    config.isSubgraphCompatible ? address.toLowerCase() : address,
+    address.toLowerCase(),
+    // config.isSubgraphCompatible ? address.toLowerCase() : address,
     node,
   ]
     .filter(Boolean)
