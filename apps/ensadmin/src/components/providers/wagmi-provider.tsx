@@ -20,19 +20,14 @@ export function WagmiProvider({ children }: PropsWithChildren) {
   const ensNodeUrl = selectedEnsNodeUrl(searchParams);
   const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
   const [wagmiConfig, setWagmiConfig] = useState<WagmiConfig | undefined>();
-  const [rpcEnvVarDefined, setRpcEnvVarDefined] = useState<boolean>(true);
 
   useEffect(() => {
       if (indexingStatusQuery.status === "success") {
           try {
-              const configParams = wagmiConfigForEnsNamespace(indexingStatusQuery.data.env.NAMESPACE);
-              const wagmiConfig = createConfig(configParams);
-              setRpcEnvVarDefined(true);
+              const wagmiConfig = createConfig(wagmiConfigForEnsNamespace(indexingStatusQuery.data.env.NAMESPACE));
               setWagmiConfig(wagmiConfig);
-          } catch (error) { //this error handling doesn't catch the error from getEnsNamespaceRpcUrl (idk why)
-              // and because it's not inside /status page therefore there is no handler for it!
-              console.log(error);
-              setRpcEnvVarDefined(false);
+          } catch (error) {
+              throw error;
           }
       } else {
           setWagmiConfig(undefined);
@@ -40,16 +35,7 @@ export function WagmiProvider({ children }: PropsWithChildren) {
   }, [indexingStatusQuery.data, indexingStatusQuery.status]);
 
   if (typeof wagmiConfig === "undefined") {
-      return <>{children}</>;
-  }
-
-  if (!rpcEnvVarDefined && indexingStatusQuery.status === "success"){
-      return (
-          <div className="p-6">
-              <h1 className="text-2xl font-bold">An error occurred</h1>
-              <p className="text-gray-600">No RPC URL was set for ENS namespace {indexingStatusQuery.data.env.NAMESPACE} (NEXT_PUBLIC_RPC_URL_{getENSRootChainId(indexingStatusQuery.data.env.NAMESPACE)}).</p>
-          </div>
-      );
+        return <>{children}</>;
   }
 
   return (

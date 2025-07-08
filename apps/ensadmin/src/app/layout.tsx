@@ -63,7 +63,6 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
       <QueryClientProvider>
-        <WagmiProvider>
           <SidebarProvider>
             <Suspense>
               <AppSidebar />
@@ -78,7 +77,6 @@ export default function Layout({
               {children}
             </SidebarInset>
           </SidebarProvider>
-        </WagmiProvider>
       </QueryClientProvider>
       <Toaster />
       </body>
