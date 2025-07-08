@@ -186,7 +186,10 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   );
 }
 
-function RegistrationsListLoading(rowCount: number) {
+interface RegistrationLoadingProps {
+    rowCount: number
+}
+function RegistrationsListLoading({rowCount}: RegistrationLoadingProps) {
   return (
     <div className="animate-pulse space-y-4">
       {[...Array(rowCount)].map((_, idx) => (

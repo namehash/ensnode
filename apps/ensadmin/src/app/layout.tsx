@@ -10,6 +10,7 @@ import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/component
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ensAdminPublicUrl } from "@/lib/env";
+import {QueryClientProvider} from "@/components/query-client/components";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -61,6 +62,7 @@ export default function Layout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
+      <QueryClientProvider>
         <WagmiProvider>
           <SidebarProvider>
             <Suspense>
@@ -77,7 +79,8 @@ export default function Layout({
             </SidebarInset>
           </SidebarProvider>
         </WagmiProvider>
-        <Toaster />
+      </QueryClientProvider>
+      <Toaster />
       </body>
     </html>
   );

@@ -1,18 +1,20 @@
-import { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
-import { http } from "viem";
+import {DatasourceNames, ENSNamespaceId, ENSNamespaceIds, getDatasource} from "@ensnode/datasources";
+import {Chain, http, Transport} from "viem";
 import { anvil, localhost, holesky, mainnet, sepolia } from "viem/chains";
-import { createConfig } from "wagmi";
+import {createConfig} from "wagmi";
 import { parseUrl } from "./env";
 
 /**
  * Get RPC URLs from environment variables for a requested ENS namespace.
+ *
  * NOTE: Environment variables have to be read using direct `process.env` access
  * because otherwise Next.js will not expose them to the client.
  *
  * @param namespaceId ENS namespace
- * @returns RPC URL
+ * @returns RPC URL, or throws an error if an RPC URL is not defined as an env variable,
+ * or its URL is invalid
  */
-function getEnsDeploymentRpcUrl(namespaceId: ENSNamespaceId): URL {
+function getEnsNamespaceRpcUrl(namespaceId: ENSNamespaceId): URL {
   let envVarName: string;
   let envVarValue: string | undefined;
 
@@ -49,19 +51,27 @@ function getEnsDeploymentRpcUrl(namespaceId: ENSNamespaceId): URL {
 }
 
 // Create wagmi config with supported namespaces
+export type WagmiConfigForEnsNamespaces = {
+  readonly chains: [Chain, ...Chain[]];
+  readonly transports: Record<Chain["id"], Transport>;
+};
 
-//TODO: check with @tko what he meant in his PR comment there ("Try applying ens-deployments package config:")
-// -> basically to do what tko proposed in the PR comment, to use chains declared in ensnode/datasources package and not directly from viem (that would make a nicer dependency)
-export const config = createConfig({
-  // ens-test-env runs on a local Anvil chain with id 1337 belonging to localhost chain
-  chains: [mainnet, sepolia, holesky, {...anvil, id:localhost.id}],
-  transports: {
-    [mainnet.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.Mainnet).toString()),
-    [sepolia.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.Sepolia).toString()),
-    [holesky.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.Holesky).toString()),
-    [localhost.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.EnsTestEnv).toString()),
-  },
-});
+/**
+ * Returns a valid wagmi config object
+ */
+export const wagmiConfigForEnsNamespace = (namespaceId: ENSNamespaceId) => {
+  const rootDatasourceChain = getDatasource(namespaceId, DatasourceNames.ENSRoot).chain;
+
+  // `getEnsNamespaceRpcUrl` call would throw an error if no valid RPC URL was provided i.e. in env vars
+  const chainRpcUrl = getEnsNamespaceRpcUrl(namespaceId);
+
+  return {
+    chains: [rootDatasourceChain],
+    transports: {
+        [rootDatasourceChain.id]: http(chainRpcUrl.toString()),
+    },
+  } satisfies WagmiConfigForEnsNamespaces;
+}
 
 /**
  * Supported chain ID type.
