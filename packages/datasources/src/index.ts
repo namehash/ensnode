@@ -1,10 +1,10 @@
-import {DatasourceNames, ENSNamespace, ENSNamespaceId, ENSNamespaceIds} from "./lib/types";
+import { DatasourceNames, ENSNamespace, ENSNamespaceId, ENSNamespaceIds } from "./lib/types";
 
+import { Address } from "viem";
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
 import mainnet from "./mainnet";
 import sepolia from "./sepolia";
-import {Address} from "viem";
 
 export * from "./lib/types";
 
@@ -52,14 +52,13 @@ export const getDatasource = <
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
   getDatasource(namespaceId, DatasourceNames.ENSRoot).chain.id;
 
-
 /**
  * Returns the Address of the NameWrapper contract within the requested namespace.
  *
  * @returns the viem#Address object
  */
 export const getNameWrapperAddress = (namespaceId: ENSNamespaceId): Address =>
-    getDatasource(namespaceId, DatasourceNames.ENSRoot).contracts.NameWrapper.address;
+  getDatasource(namespaceId, DatasourceNames.ENSRoot).contracts.NameWrapper.address;
 
 /**
  * Get the ENS Manager App URL for the provided namespace.
@@ -67,7 +66,7 @@ export const getNameWrapperAddress = (namespaceId: ENSNamespaceId): Address =>
  * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
  * @returns ENS Manager App URL for the provided namespace, or null if the provided namespace doesn't have a known ENS Manager App
  */
-export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null{
+export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null {
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
       return new URL(`https://app.ens.domains/`);
@@ -111,7 +110,7 @@ export function getNameAvatarUrl(name: string, namespaceId: ENSNamespaceId): URL
 export function getNameDetailsUrl(name: string, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
 
-  return baseUrl ? new URL(name, baseUrl): null;
+  return baseUrl ? new URL(name, baseUrl) : null;
 }
 
 /**
@@ -122,5 +121,5 @@ export function getNameDetailsUrl(name: string, namespaceId: ENSNamespaceId): UR
 export function getAddressDetailsUrl(address: Address, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
 
-  return baseUrl ? new URL(address, baseUrl): null;
+  return baseUrl ? new URL(address, baseUrl) : null;
 }
