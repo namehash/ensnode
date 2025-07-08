@@ -6,6 +6,7 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
+import { sdk } from "@/api/lib/instrumentation";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
@@ -145,5 +146,14 @@ app.use(
     }),
   }),
 );
+
+// Start/Terminate ENSNode API OpenTelemetry SDK
+sdk.start();
+const shutdownOpenTelemetry = () =>
+  sdk.shutdown().catch((error) => console.error("Error terminating tracing", error));
+
+// gracefully shut down the SDK on process exit
+process.on("SIGINT", shutdownOpenTelemetry);
+process.on("SIGTERM", shutdownOpenTelemetry);
 
 export default app;
