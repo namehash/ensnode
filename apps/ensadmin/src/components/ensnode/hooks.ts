@@ -1,6 +1,4 @@
-import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
-import { SupportedChainId } from "@/lib/wagmi";
-import { getENSRootChainId } from "@ensnode/datasources";
+import { ensAdminVersion } from "@/lib/env";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { EnsNode } from "./types";
 

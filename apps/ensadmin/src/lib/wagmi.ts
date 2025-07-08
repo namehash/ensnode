@@ -72,13 +72,3 @@ export const wagmiConfigForEnsNamespace = (namespaceId: ENSNamespaceId) => {
     },
   } satisfies WagmiConfigForEnsNamespaces;
 }
-
-/**
- * Supported chain ID type.
- */
-export type SupportedChainId = (typeof config.chains)[number]["id"];
-/**
- * Get the supported chain ID by chain name.
- * @param name
- * @returns
- */
