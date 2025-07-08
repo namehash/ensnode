@@ -4,25 +4,26 @@ sidebar:
   order: 2
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
 ENSNode v1 provides an ENS Subgraph-Compatible GraphQL endpoint for the purposes of:
 
 1. Demonstrating 1:1 reproduction of the ENS Subgraph's logic & data
-    - the ENS Subgraph has been adopted by the community as an important resource for ENS protocol data, and confidence in ENSNode's implementation is demanded
+   - the ENS Subgraph has been adopted by the community as an important resource for ENS protocol data, and confidence in ENSNode's implementation is demanded
 2. Plug-and-Play compatibility for those that wish to host their own ENS indexer
-    - deploying ENSNode is faster and easier than running an ENS Subgraph instance
-    - 100% compatibility with `ensjs` eases community adoption of ENSNode
+   - deploying ENSNode is faster and easier than running an ENS Subgraph instance
+   - 100% compatibility with `ensjs` eases community adoption of ENSNode
 3. Gradual migration from the subgraph
-    - users may wish to gradually migrate from the subgraph & its api to ENSNode's api
-    - the built-in Ponder GraphQL api provides more efficient querying (esp. pagination) semantics
-    - the built-in `@ponder/client` provides a smoother devx for retrieving data within a client app
+   - users may wish to gradually migrate from the subgraph & its API to ENSNode's Subgraph API
 
 ## Compatibility Tooling
 
 ENSNode has developed tooling to verify subgraph compatibility and ease migration from the ENS Subgraph.
 
-<LinkCard title="Subgraph Compatibility Tooling" href="../subgraph-compatibility-tooling" />
+<LinkCard
+  title="Subgraph Compatibility Tooling"
+  href="../subgraph-compatibility-tooling"
+/>
 
 ## Subgraph-Compatible GraphQL API Reference
 
@@ -57,7 +58,7 @@ The following features of the subgraph graphql api are explicitly unsupported an
 
 - [1-level-nested Entity `_orderBy` param](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-nested-entity-sorting)
 - [time travel queries](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#time-travel-queries)
-- [_change_block filtering](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-block-filtering)
+- [\_change_block filtering](https://thegraph.com/docs/en/subgraphs/querying/graphql-api/#example-for-block-filtering)
 
 :::note[Contributions]
 If you'd like to discuss these features, please [open an Issue on GitHub](https://github.com/namehash/ensnode/issues).
@@ -72,6 +73,7 @@ If you'd like to highlight additional query patterns of the ENS Subgraph GraphQL
 :::
 
 #### from ensjs
+
 - [`getDecodedName`](https://github.com/ensdomains/ensjs/blob/17ab314/packages/ensjs/src/functions/subgraph/getDecodedName.ts) — Gets the full name for a name with unknown labels from the subgraph
   - Heals encoded labels using the subgraph
   - Returns if name is fully decoded

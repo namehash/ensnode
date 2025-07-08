@@ -1,5 +1,32 @@
 # @ensnode/ponder-metadata
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@0.31.0
+
+## 0.30.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@0.30.0
+
+## 0.29.0
+
+### Minor Changes
+
+- [#818](https://github.com/namehash/ensnode/pull/818) [`2f9f357`](https://github.com/namehash/ensnode/commit/2f9f35780def5a6696263cf2e10d4ec4f89194f5) Thanks [@tk-o](https://github.com/tk-o)! - Update Ponder version to `0.11`.
+
+- [#828](https://github.com/namehash/ensnode/pull/828) [`fdc6eef`](https://github.com/namehash/ensnode/commit/fdc6eefbf870a8451e40e56de2fb424bfc85ba7f) Thanks [@tk-o](https://github.com/tk-o)! - Updated terminology to replace `network` with `chain`.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@0.29.0
+
 ## 0.28.0
 
 ### Patch Changes

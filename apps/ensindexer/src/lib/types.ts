@@ -27,7 +27,7 @@ export type RegistrarManagedName = string;
  * An undefined start block indicates indexing from block 0, and undefined end block indicates
  * indexing in perpetuity (realtime).
  *
- * @docs https://ponder.sh/docs/contracts-and-networks#block-range
+ * @docs https://ponder.sh/docs/config/contracts#block-range
  * i.e. Pick<ContractConfig, 'startBlock' | 'endBlock'>
  */
 export type Blockrange = {

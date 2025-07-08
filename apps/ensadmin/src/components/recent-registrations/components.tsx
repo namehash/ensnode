@@ -1,8 +1,8 @@
 "use client";
 
-import { ENSName } from "@/components/ens-name";
 import { useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
+import { Duration, FormattedDate, RelativeTime } from "@/components/recent-registrations/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -12,146 +12,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { differenceInYears, formatDistanceToNow, fromUnixTime, intlFormat } from "date-fns";
+import { selectedEnsNodeUrl } from "@/lib/env";
 import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Address, getAddress, isAddressEqual } from "viem";
+import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
 
-// Helper function to safely format dates
-const formatDate = (timestamp: string, options: Intl.DateTimeFormatOptions) => {
-  try {
-    const parsedTimestamp = parseInt(timestamp);
-    if (isNaN(parsedTimestamp)) {
-      return "Invalid date";
-    }
-    return intlFormat(fromUnixTime(parsedTimestamp), options);
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return "Invalid date";
-  }
-};
+/**
+ * Maximal number of latest registrations to be displayed in the panel
+ */
+const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
-// Helper function to calculate duration in years
-const calculateDurationYears = (registrationDate: string, expiryDate: string) => {
-  try {
-    const registrationTimestamp = parseInt(registrationDate);
-    const expiryTimestamp = parseInt(expiryDate);
-
-    if (isNaN(registrationTimestamp) || isNaN(expiryTimestamp)) {
-      return "Unknown";
-    }
-
-    const registrationDate_ = fromUnixTime(registrationTimestamp);
-    const expiryDate_ = fromUnixTime(expiryTimestamp);
-    const years = differenceInYears(expiryDate_, registrationDate_);
-
-    // If less than a year, show months instead
-    if (years === 0) {
-      // Calculate months by getting the difference in milliseconds and converting to months
-      const diffInMs = expiryDate_.getTime() - registrationDate_.getTime();
-      const months = Math.floor(diffInMs / (1000 * 60 * 60 * 24 * 30));
-      return `${months} month${months !== 1 ? "s" : ""}`;
-    }
-
-    return `${years} year${years !== 1 ? "s" : ""}`;
-  } catch (error) {
-    console.error("Error calculating duration:", error);
-    return "Unknown";
-  }
-};
-
-// Helper function to format relative time
-const formatRelativeTime = (timestamp: string) => {
-  try {
-    const parsedTimestamp = parseInt(timestamp);
-    if (isNaN(parsedTimestamp)) {
-      return "Unknown";
-    }
-
-    const date = fromUnixTime(parsedTimestamp);
-    return formatDistanceToNow(date, { addSuffix: true });
-  } catch (error) {
-    console.error("Error formatting relative time:", error);
-    return "Unknown";
-  }
-};
-
-// Helper function to generate ENS app URL for a name
+/**
+ * Helper function to generate ENS app URL for a name
+ */
 const getEnsAppUrlForName = (name: string) => {
+  // no explicit url encoding needed
   return `https://app.ens.domains/${name}`;
 };
 
-// Client-only date formatter component
-function FormattedDate({
-  timestamp,
-  options,
-}: {
-  timestamp: string;
-  options: Intl.DateTimeFormatOptions;
-}) {
-  const [formattedDate, setFormattedDate] = useState<string>("");
-
-  useEffect(() => {
-    setFormattedDate(formatDate(timestamp, options));
-  }, [timestamp, options]);
-
-  return <>{formattedDate}</>;
-}
-
-// Client-only relative time component
-function RelativeTime({ timestamp }: { timestamp: string }) {
-  const [relativeTime, setRelativeTime] = useState<string>("");
-
-  useEffect(() => {
-    setRelativeTime(formatRelativeTime(timestamp));
-  }, [timestamp]);
-
-  return <>{relativeTime}</>;
-}
-
-// Client-only duration component
-function Duration({
-  registrationDate,
-  expiryDate,
-}: {
-  registrationDate: string;
-  expiryDate: string;
-}) {
-  const [duration, setDuration] = useState<string>("");
-
-  useEffect(() => {
-    setDuration(calculateDurationYears(registrationDate, expiryDate));
-  }, [registrationDate, expiryDate]);
-
-  return <>{duration}</>;
-}
-
-// The NameWrapper contract address
-const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
-
-/**
- * Determines the true owner of a domain.
- * If the owner is the NameWrapper contract, returns the wrapped owner instead.
- *
- * @param owner The owner address
- * @param wrappedOwner The wrapped owner address (optional)
- * @returns The true owner address
- */
-function getTrueOwner(owner: { id: Address }, wrappedOwner?: { id: Address }) {
-  // Only use wrapped owner if the owner is the NameWrapper contract
-  if (wrappedOwner?.id && isAddressEqual(owner.id, NAME_WRAPPER_ADDRESS)) {
-    return getAddress(wrappedOwner.id);
-  }
-
-  // Otherwise, use the regular owner
-  return getAddress(owner.id);
-}
-
 export function RecentRegistrations() {
   const searchParams = useSearchParams();
-  const recentRegistrationsQuery = useRecentRegistrations(searchParams);
+  const recentRegistrationsQuery = useRecentRegistrations(
+    selectedEnsNodeUrl(searchParams),
+    MAX_NUMBER_OF_LATEST_REGISTRATIONS,
+  );
   const indexingStatus = useIndexingStatusQuery(searchParams);
   const indexedChainId = useENSRootDatasourceChainId(indexingStatus.data);
   const [isClient, setIsClient] = useState(false);
@@ -163,7 +49,7 @@ export function RecentRegistrations() {
   // Get the current indexing date from the indexing status
   const currentIndexingDate = indexingStatus.data
     ? globalIndexingStatusViewModel(
-        indexingStatus.data.runtime.networkIndexingStatusByChainId,
+        indexingStatus.data.runtime.chainIndexingStatuses,
         indexingStatus.data.env.NAMESPACE,
       ).currentIndexingDate
     : null;
@@ -179,7 +65,7 @@ export function RecentRegistrations() {
               <span className="text-sm font-medium">
                 Last indexed block on{" "}
                 <FormattedDate
-                  timestamp={(currentIndexingDate.getTime() / 1000).toString()}
+                  date={currentIndexingDate}
                   options={{
                     year: "numeric",
                     month: "short",
@@ -210,40 +96,37 @@ export function RecentRegistrations() {
             </TableHeader>
             <TableBody>
               {isClient &&
-                recentRegistrationsQuery.data?.registrations.map((registration) => (
-                  <TableRow key={registration.domain.name}>
+                recentRegistrationsQuery.data?.map((registration) => (
+                  <TableRow key={registration.name}>
                     <TableCell className="font-medium">
                       <a
-                        href={getEnsAppUrlForName(registration.domain.name)}
+                        href={getEnsAppUrlForName(registration.name)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline"
+                        className="flex items-center gap-1 text-blue-600 hover:underline w-fit"
                       >
-                        {registration.domain.name}
+                        {registration.name}
                         <ExternalLink size={14} className="inline-block" />
                       </a>
                     </TableCell>
                     <TableCell>
-                      <RelativeTime timestamp={registration.registrationDate} />
+                      <RelativeTime date={registration.registeredAt} />
                     </TableCell>
                     <TableCell>
                       <Duration
-                        registrationDate={registration.registrationDate}
-                        expiryDate={registration.expiryDate}
+                        beginsAt={registration.registeredAt}
+                        endsAt={registration.expiresAt}
                       />
                     </TableCell>
                     <TableCell>
                       {indexedChainId ? (
-                        <ENSName
-                          address={getTrueOwner(
-                            registration.domain.owner,
-                            registration.domain.wrappedOwner,
-                          )}
+                        <Identity
+                          address={registration.owner}
                           chainId={indexedChainId}
                           showAvatar={true}
                         />
                       ) : (
-                        <ENSName.Placeholder showAvatar={true} />
+                        <Identity.Placeholder showAvatar={true} />
                       )}
                     </TableCell>
                   </TableRow>

@@ -8,7 +8,7 @@ const environment = {
   ponderDatabaseSchema: process.env.DATABASE_SCHEMA,
   databaseUrl: process.env.DATABASE_URL,
   namespace: process.env.NAMESPACE,
-  plugins: process.env.ACTIVE_PLUGINS,
+  plugins: process.env.PLUGINS,
   ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
   ensNodePublicUrl: process.env.ENSNODE_PUBLIC_URL,
   ensAdminUrl: process.env.ENSADMIN_URL,

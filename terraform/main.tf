@@ -12,8 +12,8 @@ locals {
       instance_name                     = "holesky"
       subdomain_prefix                  = "holesky.${local.railway_environment}"
       database_schema                   = "holeskySchema-${var.ensnode_version}"
-      active_plugins                    = "subgraph"
-      namespace                          = "holesky"
+      plugins                           = "subgraph"
+      namespace                         = "holesky"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
@@ -21,8 +21,8 @@ locals {
       instance_name                     = "sepolia"
       subdomain_prefix                  = "sepolia.${local.railway_environment}"
       database_schema                   = "sepoliaSchema-${var.ensnode_version}"
-      active_plugins                    = "subgraph"
-      namespace                          = "sepolia"
+      plugins                           = "subgraph"
+      namespace                         = "sepolia"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
@@ -30,8 +30,8 @@ locals {
       instance_name                     = "mainnet"
       subdomain_prefix                  = "mainnet.${local.railway_environment}"
       database_schema                   = "mainnetSchema-${var.ensnode_version}"
-      active_plugins                    = "subgraph"
-      namespace                          = "mainnet"
+      plugins                           = "subgraph"
+      namespace                         = "mainnet"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
     }
@@ -39,8 +39,18 @@ locals {
       instance_name                     = "alpha"
       subdomain_prefix                  = "alpha.${local.railway_environment}"
       database_schema                   = "alphaSchema-${var.ensnode_version}"
-      active_plugins                    = "subgraph,basenames,lineanames,threedns"
-      namespace                          = "mainnet"
+      plugins                           = "subgraph,basenames,lineanames,threedns"
+      namespace                         = "mainnet"
+      heal_reverse_addresses            = "true"
+      index_additional_resolver_records = "true"
+    }
+
+    alpha-sepolia = {
+      instance_name                     = "alpha-sepolia"
+      subdomain_prefix                  = "alpha-sepolia.${local.railway_environment}"
+      database_schema                   = "alphaSepoliaSchema-${var.ensnode_version}"
+      plugins                           = "subgraph,basenames,lineanames"
+      namespace                         = "sepolia"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
     }
@@ -71,8 +81,8 @@ module "ensindexer" {
   instance_name                     = each.value.instance_name
   subdomain_prefix                  = each.value.subdomain_prefix
   database_schema                   = each.value.database_schema
-  active_plugins                    = each.value.active_plugins
-  namespace                          = each.value.namespace
+  plugins                           = each.value.plugins
+  namespace                         = each.value.namespace
   heal_reverse_addresses            = each.value.heal_reverse_addresses
   index_additional_resolver_records = each.value.index_additional_resolver_records
 

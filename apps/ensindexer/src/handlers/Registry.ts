@@ -94,7 +94,7 @@ export const handleNewOwner =
       if (
         config.healReverseAddresses &&
         REVERSE_ROOT_NODES.has(parentNode) &&
-        context.network.chainId === ensRootChainId
+        context.chain.id === ensRootChainId
       ) {
         // First, try healing with the transaction sender address.
         //
@@ -213,7 +213,7 @@ export const handleNewOwner =
 
     // log DomainEvent
     await context.db.insert(schema.newOwner).values({
-      ...sharedEventValues(context.network.chainId, event),
+      ...sharedEventValues(context.chain.id, event),
       parentDomainId: parentNode,
       domainId: node,
       ownerId: owner,
@@ -244,7 +244,7 @@ export async function handleTransfer({
 
   // log DomainEvent
   await context.db.insert(schema.transfer).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ownerId: owner,
   });
@@ -267,7 +267,7 @@ export async function handleNewTTL({
 
   // log DomainEvent
   await context.db.insert(schema.newTTL).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ttl,
   });
@@ -282,7 +282,7 @@ export async function handleNewResolver({
 }) {
   const { node, resolver: resolverAddress } = event.args;
 
-  const resolverId = makeResolverId(context.network.chainId, resolverAddress, node);
+  const resolverId = makeResolverId(context.chain.id, resolverAddress, node);
 
   const isZeroResolver = resolverAddress === zeroAddress;
 
@@ -314,7 +314,7 @@ export async function handleNewResolver({
 
   // log DomainEvent
   await context.db.insert(schema.newResolver).values({
-    ...sharedEventValues(context.network.chainId, event),
+    ...sharedEventValues(context.chain.id, event),
     domainId: node,
     // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable
     // but there is never a resolver record created for the zeroAddress. so if you query the

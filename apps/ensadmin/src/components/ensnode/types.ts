@@ -16,7 +16,7 @@ export namespace EnsNode {
   export interface Metadata extends Omit<PonderMetadata.MetadataMiddlewareResponse, "env"> {
     // override the `env` field to include the fields required by the ENSAdmin client
     env: {
-      ACTIVE_PLUGINS: Array<PluginName>;
+      PLUGINS: Array<PluginName>;
       DATABASE_SCHEMA: string;
       NAMESPACE: ENSNamespaceId;
     };
@@ -28,7 +28,7 @@ export namespace EnsNode {
   export type BlockInfo = PonderMetadata.BlockInfo;
 
   /**
-   * Network indexing status for a chain.
+   * Indexing status for a chain.
    */
-  export type NetworkIndexingStatus = PonderMetadata.NetworkIndexingStatus;
+  export type ChainIndexingStatus = PonderMetadata.ChainIndexingStatus;
 }

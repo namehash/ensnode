@@ -1,0 +1,247 @@
+---
+import { getCollection } from "astro:content";
+import { Icon } from "astro-icon/components";
+import StaticHeader from "../components/molecules/StaticHeader.astro";
+import ExampleCard from "../components/organisms/ExampleCard.astro";
+import Layout from "../layouts/Layout.astro";
+
+const examples = await getCollection("examples");
+const examplesData = examples.map((example) => example.data);
+
+const categoryMap = new Map<string, number>();
+examplesData.forEach((example) => {
+  categoryMap.set(example.category, (categoryMap.get(example.category) || 0) + 1);
+});
+
+const categories = Array.from(categoryMap.entries())
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<Layout title="Example ENSNode GraphQL Queries">
+    <StaticHeader />
+
+<div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-26 pb-8 xl:pt-32 z-10 relative">
+      <h1 class="text-black text-2xl sm:text-4xl leading-8 sm:leading-10 font-semibold sm:font-bold mb-2">
+        Example ENS Data Requests
+      </h1>
+      <p class="text-gray-500 text-base sm:text-sm leading-6 font-normal">
+        Explore our collection of example ENSNode GraphQL queries.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 pt-6 pb-10">
+        <div class="flex-1">
+          <label for="search" class="sr-only">
+            Search examples
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Icon name="lucide:search" class="w-5 h-5 text-gray-400" />
+            </div>
+            <input
+              id="search"
+              type="text"
+              class="block w-full pl-10 pr-3 py-3 border border-[var(--color-border)] shadow-sm rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0"
+              placeholder="Search examples by name or description..."
+              autocomplete="off"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-8">
+        <div class="lg:w-64 flex-shrink-0">
+          <div class="bg-white rounded-md border border-gray-200 p-6 sticky top-24">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
+
+            <button
+              id="all-categories-btn"
+              class="w-full text-left px-3 py-2 rounded-md text-sm font-medium mb-2 transition-colors bg-blue-100 text-[var(--color-primary)] border border-blue-200"
+            >
+              <div class="flex justify-between items-center">
+                <span>All Categories</span>
+                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  {examplesData.length}
+                </span>
+              </div>
+            </button>
+
+            <div class="space-y-1" id="category-buttons">
+              {categories.map(({ name, count }) => (
+                <button
+                  data-category={name}
+                  class="category-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100 border border-transparent"
+                >
+                  <div class="flex justify-between items-center">
+                    <span>{name}</span>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      {count}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <button
+              id="clear-filter-btn"
+              class="w-full mt-4 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors hidden"
+            >
+              Clear Filter
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1">
+          <div class="mb-6">
+            <p id="results-count" class="text-sm text-gray-600">
+              Showing all {examplesData.length} {examplesData.length === 1 ? 'example' : 'examples'}
+            </p>
+          </div>
+
+          <div id="examples-grid" class="grid gap-6 md:grid-cols-2">
+            {examplesData.map((example) => (
+              <ExampleCard example={example} />
+            ))}
+          </div>
+
+          <div id="no-results" class="text-center py-12 hidden">
+            <Icon name="lucide:search" class="w-12 h-12 mx-auto text-gray-400" />
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No examples found</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              Try adjusting your search or filter criteria.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import Fuse from 'fuse.js';
+
+    const exampleElements = document.querySelectorAll('[data-example]');
+    const examples = Array.from(exampleElements).map(el => {
+      const dataAttr = el.getAttribute('data-example');
+      if (!dataAttr) throw new Error('Missing data-example attribute');
+      return JSON.parse(dataAttr);
+    });
+
+    let filteredExamples = [...examples];
+    let selectedCategory = '';
+    let searchTerm = '';
+
+    const fuse = new Fuse(examples, {
+      keys: ['name', 'description'],
+      threshold: 0.3,
+      includeScore: true,
+    });
+
+    const searchInput = document.getElementById('search') as HTMLInputElement;
+    const allCategoriesBtn = document.getElementById('all-categories-btn') as HTMLButtonElement;
+    const categoryBtns = document.querySelectorAll('.category-btn') as NodeListOf<HTMLButtonElement>;
+    const clearFilterBtn = document.getElementById('clear-filter-btn') as HTMLButtonElement;
+    const examplesGrid = document.getElementById('examples-grid') as HTMLElement;
+    const resultsCount = document.getElementById('results-count') as HTMLElement;
+    const noResults = document.getElementById('no-results') as HTMLElement;
+
+    function updateDisplay() {
+      let filtered = examples;
+
+      if (searchTerm.trim()) {
+        const searchResults = fuse.search(searchTerm);
+        filtered = searchResults.map(result => result.item);
+      }
+
+      if (selectedCategory) {
+        filtered = filtered.filter(example => example.category === selectedCategory);
+      }
+
+      filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+
+      filteredExamples = filtered;
+
+      // Update grid visibility
+      exampleElements.forEach((el, index) => {
+        const dataAttr = el.getAttribute('data-example');
+        if (!dataAttr) return;
+        const example = JSON.parse(dataAttr);
+        const isVisible = filteredExamples.some(filtered => filtered.id === example.id);
+        (el as HTMLElement).style.display = isVisible ? 'flex' : 'none';
+      });
+
+      // Update results count
+      if (filteredExamples.length === examples.length) {
+        const exampleText = filteredExamples.length === 1 ? 'example' : 'examples';
+        resultsCount.textContent = `Showing all ${filteredExamples.length} ${exampleText}`;
+      } else {
+        const filteredText = filteredExamples.length === 1 ? 'example' : 'examples';
+        const totalText = examples.length === 1 ? 'example' : 'examples';
+        let countText = `Showing ${filteredExamples.length} of ${examples.length} ${totalText}`;
+        resultsCount.textContent = countText;
+      }
+
+      // Show/hide no results message
+      if (filteredExamples.length === 0) {
+        examplesGrid.style.display = 'none';
+        noResults.classList.remove('hidden');
+      } else {
+        examplesGrid.style.display = 'grid';
+        noResults.classList.add('hidden');
+      }
+
+      // Show/hide clear filter button
+      if (selectedCategory) {
+        clearFilterBtn.classList.remove('hidden');
+      } else {
+        clearFilterBtn.classList.add('hidden');
+      }
+    }
+
+    function updateCategoryButtons() {
+      allCategoriesBtn.className = selectedCategory === '' ?
+        'w-full text-left px-3 py-2 rounded-md text-sm font-medium mb-2 transition-colors bg-blue-100 text-[var(--color-primary)] border border-blue-200' :
+        'w-full text-left px-3 py-2 rounded-md text-sm font-medium mb-2 transition-colors text-gray-700 hover:bg-gray-100 border border-transparent';
+
+      categoryBtns.forEach(btn => {
+        const category = btn.getAttribute('data-category');
+        btn.className = selectedCategory === category ?
+          'category-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors bg-blue-100 text-[var(--color-primary)] border border-blue-200' :
+          'category-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100 border border-transparent';
+      });
+    }
+
+
+    searchInput.addEventListener('input', (e) => {
+      if (e.target) {
+        searchTerm = (e.target as HTMLInputElement).value;
+      }
+      updateDisplay();
+    });
+
+    allCategoriesBtn.addEventListener('click', () => {
+      selectedCategory = '';
+      updateCategoryButtons();
+      updateDisplay();
+    });
+
+    categoryBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+        if (category) {
+          selectedCategory = category;
+        }
+        updateCategoryButtons();
+        updateDisplay();
+      });
+    });
+
+    clearFilterBtn.addEventListener('click', () => {
+      selectedCategory = '';
+      updateCategoryButtons();
+      updateDisplay();
+    });
+
+    updateDisplay();
+  </script>
+</Layout>

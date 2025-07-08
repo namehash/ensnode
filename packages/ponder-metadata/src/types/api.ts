@@ -2,9 +2,15 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 
-import type { BlockInfo } from "./common";
+import type { BlockInfo, PonderStatus } from "./common";
 
 export type PonderEnvVarsInfo = Record<string, unknown>;
+
+/**
+ * Helper type which describes public clients grouped by chain name
+ */
+type PublicClientsByChainName<ChainName extends string = string> = Record<ChainName, PublicClient>;
+
 export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends PonderEnvVarsInfo> {
   /** Database access object (readonly Drizzle) */
   db: ReadonlyDrizzle<Record<string, unknown>>;
@@ -17,6 +23,9 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
 
   /** Query methods */
   query: {
+    /** Fetches Ponder Status object for Ponder application */
+    ponderStatus(): Promise<PonderStatus>;
+
     /** Fetches prometheus metrics for Ponder application */
     prometheusMetrics(): Promise<string>;
 
@@ -27,8 +36,8 @@ export interface PonderMetadataMiddlewareOptions<AppInfo, EnvVars extends Ponder
     ensRainbowVersion?(): Promise<EnsRainbow.VersionInfo>;
   };
 
-  /** Public clients for each blockchain network fetching data */
-  publicClients: Record<number, PublicClient>;
+  /** Public clients for fetching data from each chain */
+  publicClients: PublicClientsByChainName;
 }
 
 export interface PonderMetadataMiddlewareResponse<

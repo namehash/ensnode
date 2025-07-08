@@ -13,8 +13,9 @@ import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware"
 import {
   fetchEnsRainbowVersion,
   fetchFirstBlockToIndexByChainId,
+  fetchPonderStatus,
   fetchPrometheusMetrics,
-  makePonderMetdataProvider,
+  makePonderMetadataProvider,
 } from "@/lib/ponder-metadata-provider";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
 import {
@@ -69,7 +70,7 @@ app.get(
       version: packageJson.version,
     },
     env: {
-      ACTIVE_PLUGINS: config.plugins.join(","),
+      PLUGINS: config.plugins.join(","),
       DATABASE_SCHEMA: config.ponderDatabaseSchema,
       NAMESPACE: config.namespace,
     },
@@ -78,6 +79,7 @@ app.get(
       firstBlockToIndexByChainId: fetchFirstBlockToIndexByChainId,
       prometheusMetrics: fetchPrometheusMetrics,
       ensRainbowVersion: fetchEnsRainbowVersion,
+      ponderStatus: fetchPonderStatus,
     },
     publicClients,
   }),
@@ -101,7 +103,7 @@ app.use(
     graphqlSchema: buildSubgraphGraphQLSchema({
       schema: schemaWithoutExtensions,
       // provide the schema with ponder's internal metadata to power _meta
-      metadataProvider: makePonderMetdataProvider({ db, publicClients }),
+      metadataProvider: makePonderMetadataProvider({ db, publicClients }),
       // describes the polymorphic (interface) relationships in the schema
       polymorphicConfig: {
         types: {

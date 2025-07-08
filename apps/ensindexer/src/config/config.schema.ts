@@ -93,19 +93,19 @@ const PluginsSchema = z.coerce
     z
       .array(
         z.enum(PluginName, {
-          error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
+          error: `PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
             PluginName,
           ).join(", ")}`,
         }),
       )
       .min(1, {
-        error: `ACTIVE_PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
+        error: `PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
           PluginName,
         ).join(", ")}`,
       }),
   )
   .refine((arr) => arr.length === uniq(arr).length, {
-    error: "ACTIVE_PLUGINS cannot contain duplicate values",
+    error: "PLUGINS cannot contain duplicate values",
   });
 
 const HealReverseAddressesSchema = makeEnvStringBoolSchema("HEAL_REVERSE_ADDRESSES") //
