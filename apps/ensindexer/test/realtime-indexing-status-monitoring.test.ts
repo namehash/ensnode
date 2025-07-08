@@ -3,47 +3,48 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { afterEach } from "node:test";
 import {
-  DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD,
-  type UptimeMonitoring,
-  buildUptimeMonitoringRequest,
-  getLowestLastIndexedBlockTimestamp,
-  uptimeMonitoring,
+  DEFAULT_REALTIME_INDEXING_MAX_LAG,
+  type RealtimeIndexingStatusMonitoringApp,
+  buildRealtimeIndexingStatusMonitoringRequest,
+  getOldestLastIndexedBlockTimestamp,
+  realtimeIndexingStatusMonitoringApp,
 } from "@/lib/realtime-indexing-status-monitoring";
+import { RealtimeIndexingStatusMonitoring } from "@ensnode/ensnode-sdk";
 import { PonderStatus } from "@ensnode/ponder-metadata";
 import { fromUnixTime } from "date-fns";
 import { Chain, base, linea, mainnet } from "viem/chains";
 
-describe("buildUptimeMonitoringRequest", () => {
+describe("buildRealtimeIndexingStatusMonitoringRequest", () => {
   it("can skip default values for the provided raw request properties", () => {
     const rawRequest = {
-      gapThreshold: "98765",
-    } satisfies UptimeMonitoring.RawRequest;
+      maxAllowedIndexingLag: "98765",
+    } satisfies RealtimeIndexingStatusMonitoring.RawRequest;
 
     const requestDefaults = {
-      gapThreshold: 12345,
-    } satisfies UptimeMonitoring.RequestDefaults;
+      maxAllowedIndexingLag: 12345,
+    } satisfies RealtimeIndexingStatusMonitoringApp.RequestDefaults;
 
-    const parsedRequest = buildUptimeMonitoringRequest(rawRequest, requestDefaults);
+    const parsedRequest = buildRealtimeIndexingStatusMonitoringRequest(rawRequest, requestDefaults);
 
     expect(parsedRequest).toStrictEqual({
-      gapThreshold: 98765,
-    } satisfies UptimeMonitoring.ParsedRequest);
+      maxAllowedIndexingLag: 98765,
+    } satisfies RealtimeIndexingStatusMonitoring.ParsedRequest);
   });
 
   it("can apply default values for the omitted raw request properties", () => {
     const rawRequest = {
-      gapThreshold: undefined,
-    } satisfies UptimeMonitoring.RawRequest;
+      maxAllowedIndexingLag: undefined,
+    } satisfies RealtimeIndexingStatusMonitoring.RawRequest;
 
     const requestDefaults = {
-      gapThreshold: 12345,
-    } satisfies UptimeMonitoring.RequestDefaults;
+      maxAllowedIndexingLag: 12345,
+    } satisfies RealtimeIndexingStatusMonitoringApp.RequestDefaults;
 
-    const parsedRequest = buildUptimeMonitoringRequest(rawRequest, requestDefaults);
+    const parsedRequest = buildRealtimeIndexingStatusMonitoringRequest(rawRequest, requestDefaults);
 
     expect(parsedRequest).toStrictEqual({
-      gapThreshold: 12345,
-    } satisfies UptimeMonitoring.ParsedRequest);
+      maxAllowedIndexingLag: 12345,
+    } satisfies RealtimeIndexingStatusMonitoring.ParsedRequest);
   });
 });
 
@@ -65,7 +66,7 @@ const createPonderStatus = (
     },
   }) satisfies PonderStatus;
 
-describe("uptimeMonitoring middleware", () => {
+describe("realtimeIndexingStatusMonitoringApp", () => {
   const createQuery = (ponderStatus: PonderStatus) => ({
     ponderStatus() {
       return Promise.resolve(ponderStatus);
@@ -79,7 +80,7 @@ describe("uptimeMonitoring middleware", () => {
 
   let app: Hono;
 
-  let middlewareOptions: UptimeMonitoring.MiddlewareOptions;
+  let options: RealtimeIndexingStatusMonitoringApp.Options;
 
   beforeEach(() => {
     // tell vitest we use mocked time
@@ -95,7 +96,7 @@ describe("uptimeMonitoring middleware", () => {
       timestamp: 1690520327,
     };
 
-    middlewareOptions = {
+    options = {
       query: createQuery(
         createPonderStatus(
           chain,
@@ -112,13 +113,13 @@ describe("uptimeMonitoring middleware", () => {
   });
 
   it("returns 200 when the currentRealtimeIndexingGap does not exceed the realtimeIndexingGapThreshold", async () => {
-    app.get("/amirealtime", uptimeMonitoring(middlewareOptions));
+    app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
     /**
      * Date that allows the realtimeIndexingGapThreshold not to be exceeded.
      */
     const mockedSystemDate = fromUnixTime(
-      mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD,
+      mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_MAX_LAG,
     );
 
     // set system time
@@ -129,20 +130,20 @@ describe("uptimeMonitoring middleware", () => {
     expect(response.status).toEqual(200);
 
     expect(await response.json()).toStrictEqual({
-      currentRealtimeIndexingGap: 600,
-      lowestLastIndexedBlockTimestamp: 1690520327,
-      realtimeIndexingGapThreshold: 600,
-    });
+      currentRealtimeIndexingLag: 600,
+      oldestLastIndexedBlockTimestamp: 1690520327,
+      maxAllowedIndexingLag: 600,
+    } satisfies RealtimeIndexingStatusMonitoring.Response);
   });
 
   it("returns 503 when the currentRealtimeIndexingGap exceeds the realtimeIndexingGapThreshold", async () => {
-    app.get("/amirealtime", uptimeMonitoring(middlewareOptions));
+    app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
     /**
      * Date that causes the realtimeIndexingGapThreshold to be exceeded.
      */
     const mockedSystemDate = fromUnixTime(
-      mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD + 1,
+      mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_MAX_LAG + 1,
     );
 
     // set system time
@@ -153,40 +154,40 @@ describe("uptimeMonitoring middleware", () => {
     expect(response.status).toEqual(503);
 
     expect(await response.json()).toStrictEqual({
-      currentRealtimeIndexingGap: 601,
-      lowestLastIndexedBlockTimestamp: 1690520327,
-      realtimeIndexingGapThreshold: 600,
-    });
+      currentRealtimeIndexingLag: 601,
+      oldestLastIndexedBlockTimestamp: 1690520327,
+      maxAllowedIndexingLag: 600,
+    } satisfies RealtimeIndexingStatusMonitoring.Response);
   });
 
   it("allows the client request to include the custom gap threshold", async () => {
-    app.get("/amirealtime", uptimeMonitoring(middlewareOptions));
+    app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
-    // let the client to set a custom allowed gap threshold in seconds
-    const realtimeIndexingGapThresholdByClient = 321;
+    // let the client to set a custom max allowed indexing lag in seconds
+    const maxAllowedIndexingLagByClient = 321;
 
     const response = await app.request(
-      `/amirealtime?gapThreshold=${realtimeIndexingGapThresholdByClient}`,
+      `/amirealtime?maxAllowedIndexingLag=${maxAllowedIndexingLagByClient}`,
     );
-    const responseData = await response.json();
+    const responseData = (await response.json()) as RealtimeIndexingStatusMonitoring.Response;
 
-    expect(responseData.realtimeIndexingGapThreshold).toBe(321);
+    expect(responseData.maxAllowedIndexingLag).toBe(321);
   });
 
   it("rejects the invalid custom gap threshold", async () => {
-    app.get("/amirealtime", uptimeMonitoring(middlewareOptions));
+    app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
-    // let the client to set a custom allowed gap threshold in seconds
-    const realtimeIndexingGapThresholdByClient = -1;
+    // let the client to set a custom max allowed indexing lag in seconds
+    const maxAllowedIndexingLagByClient = -1;
 
     const response = await app.request(
-      `/amirealtime?gapThreshold=${realtimeIndexingGapThresholdByClient}`,
+      `/amirealtime?maxAllowedIndexingLag=${maxAllowedIndexingLagByClient}`,
     );
     const responseData = await response.text();
 
-    expect(responseData).toBe(`Failed to parse the uptime monitoring request: 
-✖ \"gapThreshold\" must be a positive integer.
-  → at gapThreshold
+    expect(responseData).toBe(`Failed to parse the realtime indexing status monitoring request: 
+✖ Value must be a non-negative integer.
+  → at maxAllowedIndexingLag
 `);
   });
 });
@@ -218,6 +219,6 @@ describe("getLowestLastIndexedBlockTimestamp", () => {
       ...ponderStatusLinea,
     };
 
-    expect(getLowestLastIndexedBlockTimestamp(ponderStatus)).toEqual(1690520320);
+    expect(getOldestLastIndexedBlockTimestamp(ponderStatus)).toEqual(1690520320);
   });
 });

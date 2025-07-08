@@ -17,7 +17,7 @@ import {
   fetchPrometheusMetrics,
   makePonderMetadataProvider,
 } from "@/lib/ponder-metadata-provider";
-import { uptimeMonitoring } from "@/lib/realtime-indexing-status-monitoring";
+import { realtimeIndexingStatusMonitoringApp } from "@/lib/realtime-indexing-status-monitoring";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
 import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
@@ -86,10 +86,10 @@ app.get(
   }),
 );
 
-// HTTP endpoint for uptime monitoring toolkit
-app.get(
+// HTTP endpoint for monitoring realtime indexing status
+app.route(
   "/amirealtime",
-  uptimeMonitoring({
+  realtimeIndexingStatusMonitoringApp({
     query: {
       ponderStatus: fetchPonderStatus,
     },
