@@ -1,6 +1,6 @@
 import { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import { http } from "viem";
-import { anvil, holesky, mainnet, sepolia } from "viem/chains";
+import { anvil, localhost, holesky, mainnet, sepolia } from "viem/chains";
 import { createConfig } from "wagmi";
 import { parseUrl } from "./env";
 
@@ -53,12 +53,13 @@ function getEnsDeploymentRpcUrl(namespaceId: ENSNamespaceId): URL {
 //TODO: check with @tko what he meant in his PR comment there ("Try applying ens-deployments package config:")
 // -> basically to do what tko proposed in the PR comment, to use chains declared in ensnode/datasources package and not directly from viem (that would make a nicer dependency)
 export const config = createConfig({
-  chains: [mainnet, sepolia, holesky, anvil],
+  // ens-test-env runs on a local Anvil chain with id 1337 belonging to localhost chain
+  chains: [mainnet, sepolia, holesky, {...anvil, id:localhost.id}],
   transports: {
     [mainnet.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.Mainnet).toString()),
     [sepolia.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.Sepolia).toString()),
     [holesky.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.Holesky).toString()),
-    [anvil.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.EnsTestEnv).toString()),
+    [localhost.id]: http(getEnsDeploymentRpcUrl(ENSNamespaceIds.EnsTestEnv).toString()),
   },
 });
 
