@@ -76,12 +76,11 @@ export function Identity({
   return (
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar &&
-          (ensName ?
-                  <Avatar className="h-6 w-6" namespaceId={namespaceId} name={ensName} />
-                  :
-                  <Avatar className="h-6 w-6" namespaceId={namespaceId} address={address} />
-          )
-      }
+        (ensName ? (
+          <Avatar className="h-6 w-6" namespaceId={namespaceId} name={ensName} />
+        ) : (
+          <Avatar className="h-6 w-6" namespaceId={namespaceId} address={address} />
+        ))}
       {ensName ? (
         <NameDisplay name={ensName} namespaceId={namespaceId} showExternalLink={showExternalLink} />
       ) : (

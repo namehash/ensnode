@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 
 import { IndexingStatus } from "@/components/indexing-status/components";
+import { WagmiProvider } from "@/components/providers/wagmi-provider";
 import { RecentRegistrations } from "@/components/recent-registrations";
-import {WagmiProvider} from "@/components/providers/wagmi-provider";
 
 export default function Status() {
   return (
@@ -11,11 +11,11 @@ export default function Status() {
         <IndexingStatus />
       </Suspense>
       <Suspense>
-          <WagmiProvider>
-            <div className="px-6 pb-6">
-              <RecentRegistrations />
-            </div>
-          </WagmiProvider>
+        <WagmiProvider>
+          <div className="px-6 pb-6">
+            <RecentRegistrations />
+          </div>
+        </WagmiProvider>
       </Suspense>
     </>
   );

@@ -110,18 +110,10 @@ interface RegistrationsListProps {
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  * @param ensNodeUrl URL of currently selected ENSNode instance
  */
-function RegistrationsList({
-  ensNodeMetadata,
-  ensNodeUrl,
-  maxRecords,
-}: RegistrationsListProps) {
+function RegistrationsList({ ensNodeMetadata, ensNodeUrl, maxRecords }: RegistrationsListProps) {
   const namespaceId = ensNodeMetadata.env.NAMESPACE;
 
-  const recentRegistrationsQuery = useRecentRegistrations(
-    ensNodeUrl,
-    maxRecords,
-    namespaceId,
-  );
+  const recentRegistrationsQuery = useRecentRegistrations(ensNodeUrl, maxRecords, namespaceId);
 
   if (recentRegistrationsQuery.isLoading) {
     return <RegistrationsListLoading rowCount={maxRecords} />;
@@ -187,9 +179,9 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
 }
 
 interface RegistrationLoadingProps {
-    rowCount: number
+  rowCount: number;
 }
-function RegistrationsListLoading({rowCount}: RegistrationLoadingProps) {
+function RegistrationsListLoading({ rowCount }: RegistrationLoadingProps) {
   return (
     <div className="animate-pulse space-y-4">
       {[...Array(rowCount)].map((_, idx) => (

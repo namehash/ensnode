@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 
-import { Inter } from "next/font/google";
 import { AppSidebar } from "@/components/app-sidebar";
+import { QueryClientProvider } from "@/components/query-client/components";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ensAdminPublicUrl } from "@/lib/env";
-import {QueryClientProvider} from "@/components/query-client/components";
+import { Inter } from "next/font/google";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -60,7 +60,7 @@ export default function Layout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
-      <QueryClientProvider>
+        <QueryClientProvider>
           <SidebarProvider>
             <Suspense>
               <AppSidebar />
@@ -75,8 +75,8 @@ export default function Layout({
               {children}
             </SidebarInset>
           </SidebarProvider>
-      </QueryClientProvider>
-      <Toaster />
+        </QueryClientProvider>
+        <Toaster />
       </body>
     </html>
   );

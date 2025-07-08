@@ -1,5 +1,10 @@
-import {DatasourceNames, ENSNamespaceId, ENSNamespaceIds, getDatasource} from "@ensnode/datasources";
-import {Chain, http, Transport} from "viem";
+import {
+  DatasourceNames,
+  ENSNamespaceId,
+  ENSNamespaceIds,
+  getDatasource,
+} from "@ensnode/datasources";
+import { http, Chain, Transport } from "viem";
 import { parseUrl } from "./env";
 
 /**
@@ -66,7 +71,7 @@ export const wagmiConfigForEnsNamespace = (namespaceId: ENSNamespaceId) => {
   return {
     chains: [rootDatasourceChain],
     transports: {
-        [rootDatasourceChain.id]: http(chainRpcUrl.toString()),
+      [rootDatasourceChain.id]: http(chainRpcUrl.toString()),
     },
   } satisfies WagmiConfigForEnsNamespaces;
-}
+};
