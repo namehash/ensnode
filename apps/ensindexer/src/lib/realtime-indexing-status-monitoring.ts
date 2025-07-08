@@ -34,8 +34,6 @@ const NonNegativeIntegerSchema = z.coerce
   .int({ error: `Value must be a non-negative integer.` })
   .min(0, { error: `Value must be a non-negative integer.` });
 
-export const DEFAULT_REALTIME_INDEXING_MAX_LAG = minutesToSeconds(10);
-
 const createRealtimeIndexingStatusMonitoringRequestSchema = (
   defaultValues: RealtimeIndexingStatusMonitoringApp.RequestDefaults,
 ) =>
@@ -69,6 +67,7 @@ export function getOldestLastIndexedBlockTimestamp(
 
   return oldestLastIndexedBlockTimestamp as RealtimeIndexingStatusMonitoring.UnixTimestamp;
 }
+
 /**
  * Builds the RealtimeIndexingStatusMonitoring.ParsedRequest object.
  *
@@ -114,6 +113,8 @@ function getRealtimeIndexingStatus(
     oldestLastIndexedBlockTimestamp,
   } satisfies RealtimeIndexingStatusMonitoring.RealtimeIndexingStatus;
 }
+
+export const DEFAULT_REALTIME_INDEXING_MAX_LAG = minutesToSeconds(10);
 
 /**
  * Creates a Hono App object to be used for providing

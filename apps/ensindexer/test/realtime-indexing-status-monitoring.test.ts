@@ -12,7 +12,7 @@ import {
 import { RealtimeIndexingStatusMonitoring } from "@ensnode/ensnode-sdk";
 import { PonderStatus } from "@ensnode/ponder-metadata";
 import { fromUnixTime } from "date-fns";
-import { Chain, base, linea, mainnet } from "viem/chains";
+import { type Chain } from "viem/chains";
 
 describe("buildRealtimeIndexingStatusMonitoringRequest", () => {
   it("can skip default values for the provided raw request properties", () => {
@@ -89,17 +89,21 @@ describe("realtimeIndexingStatusMonitoringApp", () => {
     // create a new Hono app instance
     app = new Hono();
 
-    // create middleware options
-    const chain = mainnet;
+    // create app options
     const mockedLatestBlockForChain = {
       number: 17_789_321,
       timestamp: 1690520327,
     };
 
+    const testChain = {
+      id: 123321,
+      name: "Test Chain",
+    } as Chain;
+
     options = {
       query: createQuery(
         createPonderStatus(
-          chain,
+          testChain,
           mockedLatestBlockForChain.number,
           mockedLatestBlockForChain.timestamp,
         ),
@@ -112,11 +116,11 @@ describe("realtimeIndexingStatusMonitoringApp", () => {
     vi.useRealTimers();
   });
 
-  it("returns 200 when the currentRealtimeIndexingGap does not exceed the realtimeIndexingGapThreshold", async () => {
+  it("returns 200 when the currentRealtimeIndexingLag does not exceed the maxAllowedIndexingLag", async () => {
     app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
     /**
-     * Date that allows the realtimeIndexingGapThreshold not to be exceeded.
+     * Date that allows the maxAllowedIndexingLag not to be exceeded.
      */
     const mockedSystemDate = fromUnixTime(
       mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_MAX_LAG,
@@ -136,11 +140,11 @@ describe("realtimeIndexingStatusMonitoringApp", () => {
     } satisfies RealtimeIndexingStatusMonitoring.Response);
   });
 
-  it("returns 503 when the currentRealtimeIndexingGap exceeds the realtimeIndexingGapThreshold", async () => {
+  it("returns 503 when the currentRealtimeIndexingLag exceeds the maxAllowedIndexingLag", async () => {
     app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
     /**
-     * Date that causes the realtimeIndexingGapThreshold to be exceeded.
+     * Date that causes the maxAllowedIndexingLag to be exceeded.
      */
     const mockedSystemDate = fromUnixTime(
       mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_MAX_LAG + 1,
@@ -160,7 +164,7 @@ describe("realtimeIndexingStatusMonitoringApp", () => {
     } satisfies RealtimeIndexingStatusMonitoring.Response);
   });
 
-  it("allows the client request to include the custom gap threshold", async () => {
+  it("allows client's request to include a custom maxAllowedIndexingLag value", async () => {
     app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
     // let the client to set a custom max allowed indexing lag in seconds
@@ -174,7 +178,7 @@ describe("realtimeIndexingStatusMonitoringApp", () => {
     expect(responseData.maxAllowedIndexingLag).toBe(321);
   });
 
-  it("rejects the invalid custom gap threshold", async () => {
+  it("rejects invalid maxAllowedIndexingLag value", async () => {
     app.route("/amirealtime", realtimeIndexingStatusMonitoringApp(options));
 
     // let the client to set a custom max allowed indexing lag in seconds
@@ -192,31 +196,49 @@ describe("realtimeIndexingStatusMonitoringApp", () => {
   });
 });
 
-describe("getLowestLastIndexedBlockTimestamp", () => {
+describe("getOldestLastIndexedBlockTimestamp", () => {
   it("can select the minimal timestamp value from all provided Ponder Status objects", () => {
     const mockedLatestBlockForChain = {
       number: 17_789_321,
       timestamp: 1690520327,
     };
-    const ponderStatusMainnet = createPonderStatus(
-      mainnet,
+
+    const testChainA = {
+      id: 123321,
+      name: "Test Chain A",
+    } as Chain;
+
+    const ponderStatusA = createPonderStatus(
+      testChainA,
       mockedLatestBlockForChain.number,
       mockedLatestBlockForChain.timestamp,
     );
-    const ponderStatusBase = createPonderStatus(
-      base,
+
+    const testChainB = {
+      id: 123322,
+      name: "Test Chain B",
+    } as Chain;
+
+    const ponderStatusB = createPonderStatus(
+      testChainB,
       mockedLatestBlockForChain.number - 1,
       mockedLatestBlockForChain.timestamp - 7,
     );
-    const ponderStatusLinea = createPonderStatus(
-      linea,
+
+    const testChainC = {
+      id: 123323,
+      name: "Test Chain C",
+    } as Chain;
+
+    const ponderStatusC = createPonderStatus(
+      testChainC,
       mockedLatestBlockForChain.number + 1,
       mockedLatestBlockForChain.timestamp + 7,
     );
     const ponderStatus = {
-      ...ponderStatusMainnet,
-      ...ponderStatusBase,
-      ...ponderStatusLinea,
+      ...ponderStatusA,
+      ...ponderStatusB,
+      ...ponderStatusC,
     };
 
     expect(getOldestLastIndexedBlockTimestamp(ponderStatus)).toEqual(1690520320);

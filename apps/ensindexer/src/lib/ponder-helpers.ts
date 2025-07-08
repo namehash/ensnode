@@ -1,9 +1,8 @@
 import type { Event } from "ponder:registry";
-import type { PublicClient } from "viem";
+import { PublicClient } from "viem";
 import * as z from "zod/v4";
 
 import { ENSIndexerConfig } from "@/config/types";
-import { uniq } from "@/lib/lib-helpers";
 import { Blockrange } from "@/lib/types";
 import { ContractConfig } from "@ensnode/datasources";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
