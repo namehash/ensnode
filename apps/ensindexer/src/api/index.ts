@@ -17,7 +17,7 @@ import {
   fetchPrometheusMetrics,
   makePonderMetadataProvider,
 } from "@/lib/ponder-metadata-provider";
-import { uptimeMonitoring } from "@/lib/uptime-monitoring-middleware";
+import { uptimeMonitoring } from "@/lib/realtime-indexing-status-monitoring";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
 import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,

@@ -8,7 +8,7 @@ import {
   buildUptimeMonitoringRequest,
   getLowestLastIndexedBlockTimestamp,
   uptimeMonitoring,
-} from "@/lib/uptime-monitoring-middleware";
+} from "@/lib/realtime-indexing-status-monitoring";
 import { PonderStatus } from "@ensnode/ponder-metadata";
 import { fromUnixTime } from "date-fns";
 import { Chain, base, linea, mainnet } from "viem/chains";
