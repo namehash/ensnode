@@ -1,8 +1,8 @@
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, envField } from "astro/config";
 import mermaid from "astro-mermaid";
+import { defineConfig, envField } from "astro/config";
 
 import { sitemap } from "./config/integrations/sitemap";
 import { starlight } from "./config/integrations/starlight";
