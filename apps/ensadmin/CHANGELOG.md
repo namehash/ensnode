@@ -1,5 +1,33 @@
 # ensadmin
 
+## 0.31.0
+
+### Minor Changes
+
+- [#858](https://github.com/namehash/ensnode/pull/858) [`92f77c3`](https://github.com/namehash/ensnode/commit/92f77c3a03c01864519cdc9ad5573d69b766cbe2) Thanks [@notrab](https://github.com/notrab)! - Remove ponder graphql UI and update routes from /gql to /api
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.31.0
+  - @ensnode/ponder-metadata@0.31.0
+  - @ensnode/ensnode-schema@0.31.0
+  - @ensnode/ensnode-sdk@0.31.0
+
+## 0.30.0
+
+### Minor Changes
+
+- [#794](https://github.com/namehash/ensnode/pull/794) [`1bc2197`](https://github.com/namehash/ensnode/commit/1bc2197a33c8856ae47878c587b8faaeb817f553) Thanks [@notrab](https://github.com/notrab)! - Enable default query and variable state through query params
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.30.0
+  - @ensnode/ponder-metadata@0.30.0
+  - @ensnode/ensnode-schema@0.30.0
+  - @ensnode/ensnode-sdk@0.30.0
+
 ## 0.29.0
 
 ### Minor Changes

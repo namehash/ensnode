@@ -11,13 +11,13 @@ const { example } = Astro.props;
 
 const createGraphiQLUrl = (query: string, variables: string): string => {
   try {
-    const url = new URL("/gql/subgraph-compat", ENSADMIN_URL);
+    const url = new URL("/api/subgraph", ENSADMIN_URL);
     url.searchParams.set("query", query.trim());
     url.searchParams.set("variables", variables.trim());
     return url.toString();
   } catch (err) {
     console.error("Failed to create GraphiQL URL: ", err);
-    return new URL("/gql/subgraph-compat", ENSADMIN_URL).toString();
+    return new URL("/api/subgraph", ENSADMIN_URL).toString();
   }
 };
 
