@@ -1,7 +1,5 @@
 import {DatasourceNames, ENSNamespaceId, ENSNamespaceIds, getDatasource} from "@ensnode/datasources";
 import {Chain, http, Transport} from "viem";
-import { anvil, localhost, holesky, mainnet, sepolia } from "viem/chains";
-import {createConfig} from "wagmi";
 import { parseUrl } from "./env";
 
 /**
@@ -57,7 +55,7 @@ export type WagmiConfigForEnsNamespaces = {
 };
 
 /**
- * Returns a valid wagmi config object
+ * Returns a valid input for a wagmi config object
  */
 export const wagmiConfigForEnsNamespace = (namespaceId: ENSNamespaceId) => {
   const rootDatasourceChain = getDatasource(namespaceId, DatasourceNames.ENSRoot).chain;
