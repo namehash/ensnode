@@ -1,5 +1,7 @@
-import type { Chain } from "viem";
-import { Datasource, DatasourceNames, ENSNamespace, ENSNamespaceId } from "./lib/types";
+import { DatasourceNames, ENSNamespace, ENSNamespaceId } from "./lib/types";
+import {
+  optimism,
+} from "viem/chains";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -53,28 +55,13 @@ export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
   getDatasource(namespaceId, DatasourceNames.ENSRoot).chain.id;
 
 /**
- * Get a chain object by ID from any datasource
+ * Gets the base block explorer URL for a given chainId
+ *
+ * @returns default block explorer URL for the chain with the provided id,
+ * or null if the referenced chain doesn't have a known block explorer
  */
-//TODO: Maybe we can make this more efficient?
-export const getChainById = (chainId: number): Chain => {
-  const ENSNamespaces = Object.values(ENSNamespacesById) as ENSNamespace[];
-  const datasources = ENSNamespaces.map(
-    (namespace) => Object.values(namespace) as Datasource[],
-  ).flat() as Datasource[];
-  const datasource = datasources.find((datasource) => datasource.chain.id === chainId);
-
-  if (!datasource) {
-    throw new Error(`No Datasources are defined for Chain ID "${chainId}".`);
-  }
-
-  return datasource.chain;
-};
-
-/**
- * Gets the overall block explorer URL for a given chainId
- */
-export const getChainBlockExplorerUrl = (chainId: number): URL | null => {
-  const chainBlockExplorer = getChainById(chainId).blockExplorers;
+export const getChainBlockExplorerUrl = (chainId: number): URL | null => { //TODO: transition this to work the same way as getChainName: implement a hardcoded lookup table. We can control this ourselves and not rely on Viem's definition of Chain objects.
+  const chainBlockExplorer = "";
 
   if (!chainBlockExplorer) {
     return null;
@@ -85,6 +72,9 @@ export const getChainBlockExplorerUrl = (chainId: number): URL | null => {
 
 /**
  * Gets the block explorer URL for a specific block on a specific chainId
+ *
+ * @returns complete block explorer URL for a specific block on a specific chainId,
+ * or null if the referenced chain doesn't have a known block explorer
  */
 export const getBlockExplorerUrlForBlock = (chainId: number, blockNumber: number): URL | null => {
   const chainBlockExplorer = getChainBlockExplorerUrl(chainId);
@@ -94,3 +84,33 @@ export const getBlockExplorerUrlForBlock = (chainId: number, blockNumber: number
   }
   return new URL(`block/${blockNumber}`, chainBlockExplorer.toString());
 };
+
+/**
+ * Mapping of chain id to prettified chain name.
+ * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
+ */
+const chainNames = new Map<number, string>([
+  [mainnet[DatasourceNames.ENSRoot].chain.id, "Ethereum"],
+  [mainnet[DatasourceNames.Basenames].chain.id, "Base"],
+  [sepolia[DatasourceNames.ENSRoot].chain.id, "Ethereum Sepolia"],
+  [optimism.id, "Optimism"],
+  [mainnet[DatasourceNames.Lineanames].chain.id, "Linea"],
+  [holesky[DatasourceNames.ENSRoot].chain.id, "Ethereum Holesky"],
+  [ensTestEnv[DatasourceNames.ENSRoot].chain.id, "Ethereum Local"],
+  [sepolia[DatasourceNames.Basenames].chain.id, "Base Sepolia"],
+  [sepolia[DatasourceNames.Lineanames].chain.id, "Linea Sepolia"],
+]);
+
+/**
+ * Returns a prettified chain name for the provided chain ID,
+ * or throws an error if the provided chain id doesn't have an assigned name.
+ */
+export function getChainName(chainId: number): string {
+  const chainName = chainNames.get(chainId);
+
+  if (!chainName) {
+    throw new Error(`Chain ID "${chainId}" doesn't have an assigned name`);
+  }
+
+  return chainName;
+}

@@ -22,13 +22,14 @@ export function FormattedDate({
 }
 
 /**
- * Parses a date object to a relative distance between such date and now
+ * Formats a Date as its relative distance with now
  *
- * @param enforcePast - if true, won't allow the result to relate to the future
- * @param includeSeconds - if true makes the base result consider seconds
- * @param conciseFormatting - if true removes prefixes from the base result
+ * @param enforcePast - iif true, enforces that the return value won't relate to the future.
+ * Helpful for UI contexts where its nonsensical for a value to relate to the future. Ex: how long ago an event happened.
+ * @param includeSeconds - if true includes seconds in the result
+ * @param conciseFormatting - if true removes special prefixes
  */
-export function parseRelativeTime(
+export function formatRelativeTime(
   date: Date,
   enforcePast = false,
   includeSeconds = false,
@@ -40,7 +41,7 @@ export function parseRelativeTime(
 
   const relativeTime = formatDistanceToNow(date, {
     addSuffix: true,
-    includeSeconds: includeSeconds,
+    includeSeconds,
   });
 
   if (conciseFormatting) {
@@ -62,7 +63,7 @@ export function RelativeTime({
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
-    setRelativeTime(parseRelativeTime(date, enforcePast, includeSeconds, conciseFormatting));
+    setRelativeTime(formatRelativeTime(date, enforcePast, includeSeconds, conciseFormatting));
   }, [date]);
 
   return <>{relativeTime}</>;
