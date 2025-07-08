@@ -14,9 +14,9 @@ import { Clock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
+  ChainIndexingPhaseViewModel,
+  ChainStatusViewModel,
   GlobalIndexingStatusViewModel,
-  NetworkIndexingPhaseViewModel,
-  NetworkStatusViewModel,
   ensNodeDepsViewModel,
   ensNodeEnvViewModel,
   ensRainbowViewModel,
@@ -30,35 +30,35 @@ export function IndexingStatus() {
 
   return (
     <section className="flex flex-col gap-6 py-6">
-      <NetworkIndexingTimeline indexingStatus={indexingStatus} />
+      <ChainIndexingTimeline indexingStatus={indexingStatus} />
 
-      <NetworkIndexingStats indexingStatus={indexingStatus} />
+      <ChainIndexingStats indexingStatus={indexingStatus} />
     </section>
   );
 }
 
-interface NetworkIndexingStatsProps {
+interface ChainIndexingStatsProps {
   indexingStatus: ReturnType<typeof useIndexingStatusQuery>;
 }
 
 /**
- * Component to display network indexing stats for each indexed blockchain network.
+ * Component to display chain indexing stats for each indexed blockchain chain.
  * @param props
  * @returns
  */
-function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
+function ChainIndexingStats(props: ChainIndexingStatsProps) {
   const { data, isLoading } = props.indexingStatus;
 
   if (isLoading) {
-    return <NetworkIndexingStatsLoading />;
+    return <ChainIndexingStatsFallback />;
   }
 
   if (!data) {
     // propagate error to error boundary
-    throw new Error("No data available for network indexing stats");
+    throw new Error("No data available for chain indexing stats");
   }
 
-  const { networkIndexingStatusByChainId } = data.runtime;
+  const { chainIndexingStatuses } = data.runtime;
   const namespace = data.env.NAMESPACE;
 
   return (
@@ -71,44 +71,43 @@ function NetworkIndexingStats(props: NetworkIndexingStatsProps) {
         </CardHeader>
 
         <CardContent className="flex flex-row gap-8">
-          {globalIndexingStatusViewModel(
-            networkIndexingStatusByChainId,
-            namespace,
-          ).networkStatuses.map((networkStatus) => (
-            <NetworkIndexingStatsCard key={networkStatus.name} network={networkStatus} />
-          ))}
+          {globalIndexingStatusViewModel(chainIndexingStatuses, namespace).chainStatuses.map(
+            (chainStatus) => (
+              <ChainIndexingStatsCard key={chainStatus.chainId} chainStatus={chainStatus} />
+            ),
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
 
-interface NetworkIndexingStatsCardProps {
-  network: NetworkStatusViewModel;
+interface ChainIndexingStatsCardProps {
+  chainStatus: ChainStatusViewModel;
 }
 
 /**
- * Component to display network indexing stats for a single network.
+ * Component to display chain indexing stats for a single chain.
  * @param props
  * @returns
  */
-function NetworkIndexingStatsCard(props: NetworkIndexingStatsCardProps) {
-  const { network } = props;
+function ChainIndexingStatsCard(props: ChainIndexingStatsCardProps) {
+  const { chainStatus } = props;
 
   return (
-    <Card key={network.name}>
+    <Card key={chainStatus.chainId}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">{network.name}</span>
+            <span className="font-semibold">{chainStatus.chainName}</span>
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
-          <BlockStats label="Last indexed block" block={network.lastIndexedBlock} />
-          <BlockStats label="Latest safe block" block={network.latestSafeBlock} />
+          <BlockStats label="Last indexed block" block={chainStatus.lastIndexedBlock} />
+          <BlockStats label="Latest safe block" block={chainStatus.latestSafeBlock} />
         </div>
       </CardContent>
     </Card>
@@ -150,9 +149,9 @@ interface LoadingViewProps {
 }
 
 /**
- * Component to display loading state for network indexing stats.
+ * Component to display loading state for chain indexing stats.
  */
-function NetworkIndexingStatsLoading(props: LoadingViewProps) {
+function ChainIndexingStatsFallback(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -161,7 +160,7 @@ function NetworkIndexingStatsLoading(props: LoadingViewProps) {
         <div className="h-8 bg-muted animate-pulse rounded-md w-48" />
         <div className="space-y-4">
           {Array.from(Array(placeholderCount).keys()).map((i) => (
-            <NetworkIndexingStatsPlaceholder key={i} />
+            <ChainIndexingStatsPlaceholder key={i} />
           ))}
         </div>
       </div>
@@ -170,9 +169,9 @@ function NetworkIndexingStatsLoading(props: LoadingViewProps) {
 }
 
 /**
- * Component to display a placeholder for the network indexing stats.
+ * Component to display a placeholder for the chain indexing stats.
  */
-function NetworkIndexingStatsPlaceholder() {
+function ChainIndexingStatsPlaceholder() {
   return (
     <Card className="animate-pulse">
       <CardHeader>
@@ -188,21 +187,21 @@ function NetworkIndexingStatsPlaceholder() {
   );
 }
 
-interface NetworkIndexingTimelineProps {
+interface ChainIndexingTimelineProps {
   /** ENSNode status query result */
   indexingStatus: ReturnType<typeof useIndexingStatusQuery>;
 }
 
 /**
- * Component to display network indexing timeline for each indexed blockchain network.
+ * Component to display chain indexing timeline for each indexed blockchain chain.
  */
-function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
+function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
   const { indexingStatus } = props;
   const searchParams = useSearchParams();
   const currentEnsNodeUrl = selectedEnsNodeUrl(searchParams);
 
   if (indexingStatus.isLoading) {
-    return <NetworkIndexingTimelineLoading />;
+    return <ChainIndexingTimelineFallback />;
   }
 
   if (indexingStatus.error) {
@@ -212,7 +211,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
 
   if (!indexingStatus.data) {
     // propagate error to error boundary
-    throw new Error("No data available for network indexing timeline");
+    throw new Error("No data available for chain indexing timeline");
   }
 
   const { data } = indexingStatus;
@@ -282,10 +281,7 @@ function NetworkIndexingTimeline(props: NetworkIndexingTimelineProps) {
 
       <main className="grid gap-4">
         <IndexingTimeline
-          {...globalIndexingStatusViewModel(
-            data.runtime.networkIndexingStatusByChainId,
-            data.env.NAMESPACE,
-          )}
+          {...globalIndexingStatusViewModel(data.runtime.chainIndexingStatuses, data.env.NAMESPACE)}
         />
       </main>
     </section>
@@ -321,9 +317,9 @@ function InlineSummaryItem(props: InlineSummaryItemProps) {
 }
 
 /**
- * Component to display loading state for the network indexing timeline.
+ * Component to display loading state for the chain indexing timeline.
  */
-function NetworkIndexingTimelineLoading(props: LoadingViewProps) {
+function ChainIndexingTimelineFallback(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -332,7 +328,7 @@ function NetworkIndexingTimelineLoading(props: LoadingViewProps) {
         <div className="h-8 bg-muted animate-pulse rounded-md w-48" />
         <div className="space-y-4">
           {Array.from(Array(placeholderCount).keys()).map((i) => (
-            <NetworkIndexingTimelinePlaceholder key={i} />
+            <ChainIndexingTimelinePlaceholder key={i} />
           ))}
         </div>
       </div>
@@ -341,9 +337,9 @@ function NetworkIndexingTimelineLoading(props: LoadingViewProps) {
 }
 
 /**
- * Component to display a placeholder for the network indexing timeline.
+ * Component to display a placeholder for the chain indexing timeline.
  */
-function NetworkIndexingTimelinePlaceholder() {
+function ChainIndexingTimelinePlaceholder() {
   return (
     <Card className="animate-pulse">
       <CardHeader>
@@ -362,7 +358,7 @@ function NetworkIndexingTimelinePlaceholder() {
 interface TimelineProps extends GlobalIndexingStatusViewModel {}
 
 export function IndexingTimeline({
-  networkStatuses,
+  chainStatuses,
   currentIndexingDate,
   indexingStartsAt,
 }: TimelineProps) {
@@ -423,7 +419,7 @@ export function IndexingTimeline({
                 left: `${timelinePosition}%`,
                 top: "0",
                 bottom: "0",
-                height: `${networkStatuses.length * 60}px`,
+                height: `${chainStatuses.length * 60}px`,
               }}
             >
               <div className="absolute -bottom-8 -translate-x-1/2 whitespace-nowrap">
@@ -435,13 +431,13 @@ export function IndexingTimeline({
           </div>
         </div>
 
-        {/* Network bars */}
+        {/* Chain indexing status: progress bars */}
         <div className="space-y-6">
-          {networkStatuses.map((networkStatus) => (
-            <NetworkIndexingStatus
-              key={networkStatus.name}
+          {chainStatuses.map((chainStatus) => (
+            <ChainIndexingStatus
+              key={chainStatus.chainId}
               currentIndexingDate={currentIndexingDate}
-              networkStatus={networkStatus}
+              chainStatus={chainStatus}
               timelineStart={timelineStart}
               timelineEnd={timelineEnd}
             />
@@ -468,33 +464,33 @@ export function IndexingTimeline({
   );
 }
 
-interface NetworkIndexingStatusProps {
+interface ChainIndexingStatusProps {
   currentIndexingDate: Date | null;
   timelineStart: Date;
   timelineEnd: Date;
-  networkStatus: NetworkStatusViewModel;
+  chainStatus: ChainStatusViewModel;
 }
 
 /**
- * Component to display network indexing status for a single network.
+ * Component to display chain indexing status for a single chain.
  * Includes a timeline bar for each indexing phase.
  */
-function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
-  const { currentIndexingDate, networkStatus, timelineStart, timelineEnd } = props;
-  const currentIndexingPhase = currentPhase(currentIndexingDate, networkStatus);
+function ChainIndexingStatus(props: ChainIndexingStatusProps) {
+  const { currentIndexingDate, chainStatus, timelineStart, timelineEnd } = props;
+  const currentIndexingPhase = currentPhase(currentIndexingDate, chainStatus);
 
   return (
-    <div key={networkStatus.name} className="flex items-center">
-      {/* Network label */}
+    <div key={chainStatus.chainId} className="flex items-center">
+      {/* Chain label */}
       <div className="w-24 pr-3 text-sm font-medium flex flex-col">
-        <span>{networkStatus.name}</span>
+        <span>{chainStatus.chainName}</span>
       </div>
 
-      {/* Network timeline bar */}
+      {/* Chain timeline bar */}
       <div className="relative flex-1 h-6">
-        {networkStatus.phases.map((phase) => (
-          <NetworkIndexingPhase
-            key={`${networkStatus.name}-${phase.state}`}
+        {chainStatus.phases.map((phase) => (
+          <ChainIndexingPhase
+            key={`${chainStatus.chainId}-${phase.state}`}
             phase={phase}
             isActive={phase === currentIndexingPhase}
             timelineStart={timelineStart}
@@ -502,12 +498,12 @@ function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
           />
         ))}
 
-        {/* Network start indicator */}
+        {/* Chain start indicator */}
         <div
           className="absolute w-0.5 h-5 bg-gray-800 z-10"
           style={{
             left: `${getTimelinePosition(
-              networkStatus.firstBlockToIndex.date,
+              chainStatus.firstBlockToIndex.date,
               timelineStart,
               timelineEnd,
             )}%`,
@@ -515,7 +511,7 @@ function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
         >
           <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
             <span className="text-xs text-gray-600">
-              {intlFormat(networkStatus.firstBlockToIndex.date)}
+              {intlFormat(chainStatus.firstBlockToIndex.date)}
             </span>
           </div>
         </div>
@@ -524,22 +520,22 @@ function NetworkIndexingStatus(props: NetworkIndexingStatusProps) {
   );
 }
 
-interface NetworkIndexingPhaseProps {
-  phase: NetworkIndexingPhaseViewModel;
+interface ChainIndexingPhaseProps {
+  phase: ChainIndexingPhaseViewModel;
   isActive: boolean;
   timelineStart: Date;
   timelineEnd: Date;
 }
 
 /**
- * Component to display a single indexing phase on the network indexing timeline.
+ * Component to display a single indexing phase on the chain indexing timeline.
  */
-function NetworkIndexingPhase({
+function ChainIndexingPhase({
   phase,
   isActive,
   timelineStart,
   timelineEnd,
-}: NetworkIndexingPhaseProps) {
+}: ChainIndexingPhaseProps) {
   const isQueued = phase.state === "queued";
   const isIndexing = phase.state === "indexing";
 

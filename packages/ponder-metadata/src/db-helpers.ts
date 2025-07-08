@@ -10,9 +10,9 @@ type PonderAppMeta = {
   is_dev: 0 | 1;
   heartbeat_at: number;
   build_id: string;
-  checkpoint: string;
   table_names: Array<string>;
   version: string;
+  is_ready: 0 | 1;
 };
 
 /**
@@ -35,49 +35,6 @@ const getPonderMetaTableSchema = (databaseNamespace: string) => {
     value: t.jsonb().$type<PonderAppMeta>().notNull(),
   }));
 };
-
-/**
- * Get DB schema for _ponder_status table.
- * Akin to https://github.com/ponder-sh/ponder/blob/32634897bf65e92a85dc4cccdaba70c9425d90f3/packages/core/src/database/index.ts#L143-L159
- *
- * @param databaseNamespace A namespace for the database.
- * @returns A table schema for _ponder_status table.
- */
-const getPonderStatusTableSchema = (databaseNamespace: string) => {
-  if (databaseNamespace === "public") {
-    return pgTable("_ponder_status", (t) => ({
-      network_name: t.text().primaryKey(),
-      block_number: t.bigint({ mode: "number" }),
-      block_timestamp: t.bigint({ mode: "number" }),
-      ready: t.boolean().notNull(),
-    }));
-  }
-
-  return pgSchema(databaseNamespace).table("_ponder_status", (t) => ({
-    network_name: t.text().primaryKey(),
-    block_number: t.bigint({ mode: "number" }),
-    block_timestamp: t.bigint({ mode: "number" }),
-    ready: t.boolean().notNull(),
-  }));
-};
-
-type PonderStatusTableSchema = ReturnType<typeof getPonderStatusTableSchema>;
-
-/**
- * Get a list of ponder status entries for each network.
- *
- * @param namespace A namespace for the database (e.g. "public").
- * @param db Drizzle DB Client instance.
- * @returns a list of ponder status entries for each network.
- */
-export async function queryPonderStatus(
-  namespace: string,
-  db: ReadonlyDrizzle<Record<string, unknown>>,
-): Promise<Array<PonderStatusTableSchema["$inferSelect"]>> {
-  const PONDER_STATUS = getPonderStatusTableSchema(namespace);
-
-  return db.select().from(PONDER_STATUS);
-}
 
 type PonderMetaTableSchema = ReturnType<typeof getPonderMetaTableSchema>;
 

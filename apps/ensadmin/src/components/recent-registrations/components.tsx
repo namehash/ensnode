@@ -44,8 +44,8 @@ export function RecentRegistrations() {
   // Get the current indexing date from the indexing status
   const currentIndexingDate = indexingStatusQuery.data
     ? globalIndexingStatusViewModel(
-        indexingStatusQuery.data.runtime.networkIndexingStatusByChainId,
-        indexingStatusQuery.data.env.NAMESPACE,
+        indexingStatus.data.runtime.chainIndexingStatuses,
+        indexingStatus.data.env.NAMESPACE,
       ).currentIndexingDate
     : null;
 

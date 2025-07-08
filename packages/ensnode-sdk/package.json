@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-sdk",
-  "version": "0.28.0",
+  "version": "0.31.0",
   "type": "module",
   "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",

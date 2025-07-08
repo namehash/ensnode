@@ -52,23 +52,23 @@ export function useIndexingStatusQuery(ensNodeUrl: URL): UseIndexingStatusQueryR
  * @throws Error if the response is invalid
  */
 function validateResponse(response: EnsNode.Metadata) {
-  const { networkIndexingStatusByChainId } = response.runtime;
+  const { chainIndexingStatuses } = response.runtime;
 
-  if (typeof networkIndexingStatusByChainId === "undefined") {
-    throw new Error(`Network indexing status not found in the response.`);
+  if (typeof chainIndexingStatuses === "undefined") {
+    throw new Error(`Chain indexing status not found in the response.`);
   }
 
-  if (Object.keys(networkIndexingStatusByChainId).length === 0) {
-    throw new Error(`No network indexing status found response.`);
+  if (Object.keys(chainIndexingStatuses).length === 0) {
+    throw new Error(`No chain indexing status found response.`);
   }
 
-  const networksWithoutFirstBlockToIndex = Object.entries(networkIndexingStatusByChainId).filter(
-    ([, network]) => network.firstBlockToIndex === null,
+  const chainsWithoutFirstBlockToIndex = Object.entries(chainIndexingStatuses).filter(
+    ([, chain]) => chain.firstBlockToIndex === null,
   );
 
-  if (networksWithoutFirstBlockToIndex.length > 0) {
+  if (chainsWithoutFirstBlockToIndex.length > 0) {
     throw new Error(
-      `Missing first block to index for some networks with the following chain IDs: ${networksWithoutFirstBlockToIndex
+      `Missing first block to index for some chains with the following chain IDs: ${chainsWithoutFirstBlockToIndex
         .map(([chainId]) => chainId)
         .join(", ")}`,
     );

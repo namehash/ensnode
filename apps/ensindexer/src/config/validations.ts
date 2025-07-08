@@ -21,8 +21,8 @@ export function invariant_requiredDatasources(
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
   for (const pluginName of config.plugins) {
-    const { requiredDatasources } = getPlugin(pluginName);
-    const hasRequiredDatasources = requiredDatasources.every((datasourceName) =>
+    const { requiredDatasourceNames } = getPlugin(pluginName);
+    const hasRequiredDatasources = requiredDatasourceNames.every((datasourceName) =>
       availableDatasourceNames.includes(datasourceName),
     );
 
@@ -32,7 +32,7 @@ export function invariant_requiredDatasources(
         input: config,
         message: `Requested plugin '${pluginName}' cannot be activated for the ${
           config.namespace
-        } ENS namespace. ${pluginName} specifies dependent datasources: [${requiredDatasources.join(
+        } ENS namespace. ${pluginName} specifies dependent datasources: [${requiredDatasourceNames.join(
           ", ",
         )}], but available datasources in the ${
           config.namespace
@@ -51,7 +51,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
   const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
 
   for (const pluginName of config.plugins) {
-    const datasourceNames = getPlugin(pluginName).requiredDatasources;
+    const datasourceNames = getPlugin(pluginName).requiredDatasourceNames;
 
     for (const datasourceName of datasourceNames) {
       const { chain } = datasources[datasourceName];
@@ -67,7 +67,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
   }
 }
 
-// Invariant: if a global blockrange is defined, only one network is indexed
+// Invariant: if a global blockrange is defined, only one chain is indexed
 export function invariant_globalBlockrange(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "globalBlockrange" | "namespace" | "plugins">>,
 ) {
@@ -78,7 +78,7 @@ export function invariant_globalBlockrange(
     const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
     const indexedChainIds = uniq(
       config.plugins
-        .flatMap((pluginName) => getPlugin(pluginName).requiredDatasources)
+        .flatMap((pluginName) => getPlugin(pluginName).requiredDatasourceNames)
         .map((datasourceName) => datasources[datasourceName])
         .map((datasource) => datasource.chain.id),
     );
@@ -87,7 +87,7 @@ export function invariant_globalBlockrange(
       ctx.issues.push({
         code: "custom",
         input: config,
-        message: `ENSIndexer's behavior when indexing _multiple networks_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
+        message: `ENSIndexer's behavior when indexing _multiple chains_ with a _specific blockrange_ is considered undefined (for now). If you're using this feature, you're likely interested in snapshotting at a specific END_BLOCK, and may have unintentially activated plugins that source events from multiple chains. The config currently is:
 
   NAMESPACE=${config.namespace}
   PLUGINS=${config.plugins.join(",")}
@@ -98,7 +98,7 @@ export function invariant_globalBlockrange(
     NAMESPACE=(mainnet|sepolia|holesky) PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
-  In the future, indexing multiple networks with network-specific blockrange constraints may be possible.`,
+  In the future, indexing multiple chains with chain-specific blockrange constraints may be possible.`,
       });
     }
   }

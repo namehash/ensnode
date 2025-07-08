@@ -2,85 +2,72 @@
  * The ThreeDNS plugin describes indexing behavior for 3DNSToken on both Optimism and Base.
  */
 
+import {
+  createPlugin,
+  getDatasourceAsFullyDefinedAtCompileTime,
+  namespaceContract,
+} from "@/lib/plugin-helpers";
+import { chainConfigForContract, chainConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
-import { createConfig } from "ponder";
-
-import type { ENSIndexerConfig } from "@/config/types";
-import {
-  type ENSIndexerPlugin,
-  activateHandlers,
-  getDatasourceAsFullyDefinedAtCompileTime,
-  makePluginNamespace,
-  networkConfigForContract,
-  networksConfigForChain,
-} from "@/lib/plugin-helpers";
+import * as ponder from "ponder";
 
 const pluginName = PluginName.ThreeDNS;
 
-// Define the Datasources required by the plugin
-const requiredDatasources = [DatasourceNames.ThreeDNSOptimism, DatasourceNames.ThreeDNSBase];
+export default createPlugin({
+  name: pluginName,
+  requiredDatasourceNames: [DatasourceNames.ThreeDNSOptimism, DatasourceNames.ThreeDNSBase],
+  createPonderConfig(config) {
+    const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ThreeDNSOptimism,
+    );
+    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ThreeDNSBase,
+    );
 
-// Construct a unique plugin namespace to wrap contract names
-const pluginNamespace = makePluginNamespace(pluginName);
-
-// config object factory used to derive PluginConfig type
-function createPonderConfig(config: ENSIndexerConfig) {
-  const { chain: optimism, contracts: optimismContracts } =
-    getDatasourceAsFullyDefinedAtCompileTime(config.namespace, DatasourceNames.ThreeDNSOptimism);
-
-  const { chain: base, contracts: baseContracts } = getDatasourceAsFullyDefinedAtCompileTime(
-    config.namespace,
-    DatasourceNames.ThreeDNSBase,
-  );
-
-  return createConfig({
-    networks: {
-      ...networksConfigForChain(config, optimism.id),
-      ...networksConfigForChain(config, base.id),
-    },
-    contracts: {
-      [pluginNamespace("ThreeDNSToken")]: {
-        network: {
-          ...networkConfigForContract(config, optimism, optimismContracts.ThreeDNSToken),
-          ...networkConfigForContract(config, base, baseContracts.ThreeDNSToken),
-        },
-        abi: optimismContracts.ThreeDNSToken.abi,
+    return ponder.createConfig({
+      chains: {
+        ...chainConnectionConfig(config.rpcConfigs, threeDNSOptimism.chain.id),
+        ...chainConnectionConfig(config.rpcConfigs, threeDNSBase.chain.id),
       },
-      [pluginNamespace("Resolver")]: {
-        network: {
-          ...networkConfigForContract(config, optimism, optimismContracts.Resolver),
-          ...networkConfigForContract(config, base, baseContracts.Resolver),
+      contracts: {
+        // multi-network ThreeDNSToken indexing config
+        [namespaceContract(pluginName, "ThreeDNSToken")]: {
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSOptimism.chain.id,
+              threeDNSOptimism.contracts.ThreeDNSToken,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSBase.chain.id,
+              threeDNSBase.contracts.ThreeDNSToken,
+            ),
+          },
+          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
+          abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
         },
-        abi: optimismContracts.Resolver.abi,
+        // multi-network ThreeDNS-specific Resolver indexing config
+        [namespaceContract(pluginName, "Resolver")]: {
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSOptimism.chain.id,
+              threeDNSOptimism.contracts.Resolver,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSBase.chain.id,
+              threeDNSBase.contracts.Resolver,
+            ),
+          },
+          // NOTE: abi is identical in a multi-network ponder config, just use Optimism's here
+          abi: threeDNSOptimism.contracts.Resolver.abi,
+        },
       },
-    },
-  });
-}
-
-// Implicitly define the type returned by createPluginConfig
-type PonderConfig = ReturnType<typeof createPonderConfig>;
-
-export default {
-  /**
-   * Activate the plugin handlers for indexing.
-   */
-  activate: activateHandlers({
-    pluginName,
-    pluginNamespace: pluginNamespace,
-    handlers: () => [import("./handlers/ThreeDNSToken")],
-  }),
-
-  /**
-   * Create the ponder configuration lazily to prevent premature execution of
-   * nested factory functions, i.e. to ensure that the ponder configuration
-   * is only created for this plugin when it is activated.
-   */
-  createPonderConfig,
-
-  /** The unique plugin name  */
-  pluginName,
-
-  /** The plugin's required Datasources */
-  requiredDatasources,
-} as const satisfies ENSIndexerPlugin<PluginName.ThreeDNS, PonderConfig>;
+    });
+  },
+});

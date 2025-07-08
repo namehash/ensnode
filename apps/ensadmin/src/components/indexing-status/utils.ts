@@ -1,4 +1,4 @@
-import { NetworkIndexingPhaseViewModel, NetworkStatusViewModel } from "./view-models";
+import { ChainIndexingPhaseViewModel, ChainStatusViewModel } from "./view-models";
 
 /**
  * Calculate the position of a date in a timeline.
@@ -51,24 +51,24 @@ export function generateYearMarkers(timelineStart: Date, timelineEnd: Date): Arr
 }
 
 /**
- * Get the current phase of the network indexing.
+ * Get the current phase of the chain indexing.
  * @param date current indexing date
- * @param networkStatus view model
+ * @param chainStatus view model
  */
 export function currentPhase(
   date: Date | null,
-  networkStatus: NetworkStatusViewModel,
-): NetworkIndexingPhaseViewModel {
-  // if the network is not indexed yet, return the first phase
+  chainStatus: ChainStatusViewModel,
+): ChainIndexingPhaseViewModel {
+  // if the chain is not indexed yet, return the first phase
   if (!date) {
-    return networkStatus.phases[0];
+    return chainStatus.phases[0];
   }
 
-  for (let i = networkStatus.phases.length - 1; i >= 0; i--) {
-    if (date >= networkStatus.phases[i].startDate) {
-      return networkStatus.phases[i];
+  for (let i = chainStatus.phases.length - 1; i >= 0; i--) {
+    if (date >= chainStatus.phases[i].startDate) {
+      return chainStatus.phases[i];
     }
   }
 
-  return networkStatus.phases[0];
+  return chainStatus.phases[0];
 }

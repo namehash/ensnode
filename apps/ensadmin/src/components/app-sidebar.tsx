@@ -27,12 +27,8 @@ const navItems = [
     isActive: true,
     items: [
       {
-        title: "GraphQL (Ponder-style)",
-        url: "/gql/ponder",
-      },
-      {
-        title: "GraphQL (Subgraph-style)",
-        url: "/gql/subgraph-compat",
+        title: "Subgraph (GraphQL)",
+        url: "/api/subgraph",
       },
       {
         title: "Ponder Client",
