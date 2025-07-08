@@ -190,14 +190,6 @@ export interface ENSIndexerConfig {
    * 2) limit indexing behavior to subgraph indexing semantics
    */
   isSubgraphCompatible: boolean;
-
-  /**
-   * Allowed difference (in seconds) between the current timestamp and
-   * the lowest last indexed block timestamp across all chains.
-   *
-   * It is used by uptime monitoring tooling to report service availability.
-   **/
-  realtimeIndexingGapThreshold: number;
 }
 
 /**
@@ -232,5 +224,4 @@ export interface ENSIndexerEnvironment {
     endBlock: string | undefined;
   };
   rpcConfigs: Record<number, RpcConfigEnvironment>;
-  realtimeIndexingGapThreshold: string | undefined;
 }

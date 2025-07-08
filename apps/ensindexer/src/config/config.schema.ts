@@ -15,7 +15,6 @@ import {
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
   DEFAULT_NAMESPACE,
   DEFAULT_PORT,
-  DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { uniq } from "@/lib/lib-helpers";
@@ -155,10 +154,6 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
-const RealtimeIndexingGapThresholdSchema = positiveIntegerSchema(
-  "REALTIME_INDEXING_GAP_THRESHOLD",
-).default(DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD);
-
 const ENSIndexerConfigSchema = z
   .object({
     namespace: ENSNamespaceSchema,
@@ -173,7 +168,6 @@ const ENSIndexerConfigSchema = z
     ensRainbowEndpointUrl: EnsRainbowEndpointUrlSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
-    realtimeIndexingGapThreshold: RealtimeIndexingGapThresholdSchema,
   })
   /**
    * Invariant enforcement

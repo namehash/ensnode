@@ -1,9 +1,7 @@
-import { getPublicClientChainIds } from "@/lib/ponder-helpers";
 import { PonderStatus } from "@ensnode/ponder-metadata";
-import { differenceInSeconds, fromUnixTime } from "date-fns";
+import { differenceInSeconds, fromUnixTime, minutesToSeconds } from "date-fns";
 import { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { PublicClient } from "viem";
 import { prettifyError, z } from "zod/v4";
 
 export namespace UptimeMonitoring {
@@ -11,21 +9,10 @@ export namespace UptimeMonitoring {
    * Option values to be used as input for {@link uptimeMonitoring} function.
    */
   export interface MiddlewareOptions {
-    /**
-     * Allowed difference (in seconds) between the current timestamp and
-     * the lowest last indexed block timestamp across all chains.
-     **/
-    realtimeIndexingGapThreshold: number;
-
     /** Query methods */
     query: {
       /** Fetches Ponder Status object for Ponder application */
       ponderStatus(): Promise<PonderStatus>;
-    };
-
-    /** Public clients for fetching data from each chain */
-    publicClients: {
-      [chainName: string]: PublicClient;
     };
   }
 
@@ -60,30 +47,15 @@ export namespace UptimeMonitoring {
 }
 
 /**
- * Get the lowest timestamp across all last indexed blocks for every chain ID.
+ * Get the lowest timestamp across all last indexed blocks for every chain from Ponder Status.
  *
- * @param chainIds
  * @param ponderStatus
  * @returns
  */
-export function getLowestLastIndexedBlockTimestamp(
-  chainIds: number[],
-  ponderStatus: PonderStatus,
-): number {
-  let lastIndexedBlockTimestamps: number[] = [];
-
-  for (const chainId of chainIds) {
-    // mapping ponder status for current chain ID
-    const ponderStatusForChain = Object.values(ponderStatus).find(
-      (ponderStatusEntry) => ponderStatusEntry.id === chainId,
-    );
-
-    if (ponderStatusForChain) {
-      const lastIndexedBlock = ponderStatusForChain.block;
-
-      lastIndexedBlockTimestamps.push(lastIndexedBlock.timestamp);
-    }
-  }
+export function getLowestLastIndexedBlockTimestamp(ponderStatus: PonderStatus): number {
+  const lastIndexedBlockTimestamps = Object.values(ponderStatus).map(
+    (chainStatus) => chainStatus.block.timestamp,
+  );
 
   return Math.min(...lastIndexedBlockTimestamps);
 }
@@ -126,6 +98,8 @@ export function buildUptimeMonitoringRequest(
   return parsed.data;
 }
 
+export const DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD = minutesToSeconds(10);
+
 /**
  * Creates a Hono Middleware object to be used for providing uptime monitoring
  * tools with information about the current ENSNode service availability.
@@ -140,7 +114,7 @@ export function uptimeMonitoring(options: UptimeMonitoring.MiddlewareOptions): M
       } satisfies UptimeMonitoring.RawRequest;
 
       const requestDefaults = {
-        gapThreshold: options.realtimeIndexingGapThreshold,
+        gapThreshold: DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD,
       } satisfies UptimeMonitoring.RequestDefaults;
 
       const parsedRequest = buildUptimeMonitoringRequest(rawRequest, requestDefaults);
@@ -152,13 +126,9 @@ export function uptimeMonitoring(options: UptimeMonitoring.MiddlewareOptions): M
     }
 
     const currentDate = new Date();
-    const publicClientChainIds = getPublicClientChainIds(options.publicClients);
     const ponderStatus = await options.query.ponderStatus();
 
-    const lowestLastIndexedBlockTimestamp = getLowestLastIndexedBlockTimestamp(
-      publicClientChainIds,
-      ponderStatus,
-    );
+    const lowestLastIndexedBlockTimestamp = getLowestLastIndexedBlockTimestamp(ponderStatus);
 
     const lowestLastIndexedBlockDate = fromUnixTime(lowestLastIndexedBlockTimestamp);
     const currentRealtimeIndexingGap = differenceInSeconds(currentDate, lowestLastIndexedBlockDate);

@@ -90,11 +90,9 @@ app.get(
 app.get(
   "/amirealtime",
   uptimeMonitoring({
-    realtimeIndexingGapThreshold: config.realtimeIndexingGapThreshold,
     query: {
       ponderStatus: fetchPonderStatus,
     },
-    publicClients,
   }),
 );
 

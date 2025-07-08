@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { afterEach } from "node:test";
 import {
+  DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD,
   type UptimeMonitoring,
   buildUptimeMonitoringRequest,
   getLowestLastIndexedBlockTimestamp,
@@ -10,8 +11,7 @@ import {
 } from "@/lib/uptime-monitoring-middleware";
 import { PonderStatus } from "@ensnode/ponder-metadata";
 import { fromUnixTime } from "date-fns";
-import { http, Chain, PublicClient, createPublicClient } from "viem";
-import { base, linea, mainnet } from "viem/chains";
+import { Chain, base, linea, mainnet } from "viem/chains";
 
 describe("buildUptimeMonitoringRequest", () => {
   it("can skip default values for the provided raw request properties", () => {
@@ -66,13 +66,6 @@ const createPonderStatus = (
   }) satisfies PonderStatus;
 
 describe("uptimeMonitoring middleware", () => {
-  const createPublicClients = (chain: Chain) => ({
-    [chain.name]: createPublicClient({
-      transport: http(),
-      chain,
-    }),
-  });
-
   const createQuery = (ponderStatus: PonderStatus) => ({
     ponderStatus() {
       return Promise.resolve(ponderStatus);
@@ -110,9 +103,6 @@ describe("uptimeMonitoring middleware", () => {
           mockedLatestBlockForChain.timestamp,
         ),
       ),
-      publicClients: createPublicClients(chain),
-      // let the server to set the default allowed gap threshold in seconds
-      realtimeIndexingGapThreshold: 12345,
     };
   });
 
@@ -128,7 +118,7 @@ describe("uptimeMonitoring middleware", () => {
      * Date that allows the realtimeIndexingGapThreshold not to be exceeded.
      */
     const mockedSystemDate = fromUnixTime(
-      mockedLatestBlockForChain.timestamp + middlewareOptions.realtimeIndexingGapThreshold,
+      mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD,
     );
 
     // set system time
@@ -139,9 +129,9 @@ describe("uptimeMonitoring middleware", () => {
     expect(response.status).toEqual(200);
 
     expect(await response.json()).toStrictEqual({
-      currentRealtimeIndexingGap: 12345,
+      currentRealtimeIndexingGap: 600,
       lowestLastIndexedBlockTimestamp: 1690520327,
-      realtimeIndexingGapThreshold: 12345,
+      realtimeIndexingGapThreshold: 600,
     });
   });
 
@@ -152,7 +142,7 @@ describe("uptimeMonitoring middleware", () => {
      * Date that causes the realtimeIndexingGapThreshold to be exceeded.
      */
     const mockedSystemDate = fromUnixTime(
-      mockedLatestBlockForChain.timestamp + middlewareOptions.realtimeIndexingGapThreshold + 1,
+      mockedLatestBlockForChain.timestamp + DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD + 1,
     );
 
     // set system time
@@ -163,9 +153,9 @@ describe("uptimeMonitoring middleware", () => {
     expect(response.status).toEqual(503);
 
     expect(await response.json()).toStrictEqual({
-      currentRealtimeIndexingGap: 12346,
+      currentRealtimeIndexingGap: 601,
       lowestLastIndexedBlockTimestamp: 1690520327,
-      realtimeIndexingGapThreshold: 12345,
+      realtimeIndexingGapThreshold: 600,
     });
   });
 
@@ -228,8 +218,6 @@ describe("getLowestLastIndexedBlockTimestamp", () => {
       ...ponderStatusLinea,
     };
 
-    expect(
-      getLowestLastIndexedBlockTimestamp([mainnet.id, base.id, linea.id], ponderStatus),
-    ).toEqual(1690520320);
+    expect(getLowestLastIndexedBlockTimestamp(ponderStatus)).toEqual(1690520320);
   });
 });

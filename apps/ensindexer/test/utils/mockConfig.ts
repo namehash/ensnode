@@ -1,10 +1,6 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerConfig } from "@/config/types";
-import {
-  DEFAULT_PORT,
-  DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD,
-  DEFAULT_RPC_RATE_LIMIT,
-} from "@/lib/lib-config";
+import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
 import { deepClone } from "@/lib/lib-helpers";
 import { vi } from "vitest";
 
@@ -27,7 +23,6 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     },
   },
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
-  realtimeIndexingGapThreshold: DEFAULT_REALTIME_INDEXING_GAP_THRESHOLD.toString(),
 });
 
 // the current, mutable ENSIndexerConfig for tests
