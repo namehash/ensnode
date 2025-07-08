@@ -188,6 +188,7 @@ export interface EnsRainbowApiClientOptions {
 export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
   private readonly cache: Cache<LabelHash, EnsRainbow.CacheableHealResponse>;
+  private readonly labelSetSearchParams: URLSearchParams;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -222,6 +223,18 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
       this.options.cacheCapacity,
     );
+
+    // Pre-compute query parameters for label set options
+    this.labelSetSearchParams = new URLSearchParams();
+    if (this.options.labelSet?.labelSetId !== undefined) {
+      this.labelSetSearchParams.append("label_set_id", this.options.labelSet.labelSetId);
+    }
+    if (this.options.labelSet?.labelSetVersion !== undefined) {
+      this.labelSetSearchParams.append(
+        "label_set_version",
+        this.options.labelSet.labelSetVersion.toString(),
+      );
+    }
   }
 
   /**
@@ -275,17 +288,9 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
 
     const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
 
-    // Add label_set_id as a query parameter if provided
-    if (this.options.labelSet?.labelSetId !== undefined) {
-      url.searchParams.append("label_set_id", this.options.labelSet.labelSetId);
-    }
-
-    // Add label_set_version as a query parameter if provided
-    if (this.options.labelSet?.labelSetVersion !== undefined) {
-      url.searchParams.append(
-        "label_set_version",
-        this.options.labelSet.labelSetVersion.toString(),
-      );
+    // Apply pre-computed label set query parameters
+    for (const [key, value] of this.labelSetSearchParams) {
+      url.searchParams.append(key, value);
     }
 
     const response = await fetch(url);
