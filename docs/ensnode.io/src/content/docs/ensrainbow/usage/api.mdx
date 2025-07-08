@@ -1,9 +1,23 @@
 ---
 title: ENSRainbow API
+description: Complete HTTP API reference for ENSRainbow label healing service.
 sidebar:
   label: API
   order: 2
 ---
+
+## Endpoint Summary
+
+| Endpoint | Purpose | Key Response Types |
+|----------|---------|--------------------|
+| `GET /health` | Liveness probe for orchestration | `{ status: "ok" }` |
+| `GET /v1/heal/{labelhash}` | Heal a single labelhash | `HealSuccess`, `HealError` |
+| `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError` |
+| `GET /v1/version` | Server & database schema info plus label set details | `VersionInfo` |
+
+:::tip[Deterministic Results]
+Pin `labelSetVersion` in your client if you need **deterministic results** across time. See the [Label Sets & Versioning guide](/ensrainbow/concepts/label-sets-and-versioning/) for details.
+:::
 
 ## Health Check
 
@@ -49,10 +63,6 @@ curl "http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2
 - **`label_set_id`** (optional): Validates that the request matches the database label set id. Must be provided together with `label_set_version`.
 - **`label_set_version`** (optional): Specifies the highest label set version of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, only labels from label sets with versions less than or equal to this value will be returned.
 
-:::note[Parameter Requirements]
-If you provide one of these parameters, you **must** provide both. The server will return a 400 error if only one parameter is provided.
-:::
-
 Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
 
 - Labels may or may not be ENS-normalized
@@ -71,21 +81,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
-  ```json
-  {
-    "status": "error",
-    "error": "Invalid parameters: both 'label_set_id' and 'label_set_version' must be provided together",
-    "errorCode": 400
-  }
-  ```
 
-  ```json
-  {
-    "status": "error",
-    "error": "Label set id mismatch",
-    "errorCode": 400
-  }
-  ```
 
   ```json
   {

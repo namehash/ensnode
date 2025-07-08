@@ -12,6 +12,28 @@ import { LinkCard } from "@astrojs/starlight/components";
 This guide covers running ENSRainbow locally for development and contributions.
 :::
 
+## Quick Navigation
+
+For focused guidance on specific topics, check out these dedicated pages:
+
+<LinkCard title="Local Development" href="/ensrainbow/contributing/local-development" />
+<LinkCard title="CLI Reference" href="/ensrainbow/contributing/cli-reference" />
+<LinkCard title="Service Management" href="/ensrainbow/contributing/service-management" />
+<LinkCard title="System Requirements" href="/ensrainbow/contributing/system-requirements" />
+<LinkCard title="Building Docker Images" href="/ensrainbow/contributing/building" />
+
+:::tip[Choose Your Path]
+- **New to the project?** Start with [Local Development](/ensrainbow/contributing/local-development)
+- **Need CLI help?** Check the [CLI Reference](/ensrainbow/contributing/cli-reference)
+- **Building for production?** See [Building Docker Images](/ensrainbow/contributing/building)
+:::
+
+---
+
+:::note[Comprehensive Guide]
+The complete development guide is included below for reference, but the dedicated pages above provide more focused guidance for specific tasks.
+:::
+
 ## Local Development
 
 :::caution[Follow ENSNode's Contribution Guide First]
@@ -107,7 +129,7 @@ curl http://localhost:3223/v1/heal/0xYourLabelHash
 # (label_set_id must match DB, label_set_version <= HIGHEST_LABEL_SET_VERSION in DB)
 curl http://localhost:3223/v1/heal/0xYourLabelHash?label_set_id=subgraph&label_set_version=1
 ```
-If `label_set_id` and `label_set_version` are provided in a heal request, both must be present. The server will validate them against the database's stored label set ID and highest label set version.
+If `label_set_version` is provided in a heal request, then `label_set_id` must be also present. The server will validate them against the database's stored label set ID and highest label set version.
 
 Expected count as of January 30, 2024: 133,856,894 unique 
 label-labelhash pairs
@@ -122,10 +144,10 @@ The script downloads a tarball (`.tgz`) containing the database. The script requ
 # Navigate to the script directory (or call it from the monorepo root)
 cd apps/ensrainbow
 
-# Example: Download schema v2, 'subgraph' label set ID, up to label set version 1
-./scripts/download-prebuilt-database.sh v2 subgraph 1
+# Example: Download database schema 3, 'subgraph' label set ID, up to label set version 0
+./scripts/download-prebuilt-database.sh 3 subgraph 0
 ```
-This will download and verify `databases/v2/subgraph-1.tgz` (relative to `OUT_DIR`). You can then extract this archive to your desired data directory (e.g., `./my-subgraph-data`) and use it with `pnpm run serve`.
+This will download and verify `databases/3/subgraph-0.tgz` (relative to `OUT_DIR`). You can then extract this archive to your desired data directory (e.g., `./my-subgraph-data`) and use it with `pnpm run serve`.
 
 ## Building the Docker Image
 
@@ -163,13 +185,13 @@ If you need to start fresh with the database:
 
 ### API Server Requirements (`serve` command)
 
-- **Storage**: ~7-8 GB for a typical LevelDB database. Docker image size will vary based on included data.
+- **Storage**: ~7-8 GB for a typical LevelDB database. Docker image size is about 1.5GB.
 - **Memory**: Minimum 1 GB RAM (4 GB recommended for optimal performance).
-- **CPU**: Minimal requirements.
+- **CPU**: Minimal requirements - operates well with low CPU resources.
 
 ## Command Line Interface
 
-ENSRainbow provides a CLI for managing the service. Add `--help` for details on any command.
+ENSRainbow provides a command-line interface (CLI) for managing the service. You can view detailed help for any command by adding `--help` after the command:
 
 ### Convert Legacy Data (`convert`)
 Converts legacy `.sql.gz` rainbow tables to the `.ensrainbow` format.
@@ -210,9 +232,8 @@ The process will exit with:
 - Code 0: Validation successful
 - Code 1: Validation failed or errors encountered
 
-### Database Purge
-
 ### Database Purge (`purge`)
+
 ```bash
 pnpm run purge [--data-dir path/to/db]
 ```
@@ -268,11 +289,12 @@ pnpm run ingest-ensrainbow --input-file ens-test-env-0.ensrainbow --data-dir dat
 
 ### Validating the Test Data
 
+You can validate the ingested test data to ensure it was properly loaded:
 ```bash
 pnpm validate --data-dir data_ens_test_env
 ```
 
-### Running ENSRainbow with Test Data
+### Running ENSRainbow with the test data
 
 ```bash
 pnpm serve --data-dir data_ens_test_env --port 3223

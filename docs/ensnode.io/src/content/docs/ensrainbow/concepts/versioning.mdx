@@ -1,0 +1,45 @@
+---
+title: Technical Versioning & Compatibility
+description: Understand how ENSRainbow handles software, database schema, and compatibility.
+sidebar:
+  label: Technical Versioning
+  order: 5
+---
+
+ENSRainbow uses **three distinct version numbers**—each serving a different purpose.
+
+## 1. ENSRainbow Software Version
+The semantic version of the Node.js application itself (e.g. `v0.4.2`).
+- Bumped when new features, fixes, or breaking changes are released.
+- Shown in `/v1/version` under the `version` field.
+
+## 2. Database Schema Version (`DB_SCHEMA_VERSION`)
+Specifies the on-disk structure of the LevelDB database as well as the format of the downloadable pre-built archives.
+- Passed as an **environment variable** when running the Docker image.
+
+## 3. Label-set Version (`LABEL_SET_VERSION`)
+Represents chronological *data* versions inside a given label-set (`LABEL_SET_ID`).
+- Starts at **0** and increments by one.
+- Each increment contains **only the delta** from the previous version.
+- Enables deterministic, reproducible healing results across time.
+
+:::caution[Mixing versions]
+The API server will refuse to start if the on-disk database schema is different than the running software's supported schema.
+:::
+
+### Choosing Versions in Practice
+| Scenario | Recommended `DB_SCHEMA_VERSION` | `LABEL_SET_ID` / `LABEL_SET_VERSION` |
+|----------|---------------------------------|---------------------------------------|
+| Local dev / tests | Latest | `ens-test-env / 0` |
+| Production parity with ENS Subgraph | Latest | `subgraph / 0` |
+| Maximum coverage | Latest | `searchlight / latest` |
+
+For a list of available label-sets and their highest versions, call:
+```bash
+curl http://<your-host>:3223/v1/version
+```
+
+## Related Documentation
+
+- **[Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning/)** - Conceptual overview of why versioning matters
+- **[Data Model](/ensrainbow/concepts/data-model/)** - How versions are stored in the database 

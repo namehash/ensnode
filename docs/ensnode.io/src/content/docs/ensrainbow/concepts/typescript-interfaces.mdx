@@ -1,0 +1,94 @@
+---
+title: TypeScript Interfaces
+description: Type definitions for ENSRainbow's server and client label set objects.
+sidebar:
+  label: TypeScript Interfaces
+  order: 4
+keywords: [ensrainbow, typescript, interfaces, types]
+---
+
+ENSRainbow's TypeScript APIs expose two companion types that describe **which label sets are available (server-side) or expected (client-side)**.
+
+## Server Label Set
+
+### `EnsRainbowServerLabelSet`
+
+Returned by `GET /version` and stored in database metadata:
+
+```ts
+interface EnsRainbowServerLabelSet {
+  labelSetId: string;          // active label set id (e.g. "subgraph")
+  highestLabelSetVersion: number; // newest label set version the server has ingested
+}
+```
+
+#### Fields
+
+- **`labelSetId`** identifies **which label set** the server is currently serving.
+- **`highestLabelSetVersion`** is the **latest version** available. The server will never return labels from a version _greater_ than this value.
+
+## Client Label Set
+
+### `EnsRainbowClientLabelSet`
+
+Provided when constructing `new EnsRainbowApiClient({ labelSet: … })` to pin client expectations:
+
+```ts
+interface EnsRainbowClientLabelSet {
+  labelSetId?: string;    // optional – require a particular label set
+  labelSetVersion?: number; // optional – maximum label setversion accepted
+}
+```
+
+#### Usage Guidelines
+
+1. **Neither field** → accept any dataset & always use the latest version (default behaviour).
+2. **Only `labelSetId`** → insist on a specific dataset but stay on its latest snapshot.
+3. **Both fields** → lock the client to an exact snapshot. The SDK validates the server supports at least this version and filters out labels with a higher version.
+
+This handshake ensures both parties interpret every heal operation against the **same logical snapshot**, enabling deterministic caching and reproducible results across time.
+
+## Example Usage
+
+### Using the Client SDK
+
+```ts
+import { EnsRainbowApiClient } from '@ensnode/ensrainbow-sdk';
+
+// Default: use latest version of any dataset
+const client1 = new EnsRainbowApiClient({
+  baseUrl: 'https://api.ensrainbow.io'
+});
+
+// Pin to subgraph dataset, use latest version
+const client2 = new EnsRainbowApiClient({
+  baseUrl: 'https://api.ensrainbow.io',
+  labelSet: { labelSetId: 'subgraph' }
+});
+
+// Pin to exact snapshot for deterministic results
+const client3 = new EnsRainbowApiClient({
+  baseUrl: 'https://api.ensrainbow.io',
+  labelSet: { 
+    labelSetId: 'subgraph', 
+    labelSetVersion: 0 
+  }
+});
+```
+
+### Version Information Response
+
+```ts
+interface VersionInfo {
+  status: 'success';
+  version: string;
+  dbSchemaVersion: number;
+  labelSet: EnsRainbowServerLabelSet;
+}
+```
+
+## Related Documentation
+
+- **[Client SDK](/ensrainbow/usage/client-sdk/)** - How to use these interfaces in practice
+- **[API Reference](/ensrainbow/usage/api/)** - HTTP API endpoints that return these types
+- **[Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning)** - Understanding the versioning concepts 
