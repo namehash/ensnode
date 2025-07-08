@@ -74,7 +74,7 @@ export class ENSRainbowServer {
     try {
       labelHashBytes = labelHashToBytes(labelHash);
     } catch (error) {
-      const defaultErrorMsg = "Invalid labelHash - must be a valid hex string";
+      const defaultErrorMsg = "Invalid labelhash - must be a valid hex string";
       return {
         status: StatusCode.Error,
         error: getErrorMessage(error) ?? defaultErrorMsg,

@@ -9,7 +9,7 @@ keywords: [ensrainbow, versioning, label sets, deterministic]
 
 ## Why Label Sets & Versions?
 
-A **label set** is analogous to a _dataset snapshot_. Every time the upstream data (e.g. an on-chain subgraph export) changes, we mint a new **LabelSetVersion** so that:
+A **label set** is analogous to a _dataset snapshot_. Every time the upstream data (e.g. an on-chain subgraph export) changes, we mint a new **label set version** so that:
 
 ### 1. Deterministic Results
 Clients that pin _version `N`_ are guaranteed to get the _exact same_ heal response today, tomorrow, and two years from now.
@@ -21,7 +21,7 @@ The server can ingest and start serving a newer version (`N+1`) _in parallel_ wi
 Researchers can spin up an ENSRainbow instance at any past version to reproduce historical state.
 
 ### 4. Multiple Sources
-Distinct `labelSetId`s (e.g. `subgraph`, `discovery-a`) allow side-by-side datasets with different coverage or curation strategies.
+Distinct `labelSetId` values (e.g. `subgraph`, `discovery-a`) allow side-by-side datasets with different coverage or curation strategies.
 
 In short, **versions are the contract** that keeps **client caches**, **API responses**, and **database state** in sync across time.
 

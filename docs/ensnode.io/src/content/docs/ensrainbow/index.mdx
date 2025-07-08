@@ -25,7 +25,7 @@ Key aspects of ENSRainbow include:
 *   **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable names.
 *   **Sidecar to ENSNode:** It integrates with ENSNode to provide comprehensive name data.
 *   **Improved Coverage:** Aims for a high percentage of name healing, far exceeding previous capabilities.
-*   **Extensible and Decentralized Data Management:** Uses a label set id and label set version system for enabling any number of different label sets (collections of rainbow records) to support incremental updates across time.
+*   **Extensible and Decentralized Data Management:** Uses a label set ID and label set version system for enabling any number of different label sets (collections of rainbow records) to support incremental updates across time.
 
 ## Documentation Structure
 
@@ -71,23 +71,26 @@ Contributing to the project and running ENSRainbow locally for development.
 
 Ready to try ENSRainbow? Here are the fastest ways to get started:
 
-### Try the API
+### Try the Public API
 ```bash
+# Heal a labelhash (returns "vitalik")
 curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 ### Use the TypeScript SDK
 ```bash
+# Install the SDK
 pnpm add @ensnode/ensrainbow-sdk
 ```
 
 ### Deploy with Docker
 ```bash
+# Run with test data (starts quickly)
 docker run --rm -p 3223:3223 \
-  -e LABEL_SET_ID=subgraph \
-  -e LABEL_SET_VERSION=0 \
   -e DB_SCHEMA_VERSION=3 \
-  ensnode/ensrainbow:latest
+  -e LABEL_SET_ID=ens-test-env \
+  -e LABEL_SET_VERSION=0 \
+  ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
 
 Choose your path above and dive into the relevant documentation section!

@@ -22,7 +22,7 @@ Pin `labelSetVersion` in your client if you need **deterministic results** acros
 ## Health Check
 
 ```bash
-curl http://localhost:3223/health
+curl https://api.ensrainbow.io/health
 ```
 
 Response: `{"status":"ok"}`
@@ -32,13 +32,13 @@ Response: `{"status":"ok"}`
 ### Basic Usage
 
 ```bash
-curl http://localhost:3223/v1/heal/0x[labelHash]
+curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
 ```
 
 Example:
 
 ```bash
-curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 Response:
@@ -55,13 +55,13 @@ Response:
 You can optionally specify `label_set_id` and `label_set_version` query parameters for additional validation:
 
 ```bash
-curl "http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc?label_set_id=subgraph&label_set_version=0"
+curl "https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc?label_set_id=subgraph&label_set_version=0"
 ```
 
 #### Query Parameters
 
-- **`label_set_id`** (optional): Validates that the request matches the database label set id. Must be provided together with `label_set_version`.
-- **`label_set_version`** (optional): Specifies the highest label set version of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, only labels from label sets with versions less than or equal to this value will be returned.
+- **`label_set_id`** (optional): Validates that the request matches the database label set ID. Must be provided together with `label_set_version`.
+- **`label_set_version`** (optional): Specifies the highest label set version of label set ID to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, only labels from label sets with versions less than or equal to this value will be returned.
 
 Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
 
@@ -71,12 +71,12 @@ Note on returned labels: The service returns labels exactly as they appear in th
 
 #### Error Responses
 
-- `400 Bad Request`: When the labelHash parameter is missing or invalid, or when query parameters are incorrectly specified
+- `400 Bad Request`: When the labelhash parameter is missing or invalid, or when query parameters are incorrectly specified
 
   ```json
   {
     "status": "error",
-    "error": "Invalid labelHash - must be a valid hex string",
+    "error": "Invalid labelhash - must be a valid hex string",
     "errorCode": 400
   }
   ```
@@ -91,7 +91,7 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
-- `404 Not Found`: When no label is found for the given labelHash
+- `404 Not Found`: When no label is found for the given labelhash
 
   ```json
   {
@@ -110,10 +110,14 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
+:::tip[Having trouble with API errors?]
+Check the [Troubleshooting guide](/ensrainbow/usage/troubleshooting/) for solutions to common issues.
+:::
+
 ## Get Count of Healable Labels
 
 ```bash
-curl http://localhost:3223/v1/labels/count
+curl https://api.ensrainbow.io/v1/labels/count
 ```
 
 Success Response:
@@ -139,7 +143,7 @@ Success Response:
 ## Get Version Information
 
 ```bash
-curl http://localhost:3223/v1/version
+curl https://api.ensrainbow.io/v1/version
 ```
 
 Success Response:
@@ -160,5 +164,5 @@ The response contains:
 - `version`: The current version of ENSRainbow
 - `dbSchemaVersion`: The current schema version of the database
 - `labelSet`: The label set of the loaded database
-  - `labelSetId`: The label set id of the loaded database
+  - `labelSetId`: The label set ID of the loaded database
   - `highestLabelSetVersion`: The highest label set version available in the database

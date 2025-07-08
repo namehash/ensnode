@@ -29,8 +29,8 @@ docker run -d --name ensrainbow \
 
 The service will be available at `http://localhost:3223`.
 
-:::note[Image Size]
-The ENSRainbow storage needed for a set of rainbow tables for healing unknown labels is from 1 MB to dozens GB depending on the label set ID and label set version.
+:::note[Storage Requirements]
+The ENSRainbow storage needed for a set of rainbow tables for healing unknown labels ranges from 1 MB to dozens of GB depending on the label set ID and label set version. See [System Requirements](/ensrainbow/contributing/system-requirements/) for details.
 ## Production Setup
 
 For full ENS Subgraph backward compatibility use the `subgraph` label set ID and 0 as the label set version (for maximized label healing use the `searchlight` label set ID and the latest label set version):
@@ -51,18 +51,17 @@ docker run -d --name ensrainbow_production \
 
 ## Required Environment Variables
 
-:::tip[Looking for detailed variable descriptions?]
-The complete, authoritative list of environment variables now lives on the
-[Configuration](/ensrainbow/usage/configuration/) page.
-Below is a concise reminder of the **three** variables you must set when running
-the Docker image.
+:::tip[Complete Environment Variable Reference]
+See the [Configuration](/ensrainbow/usage/configuration/) page for detailed descriptions of all environment variables and configuration options.
 :::
 
-| Variable | Purpose |
-|----------|---------|
-| `DB_SCHEMA_VERSION` | Selects the on-disk database schema |
-| `LABEL_SET_ID` | Chooses which label-set to download (e.g. `subgraph`) |
-| `LABEL_SET_VERSION` | Highest version of that label-set to include |
+The Docker deployment requires these three variables for data management:
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `DB_SCHEMA_VERSION` | Selects the on-disk database schema version | `3` |
+| `LABEL_SET_ID` | Chooses which label-set to download | `subgraph`, `ens-test-env` |
+| `LABEL_SET_VERSION` | Highest version of that label-set to include | `0` |
 
 ## Persistent Storage
 
@@ -160,8 +159,16 @@ volumes:
 The port mapping (`-p 3223:3223` or `ports` in docker-compose) is only needed if you want to access ENSRainbow from the host machine. If you're only accessing it from other containers in the same network, you can omit the port mapping.
 :::
 
+## Next Steps
+
 <LinkCard
-  title="Configuration"
-  description="View the ENSRainbow configuration options"
+  title="Configuration Reference"
+  description="Complete environment variable documentation and configuration options"
   href="/ensrainbow/usage/configuration/"
+/>
+
+<LinkCard
+  title="Troubleshooting"
+  description="Common Docker deployment issues and solutions"
+  href="/ensrainbow/usage/troubleshooting/"
 />

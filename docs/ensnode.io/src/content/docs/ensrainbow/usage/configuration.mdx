@@ -27,19 +27,19 @@ The following environment variables are required when running ENSRainbow with Do
   - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of downloaded database files that are prebuilt for startup-time optimizations.
   - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
-- **`LABEL_SET_ID`**: The identifier for a **Label Set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
+- **`LABEL_SET_ID`**: The identifier for a **label set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
   - **Goal**: To enable the extensible definition of new label sets (e.g., subgraph vs. production vs. test).
   - **Configuration**: Choose the label set ID that matches your needs: 
-    - `subgraph` - Main production dataset from The Graph's ENS subgraph
+    - `subgraph` - Main production dataset from The Graph's ENS Subgraph
     - `searchlight` - Extended dataset with additional label discoveries
     - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
     - `ens-test-env` - Small test dataset for development and testing. It is perfectly aligned with the set of labels expected by the [ens-test-env](https://github.com/ensdomains/ens-test-env).
 
-- **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
+- **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **label set**.
   - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
   - **Configuration**: Use the highest available version number for the most up-to-date data. Versions are sequential and incremental:
-    - `0` - The initial/base version of the **Label Set**.
-    - `1`, `2`, etc. - Incremental updates to the **Label Set**.
+    - `0` - The initial/base version of the **label set**.
+    - `1`, `2`, etc. - Incremental updates to the **label set**.
 
 ### Example Combinations
 
@@ -47,7 +47,7 @@ The following environment variables are required when running ENSRainbow with Do
 # Latest production data
 DB_SCHEMA_VERSION=3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 
-# The the ens-test-env data
+# The ens-test-env data
 DB_SCHEMA_VERSION=3 LABEL_SET_ID=ens-test-env LABEL_SET_VERSION=0
 
 # Extended discovery data

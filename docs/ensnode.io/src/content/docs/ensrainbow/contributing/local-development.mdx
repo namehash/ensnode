@@ -18,7 +18,7 @@ import { LinkCard } from "@astrojs/starlight/components";
 ENSRainbow stores label-hash-to-label pairs in compressed snapshots with the file extension `.ensrainbow`.
 Use the helper script located in `apps/ensrainbow/scripts/`:
 
-```bash
+```bash title="Download .ensrainbow files"
 cd apps/ensrainbow
 
 # Syntax: download-ensrainbow-files.sh <LABEL_SET_ID> <LABEL_SET_VERSION>
@@ -34,13 +34,13 @@ The script will:
 
 If you have a gzipped rainbow table (`ens_names.sql.gz`) you can convert it:
 
-```bash
+```bash title="Convert legacy SQL data"
 pnpm run convert --input-file path/to/ens_names.sql.gz --output-file subgraph-0.ensrainbow
 ```
 
 ## 3  Ingest into LevelDB
 
-```bash
+```bash title="Ingest data into LevelDB"
 pnpm run ingest-ensrainbow \
   --input-file subgraph-0.ensrainbow \
   --data-dir ./my-subgraph-data
@@ -53,7 +53,7 @@ Important rules:
 
 ## 4  Start the API server
 
-```bash
+```bash title="Start the API server"
 pnpm run serve --data-dir ./my-subgraph-data --port 3223
 ```
 Visit `http://localhost:3223/health` → `{ "status": "ok" }`.

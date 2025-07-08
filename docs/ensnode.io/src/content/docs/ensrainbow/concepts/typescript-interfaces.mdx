@@ -17,7 +17,7 @@ Returned by `GET /version` and stored in database metadata:
 
 ```ts
 interface EnsRainbowServerLabelSet {
-  labelSetId: string;          // active label set id (e.g. "subgraph")
+  labelSetId: string;          // active label set ID (e.g. "subgraph")
   highestLabelSetVersion: number; // newest label set version the server has ingested
 }
 ```
@@ -36,7 +36,7 @@ Provided when constructing `new EnsRainbowApiClient({ labelSet: … })` to pin c
 ```ts
 interface EnsRainbowClientLabelSet {
   labelSetId?: string;    // optional – require a particular label set
-  labelSetVersion?: number; // optional – maximum label setversion accepted
+  labelSetVersion?: number; // optional – maximum label set version accepted
 }
 ```
 
