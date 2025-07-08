@@ -1,5 +1,17 @@
 # ensindexer
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.31.0
+  - @ensnode/ensrainbow-sdk@0.31.0
+  - @ensnode/ponder-metadata@0.31.0
+  - @ensnode/ensnode-schema@0.31.0
+  - @ensnode/ponder-subgraph@0.31.0
+  - @ensnode/ensnode-sdk@0.31.0
+
 ## 0.30.0
 
 ### Minor Changes
