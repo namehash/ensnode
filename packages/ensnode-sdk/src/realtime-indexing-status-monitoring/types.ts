@@ -13,25 +13,6 @@ export namespace RealtimeIndexingStatusMonitoring {
    */
   export type TimeSpanInSeconds = number;
 
-  /**
-   * Raw Request object to be parsed.
-   */
-  export interface RawRequest {
-    maxAllowedIndexingLag: string | undefined;
-  }
-
-  /**
-   * Parsed counterpart for {@link RawRequest}.
-   */
-  export interface ParsedRequest {
-    /**
-     * Describes the acceptable lag between
-     * the date of the last known block for a chain and
-     * the date of the last indexed block on that chain.
-     */
-    maxAllowedIndexingLag: TimeSpanInSeconds;
-  }
-
   export interface RealtimeIndexingStatus {
     /**
      * Describes the current lag between
@@ -51,7 +32,14 @@ export namespace RealtimeIndexingStatusMonitoring {
   }
 
   /**
-   * Response object
+   * Request object.
+   */
+  export interface Request {
+    maxAllowedIndexingLag: string | undefined;
+  }
+
+  /**
+   * Response object.
    */
   export interface Response extends RealtimeIndexingStatus {
     /**

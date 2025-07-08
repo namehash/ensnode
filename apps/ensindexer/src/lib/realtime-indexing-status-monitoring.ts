@@ -19,11 +19,28 @@ export namespace RealtimeIndexingStatusMonitoringApp {
 
   /**
    * Default values to be applied if optional values
-   * were not provided with the {@link RealtimeIndexingStatusMonitoring.RawRequest} object.
+   * were not provided with the {@link RealtimeIndexingStatusMonitoringApp.RawRequest} object.
    */
   export interface RequestDefaults {
     /** Describes the acceptable range in seconds between
      * the last known block on a chain and the last indexed block on that chain.
+     */
+    maxAllowedIndexingLag: RealtimeIndexingStatusMonitoring.TimeSpanInSeconds;
+  }
+
+  /**
+   * Request object to be parsed.
+   */
+  export type RawRequest = RealtimeIndexingStatusMonitoring.Request;
+
+  /**
+   * Parsed counterpart for {@link RawRequest}.
+   */
+  export interface ParsedRequest {
+    /**
+     * Describes the acceptable lag between
+     * the date of the last known block for a chain and
+     * the date of the last indexed block on that chain.
      */
     maxAllowedIndexingLag: RealtimeIndexingStatusMonitoring.TimeSpanInSeconds;
   }
@@ -69,16 +86,16 @@ export function getOldestLastIndexedBlockTimestamp(
 }
 
 /**
- * Builds the RealtimeIndexingStatusMonitoring.ParsedRequest object.
+ * Builds the RealtimeIndexingStatusMonitoringApp.ParsedRequest object.
  *
  * This function then validates the raw request parameters against
  * the zod schema ensuring that the request object meets
  * all type checks and invariants.
  */
 export function buildRealtimeIndexingStatusMonitoringRequest(
-  rawRequest: RealtimeIndexingStatusMonitoring.RawRequest,
+  rawRequest: RealtimeIndexingStatusMonitoringApp.RawRequest,
   requestDefaults: RealtimeIndexingStatusMonitoringApp.RequestDefaults,
-): RealtimeIndexingStatusMonitoring.ParsedRequest {
+): RealtimeIndexingStatusMonitoringApp.ParsedRequest {
   const schema = createRealtimeIndexingStatusMonitoringRequestSchema(requestDefaults);
   const parsed = schema.safeParse(rawRequest);
 
@@ -133,7 +150,7 @@ export function realtimeIndexingStatusMonitoringApp(
     try {
       const rawRequest = {
         maxAllowedIndexingLag: ctx.req.query("maxAllowedIndexingLag"),
-      } satisfies RealtimeIndexingStatusMonitoring.RawRequest;
+      } satisfies RealtimeIndexingStatusMonitoringApp.RawRequest;
 
       const requestDefaults = {
         maxAllowedIndexingLag: DEFAULT_REALTIME_INDEXING_MAX_LAG,

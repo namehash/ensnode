@@ -18,7 +18,7 @@ describe("buildRealtimeIndexingStatusMonitoringRequest", () => {
   it("can skip default values for the provided raw request properties", () => {
     const rawRequest = {
       maxAllowedIndexingLag: "98765",
-    } satisfies RealtimeIndexingStatusMonitoring.RawRequest;
+    } satisfies RealtimeIndexingStatusMonitoringApp.RawRequest;
 
     const requestDefaults = {
       maxAllowedIndexingLag: 12345,
@@ -28,13 +28,13 @@ describe("buildRealtimeIndexingStatusMonitoringRequest", () => {
 
     expect(parsedRequest).toStrictEqual({
       maxAllowedIndexingLag: 98765,
-    } satisfies RealtimeIndexingStatusMonitoring.ParsedRequest);
+    } satisfies RealtimeIndexingStatusMonitoringApp.ParsedRequest);
   });
 
   it("can apply default values for the omitted raw request properties", () => {
     const rawRequest = {
       maxAllowedIndexingLag: undefined,
-    } satisfies RealtimeIndexingStatusMonitoring.RawRequest;
+    } satisfies RealtimeIndexingStatusMonitoringApp.RawRequest;
 
     const requestDefaults = {
       maxAllowedIndexingLag: 12345,
@@ -44,7 +44,7 @@ describe("buildRealtimeIndexingStatusMonitoringRequest", () => {
 
     expect(parsedRequest).toStrictEqual({
       maxAllowedIndexingLag: 12345,
-    } satisfies RealtimeIndexingStatusMonitoring.ParsedRequest);
+    } satisfies RealtimeIndexingStatusMonitoringApp.ParsedRequest);
   });
 });
 
