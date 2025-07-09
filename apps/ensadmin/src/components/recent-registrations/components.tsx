@@ -1,8 +1,8 @@
 "use client";
 
+import { Duration, FormattedDate, RelativeTime } from "@/components/datetime-utils";
 import { useENSRootDatasourceChainId, useIndexingStatusQuery } from "@/components/ensnode";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
-import { Duration, FormattedDate, RelativeTime } from "@/components/datetime-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,

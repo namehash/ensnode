@@ -1,6 +1,6 @@
 import { Datasource, type ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
 import { type Chain } from "viem";
-import {anvil} from "viem/chains";
+import { anvil } from "viem/chains";
 
 /**
  * Get a chain object by ID within the context of a specific namespace.
@@ -24,4 +24,4 @@ export const getChainById = (namespaceId: ENSNamespaceId, chainId: number): Chai
 };
 
 // ens-test-env runs on a local Anvil chain with id 1337
-export const ensTestEnv = { ...anvil,  id: 1337 } as Chain;
+export const ensTestEnv = { ...anvil, id: 1337 } as Chain;

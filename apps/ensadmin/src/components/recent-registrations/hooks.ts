@@ -1,7 +1,4 @@
-import {
-  UnixTimestampInSeconds,
-  unixTimestampToDate,
-} from "@/components/datetime-utils";
+import { UnixTimestampInSeconds, unixTimestampToDate } from "@/components/datetime-utils";
 import { ensAdminVersion } from "@/lib/env";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";

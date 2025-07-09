@@ -1,5 +1,6 @@
 import { BaseTestnetIcon } from "@/components/icons/BaseTestnetIcon";
 import { LineaTestnetIcon } from "@/components/icons/LineaTestnetIcon";
+import { ensTestEnv } from "@/lib/chains";
 import {
   base,
   baseSepolia,
@@ -16,7 +17,6 @@ import { EthereumLocalIcon } from "../icons/EthereumLocalIcon";
 import { EthereumTestnetIcon } from "../icons/EthereumTestnetIcon";
 import { LineaIcon } from "../icons/LineaIcon";
 import { OptimismIcon } from "../icons/OptimismIcon";
-import {ensTestEnv} from "@/lib/chains";
 
 export interface ChainIconProps {
   chainId: number;

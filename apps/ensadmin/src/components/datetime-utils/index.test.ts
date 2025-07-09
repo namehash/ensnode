@@ -1,4 +1,4 @@
-import {unixTimestampToDate} from "@/components/datetime-utils/index";
+import { unixTimestampToDate } from "@/components/datetime-utils/index";
 import { describe, expect, it } from "vitest";
 
 describe("unixTimestampToDate", () => {

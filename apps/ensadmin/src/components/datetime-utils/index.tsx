@@ -1,4 +1,4 @@
-import {formatDistanceStrict, formatDistance, intlFormat} from "date-fns";
+import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
 
@@ -42,7 +42,7 @@ export function formatRelativeTime(
   }
 
   if (conciseFormatting) {
-    return formatDistanceStrict(now, date, {addSuffix: true});
+    return formatDistanceStrict(now, date, { addSuffix: true });
   }
 
   return formatDistance(now, date, {

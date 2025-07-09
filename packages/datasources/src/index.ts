@@ -1,7 +1,5 @@
+import { optimism } from "viem/chains";
 import { DatasourceNames, ENSNamespace, ENSNamespaceId } from "./lib/types";
-import {
-  optimism,
-} from "viem/chains";
 
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
@@ -54,7 +52,6 @@ export const getDatasource = <
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
   getDatasource(namespaceId, DatasourceNames.ENSRoot).chain.id;
 
-
 /**
  * Mapping of chain id to chain's default block explorer URL.
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
@@ -69,7 +66,6 @@ const chainBlockExplorers = new Map<number, string>([
   [sepolia[DatasourceNames.Basenames].chain.id, "https://sepolia.basescan.org"],
   [sepolia[DatasourceNames.Lineanames].chain.id, "https://sepolia.lineascan.build"],
 ]);
-
 
 /**
  * Gets the base block explorer URL for a given chainId

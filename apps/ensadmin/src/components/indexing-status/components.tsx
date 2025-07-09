@@ -1,10 +1,10 @@
 "use client";
 
+import { RelativeTime, unixTimestampToDate } from "@/components/datetime-utils";
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
-import { RelativeTime, unixTimestampToDate } from "@/components/datetime-utils";
 import { ChainIcon } from "@/components/ui/ChainIcon";
 import { ChainName } from "@/components/ui/ChainName";
 import { Badge } from "@/components/ui/badge";
