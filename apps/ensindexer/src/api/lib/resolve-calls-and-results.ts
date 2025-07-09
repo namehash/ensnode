@@ -102,6 +102,8 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
  *
  * NOTE: viem#readContract implements CCIP-Read, so we get that behavior for free
  * NOTE: viem#multicall _doesn't_ implement CCIP-Read so maybe this can be optimized further
+ *
+ * NOTE: CCIP-Read Gateways can fail, should likely implement retries...
  */
 export async function executeResolveCalls<SELECTION extends ResolverRecordsSelection>({
   name,
@@ -124,17 +126,17 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
         try {
           // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
           if (requiresWildcardSupport) {
+            const encodedName = toHex(packetToBytes(name)); // DNS-encode `name` for resolve()
+            const encodedMethod = encodeFunctionData({ abi: RESOLVER_ABI, ...call });
             const value = await withSpanAsync(
               tracer,
-              `ENSIP-10 resolve(${name}, ${call.functionName})`,
+              `ENSIP-10 resolve(${call.functionName}, ${call.args})`,
+              { encodedName, encodedMethod },
               () =>
                 publicClient.readContract({
                   ...ResolverContract,
                   functionName: "resolve",
-                  args: [
-                    toHex(packetToBytes(name)), // DNS-encode `name` for resolve()
-                    encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
-                  ],
+                  args: [encodedName, encodedMethod],
                 }),
             );
 
@@ -153,8 +155,8 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
             return { call, result: results[0], reason: `resolve(${call.functionName})` };
           }
 
-          return withSpanAsync(tracer, `${call.functionName}()`, async () => {
-            // if not extended resolver, resolve directly
+          // if not extended resolver, resolve directly
+          return withSpanAsync(tracer, `${call.functionName}(${call.args})`, {}, async () => {
             // NOTE: discrimminate against the `functionName` type, otherwise typescript complains about
             // `call` not matching the expected types of the `readContract` arguments. also helpfully
             // infers the return type of `readContract` matches the result type of each `call`
@@ -182,6 +184,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
         } catch (error) {
           // in general, reverts are expected behavior
           if (error instanceof ContractFunctionExecutionError) {
+            span.recordException(error);
             return { call, result: null, reason: error.shortMessage };
           }
 

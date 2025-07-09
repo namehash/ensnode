@@ -1,11 +1,12 @@
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, reverseName } from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, metrics, trace } from "@opentelemetry/api";
-import { Address, Chain, isAddress, isAddressEqual } from "viem";
+import { Address, isAddress, isAddressEqual } from "viem";
 
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { ResolverRecordsResponse } from "@/api/lib/resolver-records-response";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
-import { ATTR_CODE_FILE_PATH, ATTR_CODE_FUNCTION_NAME } from "@opentelemetry/semantic-conventions";
+import { withActiveSpanAsync } from "@/lib/auto-span";
+import { ATTR_CODE_FUNCTION_NAME } from "@opentelemetry/semantic-conventions";
 
 const REVERSE_SELECTION = {
   name: true,
@@ -27,15 +28,15 @@ export async function resolveReverse(
   chainId: number = 1,
   options: { accelerate?: boolean } = { accelerate: true },
 ): Promise<ResolverRecordsResponse<typeof REVERSE_SELECTION> | null> {
-  return tracer.startActiveSpan(
-    "resolveReverse",
-    { attributes: { address, chainId, "options.accelerate": options.accelerate } },
+  return withActiveSpanAsync(
+    tracer,
+    `resolveReverse(${address}, chainId: ${chainId})`,
+    { address, chainId, "options.accelerate": options.accelerate || true },
     async (span) => {
-      span.setAttribute(ATTR_CODE_FUNCTION_NAME, "resolveReverse");
-      span.setAttribute(ATTR_CODE_FILE_PATH, __filename);
-
       // Steps 1-7 — Resolve coinType-specific name and avatar records
       let coinType = evmChainIdToCoinType(chainId);
+
+      span.addEvent(`Resolving records for coinType "${coinType}"...`);
       let records = await resolveForward(
         reverseName(address, coinType),
         REVERSE_SELECTION,
@@ -47,10 +48,10 @@ export async function resolveReverse(
         // Step 9 — Resolve default records if necessary
         // TODO: perhaps this could be optimistically fetched in parallel to above, ensure that coinType
         // is set correctly for whichever records ends up being used
-        console.log(
-          ` ↳ ⏮️ No Primary Name for coinType "${coinType}", continuing with default coinType...`,
-        );
         coinType = DEFAULT_EVM_COIN_TYPE;
+        span.addEvent(
+          `No Primary Name for coinType "${coinType}", Resolving records for default coinType "${coinType}"`,
+        );
         records = await resolveForward(reverseName(address, coinType), REVERSE_SELECTION, options);
       }
 
@@ -63,7 +64,10 @@ export async function resolveReverse(
         return null;
       }
 
+      span.setAttribute("resolvedName", records.name);
+
       // Step 11 — Resolve address record for the given coinType
+      span.addEvent(`Resolving Address for name "${records.name}" and coinType "${coinType}"...`);
       const { addresses } = await resolveForward(records.name, { addresses: [coinType] }, options);
       const resolvedAddress = addresses[coinType];
 
@@ -98,8 +102,6 @@ export async function resolveReverse(
 
       // finally, the records are valid for this address
       span.setAttribute("records", JSON.stringify(records));
-      span.setStatus({ code: SpanStatusCode.OK });
-      span.end();
       return records;
     },
   );

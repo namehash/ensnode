@@ -17,7 +17,7 @@ export async function withActiveSpanAsync<Fn extends (span: Span) => Promise<any
     // some default attributes
     span.setAttribute(ATTR_CODE_FUNCTION_NAME, "resolveForward");
 
-    // all relevant function arguments
+    // add provded args to span attributes
     for (const [key, value] of Object.entries(args)) {
       span.setAttribute(key, value);
     }
@@ -44,9 +44,15 @@ export async function withActiveSpanAsync<Fn extends (span: Span) => Promise<any
 export function withSpan<Fn extends (span: Span) => any>(
   tracer: Tracer,
   name: string,
+  args: Record<string, AttributeValue>,
   fn: Fn,
 ): ReturnType<Fn> {
   const span = tracer.startSpan(name);
+
+  // add provded args to span attributes
+  for (const [key, value] of Object.entries(args)) {
+    span.setAttribute(key, value);
+  }
 
   // automatically handle the obvious cases, including auto-ending the span
   try {
@@ -69,9 +75,15 @@ export function withSpan<Fn extends (span: Span) => any>(
 export async function withSpanAsync<Fn extends (span: Span) => Promise<any>>(
   tracer: Tracer,
   name: string,
+  args: Record<string, AttributeValue>,
   fn: Fn,
 ): Promise<ReturnType<Fn>> {
   const span = tracer.startSpan(name);
+
+  // add provded args to span attributes
+  for (const [key, value] of Object.entries(args)) {
+    span.setAttribute(key, value);
+  }
 
   // automatically handle the obvious cases, including auto-ending the span
   try {

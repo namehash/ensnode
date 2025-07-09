@@ -33,6 +33,11 @@ const tracer = trace.getTracer("forward-resolution");
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
+// NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
+// first trace generated here would be unusually slow)
+// TODO: make sure this is called pretty early in the app lifecycle
+normalize("example.eth");
+
 /**
  * Implements Forward Resolution of an ENS name, for a selection of records, on a specified chainId.
  *
@@ -85,7 +90,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       //
       // but honestly the state drift is at max 1 block on L1 and a block or two on an L2, it's pretty negligible,
       // so maybe we just ignore this issue entirely
-      const normalizedName = withSpan(tracer, "normalization", () => normalize(name));
+      const normalizedName = withSpan(tracer, "normalization", {}, () => normalize(name));
       if (name !== normalizedName) {
         throw new Error(`Name "${name}" must be normalized ("${normalizedName}").`);
       }
@@ -93,7 +98,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       // TODO: more name normalization logic (return values of `name` record for example)
       // TODO: need to handle encoded label hashes in name, yeah?
 
-      const node: Node = withSpan(tracer, "namehash", () => namehash(name));
+      const node: Node = withSpan(tracer, "namehash", {}, () => namehash(name));
       span.addEvent("Node Computed", { node });
 
       //////////////////////////////////////////////////
@@ -101,7 +106,9 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       //////////////////////////////////////////////////
 
       // construct the set of resolve() calls indicated by selection
-      const calls = withSpan(tracer, "makeResolveCalls", () => makeResolveCalls(node, selection));
+      const calls = withSpan(tracer, "makeResolveCalls", {}, () =>
+        makeResolveCalls(node, selection),
+      );
 
       // empty selection? invalid input, nothing to do
       if (calls.length === 0) {
@@ -130,6 +137,9 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
         return makeEmptyResolverRecordsResponse(selection);
       }
 
+      // set on the span for easy reference
+      span.setAttribute("activeResolver", activeResolver);
+      span.setAttribute("requiresWildcardSupport", requiresWildcardSupport);
       span.addEvent("Active Resolver Identified", {
         activeName,
         activeResolver,
@@ -177,7 +187,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
           const resolverId = makeResolverId(chainId, activeResolver, node);
 
-          const resolver = await withSpanAsync(tracer, "resolver.findFirst", async () =>
+          const resolver = await withSpanAsync(tracer, "resolver.findFirst", {}, async () =>
             db.query.resolver.findFirst({
               where: (resolver, { eq }) => eq(resolver.id, resolverId),
               columns: { name: true },
@@ -219,11 +229,8 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       const publicClient = createPublicClient({ transport: http(rpcConfig.url) });
 
       // requireResolver() — validate behavior
-      const isExtendedResolver = await withSpanAsync(tracer, "supportsENSIP10Interface", () =>
-        supportsENSIP10Interface({
-          address: activeResolver,
-          publicClient,
-        }),
+      const isExtendedResolver = await withSpanAsync(tracer, "supportsENSIP10Interface", {}, () =>
+        supportsENSIP10Interface({ address: activeResolver, publicClient }),
       );
 
       if (!isExtendedResolver && requiresWildcardSupport) {
@@ -242,6 +249,8 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
         calls,
         publicClient,
       });
+
+      span.setAttribute("rawResults", JSON.stringify(replaceBigInts(rawResults, String)));
 
       // interpret the results beyond simple return values
       const results = interpretRawCallsAndResults(rawResults);

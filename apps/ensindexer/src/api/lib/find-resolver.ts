@@ -6,7 +6,7 @@ import { type Address, isAddressEqual, namehash, toHex, zeroAddress } from "viem
 import { packetToBytes } from "viem/ens";
 
 import config from "@/config";
-import { withActiveSpanAsync, withSpan, withSpanAsync } from "@/lib/auto-span";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import { parseResolverId } from "@/lib/ids";
 
 type FindResolverResult =
@@ -148,6 +148,7 @@ async function findResolverWithIndex(chainId: number, name: Name): Promise<FindR
     const domainResolverRelations = await withSpanAsync(
       tracer,
       "ext_domainResolverRelation.findMany",
+      {},
       () =>
         db.query.ext_domainResolverRelation.findMany({
           where: (drr, { inArray, and, eq }) =>
