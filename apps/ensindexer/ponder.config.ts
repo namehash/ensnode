@@ -3,7 +3,6 @@ import type { ENSIndexerConfig } from "@/config/types";
 import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
-import { replaceBigInts } from "ponder";
 
 ////////
 // Log ENSIndexerConfig for debugging.
@@ -16,14 +15,16 @@ console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
 ////////
 
 // filter all plugins by those activated in the config
-const activePlugins = ALL_PLUGINS.filter((plugin) => config.plugins.includes(plugin.name));
+const activePlugins = ALL_PLUGINS.filter((plugin) =>
+	config.plugins.includes(plugin.name),
+);
 
 // merge the active plugins' Ponder configs and type as AllPluginsMergedConfig representing the merged
 // types of each plugin's `config`, so ponder's typechecking of the indexing handlers and their event
 // arguments is correct, regardless of which plugins are actually active at runtime.
 const ponderConfig = activePlugins.reduce(
-  (memo, plugin) => mergePonderConfigs(memo, plugin.createPonderConfig(config)),
-  {},
+	(memo, plugin) => mergePonderConfigs(memo, plugin.createPonderConfig(config)),
+	{},
 ) as AllPluginsMergedConfig;
 
 // NOTE: here we inject additional values (ones that change the behavior of the indexing logic) into
@@ -34,9 +35,12 @@ const ponderConfig = activePlugins.reduce(
 //
 // https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
 (ponderConfig as any).indexingBehaviorDependencies = {
-  healReverseAddresses: config.healReverseAddresses,
-  indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
-} satisfies Pick<ENSIndexerConfig, "healReverseAddresses" | "indexAdditionalResolverRecords">;
+	healReverseAddresses: config.healReverseAddresses,
+	indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
+} satisfies Pick<
+	ENSIndexerConfig,
+	"healReverseAddresses" | "indexAdditionalResolverRecords"
+>;
 
 ////////
 // Set indexing order strategy

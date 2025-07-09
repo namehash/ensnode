@@ -170,7 +170,7 @@ const ENSIndexerConfigSchema = z
     plugins: PluginsSchema,
     healReverseAddresses: HealReverseAddressesSchema,
     indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
-    experimental_resolution: ExperimentalResolutionSchema,
+    experimentalResolution: ExperimentalResolutionSchema,
     port: PortSchema,
     ensRainbowEndpointUrl: EnsRainbowEndpointUrlSchema,
     rpcConfigs: RpcConfigsSchema,
