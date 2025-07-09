@@ -10,6 +10,7 @@ import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
 import { ENSIndexerConfig } from "@/config/types";
 import { Blockrange } from "@/lib/types";
+import { fromUnixTime } from "date-fns";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -140,6 +141,22 @@ export function createPonderStatusFetcher(
 
     return PonderDataSchema.Status.parse(responseData) satisfies PonderStatus;
   };
+}
+
+/**
+ * Get date of the oldest last indexed block across chains
+ * included in Ponder Status object.
+ *
+ * @param ponderStatus
+ * @returns
+ */
+export function getOldestLastIndexedBlockDate(ponderStatus: PonderStatus): Date {
+  const lastIndexedBlockTimestamps = Object.values(ponderStatus).map(
+    (chainStatus) => chainStatus.block.timestamp,
+  );
+  const oldestLastIndexedBlockTimestamp = Math.min(...lastIndexedBlockTimestamps);
+
+  return fromUnixTime(oldestLastIndexedBlockTimestamp);
 }
 
 /**

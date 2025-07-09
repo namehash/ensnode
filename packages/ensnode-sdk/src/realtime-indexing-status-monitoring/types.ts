@@ -1,18 +1,6 @@
+import { Duration } from "../utils";
+
 export namespace RealtimeIndexingStatusMonitoring {
-  /**
-   * Represents a Unix Timestamp.
-   *
-   * Must be a non-negative integer.
-   */
-  export type UnixTimestamp = number;
-
-  /**
-   * Represents a span of time in seconds.
-   *
-   * Must be a non-negative integer.
-   */
-  export type TimeSpanInSeconds = number;
-
   export interface RealtimeIndexingStatus {
     /**
      * Describes the current lag between
@@ -21,27 +9,30 @@ export namespace RealtimeIndexingStatusMonitoring {
      *
      * Must be a non-negative integer.
      */
-    currentRealtimeIndexingLag: TimeSpanInSeconds;
+    currentRealtimeIndexingLag: Duration;
 
     /**
-     *
-     *
-     * Must be a non-negative integer.
+     * Tells if the requested realtime indexing lag was achieved.
      */
-    oldestLastIndexedBlockTimestamp: UnixTimestamp;
+    hasAchievedRequestedRealtimeIndexingGap: boolean;
+
+    /**
+     * Date of the oldest last indexed block across all chains.
+     */
+    oldestLastIndexedBlockDate: Date;
   }
 
   /**
    * Request object.
    */
   export interface Request {
-    maxAllowedIndexingLag: string | undefined;
+    maxAllowedIndexingLag: Duration;
   }
 
   /**
    * Response object.
    */
-  export interface Response extends RealtimeIndexingStatus {
+  export interface Response {
     /**
      * Describes the acceptable lag between
      * the date of the last known block for a chain and
@@ -49,6 +40,22 @@ export namespace RealtimeIndexingStatusMonitoring {
      *
      * Must be a non-negative integer.
      */
-    maxAllowedIndexingLag: TimeSpanInSeconds;
+    maxAllowedIndexingLag: Duration;
+
+    /**
+     * Describes the current lag between
+     * the date of the last known block for a chain and
+     * the date of the last indexed block on that chain.
+     *
+     * Must be a non-negative integer.
+     */
+    currentRealtimeIndexingLag: Duration;
+
+    /**
+     * Unix timestamp of the oldest last indexed block across all chains.
+     *
+     * Must be a non-negative integer.
+     */
+    oldestLastIndexedBlockTimestamp: number;
   }
 }
