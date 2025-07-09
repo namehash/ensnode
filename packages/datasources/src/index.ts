@@ -24,9 +24,9 @@ const ENSNamespacesById = {
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @returns the ENSNamespace
  */
-export const getENSNamespace = <T extends ENSNamespaceId>(
-  namespaceId: T,
-): (typeof ENSNamespacesById)[T] => ENSNamespacesById[namespaceId];
+export const getENSNamespace = <N extends ENSNamespaceId>(
+  namespaceId: N,
+): (typeof ENSNamespacesById)[N] => ENSNamespacesById[namespaceId];
 
 /**
  * Returns the `datasourceName` Datasource within the specified `namespaceId` namespace.

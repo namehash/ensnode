@@ -3,6 +3,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 import type { MergedTypes } from "@/lib/lib-helpers";
 import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
+import reverseResolversPlugin from "./reverse-resolvers/plugin";
 import subgraphPlugin from "./subgraph/plugin";
 import threednsPlugin from "./threedns/plugin";
 
@@ -11,6 +12,7 @@ export const ALL_PLUGINS = [
   basenamesPlugin,
   lineaNamesPlugin,
   threednsPlugin,
+  reverseResolversPlugin,
 ] as const;
 
 /**

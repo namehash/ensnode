@@ -1,5 +1,33 @@
 # ensindexer
 
+## 0.31.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.31.0
+  - @ensnode/ensrainbow-sdk@0.31.0
+  - @ensnode/ponder-metadata@0.31.0
+  - @ensnode/ensnode-schema@0.31.0
+  - @ensnode/ponder-subgraph@0.31.0
+  - @ensnode/ensnode-sdk@0.31.0
+
+## 0.30.0
+
+### Minor Changes
+
+- [#860](https://github.com/namehash/ensnode/pull/860) [`605b70c`](https://github.com/namehash/ensnode/commit/605b70c640fc2c857b0cf1c9b43c287a452f901e) Thanks [@shrugs](https://github.com/shrugs)! - update ponder to 0.11.25 to fix duplicate event error upon crash recovery
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.30.0
+  - @ensnode/ensrainbow-sdk@0.30.0
+  - @ensnode/ponder-metadata@0.30.0
+  - @ensnode/ensnode-schema@0.30.0
+  - @ensnode/ponder-subgraph@0.30.0
+  - @ensnode/ensnode-sdk@0.30.0
+
 ## 0.29.0
 
 ### Minor Changes

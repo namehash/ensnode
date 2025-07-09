@@ -1,6 +1,7 @@
 import { Address, concat, isAddress, isHash, keccak256, toHex } from "viem";
 
 import { labelhash } from "viem/ens";
+import { addrReverseLabel } from "./reverse-name";
 import type { Label, LabelHash, Node } from "./types";
 
 /**
@@ -10,12 +11,6 @@ import type { Label, LabelHash, Node } from "./types";
  */
 export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
   keccak256(concat([node, labelHash]));
-
-/**
- * Gets the Label used for subnames of "addr.reverse" used for reverse lookups of `address` as per
- * https://docs.ens.domains/resolution/names#reverse-nodes
- */
-const addrReverseLabel = (address: Address): Label => address.slice(2).toLowerCase();
 
 /**
  * Attempt to heal the labelHash of an addr.reverse subname using an address that might be related to the subname.

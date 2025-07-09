@@ -9,6 +9,7 @@ import { EthRegistrarController as root_EthRegistrarController } from "./abis/ro
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 
 /**
  * The Holesky ENSNamespace
@@ -56,6 +57,11 @@ export default {
         abi: root_NameWrapper,
         address: "0xab50971078225D365994dc1Edcb9b7FD72Bb4862",
         startBlock: 815127,
+      },
+      UniversalResolver: {
+        abi: root_UniversalResolver,
+        address: "0xE3f3174Fc2F2B17644cD2dBaC3E47Bc82AE0Cf81",
+        startBlock: 8515717,
       },
     },
   },
