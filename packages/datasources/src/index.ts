@@ -54,20 +54,37 @@ export const getDatasource = <
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
   getDatasource(namespaceId, DatasourceNames.ENSRoot).chain.id;
 
+
+/**
+ * Mapping of chain id to chain's default block explorer URL.
+ * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
+ */
+const chainBlockExplorers = new Map<number, string>([
+  [mainnet[DatasourceNames.ENSRoot].chain.id, "https://etherscan.io"],
+  [mainnet[DatasourceNames.Basenames].chain.id, "https://basescan.org"],
+  [sepolia[DatasourceNames.ENSRoot].chain.id, "https://sepolia.etherscan.io"],
+  [optimism.id, "https://optimistic.etherscan.io"],
+  [mainnet[DatasourceNames.Lineanames].chain.id, "https://lineascan.build"],
+  [holesky[DatasourceNames.ENSRoot].chain.id, "https://holesky.etherscan.io"],
+  [sepolia[DatasourceNames.Basenames].chain.id, "https://sepolia.basescan.org"],
+  [sepolia[DatasourceNames.Lineanames].chain.id, "https://sepolia.lineascan.build"],
+]);
+
+
 /**
  * Gets the base block explorer URL for a given chainId
  *
  * @returns default block explorer URL for the chain with the provided id,
  * or null if the referenced chain doesn't have a known block explorer
  */
-export const getChainBlockExplorerUrl = (chainId: number): URL | null => { //TODO: transition this to work the same way as getChainName: implement a hardcoded lookup table. We can control this ourselves and not rely on Viem's definition of Chain objects.
-  const chainBlockExplorer = "";
+export const getChainBlockExplorerUrl = (chainId: number): string | null => {
+  const chainBlockExplorer = chainBlockExplorers.get(chainId);
 
   if (!chainBlockExplorer) {
     return null;
   }
 
-  return new URL(chainBlockExplorer.default.url);
+  return chainBlockExplorer;
 };
 
 /**
@@ -82,7 +99,7 @@ export const getBlockExplorerUrlForBlock = (chainId: number, blockNumber: number
   if (!chainBlockExplorer) {
     return null;
   }
-  return new URL(`block/${blockNumber}`, chainBlockExplorer.toString());
+  return new URL(`block/${blockNumber}`, chainBlockExplorer);
 };
 
 /**
