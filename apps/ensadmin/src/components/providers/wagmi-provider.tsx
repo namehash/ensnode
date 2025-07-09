@@ -2,7 +2,7 @@
 
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { selectedEnsNodeUrl } from "@/lib/env";
-import { wagmiConfigForEnsNamespace } from "@/lib/wagmi";
+import { wagmiConfigParametersForEnsNamespace } from "@/lib/wagmi";
 import { useSearchParams } from "next/navigation";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { Config as WagmiConfig, WagmiProvider as WagmiProviderBase, createConfig } from "wagmi";
@@ -19,9 +19,13 @@ export function WagmiProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (indexingStatusQuery.status === "success") {
+      // TODO: The check for valid RPC URL(s) should be performed when we're in the process of accepting a connection
       try {
+        // `wagmiConfigForEnsNamespace` uses getter functions that would throw an error
+        // if no valid RPC URL was provided in env vars
+        // which would then be propagated here
         const wagmiConfig = createConfig(
-          wagmiConfigForEnsNamespace(indexingStatusQuery.data.env.NAMESPACE),
+          wagmiConfigParametersForEnsNamespace(indexingStatusQuery.data.env.NAMESPACE),
         );
         setWagmiConfig(wagmiConfig);
       } catch (error) {

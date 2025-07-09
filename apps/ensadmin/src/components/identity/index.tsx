@@ -1,8 +1,8 @@
 "use client";
 
-import { Avatar } from "@/components/ui/avatar";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ENSNamespaceId, ENSNamespaceIds, getENSRootChainId } from "@ensnode/datasources";
+import {ENSNamespaceId, ENSNamespaceIds, getENSRootChainId, getNameAvatarUrl} from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
@@ -73,14 +73,16 @@ export function Identity({
     );
   }
 
+  const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
+
   return (
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar &&
-        (ensName ? (
-          <Avatar className="h-6 w-6" namespaceId={namespaceId} name={ensName} />
-        ) : (
-          <Avatar className="h-6 w-6" namespaceId={namespaceId} address={address} />
-        ))}
+          <Avatar className="h-6 w-6">
+            {ensName && ensAvatarUrl ? <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} /> : null}
+            <AvatarFallback randomAvatarGenerationSeed={address} />
+          </Avatar>
+      }
       {ensName ? (
         <NameDisplay name={ensName} namespaceId={namespaceId} showExternalLink={showExternalLink} />
       ) : (

@@ -1,11 +1,11 @@
 import {
-  DatasourceNames,
   ENSNamespaceId,
   ENSNamespaceIds,
-  getDatasource,
+  getENSRootChain,
 } from "@ensnode/datasources";
-import { http, Chain, Transport } from "viem";
+import { http } from "viem";
 import { parseUrl } from "./env";
+import { CreateConfigParameters } from "@wagmi/core";
 
 /**
  * Get RPC URLs from environment variables for a requested ENS namespace.
@@ -14,7 +14,8 @@ import { parseUrl } from "./env";
  * because otherwise Next.js will not expose them to the client.
  *
  * @param namespaceId ENS namespace
- * @returns RPC URL, or throws an error if an RPC URL is not defined as an env variable,
+ * @returns RPC URL, or...
+ * @throws an error if an RPC URL is not defined as an env variable,
  * or its URL is invalid
  */
 function getEnsNamespaceRpcUrl(namespaceId: ENSNamespaceId): URL {
@@ -53,19 +54,13 @@ function getEnsNamespaceRpcUrl(namespaceId: ENSNamespaceId): URL {
   }
 }
 
-// Create wagmi config with supported namespaces
-export type WagmiConfigForEnsNamespaces = {
-  readonly chains: [Chain, ...Chain[]];
-  readonly transports: Record<Chain["id"], Transport>;
-};
-
 /**
- * Returns a valid input for a wagmi config object
+ * Returns valid parameters for the wagmi config object
+ *
+ * @throws an error if no valid RPC URL was provided in env vars
  */
-export const wagmiConfigForEnsNamespace = (namespaceId: ENSNamespaceId) => {
-  const rootDatasourceChain = getDatasource(namespaceId, DatasourceNames.ENSRoot).chain;
-
-  // `getEnsNamespaceRpcUrl` call would throw an error if no valid RPC URL was provided i.e. in env vars
+export const wagmiConfigParametersForEnsNamespace = (namespaceId: ENSNamespaceId): CreateConfigParameters => {
+  const rootDatasourceChain = getENSRootChain(namespaceId);
   const chainRpcUrl = getEnsNamespaceRpcUrl(namespaceId);
 
   return {
@@ -73,5 +68,5 @@ export const wagmiConfigForEnsNamespace = (namespaceId: ENSNamespaceId) => {
     transports: {
       [rootDatasourceChain.id]: http(chainRpcUrl.toString()),
     },
-  } satisfies WagmiConfigForEnsNamespaces;
+  };
 };

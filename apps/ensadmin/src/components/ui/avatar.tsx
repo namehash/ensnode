@@ -5,37 +5,17 @@ import BoringAvatar from "boring-avatars";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { ENSNamespaceId, getNameAvatarUrl } from "@ensnode/datasources";
-import { Address } from "viem";
-
-interface AvatarProps {
-  namespaceId: ENSNamespaceId;
-  name?: string;
-  address?: Address;
-}
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
->(({ name, address, className, namespaceId, ...props }, ref) => {
-  const ensAvatarUrl = name ? getNameAvatarUrl(name, namespaceId) : null;
-
-  const fallbackValue = address?.toString() || name;
-
-  // enforce that exactly 1 of address or name are passed, never both, never none.
-  if (!fallbackValue || (name && address)) {
-    throw new Error("The Avatar component needs exactly one of a name or address");
-  }
-
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
+>(({ className, ...props }, ref) => {
   return (
     <AvatarPrimitive.Root
       ref={ref}
       className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
       {...props}
-    >
-      {ensAvatarUrl ? <AvatarImage src={ensAvatarUrl.toString()} alt={fallbackValue} /> : null}
-      <AvatarFallback randomAvatarGenerationSeed={fallbackValue} />
-    </AvatarPrimitive.Root>
+     />
   );
 });
 Avatar.displayName = AvatarPrimitive.Root.displayName;
