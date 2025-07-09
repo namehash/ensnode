@@ -8,7 +8,7 @@ import {
   buildRealtimeIndexingStatusMonitoringRequest,
   getOldestLastIndexedBlockTimestamp,
   realtimeIndexingStatusMonitoringApp,
-} from "@/lib/realtime-indexing-status-monitoring";
+} from "@/api/lib/realtime-indexing-status-monitoring";
 import { RealtimeIndexingStatusMonitoring } from "@ensnode/ensnode-sdk";
 import { PonderStatus } from "@ensnode/ponder-metadata";
 import { fromUnixTime } from "date-fns";

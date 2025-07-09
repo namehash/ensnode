@@ -6,6 +6,7 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
+import { realtimeIndexingStatusMonitoringApp } from "@/api/lib/realtime-indexing-status-monitoring";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
@@ -17,7 +18,6 @@ import {
   fetchPrometheusMetrics,
   makePonderMetadataProvider,
 } from "@/lib/ponder-metadata-provider";
-import { realtimeIndexingStatusMonitoringApp } from "@/lib/realtime-indexing-status-monitoring";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
 import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
