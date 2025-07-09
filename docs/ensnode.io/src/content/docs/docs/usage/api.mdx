@@ -11,9 +11,12 @@ import { LinkCard } from "@astrojs/starlight/components";
 
 You can track ENSNode's realtime indexing status using the `GET /amirealtime` endpoint.
 
-HTTP clients can define their acceptable indexing lag using the `maxAllowedIndexingLag` query parameter. For example, if you want to check whether ENSNode is no more than 10 minutes behind the chain's latest block, you would set the maximum allowed lag to 10 minutes.
+Each request to this endpoint can optionally define what it considers to be an acceptable realtime indexing lag in seconds using the `maxAllowedIndexingLag` query parameter.
+For example, to check if ENSNode's indexing is no more than 1 minute behind the last indexed block of any chain ENSNode is indexing, you would set `maxAllowedIndexingLag=60` (60 seconds = 1 minute).
 
-To make this request, send the following HTTP request to ENSNode: `GET /amirealtime?maxAllowedIndexingLag=600`, where `600` represents the time span in seconds (10 minutes = 600 seconds).
+To make this request, send the following HTTP request to ENSNode: `GET /amirealtime?maxAllowedIndexingLag=60`.
+
+You can also omit the `maxAllowedIndexingLag` query parameter. For the `GET /amirealtime` request, ENSNode will apply the `DEFAULT_MAX_REALTIME_INDEXING_LAG` value as a default value for `maxAllowedIndexingLag` parameter.
 
 **Response Handling:**
 
