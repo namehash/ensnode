@@ -9,7 +9,7 @@ export async function upsertAccount(context: Context, address: Address) {
 }
 
 export async function upsertDomain(context: Context, values: typeof schema.domain.$inferInsert) {
-  // Remove id primary key for update values
+  // remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.domain).values(values).onConflictDoUpdate(otherValues);
@@ -19,7 +19,7 @@ export async function upsertResolver(
   context: Context,
   values: typeof schema.resolver.$inferInsert,
 ) {
-  // Remove id primary key for update values
+  // remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.resolver).values(values).onConflictDoUpdate(otherValues);
@@ -29,10 +29,23 @@ export async function upsertRegistration(
   context: Context,
   values: typeof schema.registration.$inferInsert,
 ) {
-  // Remove id primary key for update values
+  // remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.registration).values(values).onConflictDoUpdate(otherValues);
+}
+
+export async function upsertDomainResolverRelation(
+  context: Context,
+  values: typeof schema.ext_domainResolverRelation.$inferInsert,
+) {
+  // remove id primary key for update values
+  const { id, ...otherValues } = values;
+
+  return context.db
+    .insert(schema.ext_domainResolverRelation)
+    .values(values)
+    .onConflictDoUpdate(otherValues);
 }
 
 // simplifies generating the shared event column values from the ponder Event object

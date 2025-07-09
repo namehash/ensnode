@@ -1,5 +1,9 @@
 import type { Hex } from "viem";
 
+// re-export CoinType and EvmCoinType from @ensdomains/address-encoder so consumers don't need it as
+// a dependency
+export type { CoinType, EvmCoinType } from "@ensdomains/address-encoder";
+
 /**
  * A PluginName is a unique id for a 'plugin': we use the notion of 'plugins' to describe bundles
  * of indexing logic.
@@ -9,6 +13,7 @@ export enum PluginName {
   Basenames = "basenames",
   Lineanames = "lineanames",
   ThreeDNS = "threedns",
+  ReverseResolvers = "reverse-resolvers",
 }
 
 /**

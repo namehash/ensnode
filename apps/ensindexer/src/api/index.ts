@@ -23,6 +23,7 @@ import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
+import ensNodeApi from "./handlers/ensnode-api";
 
 const schemaWithoutExtensions = filterSchemaExtensions(schema);
 
@@ -95,6 +96,9 @@ app.route(
     },
   }),
 );
+
+// use ENSNode HTTP API at /api
+app.route("/api", ensNodeApi);
 
 // use ponder client support
 app.use("/sql/*", client({ db, schema: schemaWithoutExtensions }));
