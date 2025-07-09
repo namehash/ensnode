@@ -50,15 +50,14 @@ export const getDatasource = <
  * @returns the chain that hosts the ENS Root
  */
 export const getENSRootChain = (namespaceId: ENSNamespaceId) =>
-    getDatasource(namespaceId, DatasourceNames.ENSRoot).chain;
+  getDatasource(namespaceId, DatasourceNames.ENSRoot).chain;
 
 /**
  * Returns the chain id for the ENS Root Datasource within the selected namespace.
  *
  * @returns the chain ID that hosts the ENS Root
  */
-export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
-  getENSRootChain(namespaceId).id;
+export const getENSRootChainId = (namespaceId: ENSNamespaceId) => getENSRootChain(namespaceId).id;
 
 /**
  * Returns the Address of the NameWrapper contract within the requested namespace.

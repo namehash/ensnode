@@ -1,11 +1,7 @@
-import {
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  getENSRootChain,
-} from "@ensnode/datasources";
+import { ENSNamespaceId, ENSNamespaceIds, getENSRootChain } from "@ensnode/datasources";
+import { CreateConfigParameters } from "@wagmi/core";
 import { http } from "viem";
 import { parseUrl } from "./env";
-import { CreateConfigParameters } from "@wagmi/core";
 
 /**
  * Get RPC URLs from environment variables for a requested ENS namespace.
@@ -59,7 +55,9 @@ function getEnsNamespaceRpcUrl(namespaceId: ENSNamespaceId): URL {
  *
  * @throws an error if no valid RPC URL was provided in env vars
  */
-export const wagmiConfigParametersForEnsNamespace = (namespaceId: ENSNamespaceId): CreateConfigParameters => {
+export const wagmiConfigParametersForEnsNamespace = (
+  namespaceId: ENSNamespaceId,
+): CreateConfigParameters => {
   const rootDatasourceChain = getENSRootChain(namespaceId);
   const chainRpcUrl = getEnsNamespaceRpcUrl(namespaceId);
 
