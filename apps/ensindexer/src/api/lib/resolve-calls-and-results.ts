@@ -1,4 +1,5 @@
 import type { Name, Node } from "@ensnode/ensnode-sdk";
+import { trace } from "@opentelemetry/api";
 import {
   type Address,
   ContractFunctionExecutionError,
@@ -15,8 +16,11 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
+
+const tracer = trace.getTracer("resolve-calls-and-results");
 
 // for all relevant eth_calls here, all Resolver contracts share the same abi, so just grab one from
 // @ensnode/datasources that is guaranted to exist
@@ -112,71 +116,80 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
   calls: ResolveCalls<SELECTION>;
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
-  const ResolverContract = { abi: RESOLVER_ABI, address: resolverAddress } as const;
+  return withActiveSpanAsync(tracer, "executeResolveCalls", { name }, async (span) => {
+    const ResolverContract = { abi: RESOLVER_ABI, address: resolverAddress } as const;
 
-  return await Promise.all(
-    calls.map(async (call) => {
-      try {
-        // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
-        if (requiresWildcardSupport) {
-          const value = await publicClient.readContract({
-            ...ResolverContract,
-            functionName: "resolve",
-            args: [
-              toHex(packetToBytes(name)), // DNS-encode `name` for resolve()
-              encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
-            ],
-          });
+    return await Promise.all(
+      calls.map(async (call) => {
+        try {
+          // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
+          if (requiresWildcardSupport) {
+            const value = await withSpanAsync(
+              tracer,
+              `ENSIP-10 resolve(${name}, ${call.functionName})`,
+              () =>
+                publicClient.readContract({
+                  ...ResolverContract,
+                  functionName: "resolve",
+                  args: [
+                    toHex(packetToBytes(name)), // DNS-encode `name` for resolve()
+                    encodeFunctionData({ abi: RESOLVER_ABI, ...call }),
+                  ],
+                }),
+            );
 
-          // if resolve() returned empty bytes or reverted, coalece to null
-          if (size(value) === 0) {
-            return { call, result: null, reason: "returned empty response" };
+            // if resolve() returned empty bytes or reverted, coalece to null
+            if (size(value) === 0) {
+              return { call, result: null, reason: "returned empty response" };
+            }
+
+            // ENSIP-10 resolve() always returns bytes that need to be decoded
+            const results = decodeAbiParameters(
+              getAbiItem({ abi: RESOLVER_ABI, name: call.functionName, args: call.args }).outputs,
+              value,
+            );
+
+            // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length > 0)
+            return { call, result: results[0], reason: `resolve(${call.functionName})` };
           }
 
-          // ENSIP-10 resolve() always returns bytes that need to be decoded
-          const results = decodeAbiParameters(
-            getAbiItem({ abi: RESOLVER_ABI, name: call.functionName, args: call.args }).outputs,
-            value,
-          );
+          return withSpanAsync(tracer, `${call.functionName}()`, async () => {
+            // if not extended resolver, resolve directly
+            // NOTE: discrimminate against the `functionName` type, otherwise typescript complains about
+            // `call` not matching the expected types of the `readContract` arguments. also helpfully
+            // infers the return type of `readContract` matches the result type of each `call`
+            switch (call.functionName) {
+              case "name":
+                return {
+                  call,
+                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
+                  reason: ".name()",
+                };
+              case "addr":
+                return {
+                  call,
+                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
+                  reason: ".addr()",
+                };
+              case "text":
+                return {
+                  call,
+                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
+                  reason: ".text()",
+                };
+            }
+          });
+        } catch (error) {
+          // in general, reverts are expected behavior
+          if (error instanceof ContractFunctionExecutionError) {
+            return { call, result: null, reason: error.shortMessage };
+          }
 
-          // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length > 0)
-          return { call, result: results[0], reason: `resolve(${call.functionName})` };
+          throw error;
         }
-
-        // if not extended resolver, resolve directly
-        // NOTE: discrimminate against the `functionName` type, otherwise typescript complains about
-        // `call` not matching the expected types of the `readContract` arguments. also helpfully
-        // infers the return type of `readContract` matches the result type of each `call`
-        switch (call.functionName) {
-          case "name":
-            return {
-              call,
-              result: await publicClient.readContract({ ...ResolverContract, ...call }),
-              reason: ".name()",
-            };
-          case "addr":
-            return {
-              call,
-              result: await publicClient.readContract({ ...ResolverContract, ...call }),
-              reason: ".addr()",
-            };
-          case "text":
-            return {
-              call,
-              result: await publicClient.readContract({ ...ResolverContract, ...call }),
-              reason: ".text()",
-            };
-        }
-      } catch (error) {
-        // in general, reverts are expected behavior
-        if (error instanceof ContractFunctionExecutionError) {
-          return { call, result: null, reason: error.shortMessage };
-        }
-
-        throw error;
-      }
-    }),
-  );
+      }),
+    );
+  });
 }
 
 export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSelection>(

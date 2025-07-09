@@ -1,3 +1,10 @@
+import { sdk } from "@/api/lib/instrumentation";
+
+// Start/Terminate ENSNode API OpenTelemetry SDK before other imports
+// NOTE: this really needs to be loaded before ponder starts executing so that things like `pg` are
+// automatically instrumented
+sdk.start();
+
 import packageJson from "@/../package.json";
 
 import { db, publicClients } from "ponder:api";
@@ -6,7 +13,6 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
-import { sdk } from "@/api/lib/instrumentation";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
@@ -147,12 +153,9 @@ app.use(
   }),
 );
 
-// Start/Terminate ENSNode API OpenTelemetry SDK
-sdk.start();
+// gracefully shut down the SDK on process interrupt/exit
 const shutdownOpenTelemetry = () =>
   sdk.shutdown().catch((error) => console.error("Error terminating tracing", error));
-
-// gracefully shut down the SDK on process exit
 process.on("SIGINT", shutdownOpenTelemetry);
 process.on("SIGTERM", shutdownOpenTelemetry);
 

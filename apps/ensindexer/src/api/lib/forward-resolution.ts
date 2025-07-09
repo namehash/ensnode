@@ -1,7 +1,7 @@
 import { db } from "ponder:api";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { type Name, Node } from "@ensnode/ensnode-sdk";
-import { SpanStatusCode, metrics, trace } from "@opentelemetry/api";
+import { trace } from "@opentelemetry/api";
 import { replaceBigInts } from "ponder";
 import { http, createPublicClient, namehash } from "viem";
 import { normalize } from "viem/ens";
@@ -25,8 +25,8 @@ import {
 } from "@/api/lib/resolver-records-response";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import config from "@/config";
+import { withActiveSpanAsync, withSpan, withSpanAsync } from "@/lib/auto-span";
 import { makeResolverId } from "@/lib/ids";
-import { ATTR_CODE_FILE_PATH, ATTR_CODE_FUNCTION_NAME } from "@opentelemetry/semantic-conventions";
 
 const tracer = trace.getTracer("forward-resolution");
 // const metric = metrics.getMeter("forward-resolution");
@@ -65,20 +65,18 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   selection: SELECTION,
   options: { chainId?: number; accelerate?: boolean } = {},
 ): Promise<ResolverRecordsResponse<SELECTION>> {
-  return tracer.startActiveSpan(
-    "resolveForward",
+  const { chainId = ensRootChainId, accelerate = true } = options;
+
+  return withActiveSpanAsync(
+    tracer,
+    `resolveForward(${name}, chainId: ${chainId})`,
     {
-      attributes: {
-        name,
-        // TODO: more attributes
-      },
+      name,
+      selection: JSON.stringify(selection),
+      chainId,
+      accelerate,
     },
     async (span) => {
-      span.setAttribute(ATTR_CODE_FUNCTION_NAME, "resolveForward");
-      span.setAttribute(ATTR_CODE_FILE_PATH, __filename);
-
-      const { chainId = ensRootChainId, accelerate = true } = options;
-
       // TODO: need to manage state drift between ENSIndexer and RPC
       // could acquire a "most recently indexed" blockNumber or blockHash for this operation based on
       // ponder indexing status and use that to fix any rpc calls made in this context BUT there's still
@@ -87,8 +85,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       //
       // but honestly the state drift is at max 1 block on L1 and a block or two on an L2, it's pretty negligible,
       // so maybe we just ignore this issue entirely
-
-      const normalizedName = normalize(name);
+      const normalizedName = withSpan(tracer, "normalization", () => normalize(name));
       if (name !== normalizedName) {
         throw new Error(`Name "${name}" must be normalized ("${normalizedName}").`);
       }
@@ -96,14 +93,15 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       // TODO: more name normalization logic (return values of `name` record for example)
       // TODO: need to handle encoded label hashes in name, yeah?
 
-      const node: Node = namehash(name);
+      const node: Node = withSpan(tracer, "namehash", () => namehash(name));
+      span.addEvent("Node Computed", { node });
 
       //////////////////////////////////////////////////
       // Validate Input
       //////////////////////////////////////////////////
 
       // construct the set of resolve() calls indicated by selection
-      const calls = makeResolveCalls(node, selection);
+      const calls = withSpan(tracer, "makeResolveCalls", () => makeResolveCalls(node, selection));
 
       // empty selection? invalid input, nothing to do
       if (calls.length === 0) {
@@ -112,6 +110,10 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
           `Invalid selection: ${JSON.stringify(selection)} resulted in no resolution calls.`,
         );
       }
+
+      span.addEvent("Resolve Calls Generated", {
+        calls: JSON.stringify(replaceBigInts(calls, String)),
+      });
 
       //////////////////////////////////////////////////
       // 1. Identify the active resolver for the name on the specified chain.
@@ -124,15 +126,16 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
       // we're unable to find an active resolver for this name, return empty response
       if (!activeResolver) {
-        console.log(` ❌ findResolver: no active resolver, returning empty response`);
-        const response = makeEmptyResolverRecordsResponse(selection);
-        console.log(` ↳ ➡️ ${JSON.stringify(response)}`);
-        return response;
+        // console.log(` ❌ findResolver: no active resolver, returning empty response`);
+        return makeEmptyResolverRecordsResponse(selection);
       }
 
-      console.log(
-        ` ↳ findResolver: ${chainId}:${activeResolver} (via ${activeName}), Requires Wildcard? ${requiresWildcardSupport ? "YES" : "NO"}`,
-      );
+      span.addEvent("Active Resolver Identified", {
+        activeName,
+        activeResolver,
+        chainId,
+        requiresWildcardSupport,
+      });
 
       //////////////////////////////////////////////////
       // 2. _resolveBatch with activeResolver, w/ ENSIP-10 Wildcard Resolution support
@@ -149,21 +152,14 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       if (accelerate) {
         const defers = possibleKnownOffchainLookupResolverDefersTo(chainId, activeResolver);
         if (defers && !!defers.chainId && config.plugins.includes(defers.pluginName)) {
-          console.log(
-            ` ↳ ✅ ${chainId}:${activeResolver} is a Known Offchain Lookup Resolver — deferring to ${defers.pluginName} on chain ${defers.chainId}`,
-          );
+          span.addEvent("IS a Known Offchain Lookup Resolver", defers);
 
           // can short-circuit CCIP-Read and defer resolution to the specified chainId with the knowledge
           // that ENSIndexer is actively indexing the necessary plugin on the specified chain.
-          return resolveForward(name, selection, {
-            ...options,
-            chainId: defers.chainId,
-          });
+          return resolveForward(name, selection, { ...options, chainId: defers.chainId });
         }
 
-        console.log(
-          ` ↳ ❌ ${chainId}:${activeResolver} is NOT a Known Offchain Lookup Resolver — continuing`,
-        );
+        span.addEvent("NOT a Known Offchain Lookup Resolver");
       }
 
       //////////////////////////////////////////////////
@@ -177,15 +173,17 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
         const isKnownOnchainStaticResolver =
           getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
         if (isKnownOnchainStaticResolver && areResolverRecordsIndexedOnChain(chainId)) {
-          console.log(
-            ` ↳ ✅ ${chainId}:${activeResolver} is a Known Onchain Static Resolver — retrieving records from ENSIndexer`,
-          );
+          span.addEvent("IS a Known Onchain Static Resolver");
+
           const resolverId = makeResolverId(chainId, activeResolver, node);
-          const resolver = await db.query.resolver.findFirst({
-            where: (resolver, { eq }) => eq(resolver.id, resolverId),
-            columns: { name: true },
-            with: { addressRecords: true, textRecords: true },
-          });
+
+          const resolver = await withSpanAsync(tracer, "resolver.findFirst", async () =>
+            db.query.resolver.findFirst({
+              where: (resolver, { eq }) => eq(resolver.id, resolverId),
+              columns: { name: true },
+              with: { addressRecords: true, textRecords: true },
+            }),
+          );
 
           // Invariant, resolver must exist here
           if (!resolver) {
@@ -195,18 +193,14 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
           }
 
           // format into RecordsResponse and return
-          const response = makeRecordsResponseFromIndexedRecords(
+          return makeRecordsResponseFromIndexedRecords(
             selection,
             // TODO: drizzle types not inferred correctly for addressRecords/textRecords
             resolver as IndexedResolverRecords,
           );
-          console.log(` ↳ ➡️ ${JSON.stringify(response)}`);
-          return response;
         }
 
-        console.log(
-          ` ↳ ❌ ${chainId}:${activeResolver} is NOT a Known Onchain Static Resolver — continuing`,
-        );
+        span.addEvent("NOT a Known Onchain Static Resolver");
       }
 
       //////////////////////////////////////////////////
@@ -225,10 +219,12 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
       const publicClient = createPublicClient({ transport: http(rpcConfig.url) });
 
       // requireResolver() — validate behavior
-      const isExtendedResolver = await supportsENSIP10Interface({
-        address: activeResolver,
-        publicClient,
-      });
+      const isExtendedResolver = await withSpanAsync(tracer, "supportsENSIP10Interface", () =>
+        supportsENSIP10Interface({
+          address: activeResolver,
+          publicClient,
+        }),
+      );
 
       if (!isExtendedResolver && requiresWildcardSupport) {
         // requires exact match if not extended resolver
@@ -247,18 +243,11 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
         publicClient,
       });
 
-      console.log(
-        ` ↳ ✅ RawResults:\n  ${rawResults.map((result) => JSON.stringify(replaceBigInts(result, (v) => String(v)))).join("\n  ")}`,
-      );
-
       // interpret the results beyond simple return values
       const results = interpretRawCallsAndResults(rawResults);
 
       // return record values
-      const response = makeRecordsResponseFromResolveResults(selection, results);
-      console.log(` ↳ ➡️ ${JSON.stringify(response)}`);
-      span.end();
-      return response;
+      return makeRecordsResponseFromResolveResults(selection, results);
     },
   );
 }

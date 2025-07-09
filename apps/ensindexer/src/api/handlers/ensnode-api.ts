@@ -1,9 +1,12 @@
 import config from "@/config";
+import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
 import resolutionApi from "../lib/resolution-api";
 
 const app = new Hono();
+
+app.use("*", otel());
 
 // conditionally include experimental resolution api
 if (config.experimentalResolution) {

@@ -6,6 +6,7 @@ import { resolveAutomatic } from "@/api/lib/automatic-resolution";
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
+import { otel } from "@hono/otel";
 
 // TODO: replace with zod schema or validator
 function buildSelectionFromQueryParams(c: Context) {
