@@ -29,7 +29,8 @@ import {
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
-  const indexingStatus = useIndexingStatusQuery(searchParams);
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
+  const indexingStatus = useIndexingStatusQuery(ensNodeUrl);
 
   return (
     <section className="flex flex-col gap-6 py-6">
@@ -196,7 +197,7 @@ function BlockNumber({ chainId, block }: BlockNumberProps) {
   return <div className="text-lg font-semibold">#${block.number}</div>;
 }
 
-interface FallbackViewProps {
+interface LoadingViewProps {
   /** Number of placeholders to display. */
   placeholderCount?: number;
 }
@@ -204,7 +205,7 @@ interface FallbackViewProps {
 /**
  * Component to display loading state for chain indexing stats.
  */
-function ChainIndexingStatsFallback(props: FallbackViewProps) {
+function ChainIndexingStatsFallback(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -372,7 +373,7 @@ function InlineSummaryItem(props: InlineSummaryItemProps) {
 /**
  * Component to display loading state for the chain indexing timeline.
  */
-function ChainIndexingTimelineFallback(props: FallbackViewProps) {
+function ChainIndexingTimelineFallback(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -628,7 +629,7 @@ function ChainIndexingPhase({
 /**
  * Component to display loading state for the indexing timeline.
  */
-function IndexingTimelineFallback(props: FallbackViewProps) {
+function IndexingTimelineLoading(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
