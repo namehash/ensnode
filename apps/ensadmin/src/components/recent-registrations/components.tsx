@@ -1,10 +1,10 @@
 "use client";
 
+import { Duration, FormattedDate, RelativeTime } from "@/components/datetime-utils";
 import { EnsNode, useIndexingStatusQuery } from "@/components/ensnode";
 import { NameDisplay } from "@/components/identity/utils";
 import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
 import { Registration } from "@/components/recent-registrations/types";
-import { Duration, FormattedDate, RelativeTime } from "@/components/datetime-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
