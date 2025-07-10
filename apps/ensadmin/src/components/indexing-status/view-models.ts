@@ -1,6 +1,5 @@
 import type { EnsNode } from "@/components/ensnode";
-import { getChainById } from "@/lib/chains";
-import { type ENSNamespaceId } from "@ensnode/datasources";
+import { type ENSNamespaceId, getChainName } from "@ensnode/datasources";
 import { fromUnixTime } from "date-fns";
 /**
  * Basic information about a block and its date.
@@ -46,24 +45,20 @@ export interface GlobalIndexingStatusViewModel {
  * View model for the global indexing status. Includes chain status view models.
  *
  * @param chainIndexingStatuses
+ * @param namespaceId ENS namespace identifier
  * @returns
  */
 export function globalIndexingStatusViewModel(
   chainIndexingStatuses: Record<number, EnsNode.ChainIndexingStatus>,
-  namespace: ENSNamespaceId,
+  namespaceId: ENSNamespaceId,
 ): GlobalIndexingStatusViewModel {
   const indexingStartDatesAcrossChains = Object.values(chainIndexingStatuses).map(
     (status) => status.firstBlockToIndex.timestamp,
   );
   const firstBlockToIndexGloballyTimestamp = Math.min(...indexingStartDatesAcrossChains);
-  const getChainName = (chainId: number) => getChainById(namespace, chainId).name;
 
   const chainStatusesViewModel = Object.values(chainIndexingStatuses).map((chainIndexingStatus) =>
-    chainIndexingStatusViewModel(
-      getChainName(chainIndexingStatus.chainId),
-      chainIndexingStatus,
-      firstBlockToIndexGloballyTimestamp,
-    ),
+    chainIndexingStatusViewModel(chainIndexingStatus, firstBlockToIndexGloballyTimestamp),
   ) satisfies Array<ChainStatusViewModel>;
 
   // Sort the chain statuses by the first block to index timestamp
@@ -88,13 +83,11 @@ export function globalIndexingStatusViewModel(
 /**
  * View model for the chain indexing status.
  *
- * @param chainName
  * @param chainStatus
  * @param firstBlockToIndexGloballyTimestamp
  * @returns
  */
 export function chainIndexingStatusViewModel(
-  chainName: string,
   chainStatus: EnsNode.ChainIndexingStatus,
   firstBlockToIndexGloballyTimestamp: number,
 ): ChainStatusViewModel {
@@ -102,6 +95,8 @@ export function chainIndexingStatusViewModel(
 
   const { lastIndexedBlock, lastSyncedBlock, latestSafeBlock, firstBlockToIndex, chainId } =
     chainStatus;
+
+  const chainName = getChainName(chainId);
 
   if (firstBlockToIndex.timestamp > firstBlockToIndexGloballyTimestamp) {
     phases.push({
