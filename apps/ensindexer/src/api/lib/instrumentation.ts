@@ -13,7 +13,7 @@ import {
 } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
 
-// Something broken with OpenTelemetry? enable debugging by uncommenting the following two lines:
+// Something broken with OpenTelemetry? enable debug logging by uncommenting the following two lines:
 // import { DiagConsoleLogger, DiagLogLevel, diag } from "@opentelemetry/api";
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
 
