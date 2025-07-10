@@ -41,7 +41,6 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 
 // NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
 // first trace generated here would be unusually slow)
-// TODO: make sure this is called pretty early in the app lifecycle
 normalize("example.eth");
 
 /**

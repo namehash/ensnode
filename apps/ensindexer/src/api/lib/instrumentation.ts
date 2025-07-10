@@ -24,6 +24,8 @@ const spanProcessors: SpanProcessor[] = [
 ];
 
 // TODO: include this in production once OTel Collector is set up
+// TODO: filter out protocol-tracing traces for our own instrumentation? they're redundant but
+// it might be useful to refer to protocol-semantic steps for timings and such
 if (process.env.NODE_ENV === "development") {
   spanProcessors.push(
     new BatchSpanProcessor(new OTLPTraceExporter(), {

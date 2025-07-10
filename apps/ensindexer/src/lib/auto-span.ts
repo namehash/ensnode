@@ -5,18 +5,17 @@ import {
   SpanStatusCode,
   type Tracer,
 } from "@opentelemetry/api";
-import { ATTR_CODE_FUNCTION_NAME } from "@opentelemetry/semantic-conventions";
+
+// The following internal functions implement the pattern of executing `fn` in the context of a span
+// named `name` with attributes via `args` and semantic OTel handling of responses / errors.
 
 export async function withActiveSpanAsync<Fn extends (span: Span) => Promise<any>>(
   tracer: Tracer,
-  functionName: string,
+  name: string,
   args: Record<string, AttributeValue>,
   fn: Fn,
 ): Promise<ReturnType<Fn>> {
-  return tracer.startActiveSpan(functionName, async (span) => {
-    // some default attributes
-    span.setAttribute(ATTR_CODE_FUNCTION_NAME, "resolveForward");
-
+  return tracer.startActiveSpan(name, async (span) => {
     // add provded args to span attributes
     for (const [key, value] of Object.entries(args)) {
       span.setAttribute(key, value);
