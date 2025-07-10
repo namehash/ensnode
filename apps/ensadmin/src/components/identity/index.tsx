@@ -91,7 +91,11 @@ export function Identity({
         </Avatar>
       )}
       {ensName ? (
-        <NameDisplay name={ensName} namespaceId={namespaceId} showExternalLinkIcon={showExternalLinkIcon} />
+        <NameDisplay
+          name={ensName}
+          namespaceId={namespaceId}
+          showExternalLinkIcon={showExternalLinkIcon}
+        />
       ) : (
         <AddressDisplay
           address={address}

@@ -55,15 +55,13 @@ export function RecentRegistrations() {
 
   if (indexingStatusQuery.isError) {
     return (
-        <Card className="w-full">
-            <CardHeader className="text-2xl font-bold">
-                An error occurred
-            </CardHeader>
-            <CardContent>
-                Could not fetch indexing status from selected ENSNode due to an error:{" "}
-                {indexingStatusQuery.error.message}
-            </CardContent>
-        </Card>
+      <Card className="w-full">
+        <CardHeader className="text-2xl font-bold">An error occurred</CardHeader>
+        <CardContent>
+          Could not fetch indexing status from selected ENSNode due to an error:{" "}
+          {indexingStatusQuery.error.message}
+        </CardContent>
+      </Card>
     );
   }
 
@@ -168,7 +166,11 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
     <TableRow>
       <TableCell>
-        <NameDisplay name={registration.name} namespaceId={namespaceId} showExternalLinkIcon={true} />
+        <NameDisplay
+          name={registration.name}
+          namespaceId={namespaceId}
+          showExternalLinkIcon={true}
+        />
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} />

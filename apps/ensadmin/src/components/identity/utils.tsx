@@ -48,7 +48,11 @@ interface AddressDisplayProps {
  *
  * Optionally shows an external link icon.
  */
-export function AddressDisplay({ address, namespaceId, showExternalLinkIcon }: AddressDisplayProps) {
+export function AddressDisplay({
+  address,
+  namespaceId,
+  showExternalLinkIcon,
+}: AddressDisplayProps) {
   // Truncate address for display
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
