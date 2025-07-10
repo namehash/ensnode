@@ -7,7 +7,6 @@ import { resolveForward } from "@/api/lib/forward-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
-import { otel } from "@hono/otel";
 
 // TODO: replace with zod schema or validator
 function buildSelectionFromQueryParams(c: Context) {
@@ -51,9 +50,10 @@ app.get("/forward/:name", async (c) => {
 
     const selection = buildSelectionFromQueryParams(c);
 
-    const { result, trace } = await captureTrace(() => resolveForward(name, selection));
+    const { result: records, trace } = await captureTrace(() => resolveForward(name, selection));
 
-    return c.json(result);
+    const debug = !!c.req.param("debug");
+    return c.json({ records, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
@@ -79,8 +79,10 @@ app.get("/reverse/:address", async (c) => {
 
     const chainId = c.req.query("chainId") ? Number(c.req.query("chainId")) : 1;
 
-    const result = await resolveReverse(address, chainId);
-    return c.json(result);
+    const { result: records, trace } = await captureTrace(() => resolveReverse(address, chainId));
+
+    const debug = !!c.req.query("debug");
+    return c.json({ records, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
@@ -100,15 +102,19 @@ app.get("/reverse/:address", async (c) => {
 app.get("/auto/:addressOrName", async (c) => {
   try {
     // TODO: correctly parse/validate with zod
-    const addressOrName = c.req.param("addressOrName") as Address | Name;
+    const addressOrName = c.req.query("addressOrName") as Address | Name;
     if (!addressOrName) {
       return c.json({ error: "addressOrName parameter is required" }, 400);
     }
 
     const selection = buildSelectionFromQueryParams(c);
 
-    const result = await resolveAutomatic(addressOrName, selection);
-    return c.json(result);
+    const { result: records, trace } = await captureTrace(() =>
+      resolveAutomatic(addressOrName, selection),
+    );
+
+    const debug = !!c.req.query("debug");
+    return c.json({ records, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);

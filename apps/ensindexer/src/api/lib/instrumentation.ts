@@ -1,11 +1,12 @@
 import packageJson from "@/../package.json";
+import { ProtocolTraceExporter } from "@/api/lib/protocol-tracing";
 
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { BatchSpanProcessor, SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
 
 export const sdk = new NodeSDK({
@@ -14,6 +15,7 @@ export const sdk = new NodeSDK({
     [ATTR_SERVICE_VERSION]: packageJson.version,
   }),
   spanProcessors: [
+    new SimpleSpanProcessor(ProtocolTraceExporter.singleton()),
     new BatchSpanProcessor(new OTLPTraceExporter(), {
       scheduledDelayMillis: process.env.NODE_ENV === "development" ? 1_000 : undefined,
     }),

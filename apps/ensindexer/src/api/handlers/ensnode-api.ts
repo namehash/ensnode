@@ -6,6 +6,7 @@ import resolutionApi from "../lib/resolution-api";
 
 const app = new Hono();
 
+// include automatic OpenTelemetry instrumentation for incoming requests
 app.use("*", otel());
 
 // conditionally include experimental resolution api
