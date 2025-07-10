@@ -1,6 +1,11 @@
 import { db } from "ponder:api";
 import { getENSRootChainId } from "@ensnode/datasources";
-import { type Name, Node } from "@ensnode/ensnode-sdk";
+import {
+  ForwardResolutionProtocolStep,
+  type Name,
+  Node,
+  TraceableENSProtocol,
+} from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import { replaceBigInts } from "ponder";
 import { http, createPublicClient, namehash } from "viem";
@@ -10,12 +15,7 @@ import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
 import { findResolver } from "@/api/lib/find-resolver";
 import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
 import { getKnownOnchainStaticResolverAddresses } from "@/api/lib/known-onchain-static-resolver";
-import {
-  ForwardResolutionProtocolStep,
-  TraceableENSProtocol,
-  addProtocolStepEvent,
-  withProtocolStepAsync,
-} from "@/api/lib/protocol-tracing";
+import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
 import {
   executeResolveCalls,
   interpretRawCallsAndResults,

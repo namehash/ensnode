@@ -1,14 +1,15 @@
-import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType, reverseName } from "@ensnode/ensnode-sdk";
+import {
+  DEFAULT_EVM_COIN_TYPE,
+  ReverseResolutionProtocolStep,
+  TraceableENSProtocol,
+  evmChainIdToCoinType,
+  reverseName,
+} from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { Address, isAddress, isAddressEqual } from "viem";
 
 import { resolveForward } from "@/api/lib/forward-resolution";
-import {
-  ReverseResolutionProtocolStep,
-  TraceableENSProtocol,
-  addProtocolStepEvent,
-  withProtocolStepAsync,
-} from "@/api/lib/protocol-tracing";
+import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
 import { ResolverRecordsResponse } from "@/api/lib/resolver-records-response";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import { withActiveSpanAsync } from "@/lib/auto-span";
