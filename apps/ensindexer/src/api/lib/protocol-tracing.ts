@@ -55,7 +55,12 @@ export enum ReverseResolutionProtocolStep {
 }
 
 export enum ForwardResolutionProtocolStep {
-  Test = "test",
+  FindResolver = "find-resolver",
+  ActiveResolverExists = "active-resolver-exists",
+  AccelerateKnownOffchainLookupResolver = "accelerate-known-offchain-lookup-resolver",
+  AccelerateKnownOnchainStaticResolver = "accelerate-known-onchain-static-resolver",
+  RequireResolver = "require-resolver",
+  ExecuteResolveCalls = "execute-resolve-calls",
 }
 
 // executes fn in the context of a semantic ENS Protocol Step
@@ -70,7 +75,7 @@ export async function withProtocolStepAsync<
 >(protocol: PROTOCOL, step: STEP, fn: Fn): Promise<ReturnType<Fn>> {
   return withActiveSpanAsync(
     tracer,
-    "ens",
+    `${protocol}:${step}`,
     // TODO: include results in span attributes?
     { "ens.protocol": protocol, "ens.protocol.step": step },
     fn,
@@ -86,7 +91,7 @@ export function addProtocolStepEvent<
       ? ReverseResolutionProtocolStep
       : never,
 >(span: Span, protocol: PROTOCOL, step: STEP, result: AttributeValue) {
-  span.addEvent("ens", {
+  span.addEvent(`${protocol}:${step} (${result})`, {
     "ens.protocol": protocol,
     "ens.protocol.step": step,
     "ens.protocol.step.result": result,
