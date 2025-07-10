@@ -40,7 +40,7 @@ const chainIcons = new Map<number, React.ReactNode>([
 
 /**
  * Renders an icon for the provided chain ID,
- * or throws an error if the provided chain id doesn't have an assigned icon.
+ * @throws an error if the provided chain id doesn't have an assigned icon.
  */
 export function ChainIcon({ chainId }: ChainIconProps) {
   if (!chainIcons.has(chainId)) {

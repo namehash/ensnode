@@ -1,4 +1,13 @@
-import { optimism } from "viem/chains";
+import {
+  base,
+  baseSepolia,
+  holesky as holeskyChain,
+  linea,
+  lineaSepolia,
+  mainnet as mainnetChain,
+  optimism,
+  sepolia as sepoliaChain,
+} from "viem/chains";
 import { DatasourceNames, ENSNamespace, ENSNamespaceId } from "./lib/types";
 
 import ensTestEnv from "./ens-test-env";
@@ -57,14 +66,14 @@ export const getENSRootChainId = (namespaceId: ENSNamespaceId) =>
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
 const chainBlockExplorers = new Map<number, string>([
-  [mainnet[DatasourceNames.ENSRoot].chain.id, "https://etherscan.io"],
-  [mainnet[DatasourceNames.Basenames].chain.id, "https://basescan.org"],
-  [sepolia[DatasourceNames.ENSRoot].chain.id, "https://sepolia.etherscan.io"],
+  [mainnetChain.id, "https://etherscan.io"],
+  [base.id, "https://basescan.org"],
+  [sepoliaChain.id, "https://sepolia.etherscan.io"],
   [optimism.id, "https://optimistic.etherscan.io"],
-  [mainnet[DatasourceNames.Lineanames].chain.id, "https://lineascan.build"],
-  [holesky[DatasourceNames.ENSRoot].chain.id, "https://holesky.etherscan.io"],
-  [sepolia[DatasourceNames.Basenames].chain.id, "https://sepolia.basescan.org"],
-  [sepolia[DatasourceNames.Lineanames].chain.id, "https://sepolia.lineascan.build"],
+  [linea.id, "https://lineascan.build"],
+  [holeskyChain.id, "https://holesky.etherscan.io"],
+  [baseSepolia.id, "https://sepolia.basescan.org"],
+  [lineaSepolia.id, "https://sepolia.lineascan.build"],
 ]);
 
 /**
@@ -73,14 +82,14 @@ const chainBlockExplorers = new Map<number, string>([
  * @returns default block explorer URL for the chain with the provided id,
  * or null if the referenced chain doesn't have a known block explorer
  */
-export const getChainBlockExplorerUrl = (chainId: number): string | null => {
+export const getChainBlockExplorerUrl = (chainId: number): URL | null => {
   const chainBlockExplorer = chainBlockExplorers.get(chainId);
 
   if (!chainBlockExplorer) {
     return null;
   }
 
-  return chainBlockExplorer;
+  return new URL(chainBlockExplorer);
 };
 
 /**
@@ -95,7 +104,7 @@ export const getBlockExplorerUrlForBlock = (chainId: number, blockNumber: number
   if (!chainBlockExplorer) {
     return null;
   }
-  return new URL(`block/${blockNumber}`, chainBlockExplorer);
+  return new URL(`block/${blockNumber}`, chainBlockExplorer.toString());
 };
 
 /**
@@ -103,15 +112,15 @@ export const getBlockExplorerUrlForBlock = (chainId: number, blockNumber: number
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
 const chainNames = new Map<number, string>([
-  [mainnet[DatasourceNames.ENSRoot].chain.id, "Ethereum"],
-  [mainnet[DatasourceNames.Basenames].chain.id, "Base"],
-  [sepolia[DatasourceNames.ENSRoot].chain.id, "Ethereum Sepolia"],
+  [mainnetChain.id, "Ethereum"],
+  [base.id, "Base"],
+  [sepoliaChain.id, "Ethereum Sepolia"],
   [optimism.id, "Optimism"],
-  [mainnet[DatasourceNames.Lineanames].chain.id, "Linea"],
-  [holesky[DatasourceNames.ENSRoot].chain.id, "Ethereum Holesky"],
-  [ensTestEnv[DatasourceNames.ENSRoot].chain.id, "Ethereum Local"],
-  [sepolia[DatasourceNames.Basenames].chain.id, "Base Sepolia"],
-  [sepolia[DatasourceNames.Lineanames].chain.id, "Linea Sepolia"],
+  [linea.id, "Linea"],
+  [holeskyChain.id, "Ethereum Holesky"],
+  [1337, "Ethereum Local"], // ens-test-env runs on a local Anvil chain with id 1337
+  [baseSepolia.id, "Base Sepolia"],
+  [lineaSepolia.id, "Linea Sepolia"],
 ]);
 
 /**

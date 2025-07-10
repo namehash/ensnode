@@ -42,10 +42,10 @@ export function formatRelativeTime(
   }
 
   if (conciseFormatting) {
-    return formatDistanceStrict(now, date, { addSuffix: true });
+    return formatDistanceStrict(date, now, { addSuffix: true });
   }
 
-  return formatDistance(now, date, {
+  return formatDistance(date, now, {
     addSuffix: true,
     includeSeconds,
   });

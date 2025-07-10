@@ -73,7 +73,7 @@ function ChainIndexingStats(props: ChainIndexingStatsProps) {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col min-[900px]:flex-row gap-8">
+        <CardContent className="flex flex-row flex-wrap gap-8">
           {globalIndexingStatusViewModel(chainIndexingStatuses, namespace).chainStatuses.map(
             (chainStatus) => (
               <ChainIndexingStatsCard key={chainStatus.chainId} chainStatus={chainStatus} />
