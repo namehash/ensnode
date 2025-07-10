@@ -10,9 +10,9 @@ import { parseUrl } from "./env";
  * because otherwise Next.js will not expose them to the client.
  *
  * @param namespaceId ENS namespace
- * @returns RPC URL, or...
- * @throws an error if an RPC URL is not defined as an env variable,
- * or its URL is invalid
+ * @returns RPC URL for the requested ENS namespace.
+ * @throws an error if the environment variable for the requested RPC URL is not defined
+ * or is not a valid URL
  */
 function getEnsNamespaceRpcUrl(namespaceId: ENSNamespaceId): URL {
   let envVarName: string;

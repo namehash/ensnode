@@ -5,15 +5,17 @@ import { Address } from "viem";
 interface NameDisplayProps {
   name: string;
   namespaceId: ENSNamespaceId;
-  showExternalLink?: boolean;
+  showExternalLinkIcon?: boolean;
 }
 
 /**
  * Displays an ENS name.
- * If the ENS namespace has a known ENS Manager App, includes a link to the view the profile associated with the name within that ENS namespace.
+ * If the ENS namespace has a known ENS Manager App,
+ * includes a link to the view the profile associated with the name within that ENS namespace.
+ *
  * Optionally shows an external link icon.
  */
-export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplayProps) {
+export function NameDisplay({ name, namespaceId, showExternalLinkIcon }: NameDisplayProps) {
   const ensAppNameDetailsUrl = getNameDetailsUrl(name, namespaceId);
 
   if (!ensAppNameDetailsUrl) {
@@ -28,7 +30,7 @@ export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplay
       className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
     >
       {name}
-      {showExternalLink && <ExternalLink size={14} className="inline-block" />}
+      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
     </a>
   );
 }
@@ -36,15 +38,17 @@ export function NameDisplay({ name, namespaceId, showExternalLink }: NameDisplay
 interface AddressDisplayProps {
   address: Address;
   namespaceId: ENSNamespaceId;
-  showExternalLink?: boolean;
+  showExternalLinkIcon?: boolean;
 }
 
 /**
  * Displays a truncated address.
- * If the ENS namespace has a known ENS Manager App, includes a link to the view details of the address within that ENS namespace.
+ * If the ENS namespace has a known ENS Manager App,
+ * includes a link to the view details of the address within that ENS namespace.
+ *
  * Optionally shows an external link icon.
  */
-export function AddressDisplay({ address, namespaceId, showExternalLink }: AddressDisplayProps) {
+export function AddressDisplay({ address, namespaceId, showExternalLinkIcon }: AddressDisplayProps) {
   // Truncate address for display
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
@@ -62,7 +66,7 @@ export function AddressDisplay({ address, namespaceId, showExternalLink }: Addre
       className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
     >
       {truncatedAddress}
-      {showExternalLink && <ExternalLink size={14} className="inline-block" />}
+      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
     </a>
   );
 }

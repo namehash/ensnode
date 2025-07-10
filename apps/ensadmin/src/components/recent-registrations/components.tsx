@@ -55,10 +55,15 @@ export function RecentRegistrations() {
 
   if (indexingStatusQuery.isError) {
     return (
-      <p>
-        Could not fetch indexing status from selected ENSNode due to an error: $
-        {indexingStatusQuery.error.message}
-      </p>
+        <Card className="w-full">
+            <CardHeader className="text-2xl font-bold">
+                An error occurred
+            </CardHeader>
+            <CardContent>
+                Could not fetch indexing status from selected ENSNode due to an error:{" "}
+                {indexingStatusQuery.error.message}
+            </CardContent>
+        </Card>
     );
   }
 
@@ -122,7 +127,7 @@ function RegistrationsList({ ensNodeMetadata, ensNodeUrl, maxRecords }: Registra
   if (recentRegistrationsQuery.isError) {
     return (
       <p>
-        Could not fetch recent registrations due to an error: $
+        Could not fetch recent registrations due to an error:{" "}
         {recentRegistrationsQuery.error.message}
       </p>
     );
@@ -163,7 +168,7 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
     <TableRow>
       <TableCell>
-        <NameDisplay name={registration.name} namespaceId={namespaceId} showExternalLink={true} />
+        <NameDisplay name={registration.name} namespaceId={namespaceId} showExternalLinkIcon={true} />
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} />

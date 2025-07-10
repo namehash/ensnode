@@ -18,7 +18,7 @@ interface IdentityProps {
   address: Address;
   namespaceId: ENSNamespaceId;
   showAvatar?: boolean;
-  showExternalLink?: boolean;
+  showExternalLinkIcon?: boolean;
   className?: string;
 }
 
@@ -33,7 +33,7 @@ export function Identity({
   address,
   namespaceId,
   showAvatar = false,
-  showExternalLink = true,
+  showExternalLinkIcon = true,
   className = "",
 }: IdentityProps) {
   const [mounted, setMounted] = useState(false);
@@ -73,7 +73,7 @@ export function Identity({
       <AddressDisplay
         address={address}
         namespaceId={namespaceId}
-        showExternalLink={showExternalLink}
+        showExternalLinkIcon={showExternalLinkIcon}
       />
     );
   }
@@ -91,12 +91,12 @@ export function Identity({
         </Avatar>
       )}
       {ensName ? (
-        <NameDisplay name={ensName} namespaceId={namespaceId} showExternalLink={showExternalLink} />
+        <NameDisplay name={ensName} namespaceId={namespaceId} showExternalLinkIcon={showExternalLinkIcon} />
       ) : (
         <AddressDisplay
           address={address}
           namespaceId={namespaceId}
-          showExternalLink={showExternalLink}
+          showExternalLinkIcon={showExternalLinkIcon}
         />
       )}
     </div>
