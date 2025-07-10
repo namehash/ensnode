@@ -38,7 +38,7 @@ export async function resolveReverse(
   return withProtocolStepAsync(
     TraceableENSProtocol.ReverseResolution,
     ReverseResolutionProtocolStep.Operation,
-    () =>
+    (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
@@ -57,7 +57,7 @@ export async function resolveReverse(
 
           // Step 8 — Determine if name record exists
           addProtocolStepEvent(
-            span,
+            protocolTracingSpan,
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.SpecificNameRecordExists,
             !!records.name,
@@ -79,7 +79,7 @@ export async function resolveReverse(
 
           // Step 10 — If no name record, there is no Primary Name for this address
           addProtocolStepEvent(
-            span,
+            protocolTracingSpan,
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.DefaultNameRecordExists,
             !!records.name,
@@ -112,7 +112,7 @@ export async function resolveReverse(
           // if there's no resolvedAddress, no Primary Name
           const resolvedAddressExists = !!resolvedAddress;
           addProtocolStepEvent(
-            span,
+            protocolTracingSpan,
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.VerifyResolvedAddressExistence,
             resolvedAddressExists,
@@ -128,7 +128,7 @@ export async function resolveReverse(
           // if the resolvedAddress is not an EVM address, no Primary Name
           const resolvedAddressIsEVMAddress = isAddress(resolvedAddress);
           addProtocolStepEvent(
-            span,
+            protocolTracingSpan,
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.VerifyResolvedAddressValidity,
             resolvedAddressIsEVMAddress,
@@ -144,7 +144,7 @@ export async function resolveReverse(
           // if resolvedAddress does not match expected address, no Primary Name
           const resolvedAddressMatchesAddress = isAddressEqual(resolvedAddress, address);
           addProtocolStepEvent(
-            span,
+            protocolTracingSpan,
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.VerifyResolvedAddressMatchesAddress,
             resolvedAddressIsEVMAddress,

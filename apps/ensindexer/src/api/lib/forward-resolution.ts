@@ -82,7 +82,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   return withProtocolStepAsync(
     TraceableENSProtocol.ForwardResolution,
     ForwardResolutionProtocolStep.Operation,
-    () =>
+    (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
@@ -148,7 +148,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
           // 1.2 Determine whether active resolver exists
           addProtocolStepEvent(
-            span,
+            protocolTracingSpan,
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.ActiveResolverExists,
             !!activeResolver,
@@ -194,7 +194,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
             }
 
             addProtocolStepEvent(
-              span,
+              protocolTracingSpan,
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
               false,
@@ -246,7 +246,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
             }
 
             addProtocolStepEvent(
-              span,
+              protocolTracingSpan,
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
               false,
