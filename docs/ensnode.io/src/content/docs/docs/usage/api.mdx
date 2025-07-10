@@ -7,6 +7,34 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
+## Realtime Indexing Status Monitoring
+
+You can track ENSNode's realtime indexing status using the `GET /amirealtime` endpoint.
+
+Each request to this endpoint can optionally define what it considers to be an acceptable realtime indexing lag in seconds using the `maxAllowedIndexingLag` query parameter.
+For example, to check if ENSNode's indexing is no more than 1 minute behind the last indexed block of any chain ENSNode is indexing, you would set `maxAllowedIndexingLag=60` (60 seconds = 1 minute).
+
+To make this request, send the following HTTP request to ENSNode: `GET /amirealtime?maxAllowedIndexingLag=60`.
+
+You can also omit the `maxAllowedIndexingLag` query parameter. For the `GET /amirealtime` request, ENSNode will apply the `DEFAULT_MAX_REALTIME_INDEXING_LAG` value as a default value for `maxAllowedIndexingLag` parameter.
+
+**Response Handling:**
+
+- **Status Code 503**: The requested realtime indexing gap has not been achieved
+- **Status Code 200**: The indexing lag is within acceptable limits
+
+The response data is returned regardless of the status code. Here's an example response:
+
+```json
+{
+  "currentRealtimeIndexingLag": 42608279,
+  "maxAllowedIndexingLag": 600,
+  "oldestLastIndexedBlockTimestamp": 1709373060
+}
+```
+
+## GraphQL
+
 ENSNode exposes two GraphQL endpoints:
 
 - `/ponder` — uses a Ponder-native GraphQL schema
