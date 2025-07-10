@@ -1,5 +1,10 @@
 import { type Cache, Label, type LabelHash, LruCache } from "@ensnode/ensnode-sdk";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
+import {
+  type EnsRainbowClientLabelSet,
+  type EnsRainbowServerLabelSet,
+  buildEnsRainbowClientLabelSet,
+} from "./utils/labelset";
 
 export namespace EnsRainbow {
   export type ApiClientOptions = EnsRainbowApiClientOptions;
@@ -7,6 +12,10 @@ export namespace EnsRainbow {
   export interface ApiClient {
     count(): Promise<CountResponse>;
 
+    /**
+     * Heal a labelhash to its original label
+     * @param labelHash The labelhash to heal
+     */
     heal(labelHash: LabelHash): Promise<HealResponse>;
 
     health(): Promise<HealthResponse>;
@@ -84,7 +93,8 @@ export namespace EnsRainbow {
 
   export interface CountSuccess extends BaseCountResponse<typeof StatusCode.Success, never> {
     status: typeof StatusCode.Success;
-    /** The total count of labels that can be healed by the ENSRainbow instance. Always a non-negative integer. */
+    /** The total count of labels that can be healed by the ENSRainbow instance. Always a
+     * non-negative integer. */
     count: number;
     timestamp: string;
     error?: never;
@@ -112,9 +122,14 @@ export namespace EnsRainbow {
     version: string;
 
     /**
-     * ENSRainbow schema version.
+     * ENSRainbow database schema version.
      */
-    schema_version: number;
+    dbSchemaVersion: number;
+
+    /**
+     * The EnsRainbowServerLabelSet managed by the ENSRainbow server.
+     */
+    labelSet: EnsRainbowServerLabelSet;
   }
 
   /**
@@ -138,6 +153,23 @@ export interface EnsRainbowApiClientOptions {
    * The URL of an ENSRainbow API endpoint.
    */
   endpointUrl: URL;
+
+  /**
+   * Optional label set preferences that the ENSRainbow server at endpointUrl is expected to
+   * support. If provided, enables deterministic heal results across time, such that only
+   * labels from label sets with versions less than or equal to this value will be returned.
+   * Therefore, even if the ENSRainbow server later ingests label sets with greater versions
+   * than this value, the results returned across time can be deterministic. If
+   * provided, heal operations with this EnsRainbowApiClient will validate the ENSRainbow
+   * server manages a compatible label set. If not provided no specific labelSetId validation
+   * will be performed during heal operations.
+   * If `labelSetId` is provided without `labelSetVersion`, the server will use the latest
+   * available version.
+   * If `labelSetVersion` is defined, only labels from sets less than or equal to this value
+   * will be returned.
+   * When `labelSetVersion` is defined, `labelSetId` must also be defined.
+   */
+  labelSet?: EnsRainbowClientLabelSet;
 }
 
 /**
@@ -156,6 +188,7 @@ export interface EnsRainbowApiClientOptions {
 export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   private readonly options: EnsRainbowApiClientOptions;
   private readonly cache: Cache<LabelHash, EnsRainbow.CacheableHealResponse>;
+  private readonly labelSetSearchParams: URLSearchParams;
 
   public static readonly DEFAULT_CACHE_CAPACITY = 1000;
 
@@ -168,18 +201,40 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     return {
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      labelSet: buildEnsRainbowClientLabelSet(),
     };
   }
 
   constructor(options: Partial<EnsRainbow.ApiClientOptions> = {}) {
+    const { labelSet: optionsLabelSet, ...rest } = options;
+    const defaultOptions = EnsRainbowApiClient.defaultOptions();
+
+    const copiedLabelSet = buildEnsRainbowClientLabelSet(
+      optionsLabelSet?.labelSetId,
+      optionsLabelSet?.labelSetVersion,
+    );
+
     this.options = {
-      ...EnsRainbowApiClient.defaultOptions(),
-      ...options,
+      ...defaultOptions,
+      ...rest,
+      labelSet: copiedLabelSet,
     };
 
     this.cache = new LruCache<LabelHash, EnsRainbow.CacheableHealResponse>(
       this.options.cacheCapacity,
     );
+
+    // Pre-compute query parameters for label set options
+    this.labelSetSearchParams = new URLSearchParams();
+    if (this.options.labelSet?.labelSetId !== undefined) {
+      this.labelSetSearchParams.append("label_set_id", this.options.labelSet.labelSetId);
+    }
+    if (this.options.labelSet?.labelSetVersion !== undefined) {
+      this.labelSetSearchParams.append(
+        "label_set_version",
+        this.options.labelSet.labelSetVersion.toString(),
+      );
+    }
   }
 
   /**
@@ -194,8 +249,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * @param labelHash all lowercase 64-digit hex string with 0x prefix (total length of 66 characters)
    * @returns a `HealResponse` indicating the result of the request and the healed label if successful
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts,
+   * CORS violations, or Invalid URLs
    * @example
    * ```typescript
    * const response = await client.heal(
@@ -231,7 +286,14 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
       return cachedResult;
     }
 
-    const response = await fetch(new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl));
+    const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
+
+    // Apply pre-computed label set query parameters
+    for (const [key, value] of this.labelSetSearchParams) {
+      url.searchParams.append(key, value);
+    }
+
+    const response = await fetch(url);
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;
 
     if (isCacheableHealResponse(healResponse)) {
@@ -244,9 +306,10 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   /**
    * Get Count of Healable Labels
    *
-   * @returns a `CountResponse` indicating the result and the timestamp of the request and the number of healable labels if successful
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
+   * @returns a `CountResponse` indicating the result and the timestamp of the request and the
+   * number of healable labels if successful
+   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts,
+   * CORS violations, or Invalid URLs
    * @example
    *
    * const response = await client.count();
@@ -268,8 +331,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
 
   /**
    *
-   * Simple verification that the service is running, either in your local setup or for the provided hosted instance
-   *
+   * Simple verification that the service is running, either in your local setup or for the
+   * provided hosted instance.
    * @returns a status of ENS Rainbow service
    * @example
    *
@@ -291,8 +354,8 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    * Get the version information of the ENSRainbow service
    *
    * @returns the version information of the ENSRainbow service
-   * @throws if the request fails due to network failures, DNS lookup failures, request timeouts, CORS violations, or Invalid URLs
-   *
+   * @throws if the request fails due to network failures, DNS lookup failures, request
+   * timeouts, CORS violations, or invalid URLs
    * @example
    * ```typescript
    * const response = await client.version();
@@ -301,8 +364,14 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * // {
    * //   "status": "success",
-   * //   "version": "0.1.0",
-   * //   "schema_version": 2
+   * //   "versionInfo": {
+   * //     "version": "0.1.0",
+   * //     "dbSchemaVersion": 2,
+   * //     "labelSet": {
+   * //       "labelSetId": "subgraph",
+   * //       "labelSetVersion": 0
+   * //     }
+   * //   }
    * // }
    * ```
    */
@@ -322,6 +391,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const deepCopy = {
       cacheCapacity: this.options.cacheCapacity,
       endpointUrl: new URL(this.options.endpointUrl.href),
+      labelSet: this.options.labelSet ? { ...this.options.labelSet } : undefined,
     } satisfies EnsRainbowApiClientOptions;
 
     return Object.freeze(deepCopy);

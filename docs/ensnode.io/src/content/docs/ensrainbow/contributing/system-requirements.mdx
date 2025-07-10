@@ -1,0 +1,13 @@
+---
+title: System Requirements
+sidebar:
+  label: System Requirements
+  order: 5
+keywords: [ensrainbow, hardware requirements]
+---
+
+| Scenario | Disk | RAM | Notes |
+|----------|------|-----|-------|
+| **Data ingestion** (`convert`, `ingest-ensrainbow`) | `.ensrainbow` files size + ~7 GB for LevelDB | ≥ 4 GB | Temporary disk spikes during ingestion |
+| **API server** (`serve`) | 7-8 GB | ≥ 1 GB (4 GB recommended) | CPU usage is minimal |
+| **Test-env dataset** | < 50 MB | 512 MB | Ideal for CI and quick demos | 

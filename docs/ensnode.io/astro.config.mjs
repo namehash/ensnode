@@ -1,6 +1,7 @@
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
+import mermaid from "astro-mermaid";
 import { defineConfig, envField } from "astro/config";
 
 import { sitemap } from "./config/integrations/sitemap";
@@ -10,7 +11,7 @@ import icon from "astro-icon";
 
 export default defineConfig({
   site: "https://ensnode.io",
-  integrations: [starlight(), sitemap(), react(), mdx(), icon()],
+  integrations: [mermaid(), starlight(), sitemap(), react(), mdx(), icon()],
   vite: {
     ssr: {
       noExternal: ["@namehash/namekit-react"],

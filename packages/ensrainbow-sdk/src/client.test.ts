@@ -29,6 +29,10 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: new URL(DEFAULT_ENSRAINBOW_URL),
       cacheCapacity: EnsRainbowApiClient.DEFAULT_CACHE_CAPACITY,
+      labelSet: {
+        labelSetId: undefined,
+        labelSetVersion: undefined,
+      },
     } satisfies EnsRainbowApiClientOptions);
   });
 
@@ -42,7 +46,64 @@ describe("EnsRainbowApiClient", () => {
     expect(client.getOptions()).toEqual({
       endpointUrl: customEndpointUrl,
       cacheCapacity: 0,
+      labelSet: {
+        labelSetId: undefined,
+        labelSetVersion: undefined,
+      },
     } satisfies EnsRainbowApiClientOptions);
+  });
+
+  it("should apply custom options when provided with labelSetId only", async () => {
+    const customEndpointUrl = new URL("http://custom-endpoint.com");
+    client = new EnsRainbowApiClient({
+      endpointUrl: customEndpointUrl,
+      cacheCapacity: 0,
+      labelSet: {
+        labelSetId: "subgraph",
+        labelSetVersion: undefined,
+      },
+    });
+
+    expect(client.getOptions()).toEqual({
+      endpointUrl: customEndpointUrl,
+      cacheCapacity: 0,
+      labelSet: {
+        labelSetId: "subgraph",
+        labelSetVersion: undefined,
+      },
+    } satisfies EnsRainbowApiClientOptions);
+
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+          label: "vitalik",
+        } satisfies EnsRainbow.HealSuccess),
+    });
+
+    const response = await client.heal(
+      "0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc",
+    );
+
+    expect(response).toEqual({
+      status: StatusCode.Success,
+      label: "vitalik",
+    } satisfies EnsRainbow.HealSuccess);
+  });
+
+  it("should throw an error when labelSetVersion is provided without labelSetId", () => {
+    const customEndpointUrl = new URL("http://custom-endpoint.com");
+    expect(
+      () =>
+        new EnsRainbowApiClient({
+          endpointUrl: customEndpointUrl,
+          cacheCapacity: 0,
+          labelSet: {
+            labelSetId: undefined,
+            labelSetVersion: 0,
+          },
+        }),
+    ).toThrow("When a labelSetVersion is defined, labelSetId must also be defined.");
   });
 
   it("should heal a known labelHash", async () => {
@@ -144,7 +205,11 @@ describe("EnsRainbowApiClient", () => {
           status: StatusCode.Success,
           versionInfo: {
             version: "1.0.0",
-            schema_version: 1,
+            dbSchemaVersion: 1,
+            labelSet: {
+              labelSetId: "test-label-set-id",
+              highestLabelSetVersion: 123,
+            },
           },
         } satisfies EnsRainbow.VersionResponse),
     });
@@ -154,7 +219,7 @@ describe("EnsRainbowApiClient", () => {
     expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.versionInfo.version === "string").toBeTruthy();
-    expect(typeof response.versionInfo.schema_version === "number").toBeTruthy();
+    expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();
   });
 });
 

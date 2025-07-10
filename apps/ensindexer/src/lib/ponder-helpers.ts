@@ -53,15 +53,19 @@ export const createEnsRainbowVersionFetcher = (
   return async () => {
     try {
       const versionResponse = await client.version();
-      return {
-        version: versionResponse.versionInfo.version,
-        schema_version: versionResponse.versionInfo.schema_version,
-      };
+      return versionResponse.versionInfo;
     } catch (error) {
       console.error("Failed to fetch ENSRainbow version", error);
+
+      // TODO: Improve error handling here when we advance the strict schema
+      // handling for how ENSIndexer exposes its public config through an API.
       return {
         version: "unknown",
-        schema_version: 0,
+        dbSchemaVersion: 0,
+        labelSet: {
+          labelSetId: "unknown",
+          highestLabelSetVersion: 0,
+        },
       };
     }
   };

@@ -1,0 +1,15 @@
+---
+title: Performance & Sizing
+sidebar:
+  label: Performance
+  order: 4
+keywords: [ensrainbow, performance]
+---
+
+| Dataset | `.ensrainbow` size | LevelDB size | Ingest time* |
+|---------|-------------------|--------------|--------------|
+| `ens-test-env / 0` | 1 MB | 5 MB | < 30 s |
+| `subgraph / 0` | 3 GB | 7 GB | ~20 min |
+| `searchlight / latest` | 8 GB | 18 GB | ~50 min |
+
+`*` Times measured on a 4-core CPU & NVMe SSD. 

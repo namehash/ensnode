@@ -1,0 +1,18 @@
+---
+title: Service Management
+description: Graceful shutdown, database maintenance, and common operations.
+sidebar:
+  label: Service Management
+  order: 4
+keywords: [ensrainbow, graceful shutdown]
+---
+
+## Graceful Shutdown
+
+ENSRainbow listens for `SIGTERM` and `SIGINT`. Docker (and most PaaS) send these signals on termination, allowing the server to finish in-flight requests before exiting with code 0.
+
+## Database Maintenance
+
+* **Reset database** – stop the server, delete the data directory, and ingest again.
+* **Validate database** – `pnpm run validate --data-dir ./data` ensures record integrity.
+* **Upgrade label-set** – ingest the next `.ensrainbow` file (version +1). The highest version is reported by `GET /version`.

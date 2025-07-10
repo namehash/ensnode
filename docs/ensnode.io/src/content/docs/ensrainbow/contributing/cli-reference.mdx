@@ -1,0 +1,19 @@
+---
+title: ENSRainbow CLI Reference
+sidebar:
+  label: CLI Reference
+  order: 3
+keywords: [ensrainbow, cli]
+---
+
+| Command | Purpose | Most useful flags | Example |
+|---------|---------|-------------------|---------|
+| `convert` | Convert legacy `.sql.gz` rainbow tables to `.ensrainbow` | `--input-file`, `--output-file` | `pnpm run convert --input-file ens_names.sql.gz --output-file subgraph-0.ensrainbow` |
+| `ingest-ensrainbow` | Stream a `.ensrainbow` file into LevelDB | `--input-file`, `--data-dir` | `pnpm run ingest-ensrainbow --input-file subgraph-0.ensrainbow --data-dir ./data` |
+| `validate` | Verify DB integrity | `--data-dir`, `--lite` | `pnpm run validate --lite` |
+| `purge` | Delete all DB files in a directory | `--data-dir` | `pnpm run purge --data-dir ./data` |
+| `serve` | Launch the HTTP API server | `--data-dir`, `--port` | `pnpm run serve --port 3223` |
+
+:::tip[Need full help?]
+Append `--help` to any command, e.g. `pnpm run serve --help`.
+::: 

@@ -118,14 +118,15 @@ export function starlight(): AstroIntegration {
               label: "Overview",
               items: [
                 {
-                  label: "Quickstart",
+                  label: "What is ENSRainbow?",
                   link: "/ensrainbow",
                 },
-                {
-                  label: "What is ENSRainbow?",
-                  link: "/ensrainbow/overview/what-is-ensrainbow",
-                },
               ],
+            },
+            {
+              label: "Concepts",
+              collapsed: false,
+              autogenerate: { directory: "ensrainbow/concepts" },
             },
             {
               label: "Using ENSRainbow",

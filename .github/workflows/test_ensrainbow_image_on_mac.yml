@@ -33,12 +33,21 @@ jobs:
 
       - name: Pull ENSRainbow test image
         run: |
-          docker pull ghcr.io/namehash/ensnode/ensrainbow-test:latest
+          docker pull ghcr.io/namehash/ensnode/ensrainbow:latest
 
       - name: Run ENSRainbow test container
         run: |
+          # Create a directory on your host machine for test data
+          mkdir -p ~/my_ensrainbow_test_data
+
           # Run the container in detached mode
-          CONTAINER_ID=$(docker run -d -p 3223:3223 ghcr.io/namehash/ensnode/ensrainbow-test:latest)
+          CONTAINER_ID=$(docker run -d \
+            -v ~/my_ensrainbow_test_data:/app/apps/ensrainbow/data \
+            -e DB_SCHEMA_VERSION="3" \
+            -e LABEL_SET_ID="ens-test-env" \
+            -e LABEL_SET_VERSION="0" \
+            -p 3223:3223 \
+            ghcr.io/namehash/ensnode/ensrainbow:latest)
           echo "Container ID: $CONTAINER_ID"
 
           # Wait for container to start up
