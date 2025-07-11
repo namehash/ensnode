@@ -78,6 +78,10 @@ export default function () {
     });
   });
 
+  ///////////////////////////////
+  // LegacyEthRegistrarController
+  ///////////////////////////////
+
   ponder.on(
     namespaceContract(pluginName, "LegacyEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
@@ -89,10 +93,14 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "LegacyEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
-      // the old registrar controller just had `cost` param
+      // the legacy registrar controller just had `cost` param
       await handleNameRenewedByController({ context, event });
     },
   );
+
+  ////////////////////////////////
+  // WrappedEthRegistrarController
+  ////////////////////////////////
 
   ponder.on(
     namespaceContract(pluginName, "WrappedEthRegistrarController:NameRegistered"),
@@ -103,7 +111,7 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            // the new registrar controller uses baseCost + premium to compute cost
+            // the WrappedEthRegistrarController uses baseCost + premium to compute cost
             cost: event.args.baseCost + event.args.premium,
           },
         },
@@ -113,8 +121,50 @@ export default function () {
 
   ponder.on(
     namespaceContract(pluginName, "WrappedEthRegistrarController:NameRenewed"),
+    handleNameRenewedByController,
+  );
+
+  //////////////////////////////////
+  // UnwrappedEthRegistrarController
+  //////////////////////////////////
+
+  ponder.on(
+    namespaceContract(pluginName, "UnwrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
-      await handleNameRenewedByController({ context, event });
+      await handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // the UnwrappedEthRegistrarController uses the correct argument names (`label`, `labelhash`)
+            // so we re-map them back to the subgraph-expected nomenclature here
+            name: event.args.label,
+            label: event.args.labelhash,
+            // the UnwrappedEthRegistrarController uses baseCost + premium to compute cost
+            cost: event.args.baseCost + event.args.premium,
+          },
+        },
+      });
+    },
+  );
+
+  ponder.on(
+    namespaceContract(pluginName, "UnwrappedEthRegistrarController:NameRenewed"),
+    async ({ context, event }) => {
+      await handleNameRenewedByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // the UnwrappedEthRegistrarController uses the correct argument names (`label`, `labelhash`)
+            // so we re-map them back to the subgraph-expected nomenclature here
+            name: event.args.label,
+            label: event.args.labelhash,
+            // cost is
+            cost: event.args.cost,
+          },
+        },
+      });
     },
   );
 }

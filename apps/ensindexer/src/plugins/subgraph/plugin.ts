@@ -55,6 +55,14 @@ export default createPlugin({
           ),
           abi: contracts.WrappedEthRegistrarController.abi,
         },
+        [namespaceContract(pluginName, "UnwrappedEthRegistrarController")]: {
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            chain.id,
+            contracts.UnwrappedEthRegistrarController,
+          ),
+          abi: contracts.UnwrappedEthRegistrarController.abi,
+        },
         [namespaceContract(pluginName, "NameWrapper")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.NameWrapper),
           abi: contracts.NameWrapper.abi,
