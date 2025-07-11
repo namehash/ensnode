@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/ponder-client-api",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
 };

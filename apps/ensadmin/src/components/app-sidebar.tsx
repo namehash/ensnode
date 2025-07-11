@@ -21,20 +21,10 @@ const navItems = [
     icon: IconENS,
   },
   {
-    title: "APIs",
-    url: "#",
+    title: "Subgraph (GraphQL)",
+    url: "/api/subgraph",
     icon: RadioTower,
     isActive: true,
-    items: [
-      {
-        title: "Subgraph (GraphQL)",
-        url: "/api/subgraph",
-      },
-      {
-        title: "Ponder Client",
-        url: "/ponder-client-api",
-      },
-    ],
   },
 ];
 
