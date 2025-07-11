@@ -31,6 +31,11 @@ export default function () {
     registrarManagedName: "eth",
   });
 
+  ///////////////////////////////
+  // BaseRegistrar
+  // https://docs.ens.domains/registry/eth/#baseregistrar-vs-controller
+  ///////////////////////////////
+
   ponder.on(
     namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {
@@ -85,16 +90,38 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "LegacyEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
-      // the old registrar controller just had `cost` param
-      await handleNameRegisteredByController({ context, event });
+      await handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // LegacyEthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            // LegacyEthRegistrarController just uses `cost` param
+            cost: event.args.cost,
+          },
+        },
+      });
     },
   );
 
   ponder.on(
     namespaceContract(pluginName, "LegacyEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
-      // the legacy registrar controller just had `cost` param
-      await handleNameRenewedByController({ context, event });
+      await handleNameRenewedByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // LegacyEthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            // LegacyEthRegistrarController just uses `cost` param
+            cost: event.args.cost,
+          },
+        },
+      });
     },
   );
 
@@ -110,8 +137,10 @@ export default function () {
         event: {
           ...event,
           args: {
-            ...event.args,
-            // the WrappedEthRegistrarController uses baseCost + premium to compute cost
+            // WrappedEthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            // the WrappedEthRegistrarController#NameRegistered uses baseCost + premium to compute cost
             cost: event.args.baseCost + event.args.premium,
           },
         },
@@ -121,7 +150,21 @@ export default function () {
 
   ponder.on(
     namespaceContract(pluginName, "WrappedEthRegistrarController:NameRenewed"),
-    handleNameRenewedByController,
+    async ({ context, event }) => {
+      await handleNameRenewedByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // WrappedEthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            // WrappedEthRegistrarController#NameRenewed provides direct `cost` argument
+            cost: event.args.cost,
+          },
+        },
+      });
+    },
   );
 
   //////////////////////////////////
@@ -136,11 +179,10 @@ export default function () {
         event: {
           ...event,
           args: {
-            // the UnwrappedEthRegistrarController uses the correct argument names (`label`, `labelhash`)
-            // so we re-map them back to the subgraph-expected nomenclature here
-            name: event.args.label,
-            label: event.args.labelhash,
-            // the UnwrappedEthRegistrarController uses baseCost + premium to compute cost
+            label: event.args.label,
+            // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
+            labelHash: event.args.labelhash,
+            // the UnwrappedEthRegistrarController#NameRegistered uses baseCost + premium to compute cost
             cost: event.args.baseCost + event.args.premium,
           },
         },
@@ -156,11 +198,10 @@ export default function () {
         event: {
           ...event,
           args: {
-            // the UnwrappedEthRegistrarController uses the correct argument names (`label`, `labelhash`)
-            // so we re-map them back to the subgraph-expected nomenclature here
-            name: event.args.label,
-            label: event.args.labelhash,
-            // cost is
+            label: event.args.label,
+            // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
+            labelHash: event.args.labelhash,
+            // UnwrappedEthRegistrarController#NameRenewed provides direct `cost` argument
             cost: event.args.cost,
           },
         },

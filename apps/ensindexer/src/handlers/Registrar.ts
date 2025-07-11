@@ -166,17 +166,15 @@ export const makeRegistrarHandlers = ({
     }: {
       context: Context;
       event: EventWithArgs<{
-        // NOTE: `name` event arg actually represents a `Label`
-        name: Label;
-        // NOTE: `label` event arg actually represents a `LabelHash`
-        label: LabelHash;
+        label: Label;
+        labelHash: LabelHash;
         cost: bigint;
       }>;
     }) {
       // NOTE(preminted-names): no special handling is needed here: this handler is not used by
       // the plugins that support preminted names
 
-      const { name: label, label: labelHash, cost } = event.args;
+      const { label, labelHash, cost } = event.args;
       await setNamePreimage(context, label, labelHash, cost);
     },
 
@@ -186,17 +184,15 @@ export const makeRegistrarHandlers = ({
     }: {
       context: Context;
       event: EventWithArgs<{
-        // NOTE: `name` event arg actually represents a `Label`
-        name: Label;
-        // NOTE: `label` event arg actually represents a `LabelHash`
-        label: LabelHash;
+        label: Label;
+        labelHash: LabelHash;
         cost: bigint;
       }>;
     }) {
       // NOTE(preminted-names): no special handling is needed here: this handler is not used by
       // the plugins that support preminted names
 
-      const { name: label, label: labelHash, cost } = event.args;
+      const { label, labelHash, cost } = event.args;
       await setNamePreimage(context, label, labelHash, cost);
     },
 
