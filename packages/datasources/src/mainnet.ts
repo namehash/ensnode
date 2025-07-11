@@ -259,25 +259,31 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on the ENS Root chain.
+   * The Reverse Resolver(s) on the ENS Root chain.
    */
   [DatasourceNames.ReverseResolverRoot]: {
     chain: mainnet,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        // https://docs.ens.domains/learn/deployments/#mainnet
-        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
-        startBlock: 16925619,
-      },
-      // NOTE: the LegacyDefaultReverseResolver does NOT emit events (NameChanged or TextChanged),
+      // NOTE: the DefaultReverseResolver1 (aka LegacyDefaultReverseResolver) does NOT emit events
       // and is effectively unindexable for the purposes of Reverse Resolution. We document it here
-      // for completeness, and explicity do not index it.
-      // LegacyDefaultReverseResolver: {
+      // for completeness, but/and explicity do not index it.
+      // DefaultReverseResolver1: {
       //   abi: ResolverConfig.abi,
       //   address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
       //   startBlock: 9380501,
       // },
+      DefaultReverseResolver2: {
+        abi: ResolverConfig.abi,
+        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
+        startBlock: 16925619,
+      },
+      // this DefaultReverseResolver was enabled in the following proposal:
+      // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
+      DefaultReverseResolver3: {
+        abi: ResolverConfig.abi,
+        address: "0xA7d635c8de9a58a228AA69353a1699C7Cc240DCF",
+        startBlock: 22764871,
+      },
     },
   },
 
