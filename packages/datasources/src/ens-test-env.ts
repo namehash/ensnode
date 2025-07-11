@@ -7,11 +7,11 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
-import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 
 const deploymentAddresses = getENSTestEnvDeploymentAddresses();
 
@@ -67,13 +67,15 @@ export default {
         address: deploymentAddresses?.BaseRegistrarImplementation ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
-      EthRegistrarControllerOld: {
-        abi: root_EthRegistrarControllerOld,
+      LegacyEthRegistrarController: {
+        abi: root_LegacyEthRegistrarController,
         address: deploymentAddresses?.LegacyETHRegistrarController ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
-      EthRegistrarController: {
-        abi: root_EthRegistrarController,
+      WrappedEthRegistrarController: {
+        abi: root_WrappedEthRegistrarController,
+        // TODO: if ens-test-env is updated with the new UnwrappedEthRegistrarController, update
+        // this reference here
         address: deploymentAddresses?.ETHRegistrarController ?? EMPTY_ADDRESS,
         startBlock: 0,
       },

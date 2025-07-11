@@ -5,11 +5,11 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
-import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
@@ -59,13 +59,13 @@ export default {
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
         startBlock: 9380410,
       },
-      EthRegistrarControllerOld: {
-        abi: root_EthRegistrarControllerOld,
+      LegacyEthRegistrarController: {
+        abi: root_LegacyEthRegistrarController,
         address: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
         startBlock: 9380471,
       },
-      EthRegistrarController: {
-        abi: root_EthRegistrarController,
+      WrappedEthRegistrarController: {
+        abi: root_WrappedEthRegistrarController,
         address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
         startBlock: 16925618,
       },

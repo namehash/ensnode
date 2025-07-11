@@ -79,7 +79,7 @@ export default function () {
   });
 
   ponder.on(
-    namespaceContract(pluginName, "EthRegistrarControllerOld:NameRegistered"),
+    namespaceContract(pluginName, "LegacyEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       // the old registrar controller just had `cost` param
       await handleNameRegisteredByController({ context, event });
@@ -87,7 +87,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(pluginName, "EthRegistrarControllerOld:NameRenewed"),
+    namespaceContract(pluginName, "LegacyEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       // the old registrar controller just had `cost` param
       await handleNameRenewedByController({ context, event });
@@ -95,7 +95,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(pluginName, "EthRegistrarController:NameRegistered"),
+    namespaceContract(pluginName, "WrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
       await handleNameRegisteredByController({
         context,
@@ -112,7 +112,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(pluginName, "EthRegistrarController:NameRenewed"),
+    namespaceContract(pluginName, "WrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
       await handleNameRenewedByController({ context, event });
     },
