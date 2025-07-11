@@ -77,7 +77,7 @@ export default {
       },
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547",
+        address: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968",
         startBlock: 8579988,
       },
       NameWrapper: {
