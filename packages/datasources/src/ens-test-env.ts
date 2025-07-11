@@ -70,21 +70,31 @@ export default {
       },
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: deploymentAddresses?.LegacyETHRegistrarController ?? EMPTY_ADDRESS,
+        address:
+          // NOTE: prefer the post-UnwrappedEthRegistrarController naming
+          deploymentAddresses?.LegacyETHRegistrarController ??
+          // TODO: remove deploymentAddresses?.ETHRegistrarControllerOld after ens-test-env is updated
+          deploymentAddresses?.ETHRegistrarControllerOld ??
+          EMPTY_ADDRESS,
         startBlock: 0,
       },
       WrappedEthRegistrarController: {
         abi: root_WrappedEthRegistrarController,
-        // TODO: once ens-test-env is updated with the new UnwrappedEthRegistrarController, update
-        // this reference here
-        address: deploymentAddresses?.ETHRegistrarController ?? EMPTY_ADDRESS,
+        address:
+          // NOTE: prefer the post-UnwrappedEthRegistrarController naming
+          deploymentAddresses?.WrappedETHRegistrarController ??
+          // TODO: remove deploymentAddresses?.ETHRegistrarController after ens-test-env is updated
+          deploymentAddresses?.ETHRegistrarController ??
+          EMPTY_ADDRESS,
         startBlock: 0,
       },
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
         // TODO: once ens-test-env is updated with the new UnwrappedEthRegistrarController, update
         // this reference here
-        address: zeroAddress,
+        // NOTE: using zeroAddress so indexing proceeds as expected in ens-test-env pre-UnwrappedEthRegistrarController
+        // TODO: change zeroAddress to EMPTY_ADDRESS after ens-test-env is updated
+        address: deploymentAddresses?.UnwrappedETHRegistrarController ?? zeroAddress,
         startBlock: 0,
       },
       NameWrapper: {
