@@ -130,11 +130,10 @@ export default function () {
         event: {
           ...event,
           args: {
+            ...event.args,
             // EthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
-            // EthRegistrarController#NameRenewed just uses `cost` param
-            cost: event.args.cost,
           },
         },
       });

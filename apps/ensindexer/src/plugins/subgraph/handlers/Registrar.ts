@@ -95,11 +95,10 @@ export default function () {
         event: {
           ...event,
           args: {
+            ...event.args,
             // LegacyEthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
-            // LegacyEthRegistrarController just uses `cost` param
-            cost: event.args.cost,
           },
         },
       });
@@ -114,11 +113,10 @@ export default function () {
         event: {
           ...event,
           args: {
+            ...event.args,
             // LegacyEthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
-            // LegacyEthRegistrarController just uses `cost` param
-            cost: event.args.cost,
           },
         },
       });
@@ -156,11 +154,10 @@ export default function () {
         event: {
           ...event,
           args: {
+            ...event.args,
             // WrappedEthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
-            // WrappedEthRegistrarController#NameRenewed provides direct `cost` argument
-            cost: event.args.cost,
           },
         },
       });
@@ -198,11 +195,11 @@ export default function () {
         event: {
           ...event,
           args: {
+            ...event.args,
             label: event.args.label,
             // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
             labelHash: event.args.labelhash,
             // UnwrappedEthRegistrarController#NameRenewed provides direct `cost` argument
-            cost: event.args.cost,
           },
         },
       });
