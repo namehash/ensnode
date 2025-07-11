@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 import { anvil } from "viem/chains";
 
 import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
@@ -11,6 +11,7 @@ import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } fro
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 
 const deploymentAddresses = getENSTestEnvDeploymentAddresses();
@@ -74,9 +75,16 @@ export default {
       },
       WrappedEthRegistrarController: {
         abi: root_WrappedEthRegistrarController,
-        // TODO: if ens-test-env is updated with the new UnwrappedEthRegistrarController, update
+        // TODO: once ens-test-env is updated with the new UnwrappedEthRegistrarController, update
         // this reference here
         address: deploymentAddresses?.ETHRegistrarController ?? EMPTY_ADDRESS,
+        startBlock: 0,
+      },
+      UnwrappedEthRegistrarController: {
+        abi: root_UnwrappedEthRegistrarController,
+        // TODO: once ens-test-env is updated with the new UnwrappedEthRegistrarController, update
+        // this reference here
+        address: zeroAddress,
         startBlock: 0,
       },
       NameWrapper: {
