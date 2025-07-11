@@ -90,9 +90,6 @@ app.get(
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
 
-// use ponder client support
-app.use("/sql/*", client({ db, schema: schemaWithoutExtensions }));
-
 // use ponder middleware at `/ponder` with description injection
 app.use("/ponder", fixContentLengthMiddleware);
 app.use("/ponder", makeApiDocumentationMiddleware("/ponder"));
