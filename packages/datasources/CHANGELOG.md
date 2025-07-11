@@ -1,5 +1,13 @@
 # @ensnode/ens-deployments
 
+## 0.32.0
+
+### Minor Changes
+
+- [#740](https://github.com/namehash/ensnode/pull/740) [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0) Thanks [@Y3drk](https://github.com/Y3drk)! - Added helper functions to generate block explorer URLs for supported chains.
+
+- [#812](https://github.com/namehash/ensnode/pull/812) [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8) Thanks [@Y3drk](https://github.com/Y3drk)! - Added helper functions for generating ENS Manager App URLs
+
 ## 0.31.0
 
 ## 0.30.0

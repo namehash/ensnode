@@ -1,5 +1,23 @@
 # ensindexer
 
+## 0.32.0
+
+### Minor Changes
+
+- [#865](https://github.com/namehash/ensnode/pull/865) [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294) Thanks [@shrugs](https://github.com/shrugs)! - implements protocol tracing outputs for the resolution apis via ?debug query param
+
+- [#747](https://github.com/namehash/ensnode/pull/747) [`27c0ea0`](https://github.com/namehash/ensnode/commit/27c0ea0c834fcce6c45a04510ba56e4e86a82738) Thanks [@shrugs](https://github.com/shrugs)! - add forward/reverse resolution apis gated behind an EXPERIMENTAL_RESOLUTION config flag
+
+### Patch Changes
+
+- Updated dependencies [[`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294), [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0), [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8)]:
+  - @ensnode/ensnode-sdk@0.32.0
+  - @ensnode/datasources@0.32.0
+  - @ensnode/ensrainbow-sdk@0.32.0
+  - @ensnode/ponder-metadata@0.32.0
+  - @ensnode/ensnode-schema@0.32.0
+  - @ensnode/ponder-subgraph@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes
