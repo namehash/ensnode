@@ -39,21 +39,29 @@ export default createPlugin({
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
-        [namespaceContract(pluginName, "EthRegistrarControllerOld")]: {
+        [namespaceContract(pluginName, "LegacyEthRegistrarController")]: {
           chain: chainConfigForContract(
             config.globalBlockrange,
             chain.id,
-            contracts.EthRegistrarControllerOld,
+            contracts.LegacyEthRegistrarController,
           ),
-          abi: contracts.EthRegistrarControllerOld.abi,
+          abi: contracts.LegacyEthRegistrarController.abi,
         },
-        [namespaceContract(pluginName, "EthRegistrarController")]: {
+        [namespaceContract(pluginName, "WrappedEthRegistrarController")]: {
           chain: chainConfigForContract(
             config.globalBlockrange,
             chain.id,
-            contracts.EthRegistrarController,
+            contracts.WrappedEthRegistrarController,
           ),
-          abi: contracts.EthRegistrarController.abi,
+          abi: contracts.WrappedEthRegistrarController.abi,
+        },
+        [namespaceContract(pluginName, "UnwrappedEthRegistrarController")]: {
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            chain.id,
+            contracts.UnwrappedEthRegistrarController,
+          ),
+          abi: contracts.UnwrappedEthRegistrarController.abi,
         },
         [namespaceContract(pluginName, "NameWrapper")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.NameWrapper),

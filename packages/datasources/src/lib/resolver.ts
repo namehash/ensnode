@@ -3,6 +3,8 @@ import { LegacyPublicResolver } from "../abis/resolver/LegacyPublicResolver";
 import { Resolver } from "../abis/resolver/Resolver";
 import type { ContractConfig } from "./types";
 
+export const ResolverABI = mergeAbis([LegacyPublicResolver, Resolver]);
+
 /**
  * The Resolver ABI is the same across plugins, and includes the LegacyPublicResolver abi
  * (notably its altered `TextChanged` event) for full compatibility with Resolvers on mainnet.
@@ -11,7 +13,7 @@ import type { ContractConfig } from "./types";
  * is omitted in this ContractConfig.
  */
 export const ResolverConfig = {
-  abi: mergeAbis([LegacyPublicResolver, Resolver]),
+  abi: ResolverABI,
   // NOTE: a Resolver is any contract that matches this `filter`
   filter: [
     { event: "AddrChanged", args: {} },

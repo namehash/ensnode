@@ -1,4 +1,4 @@
-export const EthRegistrarController = [
+export const WrappedEthRegistrarController = [
   {
     inputs: [
       {
