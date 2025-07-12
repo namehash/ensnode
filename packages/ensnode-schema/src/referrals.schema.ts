@@ -17,7 +17,6 @@ export const ext_registrationReferral = onchainTable(
     referrerId: t.hex().notNull(),
     domainId: t.text().notNull(),
     refereeId: t.hex().notNull(),
-    // TODO: maybe baseCost/premium should be optional? not all registrars may price that way...
     baseCost: t.bigint().notNull(),
     premium: t.bigint().notNull(),
     total: t.bigint().notNull(),
@@ -26,7 +25,7 @@ export const ext_registrationReferral = onchainTable(
     chainId: t.integer().notNull(),
     // transaction's hash
     transactionHash: t.hex().notNull(),
-    // Block's Unix timestamp in seconds
+    // block's Unix timestamp in seconds
     timestamp: t.bigint().notNull(),
   }),
   (t) => ({
