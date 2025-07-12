@@ -1,8 +1,15 @@
 import { ponder } from "ponder:registry";
-import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import {
+  type LabelHash,
+  PluginName,
+  makeSubdomainNode,
+  uint256ToHex32,
+} from "@ensnode/ensnode-sdk";
 
+import { handleRegistrationReferral, handleRenewalReferral } from "@/handlers/Referrals";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { namespaceContract } from "@/lib/plugin-helpers";
+import { namehash } from "viem";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
@@ -12,6 +19,9 @@ import { namespaceContract } from "@/lib/plugin-helpers";
  * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/ethregistrar/ETHRegistrarController.sol#L215
  */
 const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
+
+// the shared Registrar handlers in this plugin index direct subnames of '.eth'
+const registrarManagedName = "eth" as const;
 
 /**
  * Registers event handlers with Ponder.
@@ -27,8 +37,7 @@ export default function () {
     handleNameTransferred,
   } = makeRegistrarHandlers({
     pluginName,
-    // the shared Registrar handlers in this plugin index direct subnames of '.eth'
-    registrarManagedName: "eth",
+    registrarManagedName,
   });
 
   ///////////////////////////////
@@ -184,6 +193,19 @@ export default function () {
           },
         },
       });
+
+      // UnwrappedEthRegistrarController includes referral tracking, so we index it here
+      await handleRegistrationReferral({
+        context,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            referee: event.args.owner,
+            node: makeSubdomainNode(event.args.labelhash, namehash(registrarManagedName)),
+          },
+        },
+      });
     },
   );
 
@@ -200,6 +222,18 @@ export default function () {
             // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
             labelHash: event.args.labelhash,
             // UnwrappedEthRegistrarController#NameRenewed provides direct `cost` argument
+          },
+        },
+      });
+
+      // UnwrappedEthRegistrarController includes referral tracking, so we index it here
+      await handleRenewalReferral({
+        context,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            node: makeSubdomainNode(event.args.labelhash, namehash(registrarManagedName)),
           },
         },
       });
