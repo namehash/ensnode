@@ -6,7 +6,6 @@ import {
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
-import { handleRegistrationReferral, handleRenewalReferral } from "@/handlers/Referrals";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { namehash } from "viem";
@@ -193,19 +192,6 @@ export default function () {
           },
         },
       });
-
-      // UnwrappedEthRegistrarController includes referral tracking, so we index it here
-      await handleRegistrationReferral({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            referee: event.args.owner,
-            node: makeSubdomainNode(event.args.labelhash, namehash(registrarManagedName)),
-          },
-        },
-      });
     },
   );
 
@@ -222,18 +208,6 @@ export default function () {
             // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
             labelHash: event.args.labelhash,
             // UnwrappedEthRegistrarController#NameRenewed provides direct `cost` argument
-          },
-        },
-      });
-
-      // UnwrappedEthRegistrarController includes referral tracking, so we index it here
-      await handleRenewalReferral({
-        context,
-        event: {
-          ...event,
-          args: {
-            ...event.args,
-            node: makeSubdomainNode(event.args.labelhash, namehash(registrarManagedName)),
           },
         },
       });
