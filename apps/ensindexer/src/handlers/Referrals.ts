@@ -5,7 +5,7 @@
 
 import { Context } from "ponder:registry";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { Address, Hex } from "viem";
+import { Address, Hex, zeroHash } from "viem";
 
 import schema from "ponder:schema";
 import { Node } from "@ensnode/ensnode-sdk";
@@ -27,6 +27,10 @@ export async function handleRegistrationReferral({
   }>;
 }) {
   const { referrer, node, referee, baseCost, premium } = event.args;
+
+  // no referrer, no-op
+  if (referrer === zeroHash) return;
+
   const total = baseCost + premium;
 
   // create the Referral event
@@ -74,6 +78,9 @@ export async function handleRenewalReferral({
   }>;
 }) {
   const { referrer, node, cost } = event.args;
+
+  // no referrer, no-op
+  if (referrer === zeroHash) return;
 
   // create the Referral event
   await context.db.insert(schema.ext_renewalReferral).values({
