@@ -1,4 +1,4 @@
-import type { Name, Node } from "@ensnode/ensnode-sdk";
+import { ETH_COIN_TYPE, type Name, type Node } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
   type Address,
@@ -24,6 +24,7 @@ const tracer = trace.getTracer("resolve-calls-and-results");
 
 // for all relevant eth_calls here, all Resolver contracts share the same abi, so just grab one from
 // @ensnode/datasources that is guaranted to exist
+// TODO: update this to use datasources' ResolverABI once it's available
 const RESOLVER_ABI = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot).contracts
   .Resolver.abi;
 
@@ -77,13 +78,21 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
 ) {
   return [
     selection.name && ({ functionName: "name", args: [node] } as const),
-    ...(selection.addresses ?? []).map(
-      (coinType) =>
-        ({
+    ...(selection.addresses ?? []).map((coinType) => {
+      // NOTE(ENSIP-19): if the coinType is 60 (ETH_COIN_TYPE), the calldata should _not_ include coinType argument
+      // https://docs.ens.domains/ensip/19/#forward-resolution
+      if (coinType === ETH_COIN_TYPE) {
+        return {
           functionName: "addr",
-          args: [node, BigInt(coinType)],
-        }) as const,
-    ),
+          args: [node],
+        } as const;
+      }
+
+      return {
+        functionName: "addr",
+        args: [node, BigInt(coinType)],
+      } as const;
+    }),
     ...(selection.texts ?? []).map(
       (key) =>
         ({
@@ -157,29 +166,16 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
 
           // if not extended resolver, resolve directly
           return withSpanAsync(tracer, `${call.functionName}(${call.args})`, {}, async () => {
-            // NOTE: discrimminate against the `functionName` type, otherwise typescript complains about
-            // `call` not matching the expected types of the `readContract` arguments. also helpfully
-            // infers the return type of `readContract` matches the result type of each `call`
-            switch (call.functionName) {
-              case "name":
-                return {
-                  call,
-                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
-                  reason: ".name()",
-                };
-              case "addr":
-                return {
-                  call,
-                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
-                  reason: ".addr()",
-                };
-              case "text":
-                return {
-                  call,
-                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
-                  reason: ".text()",
-                };
-            }
+            return {
+              call,
+              result: await publicClient.readContract({
+                ...ResolverContract,
+                functionName: call.functionName,
+                // NOTE: typescript is having some issues here so let's help it out...
+                args: call.args as any,
+              }),
+              reason: `.${call.functionName}(${call.args})`,
+            };
           });
         } catch (error) {
           // in general, reverts are expected behavior

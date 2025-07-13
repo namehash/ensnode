@@ -1,5 +1,7 @@
 import {
+  DEFAULT_EVM_CHAIN_ID,
   DEFAULT_EVM_COIN_TYPE,
+  Name,
   ReverseResolutionProtocolStep,
   TraceableENSProtocol,
   evmChainIdToCoinType,
@@ -16,7 +18,6 @@ import { withActiveSpanAsync } from "@/lib/auto-span";
 
 const REVERSE_SELECTION = {
   name: true,
-  texts: ["avatar"],
 } as const satisfies ResolverRecordsSelection;
 
 const tracer = trace.getTracer("reverse-resolution");
@@ -24,16 +25,16 @@ const tracer = trace.getTracer("reverse-resolution");
 /**
  * Implements ENS Reverse Resolution, including support for ENSIP-19 L2 Primary Names.
  *
- * @see https://docs.ens.domains/ensip/19#primary-name-resolution-process
+ * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  *
  * @param address the adddress to lookup the Primary Name of
- * @param [chainId=1] fetch the Primary Name of the `address` in the context of this `chainId`
+ * @param [chainId=0] the chainId context to fetch the Primary Name in, defaulting to the 'default' Primary Name
  */
 export async function resolveReverse(
   address: Address,
-  chainId: number = 1,
+  chainId: number = DEFAULT_EVM_CHAIN_ID,
   options: { accelerate?: boolean } = { accelerate: true },
-): Promise<ResolverRecordsResponse<typeof REVERSE_SELECTION> | null> {
+): Promise<Name | null> {
   // trace for external consumers
   return withProtocolStepAsync(
     TraceableENSProtocol.ReverseResolution,
@@ -45,46 +46,28 @@ export async function resolveReverse(
         `resolveReverse(${address}, chainId: ${chainId})`,
         { address, chainId, "ens.protocol": TraceableENSProtocol.ReverseResolution },
         async (span) => {
-          let coinType = evmChainIdToCoinType(chainId);
+          /////////////////////////////////////////////////////////
+          // 'Reverse Resoltion' Steps
+          // https://docs.ens.domains/ensip/19/#reverse-resolution
+          /////////////////////////////////////////////////////////
 
-          // Steps 1-7 — Resolve coinType-specific name and avatar records
+          // Steps 1-3 — Resolve coinType-specific name record
+          const coinType = evmChainIdToCoinType(chainId);
           span.addEvent(`Resolving records for coinType "${coinType}"...`);
-          let records = await withProtocolStepAsync(
+          const { name } = await withProtocolStepAsync(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ForwardResolveCoinType,
             () => resolveForward(reverseName(address, coinType), REVERSE_SELECTION, options),
           );
 
-          // Step 8 — Determine if name record exists
+          // Step 4 — If no name record, there is no Primary Name for this address
           addProtocolStepEvent(
             protocolTracingSpan,
             TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.SpecificNameRecordExists,
-            !!records.name,
+            ReverseResolutionProtocolStep.NameRecordExists,
+            !!name,
           );
-          if (!records.name) {
-            // Step 9 — Resolve default records if necessary
-            // TODO: perhaps this could be optimistically fetched in parallel to above, ensure that coinType
-            // is set correctly for whichever records ends up being used
-            coinType = DEFAULT_EVM_COIN_TYPE;
-            span.addEvent(
-              `No Primary Name for coinType "${coinType}", Resolving records for default coinType "${coinType}"`,
-            );
-            records = await withProtocolStepAsync(
-              TraceableENSProtocol.ReverseResolution,
-              ReverseResolutionProtocolStep.ForwardResolveDefaultCoinType,
-              () => resolveForward(reverseName(address, coinType), REVERSE_SELECTION, options),
-            );
-          }
-
-          // Step 10 — If no name record, there is no Primary Name for this address
-          addProtocolStepEvent(
-            protocolTracingSpan,
-            TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.DefaultNameRecordExists,
-            !!records.name,
-          );
-          if (!records.name) {
+          if (!name) {
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: `No Primary Name for coinType "${evmChainIdToCoinType(chainId)}" or default coinType.`,
@@ -92,22 +75,24 @@ export async function resolveReverse(
             return null;
           }
 
-          const resolvedName = records.name;
-          span.setAttribute("resolvedName", resolvedName);
+          span.setAttribute("name", name);
 
-          // Step 11 — Resolve address record for the given coinType
-          span.addEvent(
-            `Resolving Address for name "${resolvedName}" and coinType "${coinType}"...`,
-          );
+          /////////////////////////////////////////////////////////
+          // 'Forward Resoltion' Steps
+          // https://docs.ens.domains/ensip/19/#forward-resolution
+          /////////////////////////////////////////////////////////
+
+          // Steps 1-2 — Resolve address record for the given coinType
+          span.addEvent(`Resolving address for name "${name}" and coinType "${coinType}"...`);
           const { addresses } = await withProtocolStepAsync(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ForwardResolveAddressRecord,
-            () => resolveForward(resolvedName, { addresses: [coinType] }, options),
+            () => resolveForward(name, { addresses: [coinType] }, options),
           );
 
           const resolvedAddress = addresses[coinType];
 
-          // Steps 12-13 — Check resolvedAddress validity
+          // Step 3 — Check resolvedAddress validity
 
           // if there's no resolvedAddress, no Primary Name
           const resolvedAddressExists = !!resolvedAddress;
@@ -157,9 +142,8 @@ export async function resolveReverse(
             return null;
           }
 
-          // finally, the records are valid for this address
-          span.setAttribute("records", JSON.stringify(records));
-          return records;
+          // finally, the name is considered a valid Primary Name for this address
+          return name;
         },
       ),
   );

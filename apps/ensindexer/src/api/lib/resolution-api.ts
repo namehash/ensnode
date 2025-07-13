@@ -77,12 +77,12 @@ app.get("/reverse/:address", async (c) => {
       return c.json({ error: "address parameter is required" }, 400);
     }
 
-    const chainId = c.req.query("chainId") ? Number(c.req.query("chainId")) : 1;
+    const chainId = c.req.query("chainId") ? Number(c.req.query("chainId")) : undefined;
 
-    const { result: records, trace } = await captureTrace(() => resolveReverse(address, chainId));
+    const { result: name, trace } = await captureTrace(() => resolveReverse(address, chainId));
 
     const debug = !!c.req.query("debug");
-    return c.json({ records, ...(debug && { trace }) });
+    return c.json({ name, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
@@ -109,12 +109,12 @@ app.get("/auto/:addressOrName", async (c) => {
 
     const selection = buildSelectionFromQueryParams(c);
 
-    const { result: records, trace } = await captureTrace(() =>
+    const { result: name, trace } = await captureTrace(() =>
       resolveAutomatic(addressOrName, selection),
     );
 
     const debug = !!c.req.query("debug");
-    return c.json({ records, ...(debug && { trace }) });
+    return c.json({ name, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);

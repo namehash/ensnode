@@ -31,7 +31,7 @@ import {
 } from "@/api/lib/resolver-records-response";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import config from "@/config";
-import { withActiveSpanAsync, withSpan, withSpanAsync } from "@/lib/auto-span";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import { makeResolverId } from "@/lib/ids";
 
 const tracer = trace.getTracer("forward-resolution");
@@ -102,7 +102,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
           //
           // but honestly the state drift is at max 1 block on L1 and a block or two on an L2, it's pretty negligible,
           // so maybe we just ignore this issue entirely
-          const normalizedName = withSpan(tracer, "normalization", {}, () => normalize(name));
+          const normalizedName = normalize(name);
           if (name !== normalizedName) {
             throw new Error(`Name "${name}" must be normalized ("${normalizedName}").`);
           }
@@ -110,29 +110,24 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
           // TODO: more name normalization logic (return values of `name` record for example)
           // TODO: need to handle encoded label hashes in name, yeah?
 
-          const node: Node = withSpan(tracer, "namehash", {}, () => namehash(name));
-          span.addEvent("Node Computed", { node });
+          const node: Node = namehash(name);
+          span.setAttribute("node", node);
 
           //////////////////////////////////////////////////
           // Validate Input
           //////////////////////////////////////////////////
 
           // construct the set of resolve() calls indicated by selection
-          const calls = withSpan(tracer, "makeResolveCalls", {}, () =>
-            makeResolveCalls(node, selection),
-          );
+          const calls = makeResolveCalls(node, selection);
+          span.setAttribute("calls", JSON.stringify(replaceBigInts(calls, String)));
 
           // empty selection? invalid input, nothing to do
           if (calls.length === 0) {
-            // TODO: maybe return some empty response instead of an error?
+            // TODO: maybe return some empty response instead of an error? user asked for it...
             throw new Error(
               `Invalid selection: ${JSON.stringify(selection)} resulted in no resolution calls.`,
             );
           }
-
-          span.addEvent("Resolve Calls Generated", {
-            calls: JSON.stringify(replaceBigInts(calls, String)),
-          });
 
           //////////////////////////////////////////////////
           // 1. Identify the active resolver for the name on the specified chain.
@@ -153,10 +148,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
             !!activeResolver,
           );
           // we're unable to find an active resolver for this name, return empty response
-          if (!activeResolver) {
-            // console.log(` ❌ findResolver: no active resolver, returning empty response`);
-            return makeEmptyResolverRecordsResponse(selection);
-          }
+          if (!activeResolver) return makeEmptyResolverRecordsResponse(selection);
 
           // set some attributes on the span for easy reference
           span.setAttribute("activeResolver", activeResolver);
@@ -217,8 +209,8 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
                 async () => {
+                  // fetch the Resolver and its records from index
                   const resolverId = makeResolverId(chainId, activeResolver, node);
-
                   const resolver = await withSpanAsync(tracer, "resolver.findFirst", {}, async () =>
                     db.query.resolver.findFirst({
                       where: (resolver, { eq }) => eq(resolver.id, resolverId),
@@ -227,7 +219,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
                     }),
                   );
 
-                  // Invariant, resolver must exist here
+                  // Invariant: resolver must exist here
                   if (!resolver) {
                     throw new Error(
                       `Invariant: chain ${chainId} is indexed and active resolver ${activeResolver} was identified, but no resolver exists with id ${resolverId}.`,
@@ -267,7 +259,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
           // create an un-cached publicClient
           const publicClient = createPublicClient({ transport: http(rpcConfig.url) });
 
-          // requireResolver() — validate behavior
+          // 3.1 requireResolver() — verifies that the resolver supports ENSIP-10 if necessary
           await withProtocolStepAsync(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.RequireResolver,
@@ -305,8 +297,9 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
           span.setAttribute("rawResults", JSON.stringify(replaceBigInts(rawResults, String)));
 
-          // interpret the results beyond simple return values
+          // additional semantic interpretation of the raw resuls from the chain
           const results = interpretRawCallsAndResults(rawResults);
+          span.setAttribute("results", JSON.stringify(replaceBigInts(results, String)));
 
           // return record values
           return makeRecordsResponseFromResolveResults(selection, results);
