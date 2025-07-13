@@ -1,9 +1,9 @@
-import { CoinType, Name } from "@ensnode/ensnode-sdk";
+import { CoinType } from "@ensnode/ensnode-sdk";
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
-import { resolveAutomatic } from "@/api/lib/automatic-resolution";
 import { resolveForward } from "@/api/lib/forward-resolution";
+import { resolvePrimaryNames } from "@/api/lib/primary-names-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
@@ -49,10 +49,13 @@ app.get("/forward/:name", async (c) => {
     }
 
     const selection = buildSelectionFromQueryParams(c);
-
-    const { result: records, trace } = await captureTrace(() => resolveForward(name, selection));
-
     const debug = !!c.req.param("debug");
+    const accelerate = !c.req.query("noaccel");
+
+    const { result: records, trace } = await captureTrace(() =>
+      resolveForward(name, selection, { accelerate }),
+    );
+
     return c.json({ records, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
@@ -78,10 +81,13 @@ app.get("/reverse/:address", async (c) => {
     }
 
     const chainId = c.req.query("chainId") ? Number(c.req.query("chainId")) : undefined;
-
-    const { result: name, trace } = await captureTrace(() => resolveReverse(address, chainId));
-
     const debug = !!c.req.query("debug");
+    const accelerate = !c.req.query("noaccel");
+
+    const { result: name, trace } = await captureTrace(() =>
+      resolveReverse(address, chainId, { accelerate }),
+    );
+
     return c.json({ name, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
@@ -89,32 +95,22 @@ app.get("/reverse/:address", async (c) => {
   }
 });
 
-/**
- * Example queries for /auto:
- *
- * 1. Auto resolution for an address:
- * GET /auto/0x1234...abcd?name=true&addresses=60&texts=avatar
- *
- * 2. Auto resolution for a name:
- * GET /auto/example.eth?name=true&addresses=60,0&texts=avatar,com.twitter
- */
-
-app.get("/auto/:addressOrName", async (c) => {
+app.get("/primary-names/:address", async (c) => {
   try {
     // TODO: correctly parse/validate with zod
-    const addressOrName = c.req.query("addressOrName") as Address | Name;
-    if (!addressOrName) {
-      return c.json({ error: "addressOrName parameter is required" }, 400);
+    const address = c.req.param("address") as Address;
+    if (!address) {
+      return c.json({ error: "address parameter is required" }, 400);
     }
 
-    const selection = buildSelectionFromQueryParams(c);
+    const debug = !!c.req.query("debug");
+    const accelerate = !c.req.query("noaccel");
 
-    const { result: name, trace } = await captureTrace(() =>
-      resolveAutomatic(addressOrName, selection),
+    const { result: names, trace } = await captureTrace(() =>
+      resolvePrimaryNames(address, { accelerate }),
     );
 
-    const debug = !!c.req.query("debug");
-    return c.json({ name, ...(debug && { trace }) });
+    return c.json({ names, ...(debug && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);

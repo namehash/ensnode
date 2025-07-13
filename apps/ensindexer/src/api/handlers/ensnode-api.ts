@@ -2,7 +2,7 @@ import config from "@/config";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
-import resolutionApi from "../lib/resolution-api";
+import resolutionApi from "./resolution-api";
 
 const app = new Hono();
 
