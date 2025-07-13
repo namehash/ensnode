@@ -137,7 +137,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
             await withProtocolStepAsync(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.FindResolver,
-              () => findResolver(chainId, name),
+              () => findResolver(chainId, name, { accelerate }),
             );
 
           // 1.2 Determine whether active resolver exists
@@ -152,13 +152,8 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 
           // set some attributes on the span for easy reference
           span.setAttribute("activeResolver", activeResolver);
+          span.setAttribute("activeName", activeName);
           span.setAttribute("requiresWildcardSupport", requiresWildcardSupport);
-          span.addEvent("Active Resolver Identified", {
-            activeName,
-            activeResolver,
-            chainId,
-            requiresWildcardSupport,
-          });
 
           //////////////////////////////////////////////////
           // 2. _resolveBatch with activeResolver, w/ ENSIP-10 Wildcard Resolution support
@@ -203,8 +198,6 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
             const isKnownOnchainStaticResolver =
               getKnownOnchainStaticResolverAddresses(chainId).includes(activeResolver);
             if (isKnownOnchainStaticResolver && areResolverRecordsIndexedOnChain(chainId)) {
-              span.addEvent("IS a Known Onchain Static Resolver");
-
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,

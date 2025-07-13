@@ -49,7 +49,7 @@ app.get("/forward/:name", async (c) => {
     }
 
     const selection = buildSelectionFromQueryParams(c);
-    const debug = !!c.req.param("debug");
+    const debug = !!c.req.query("debug");
     const accelerate = !c.req.query("noaccel");
 
     const { result: records, trace } = await captureTrace(() =>

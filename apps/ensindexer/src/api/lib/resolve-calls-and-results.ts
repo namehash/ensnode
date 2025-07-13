@@ -81,12 +81,12 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
     ...(selection.addresses ?? []).map((coinType) => {
       // NOTE(ENSIP-19): if the coinType is 60 (ETH_COIN_TYPE), the calldata should _not_ include coinType argument
       // https://docs.ens.domains/ensip/19/#forward-resolution
-      if (coinType === ETH_COIN_TYPE) {
-        return {
-          functionName: "addr",
-          args: [node],
-        } as const;
-      }
+      // if (coinType === ETH_COIN_TYPE) {
+      //   return {
+      //     functionName: "addr",
+      //     args: [node],
+      //   } as const;
+      // }
 
       return {
         functionName: "addr",
