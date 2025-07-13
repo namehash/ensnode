@@ -42,7 +42,6 @@ ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS 
    - Improved indexing speed (>10x faster than ENS Subgraph)
    - Isolated indexing schemas (supporting branches, staging environments)
    - Access your indexed data directly from Postgres
-   - `@ponder/client` for efficent client-side live queries
 
 4. **Self-hostable Decentralization Approach**
 
@@ -105,19 +104,13 @@ In general, however, each handler is written in a more ponder-native way, using 
 
 ## API Layer
 
-ENSIndexer exposes the following API endpoints:
+ENSIndexer exposes the following API endpoint:
 
-1. **Subgraph-Compatible GraphQL** (`/subgraph`)
+- **Subgraph-Compatible GraphQL** (`/subgraph`)
 
-   - Implements the ENS Subgraph schema and query patterns
-   - Enables gradual migration from existing Subgraph implementations
-   - Maintains compatibility with `ensjs` client library — just replace
-
-2. **Ponder Client API** (`/sql/*`)
-   - SQL-based alternative to GraphQL
-   - End-to-end type inference
-   - Support for live updates
-   - Optimized for client application integration
+  - Implements the ENS Subgraph schema and query patterns
+  - Enables gradual migration from existing Subgraph implementations
+  - Maintains compatibility with `ensjs` client library — just replace
 
 ## Label Healing with ENSRainbow
 
