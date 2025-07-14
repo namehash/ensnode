@@ -4,7 +4,7 @@ import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
-import { client, graphql as ponderGraphQL } from "ponder";
+import { graphql as ponderGraphQL } from "ponder";
 
 import { sdk } from "@/api/lib/instrumentation";
 import config from "@/config";
@@ -89,9 +89,6 @@ app.get(
 
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
-
-// use ponder client support
-app.use("/sql/*", client({ db, schema: schemaWithoutExtensions }));
 
 // use ponder middleware at `/ponder` with description injection
 app.use("/ponder", fixContentLengthMiddleware);
