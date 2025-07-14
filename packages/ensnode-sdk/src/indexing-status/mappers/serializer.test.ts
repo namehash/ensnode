@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ENSNode } from "../../ensnode";
 import { IndexingStatusDomain } from "../domain/types";
 import { IndexingStatusDTO } from "../dto/types";
-import { serializeIndexingStatus } from "./serializers";
+import { serializeIndexingStatus } from "./serializer";
 
 describe("Indexing Status", () => {
   describe("Domain serializers", () => {

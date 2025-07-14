@@ -1,5 +1,4 @@
 import * as z from "zod/v4";
-import { prettifyError } from "zod/v4";
 import { ENSNode } from "../../ensnode";
 import { IndexingStatusDomain } from "../domain/types";
 import { IndexingStatusDTO } from "../dto/types";
@@ -37,13 +36,11 @@ const FullBlockInfoSchema = z.object({
 // Base chain status properties
 const ChainStatusBaseSchema = z.object({
   chainId: ChainIdSchema,
-  indexingPhase: IndexingPhaseSchema,
-  rpcHealth: RpcHealthSchema,
 });
 
 // Define schemas for each specific combination of ChainStatus
 
-// Inv: 1 - RPC Unhealthy + Sync Queued
+// Permutation ID: 1 - RPC Unhealthy + Sync Queued
 const RpcUnhealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.SyncQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Unhealthy),
@@ -53,7 +50,7 @@ const RpcUnhealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   latestSafeBlock: z.null(),
 });
 
-// Inv: 2 - RPC Healthy + Sync Queued
+// Permutation ID: 2 - RPC Healthy + Sync Queued
 const RpcHealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.SyncQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Healthy),
@@ -63,7 +60,10 @@ const RpcHealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   latestSafeBlock: FullBlockInfoSchema, // Full block info available
 });
 
-// Inv: 3 - RPC Unhealthy + Indexing Queued
+// Permutation ID: 3 - RPC Unhealthy + Indexing Queued
+// TODO: Address the following: if we could have Ponder to cache full block
+//       information (number & date) in the RPC cache then we could serve
+//       full block info for `firstBlockToIndex` and `lastSyncedBlock`.
 const RpcUnhealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Unhealthy),
@@ -75,7 +75,7 @@ const RpcUnhealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
   error: "`lastSyncedBlock.number` must be greater than or equal to `firstBlockToIndex.number`",
 });
 
-// Inv: 4 - RPC Healthy + Indexing Queued
+// Permutation ID: 4 - RPC Healthy + Indexing Queued
 const RpcHealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Healthy),
@@ -91,7 +91,10 @@ const RpcHealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
     error: "`lastSyncedBlock.number` must be greater than or equal to `firstBlockToIndex.number`",
   });
 
-// Inv: 5 - RPC Unhealthy + Indexing Started
+// Permutation ID: 5 - RPC Unhealthy + Indexing Started
+// TODO: Address the following: if we could have Ponder to cache full block
+//       information (number & date) in the RPC cache then we could serve
+//       full block info for `firstBlockToIndex`, `lastSyncedBlock`, and `lastIndexedBlock`.
 const RpcUnhealthyIndexingStartedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingStarted),
   rpcHealth: z.literal(ENSNode.RPCHealth.Unhealthy),
@@ -107,7 +110,7 @@ const RpcUnhealthyIndexingStartedSchema = ChainStatusBaseSchema.extend({
     error: "`lastIndexedBlock.number` must be greater than or equal to `firstBlockToIndex.number`",
   });
 
-// Inv: 6 - RPC Healthy + Indexing Started
+// Permutation ID: 6 - RPC Healthy + Indexing Started
 const RpcHealthyIndexingStartedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingStarted),
   rpcHealth: z.literal(ENSNode.RPCHealth.Healthy),
@@ -137,7 +140,9 @@ const ChainStatusSchema = z.union([
 ]);
 
 const IndexingStatusDtoSchema = z
-  .record(z.string().transform(Number).pipe(ChainIdSchema), ChainStatusSchema)
+  .record(z.string().transform(Number).pipe(ChainIdSchema), ChainStatusSchema, {
+    error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
+  })
   .transform((parsedIndexStatusDto) => {
     const indexingStatusDomain: IndexingStatusDomain.IndexingStatus = new Map();
 
@@ -159,8 +164,14 @@ export function deserializeIndexingStatus(
 ): IndexingStatusDomain.IndexingStatus {
   const parsed = IndexingStatusDtoSchema.safeParse(indexingStatusDto);
 
+  // if (parsed.error) {
+  //   throw new Error(
+  //     "Failed to parse IndexingStatus DTO:" + JSON.stringify(treeifyError(parsed.error), null, 2),
+  //   );
+  // }
+
   if (parsed.error) {
-    throw new Error("Failed to parse IndexingStatus DTO: \n" + prettifyError(parsed.error) + "\n");
+    throw new Error(`Failed to parse IndexingStatus DTO: \n${z.prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;
