@@ -187,7 +187,7 @@ When using ENSRainbow with Docker, the following environment variables control w
   - **Configuration**: Choose the label set ID that matches your needs: 
     - `subgraph` - Main production dataset from The Graph's ENS subgraph
     - `searchlight` - Extended dataset with additional label discoveries
-    - `discoveryA` - Dataset for dynamically discovered labels (initially empty)
+    - `discovery-a` - Dataset for dynamically discovered labels (initially empty)
     - `ens-test-env` - Small test dataset for development and testing. It is perfectly aligned with the set of labels expected by the [ens-test-env](https://github.com/ensdomains/ens-test-env).
 
 - **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
@@ -278,12 +278,12 @@ This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow`
 time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
 ```
 
-**For the `discoveryA` Label Set (initially empty for discovered labels):**
-This creates an empty `.ensrainbow` file for version 0 of the `discoveryA` Label Set, which is used for labels discovered dynamically.
+**For the `discovery-a` Label Set (initially empty for discovered labels):**
+This creates an empty `.ensrainbow` file for version 0 of the `discovery-a` Label Set, which is used for labels discovered dynamically.
 ```bash
 touch empty.sql
 gzip empty.sql
-time pnpm run convert --input-file empty.sql.gz --output-file discoveryA_0.ensrainbow --label-set-id discoveryA --label-set-version 0
+time pnpm run convert --input-file empty.sql.gz --output-file discovery-a_0.ensrainbow --label-set-id discovery-a --label-set-version 0
 ```
 
 **For the `ens-test-env` Label Set (for testing):**
@@ -297,7 +297,7 @@ time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --out
 After generation, these `.ensrainbow` files are uploaded to the designated cloud storage (e.g., R2 via rclone).
 ```bash
 rclone copy ./subgraph_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
-rclone copy ./discoveryA_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./discovery-a_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./ens-test-env_0.ensrainbow ENSRAINBOWR2:ensrainbow/labelsets/
 ```
 
@@ -307,12 +307,12 @@ SHA256 checksums are generated for each `.ensrainbow` file to ensure data integr
 ```bash
 # Calculate checksums
 sha256sum subgraph_0.ensrainbow > subgraph_0.ensrainbow.sha256sum
-sha256sum discoveryA_0.ensrainbow > discoveryA_0.ensrainbow.sha256sum
+sha256sum discovery-a_0.ensrainbow > discovery-a_0.ensrainbow.sha256sum
 sha256sum ens-test-env_0.ensrainbow > ens-test-env_0.ensrainbow.sha256sum
 
 # Upload checksums
 rclone copy ./subgraph_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
-rclone copy ./discoveryA_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
+rclone copy ./discovery-a_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 rclone copy ./ens-test-env_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labelsets/
 ```
 
@@ -321,7 +321,7 @@ rclone copy ./ens-test-env_0.ensrainbow.sha256sum ENSRAINBOWR2:ensrainbow/labels
 The `.ensrainbow` files are ingested into local LevelDB instances to create the actual databases.
 ```bash
 pnpm ingest-ensrainbow --input-file subgraph_0.ensrainbow --data-dir ./data-subgraph_0
-pnpm ingest-ensrainbow --input-file discoveryA_0.ensrainbow --data-dir ./data-discoveryA_0
+pnpm ingest-ensrainbow --input-file discovery-a_0.ensrainbow --data-dir ./data-discovery-a_0
 pnpm ingest-ensrainbow --input-file ens-test-env_0.ensrainbow --data-dir ./data-ens-test-env_0
 ```
 
@@ -330,7 +330,7 @@ pnpm ingest-ensrainbow --input-file ens-test-env_0.ensrainbow --data-dir ./data-
 The LevelDB data directories, now populated, are packaged into compressed `tar.gz` archives.
 ```bash
 tar -czvf subgraph_0.tgz ./data-subgraph_0
-tar -czvf discoveryA_0.tgz ./data-discoveryA_0
+tar -czvf discovery-a_0.tgz ./data-discovery-a_0
 tar -czvf ens-test-env_0.tgz ./data-ens-test-env_0
 ```
 
@@ -339,7 +339,7 @@ tar -czvf ens-test-env_0.tgz ./data-ens-test-env_0
 These database archives are uploaded to cloud storage, tagged with a schema version (e.g., `3` in this example).
 ```bash
 rclone copy ./subgraph_0.tgz ENSRAINBOWR2:ensrainbow/databases/3/
-rclone copy ./discoveryA_0.tgz ENSRAINBOWR2:ensrainbow/databases/3/
+rclone copy ./discovery-a_0.tgz ENSRAINBOWR2:ensrainbow/databases/3/
 rclone copy ./ens-test-env_0.tgz ENSRAINBOWR2:ensrainbow/databases/3/
 ```
 
@@ -349,12 +349,12 @@ Finally, checksums for the database archives are calculated and uploaded to ensu
 ```bash
 # Calculate checksums
 sha256sum subgraph_0.tgz > subgraph_0.tgz.sha256sum
-sha256sum discoveryA_0.tgz > discoveryA_0.tgz.sha256sum
+sha256sum discovery-a_0.tgz > discovery-a_0.tgz.sha256sum
 sha256sum ens-test-env_0.tgz > ens-test-env_0.tgz.sha256sum
 
 # Upload checksums
 rclone copy ./subgraph_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/3/
-rclone copy ./discoveryA_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/3/
+rclone copy ./discovery-a_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/3/
 rclone copy ./ens-test-env_0.tgz.sha256sum ENSRAINBOWR2:ensrainbow/databases/3/
 ```
 
