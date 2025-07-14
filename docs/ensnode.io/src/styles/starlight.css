@@ -8,8 +8,7 @@
 @theme {
   /* Reference global design tokens */
   --font-sans: var(--font-primary);
-  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono",
-    "Menlo", monospace;
+  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
 
   /* Accent colors based on global primary */
   --color-accent-50: #f0f8fb;
@@ -310,6 +309,5 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
   filter: brightness(1.2) contrast(1.1);
   box-shadow: 0 0 8px rgba(65, 130, 184, 0.3);
   border-radius: 4px;
-  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
