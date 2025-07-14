@@ -16,6 +16,7 @@ export default function () {
       coinType,
       address,
       name,
+      standaloneReverseRegistrarAddress: event.log.address,
     });
 
     // TODO: upsert entity representing (address, coinType) -> Name
