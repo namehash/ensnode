@@ -57,3 +57,24 @@ export type EncodedLabelHash = `[${string}]`;
  * ex: vitalik.eth
  */
 export type Name = string;
+
+/**
+ * Chain ID
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type ChainId = number;
+
+/**
+ * Block Number
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type BlockNumber = number;
+
+/**
+ * Unix timestamp
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type UnixTimestamp = number;
