@@ -45,6 +45,10 @@
     },
     "ignoredBuiltDependencies": [
       "bun"
-    ]
+    ],
+    "patchedDependencies": {
+      "@opentelemetry/api": "patches/@opentelemetry__api.patch",
+      "@opentelemetry/otlp-exporter-base": "patches/@opentelemetry__otlp-exporter-base.patch"
+    }
   }
 }

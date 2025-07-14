@@ -1,6 +1,6 @@
 import config from "@/config";
 import { type LabelHash, type Node } from "@ensnode/ensnode-sdk";
-import type { Address } from "viem";
+import { type Address, getAddress } from "viem";
 
 /**
  * Makes a unique, chain-scoped resolver ID.
@@ -19,12 +19,45 @@ export const makeResolverId = (chainId: number, address: Address, node: Node) =>
   [
     // null out chainId prefix iff subgraph-compat, otherwise include for chain-scoping
     config.isSubgraphCompatible ? null : chainId,
-    // NOTE: subgraph uses lowercase address here, viem provides us checksummed, so we lowercase it
+    // NOTE(subgraph-compat): subgraph uses lowercase address here, otherwise keep checksummed
     address.toLowerCase(),
+    // config.isSubgraphCompatible ? address.toLowerCase() : address,
     node,
   ]
     .filter(Boolean)
     .join("-");
+
+/**
+ * Parses a resolver ID string back into its components.
+ * Handles both subgraph-compatible and chain-scoped formats.
+ * Checksums the address.
+ *
+ * @param resolverId The resolver ID string to parse
+ * @returns object describing each segment of the resolver ID
+ */
+export const parseResolverId = (
+  resolverId: string,
+): { chainId: number | null; address: Address; node: Node } => {
+  const parts = resolverId.split("-");
+
+  if (parts.length === 2) {
+    return {
+      chainId: null,
+      address: getAddress(parts[0] as Address),
+      node: parts[1] as Node,
+    };
+  }
+
+  if (parts.length === 3) {
+    return {
+      chainId: parseInt(parts[0]!),
+      address: getAddress(parts[1] as Address),
+      node: parts[2] as Node,
+    };
+  }
+
+  throw new Error(`Invalid resolver ID format: ${resolverId}`);
+};
 
 /**
  * Makes a unique, chain-scoped event ID.
@@ -63,7 +96,7 @@ export const makeEventId = (
  * form a unique Registration id.
  *
  * Because ENSIndexer supports indexing multiple Registrar contracts via plugins
- * (currently using the shared handlers modelled after the Subgraph's indexing logic), however,
+ * (currently modelled after the Subgraph's indexing logic), however,
  * additional Registration entities may be created. A unique ID other than labelHash is necessary,
  * otherwise Registration entities for the same label would collide.
  *
@@ -112,3 +145,18 @@ export const makeRegistrationId = (labelHash: LabelHash, node: Node) => {
  */
 export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>
   [resolverId, key].join("-");
+
+/**
+ * Makes a unique ID for a domain-resolver relation on a given chain. DomainResolverRelations are
+ * unique by (chainId, domainId).
+ *
+ * @see packages/ensnode-schema/src/resolver-relations.schema.ts
+ *
+ * @example `${chainId}-${domainId}`
+ *
+ * @param chainId the chain ID
+ * @param domainId the domain ID (node)
+ * @returns a unique domain-resolver relation ID
+ */
+export const makeDomainResolverRelationId = (chainId: number, domainId: Node) =>
+  [chainId, domainId].join("-");

@@ -1,6 +1,6 @@
 import { Context } from "ponder:registry";
-import { Address, Hex, zeroAddress } from "viem";
 import schema from "ponder:schema";
+import { Address, Hex, zeroAddress } from "viem";
 
 export async function upsertCurrency(context: Context, tokenAddress: Address): Promise<Hex> {
   const currencyId = tokenAddress as Hex;

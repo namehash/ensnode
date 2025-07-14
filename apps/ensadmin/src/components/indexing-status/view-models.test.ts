@@ -98,7 +98,6 @@ describe("View Models", () => {
     it("should return the correct view model", () => {
       expect(
         chainIndexingStatusViewModel(
-          `${base.name}`,
           {
             chainId: base.id,
             latestSafeBlock: {

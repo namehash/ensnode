@@ -1,5 +1,5 @@
 import { namehash } from "viem";
-import { Node } from "./types";
+import type { CoinType, EvmCoinType, Node } from "./types";
 
 export const ROOT_NODE: Node = namehash("");
 
@@ -16,4 +16,11 @@ export const REVERSE_ROOT_NODES: Set<Node> = new Set([namehash("addr.reverse")])
  *
  * @see https://docs.ens.domains/ensip/9
  */
-export const ETH_COIN_TYPE = 60n;
+export const ETH_COIN_TYPE: CoinType = 60;
+
+/**
+ * ENSIP-19 EVM CoinType representing the 'default' coinType for EVM chains in ENS.
+ *
+ * @see https://docs.ens.domains/ensip/19/#reverse-resolution
+ */
+export const DEFAULT_EVM_COIN_TYPE = 0x8000_0000 as EvmCoinType;

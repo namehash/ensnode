@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { ENSADMIN_URL } from "astro:env/client";
 import { Balancer } from "react-wrap-balancer";
 import skies_image from "../../assets/hero_skies_image.png";
 import { ENSAdminLogoLight } from "../atoms/logos/ENSAdminLogoLight";
@@ -18,7 +19,7 @@ import { ENSAdminLogoLight } from "../atoms/logos/ENSAdminLogoLight";
             <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    href="https://admin.ensnode.io/"
+                    href={ENSADMIN_URL}
                     class="no-underline hover:no-underline"
             >
                 <button class="button-as-child cursor-pointer transition-all duration-200 bg-black hover:bg-[#272727] flex flex-row flex-nowrap justify-center items-center gap-2 rounded-lg pl-2 pr-3 py-2 text-white whitespace-nowrap text-base leading-6 font-medium">

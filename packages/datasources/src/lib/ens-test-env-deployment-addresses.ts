@@ -7,6 +7,7 @@ interface ENSTestEnvDeploymentAddresses {
   LegacyETHRegistrarController: Address;
   ETHRegistrarController: Address;
   NameWrapper: Address;
+  UniversalResolver: Address;
 }
 
 /**
