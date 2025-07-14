@@ -8,7 +8,8 @@
 @theme {
   /* Reference global design tokens */
   --font-sans: var(--font-primary);
-  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
+  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", "Liberation Mono",
+    "Menlo", monospace;
 
   /* Accent colors based on global primary */
   --color-accent-50: #f0f8fb;
@@ -76,6 +77,8 @@
   --pagination-arrow-color: var(--color-text-secondary);
   --sl-shadow-md: var(--shadow-md);
   --sl-shadow-sm: var(--shadow-sm);
+
+  --sidebar-item-gap: 4px;
 }
 
 /* Starlight-specific component styles */
@@ -220,4 +223,93 @@ a[rel="prev"]:hover {
   @media screen and (max-width: 400px) {
     font-size: 14px;
   }
+}
+
+/* Styling for the list items to prepare for lines */
+#starlight__sidebar > div > ul > li {
+  position: relative; /* For absolute positioning of ::before */
+}
+
+/* Add padding-left only to items that will get a line, to make space for it */
+#starlight__sidebar > div > ul > li:not(:first-child) {
+  padding-left: 20px; /* Space for the line and content */
+}
+
+/* Add margin-bottom for the gap to all LIs except the very last one in the UL */
+#starlight__sidebar > div > ul > li:not(:last-child) {
+  margin-bottom: var(--sidebar-item-gap);
+}
+
+/* Vertical line segment for relevant list items */
+#starlight__sidebar > div > ul > li:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: 8px; /* X-position of the vertical line */
+  top: 0;
+  width: 1px; /* Thickness of the vertical line */
+  background-color: var(--sl-color-hairline-light); /* Line color */
+  height: 100%; /* Default height, covers the item itself */
+}
+
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
+  height: calc(100% + var(--sidebar-item-gap));
+}
+
+/* Custom icon logic for specific sidebar items based on URL - hack as only
+ * icons are supported in starlight. */
+
+/* Styles to replace the default Starlight sidebar icon with a custom image */
+.starlight-sidebar-topics-icon svg {
+  display: none; /* Hide the default SVG icon */
+}
+
+/* Default sidebar icon (parent) */
+.starlight-sidebar-topics-icon {
+  background-image: url("../assets/ensnode.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+/* URL based custom icons */
+a[href*="ensindexer"] .starlight-sidebar-topics-icon {
+  background-image: url("../assets/ensindexer.svg");
+}
+
+a[href*="ensrainbow"] .starlight-sidebar-topics-icon {
+  background-image: url("../assets/ensrainbow.svg");
+}
+
+a[href*="ensadmin"] .starlight-sidebar-topics-icon {
+  background-image: url("../assets/ensadmin.svg");
+}
+
+/* Enhance hover and selected states for sidebar items */
+#starlight__sidebar a {
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+/* Only apply hover effects to non-selected items */
+#starlight__sidebar a:not([aria-current="page"]):hover {
+  background-color: rgba(128, 128, 128, 0.1);
+  transform: translateX(2px);
+  border-radius: 6px;
+}
+
+a.starlight-sidebar-topics-current {
+  background-color: rgb(0, 128, 188) !important;
+  color: white !important;
+  border-radius: 6px;
+}
+
+a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
+  transform: scale(1.1);
+  filter: brightness(1.2) contrast(1.1);
+  box-shadow: 0 0 8px rgba(65, 130, 184, 0.3);
+  border-radius: 4px;
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
 }
