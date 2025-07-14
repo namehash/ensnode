@@ -27,6 +27,9 @@ import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 // Shared Resolver Config
 import { ResolverConfig } from "./lib/resolver";
 
+// ABIs for Seaport Datasource
+import { Seaport } from "./abis/seaport/Seaport";
+
 /**
  * The Mainnet ENSNamespace
  */
@@ -248,6 +251,20 @@ export default {
         // NOTE: 3DNSToken on Base has a hardcoded protocol-wide Resolver at this address
         address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
         startBlock: 17522624,
+      },
+    },
+  },
+
+  /**
+   * The Seaport Datasource.
+   */
+  [DatasourceNames.Seaport]: {
+    chain: mainnet,
+    contracts: {
+      Seaport: {
+        abi: Seaport,
+        address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+        startBlock: 17129405,
       },
     },
   },

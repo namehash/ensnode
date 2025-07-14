@@ -28,6 +28,7 @@ import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegi
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
+import { Seaport } from "./abis/seaport/Seaport";
 
 // Shared Resolver Config
 import { ResolverConfig } from "./lib/resolver";
@@ -185,6 +186,20 @@ export default {
         abi: linea_NameWrapper,
         address: "0xF127De9E039a789806fEd4C6b1C0f3aFfeA9425e",
         startBlock: 2395202,
+      },
+    },
+  },
+
+  /**
+   * The Seaport Datasource.
+   */
+  [DatasourceNames.Seaport]: {
+    chain: sepolia,
+    contracts: {
+      Seaport: {
+        abi: Seaport,
+        address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+        startBlock: 3365529,
       },
     },
   },
