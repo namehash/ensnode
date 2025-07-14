@@ -24,7 +24,8 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 
-// Shared Resolver Config
+// Shared ABIs
+import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ResolverConfig } from "./lib/resolver";
 
 /**
@@ -253,20 +254,38 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on the ENS Root chain.
+   * The Reverse Resolvers on the ENS Root chain.
    */
   [DatasourceNames.ReverseResolverRoot]: {
     chain: mainnet,
     contracts: {
-      ReverseResolver: {
+      // The DefaultReverseRegistrar, which manages reverse name mappings on the root chain.
+      DefaultReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x283F227c4Bd38ecE252C4Ae7ECE650B0e913f1f9",
+        startBlock: 22764819,
+      },
+
+      // The third DefaultReverseResolver, made active in the following proposal:
+      // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
+      DefaultReverseResolver3: {
         abi: ResolverConfig.abi,
-        // https://docs.ens.domains/learn/deployments/#mainnet
+        address: "0xA7d635c8de9a58a228AA69353a1699C7Cc240DCF",
+        startBlock: 22764871,
+      },
+
+      // The second DefaultReverseResolver (aka PublicResolver)
+      // https://docs.ens.domains/learn/deployments/#mainnet
+      DefaultReverseResolver2: {
+        abi: ResolverConfig.abi,
         address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
         startBlock: 16925619,
       },
-      // NOTE: the LegacyDefaultReverseResolver does NOT emit events (NameChanged or TextChanged),
-      // and is effectively unindexable for the purposes of Reverse Resolution. We document it here
-      // for completeness, and explicity do not index it.
+
+      // the first DefaultReverseResolver (aka LegacyDefaultReverseResolver)
+      // NOTE: this contract does NOT emit events (NameChanged or TextChanged), and is effectively
+      // unindexable for the purposes of Reverse Resolution. We document it here for completeness,
+      // but/and explicity do not index it.
       // LegacyDefaultReverseResolver: {
       //   abi: ResolverConfig.abi,
       //   address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
@@ -287,47 +306,10 @@ export default {
         address: "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD", // TODO: update this address
         startBlock: 17575714,
       },
-    },
-  },
-
-  /**
-   * The Reverse Resolver on Optimism.
-   */
-  [DatasourceNames.ReverseResolverOptimism]: {
-    chain: optimism,
-    contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
-      },
-    },
-  },
-
-  /**
-   * The Reverse Resolver on Arbitrum.
-   */
-  [DatasourceNames.ReverseResolverArbitrum]: {
-    chain: arbitrum,
-    contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
-      },
-    },
-  },
-
-  /**
-   * The Reverse Resolver on Scroll.
-   */
-  [DatasourceNames.ReverseResolverScroll]: {
-    chain: scroll,
-    contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 31808582,
       },
     },
   },
@@ -338,10 +320,58 @@ export default {
   [DatasourceNames.ReverseResolverLinea]: {
     chain: linea,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
+      // TODO: linea's legacy ReverseResolver iff no migration
+      // ReverseResolver: {
+      //   abi: ResolverConfig.abi,
+      //   address: zeroAddress, // TODO: update this address
+      //   startBlock: 0, // TODO: set this correctly
+      // },
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 20173340,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Optimism.
+   */
+  [DatasourceNames.ReverseResolverOptimism]: {
+    chain: optimism,
+    contracts: {
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 137403854,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Arbitrum.
+   */
+  [DatasourceNames.ReverseResolverArbitrum]: {
+    chain: arbitrum,
+    contracts: {
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 349263357,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Scroll.
+   */
+  [DatasourceNames.ReverseResolverScroll]: {
+    chain: scroll,
+    contracts: {
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 16604272,
       },
     },
   },
