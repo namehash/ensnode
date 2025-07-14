@@ -7,7 +7,7 @@ import {
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainConnectionConfig } from "@/lib/ponder-helpers";
+import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
@@ -25,7 +25,7 @@ export default createPlugin({
 
     return ponder.createConfig({
       chains: {
-        ...chainConnectionConfig(config.rpcConfigs, seaport.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, seaport.chain.id),
       },
       contracts: {
         [namespaceContract(pluginName, "Seaport")]: {

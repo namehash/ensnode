@@ -6,6 +6,7 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { client, graphql as ponderGraphQL } from "ponder";
 
+import { sdk } from "@/api/lib/instrumentation";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
@@ -22,6 +23,7 @@ import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
+import ensNodeApi from "./handlers/ensnode-api";
 
 const schemaWithoutExtensions = filterSchemaExtensions(schema);
 
@@ -85,6 +87,9 @@ app.get(
   }),
 );
 
+// use ENSNode HTTP API at /api
+app.route("/api", ensNodeApi);
+
 // use ponder client support
 app.use("/sql/*", client({ db, schema: schemaWithoutExtensions }));
 
@@ -141,5 +146,14 @@ app.use(
     }),
   }),
 );
+
+// Start/Terminate ENSNode API OpenTelemetry SDK
+sdk.start();
+
+// gracefully shut down the SDK on process interrupt/exit
+const shutdownOpenTelemetry = () =>
+  sdk.shutdown().catch((error) => console.error("Error terminating tracing", error));
+process.on("SIGINT", shutdownOpenTelemetry);
+process.on("SIGTERM", shutdownOpenTelemetry);
 
 export default app;

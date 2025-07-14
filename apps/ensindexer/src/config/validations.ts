@@ -6,6 +6,7 @@ import type { ENSIndexerConfig } from "@/config/types";
 import { uniq } from "@/lib/lib-helpers";
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 // type alias to highlight the input param of Zod's check() method
 type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
@@ -129,6 +130,68 @@ NAMESPACE=${config.namespace}
 NEXT_PUBLIC_DEPLOYMENT_ADDRESSES=${process.env.NEXT_PUBLIC_DEPLOYMENT_ADDRESSES || "undefined"}
 DEPLOYMENT_ADDRESSES=${process.env.DEPLOYMENT_ADDRESSES || "undefined"}`,
       );
+    }
+  }
+}
+
+// Invariant: ReverseResolvers plugin requires indexAdditionalResolverRecords
+export function invariant_reverseResolversPluginNeedsResolverRecords(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "indexAdditionalResolverRecords">>,
+) {
+  const { value: config } = ctx;
+
+  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
+
+  if (reverseResolversPluginActive && !config.indexAdditionalResolverRecords) {
+    ctx.issues.push({
+      code: "custom",
+      input: config,
+      message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
+    });
+  }
+}
+
+// Invariant: experimentalResolution requires ReverseResolvers plugin
+export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "experimentalResolution">>,
+) {
+  const { value: config } = ctx;
+
+  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
+
+  if (config.experimentalResolution && !reverseResolversPluginActive) {
+    ctx.issues.push({
+      code: "custom",
+      input: config,
+      message: `EXPERIMENTAL_RESOLUTION requires the reverse-resolvers plugin to be active.`,
+    });
+  }
+}
+
+export function invariant_seaportPluginNeedsMinimumOneOtherNamePluginActive(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins">>,
+) {
+  const { value: config } = ctx;
+
+  if (config.plugins.includes(PluginName.Seaport)) {
+    const nameProtocols = [
+      PluginName.Subgraph,
+      PluginName.Basenames,
+      PluginName.Lineanames,
+      PluginName.ThreeDNS,
+    ];
+
+    const hasAtLeastOneNameProtocol = config.plugins.some((plugin) =>
+      nameProtocols.includes(plugin),
+    );
+
+    if (!hasAtLeastOneNameProtocol) {
+      ctx.issues.push({
+        code: "custom",
+        input: config,
+        message:
+          "Seaport plugin requires at least one name protocol to be active (subgraph, basenames, lineanames, or threedns)",
+      });
     }
   }
 }

@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import {handleOrderFulfilled} from "@/handlers/Seaport";
+import { handleOrderFulfilled } from "@/handlers/Seaport";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 /**

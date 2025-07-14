@@ -1,5 +1,4 @@
-import { ensAdminVersion, selectedEnsNodeUrl } from "@/lib/env";
-import { SupportedChainId, parseSupportedChainIdByName } from "@/lib/wagmi";
+import { ensAdminVersion } from "@/lib/env";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { EnsNode } from "./types";
 
@@ -29,14 +28,10 @@ type UseIndexingStatusQueryResult = UseQueryResult<EnsNode.Metadata, Error>;
 
 /**
  * Hook to fetch the indexing status of the ENS node.
- * @param searchParams The URL search params including the selected ENS node URL.
+ * @param {URL} ensNodeUrl the selected ENS node URL.
  * @returns React Query hook result.
  */
-export function useIndexingStatusQuery(
-  searchParams: URLSearchParams,
-): UseIndexingStatusQueryResult {
-  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
-
+export function useIndexingStatusQuery(ensNodeUrl: URL): UseIndexingStatusQueryResult {
   return useQuery({
     queryKey: ["indexing-status", ensNodeUrl],
     queryFn: () => fetchEnsNodeStatus(ensNodeUrl),
@@ -78,19 +73,4 @@ function validateResponse(response: EnsNode.Metadata) {
         .join(", ")}`,
     );
   }
-}
-
-/**
- * Gets chainId of the ENS root Datasource
- *
- * @param indexingStatus The ENSNode indexing status.
- * @returns The chain ID or undefined if the status is not available.
- * @throws Error if the chain ID is not supported within the configured namespace
- */
-export function useENSRootDatasourceChainId(
-  indexingStatus: UseIndexingStatusQueryResult["data"],
-): SupportedChainId | undefined {
-  if (!indexingStatus) return undefined;
-  // TODO: this should use the namespace's ensroot datasource's chain ID, not the namespace identifier itself
-  return parseSupportedChainIdByName(indexingStatus.env.NAMESPACE);
 }

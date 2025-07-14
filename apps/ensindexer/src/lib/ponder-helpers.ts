@@ -1,13 +1,15 @@
 import type { Event } from "ponder:registry";
-import { PublicClient } from "viem";
+
+import type { ChainConfig } from "ponder";
+import { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
-import { ENSIndexerConfig } from "@/config/types";
-import { Blockrange } from "@/lib/types";
 import { ContractConfig } from "@ensnode/datasources";
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
-import type { ChainConfig } from "ponder";
+
+import { ENSIndexerConfig } from "@/config/types";
+import { Blockrange } from "@/lib/types";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -275,26 +277,29 @@ export async function createStartBlockByChainIdMap(
 
 /**
 /**
- * Builds a ponder#ChainConfig for a single, specific chain in the context of the ENSIndexerConfig.
+ * Builds a ponder#Config["chains"] for a single, specific chain in the context of the ENSIndexerConfig.
  *
  * @param rpcConfigs - The RPC configuration object from ENSIndexerConfig, keyed by chain ID.
  * @param chainId - The numeric chain ID for which to build the chain config.
- * @returns a ponder#ChainConfig
+ * @returns a ponder#Config["chains"]
  */
-export function chainConnectionConfig(rpcConfigs: ENSIndexerConfig["rpcConfigs"], chainId: number) {
-  const chainRpcConfig = rpcConfigs[chainId];
+export function chainsConnectionConfig(
+  rpcConfigs: ENSIndexerConfig["rpcConfigs"],
+  chainId: number,
+) {
+  const rpcConfig = rpcConfigs[chainId];
 
-  if (!chainRpcConfig) {
+  if (!rpcConfig) {
     throw new Error(
-      `chainConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available in ENSIndexerConfig. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,
+      `chainsConnectionConfig called for chain id ${chainId} but no associated rpcConfig is available. rpcConfig specifies the following chain ids: [${Object.keys(rpcConfigs).join(", ")}].`,
     );
   }
 
   return {
     [chainId.toString()]: {
       id: chainId,
-      rpc: chainRpcConfig.url,
-      maxRequestsPerSecond: chainRpcConfig.maxRequestsPerSecond,
+      rpc: rpcConfig.url,
+      maxRequestsPerSecond: rpcConfig.maxRequestsPerSecond,
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
       ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies ChainConfig,
@@ -326,5 +331,26 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
       startBlock,
       endBlock,
     },
+  };
+}
+
+/**
+ * Merges a set of ContractConfigs representing contracts at specific addresses on the same chain.
+ * Uses the lowest startBlock to ensure all events are indexed.
+ */
+export function mergeContractConfigs<CONTRACTS extends ContractConfig[]>(contracts: CONTRACTS) {
+  if (contracts.length === 0) throw new Error("Cannot merge 0 ContractConfigs");
+
+  const addresses = contracts
+    .map((contract) => contract.address)
+    .filter((address): address is Address => !!address);
+
+  const startBlocks = contracts.map((contract) => contract.startBlock);
+
+  return {
+    // just use the first's ABI, they're all identical, no need to mergeAbis
+    abi: contracts[0]!.abi,
+    startBlock: Math.min(...startBlocks),
+    address: addresses,
   };
 }
