@@ -61,6 +61,7 @@ We place all of our application code into the `src/` directory, so it's all elig
 ENSIndexer implements the indexing logic for each plugin inside event handlers. Event handlers may optionally be shared across plugins. For example, see the shared event handler functions in `apps/ensindexer/src/handlers/*.ts` which are shared by multiple plugins such as the `subgraph`, `basenames`, and `lineanames` plugins.
 
 Each plugin requires two files:
+
 - `plugin.ts` defines the plugin's overall indexing configuration. See `apps/ensindexer/src/plugins/basenames/plugin.ts` and `apps/ensindexer/src/plugins/lineanames/plugin.ts` for examples.
 - `event-handlers.ts` registers the event handler functions with Ponder at runtime. See `apps/ensindexer/src/plugins/basenames/event-handlers.ts` and `apps/ensindexer/src/plugins/lineanames/event-handlers.ts` for examples.
 
@@ -104,7 +105,7 @@ In general, however, each handler is written in a more ponder-native way, using 
 
 ## API Layer
 
-ENSIndexer exposes three distinct API endpoints:
+ENSIndexer exposes the following API endpoints:
 
 1. **Subgraph-Compatible GraphQL** (`/subgraph`)
 
@@ -112,12 +113,7 @@ ENSIndexer exposes three distinct API endpoints:
    - Enables gradual migration from existing Subgraph implementations
    - Maintains compatibility with `ensjs` client library — just replace
 
-2. **Native Ponder GraphQL** (`/ponder`)
-
-   - Auto-generated GraphQL API from Ponder schema
-   - More efficient query patterns than Subgraph API, particularly for pagination
-
-3. **Ponder Client API** (`/sql/*`)
+2. **Ponder Client API** (`/sql/*`)
    - SQL-based alternative to GraphQL
    - End-to-end type inference
    - Support for live updates

@@ -1,6 +1,12 @@
-import {base, baseSepolia, lineaSepolia, sepolia} from "viem/chains";
+import {
+  arbitrumSepolia,
+  baseSepolia,
+  lineaSepolia,
+  optimismSepolia,
+  scrollSepolia,
+  sepolia,
+} from "viem/chains";
 
-import { ResolverConfig } from "./lib/resolver";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
@@ -9,6 +15,7 @@ import { EthRegistrarController as root_EthRegistrarController } from "./abis/ro
 import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
@@ -21,7 +28,10 @@ import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegi
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
-import {Seaport} from "./abis/seaport/Seaport";
+import { Seaport } from "./abis/seaport/Seaport";
+
+// Shared Resolver Config
+import { ResolverConfig } from "./lib/resolver";
 
 /**
  * The Sepolia ENSNamespace
@@ -69,6 +79,11 @@ export default {
         abi: root_NameWrapper,
         address: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
         startBlock: 3790153,
+      },
+      UniversalResolver: {
+        abi: root_UniversalResolver,
+        address: "0xb7B7DAdF4D42a08B3eC1d3A1079959Dfbc8CFfCC",
+        startBlock: 8515717,
       },
     },
   },
@@ -175,6 +190,9 @@ export default {
     },
   },
 
+  /**
+   * The Seaport Datasource.
+   */
   [DatasourceNames.Seaport]: {
     chain: sepolia,
     contracts: {
@@ -184,5 +202,89 @@ export default {
         startBlock: 3365529,
       },
     },
-  }
+  },
+
+  /**
+   * The Reverse Resolver on the (Sepolia) ENS Root chain.
+   */
+  [DatasourceNames.ReverseResolverRoot]: {
+    chain: sepolia,
+    contracts: {
+      ReverseResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
+        startBlock: 3790251,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Base Sepolia.
+   */
+  [DatasourceNames.ReverseResolverBase]: {
+    chain: baseSepolia,
+    contracts: {
+      ReverseResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 21788010,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Optimism Sepolia.
+   */
+  [DatasourceNames.ReverseResolverOptimism]: {
+    chain: optimismSepolia,
+    contracts: {
+      ReverseResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 23770766,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Arbitrum Sepolia.
+   */
+  [DatasourceNames.ReverseResolverArbitrum]: {
+    chain: arbitrumSepolia,
+    contracts: {
+      ReverseResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 123142726,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Scroll Sepolia.
+   */
+  [DatasourceNames.ReverseResolverScroll]: {
+    chain: scrollSepolia,
+    contracts: {
+      ReverseResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 8175276,
+      },
+    },
+  },
+
+  /**
+   * The Reverse Resolver on Linea Sepolia.
+   */
+  [DatasourceNames.ReverseResolverLinea]: {
+    chain: lineaSepolia,
+    contracts: {
+      ReverseResolver: {
+        abi: ResolverConfig.abi,
+        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        startBlock: 9267966,
+      },
+    },
+  },
 } satisfies ENSNamespace;

@@ -14,12 +14,13 @@ import {
   sharedEventValues,
   upsertAccount,
   upsertDomain,
+  upsertDomainResolverRelation,
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import { makeRegistrationId, makeResolverId } from "@/lib/ids";
+import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
@@ -32,7 +33,8 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
   // https://ponder.sh/docs/indexing/read-contracts#multiple-chains
   return context.client.readContract({
     abi: context.contracts["threedns/ThreeDNSToken"].abi,
-    address: context.contracts["threedns/ThreeDNSToken"].address,
+    // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
+    address: context.contracts["threedns/ThreeDNSToken"].address! as Address,
     functionName: "uri",
     args: [tokenId],
   });
@@ -68,26 +70,28 @@ export async function handleNewOwner({
   const node = makeSubdomainNode(labelHash, parentNode);
   let domain = await context.db.find(schema.domain, { id: node });
 
-  // in ThreeDNS there's a hard-coded Resolver that all domains use
-  const resolverId = makeResolverId(
-    context.chain.id,
-    // NetworkConfig#address is `Address | undefined`, but we know this is defined for 3DNS' Resolver
-    context.contracts["threedns/Resolver"].address!,
-    node,
-  );
+  // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
+  const resolverAddress = context.contracts["threedns/Resolver"].address! as Address;
 
+  // in ThreeDNS there's a hard-coded Resolver that all domains use
   // so upsert the resolver record and link Domain.resolverId below
+  const resolverId = makeResolverId(context.chain.id, resolverAddress, node);
   await upsertResolver(context, {
     id: resolverId,
-    address: context.contracts["threedns/Resolver"].address!,
+    address: resolverAddress,
     domainId: node,
   });
 
   if (domain) {
     // if the domain already exists, this is just an update of the owner record
-    domain = await context.db.update(schema.domain, { id: node }).set({
-      ownerId: owner,
-      resolverId, // and ensure resolver reference is set
+    domain = await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
+
+    // NOTE(resolver-relations): link Domain and Resolver on this chain
+    await upsertDomainResolverRelation(context, {
+      id: makeDomainResolverRelationId(context.chain.id, node),
+      chainId: context.chain.id,
+      domainId: node,
+      resolverId,
     });
   } else {
     // otherwise create the domain
@@ -97,8 +101,6 @@ export async function handleNewOwner({
       parentId: parentNode,
       createdAt: event.block.timestamp,
       labelhash: labelHash,
-
-      resolverId, // and ensure resolver reference is set
 
       // NOTE: threedns has no concept of registry migration, so domains indexed by this plugin
       // are always considered 'migrated'

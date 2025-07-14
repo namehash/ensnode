@@ -1,0 +1,28 @@
+diff --git a/package.json b/package.json
+index f7ba45f96dae308d68a738877c695026c0a312b6..4dc972856c7e937d816b2719aec0da71b07a1883 100644
+--- a/package.json
++++ b/package.json
+@@ -3,8 +3,6 @@
+   "version": "1.9.0",
+   "description": "Public API for OpenTelemetry",
+   "main": "build/src/index.js",
+-  "module": "build/esm/index.js",
+-  "esnext": "build/esnext/index.js",
+   "types": "build/src/index.d.ts",
+   "browser": {
+     "./src/platform/index.ts": "./src/platform/browser/index.ts",
+@@ -14,14 +12,10 @@
+   },
+   "exports": {
+     ".": {
+-      "module": "./build/esm/index.js",
+-      "esnext": "./build/esnext/index.js",
+       "types": "./build/src/index.d.ts",
+       "default": "./build/src/index.js"
+     },
+     "./experimental": {
+-      "module": "./build/esm/experimental/index.js",
+-      "esnext": "./build/esnext/experimental/index.js",
+       "types": "./build/src/experimental/index.d.ts",
+       "default": "./build/src/experimental/index.js"
+     }

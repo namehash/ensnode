@@ -4,13 +4,16 @@ import { prettifyError, z } from "zod/v4";
 import { derive_isSubgraphCompatible } from "@/config/derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
 import {
+  invariant_experimentalResolutionNeedsReverseResolversPlugin,
   invariant_globalBlockrange,
   invariant_requiredDatasources,
+  invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "@/config/validations";
 import {
   DEFAULT_ENSADMIN_URL,
+  DEFAULT_EXPERIMENTAL_RESOLUTION,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
   DEFAULT_NAMESPACE,
@@ -111,9 +114,13 @@ const PluginsSchema = z.coerce
 const HealReverseAddressesSchema = makeEnvStringBoolSchema("HEAL_REVERSE_ADDRESSES") //
   .default(DEFAULT_HEAL_REVERSE_ADDRESSES);
 
-const indexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
+const IndexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
   "INDEX_ADDITIONAL_RESOLVER_RECORDS",
 ).default(DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS);
+
+const ExperimentalResolutionSchema = makeEnvStringBoolSchema("EXPERIMENTAL_RESOLUTION").default(
+  DEFAULT_EXPERIMENTAL_RESOLUTION,
+);
 
 const PortSchema = z.coerce
   .number({ error: "PORT must be an integer." })
@@ -162,7 +169,8 @@ const ENSIndexerConfigSchema = z
     ponderDatabaseSchema: PonderDatabaseSchemaSchema,
     plugins: PluginsSchema,
     healReverseAddresses: HealReverseAddressesSchema,
-    indexAdditionalResolverRecords: indexAdditionalResolverRecordsSchema,
+    indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
+    experimentalResolution: ExperimentalResolutionSchema,
     port: PortSchema,
     ensRainbowEndpointUrl: EnsRainbowEndpointUrlSchema,
     rpcConfigs: RpcConfigsSchema,
@@ -189,6 +197,8 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_globalBlockrange)
   .check(invariant_validContractConfigs)
+  .check(invariant_reverseResolversPluginNeedsResolverRecords)
+  .check(invariant_experimentalResolutionNeedsReverseResolversPlugin)
   /**
    * Derived configuration
    *

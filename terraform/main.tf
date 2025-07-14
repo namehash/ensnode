@@ -77,6 +77,7 @@ module "ensindexer" {
   for_each = local.ensindexer_instances
 
   depends_on = [null_resource.health_check]
+
   # Instance-specific configuration
   instance_name                     = each.value.instance_name
   subdomain_prefix                  = each.value.subdomain_prefix

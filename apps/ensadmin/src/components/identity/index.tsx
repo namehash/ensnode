@@ -2,87 +2,107 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SupportedChainId } from "@/lib/wagmi";
+import {
+  ENSNamespaceId,
+  ENSNamespaceIds,
+  getENSRootChainId,
+  getNameAvatarUrl,
+} from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
-import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { useEnsName } from "wagmi";
+import { UseEnsNameReturnType, useEnsName } from "wagmi";
+import { AddressDisplay, NameDisplay } from "./utils";
 
 interface IdentityProps {
   address: Address;
-  chainId: SupportedChainId;
+  namespaceId: ENSNamespaceId;
   showAvatar?: boolean;
-  showExternalLink?: boolean;
+  showExternalLinkIcon?: boolean;
   className?: string;
 }
 
 /**
- * Component to display an ENS name for an Ethereum address.
- * Falls back to a truncated address if no ENS name is found.
+ * Displays an ENS identity (name, avatar, etc.) for an Ethereum address on the provided ENS namespace.
+ *
+ * If the provided address has a primary name set, displays that primary name and links to the profile for that name.
+ * Else, if the provided address doesn't have a primary name, displays the truncated address and links to the profile for that address.
+ * Also, optionally displays an avatar image and external link.
  */
 export function Identity({
   address,
-  chainId,
+  namespaceId,
   showAvatar = false,
-  showExternalLink = true,
+  showExternalLinkIcon = true,
   className = "",
 }: IdentityProps) {
   const [mounted, setMounted] = useState(false);
-
-  // Use the ENS name hook from wagmi
-  const { data: ensName, isLoading } = useEnsName({
-    address,
-    chainId,
-  });
 
   // Handle client-side rendering
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Generate ENS app URL
-  const ensAppUrl = `https://app.ens.domains/${address}`;
+  // if the ENS namespace is the ens-test-env, always show the truncated address and not look up the primary name.
+  if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
+    // TODO: come back to this later only when ENSNode exposes its own APIs for primary name lookups
 
-  // Truncate address for display
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+    return <AddressDisplay address={address} namespaceId={namespaceId} />;
+  }
 
-  // Display name (ENS name or truncated address)
-  const displayName = ensName || truncatedAddress;
+  const ensRootChainId = getENSRootChainId(namespaceId);
 
-  // If not mounted yet (server-side), show a skeleton
-  if (!mounted) {
+  // Lookup the primary name for address using wagmi
+  const {
+    data: ensName,
+    isLoading,
+    isError,
+  }: UseEnsNameReturnType<string> = useEnsName({
+    address,
+    chainId: ensRootChainId,
+  });
+
+  // If not mounted yet (server-side), or still loading, show a skeleton
+  if (!mounted || isLoading) {
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
+
+  // If there is an error looking up the primary name, fallback to showing the address
+  if (isError) {
+    return (
+      <AddressDisplay
+        address={address}
+        namespaceId={namespaceId}
+        showExternalLinkIcon={showExternalLinkIcon}
+      />
+    );
+  }
+
+  const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
 
   return (
     <div className={cx("flex items-center gap-2", className)}>
       {showAvatar && (
         <Avatar className="h-6 w-6">
-          {ensName && (
-            <AvatarImage
-              src={`https://metadata.ens.domains/mainnet/avatar/${ensName}`}
-              alt={ensName}
-            />
-          )}
-          <AvatarFallback className="text-xs">
-            {displayName.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
+          {ensName && ensAvatarUrl ? (
+            <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />
+          ) : null}
+          <AvatarFallback randomAvatarGenerationSeed={address} />
         </Avatar>
       )}
-
-      <a
-        href={ensAppUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1 text-blue-600 hover:underline"
-        title={address}
-      >
-        <span className="font-medium">
-          {isLoading ? <Skeleton className="h-4 w-24" /> : displayName}
-        </span>
-        {showExternalLink && <ExternalLink size={14} className="inline-block" />}
-      </a>
+      {ensName ? (
+        <NameDisplay
+          name={ensName}
+          namespaceId={namespaceId}
+          showExternalLinkIcon={showExternalLinkIcon}
+        />
+      ) : (
+        <AddressDisplay
+          address={address}
+          namespaceId={namespaceId}
+          showExternalLinkIcon={showExternalLinkIcon}
+        />
+      )}
     </div>
   );
 }

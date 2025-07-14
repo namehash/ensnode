@@ -16,10 +16,12 @@ It's easy to get started contributing to the ENSNode documentation:
 
 ### Optional Steps
 
-The documentation uses a `GITHUB_TOKEN` environment variable to authenticate with GitHub. While this is optional, it is recommended to avoid rate limiting:
+The documentation uses optional environment variables:
 
 1. `cp .env.example .env` (optional)
-2. Create a [fine-grained GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens-limitations) and add it to `.env`
+2. Configure environment variables in `.env`:
+   - `GITHUB_TOKEN`: Create a [fine-grained GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens-limitations) to avoid rate limiting
+   - `ENSADMIN_URL`: Base URL for an ENSAdmin instance. Used for links that open in ENSAdmin. (defaults to `https://admin.ensnode.io`)
 3. Stop the Astro server and restart it with `pnpm dev`
 
 Visit [ensnode.io](https://www.ensnode.io) for documentation, guides, and the API reference.

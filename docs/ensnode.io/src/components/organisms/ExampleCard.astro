@@ -1,0 +1,51 @@
+---
+import { ENSADMIN_URL } from "astro:env/client";
+import { Icon } from "astro-icon/components";
+import type { SavedQuery } from "../../data/savedQueries";
+
+export interface Props {
+  example: SavedQuery;
+}
+
+const { example } = Astro.props;
+
+const createGraphiQLUrl = (query: string, variables: string): string => {
+  try {
+    const url = new URL("/api/subgraph", ENSADMIN_URL);
+    url.searchParams.set("query", query.trim());
+    url.searchParams.set("variables", variables.trim());
+    return url.toString();
+  } catch (err) {
+    console.error("Failed to create GraphiQL URL: ", err);
+    return new URL("/api/subgraph", ENSADMIN_URL).toString();
+  }
+};
+
+const graphiqlUrl = createGraphiQLUrl(example.query, example.variables);
+---
+
+<div data-example={JSON.stringify(example)} class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 flex flex-col p-6 justify-between space-y-6">
+    <div class="space-y-3">
+        <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-[var(--color-primary)]">
+                {example.category}
+            </span>
+        </div>
+
+        <h3 class="text-lg font-semibold text-gray-900">{example.name}</h3>
+
+        <p class="text-gray-600 text-sm">
+            {example.description}
+        </p>
+    </div>
+
+    <a
+        href={graphiqlUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex justify-center items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-0 transition-colors"
+    >
+        <Icon name="lucide:external-link" class="h-4 w-4 mr-2" />
+        Open in ENSAdmin
+    </a>
+</div>

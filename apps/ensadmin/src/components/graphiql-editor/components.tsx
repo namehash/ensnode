@@ -7,46 +7,42 @@ import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
-import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useGraphiQLEditor } from "./hooks";
-import { type SavedQuery, savedQueriesPlugin } from "./plugins/saved-queries";
 
-export type { SavedQuery };
-
-interface GraphiQLEditorProps
-  extends Omit<GraphiQLPropsWithUrl, "plugins" | "query" | "variables"> {
-  savedQueries?: Array<SavedQuery>;
-}
+const defaultQuery = `#
+# Welcome to this interactive playground for
+# ENSNode's GraphQL API!
+#
+# You can get started by typing your query here or by using
+# the Explorer on the left to select the data
+# you want to query.
+#
+# When you are ready to execute your query,
+# press the pink Play icon -->
+#
+`;
 
 /**
  * A GraphiQL editor for Ponder API page.
  */
-export function PonderGraphiQLEditor(props: GraphiQLEditorProps) {
-  const graphiqlEditor = useGraphiQLEditor();
+export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
+  const searchParams = useSearchParams();
 
-  const plugins = useMemo(
-    () => [
-      savedQueriesPlugin({
-        queries: props.savedQueries ?? [],
-        onQuerySelect: ({ query, variables }) => {
-          if (variables) {
-            graphiqlEditor.actions.setQueryAndVariables(query, variables);
-          } else {
-            graphiqlEditor.actions.setQuery(query);
-          }
-        },
-      }),
-    ],
-    [props.savedQueries, graphiqlEditor.actions],
-  );
+  const initialQuery = searchParams.get("query") || defaultQuery;
+  const initialVariables = searchParams.get("variables") || "";
+
+  const graphiqlEditor = useGraphiQLEditor({
+    query: initialQuery,
+    variables: initialVariables,
+  });
 
   return (
     <section className="flex flex-col flex-1">
       <GraphiQLEditor
         {...props}
-        query={graphiqlEditor.state.query}
-        variables={graphiqlEditor.state.variables}
-        plugins={plugins}
+        query={graphiqlEditor.state.query || initialQuery}
+        variables={graphiqlEditor.state.variables || initialVariables}
       />
     </section>
   );
@@ -55,24 +51,16 @@ export function PonderGraphiQLEditor(props: GraphiQLEditorProps) {
 /**
  * A GraphiQL editor for Subgraph API page.
  */
-export function SubgraphGraphiQLEditor(props: GraphiQLEditorProps) {
-  const graphiqlEditor = useGraphiQLEditor();
+export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
+  const searchParams = useSearchParams();
 
-  const plugins = useMemo(
-    () => [
-      savedQueriesPlugin({
-        queries: props.savedQueries ?? [],
-        onQuerySelect: ({ query, variables }) => {
-          if (variables) {
-            graphiqlEditor.actions.setQueryAndVariables(query, variables);
-          } else {
-            graphiqlEditor.actions.setQuery(query);
-          }
-        },
-      }),
-    ],
-    [props.savedQueries, graphiqlEditor.actions],
-  );
+  const initialQuery = searchParams.get("query") || defaultQuery;
+  const initialVariables = searchParams.get("variables") || "";
+
+  const graphiqlEditor = useGraphiQLEditor({
+    query: initialQuery,
+    variables: initialVariables,
+  });
 
   return (
     <section className="flex flex-col flex-1">
@@ -85,9 +73,8 @@ export function SubgraphGraphiQLEditor(props: GraphiQLEditorProps) {
 
       <GraphiQLEditor
         {...props}
-        query={graphiqlEditor.state.query}
-        variables={graphiqlEditor.state.variables}
-        plugins={plugins}
+        query={graphiqlEditor.state.query || initialQuery}
+        variables={graphiqlEditor.state.variables || initialVariables}
       />
     </section>
   );

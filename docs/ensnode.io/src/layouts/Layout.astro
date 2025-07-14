@@ -1,8 +1,8 @@
 ---
 import { AstroFont } from "astro-font";
 import { SEO } from "astro-seo";
+
 import Footer from "../components/organisms/Footer.tsx";
-import Header from "../components/organisms/Header.astro";
 import "../styles/tailwind.css";
 import "../styles/globals.css";
 import heroImage from "../assets/hero_skies_image.png";
@@ -59,9 +59,8 @@ import heroImage from "../assets/hero_skies_image.png";
     />
 </head>
 <body>
-<Header />
 <slot/>
-<Footer client:load />
+<Footer />
 </body>
 </html>
 
