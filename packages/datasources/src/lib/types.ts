@@ -55,6 +55,7 @@ export const DatasourceNames = {
   ENSRoot: "ensroot",
   Basenames: "basenames",
   Lineanames: "lineanames",
+  Seaport: "seaport",
   ThreeDNSOptimism: "threedns-optimism",
   ThreeDNSBase: "threedns-base",
 } as const;

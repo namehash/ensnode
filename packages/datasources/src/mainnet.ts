@@ -23,6 +23,9 @@ import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverConfig } from "./lib/resolver";
 
+// ABIs for Seaport Datasource
+import { Seaport } from "./abis/seaport/Seaport";
+
 /**
  * The Mainnet ENSNamespace
  */
@@ -216,4 +219,15 @@ export default {
       },
     },
   },
+
+  [DatasourceNames.Seaport]: {
+    chain: mainnet,
+    contracts: {
+      Seaport: {
+        abi: Seaport,
+        address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+        startBlock: 17129405,
+      },
+    },
+  }
 } satisfies ENSNamespace;
