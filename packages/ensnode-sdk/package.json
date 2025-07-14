@@ -52,6 +52,7 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@ensdomains/address-encoder": "^1.1.2"
+    "@ensdomains/address-encoder": "^1.1.2",
+    "zod": "catalog:"
   }
 }

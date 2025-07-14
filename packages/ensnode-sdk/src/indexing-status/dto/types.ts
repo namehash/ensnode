@@ -1,5 +1,5 @@
-import type { ENSNode } from "../../types";
-import type { UnixTimestamp } from "../../utils/types";
+import type { ENSNode } from "../../ensnode";
+import type { DatetimeIso8601 } from "../../utils/types";
 
 /**
  * ENSNode namespace: DTO types
@@ -12,10 +12,12 @@ import type { UnixTimestamp } from "../../utils/types";
  */
 export namespace IndexingStatusDTO {
   export interface BlockInfo extends ENSNode.PartialBlockInfo {
-    createdAt: UnixTimestamp;
+    createdAt: DatetimeIso8601 | null;
   }
 
+  export type ChainStatus = ENSNode.ChainStatus<BlockInfo>;
+
   export type IndexingStatus = {
-    [chainId: string]: ENSNode.ChainStatus<BlockInfo>;
+    [chainId: string]: ChainStatus;
   };
 }

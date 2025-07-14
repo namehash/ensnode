@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { ENSNode } from "../../types";
+import { ENSNode } from "../../ensnode";
 import { IndexingStatusDomain } from "./types";
 
 describe("Indexing Status", () => {
-  describe("Domain layer", () => {
+  describe("Domain types", () => {
     it("can express a complete data model", () => {
-      // permutations defined: https://docs.google.com/spreadsheets/d/1BresRxwVBquMftKtmdRL7aayYtwy-MN0BWQMg9aufkU/edit?gid=0#gid=0
+      /**
+       * Below you can find all available permutations for {@link ENSNode.ChainStatus}.
+       */
 
-      // ID: 1
+      // Permutation ID: 1
       const unhealthyRpcAndSyncQueued = {
         chainId: 1,
         rpcHealth: ENSNode.RPCHealth.Unhealthy,
@@ -20,7 +22,7 @@ describe("Indexing Status", () => {
         latestSafeBlock: null,
       } satisfies ENSNode.RpcUnhealthyAndSyncQueued<IndexingStatusDomain.BlockInfo>;
 
-      // ID: 2
+      // Permutation ID: 2
       const healthyRpcAndSyncQueued = {
         chainId: 2,
         rpcHealth: ENSNode.RPCHealth.Healthy,
@@ -37,7 +39,7 @@ describe("Indexing Status", () => {
         },
       } satisfies ENSNode.RpcHealthyAndSyncQueued<IndexingStatusDomain.BlockInfo>;
 
-      // ID: 3
+      // Permutation ID: 3
       const unhealthyRpcAndIndexingQueued = {
         chainId: 3,
         rpcHealth: ENSNode.RPCHealth.Unhealthy,
@@ -54,7 +56,7 @@ describe("Indexing Status", () => {
         latestSafeBlock: null,
       } satisfies ENSNode.RpcUnhealthyAndIndexingQueued<IndexingStatusDomain.BlockInfo>;
 
-      // ID: 4
+      // Permutation ID: 4
       const healthyRpcAndIndexingQueued = {
         chainId: 4,
         rpcHealth: ENSNode.RPCHealth.Healthy,
@@ -74,7 +76,7 @@ describe("Indexing Status", () => {
         },
       } satisfies ENSNode.RpcHealthyAndIndexingQueued<IndexingStatusDomain.BlockInfo>;
 
-      // ID: 5
+      // Permutation ID: 5
       const unhealthyRpcAndIndexingStarted = {
         chainId: 5,
         rpcHealth: ENSNode.RPCHealth.Unhealthy,
@@ -94,7 +96,7 @@ describe("Indexing Status", () => {
         latestSafeBlock: null,
       } satisfies ENSNode.RpcUnhealthyAndIndexingStarted<IndexingStatusDomain.BlockInfo>;
 
-      // ID: 6
+      // Permutation ID: 6
       const healthyRpcAndIndexingStarted = {
         chainId: 6,
         rpcHealth: ENSNode.RPCHealth.Healthy,

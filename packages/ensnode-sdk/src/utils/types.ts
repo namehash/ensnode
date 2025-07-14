@@ -73,8 +73,8 @@ export type ChainId = number;
 export type BlockNumber = number;
 
 /**
- * Unix timestamp
+ * Datetime value following the ISO 8601 standard.
  *
- * Guaranteed to be a non-negative integer.
+ * @see https://www.iso.org/iso-8601-date-and-time-format.html
  */
-export type UnixTimestamp = number;
+export type DatetimeIso8601 = string;

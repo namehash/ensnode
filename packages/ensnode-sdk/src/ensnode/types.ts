@@ -1,4 +1,4 @@
-import type { BlockNumber, ChainId } from "./utils/types";
+import type { BlockNumber, ChainId } from "../utils/types";
 
 /**
  * ENSNode namespace
@@ -48,12 +48,12 @@ export namespace ENSNode {
   }
 
   /**
-   * Chain Phase: Base type
+   * Chain Status: Base type
    *
    * This type includes properties shared across other types
-   * extending from the ChainPhaseBase type.
+   * extending from the ChainStatusBase type.
    */
-  export interface ChainPhaseBase<
+  export interface ChainStatusBase<
     IndexingPhaseType extends IndexingPhase,
     RpcHealthType extends RPCHealth,
   > {
@@ -81,7 +81,7 @@ export namespace ENSNode {
   export interface SyncQueuedPhase<
     BlockType extends PartialBlockInfo,
     RpcHealthType extends RPCHealth,
-  > extends ChainPhaseBase<IndexingPhase.SyncQueued, RpcHealthType> {
+  > extends ChainStatusBase<IndexingPhase.SyncQueued, RpcHealthType> {
     /**
      * First block to index must be defined, at least partially.
      * It's fully defined when RPC is healthy.
@@ -112,7 +112,7 @@ export namespace ENSNode {
   export interface IndexingQueuedPhase<
     BlockType extends PartialBlockInfo,
     RpcHealthType extends RPCHealth,
-  > extends ChainPhaseBase<IndexingPhase.IndexingQueued, RpcHealthType> {
+  > extends ChainStatusBase<IndexingPhase.IndexingQueued, RpcHealthType> {
     /**
      * First block to index must be fully defined.
      */
@@ -145,7 +145,7 @@ export namespace ENSNode {
   export interface IndexingStartedPhase<
     BlockType extends PartialBlockInfo,
     RpcHealthType extends RPCHealth,
-  > extends ChainPhaseBase<IndexingPhase.IndexingStarted, RpcHealthType> {
+  > extends ChainStatusBase<IndexingPhase.IndexingStarted, RpcHealthType> {
     /**
      * First block to index must be fully defined.
      */
@@ -166,22 +166,6 @@ export namespace ENSNode {
      */
     latestSafeBlock: RpcHealthType extends RPCHealth.Healthy ? BlockType : null;
   }
-
-  /**
-   * Chain Status Phase
-   *
-   * Describes a phase the given chain status is at. For example:
-   * - Sync Queued: RPC cache sync has not started yet
-   * - Indexing Queued: RPC Cache sync has started already, and the indexing is queued.
-   * - Indexing Started: processing events from RPC Cache
-   */
-  export type ChainStatusPhase<
-    BlockType extends PartialBlockInfo,
-    RpcHealthType extends RPCHealth,
-  > =
-    | SyncQueuedPhase<BlockType, RpcHealthType>
-    | IndexingQueuedPhase<BlockType, RpcHealthType>
-    | IndexingStartedPhase<BlockType, RpcHealthType>;
 
   // RPC healthy
 
@@ -261,8 +245,8 @@ export namespace ENSNode {
    * In doing so, we support dual nature of data models: domain data models (used in domain logic) and
    * DTO data models (used for I/O operations).
    *
-   * Covers all ChainStatus Permutations defined via
-   * https://docs.google.com/spreadsheets/d/1BresRxwVBquMftKtmdRL7aayYtwy-MN0BWQMg9aufkU/edit?gid=0#gid=0
+   * Available permutations are documented in the following file
+   * `packages/ensnode-sdk/src/ensnode/chain-status-permutations.md`
    **/
   export type ChainStatus<BlockType extends PartialBlockInfo = PartialBlockInfo> =
     | HealthyIndexingStatus<BlockType>

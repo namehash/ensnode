@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { ENSNode } from "../../types";
+import { ENSNode } from "../../ensnode";
 import { IndexingStatusDTO } from "./types";
 
 describe("Indexing Status", () => {
-  describe("DTO layer", () => {
+  describe("DTO types", () => {
     it("can express a complete data model", () => {
-      // permutations defined: https://docs.google.com/spreadsheets/d/1BresRxwVBquMftKtmdRL7aayYtwy-MN0BWQMg9aufkU/edit?gid=0#gid=0
+      /**
+       * Below you can find all available permutations for {@link ENSNode.ChainStatus}.
+       */
 
-      // ID: 1
+      // Permutation ID: 1
       const unhealthyRpcAndSyncQueued = {
         chainId: 1,
         rpcHealth: ENSNode.RPCHealth.Unhealthy,
@@ -20,100 +22,100 @@ describe("Indexing Status", () => {
         latestSafeBlock: null,
       } satisfies ENSNode.RpcUnhealthyAndSyncQueued<IndexingStatusDTO.BlockInfo>;
 
-      // ID: 2
+      // Permutation ID: 2
       const healthyRpcAndSyncQueued = {
         chainId: 2,
         rpcHealth: ENSNode.RPCHealth.Healthy,
         firstBlockToIndex: {
           number: 123,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         indexingPhase: ENSNode.IndexingPhase.SyncQueued,
         lastIndexedBlock: null,
         lastSyncedBlock: null,
         latestSafeBlock: {
           number: 456,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
       } satisfies ENSNode.RpcHealthyAndSyncQueued<IndexingStatusDTO.BlockInfo>;
 
-      // ID: 3
+      // Permutation ID: 3
       const unhealthyRpcAndIndexingQueued = {
         chainId: 3,
         rpcHealth: ENSNode.RPCHealth.Unhealthy,
         indexingPhase: ENSNode.IndexingPhase.IndexingQueued,
         firstBlockToIndex: {
           number: 123,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         lastIndexedBlock: null,
         lastSyncedBlock: {
           number: 456,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         latestSafeBlock: null,
       } satisfies ENSNode.RpcUnhealthyAndIndexingQueued<IndexingStatusDTO.BlockInfo>;
 
-      // ID: 4
+      // Permutation ID: 4
       const healthyRpcAndIndexingQueued = {
         chainId: 4,
         rpcHealth: ENSNode.RPCHealth.Healthy,
         indexingPhase: ENSNode.IndexingPhase.IndexingQueued,
         firstBlockToIndex: {
           number: 123,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         lastIndexedBlock: null,
         lastSyncedBlock: {
           number: 456,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         latestSafeBlock: {
           number: 789,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
       } satisfies ENSNode.RpcHealthyAndIndexingQueued<IndexingStatusDTO.BlockInfo>;
 
-      // ID: 5
+      // Permutation ID: 5
       const unhealthyRpcAndIndexingStarted = {
         chainId: 5,
         rpcHealth: ENSNode.RPCHealth.Unhealthy,
         indexingPhase: ENSNode.IndexingPhase.IndexingStarted,
         firstBlockToIndex: {
           number: 123,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         lastIndexedBlock: {
           number: 333,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         lastSyncedBlock: {
           number: 456,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         latestSafeBlock: null,
       } satisfies ENSNode.RpcUnhealthyAndIndexingStarted<IndexingStatusDTO.BlockInfo>;
 
-      // ID: 6
+      // Permutation ID: 6
       const healthyRpcAndIndexingStarted = {
         chainId: 6,
         rpcHealth: ENSNode.RPCHealth.Healthy,
         indexingPhase: ENSNode.IndexingPhase.IndexingStarted,
         firstBlockToIndex: {
           number: 123,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         lastIndexedBlock: {
           number: 333,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         lastSyncedBlock: {
           number: 456,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
         latestSafeBlock: {
           number: 789,
-          createdAt: 1752252883,
+          createdAt: "2025-07-11T16:54:43.000Z",
         },
       } satisfies ENSNode.RpcHealthyAndIndexingStarted<IndexingStatusDTO.BlockInfo>;
 
