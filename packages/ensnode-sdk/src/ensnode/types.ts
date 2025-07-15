@@ -9,7 +9,7 @@ export namespace ENSNode {
   /**
    * RPC Health
    *
-   * Describes health for an RPC service.
+   * Describes health of an RPC service.
    */
   export enum RPCHealth {
     Healthy = "RPCHealth_Healthy",
@@ -238,8 +238,7 @@ export namespace ENSNode {
    *
    * Describes the state of a given chain, including:
    * - RPC health
-   * - Syncing progress
-   * - Indexing progress
+   * - Indexing phase
    *
    * We use a `BlockType` generic type to enable using different data model to describe a block.
    * In doing so, we support dual nature of data models: domain data models (used in domain logic) and

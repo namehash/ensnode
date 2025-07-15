@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { ENSNode } from "../../ensnode";
 import { IndexingStatusDomain } from "../domain/types";
 import { IndexingStatusDTO } from "../dto/types";
-import { serializeIndexingStatus } from "./serializer";
+import { mapIndexingStatusDomainIntoDto } from "./domain-to-dto";
 
 describe("Indexing Status", () => {
-  describe("Domain serializers", () => {
-    it("can serialize IndexingStatus Domain object", () => {
+  describe("Domain mapper", () => {
+    it("can map IndexingStatus Domain object into DTO object", () => {
       // arrange: IndexingStatus Domain object
       const indexingStatusDomain: IndexingStatusDomain.IndexingStatus = new Map();
 
@@ -93,7 +93,7 @@ describe("Indexing Status", () => {
       };
 
       // act & assert
-      expect(serializeIndexingStatus(indexingStatusDomain)).toStrictEqual(indexingStatusDto);
+      expect(mapIndexingStatusDomainIntoDto(indexingStatusDomain)).toStrictEqual(indexingStatusDto);
     });
   });
 });

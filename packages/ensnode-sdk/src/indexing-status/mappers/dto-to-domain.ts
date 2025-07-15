@@ -1,46 +1,85 @@
 import * as z from "zod/v4";
 import { ENSNode } from "../../ensnode";
+import { ChainId } from "../../utils/types";
 import { IndexingStatusDomain } from "../domain/types";
 import { IndexingStatusDTO } from "../dto/types";
 
-const ChainIdSchema = z.number().int().min(1);
-
+/**
+ * Positive Integer Schema
+ */
 const PositiveIntegerSchema = z.coerce
   .number({ error: `Value must be a positive integer.` })
   .int({ error: `Value must be a positive integer.` })
   .min(0, { error: `Value must be a positive integer.` });
 
+/**
+ * Partial Block Info Schema
+ *
+ * Related to {@link ENSNode.PartialBlockInfo}
+ */
+const PartialBlockInfoSchema = z.object({
+  number: PositiveIntegerSchema,
+});
+
+/**
+ * Block Info Schema
+ *
+ * Related to {@link IndexingStatusDTO.BlockInfo}.
+ * Produces {@link IndexingStatusDomain.BlockInfo}.
+ */
+const FullBlockInfoSchema = PartialBlockInfoSchema.extend({
+  createdAt: z.iso.datetime().transform((v) => new Date(v)),
+});
+
+/**
+ * Chain ID Schema
+ *
+ * Related to {@link ChainId}.
+ */
+const ChainIdSchema = z.number().int().min(1);
+
+/**
+ * Indexing Phase Schema
+ *
+ * Related to {@link ENSNode.IndexingPhase}.
+ */
 const IndexingPhaseSchema = z.enum(ENSNode.IndexingPhase, {
   error: `Value must be a valid ENSNode IndexingPhase. Valid choices are: ${Object.values(
     ENSNode.IndexingPhase,
   ).join(", ")}`,
 });
 
+/**
+ * RPC Health Schema
+ *
+ * Related to {@link ENSNode.RPCHealth}.
+ */
 const RpcHealthSchema = z.enum(ENSNode.RPCHealth, {
   error: `Value must be a valid ENSNode RPCHealth. Valid choices are: ${Object.values(
     ENSNode.RPCHealth,
   ).join(", ")}`,
 });
 
-// Partial BlockInfo schema that only has number
-const PartialBlockInfoSchema = z.object({
-  number: PositiveIntegerSchema,
-});
-
-// Full BlockInfo schema that always produces a complete BlockInfo
-const FullBlockInfoSchema = z.object({
-  number: PositiveIntegerSchema,
-  createdAt: z.iso.datetime().transform((v) => new Date(v)),
-});
-
-// Base chain status properties
+/**
+ * Chain Status Base Schema
+ *
+ * Related to {@link ENSNode.ChainStatusBase}
+ */
 const ChainStatusBaseSchema = z.object({
   chainId: ChainIdSchema,
+  indexingPhase: IndexingPhaseSchema,
+  rpcHealth: RpcHealthSchema,
 });
 
 // Define schemas for each specific combination of ChainStatus
 
-// Permutation ID: 1 - RPC Unhealthy + Sync Queued
+/**
+ * RPC Unhealthy & Sync Queued Schema
+ *
+ * Permutation ID: 1
+ *
+ * RPC is Unhealthy, so we can only assume the `firstBlockToIndex` is known just by its block number.
+ */
 const RpcUnhealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.SyncQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Unhealthy),
@@ -50,7 +89,13 @@ const RpcUnhealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   latestSafeBlock: z.null(),
 });
 
-// Permutation ID: 2 - RPC Healthy + Sync Queued
+/**
+ * RPC Healthy + Sync Queued
+ *
+ * Permutation ID: 2
+ *
+ * RPC is Healthy, so `firstBlockToIndex` and `latestSafeBlock` values must be known.
+ */
 const RpcHealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.SyncQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Healthy),
@@ -60,10 +105,15 @@ const RpcHealthySyncQueuedSchema = ChainStatusBaseSchema.extend({
   latestSafeBlock: FullBlockInfoSchema, // Full block info available
 });
 
-// Permutation ID: 3 - RPC Unhealthy + Indexing Queued
-// TODO: Address the following: if we could have Ponder to cache full block
-//       information (number & date) in the RPC cache then we could serve
-//       full block info for `firstBlockToIndex` and `lastSyncedBlock`.
+/**
+ * RPC Unhealthy + Indexing Queued
+ *
+ * Permutation ID: 3
+ *
+ * RPC is Unhealthy, but indexing is queued, which means some blocks were synced.
+ *
+ * Both `firstBlockToIndex` and `lastSyncedBlock` values must be known.
+ */
 const RpcUnhealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Unhealthy),
@@ -75,7 +125,14 @@ const RpcUnhealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
   error: "`lastSyncedBlock.number` must be greater than or equal to `firstBlockToIndex.number`",
 });
 
-// Permutation ID: 4 - RPC Healthy + Indexing Queued
+/**
+ * RPC Healthy + Indexing Queued
+ *
+ * Permutation ID: 4
+ *
+ * RPC is Healthy, some blocks have been synced already. The following values must be known:
+ * `firstBlockToIndex`, `lastSyncedBlock`, `latestSafeBlock`.
+ */
 const RpcHealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingQueued),
   rpcHealth: z.literal(ENSNode.RPCHealth.Healthy),
@@ -91,10 +148,14 @@ const RpcHealthyIndexingQueuedSchema = ChainStatusBaseSchema.extend({
     error: "`lastSyncedBlock.number` must be greater than or equal to `firstBlockToIndex.number`",
   });
 
-// Permutation ID: 5 - RPC Unhealthy + Indexing Started
-// TODO: Address the following: if we could have Ponder to cache full block
-//       information (number & date) in the RPC cache then we could serve
-//       full block info for `firstBlockToIndex`, `lastSyncedBlock`, and `lastIndexedBlock`.
+/**
+ * RPC Unhealthy + Indexing Started
+ *
+ * Permutation ID: 5
+ *
+ * RPC is Unhealthy, some blocks have been indexed. The following values must be known:
+ * `firstBlockToIndex`, `lastSyncedBlock`, `lastIndexedBlock`.
+ */
 const RpcUnhealthyIndexingStartedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingStarted),
   rpcHealth: z.literal(ENSNode.RPCHealth.Unhealthy),
@@ -110,7 +171,13 @@ const RpcUnhealthyIndexingStartedSchema = ChainStatusBaseSchema.extend({
     error: "`lastIndexedBlock.number` must be greater than or equal to `firstBlockToIndex.number`",
   });
 
-// Permutation ID: 6 - RPC Healthy + Indexing Started
+/**
+ * RPC Healthy + Indexing Started
+ *
+ * Permutation ID: 6
+ *
+ * RPC is Healthy, some blocks have been indexed. All block-related values must be known.
+ */
 const RpcHealthyIndexingStartedSchema = ChainStatusBaseSchema.extend({
   indexingPhase: z.literal(ENSNode.IndexingPhase.IndexingStarted),
   rpcHealth: z.literal(ENSNode.RPCHealth.Healthy),
@@ -129,7 +196,11 @@ const RpcHealthyIndexingStartedSchema = ChainStatusBaseSchema.extend({
     error: "`lastIndexedBlock.number` must be greater than or equal to `firstBlockToIndex.number`",
   });
 
-// Union of all possible chain status schemas
+/**
+ * Chain Status Schema
+ *
+ * A union of all schemas which cover every possible chain status permutation.
+ */
 const ChainStatusSchema = z.union([
   RpcHealthySyncQueuedSchema,
   RpcUnhealthySyncQueuedSchema,
@@ -139,7 +210,13 @@ const ChainStatusSchema = z.union([
   RpcUnhealthyIndexingStartedSchema,
 ]);
 
-const IndexingStatusDtoSchema = z
+/**
+ * Indexing Status Schema
+ *
+ * Related to {@link IndexingStatusDTO.IndexingStatus}.
+ * Produces {@link IndexingStatusDomain.IndexingStatus}.
+ */
+const IndexingStatusSchema = z
   .record(z.string().transform(Number).pipe(ChainIdSchema), ChainStatusSchema, {
     error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
   })
@@ -154,24 +231,18 @@ const IndexingStatusDtoSchema = z
   });
 
 /**
- * Deserialize IndexingStatus DTO object.
+ * Map IndexingStatus DTO object into Indexing Status Domain object.
  *
  * @returns {IndexingStatusDomain.IndexingStatus}
- * @throws {Error} when the DTO object could not be deserialized
+ * @throws {Error} when the DTO object could not be mapped.
  */
-export function deserializeIndexingStatus(
+export function mapIndexingStatusDtoIntoDomain(
   indexingStatusDto: IndexingStatusDTO.IndexingStatus,
 ): IndexingStatusDomain.IndexingStatus {
-  const parsed = IndexingStatusDtoSchema.safeParse(indexingStatusDto);
-
-  // if (parsed.error) {
-  //   throw new Error(
-  //     "Failed to parse IndexingStatus DTO:" + JSON.stringify(treeifyError(parsed.error), null, 2),
-  //   );
-  // }
+  const parsed = IndexingStatusSchema.safeParse(indexingStatusDto);
 
   if (parsed.error) {
-    throw new Error(`Failed to parse IndexingStatus DTO: \n${z.prettifyError(parsed.error)}\n`);
+    throw new Error(`Failed to map IndexingStatus DTO: \n${z.prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;

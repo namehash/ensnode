@@ -1,5 +1,5 @@
 import type { ENSNode } from "../../ensnode";
-import type { DatetimeIso8601 } from "../../utils/types";
+import type { ChainId, DatetimeIso8601 } from "../../utils/types";
 
 /**
  * ENSNode namespace: DTO types
@@ -15,9 +15,11 @@ export namespace IndexingStatusDTO {
     createdAt: DatetimeIso8601 | null;
   }
 
+  export type IndexingStatusKey = string;
+
   export type ChainStatus = ENSNode.ChainStatus<BlockInfo>;
 
   export type IndexingStatus = {
-    [chainId: string]: ChainStatus;
+    [chainId: IndexingStatusKey]: ChainStatus;
   };
 }

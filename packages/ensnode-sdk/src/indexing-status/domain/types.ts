@@ -12,6 +12,8 @@ export namespace IndexingStatusDomain {
     createdAt: Date;
   }
 
+  export type IndexingStatusKey = ChainId;
+
   export type ChainStatus = ENSNode.ChainStatus<BlockInfo>;
 
   /**
@@ -19,5 +21,5 @@ export namespace IndexingStatusDomain {
    *
    * Represents key-value pairs of Chain ID and Chain Status.
    */
-  export type IndexingStatus = Map<ChainId, ChainStatus>;
+  export type IndexingStatus = Map<IndexingStatusKey, ChainStatus>;
 }
