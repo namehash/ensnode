@@ -41,16 +41,31 @@ This network provides access to a [semi-decentralized ENS Subgraph](https://theg
 
 As an alternative to the Graph Network, [NameHash Labs](https://namehashlabs.org/) operates an independent Graph Node instance. This is currently being freely offered to the ENS community without need for API keys or rate limiting. It can be found at https://graphnode.namehashlabs.org:8030. An [interactive GraphQL Playground](https://graphnode.namehashlabs.org:8030/graphql/playground) is also available.
 
-This server is running [Graph Node version 0.33.0](https://github.com/graphprotocol/graph-node/releases/tag/v0.33.0). The latest Graph Node release (as of this writing) is [version 0.36.0](https://github.com/graphprotocol/graph-node/releases), however it is understood that this version update has no impact on the data being indexed.
+This server is running [Graph Node version 0.39.1](https://github.com/graphprotocol/graph-node/releases/tag/v0.39.1) which is the [latest Graph Node release](https://github.com/graphprotocol/graph-node/releases) (as of July 15, 2025).
 
 ## NameHash Labs Hosted ENS Subgraphs
 
-Our Graph Node instance indexes the ENS Subgraph. The live status can be monitored with [the indexing status API endpoint](https://graphnode.namehashlabs.org:8030/graphql/playground?query=%7B%0A%20%20indexingStatuses%20%7B%0A%20%20%20%20subgraph%0A%20%20%20%20health%0A%20%20%20%20historyBlocks%0A%20%20%20%20paused%0A%20%20%20%20synced%0A%20%20%20%20chains%20%7B%0A%20%20%20%20%20%20network%0A%20%20%20%20%20%20chainHeadBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20latestBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D). Subgraph ID: `QmVsj1tYQ84DZH3NHAbZKjQ5agQ5Gt6VusUBf67CU32FWP`
+Our Graph Node instance indexes the ENS Subgraph on mainnet, sepolia, and holesky. The live indexing status of each can be monitored with [the indexing status API endpoint](https://graphnode.namehashlabs.org:8030/graphql/playground?query=%7B%0A%20%20indexingStatuses%20%7B%0A%20%20%20%20subgraph%0A%20%20%20%20health%0A%20%20%20%20historyBlocks%0A%20%20%20%20paused%0A%20%20%20%20synced%0A%20%20%20%20chains%20%7B%0A%20%20%20%20%20%20network%0A%20%20%20%20%20%20chainHeadBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20latestBlock%20%7B%0A%20%20%20%20%20%20%20%20number%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D).
 
-As of the time of writing this wiki page:
+As of the latest update to this page on July 15, 2025:
 
-- This is the latest version of the ENS Subgraph, published [Feb 15, 2024](https://github.com/graphprotocol/ens-subgraph/commit/c8447914e8743671fb4b20cffe5a0a97020b3cee).
-- The subgraph is fully synced with the latest block on mainnet.
-- [Interactive GraphiQL Explorer](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-2/graphql)
+- The ["old" version](https://github.com/ensdomains/ens-subgraph/commit/c8447914e8743671fb4b20cffe5a0a97020b3cee) of the ENS Subgraph ([the version currently served by the semi-decentralized Graph Network](https://thegraph.com/explorer/subgraphs/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH?view=Query&chain=arbitrum-one)) is no longer being indexed by our Graph Node server.
+- The ["new" version](https://github.com/ensdomains/ens-subgraph/pull/90) (as of commit `310bdb2`) is now being indexed across the following chains:
 
-This Subgraph Id is understood to be distinct from the "official" hosted ENS subgraph because it is associated with our own hosted Graph Node instance that is not participating in The Graph's distributed network of indexers.
+**Mainnet**
+
+- Subgraph ID: `QmVsj1tYQ84DZH3NHAbZKjQ5agQ5Gt6VusUBf67CU32FWP`
+- [GraphQL Endpoint](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-mainnet)
+- [Interactive GraphiQL Explorer](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-mainnet/graphql)
+
+**Sepolia**
+
+- Subgraph ID: `QmZkCMqRDzq8tWfJy12KudmRjwzHLSA5F6KnSnHRoC6kQe`
+- [GraphQL Endpoint](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-3)
+- [Interactive GraphiQL Explorer](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-3/graphql)
+
+**Holesky**
+
+- Subgraph ID: `QmQCDNHEuV359KwtyYZBWv4godb8t6kzErcYSFs7YgdqAM`
+- [GraphQL Endpoint](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-holesky)
+- [Interactive GraphiQL Explorer](https://graphnode.namehashlabs.org:8000/subgraphs/name/namehash/ens-subgraph-holesky/graphql)
