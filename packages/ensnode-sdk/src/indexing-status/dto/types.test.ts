@@ -6,7 +6,7 @@ describe("Indexing Status", () => {
   describe("DTO types", () => {
     it("can express a complete data model", () => {
       /**
-       * Below you can find all available permutations for {@link ENSNode.ChainStatus}.
+       * Test all chain status permutations for {@link ENSNode.ChainStatus}.
        */
 
       // Permutation ID: 1
@@ -128,7 +128,7 @@ describe("Indexing Status", () => {
       indexingStatus[unhealthyRpcAndIndexingStarted.chainId] = unhealthyRpcAndIndexingStarted;
       indexingStatus[healthyRpcAndIndexingStarted.chainId] = healthyRpcAndIndexingStarted;
 
-      // get chain by chain ID
+      // get chain status by chain ID
       expect(indexingStatus[healthyRpcAndSyncQueued.chainId]).toBe(healthyRpcAndSyncQueued);
     });
   });

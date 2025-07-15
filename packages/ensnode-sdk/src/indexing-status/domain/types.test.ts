@@ -128,7 +128,7 @@ describe("Indexing Status", () => {
       indexingStatus.set(unhealthyRpcAndIndexingStarted.chainId, unhealthyRpcAndIndexingStarted);
       indexingStatus.set(healthyRpcAndIndexingStarted.chainId, healthyRpcAndIndexingStarted);
 
-      // get chain by chain ID
+      // get chain status by chain ID
       expect(indexingStatus.get(healthyRpcAndSyncQueued.chainId)).toBe(healthyRpcAndSyncQueued);
     });
   });

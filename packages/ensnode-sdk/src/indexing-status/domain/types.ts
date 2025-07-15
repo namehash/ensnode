@@ -8,12 +8,27 @@ import type { ChainId } from "../../utils";
  */
 
 export namespace IndexingStatusDomain {
+  /**
+   * Block Info
+   *
+   * Describes a block.
+   */
   export interface BlockInfo extends ENSNode.PartialBlockInfo {
     createdAt: Date;
   }
 
+  /**
+   * Indexing Status Key
+   *
+   * A key type used in {@link IndexingStatus}.
+   */
   export type IndexingStatusKey = ChainId;
 
+  /**
+   * Chain Status
+   *
+   * A value type used in {@link IndexingStatus}.
+   */
   export type ChainStatus = ENSNode.ChainStatus<BlockInfo>;
 
   /**
