@@ -1,7 +1,7 @@
-# Use a slim Node.js image as the base
-FROM --platform=${TARGETPLATFORM} node:22-slim AS base
+# Runtime image for ENSRainbow
+FROM --platform=${TARGETPLATFORM} node:22-slim AS runtime
 
-# Install system dependencies required for downloading and extracting .ensrainbow files
+# Install only essential system dependencies for runtime
 RUN apt-get update && apt-get install -y wget tar && rm -rf /var/lib/apt/lists/*
 
 # Set up pnpm
@@ -12,35 +12,31 @@ RUN corepack enable
 # Set the working directory
 WORKDIR /app
 
-# Copy all source files to the /app directory
-# This includes the main application and any scripts like download-prebuilt-database.sh
-COPY . .
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/ packages/
+COPY apps/ensrainbow/package.json apps/ensrainbow/
 
-# Install dependencies using pnpm
-# This will install dependencies for all packages in the monorepo, including ensrainbow
-# Using --prod to only install production dependencies for a smaller image, if applicable,
-# or ensure all necessary scripts are available if not using --prod.
-# The `download-prebuilt-database.sh` and `entrypoint.sh` don't have separate pnpm deps,
-# but `pnpm run serve` and `pnpm run validate:lite` do.
+# Install dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# Copy the entrypoint script and make it executable
-# Ensure this path is correct relative to the monorepo root during COPY
-COPY ./apps/ensrainbow/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Copy the application source and scripts
+COPY apps/ensrainbow/src/ apps/ensrainbow/src/
+COPY apps/ensrainbow/scripts/ apps/ensrainbow/scripts/
+COPY apps/ensrainbow/tsconfig.json apps/ensrainbow/
+COPY apps/ensrainbow/vitest.config.ts apps/ensrainbow/
 
-# Copy the download script and make it executable (if not already handled by COPY . . and permissions)
-# It's assumed to be in /app/apps/ensrainbow/scripts/download-prebuilt-database.sh after `COPY . .`
+# Make scripts executable
+RUN chmod +x /app/apps/ensrainbow/scripts/entrypoint.sh
 RUN chmod +x /app/apps/ensrainbow/scripts/download-prebuilt-database.sh
 
-# Set environment variables for the application
+# Set environment variables
 ENV NODE_ENV=production
 # PORT will be used by entrypoint.sh, defaulting to 3223 if not set at runtime
-# SCHEMA_VERSION, LABEL_SET_ID, LABEL_SET_VERSION must be provided at runtime to the entrypoint
+# DB_SCHEMA_VERSION, LABEL_SET_ID, LABEL_SET_VERSION must be provided at runtime to the entrypoint
 
 # Default port, can be overridden by PORT env var for the entrypoint/serve command
 EXPOSE 3223
 
-# Set the entrypoint to the new script
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
+# Set the entrypoint
+ENTRYPOINT ["/app/apps/ensrainbow/scripts/entrypoint.sh"]
