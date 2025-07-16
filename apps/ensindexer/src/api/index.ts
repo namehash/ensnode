@@ -6,6 +6,7 @@ import { Hono, MiddlewareHandler } from "hono";
 import { cors } from "hono/cors";
 import { graphql as ponderGraphQL } from "ponder";
 
+import { indexingStatusMiddleware } from "@/api/lib/indexing-status";
 import { sdk } from "@/api/lib/instrumentation";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
@@ -28,6 +29,8 @@ import ensNodeApi from "./handlers/ensnode-api";
 const schemaWithoutExtensions = filterSchemaExtensions(schema);
 
 const app = new Hono();
+
+app.get("/indexing-status", indexingStatusMiddleware);
 
 const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
   ctx.header("x-ensnode-version", packageJson.version);
