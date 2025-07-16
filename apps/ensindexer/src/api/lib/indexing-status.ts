@@ -17,28 +17,25 @@ type ChainIndexingStatus =
   | {
       status: "not_started";
       config: ChainIndexingConfig;
-      latestBlock: BlockRef;
     }
   | {
       status: "backfill";
       config: ChainIndexingConfig;
-      latestSyncedBlock: BlockRef;
       latestIndexedBlock: BlockRef;
-      latestBlock: BlockRef;
+      latestKnownBlock: BlockRef;
+      backfillEndBlock: BlockRef;
     }
   | {
       status: "realtime";
       config: ChainIndexingConfig;
-      latestSyncedBlock: BlockRef;
       latestIndexedBlock: BlockRef;
-      latestBlock: BlockRef;
+      latestKnownBlock: BlockRef;
     }
   | {
       status: "completed";
       config: ChainIndexingConfig;
-      latestSyncedBlock: BlockRef;
       latestIndexedBlock: BlockRef;
-      latestBlock: BlockRef;
+      latestKnownBlock: BlockRef;
     };
 
 type IndexingStatus = { chains: Record<number, ChainIndexingStatus> };
@@ -71,10 +68,8 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
 
         const chainBlockConfig = await getChainConfig(chainName);
 
-        const latestBlock = await getLatestBlock(chainName);
-
-        const statusBlock = status[chainName]?.block;
-        if (statusBlock === undefined) {
+        const latestIndexedBlock = status[chainName]?.block;
+        if (latestIndexedBlock === undefined) {
           throw new Error(`Chain ${chainName} found in config but not in status`);
         }
 
@@ -92,9 +87,8 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             result: {
               status: "completed" as const,
               config: chainBlockConfig,
-              latestSyncedBlock: statusBlock,
-              latestIndexedBlock: statusBlock,
-              latestBlock,
+              latestIndexedBlock,
+              latestKnownBlock: latestIndexedBlock,
             } satisfies ChainIndexingStatus,
           };
         }
@@ -110,29 +104,28 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
         // The is_realtime metric reliably indicates that the backfill is complete,
         // so take advantage of that here to simplify the logic below.
         if (isRealtime === true) {
-          const latestSyncedBlockNumber = metrics.getMetricValue("ponder_sync_block", {
+          const latestKnownBlockNumber = metrics.getMetricValue("ponder_sync_block", {
             chain: chainName,
           });
-          if (latestSyncedBlockNumber === undefined) {
+          if (latestKnownBlockNumber === undefined) {
             throw new Error(`No ponder_sync_block metric found for realtime chain ${chainName}`);
           }
 
           // If the latest sync block number is the same as the latest indexed
           // block number, use the latest indexed block as an optimization to
           // avoid the extra RPC request.
-          const latestSyncedBlock =
-            latestSyncedBlockNumber === statusBlock.number
-              ? statusBlock
-              : await cachedGetBlockByNumber(chainName, latestSyncedBlockNumber);
+          const latestKnownBlock =
+            latestKnownBlockNumber === latestIndexedBlock.number
+              ? latestIndexedBlock
+              : await cachedGetBlockByNumber(chainName, latestKnownBlockNumber);
 
           return {
             chainId,
             result: {
               status: "realtime" as const,
               config: chainBlockConfig,
-              latestSyncedBlock,
-              latestIndexedBlock: statusBlock,
-              latestBlock,
+              latestIndexedBlock,
+              latestKnownBlock,
             } satisfies ChainIndexingStatus,
           };
         }
@@ -145,20 +138,21 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             result: {
               status: "not_started" as const,
               config: chainBlockConfig,
-              latestBlock,
             } satisfies ChainIndexingStatus,
           };
         }
 
         // In omnichain ordering, if the startBlock is the same as the
-        // status block, the chain has not started yet.
-        if (ordering === "omnichain" && chainBlockConfig.startBlock.number === statusBlock.number) {
+        // latestIndexedBlock, the chain has not started yet.
+        if (
+          ordering === "omnichain" &&
+          chainBlockConfig.startBlock.number === latestIndexedBlock.number
+        ) {
           return {
             chainId,
             result: {
               status: "not_started" as const,
               config: chainBlockConfig,
-              latestBlock,
             } satisfies ChainIndexingStatus,
           };
         }
@@ -190,32 +184,28 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             result: {
               status: "not_started" as const,
               config: chainBlockConfig,
-              latestBlock,
             } satisfies ChainIndexingStatus,
           };
         }
 
-        // We can calculate the latest synced block number by adding
-        // the historical cached + completed blocks to the start block.
-        const latestSyncedBlockNumber =
-          chainBlockConfig.startBlock.number + historicalCachedBlocks + historicalCompletedBlocks;
+        // The backfill end block is equal to the earliest start block
+        // plus the total number of blocks in the backfill.
+        const backfillEndBlockNumber = chainBlockConfig.startBlock.number + historicalTotalBlocks;
 
-        // If the latest sync block number is the same as the latest indexed
-        // block number, use the latest indexed block as an optimization to
-        // avoid the extra RPC request.
-        const latestSyncedBlock =
-          latestSyncedBlockNumber === statusBlock.number
-            ? statusBlock
-            : await cachedGetBlockByNumber(chainName, latestSyncedBlockNumber);
+        // This will be cached after the first request.
+        const backfillEndBlock = await cachedGetBlockByNumber(chainName, backfillEndBlockNumber);
+
+        // During the backfill, the latest known block is the backfill end block.
+        const latestKnownBlock = backfillEndBlock;
 
         return {
           chainId,
           result: {
             status: "backfill" as const,
             config: chainBlockConfig,
-            latestSyncedBlock,
-            latestIndexedBlock: statusBlock,
-            latestBlock,
+            latestIndexedBlock,
+            latestKnownBlock,
+            backfillEndBlock,
           } satisfies ChainIndexingStatus,
         };
       }),
@@ -230,20 +220,6 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
     return c.json({ error: "Internal server error" }, 500);
   }
 });
-
-async function getLatestBlock(chainName: string) {
-  const client = publicClients[chainName];
-  if (client === undefined) throw new Error(`Client not found for chain ${chainName}`);
-
-  const block = await client.getBlock({ blockTag: "latest" });
-
-  const blockRef = {
-    number: Number(block.number),
-    timestamp: Number(block.timestamp),
-  } satisfies BlockRef;
-
-  return blockRef;
-}
 
 const blockCache = new Map<string, Map<number, BlockRef>>();
 
