@@ -10,6 +10,13 @@ import { CoinType, Label, Name } from "./types";
 export const addrReverseLabel = (address: Address): Label => address.slice(2).toLowerCase();
 
 /**
+ * Converts `coinType` to prefix-free hex string.
+ *
+ * @see https://docs.ens.domains/ensip/19
+ */
+export const coinTypeAsHexSansPrefix = (coinType: CoinType) => coinType.toString(16);
+
+/**
  * Gets the reverse name for an address according to ENSIP-11 & ENSIP-19.
  *
  * @see https://docs.ens.domains/ensip/11#specification
@@ -36,7 +43,7 @@ export function reverseName(address: Address, coinType: CoinType): Name {
       case DEFAULT_EVM_COIN_TYPE:
         return "default";
       default:
-        return coinType.toString(16); // hex string, sans 0x prefix
+        return coinTypeAsHexSansPrefix(coinType);
     }
   })();
 

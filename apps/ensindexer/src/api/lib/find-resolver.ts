@@ -25,7 +25,11 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
-export async function findResolver(chainId: number, name: Name) {
+export async function findResolver(
+  chainId: number,
+  name: Name,
+  { accelerate }: { accelerate: boolean } = { accelerate: true },
+) {
   // TODO: Accelerate names that are subnames of well-known registrar managed names (i.e. base.eth, .linea.eth)
   // .base.eth -> ensroot.BasenamesL1Resolver.address;
   // .linea.eth -> ensroot.LineanamesL1Resolver.address;
@@ -37,16 +41,18 @@ export async function findResolver(chainId: number, name: Name) {
   // This is enforced by the requirement that `forwardResolve` with non-ENSRoot chain ids is only
   // called when an known offchain lookup resolver defers to a plugin that is active.
 
-  // if the Subgraph plugin is not active, then we don't have Domain-Resolver relationships
-  // for the ENSRoot Chain
-  if (!config.plugins.includes(PluginName.Subgraph)) {
-    // query the UniversalResolver on the ENSRoot Chain (via RPC)
-    return findResolverWithUniversalResolver(chainId, name);
+  if (accelerate) {
+    // if the Subgraph plugin is not active, then we don't have Domain-Resolver relationships
+    // for the ENSRoot Chain
+    if (config.plugins.includes(PluginName.Subgraph)) {
+      // we have access to the indexed Domain-Resolver relations necessary to look up
+      // the Domain's configured Resolver (see invariant above)
+      return findResolverWithIndex(chainId, name);
+    }
   }
 
-  // otherwise we _must_ have access to the indexed Domain-Resolver relations necessary to look up
-  // the Domain's configured Resolver (see invariant above)
-  return findResolverWithIndex(chainId, name);
+  // query the UniversalResolver on the ENSRoot Chain (via RPC)
+  return findResolverWithUniversalResolver(chainId, name);
 }
 
 /**
