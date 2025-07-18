@@ -72,10 +72,10 @@ jobs:
           # as secrets can only be provided to workflows running against
           # the very repository they were defined on.
           PLUGINS: subgraph,basenames,lineanames,threedns
-          RPC_URL_1: https://eth.drpc.org
-          RPC_URL_10: https://optimism.drpc.org
-          RPC_URL_8453: https://base.drpc.org
-          RPC_URL_59144: https://linea.drpc.org
+          RPC_URL_1: ${{ secrets.MAINNET_RPC_URL }}
+          RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL }}
+          RPC_URL_8453: ${{ secrets.BASE_RPC_URL }}
+          RPC_URL_59144: ${{ secrets.LINEA_RPC_URL }}
           HEALTH_CHECK_TIMEOUT: 60
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSNODE_PUBLIC_URL: http://localhost:42069
