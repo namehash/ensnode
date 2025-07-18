@@ -146,7 +146,7 @@ export default function () {
             // WrappedEthRegistrarController incorrectly names its event arguments, so we re-map them here
             label: event.args.name,
             labelHash: event.args.label,
-            // the WrappedEthRegistrarController#NameRegistered uses baseCost + premium to compute cost
+            // the WrappedEthRegistrarController#NameRegistered uses baseCost + premium for full cost
             cost: event.args.baseCost + event.args.premium,
           },
         },
@@ -187,7 +187,7 @@ export default function () {
             label: event.args.label,
             // NOTE: remapping `labelhash` to `labelHash` to match ENSNode terminology
             labelHash: event.args.labelhash,
-            // the UnwrappedEthRegistrarController#NameRegistered uses baseCost + premium to compute cost
+            // the UnwrappedEthRegistrarController#NameRegistered uses baseCost + premium for full cost
             cost: event.args.baseCost + event.args.premium,
           },
         },

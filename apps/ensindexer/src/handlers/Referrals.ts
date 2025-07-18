@@ -74,10 +74,11 @@ export async function handleRenewalReferral({
   event: EventWithArgs<{
     referrer: Hex;
     node: Node;
+    referee: Address;
     cost: bigint;
   }>;
 }) {
-  const { referrer, node, cost } = event.args;
+  const { referrer, node, referee, cost } = event.args;
 
   // no referrer, no-op
   if (referrer === zeroHash) return;
@@ -88,6 +89,7 @@ export async function handleRenewalReferral({
 
     // referral data
     referrerId: referrer,
+    refereeId: referee,
     domainId: node,
     cost,
 

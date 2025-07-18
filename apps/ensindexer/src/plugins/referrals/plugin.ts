@@ -1,6 +1,5 @@
 /**
- * The Subgraph plugin describes indexing behavior for the 'ENSRoot' Datasource, in alignment with the
- * legacy ENS Subgraph indexing logic.
+ * The Referrals plugin indexes registration and renewal referral data emitted by the `UnwrappedEthRegistrarController` contract.
  */
 
 import {

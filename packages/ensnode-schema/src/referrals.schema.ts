@@ -65,6 +65,7 @@ export const ext_renewalReferral = onchainTable(
     id: t.text().primaryKey(),
 
     referrerId: t.hex().notNull(),
+    refereeId: t.hex().notNull(),
     domainId: t.text().notNull(),
     cost: t.bigint().notNull(),
 
@@ -76,6 +77,7 @@ export const ext_renewalReferral = onchainTable(
     timestamp: t.bigint().notNull(),
   }),
   (t) => ({
+    byRefereeId: index().on(t.refereeId),
     byReferrerId: index().on(t.referrerId),
   }),
 );
@@ -85,6 +87,11 @@ export const ext_renewalReferral_relations = relations(ext_renewalReferral, ({ o
   referrer: one(ext_referrer, {
     fields: [ext_renewalReferral.referrerId],
     references: [ext_referrer.id],
+  }),
+  // RenewalReferral references one Account (as referee)
+  referee: one(account, {
+    fields: [ext_renewalReferral.refereeId],
+    references: [account.id],
   }),
   // RenewalReferral references one Domain
   domain: one(domain, {

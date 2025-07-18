@@ -5,7 +5,7 @@ import { handleRegistrationReferral, handleRenewalReferral } from "@/handlers/Re
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
-const ETH_NAMEHASH = namehash("eth");
+const ETH_NODE = namehash("eth");
 
 /**
  * Registers event handlers with Ponder.
@@ -26,9 +26,11 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            referee: event.args.owner,
+            // NOTE: transaction sender pays for the name registration,
+            // so we treat the transaction sender address as a referee
+            referee: event.transaction.from,
             // NOTE: UnwrappedEthRegistrarController emits the labelHash of the name under '.eth'
-            node: makeSubdomainNode(event.args.labelhash, ETH_NAMEHASH),
+            node: makeSubdomainNode(event.args.labelhash, ETH_NODE),
           },
         },
       });
@@ -45,8 +47,11 @@ export default function () {
           ...event,
           args: {
             ...event.args,
+            // NOTE: transaction sender pays for the name renewal,
+            // so we treat the transaction sender address as a referee
+            referee: event.transaction.from,
             // NOTE: UnwrappedEthRegistrarController emits the labelHash of the name under '.eth'
-            node: makeSubdomainNode(event.args.labelhash, ETH_NAMEHASH),
+            node: makeSubdomainNode(event.args.labelhash, ETH_NODE),
           },
         },
       });
