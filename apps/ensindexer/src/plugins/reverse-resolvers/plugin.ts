@@ -1,4 +1,4 @@
-import { DatasourceNames } from "@ensnode/datasources";
+import { DatasourceNames, ResolverABI } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { ChainConfig, createConfig } from "ponder";
 
@@ -47,6 +47,7 @@ export default createPlugin({
       contracts: {
         // a single multi-chain ReverseResolver ContractConfig
         ReverseResolver: {
+          abi: ResolverABI,
           // each chain's ReverseResolver gets a `chain` entry via `chainConfigForContract`
           chain: datasources.reduce((memo, datasource) => {
             const contracts = Object.values(
@@ -61,9 +62,6 @@ export default createPlugin({
               ...chainConfigForContract(config.globalBlockrange, datasource.chain.id, contract),
             };
           }, {}),
-
-          // NOTE: all ReverseResolvers share the same abi, so just use the first definition
-          abi: datasources[0]!.contracts.ReverseResolver.abi,
         },
       },
     });

@@ -16,6 +16,8 @@ import mainnet from "./mainnet";
 import sepolia from "./sepolia";
 
 export * from "./lib/types";
+// export the shared ResolverABI for consumer convenience
+export { ResolverABI } from "./lib/resolver";
 
 // internal map ENSNamespaceId -> ENSNamespace
 const ENSNamespacesById = {

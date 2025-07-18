@@ -5,11 +5,12 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
-import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
@@ -59,15 +60,20 @@ export default {
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
         startBlock: 9380410,
       },
-      EthRegistrarControllerOld: {
-        abi: root_EthRegistrarControllerOld,
+      LegacyEthRegistrarController: {
+        abi: root_LegacyEthRegistrarController,
         address: "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5",
         startBlock: 9380471,
       },
-      EthRegistrarController: {
-        abi: root_EthRegistrarController,
+      WrappedEthRegistrarController: {
+        abi: root_WrappedEthRegistrarController,
         address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
         startBlock: 16925618,
+      },
+      UnwrappedEthRegistrarController: {
+        abi: root_UnwrappedEthRegistrarController,
+        address: "0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547",
+        startBlock: 22764821,
       },
       NameWrapper: {
         abi: root_NameWrapper,
@@ -253,25 +259,31 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on the ENS Root chain.
+   * The Reverse Resolver(s) on the ENS Root chain.
    */
   [DatasourceNames.ReverseResolverRoot]: {
     chain: mainnet,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        // https://docs.ens.domains/learn/deployments/#mainnet
-        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
-        startBlock: 16925619,
-      },
-      // NOTE: the LegacyDefaultReverseResolver does NOT emit events (NameChanged or TextChanged),
+      // NOTE: the DefaultReverseResolver1 (aka LegacyDefaultReverseResolver) does NOT emit events
       // and is effectively unindexable for the purposes of Reverse Resolution. We document it here
-      // for completeness, and explicity do not index it.
-      // LegacyDefaultReverseResolver: {
+      // for completeness, but/and explicity do not index it.
+      // DefaultReverseResolver1: {
       //   abi: ResolverConfig.abi,
       //   address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
       //   startBlock: 9380501,
       // },
+      DefaultReverseResolver2: {
+        abi: ResolverConfig.abi,
+        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
+        startBlock: 16925619,
+      },
+      // this DefaultReverseResolver was enabled in the following proposal:
+      // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
+      DefaultReverseResolver3: {
+        abi: ResolverConfig.abi,
+        address: "0xA7d635c8de9a58a228AA69353a1699C7Cc240DCF",
+        startBlock: 22764871,
+      },
     },
   },
 

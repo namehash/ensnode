@@ -62,20 +62,19 @@ jobs:
       # environment. It will be discarded after the CI run. The app will not
       # check anything beyond the healthcheck as its job is to ensure the app
       # starts successfully only. With the configured RPCs there is likely to
-      # be rate limits hit but we do not care for those.
+      # be rate limits hit. To prevent that, we use private RPC URLs from
+      # GitHub Secrets.
       - name: Run ENSIndexer runtime integrity checks
         env:
           # Note on managing below configuration with GitHub:
-          # If we decide to have these inline values replaced with GitHub managed ones,
-          # we’d need to use GitHub Repository Variables to allow workflow runs
-          # against forked repositories. Using GitHub Repository Secrets won't work,
-          # as secrets can only be provided to workflows running against
-          # the very repository they were defined on.
+          # We use private RPC URLs from GitHub Secrets to avoid rate limits.
+          # Public RPC URLs are used as fallbacks for repository forks
+          # that don't have the relevant secrets configured.
           PLUGINS: subgraph,basenames,lineanames,threedns
-          RPC_URL_1: https://eth.drpc.org
-          RPC_URL_10: https://optimism.drpc.org
-          RPC_URL_8453: https://base.drpc.org
-          RPC_URL_59144: https://linea.drpc.org
+          RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
+          RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
+          RPC_URL_8453: ${{ secrets.BASE_RPC_URL || 'https://base.drpc.org' }}
+          RPC_URL_59144: ${{ secrets.LINEA_RPC_URL || 'https://linea.drpc.org' }}
           HEALTH_CHECK_TIMEOUT: 60
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSNODE_PUBLIC_URL: http://localhost:42069
