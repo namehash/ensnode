@@ -1,5 +1,23 @@
 # ensadmin
 
+## 0.32.0
+
+### Minor Changes
+
+- [#870](https://github.com/namehash/ensnode/pull/870) [`29176f9`](https://github.com/namehash/ensnode/commit/29176f94e477a96a3dd9f98141cf8235bc135be2) Thanks [@notrab](https://github.com/notrab)! - remove ponder client examples page
+
+### Patch Changes
+
+- [#812](https://github.com/namehash/ensnode/pull/812) [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8) Thanks [@Y3drk](https://github.com/Y3drk)! - Fixed support for all ENS namespaces in ENSAdmin
+
+- [#740](https://github.com/namehash/ensnode/pull/740) [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0) Thanks [@Y3drk](https://github.com/Y3drk)! - Improve 'Indexed Chains' panel's UI
+
+- Updated dependencies [[`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294), [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01), [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0), [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8)]:
+  - @ensnode/ensnode-sdk@0.32.0
+  - @ensnode/datasources@0.32.0
+  - @ensnode/ponder-metadata@0.32.0
+  - @ensnode/ensnode-schema@0.32.0
+
 ## 0.31.0
 
 ### Minor Changes
