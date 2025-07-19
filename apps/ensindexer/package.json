@@ -49,7 +49,7 @@
     "ponder": "catalog:",
     "ponder-enrich-gql-docs-middleware": "^0.1.3",
     "viem": "catalog:",
-    "zod": "3.25.7"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
