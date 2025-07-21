@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
 import type { Resolution } from "@ensnode/ensnode-sdk";
-import { createForwardResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
 import type { ConfigParameter, UseNameParameters, UseQueryReturnType } from "../types.js";
+import { createForwardResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
 import { useConfig } from "./useConfig.js";
 
 export type UseNameReturnType = UseQueryReturnType<Resolution.ForwardResponse>;
@@ -31,15 +31,13 @@ export type UseNameReturnType = UseQueryReturnType<Resolution.ForwardResponse>;
  * }
  * ```
  */
-export function useName(
-  parameters: UseNameParameters & ConfigParameter = {}
-): UseNameReturnType {
+export function useName(parameters: UseNameParameters & ConfigParameter = {}): UseNameReturnType {
   const { name, selection, query = {} } = parameters;
   const config = useConfig(parameters);
 
   const queryOptions = name
     ? createForwardResolutionQueryOptions(config, name, selection)
-    : { enabled: false, queryKey: ['disabled'] as const };
+    : { enabled: false, queryKey: ["disabled"] as const };
 
   const finalOptions = {
     ...queryOptions,

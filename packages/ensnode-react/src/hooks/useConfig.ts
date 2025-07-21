@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useContext } from "react";
 import { ENSNodeContext } from "../context.js";
@@ -12,7 +12,7 @@ import type { ConfigParameter, ENSNodeConfig } from "../types.js";
  * @throws Error if no config is available in context or parameters
  */
 export function useConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
-  parameters: ConfigParameter<TConfig> = {}
+  parameters: ConfigParameter<TConfig> = {},
 ): TConfig {
   const contextConfig = useContext(ENSNodeContext);
   const { config } = parameters;
@@ -22,7 +22,7 @@ export function useConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
 
   if (!finalConfig) {
     throw new Error(
-      "useConfig must be used within an ENSNodeProvider or you must pass a config parameter"
+      "useConfig must be used within an ENSNodeProvider or you must pass a config parameter",
     );
   }
 

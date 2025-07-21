@@ -1,11 +1,7 @@
 "use client";
 
 import { ResolutionApiClient } from "@ensnode/ensnode-sdk";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { createElement, useMemo } from "react";
 import { ENSNodeContext } from "./context.js";
 import type { ENSNodeConfig } from "./types.js";
@@ -35,16 +31,10 @@ function ENSNodeInternalProvider({
   // Memoize the config to prevent unnecessary re-renders
   const memoizedConfig = useMemo(() => config, [config]);
 
-  return createElement(
-    ENSNodeContext.Provider,
-    { value: memoizedConfig },
-    children
-  );
+  return createElement(ENSNodeContext.Provider, { value: memoizedConfig }, children);
 }
 
-export function ENSNodeProvider(
-  parameters: React.PropsWithChildren<ENSNodeProviderProps>
-) {
+export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProviderProps>) {
   const { children, config, queryClient, queryClientOptions } = parameters;
 
   // Check if we're already inside a QueryClientProvider
@@ -61,7 +51,7 @@ export function ENSNodeProvider(
     if (!hasExistingQueryClient) {
       throw new Error(
         "When providing a custom queryClient, you must wrap your app with QueryClientProvider. " +
-          "Either remove the queryClient prop to use auto-managed setup, or wrap with QueryClientProvider."
+          "Either remove the queryClient prop to use auto-managed setup, or wrap with QueryClientProvider.",
       );
     }
     return createElement(ENSNodeInternalProvider, { config, children });
@@ -85,26 +75,21 @@ export function ENSNodeProvider(
         },
         ...queryClientOptions,
       }),
-    [queryClientOptions]
+    [queryClientOptions],
   );
 
   return createElement(
     QueryClientProvider,
     { client: defaultQueryClient },
-    createElement(ENSNodeInternalProvider, { config, children })
+    createElement(ENSNodeInternalProvider, { config, children }),
   );
 }
 
 /**
  * Helper function to create ENSNode configuration
  */
-export function createConfig(
-  url?: string | URL,
-  options?: { debug?: boolean }
-): ENSNodeConfig {
-  const endpointUrl = url
-    ? new URL(url)
-    : ResolutionApiClient.defaultOptions().endpointUrl;
+export function createConfig(url?: string | URL, options?: { debug?: boolean }): ENSNodeConfig {
+  const endpointUrl = url ? new URL(url) : ResolutionApiClient.defaultOptions().endpointUrl;
 
   return {
     client: {

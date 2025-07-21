@@ -13,25 +13,20 @@ export interface ENSNodeConfig {
  * Base query parameters that can be passed to hooks
  */
 export interface QueryParameter<TData = unknown, TError = Error> {
-  query?: Partial<
-    QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>
-  >;
+  query?: Partial<QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>>;
 }
 
 /**
  * Configuration parameter for hooks that need access to config
  */
-export interface ConfigParameter<
-  TConfig extends ENSNodeConfig = ENSNodeConfig
-> {
+export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> {
   config?: TConfig | undefined;
 }
 
 /**
  * Parameters for the useName hook
  */
-export interface UseNameParameters
-  extends QueryParameter<Resolution.ForwardResponse> {
+export interface UseNameParameters extends QueryParameter<Resolution.ForwardResponse> {
   /** The ENS name to resolve */
   name?: string;
   /** Selection criteria for what records to resolve */
@@ -41,8 +36,7 @@ export interface UseNameParameters
 /**
  * Parameters for the useAddress hook
  */
-export interface UseAddressParameters
-  extends QueryParameter<Resolution.ReverseResponse> {
+export interface UseAddressParameters extends QueryParameter<Resolution.ReverseResponse> {
   /** The address to resolve */
   address?: string;
   /** Optional chain ID for multichain resolution */

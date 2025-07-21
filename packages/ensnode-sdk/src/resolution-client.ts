@@ -4,8 +4,7 @@ import type { CoinType, Name } from "./utils";
 /**
  * Default ENSNode resolution API endpoint URL
  */
-export const DEFAULT_RESOLUTION_API_URL =
-  "https://api.mainnet.ensnode.io" as const;
+export const DEFAULT_RESOLUTION_API_URL = "https://api.mainnet.ensnode.io" as const;
 
 export namespace Resolution {
   /**
@@ -76,18 +75,12 @@ export namespace Resolution {
     /**
      * Resolve an ENS name to records (forward resolution)
      */
-    resolveName(
-      name: Name,
-      selection?: RecordsSelection
-    ): Promise<ForwardResponse>;
+    resolveName(name: Name, selection?: RecordsSelection): Promise<ForwardResponse>;
 
     /**
      * Resolve an address to its primary name (reverse resolution)
      */
-    resolveAddress(
-      address: Address,
-      chainId?: number
-    ): Promise<ReverseResponse>;
+    resolveAddress(address: Address, chainId?: number): Promise<ReverseResponse>;
 
     /**
      * Get the current client options
@@ -155,12 +148,9 @@ export class ResolutionApiClient implements Resolution.Client {
    */
   async resolveName(
     name: Name,
-    selection: Resolution.RecordsSelection = {}
+    selection: Resolution.RecordsSelection = {},
   ): Promise<Resolution.ForwardResponse> {
-    const url = new URL(
-      `/forward/${encodeURIComponent(name)}`,
-      this.options.endpointUrl
-    );
+    const url = new URL(`/forward/${encodeURIComponent(name)}`, this.options.endpointUrl);
 
     // Add query parameters based on selection
     if (selection.name) {
@@ -206,10 +196,7 @@ export class ResolutionApiClient implements Resolution.Client {
    * const result = await client.resolveAddress("0xd...", 10);
    * ```
    */
-  async resolveAddress(
-    address: Address,
-    chainId: number = 1
-  ): Promise<Resolution.ReverseResponse> {
+  async resolveAddress(address: Address, chainId: number = 1): Promise<Resolution.ReverseResponse> {
     const url = new URL(`/reverse/${address}`, this.options.endpointUrl);
 
     if (chainId !== 1) {

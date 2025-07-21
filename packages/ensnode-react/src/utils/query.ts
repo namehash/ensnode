@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { ResolutionApiClient, type Resolution } from "@ensnode/ensnode-sdk";
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { type Resolution, ResolutionApiClient } from "@ensnode/ensnode-sdk";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { ENSNodeConfig, UseQueryReturnType } from "../types.js";
 
 /**
  * Query key factory for ENSNode queries
  */
 export const queryKeys = {
-  all: ['ensnode'] as const,
-  resolutions: () => [...queryKeys.all, 'resolution'] as const,
+  all: ["ensnode"] as const,
+  resolutions: () => [...queryKeys.all, "resolution"] as const,
   forward: (name: string, selection?: Resolution.RecordsSelection) =>
-    [...queryKeys.resolutions(), 'forward', name, selection] as const,
+    [...queryKeys.resolutions(), "forward", name, selection] as const,
   reverse: (address: string, chainId?: number) =>
-    [...queryKeys.resolutions(), 'reverse', address, chainId] as const,
+    [...queryKeys.resolutions(), "reverse", address, chainId] as const,
 };
 
 /**
@@ -22,7 +22,7 @@ export const queryKeys = {
 export function createForwardResolutionQueryOptions(
   config: ENSNodeConfig,
   name: string,
-  selection?: Resolution.RecordsSelection
+  selection?: Resolution.RecordsSelection,
 ) {
   return {
     queryKey: queryKeys.forward(name, selection),
@@ -42,7 +42,7 @@ export function createForwardResolutionQueryOptions(
 export function createReverseResolutionQueryOptions(
   config: ENSNodeConfig,
   address: string,
-  chainId?: number
+  chainId?: number,
 ) {
   return {
     queryKey: queryKeys.reverse(address, chainId),
@@ -60,7 +60,7 @@ export function createReverseResolutionQueryOptions(
  * Transform React Query result to our custom return type
  */
 export function transformQueryResult<TData, TError = Error>(
-  result: UseQueryResult<TData, TError>
+  result: UseQueryResult<TData, TError>,
 ): UseQueryReturnType<TData, TError> {
   return {
     data: result.data,
@@ -77,7 +77,7 @@ export function transformQueryResult<TData, TError = Error>(
  * Custom useQuery wrapper that returns our simplified interface
  */
 export function useENSNodeQuery<TData, TError = Error>(
-  options: Parameters<typeof useQuery<TData, TError>>[0]
+  options: Parameters<typeof useQuery<TData, TError>>[0],
 ): UseQueryReturnType<TData, TError> {
   const result = useQuery(options);
   return transformQueryResult(result);
