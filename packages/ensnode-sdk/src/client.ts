@@ -1,0 +1,366 @@
+import type { Address } from "viem";
+import type { CoinType, Name } from "./utils/index.js";
+
+/**
+ * Default ENSNode API endpoint URL
+ */
+export const DEFAULT_ENSNODE_API_URL =
+  "https://api.mainnet.ensnode.io" as const;
+
+export namespace ENSNode {
+  /**
+   * Configuration options for ENSNode API client
+   */
+  export interface ClientOptions {
+    /** The ENSNode API endpoint URL */
+    endpointUrl: URL;
+    /** Whether to enable debug tracing */
+    debug?: boolean;
+  }
+
+  /**
+   * Selection criteria for what records to resolve
+   */
+  export interface RecordsSelection {
+    /** Whether to include the canonical name */
+    name?: boolean;
+    /** Array of coin types to resolve addresses for */
+    addresses?: CoinType[];
+    /** Array of text record keys to resolve */
+    texts?: string[];
+  }
+
+  /**
+   * Resolved records response
+   */
+  export interface Records {
+    /** The canonical name if requested */
+    name?: string;
+    /** Resolved addresses by coin type */
+    addresses?: Record<string, string>;
+    /** Resolved text records */
+    texts?: Record<string, string>;
+  }
+
+  /**
+   * Base API response structure
+   */
+  export interface BaseResponse {
+    /** Resolved records */
+    records: Records;
+    /** Debug trace information (if debug enabled) */
+    trace?: any;
+  }
+
+  /**
+   * Forward resolution response (name to records)
+   */
+  export interface ForwardResponse extends BaseResponse {}
+
+  /**
+   * Reverse resolution response (address to name)
+   */
+  export interface ReverseResponse extends BaseResponse {}
+
+  /**
+   * ENS Indexer configuration response
+   */
+  export interface IndexerConfig {
+    /** The indexer version */
+    version: string;
+    /** Supported chains */
+    chains: Array<{
+      id: number;
+      name: string;
+      enabled: boolean;
+    }>;
+    /** Feature flags */
+    features: Record<string, boolean>;
+  }
+
+  /**
+   * ENS Indexer status response
+   */
+  export interface IndexingStatus {
+    /** Current block height being indexed */
+    currentBlock: number;
+    /** Latest block height available */
+    latestBlock: number;
+    /** Indexing progress percentage */
+    progress: number;
+    /** Status of the indexer */
+    status: "syncing" | "synced" | "error";
+    /** Last update timestamp */
+    lastUpdate: string;
+    /** Per-chain status */
+    chains: Array<{
+      id: number;
+      currentBlock: number;
+      latestBlock: number;
+      status: "syncing" | "synced" | "error";
+    }>;
+  }
+
+  /**
+   * API error response
+   */
+  export interface ErrorResponse {
+    error: string;
+    code?: string;
+    details?: Record<string, unknown>;
+  }
+
+  /**
+   * Complete ENSNode API client interface
+   */
+  export interface Client {
+    /**
+     * Resolve an ENS name to records (forward resolution)
+     */
+    resolveName(
+      name: Name,
+      selection?: RecordsSelection
+    ): Promise<ForwardResponse>;
+
+    /**
+     * Resolve an address to its primary name (reverse resolution)
+     */
+    resolveAddress(
+      address: Address,
+      chainId?: number
+    ): Promise<ReverseResponse>;
+
+    /**
+     * Get ENS Indexer configuration
+     */
+    getConfig(): Promise<IndexerConfig>;
+
+    /**
+     * Get current indexing status
+     */
+    getStatus(): Promise<IndexingStatus>;
+
+    /**
+     * Get the current client options
+     */
+    getOptions(): Readonly<ClientOptions>;
+  }
+}
+
+/**
+ * Complete ENSNode API client
+ *
+ * Provides access to all ENSNode API functionality through a unified interface.
+ * Supports resolution, configuration, and indexing status operations.
+ *
+ * @example
+ * ```typescript
+ * // Create client with default options
+ * const client = new ENSNodeClient();
+ *
+ * // Use resolution methods
+ * const nameResult = await client.resolveName("vitalik.eth", {
+ *   addresses: [60],
+ *   texts: ["avatar"]
+ * });
+ *
+ * // Get indexer configuration
+ * const config = await client.getConfig();
+ *
+ * // Check indexing status
+ * const status = await client.getStatus();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Custom configuration
+ * const client = new ENSNodeClient({
+ *   endpointUrl: new URL("https://custom-api.ensnode.io"),
+ *   debug: true
+ * });
+ * ```
+ */
+export class ENSNodeClient implements ENSNode.Client {
+  private readonly options: ENSNode.ClientOptions;
+
+  /**
+   * Create default client options
+   */
+  static defaultOptions(): ENSNode.ClientOptions {
+    return {
+      endpointUrl: new URL(DEFAULT_ENSNODE_API_URL),
+      debug: false,
+    };
+  }
+
+  constructor(options: Partial<ENSNode.ClientOptions> = {}) {
+    this.options = {
+      ...ENSNodeClient.defaultOptions(),
+      ...options,
+    };
+  }
+
+  /**
+   * Get a copy of the current client options
+   */
+  getOptions(): Readonly<ENSNode.ClientOptions> {
+    return Object.freeze({
+      endpointUrl: new URL(this.options.endpointUrl.href),
+      debug: this.options.debug,
+    });
+  }
+
+  /**
+   * Resolve an ENS name to records (forward resolution)
+   *
+   * @param name The ENS name to resolve
+   * @param selection Optional selection of what records to resolve
+   * @returns Promise resolving to the records
+   * @throws If the request fails or the name is not found
+   *
+   * @example
+   * ```typescript
+   * const result = await client.resolveName("vitalik.eth", {
+   *   name: true,
+   *   addresses: [60, 0],
+   *   texts: ["avatar", "com.twitter"]
+   * });
+   * ```
+   */
+  async resolveName(
+    name: Name,
+    selection: ENSNode.RecordsSelection = {}
+  ): Promise<ENSNode.ForwardResponse> {
+    const url = new URL(
+      `/forward/${encodeURIComponent(name)}`,
+      this.options.endpointUrl
+    );
+
+    // Add query parameters based on selection
+    if (selection.name) {
+      url.searchParams.set("name", "true");
+    }
+
+    if (selection.addresses && selection.addresses.length > 0) {
+      url.searchParams.set("addresses", selection.addresses.join(","));
+    }
+
+    if (selection.texts && selection.texts.length > 0) {
+      url.searchParams.set("texts", selection.texts.join(","));
+    }
+
+    if (this.options.debug) {
+      url.searchParams.set("debug", "true");
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const error = (await response.json()) as ENSNode.ErrorResponse;
+      throw new Error(`Forward resolution failed: ${error.error}`);
+    }
+
+    return response.json() as Promise<ENSNode.ForwardResponse>;
+  }
+
+  /**
+   * Resolve an address to its primary name (reverse resolution)
+   *
+   * @param address The address to resolve
+   * @param chainId Optional chain ID for multichain resolution (defaults to 1 for Ethereum mainnet)
+   * @returns Promise resolving to the primary name
+   * @throws If the request fails or no primary name is set
+   *
+   * @example
+   * ```typescript
+   * // Resolve on Ethereum mainnet
+   * const result = await client.resolveAddress("0xd...");
+   *
+   * // Resolve on Optimism
+   * const result = await client.resolveAddress("0xd...", 10);
+   * ```
+   */
+  async resolveAddress(
+    address: Address,
+    chainId: number = 1
+  ): Promise<ENSNode.ReverseResponse> {
+    const url = new URL(`/reverse/${address}`, this.options.endpointUrl);
+
+    if (chainId !== 1) {
+      url.searchParams.set("chainId", chainId.toString());
+    }
+
+    if (this.options.debug) {
+      url.searchParams.set("debug", "true");
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const error = (await response.json()) as ENSNode.ErrorResponse;
+      throw new Error(`Reverse resolution failed: ${error.error}`);
+    }
+
+    return response.json() as Promise<ENSNode.ReverseResponse>;
+  }
+
+  /**
+   * Get ENS Indexer configuration
+   *
+   * @returns Promise resolving to indexer configuration
+   * @throws If the request fails
+   *
+   * @example
+   * ```typescript
+   * const config = await client.getConfig();
+   * console.log("Version:", config.version);
+   * console.log("Supported chains:", config.chains);
+   * ```
+   */
+  async getConfig(): Promise<ENSNode.IndexerConfig> {
+    const url = new URL("/api/config", this.options.endpointUrl);
+
+    if (this.options.debug) {
+      url.searchParams.set("debug", "true");
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const error = (await response.json()) as ENSNode.ErrorResponse;
+      throw new Error(`Config fetch failed: ${error.error}`);
+    }
+
+    return response.json() as Promise<ENSNode.IndexerConfig>;
+  }
+
+  /**
+   * Get current indexing status
+   *
+   * @returns Promise resolving to indexing status
+   * @throws If the request fails
+   *
+   * @example
+   * ```typescript
+   * const status = await client.getStatus();
+   * console.log("Status:", status.status);
+   * console.log("Progress:", status.progress);
+   * ```
+   */
+  async getStatus(): Promise<ENSNode.IndexingStatus> {
+    const url = new URL("/indexing-status", this.options.endpointUrl);
+
+    if (this.options.debug) {
+      url.searchParams.set("debug", "true");
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const error = (await response.json()) as ENSNode.ErrorResponse;
+      throw new Error(`Indexing status fetch failed: ${error.error}`);
+    }
+
+    return response.json() as Promise<ENSNode.IndexingStatus>;
+  }
+}

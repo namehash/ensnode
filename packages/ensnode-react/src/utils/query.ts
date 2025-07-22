@@ -1,6 +1,6 @@
 "use client";
 
-import { type Resolution, ResolutionApiClient } from "@ensnode/ensnode-sdk";
+import { type ENSNode, ENSNodeClient } from "@ensnode/ensnode-sdk";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import type { ENSNodeConfig, UseQueryReturnType } from "../types.js";
 
@@ -10,10 +10,12 @@ import type { ENSNodeConfig, UseQueryReturnType } from "../types.js";
 export const queryKeys = {
   all: ["ensnode"] as const,
   resolutions: () => [...queryKeys.all, "resolution"] as const,
-  forward: (name: string, selection?: Resolution.RecordsSelection) =>
+  forward: (name: string, selection?: ENSNode.RecordsSelection) =>
     [...queryKeys.resolutions(), "forward", name, selection] as const,
   reverse: (address: string, chainId?: number) =>
     [...queryKeys.resolutions(), "reverse", address, chainId] as const,
+  config: () => [...queryKeys.all, "config"] as const,
+  indexingStatus: () => [...queryKeys.all, "indexing-status"] as const,
 };
 
 /**
@@ -22,12 +24,12 @@ export const queryKeys = {
 export function createForwardResolutionQueryOptions(
   config: ENSNodeConfig,
   name: string,
-  selection?: Resolution.RecordsSelection,
+  selection?: ENSNode.RecordsSelection
 ) {
   return {
     queryKey: queryKeys.forward(name, selection),
-    queryFn: async (): Promise<Resolution.ForwardResponse> => {
-      const client = new ResolutionApiClient(config.client);
+    queryFn: async (): Promise<ENSNode.ForwardResponse> => {
+      const client = new ENSNodeClient(config.client);
       return client.resolveName(name, selection);
     },
     enabled: Boolean(name),
@@ -42,12 +44,12 @@ export function createForwardResolutionQueryOptions(
 export function createReverseResolutionQueryOptions(
   config: ENSNodeConfig,
   address: string,
-  chainId?: number,
+  chainId?: number
 ) {
   return {
     queryKey: queryKeys.reverse(address, chainId),
-    queryFn: async (): Promise<Resolution.ReverseResponse> => {
-      const client = new ResolutionApiClient(config.client);
+    queryFn: async (): Promise<ENSNode.ReverseResponse> => {
+      const client = new ENSNodeClient(config.client);
       return client.resolveAddress(address as any, chainId);
     },
     enabled: Boolean(address),
@@ -57,10 +59,40 @@ export function createReverseResolutionQueryOptions(
 }
 
 /**
+ * Create query options for indexer configuration
+ */
+export function createIndexerConfigQueryOptions(config: ENSNodeConfig) {
+  return {
+    queryKey: queryKeys.config(),
+    queryFn: async (): Promise<ENSNode.IndexerConfig> => {
+      const client = new ENSNodeClient(config.client);
+      return client.getConfig();
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes (config changes less frequently)
+    gcTime: 1000 * 60 * 60, // 1 hour
+  };
+}
+
+/**
+ * Create query options for indexing status
+ */
+export function createIndexingStatusQueryOptions(config: ENSNodeConfig) {
+  return {
+    queryKey: queryKeys.indexingStatus(),
+    queryFn: async (): Promise<ENSNode.IndexingStatus> => {
+      const client = new ENSNodeClient(config.client);
+      return client.getStatus();
+    },
+    staleTime: 1000 * 30, // 30 seconds (status changes frequently)
+    gcTime: 1000 * 60 * 5, // 5 minutes
+  };
+}
+
+/**
  * Transform React Query result to our custom return type
  */
 export function transformQueryResult<TData, TError = Error>(
-  result: UseQueryResult<TData, TError>,
+  result: UseQueryResult<TData, TError>
 ): UseQueryReturnType<TData, TError> {
   return {
     data: result.data,
@@ -77,7 +109,7 @@ export function transformQueryResult<TData, TError = Error>(
  * Custom useQuery wrapper that returns our simplified interface
  */
 export function useENSNodeQuery<TData, TError = Error>(
-  options: Parameters<typeof useQuery<TData, TError>>[0],
+  options: Parameters<typeof useQuery<TData, TError>>[0]
 ): UseQueryReturnType<TData, TError> {
   const result = useQuery(options);
   return transformQueryResult(result);

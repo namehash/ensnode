@@ -7,7 +7,7 @@ Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://
 ## Package overview
 
 - [`utils`](utils) A utility library for interacting with ENS (Ethereum Name Service) data. It contains various helper functions and tools to facilitate interactions with ENS and ENSNode instances.
-- [`resolution-client`](src/resolution-client.ts) A TypeScript client for the ENSNode Resolution API, providing simple methods for ENS name and address lookups.
+- [`client`](src/client.ts) A unified TypeScript client for all ENSNode APIs, providing methods for resolution, configuration, and indexing status.
 
 ## Installation
 
@@ -15,32 +15,43 @@ Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://
 npm install @ensnode/ensnode-sdk
 ```
 
-## Resolution Client
+## ENSNode Client
 
-The `ResolutionApiClient` provides a simple interface for ENS resolution operations:
+The `ENSNodeClient` provides a unified interface for all ENSNode API operations:
 
 ### Basic Usage
 
 ```typescript
-import { ResolutionApiClient } from "@ensnode/ensnode-sdk";
+import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 
-const client = new ResolutionApiClient();
+const client = new ENSNodeClient();
 
-// Resolve a name to address records
-const result = await client.resolveName("vitalik.eth", {
+// Resolution operations
+const nameResult = await client.resolveName("vitalik.eth", {
   addresses: [60],
   texts: ["avatar", "com.twitter"],
 });
 
-// Resolve an address to its primary name
-const nameResult = await client.resolveAddress(
+const addressResult = await client.resolveAddress(
   "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 );
+
+// Configuration operations
+const config = await client.getConfig();
+console.log("Indexer version:", config.version);
+console.log("Supported chains:", config.chains);
+
+// Indexing status operations
+const status = await client.getStatus();
+console.log("Indexing status:", status.status);
+console.log("Progress:", status.progress);
 ```
 
 ### API Methods
 
-#### `resolveName(name, selection?)`
+#### Resolution
+
+##### `resolveName(name, selection?)`
 
 Resolves an ENS name to records (forward resolution).
 
@@ -50,18 +61,90 @@ Resolves an ENS name to records (forward resolution).
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
 
-#### `resolveAddress(address, chainId?)`
+##### `resolveAddress(address, chainId?)`
 
 Resolves an address to its primary name (reverse resolution).
 
 - `address`: The address to resolve
 - `chainId`: Optional chain ID (defaults to 1 for Ethereum mainnet)
 
+#### Configuration
+
+##### `getConfig()`
+
+Returns indexer configuration including version, supported chains, and feature flags.
+
+```typescript
+const config = await client.getConfig();
+console.log("Version:", config.version);
+console.log(
+  "Enabled chains:",
+  config.chains.filter((c) => c.enabled)
+);
+console.log("Features:", config.features);
+```
+
+#### Indexing Status
+
+##### `getStatus()`
+
+Returns current indexing status and progress.
+
+```typescript
+const status = await client.getStatus();
+console.log("Status:", status.status); // "syncing" | "synced" | "error"
+console.log("Progress:", status.progress); // 0-100
+console.log("Current block:", status.currentBlock);
+console.log("Latest block:", status.latestBlock);
+
+// Per-chain status
+status.chains.forEach((chain) => {
+  console.log(`Chain ${chain.id}: ${chain.status}`);
+});
+```
+
 ### Configuration
 
 ```typescript
-const client = new ResolutionApiClient({
+const client = new ENSNodeClient({
   endpointUrl: new URL("https://custom-api.ensnode.io"),
   debug: true,
 });
+```
+
+### Complete Example
+
+```typescript
+import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+
+const client = new ENSNodeClient({
+  endpointUrl: new URL("https://api.mainnet.ensnode.io"),
+  debug: false,
+});
+
+// Check indexer status
+const status = await client.getStatus();
+if (status.status === "synced") {
+  console.log("✅ Indexer is fully synced");
+} else {
+  console.log(`⚠️ Indexer syncing: ${status.progress.toFixed(2)}%`);
+}
+
+// Get configuration
+const config = await client.getConfig();
+console.log(`Version: ${config.version}`);
+
+// Resolve name
+const resolution = await client.resolveName("vitalik.eth", {
+  name: true,
+  addresses: [60],
+  texts: ["avatar", "com.twitter"],
+});
+console.log("Records:", resolution.records);
+
+// Reverse resolution
+const reverse = await client.resolveAddress(
+  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+);
+console.log("Primary name:", reverse.records.name);
 ```
