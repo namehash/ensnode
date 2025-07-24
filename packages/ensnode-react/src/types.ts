@@ -1,4 +1,4 @@
-import type { ENSNode } from "@ensnode/ensnode-sdk";
+import type { ClientOptions } from "@ensnode/ensnode-sdk";
 import type { QueryObserverOptions } from "@tanstack/react-query";
 
 /**
@@ -6,24 +6,20 @@ import type { QueryObserverOptions } from "@tanstack/react-query";
  */
 export interface ENSNodeConfig {
   /** The ENSNode API client configuration */
-  client: ENSNode.ClientOptions;
+  client: ClientOptions;
 }
 
 /**
  * Base query parameters that can be passed to hooks
  */
 export interface QueryParameter<TData = unknown, TError = Error> {
-  query?: Partial<
-    QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>
-  >;
+  query?: Partial<QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>>;
 }
 
 /**
  * Configuration parameter for hooks that need access to config
  */
-export interface ConfigParameter<
-  TConfig extends ENSNodeConfig = ENSNodeConfig
-> {
+export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> {
   config?: TConfig | undefined;
 }
 
@@ -31,18 +27,18 @@ export interface ConfigParameter<
  * Parameters for the useName hook
  */
 export interface UseNameParameters
-  extends QueryParameter<ENSNode.ForwardResponse> {
+  extends QueryParameter<import("@ensnode/ensnode-sdk").ForwardResponse> {
   /** The ENS name to resolve */
   name?: string;
   /** Selection criteria for what records to resolve */
-  selection?: ENSNode.RecordsSelection;
+  selection?: import("@ensnode/ensnode-sdk").RecordsSelection;
 }
 
 /**
  * Parameters for the useAddress hook
  */
 export interface UseAddressParameters
-  extends QueryParameter<ENSNode.ReverseResponse> {
+  extends QueryParameter<import("@ensnode/ensnode-sdk").ReverseResponse> {
   /** The address to resolve */
   address?: string;
   /** Optional chain ID for multichain resolution */
@@ -53,13 +49,13 @@ export interface UseAddressParameters
  * Parameters for the useConfig hook
  */
 export interface UseConfigParameters
-  extends QueryParameter<ENSNode.IndexerConfig> {}
+  extends QueryParameter<import("@ensnode/ensnode-sdk").IndexerConfig> {}
 
 /**
  * Parameters for the useIndexingStatus hook
  */
 export interface UseIndexingStatusParameters
-  extends QueryParameter<ENSNode.IndexingStatus> {}
+  extends QueryParameter<import("@ensnode/ensnode-sdk").IndexingStatus> {}
 
 /**
  * Return type for query hooks

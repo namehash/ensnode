@@ -1,11 +1,11 @@
 "use client";
 
-import type { ENSNode } from "@ensnode/ensnode-sdk";
+import type { IndexerConfig } from "@ensnode/ensnode-sdk";
 import type { ConfigParameter, UseConfigParameters, UseQueryReturnType } from "../types.js";
 import { createIndexerConfigQueryOptions, useENSNodeQuery } from "../utils/query.js";
 import { useConfig } from "./useConfig.js";
 
-export type UseIndexerConfigReturnType = UseQueryReturnType<ENSNode.IndexerConfig>;
+export type UseIndexerConfigReturnType = UseQueryReturnType<IndexerConfig>;
 
 /**
  * Hook to fetch ENS Indexer configuration

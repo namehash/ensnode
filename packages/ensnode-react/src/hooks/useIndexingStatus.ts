@@ -1,11 +1,11 @@
 "use client";
 
-import type { ENSNode } from "@ensnode/ensnode-sdk";
+import type { IndexingStatus } from "@ensnode/ensnode-sdk";
 import type { ConfigParameter, UseIndexingStatusParameters, UseQueryReturnType } from "../types.js";
 import { createIndexingStatusQueryOptions, useENSNodeQuery } from "../utils/query.js";
 import { useConfig } from "./useConfig.js";
 
-export type UseIndexingStatusReturnType = UseQueryReturnType<ENSNode.IndexingStatus>;
+export type UseIndexingStatusReturnType = UseQueryReturnType<IndexingStatus>;
 
 /**
  * Hook to fetch ENS Indexer status

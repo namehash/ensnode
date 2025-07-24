@@ -182,9 +182,7 @@ describe("ENSNodeClient", () => {
       const client = new ENSNodeClient();
       const result = await client.getConfig();
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        new URL(`${DEFAULT_ENSNODE_API_URL}/api/config`),
-      );
+      expect(mockFetch).toHaveBeenCalledWith(new URL(`${DEFAULT_ENSNODE_API_URL}/api/config`));
       expect(result).toEqual(mockResponse);
     });
 
@@ -211,9 +209,7 @@ describe("ENSNodeClient", () => {
 
       const client = new ENSNodeClient();
 
-      await expect(client.getConfig()).rejects.toThrow(
-        "Config fetch failed: Config unavailable",
-      );
+      await expect(client.getConfig()).rejects.toThrow("Config fetch failed: Config unavailable");
     });
   });
 
@@ -225,7 +221,14 @@ describe("ENSNodeClient", () => {
         progress: 100,
         status: "synced" as const,
         lastUpdate: "2023-01-01T00:00:00Z",
-        chains: [{ id: 1, currentBlock: 100, latestBlock: 100, status: "synced" as const }],
+        chains: [
+          {
+            id: 1,
+            currentBlock: 100,
+            latestBlock: 100,
+            status: "synced" as const,
+          },
+        ],
       };
 
       mockFetch.mockResolvedValueOnce({
@@ -236,9 +239,7 @@ describe("ENSNodeClient", () => {
       const client = new ENSNodeClient();
       const result = await client.getStatus();
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        new URL(`${DEFAULT_ENSNODE_API_URL}/indexing-status`),
-      );
+      expect(mockFetch).toHaveBeenCalledWith(new URL(`${DEFAULT_ENSNODE_API_URL}/indexing-status`));
       expect(result).toEqual(mockResponse);
     });
 

@@ -1,18 +1,11 @@
 "use client";
 
-import type { ENSNode } from "@ensnode/ensnode-sdk";
-import type {
-  ConfigParameter,
-  UseAddressParameters,
-  UseQueryReturnType,
-} from "../types.js";
-import {
-  createReverseResolutionQueryOptions,
-  useENSNodeQuery,
-} from "../utils/query.js";
+import type { ReverseResponse } from "@ensnode/ensnode-sdk";
+import type { ConfigParameter, UseAddressParameters, UseQueryReturnType } from "../types.js";
+import { createReverseResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
 import { useConfig } from "./useConfig.js";
 
-export type UseAddressReturnType = UseQueryReturnType<ENSNode.ReverseResponse>;
+export type UseAddressReturnType = UseQueryReturnType<ReverseResponse>;
 
 /**
  * Hook to resolve an address to its primary name (reverse resolution)
@@ -49,7 +42,7 @@ export type UseAddressReturnType = UseQueryReturnType<ENSNode.ReverseResponse>;
  * ```
  */
 export function useAddress(
-  parameters: UseAddressParameters & ConfigParameter = {}
+  parameters: UseAddressParameters & ConfigParameter = {},
 ): UseAddressReturnType {
   const { address, chainId, query = {} } = parameters;
   const config = useConfig(parameters);
