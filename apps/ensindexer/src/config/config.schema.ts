@@ -42,12 +42,13 @@ const makeUrlSchema = (envVarKey: string) =>
     error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
   });
 
-const makeBlockNumberSchema = (envVarKey: string) =>
+const positiveIntegerSchema = (envVarKey: string) =>
   z.coerce
     .number({ error: `${envVarKey} must be a positive integer.` })
     .int({ error: `${envVarKey} must be a positive integer.` })
-    .min(0, { error: `${envVarKey} must be a positive integer.` })
-    .optional();
+    .min(0, { error: `${envVarKey} must be a positive integer.` });
+
+const makeBlockNumberSchema = (envVarKey: string) => positiveIntegerSchema(envVarKey).optional();
 
 const RpcConfigSchema = z.object({
   url: makeUrlSchema("RPC_URL_*"),
