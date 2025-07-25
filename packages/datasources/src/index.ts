@@ -19,6 +19,14 @@ export * from "./lib/types";
 // export the shared ResolverABI for consumer convenience
 export { ResolverABI } from "./lib/resolver";
 
+/**
+ * Identifies a specific address on a specific chain.
+ */
+export interface ChainAddress {
+  chainId: number;
+  address: Address;
+}
+
 // internal map ENSNamespaceId -> ENSNamespace
 const ENSNamespacesById = {
   mainnet,
@@ -217,3 +225,83 @@ export function getChainName(chainId: number): string {
 
   return chainName;
 }
+
+/**
+ * Returns an array of 0 or more ChainAddress objects that are known to issue tokens
+ * that are compatible with Seaport.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns an array of 0 or more ChainAddress objects
+ */
+export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): ChainAddress[] => {
+  switch (namespaceId) {
+    case ENSNamespaceIds.Mainnet:
+      return [
+        {
+          // ENS Token - Mainnet
+          chainId: mainnetChain.id,
+          address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+        },
+        // NameWrapper Token - Mainnet
+        {
+          chainId: mainnetChain.id,
+          address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+        },
+        // 3DNS Token - Optimism
+        {
+          chainId: optimism.id,
+          address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
+        },
+        // 3DNS Token - Base
+        {
+          chainId: base.id,
+          address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
+        },
+        // Linear Names Token - Base
+        {
+          chainId: linea.id,
+          address: "0x6e84390dCc5195414eC91A8c56A5c91021B95704",
+        },
+        // Base Names Token - Base
+        {
+          chainId: base.id,
+          address: "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
+        },
+      ];
+    case ENSNamespaceIds.Sepolia:
+      return [
+        {
+          // ENS Token - Sepolia
+          chainId: sepoliaChain.id,
+          address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+        },
+        {
+          // NameWrapper Token - Sepolia
+          chainId: sepoliaChain.id,
+          address: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
+        },
+      ];
+    case ENSNamespaceIds.Holesky:
+    case ENSNamespaceIds.EnsTestEnv:
+      return [];
+  }
+};
+
+/**
+ * Returns a boolean indicating whether the provided ChainAddress is a known token issuing contract.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param chainAddress - The ChainAddress to check
+ * @returns a boolean indicating whether the provided ChainAddress is a known token issuing contract
+ */
+export const isKnownTokenIssuingContract = (
+  namespaceId: ENSNamespaceId,
+  chainAddress: ChainAddress,
+): boolean => {
+  const knownContracts = getKnownTokenIssuingContracts(namespaceId);
+  return knownContracts.some(
+    (knownContract) =>
+      knownContract.chainId === chainAddress.chainId &&
+      knownContract.address.toLowerCase() === chainAddress.address.toLowerCase(),
+  );
+};
