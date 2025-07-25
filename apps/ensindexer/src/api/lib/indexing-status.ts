@@ -84,11 +84,22 @@ await Promise.all(
   })
 );
 
+// Fetch chain backfill end blocks on an interval, to account for lag between when
+// the module executes and when the ponder_historical_total_blocks metric gets set
+// by Ponder. If we can't get a result within 10 seconds, crash the process.
 let chainBackfillEndBlocks: { [chainName: string]: BlockRef } | null = null;
 
-let interval = setInterval(async () => {
+const shutdownTimeout = setTimeout(() => {
+  console.error(
+    "Unable to fetch backfill end blocks within 10 seconds, shutting down"
+  );
+  process.exit(1);
+}, 10_000);
+
+const chainBackfillEndBlockInterval = setInterval(async () => {
   if (chainBackfillEndBlocks !== null) {
-    clearInterval(interval);
+    clearInterval(chainBackfillEndBlockInterval);
+    clearTimeout(shutdownTimeout);
     return;
   }
 
@@ -139,9 +150,11 @@ let interval = setInterval(async () => {
     );
 
     chainBackfillEndBlocks = Object.fromEntries(backfillEndBlocks);
-    clearInterval(interval);
+    clearInterval(chainBackfillEndBlockInterval);
+    clearTimeout(shutdownTimeout);
   } catch (error) {
     console.error("Error fetching backfill end blocks, retrying in 1 second");
+    console.error(error);
     return;
   }
 }, 1_000);
