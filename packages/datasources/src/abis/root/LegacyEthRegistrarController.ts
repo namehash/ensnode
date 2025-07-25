@@ -1,4 +1,4 @@
-export const EthRegistrarControllerOld = [
+export const LegacyEthRegistrarController = [
   {
     constant: true,
     inputs: [{ name: "interfaceID", type: "bytes4" }],

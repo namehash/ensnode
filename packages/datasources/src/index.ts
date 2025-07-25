@@ -16,6 +16,8 @@ import mainnet from "./mainnet";
 import sepolia from "./sepolia";
 
 export * from "./lib/types";
+// export the shared ResolverABI for consumer convenience
+export { ResolverABI } from "./lib/resolver";
 
 /**
  * Identifies a specific address on a specific chain.
@@ -248,7 +250,7 @@ export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): Chai
         // 3DNS Token - Optimism
         {
           chainId: optimism.id,
-          address: "0xbb7b805b257d7c76ca9435b3ffe780355e4c4b17",
+          address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
         },
         // 3DNS Token - Base
         {
@@ -269,12 +271,12 @@ export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): Chai
     case ENSNamespaceIds.Sepolia:
       return [
         {
-          // BaseRegistrar
+          // ENS Token - Sepolia
           chainId: sepoliaChain.id,
           address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
         },
         {
-          // NameWrapper
+          // NameWrapper Token - Sepolia
           chainId: sepoliaChain.id,
           address: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
         },

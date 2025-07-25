@@ -31,8 +31,6 @@
     "@graphiql/plugin-explorer": "^4.0.2",
     "@graphiql/react": "^0.28.2",
     "@graphiql/toolkit": "^0.11.1",
-    "@ponder/client": "catalog:",
-    "@ponder/react": "catalog:",
     "@ponder/utils": "catalog:",
     "@radix-ui/react-avatar": "^1.1.3",
     "@radix-ui/react-collapsible": "^1.1.3",

@@ -8,7 +8,7 @@ import {
   namespaceContract,
 } from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
-import { DatasourceNames } from "@ensnode/datasources";
+import { DatasourceNames, ResolverABI } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
 
@@ -52,6 +52,7 @@ export default createPlugin({
         },
         // multi-chain ThreeDNS-specific Resolver indexing config
         [namespaceContract(pluginName, "Resolver")]: {
+          abi: ResolverABI,
           chain: {
             ...chainConfigForContract(
               config.globalBlockrange,
@@ -64,8 +65,6 @@ export default createPlugin({
               threeDNSBase.contracts.Resolver,
             ),
           },
-          // NOTE: abi is identical in a multi-chain ponder config, just use Optimism's here
-          abi: threeDNSOptimism.contracts.Resolver.abi,
         },
       },
     });
