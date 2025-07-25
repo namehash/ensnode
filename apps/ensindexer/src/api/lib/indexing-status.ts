@@ -2,6 +2,9 @@ import { publicClients } from "ponder:api";
 import { createMiddleware } from "hono/factory";
 import config from "../../../ponder.config.js";
 
+// TODO: Provide through configuration / env var.
+const BASE_URL = "http://localhost:42069";
+
 type BlockRef = { number: number; timestamp: number };
 
 type ChainIndexingStatus =
@@ -11,10 +14,6 @@ type ChainIndexingStatus =
     }
   | {
       status: "backfill";
-      /**
-       * The earliest block number among all registered contracts,
-       * accounts, and block intervals for a chain.
-       */
       startBlock: BlockRef;
       latestIndexedBlock: BlockRef;
       latestKnownBlock: BlockRef;
@@ -66,7 +65,9 @@ await Promise.all(
     }
 
     if (minStartBlock === null) {
-      throw new Error(`No minimum start block found for chain '${chainName}'`);
+      throw new Error(
+        `No minimum start block found for chain '${chainName}'. Either all contracts, accounts, and block intervals use "latest" (unsupported) or the chain is misconfigured.`
+      );
     }
 
     const client = publicClients[chainName];
@@ -83,12 +84,73 @@ await Promise.all(
   })
 );
 
+let chainBackfillEndBlocks: { [chainName: string]: BlockRef } | null = null;
+
+let interval = setInterval(async () => {
+  if (chainBackfillEndBlocks !== null) {
+    clearInterval(interval);
+    return;
+  }
+
+  try {
+    const metricsText = await fetch(`${BASE_URL}/metrics`).then((r) =>
+      r.text()
+    );
+    const metrics = parsePrometheusMetrics(metricsText);
+
+    const backfillEndBlocks = await Promise.all(
+      Object.keys(config.chains).map(async (chainName) => {
+        const startBlock = chainStartBlocks.get(chainName);
+        if (startBlock === undefined) {
+          throw new Error(`No start block found for chain ${chainName}`);
+        }
+
+        const client = publicClients[chainName];
+        if (client === undefined) {
+          throw new Error(`Client not found for chain ${chainName}`);
+        }
+
+        const historicalTotalBlocks = metrics.getMetricValue(
+          "ponder_historical_total_blocks",
+          {
+            chain: chainName,
+          }
+        );
+
+        if (historicalTotalBlocks === undefined) {
+          throw new Error(
+            `No historical total blocks metric found for chain ${chainName}`
+          );
+        }
+
+        const backfillEndBlockNumber =
+          startBlock.number + historicalTotalBlocks;
+        const block = await client.getBlock({
+          blockNumber: BigInt(backfillEndBlockNumber),
+        });
+
+        const blockRef = {
+          number: Number(block.number),
+          timestamp: Number(block.timestamp),
+        } satisfies BlockRef;
+
+        return [chainName, blockRef] as const;
+      })
+    );
+
+    chainBackfillEndBlocks = Object.fromEntries(backfillEndBlocks);
+    clearInterval(interval);
+  } catch (error) {
+    console.error("Error fetching backfill end blocks, retrying in 1 second");
+    return;
+  }
+}, 1_000);
+
 export const indexingStatusMiddleware = createMiddleware(async (c) => {
   try {
-    const baseUrl = c.req.url.replace(/\/[^\/]*$/, "");
     const [metricsText, statusJson] = await Promise.all([
-      fetch(`${baseUrl}/metrics`).then((r) => r.text()),
-      fetch(`${baseUrl}/status`).then((r) => r.json()),
+      fetch(`${BASE_URL}/metrics`).then((r) => r.text()),
+      fetch(`${BASE_URL}/status`).then((r) => r.json()),
     ]);
 
     const metrics = parsePrometheusMetrics(metricsText);
@@ -114,22 +176,35 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
           throw new Error(`No start block found for chain ${chainName}`);
         }
 
-        const latestIndexedBlock = status[chainName]?.block;
-        if (latestIndexedBlock === undefined) {
+        const statusBlock = status[chainName]?.block;
+        if (statusBlock === undefined) {
           throw new Error(
             `Chain ${chainName} found in config but not in status`
           );
         }
 
+        // In omnichain ordering, if the startBlock is the same as the
+        // status block, the chain has not started yet.
+        if (
+          ordering === "omnichain" &&
+          startBlock.number === statusBlock.number
+        ) {
+          return {
+            chainId,
+            result: {
+              status: "not_started" as const,
+              startBlock,
+            } satisfies ChainIndexingStatus,
+          };
+        }
+
         const isCompleteNumber = metrics.getMetricValue(
           "ponder_sync_is_complete",
-          {
-            chain: chainName,
-          }
+          { chain: chainName }
         );
         if (isCompleteNumber === undefined) {
           throw new Error(
-            `No ponder_sync_is_completed metric found for chain ${chainName}`
+            `No ponder_sync_is_complete metric found for chain ${chainName}`
           );
         }
         const isComplete = isCompleteNumber === 1;
@@ -140,8 +215,8 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             result: {
               status: "completed" as const,
               startBlock,
-              latestIndexedBlock,
-              latestKnownBlock: latestIndexedBlock,
+              latestIndexedBlock: statusBlock,
+              latestKnownBlock: statusBlock,
             } satisfies ChainIndexingStatus,
           };
         }
@@ -162,49 +237,33 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
         // The is_realtime metric reliably indicates that the backfill is complete,
         // so take advantage of that here to simplify the logic below.
         if (isRealtime === true) {
-          const latestKnownBlockNumber = metrics.getMetricValue(
-            "ponder_sync_block",
-            {
-              chain: chainName,
-            }
+          const syncBlockNumber = metrics.getMetricValue("ponder_sync_block", {
+            chain: chainName,
+          });
+          const syncBlockTimestamp = metrics.getMetricValue(
+            "ponder_sync_block_timestamp",
+            { chain: chainName }
           );
-          if (latestKnownBlockNumber === undefined) {
+          if (
+            syncBlockNumber === undefined ||
+            syncBlockTimestamp === undefined
+          ) {
             throw new Error(
-              `No ponder_sync_block metric found for realtime chain ${chainName}`
+              `No ponder_sync_block or ponder_sync_block_timestamp metric found for chain ${chainName}`
             );
           }
-
-          // If the latest sync block number is the same as the latest indexed
-          // block number, use the latest indexed block as an optimization to
-          // avoid the extra RPC request.
-          // TODO: Get the ponder_sync_block timestamp from a new metric.
-          const latestKnownBlock =
-            latestKnownBlockNumber === latestIndexedBlock.number
-              ? latestIndexedBlock
-              : await cachedGetBlockByNumber(chainName, latestKnownBlockNumber);
+          const syncBlock = {
+            number: syncBlockNumber,
+            timestamp: syncBlockTimestamp,
+          } satisfies BlockRef;
 
           return {
             chainId,
             result: {
               status: "realtime" as const,
               startBlock,
-              latestIndexedBlock,
-              latestKnownBlock,
-            } satisfies ChainIndexingStatus,
-          };
-        }
-
-        // In omnichain ordering, if the startBlock is the same as the
-        // latestIndexedBlock, the chain has not started yet.
-        if (
-          ordering === "omnichain" &&
-          startBlock.number === latestIndexedBlock.number
-        ) {
-          return {
-            chainId,
-            result: {
-              status: "not_started" as const,
-              startBlock,
+              latestIndexedBlock: statusBlock,
+              latestKnownBlock: syncBlock,
             } satisfies ChainIndexingStatus,
           };
         }
@@ -237,7 +296,7 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
 
         const hasSyncBackfill = historicalTotalBlocks > 0;
 
-        // If the chain has a sync backfill but hasn't completed any blocks,
+        // If the chain has a backfill but hasn't completed any blocks,
         // the chain has not started yet.
         if (hasSyncBackfill && historicalCompletedBlocks === 0) {
           return {
@@ -249,27 +308,19 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
           };
         }
 
-        // The backfill end block is equal to the earliest start block
-        // plus the total number of blocks in the backfill.
-        const backfillEndBlockNumber =
-          startBlock.number + historicalTotalBlocks;
-
-        // TODO: Get the backfill end block from the metrics.
-        const backfillEndBlock = await cachedGetBlockByNumber(
-          chainName,
-          backfillEndBlockNumber
-        );
-
-        // During the backfill, the latest known block is the backfill end block.
-        const latestKnownBlock = backfillEndBlock;
+        const backfillEndBlock = chainBackfillEndBlocks?.[chainName];
+        if (backfillEndBlock === undefined) {
+          throw new Error(`No backfill end block found for chain ${chainName}`);
+        }
 
         return {
           chainId,
           result: {
             status: "backfill" as const,
             startBlock,
-            latestIndexedBlock,
-            latestKnownBlock,
+            latestIndexedBlock: statusBlock,
+            // During the backfill, the latest known block is the backfill end block.
+            latestKnownBlock: backfillEndBlock,
             backfillEndBlock,
           } satisfies ChainIndexingStatus,
         };
@@ -287,34 +338,6 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
     return c.json({ error: "Internal server error" }, 500);
   }
 });
-
-const blockCache = new Map<string, Map<number, BlockRef>>();
-
-async function cachedGetBlockByNumber(chainName: string, blockNumber: number) {
-  let cache = blockCache.get(chainName);
-  if (!cache) {
-    cache = new Map<number, BlockRef>();
-    blockCache.set(chainName, cache);
-  }
-
-  const cachedBlockRef = cache.get(blockNumber);
-  if (cachedBlockRef) return cachedBlockRef;
-
-  const client = publicClients[chainName];
-  if (client === undefined)
-    throw new Error(`Client not found for chain ${chainName}`);
-
-  const block = await client.getBlock({ blockNumber: BigInt(blockNumber) });
-
-  const blockRef = {
-    number: Number(block.number),
-    timestamp: Number(block.timestamp),
-  } satisfies BlockRef;
-
-  cache.set(blockNumber, blockRef);
-
-  return blockRef;
-}
 
 type PromLabels = { [key: string]: string };
 type PromMetric = { name: string; labels: PromLabels; value: number };
