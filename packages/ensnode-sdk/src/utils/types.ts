@@ -58,3 +58,24 @@ export type EncodedLabelHash = `[${string}]`;
  * ex: vitalik.eth
  */
 export type Name = string;
+
+/**
+ * Chain ID
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type ChainId = number;
+
+/**
+ * Block Number
+ *
+ * Guaranteed to be a non-negative integer.
+ */
+export type BlockNumber = number;
+
+/**
+ * Datetime value following the ISO 8601 standard.
+ *
+ * @see https://www.iso.org/iso-8601-date-and-time-format.html
+ */
+export type DatetimeIso8601 = string;
