@@ -3,8 +3,6 @@
 import {
   ENSNodeClient,
   type ForwardResponse,
-  type IndexerConfig,
-  type IndexingStatus,
   type RecordsSelection,
   type ReverseResponse,
 } from "@ensnode/ensnode-sdk";
@@ -21,8 +19,6 @@ export const queryKeys = {
     [...queryKeys.resolutions(), "forward", name, selection] as const,
   reverse: (address: string, chainId?: number) =>
     [...queryKeys.resolutions(), "reverse", address, chainId] as const,
-  config: () => [...queryKeys.all, "config"] as const,
-  indexingStatus: () => [...queryKeys.all, "indexing-status"] as const,
 };
 
 /**
@@ -31,7 +27,7 @@ export const queryKeys = {
 export function createForwardResolutionQueryOptions(
   config: ENSNodeConfig,
   name: string,
-  selection?: RecordsSelection,
+  selection?: RecordsSelection
 ) {
   return {
     queryKey: queryKeys.forward(name, selection),
@@ -51,7 +47,7 @@ export function createForwardResolutionQueryOptions(
 export function createReverseResolutionQueryOptions(
   config: ENSNodeConfig,
   address: string,
-  chainId?: number,
+  chainId?: number
 ) {
   return {
     queryKey: queryKeys.reverse(address, chainId),
@@ -66,40 +62,10 @@ export function createReverseResolutionQueryOptions(
 }
 
 /**
- * Create query options for indexer configuration
- */
-export function createIndexerConfigQueryOptions(config: ENSNodeConfig) {
-  return {
-    queryKey: queryKeys.config(),
-    queryFn: async (): Promise<IndexerConfig> => {
-      const client = new ENSNodeClient(config.client);
-      return client.getConfig();
-    },
-    staleTime: 1000 * 60 * 10, // 10 minutes (config changes less frequently)
-    gcTime: 1000 * 60 * 60, // 1 hour
-  };
-}
-
-/**
- * Create query options for indexing status
- */
-export function createIndexingStatusQueryOptions(config: ENSNodeConfig) {
-  return {
-    queryKey: queryKeys.indexingStatus(),
-    queryFn: async (): Promise<IndexingStatus> => {
-      const client = new ENSNodeClient(config.client);
-      return client.getStatus();
-    },
-    staleTime: 1000 * 30, // 30 seconds (status changes frequently)
-    gcTime: 1000 * 60 * 5, // 5 minutes
-  };
-}
-
-/**
  * Transform React Query result to our custom return type
  */
 export function transformQueryResult<TData, TError = Error>(
-  result: UseQueryResult<TData, TError>,
+  result: UseQueryResult<TData, TError>
 ): UseQueryReturnType<TData, TError> {
   return {
     data: result.data,
@@ -116,7 +82,7 @@ export function transformQueryResult<TData, TError = Error>(
  * Custom useQuery wrapper that returns our simplified interface
  */
 export function useENSNodeQuery<TData, TError = Error>(
-  options: Parameters<typeof useQuery<TData, TError>>[0],
+  options: Parameters<typeof useQuery<TData, TError>>[0]
 ): UseQueryReturnType<TData, TError> {
   const result = useQuery(options);
   return transformQueryResult(result);

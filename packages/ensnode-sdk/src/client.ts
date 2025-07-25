@@ -4,7 +4,8 @@ import type { CoinType, Name } from "./utils/index.js";
 /**
  * Default ENSNode API endpoint URL
  */
-export const DEFAULT_ENSNODE_API_URL = "https://api.mainnet.ensnode.io" as const;
+export const DEFAULT_ENSNODE_API_URL =
+  "https://api.mainnet.ensnode.io" as const;
 
 /**
  * Configuration options for ENSNode API client
@@ -61,45 +62,6 @@ export interface ForwardResponse extends BaseResponse {}
 export interface ReverseResponse extends BaseResponse {}
 
 /**
- * ENS Indexer configuration response
- */
-export interface IndexerConfig {
-  /** The indexer version */
-  version: string;
-  /** Supported chains */
-  chains: Array<{
-    id: number;
-    name: string;
-    enabled: boolean;
-  }>;
-  /** Feature flags */
-  features: Record<string, boolean>;
-}
-
-/**
- * ENS Indexer status response
- */
-export interface IndexingStatus {
-  /** Current block height being indexed */
-  currentBlock: number;
-  /** Latest block height available */
-  latestBlock: number;
-  /** Indexing progress percentage */
-  progress: number;
-  /** Status of the indexer */
-  status: "syncing" | "synced" | "error";
-  /** Last update timestamp */
-  lastUpdate: string;
-  /** Per-chain status */
-  chains: Array<{
-    id: number;
-    currentBlock: number;
-    latestBlock: number;
-    status: "syncing" | "synced" | "error";
-  }>;
-}
-
-/**
  * API error response
  */
 export interface ErrorResponse {
@@ -115,22 +77,15 @@ export interface Client {
   /**
    * Resolve an ENS name to records (forward resolution)
    */
-  resolveName(name: Name, selection?: RecordsSelection): Promise<ForwardResponse>;
+  resolveName(
+    name: Name,
+    selection?: RecordsSelection
+  ): Promise<ForwardResponse>;
 
   /**
    * Resolve an address to its primary name (reverse resolution)
    */
   resolveAddress(address: Address, chainId?: number): Promise<ReverseResponse>;
-
-  /**
-   * Get ENS Indexer configuration
-   */
-  getConfig(): Promise<IndexerConfig>;
-
-  /**
-   * Get current indexing status
-   */
-  getStatus(): Promise<IndexingStatus>;
 
   /**
    * Get the current client options
@@ -155,11 +110,7 @@ export interface Client {
  *   texts: ["avatar"]
  * });
  *
- * // Get indexer configuration
- * const config = await client.getConfig();
- *
- * // Check indexing status
- * const status = await client.getStatus();
+
  * ```
  *
  * @example
@@ -218,8 +169,14 @@ export class ENSNodeClient implements Client {
    * });
    * ```
    */
-  async resolveName(name: Name, selection: RecordsSelection = {}): Promise<ForwardResponse> {
-    const url = new URL(`/forward/${encodeURIComponent(name)}`, this.options.endpointUrl);
+  async resolveName(
+    name: Name,
+    selection: RecordsSelection = {}
+  ): Promise<ForwardResponse> {
+    const url = new URL(
+      `/forward/${encodeURIComponent(name)}`,
+      this.options.endpointUrl
+    );
 
     // Add query parameters based on selection
     if (selection.name) {
@@ -265,7 +222,10 @@ export class ENSNodeClient implements Client {
    * const result = await client.resolveAddress("0xd...", 10);
    * ```
    */
-  async resolveAddress(address: Address, chainId: number = 1): Promise<ReverseResponse> {
+  async resolveAddress(
+    address: Address,
+    chainId: number = 1
+  ): Promise<ReverseResponse> {
     const url = new URL(`/reverse/${address}`, this.options.endpointUrl);
 
     if (chainId !== 1) {
@@ -284,65 +244,5 @@ export class ENSNodeClient implements Client {
     }
 
     return response.json() as Promise<ReverseResponse>;
-  }
-
-  /**
-   * Get ENS Indexer configuration
-   *
-   * @returns Promise resolving to indexer configuration
-   * @throws If the request fails
-   *
-   * @example
-   * ```typescript
-   * const config = await client.getConfig();
-   * console.log("Version:", config.version);
-   * console.log("Supported chains:", config.chains);
-   * ```
-   */
-  async getConfig(): Promise<IndexerConfig> {
-    const url = new URL("/api/config", this.options.endpointUrl);
-
-    if (this.options.debug) {
-      url.searchParams.set("debug", "true");
-    }
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Config fetch failed: ${error.error}`);
-    }
-
-    return response.json() as Promise<IndexerConfig>;
-  }
-
-  /**
-   * Get current indexing status
-   *
-   * @returns Promise resolving to indexing status
-   * @throws If the request fails
-   *
-   * @example
-   * ```typescript
-   * const status = await client.getStatus();
-   * console.log("Status:", status.status);
-   * console.log("Progress:", status.progress);
-   * ```
-   */
-  async getStatus(): Promise<IndexingStatus> {
-    const url = new URL("/indexing-status", this.options.endpointUrl);
-
-    if (this.options.debug) {
-      url.searchParams.set("debug", "true");
-    }
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Indexing status fetch failed: ${error.error}`);
-    }
-
-    return response.json() as Promise<IndexingStatus>;
   }
 }

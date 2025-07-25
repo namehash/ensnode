@@ -35,16 +35,6 @@ const nameResult = await client.resolveName("vitalik.eth", {
 const addressResult = await client.resolveAddress(
   "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 );
-
-// Configuration operations
-const config = await client.getConfig();
-console.log("Indexer version:", config.version);
-console.log("Supported chains:", config.chains);
-
-// Indexing status operations
-const status = await client.getStatus();
-console.log("Indexing status:", status.status);
-console.log("Progress:", status.progress);
 ```
 
 ### API Methods
@@ -68,41 +58,6 @@ Resolves an address to its primary name (reverse resolution).
 - `address`: The address to resolve
 - `chainId`: Optional chain ID (defaults to 1 for Ethereum mainnet)
 
-#### Configuration
-
-##### `getConfig()`
-
-Returns indexer configuration including version, supported chains, and feature flags.
-
-```typescript
-const config = await client.getConfig();
-console.log("Version:", config.version);
-console.log(
-  "Enabled chains:",
-  config.chains.filter((c) => c.enabled)
-);
-console.log("Features:", config.features);
-```
-
-#### Indexing Status
-
-##### `getStatus()`
-
-Returns current indexing status and progress.
-
-```typescript
-const status = await client.getStatus();
-console.log("Status:", status.status); // "syncing" | "synced" | "error"
-console.log("Progress:", status.progress); // 0-100
-console.log("Current block:", status.currentBlock);
-console.log("Latest block:", status.latestBlock);
-
-// Per-chain status
-status.chains.forEach((chain) => {
-  console.log(`Chain ${chain.id}: ${chain.status}`);
-});
-```
-
 ### Configuration
 
 ```typescript
@@ -121,18 +76,6 @@ const client = new ENSNodeClient({
   endpointUrl: new URL("https://api.mainnet.ensnode.io"),
   debug: false,
 });
-
-// Check indexer status
-const status = await client.getStatus();
-if (status.status === "synced") {
-  console.log("✅ Indexer is fully synced");
-} else {
-  console.log(`⚠️ Indexer syncing: ${status.progress.toFixed(2)}%`);
-}
-
-// Get configuration
-const config = await client.getConfig();
-console.log(`Version: ${config.version}`);
 
 // Resolve name
 const resolution = await client.resolveName("vitalik.eth", {

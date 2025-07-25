@@ -10,8 +10,6 @@ export type {
   BaseResponse,
   ForwardResponse,
   ReverseResponse,
-  IndexerConfig,
-  IndexingStatus,
   ErrorResponse,
   Client,
 } from "./client";

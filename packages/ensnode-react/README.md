@@ -199,37 +199,6 @@ Hook to access the ENSNode configuration from context.
 const config = useConfig();
 ```
 
-### useIndexerConfig
-
-Hook to fetch ENS Indexer configuration.
-
-```tsx
-const { data, isLoading, error } = useIndexerConfig();
-
-if (data) {
-  console.log("Indexer version:", data.version);
-  console.log("Supported chains:", data.chains);
-  console.log("Features:", data.features);
-}
-```
-
-### useIndexingStatus
-
-Hook to fetch ENS Indexer status with real-time updates.
-
-```tsx
-const { data, isLoading, error } = useIndexingStatus({
-  query: {
-    refetchInterval: 5000, // Poll every 5 seconds
-  },
-});
-
-if (data) {
-  console.log("Status:", data.status); // "syncing" | "synced" | "error"
-  console.log("Progress:", data.progress); // 0-100
-}
-```
-
 ## Advanced Usage
 
 ### Custom Query Configuration
@@ -312,44 +281,6 @@ function MultiChainResolver({ address }: { address: string }) {
 }
 ```
 
-### Indexer Status Monitoring
-
-Monitor indexer status and display warnings when syncing:
-
-```tsx
-function StatusAwareComponent() {
-  const { data: status } = useIndexingStatus({
-    query: {
-      refetchInterval: 5000, // Poll every 5 seconds
-    },
-  });
-
-  const { data: config } = useIndexerConfig();
-
-  const isSyncing = status?.status === "syncing";
-  const progress = status?.progress || 0;
-
-  return (
-    <div>
-      {isSyncing && (
-        <div className="warning">
-          ⚠️ Indexer syncing: {progress.toFixed(2)}% - Results may be incomplete
-        </div>
-      )}
-
-      {config && (
-        <div>
-          Version: {config.version} | Chains:{" "}
-          {config.chains.filter((c) => c.enabled).length}
-        </div>
-      )}
-
-      {/* Your resolution components */}
-    </div>
-  );
-}
-```
-
 ### Error Handling
 
 ```tsx
@@ -374,8 +305,6 @@ import type {
   UseAddressParameters,
   UseNameReturnType,
   UseAddressReturnType,
-  UseIndexerConfigReturnType,
-  UseIndexingStatusReturnType,
 } from "@ensnode/ensnode-react";
 ```
 

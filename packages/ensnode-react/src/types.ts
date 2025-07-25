@@ -13,13 +13,17 @@ export interface ENSNodeConfig {
  * Base query parameters that can be passed to hooks
  */
 export interface QueryParameter<TData = unknown, TError = Error> {
-  query?: Partial<QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>>;
+  query?: Partial<
+    QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>
+  >;
 }
 
 /**
  * Configuration parameter for hooks that need access to config
  */
-export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> {
+export interface ConfigParameter<
+  TConfig extends ENSNodeConfig = ENSNodeConfig
+> {
   config?: TConfig | undefined;
 }
 
@@ -44,18 +48,6 @@ export interface UseAddressParameters
   /** Optional chain ID for multichain resolution */
   chainId?: number;
 }
-
-/**
- * Parameters for the useConfig hook
- */
-export interface UseConfigParameters
-  extends QueryParameter<import("@ensnode/ensnode-sdk").IndexerConfig> {}
-
-/**
- * Parameters for the useIndexingStatus hook
- */
-export interface UseIndexingStatusParameters
-  extends QueryParameter<import("@ensnode/ensnode-sdk").IndexingStatus> {}
 
 /**
  * Return type for query hooks

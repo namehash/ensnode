@@ -5,19 +5,8 @@ export {
 } from "./provider.js";
 export { ENSNodeContext } from "./context.js";
 
-export {
-  useConfig,
-  useName,
-  useAddress,
-  useIndexerConfig,
-  useIndexingStatus,
-} from "./hooks/index.js";
-export type {
-  UseNameReturnType,
-  UseAddressReturnType,
-  UseIndexerConfigReturnType,
-  UseIndexingStatusReturnType,
-} from "./hooks/index.js";
+export { useConfig, useName, useAddress } from "./hooks/index.js";
+export type { UseNameReturnType, UseAddressReturnType } from "./hooks/index.js";
 
 export type {
   ENSNodeConfig,
@@ -34,6 +23,4 @@ export {
   queryKeys,
   createForwardResolutionQueryOptions,
   createReverseResolutionQueryOptions,
-  createIndexerConfigQueryOptions,
-  createIndexingStatusQueryOptions,
 } from "./utils/query.js";
