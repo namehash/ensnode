@@ -132,25 +132,16 @@ const PortSchema = z.coerce
 const EnsRainbowEndpointUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
 const RpcConfigsSchema = z
-  .record(
-    z.string().transform(Number).pipe(chainIdSchema),
-    RpcConfigSchema,
-    {
-      error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
-    },
-  )
-  .refine(
-    (configs) => Object.keys(configs).length > 0,
-    {
-      message: "No RPC configurations found. You must configure RPC endpoints for the chains required by your enabled plugins. See .env.local.example for guidance. Public (rate limited) RPC endpoints will not provide acceptable performance - use only private (paid) endpoints.",
-    },
-  )
-  .refine(
-    (configs) => !!configs[1],
-    {
-      message: "Ethereum mainnet RPC configuration (RPC_URL_1) is required.",
-    },
-  );
+  .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
+    error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
+  })
+  .refine((configs) => Object.keys(configs).length > 0, {
+    message:
+      "No RPC configurations found. You must configure RPC endpoints for the chains required by your enabled plugins. See .env.local.example for guidance. Public (rate limited) RPC endpoints will not provide acceptable performance - use only private (paid) endpoints.",
+  })
+  .refine((configs) => !!configs[1], {
+    message: "Ethereum mainnet RPC configuration (RPC_URL_1) is required.",
+  });
 
 const DatabaseUrlSchema = z.union(
   [
