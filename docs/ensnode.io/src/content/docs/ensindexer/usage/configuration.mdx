@@ -9,11 +9,20 @@ import { LinkCard } from '@astrojs/starlight/components';
 import { Code } from '@astrojs/starlight/components';
 import envExample from '@workspace/apps/ensindexer/.env.local.example?raw';
 
+:::danger[Critical: RPC Configuration Required]
+**ENSIndexer requires proper RPC endpoint configuration to function.** Public (rate limited) RPC endpoints will NOT provide acceptable performance due to:
+- Strict rate limits (typically 20 requests/second) - ENSIndexer needs 500+ RPS
+- Block range limitations (often less than 10k blocks per request)  
+- Query timeouts that cause indexing failures
+
+You MUST configure private (paid) RPC services from providers like Alchemy, Infura, or QuickNode that can handle high-volume requests.
+:::
+
 :::caution[Performance Tip: ENSRainbow Server]
 Warning: Configuring ENSIndexer to use the public ENSRainbow server (`https://api.ensrainbow.io`) will significantly slow down indexing.
 For optimal indexing performance, always colocate ENSIndexer and ENSRainbow. For example, if you are running ENSIndexer locally, you should also run a local instance of ENSRainbow and set `ENSRAINBOW_URL` to your local ENSRainbow server.
 :::
-ENSIndexer's behavior can be configured through environment variables.
+ENSIndexer's behavior can be configured through environment variables. Copy `.env.local.example` to `.env.local` and configure all required values.
 
 <Code code={envExample} lang="bash" title=".env.local.example" />
 
