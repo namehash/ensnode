@@ -4,8 +4,7 @@ import type { CoinType, Name } from "./utils/index.js";
 /**
  * Default ENSNode API endpoint URL
  */
-export const DEFAULT_ENSNODE_API_URL =
-  "https://api.mainnet.ensnode.io" as const;
+export const DEFAULT_ENSNODE_API_URL = "https://api.mainnet.ensnode.io" as const;
 
 /**
  * Configuration options for ENSNode API client
@@ -77,10 +76,7 @@ export interface Client {
   /**
    * Resolve an ENS name to records (forward resolution)
    */
-  resolveName(
-    name: Name,
-    selection?: RecordsSelection
-  ): Promise<ForwardResponse>;
+  resolveName(name: Name, selection?: RecordsSelection): Promise<ForwardResponse>;
 
   /**
    * Resolve an address to its primary name (reverse resolution)
@@ -169,14 +165,8 @@ export class ENSNodeClient implements Client {
    * });
    * ```
    */
-  async resolveName(
-    name: Name,
-    selection: RecordsSelection = {}
-  ): Promise<ForwardResponse> {
-    const url = new URL(
-      `/forward/${encodeURIComponent(name)}`,
-      this.options.endpointUrl
-    );
+  async resolveName(name: Name, selection: RecordsSelection = {}): Promise<ForwardResponse> {
+    const url = new URL(`/forward/${encodeURIComponent(name)}`, this.options.endpointUrl);
 
     // Add query parameters based on selection
     if (selection.name) {
@@ -222,10 +212,7 @@ export class ENSNodeClient implements Client {
    * const result = await client.resolveAddress("0xd...", 10);
    * ```
    */
-  async resolveAddress(
-    address: Address,
-    chainId: number = 1
-  ): Promise<ReverseResponse> {
+  async resolveAddress(address: Address, chainId: number = 1): Promise<ReverseResponse> {
     const url = new URL(`/reverse/${address}`, this.options.endpointUrl);
 
     if (chainId !== 1) {

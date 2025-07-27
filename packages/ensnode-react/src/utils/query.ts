@@ -11,14 +11,30 @@ import type { ENSNodeConfig, UseQueryReturnType } from "../types.js";
 
 /**
  * Query key factory for ENSNode queries
+ * Includes endpoint URL for proper cache isolation between different ENSNode instances
+ *
+ * @example
+ * ```typescript
+ * // Forward resolution
+ * queryKeys.forward("https://api.mainnet.ensnode.io", "vitalik.eth", { addresses: [60] })
+ * // Results in: ["ensnode", "https://api.mainnet.ensnode.io", "resolution", "forward", "vitalik.eth", { addresses: [60] }]
+ *
+ * // Reverse resolution
+ * queryKeys.reverse("https://api.mainnet.ensnode.io", "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", 1)
+ * // Results in: ["ensnode", "https://api.mainnet.ensnode.io", "resolution", "reverse", "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", 1]
+ *
+ * // Different endpoints have separate cache keys
+ * queryKeys.forward("https://api.testnet.ensnode.io", "vitalik.eth", { addresses: [60] })
+ * // Results in: ["ensnode", "https://api.testnet.ensnode.io", "resolution", "forward", "vitalik.eth", { addresses: [60] }]
+ * ```
  */
 export const queryKeys = {
-  all: ["ensnode"] as const,
-  resolutions: () => [...queryKeys.all, "resolution"] as const,
-  forward: (name: string, selection?: RecordsSelection) =>
-    [...queryKeys.resolutions(), "forward", name, selection] as const,
-  reverse: (address: string, chainId?: number) =>
-    [...queryKeys.resolutions(), "reverse", address, chainId] as const,
+  all: (endpointUrl: string) => ["ensnode", endpointUrl] as const,
+  resolutions: (endpointUrl: string) => [...queryKeys.all(endpointUrl), "resolution"] as const,
+  forward: (endpointUrl: string, name: string, selection?: RecordsSelection) =>
+    [...queryKeys.resolutions(endpointUrl), "forward", name, selection] as const,
+  reverse: (endpointUrl: string, address: string, chainId?: number) =>
+    [...queryKeys.resolutions(endpointUrl), "reverse", address, chainId] as const,
 };
 
 /**
@@ -27,10 +43,10 @@ export const queryKeys = {
 export function createForwardResolutionQueryOptions(
   config: ENSNodeConfig,
   name: string,
-  selection?: RecordsSelection
+  selection?: RecordsSelection,
 ) {
   return {
-    queryKey: queryKeys.forward(name, selection),
+    queryKey: queryKeys.forward(config.client.endpointUrl.href, name, selection),
     queryFn: async (): Promise<ForwardResponse> => {
       const client = new ENSNodeClient(config.client);
       return client.resolveName(name, selection);
@@ -47,10 +63,10 @@ export function createForwardResolutionQueryOptions(
 export function createReverseResolutionQueryOptions(
   config: ENSNodeConfig,
   address: string,
-  chainId?: number
+  chainId?: number,
 ) {
   return {
-    queryKey: queryKeys.reverse(address, chainId),
+    queryKey: queryKeys.reverse(config.client.endpointUrl.href, address, chainId),
     queryFn: async (): Promise<ReverseResponse> => {
       const client = new ENSNodeClient(config.client);
       return client.resolveAddress(address as any, chainId);
@@ -62,28 +78,10 @@ export function createReverseResolutionQueryOptions(
 }
 
 /**
- * Transform React Query result to our custom return type
- */
-export function transformQueryResult<TData, TError = Error>(
-  result: UseQueryResult<TData, TError>
-): UseQueryReturnType<TData, TError> {
-  return {
-    data: result.data,
-    error: result.error,
-    isLoading: result.isLoading,
-    isError: result.isError,
-    isSuccess: result.isSuccess,
-    isPending: result.isPending,
-    refetch: result.refetch,
-  };
-}
-
-/**
- * Custom useQuery wrapper that returns our simplified interface
+ * Custom useQuery wrapper that returns TanStack Query result directly
  */
 export function useENSNodeQuery<TData, TError = Error>(
-  options: Parameters<typeof useQuery<TData, TError>>[0]
+  options: Parameters<typeof useQuery<TData, TError>>[0],
 ): UseQueryReturnType<TData, TError> {
-  const result = useQuery(options);
-  return transformQueryResult(result);
+  return useQuery(options);
 }

@@ -35,17 +35,17 @@ function App() {
 }
 ```
 
-That's it! No need to wrap with `QueryClientProvider` or create a `QueryClient` - it's all handled automatically.
+That's it! No need to wrap with `QueryClientProvider` or create a `QueryClient` - it's all handled automatically. Each ENSNode endpoint gets its own isolated cache for proper data separation.
 
 ### 2. Use the Hooks
 
 #### Forward Resolution (Name to Records)
 
 ```tsx
-import { useName } from "@ensnode/ensnode-react";
+import { useResolveName } from "@ensnode/ensnode-react";
 
 function NameResolver() {
-  const { data, isLoading, error } = useName({
+  const { data, isLoading, error } = useResolveName({
     name: "vitalik.eth",
     selection: {
       name: true,
@@ -78,10 +78,10 @@ function NameResolver() {
 #### Reverse Resolution (Address to Name)
 
 ```tsx
-import { useAddress } from "@ensnode/ensnode-react";
+import { useResolveAddress } from "@ensnode/ensnode-react";
 
 function AddressResolver() {
-  const { data, isLoading, error } = useAddress({
+  const { data, isLoading, error } = useResolveAddress({
     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     chainId: 1, // Ethereum mainnet
   });
@@ -130,12 +130,12 @@ const config = createConfig({
 });
 ```
 
-### useName
+### useResolveName
 
 Hook for forward resolution (ENS name to records).
 
 ```tsx
-function useName(parameters: UseNameParameters): UseNameReturnType;
+function useResolveName(parameters: UseResolveNameParameters): UseResolveNameReturnType;
 ```
 
 #### Parameters
@@ -150,7 +150,7 @@ function useName(parameters: UseNameParameters): UseNameReturnType;
 #### Example
 
 ```tsx
-const { data, isLoading, error, refetch } = useName({
+const { data, isLoading, error, refetch } = useResolveName({
   name: "example.eth",
   selection: {
     name: true,
@@ -164,12 +164,12 @@ const { data, isLoading, error, refetch } = useName({
 });
 ```
 
-### useAddress
+### useResolveAddress
 
 Hook for reverse resolution (address to primary name).
 
 ```tsx
-function useAddress(parameters: UseAddressParameters): UseAddressReturnType;
+function useResolveAddress(parameters: UseResolveAddressParameters): UseResolveAddressReturnType;
 ```
 
 #### Parameters
@@ -181,7 +181,7 @@ function useAddress(parameters: UseAddressParameters): UseAddressReturnType;
 #### Example
 
 ```tsx
-const { data, isLoading, error, refetch } = useAddress({
+const { data, isLoading, error, refetch } = useResolveAddress({
   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   chainId: 10, // Optimism
   query: {
@@ -203,7 +203,7 @@ const config = useConfig();
 
 ### Custom Query Configuration
 
-The `ENSNodeProvider` automatically creates and manages a QueryClient for you. You can customize it without importing TanStack Query:
+The `ENSNodeProvider` automatically creates and manages a QueryClient for you. Cache keys include the ENSNode endpoint URL, so different endpoints (mainnet vs testnet) maintain separate caches. You can customize the QueryClient without importing TanStack Query:
 
 ```tsx
 // Simple setup - no TanStack Query knowledge needed
@@ -253,7 +253,7 @@ You can conditionally enable/disble queries:
 
 ```tsx
 const [address, setAddress] = useState("");
-const { data } = useAddress({
+const { data } = useResolveAddress({
   address,
   query: {
     enabled: Boolean(address), // Only run when address is set
@@ -267,9 +267,9 @@ Resolve names on different chains:
 
 ```tsx
 function MultiChainResolver({ address }: { address: string }) {
-  const mainnet = useAddress({ address, chainId: 1 });
-  const optimism = useAddress({ address, chainId: 10 });
-  const polygon = useAddress({ address, chainId: 137 });
+  const mainnet = useResolveAddress({ address, chainId: 1 });
+  const optimism = useResolveAddress({ address, chainId: 10 });
+  const polygon = useResolveAddress({ address, chainId: 137 });
 
   return (
     <div>
@@ -281,10 +281,54 @@ function MultiChainResolver({ address }: { address: string }) {
 }
 ```
 
+### Multiple ENSNode Endpoints
+
+Use different ENSNode endpoints with automatic cache isolation:
+
+```tsx
+// Mainnet provider
+const mainnetConfig = createConfig({
+  url: "https://api.mainnet.ensnode.io",
+});
+
+// Testnet provider  
+const testnetConfig = createConfig({
+  url: "https://api.testnet.ensnode.io",
+});
+
+function MainnetData() {
+  const { data } = useResolveAddress({ 
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" 
+  });
+  return <div>Mainnet: {data?.records.name}</div>;
+}
+
+function TestnetData() {
+  const { data } = useResolveAddress({ 
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" 
+  });
+  return <div>Testnet: {data?.records.name}</div>;
+}
+
+function App() {
+  return (
+    <div>
+      <ENSNodeProvider config={mainnetConfig}>
+        <MainnetData />
+      </ENSNodeProvider>
+      
+      <ENSNodeProvider config={testnetConfig}>
+        <TestnetData />
+      </ENSNodeProvider>
+    </div>
+  );
+}
+```
+
 ### Error Handling
 
 ```tsx
-const { data, error, isError } = useName({ name: "invalid.eth" });
+const { data, error, isError } = useResolveName({ name: "invalid.eth" });
 
 if (isError) {
   if (error.message.includes("Name not found")) {
@@ -296,18 +340,23 @@ if (isError) {
 
 ## TypeScript
 
-This package is written in TypeScript and exports all necessary types:
+This package is written in TypeScript and exports all necessary types. Hook return types are directly compatible with TanStack Query's `UseQueryResult`:
 
 ```tsx
 import type {
   ENSNodeConfig,
-  UseNameParameters,
-  UseAddressParameters,
-  UseNameReturnType,
-  UseAddressReturnType,
+  UseResolveNameParameters,
+  UseResolveAddressParameters,
+  UseResolveNameReturnType,
+  UseResolveAddressReturnType,
 } from "@ensnode/ensnode-react";
+
+// Hook return types are TanStack Query's UseQueryResult
+// so they work seamlessly with TanStack Query utilities
+import type { UseQueryResult } from "@tanstack/react-query";
+type NameResult = UseQueryResult<ForwardResponse>; // Same as UseResolveNameReturnType
 ```
 
 ## Requirements
 
-Note: TanStack Query v5+ is used internally but abstracted away. You don't need to interact with it directly unless you want advanced query customization.
+Note: TanStack Query v5+ is used internally. Hook return types are TanStack Query's `UseQueryResult` for full ecosystem compatibility, but you don't need to interact with TanStack Query directly unless you want advanced customization.

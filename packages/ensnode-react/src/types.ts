@@ -1,5 +1,5 @@
 import type { ClientOptions } from "@ensnode/ensnode-sdk";
-import type { QueryObserverOptions } from "@tanstack/react-query";
+import type { QueryObserverOptions, UseQueryResult } from "@tanstack/react-query";
 
 /**
  * Configuration options for the ENSNode provider
@@ -13,24 +13,20 @@ export interface ENSNodeConfig {
  * Base query parameters that can be passed to hooks
  */
 export interface QueryParameter<TData = unknown, TError = Error> {
-  query?: Partial<
-    QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>
-  >;
+  query?: Partial<QueryObserverOptions<TData, TError, TData, TData, readonly unknown[]>>;
 }
 
 /**
  * Configuration parameter for hooks that need access to config
  */
-export interface ConfigParameter<
-  TConfig extends ENSNodeConfig = ENSNodeConfig
-> {
+export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> {
   config?: TConfig | undefined;
 }
 
 /**
- * Parameters for the useName hook
+ * Parameters for the useResolveName hook
  */
-export interface UseNameParameters
+export interface UseResolveNameParameters
   extends QueryParameter<import("@ensnode/ensnode-sdk").ForwardResponse> {
   /** The ENS name to resolve */
   name?: string;
@@ -39,9 +35,9 @@ export interface UseNameParameters
 }
 
 /**
- * Parameters for the useAddress hook
+ * Parameters for the useResolveAddress hook
  */
-export interface UseAddressParameters
+export interface UseResolveAddressParameters
   extends QueryParameter<import("@ensnode/ensnode-sdk").ReverseResponse> {
   /** The address to resolve */
   address?: string;
@@ -50,14 +46,6 @@ export interface UseAddressParameters
 }
 
 /**
- * Return type for query hooks
+ * Return type for query hooks (re-export of TanStack Query's UseQueryResult)
  */
-export type UseQueryReturnType<TData = unknown, TError = Error> = {
-  data: TData | undefined;
-  error: TError | null;
-  isLoading: boolean;
-  isError: boolean;
-  isSuccess: boolean;
-  isPending: boolean;
-  refetch: () => void;
-};
+export type UseQueryReturnType<TData = unknown, TError = Error> = UseQueryResult<TData, TError>;

@@ -5,15 +5,15 @@ export {
 } from "./provider.js";
 export { ENSNodeContext } from "./context.js";
 
-export { useConfig, useName, useAddress } from "./hooks/index.js";
-export type { UseNameReturnType, UseAddressReturnType } from "./hooks/index.js";
+export { useConfig, useResolveName, useResolveAddress } from "./hooks/index.js";
+export type { UseResolveNameReturnType, UseResolveAddressReturnType } from "./hooks/index.js";
 
 export type {
   ENSNodeConfig,
   QueryParameter,
   ConfigParameter,
-  UseNameParameters,
-  UseAddressParameters,
+  UseResolveNameParameters,
+  UseResolveAddressParameters,
   UseQueryReturnType,
 } from "./types.js";
 

@@ -1,11 +1,11 @@
 "use client";
 
 import type { ForwardResponse, RecordsSelection } from "@ensnode/ensnode-sdk";
-import type { ConfigParameter, UseNameParameters, UseQueryReturnType } from "../types.js";
+import type { ConfigParameter, UseQueryReturnType, UseResolveNameParameters } from "../types.js";
 import { createForwardResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
 import { useConfig } from "./useConfig.js";
 
-export type UseNameReturnType = UseQueryReturnType<ForwardResponse>;
+export type UseResolveNameReturnType = UseQueryReturnType<ForwardResponse>;
 
 /**
  * Hook to resolve an ENS name to records (forward resolution)
@@ -15,7 +15,7 @@ export type UseNameReturnType = UseQueryReturnType<ForwardResponse>;
  *
  * @example
  * ```typescript
- * const { data, isLoading, error } = useName({
+ * const { data, isLoading, error } = useResolveName({
  *   name: "vitalik.eth",
  *   selection: {
  *     name: true,
@@ -31,7 +31,9 @@ export type UseNameReturnType = UseQueryReturnType<ForwardResponse>;
  * }
  * ```
  */
-export function useName(parameters: UseNameParameters & ConfigParameter = {}): UseNameReturnType {
+export function useResolveName(
+  parameters: UseResolveNameParameters & ConfigParameter = {},
+): UseResolveNameReturnType {
   const { name, selection, query = {} } = parameters;
   const config = useConfig(parameters);
 

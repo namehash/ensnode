@@ -1,11 +1,11 @@
 "use client";
 
 import type { ReverseResponse } from "@ensnode/ensnode-sdk";
-import type { ConfigParameter, UseAddressParameters, UseQueryReturnType } from "../types.js";
+import type { ConfigParameter, UseQueryReturnType, UseResolveAddressParameters } from "../types.js";
 import { createReverseResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
 import { useConfig } from "./useConfig.js";
 
-export type UseAddressReturnType = UseQueryReturnType<ReverseResponse>;
+export type UseResolveAddressReturnType = UseQueryReturnType<ReverseResponse>;
 
 /**
  * Hook to resolve an address to its primary name (reverse resolution)
@@ -15,7 +15,7 @@ export type UseAddressReturnType = UseQueryReturnType<ReverseResponse>;
  *
  * @example
  * ```typescript
- * const { data, isLoading, error } = useAddress({
+ * const { data, isLoading, error } = useResolveAddress({
  *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
  *   chainId: 1
  * });
@@ -30,20 +30,20 @@ export type UseAddressReturnType = UseQueryReturnType<ReverseResponse>;
  * @example
  * ```typescript
  * // Resolve on different chains
- * const mainnetName = useAddress({
+ * const mainnetName = useResolveAddress({
  *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
  *   chainId: 1 // Ethereum mainnet
  * });
  *
- * const optimismName = useAddress({
+ * const optimismName = useResolveAddress({
  *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
  *   chainId: 10 // Optimism
  * });
  * ```
  */
-export function useAddress(
-  parameters: UseAddressParameters & ConfigParameter = {},
-): UseAddressReturnType {
+export function useResolveAddress(
+  parameters: UseResolveAddressParameters & ConfigParameter = {},
+): UseResolveAddressReturnType {
   const { address, chainId, query = {} } = parameters;
   const config = useConfig(parameters);
 
