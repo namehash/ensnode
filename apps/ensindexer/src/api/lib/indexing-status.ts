@@ -1,9 +1,9 @@
 import { publicClients } from "ponder:api";
 import { createMiddleware } from "hono/factory";
 import config from "../../../ponder.config.js";
+import ensIndexerConfig from "../../config/index.js";
 
-// TODO: Provide through configuration / env var.
-const BASE_URL = "http://localhost:42069";
+const BASE_URL = ensIndexerConfig.ensIndexerPrivateUrl;
 
 type BlockRef = { number: number; timestamp: number };
 
