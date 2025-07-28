@@ -1,5 +1,11 @@
 # @ensnode/ensnode-sdk
 
+## 0.32.0
+
+### Minor Changes
+
+- [#865](https://github.com/namehash/ensnode/pull/865) [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294) Thanks [@shrugs](https://github.com/shrugs)! - adds protocol-tracing-related types to the sdk
+
 ## 0.31.0
 
 ## 0.30.0
