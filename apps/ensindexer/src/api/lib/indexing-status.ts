@@ -49,6 +49,7 @@ type ChainIndexingStatus =
       startBlock: BlockRef;
       latestIndexedBlock: BlockRef;
       latestKnownBlock: BlockRef;
+      approximateRealtimeDistance: number;
     }
   /**
    * Completed
@@ -305,6 +306,9 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             timestamp: syncBlockTimestamp,
           } satisfies BlockRef;
 
+          const approximateRealtimeDistance =
+            Date.now() - statusBlock.timestamp;
+
           return {
             chainId,
             result: {
@@ -312,6 +316,7 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
               startBlock,
               latestIndexedBlock: statusBlock,
               latestKnownBlock: syncBlock,
+              approximateRealtimeDistance,
             } satisfies ChainIndexingStatus,
           };
         }
