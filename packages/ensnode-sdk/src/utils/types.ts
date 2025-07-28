@@ -58,3 +58,10 @@ export type EncodedLabelHash = `[${string}]`;
  * ex: vitalik.eth
  */
 export type Name = string;
+
+/**
+ * Represents a duration in seconds.
+ *
+ * Must be a non-negative integer.
+ */
+export type Duration = number;
