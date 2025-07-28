@@ -5,8 +5,15 @@ export {
 } from "./provider.js";
 export { ENSNodeContext } from "./context.js";
 
-export { useConfig, useResolveName, useResolveAddress } from "./hooks/index.js";
-export type { UseResolveNameReturnType, UseResolveAddressReturnType } from "./hooks/index.js";
+export {
+  useENSNodeConfig,
+  useResolveName,
+  useResolveAddress,
+} from "./hooks/index.js";
+export type {
+  UseResolveNameReturnType,
+  UseResolveAddressReturnType,
+} from "./hooks/index.js";
 
 export type {
   ENSNodeConfig,

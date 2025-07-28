@@ -3,7 +3,7 @@
 import type { ReverseResponse } from "@ensnode/ensnode-sdk";
 import type { ConfigParameter, UseQueryReturnType, UseResolveAddressParameters } from "../types.js";
 import { createReverseResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
-import { useConfig } from "./useConfig.js";
+import { useENSNodeConfig } from "./useENSNodeConfig.js";
 
 export type UseResolveAddressReturnType = UseQueryReturnType<ReverseResponse>;
 
@@ -45,7 +45,7 @@ export function useResolveAddress(
   parameters: UseResolveAddressParameters & ConfigParameter = {},
 ): UseResolveAddressReturnType {
   const { address, chainId, query = {} } = parameters;
-  const config = useConfig(parameters);
+  const config = useENSNodeConfig(parameters);
 
   const queryOptions = address
     ? createReverseResolutionQueryOptions(config, address, chainId)

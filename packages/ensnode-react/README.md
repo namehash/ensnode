@@ -135,7 +135,9 @@ const config = createConfig({
 Hook for forward resolution (ENS name to records).
 
 ```tsx
-function useResolveName(parameters: UseResolveNameParameters): UseResolveNameReturnType;
+function useResolveName(
+  parameters: UseResolveNameParameters
+): UseResolveNameReturnType;
 ```
 
 #### Parameters
@@ -169,7 +171,9 @@ const { data, isLoading, error, refetch } = useResolveName({
 Hook for reverse resolution (address to primary name).
 
 ```tsx
-function useResolveAddress(parameters: UseResolveAddressParameters): UseResolveAddressReturnType;
+function useResolveAddress(
+  parameters: UseResolveAddressParameters
+): UseResolveAddressReturnType;
 ```
 
 #### Parameters
@@ -191,12 +195,12 @@ const { data, isLoading, error, refetch } = useResolveAddress({
 });
 ```
 
-### useConfig
+### useENSNodeConfig
 
 Hook to access the ENSNode configuration from context.
 
 ```tsx
-const config = useConfig();
+const config = useENSNodeConfig();
 ```
 
 ## Advanced Usage
@@ -291,21 +295,21 @@ const mainnetConfig = createConfig({
   url: "https://api.mainnet.ensnode.io",
 });
 
-// Testnet provider  
+// Testnet provider
 const testnetConfig = createConfig({
   url: "https://api.testnet.ensnode.io",
 });
 
 function MainnetData() {
-  const { data } = useResolveAddress({ 
-    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" 
+  const { data } = useResolveAddress({
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   });
   return <div>Mainnet: {data?.records.name}</div>;
 }
 
 function TestnetData() {
-  const { data } = useResolveAddress({ 
-    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" 
+  const { data } = useResolveAddress({
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   });
   return <div>Testnet: {data?.records.name}</div>;
 }
@@ -316,7 +320,7 @@ function App() {
       <ENSNodeProvider config={mainnetConfig}>
         <MainnetData />
       </ENSNodeProvider>
-      
+
       <ENSNodeProvider config={testnetConfig}>
         <TestnetData />
       </ENSNodeProvider>

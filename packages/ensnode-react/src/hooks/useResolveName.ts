@@ -3,7 +3,7 @@
 import type { ForwardResponse, RecordsSelection } from "@ensnode/ensnode-sdk";
 import type { ConfigParameter, UseQueryReturnType, UseResolveNameParameters } from "../types.js";
 import { createForwardResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
-import { useConfig } from "./useConfig.js";
+import { useENSNodeConfig } from "./useENSNodeConfig.js";
 
 export type UseResolveNameReturnType = UseQueryReturnType<ForwardResponse>;
 
@@ -35,7 +35,7 @@ export function useResolveName(
   parameters: UseResolveNameParameters & ConfigParameter = {},
 ): UseResolveNameReturnType {
   const { name, selection, query = {} } = parameters;
-  const config = useConfig(parameters);
+  const config = useENSNodeConfig(parameters);
 
   const queryOptions = name
     ? createForwardResolutionQueryOptions(config, name, selection)

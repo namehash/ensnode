@@ -11,7 +11,7 @@ import type { ConfigParameter, ENSNodeConfig } from "../types.js";
  * @returns The ENSNode configuration
  * @throws Error if no config is available in context or parameters
  */
-export function useConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
+export function useENSNodeConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
   parameters: ConfigParameter<TConfig> = {},
 ): TConfig {
   const contextConfig = useContext(ENSNodeContext);
@@ -22,7 +22,7 @@ export function useConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
 
   if (!finalConfig) {
     throw new Error(
-      "useConfig must be used within an ENSNodeProvider or you must pass a config parameter",
+      "useENSNodeConfig must be used within an ENSNodeProvider or you must pass a config parameter",
     );
   }
 
