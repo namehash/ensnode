@@ -173,7 +173,7 @@ export function invariant_seaportPluginNeedsMinimumOneOtherNamePluginActive(
 ) {
   const { value: config } = ctx;
 
-  if (config.plugins.includes(PluginName.Seaport)) {
+  if (config.plugins.includes(PluginName.TokenScope)) {
     const nameProtocols = [
       PluginName.Subgraph,
       PluginName.Basenames,

@@ -5,9 +5,8 @@ import { ItemType } from "@opensea/seaport-js/lib/constants";
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { lookupDomainId, upsertCurrency } from "@/lib/seaport/seaport-helpers";
+import { lookupDomainId } from "@/lib/seaport/seaport-helpers";
 import { isKnownTokenIssuingContract } from "@ensnode/datasources";
-import { replaceBigInts } from "ponder";
 import { Address, Hex } from "viem";
 
 type OfferItem = {
@@ -73,17 +72,32 @@ interface SeaportOrderFulfilledEvent
 /**
  * Validates that all payment items use the same currency
  */
-function validateCurrencyConsistency(paymentItems: Item[]): boolean {
+function getPaymentTokenAddress(paymentItems: Item[]): Address {
   if (paymentItems.length === 0) {
-    return false;
+    throw new Error(
+      "No payment item. Provide at least one payment item to get the payment token address.",
+    );
   }
 
   // Get all unique tokens used in payment items
   const paymentTokens = paymentItems.map((item) => item.token);
   const uniqueTokens = [...new Set(paymentTokens)];
 
-  // Return false if mixed currencies found
-  return uniqueTokens.length === 1;
+  // Mixed currencies
+  if (uniqueTokens.length > 1) {
+    throw new Error(
+      "Too many currencies used. All payment items must be paid for with exactly the same currency.",
+    );
+  }
+
+  // No currency
+  if (uniqueTokens.length === 0) {
+    throw new Error(
+      "No payment item. Provide at least one payment item to get the payment token address.",
+    );
+  }
+
+  return uniqueTokens[0]!;
 }
 
 /**
@@ -112,22 +126,15 @@ async function handleOfferFulfilled(
   await upsertAccount(context, buyer);
   await upsertAccount(context, seller);
 
-  // Validate currency consistency
-  if (!validateCurrencyConsistency(paymentItems)) {
-    // TODO: log mixed currencies error
-    return;
-  }
-
   // Calculate total payment amount
   const totalAmount = getTotalPaymentAmount(paymentItems);
-  const currencyAddress = paymentItems[0]!.token;
+  const currencyAddress = getPaymentTokenAddress(paymentItems);
 
   const contractAddress = nftItem.token as Address;
   const tokenId = nftItem.identifier.toString();
 
   // Get Domain ID
   const domainId = await lookupDomainId(context, contractAddress, tokenId);
-
   if (!domainId) {
     console.log("Domain ID not found for", contractAddress, tokenId);
     return;
@@ -169,22 +176,15 @@ async function handleListingFulfilled(
   await upsertAccount(context, seller);
   await upsertAccount(context, buyer);
 
-  // Validate currency consistency
-  if (!validateCurrencyConsistency(paymentItems)) {
-    console.log("Mixed currencies in payment items");
-    return;
-  }
-
   // Calculate total payment amount
   const totalAmount = getTotalPaymentAmount(paymentItems);
-  const currencyAddress = paymentItems[0]!.token;
+  const currencyAddress = getPaymentTokenAddress(paymentItems);
 
   const contractAddress = nftItem.token as Address;
   const tokenId = nftItem.identifier.toString();
 
   // Get domain ID
-  let domainId = await lookupDomainId(context, contractAddress, tokenId);
-
+  const domainId = await lookupDomainId(context, contractAddress, tokenId);
   if (!domainId) {
     console.log("Domain ID not found for", contractAddress, tokenId);
     return;

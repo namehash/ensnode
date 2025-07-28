@@ -9,7 +9,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.Seaport;
+  const pluginName = PluginName.TokenScope;
 
   ponder.on(namespaceContract(pluginName, "Seaport:OrderFulfilled"), handleOrderFulfilled);
 }

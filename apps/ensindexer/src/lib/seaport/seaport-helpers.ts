@@ -1,5 +1,7 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
+import config from "@/config";
+import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import { Address, Hex } from "viem";
 
 /**
@@ -15,8 +17,11 @@ export async function lookupDomainId(
 ): Promise<Hex | null> {
   const tokenIdHex = `0x${BigInt(tokenId).toString(16).padStart(64, "0")}` as Hex;
 
+  const baseRegistrarContractAddress = getDatasource(config.namespace, DatasourceNames.ENSRoot)
+    .contracts["BaseRegistrar"].address;
+
   // OLD ENS Registry: tokenId is labelhash, need to find domain by labelhash
-  if (contractAddress === "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85") {
+  if (contractAddress === baseRegistrarContractAddress) {
     const domains = await context.db.sql.query.domain.findMany({
       where: (table, { eq }) => eq(table.labelhash, tokenIdHex),
       limit: 1,

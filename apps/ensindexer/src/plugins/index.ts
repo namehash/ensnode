@@ -5,7 +5,7 @@ import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
 import referralsPlugin from "./referrals/plugin";
 import reverseResolversPlugin from "./reverse-resolvers/plugin";
-import seaportPlugin from "./seaport/plugin";
+import tokenScopePlugin from "./tokenscope/plugin";
 import subgraphPlugin from "./subgraph/plugin";
 import threednsPlugin from "./threedns/plugin";
 
@@ -14,7 +14,7 @@ export const ALL_PLUGINS = [
   basenamesPlugin,
   lineaNamesPlugin,
   threednsPlugin,
-  seaportPlugin,
+  tokenScopePlugin,
   reverseResolversPlugin,
   referralsPlugin,
 ] as const;

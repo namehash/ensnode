@@ -235,52 +235,63 @@ export function getChainName(chainId: number): string {
  */
 export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): ChainAddress[] => {
   switch (namespaceId) {
-    case ENSNamespaceIds.Mainnet:
+    case ENSNamespaceIds.Mainnet: {
+      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
+      const lineanamesDatasource = getDatasource(namespaceId, DatasourceNames.Lineanames);
+      const basenamesDatasource = getDatasource(namespaceId, DatasourceNames.Basenames);
+      const threeDnsBaseDatasource = getDatasource(namespaceId, DatasourceNames.ThreeDNSBase);
+      const threeDnsOptimismDatasource = getDatasource(
+        namespaceId,
+        DatasourceNames.ThreeDNSOptimism,
+      );
       return [
         {
           // ENS Token - Mainnet
-          chainId: mainnetChain.id,
-          address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["BaseRegistrar"].address,
         },
         // NameWrapper Token - Mainnet
         {
-          chainId: mainnetChain.id,
-          address: "0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401",
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["NameWrapper"].address,
         },
         // 3DNS Token - Optimism
         {
-          chainId: optimism.id,
-          address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
+          chainId: threeDnsOptimismDatasource.chain.id,
+          address: threeDnsOptimismDatasource.contracts["ThreeDNSToken"].address,
         },
         // 3DNS Token - Base
         {
-          chainId: base.id,
-          address: "0xBB7B805B257d7C76CA9435B3ffe780355E4C4B17",
+          chainId: threeDnsBaseDatasource.chain.id,
+          address: threeDnsBaseDatasource.contracts["ThreeDNSToken"].address,
         },
         // Linear Names Token - Base
         {
-          chainId: linea.id,
-          address: "0x6e84390dCc5195414eC91A8c56A5c91021B95704",
+          chainId: lineanamesDatasource.chain.id,
+          address: lineanamesDatasource.contracts["BaseRegistrar"].address,
         },
         // Base Names Token - Base
         {
-          chainId: base.id,
-          address: "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a",
+          chainId: basenamesDatasource.chain.id,
+          address: basenamesDatasource.contracts["BaseRegistrar"].address,
         },
       ];
-    case ENSNamespaceIds.Sepolia:
+    }
+    case ENSNamespaceIds.Sepolia: {
+      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
       return [
         {
           // ENS Token - Sepolia
-          chainId: sepoliaChain.id,
-          address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["BaseRegistrar"].address,
         },
         {
           // NameWrapper Token - Sepolia
-          chainId: sepoliaChain.id,
-          address: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["NameWrapper"].address,
         },
       ];
+    }
     case ENSNamespaceIds.Holesky:
     case ENSNamespaceIds.EnsTestEnv:
       return [];
