@@ -8,10 +8,29 @@ const BASE_URL = ensIndexerConfig.ensIndexerPrivateUrl;
 type BlockRef = { number: number; timestamp: number };
 
 type ChainIndexingStatus =
+  /**
+   * Not started
+   *
+   * Notes:
+   * - The "not_started" status applies when using omnichain ordering and the
+   *   overall progress checkpoint has not reached the startBlock of the chain.
+   */
   | {
       status: "not_started";
       startBlock: BlockRef;
     }
+  /**
+   * Backfill
+   *
+   * Notes:
+   * - The backfillEndBlock is the latest block when the process starts up.
+   * - When latestIndexedBlock reaches backfillEndBlock, the backfill is complete
+   *   and the status will change to "following" or "completed".
+   *
+   * Invariants:
+   * - latestIndexedBlock is always before or the same as latestKnownBlock
+   * - backfillEndBlock is always the same as latestKnownBlock
+   */
   | {
       status: "backfill";
       startBlock: BlockRef;
@@ -19,12 +38,28 @@ type ChainIndexingStatus =
       latestKnownBlock: BlockRef;
       backfillEndBlock: BlockRef;
     }
+  /**
+   * Following
+   *
+   * Invariants:
+   * - latestIndexedBlock is always before or the same as latestKnownBlock
+   */
   | {
-      status: "realtime";
+      status: "following";
       startBlock: BlockRef;
       latestIndexedBlock: BlockRef;
       latestKnownBlock: BlockRef;
     }
+  /**
+   * Completed
+   *
+   * Notes:
+   * - The "completed" status only applies when all contracts, accounts, and block intervals
+   *   have a defined endBlock. This means the chain will not enter the "following" status.
+   *
+   * Invariants:
+   * - latestIndexedBlock is always the same as latestKnownBlock
+   */
   | {
       status: "completed";
       startBlock: BlockRef;
@@ -273,7 +308,7 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
           return {
             chainId,
             result: {
-              status: "realtime" as const,
+              status: "following" as const,
               startBlock,
               latestIndexedBlock: statusBlock,
               latestKnownBlock: syncBlock,
