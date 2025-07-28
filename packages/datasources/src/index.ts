@@ -19,6 +19,14 @@ export * from "./lib/types";
 // export the shared ResolverABI for consumer convenience
 export { ResolverABI } from "./lib/resolver";
 
+/**
+ * Identifies a specific address on a specific chain.
+ */
+export interface ChainAddress {
+  chainId: number;
+  address: Address;
+}
+
 // internal map ENSNamespaceId -> ENSNamespace
 const ENSNamespacesById = {
   mainnet,
@@ -217,3 +225,94 @@ export function getChainName(chainId: number): string {
 
   return chainName;
 }
+
+/**
+ * Returns an array of 0 or more ChainAddress objects that are known to issue tokens
+ * that are compatible with Seaport.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns an array of 0 or more ChainAddress objects
+ */
+export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): ChainAddress[] => {
+  switch (namespaceId) {
+    case ENSNamespaceIds.Mainnet: {
+      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
+      const lineanamesDatasource = getDatasource(namespaceId, DatasourceNames.Lineanames);
+      const basenamesDatasource = getDatasource(namespaceId, DatasourceNames.Basenames);
+      const threeDnsBaseDatasource = getDatasource(namespaceId, DatasourceNames.ThreeDNSBase);
+      const threeDnsOptimismDatasource = getDatasource(
+        namespaceId,
+        DatasourceNames.ThreeDNSOptimism,
+      );
+      return [
+        {
+          // ENS Token - Mainnet
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["BaseRegistrar"].address,
+        },
+        // NameWrapper Token - Mainnet
+        {
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["NameWrapper"].address,
+        },
+        // 3DNS Token - Optimism
+        {
+          chainId: threeDnsOptimismDatasource.chain.id,
+          address: threeDnsOptimismDatasource.contracts["ThreeDNSToken"].address,
+        },
+        // 3DNS Token - Base
+        {
+          chainId: threeDnsBaseDatasource.chain.id,
+          address: threeDnsBaseDatasource.contracts["ThreeDNSToken"].address,
+        },
+        // Linear Names Token - Base
+        {
+          chainId: lineanamesDatasource.chain.id,
+          address: lineanamesDatasource.contracts["BaseRegistrar"].address,
+        },
+        // Base Names Token - Base
+        {
+          chainId: basenamesDatasource.chain.id,
+          address: basenamesDatasource.contracts["BaseRegistrar"].address,
+        },
+      ];
+    }
+    case ENSNamespaceIds.Sepolia: {
+      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
+      return [
+        {
+          // ENS Token - Sepolia
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["BaseRegistrar"].address,
+        },
+        {
+          // NameWrapper Token - Sepolia
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["NameWrapper"].address,
+        },
+      ];
+    }
+    case ENSNamespaceIds.Holesky:
+    case ENSNamespaceIds.EnsTestEnv:
+      return [];
+  }
+};
+
+/**
+ * Returns a boolean indicating whether the provided ChainAddress is a known token issuing contract.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param chainAddress - The ChainAddress to check
+ * @returns a boolean indicating whether the provided ChainAddress is a known token issuing contract
+ */
+export const isKnownTokenIssuingContract = (
+  namespaceId: ENSNamespaceId,
+  chainAddress: ChainAddress,
+): boolean => {
+  const knownContracts = getKnownTokenIssuingContracts(namespaceId);
+  return knownContracts.some(
+    (knownContract) =>
+      knownContract.chainId === chainAddress.chainId &&
+      knownContract.address.toLowerCase() === chainAddress.address.toLowerCase(),
+  );
+};

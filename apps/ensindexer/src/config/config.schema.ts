@@ -9,6 +9,7 @@ import {
   invariant_requiredDatasources,
   invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
+  invariant_seaportPluginNeedsMinimumOneOtherNamePluginActive,
   invariant_validContractConfigs,
 } from "@/config/validations";
 import {
@@ -199,6 +200,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_validContractConfigs)
   .check(invariant_reverseResolversPluginNeedsResolverRecords)
   .check(invariant_experimentalResolutionNeedsReverseResolversPlugin)
+  .check(invariant_seaportPluginNeedsMinimumOneOtherNamePluginActive)
   /**
    * Derived configuration
    *

@@ -13,6 +13,7 @@ export enum PluginName {
   Basenames = "basenames",
   Lineanames = "lineanames",
   ThreeDNS = "threedns",
+  Seaport = "seaport",
   ReverseResolvers = "reverse-resolvers",
   Referrals = "referrals",
 }
