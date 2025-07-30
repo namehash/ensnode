@@ -11,10 +11,14 @@ export {
   useENSNodeConfig,
   useResolveName,
   useResolveAddress,
+  useConnections,
+  useCurrentConnection,
 } from "./hooks/index";
 export type {
   UseResolveNameReturnType,
   UseResolveAddressReturnType,
+  UseCurrentConnectionParameters,
+  UseCurrentConnectionReturnType,
 } from "./hooks/index";
 
 export type {
@@ -24,6 +28,11 @@ export type {
   UseResolveNameParameters,
   UseResolveAddressParameters,
   UseQueryReturnType,
+  Connection,
+  AddConnectionVariables,
+  RemoveConnectionVariables,
+  UseConnectionsParameters,
+  UseConnectionsReturnType,
 } from "./types";
 
 export {
@@ -31,3 +40,5 @@ export {
   createForwardResolutionQueryOptions,
   createReverseResolutionQueryOptions,
 } from "./utils/query";
+
+export { BasicEnsNodeValidator, defaultValidator } from "./utils/validator";

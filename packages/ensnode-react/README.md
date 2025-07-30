@@ -1,6 +1,6 @@
 # @ensnode/ensnode-react
 
-React hooks and provider for ENSNode API. This package provides a React-friendly interface to the ENSNode SDK with automatic caching, loading states, and error handling. **TanStack Query is handled automatically** - no setup required unless you want custom configuration.
+React hooks and provider for ENSNode API. This package provides a React-friendly interface to the ENSNode SDK with automatic caching, loading states, error handling, and connection management. **TanStack Query is handled automatically** - no setup required unless you want custom configuration.
 
 Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://ensnode.io/docs/).
 
@@ -195,6 +195,75 @@ const { data, isLoading, error, refetch } = useResolveAddress({
 });
 ```
 
+### useConnections
+
+Hook for managing multiple ENSNode connections with add/remove functionality and localStorage persistence.
+
+```tsx
+function useConnections(
+  parameters: UseConnectionsParameters
+): UseConnectionsReturnType;
+```
+
+#### Parameters
+
+- `selectedUrl`: The currently selected ENSNode URL
+- `defaultUrls`: Array of default connection URLs
+- `storageKey`: Custom localStorage key (optional)
+
+#### Example
+
+```tsx
+const {
+  connections,
+  currentUrl,
+  setCurrentUrl,
+  addConnection,
+  removeConnection,
+  isLoading,
+} = useConnections({
+  selectedUrl: "https://api.mainnet.ensnode.io",
+  defaultUrls: [
+    "https://api.mainnet.ensnode.io",
+    "https://api.testnet.ensnode.io",
+  ],
+});
+
+// Add a custom connection
+await addConnection.mutateAsync({
+  url: "https://my-custom-node.com",
+});
+
+// Switch connections
+setCurrentUrl("https://api.testnet.ensnode.io");
+
+// Remove a custom connection
+await removeConnection.mutateAsync({
+  url: "https://my-custom-node.com",
+});
+```
+
+### useCurrentConnection
+
+Hook for accessing and managing the current ENSNode connection.
+
+```tsx
+function useCurrentConnection(
+  parameters?: UseCurrentConnectionParameters
+): UseCurrentConnectionReturnType;
+```
+
+#### Example
+
+```tsx
+const { url, config, createConfigWithUrl } = useCurrentConnection();
+
+console.log("Current endpoint:", url);
+
+// Create config for different endpoint
+const testnetConfig = createConfigWithUrl("https://api.testnet.ensnode.io");
+```
+
 ### useENSNodeConfig
 
 Hook to access the ENSNode configuration from context.
@@ -285,6 +354,85 @@ function MultiChainResolver({ address }: { address: string }) {
 }
 ```
 
+### Connection Management
+
+Build connection selectors and manage multiple ENSNode endpoints:
+
+```tsx
+function ConnectionSelector() {
+  const {
+    connections,
+    currentUrl,
+    setCurrentUrl,
+    addConnection,
+    removeConnection,
+  } = useConnections({
+    defaultUrls: [
+      "https://api.mainnet.ensnode.io",
+      "https://api.testnet.ensnode.io",
+    ],
+  });
+
+  const [newUrl, setNewUrl] = useState("");
+
+  const handleAdd = async () => {
+    try {
+      await addConnection.mutateAsync({ url: newUrl });
+      setNewUrl("");
+    } catch (error) {
+      console.error("Failed to add connection:", error);
+    }
+  };
+
+  return (
+    <div>
+      <h3>ENSNode Connections</h3>
+
+      {/* Connection List */}
+      {connections.map(({ url, isDefault }) => (
+        <div key={url} className="connection-item">
+          <button
+            onClick={() => setCurrentUrl(url)}
+            className={url === currentUrl ? "active" : ""}
+          >
+            {url} {isDefault && "(default)"}
+          </button>
+          {!isDefault && (
+            <button onClick={() => removeConnection.mutate({ url })}>
+              Remove
+            </button>
+          )}
+        </div>
+      ))}
+
+      {/* Add New Connection */}
+      <div>
+        <input
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          placeholder="https://your-node.com"
+        />
+        <button onClick={handleAdd} disabled={addConnection.isPending}>
+          Add Connection
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DataDisplay() {
+  const { config } = useCurrentConnection();
+
+  // This will automatically use the current connection
+  const { data } = useResolveAddress({
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    config, // Use the current connection's config
+  });
+
+  return <div>Name: {data?.records.name}</div>;
+}
+```
+
 ### Multiple ENSNode Endpoints
 
 Use different ENSNode endpoints with automatic cache isolation:
@@ -353,6 +501,13 @@ import type {
   UseResolveAddressParameters,
   UseResolveNameReturnType,
   UseResolveAddressReturnType,
+  UseConnectionsParameters,
+  UseConnectionsReturnType,
+  UseCurrentConnectionParameters,
+  UseCurrentConnectionReturnType,
+  Connection,
+  AddConnectionVariables,
+  RemoveConnectionVariables,
 } from "@ensnode/ensnode-react";
 
 // Hook return types are TanStack Query's UseQueryResult
