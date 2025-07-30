@@ -54,15 +54,13 @@ export interface UseCurrentConnectionReturnType {
  * ```
  */
 export function useCurrentConnection(
-  parameters: UseCurrentConnectionParameters = {}
+  parameters: UseCurrentConnectionParameters = {},
 ): UseCurrentConnectionReturnType {
   const { url: overrideUrl } = parameters;
   const contextConfig = useContext(ENSNodeContext);
 
   if (!contextConfig) {
-    throw new Error(
-      "useCurrentConnection must be used within an ENSNodeProvider"
-    );
+    throw new Error("useCurrentConnection must be used within an ENSNodeProvider");
   }
 
   // Determine the current URL
@@ -102,7 +100,7 @@ export function useCurrentConnection(
         },
       };
     },
-    [contextConfig.client]
+    [contextConfig.client],
   );
 
   return {

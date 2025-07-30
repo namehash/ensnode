@@ -44,13 +44,9 @@ const DEFAULT_STORAGE_KEY = "ensnode:connections:urls";
  * ```
  */
 export function useConnections(
-  parameters: UseConnectionsParameters = {}
+  parameters: UseConnectionsParameters = {},
 ): UseConnectionsReturnType {
-  const {
-    selectedUrl,
-    defaultUrls = [],
-    storageKey = DEFAULT_STORAGE_KEY,
-  } = parameters;
+  const { selectedUrl, defaultUrls = [], storageKey = DEFAULT_STORAGE_KEY } = parameters;
 
   const queryClient = useQueryClient();
 
@@ -60,7 +56,9 @@ export function useConnections(
       return typeof selectedUrl === "string" ? selectedUrl : selectedUrl.toString();
     }
     return defaultUrls.length > 0
-      ? (typeof defaultUrls[0] === "string" ? defaultUrls[0] : defaultUrls[0].toString())
+      ? typeof defaultUrls[0] === "string"
+        ? defaultUrls[0]
+        : defaultUrls[0].toString()
       : "";
   });
 
@@ -77,15 +75,13 @@ export function useConnections(
     let connections: Connection[];
 
     try {
-      const savedUrlsRaw = typeof window !== "undefined"
-        ? localStorage.getItem(storageKey)
-        : null;
+      const savedUrlsRaw = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
       const savedUrls = savedUrlsRaw ? JSON.parse(savedUrlsRaw) : [];
 
       const savedConnections: Connection[] = savedUrls
         .filter((savedUrl: string) =>
           // Filter out saved URLs that are already in defaults
-          defaultConnections.every((defaultConn) => defaultConn.url !== savedUrl)
+          defaultConnections.every((defaultConn) => defaultConn.url !== savedUrl),
         )
         .map((url: string) => ({
           url,
@@ -103,15 +99,16 @@ export function useConnections(
   /**
    * Save custom connections to localStorage
    */
-  const saveConnections = useCallback((connections: Connection[]) => {
-    const customUrls = connections
-      .filter((c) => !c.isDefault)
-      .map((c) => c.url);
+  const saveConnections = useCallback(
+    (connections: Connection[]) => {
+      const customUrls = connections.filter((c) => !c.isDefault).map((c) => c.url);
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem(storageKey, JSON.stringify(customUrls));
-    }
-  }, [storageKey]);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(storageKey, JSON.stringify(customUrls));
+      }
+    },
+    [storageKey],
+  );
 
   // Query for loading connections
   const { data: connections = [], isLoading } = useQuery({
