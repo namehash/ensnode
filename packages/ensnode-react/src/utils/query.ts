@@ -6,8 +6,8 @@ import {
   type RecordsSelection,
   type ReverseResponse,
 } from "@ensnode/ensnode-sdk";
-import { type UseQueryResult, useQuery } from "@tanstack/react-query";
-import type { ENSNodeConfig, UseQueryReturnType } from "../types.js";
+import { useQuery } from "@tanstack/react-query";
+import type { ENSNodeConfig, UseQueryReturnType } from "../types";
 
 /**
  * Query key factory for ENSNode queries

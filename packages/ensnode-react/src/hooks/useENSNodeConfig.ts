@@ -1,8 +1,8 @@
 "use client";
 
 import { useContext } from "react";
-import { ENSNodeContext } from "../context.js";
-import type { ConfigParameter, ENSNodeConfig } from "../types.js";
+import { ENSNodeContext } from "../context";
+import type { ConfigParameter, ENSNodeConfig } from "../types";
 
 /**
  * Hook to access the ENSNode configuration from context or parameters

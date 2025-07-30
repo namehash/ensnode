@@ -3,8 +3,9 @@
 import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { createElement, useMemo } from "react";
-import { ENSNodeContext } from "./context.js";
-import type { ENSNodeConfig } from "./types.js";
+
+import { ENSNodeContext } from "./context";
+import type { ENSNodeConfig } from "./types";
 
 export interface ENSNodeProviderProps {
   /** ENSNode configuration */

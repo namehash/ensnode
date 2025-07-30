@@ -1,9 +1,9 @@
 "use client";
 
 import type { ReverseResponse } from "@ensnode/ensnode-sdk";
-import type { ConfigParameter, UseQueryReturnType, UseResolveAddressParameters } from "../types.js";
-import { createReverseResolutionQueryOptions, useENSNodeQuery } from "../utils/query.js";
-import { useENSNodeConfig } from "./useENSNodeConfig.js";
+import type { ConfigParameter, UseQueryReturnType, UseResolveAddressParameters } from "../types";
+import { createReverseResolutionQueryOptions, useENSNodeQuery } from "../utils/query";
+import { useENSNodeConfig } from "./useENSNodeConfig";
 
 export type UseResolveAddressReturnType = UseQueryReturnType<ReverseResponse>;
 

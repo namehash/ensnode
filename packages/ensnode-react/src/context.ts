@@ -1,5 +1,6 @@
 import { createContext } from "react";
-import type { ENSNodeConfig } from "./types.js";
+
+import type { ENSNodeConfig } from "./types";
 
 /**
  * React context for ENSNode configuration
