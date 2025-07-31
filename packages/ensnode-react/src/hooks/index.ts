@@ -1,9 +1,15 @@
-export { useENSNodeConfig } from "./useENSNodeConfig.js";
+export { useENSNodeConfig } from "./useENSNodeConfig";
 export {
   useResolveName,
   type UseResolveNameReturnType,
-} from "./useResolveName.js";
+} from "./useResolveName";
 export {
   useResolveAddress,
   type UseResolveAddressReturnType,
-} from "./useResolveAddress.js";
+} from "./useResolveAddress";
+export { useConnections } from "./useConnections";
+export {
+  useCurrentConnection,
+  type UseCurrentConnectionParameters,
+  type UseCurrentConnectionReturnType,
+} from "./useCurrentConnection.js";

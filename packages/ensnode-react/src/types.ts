@@ -2,11 +2,96 @@ import type { ClientOptions } from "@ensnode/ensnode-sdk";
 import type { QueryObserverOptions, UseQueryResult } from "@tanstack/react-query";
 
 /**
+ * Interface for ENSNode URL validators
+ */
+export interface ENSNodeValidator {
+  /**
+   * Validates an ENSNode endpoint URL
+   *
+   * @param url - The URL to validate
+   * @returns Promise with validation result
+   */
+  validate(url: string): Promise<{ isValid: boolean; error?: string }>;
+}
+
+/**
  * Configuration options for the ENSNode provider
  */
 export interface ENSNodeConfig {
   /** The ENSNode API client configuration */
   client: ClientOptions;
+}
+
+/**
+ * Represents a connection to an ENSNode endpoint
+ */
+export interface Connection {
+  /** The URL of the ENSNode endpoint */
+  url: string;
+  /** Whether this is a default/built-in connection */
+  isDefault: boolean;
+}
+
+/**
+ * Variables for adding a new connection
+ */
+export interface AddConnectionVariables {
+  /** The URL to add as a new connection */
+  url: string;
+}
+
+/**
+ * Variables for removing a connection
+ */
+export interface RemoveConnectionVariables {
+  /** The URL of the connection to remove */
+  url: string;
+}
+
+/**
+ * Parameters for the useConnections hook
+ */
+export interface UseConnectionsParameters {
+  /** The currently selected ENSNode URL */
+  selectedUrl?: string | URL;
+  /** List of default connection URLs */
+  defaultUrls?: Array<string | URL>;
+  /** Storage key for persisting connections */
+  storageKey?: string;
+  /** Custom validator for ENSNode endpoints */
+  validator?: ENSNodeValidator;
+}
+
+/**
+ * Return type for the useConnections hook
+ */
+export interface UseConnectionsReturnType {
+  /** List of all available connections */
+  connections: Connection[];
+  /** Whether connections are being loaded */
+  isLoading: boolean;
+  /** Currently selected connection URL */
+  currentUrl: string;
+  /** Function to change the current connection */
+  setCurrentUrl: (url: string) => void;
+  /** Mutation to add a new connection */
+  addConnection: {
+    mutate: (variables: AddConnectionVariables) => void;
+    mutateAsync: (variables: AddConnectionVariables) => Promise<{ url: string }>;
+    isPending: boolean;
+    isError: boolean;
+    error: Error | null;
+    reset: () => void;
+  };
+  /** Mutation to remove a connection */
+  removeConnection: {
+    mutate: (variables: RemoveConnectionVariables) => void;
+    mutateAsync: (variables: RemoveConnectionVariables) => Promise<{ url: string }>;
+    isPending: boolean;
+    isError: boolean;
+    error: Error | null;
+    reset: () => void;
+  };
 }
 
 /**
