@@ -157,6 +157,34 @@ describe("config", () => {
     });
   });
 
+  describe(".ensIndexerPrivateUrl", () => {
+    it("throws an error if ENSINDEXER_PRIVATE_URL is not a valid URL", async () => {
+      vi.stubEnv("ENSINDEXER_PRIVATE_URL", "invalid url");
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_PRIVATE_URL must be a valid URL string/i);
+    });
+
+    it("throws an error if ENSINDEXER_PRIVATE_URL is empty", async () => {
+      vi.stubEnv("ENSINDEXER_PRIVATE_URL", "");
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_PRIVATE_URL must be a valid URL string/i);
+    });
+
+    it("throws an error if ENSINDEXER_PRIVATE_URL is undefined (explicitly testing the refine)", async () => {
+      vi.stubEnv("ENSINDEXER_PRIVATE_URL", undefined);
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_PRIVATE_URL must be a valid URL string/i);
+    });
+
+    it("returns the ENSINDEXER_PRIVATE_URL if it is a valid URL", async () => {
+      const config = await getConfig();
+      expect(config.ensIndexerPrivateUrl).toBe("http://localhost:42069");
+    });
+
+    it("returns a different valid ENSINDEXER_PRIVATE_URL if set", async () => {
+      vi.stubEnv("ENSINDEXER_PRIVATE_URL", "https://someotherurl.com");
+      const config = await getConfig();
+      expect(config.ensIndexerPrivateUrl).toBe("https://someotherurl.com");
+    });
+  });
+
   describe(".ensAdminUrl", () => {
     it("throws an error if ENSADMIN_URL is not a valid URL", async () => {
       vi.stubEnv("ENSADMIN_URL", "invalid url");
