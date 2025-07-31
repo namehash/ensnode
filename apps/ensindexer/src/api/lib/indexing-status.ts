@@ -17,7 +17,7 @@ type ChainIndexingStatus =
    */
   | {
       status: "not_started";
-      startBlock: BlockRef;
+      config: { startBlock: BlockRef; endBlock: BlockRef | null };
     }
   /**
    * Backfill
@@ -33,7 +33,7 @@ type ChainIndexingStatus =
    */
   | {
       status: "backfill";
-      startBlock: BlockRef;
+      config: { startBlock: BlockRef; endBlock: BlockRef | null };
       latestIndexedBlock: BlockRef;
       latestKnownBlock: BlockRef;
       backfillEndBlock: BlockRef;
@@ -46,7 +46,7 @@ type ChainIndexingStatus =
    */
   | {
       status: "following";
-      startBlock: BlockRef;
+      config: { startBlock: BlockRef; endBlock: BlockRef | null };
       latestIndexedBlock: BlockRef;
       latestKnownBlock: BlockRef;
       approximateRealtimeDistance: number;
@@ -63,19 +63,23 @@ type ChainIndexingStatus =
    */
   | {
       status: "completed";
-      startBlock: BlockRef;
+      config: { startBlock: BlockRef; endBlock: BlockRef | null };
       latestIndexedBlock: BlockRef;
       latestKnownBlock: BlockRef;
     };
 
 type IndexingStatus = { chains: Record<number, ChainIndexingStatus> };
 
-// Fetch chain start blocks in module scope. These RPC requests happen only
-// once on startup. If they fail, Ponder's build step will fail.
-const chainStartBlocks = new Map<string, BlockRef>();
+// Fetch chain start and end blocks in module scope. These RPC requests happen
+// only once on startup. If they fail, Ponder's build step will fail.
+const chainConfigs = new Map<string, { startBlock: BlockRef; endBlock: BlockRef | null }>();
 await Promise.all(
   Object.keys(config.chains).map(async (chainName) => {
-    let minStartBlock: number | null = null;
+    // let minStartBlock: number | null = null;
+    // let maxEndBlock: number | null = null;
+
+    const startBlocks: (number | string | undefined | null)[] = [];
+    const endBlocks: (number | string | undefined | null)[] = [];
 
     for (const source of [
       ...Object.values(config.contracts ?? {}),
@@ -83,26 +87,27 @@ await Promise.all(
       ...Object.values(config.blocks ?? {}),
     ]) {
       const chain = (source as any).chain;
-      let startBlock: any;
+      // let startBlock: any;
+      // let endBlock: any;
 
       if (typeof chain === "string" && chain === chainName) {
-        startBlock = (source as any).startBlock;
+        startBlocks.push((source as any).startBlock);
+        endBlocks.push((source as any).endBlock);
       } else if (typeof chain === "object" && chain?.[chainName]) {
-        startBlock = chain[chainName].startBlock;
-      }
-
-      if (typeof startBlock === "number") {
-        if (minStartBlock === null) {
-          minStartBlock = startBlock;
-        } else {
-          minStartBlock = Math.min(minStartBlock, startBlock);
-        }
+        startBlocks.push(chain[chainName].startBlock);
+        endBlocks.push(chain[chainName].endBlock);
       }
     }
 
+    const validStartBlocks = startBlocks.filter((block) => typeof block === "number");
+    const minStartBlock = validStartBlocks.length > 0 ? Math.min(...validStartBlocks) : null;
+
+    const validEndBlocks = endBlocks.filter((block) => typeof block === "number");
+    const maxEndBlock = validEndBlocks.length > 0 ? Math.max(...validEndBlocks) : null;
+
     if (minStartBlock === null) {
       throw new Error(
-        `No minimum start block found for chain '${chainName}'. Either all contracts, accounts, and block intervals use "latest" (unsupported) or the chain is misconfigured.`
+        `No minimum start block found for chain '${chainName}'. Either all contracts, accounts, and block intervals use "latest" (unsupported) or the chain is misconfigured.`,
       );
     }
 
@@ -111,13 +116,24 @@ await Promise.all(
       throw new Error(`Client not found for chain ${chainName}`);
     }
 
-    const block = await client.getBlock({ blockNumber: BigInt(minStartBlock) });
+    const [startBlock, endBlock] = await Promise.all([
+      client.getBlock({ blockNumber: BigInt(minStartBlock) }),
+      maxEndBlock ? client.getBlock({ blockNumber: BigInt(maxEndBlock) }) : null,
+    ]);
 
-    chainStartBlocks.set(chainName, {
-      number: Number(block.number),
-      timestamp: Number(block.timestamp),
-    } satisfies BlockRef);
-  })
+    chainConfigs.set(chainName, {
+      startBlock: {
+        number: Number(startBlock.number),
+        timestamp: Number(startBlock.timestamp),
+      },
+      endBlock: endBlock
+        ? {
+            number: Number(endBlock.number),
+            timestamp: Number(endBlock.timestamp),
+          }
+        : null,
+    });
+  }),
 );
 
 // Fetch chain backfill end blocks on an interval, to account for lag between when
@@ -126,9 +142,7 @@ await Promise.all(
 let chainBackfillEndBlocks: { [chainName: string]: BlockRef } | null = null;
 
 const shutdownTimeout = setTimeout(() => {
-  console.error(
-    "Unable to fetch backfill end blocks within 10 seconds, shutting down"
-  );
+  console.error("Unable to fetch backfill end blocks within 10 seconds, shutting down");
   process.exit(1);
 }, 10_000);
 
@@ -140,16 +154,14 @@ const chainBackfillEndBlockInterval = setInterval(async () => {
   }
 
   try {
-    const metricsText = await fetch(`${BASE_URL}/metrics`).then((r) =>
-      r.text()
-    );
+    const metricsText = await fetch(`${BASE_URL}/metrics`).then((r) => r.text());
     const metrics = parsePrometheusMetrics(metricsText);
 
     const backfillEndBlocks = await Promise.all(
       Object.keys(config.chains).map(async (chainName) => {
-        const startBlock = chainStartBlocks.get(chainName);
-        if (startBlock === undefined) {
-          throw new Error(`No start block found for chain ${chainName}`);
+        const chainConfig = chainConfigs.get(chainName);
+        if (chainConfig === undefined) {
+          throw new Error(`No chain config found for chain ${chainName}`);
         }
 
         const client = publicClients[chainName];
@@ -157,21 +169,15 @@ const chainBackfillEndBlockInterval = setInterval(async () => {
           throw new Error(`Client not found for chain ${chainName}`);
         }
 
-        const historicalTotalBlocks = metrics.getMetricValue(
-          "ponder_historical_total_blocks",
-          {
-            chain: chainName,
-          }
-        );
+        const historicalTotalBlocks = metrics.getMetricValue("ponder_historical_total_blocks", {
+          chain: chainName,
+        });
 
         if (historicalTotalBlocks === undefined) {
-          throw new Error(
-            `No historical total blocks metric found for chain ${chainName}`
-          );
+          throw new Error(`No historical total blocks metric found for chain ${chainName}`);
         }
 
-        const backfillEndBlockNumber =
-          startBlock.number + historicalTotalBlocks;
+        const backfillEndBlockNumber = chainConfig.startBlock.number + historicalTotalBlocks;
         const block = await client.getBlock({
           blockNumber: BigInt(backfillEndBlockNumber),
         });
@@ -182,7 +188,7 @@ const chainBackfillEndBlockInterval = setInterval(async () => {
         } satisfies BlockRef;
 
         return [chainName, blockRef] as const;
-      })
+      }),
     );
 
     chainBackfillEndBlocks = Object.fromEntries(backfillEndBlocks);
@@ -217,44 +223,36 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
     }
 
     const chainResults = await Promise.all(
-      Object.entries(config.chains).map(async ([chainName, chainConfig]) => {
-        const chainId = (chainConfig as { id: number }).id;
+      Object.entries(config.chains).map(async ([chainName, chainObj]) => {
+        const chainId = (chainObj as { id: number }).id;
 
-        const startBlock = chainStartBlocks.get(chainName);
-        if (startBlock === undefined) {
-          throw new Error(`No start block found for chain ${chainName}`);
+        const chainConfig = chainConfigs.get(chainName);
+        if (chainConfig === undefined) {
+          throw new Error(`No chain config found for chain ${chainName}`);
         }
 
         const statusBlock = status[chainName]?.block;
         if (statusBlock === undefined) {
-          throw new Error(
-            `Chain ${chainName} found in config but not in status`
-          );
+          throw new Error(`Chain ${chainName} found in config but not in status`);
         }
 
         // In omnichain ordering, if the startBlock is the same as the
         // status block, the chain has not started yet.
-        if (
-          ordering === "omnichain" &&
-          startBlock.number === statusBlock.number
-        ) {
+        if (ordering === "omnichain" && chainConfig.startBlock.number === statusBlock.number) {
           return {
             chainId,
             result: {
               status: "not_started" as const,
-              startBlock,
+              config: chainConfig,
             } satisfies ChainIndexingStatus,
           };
         }
 
-        const isCompleteNumber = metrics.getMetricValue(
-          "ponder_sync_is_complete",
-          { chain: chainName }
-        );
+        const isCompleteNumber = metrics.getMetricValue("ponder_sync_is_complete", {
+          chain: chainName,
+        });
         if (isCompleteNumber === undefined) {
-          throw new Error(
-            `No ponder_sync_is_complete metric found for chain ${chainName}`
-          );
+          throw new Error(`No ponder_sync_is_complete metric found for chain ${chainName}`);
         }
         const isComplete = isCompleteNumber === 1;
 
@@ -263,23 +261,18 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             chainId,
             result: {
               status: "completed" as const,
-              startBlock,
+              config: chainConfig,
               latestIndexedBlock: statusBlock,
               latestKnownBlock: statusBlock,
             } satisfies ChainIndexingStatus,
           };
         }
 
-        const isRealtimeNumber = metrics.getMetricValue(
-          "ponder_sync_is_realtime",
-          {
-            chain: chainName,
-          }
-        );
+        const isRealtimeNumber = metrics.getMetricValue("ponder_sync_is_realtime", {
+          chain: chainName,
+        });
         if (isRealtimeNumber === undefined) {
-          throw new Error(
-            `No ponder_sync_is_realtime metric found for chain ${chainName}`
-          );
+          throw new Error(`No ponder_sync_is_realtime metric found for chain ${chainName}`);
         }
         const isRealtime = isRealtimeNumber === 1;
 
@@ -289,16 +282,12 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
           const syncBlockNumber = metrics.getMetricValue("ponder_sync_block", {
             chain: chainName,
           });
-          const syncBlockTimestamp = metrics.getMetricValue(
-            "ponder_sync_block_timestamp",
-            { chain: chainName }
-          );
-          if (
-            syncBlockNumber === undefined ||
-            syncBlockTimestamp === undefined
-          ) {
+          const syncBlockTimestamp = metrics.getMetricValue("ponder_sync_block_timestamp", {
+            chain: chainName,
+          });
+          if (syncBlockNumber === undefined || syncBlockTimestamp === undefined) {
             throw new Error(
-              `No ponder_sync_block or ponder_sync_block_timestamp metric found for chain ${chainName}`
+              `No ponder_sync_block or ponder_sync_block_timestamp metric found for chain ${chainName}`,
             );
           }
           const syncBlock = {
@@ -306,14 +295,13 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             timestamp: syncBlockTimestamp,
           } satisfies BlockRef;
 
-          const approximateRealtimeDistance =
-            Date.now() - statusBlock.timestamp;
+          const approximateRealtimeDistance = Date.now() - statusBlock.timestamp;
 
           return {
             chainId,
             result: {
               status: "following" as const,
-              startBlock,
+              config: chainConfig,
               latestIndexedBlock: statusBlock,
               latestKnownBlock: syncBlock,
               approximateRealtimeDistance,
@@ -321,24 +309,15 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
           };
         }
 
-        const historicalTotalBlocks = metrics.getMetricValue(
-          "ponder_historical_total_blocks",
-          {
-            chain: chainName,
-          }
-        );
-        const historicalCachedBlocks = metrics.getMetricValue(
-          "ponder_historical_cached_blocks",
-          {
-            chain: chainName,
-          }
-        );
-        if (
-          historicalTotalBlocks === undefined ||
-          historicalCachedBlocks === undefined
-        ) {
+        const historicalTotalBlocks = metrics.getMetricValue("ponder_historical_total_blocks", {
+          chain: chainName,
+        });
+        const historicalCachedBlocks = metrics.getMetricValue("ponder_historical_cached_blocks", {
+          chain: chainName,
+        });
+        if (historicalTotalBlocks === undefined || historicalCachedBlocks === undefined) {
           throw new Error(
-            `No ponder_historical_total_blocks or ponder_historical_cached_blocks metric found for chain ${chainName}`
+            `No ponder_historical_total_blocks or ponder_historical_cached_blocks metric found for chain ${chainName}`,
           );
         }
 
@@ -356,7 +335,7 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
             chainId,
             result: {
               status: "not_started" as const,
-              startBlock,
+              config: chainConfig,
             } satisfies ChainIndexingStatus,
           };
         }
@@ -370,20 +349,18 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
           chainId,
           result: {
             status: "backfill" as const,
-            startBlock,
+            config: chainConfig,
             latestIndexedBlock: statusBlock,
             // During the backfill, the latest known block is the backfill end block.
             latestKnownBlock: backfillEndBlock,
             backfillEndBlock,
           } satisfies ChainIndexingStatus,
         };
-      })
+      }),
     );
 
     const result = {
-      chains: Object.fromEntries(
-        chainResults.map(({ chainId, result }) => [chainId, result])
-      ),
+      chains: Object.fromEntries(chainResults.map(({ chainId, result }) => [chainId, result])),
     } satisfies IndexingStatus;
 
     return c.json(result);
@@ -403,18 +380,14 @@ function parsePrometheusMetrics(text: string) {
     if (line.startsWith("#") || line.trim() === "") continue;
 
     // Parse metric line: metric_name{label1="value1",label2="value2"} value
-    const metricMatch = line.match(
-      /^([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^}]*)\}\s+([0-9.-]+)$/
-    );
+    const metricMatch = line.match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^}]*)\}\s+([0-9.-]+)$/);
     if (metricMatch) {
       const [, metricName, labelsStr, valueStr] = metricMatch;
       if (metricName && labelsStr !== undefined && valueStr) {
         const labels: PromLabels = {};
 
         // Parse labels: label1="value1",label2="value2"
-        const labelMatches = labelsStr.matchAll(
-          /([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*"([^"]*)"/g
-        );
+        const labelMatches = labelsStr.matchAll(/([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*"([^"]*)"/g);
         for (const labelMatch of labelMatches) {
           const [, labelName, labelValue] = labelMatch;
           if (labelName && labelValue !== undefined) {
@@ -430,9 +403,7 @@ function parsePrometheusMetrics(text: string) {
     }
 
     // Parse metric line without labels: metric_name value
-    const simpleMetricMatch = line.match(
-      /^([a-zA-Z_:][a-zA-Z0-9_:]*)\s+([0-9.-]+)$/
-    );
+    const simpleMetricMatch = line.match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)\s+([0-9.-]+)$/);
     if (simpleMetricMatch) {
       const [, metricName, valueStr] = simpleMetricMatch;
       if (metricName && valueStr) {
@@ -445,10 +416,7 @@ function parsePrometheusMetrics(text: string) {
   }
 
   return {
-    getMetricValue: (
-      metricName: string,
-      labels?: PromLabels
-    ): number | undefined => {
+    getMetricValue: (metricName: string, labels?: PromLabels): number | undefined => {
       for (const metric of metrics) {
         if (metric.name === metricName) {
           if (!labels || Object.keys(labels).length === 0) {
@@ -457,7 +425,7 @@ function parsePrometheusMetrics(text: string) {
 
           // Check if all provided labels match
           const labelsMatch = Object.entries(labels).every(
-            ([key, value]) => metric.labels[key] === value
+            ([key, value]) => metric.labels[key] === value,
           );
 
           if (labelsMatch) {
@@ -467,10 +435,7 @@ function parsePrometheusMetrics(text: string) {
       }
       return undefined;
     },
-    getMetricValues: (
-      metricName: string,
-      labelFilter?: PromLabels
-    ): PromMetric[] => {
+    getMetricValues: (metricName: string, labelFilter?: PromLabels): PromMetric[] => {
       return metrics.filter((metric) => {
         if (metric.name !== metricName) return false;
 
@@ -479,9 +444,7 @@ function parsePrometheusMetrics(text: string) {
         }
 
         // Check if all provided labels match
-        return Object.entries(labelFilter).every(
-          ([key, value]) => metric.labels[key] === value
-        );
+        return Object.entries(labelFilter).every(([key, value]) => metric.labels[key] === value);
       });
     },
   };
