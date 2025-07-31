@@ -23,6 +23,7 @@ export type {
 
 export type {
   ENSNodeConfig,
+  ENSNodeValidator,
   QueryParameter,
   ConfigParameter,
   UseResolveNameParameters,

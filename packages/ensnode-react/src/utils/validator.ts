@@ -1,9 +1,11 @@
+import type { ENSNodeValidator } from "../types";
+
 /**
  * Basic validator for ENSNode endpoint URLs
  * This is a simple implementation that validates URL format
  * In the future, this could be extended to validate ENSNode compatibility
  */
-export class BasicEnsNodeValidator {
+export class BasicEnsNodeValidator implements ENSNodeValidator {
   /**
    * Validates an ENSNode endpoint URL
    *

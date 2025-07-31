@@ -2,6 +2,19 @@ import type { ClientOptions } from "@ensnode/ensnode-sdk";
 import type { QueryObserverOptions, UseQueryResult } from "@tanstack/react-query";
 
 /**
+ * Interface for ENSNode URL validators
+ */
+export interface ENSNodeValidator {
+  /**
+   * Validates an ENSNode endpoint URL
+   *
+   * @param url - The URL to validate
+   * @returns Promise with validation result
+   */
+  validate(url: string): Promise<{ isValid: boolean; error?: string }>;
+}
+
+/**
  * Configuration options for the ENSNode provider
  */
 export interface ENSNodeConfig {
@@ -45,6 +58,8 @@ export interface UseConnectionsParameters {
   defaultUrls?: Array<string | URL>;
   /** Storage key for persisting connections */
   storageKey?: string;
+  /** Custom validator for ENSNode endpoints */
+  validator?: ENSNodeValidator;
 }
 
 /**

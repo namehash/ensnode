@@ -22,6 +22,7 @@ const DEFAULT_STORAGE_KEY = "ensnode:connections:urls";
  *
  * @example
  * ```typescript
+ * // Basic usage with default validator
  * const {
  *   connections,
  *   currentUrl,
@@ -33,7 +34,29 @@ const DEFAULT_STORAGE_KEY = "ensnode:connections:urls";
  *   defaultUrls: ["https://api.mainnet.ensnode.io", "https://api.testnet.ensnode.io"]
  * });
  *
- * // Add a new connection
+ * // Usage with custom validator
+ * const customValidator = {
+ *   async validate(url: string) {
+ *     // Custom validation logic here
+ *     if (!url.includes("ensnode")) {
+ *       return { isValid: false, error: "Must be an ENSNode endpoint" };
+ *     }
+ *     // Check if endpoint is reachable
+ *     try {
+ *       const response = await fetch(`${url}/health`);
+ *       return { isValid: response.ok };
+ *     } catch {
+ *       return { isValid: false, error: "Endpoint is not reachable" };
+ *     }
+ *   }
+ * };
+ *
+ * const { addConnection: addValidatedConnection } = useConnections({
+ *   validator: customValidator,
+ *   defaultUrls: ["https://api.mainnet.ensnode.io"]
+ * });
+ *
+ * // Add a new connection (will use custom validator)
  * await addConnection.mutateAsync({ url: "https://my-custom-node.com" });
  *
  * // Switch to a different connection
@@ -46,7 +69,12 @@ const DEFAULT_STORAGE_KEY = "ensnode:connections:urls";
 export function useConnections(
   parameters: UseConnectionsParameters = {},
 ): UseConnectionsReturnType {
-  const { selectedUrl, defaultUrls = [], storageKey = DEFAULT_STORAGE_KEY } = parameters;
+  const {
+    selectedUrl,
+    defaultUrls = [],
+    storageKey = DEFAULT_STORAGE_KEY,
+    validator = defaultValidator,
+  } = parameters;
 
   const queryClient = useQueryClient();
 
@@ -122,7 +150,7 @@ export function useConnections(
   const addConnection = useMutation({
     mutationFn: async ({ url }: AddConnectionVariables) => {
       // Validate the URL
-      const validationResult = await defaultValidator.validate(url);
+      const validationResult = await validator.validate(url);
       if (!validationResult.isValid) {
         throw new Error(validationResult.error || "Invalid URL");
       }
