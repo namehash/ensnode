@@ -1,10 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { ConnectionContext } from "../context";
 import type {
   AddConnectionVariables,
   Connection,
+  ENSIndexerPublicConfig,
   RemoveConnectionVariables,
   UseConnectionsParameters,
   UseConnectionsReturnType,
@@ -77,9 +79,14 @@ export function useConnections(
   } = parameters;
 
   const queryClient = useQueryClient();
+  const connectionContext = useContext(ConnectionContext);
 
   // State for current URL
   const [currentUrl, setCurrentUrlState] = useState(() => {
+    // If we have connection context, use its current URL
+    if (connectionContext?.isConnectionManaged) {
+      return connectionContext.currentUrl;
+    }
     if (selectedUrl) {
       return typeof selectedUrl === "string" ? selectedUrl : selectedUrl.toString();
     }
@@ -90,10 +97,18 @@ export function useConnections(
       : "";
   });
 
+  // Sync with connection context when connection management is enabled
+  useEffect(() => {
+    if (connectionContext?.isConnectionManaged) {
+      setCurrentUrlState(connectionContext.currentUrl);
+    }
+  }, [connectionContext?.currentUrl, connectionContext?.isConnectionManaged]);
+
   // Convert default URLs to connections
   const defaultConnections: Connection[] = defaultUrls.map((url) => ({
     url: typeof url === "string" ? url : url.toString(),
     isDefault: true,
+    config: undefined, // Default connections don't have config initially
   }));
 
   /**
@@ -103,20 +118,22 @@ export function useConnections(
     let connections: Connection[];
 
     try {
-      const savedUrlsRaw = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
-      const savedUrls = savedUrlsRaw ? JSON.parse(savedUrlsRaw) : [];
+      const savedConnectionsRaw =
+        typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+      const savedConnections = savedConnectionsRaw ? JSON.parse(savedConnectionsRaw) : [];
 
-      const savedConnections: Connection[] = savedUrls
-        .filter((savedUrl: string) =>
+      const customConnections: Connection[] = savedConnections
+        .filter((savedConn: Connection) =>
           // Filter out saved URLs that are already in defaults
-          defaultConnections.every((defaultConn) => defaultConn.url !== savedUrl),
+          defaultConnections.every((defaultConn) => defaultConn.url !== savedConn.url),
         )
-        .map((url: string) => ({
-          url,
+        .map((savedConn: Connection) => ({
+          url: savedConn.url,
           isDefault: false,
+          config: savedConn.config,
         }));
 
-      connections = [...defaultConnections, ...savedConnections];
+      connections = [...defaultConnections, ...customConnections];
     } catch {
       connections = defaultConnections;
     }
@@ -129,10 +146,10 @@ export function useConnections(
    */
   const saveConnections = useCallback(
     (connections: Connection[]) => {
-      const customUrls = connections.filter((c) => !c.isDefault).map((c) => c.url);
+      const customConnections = connections.filter((c) => !c.isDefault);
 
       if (typeof window !== "undefined") {
-        localStorage.setItem(storageKey, JSON.stringify(customUrls));
+        localStorage.setItem(storageKey, JSON.stringify(customConnections));
       }
     },
     [storageKey],
@@ -149,7 +166,7 @@ export function useConnections(
   // Mutation for adding a connection
   const addConnection = useMutation({
     mutationFn: async ({ url }: AddConnectionVariables) => {
-      // Validate the URL
+      // Validate the URL and fetch config
       const validationResult = await validator.validate(url);
       if (!validationResult.isValid) {
         throw new Error(validationResult.error || "Invalid URL");
@@ -160,8 +177,15 @@ export function useConnections(
         throw new Error("Connection already exists");
       }
 
-      // Add new connection
-      const newConnections = [...connections, { url, isDefault: false }];
+      // Add new connection with config
+      const newConnections = [
+        ...connections,
+        {
+          url,
+          isDefault: false,
+          config: validationResult.config,
+        },
+      ];
       saveConnections(newConnections);
 
       return { url };
@@ -205,9 +229,16 @@ export function useConnections(
   });
 
   // Function to update current URL
-  const setCurrentUrl = useCallback((url: string) => {
-    setCurrentUrlState(url);
-  }, []);
+  const setCurrentUrl = useCallback(
+    (url: string) => {
+      setCurrentUrlState(url);
+      // If connection management is enabled, also update the context
+      if (connectionContext?.isConnectionManaged) {
+        connectionContext.setCurrentUrl(url);
+      }
+    },
+    [setCurrentUrlState, connectionContext],
+  );
 
   return {
     connections,

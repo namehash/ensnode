@@ -13,3 +13,4 @@ export {
   type UseCurrentConnectionParameters,
   type UseCurrentConnectionReturnType,
 } from "./useCurrentConnection.js";
+export { useConnectionConfig } from "./useConnectionConfig";

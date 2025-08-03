@@ -2,16 +2,46 @@ import type { ClientOptions } from "@ensnode/ensnode-sdk";
 import type { QueryObserverOptions, UseQueryResult } from "@tanstack/react-query";
 
 /**
+ * ENSIndexer Public Configuration
+ * Configuration data fetched from an ENSNode endpoint
+ */
+export interface ENSIndexerPublicConfig {
+  /** The name/identifier of this ENSNode instance */
+  name?: string;
+  /** Description of this ENSNode instance */
+  description?: string;
+  /** Version of the ENSNode software */
+  version?: string;
+  /** Supported chains and their configurations */
+  chains?: Array<{
+    chainId: number;
+    name: string;
+    rpcUrl?: string;
+    ensRegistryAddress?: string;
+  }>;
+  /** Supported features/capabilities */
+  features?: string[];
+  /** API version */
+  apiVersion?: string;
+  /** Additional metadata */
+  metadata?: Record<string, unknown>;
+}
+
+/**
  * Interface for ENSNode URL validators
  */
 export interface ENSNodeValidator {
   /**
-   * Validates an ENSNode endpoint URL
+   * Validates an ENSNode endpoint URL and fetches its public configuration
    *
    * @param url - The URL to validate
-   * @returns Promise with validation result
+   * @returns Promise with validation result and optional config
    */
-  validate(url: string): Promise<{ isValid: boolean; error?: string }>;
+  validate(url: string): Promise<{
+    isValid: boolean;
+    error?: string;
+    config?: ENSIndexerPublicConfig;
+  }>;
 }
 
 /**
@@ -30,6 +60,8 @@ export interface Connection {
   url: string;
   /** Whether this is a default/built-in connection */
   isDefault: boolean;
+  /** The ENSIndexer public configuration for this connection */
+  config?: ENSIndexerPublicConfig;
 }
 
 /**
@@ -128,6 +160,30 @@ export interface UseResolveAddressParameters
   address?: string;
   /** Optional chain ID for multichain resolution */
   chainId?: number;
+}
+
+/**
+ * Parameters for the useConnectionConfig hook
+ */
+export interface UseConnectionConfigParameters {
+  /** Override to get config for a specific URL instead of current connection */
+  url?: string;
+}
+
+/**
+ * Return type for the useConnectionConfig hook
+ */
+export interface UseConnectionConfigReturnType {
+  /** The ENSIndexer public config for the current/specified connection */
+  config?: ENSIndexerPublicConfig;
+  /** Whether the config is currently being loaded */
+  isLoading: boolean;
+  /** Error if config failed to load */
+  error: Error | null;
+  /** The URL this config belongs to */
+  url: string;
+  /** Function to refresh the config */
+  refetch: () => void;
 }
 
 /**

@@ -16,6 +16,8 @@ Note: `@tanstack/react-query` is a peer dependency but you don't need to interac
 
 ### 1. Setup the Provider
 
+#### Basic Setup (Fixed Endpoint)
+
 Wrap your app with the `ENSNodeProvider`:
 
 ```tsx
@@ -34,6 +36,33 @@ function App() {
   );
 }
 ```
+
+#### Reactive Connection Management (Recommended)
+
+Enable connection management for seamless endpoint switching:
+
+```tsx
+import { ENSNodeProvider, createConfig } from "@ensnode/ensnode-react";
+
+const config = createConfig({
+  url: "https://api.mainnet.ensnode.io",
+  debug: false,
+});
+
+function App() {
+  return (
+    <ENSNodeProvider
+      config={config}
+      enableConnectionManagement={true}
+      initialConnectionUrl="https://api.mainnet.ensnode.io"
+    >
+      <YourApp />
+    </ENSNodeProvider>
+  );
+}
+```
+
+With `enableConnectionManagement={true}`, when you switch connections using `useConnections`, **ALL queries automatically switch to the new endpoint** - no manual config passing required!
 
 That's it! No need to wrap with `QueryClientProvider` or create a `QueryClient` - it's all handled automatically. Each ENSNode endpoint gets its own isolated cache for proper data separation.
 
@@ -99,6 +128,38 @@ function AddressResolver() {
 }
 ```
 
+## Configuration Types
+
+This package distinguishes between two types of configuration:
+
+### Client Configuration vs Connection Configuration
+
+**Client Configuration (`ENSNodeConfig`)**
+
+- Controls how the ENSNode SDK client behaves
+- Includes endpoint URL, debug settings, request options
+- Managed by `useENSNodeConfig()` and `ENSNodeProvider`
+- Used for making API requests
+
+**Connection Configuration (`ENSIndexerPublicConfig`)**
+
+- Describes the capabilities and metadata of a specific ENSNode endpoint
+- Fetched automatically from each endpoint during connection validation
+- Includes supported chains, features, version info, etc.
+- Managed by `useConnectionConfig()` and `useConnections()`
+- Used for displaying endpoint information and feature detection
+
+```tsx
+// Client config - how to connect
+const clientConfig = useENSNodeConfig();
+console.log("Endpoint:", clientConfig.client.endpointUrl);
+
+// Connection config - what the endpoint supports
+const { config: connectionConfig } = useConnectionConfig();
+console.log("Supported chains:", connectionConfig?.chains);
+console.log("Features:", connectionConfig?.features);
+```
+
 ## API Reference
 
 ### ENSNodeProvider
@@ -110,6 +171,8 @@ interface ENSNodeProviderProps {
   config: ENSNodeConfig;
   queryClient?: QueryClient;
   queryClientOptions?: QueryClientOptions;
+  enableConnectionManagement?: boolean;
+  initialConnectionUrl?: string;
 }
 ```
 
@@ -118,6 +181,8 @@ interface ENSNodeProviderProps {
 - `config`: ENSNode configuration object
 - `queryClient`: Optional TanStack Query client instance (requires manual QueryClientProvider setup)
 - `queryClientOptions`: Custom options for auto-created QueryClient (only used when queryClient is not provided)
+- `enableConnectionManagement`: Enable reactive connection switching (default: false)
+- `initialConnectionUrl`: Initial connection URL when connection management is enabled
 
 ### createConfig
 
@@ -197,7 +262,7 @@ const { data, isLoading, error, refetch } = useResolveAddress({
 
 ### useConnections
 
-Hook for managing multiple ENSNode connections with add/remove functionality and localStorage persistence.
+Hook for managing multiple ENSNode connections with add/remove functionality, localStorage persistence, and automatic ENSIndexer Public Config fetching.
 
 ```tsx
 function useConnections(
@@ -229,7 +294,7 @@ const {
   ],
 });
 
-// Add a custom connection
+// Add a custom connection (automatically fetches and validates config)
 await addConnection.mutateAsync({
   url: "https://my-custom-node.com",
 });
@@ -262,6 +327,60 @@ console.log("Current endpoint:", url);
 
 // Create config for different endpoint
 const testnetConfig = createConfigWithUrl("https://api.testnet.ensnode.io");
+```
+
+### useConnectionConfig
+
+Hook for accessing the ENSIndexer Public Config of the current or specified connection. This provides access to configuration data fetched from the ENSNode endpoint, separate from the client configuration.
+
+```tsx
+function useConnectionConfig(
+  parameters?: UseConnectionConfigParameters
+): UseConnectionConfigReturnType;
+```
+
+#### Parameters
+
+- `url`: Optional URL to get config for a specific connection (defaults to current connection)
+
+#### Example
+
+```tsx
+const { config, isLoading, error } = useConnectionConfig();
+
+if (isLoading) return <div>Loading config...</div>;
+if (error) return <div>Error: {error.message}</div>;
+if (config) {
+  return (
+    <div>
+      <h3>{config.name || "ENSNode"}</h3>
+      <p>{config.description}</p>
+      <p>Version: {config.version}</p>
+
+      {config.chains && (
+        <div>
+          <h4>Supported Chains:</h4>
+          {config.chains.map((chain) => (
+            <div key={chain.chainId}>
+              {chain.name} (ID: {chain.chainId})
+            </div>
+          ))}
+        </div>
+      )}
+
+      {config.features && (
+        <div>
+          <h4>Features:</h4>
+          <ul>
+            {config.features.map((feature) => (
+              <li key={feature}>{feature}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
 ```
 
 ### useENSNodeConfig
@@ -356,9 +475,16 @@ function MultiChainResolver({ address }: { address: string }) {
 
 ### Connection Management
 
-Build connection selectors and manage multiple ENSNode endpoints:
+#### Reactive Connection Management (Recommended)
+
+With `enableConnectionManagement={true}`, switching connections automatically updates all queries:
 
 ```tsx
+// Provider setup with connection management
+<ENSNodeProvider config={config} enableConnectionManagement={true}>
+  <App />
+</ENSNodeProvider>;
+
 function ConnectionSelector() {
   const {
     connections,
@@ -373,67 +499,86 @@ function ConnectionSelector() {
     ],
   });
 
-  const [newUrl, setNewUrl] = useState("");
-
-  const handleAdd = async () => {
-    try {
-      await addConnection.mutateAsync({ url: newUrl });
-      setNewUrl("");
-    } catch (error) {
-      console.error("Failed to add connection:", error);
-    }
-  };
-
   return (
     <div>
       <h3>ENSNode Connections</h3>
-
-      {/* Connection List */}
-      {connections.map(({ url, isDefault }) => (
-        <div key={url} className="connection-item">
+      {connections.map(({ url, isDefault, config }) => (
+        <div key={url}>
           <button
-            onClick={() => setCurrentUrl(url)}
+            onClick={() => setCurrentUrl(url)} // 🚀 This switches ALL queries!
             className={url === currentUrl ? "active" : ""}
           >
-            {url} {isDefault && "(default)"}
+            {config?.name || url} {isDefault && "(default)"}
           </button>
-          {!isDefault && (
-            <button onClick={() => removeConnection.mutate({ url })}>
-              Remove
-            </button>
-          )}
         </div>
       ))}
-
-      {/* Add New Connection */}
-      <div>
-        <input
-          value={newUrl}
-          onChange={(e) => setNewUrl(e.target.value)}
-          placeholder="https://your-node.com"
-        />
-        <button onClick={handleAdd} disabled={addConnection.isPending}>
-          Add Connection
-        </button>
-      </div>
     </div>
   );
 }
 
 function DataDisplay() {
-  const { config } = useCurrentConnection();
+  const { config: connectionConfig } = useConnectionConfig();
 
-  // This will automatically use the current connection
+  // 🎯 This automatically uses the current connection - no config passing needed!
   const { data } = useResolveAddress({
     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    config, // Use the current connection's config
   });
 
-  return <div>Name: {data?.records.name}</div>;
+  return (
+    <div>
+      <div>Connected to: {connectionConfig?.name || "Unknown"}</div>
+      <div>Primary name: {data?.records.name}</div>
+      {/* When you switch connections above, this data automatically updates! */}
+    </div>
+  );
+}
+```
+
+#### Manual Connection Management
+
+Without connection management, you need to manually pass configs:
+
+```tsx
+function ManualDataDisplay() {
+  const { config } = useCurrentConnection();
+  const { config: connectionConfig } = useConnectionConfig();
+
+  // Must manually pass config for each query
+  const { data } = useResolveAddress({
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    config, // Manual config passing required
+  });
+
+  return (
+    <div>
+      <div>Node: {connectionConfig?.name || "Unknown"}</div>
+      <div>Name: {data?.records.name}</div>
+    </div>
+  );
 }
 ```
 
 ### Multiple ENSNode Endpoints
+
+#### Option 1: Single Provider with Connection Management (Recommended)
+
+Use one provider with connection switching for the best UX:
+
+```tsx
+const config = createConfig({ url: "https://api.mainnet.ensnode.io" });
+
+function App() {
+  return (
+    <ENSNodeProvider config={config} enableConnectionManagement={true}>
+      {/* Users can switch between mainnet/testnet dynamically */}
+      <ConnectionSelector />
+      <DataDisplay />
+    </ENSNodeProvider>
+  );
+}
+```
+
+#### Option 2: Multiple Separate Providers
 
 Use different ENSNode endpoints with automatic cache isolation:
 
@@ -497,6 +642,10 @@ This package is written in TypeScript and exports all necessary types. Hook retu
 ```tsx
 import type {
   ENSNodeConfig,
+  ENSIndexerPublicConfig,
+  ENSNodeValidator,
+  ENSNodeProviderProps,
+  ConnectionContextState,
   UseResolveNameParameters,
   UseResolveAddressParameters,
   UseResolveNameReturnType,
@@ -505,6 +654,8 @@ import type {
   UseConnectionsReturnType,
   UseCurrentConnectionParameters,
   UseCurrentConnectionReturnType,
+  UseConnectionConfigParameters,
+  UseConnectionConfigReturnType,
   Connection,
   AddConnectionVariables,
   RemoveConnectionVariables,
@@ -514,7 +665,29 @@ import type {
 // so they work seamlessly with TanStack Query utilities
 import type { UseQueryResult } from "@tanstack/react-query";
 type NameResult = UseQueryResult<ForwardResponse>; // Same as UseResolveNameReturnType
+
+// Connection configuration types
+type ConnectionConfig = ENSIndexerPublicConfig;
+type ValidatorResult = Awaited<ReturnType<ENSNodeValidator["validate"]>>;
 ```
+
+## Connection Management Modes
+
+### Reactive Mode (Recommended)
+
+- **Setup**: `<ENSNodeProvider enableConnectionManagement={true}>`
+- **Behavior**: Switching connections automatically updates all queries
+- **Use case**: Apps with connection switching UI
+- **DX**: Excellent - everything "just works"
+
+### Manual Mode
+
+- **Setup**: `<ENSNodeProvider>` (default)
+- **Behavior**: Fixed endpoint, manual config passing required
+- **Use case**: Single endpoint apps, or when you need explicit control
+- **DX**: Good - more explicit but requires more code
+
+Choose reactive mode for the best developer experience when building connection management features!
 
 ## Requirements
 

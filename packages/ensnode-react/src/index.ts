@@ -5,6 +5,7 @@ export {
   createConfig,
   type ENSNodeProviderProps,
 } from "./provider";
+export { ConnectionContext, type ConnectionContextState } from "./context";
 export { ENSNodeContext } from "./context";
 
 export {
@@ -13,6 +14,7 @@ export {
   useResolveAddress,
   useConnections,
   useCurrentConnection,
+  useConnectionConfig,
 } from "./hooks/index";
 export type {
   UseResolveNameReturnType,
@@ -24,6 +26,7 @@ export type {
 export type {
   ENSNodeConfig,
   ENSNodeValidator,
+  ENSIndexerPublicConfig,
   QueryParameter,
   ConfigParameter,
   UseResolveNameParameters,

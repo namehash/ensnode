@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useContext, useMemo } from "react";
-import { ENSNodeContext } from "../context";
+import { ConnectionContext, ENSNodeContext } from "../context";
 import type { ENSNodeConfig } from "../types";
 
 /**
@@ -58,6 +58,7 @@ export function useCurrentConnection(
 ): UseCurrentConnectionReturnType {
   const { url: overrideUrl } = parameters;
   const contextConfig = useContext(ENSNodeContext);
+  const connectionContext = useContext(ConnectionContext);
 
   if (!contextConfig) {
     throw new Error("useCurrentConnection must be used within an ENSNodeProvider");
@@ -68,8 +69,17 @@ export function useCurrentConnection(
     if (overrideUrl) {
       return typeof overrideUrl === "string" ? overrideUrl : overrideUrl.toString();
     }
+    // If connection management is enabled, use the context's current URL
+    if (connectionContext?.isConnectionManaged) {
+      return connectionContext.currentUrl;
+    }
     return contextConfig.client.endpointUrl.toString();
-  }, [overrideUrl, contextConfig.client.endpointUrl]);
+  }, [
+    overrideUrl,
+    contextConfig.client.endpointUrl,
+    connectionContext?.currentUrl,
+    connectionContext?.isConnectionManaged,
+  ]);
 
   // Create URL object
   const urlObject = useMemo(() => {
