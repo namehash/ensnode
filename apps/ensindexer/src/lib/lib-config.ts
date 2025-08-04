@@ -1,5 +1,6 @@
 import type { ENSIndexerConfig, RpcConfigEnvironment } from "@/config/types";
 import { ENSNamespaceIds } from "@ensnode/datasources";
+import { serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 
 export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");
@@ -47,20 +48,22 @@ export function getRpcConfigsFromEnv(): Record<number, RpcConfigEnvironment> {
 }
 
 export function prettyPrintConfig(config: ENSIndexerConfig) {
+  const serializedConfig = serializeENSIndexerPublicConfig(config);
+
   return JSON.stringify(
     {
-      ...config,
+      ...serializedConfig,
       databaseUrl: "*******",
       rpcConfigs: Object.fromEntries(
         Object.entries(config.rpcConfigs).map(([chainId, rpcConfig]) => [
           chainId,
           {
             ...rpcConfig,
-            url: new URL("*******", rpcConfig.url.hostname),
+            url: new URL("/*******", rpcConfig.url.href),
           },
         ]),
       ),
-    } as ENSIndexerConfig,
+    },
     (key: string, value: unknown) => (key === "abi" ? `(truncated ABI output)` : value),
     2,
   );
