@@ -115,7 +115,7 @@ describe("ENSNodeClient", () => {
   });
 
   describe("resolveAddress", () => {
-    it("should make correct API call for address resolution", async () => {
+    it("should make correct API call for reverse resolution", async () => {
       const mockResponse = {
         records: { name: "vitalik.eth" },
       };
