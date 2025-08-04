@@ -1,5 +1,5 @@
 ---
-"@ensnode/ensnode-react": minor
+"@ensnode/ensnode-sdk": minor
 ---
 
-add ensnode react hooks and provider based on ensnode-sdk
+Adds `resolveName` and `resolveAddress` methods to ENSNode-SDK

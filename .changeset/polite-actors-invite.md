@@ -2,4 +2,4 @@
 "@ensnode/ensnode-react": minor
 ---
 
-add ensnode-react package provider and hooks based on ensnode-sdk
+Adds ENSNode React hooks and providers based on ENSNode-SDK for use inside React apps
