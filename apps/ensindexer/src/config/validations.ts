@@ -167,31 +167,3 @@ export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
     });
   }
 }
-
-export function invariant_seaportPluginNeedsMinimumOneOtherNamePluginActive(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins">>,
-) {
-  const { value: config } = ctx;
-
-  if (config.plugins.includes(PluginName.TokenScope)) {
-    const nameProtocols = [
-      PluginName.Subgraph,
-      PluginName.Basenames,
-      PluginName.Lineanames,
-      PluginName.ThreeDNS,
-    ];
-
-    const hasAtLeastOneNameProtocol = config.plugins.some((plugin) =>
-      nameProtocols.includes(plugin),
-    );
-
-    if (!hasAtLeastOneNameProtocol) {
-      ctx.issues.push({
-        code: "custom",
-        input: config,
-        message:
-          "Seaport plugin requires at least one name protocol to be active (subgraph, basenames, lineanames, or threedns)",
-      });
-    }
-  }
-}

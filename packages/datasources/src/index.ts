@@ -1,4 +1,5 @@
-import { Address } from "viem";
+import { makeSubdomainNode } from "@ensnode/ensnode-sdk";
+import { Address, Hex, toHex } from "viem";
 import {
   base,
   baseSepolia,
@@ -227,8 +228,7 @@ export function getChainName(chainId: number): string {
 }
 
 /**
- * Returns an array of 0 or more ChainAddress objects that are known to issue tokens
- * that are compatible with Seaport.
+ * Returns an array of 0 or more ChainAddress objects that are known to provide tokenized name ownership.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @returns an array of 0 or more ChainAddress objects
@@ -292,9 +292,36 @@ export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): Chai
         },
       ];
     }
-    case ENSNamespaceIds.Holesky:
-    case ENSNamespaceIds.EnsTestEnv:
-      return [];
+    case ENSNamespaceIds.Holesky: {
+      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
+      return [
+        {
+          // ENS Token - Holesky
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["BaseRegistrar"].address,
+        },
+        {
+          // NameWrapper Token - Holesky
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["NameWrapper"].address,
+        },
+      ];
+    }
+    case ENSNamespaceIds.EnsTestEnv: {
+      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
+      return [
+        {
+          // ENS Token - EnsTestEnv
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["BaseRegistrar"].address,
+        },
+        {
+          // NameWrapper Token - EnsTestEnv
+          chainId: rootDatasource.chain.id,
+          address: rootDatasource.contracts["NameWrapper"].address,
+        },
+      ];
+    }
   }
 };
 
@@ -316,3 +343,28 @@ export const isKnownTokenIssuingContract = (
       knownContract.address.toLowerCase() === chainAddress.address.toLowerCase(),
   );
 };
+
+/**
+ * Get the domainId by contract address and tokenId
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param contractAddress - contract address of the NFT
+ * @param tokenId - tokenId of the NFT
+ */
+export function getDomainIdByTokenId(
+  namespaceId: ENSNamespaceId,
+  contractAddress: Address,
+  tokenId: string,
+): Hex {
+  const tokenIdHex = `0x${BigInt(tokenId).toString(16).padStart(64, "0")}` as Hex;
+  const baseRegistrarContractAddress = getDatasource(namespaceId, DatasourceNames.ENSRoot)
+    .contracts["BaseRegistrar"].address;
+
+  // OLD ENS Registry: tokenId is labelhash so need to convert to namehash
+  if (contractAddress === baseRegistrarContractAddress) {
+    const ETH_PARENT_NODE = "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae";
+    return makeSubdomainNode(tokenIdHex, ETH_PARENT_NODE);
+  }
+
+  // for other names we for now assume it is already namehash
+  return tokenIdHex;
+}

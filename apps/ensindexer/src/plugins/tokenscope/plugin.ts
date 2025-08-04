@@ -1,5 +1,5 @@
 /**
- * The Seaport plugin describes indexing behavior for Seaport contracts on all supported networks.
+ * The TokenScope plugin describes indexing behavior for marketplace contracts (e.g. Seaport) on all supported networks.
  */
 
 import {

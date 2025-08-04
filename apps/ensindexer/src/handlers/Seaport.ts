@@ -5,8 +5,7 @@ import { ItemType } from "@opensea/seaport-js/lib/constants";
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { lookupDomainId } from "@/lib/seaport/seaport-helpers";
-import { isKnownTokenIssuingContract } from "@ensnode/datasources";
+import { getDomainIdByTokenId, isKnownTokenIssuingContract } from "@ensnode/datasources";
 import { Address, Hex } from "viem";
 
 type OfferItem = {
@@ -69,10 +68,15 @@ interface SeaportOrderFulfilledEvent
     consideration: readonly ConsiderationItem[];
   }> {}
 
+type PaymentDetails = {
+  currencyAddress: Address;
+  totalAmount: bigint;
+};
+
 /**
- * Validates that all payment items use the same currency
+ * Get the payment token address and total amount from the payment items
  */
-function getPaymentTokenAddress(paymentItems: Item[]): Address {
+function validateAndGetPaymentDetails(paymentItems: Item[]): PaymentDetails {
   if (paymentItems.length === 0) {
     throw new Error(
       "No payment item. Provide at least one payment item to get the payment token address.",
@@ -97,18 +101,17 @@ function getPaymentTokenAddress(paymentItems: Item[]): Address {
     );
   }
 
-  return uniqueTokens[0]!;
+  // Calculate total payment amount
+  const totalAmount = paymentItems.reduce((total, item) => total + item.amount, 0n);
+
+  return {
+    currencyAddress: uniqueTokens[0]!,
+    totalAmount,
+  };
 }
 
 /**
- * Calculates the total payment amount from all items
- */
-function getTotalPaymentAmount(items: Item[]): bigint {
-  return items.reduce((total, item) => total + item.amount, 0n);
-}
-
-/**
- * Handles NFT offers being fulfilled (someone accepting an offer)
+ * Handles NFT offers being fulfilled (seller accepting a buyer's offer)
  */
 async function handleOfferFulfilled(
   context: Context,
@@ -118,7 +121,7 @@ async function handleOfferFulfilled(
 ) {
   const { orderHash, offerer, recipient } = event.args;
 
-  // In an offer, the offerer is buying the NFT, recipient is selling
+  // In a fulfilled offer, the offerer is buying the NFT, recipient is selling
   const buyer = offerer;
   const seller = recipient;
 
@@ -126,19 +129,14 @@ async function handleOfferFulfilled(
   await upsertAccount(context, buyer);
   await upsertAccount(context, seller);
 
-  // Calculate total payment amount
-  const totalAmount = getTotalPaymentAmount(paymentItems);
-  const currencyAddress = getPaymentTokenAddress(paymentItems);
+  // Get payment details
+  const { currencyAddress, totalAmount } = validateAndGetPaymentDetails(paymentItems);
 
-  const contractAddress = nftItem.token as Address;
+  const contractAddress = nftItem.token;
   const tokenId = nftItem.identifier.toString();
 
   // Get Domain ID
-  const domainId = await lookupDomainId(context, contractAddress, tokenId);
-  if (!domainId) {
-    console.log("Domain ID not found for", contractAddress, tokenId);
-    return;
-  }
+  const domainId = getDomainIdByTokenId(config.namespace, contractAddress, tokenId);
 
   // Record the sale
   await context.db.insert(schema.nameSold).values({
@@ -147,18 +145,19 @@ async function handleOfferFulfilled(
     newOwnerId: buyer,
     currencyAddress: currencyAddress,
     chainId: context.chain.id,
+    logIndex: event.log.logIndex,
     orderHash: orderHash,
     price: totalAmount,
     contractAddress: contractAddress,
     tokenId: tokenId,
-    itemType: nftItem.itemType === ItemType.ERC721 ? "ERC721" : "ERC1155",
+    tokenType: nftItem.itemType === ItemType.ERC721 ? "ERC721" : "ERC1155",
     domainId: domainId,
     createdAt: event.block.timestamp,
   });
 }
 
 /**
- * Handles NFT listings being fulfilled (someone buying a listed item)
+ * Handles NFT listings being fulfilled (buyer accepting a seller's listing)
  */
 async function handleListingFulfilled(
   context: Context,
@@ -168,7 +167,7 @@ async function handleListingFulfilled(
 ) {
   const { orderHash, offerer, recipient } = event.args;
 
-  // In a listing, the offerer is selling the NFT, recipient is buying
+  // In a fulfilled listing, the offerer is selling the NFT, recipient is buying
   const seller = offerer;
   const buyer = recipient;
 
@@ -176,19 +175,14 @@ async function handleListingFulfilled(
   await upsertAccount(context, seller);
   await upsertAccount(context, buyer);
 
-  // Calculate total payment amount
-  const totalAmount = getTotalPaymentAmount(paymentItems);
-  const currencyAddress = getPaymentTokenAddress(paymentItems);
+  // Get payment details
+  const { currencyAddress, totalAmount } = validateAndGetPaymentDetails(paymentItems);
 
-  const contractAddress = nftItem.token as Address;
+  const contractAddress = nftItem.token;
   const tokenId = nftItem.identifier.toString();
 
   // Get domain ID
-  const domainId = await lookupDomainId(context, contractAddress, tokenId);
-  if (!domainId) {
-    console.log("Domain ID not found for", contractAddress, tokenId);
-    return;
-  }
+  const domainId = getDomainIdByTokenId(config.namespace, contractAddress, tokenId);
 
   // Record the sale
   await context.db.insert(schema.nameSold).values({
@@ -197,20 +191,25 @@ async function handleListingFulfilled(
     newOwnerId: buyer,
     currencyAddress: currencyAddress,
     chainId: context.chain.id,
+    logIndex: event.log.logIndex,
     orderHash: orderHash,
     price: totalAmount,
     contractAddress: contractAddress,
     tokenId: tokenId,
-    itemType: nftItem.itemType === ItemType.ERC721 ? "ERC721" : "ERC1155",
+    tokenType: nftItem.itemType === ItemType.ERC721 ? "ERC721" : "ERC1155",
     domainId: domainId,
     createdAt: event.block.timestamp,
   });
 }
 
 /**
- * Validates if an NFT item is supported
+ * Checks if the item is an ERC721 or ERC1155 item
+ * and if the token contract is a known token contract
  */
-function isIndexable(item: OfferItem | ConsiderationItem, context: Context): boolean {
+function isSupportedTokenTypeAndContract(
+  item: OfferItem | ConsiderationItem,
+  context: Context,
+): boolean {
   if (!item || !item.token) return false;
 
   const chainId = context.chain.id;
@@ -257,7 +256,7 @@ export async function handleOrderFulfilled({
   const { offer, consideration } = event.args;
 
   // Check if this is a listing (NFT in offer, payment in consideration)
-  const nftInOffer = offer.find((item) => isIndexable(item, context));
+  const nftInOffer = offer.find((item) => isSupportedTokenTypeAndContract(item, context));
   const paymentItemsInConsideration = findPaymentItemsInConsideration(consideration);
 
   if (nftInOffer && paymentItemsInConsideration.length > 0) {
@@ -267,17 +266,11 @@ export async function handleOrderFulfilled({
 
   // Check if this is an offer (payment in offer, NFT in consideration)
   const paymentItemsInOffer = findPaymentItemsInOffer(offer);
-  const nftInConsideration = consideration.find((item) => isIndexable(item, context));
+  const nftInConsideration = consideration.find((item) =>
+    isSupportedTokenTypeAndContract(item, context),
+  );
 
   if (paymentItemsInOffer.length > 0 && nftInConsideration) {
     await handleOfferFulfilled(context, event, nftInConsideration, paymentItemsInOffer);
-    return;
   }
-
-  console.log(
-    "Unsupported order type. Offer: ",
-    offer.map((item) => item.itemType),
-    "Consideration: ",
-    consideration.map((item) => item.itemType),
-  );
 }
