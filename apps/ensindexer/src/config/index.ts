@@ -1,11 +1,12 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerEnvironment } from "@/config/types";
 import { getRpcConfigsFromEnv } from "@/lib/lib-config";
+import { getPackageVersion } from "@/lib/version-info";
 
 // format the relevant environment variables into the shape of an ENSIndexerEnvironment
 const environment = {
   port: process.env.PORT,
-  ponderDatabaseSchema: process.env.DATABASE_SCHEMA,
+  databaseSchemaName: process.env.DATABASE_SCHEMA,
   databaseUrl: process.env.DATABASE_URL,
   namespace: process.env.NAMESPACE,
   plugins: process.env.PLUGINS,
@@ -20,6 +21,13 @@ const environment = {
     endBlock: process.env.END_BLOCK,
   },
   rpcConfigs: getRpcConfigsFromEnv(),
+  versionInfo: {
+    // TODO: replace hardcoded ENSRainbow version info in the next commit
+    ensRainbow: "0.31.0",
+    ensRainbowSchema: 2,
+    nodejs: process.versions.node,
+    ponder: getPackageVersion("ponder"),
+  },
 } satisfies ENSIndexerEnvironment;
 
 // build, validate, and export the ENSIndexerConfig

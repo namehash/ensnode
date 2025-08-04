@@ -265,7 +265,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
           }
 
           // create an un-cached publicClient
-          const publicClient = createPublicClient({ transport: http(rpcConfig.url) });
+          const publicClient = createPublicClient({ transport: http(rpcConfig.url.href) });
 
           // requireResolver() — validate behavior
           await withProtocolStepAsync(

@@ -10,7 +10,7 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   namespace: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
-  ponderDatabaseSchema: "test_schema",
+  databaseSchemaName: "test_schema",
   plugins: "subgraph",
   ensRainbowEndpointUrl: "https://api.ensrainbow.io",
   healReverseAddresses: "true",
@@ -24,6 +24,12 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     },
   },
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
+  versionInfo: {
+    nodejs: "22",
+    ponder: "0.11",
+    ensRainbow: "0.31.0",
+    ensRainbowSchema: 2,
+  },
 });
 
 // the current, mutable ENSIndexerConfig for tests
@@ -110,7 +116,7 @@ export function setChainConfig(
   updateMockConfig({
     rpcConfigs: {
       ...(currentMockConfig.rpcConfigs || {}),
-      [chainId]: { url, maxRequestsPerSecond },
+      [chainId]: { url: new URL(url), maxRequestsPerSecond },
     },
   });
 }

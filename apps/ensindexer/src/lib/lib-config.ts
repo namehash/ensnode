@@ -2,7 +2,7 @@ import type { ENSIndexerConfig, RpcConfigEnvironment } from "@/config/types";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 export const DEFAULT_RPC_RATE_LIMIT = 500;
-export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
+export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS = true;
@@ -56,7 +56,7 @@ export function prettyPrintConfig(config: ENSIndexerConfig) {
           chainId,
           {
             ...rpcConfig,
-            url: "*******",
+            url: new URL("*******", rpcConfig.url.hostname),
           },
         ]),
       ),

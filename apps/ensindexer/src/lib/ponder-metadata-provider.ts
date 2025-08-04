@@ -78,7 +78,7 @@ export const makePonderMetadataProvider = ({
    * @returns The Ponder build ID
    */
   const getPonderBuildId = async (): Promise<string> => {
-    const meta = await queryPonderMeta(config.ponderDatabaseSchema, db);
+    const meta = await queryPonderMeta(config.databaseSchemaName, db);
 
     return meta.build_id;
   };

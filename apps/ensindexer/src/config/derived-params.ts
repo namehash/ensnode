@@ -1,5 +1,39 @@
 import type { ENSIndexerConfig } from "@/config/types";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
+import { getPlugin } from "@/plugins";
+import { type IndexedChainIds, isSubgraphCompatible } from "@ensnode/ensnode-sdk";
+
+/**
+ * Derive `indexedChainIds` configuration parameter and include it in
+ * configuration.
+ *
+ * @param config partial configuration
+ * @returns extended configuration
+ */
+export const derive_indexedChainIds = <
+  CONFIG extends Pick<ENSIndexerConfig, "namespace" | "plugins">,
+>(
+  config: CONFIG,
+): CONFIG & { indexedChainIds: ENSIndexerConfig["indexedChainIds"] } => {
+  const indexedChainIds: IndexedChainIds = new Set();
+
+  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
+
+  for (const pluginName of config.plugins) {
+    const datasourceNames = getPlugin(pluginName).requiredDatasourceNames;
+
+    for (const datasourceName of datasourceNames) {
+      const { chain } = datasources[datasourceName];
+
+      indexedChainIds.add(chain.id);
+    }
+  }
+
+  return {
+    ...config,
+    indexedChainIds,
+  };
+};
 
 /**
  * Derived `isSubgraphCompatible` config param based on validated ENSIndexerConfig object.
@@ -12,17 +46,8 @@ export const derive_isSubgraphCompatible = <
 >(
   config: CONFIG,
 ): CONFIG & { isSubgraphCompatible: boolean } => {
-  // 1. only the subgraph plugin is active
-  const onlySubgraphPluginActivated =
-    config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
-
-  // 2. healReverseAddresses = false
-  // 3. indexAdditionalResolverRecords = false
-  const indexingBehaviorIsSubgraphCompatible =
-    !config.healReverseAddresses && !config.indexAdditionalResolverRecords;
-
   return {
     ...config,
-    isSubgraphCompatible: onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible,
+    isSubgraphCompatible: isSubgraphCompatible(config),
   };
 };

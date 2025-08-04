@@ -298,7 +298,7 @@ export function chainsConnectionConfig(
   return {
     [chainId.toString()]: {
       id: chainId,
-      rpc: rpcConfig.url,
+      rpc: rpcConfig.url.href,
       maxRequestsPerSecond: rpcConfig.maxRequestsPerSecond,
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
       ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
