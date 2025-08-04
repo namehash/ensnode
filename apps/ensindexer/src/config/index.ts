@@ -1,7 +1,12 @@
-import { buildConfigFromEnvironment } from "@/config/config.schema";
+import { EnsRainbowEndpointUrlSchema, buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerEnvironment } from "@/config/types";
 import { getRpcConfigsFromEnv } from "@/lib/lib-config";
-import { getPackageVersion } from "@/lib/version-info";
+import { getENSRainbowVersionInfo, getPackageVersion } from "@/lib/version-info";
+
+// Fetch ENSRainbow Version info
+const ensRainbowEndpointUrl = EnsRainbowEndpointUrlSchema.parse(process.env.ENSRAINBOW_URL);
+const { versionInfo: ensRainbowVersionInfo } =
+  await getENSRainbowVersionInfo(ensRainbowEndpointUrl);
 
 // format the relevant environment variables into the shape of an ENSIndexerEnvironment
 const environment = {
@@ -22,9 +27,8 @@ const environment = {
   },
   rpcConfigs: getRpcConfigsFromEnv(),
   versionInfo: {
-    // TODO: replace hardcoded ENSRainbow version info in the next commit
-    ensRainbow: "0.31.0",
-    ensRainbowSchema: 2,
+    ensRainbow: ensRainbowVersionInfo.version,
+    ensRainbowSchema: ensRainbowVersionInfo.schema_version,
     nodejs: process.versions.node,
     ponder: getPackageVersion("ponder"),
   },

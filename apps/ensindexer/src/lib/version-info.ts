@@ -8,6 +8,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getENSRainbowApiCLient } from "@/lib/ensraibow-api-client";
 
 /**
  * Get NPM package version.
@@ -55,4 +56,13 @@ export function getPackageVersion(packageName: string) {
 
     return "unknown";
   }
+}
+
+/**
+ * Get Version Info from ENSRainbow service.
+ */
+export async function getENSRainbowVersionInfo(ensRainbowEndpointUrl: URL) {
+  const ensRainbowApiClient = getENSRainbowApiCLient(ensRainbowEndpointUrl);
+
+  return ensRainbowApiClient.version();
 }
