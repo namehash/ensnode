@@ -5,9 +5,9 @@ import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
 import referralsPlugin from "./referrals/plugin";
 import reverseResolversPlugin from "./reverse-resolvers/plugin";
-import tokenScopePlugin from "./tokenscope/plugin";
 import subgraphPlugin from "./subgraph/plugin";
 import threednsPlugin from "./threedns/plugin";
+import tokenScopePlugin from "./tokenscope/plugin";
 
 export const ALL_PLUGINS = [
   subgraphPlugin,
