@@ -34,7 +34,7 @@ describe("ENSIndexer: Shared", () => {
     });
 
     it("can serialize Datetime into an ISO 8601 string representation", () => {
-      const datetime = new Date(2020, 1, 2, 3, 22, 59, 123);
+      const datetime = new Date(Date.UTC(2020, 1, 2, 2, 22, 59, 123));
 
       expect(serializeDatetime(datetime)).toBe("2020-02-02T02:22:59.123Z");
     });
@@ -105,7 +105,7 @@ describe("ENSIndexer: Shared", () => {
     });
 
     it("can deserialize Datetime from an ISO 8601 string representation", () => {
-      const resultDatetime = new Date(2020, 1, 2, 3, 22, 59, 123);
+      const resultDatetime = new Date(Date.UTC(2020, 1, 2, 2, 22, 59, 123));
 
       expect(deserializeDatetime("2020-02-02T02:22:59.123Z")).toStrictEqual(resultDatetime);
     });

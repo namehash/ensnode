@@ -118,7 +118,7 @@ describe("ENSIndexer: Shared", () => {
 
       it("can parse datetime values", () => {
         expect(makeDatetimeSchema().parse("2020-02-02T02:22:59.123Z")).toStrictEqual(
-          new Date(2020, 1, 2, 3, 22, 59, 123),
+          new Date(Date.UTC(2020, 1, 2, 2, 22, 59, 123)),
         );
 
         const errorMessage = "Datetime string must be a string in ISO 8601 format.";
