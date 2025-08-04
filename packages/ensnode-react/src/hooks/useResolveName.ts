@@ -1,6 +1,6 @@
 "use client";
 
-import type { ForwardResponse, RecordsSelection } from "@ensnode/ensnode-sdk";
+import type { ForwardResponse } from "@ensnode/ensnode-sdk";
 import type { ConfigParameter, UseQueryReturnType, UseResolveNameParameters } from "../types";
 import { createForwardResolutionQueryOptions, useENSNodeQuery } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
