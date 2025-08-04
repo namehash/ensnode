@@ -359,4 +359,4 @@ type NameResult = UseQueryResult<ForwardResponse>; // Same as UseResolveNameRetu
 
 ## Requirements
 
-Note: TanStack Query v5+ is used internally. Hook return types are TanStack Query's `UseQueryResult` for full ecosystem compatibility, but you don't need to interact with TanStack Query directly unless you want advanced customization.
+Note: TanStack Query v5+ is used internally. Hook return types are TanStack Query's `UseQueryResult` for full compatibility, but you don't need to interact with TanStack Query directly unless you want advanced customization.
