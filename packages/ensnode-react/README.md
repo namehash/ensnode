@@ -265,7 +265,7 @@ const { data } = useResolveAddress({
 });
 ```
 
-### Multiple Chain Resolution
+### Multichain Reverse Resolution
 
 Resolve names on different chains:
 
