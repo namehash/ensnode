@@ -59,7 +59,7 @@ function NameResolver() {
 
   return (
     <div>
-      <h3>Resolved Records for {data.records.name}</h3>
+      <h3>Resolved Records for vitalik.eth</h3>
       {data.records.addresses && (
         <p>ETH Address: {data.records.addresses["60"]}</p>
       )}
@@ -154,7 +154,6 @@ function useResolveName(
 const { data, isLoading, error, refetch } = useResolveName({
   name: "example.eth",
   selection: {
-    name: true,
     addresses: [60, 0], // ETH and BTC
     texts: ["avatar", "description", "url"],
   },
