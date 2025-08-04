@@ -48,7 +48,6 @@ function NameResolver() {
   const { data, isLoading, error } = useResolveName({
     name: "vitalik.eth",
     selection: {
-      name: true,
       addresses: [60], // ETH
       texts: ["avatar", "com.twitter"],
     },
@@ -332,12 +331,9 @@ function App() {
 ### Error Handling
 
 ```tsx
-const { data, error, isError } = useResolveName({ name: "invalid.eth" });
+const { data, error, isError } = useResolveName({ name: "vitalik.eth" });
 
 if (isError) {
-  if (error.message.includes("Name not found")) {
-    return <div>This name is not registered</div>;
-  }
   return <div>Failed to resolve: {error.message}</div>;
 }
 ```

@@ -40,25 +40,6 @@ describe("ENSNodeClient", () => {
   });
 
   describe("resolveName", () => {
-    it("should make correct API call for forward resolution", async () => {
-      const mockResponse = {
-        records: { name: "vitalik.eth" },
-      };
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
-
-      const client = new ENSNodeClient();
-      const result = await client.resolveName("vitalik.eth", { name: true });
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        new URL(`${DEFAULT_ENSNODE_API_URL}/forward/vitalik.eth?name=true`),
-      );
-      expect(result).toEqual(mockResponse);
-    });
-
     it("should handle address and text selections", async () => {
       const mockResponse = {
         records: {
