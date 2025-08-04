@@ -4,7 +4,7 @@ import type { CoinType, Name } from "./utils/index.js";
 /**
  * Default ENSNode API endpoint URL
  */
-export const DEFAULT_ENSNODE_API_URL = "https://api.mainnet.ensnode.io" as const;
+export const DEFAULT_ENSNODE_API_URL = "https://api.alpha.ensnode.io" as const;
 
 /**
  * Configuration options for ENSNode API client

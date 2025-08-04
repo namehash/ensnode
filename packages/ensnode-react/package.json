@@ -2,7 +2,7 @@
   "name": "@ensnode/ensnode-react",
   "version": "0.1.0",
   "type": "module",
-  "description": "React hooks and provider for ENSNode resolution API",
+  "description": "React hooks and providers for ENSNode",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,8 +13,7 @@
   "keywords": [
     "ENS",
     "ENSNode",
-    "React",
-    "hooks"
+    "React"
   ],
   "files": [
     "dist"

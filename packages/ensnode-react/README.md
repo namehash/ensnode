@@ -1,6 +1,6 @@
 # @ensnode/ensnode-react
 
-React hooks and provider for ENSNode API. This package provides a React-friendly interface to the ENSNode SDK with automatic caching, loading states, and error handling. **TanStack Query is handled automatically** - no setup required unless you want custom configuration.
+React hooks and providers for the ENSNode API. This package provides a React-friendly interface to the ENSNode SDK with automatic caching, loading states, and error handling. **TanStack Query is handled automatically** - no setup required unless you want custom configuration.
 
 Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://ensnode.io/docs/).
 
@@ -267,7 +267,7 @@ const { data } = useResolveAddress({
 
 ### Multichain Reverse Resolution
 
-Resolve names on different chains:
+Resolve primary names for an address on different chains:
 
 ```tsx
 function MultiChainResolver({ address }: { address: string }) {

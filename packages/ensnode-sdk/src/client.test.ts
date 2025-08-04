@@ -40,7 +40,7 @@ describe("ENSNodeClient", () => {
   });
 
   describe("resolveName", () => {
-    it("should make correct API call for basic name resolution", async () => {
+    it("should make correct API call for forward resolution", async () => {
       const mockResponse = {
         records: { name: "vitalik.eth" },
       };
