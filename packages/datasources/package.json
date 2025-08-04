@@ -46,6 +46,7 @@
     "viem": "catalog:"
   },
   "dependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@ponder/utils": "catalog:"
   }
 }

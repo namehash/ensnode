@@ -63,3 +63,16 @@ export interface Blockrange<BlockType = BlockNumber> {
  * Guaranteed to be a non-negative integer.
  */
 export type Duration = number;
+
+/**
+ * A PluginName is a unique id for a 'plugin': we use the notion of 'plugins' to describe bundles
+ * of indexing logic.
+ */
+export enum PluginName {
+  Subgraph = "subgraph",
+  Basenames = "basenames",
+  Lineanames = "lineanames",
+  ThreeDNS = "threedns",
+  ReverseResolvers = "reverse-resolvers",
+  Referrals = "referrals",
+}
