@@ -250,6 +250,8 @@ const queryClient = new QueryClient({
 </QueryClientProvider>;
 ```
 
+TanStack Query v5+ is used internally. Hook return types are TanStack Query's `UseQueryResult` for full compatibility, but you don't need to interact with TanStack Query directly unless you want advanced customization.
+
 ### Conditional Queries
 
 You can conditionally enable/disble queries:
@@ -296,7 +298,7 @@ const mainnetConfig = createConfig({
 
 // Testnet provider
 const testnetConfig = createConfig({
-  url: "https://api.testnet.ensnode.io",
+  url: "https://api.alpha-sepolia.ensnode.io",
 });
 
 function MainnetData() {
@@ -356,7 +358,3 @@ import type {
 import type { UseQueryResult } from "@tanstack/react-query";
 type NameResult = UseQueryResult<ForwardResponse>; // Same as UseResolveNameReturnType
 ```
-
-## Requirements
-
-Note: TanStack Query v5+ is used internally. Hook return types are TanStack Query's `UseQueryResult` for full compatibility, but you don't need to interact with TanStack Query directly unless you want advanced customization.
