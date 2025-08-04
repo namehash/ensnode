@@ -182,12 +182,6 @@ export async function fetchChainsBlockRefs(
       } satisfies PonderBlockRef;
     };
 
-    const asBlockRef = (block: { number: bigint; timestamp: bigint }) =>
-      ({
-        number: Number(block.number),
-        timestamp: Number(block.timestamp),
-      }) satisfies PonderBlockRef;
-
     const [startBlockRef, endBlockRef, backfillEndBlockRef] = await Promise.all([
       fetchBlock(startBlock),
       endBlock ? fetchBlock(endBlock) : null,

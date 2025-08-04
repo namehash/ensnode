@@ -48,7 +48,7 @@ app.get("/indexing-status", async (c) => {
     indexedChainsBlockRefs,
   ]);
 
-  // Validate Ponder metadata and enforce invariants, then build IndexingStatus object.q
+  // Validate Ponder metadata and enforce invariants, then build IndexingStatus object.
   const indexingStatus = await buildIndexingStatus({
     metrics,
     status,

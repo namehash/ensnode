@@ -24,13 +24,11 @@ export const indexedChainNames = Object.keys(ponderConfig.chains) as [string, ..
  */
 export const indexedChainsBlockrange = getChainsBlockrange(ponderConfig);
 
-type BuildIndexingStatusFromPonderMetadata = PonderMetadata;
-
 /**
  * Build {@link ENSIndexerIndexingStatus} object from Ponder metadata
  */
 export async function buildIndexingStatus(
-  ponderMetadata: BuildIndexingStatusFromPonderMetadata,
+  ponderMetadata: PonderMetadata,
 ): Promise<ENSIndexerIndexingStatus> {
   const { chainsBlockRefs, metrics, status } = ponderMetadata;
 
@@ -61,11 +59,14 @@ export async function buildIndexingStatus(
       },
     } satisfies PartialPonderChainMetrics;
 
-    const { id: chainId, block } = status[chainName]!;
+    const chainStatus = status[chainName];
 
     chainsStatuses[chainName] = {
-      chainId,
-      block,
+      chainId: chainStatus?.id,
+      block: {
+        number: chainStatus?.block.number,
+        timestamp: chainStatus?.block.timestamp,
+      },
     } satisfies PartialPonderChainStatus;
   }
 
