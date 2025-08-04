@@ -17,6 +17,7 @@ const environment = {
   plugins: process.env.PLUGINS,
   ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
   ensNodePublicUrl: process.env.ENSNODE_PUBLIC_URL,
+  ensIndexerPrivateUrl: process.env.ENSINDEXER_PRIVATE_URL,
   ensAdminUrl: process.env.ENSADMIN_URL,
   healReverseAddresses: process.env.HEAL_REVERSE_ADDRESSES,
   indexAdditionalResolverRecords: process.env.INDEX_ADDITIONAL_RESOLVER_RECORDS,

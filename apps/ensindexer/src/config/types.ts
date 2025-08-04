@@ -165,6 +165,18 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
   databaseUrl: string | undefined;
 
   /**
+   * The privately accessible endpoint of the ENSIndexer instance (ex: http://localhost:42069).
+   *
+   * This URL is to fetch the status and metrics from the ENSIndexer. For ENSIndexer instances,
+   * this will typically be set to http://localhost:{port}. For ENSApi instances, this should
+   * be set to the private network URL of the corresponding ENSIndexer instance.
+   *
+   * Invariants:
+   * - The URL must be a valid URL (localhost urls are allowed)
+   */
+  ensIndexerPrivateUrl: URL;
+
+  /**
    * Constrains the global blockrange for indexing, useful for testing purposes.
    *
    * This is strictly designed for testing and development and its usage in production will result
@@ -221,6 +233,7 @@ export interface ENSIndexerEnvironment {
   plugins: string | undefined;
   ensRainbowEndpointUrl: string | undefined;
   ensNodePublicUrl: string | undefined;
+  ensIndexerPrivateUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;
