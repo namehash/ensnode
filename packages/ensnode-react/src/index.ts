@@ -26,6 +26,8 @@ export type {
   UseQueryReturnType,
 } from "./types";
 
+export type { ForwardResolutionSelection } from "@ensnode/ensnode-sdk";
+
 export {
   queryKeys,
   createForwardResolutionQueryOptions,
