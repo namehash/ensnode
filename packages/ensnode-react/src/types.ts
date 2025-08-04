@@ -31,7 +31,7 @@ export interface UseResolveNameParameters
   /** The ENS name to resolve */
   name?: string;
   /** Selection criteria for what records to resolve */
-  selection?: import("@ensnode/ensnode-sdk").RecordsSelection;
+  selection?: import("@ensnode/ensnode-sdk").ForwardResolutionSelection;
 }
 
 /**

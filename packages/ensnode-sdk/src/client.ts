@@ -17,11 +17,9 @@ export interface ClientOptions {
 }
 
 /**
- * Selection criteria for what records to resolve
+ * Selection criteria for forward resolution (name to records)
  */
-export interface RecordsSelection {
-  /** Whether to include the canonical name */
-  name?: boolean;
+export interface ForwardResolutionSelection {
   /** Array of coin types to resolve addresses for */
   addresses?: CoinType[];
   /** Array of text record keys to resolve */
@@ -32,7 +30,7 @@ export interface RecordsSelection {
  * Resolved records response
  */
 export interface Records {
-  /** The canonical name if requested */
+  /** The canonical name (only available in reverse resolution) */
   name?: string;
   /** Resolved addresses by coin type */
   addresses?: Record<string, string>;
@@ -76,7 +74,7 @@ export interface Client {
   /**
    * Resolve an ENS name to records (forward resolution)
    */
-  resolveName(name: Name, selection?: RecordsSelection): Promise<ForwardResponse>;
+  resolveName(name: Name, selection?: ForwardResolutionSelection): Promise<ForwardResponse>;
 
   /**
    * Resolve an address to its primary name (reverse resolution)
@@ -159,20 +157,18 @@ export class ENSNodeClient implements Client {
    * @example
    * ```typescript
    * const result = await client.resolveName("vitalik.eth", {
-   *   name: true,
    *   addresses: [60, 0],
    *   texts: ["avatar", "com.twitter"]
    * });
    * ```
    */
-  async resolveName(name: Name, selection: RecordsSelection = {}): Promise<ForwardResponse> {
+  async resolveName(
+    name: Name,
+    selection: ForwardResolutionSelection = {},
+  ): Promise<ForwardResponse> {
     const url = new URL(`/forward/${encodeURIComponent(name)}`, this.options.endpointUrl);
 
     // Add query parameters based on selection
-    if (selection.name) {
-      url.searchParams.set("name", "true");
-    }
-
     if (selection.addresses && selection.addresses.length > 0) {
       url.searchParams.set("addresses", selection.addresses.join(","));
     }

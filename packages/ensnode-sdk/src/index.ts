@@ -2,10 +2,9 @@ export * from "./utils";
 export * from "./tracing";
 export * from "./client";
 
-// Re-export commonly used types for convenience
 export type {
   ClientOptions,
-  RecordsSelection,
+  ForwardResolutionSelection,
   Records,
   BaseResponse,
   ForwardResponse,

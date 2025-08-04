@@ -2,8 +2,8 @@
 
 import {
   ENSNodeClient,
+  type ForwardResolutionSelection,
   type ForwardResponse,
-  type RecordsSelection,
   type ReverseResponse,
 } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
@@ -31,7 +31,7 @@ import type { ENSNodeConfig, UseQueryReturnType } from "../types";
 export const queryKeys = {
   all: (endpointUrl: string) => ["ensnode", endpointUrl] as const,
   resolutions: (endpointUrl: string) => [...queryKeys.all(endpointUrl), "resolution"] as const,
-  forward: (endpointUrl: string, name: string, selection?: RecordsSelection) =>
+  forward: (endpointUrl: string, name: string, selection?: ForwardResolutionSelection) =>
     [...queryKeys.resolutions(endpointUrl), "forward", name, selection] as const,
   reverse: (endpointUrl: string, address: string, chainId?: number) =>
     [...queryKeys.resolutions(endpointUrl), "reverse", address, chainId] as const,
@@ -43,7 +43,7 @@ export const queryKeys = {
 export function createForwardResolutionQueryOptions(
   config: ENSNodeConfig,
   name: string,
-  selection?: RecordsSelection,
+  selection?: ForwardResolutionSelection,
 ) {
   return {
     queryKey: queryKeys.forward(config.client.endpointUrl.href, name, selection),

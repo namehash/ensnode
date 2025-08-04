@@ -79,7 +79,6 @@ const client = new ENSNodeClient({
 
 // Resolve name
 const resolution = await client.resolveName("vitalik.eth", {
-  name: true,
   addresses: [60],
   texts: ["avatar", "com.twitter"],
 });
