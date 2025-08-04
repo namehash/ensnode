@@ -2,9 +2,9 @@
 
 import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { createElement, useMemo } from "react";
+import { createElement, useCallback, useMemo, useState } from "react";
 
-import { ENSNodeContext } from "./context";
+import { ConnectionContext, type ConnectionContextState, ENSNodeContext } from "./context";
 import type { ENSNodeConfig } from "./types";
 
 export interface ENSNodeProviderProps {
@@ -20,23 +20,85 @@ export interface ENSNodeProviderProps {
    * Only used when queryClient is not provided.
    */
   queryClientOptions?: ConstructorParameters<typeof QueryClient>[0];
+  /**
+   * Enable connection management. When enabled, the provider will automatically
+   * switch endpoints when connections are changed via useConnections.
+   */
+  enableConnectionManagement?: boolean;
+  /**
+   * Initial connection URL when connection management is enabled.
+   * Defaults to the config's endpoint URL.
+   */
+  initialConnectionUrl?: string;
 }
 
 function ENSNodeInternalProvider({
   children,
   config,
+  enableConnectionManagement = false,
+  initialConnectionUrl,
 }: {
   children: React.ReactNode;
   config: ENSNodeConfig;
+  enableConnectionManagement?: boolean;
+  initialConnectionUrl?: string;
 }) {
-  // Memoize the config to prevent unnecessary re-renders
-  const memoizedConfig = useMemo(() => config, [config]);
+  // State for connection management
+  const [currentUrl, setCurrentUrlState] = useState(
+    () => initialConnectionUrl || config.client.endpointUrl.toString(),
+  );
+
+  // Callback to update current URL
+  const setCurrentUrl = useCallback((url: string) => {
+    setCurrentUrlState(url);
+  }, []);
+
+  // Create dynamic config based on current connection
+  const memoizedConfig = useMemo(() => {
+    if (!enableConnectionManagement || currentUrl === config.client.endpointUrl.toString()) {
+      return config;
+    }
+
+    // Create new config with different endpoint
+    return {
+      client: {
+        ...config.client,
+        endpointUrl: new URL(currentUrl),
+      },
+    };
+  }, [config, enableConnectionManagement, currentUrl]);
+
+  // Connection context value
+  const connectionContextValue: ConnectionContextState = useMemo(
+    () => ({
+      currentUrl,
+      setCurrentUrl,
+      isConnectionManaged: enableConnectionManagement,
+    }),
+    [currentUrl, setCurrentUrl, enableConnectionManagement],
+  );
+
+  // Wrap with connection context if connection management is enabled
+  if (enableConnectionManagement) {
+    return createElement(
+      ConnectionContext.Provider,
+      { value: connectionContextValue },
+      createElement(ENSNodeContext.Provider, { value: memoizedConfig }, children),
+    );
+  }
 
   return createElement(ENSNodeContext.Provider, { value: memoizedConfig }, children);
 }
 
 export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProviderProps>) {
-  const { children, config, queryClient, queryClientOptions } = parameters;
+  const {
+    children,
+    config,
+    queryClient,
+    queryClientOptions,
+    enableConnectionManagement,
+    initialConnectionUrl,
+  } = parameters;
 
   // Check if we're already inside a QueryClientProvider
   let hasExistingQueryClient = false;
@@ -55,12 +117,22 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
           "Either remove the queryClient prop to use auto-managed setup, or wrap with QueryClientProvider.",
       );
     }
-    return createElement(ENSNodeInternalProvider, { config, children });
+    return createElement(ENSNodeInternalProvider, {
+      config,
+      children,
+      enableConnectionManagement,
+      initialConnectionUrl,
+    });
   }
 
   // If already inside a QueryClientProvider, just use that
   if (hasExistingQueryClient) {
-    return createElement(ENSNodeInternalProvider, { config, children });
+    return createElement(ENSNodeInternalProvider, {
+      config,
+      children,
+      enableConnectionManagement,
+      initialConnectionUrl,
+    });
   }
 
   // Create our own QueryClient and QueryClientProvider
@@ -82,7 +154,12 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
   return createElement(
     QueryClientProvider,
     { client: defaultQueryClient },
-    createElement(ENSNodeInternalProvider, { config, children }),
+    createElement(ENSNodeInternalProvider, {
+      config,
+      children,
+      enableConnectionManagement,
+      initialConnectionUrl,
+    }),
   );
 }
 
