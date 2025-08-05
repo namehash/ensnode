@@ -1,24 +1,23 @@
 "use client";
 
-import type { ForwardResponse } from "@ensnode/ensnode-sdk";
-import type { ConfigParameter, UseQueryReturnType, UseResolveNameParameters } from "../types";
-import { createForwardResolutionQueryOptions, useENSNodeQuery } from "../utils/query";
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { useQuery } from "@tanstack/react-query";
+
+import type { ConfigParameter, UseForwardResolutionParameters } from "../types";
+import { createForwardResolutionQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 
-export type UseResolveNameReturnType = UseQueryReturnType<ForwardResponse>;
-
 /**
- * Hook to resolve an ENS name to records (forward resolution)
+ * Forward Resolution: Resolve records for an ENS name.
  *
- * @param parameters - Configuration for the name resolution
+ * @param parameters - Configuration for the ENS name resolution
  * @returns Query result with resolved records
  *
  * @example
  * ```typescript
- * const { data, isLoading, error } = useResolveName({
+ * const { data, isLoading, error } = useForwardResolution({
  *   name: "vitalik.eth",
  *   selection: {
- *     name: true,
  *     addresses: [60],
  *     texts: ["avatar", "com.twitter"]
  *   }
@@ -31,9 +30,9 @@ export type UseResolveNameReturnType = UseQueryReturnType<ForwardResponse>;
  * }
  * ```
  */
-export function useResolveName(
-  parameters: UseResolveNameParameters & ConfigParameter = {},
-): UseResolveNameReturnType {
+export function useForwardResolution<SELECTION extends ResolverRecordsSelection>(
+  parameters: UseForwardResolutionParameters<SELECTION> & ConfigParameter,
+) {
   const { name, selection, query = {} } = parameters;
   const config = useENSNodeConfig(parameters);
 
@@ -47,5 +46,5 @@ export function useResolveName(
     enabled: Boolean(name && (query.enabled ?? queryOptions.enabled)),
   };
 
-  return useENSNodeQuery(finalOptions);
+  return useQuery(finalOptions);
 }

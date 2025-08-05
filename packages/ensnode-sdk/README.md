@@ -62,8 +62,7 @@ Resolves an address to its primary name (reverse resolution).
 
 ```typescript
 const client = new ENSNodeClient({
-  endpointUrl: new URL("https://custom-api.ensnode.io"),
-  debug: true,
+  url: new URL("https://custom-api.ensnode.io"),
 });
 ```
 
@@ -73,8 +72,7 @@ const client = new ENSNodeClient({
 import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 
 const client = new ENSNodeClient({
-  endpointUrl: new URL("https://api.mainnet.ensnode.io"),
-  debug: false,
+  url: new URL("https://api.mainnet.ensnode.io"),
 });
 
 // Resolve name

@@ -1,5 +1,13 @@
-import type { ClientOptions } from "@ensnode/ensnode-sdk";
-import type { QueryObserverOptions, UseQueryResult } from "@tanstack/react-query";
+import type {
+  ClientOptions,
+  ForwardResolutionRequest,
+  ForwardResolutionResponse,
+  ResolverRecordsSelection,
+  ReverseResolutionRequest,
+  ReverseResolutionResponse,
+} from "@ensnode/ensnode-sdk";
+
+import type { QueryObserverOptions } from "@tanstack/react-query";
 
 /**
  * Configuration options for the ENSNode provider
@@ -24,28 +32,15 @@ export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> 
 }
 
 /**
- * Parameters for the useResolveName hook
+ * Parameters for the useForwardResolution hook
  */
-export interface UseResolveNameParameters
-  extends QueryParameter<import("@ensnode/ensnode-sdk").ForwardResponse> {
-  /** The ENS name to resolve */
-  name?: string;
-  /** Selection criteria for what records to resolve */
-  selection?: import("@ensnode/ensnode-sdk").ForwardResolutionSelection;
-}
+export interface UseForwardResolutionParameters<SELECTION extends ResolverRecordsSelection>
+  extends ForwardResolutionRequest<SELECTION>,
+    QueryParameter<ForwardResolutionResponse<SELECTION>> {}
 
 /**
- * Parameters for the useResolveAddress hook
+ * Parameters for the useReverseResolution hook
  */
-export interface UseResolveAddressParameters
-  extends QueryParameter<import("@ensnode/ensnode-sdk").ReverseResponse> {
-  /** The address to resolve */
-  address?: string;
-  /** Optional chain ID for multichain resolution */
-  chainId?: number;
-}
-
-/**
- * Return type for query hooks (re-export of TanStack Query's UseQueryResult)
- */
-export type UseQueryReturnType<TData = unknown, TError = Error> = UseQueryResult<TData, TError>;
+export interface UseReverseResolutionParameters
+  extends ReverseResolutionRequest,
+    QueryParameter<ReverseResolutionResponse> {}

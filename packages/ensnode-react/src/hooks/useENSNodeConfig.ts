@@ -18,13 +18,13 @@ export function useENSNodeConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
   const { config } = parameters;
 
   // Use provided config or fall back to context
-  const finalConfig = config ?? contextConfig;
+  const resolvedConfig = config ?? contextConfig;
 
-  if (!finalConfig) {
+  if (!resolvedConfig) {
     throw new Error(
       "useENSNodeConfig must be used within an ENSNodeProvider or you must pass a config parameter",
     );
   }
 
-  return finalConfig as TConfig;
+  return resolvedConfig as TConfig;
 }

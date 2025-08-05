@@ -1,9 +1,8 @@
-import { Name } from "@ensnode/ensnode-sdk";
+import { Name, ResolverRecordsResponse, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { Address, isAddress } from "viem";
 
 import { resolveForward } from "@/api/lib/forward-resolution";
-import { makeEmptyResolverRecordsResponse } from "@/api/lib/resolver-records-response";
-import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
+import { makeEmptyResolverRecordsResponse } from "@/api/lib/make-records-response";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
 
 /**
@@ -18,7 +17,7 @@ import { resolveReverse } from "@/api/lib/reverse-resolution";
 export async function resolveAutomatic<SELECTION extends ResolverRecordsSelection>(
   addressOrName: Address | Name,
   selection: SELECTION,
-) {
+): Promise<ResolverRecordsResponse<SELECTION>> {
   // resolve name if necessary
   let name: Name | null;
   if (isAddress(addressOrName)) {
@@ -32,5 +31,5 @@ export async function resolveAutomatic<SELECTION extends ResolverRecordsSelectio
   if (!name) return makeEmptyResolverRecordsResponse(selection);
 
   // otherwise, perform forward resolution as normal
-  return resolveForward(name, selection);
+  return await resolveForward(name, selection);
 }

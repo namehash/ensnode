@@ -1,4 +1,5 @@
-import type { Name, Node } from "@ensnode/ensnode-sdk";
+import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
+import type { Name, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
   type Address,
@@ -17,8 +18,6 @@ import {
 import { packetToBytes } from "viem/ens";
 
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
-import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
-import type { ResolverRecordsSelection } from "./resolver-records-selection";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 

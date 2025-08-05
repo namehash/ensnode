@@ -1,4 +1,10 @@
-import { CoinType, Name, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import {
+  CoinType,
+  ForwardResolutionResponse,
+  Name,
+  ResolverRecordsSelection,
+  ReverseResolutionResponse,
+} from "@ensnode/ensnode-sdk";
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
@@ -47,12 +53,15 @@ app.get("/forward/:name", async (c) => {
       return c.json({ error: "name parameter is required" }, 400);
     }
 
+    // TODO: default selection if none in query
     const selection = buildSelectionFromQueryParams(c);
 
     const { result: records, trace } = await captureTrace(() => resolveForward(name, selection));
 
-    const debug = !!c.req.param("debug");
-    return c.json({ records, ...(debug && { trace }) });
+    const showTrace = !!c.req.param("trace");
+    return c.json({ records, ...(showTrace && { trace }) } as ForwardResolutionResponse<
+      typeof selection
+    >);
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
@@ -76,12 +85,13 @@ app.get("/reverse/:address", async (c) => {
       return c.json({ error: "address parameter is required" }, 400);
     }
 
+    // TODO: _require_ chain Id ?
     const chainId = c.req.query("chainId") ? Number(c.req.query("chainId")) : 1;
 
     const { result: records, trace } = await captureTrace(() => resolveReverse(address, chainId));
 
-    const debug = !!c.req.query("debug");
-    return c.json({ records, ...(debug && { trace }) });
+    const showTrace = !!c.req.query("trace");
+    return c.json({ records, ...(showTrace && { trace }) } as ReverseResolutionResponse);
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
@@ -112,8 +122,8 @@ app.get("/auto/:addressOrName", async (c) => {
       resolveAutomatic(addressOrName, selection),
     );
 
-    const debug = !!c.req.query("debug");
-    return c.json({ records, ...(debug && { trace }) });
+    const showTrace = !!c.req.query("trace");
+    return c.json({ records, ...(showTrace && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);

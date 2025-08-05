@@ -5,7 +5,7 @@ export * from "./client";
 export * from "./resolution";
 export * from "./api";
 
-export type {
-  ClientOptions,
+export {
+  type ClientOptions,
   ENSNodeClient,
 } from "./client";

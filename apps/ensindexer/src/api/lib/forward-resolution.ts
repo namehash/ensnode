@@ -4,6 +4,8 @@ import {
   ForwardResolutionProtocolStep,
   type Name,
   Node,
+  ResolverRecordsResponse,
+  ResolverRecordsSelection,
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
@@ -15,6 +17,12 @@ import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
 import { findResolver } from "@/api/lib/find-resolver";
 import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
 import { getKnownOnchainStaticResolverAddresses } from "@/api/lib/known-onchain-static-resolver";
+import {
+  IndexedResolverRecords,
+  makeEmptyResolverRecordsResponse,
+  makeRecordsResponseFromIndexedRecords,
+  makeRecordsResponseFromResolveResults,
+} from "@/api/lib/make-records-response";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
 import {
   executeResolveCalls,
@@ -22,14 +30,6 @@ import {
   makeResolveCalls,
 } from "@/api/lib/resolve-calls-and-results";
 import { areResolverRecordsIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
-import {
-  IndexedResolverRecords,
-  ResolverRecordsResponse,
-  makeEmptyResolverRecordsResponse,
-  makeRecordsResponseFromIndexedRecords,
-  makeRecordsResponseFromResolveResults,
-} from "@/api/lib/resolver-records-response";
-import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import config from "@/config";
 import { withActiveSpanAsync, withSpan, withSpanAsync } from "@/lib/auto-span";
 import { makeResolverId } from "@/lib/ids";

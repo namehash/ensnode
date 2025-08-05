@@ -10,11 +10,13 @@ import type { ENSNodeConfig } from "./types";
 export interface ENSNodeProviderProps {
   /** ENSNode configuration */
   config: ENSNodeConfig;
+
   /**
    * Optional QueryClient instance. If provided, you must wrap your app with QueryClientProvider yourself.
    * If not provided, ENSNodeProvider will create and manage its own QueryClient internally.
    */
   queryClient?: QueryClient;
+
   /**
    * Custom query client options when auto-creating a QueryClient.
    * Only used when queryClient is not provided.
@@ -93,15 +95,12 @@ export function createConfig(options?: {
   url?: string | URL;
   debug?: boolean;
 }): ENSNodeConfig {
-  const endpointUrl = options?.url
-    ? new URL(options.url)
-    : ENSNodeClient.defaultOptions().endpointUrl;
+  const url = options?.url ? new URL(options.url) : ENSNodeClient.defaultOptions().url;
 
   return {
     client: {
       ...ENSNodeClient.defaultOptions(),
-      endpointUrl,
-      debug: options?.debug,
+      url,
     },
   };
 }

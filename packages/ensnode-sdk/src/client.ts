@@ -70,7 +70,7 @@ export class ENSNodeClient {
    * Forward Resolution: Resolve records for an ENS name.
    *
    * @param name The ENS Name whose records to resolve
-   * @param selection Optional selection of what records to resolve
+   * @param selection Optional selection of Resolver records
    * @returns ForwardResolutionResponse<SELECTION>
    * @throws If the request fails or the ENSNode API returns an error response
    *
@@ -118,7 +118,8 @@ export class ENSNodeClient {
       throw new Error(`Forward Resolution Failed: ${error.error}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    return data as ForwardResolutionResponse<SELECTION>;
   }
 
   /**
@@ -162,6 +163,7 @@ export class ENSNodeClient {
       throw new Error(`Reverse Resolution Failed: ${error.error}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    return data as ReverseResolutionResponse;
   }
 }

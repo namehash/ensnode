@@ -1,11 +1,9 @@
 "use client";
 
-import type { ReverseResponse } from "@ensnode/ensnode-sdk";
-import type { ConfigParameter, UseQueryReturnType, UseResolveAddressParameters } from "../types";
-import { createReverseResolutionQueryOptions, useENSNodeQuery } from "../utils/query";
+import { useQuery } from "@tanstack/react-query";
+import type { ConfigParameter, UseReverseResolutionParameters } from "../types";
+import { createReverseResolutionQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
-
-export type UseResolveAddressReturnType = UseQueryReturnType<ReverseResponse>;
 
 /**
  * Hook to resolve an address to its primary name (reverse resolution)
@@ -15,7 +13,7 @@ export type UseResolveAddressReturnType = UseQueryReturnType<ReverseResponse>;
  *
  * @example
  * ```typescript
- * const { data, isLoading, error } = useResolveAddress({
+ * const { data, isLoading, error } = useReverseResolution({
  *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
  *   chainId: 1
  * });
@@ -30,20 +28,18 @@ export type UseResolveAddressReturnType = UseQueryReturnType<ReverseResponse>;
  * @example
  * ```typescript
  * // Resolve on different chains
- * const mainnetName = useResolveAddress({
+ * const mainnetName = useReverseResolution({
  *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
- *   chainId: 1 // Ethereum mainnet
+ *   chainId: 1 // Ethereum Mainnet
  * });
  *
- * const optimismName = useResolveAddress({
+ * const optimismName = useReverseResolution({
  *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
  *   chainId: 10 // Optimism
  * });
  * ```
  */
-export function useResolveAddress(
-  parameters: UseResolveAddressParameters & ConfigParameter = {},
-): UseResolveAddressReturnType {
+export function useReverseResolution(parameters: UseReverseResolutionParameters & ConfigParameter) {
   const { address, chainId, query = {} } = parameters;
   const config = useENSNodeConfig(parameters);
 
@@ -57,5 +53,5 @@ export function useResolveAddress(
     enabled: Boolean(address && (query.enabled ?? queryOptions.enabled)),
   };
 
-  return useENSNodeQuery(finalOptions);
+  return useQuery(finalOptions);
 }

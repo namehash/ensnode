@@ -1,17 +1,24 @@
 import type {
+  ForwardResolutionArgs,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
+  ReverseResolutionArgs,
   ReverseResolutionRecordsResponse,
 } from "../resolution";
 import type { ProtocolTrace } from "../tracing";
 
 /**
- * API error response
+ * API Error Response Type
  */
 export interface ErrorResponse {
   error: string;
-  code?: string;
-  details?: Record<string, unknown>;
+  // TODO: the following?
+  // code?: string;
+  // details?: Record<string, unknown>;
+}
+
+interface TraceableRequest {
+  trace?: boolean;
 }
 
 interface TraceableResponse {
@@ -19,7 +26,14 @@ interface TraceableResponse {
 }
 
 /**
- * Forward Resolution Response
+ * Forward Resolution Request Type
+ */
+export interface ForwardResolutionRequest<SELECTION extends ResolverRecordsSelection>
+  extends ForwardResolutionArgs<SELECTION>,
+    TraceableRequest {}
+
+/**
+ * Forward Resolution Response Type
  */
 export interface ForwardResolutionResponse<SELECTION extends ResolverRecordsSelection>
   extends TraceableResponse {
@@ -27,7 +41,12 @@ export interface ForwardResolutionResponse<SELECTION extends ResolverRecordsSele
 }
 
 /**
- * Reverse Resolution Response
+ * Reverse Resolution Request Type
+ */
+export interface ReverseResolutionRequest extends ReverseResolutionArgs, TraceableRequest {}
+
+/**
+ * Reverse Resolution Response Type
  */
 export interface ReverseResolutionResponse extends TraceableResponse {
   records: ReverseResolutionRecordsResponse;
