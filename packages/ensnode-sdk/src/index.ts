@@ -1,4 +1,5 @@
-export * from "./utils";
+export * from "./ens";
+export * from "./shared";
 export * from "./tracing";
 export * from "./client";
 
