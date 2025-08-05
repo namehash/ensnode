@@ -19,6 +19,13 @@ export type BlockNumber = number;
 export type Datetime = Date;
 
 /**
+ * Unix timestamp value
+ *
+ * Guaranteed to be an integer.
+ */
+export type UnixTimestamp = number;
+
+/**
  * Represents a URL that is used for RPC endpoints.
  *
  * Invariants:
@@ -34,12 +41,12 @@ export type RpcUrl = URL;
  * We use parameter types to maintain fields layout and documentation across
  * the domain model and its serialized counterpart.
  */
-export interface BlockRef<DatetimeType = Datetime> {
+export interface BlockRef {
   /** Block number (height) */
   number: BlockNumber;
 
-  /** Block creation datetime */
-  createdAt: DatetimeType;
+  /** Block timestamp */
+  timestamp: UnixTimestamp;
 }
 
 /**
