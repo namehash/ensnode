@@ -84,7 +84,7 @@ export interface ENSIndexerPublicConfig<URLType = URL, IndexedChainIdsType = Ind
    * Invariant:
    * - The URL must be a valid URL. localhost urls are allowed (and expected).
    */
-  ensRainbowEndpointUrl: URLType;
+  ensRainbowUrl: URLType;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the

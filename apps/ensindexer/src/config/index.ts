@@ -1,12 +1,11 @@
-import { EnsRainbowEndpointUrlSchema, buildConfigFromEnvironment } from "@/config/config.schema";
+import { EnsRainbowUrlSchema, buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerEnvironment } from "@/config/types";
 import { getRpcConfigsFromEnv } from "@/lib/lib-config";
 import { getENSRainbowVersionInfo, getPackageVersion } from "@/lib/version-info";
 
 // Fetch ENSRainbow Version info
-const ensRainbowEndpointUrl = EnsRainbowEndpointUrlSchema.parse(process.env.ENSRAINBOW_URL);
-const { versionInfo: ensRainbowVersionInfo } =
-  await getENSRainbowVersionInfo(ensRainbowEndpointUrl);
+const ensRainbowUrl = EnsRainbowUrlSchema.parse(process.env.ENSRAINBOW_URL);
+const { versionInfo: ensRainbowVersionInfo } = await getENSRainbowVersionInfo(ensRainbowUrl);
 
 // format the relevant environment variables into the shape of an ENSIndexerEnvironment
 const environment = {
@@ -15,7 +14,7 @@ const environment = {
   databaseUrl: process.env.DATABASE_URL,
   namespace: process.env.NAMESPACE,
   plugins: process.env.PLUGINS,
-  ensRainbowEndpointUrl: process.env.ENSRAINBOW_URL,
+  ensRainbowUrl: process.env.ENSRAINBOW_URL,
   ensNodePublicUrl: process.env.ENSNODE_PUBLIC_URL,
   ensAdminUrl: process.env.ENSADMIN_URL,
   healReverseAddresses: process.env.HEAL_REVERSE_ADDRESSES,

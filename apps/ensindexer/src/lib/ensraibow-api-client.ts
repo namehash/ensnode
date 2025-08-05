@@ -11,13 +11,13 @@ const clientCache = new Map<UrlString, EnsRainbowApiClient>();
  * will always return the same {@link EnsRainbowApiClient} instance in
  * order to leverage caching.
  */
-export function getENSRainbowApiCLient(ensRainbowEndpointUrl: URL) {
-  if (clientCache.has(ensRainbowEndpointUrl.href)) {
-    return clientCache.get(ensRainbowEndpointUrl.href)!;
+export function getENSRainbowApiCLient(ensRainbowUrl: URL) {
+  if (clientCache.has(ensRainbowUrl.href)) {
+    return clientCache.get(ensRainbowUrl.href)!;
   }
 
   const ensRainbowApiClient = new EnsRainbowApiClient({
-    endpointUrl: new URL(ensRainbowEndpointUrl),
+    endpointUrl: new URL(ensRainbowUrl),
   });
 
   if (
@@ -32,7 +32,7 @@ as the ENSIndexer server.`,
   }
 
   // Cache the client before returning
-  clientCache.set(ensRainbowEndpointUrl.href, ensRainbowApiClient);
+  clientCache.set(ensRainbowUrl.href, ensRainbowApiClient);
 
   if (clientCache.size !== 1) {
     console.warn(

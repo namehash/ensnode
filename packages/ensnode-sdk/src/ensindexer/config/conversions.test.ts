@@ -12,7 +12,7 @@ describe("ENSIndexer: Config", () => {
         databaseSchemaName: "public",
         ensAdminUrl: new URL("https://admin.ensnode.io"),
         ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
-        ensRainbowEndpointUrl: new URL("https://api.ensrainbow.io"),
+        ensRainbowUrl: new URL("https://api.ensrainbow.io"),
         experimentalResolution: false,
         healReverseAddresses: false,
         indexAdditionalResolverRecords: false,
@@ -36,7 +36,7 @@ describe("ENSIndexer: Config", () => {
         ...config,
         ensAdminUrl: "https://admin.ensnode.io/",
         ensNodePublicUrl: "https://api.alpha.ensnode.io/",
-        ensRainbowEndpointUrl: "https://api.ensrainbow.io/",
+        ensRainbowUrl: "https://api.ensrainbow.io/",
         indexedChainIds: [1, 10, 8453],
       } satisfies SerializedENSIndexerPublicConfig);
 
@@ -54,7 +54,7 @@ describe("ENSIndexer: Config", () => {
       databaseSchemaName: "public",
       ensAdminUrl: "https://admin.ensnode.io",
       ensNodePublicUrl: "https://api.alpha.ensnode.io",
-      ensRainbowEndpointUrl: "https://api.ensrainbow.io",
+      ensRainbowUrl: "https://api.ensrainbow.io",
       experimentalResolution: false,
       healReverseAddresses: false,
       indexAdditionalResolverRecords: false,
@@ -82,7 +82,7 @@ describe("ENSIndexer: Config", () => {
         ...serializedConfig,
         ensAdminUrl: new URL("https://admin.ensnode.io"),
         ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
-        ensRainbowEndpointUrl: new URL("https://api.ensrainbow.io"),
+        ensRainbowUrl: new URL("https://api.ensrainbow.io"),
         indexedChainIds: new Set([1, 10, 8453]),
       } satisfies ENSIndexerPublicConfig);
     });

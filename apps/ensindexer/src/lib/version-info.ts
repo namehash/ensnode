@@ -61,8 +61,8 @@ export function getPackageVersion(packageName: string) {
 /**
  * Get Version Info from ENSRainbow service.
  */
-export async function getENSRainbowVersionInfo(ensRainbowEndpointUrl: URL) {
-  const ensRainbowApiClient = getENSRainbowApiCLient(ensRainbowEndpointUrl);
+export async function getENSRainbowVersionInfo(ensRainbowUrl: URL) {
+  const ensRainbowApiClient = getENSRainbowApiCLient(ensRainbowUrl);
 
   return ensRainbowApiClient.version();
 }

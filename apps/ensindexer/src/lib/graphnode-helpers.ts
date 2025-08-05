@@ -3,7 +3,7 @@ import { getENSRainbowApiCLient } from "@/lib/ensraibow-api-client";
 import type { Label, LabelHash } from "@ensnode/ensnode-sdk";
 import { ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 
-const ensRainbowApiClient = getENSRainbowApiCLient(new URL(config.ensRainbowEndpointUrl));
+const ensRainbowApiClient = getENSRainbowApiCLient(new URL(config.ensRainbowUrl));
 
 /**
  * Attempt to heal a labelHash to its original label.

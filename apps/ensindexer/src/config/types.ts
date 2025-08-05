@@ -69,7 +69,7 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
    * Invariant:
    * - The URL must be a valid URL. localhost urls are allowed (and expected).
    */
-  ensRainbowEndpointUrl: URL;
+  ensRainbowUrl: URL;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
@@ -219,7 +219,7 @@ export interface ENSIndexerEnvironment {
   databaseUrl: string | undefined;
   namespace: string | undefined;
   plugins: string | undefined;
-  ensRainbowEndpointUrl: string | undefined;
+  ensRainbowUrl: string | undefined;
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;

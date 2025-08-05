@@ -19,7 +19,7 @@ export function serializeENSIndexerPublicConfig(
   const {
     ensAdminUrl,
     ensNodePublicUrl,
-    ensRainbowEndpointUrl,
+    ensRainbowUrl,
     indexedChainIds,
     databaseSchemaName,
     experimentalResolution,
@@ -34,7 +34,7 @@ export function serializeENSIndexerPublicConfig(
   return {
     ensAdminUrl: serializeUrl(ensAdminUrl),
     ensNodePublicUrl: serializeUrl(ensNodePublicUrl),
-    ensRainbowEndpointUrl: serializeUrl(ensRainbowEndpointUrl),
+    ensRainbowUrl: serializeUrl(ensRainbowUrl),
     indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     databaseSchemaName,
     experimentalResolution,

@@ -49,7 +49,7 @@ describe("config", () => {
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.healReverseAddresses).toBe(true);
       expect(config.port).toBe(3000);
-      expect(config.ensRainbowEndpointUrl).toStrictEqual(new URL("https://api.ensrainbow.io"));
+      expect(config.ensRainbowUrl).toStrictEqual(new URL("https://api.ensrainbow.io"));
     });
 
     it("refreshes config when module is re-imported with new environment variables", async () => {
@@ -177,7 +177,7 @@ describe("config", () => {
     });
   });
 
-  describe(".ensRainbowEndpointUrl", () => {
+  describe(".ensRainbowUrl", () => {
     it("throws an error if ENSRAINBOW_URL is not a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "invalid url");
       await expect(getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
@@ -186,7 +186,7 @@ describe("config", () => {
     it("returns the ENSRAINBOW_URL if it is a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "https://customrainbow.com");
       const config = await getConfig();
-      expect(config.ensRainbowEndpointUrl).toStrictEqual(new URL("https://customrainbow.com"));
+      expect(config.ensRainbowUrl).toStrictEqual(new URL("https://customrainbow.com"));
     });
 
     it("throws an error if ENSRAINBOW_URL is not set", async () => {

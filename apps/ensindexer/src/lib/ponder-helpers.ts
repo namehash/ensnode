@@ -45,9 +45,7 @@ export const constrainBlockrange = (
  *
  * @returns A function that fetches ENSRainbow version information
  */
-export const createEnsRainbowVersionFetcher = (
-  endpointUrl: ENSIndexerConfig["ensRainbowEndpointUrl"],
-) => {
+export const createEnsRainbowVersionFetcher = (endpointUrl: ENSIndexerConfig["ensRainbowUrl"]) => {
   const client = new EnsRainbowApiClient({ endpointUrl: new URL(endpointUrl) });
 
   return async () => {

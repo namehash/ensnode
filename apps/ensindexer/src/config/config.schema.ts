@@ -125,7 +125,7 @@ const PortSchema = z.coerce
   .max(65535, { error: "PORT must be an integer between 1 and 65535." })
   .default(DEFAULT_PORT);
 
-export const EnsRainbowEndpointUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
+export const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
 const RpcConfigsSchema = z.record(
   z.string().transform(Number).pipe(chainIdSchema),
@@ -170,7 +170,7 @@ const ENSIndexerConfigSchema = z
     indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
     experimentalResolution: ExperimentalResolutionSchema,
     port: PortSchema,
-    ensRainbowEndpointUrl: EnsRainbowEndpointUrlSchema,
+    ensRainbowUrl: EnsRainbowUrlSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
     versionInfo: VersionInfoSchema,

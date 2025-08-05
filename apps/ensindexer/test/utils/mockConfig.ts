@@ -12,7 +12,7 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   ensAdminUrl: "http://localhost:3000",
   databaseSchemaName: "test_schema",
   plugins: "subgraph",
-  ensRainbowEndpointUrl: "https://api.ensrainbow.io",
+  ensRainbowUrl: "https://api.ensrainbow.io",
   healReverseAddresses: "true",
   indexAdditionalResolverRecords: "true",
   experimentalResolution: "false",
