@@ -47,11 +47,11 @@ export function useReverseResolution(parameters: UseReverseResolutionParameters 
     ? createReverseResolutionQueryOptions(config, address, chainId)
     : { enabled: false, queryKey: ["disabled"] as const };
 
-  const finalOptions = {
+  const options = {
     ...queryOptions,
     ...query,
     enabled: Boolean(address && (query.enabled ?? queryOptions.enabled)),
   };
 
-  return useQuery(finalOptions);
+  return useQuery(options);
 }

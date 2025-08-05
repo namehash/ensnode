@@ -40,11 +40,11 @@ export function useForwardResolution<SELECTION extends ResolverRecordsSelection>
     ? createForwardResolutionQueryOptions(config, name, selection)
     : { enabled: false, queryKey: ["disabled"] as const };
 
-  const finalOptions = {
+  const options = {
     ...queryOptions,
     ...query,
     enabled: Boolean(name && (query.enabled ?? queryOptions.enabled)),
   };
 
-  return useQuery(finalOptions);
+  return useQuery(options);
 }
