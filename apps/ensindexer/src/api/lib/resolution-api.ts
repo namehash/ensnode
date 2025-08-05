@@ -1,11 +1,10 @@
-import { CoinType, Name } from "@ensnode/ensnode-sdk";
+import { CoinType, Name, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
 import { resolveAutomatic } from "@/api/lib/automatic-resolution";
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
-import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
 
 // TODO: replace with zod schema or validator

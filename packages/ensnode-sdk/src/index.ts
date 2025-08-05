@@ -2,14 +2,10 @@ export * from "./ens";
 export * from "./shared";
 export * from "./tracing";
 export * from "./client";
+export * from "./resolution";
+export * from "./api";
 
 export type {
   ClientOptions,
-  ForwardResolutionSelection,
-  Records,
-  BaseResponse,
-  ForwardResponse,
-  ReverseResponse,
-  ErrorResponse,
-  Client,
+  ENSNodeClient,
 } from "./client";

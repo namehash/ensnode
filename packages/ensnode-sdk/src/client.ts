@@ -1,5 +1,7 @@
 import type { Address } from "viem";
-import type { CoinType, Name } from "./ens";
+import { ErrorResponse, ForwardResolutionResponse, ReverseResolutionResponse } from "./api/types";
+import type { Name } from "./ens";
+import { ResolverRecordsSelection } from "./resolution";
 
 /**
  * Default ENSNode API endpoint URL
@@ -10,81 +12,8 @@ export const DEFAULT_ENSNODE_API_URL = "https://api.alpha.ensnode.io" as const;
  * Configuration options for ENSNode API client
  */
 export interface ClientOptions {
-  /** The ENSNode API endpoint URL */
-  endpointUrl: URL;
-  /** Whether to enable debug tracing */
-  debug?: boolean;
-}
-
-/**
- * Selection criteria for forward resolution (name to records)
- */
-export interface ForwardResolutionSelection {
-  /** Array of coin types to resolve addresses for */
-  addresses?: CoinType[];
-  /** Array of text record keys to resolve */
-  texts?: string[];
-}
-
-/**
- * Resolved records response
- */
-export interface Records {
-  /** The canonical name (only available in reverse resolution) */
-  name?: string;
-  /** Resolved addresses by coin type */
-  addresses?: Record<string, string>;
-  /** Resolved text records */
-  texts?: Record<string, string>;
-}
-
-/**
- * Base API response structure
- */
-export interface BaseResponse {
-  /** Resolved records */
-  records: Records;
-  /** Debug trace information (if debug enabled) */
-  trace?: any;
-}
-
-/**
- * Forward resolution response (name to records)
- */
-export interface ForwardResponse extends BaseResponse {}
-
-/**
- * Reverse resolution response (address to name)
- */
-export interface ReverseResponse extends BaseResponse {}
-
-/**
- * API error response
- */
-export interface ErrorResponse {
-  error: string;
-  code?: string;
-  details?: Record<string, unknown>;
-}
-
-/**
- * Complete ENSNode API client interface
- */
-export interface Client {
-  /**
-   * Resolve an ENS name to records (forward resolution)
-   */
-  resolveName(name: Name, selection?: ForwardResolutionSelection): Promise<ForwardResponse>;
-
-  /**
-   * Resolve an address to its primary name (reverse resolution)
-   */
-  resolveAddress(address: Address, chainId?: number): Promise<ReverseResponse>;
-
-  /**
-   * Get the current client options
-   */
-  getOptions(): Readonly<ClientOptions>;
+  /** The ENSNode API URL */
+  url: URL;
 }
 
 /**
@@ -111,12 +40,11 @@ export interface Client {
  * ```typescript
  * // Custom configuration
  * const client = new ENSNodeClient({
- *   endpointUrl: new URL("https://custom-api.ensnode.io"),
- *   debug: true
+ *   url: new URL("https://custom-api.ensnode.io"),
  * });
  * ```
  */
-export class ENSNodeClient implements Client {
+export class ENSNodeClient {
   private readonly options: ClientOptions;
 
   /**
@@ -124,8 +52,7 @@ export class ENSNodeClient implements Client {
    */
   static defaultOptions(): ClientOptions {
     return {
-      endpointUrl: new URL(DEFAULT_ENSNODE_API_URL),
-      debug: false,
+      url: new URL(DEFAULT_ENSNODE_API_URL),
     };
   }
 
@@ -141,8 +68,7 @@ export class ENSNodeClient implements Client {
    */
   getOptions(): Readonly<ClientOptions> {
     return Object.freeze({
-      endpointUrl: new URL(this.options.endpointUrl.href),
-      debug: this.options.debug,
+      url: new URL(this.options.url.href),
     });
   }
 
@@ -162,11 +88,12 @@ export class ENSNodeClient implements Client {
    * });
    * ```
    */
-  async resolveName(
+  async resolveForward<SELECTION extends ResolverRecordsSelection>(
     name: Name,
-    selection: ForwardResolutionSelection = {},
-  ): Promise<ForwardResponse> {
-    const url = new URL(`/forward/${encodeURIComponent(name)}`, this.options.endpointUrl);
+    selection: SELECTION,
+    debug = false,
+  ): Promise<ForwardResolutionResponse<SELECTION>> {
+    const url = new URL(`/api/resolve/forward/${encodeURIComponent(name)}`, this.options.url);
 
     // Add query parameters based on selection
     if (selection.addresses && selection.addresses.length > 0) {
@@ -177,18 +104,16 @@ export class ENSNodeClient implements Client {
       url.searchParams.set("texts", selection.texts.join(","));
     }
 
-    if (this.options.debug) {
-      url.searchParams.set("debug", "true");
-    }
+    if (debug) url.searchParams.set("debug", "true");
 
     const response = await fetch(url);
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Forward resolution failed: ${error.error}`);
+      throw new Error(`Forward Resolution Failed: ${error.error}`);
     }
 
-    return response.json() as Promise<ForwardResponse>;
+    return response.json();
   }
 
   /**
@@ -208,24 +133,23 @@ export class ENSNodeClient implements Client {
    * const result = await client.resolveAddress("0xd...", 10);
    * ```
    */
-  async resolveAddress(address: Address, chainId: number = 1): Promise<ReverseResponse> {
-    const url = new URL(`/reverse/${address}`, this.options.endpointUrl);
+  async resolveAddress(
+    address: Address,
+    chainId: number = 1,
+    debug = false,
+  ): Promise<ReverseResolutionResponse> {
+    const url = new URL(`/api/resolve/reverse/${address}`, this.options.url);
+    url.searchParams.set("chainId", chainId.toString());
 
-    if (chainId !== 1) {
-      url.searchParams.set("chainId", chainId.toString());
-    }
-
-    if (this.options.debug) {
-      url.searchParams.set("debug", "true");
-    }
+    if (debug) url.searchParams.set("debug", "true");
 
     const response = await fetch(url);
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Reverse resolution failed: ${error.error}`);
+      throw new Error(`Reverse Resolution Failed: ${error.error}`);
     }
 
-    return response.json() as Promise<ReverseResponse>;
+    return response.json();
   }
 }

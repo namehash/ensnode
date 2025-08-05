@@ -1,4 +1,5 @@
-import { CoinType } from "@ensnode/ensnode-sdk";
+import { CoinType } from "../ens";
+import { ResolverRecordsResponse } from "./resolver-records-response";
 
 /**
  * Encodes a selection of Resolver records in the context of a specific Name.
@@ -24,3 +25,12 @@ export interface ResolverRecordsSelection {
 
   // TODO: include others as/if necessary
 }
+
+export const REVERSE_RESOLUTION_SELECTION = {
+  name: true,
+  texts: ["avatar"],
+} as const satisfies ResolverRecordsSelection;
+
+export type ReverseResolutionRecordsResponse = ResolverRecordsResponse<
+  typeof REVERSE_RESOLUTION_SELECTION
+>;
