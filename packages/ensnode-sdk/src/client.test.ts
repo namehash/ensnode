@@ -89,7 +89,7 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
       const client = new ENSNodeClient();
-      const response = await client.resolveAddress(EXAMPLE_ADDRESS);
+      const response = await client.resolveReverse(EXAMPLE_ADDRESS);
 
       const expectedUrl = new URL(
         `/api/resolve/reverse/${EXAMPLE_ADDRESS}`,
@@ -107,7 +107,7 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ records: {} }) });
 
       const client = new ENSNodeClient();
-      await client.resolveAddress(EXAMPLE_ADDRESS, 10);
+      await client.resolveReverse(EXAMPLE_ADDRESS, 10);
 
       const expectedUrl = new URL(
         `/api/resolve/reverse/${EXAMPLE_ADDRESS}`,
@@ -122,7 +122,7 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
       const client = new ENSNodeClient();
-      await expect(client.resolveAddress(EXAMPLE_ADDRESS)).rejects.toThrow(
+      await expect(client.resolveReverse(EXAMPLE_ADDRESS)).rejects.toThrow(
         /Reverse Resolution Failed/i,
       );
     });

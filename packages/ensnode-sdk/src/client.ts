@@ -1,4 +1,5 @@
 import type { Address } from "viem";
+
 import { ErrorResponse, ForwardResolutionResponse, ReverseResolutionResponse } from "./api/types";
 import type { Name } from "./ens";
 import { ResolverRecordsSelection } from "./resolution";
@@ -28,12 +29,11 @@ export interface ClientOptions {
  * const client = new ENSNodeClient();
  *
  * // Use resolution methods
- * const nameResult = await client.resolveName("vitalik.eth", {
+ * const nameResult = await client.resolveForward("vitalik.eth", {
  *   addresses: [60],
  *   texts: ["avatar"]
  * });
  *
-
  * ```
  *
  * @example
@@ -47,9 +47,6 @@ export interface ClientOptions {
 export class ENSNodeClient {
   private readonly options: ClientOptions;
 
-  /**
-   * Create default client options
-   */
   static defaultOptions(): ClientOptions {
     return {
       url: new URL(DEFAULT_ENSNODE_API_URL),
@@ -63,9 +60,6 @@ export class ENSNodeClient {
     };
   }
 
-  /**
-   * Get a copy of the current client options
-   */
   getOptions(): Readonly<ClientOptions> {
     return Object.freeze({
       url: new URL(this.options.url.href),
@@ -73,19 +67,30 @@ export class ENSNodeClient {
   }
 
   /**
-   * Resolve an ENS name to records (forward resolution)
+   * Forward Resolution: Resolve records for an ENS name.
    *
-   * @param name The ENS name to resolve
+   * @param name The ENS Name whose records to resolve
    * @param selection Optional selection of what records to resolve
-   * @returns Promise resolving to the records
-   * @throws If the request fails or the name is not found
+   * @returns ForwardResolutionResponse<SELECTION>
+   * @throws If the request fails or the ENSNode API returns an error response
    *
    * @example
    * ```typescript
-   * const result = await client.resolveName("vitalik.eth", {
-   *   addresses: [60, 0],
+   * const { records } = await client.resolveForward("vitalik.eth", {
+   *   addresses: [60],
    *   texts: ["avatar", "com.twitter"]
    * });
+   *
+   * console.log(records);
+   * // {
+   * //   addresses: {
+   * //     60: "0xabcd..."
+   * //   },
+   * //   texts: {
+   * //     avatar: "https://example.com/image.jpg",
+   * //     "com.twitter": null, // if not set, for example
+   * //   }
+   * // }
    * ```
    */
   async resolveForward<SELECTION extends ResolverRecordsSelection>(
@@ -117,23 +122,30 @@ export class ENSNodeClient {
   }
 
   /**
-   * Resolve an address to its primary name (reverse resolution)
+   * Reverse Resolution: Resolve the Primary Name of an Address
    *
-   * @param address The address to resolve
-   * @param chainId Optional chain ID for multichain resolution (defaults to 1 for Ethereum mainnet)
-   * @returns Promise resolving to the primary name
-   * @throws If the request fails or no primary name is set
+   * @param address The Address whose Primary Name to resolve
+   * @param chainId Optional chain id within which to query the address' ENSIP-19 Multichain Primary
+   *   Name (defaulting to Ethereum Mainnet [1])
+   * @returns ReverseResolutionResponse
+   * @throws If the request fails or the ENSNode API returns an error response
    *
    * @example
    * ```typescript
-   * // Resolve on Ethereum mainnet
-   * const result = await client.resolveAddress("0xd...");
+   * // Resolve the address' Primary Name on Ethereum Mainnet
+   * const { records } = await client.resolveReverse("0xabcd...");
    *
-   * // Resolve on Optimism
-   * const result = await client.resolveAddress("0xd...", 10);
+   * console.log(records);
+   * // {
+   * //   name: 'vitalik.eth',
+   * //   avatar: 'https://example.com/image.jpg',
+   * // }
+   *
+   * // Resolve the address' Primary Name on Optimism
+   * const { records } = await client.resolveReverse("0xabcd...", 10);
    * ```
    */
-  async resolveAddress(
+  async resolveReverse(
     address: Address,
     chainId: number = 1,
     debug = false,
