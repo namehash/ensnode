@@ -46,8 +46,6 @@ export function createForwardResolutionQueryOptions<SELECTION extends ResolverRe
       return client.resolveForward(name, selection);
     },
     enabled: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
   };
 }
 
@@ -66,7 +64,5 @@ export function createReverseResolutionQueryOptions(
       return client.resolveReverse(address, chainId);
     },
     enabled: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
   };
 }

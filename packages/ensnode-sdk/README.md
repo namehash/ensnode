@@ -4,11 +4,6 @@ This package is a set of libraries enabling smooth interaction with ENSNode serv
 
 Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://ensnode.io/docs/).
 
-## Package overview
-
-- [`client`](src/client.ts) A unified TypeScript client for all ENSNode APIs, providing methods for resolution, configuration, and indexing status.
-- [`utils`](utils) A utility library for interacting with ENS (Ethereum Name Service) data. It contains various helper functions and tools to facilitate interactions with ENS and ENSNode instances.
-
 ## Installation
 
 ```bash

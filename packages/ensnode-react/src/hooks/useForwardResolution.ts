@@ -15,18 +15,35 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  *
  * @example
  * ```typescript
- * const { data, isLoading, error } = useForwardResolution({
- *   name: "vitalik.eth",
- *   selection: {
- *     addresses: [60],
- *     texts: ["avatar", "com.twitter"]
- *   }
- * });
+ * import { useForwardResolution } from "@ensnode/ensnode-react";
  *
- * if (isLoading) return <div>Loading...</div>;
- * if (error) return <div>Error: {error.message}</div>;
- * if (data) {
- *   console.log("Resolved records:", data.records);
+ * function DisplayNameRecords() {
+ *   const { data, isLoading, error } = useForwardResolution({
+ *     name: "vitalik.eth",
+ *     selection: {
+ *       addresses: [60], // ETH
+ *       texts: ["avatar", "com.twitter"],
+ *     },
+ *   });
+ *
+ *   if (isLoading) return <div>Loading...</div>;
+ *   if (error) return <div>Error: {error.message}</div>;
+ *   if (!data) return <div>No data</div>;
+ *
+ *   return (
+ *     <div>
+ *       <h3>Resolved Records for vitalik.eth</h3>
+ *       {data.records.addresses && (
+ *         <p>ETH Address: {data.records.addresses["60"]}</p>
+ *       )}
+ *       {data.records.texts && (
+ *         <div>
+ *           <p>Avatar: {data.records.texts.avatar}</p>
+ *           <p>Twitter: {data.records.texts["com.twitter"]}</p>
+ *         </div>
+ *       )}
+ *     </div>
+ *   );
  * }
  * ```
  */

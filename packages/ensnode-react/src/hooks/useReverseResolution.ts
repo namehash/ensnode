@@ -13,30 +13,28 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  *
  * @example
  * ```typescript
- * const { data, isLoading, error } = useReverseResolution({
- *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
- *   chainId: 1
- * });
+ * import { useReverseResolution } from "@ensnode/ensnode-react";
  *
- * if (isLoading) return <div>Loading...</div>;
- * if (error) return <div>Error: {error.message}</div>;
- * if (data) {
- *   console.log("Primary name:", data.records.name);
+ * function DisplayPrimaryNameAndAvatar() {
+ *   const { data, isLoading, error } = useReverseResolution({
+ *     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+ *     chainId: 1, // Ethereum Mainnet
+ *   });
+ *
+ *   if (isLoading) return <div>Loading...</div>;
+ *   if (error) return <div>Error: {error.message}</div>;
+ *   if (!data) return <div>No primary name set</div>;
+ *
+ *   return (
+ *     <div>
+ *       <h3>Primary Name (for Mainnet)</h3>
+ *       <p>{data.records.name}</p>
+ *
+ *       <h3>Avatar Record (for Mainnet)</h3>
+ *       <p>{data.records.texts.avatar}</p>
+ *     </div>
+ *   );
  * }
- * ```
- *
- * @example
- * ```typescript
- * // Resolve on different chains
- * const mainnetName = useReverseResolution({
- *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
- *   chainId: 1 // Ethereum Mainnet
- * });
- *
- * const optimismName = useReverseResolution({
- *   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
- *   chainId: 10 // Optimism
- * });
  * ```
  */
 export function useReverseResolution(parameters: UseReverseResolutionParameters & ConfigParameter) {

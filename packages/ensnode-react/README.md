@@ -76,7 +76,7 @@ function DisplayNameRecords() {
 ```tsx
 import { useReverseResolution } from "@ensnode/ensnode-react";
 
-function AddressResolver() {
+function DisplayPrimaryNameAndAvatar() {
   const { data, isLoading, error } = useReverseResolution({
     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     chainId: 1, // Ethereum Mainnet
