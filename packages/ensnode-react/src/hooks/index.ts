@@ -1,3 +1,3 @@
-export * from "./useENSNodeConfig.js";
-export * from "./useForwardResolution.js";
-export * from "./useReverseResolution.js";
+export * from "./useENSNodeConfig";
+export * from "./useForwardResolution";
+export * from "./useReverseResolution";
