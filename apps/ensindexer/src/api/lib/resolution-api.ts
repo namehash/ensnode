@@ -1,14 +1,12 @@
 import {
   CoinType,
   ForwardResolutionResponse,
-  Name,
   ResolverRecordsSelection,
   ReverseResolutionResponse,
 } from "@ensnode/ensnode-sdk";
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
-import { resolveAutomatic } from "@/api/lib/automatic-resolution";
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
@@ -94,38 +92,6 @@ app.get("/reverse/:address", async (c) => {
 
     const showTrace = !!c.req.query("trace");
     return c.json({ records, ...(showTrace && { trace }) } as ReverseResolutionResponse);
-  } catch (error) {
-    console.error(error);
-    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
-  }
-});
-
-/**
- * Example queries for /auto:
- *
- * 1. Auto resolution for an address:
- * GET /auto/0x1234...abcd?name=true&addresses=60&texts=avatar
- *
- * 2. Auto resolution for a name:
- * GET /auto/example.eth?name=true&addresses=60,0&texts=avatar,com.twitter
- */
-
-app.get("/auto/:addressOrName", async (c) => {
-  try {
-    // TODO: correctly parse/validate with zod
-    const addressOrName = c.req.query("addressOrName") as Address | Name;
-    if (!addressOrName) {
-      return c.json({ error: "addressOrName parameter is required" }, 400);
-    }
-
-    const selection = buildSelectionFromQueryParams(c);
-
-    const { result: records, trace } = await captureTrace(() =>
-      resolveAutomatic(addressOrName, selection),
-    );
-
-    const showTrace = !!c.req.query("trace");
-    return c.json({ records, ...(showTrace && { trace }) });
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);

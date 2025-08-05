@@ -112,7 +112,7 @@ export function addProtocolStepEvent<
  */
 export async function captureTrace<Fn extends () => Promise<any>>(
   fn: Fn,
-): Promise<{ trace: ProtocolTrace; result: Awaited<ReturnType<Awaited<Fn>>> }> {
+): Promise<{ trace: ProtocolTrace; result: Awaited<ReturnType<Fn>> }> {
   // TODO: make sure there are no race conditions here, not sure how hono & otel work
   const traceId = trace.getActiveSpan()?.spanContext().traceId;
 
