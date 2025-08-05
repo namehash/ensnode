@@ -1,5 +1,5 @@
 import type { Address } from "viem";
-import type { CoinType, Name } from "./utils/index.js";
+import type { CoinType, Name } from "./ens";
 
 /**
  * Default ENSNode API endpoint URL
