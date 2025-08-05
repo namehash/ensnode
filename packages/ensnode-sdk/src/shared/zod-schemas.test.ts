@@ -1,16 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { type ZodSafeParseResult, prettifyError } from "zod/v4";
 import {
-  makeBooleanSchema,
   makeBooleanStringSchema,
   makeChainIdSchema,
   makeChainIdStringSchema,
   makeDatetimeSchema,
   makeIntegerSchema,
-  makeNonEmptyStringSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
-  makeStringSchema,
+  makeUnixTimestampSchema,
   makeUrlSchema,
 } from "./zod-schemas";
 
@@ -20,16 +18,6 @@ describe("ENSIndexer: Shared", () => {
       prettifyError(zodParseError.error!);
 
     describe("Parsing", () => {
-      it("can parse boolean values", () => {
-        expect(makeBooleanSchema().parse(true)).toBe(true);
-        expect(makeBooleanSchema().parse(false)).toBe(false);
-
-        const errorMessage = "Value must be a boolean.";
-
-        expect(formatParseError(makeBooleanSchema().safeParse(1))).toContain(errorMessage);
-        expect(formatParseError(makeBooleanSchema().safeParse(0))).toContain(errorMessage);
-      });
-
       it("can parse boolean string values", () => {
         expect(makeBooleanStringSchema().parse("true")).toBe(true);
         expect(makeBooleanStringSchema().parse("false")).toBe(false);
@@ -70,30 +58,6 @@ describe("ENSIndexer: Shared", () => {
         expect(formatParseError(makeNonNegativeIntegerSchema().safeParse(-1))).toContain("");
       });
 
-      it("can parse string values", () => {
-        expect(makeStringSchema().parse("")).toBe("");
-        expect(makeStringSchema().parse("ens")).toBe("ens");
-        expect(makeStringSchema().parse(" ens ")).toBe("ens");
-
-        expect(formatParseError(makeStringSchema().safeParse(-1))).toContain(
-          "Value must be a string.",
-        );
-      });
-
-      it("can parse non-empty string values", () => {
-        expect(makeNonEmptyStringSchema().parse("ens")).toBe("ens");
-        expect(makeNonEmptyStringSchema().parse(" ens ")).toBe("ens");
-
-        const errorMessage = "Value must be a non-empty string.";
-
-        expect(formatParseError(makeNonEmptyStringSchema().safeParse(-1))).toContain(
-          "Value must be a string.",
-        );
-        expect(formatParseError(makeNonEmptyStringSchema().safeParse(""))).toContain(
-          "Value must be a non-empty string.",
-        );
-      });
-
       it("can parse Chain ID values", () => {
         expect(makeChainIdSchema().parse(1)).toBe(1);
         expect(makeChainIdSchema().parse(Number.MAX_SAFE_INTEGER)).toBe(Number.MAX_SAFE_INTEGER);
@@ -110,7 +74,8 @@ describe("ENSIndexer: Shared", () => {
           Number.MAX_SAFE_INTEGER,
         );
 
-        const errorMessage = "Chain ID string must be a positive integer (>0).";
+        const errorMessage =
+          "The numeric value represented by Chain ID String must be a positive integer (>0).";
 
         expect(formatParseError(makeChainIdStringSchema().safeParse("-1"))).toContain(errorMessage);
         expect(formatParseError(makeChainIdStringSchema().safeParse("0"))).toContain(errorMessage);
@@ -137,6 +102,12 @@ describe("ENSIndexer: Shared", () => {
         ).toContain(errorMessage);
       });
 
+      it("can parse unix timestamp values", () => {
+        expect(makeUnixTimestampSchema().parse(-1)).toBe(-1);
+        expect(makeUnixTimestampSchema().parse(0)).toBe(0);
+        expect(makeUnixTimestampSchema().parse(1)).toBe(1);
+      });
+
       it("can parse URL values", () => {
         expect(makeUrlSchema().parse("https://example.com")).toStrictEqual(
           new URL("https://example.com"),
@@ -152,11 +123,11 @@ describe("ENSIndexer: Shared", () => {
 
     describe("Useful error messages", () => {
       it("can apply custom value labels", () => {
-        expect(formatParseError(makeBooleanSchema("isCompleted").safeParse(""))).toContain(
-          "isCompleted must be a boolean.",
+        expect(formatParseError(makeChainIdStringSchema().safeParse("notanumber"))).toContain(
+          "Chain ID String must represent a positive integer (>0).",
         );
-        expect(formatParseError(makeBooleanSchema("IS_COMPLETED").safeParse(""))).toContain(
-          "IS_COMPLETED must be a boolean.",
+        expect(formatParseError(makeChainIdStringSchema().safeParse("-1"))).toContain(
+          "The numeric value represented by Chain ID String must be a positive integer (>0).",
         );
       });
     });

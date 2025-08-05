@@ -8,10 +8,8 @@ import z from "zod/v4";
 import { uniq } from "../../shared";
 import {
   ZodCheckFnInput,
-  makeBooleanSchema,
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
-  makeNonEmptyStringSchema,
   makePositiveIntegerSchema,
   makeUrlSchema,
 } from "../../shared/zod-schemas";
@@ -66,12 +64,15 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
       error: `${valueLabel} is required and must be a non-empty string.`,
     });
 
+const makeNonEmptyString = (valueLabel: string = "Value") =>
+  z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
+
 export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
-  z.object(
+  z.strictObject(
     {
-      nodejs: makeNonEmptyStringSchema(),
-      ponder: makeNonEmptyStringSchema(),
-      ensRainbow: makeNonEmptyStringSchema(),
+      nodejs: makeNonEmptyString(),
+      ponder: makeNonEmptyString(),
+      ensRainbow: makeNonEmptyString(),
       ensRainbowSchema: makePositiveIntegerSchema(),
     },
     {
@@ -149,13 +150,13 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
       ensRainbowEndpointUrl: makeUrlSchema(`${valueLabel}.ensRainbowEndpointUrl`),
-      experimentalResolution: makeBooleanSchema(`${valueLabel}.experimentalResolution`),
-      healReverseAddresses: makeBooleanSchema(`${valueLabel}.healReverseAddresses`),
-      indexAdditionalResolverRecords: makeBooleanSchema(
-        `${valueLabel}.indexAdditionalResolverRecords`,
-      ),
+      experimentalResolution: z.boolean({ error: `${valueLabel}.experimentalResolution` }),
+      healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
+      indexAdditionalResolverRecords: z.boolean({
+        error: `${valueLabel}.indexAdditionalResolverRecords`,
+      }),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
-      isSubgraphCompatible: makeBooleanSchema(`${valueLabel}.isSubgraphCompatible`),
+      isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
