@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@ensdomains/address-encoder": "^1.1.2",
+    "@ensnode/datasources": "workspace:*",
     "zod": "catalog:"
   }
 }
