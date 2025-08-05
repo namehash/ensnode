@@ -21,9 +21,7 @@ Wrap your app with the `ENSNodeProvider`:
 ```tsx
 import { ENSNodeProvider, createConfig } from "@ensnode/ensnode-react";
 
-const config = createConfig({
-  url: "https://api.mainnet.ensnode.io",
-});
+const config = createConfig({ url: "https://api.mainnet.ensnode.io" });
 
 function App() {
   return (
@@ -38,13 +36,13 @@ That's it! No need to wrap with `QueryClientProvider` or create a `QueryClient` 
 
 ### 2. Use the Hooks
 
-#### Forward Resolution (Name to Records)
+#### Forward Resolution — `useForwardResolution`
 
 ```tsx
-import { useResolveName } from "@ensnode/ensnode-react";
+import { useForwardResolution } from "@ensnode/ensnode-react";
 
-function NameResolver() {
-  const { data, isLoading, error } = useResolveName({
+function DisplayNameRecords() {
+  const { data, isLoading, error } = useForwardResolution({
     name: "vitalik.eth",
     selection: {
       addresses: [60], // ETH
@@ -73,15 +71,15 @@ function NameResolver() {
 }
 ```
 
-#### Reverse Resolution (Address to Name)
+#### Reverse Resolution — `useReverseResolution`
 
 ```tsx
-import { useResolveAddress } from "@ensnode/ensnode-react";
+import { useReverseResolution } from "@ensnode/ensnode-react";
 
 function AddressResolver() {
-  const { data, isLoading, error } = useResolveAddress({
+  const { data, isLoading, error } = useReverseResolution({
     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    chainId: 1, // Ethereum mainnet
+    chainId: 1, // Ethereum Mainnet
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -90,8 +88,11 @@ function AddressResolver() {
 
   return (
     <div>
-      <h3>Primary Name</h3>
+      <h3>Primary Name (for Mainnet)</h3>
       <p>{data.records.name}</p>
+
+      <h3>Avatar Record (for Mainnet)</h3>
+      <p>{data.records.texts.avatar}</p>
     </div>
   );
 }
@@ -127,21 +128,14 @@ const config = createConfig({
 });
 ```
 
-### useResolveName
+### `useForwardResolution`
 
-Hook for forward resolution (ENS name to records).
-
-```tsx
-function useResolveName(
-  parameters: UseResolveNameParameters
-): UseResolveNameReturnType;
-```
+Hook for Forward Resolution (resolving records from an ENS name).
 
 #### Parameters
 
 - `name`: The ENS name to resolve
 - `selection`: Optional selection of what records to resolve
-  - `name`: Include canonical name
   - `addresses`: Array of coin types to resolve
   - `texts`: Array of text record keys to resolve
 - `query`: TanStack Query options for customization
@@ -149,54 +143,35 @@ function useResolveName(
 #### Example
 
 ```tsx
-const { data, isLoading, error, refetch } = useResolveName({
+const { data, isLoading, error, refetch } = useForwardResolution({
   name: "example.eth",
   selection: {
-    addresses: [60, 0], // ETH and BTC
+    addresses: [60], // ETH
     texts: ["avatar", "description", "url"],
   },
   query: {
-    enabled: true,
     staleTime: 60000, // 1 minute
   },
 });
 ```
 
-### useResolveAddress
+### `useReverseResolution`
 
-Hook for reverse resolution (address to primary name).
-
-```tsx
-function useResolveAddress(
-  parameters: UseResolveAddressParameters
-): UseResolveAddressReturnType;
-```
+Hook for Reverse Resolution (resolving Primary Name for a given `address` on a specified `chainId`).
 
 #### Parameters
 
-- `address`: The address to resolve
+- `address`: The address whose Primary Name to resolve
 - `chainId`: Optional chain ID (defaults to 1 for Ethereum mainnet)
 - `query`: TanStack Query options for customization
 
 #### Example
 
 ```tsx
-const { data, isLoading, error, refetch } = useResolveAddress({
+const { data, isLoading, error, refetch } = useReverseResolution({
   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   chainId: 10, // Optimism
-  query: {
-    enabled: true,
-    retry: 2,
-  },
 });
-```
-
-### useENSNodeConfig
-
-Hook to access the ENSNode configuration from context.
-
-```tsx
-const config = useENSNodeConfig();
 ```
 
 ## Advanced Usage
@@ -251,27 +226,36 @@ TanStack Query v5+ is used internally. Hook return types are TanStack Query's `U
 
 ### Conditional Queries
 
-You can conditionally enable/disble queries:
+Queries only execute if all required variables are provided:
 
 ```tsx
 const [address, setAddress] = useState("");
-const { data } = useResolveAddress({
+
+// only executes when address is truthy
+const { data } = useReverseResolution({ address });
+```
+
+You can also conditionally enable/disable queries based on your own logic:
+
+```tsx
+const [showPrimaryName, setShowPrimaryName] = useState(false);
+
+const { data } = useReverseResolution({
   address,
-  query: {
-    enabled: Boolean(address), // Only run when address is set
-  },
+  query: { enabled: showPrimaryName },
 });
 ```
 
 ### Multichain Reverse Resolution
 
-Resolve primary names for an address on different chains:
+ENS supports [Multichain Primary Names](https://docs.ens.domains/ensip/19/), and ENSNode supports
+resolving the Primary Name of an address within the context of a specific `chainId`.
 
 ```tsx
-function MultiChainResolver({ address }: { address: string }) {
-  const mainnet = useResolveAddress({ address, chainId: 1 });
-  const optimism = useResolveAddress({ address, chainId: 10 });
-  const polygon = useResolveAddress({ address, chainId: 137 });
+function ShowMultichainPrimaryNames({ address }: { address: Address }) {
+  const mainnet = useReverseResolution({ address, chainId: 1 });
+  const optimism = useReverseResolution({ address, chainId: 10 });
+  const polygon = useReverseResolution({ address, chainId: 137 });
 
   return (
     <div>
@@ -283,75 +267,14 @@ function MultiChainResolver({ address }: { address: string }) {
 }
 ```
 
-### Multiple ENSNode Endpoints
-
-Use different ENSNode endpoints with automatic cache isolation:
-
-```tsx
-// Mainnet provider
-const mainnetConfig = createConfig({
-  url: "https://api.mainnet.ensnode.io",
-});
-
-// Testnet provider
-const testnetConfig = createConfig({
-  url: "https://api.alpha-sepolia.ensnode.io",
-});
-
-function MainnetData() {
-  const { data } = useResolveAddress({
-    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  });
-  return <div>Mainnet: {data?.records.name}</div>;
-}
-
-function TestnetData() {
-  const { data } = useResolveAddress({
-    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  });
-  return <div>Testnet: {data?.records.name}</div>;
-}
-
-function App() {
-  return (
-    <div>
-      <ENSNodeProvider config={mainnetConfig}>
-        <MainnetData />
-      </ENSNodeProvider>
-
-      <ENSNodeProvider config={testnetConfig}>
-        <TestnetData />
-      </ENSNodeProvider>
-    </div>
-  );
-}
-```
-
 ### Error Handling
 
+Use the `error` and `isError` result parameters to handle error states in your application.
+
 ```tsx
-const { data, error, isError } = useResolveName({ name: "vitalik.eth" });
+const { data, error, isError } = useForwardResolution({ name: "vitalik.eth" });
 
 if (isError) {
   return <div>Failed to resolve: {error.message}</div>;
 }
-```
-
-## TypeScript
-
-This package is written in TypeScript and exports all necessary types. Hook return types are directly compatible with TanStack Query's `UseQueryResult`:
-
-```tsx
-import type {
-  ENSNodeConfig,
-  UseResolveNameParameters,
-  UseResolveAddressParameters,
-  UseResolveNameReturnType,
-  UseResolveAddressReturnType,
-} from "@ensnode/ensnode-react";
-
-// Hook return types are TanStack Query's UseQueryResult
-// so they work seamlessly with TanStack Query utilities
-import type { UseQueryResult } from "@tanstack/react-query";
-type NameResult = UseQueryResult<ForwardResponse>; // Same as UseResolveNameReturnType
 ```

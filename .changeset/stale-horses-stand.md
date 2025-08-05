@@ -2,4 +2,4 @@
 "@ensnode/ensnode-sdk": minor
 ---
 
-Adds `resolveName` and `resolveAddress` methods to ENSNode-SDK
+Adds `resolveForward` and `resolveReverse` methods to ENSNode-SDK

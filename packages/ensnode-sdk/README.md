@@ -1,13 +1,13 @@
 # ENSNode SDK
 
-This package is a set of libraries enabling smooth interaction with ENSNode services and data, including data processing (such as validating data and enforcing invariants), and ENS-oriented helper functions.
+This package is a set of libraries enabling smooth interaction with ENSNode services and data, including shared types, data processing (such as validating data and enforcing invariants), and ENS-oriented helper functions.
 
 Learn more about [ENSNode](https://ensnode.io/) from [the ENSNode docs](https://ensnode.io/docs/).
 
 ## Package overview
 
-- [`utils`](utils) A utility library for interacting with ENS (Ethereum Name Service) data. It contains various helper functions and tools to facilitate interactions with ENS and ENSNode instances.
 - [`client`](src/client.ts) A unified TypeScript client for all ENSNode APIs, providing methods for resolution, configuration, and indexing status.
+- [`utils`](utils) A utility library for interacting with ENS (Ethereum Name Service) data. It contains various helper functions and tools to facilitate interactions with ENS and ENSNode instances.
 
 ## Installation
 
@@ -17,7 +17,10 @@ npm install @ensnode/ensnode-sdk
 
 ## ENSNode Client
 
-The `ENSNodeClient` provides a unified interface for all ENSNode API operations:
+The `ENSNodeClient` provides a unified interface for the supported ENSNode APIs:
+- Resolution API
+- 🚧 Configuration API
+- 🚧 Indexing Status API
 
 ### Basic Usage
 
@@ -26,24 +29,23 @@ import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 
 const client = new ENSNodeClient();
 
-// Resolution operations
-const nameResult = await client.resolveName("vitalik.eth", {
+// Resolution API (Forward Resolution)
+const { records } = await client.resolveForward("vitalik.eth", {
   addresses: [60],
   texts: ["avatar", "com.twitter"],
 });
 
-const addressResult = await client.resolveAddress(
-  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-);
+// Resolution API (Reverse Resolution)
+const { records } = await client.resolveReverse("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 ```
 
 ### API Methods
 
-#### Resolution
+#### Resolution API
 
-##### `resolveName(name, selection?)`
+##### `resolveForward(name, selection?)`
 
-Resolves an ENS name to records (forward resolution).
+Resolves the selected records for the provided Name.
 
 - `name`: The ENS name to resolve
 - `selection`: Optional object specifying what records to resolve:
@@ -53,7 +55,7 @@ Resolves an ENS name to records (forward resolution).
 
 ##### `resolveAddress(address, chainId?)`
 
-Resolves an address to its primary name (reverse resolution).
+Resolves the Primary Name on the specified `chainId` for the provided Address.
 
 - `address`: The address to resolve
 - `chainId`: Optional chain ID (defaults to 1 for Ethereum mainnet)
@@ -64,27 +66,4 @@ Resolves an address to its primary name (reverse resolution).
 const client = new ENSNodeClient({
   url: new URL("https://custom-api.ensnode.io"),
 });
-```
-
-### Complete Example
-
-```typescript
-import { ENSNodeClient } from "@ensnode/ensnode-sdk";
-
-const client = new ENSNodeClient({
-  url: new URL("https://api.mainnet.ensnode.io"),
-});
-
-// Resolve name
-const resolution = await client.resolveName("vitalik.eth", {
-  addresses: [60],
-  texts: ["avatar", "com.twitter"],
-});
-console.log("Records:", resolution.records);
-
-// Reverse resolution
-const reverse = await client.resolveAddress(
-  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-);
-console.log("Primary name:", reverse.records.name);
 ```

@@ -18,10 +18,12 @@ export interface ClientOptions {
 }
 
 /**
- * Complete ENSNode API client
+ * ENSNode API Client
  *
- * Provides access to all ENSNode API functionality through a unified interface.
- * Supports resolution, configuration, and indexing status operations.
+ * Provides access to the following ENSNode APIs:
+ * - Resolution API
+ * - 🚧 Configuration API
+ * - 🚧 Indexing Status API
  *
  * @example
  * ```typescript
