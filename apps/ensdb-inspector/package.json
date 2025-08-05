@@ -1,0 +1,43 @@
+{
+  "name": "ensdb-inspector",
+  "version": "0.31.0",
+  "private": true,
+  "type": "module",
+  "description": "A CLI tool for inspecting ENSNode database schemas and their metadata",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/ensdb-inspector"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensdb-inspector",
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "list-schemas": "tsx src/cli.ts list-schemas",
+    "schema-info": "tsx src/cli.ts schema-info",
+    "db-info": "tsx src/cli.ts db-info",
+    "test": "vitest",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ensnode/ensnode-schema": "workspace:*",
+    "@ensnode/ponder-metadata": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "postgres": "^3.4.5",
+    "pg-connection-string": "^2.9.0",
+    "yargs": "^17.7.2",
+    "pino": "^8.19.0",
+    "pino-pretty": "^10.3.1"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/yargs": "^17.0.32",
+    "@vitest/coverage-v8": "catalog:",
+    "tsx": "^4.19.3",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+} 
