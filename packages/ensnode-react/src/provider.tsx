@@ -93,7 +93,6 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
  */
 export function createConfig(options?: {
   url?: string | URL;
-  debug?: boolean;
 }): ENSNodeConfig {
   const url = options?.url ? new URL(options.url) : ENSNodeClient.defaultOptions().url;
 

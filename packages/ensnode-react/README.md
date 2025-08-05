@@ -23,7 +23,6 @@ import { ENSNodeProvider, createConfig } from "@ensnode/ensnode-react";
 
 const config = createConfig({
   url: "https://api.mainnet.ensnode.io",
-  debug: false,
 });
 
 function App() {
@@ -125,7 +124,6 @@ Helper function to create ENSNode configuration with defaults.
 ```tsx
 const config = createConfig({
   url: "https://api.mainnet.ensnode.io",
-  debug: true,
 });
 ```
 

@@ -96,7 +96,7 @@ export class ENSNodeClient {
   async resolveForward<SELECTION extends ResolverRecordsSelection>(
     name: Name,
     selection: SELECTION,
-    debug = false,
+    trace = false,
   ): Promise<ForwardResolutionResponse<SELECTION>> {
     const url = new URL(`/api/resolve/forward/${encodeURIComponent(name)}`, this.options.url);
 
@@ -109,7 +109,7 @@ export class ENSNodeClient {
       url.searchParams.set("texts", selection.texts.join(","));
     }
 
-    if (debug) url.searchParams.set("debug", "true");
+    if (trace) url.searchParams.set("trace", "true");
 
     const response = await fetch(url);
 
@@ -149,12 +149,12 @@ export class ENSNodeClient {
   async resolveReverse(
     address: Address,
     chainId: number = 1,
-    debug = false,
+    trace = false,
   ): Promise<ReverseResolutionResponse> {
     const url = new URL(`/api/resolve/reverse/${address}`, this.options.url);
     url.searchParams.set("chainId", chainId.toString());
 
-    if (debug) url.searchParams.set("debug", "true");
+    if (trace) url.searchParams.set("trace", "true");
 
     const response = await fetch(url);
 

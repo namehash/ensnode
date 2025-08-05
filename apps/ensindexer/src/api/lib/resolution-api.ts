@@ -13,6 +13,8 @@ import { resolveForward } from "@/api/lib/forward-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
 
+// TODO: use a zod middleware to parse out the arguments and conform to *ResolutionRequest typings
+
 // TODO: replace with zod schema or validator
 function buildSelectionFromQueryParams(c: Context) {
   const selection: Partial<ResolverRecordsSelection> = {};
