@@ -23,7 +23,7 @@ import {
 import { uniq } from "@/lib/lib-helpers";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
-import { makeUrlSchema, makeVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
 const chainIdSchema = z.number().int().min(1);
 
@@ -125,7 +125,7 @@ const PortSchema = z.coerce
   .max(65535, { error: "PORT must be an integer between 1 and 65535." })
   .default(DEFAULT_PORT);
 
-export const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
+const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
 const RpcConfigsSchema = z.record(
   z.string().transform(Number).pipe(chainIdSchema),
@@ -156,8 +156,6 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
-const VersionInfoSchema = makeVersionInfoSchema();
-
 const ENSIndexerConfigSchema = z
   .object({
     namespace: ENSNamespaceSchema,
@@ -173,7 +171,6 @@ const ENSIndexerConfigSchema = z
     ensRainbowUrl: EnsRainbowUrlSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
-    versionInfo: VersionInfoSchema,
   })
   /**
    * Invariant enforcement

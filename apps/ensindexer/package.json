@@ -55,7 +55,6 @@
     "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
-    "msw": "^2.10.4",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

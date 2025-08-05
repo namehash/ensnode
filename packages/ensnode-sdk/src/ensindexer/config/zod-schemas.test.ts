@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { type ZodSafeParseResult, prettifyError } from "zod/v4";
-import { PluginName, VersionInfo } from "./types";
+import { DependencyInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
+  makeDependencyInfoSchema,
   makeIndexedChainIdsSchema,
   makePluginsListSchema,
-  makeVersionInfoSchema,
 } from "./zod-schemas";
 
 describe("ENSIndexer: Config", () => {
@@ -64,27 +64,27 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse version info values", () => {
         expect(
-          makeVersionInfoSchema().parse({
+          makeDependencyInfoSchema().parse({
             nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies VersionInfo),
+          } satisfies DependencyInfo),
         ).toStrictEqual({
           nodejs: "v22.22.22",
           ponder: "0.11.25",
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
-        } satisfies VersionInfo);
+        } satisfies DependencyInfo);
 
         expect(
           formatParseError(
-            makeVersionInfoSchema().safeParse({
+            makeDependencyInfoSchema().safeParse({
               nodejs: "",
               ponder: "",
               ensRainbow: "",
               ensRainbowSchema: -1,
-            } satisfies VersionInfo),
+            } satisfies DependencyInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
   → at nodejs

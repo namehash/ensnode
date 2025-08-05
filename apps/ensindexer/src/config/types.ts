@@ -1,6 +1,11 @@
-import { Blockrange } from "@/lib/types";
 import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
-import type { ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
+import type {
+  Blockrange,
+  ChainId,
+  ChainIdString,
+  IndexedChainIds,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -28,7 +33,7 @@ export interface RpcConfig {
 /**
  * The complete runtime configuration for an ENSIndexer instance.
  */
-export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
+export interface ENSIndexerConfig {
   /**
    * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_NAMESPACE).
    *
@@ -151,9 +156,20 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
    * Configuration for each indexable RPC, keyed by chain id.
    *
    * Invariants:
-   * - Each key (chain id) must be a number
+   * - Each key (chain id) must be a {@link ChainIdString} value.
    */
-  rpcConfigs: Record<number, RpcConfig>;
+  rpcConfigs: Record<ChainIdString, RpcConfig>;
+
+  /**
+   * Indexed Chain IDs
+   *
+   * Includes Chain ID for each chain being indexed.
+   *
+   * Invariants:
+   * - No duplicates
+   * - Only positive integer values matching {@link ChainId}
+   */
+  indexedChainIds: IndexedChainIds;
 
   /**
    * The database connection string for the indexer, if present. When undefined
@@ -230,10 +246,4 @@ export interface ENSIndexerEnvironment {
     endBlock: string | undefined;
   };
   rpcConfigs: Record<number, RpcConfigEnvironment>;
-  versionInfo: {
-    nodejs: string | undefined;
-    ponder: string | undefined;
-    ensRainbow: string | undefined;
-    ensRainbowSchema: number | undefined;
-  };
 }

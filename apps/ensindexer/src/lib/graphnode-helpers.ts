@@ -1,9 +1,8 @@
-import config from "@/config";
-import { getENSRainbowApiCLient } from "@/lib/ensraibow-api-client";
+import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 import type { Label, LabelHash } from "@ensnode/ensnode-sdk";
 import { ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 
-const ensRainbowApiClient = getENSRainbowApiCLient(new URL(config.ensRainbowUrl));
+const ensRainbowApiClient = getENSRainbowApiClient();
 
 /**
  * Attempt to heal a labelHash to its original label.

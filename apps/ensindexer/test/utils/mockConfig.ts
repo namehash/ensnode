@@ -24,12 +24,6 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     },
   },
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
-  versionInfo: {
-    nodejs: "22",
-    ponder: "0.11",
-    ensRainbow: "0.31.0",
-    ensRainbowSchema: 2,
-  },
 });
 
 // the current, mutable ENSIndexerConfig for tests

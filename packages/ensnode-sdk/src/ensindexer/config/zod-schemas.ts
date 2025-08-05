@@ -1,5 +1,7 @@
 /**
- * Zod schemas can never be included in the NPM package for ENSNode SDK.
+ * All zod schemas we define must remain internal implementation details.
+ * We want the freedom to move away from zod in the future without impacting
+ * any users of the ensnode-sdk package.
  *
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
@@ -67,7 +69,7 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
 const makeNonEmptyString = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
-export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
+export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
   z.strictObject(
     {
       nodejs: makeNonEmptyString(),
@@ -76,7 +78,7 @@ export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
       ensRainbowSchema: makePositiveIntegerSchema(),
     },
     {
-      error: `${valueLabel} must be a valid VersionInfo object.`,
+      error: `${valueLabel} must be a valid DependencyInfo object.`,
     },
   );
 
@@ -160,7 +162,7 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-      versionInfo: makeVersionInfoSchema(`${valueLabel}.versionInfo`),
+      dependencyInfo: makeDependencyInfoSchema(`${valueLabel}.dependencyInfo`),
     })
     /**
      * Validations

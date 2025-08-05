@@ -8,10 +8,19 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getENSRainbowApiCLient } from "@/lib/ensraibow-api-client";
+import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
+import { DependencyInfo } from "@ensnode/ensnode-sdk";
+import { makeDependencyInfoSchema } from "@ensnode/ensnode-sdk/internal";
+import { prettifyError } from "zod/v4";
 
 /**
  * Get NPM package version.
+ *
+ * Note:
+ * Since we use PNPM's `catalog:` references, reading directly from
+ * the `package.json` file would give us `catalog:` values, and not resolved
+ * version values. We need the later, so we implement our own version
+ * resolution method.
  */
 export function getPackageVersion(packageName: string) {
   try {
@@ -59,10 +68,25 @@ export function getPackageVersion(packageName: string) {
 }
 
 /**
- * Get Version Info from ENSRainbow service.
+ * Get complete Version info for ENSIndexer app.
  */
-export async function getENSRainbowVersionInfo(ensRainbowUrl: URL) {
-  const ensRainbowApiClient = getENSRainbowApiCLient(ensRainbowUrl);
+export async function getDependencyInfo(): Promise<DependencyInfo> {
+  const ensRainbowApiClient = getENSRainbowApiClient();
+  const { versionInfo: ensRainbowDependencyInfo } = await ensRainbowApiClient.version();
 
-  return ensRainbowApiClient.version();
+  const schema = makeDependencyInfoSchema();
+  const data = {
+    ensRainbow: ensRainbowDependencyInfo.version,
+    ensRainbowSchema: ensRainbowDependencyInfo.schema_version,
+    nodejs: process.versions.node,
+    ponder: getPackageVersion("ponder"),
+  } satisfies DependencyInfo;
+
+  const parsed = schema.safeParse(data);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize DependencyInfo:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
 }

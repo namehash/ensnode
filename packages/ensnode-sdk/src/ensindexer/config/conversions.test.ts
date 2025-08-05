@@ -20,7 +20,7 @@ describe("ENSIndexer: Config", () => {
         isSubgraphCompatible: true,
         namespace: "mainnet",
         plugins: [PluginName.Subgraph],
-        versionInfo: {
+        dependencyInfo: {
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
           nodejs: "v22.10.12",
@@ -62,7 +62,7 @@ describe("ENSIndexer: Config", () => {
       isSubgraphCompatible: true,
       namespace: "mainnet",
       plugins: [PluginName.Subgraph],
-      versionInfo: {
+      dependencyInfo: {
         ensRainbow: "0.32.0",
         ensRainbowSchema: 2,
         nodejs: "v22.10.12",

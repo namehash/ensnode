@@ -1,11 +1,6 @@
-import { EnsRainbowUrlSchema, buildConfigFromEnvironment } from "@/config/config.schema";
+import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerEnvironment } from "@/config/types";
 import { getRpcConfigsFromEnv } from "@/lib/lib-config";
-import { getENSRainbowVersionInfo, getPackageVersion } from "@/lib/version-info";
-
-// Fetch ENSRainbow Version info
-const ensRainbowUrl = EnsRainbowUrlSchema.parse(process.env.ENSRAINBOW_URL);
-const { versionInfo: ensRainbowVersionInfo } = await getENSRainbowVersionInfo(ensRainbowUrl);
 
 // format the relevant environment variables into the shape of an ENSIndexerEnvironment
 const environment = {
@@ -25,12 +20,6 @@ const environment = {
     endBlock: process.env.END_BLOCK,
   },
   rpcConfigs: getRpcConfigsFromEnv(),
-  versionInfo: {
-    ensRainbow: ensRainbowVersionInfo.version,
-    ensRainbowSchema: ensRainbowVersionInfo.schema_version,
-    nodejs: process.versions.node,
-    ponder: getPackageVersion("ponder"),
-  },
 } satisfies ENSIndexerEnvironment;
 
 // build, validate, and export the ENSIndexerConfig
