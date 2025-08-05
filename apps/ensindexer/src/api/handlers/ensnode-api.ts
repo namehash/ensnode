@@ -3,7 +3,7 @@ import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
 import { buildENSIndexerPublicConfig } from "@/config/helpers";
-import { getDependencyInfo } from "@/lib/version-info";
+import { getDependencyInfo } from "@/lib/dependency-info";
 import { serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import resolutionApi from "../lib/resolution-api";
 

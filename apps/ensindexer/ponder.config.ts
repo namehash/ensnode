@@ -2,7 +2,6 @@ import config from "@/config";
 import { prettyPrintConfig } from "@/config/helpers";
 import type { ENSIndexerConfig } from "@/config/types";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
-import { getDependencyInfo } from "@/lib/version-info";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
 
 ////////

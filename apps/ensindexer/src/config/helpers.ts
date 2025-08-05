@@ -1,5 +1,5 @@
 import type { ENSIndexerConfig } from "@/config/types";
-import { getDependencyInfo } from "@/lib/version-info";
+import { getDependencyInfo } from "@/lib/dependency-info";
 import {
   type DependencyInfo,
   type ENSIndexerPublicConfig,
