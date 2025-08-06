@@ -162,7 +162,7 @@ Hook for resolving the primary name of a specified address (Reverse Resolution).
 #### Parameters
 
 - `address`: The Address whose Primary Name to resolve
-- `chainId`: Optional chain id within which to query the address' ENSIP-19 Multichain Primary Name (defaulting to Ethereum Mainnet [1])
+- `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
 - `query`: TanStack Query options for customization
 
 #### Example
@@ -231,8 +231,8 @@ Queries only execute if all required variables are provided:
 ```tsx
 const [address, setAddress] = useState("");
 
-// only executes when address is truthy
-const { data } = usePrimaryName({ address });
+// only executes when address and chainId are truthy
+const { data } = usePrimaryName({ address, chainId: 1 });
 ```
 
 You can also conditionally enable/disable queries based on your own logic:
@@ -242,6 +242,7 @@ const [showPrimaryName, setShowPrimaryName] = useState(false);
 
 const { data } = usePrimaryName({
   address,
+  chainId: 1,
   query: { enabled: showPrimaryName },
 });
 ```

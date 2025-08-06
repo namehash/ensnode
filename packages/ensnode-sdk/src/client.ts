@@ -130,15 +130,14 @@ export class ENSNodeClient {
    * Resolves the primary name of a specified address (Reverse Resolution).
    *
    * @param address The Address whose Primary Name to resolve
-   * @param chainId Optional chain id within which to query the address' ENSIP-19 Multichain Primary
-   *   Name (defaulting to Ethereum Mainnet [1])
+   * @param chainId The chain id within which to query the address' ENSIP-19 Multichain Primary Name
    * @returns ResolvePrimaryNameResponse
    * @throws If the request fails or the ENSNode API returns an error response
    *
    * @example
    * ```typescript
    * // Resolve the address' Primary Name on Ethereum Mainnet
-   * const { records } = await client.resolvePrimaryName("0xabcd...");
+   * const { records } = await client.resolvePrimaryName("0xabcd...", 1);
    *
    * console.log(records);
    * // {
@@ -152,11 +151,10 @@ export class ENSNodeClient {
    */
   async resolvePrimaryName(
     address: ResolvePrimaryNameRequest["address"],
-    chainId: ResolvePrimaryNameRequest["chainId"] = 1,
+    chainId: ResolvePrimaryNameRequest["chainId"],
     trace: ResolvePrimaryNameRequest["trace"] = false,
   ): Promise<ResolvePrimaryNameResponse> {
-    const url = new URL(`/api/resolve/primary-name/${address}`, this.options.url);
-    url.searchParams.set("chainId", chainId.toString());
+    const url = new URL(`/api/resolve/primary-name/${address}/${chainId}`, this.options.url);
 
     if (trace) url.searchParams.set("trace", "true");
 

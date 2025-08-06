@@ -1,8 +1,8 @@
 import {
   CoinType,
+  ResolvePrimaryNameResponse,
   ResolveRecordsResponse,
   ResolverRecordsSelection,
-  ResolvePrimaryNameResponse,
 } from "@ensnode/ensnode-sdk";
 import { Context, Hono } from "hono";
 import { Address } from "viem";
@@ -71,22 +71,30 @@ app.get("/records/:name", async (c) => {
 /**
  * Example queries for /primary-name:
  *
- * 1. ENSIP-19 Primary Name Lookup (for ENS Root Chain coinType, or default)
- * GET /primary-name/0x1234...abcd
+ * 1. ENSIP-19 Primary Name Lookup (for ENS Root Chain Id)
+ * GET /primary-name/0x1234...abcd/1
  *
- * 2. ENSIP-19 Multichain Primary Name (for specific Chain (e.g., Optimism), or default)
- * GET /primary-name/0x1234...abcd?chainId=10
+ * 2. ENSIP-19 Multichain Primary Name (for specific Chain, e.g., Optimism)
+ * GET /primary-name/0x1234...abcd/10
  */
-app.get("/primary-name/:address", async (c) => {
+app.get("/primary-name/:address/:chainId", async (c) => {
   try {
     // TODO: correctly parse/validate with zod
     const address = c.req.param("address") as Address;
+    const chainIdParam = c.req.param("chainId");
+
     if (!address) {
       return c.json({ error: "address parameter is required" }, 400);
     }
 
-    // TODO: _require_ chain Id ?
-    const chainId = c.req.query("chainId") ? Number(c.req.query("chainId")) : 1;
+    if (!chainIdParam) {
+      return c.json({ error: "chainId parameter is required" }, 400);
+    }
+
+    const chainId = Number(chainIdParam);
+    if (isNaN(chainId)) {
+      return c.json({ error: "chainId must be a valid number" }, 400);
+    }
 
     const { result: records, trace } = await captureTrace(() => resolveReverse(address, chainId));
 

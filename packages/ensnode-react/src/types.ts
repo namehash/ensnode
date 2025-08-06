@@ -1,10 +1,10 @@
 import type {
   ClientOptions,
+  ResolvePrimaryNameRequest,
+  ResolvePrimaryNameResponse,
   ResolveRecordsRequest,
   ResolveRecordsResponse,
   ResolverRecordsSelection,
-  ResolvePrimaryNameRequest,
-  ResolvePrimaryNameResponse,
 } from "@ensnode/ensnode-sdk";
 
 import type { QueryObserverOptions } from "@tanstack/react-query";
@@ -32,15 +32,19 @@ export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> 
 }
 
 /**
- * Parameters for the useRecords hook
+ * Parameters for the useRecords hook, allowing nullable name
  */
 export interface UseRecordsParameters<SELECTION extends ResolverRecordsSelection>
-  extends ResolveRecordsRequest<SELECTION>,
-    QueryParameter<ResolveRecordsResponse<SELECTION>> {}
+  extends Omit<ResolveRecordsRequest<SELECTION>, "name">,
+    QueryParameter<ResolveRecordsResponse<SELECTION>> {
+  name: ResolveRecordsRequest<SELECTION>["name"] | null;
+}
 
 /**
- * Parameters for the usePrimaryName hook
+ * Parameters for the usePrimaryName hook, allowing nullable address
  */
 export interface UsePrimaryNameParameters
-  extends ResolvePrimaryNameRequest,
-    QueryParameter<ResolvePrimaryNameResponse> {}
+  extends Omit<ResolvePrimaryNameRequest, "address">,
+    QueryParameter<ResolvePrimaryNameResponse> {
+  address: ResolvePrimaryNameRequest["address"] | null;
+}

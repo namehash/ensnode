@@ -89,13 +89,12 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
       const client = new ENSNodeClient();
-      const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS);
+      const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1);
 
       const expectedUrl = new URL(
-        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}`,
+        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
         DEFAULT_ENSNODE_API_URL,
       );
-      expectedUrl.searchParams.set("chainId", "1");
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
       expect(response).toEqual(mockResponse);
@@ -110,10 +109,9 @@ describe("ENSNodeClient", () => {
       await client.resolvePrimaryName(EXAMPLE_ADDRESS, 10);
 
       const expectedUrl = new URL(
-        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}`,
+        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/10`,
         DEFAULT_ENSNODE_API_URL,
       );
-      expectedUrl.searchParams.set("chainId", "10");
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
     });
@@ -122,7 +120,7 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
       const client = new ENSNodeClient();
-      await expect(client.resolvePrimaryName(EXAMPLE_ADDRESS)).rejects.toThrow(
+      await expect(client.resolvePrimaryName(EXAMPLE_ADDRESS, 1)).rejects.toThrow(
         /Primary Name Resolution Failed/i,
       );
     });

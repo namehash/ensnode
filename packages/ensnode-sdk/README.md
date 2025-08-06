@@ -31,7 +31,7 @@ const { records } = await client.resolveRecords("vitalik.eth", {
 });
 
 // Resolution API (Primary Name Resolution)
-const { records } = await client.resolvePrimaryName("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
+const { records } = await client.resolvePrimaryName("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", 1);
 ```
 
 ### API Methods
@@ -47,12 +47,12 @@ Resolves records for an ENS name (Forward Resolution).
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
 
-##### `resolvePrimaryName(address, chainId?)`
+##### `resolvePrimaryName(address, chainId)`
 
 Resolves the primary name of a specified address (Reverse Resolution).
 
 - `address`: The Address whose Primary Name to resolve
-- `chainId`: Optional chain id within which to query the address' ENSIP-19 Multichain Primary Name (defaulting to Ethereum Mainnet [1])
+- `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
 
 ### Configuration
 

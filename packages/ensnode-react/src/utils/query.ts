@@ -27,7 +27,7 @@ export const queryKeys = {
   resolutions: (url: string) => [...queryKeys.all(url), "resolution"] as const,
   records: (url: string, name: string, selection: ResolverRecordsSelection) =>
     [...queryKeys.resolutions(url), "records", name, selection] as const,
-  primaryName: (url: string, address: string, chainId?: number) =>
+  primaryName: (url: string, address: string, chainId: number) =>
     [...queryKeys.resolutions(url), "primaryName", address, chainId] as const,
 };
 
@@ -55,7 +55,7 @@ export function createRecordsQueryOptions<SELECTION extends ResolverRecordsSelec
 export function createPrimaryNameQueryOptions(
   config: ENSNodeConfig,
   address: `0x${string}`,
-  chainId?: number,
+  chainId: number,
 ) {
   return {
     queryKey: queryKeys.primaryName(config.client.url.href, address, chainId),
