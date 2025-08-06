@@ -10,7 +10,7 @@ export interface RpcConfig {
    * For nominal indexing behavior, must be an endpoint with high rate limits.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
   url: URL;
 
@@ -43,7 +43,7 @@ export interface ENSIndexerConfig {
    * ENSAdmin with an entry for this instance of ENSNode, identified by {@link ensNodePublicUrl}.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
   ensAdminUrl: URL;
 
@@ -53,7 +53,7 @@ export interface ENSIndexerConfig {
    * ENSAdmin will use this url to connect to the ENSNode api for querying state about the ENSNode instance.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
   ensNodePublicUrl: URL;
 
@@ -66,7 +66,7 @@ export interface ENSIndexerConfig {
    * networking to minimize latency.
    *
    * Invariant:
-   * - The URL must be a valid URL. localhost urls are allowed (and expected).
+   * - localhost urls are allowed (and expected).
    */
   ensRainbowUrl: URL;
 
@@ -149,23 +149,19 @@ export interface ENSIndexerConfig {
   /**
    * Configuration for each indexable RPC, keyed by chain id.
    *
-   * Note: There may be some {@link RpcConfig} values preset for
-   * the chain IDs that are not included in {@link indexedChainIds}.
-   *
    * Invariants:
-   * - Each key must be a {@link Chain} value.
    * - Each value in {@link indexedChainIds} is guaranteed to
    *   have its {@link RpcConfig} included here.
+   * - Note: There may be some {@link RpcConfig} values preset for
+   *   chain IDs that are not included in {@link indexedChainIds}. In other words, the keys
+   *   of {@link rpcConfigs} is a superset of {@link indexedChainIds}.
    */
   rpcConfigs: Map<ChainId, RpcConfig>;
 
   /**
    * Indexed Chain IDs
    *
-   * Includes the Chain ID for each chain being indexed.
-   *
-   * Invariants:
-   * - Only positive integer values matching {@link ChainId}
+   * Includes the {@link ChainId} for each chain being indexed.
    */
   indexedChainIds: Set<ChainId>;
 

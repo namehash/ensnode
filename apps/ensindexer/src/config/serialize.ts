@@ -49,11 +49,13 @@ function redactENSIndexerConfig(config: ENSIndexerConfig): ENSIndexerConfig {
 }
 
 /**
- * Serialize {@link ENSIndexerConfig} objet.
+ * Serialize redacted {@link ENSIndexerConfig} object.
  *
  * Guaranteed to have all sensitive values redacted prior serialization.
  */
-export function serializeENSIndexerConfig(config: ENSIndexerConfig): SerializedENSIndexerConfig {
+export function serializeRedactedENSIndexerConfig(
+  config: ENSIndexerConfig,
+): SerializedENSIndexerConfig {
   const redactedConfig = redactENSIndexerConfig(config);
 
   return {

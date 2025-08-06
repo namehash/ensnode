@@ -27,9 +27,6 @@ export type UnixTimestamp = number;
 
 /**
  * Represents a URL that is used for RPC endpoints.
- *
- * Invariants:
- * - The URL must be a valid URL (localhost urls are allowed)
  */
 export type RpcUrl = URL;
 

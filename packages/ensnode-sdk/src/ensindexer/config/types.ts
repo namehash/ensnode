@@ -72,9 +72,6 @@ export interface ENSIndexerPublicConfig {
    *
    * For best performance, ENSRainbow should be colocated with ENSIndexer and
    * use private/internal networking to minimize latency.
-   *
-   * Invariant:
-   * - The URL must be a valid URL. localhost urls are allowed (and expected).
    */
   ensRainbowUrl: URL;
 
@@ -136,10 +133,7 @@ export interface ENSIndexerPublicConfig {
   /**
    * Indexed Chain IDs
    *
-   * Includes the Chain ID for each chain being indexed.
-   *
-   * Invariants:
-   * - Only positive integer values matching {@link ChainId}
+   * Includes the {@link ChainId} for each chain being indexed.
    */
   indexedChainIds: Set<ChainId>;
 

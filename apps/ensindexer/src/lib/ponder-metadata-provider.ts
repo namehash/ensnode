@@ -23,20 +23,12 @@ export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdF
 // setup ENSRainbow version fetching
 export const fetchEnsRainbowVersion = async (): Promise<EnsRainbow.VersionInfo> => {
   const ensRainbowApiClient = getENSRainbowApiClient();
+  const versionResponse = await ensRainbowApiClient.version();
 
-  try {
-    const versionResponse = await ensRainbowApiClient.version();
-    return {
-      version: versionResponse.versionInfo.version,
-      schema_version: versionResponse.versionInfo.schema_version,
-    };
-  } catch (error) {
-    console.error("Failed to fetch ENSRainbow version", error);
-    return {
-      version: "unknown",
-      schema_version: 0,
-    };
-  }
+  return {
+    version: versionResponse.versionInfo.version,
+    schema_version: versionResponse.versionInfo.schema_version,
+  };
 };
 
 // setup prometheus metrics fetching

@@ -1,4 +1,4 @@
-import { serializeENSIndexerConfig } from "./serialize";
+import { serializeRedactedENSIndexerConfig } from "./serialize";
 import { ENSIndexerConfig } from "./types";
 
 /**
@@ -32,7 +32,7 @@ function ENSIndexerConfigJSONReplacer(key: string, value: unknown) {
  */
 export function prettyPrintRedactedConfig(config: ENSIndexerConfig) {
   // Serialized redacted ENSIndexerConfig object.
-  const serializedConfig = serializeENSIndexerConfig(config);
+  const serializedConfig = serializeRedactedENSIndexerConfig(config);
 
   // Stringify serializedConfig using special replacer function.
   const configString = JSON.stringify(serializedConfig, ENSIndexerConfigJSONReplacer, 2);
