@@ -361,12 +361,17 @@ describe("config", () => {
     it("returns the chains if it is a valid object", async () => {
       vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
       const config = await getConfig();
-      expect(config.rpcConfigs).toStrictEqual({
-        1: {
-          url: new URL(VALID_RPC_URL),
-          maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
-        } satisfies RpcConfig,
-      });
+      expect(config.rpcConfigs).toStrictEqual(
+        new Map([
+          [
+            1,
+            {
+              url: new URL(VALID_RPC_URL),
+              maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
+            } satisfies RpcConfig,
+          ],
+        ]),
+      );
     });
 
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
@@ -379,13 +384,13 @@ describe("config", () => {
     it("returns the RPC_REQUEST_RATE_LIMIT_1 if it is a valid number", async () => {
       vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", "100");
       const config = await getConfig();
-      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(100);
+      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(100);
     });
 
     it("returns the default if it is not set", async () => {
       vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", undefined);
       const config = await getConfig();
-      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(DEFAULT_RPC_RATE_LIMIT);
+      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(DEFAULT_RPC_RATE_LIMIT);
     });
   });
 

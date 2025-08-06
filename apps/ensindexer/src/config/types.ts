@@ -1,11 +1,5 @@
 import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
-import type {
-  Blockrange,
-  ChainId,
-  ChainIdString,
-  IndexedChainIds,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -155,21 +149,25 @@ export interface ENSIndexerConfig {
   /**
    * Configuration for each indexable RPC, keyed by chain id.
    *
+   * Note: There may be some {@link RpcConfig} values preset for
+   * the chain IDs that are not included in {@link indexedChainIds}.
+   *
    * Invariants:
-   * - Each key (chain id) must be a {@link ChainIdString} value.
+   * - Each key must be a {@link Chain} value.
+   * - Each value in {@link indexedChainIds} is guaranteed to
+   *   have its {@link RpcConfig} included here.
    */
-  rpcConfigs: Record<ChainIdString, RpcConfig>;
+  rpcConfigs: Map<ChainId, RpcConfig>;
 
   /**
    * Indexed Chain IDs
    *
-   * Includes Chain ID for each chain being indexed.
+   * Includes the Chain ID for each chain being indexed.
    *
    * Invariants:
-   * - No duplicates
    * - Only positive integer values matching {@link ChainId}
    */
-  indexedChainIds: IndexedChainIds;
+  indexedChainIds: Set<ChainId>;
 
   /**
    * The database connection string for the indexer, if present. When undefined
@@ -245,5 +243,5 @@ export interface ENSIndexerEnvironment {
     startBlock: string | undefined;
     endBlock: string | undefined;
   };
-  rpcConfigs: Record<number, RpcConfigEnvironment>;
+  rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
 }

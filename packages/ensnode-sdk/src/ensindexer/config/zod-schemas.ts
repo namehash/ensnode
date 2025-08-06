@@ -17,7 +17,7 @@ import {
 } from "../../shared/zod-schemas";
 import { isSubgraphCompatible } from "./helpers";
 import { PluginName } from "./types";
-import type { ENSIndexerPublicConfig, IndexedChainIds } from "./types";
+import type { ENSIndexerPublicConfig } from "./types";
 
 /**
  * Makes a schema for parsing {@link IndexedChainIds}.
@@ -66,15 +66,15 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
       error: `${valueLabel} is required and must be a non-empty string.`,
     });
 
-const makeNonEmptyString = (valueLabel: string = "Value") =>
+const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
 export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
   z.strictObject(
     {
-      nodejs: makeNonEmptyString(),
-      ponder: makeNonEmptyString(),
-      ensRainbow: makeNonEmptyString(),
+      nodejs: makeNonEmptyStringSchema(),
+      ponder: makeNonEmptyStringSchema(),
+      ensRainbow: makeNonEmptyStringSchema(),
       ensRainbowSchema: makePositiveIntegerSchema(),
     },
     {

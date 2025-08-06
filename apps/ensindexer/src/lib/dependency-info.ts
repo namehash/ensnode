@@ -1,10 +1,3 @@
-/**
- * Bootstrap helpers for ENSIndexer
- *
- * This library covers functionality useful during the ENSIndexer bootstrap phase,
- * when all dependencies are fetched and validated before ENSIndexer service
- * becomes operational and ready to be used.
- */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -68,7 +61,7 @@ export function getPackageVersion(packageName: string) {
 }
 
 /**
- * Get complete Version info for ENSIndexer app.
+ * Get complete {@link DependencyInfo} for ENSIndexer app.
  */
 export async function getDependencyInfo(): Promise<DependencyInfo> {
   const ensRainbowApiClient = getENSRainbowApiClient();

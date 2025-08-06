@@ -2,8 +2,7 @@ import config from "@/config";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
-import { buildENSIndexerPublicConfig } from "@/config/helpers";
-import { getDependencyInfo } from "@/lib/dependency-info";
+import { buildENSIndexerPublicConfig } from "@/config/public";
 import { serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import resolutionApi from "../lib/resolution-api";
 
@@ -14,17 +13,11 @@ app.use("*", otel());
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
-  // fetch the current state of dependency info
-  const dependencyInfo = await getDependencyInfo();
-
   // prepare the public config object, including dependency info
-  const publicConfig = buildENSIndexerPublicConfig(config, dependencyInfo);
-
-  // serialize the public config object
-  const serializedPublicConfig = serializeENSIndexerPublicConfig(publicConfig);
+  const publicConfig = await buildENSIndexerPublicConfig(config);
 
   // respond with the serialized public config object
-  return c.json(serializedPublicConfig);
+  return c.json(serializeENSIndexerPublicConfig(publicConfig));
 });
 
 // conditionally include experimental resolution api

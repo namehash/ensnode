@@ -32,17 +32,12 @@ export interface DependencyInfo {
 }
 
 /**
- * Indexed Chain IDs
- */
-export type IndexedChainIds = Set<ChainId>;
-
-/**
  * Complete public configuration object for ENSIndexer.
  *
  * We use parameter types to maintain fields layout and documentation across
  * the domain model and its serialized counterpart.
  */
-export interface ENSIndexerPublicConfig<URLType = URL, IndexedChainIdsType = IndexedChainIds> {
+export interface ENSIndexerPublicConfig {
   /**
    * The ENS namespace that ENSNode operates in the context of.
    *
@@ -58,11 +53,8 @@ export interface ENSIndexerPublicConfig<URLType = URL, IndexedChainIdsType = Ind
    * identified by {@link ensNodePublicUrl}.
    *
    * @see https://ensnode.io/ensadmin/overview/what-is-ensadmin
-   *
-   * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
    */
-  ensAdminUrl: URLType;
+  ensAdminUrl: URL;
 
   /**
    * The publicly accessible endpoint of the ENSNode API
@@ -70,11 +62,8 @@ export interface ENSIndexerPublicConfig<URLType = URL, IndexedChainIdsType = Ind
    *
    * ENSAdmin will use this url to connect to the ENSNode api for querying
    * state about the ENSNode instance.
-   *
-   * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
    */
-  ensNodePublicUrl: URLType;
+  ensNodePublicUrl: URL;
 
   /**
    * An ENSRainbow API Endpoint (ex: http://localhost:3223). ENSIndexer uses
@@ -87,7 +76,7 @@ export interface ENSIndexerPublicConfig<URLType = URL, IndexedChainIdsType = Ind
    * Invariant:
    * - The URL must be a valid URL. localhost urls are allowed (and expected).
    */
-  ensRainbowUrl: URLType;
+  ensRainbowUrl: URL;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write
@@ -147,13 +136,12 @@ export interface ENSIndexerPublicConfig<URLType = URL, IndexedChainIdsType = Ind
   /**
    * Indexed Chain IDs
    *
-   * Includes Chain ID for each chain being indexed.
+   * Includes the Chain ID for each chain being indexed.
    *
    * Invariants:
-   * - No duplicates
    * - Only positive integer values matching {@link ChainId}
    */
-  indexedChainIds: IndexedChainIdsType;
+  indexedChainIds: Set<ChainId>;
 
   /**
    * A flag derived from the built config indicating whether ENSIndexer is operating in a

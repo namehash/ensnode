@@ -1,16 +1,10 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { derive_indexedChainIds, derive_isSubgraphCompatible } from "@/config/derived-params";
-import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
-import {
-  invariant_experimentalResolutionNeedsReverseResolversPlugin,
-  invariant_globalBlockrange,
-  invariant_requiredDatasources,
-  invariant_reverseResolversPluginNeedsResolverRecords,
-  invariant_rpcConfigsSpecifiedForIndexedChains,
-  invariant_validContractConfigs,
-} from "@/config/validations";
+import { ENSNamespaceIds } from "@ensnode/datasources";
+import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
+import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
+
 import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_EXPERIMENTAL_RESOLUTION,
@@ -20,10 +14,17 @@ import {
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
-import { uniq } from "@/lib/lib-helpers";
-import { ENSNamespaceIds } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
+
+import { derive_indexedChainIds, derive_isSubgraphCompatible } from "./derived-params";
+import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
+import {
+  invariant_experimentalResolutionNeedsReverseResolversPlugin,
+  invariant_globalBlockrange,
+  invariant_requiredDatasources,
+  invariant_reverseResolversPluginNeedsResolverRecords,
+  invariant_rpcConfigsSpecifiedForIndexedChains,
+  invariant_validContractConfigs,
+} from "./validations";
 
 const chainIdSchema = z.number().int().min(1);
 
@@ -127,13 +128,19 @@ const PortSchema = z.coerce
 
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
-const RpcConfigsSchema = z.record(
-  z.string().transform(Number).pipe(chainIdSchema),
-  RpcConfigSchema,
-  {
+const RpcConfigsSchema = z
+  .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
     error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
-  },
-);
+  })
+  .transform((records) => {
+    const rpcConfigs = new Map<ChainId, RpcConfig>();
+
+    for (const [chianIdString, rpcConfig] of Object.entries(records)) {
+      rpcConfigs.set(deserializeChainId(chianIdString), rpcConfig);
+    }
+
+    return rpcConfigs;
+  });
 
 const DatabaseUrlSchema = z.union(
   [

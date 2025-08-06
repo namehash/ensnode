@@ -37,7 +37,7 @@ describe("ENSIndexer: Shared", () => {
       const serializedBlockRef = {
         timestamp: 1754390708,
         number: 123,
-      } as BlockRef;
+      } satisfies BlockRef;
 
       // act
       const result = deserializeBlockRef(serializedBlockRef);

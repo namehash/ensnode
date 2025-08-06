@@ -1,6 +1,5 @@
-import type { ENSIndexerConfig, RpcConfigEnvironment } from "@/config/types";
+import type { RpcConfigEnvironment } from "@/config/types";
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 
 export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");

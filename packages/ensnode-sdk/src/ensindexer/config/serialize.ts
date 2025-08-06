@@ -1,13 +1,12 @@
+import { ChainId } from "../../shared";
 import { serializeUrl } from "../../shared/serialize";
 import { SerializedENSIndexerPublicConfig, SerializedIndexedChainIds } from "./serialized-types";
-import { ENSIndexerPublicConfig, IndexedChainIds } from "./types";
+import { ENSIndexerPublicConfig } from "./types";
 
 /**
  * Serializes a {@link ChainConfig} object.
  */
-export function serializeIndexedChainIds(
-  indexedChainIds: IndexedChainIds,
-): SerializedIndexedChainIds {
+export function serializeIndexedChainIds(indexedChainIds: Set<ChainId>): SerializedIndexedChainIds {
   return Array.from(indexedChainIds);
 }
 /**
