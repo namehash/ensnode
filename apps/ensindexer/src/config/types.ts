@@ -1,6 +1,5 @@
-import { Blockrange } from "@/lib/types";
 import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
-import type { PluginName } from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -11,9 +10,9 @@ export interface RpcConfig {
    * For nominal indexing behavior, must be an endpoint with high rate limits.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
-  url: string;
+  url: URL;
 
   /**
    * The maximum number of RPC requests per second allowed for this chain, defaulting to
@@ -44,9 +43,9 @@ export interface ENSIndexerConfig {
    * ENSAdmin with an entry for this instance of ENSNode, identified by {@link ensNodePublicUrl}.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
-  ensAdminUrl: string;
+  ensAdminUrl: URL;
 
   /**
    * The publicly accessible endpoint of the ENSNode api (ex: http://localhost:42069).
@@ -54,9 +53,9 @@ export interface ENSIndexerConfig {
    * ENSAdmin will use this url to connect to the ENSNode api for querying state about the ENSNode instance.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
-  ensNodePublicUrl: string;
+  ensNodePublicUrl: URL;
 
   /**
    * An ENSRainbow API Endpoint (ex: http://localhost:3223). ENSIndexer uses ENSRainbow to 'heal'
@@ -67,20 +66,20 @@ export interface ENSIndexerConfig {
    * networking to minimize latency.
    *
    * Invariant:
-   * - The URL must be a valid URL. localhost urls are allowed (and expected).
+   * - localhost urls are allowed (and expected).
    */
-  ensRainbowEndpointUrl: string;
+  ensRainbowUrl: URL;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
    * tables in this schema.
    *
-   * The {@link ponderDatabaseSchema} must be unique per running instance of ENSIndexer (ponder will
+   * The {@link databaseSchemaName} must be unique per running instance of ENSIndexer (ponder will
    * enforce this with database locks). If multiple instances of ENSIndexer with the same
-   * {@link ponderDatabaseSchema} are running, only the first will successfully acquire the lock and begin
+   * {@link databaseSchemaName} are running, only the first will successfully acquire the lock and begin
    * indexing: the rest will crash.
    *
-   * If an ENSIndexer instance with the same configuration (including `ponderDatabaseSchema`) is
+   * If an ENSIndexer instance with the same configuration (including `databaseSchemaName`) is
    * started, and it successfully acquires the lock on this schema, it will continue indexing from
    * the current state.
    *
@@ -92,7 +91,7 @@ export interface ENSIndexerConfig {
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema identifier.
    */
-  ponderDatabaseSchema: string;
+  databaseSchemaName: string;
 
   /**
    * A set of {@link PluginName}s indicating which plugins to activate.
@@ -151,9 +150,20 @@ export interface ENSIndexerConfig {
    * Configuration for each indexable RPC, keyed by chain id.
    *
    * Invariants:
-   * - Each key (chain id) must be a number
+   * - Each value in {@link indexedChainIds} is guaranteed to
+   *   have its {@link RpcConfig} included here.
+   * - Note: There may be some {@link RpcConfig} values preset for
+   *   chain IDs that are not included in {@link indexedChainIds}. In other words, the keys
+   *   of {@link rpcConfigs} is a superset of {@link indexedChainIds}.
    */
-  rpcConfigs: Record<number, RpcConfig>;
+  rpcConfigs: Map<ChainId, RpcConfig>;
+
+  /**
+   * Indexed Chain IDs
+   *
+   * Includes the {@link ChainId} for each chain being indexed.
+   */
+  indexedChainIds: Set<ChainId>;
 
   /**
    * The database connection string for the indexer, if present. When undefined
@@ -215,11 +225,11 @@ export interface RpcConfigEnvironment {
  */
 export interface ENSIndexerEnvironment {
   port: string | undefined;
-  ponderDatabaseSchema: string | undefined;
+  databaseSchemaName: string | undefined;
   databaseUrl: string | undefined;
   namespace: string | undefined;
   plugins: string | undefined;
-  ensRainbowEndpointUrl: string | undefined;
+  ensRainbowUrl: string | undefined;
   ensNodePublicUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
@@ -229,5 +239,5 @@ export interface ENSIndexerEnvironment {
     startBlock: string | undefined;
     endBlock: string | undefined;
   };
-  rpcConfigs: Record<number, RpcConfigEnvironment>;
+  rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
 }

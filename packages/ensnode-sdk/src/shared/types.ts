@@ -2,7 +2,7 @@
  * Chain ID
  *
  * Represents a unique identifier for a chain.
- * Guaranteed to be a non-negative integer.
+ * Guaranteed to be a positive integer.
  **/
 export type ChainId = number;
 
@@ -27,9 +27,6 @@ export type UnixTimestamp = number;
 
 /**
  * Represents a URL that is used for RPC endpoints.
- *
- * Invariants:
- * - The URL must be a valid URL (localhost urls are allowed)
  */
 export type RpcUrl = URL;
 
@@ -70,16 +67,3 @@ export interface Blockrange<BlockType = BlockNumber> {
  * Guaranteed to be a non-negative integer.
  */
 export type Duration = number;
-
-/**
- * A PluginName is a unique id for a 'plugin': we use the notion of 'plugins' to describe bundles
- * of indexing logic.
- */
-export enum PluginName {
-  Subgraph = "subgraph",
-  Basenames = "basenames",
-  Lineanames = "lineanames",
-  ThreeDNS = "threedns",
-  ReverseResolvers = "reverse-resolvers",
-  Referrals = "referrals",
-}

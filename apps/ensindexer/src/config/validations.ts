@@ -2,11 +2,10 @@ import { DatasourceName } from "@ensnode/datasources";
 import { Address, isAddress } from "viem";
 import { z } from "zod/v4";
 
-import type { ENSIndexerConfig } from "@/config/types";
-import { uniq } from "@/lib/lib-helpers";
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
 type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
@@ -57,7 +56,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
     for (const datasourceName of datasourceNames) {
       const { chain } = datasources[datasourceName];
 
-      if (!config.rpcConfigs[chain.id]) {
+      if (!config.rpcConfigs.has(chain.id)) {
         ctx.issues.push({
           code: "custom",
           input: config,

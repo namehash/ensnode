@@ -1,14 +1,14 @@
 import config from "@/config";
+import { prettyPrintRedactedConfig } from "@/config/debug";
 import type { ENSIndexerConfig } from "@/config/types";
-import { prettyPrintConfig } from "@/lib/lib-config";
 import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
 import { ALL_PLUGINS, type AllPluginsMergedConfig } from "@/plugins";
 
 ////////
-// Log ENSIndexerConfig for debugging.
+// Log redacted ENSIndexerConfig for debugging.
 ////////
 
-console.log(`ENSIndexer running with config:\n${prettyPrintConfig(config)}`);
+prettyPrintRedactedConfig(config);
 
 ////////
 // Merge the active plugins' configs into a single ponder config.

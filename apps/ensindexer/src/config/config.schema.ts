@@ -1,16 +1,10 @@
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
-import { derive_isSubgraphCompatible } from "@/config/derived-params";
-import type { ENSIndexerConfig, ENSIndexerEnvironment } from "@/config/types";
-import {
-  invariant_experimentalResolutionNeedsReverseResolversPlugin,
-  invariant_globalBlockrange,
-  invariant_requiredDatasources,
-  invariant_reverseResolversPluginNeedsResolverRecords,
-  invariant_rpcConfigsSpecifiedForIndexedChains,
-  invariant_validContractConfigs,
-} from "@/config/validations";
+import { ENSNamespaceIds } from "@ensnode/datasources";
+import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
+import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
+
 import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_EXPERIMENTAL_RESOLUTION,
@@ -20,9 +14,17 @@ import {
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
-import { uniq } from "@/lib/lib-helpers";
-import { ENSNamespaceIds } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+
+import { derive_indexedChainIds, derive_isSubgraphCompatible } from "./derived-params";
+import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
+import {
+  invariant_experimentalResolutionNeedsReverseResolversPlugin,
+  invariant_globalBlockrange,
+  invariant_requiredDatasources,
+  invariant_reverseResolversPluginNeedsResolverRecords,
+  invariant_rpcConfigsSpecifiedForIndexedChains,
+  invariant_validContractConfigs,
+} from "./validations";
 
 const chainIdSchema = z.number().int().min(1);
 
@@ -36,11 +38,6 @@ const makeEnvStringBoolSchema = (envVarKey: string) =>
       }),
     )
     .transform((val) => val === "true");
-
-const makeUrlSchema = (envVarKey: string) =>
-  z.url({
-    error: `${envVarKey} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
-  });
 
 const makeBlockNumberSchema = (envVarKey: string) =>
   z.coerce
@@ -129,15 +126,21 @@ const PortSchema = z.coerce
   .max(65535, { error: "PORT must be an integer between 1 and 65535." })
   .default(DEFAULT_PORT);
 
-const EnsRainbowEndpointUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
+const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
-const RpcConfigsSchema = z.record(
-  z.string().transform(Number).pipe(chainIdSchema),
-  RpcConfigSchema,
-  {
+const RpcConfigsSchema = z
+  .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
     error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
-  },
-);
+  })
+  .transform((records) => {
+    const rpcConfigs = new Map<ChainId, RpcConfig>();
+
+    for (const [chianIdString, rpcConfig] of Object.entries(records)) {
+      rpcConfigs.set(deserializeChainId(chianIdString), rpcConfig);
+    }
+
+    return rpcConfigs;
+  });
 
 const DatabaseUrlSchema = z.union(
   [
@@ -166,13 +169,13 @@ const ENSIndexerConfigSchema = z
     globalBlockrange: BlockrangeSchema,
     ensNodePublicUrl: EnsNodePublicUrlSchema,
     ensAdminUrl: EnsAdminUrlSchema,
-    ponderDatabaseSchema: PonderDatabaseSchemaSchema,
+    databaseSchemaName: PonderDatabaseSchemaSchema,
     plugins: PluginsSchema,
     healReverseAddresses: HealReverseAddressesSchema,
     indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
     experimentalResolution: ExperimentalResolutionSchema,
     port: PortSchema,
-    ensRainbowEndpointUrl: EnsRainbowEndpointUrlSchema,
+    ensRainbowUrl: EnsRainbowUrlSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
   })
@@ -195,7 +198,6 @@ const ENSIndexerConfigSchema = z
    */
   .check(invariant_requiredDatasources)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
-  .check(invariant_globalBlockrange)
   .check(invariant_validContractConfigs)
   .check(invariant_reverseResolversPluginNeedsResolverRecords)
   .check(invariant_experimentalResolutionNeedsReverseResolversPlugin)
@@ -222,7 +224,10 @@ const ENSIndexerConfigSchema = z
    * }
    * ```
    */
-  .transform(derive_isSubgraphCompatible);
+  .transform(derive_isSubgraphCompatible)
+  .transform(derive_indexedChainIds)
+  // `invariant_globalBlockrange` has dependency on `derive_indexedChainIds`
+  .check(invariant_globalBlockrange);
 
 /**
  * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object

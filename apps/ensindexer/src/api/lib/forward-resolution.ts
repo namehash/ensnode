@@ -275,13 +275,13 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           // Invariant: ENSIndexer must have an rpcConfig for the `chainId` we're calling resolve() on.
-          const rpcConfig = config.rpcConfigs[chainId];
+          const rpcConfig = config.rpcConfigs.get(chainId);
           if (!rpcConfig) {
             throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
           }
 
           // create an un-cached publicClient
-          const publicClient = createPublicClient({ transport: http(rpcConfig.url) });
+          const publicClient = createPublicClient({ transport: http(rpcConfig.url.href) });
 
           // requireResolver() — validate behavior
           await withProtocolStepAsync(
