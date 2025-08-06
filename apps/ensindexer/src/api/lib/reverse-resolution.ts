@@ -1,9 +1,9 @@
 import {
   ChainId,
   DEFAULT_EVM_COIN_TYPE,
-  REVERSE_RESOLUTION_SELECTION,
+  Name,
+  ResolverRecordsSelection,
   ReverseResolutionProtocolStep,
-  ReverseResolutionRecordsResponse,
   TraceableENSProtocol,
   evmChainIdToCoinType,
   reverseName,
@@ -14,6 +14,10 @@ import { Address, isAddress, isAddressEqual } from "viem";
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
 import { withActiveSpanAsync } from "@/lib/auto-span";
+
+export const REVERSE_RESOLUTION_SELECTION = {
+  name: true,
+} as const satisfies ResolverRecordsSelection;
 
 const tracer = trace.getTracer("reverse-resolution");
 
@@ -29,7 +33,7 @@ export async function resolveReverse(
   address: Address,
   chainId: ChainId,
   options: { accelerate?: boolean } = { accelerate: true },
-): Promise<ReverseResolutionRecordsResponse | null> {
+): Promise<Name | null> {
   // trace for external consumers
   return withProtocolStepAsync(
     TraceableENSProtocol.ReverseResolution,
@@ -161,7 +165,7 @@ export async function resolveReverse(
 
           // finally, the records are valid for this address
           span.setAttribute("records", JSON.stringify(records));
-          return records;
+          return records.name;
         },
       ),
   );

@@ -37,7 +37,7 @@ export function possibleKnownOffchainLookupResolverDefersTo(
     const basenamesL1ResolverAddress = ensNamespace.ensroot.contracts.BasenamesL1Resolver
       ?.address as Address | undefined;
 
-    // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames plugin
+    // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames plugin,
     if (
       basenamesL1ResolverAddress &&
       isAddressEqual(resolverAddress, basenamesL1ResolverAddress) &&

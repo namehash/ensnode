@@ -1,4 +1,4 @@
-import { CoinType } from "../ens";
+import { CoinType, Name } from "../ens";
 import { ResolverRecordsSelection } from "./resolver-records-selection";
 
 /**
@@ -10,7 +10,7 @@ export type ResolverRecordsResponseBase = {
   /**
    * The name record.
    */
-  name: string | null;
+  name: Name | null;
 
   /**
    * Address records, keyed by CoinType.
@@ -37,7 +37,7 @@ export type ResolverRecordsResponseBase = {
  *
  * // results in the following type
  * type Response = {
- *   readonly name: string | null;
+ *   readonly name: Name | null;
  *   readonly addresses: Record<"60", string | null>;
  *   readonly texts: Record<"avatar" | "com.twitter", string | null>;
  * }

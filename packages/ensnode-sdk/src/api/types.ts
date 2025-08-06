@@ -1,9 +1,9 @@
+import { Name } from "../ens";
 import type {
   ForwardResolutionArgs,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   ReverseResolutionArgs,
-  ReverseResolutionRecordsResponse,
 } from "../resolution";
 import type { ProtocolTrace } from "../tracing";
 
@@ -49,5 +49,5 @@ export interface ResolvePrimaryNameRequest extends ReverseResolutionArgs, Tracea
  * Resolve Primary Name Response Type
  */
 export interface ResolvePrimaryNameResponse extends TraceableResponse {
-  records: ReverseResolutionRecordsResponse | null;
+  name: Name | null;
 }

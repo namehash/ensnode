@@ -100,12 +100,12 @@ app.get("/primary-name/:address/:chainId", async (c) => {
       return c.json({ error: "chainId must be a valid number" }, 400);
     }
 
-    const { result: records, trace } = await captureTrace(() => resolveReverse(address, chainId));
+    const { result: name, trace } = await captureTrace(() => resolveReverse(address, chainId));
 
     const showTrace = c.req.query("trace") === "true";
 
     const response = {
-      records,
+      name,
       ...(showTrace && { trace }),
     } satisfies ResolvePrimaryNameResponse;
 

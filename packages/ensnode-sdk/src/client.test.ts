@@ -73,6 +73,22 @@ describe("ENSNodeClient", () => {
       expect(response).toEqual(mockResponse);
     });
 
+    it("should include trace if specified", async () => {
+      const mockResponse = { records: EXAMPLE_RECORDS_RESPONSE, trace: [] };
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
+
+      const client = new ENSNodeClient();
+      const response = await client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION, true);
+
+      const expectedUrl = new URL(`/api/resolve/records/${EXAMPLE_NAME}`, DEFAULT_ENSNODE_API_URL);
+      expectedUrl.searchParams.set("addresses", EXAMPLE_SELECTION.addresses.join(","));
+      expectedUrl.searchParams.set("texts", EXAMPLE_SELECTION.texts.join(","));
+      expectedUrl.searchParams.set("trace", "true");
+
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(response).toEqual(mockResponse);
+    });
+
     it("should throw error when API returns error", async () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
@@ -85,7 +101,7 @@ describe("ENSNodeClient", () => {
 
   describe("resolvePrimaryName", () => {
     it("should make correct API call for primary name resolution", async () => {
-      const mockResponse = { records: { name: EXAMPLE_NAME } };
+      const mockResponse = { name: EXAMPLE_NAME };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
       const client = new ENSNodeClient();
@@ -100,20 +116,21 @@ describe("ENSNodeClient", () => {
       expect(response).toEqual(mockResponse);
     });
 
-    it("should include chainId parameter when provided", async () => {
-      // TODO: integrate with default-case expectations from resolution api and test behavior
-
-      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ records: {} }) });
+    it("should include trace if specified", async () => {
+      const mockResponse = { name: EXAMPLE_NAME, trace: [] };
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
       const client = new ENSNodeClient();
-      await client.resolvePrimaryName(EXAMPLE_ADDRESS, 10);
+      const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1, true);
 
       const expectedUrl = new URL(
-        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/10`,
+        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
         DEFAULT_ENSNODE_API_URL,
       );
+      expectedUrl.searchParams.set("trace", "true");
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(response).toEqual(mockResponse);
     });
 
     it("should throw error when API returns error", async () => {
