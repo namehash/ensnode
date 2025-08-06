@@ -52,7 +52,6 @@ function DisplayNameRecords() {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  if (!data) return <div>No data</div>;
 
   return (
     <div>
@@ -74,25 +73,22 @@ function DisplayNameRecords() {
 #### Primary Name Resolution — `usePrimaryName`
 
 ```tsx
+import { mainnet } from 'viem/chains';
 import { usePrimaryName } from "@ensnode/ensnode-react";
 
 function DisplayPrimaryNameAndAvatar() {
   const { data, isLoading, error } = usePrimaryName({
     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    chainId: 1, // Ethereum Mainnet
+    chainId: mainnet.id,
   });
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  if (!data) return <div>No primary name set</div>;
 
   return (
     <div>
       <h3>Primary Name (for Mainnet)</h3>
-      <p>{data.records.name}</p>
-
-      <h3>Avatar Record (for Mainnet)</h3>
-      <p>{data.records.texts.avatar}</p>
+      <p>{data.name ?? 'No Primary Name'}</p>
     </div>
   );
 }

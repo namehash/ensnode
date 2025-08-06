@@ -28,7 +28,6 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  *
  *   if (isLoading) return <div>Loading...</div>;
  *   if (error) return <div>Error: {error.message}</div>;
- *   if (!data) return <div>No data</div>;
  *
  *   return (
  *     <div>

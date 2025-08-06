@@ -23,15 +23,11 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  *
  *   if (isLoading) return <div>Loading...</div>;
  *   if (error) return <div>Error: {error.message}</div>;
- *   if (!data) return <div>No primary name set</div>;
  *
  *   return (
  *     <div>
  *       <h3>Primary Name (for Mainnet)</h3>
- *       <p>{data.records.name}</p>
- *
- *       <h3>Avatar Record (for Mainnet)</h3>
- *       <p>{data.records.texts.avatar}</p>
+ *       <p>{data.name ?? "No Primary Name"}</p>
  *     </div>
  *   );
  * }
