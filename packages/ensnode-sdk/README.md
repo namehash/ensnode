@@ -24,36 +24,35 @@ import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 
 const client = new ENSNodeClient();
 
-// Resolution API (Forward Resolution)
-const { records } = await client.resolveForward("vitalik.eth", {
+// Resolution API (Records Resolution)
+const { records } = await client.resolveRecords("vitalik.eth", {
   addresses: [60],
   texts: ["avatar", "com.twitter"],
 });
 
-// Resolution API (Reverse Resolution)
-const { records } = await client.resolveReverse("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
+// Resolution API (Primary Name Resolution)
+const { records } = await client.resolvePrimaryName("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
 ```
 
 ### API Methods
 
 #### Resolution API
 
-##### `resolveForward(name, selection?)`
+##### `resolveRecords(name, selection?)`
 
-Resolves the selected records for the provided Name.
+Resolves records for an ENS name (Forward Resolution).
 
-- `name`: The ENS name to resolve
-- `selection`: Optional object specifying what records to resolve:
-  - `name`: Include canonical name
+- `name`: The ENS Name whose records to resolve
+- `selection`: Optional selection of Resolver records:
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
 
-##### `resolveAddress(address, chainId?)`
+##### `resolvePrimaryName(address, chainId?)`
 
-Resolves the Primary Name on the specified `chainId` for the provided Address.
+Resolves the primary name of a specified address (Reverse Resolution).
 
-- `address`: The address to resolve
-- `chainId`: Optional chain ID (defaults to 1 for Ethereum mainnet)
+- `address`: The Address whose Primary Name to resolve
+- `chainId`: Optional chain id within which to query the address' ENSIP-19 Multichain Primary Name (defaulting to Ethereum Mainnet [1])
 
 ### Configuration
 

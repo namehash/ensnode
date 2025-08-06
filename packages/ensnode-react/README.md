@@ -36,13 +36,13 @@ That's it! No need to wrap with `QueryClientProvider` or create a `QueryClient` 
 
 ### 2. Use the Hooks
 
-#### Forward Resolution — `useForwardResolution`
+#### Records Resolution — `useRecords`
 
 ```tsx
-import { useForwardResolution } from "@ensnode/ensnode-react";
+import { useRecords } from "@ensnode/ensnode-react";
 
 function DisplayNameRecords() {
-  const { data, isLoading, error } = useForwardResolution({
+  const { data, isLoading, error } = useRecords({
     name: "vitalik.eth",
     selection: {
       addresses: [60], // ETH
@@ -71,13 +71,13 @@ function DisplayNameRecords() {
 }
 ```
 
-#### Reverse Resolution — `useReverseResolution`
+#### Primary Name Resolution — `usePrimaryName`
 
 ```tsx
-import { useReverseResolution } from "@ensnode/ensnode-react";
+import { usePrimaryName } from "@ensnode/ensnode-react";
 
 function DisplayPrimaryNameAndAvatar() {
-  const { data, isLoading, error } = useReverseResolution({
+  const { data, isLoading, error } = usePrimaryName({
     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     chainId: 1, // Ethereum Mainnet
   });
@@ -128,22 +128,22 @@ const config = createConfig({
 });
 ```
 
-### `useForwardResolution`
+### `useRecords`
 
-Hook for Forward Resolution (resolving records from an ENS name).
+Hook for resolving records for an ENS name (Forward Resolution).
 
 #### Parameters
 
-- `name`: The ENS name to resolve
-- `selection`: Optional selection of what records to resolve
-  - `addresses`: Array of coin types to resolve
+- `name`: The ENS Name whose records to resolve
+- `selection`: Optional selection of Resolver records
+  - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
 - `query`: TanStack Query options for customization
 
 #### Example
 
 ```tsx
-const { data, isLoading, error, refetch } = useForwardResolution({
+const { data, isLoading, error, refetch } = useRecords({
   name: "example.eth",
   selection: {
     addresses: [60], // ETH
@@ -155,20 +155,20 @@ const { data, isLoading, error, refetch } = useForwardResolution({
 });
 ```
 
-### `useReverseResolution`
+### `usePrimaryName`
 
-Hook for Reverse Resolution (resolving Primary Name for a given `address` on a specified `chainId`).
+Hook for resolving the primary name of a specified address (Reverse Resolution).
 
 #### Parameters
 
-- `address`: The address whose Primary Name to resolve
-- `chainId`: Optional chain ID (defaults to 1 for Ethereum mainnet)
+- `address`: The Address whose Primary Name to resolve
+- `chainId`: Optional chain id within which to query the address' ENSIP-19 Multichain Primary Name (defaulting to Ethereum Mainnet [1])
 - `query`: TanStack Query options for customization
 
 #### Example
 
 ```tsx
-const { data, isLoading, error, refetch } = useReverseResolution({
+const { data, isLoading, error, refetch } = usePrimaryName({
   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   chainId: 10, // Optimism
 });
@@ -232,7 +232,7 @@ Queries only execute if all required variables are provided:
 const [address, setAddress] = useState("");
 
 // only executes when address is truthy
-const { data } = useReverseResolution({ address });
+const { data } = usePrimaryName({ address });
 ```
 
 You can also conditionally enable/disable queries based on your own logic:
@@ -240,7 +240,7 @@ You can also conditionally enable/disable queries based on your own logic:
 ```tsx
 const [showPrimaryName, setShowPrimaryName] = useState(false);
 
-const { data } = useReverseResolution({
+const { data } = usePrimaryName({
   address,
   query: { enabled: showPrimaryName },
 });
@@ -253,9 +253,9 @@ resolving the Primary Name of an address within the context of a specific `chain
 
 ```tsx
 function ShowMultichainPrimaryNames({ address }: { address: Address }) {
-  const mainnet = useReverseResolution({ address, chainId: 1 });
-  const optimism = useReverseResolution({ address, chainId: 10 });
-  const polygon = useReverseResolution({ address, chainId: 137 });
+  const mainnet = usePrimaryName({ address, chainId: 1 });
+  const optimism = usePrimaryName({ address, chainId: 10 });
+  const polygon = usePrimaryName({ address, chainId: 137 });
 
   return (
     <div>
@@ -272,7 +272,7 @@ function ShowMultichainPrimaryNames({ address }: { address: Address }) {
 Use the `error` and `isError` result parameters to handle error states in your application.
 
 ```tsx
-const { data, error, isError } = useForwardResolution({ name: "vitalik.eth" });
+const { data, error, isError } = useRecords({ name: "vitalik.eth" });
 
 if (isError) {
   return <div>Failed to resolve: {error.message}</div>;
