@@ -131,7 +131,7 @@ Hook for resolving records for an ENS name (Forward Resolution).
 #### Parameters
 
 - `name`: The ENS Name whose records to resolve
-- `selection`: Optional selection of Resolver records
+- `selection`: Optional selection of Resolver records to resolve
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
 - `query`: Optional TanStack Query options for customization

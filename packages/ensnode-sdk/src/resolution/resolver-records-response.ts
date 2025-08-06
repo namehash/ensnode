@@ -8,17 +8,20 @@ import { ResolverRecordsSelection } from "./resolver-records-selection";
  */
 export type ResolverRecordsResponseBase = {
   /**
-   * The name record, relevant in the context of Reverse Resolution. Null if no name record is set.
+   * The name record, relevant in the context of Reverse Resolution.
+   * Null if no name record is set.
    */
   name: Name | null;
 
   /**
-   * Address records, keyed by CoinType. Null if no record for the specified CoinType is set.
+   * Address records, keyed by CoinType.
+   * Value is null if no record for the specified CoinType is set.
    */
   addresses: Record<CoinType, string | null>;
 
   /**
-   * Text records, keyed by key. Null if no record for the specified key is set.
+   * Text records, keyed by key.
+   * Value is null if no record for the specified key is set.
    */
   texts: Record<string, string | null>;
 };
