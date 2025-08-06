@@ -1,22 +1,22 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ConfigParameter, UseReverseResolutionParameters } from "../types";
-import { createReverseResolutionQueryOptions } from "../utils/query";
+import type { ConfigParameter, UsePrimaryNameParameters } from "../types";
+import { createPrimaryNameQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 
 /**
- * Hook to resolve an address to its primary name (reverse resolution)
+ * Resolves the primary name of a specified address (Reverse Resolution).
  *
  * @param parameters - Configuration for the address resolution
  * @returns Query result with resolved primary name
  *
  * @example
  * ```typescript
- * import { useReverseResolution } from "@ensnode/ensnode-react";
+ * import { usePrimaryName } from "@ensnode/ensnode-react";
  *
  * function DisplayPrimaryNameAndAvatar() {
- *   const { data, isLoading, error } = useReverseResolution({
+ *   const { data, isLoading, error } = usePrimaryName({
  *     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
  *     chainId: 1, // Ethereum Mainnet
  *   });
@@ -37,12 +37,12 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  * }
  * ```
  */
-export function useReverseResolution(parameters: UseReverseResolutionParameters & ConfigParameter) {
+export function usePrimaryName(parameters: UsePrimaryNameParameters & ConfigParameter) {
   const { address, chainId, query = {} } = parameters;
   const config = useENSNodeConfig(parameters);
 
   const queryOptions = address
-    ? createReverseResolutionQueryOptions(config, address, chainId)
+    ? createPrimaryNameQueryOptions(config, address, chainId)
     : { enabled: false, queryKey: ["disabled"] as const };
 
   const options = {

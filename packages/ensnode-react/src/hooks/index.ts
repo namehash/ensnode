@@ -1,3 +1,3 @@
 export * from "./useENSNodeConfig";
-export * from "./useForwardResolution";
-export * from "./useReverseResolution";
+export * from "./useRecords";
+export * from "./usePrimaryName";

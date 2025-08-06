@@ -1,10 +1,10 @@
 import type {
   ClientOptions,
-  ForwardResolutionRequest,
-  ForwardResolutionResponse,
+  ResolveRecordsRequest,
+  ResolveRecordsResponse,
   ResolverRecordsSelection,
-  ReverseResolutionRequest,
-  ReverseResolutionResponse,
+  ResolvePrimaryNameRequest,
+  ResolvePrimaryNameResponse,
 } from "@ensnode/ensnode-sdk";
 
 import type { QueryObserverOptions } from "@tanstack/react-query";
@@ -32,15 +32,15 @@ export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> 
 }
 
 /**
- * Parameters for the useForwardResolution hook
+ * Parameters for the useRecords hook
  */
-export interface UseForwardResolutionParameters<SELECTION extends ResolverRecordsSelection>
-  extends ForwardResolutionRequest<SELECTION>,
-    QueryParameter<ForwardResolutionResponse<SELECTION>> {}
+export interface UseRecordsParameters<SELECTION extends ResolverRecordsSelection>
+  extends ResolveRecordsRequest<SELECTION>,
+    QueryParameter<ResolveRecordsResponse<SELECTION>> {}
 
 /**
- * Parameters for the useReverseResolution hook
+ * Parameters for the usePrimaryName hook
  */
-export interface UseReverseResolutionParameters
-  extends ReverseResolutionRequest,
-    QueryParameter<ReverseResolutionResponse> {}
+export interface UsePrimaryNameParameters
+  extends ResolvePrimaryNameRequest,
+    QueryParameter<ResolvePrimaryNameResponse> {}
