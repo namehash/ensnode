@@ -309,37 +309,6 @@ export const indexingStatusMiddleware = createMiddleware(async (c) => {
           };
         }
 
-        const historicalTotalBlocks = metrics.getMetricValue("ponder_historical_total_blocks", {
-          chain: chainName,
-        });
-        const historicalCachedBlocks = metrics.getMetricValue("ponder_historical_cached_blocks", {
-          chain: chainName,
-        });
-        if (historicalTotalBlocks === undefined || historicalCachedBlocks === undefined) {
-          throw new Error(
-            `No ponder_historical_total_blocks or ponder_historical_cached_blocks metric found for chain ${chainName}`,
-          );
-        }
-
-        const historicalCompletedBlocks =
-          metrics.getMetricValue("ponder_historical_completed_blocks", {
-            chain: chainName,
-          }) ?? 0;
-
-        const hasSyncBackfill = historicalTotalBlocks > 0;
-
-        // If the chain has a backfill but hasn't completed any blocks,
-        // the chain has not started yet.
-        if (hasSyncBackfill && historicalCompletedBlocks === 0) {
-          return {
-            chainId,
-            result: {
-              status: "not_started" as const,
-              config: chainConfig,
-            } satisfies ChainIndexingStatus,
-          };
-        }
-
         const backfillEndBlock = chainBackfillEndBlocks?.[chainName];
         if (backfillEndBlock === undefined) {
           throw new Error(`No backfill end block found for chain ${chainName}`);
