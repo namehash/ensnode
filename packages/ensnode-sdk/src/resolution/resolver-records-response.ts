@@ -16,6 +16,10 @@ export type ResolverRecordsResponseBase = {
   /**
    * Address records, keyed by CoinType.
    * Value is null if no record for the specified CoinType is set.
+   *
+   * NOTE: ENS resolver address records can store arbitrary string values,
+   * including non-EVM addresses — always validate the record value against
+   * the format your application expects.
    */
   addresses: Record<CoinType, string | null>;
 
