@@ -26,13 +26,14 @@ import { mainnet } from 'viem/chains';
 const client = new ENSNodeClient();
 
 // Resolution API: Records Resolution
-const { records } = await client.resolveRecords("vitalik.eth", {
+const { records } = await client.resolveRecords("jesse.base.eth", {
   addresses: [evmChainIdToCoinType(mainnet.id)],
   texts: ["avatar", "com.twitter"],
 });
 
 // Resolution API: Primary Name Resolution
-const { records } = await client.resolvePrimaryName("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", mainnet.id);
+const { name } = await client.resolvePrimaryName("0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", mainnet.id);
+// name === 'jesse.base.eth'
 ```
 
 ### API Methods
@@ -51,8 +52,8 @@ Resolves records for an ENS name (Forward Resolution), via ENSNode, which implem
 ```ts
 import { mainnet, base } from 'viem/chains';
 
-const { records } = await client.resolveRecords("vitalik.eth", {
-  // Resolve vitalik.eth's ETH Mainnet Address (if set) and Base Address (if set)
+const { records } = await client.resolveRecords("jesse.base.eth", {
+  // Resolve jesse.base.eth's ETH Mainnet Address (if set) and Base Address (if set)
   addresses: [evmChainIdToCoinType(mainnet.id), evmChainIdToCoinType(base.id)],
   // or pass the CoinTypes directly if you know them
   // addresses: [60, 2147492101],
@@ -70,8 +71,8 @@ Resolves the primary name of a provided address on the specified chainId (Revers
 ```ts
 import { mainnet } from 'viem/chains';
 
-// Resolve the Primary Name of 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 on ETH Mainnet
-const { name } = await client.resolvePrimaryName("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", mainnet.id);
+// Resolve the Primary Name of 0x2211d1D0020DAEA8039E46Cf1367962070d77DA9 on ETH Mainnet
+const { name } = await client.resolvePrimaryName("0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", mainnet.id);
 ```
 
 ### Configuration

@@ -19,9 +19,9 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  *
  * function DisplayNameRecords() {
  *   const { data, isLoading, error } = useRecords({
- *     name: "vitalik.eth",
+ *     name: "jesse.base.eth",
  *     selection: {
- *       addresses: [60], // ETH
+ *       addresses: [60], // ETH CoinType
  *       texts: ["avatar", "com.twitter"]
  *     }
  *   });

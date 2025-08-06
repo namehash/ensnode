@@ -34,7 +34,7 @@ export interface ClientOptions {
  * const client = new ENSNodeClient();
  *
  * // Use resolution methods
- * const { records } = await client.resolveRecords("vitalik.eth", {
+ * const { records } = await client.resolveRecords("jesse.base.eth", {
  *   addresses: [60],
  *   texts: ["avatar"]
  * });
@@ -80,7 +80,7 @@ export class ENSNodeClient {
    *
    * @example
    * ```typescript
-   * const { records } = await client.resolveRecords("vitalik.eth", {
+   * const { records } = await client.resolveRecords("jesse.base.eth", {
    *   addresses: [60],
    *   texts: ["avatar", "com.twitter"]
    * });
@@ -137,16 +137,13 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Resolve the address' Primary Name on Ethereum Mainnet
-   * const { records } = await client.resolvePrimaryName("0xabcd...", 1);
+   * const { name } = await client.resolvePrimaryName("0xabcd...", 1);
    *
-   * console.log(records);
-   * // {
-   * //   name: 'vitalik.eth',
-   * //   avatar: 'https://example.com/image.jpg',
-   * // }
+   * console.log(name);
+   * // 'jesse.base.eth'
    *
    * // Resolve the address' Primary Name on Optimism
-   * const { records } = await client.resolvePrimaryName("0xabcd...", 10);
+   * const { name } = await client.resolvePrimaryName("0xabcd...", 10);
    * ```
    */
   async resolvePrimaryName(
