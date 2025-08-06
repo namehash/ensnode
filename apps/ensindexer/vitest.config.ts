@@ -7,7 +7,4 @@ export default defineConfig({
       "@": resolve(__dirname, "./src"),
     },
   },
-  test: {
-    setupFiles: [resolve(__dirname, "test", "vitest.setup.ts")],
-  },
 });
