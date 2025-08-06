@@ -1,29 +1,21 @@
-import { SerializedBlockRef, deserializeBlockRef } from "../../shared";
+import { BlockRef } from "../../shared";
 
-export const earliestSerializedBlockRef = {
-  createdAt: "2022-10-31T23:59:59.999Z",
+export const earliestBlockRef = {
+  timestamp: 1667260799,
   number: 999,
-} satisfies SerializedBlockRef;
+} satisfies BlockRef;
 
-export const earliestBlockRef = deserializeBlockRef(earliestSerializedBlockRef);
-
-export const earlierSerializedBlockRef = {
-  createdAt: "2022-12-31T23:59:59.999Z",
+export const earlierBlockRef = {
+  timestamp: 1672531199,
   number: 1024,
-} satisfies SerializedBlockRef;
+} satisfies BlockRef;
 
-export const earlierBlockRef = deserializeBlockRef(earlierSerializedBlockRef);
-
-export const laterSerializedBlockRef = {
-  createdAt: "2023-01-01T00:00:00.000Z",
+export const laterBlockRef = {
+  timestamp: 1672531200,
   number: 1025,
-} satisfies SerializedBlockRef;
+} satisfies BlockRef;
 
-export const laterBlockRef = deserializeBlockRef(laterSerializedBlockRef);
-
-export const latestSerializedBlockRef = {
-  createdAt: "2023-02-22T22:22:22.222Z",
+export const latestBlockRef = {
+  timestamp: 1677104542,
   number: 1222,
-} satisfies SerializedBlockRef;
-
-export const latestBlockRef = deserializeBlockRef(latestSerializedBlockRef);
+} satisfies BlockRef;

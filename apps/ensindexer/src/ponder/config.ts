@@ -34,9 +34,11 @@ const ponderConfig = activePlugins.reduce(
 // Set indexing order strategy
 ////////
 
-// NOTE: Ponder uses the `multichain` strategy by default, so we enforce `omnichain` ordering here.
+// NOTE: Ponder uses the `omnichain` strategy by default, but we explicitly enforce `omnichain` ordering here.
 // ENSIndexer may be able to support multichain event ordering in the future, with additional testing,
 // but for simplicity only omnichain is currently supported at the moment.
+// For additional info see:
+// https://ponder.sh/docs/api-reference/ponder/config#guarantees
 ponderConfig.ordering = "omnichain";
 
 export default ponderConfig;

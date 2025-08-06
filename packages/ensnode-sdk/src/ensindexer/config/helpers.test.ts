@@ -4,7 +4,7 @@ import { PluginName } from "./types";
 
 describe("ENSIndexer: Config helpers", () => {
   describe("isSubgraphCompatible", () => {
-    it(`returns 'true' when only the '${PluginName.Subgraph}' plugins is active and no extended indexing features are on`, () => {
+    it(`returns 'true' when only the '${PluginName.Subgraph}' plugin is active and no extended indexing features are on`, () => {
       expect(
         isSubgraphCompatible({
           healReverseAddresses: false,

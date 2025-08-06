@@ -1,13 +1,12 @@
+import { ChainId } from "../../shared";
 import { serializeUrl } from "../../shared/serialize";
 import { SerializedENSIndexerPublicConfig, SerializedIndexedChainIds } from "./serialized-types";
-import { ENSIndexerPublicConfig, IndexedChainIds } from "./types";
+import { ENSIndexerPublicConfig } from "./types";
 
 /**
  * Serializes a {@link ChainConfig} object.
  */
-export function serializeIndexedChainIds(
-  indexedChainIds: IndexedChainIds,
-): SerializedIndexedChainIds {
+export function serializeIndexedChainIds(indexedChainIds: Set<ChainId>): SerializedIndexedChainIds {
   return Array.from(indexedChainIds);
 }
 /**
@@ -19,7 +18,7 @@ export function serializeENSIndexerPublicConfig(
   const {
     ensAdminUrl,
     ensNodePublicUrl,
-    ensRainbowEndpointUrl,
+    ensRainbowUrl,
     indexedChainIds,
     databaseSchemaName,
     experimentalResolution,
@@ -28,13 +27,13 @@ export function serializeENSIndexerPublicConfig(
     isSubgraphCompatible,
     namespace,
     plugins,
-    versionInfo,
+    dependencyInfo,
   } = config;
 
   return {
     ensAdminUrl: serializeUrl(ensAdminUrl),
     ensNodePublicUrl: serializeUrl(ensNodePublicUrl),
-    ensRainbowEndpointUrl: serializeUrl(ensRainbowEndpointUrl),
+    ensRainbowUrl: serializeUrl(ensRainbowUrl),
     indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     databaseSchemaName,
     experimentalResolution,
@@ -43,6 +42,6 @@ export function serializeENSIndexerPublicConfig(
     isSubgraphCompatible,
     namespace,
     plugins,
-    versionInfo,
+    dependencyInfo,
   } satisfies SerializedENSIndexerPublicConfig;
 }

@@ -1,13 +1,7 @@
-import { bigintMax, hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
+import { bigintMax, hasNullByte, stripNullBytes } from "@/lib/lib-helpers";
 import { describe, expect, it } from "vitest";
 
 describe("helpers", () => {
-  describe("uniq", () => {
-    it("should return unique elements from an array", () => {
-      expect(uniq([1, 2, 2, 3, 4, 4])).toEqual([1, 2, 3, 4]);
-    });
-  });
-
   describe("bigintMax", () => {
     it("should return the maximum bigint value", () => {
       expect(bigintMax(1n, 2n, 3n)).toBe(3n);

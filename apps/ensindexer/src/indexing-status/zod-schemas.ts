@@ -1,15 +1,23 @@
+/**
+ * All zod schemas we define must remain internal implementation details.
+ * We want the freedom to move away from zod in the future without impacting
+ * any users of the ensnode-sdk package.
+ *
+ * The only way to share Zod schemas is to re-export them from
+ * `./src/internal.ts` file.
+ */
 import {
+  ChainIdString,
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingFollowingStatus,
   ChainIndexingNotStartedStatus,
+  ChainIndexingStatus,
   Duration,
-  SerializedBlockRef,
-  SerializedChainIndexingStatuses,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
 import {
-  makeBlockNumberSchema,
+  makeBlockRefSchema,
   makeChainIdSchema,
   makeNonNegativeIntegerSchema,
 } from "@ensnode/ensnode-sdk/internal";
@@ -17,18 +25,7 @@ import z from "zod/v4";
 
 const makeChainNameSchema = (indexedChainNames: string[]) => z.enum(indexedChainNames);
 
-const PonderBlockRefSchema = z
-  .object({
-    number: makeBlockNumberSchema(),
-    timestamp: makeNonNegativeIntegerSchema(),
-  })
-  .transform(
-    (v) =>
-      ({
-        createdAt: new Date(v.timestamp * 1000).toISOString(),
-        number: v.number,
-      }) satisfies SerializedBlockRef,
-  );
+const PonderBlockRefSchema = makeBlockRefSchema();
 
 const PonderChainStatus = z.object({
   chainId: makeChainIdSchema(),
@@ -92,7 +89,7 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
         }),
     })
     .transform((v) => {
-      const serializedChainIndexingStatuses = {} as SerializedChainIndexingStatuses;
+      const serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
 
       for (const chainName of indexedChainNames) {
         const { chainsBlockRefs, chainsMetrics, chainsStatuses } = v;
@@ -121,7 +118,7 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
               startBlock: chainBlocksConfig.startBlock,
               endBlock: chainBlocksConfig.endBlock,
             },
-          } satisfies ChainIndexingNotStartedStatus<SerializedBlockRef>;
+          } satisfies ChainIndexingNotStartedStatus;
 
           // go to next iteration
           continue;
@@ -136,16 +133,19 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
             },
             latestIndexedBlock: chainStatusBlock,
             latestKnownBlock: chainStatusBlock,
-          } satisfies ChainIndexingCompletedStatus<SerializedBlockRef>;
+          } satisfies ChainIndexingCompletedStatus;
 
           // go to next iteration
           continue;
         }
 
-        if (isSyncRealtime) {
-          const approximateRealtimeDistance: Duration =
-            (Date.now() - Date.parse(chainStatusBlock.createdAt)) / 1000;
+        const nowUnixTimestamp = Math.floor(Date.now() / 1000);
+        const approximateRealtimeDistance: Duration = Math.max(
+          0,
+          nowUnixTimestamp - chainStatusBlock.timestamp,
+        );
 
+        if (isSyncRealtime) {
           serializedChainIndexingStatuses[`${chainId}`] = {
             status: "following",
             config: {
@@ -154,41 +154,7 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
             latestIndexedBlock: chainStatusBlock,
             latestKnownBlock: chainSyncBlock,
             approximateRealtimeDistance,
-          } satisfies ChainIndexingFollowingStatus<SerializedBlockRef>;
-
-          // go to next iteration
-          continue;
-        }
-
-        if (isSyncRealtime) {
-          const approximateRealtimeDistance: Duration =
-            (Date.now() - Date.parse(chainStatusBlock.createdAt)) / 1000;
-
-          serializedChainIndexingStatuses[`${chainId}`] = {
-            status: "following",
-            config: {
-              startBlock: chainBlocksConfig.startBlock,
-            },
-            latestIndexedBlock: chainStatusBlock,
-            latestKnownBlock: chainSyncBlock,
-            approximateRealtimeDistance,
-          } satisfies ChainIndexingFollowingStatus<SerializedBlockRef>;
-
-          // go to next iteration
-          continue;
-        }
-
-        const hasSyncBackfill = historicalTotalBlocks > 0;
-        // If the chain has a backfill but hasn't completed any blocks,
-        // the chain has not started yet.
-        if (hasSyncBackfill && historicalCompletedBlocks === 0) {
-          serializedChainIndexingStatuses[`${chainId}`] = {
-            status: "notStarted",
-            config: {
-              startBlock: chainBlocksConfig.startBlock,
-              endBlock: chainBlocksConfig.endBlock,
-            },
-          } satisfies ChainIndexingNotStartedStatus<SerializedBlockRef>;
+          } satisfies ChainIndexingFollowingStatus;
 
           // go to next iteration
           continue;
@@ -204,7 +170,7 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
           // During the backfill, the latestKnownBlock is the backfillEndBlock.
           latestKnownBlock: chainBackfillEndBlock,
           backfillEndBlock: chainBackfillEndBlock,
-        } satisfies ChainIndexingBackfillStatus<SerializedBlockRef>;
+        } satisfies ChainIndexingBackfillStatus;
       }
 
       return deserializeENSIndexerIndexingStatus({

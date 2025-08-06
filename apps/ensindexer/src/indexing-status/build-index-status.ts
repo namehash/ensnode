@@ -12,7 +12,7 @@ import { makePonderIndexingStatusSchema } from "@/indexing-status/zod-schemas";
 import { ENSIndexerIndexingStatus } from "@ensnode/ensnode-sdk";
 import { prettifyError } from "zod/v4";
 
-export const indexedChainNames = Object.keys(ponderConfig.chains) as [string, ...string[]];
+export const indexedChainNames = Object.keys(ponderConfig.chains) as string[];
 
 /**
  * A {@link Blockrange} for each indexed chain.

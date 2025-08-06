@@ -4,13 +4,14 @@ import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
 
 import config from "@/config";
+import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 import {
-  createEnsRainbowVersionFetcher,
   createFirstBlockToIndexByChainIdFetcher,
   createPonderStatusFetcher,
   createPrometheusMetricsFetcher,
 } from "@/lib/ponder-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { PrometheusMetrics, queryPonderMeta } from "@ensnode/ponder-metadata";
 import type { PonderMetadataProvider } from "@ensnode/ponder-subgraph";
 
@@ -20,7 +21,15 @@ export const fetchFirstBlockToIndexByChainId = createFirstBlockToIndexByChainIdF
 );
 
 // setup ENSRainbow version fetching
-export const fetchEnsRainbowVersion = createEnsRainbowVersionFetcher(config.ensRainbowEndpointUrl);
+export const fetchEnsRainbowVersion = async (): Promise<EnsRainbow.VersionInfo> => {
+  const ensRainbowApiClient = getENSRainbowApiClient();
+  const versionResponse = await ensRainbowApiClient.version();
+
+  return {
+    version: versionResponse.versionInfo.version,
+    schema_version: versionResponse.versionInfo.schema_version,
+  };
+};
 
 // setup prometheus metrics fetching
 export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.port);

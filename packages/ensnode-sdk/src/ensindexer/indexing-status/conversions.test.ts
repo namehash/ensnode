@@ -2,16 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deserializeENSIndexerIndexingStatus } from "./deserialize";
 import { serializeENSIndexerIndexingStatus } from "./serialize";
 import { SerializedENSIndexerIndexingStatus } from "./serialized-types";
-import {
-  earlierBlockRef,
-  earlierSerializedBlockRef,
-  earliestBlockRef,
-  earliestSerializedBlockRef,
-  laterBlockRef,
-  laterSerializedBlockRef,
-  latestBlockRef,
-  latestSerializedBlockRef,
-} from "./test-helpers";
+import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingNotStartedStatus,
@@ -60,18 +51,18 @@ describe("ENSIndexer: Indexing Status", () => {
           "1": {
             status: ChainIndexingStatusIds.Backfill,
             config: {
-              startBlock: earliestSerializedBlockRef,
+              startBlock: earliestBlockRef,
               endBlock: null,
             },
-            latestIndexedBlock: earlierSerializedBlockRef,
-            latestKnownBlock: latestSerializedBlockRef,
-            backfillEndBlock: latestSerializedBlockRef,
+            latestIndexedBlock: earlierBlockRef,
+            latestKnownBlock: latestBlockRef,
+            backfillEndBlock: latestBlockRef,
           },
           "8453": {
             status: ChainIndexingStatusIds.NotStarted,
             config: {
-              startBlock: earliestSerializedBlockRef,
-              endBlock: laterSerializedBlockRef,
+              startBlock: earliestBlockRef,
+              endBlock: laterBlockRef,
             },
           },
         },

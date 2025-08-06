@@ -1,6 +1,8 @@
-import { BlockRef, deserializeBlockNumber, deserializeBlockRef } from "@ensnode/ensnode-sdk";
+import { BlockRef, deserializeBlockNumber } from "@ensnode/ensnode-sdk";
+import { makeBlockRefSchema } from "@ensnode/ensnode-sdk/internal";
 import { PonderStatus, PrometheusMetrics } from "@ensnode/ponder-metadata";
 import { PublicClient } from "viem";
+import { prettifyError } from "zod/v4";
 import type {
   BlockNumber,
   Blockrange,
@@ -177,10 +179,13 @@ export async function fetchBlockRef(
   blockNumber: BlockNumber,
 ): Promise<BlockRef> {
   const block = await publicClient.getBlock({ blockNumber: BigInt(blockNumber) });
-  const blockCreatedAt = new Date(Date.parse(block.timestamp.toString()));
 
-  return deserializeBlockRef({
-    createdAt: blockCreatedAt.toISOString(),
-    number: Number(block.number),
-  });
+  const schema = makeBlockRefSchema();
+  const parsed = schema.safeParse(block);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize BlockRef:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
 }

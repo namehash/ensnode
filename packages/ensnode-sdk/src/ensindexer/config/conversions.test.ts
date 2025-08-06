@@ -12,15 +12,15 @@ describe("ENSIndexer: Config", () => {
         databaseSchemaName: "public",
         ensAdminUrl: new URL("https://admin.ensnode.io"),
         ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
-        ensRainbowEndpointUrl: new URL("https://api.ensrainbow.io"),
+        ensRainbowUrl: new URL("https://api.ensrainbow.io"),
         experimentalResolution: false,
         healReverseAddresses: false,
         indexAdditionalResolverRecords: false,
-        indexedChainIds: new Set([1, 10, 8453]),
+        indexedChainIds: new Set([1]),
         isSubgraphCompatible: true,
         namespace: "mainnet",
         plugins: [PluginName.Subgraph],
-        versionInfo: {
+        dependencyInfo: {
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
           nodejs: "v22.10.12",
@@ -36,8 +36,8 @@ describe("ENSIndexer: Config", () => {
         ...config,
         ensAdminUrl: "https://admin.ensnode.io/",
         ensNodePublicUrl: "https://api.alpha.ensnode.io/",
-        ensRainbowEndpointUrl: "https://api.ensrainbow.io/",
-        indexedChainIds: [1, 10, 8453],
+        ensRainbowUrl: "https://api.ensrainbow.io/",
+        indexedChainIds: [1],
       } satisfies SerializedENSIndexerPublicConfig);
 
       // bonus step: deserialize the serialized
@@ -54,7 +54,7 @@ describe("ENSIndexer: Config", () => {
       databaseSchemaName: "public",
       ensAdminUrl: "https://admin.ensnode.io",
       ensNodePublicUrl: "https://api.alpha.ensnode.io",
-      ensRainbowEndpointUrl: "https://api.ensrainbow.io",
+      ensRainbowUrl: "https://api.ensrainbow.io",
       experimentalResolution: false,
       healReverseAddresses: false,
       indexAdditionalResolverRecords: false,
@@ -62,7 +62,7 @@ describe("ENSIndexer: Config", () => {
       isSubgraphCompatible: true,
       namespace: "mainnet",
       plugins: [PluginName.Subgraph],
-      versionInfo: {
+      dependencyInfo: {
         ensRainbow: "0.32.0",
         ensRainbowSchema: 2,
         nodejs: "v22.10.12",
@@ -82,7 +82,7 @@ describe("ENSIndexer: Config", () => {
         ...serializedConfig,
         ensAdminUrl: new URL("https://admin.ensnode.io"),
         ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
-        ensRainbowEndpointUrl: new URL("https://api.ensrainbow.io"),
+        ensRainbowUrl: new URL("https://api.ensrainbow.io"),
         indexedChainIds: new Set([1, 10, 8453]),
       } satisfies ENSIndexerPublicConfig);
     });

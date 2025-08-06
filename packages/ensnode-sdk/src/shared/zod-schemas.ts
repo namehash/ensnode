@@ -1,25 +1,19 @@
 /**
- * Zod schemas can never be included in the NPM package for ENSNode SDK.
+ * All zod schemas we define must remain internal implementation details.
+ * We want the freedom to move away from zod in the future without impacting
+ * any users of the ensnode-sdk package.
  *
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
 import { ENSNamespaceIds } from "../ens";
-import type { BlockRef, ChainId, Datetime, Duration } from "./types";
+import type { BlockRef, ChainId, Datetime, Duration, UnixTimestamp } from "./types";
 
 /**
  * Zod `.check()` function input.
  */
 export type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
-
-/**
- * Parses value as a boolean.
- */
-export const makeBooleanSchema = (valueLabel: string = "Value") =>
-  z.boolean({
-    error: `${valueLabel} must be a boolean.`,
-  });
 
 /**
  * Parses a string value as a boolean.
@@ -65,20 +59,6 @@ export const makeDurationSchema = (valueLabel: string = "Value") =>
   makeNonNegativeIntegerSchema(valueLabel);
 
 /**
- * Parses value as a string.
- */
-export const makeStringSchema = (valueLabel: string = "Value") =>
-  z.string({ error: `${valueLabel} must be a string.` }).trim();
-
-/**
- * Parses a string value as a non-empty string.
- */
-export const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
-  makeStringSchema(valueLabel).nonempty({
-    error: `${valueLabel} must be a non-empty string.`,
-  });
-
-/**
  * Parses Chain ID
  *
  * {@link ChainId}
@@ -89,8 +69,11 @@ export const makeChainIdSchema = (valueLabel: string = "Chain ID") =>
 /**
  * Parses a string representation of {@link ChainId}.
  */
-export const makeChainIdStringSchema = (valueLabel: string = "Chain ID string") =>
-  z.string().transform(Number).pipe(makeChainIdSchema(valueLabel));
+export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") =>
+  z
+    .string({ error: `${valueLabel} must be a string representing a chain ID.` })
+    .pipe(z.coerce.number({ error: `${valueLabel} must represent a positive integer (>0).` }))
+    .pipe(makeChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
  * Parses an ISO 8601 string representations of {@link Datetime}
@@ -99,6 +82,12 @@ export const makeDatetimeSchema = (valueLabel: string = "Datetime string") =>
   z.iso
     .datetime({ error: `${valueLabel} must be a string in ISO 8601 format.` })
     .transform((v) => new Date(v));
+
+/**
+ * Parses value as {@link UnixTimestamp}.
+ */
+export const makeUnixTimestampSchema = (valueLabel: string = "Timestamp") =>
+  makeIntegerSchema(valueLabel);
 
 /**
  * Parses a string representations of {@link URL}
@@ -133,8 +122,8 @@ export const makeBlockNumberSchema = (valueLabel: string = "Block number") =>
 export const makeBlockRefSchema = (valueLabel: string = "Value") =>
   z.object(
     {
-      createdAt: makeDatetimeSchema(),
-      number: makeBlockNumberSchema(),
+      timestamp: makeUnixTimestampSchema(`${valueLabel}.timestamp`),
+      number: makeBlockNumberSchema(`${valueLabel}.number`),
     },
     {
       error: `${valueLabel} must be a valid BlockRef object.`,
@@ -149,4 +138,12 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
     error() {
       return `Invalid ${valueLabel}. Supported ENS namespace IDs are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
     },
+  });
+
+/**
+ * Parses a numeric value as a port number.
+ */
+export const makePortSchema = (valueLabel: string = "Port") =>
+  makePositiveIntegerSchema(valueLabel).max(65535, {
+    error: `${valueLabel} must be an integer between 1 and 65535.`,
   });

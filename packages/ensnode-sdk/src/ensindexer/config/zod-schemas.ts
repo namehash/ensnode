@@ -1,5 +1,7 @@
 /**
- * Zod schemas can never be included in the NPM package for ENSNode SDK.
+ * All zod schemas we define must remain internal implementation details.
+ * We want the freedom to move away from zod in the future without impacting
+ * any users of the ensnode-sdk package.
  *
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
@@ -8,16 +10,14 @@ import z from "zod/v4";
 import { uniq } from "../../shared";
 import {
   ZodCheckFnInput,
-  makeBooleanSchema,
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
-  makeNonEmptyStringSchema,
   makePositiveIntegerSchema,
   makeUrlSchema,
 } from "../../shared/zod-schemas";
 import { isSubgraphCompatible } from "./helpers";
 import { PluginName } from "./types";
-import type { ENSIndexerPublicConfig, IndexedChainIds } from "./types";
+import type { ENSIndexerPublicConfig } from "./types";
 
 /**
  * Makes a schema for parsing {@link IndexedChainIds}.
@@ -66,8 +66,11 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
       error: `${valueLabel} is required and must be a non-empty string.`,
     });
 
-export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
-  z.object(
+const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
+  z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
+
+export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
+  z.strictObject(
     {
       nodejs: makeNonEmptyStringSchema(),
       ponder: makeNonEmptyStringSchema(),
@@ -75,7 +78,7 @@ export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
       ensRainbowSchema: makePositiveIntegerSchema(),
     },
     {
-      error: `${valueLabel} must be a valid VersionInfo object.`,
+      error: `${valueLabel} must be a valid DependencyInfo object.`,
     },
   );
 
@@ -148,18 +151,18 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
-      ensRainbowEndpointUrl: makeUrlSchema(`${valueLabel}.ensRainbowEndpointUrl`),
-      experimentalResolution: makeBooleanSchema(`${valueLabel}.experimentalResolution`),
-      healReverseAddresses: makeBooleanSchema(`${valueLabel}.healReverseAddresses`),
-      indexAdditionalResolverRecords: makeBooleanSchema(
-        `${valueLabel}.indexAdditionalResolverRecords`,
-      ),
+      ensRainbowUrl: makeUrlSchema(`${valueLabel}.ensRainbowUrl`),
+      experimentalResolution: z.boolean({ error: `${valueLabel}.experimentalResolution` }),
+      healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
+      indexAdditionalResolverRecords: z.boolean({
+        error: `${valueLabel}.indexAdditionalResolverRecords`,
+      }),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
-      isSubgraphCompatible: makeBooleanSchema(`${valueLabel}.isSubgraphCompatible`),
+      isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-      versionInfo: makeVersionInfoSchema(`${valueLabel}.versionInfo`),
+      dependencyInfo: makeDependencyInfoSchema(`${valueLabel}.dependencyInfo`),
     })
     /**
      * Validations

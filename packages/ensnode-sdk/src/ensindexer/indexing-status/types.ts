@@ -18,20 +18,20 @@ export type ChainIndexingStatusId =
  *
  * Configuration applied for chain indexing.
  */
-export interface ChainIndexingStatusConfig<BlockRefType = BlockRef> {
+export interface ChainIndexingStatusConfig {
   /**
    * Chain indexing begins from that block.
    *
    * A chain must always have its `startBlock` defined.
    */
-  startBlock: BlockRefType;
+  startBlock: BlockRef;
 
   /**
    * Chain indexing ends at that block.
    *
    * The `endBlock` definition for chain indexing is optional.
    */
-  endBlock: BlockRefType | null;
+  endBlock: BlockRef | null;
 }
 
 /**
@@ -44,9 +44,9 @@ export interface ChainIndexingStatusConfig<BlockRefType = BlockRef> {
  * Invariants:
  * - `config.startBlock` is always before or the same as `config.endBlock` (if present)
  */
-export interface ChainIndexingNotStartedStatus<BlockRefType = BlockRef> {
+export interface ChainIndexingNotStartedStatus {
   status: typeof ChainIndexingStatusIds.NotStarted;
-  config: ChainIndexingStatusConfig<BlockRefType>;
+  config: ChainIndexingStatusConfig;
 }
 
 /**
@@ -63,12 +63,12 @@ export interface ChainIndexingNotStartedStatus<BlockRefType = BlockRef> {
  * - `latestKnownBlock` is always the same as `backfillEndBlock`
  * - `backfillEndBlock` is always the same as `config.endBlock` (if present)
  */
-export interface ChainIndexingBackfillStatus<BlockRefType = BlockRef> {
+export interface ChainIndexingBackfillStatus {
   status: typeof ChainIndexingStatusIds.Backfill;
-  config: ChainIndexingStatusConfig<BlockRefType>;
-  latestIndexedBlock: BlockRefType;
-  latestKnownBlock: BlockRefType;
-  backfillEndBlock: BlockRefType;
+  config: ChainIndexingStatusConfig;
+  latestIndexedBlock: BlockRef;
+  latestKnownBlock: BlockRef;
+  backfillEndBlock: BlockRef;
 }
 
 /**
@@ -79,11 +79,11 @@ export interface ChainIndexingBackfillStatus<BlockRefType = BlockRef> {
  * - `latestIndexedBlock` is always before or the same as `latestKnownBlock`
  * - `approximateRealtimeDistance` is always a non-negative integer value holding a duration
  */
-export interface ChainIndexingFollowingStatus<BlockRefType = BlockRef> {
+export interface ChainIndexingFollowingStatus {
   status: typeof ChainIndexingStatusIds.Following;
-  config: Omit<ChainIndexingStatusConfig<BlockRefType>, "endBlock">;
-  latestIndexedBlock: BlockRefType;
-  latestKnownBlock: BlockRefType;
+  config: Omit<ChainIndexingStatusConfig, "endBlock">;
+  latestIndexedBlock: BlockRef;
+  latestKnownBlock: BlockRef;
   approximateRealtimeDistance: Duration;
 }
 
@@ -99,11 +99,11 @@ export interface ChainIndexingFollowingStatus<BlockRefType = BlockRef> {
  * - `latestIndexedBlock` is always the same as `latestKnownBlock`
  * - `latestKnownBlock` is always the same as `config.endBlock` (if present)
  */
-export interface ChainIndexingCompletedStatus<BlockRefType = BlockRef> {
+export interface ChainIndexingCompletedStatus {
   status: typeof ChainIndexingStatusIds.Completed;
-  config: ChainIndexingStatusConfig<BlockRefType>;
-  latestIndexedBlock: BlockRefType;
-  latestKnownBlock: BlockRefType;
+  config: ChainIndexingStatusConfig;
+  latestIndexedBlock: BlockRef;
+  latestKnownBlock: BlockRef;
 }
 
 /**
@@ -111,18 +111,11 @@ export interface ChainIndexingCompletedStatus<BlockRefType = BlockRef> {
  *
  * Chain Indexing might be in one of many statuses.
  */
-export type ChainIndexingStatus<BlockRefType = BlockRef> =
-  | ChainIndexingNotStartedStatus<BlockRefType>
-  | ChainIndexingBackfillStatus<BlockRefType>
-  | ChainIndexingFollowingStatus<BlockRefType>
-  | ChainIndexingCompletedStatus<BlockRefType>;
-
-/**
- * Chain Indexing Statuses
- *
- * {@link ChainIndexingStatus} per chain.
- */
-export type ChainIndexingStatuses = Map<ChainId, ChainIndexingStatus>;
+export type ChainIndexingStatus =
+  | ChainIndexingNotStartedStatus
+  | ChainIndexingBackfillStatus
+  | ChainIndexingFollowingStatus
+  | ChainIndexingCompletedStatus;
 
 /**
  * ENSIndexer Indexing Status
@@ -130,5 +123,5 @@ export type ChainIndexingStatuses = Map<ChainId, ChainIndexingStatus>;
  * Describes the current state of the indexing operations across indexed chains.
  */
 export interface ENSIndexerIndexingStatus {
-  chains: ChainIndexingStatuses;
+  chains: Map<ChainId, ChainIndexingStatus>;
 }

@@ -1,5 +1,6 @@
 import { publicClients } from "ponder:api";
 import config from "@/config";
+import { buildENSIndexerPublicConfig } from "@/config/public";
 import {
   DEFAULT_METRICS_FETCH_TIMEOUT,
   buildIndexingStatus,
@@ -22,7 +23,7 @@ import resolutionApi from "../lib/resolution-api";
  * Otherwise, the ENSIndexer process must crash.
  */
 export const indexedChainsBlockRefs = fetchChainsBlockRefs(
-  config.ensIndexerPrivateUrl,
+  config.ensIndexerUrl,
   indexedChainsBlockrange,
   publicClients,
 ).catch((error) => {
@@ -37,14 +38,20 @@ const app = new Hono();
 app.use("*", otel());
 
 // include ENSIndexer Public Config endpoint
-app.get("/config", (c) => c.json(serializeENSIndexerPublicConfig(config)));
+app.get("/config", async (c) => {
+  // prepare the public config object, including dependency info
+  const publicConfig = await buildENSIndexerPublicConfig(config);
+
+  // respond with the serialized public config object
+  return c.json(serializeENSIndexerPublicConfig(publicConfig));
+});
 
 // include ENSIndexer Indexing Status endpoint
 app.get("/indexing-status", async (c) => {
   // Get current Ponder metadata
   const [metrics, status, chainsBlockRefs] = await Promise.all([
-    fetchPonderMetrics(config.ensIndexerPrivateUrl),
-    fetchPonderStatus(config.ensIndexerPrivateUrl),
+    fetchPonderMetrics(config.ensIndexerUrl),
+    fetchPonderStatus(config.ensIndexerUrl),
     indexedChainsBlockRefs,
   ]);
 

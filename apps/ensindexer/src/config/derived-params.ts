@@ -1,7 +1,7 @@
 import type { ENSIndexerConfig } from "@/config/types";
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { type IndexedChainIds, isSubgraphCompatible } from "@ensnode/ensnode-sdk";
+import { ChainId, isSubgraphCompatible } from "@ensnode/ensnode-sdk";
 
 /**
  * Derive `indexedChainIds` configuration parameter and include it in
@@ -15,7 +15,7 @@ export const derive_indexedChainIds = <
 >(
   config: CONFIG,
 ): CONFIG & { indexedChainIds: ENSIndexerConfig["indexedChainIds"] } => {
-  const indexedChainIds: IndexedChainIds = new Set();
+  const indexedChainIds = new Set<ChainId>();
 
   const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
 

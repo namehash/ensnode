@@ -2,32 +2,24 @@ import type { BlockRef } from "./types";
 
 /**
  * Compare two {@link BlockRef} object to check
- * if one is before or same as the other.
+ * if blockA is before blockB.
  */
-export function isBeforeOrSameAs(blockA: BlockRef, blockB: BlockRef) {
-  // compare block creation dates
-  if (blockA.createdAt.getTime() <= blockB.createdAt.getTime()) return true;
-
-  // compare block numbers
-  if (blockA.number <= blockB.number) {
-    return true;
-  }
-
-  return false;
+export function isBefore(blockA: BlockRef, blockB: BlockRef) {
+  return blockA.number < blockB.number && blockA.timestamp < blockB.timestamp;
 }
 
 /**
  * Compare two {@link BlockRef} object to check
- * if one is same as the other.
+ * if blockA is equal to blockB.
  */
-export function isSameAs(blockA: BlockRef, blockB: BlockRef) {
-  // compare block creation dates
-  if (blockA.createdAt.getTime() === blockB.createdAt.getTime()) return true;
+export function isEqualTo(blockA: BlockRef, blockB: BlockRef) {
+  return blockA.number === blockB.number && blockA.timestamp === blockB.timestamp;
+}
 
-  // compare block numbers
-  if (blockA.number === blockB.number) {
-    return true;
-  }
-
-  return false;
+/**
+ * Compare two {@link BlockRef} object to check
+ * if blockA is before or equal to blockB.
+ */
+export function isBeforeOrEqualTo(blockA: BlockRef, blockB: BlockRef) {
+  return isBefore(blockA, blockB) || isEqualTo(blockA, blockB);
 }

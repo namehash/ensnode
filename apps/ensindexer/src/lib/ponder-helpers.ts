@@ -1,3 +1,9 @@
+/**
+ * This file is required to build the ENSIndexerConfig object.
+ * No dependencies in this file can import from `@/config` path
+ * as the config object will not be ready yet.
+ */
+
 import type { Event } from "ponder:registry";
 
 import type { ChainConfig } from "ponder";
@@ -9,7 +15,7 @@ import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
 import { ENSIndexerConfig } from "@/config/types";
-import { Blockrange } from "@/lib/types";
+import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
@@ -37,33 +43,6 @@ export const constrainBlockrange = (
   return {
     startBlock: isEndConstrained ? Math.min(concreteStartBlock, endBlock) : concreteStartBlock,
     endBlock,
-  };
-};
-
-/**
- * Creates a function that fetches ENSRainbow version information.
- *
- * @returns A function that fetches ENSRainbow version information
- */
-export const createEnsRainbowVersionFetcher = (
-  endpointUrl: ENSIndexerConfig["ensRainbowEndpointUrl"],
-) => {
-  const client = new EnsRainbowApiClient({ endpointUrl: new URL(endpointUrl) });
-
-  return async () => {
-    try {
-      const versionResponse = await client.version();
-      return {
-        version: versionResponse.versionInfo.version,
-        schema_version: versionResponse.versionInfo.schema_version,
-      };
-    } catch (error) {
-      console.error("Failed to fetch ENSRainbow version", error);
-      return {
-        version: "unknown",
-        schema_version: 0,
-      };
-    }
   };
 };
 
@@ -285,9 +264,9 @@ export async function createStartBlockByChainIdMap(
  */
 export function chainsConnectionConfig(
   rpcConfigs: ENSIndexerConfig["rpcConfigs"],
-  chainId: number,
+  chainId: ChainId,
 ) {
-  const rpcConfig = rpcConfigs[chainId];
+  const rpcConfig = rpcConfigs.get(chainId);
 
   if (!rpcConfig) {
     throw new Error(

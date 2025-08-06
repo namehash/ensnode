@@ -1,6 +1,5 @@
-import { Blockrange } from "@/lib/types";
 import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
-import type { ENSIndexerPublicConfig, PluginName } from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -11,7 +10,7 @@ export interface RpcConfig {
    * For nominal indexing behavior, must be an endpoint with high rate limits.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
   url: URL;
 
@@ -28,7 +27,7 @@ export interface RpcConfig {
 /**
  * The complete runtime configuration for an ENSIndexer instance.
  */
-export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
+export interface ENSIndexerConfig {
   /**
    * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_NAMESPACE).
    *
@@ -44,7 +43,7 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
    * ENSAdmin with an entry for this instance of ENSNode, identified by {@link ensNodePublicUrl}.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
   ensAdminUrl: URL;
 
@@ -54,7 +53,7 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
    * ENSAdmin will use this url to connect to the ENSNode api for querying state about the ENSNode instance.
    *
    * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * - localhost urls are allowed (and expected).
    */
   ensNodePublicUrl: URL;
 
@@ -67,9 +66,9 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
    * networking to minimize latency.
    *
    * Invariant:
-   * - The URL must be a valid URL. localhost urls are allowed (and expected).
+   * - localhost urls are allowed (and expected).
    */
-  ensRainbowEndpointUrl: URL;
+  ensRainbowUrl: URL;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
@@ -151,9 +150,20 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
    * Configuration for each indexable RPC, keyed by chain id.
    *
    * Invariants:
-   * - Each key (chain id) must be a number
+   * - Each value in {@link indexedChainIds} is guaranteed to
+   *   have its {@link RpcConfig} included here.
+   * - Note: There may be some {@link RpcConfig} values preset for
+   *   chain IDs that are not included in {@link indexedChainIds}. In other words, the keys
+   *   of {@link rpcConfigs} is a superset of {@link indexedChainIds}.
    */
-  rpcConfigs: Record<number, RpcConfig>;
+  rpcConfigs: Map<ChainId, RpcConfig>;
+
+  /**
+   * Indexed Chain IDs
+   *
+   * Includes the {@link ChainId} for each chain being indexed.
+   */
+  indexedChainIds: Set<ChainId>;
 
   /**
    * The database connection string for the indexer, if present. When undefined
@@ -165,16 +175,16 @@ export interface ENSIndexerConfig extends ENSIndexerPublicConfig {
   databaseUrl: string | undefined;
 
   /**
-   * The privately accessible endpoint of the ENSIndexer instance (ex: http://localhost:42069).
+   * The endpoint of the ENSIndexer instance (ex: http://localhost:42069).
+   * This must be an instance of ENSIndexer using  either `ponder start`
+   * or `ponder dev, and not `ponder serve`.
    *
-   * This URL is to fetch the status and metrics from the ENSIndexer. For ENSIndexer instances,
-   * this will typically be set to http://localhost:{port}. For ENSApi instances, this should
-   * be set to the private network URL of the corresponding ENSIndexer instance.
-   *
-   * Invariants:
-   * - The URL must be a valid URL (localhost urls are allowed)
+   * This URL is to fetch the status and metrics from the ENSIndexer.
+   * For ENSIndexer instances, this will typically be set to
+   * http://localhost:{port}. For ENSApi instances, this should be set to
+   * the local network URL of the corresponding ENSIndexer instance.
    */
-  ensIndexerPrivateUrl: URL;
+  ensIndexerUrl: URL;
 
   /**
    * Constrains the global blockrange for indexing, useful for testing purposes.
@@ -231,9 +241,9 @@ export interface ENSIndexerEnvironment {
   databaseUrl: string | undefined;
   namespace: string | undefined;
   plugins: string | undefined;
-  ensRainbowEndpointUrl: string | undefined;
+  ensRainbowUrl: string | undefined;
   ensNodePublicUrl: string | undefined;
-  ensIndexerPrivateUrl: string | undefined;
+  ensIndexerUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;
@@ -242,11 +252,5 @@ export interface ENSIndexerEnvironment {
     startBlock: string | undefined;
     endBlock: string | undefined;
   };
-  rpcConfigs: Record<number, RpcConfigEnvironment>;
-  versionInfo: {
-    nodejs: string | undefined;
-    ponder: string | undefined;
-    ensRainbow: string | undefined;
-    ensRainbowSchema: number | undefined;
-  };
+  rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
 }

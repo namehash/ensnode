@@ -9,11 +9,11 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   namespace: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
-  ensIndexerPrivateUrl: "http://localhost:42069",
+  ensIndexerUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   databaseSchemaName: "test_schema",
   plugins: "subgraph",
-  ensRainbowEndpointUrl: "https://api.ensrainbow.io",
+  ensRainbowUrl: "https://api.ensrainbow.io",
   healReverseAddresses: "true",
   indexAdditionalResolverRecords: "true",
   experimentalResolution: "false",
@@ -25,12 +25,6 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     },
   },
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
-  versionInfo: {
-    nodejs: "22",
-    ponder: "0.11",
-    ensRainbow: "0.31.0",
-    ensRainbowSchema: 2,
-  },
 });
 
 // the current, mutable ENSIndexerConfig for tests

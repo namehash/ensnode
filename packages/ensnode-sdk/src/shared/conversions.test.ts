@@ -1,34 +1,10 @@
 import { describe, expect, it } from "vitest";
-import {
-  deserializeBlockRef,
-  deserializeChainId,
-  deserializeDatetime,
-  deserializeUrl,
-} from "./deserialize";
-import { serializeBlockRef, serializeChainId, serializeDatetime, serializeUrl } from "./serialize";
-import type { SerializedBlockRef } from "./serialized-types";
+import { deserializeChainId, deserializeDatetime, deserializeUrl } from "./deserialize";
+import { serializeChainId, serializeDatetime, serializeUrl } from "./serialize";
 import type { BlockRef } from "./types";
 
 describe("ENSIndexer: Shared", () => {
   describe("serialization", () => {
-    it("can serialize BlockRef", () => {
-      // arrange
-      const blockCreatedAt = new Date();
-      const blockRef = {
-        createdAt: blockCreatedAt,
-        number: 123,
-      } satisfies BlockRef;
-
-      // act
-      const result = serializeBlockRef(blockRef);
-
-      // assert
-      expect(result).toStrictEqual({
-        createdAt: blockCreatedAt.toISOString(),
-        number: 123,
-      } satisfies SerializedBlockRef);
-    });
-
     it("can serialize ChainId into its string representation", () => {
       expect(serializeChainId(8543)).toBe("8543");
     });
@@ -51,57 +27,19 @@ describe("ENSIndexer: Shared", () => {
   });
 
   describe("deserialization", () => {
-    it("can deserialize SerializedBlockRef", () => {
-      // arrange
-      const blockCreatedAt = new Date();
-      const serializedBlockRef = {
-        createdAt: blockCreatedAt.toISOString(),
-        number: 123,
-      } satisfies SerializedBlockRef;
-
-      // act
-      const result = deserializeBlockRef(serializedBlockRef);
-
-      // assert
-      expect(result).toStrictEqual({
-        createdAt: blockCreatedAt,
-        number: 123,
-      } satisfies BlockRef);
-    });
-
-    it("refuses to deserialize SerializedBlockRef for invalid input", () => {
-      expect(() =>
-        deserializeBlockRef({
-          createdAt: "",
-          number: 123,
-        } satisfies SerializedBlockRef),
-      ).toThrowError(`Cannot deserialize BlockRef:
-✖ Datetime string must be a string in ISO 8601 format.
-  → at createdAt`);
-
-      expect(() =>
-        deserializeBlockRef({
-          createdAt: new Date().toISOString(),
-          number: -123,
-        } satisfies SerializedBlockRef),
-      ).toThrowError(`Cannot deserialize BlockRef:
-✖ Block number must be a non-negative integer (>=0).
-  → at number`);
-    });
-
     it("can deserialize ChainId from its string representation", () => {
       expect(deserializeChainId("8543")).toStrictEqual(8543);
     });
 
     it("refuses to deserialize ChainId for invalid input", () => {
       expect(() => deserializeChainId("-8543")).toThrowError(`Cannot deserialize ChainId:
-✖ Chain ID string must be a positive integer (>0)`);
+✖ The numeric value represented by Chain ID String must be a positive integer (>0).`);
 
       expect(() => deserializeChainId("8543.5")).toThrowError(`Cannot deserialize ChainId:
-✖ Chain ID string must be an integer.`);
+✖ The numeric value represented by Chain ID String must be an integer.`);
 
       expect(() => deserializeChainId("vitalik")).toThrowError(`Cannot deserialize ChainId:
-✖ Chain ID string must be an integer.`);
+✖ Chain ID String must represent a positive integer (>0).`);
     });
 
     it("can deserialize Datetime from an ISO 8601 string representation", () => {

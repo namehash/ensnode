@@ -1,22 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { type ZodSafeParseResult, prettifyError } from "zod/v4";
-import { SerializedBlockRef, deserializeBlockRef } from "../../shared";
-import { SerializedChainIndexingStatus } from "./serialized-types";
-import {
-  earlierBlockRef,
-  earlierSerializedBlockRef,
-  earliestBlockRef,
-  earliestSerializedBlockRef,
-  laterBlockRef,
-  laterSerializedBlockRef,
-  latestBlockRef,
-  latestSerializedBlockRef,
-} from "./test-helpers";
+import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingFollowingStatus,
   ChainIndexingNotStartedStatus,
+  ChainIndexingStatus,
   ChainIndexingStatusIds,
 } from "./types";
 import { makeChainIndexingStatusSchema } from "./zod-schemas";
@@ -29,13 +19,13 @@ describe("ENSIndexer: Indexing Status", () => {
     describe("ChainIndexingNotStartedStatus", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.NotStarted,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingNotStartedStatus<SerializedBlockRef>;
+        } satisfies ChainIndexingNotStartedStatus;
 
         // act
         const parsed = makeChainIndexingStatusSchema().parse(serialized);
@@ -52,13 +42,13 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the config.startBlock is after the config.endBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.NotStarted,
           config: {
-            startBlock: laterSerializedBlockRef,
-            endBlock: earlierSerializedBlockRef,
+            startBlock: laterBlockRef,
+            endBlock: earlierBlockRef,
           },
-        } satisfies ChainIndexingNotStartedStatus<SerializedBlockRef>;
+        } satisfies ChainIndexingNotStartedStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -71,16 +61,16 @@ describe("ENSIndexer: Indexing Status", () => {
     describe("ChainIndexingBackfillStatus", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: earlierSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
-          backfillEndBlock: laterSerializedBlockRef,
-        } satisfies ChainIndexingBackfillStatus<SerializedBlockRef>;
+          latestIndexedBlock: earlierBlockRef,
+          latestKnownBlock: laterBlockRef,
+          backfillEndBlock: laterBlockRef,
+        } satisfies ChainIndexingBackfillStatus;
 
         // act
         const parsed = makeChainIndexingStatusSchema().parse(serialized);
@@ -100,16 +90,16 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the config.startBlock is after the latestIndexedBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: earliestSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
-          backfillEndBlock: laterSerializedBlockRef,
-        } satisfies ChainIndexingBackfillStatus<SerializedBlockRef>;
+          latestIndexedBlock: earliestBlockRef,
+          latestKnownBlock: laterBlockRef,
+          backfillEndBlock: laterBlockRef,
+        } satisfies ChainIndexingBackfillStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -120,16 +110,16 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the latestIndexedBlock is after the latestKnownBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: latestSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
-          backfillEndBlock: laterSerializedBlockRef,
-        } satisfies ChainIndexingBackfillStatus<SerializedBlockRef>;
+          latestIndexedBlock: latestBlockRef,
+          latestKnownBlock: laterBlockRef,
+          backfillEndBlock: laterBlockRef,
+        } satisfies ChainIndexingBackfillStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -140,16 +130,16 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the backfillEndBlock different than the latestKnownBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: earlierSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
-          backfillEndBlock: latestSerializedBlockRef,
-        } satisfies ChainIndexingBackfillStatus<SerializedBlockRef>;
+          latestIndexedBlock: earlierBlockRef,
+          latestKnownBlock: laterBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingBackfillStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -161,16 +151,16 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the backfillEndBlock different than the config.endBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: latestSerializedBlockRef,
-          latestKnownBlock: latestSerializedBlockRef,
-          backfillEndBlock: latestSerializedBlockRef,
-        } satisfies ChainIndexingBackfillStatus<SerializedBlockRef>;
+          latestIndexedBlock: latestBlockRef,
+          latestKnownBlock: latestBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingBackfillStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -183,15 +173,15 @@ describe("ENSIndexer: Indexing Status", () => {
     describe("ChainIndexingFollowingStatus", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            startBlock: earlierSerializedBlockRef,
+            startBlock: earlierBlockRef,
           },
-          latestIndexedBlock: laterSerializedBlockRef,
-          latestKnownBlock: latestSerializedBlockRef,
+          latestIndexedBlock: laterBlockRef,
+          latestKnownBlock: latestBlockRef,
           approximateRealtimeDistance: 0,
-        } satisfies ChainIndexingFollowingStatus<SerializedBlockRef>;
+        } satisfies ChainIndexingFollowingStatus;
 
         // act
         const parsed = makeChainIndexingStatusSchema().parse(serialized);
@@ -210,15 +200,15 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the config.startBlock is after the latestIndexedBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            startBlock: laterSerializedBlockRef,
+            startBlock: laterBlockRef,
           },
-          latestIndexedBlock: earlierSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
+          latestIndexedBlock: earlierBlockRef,
+          latestKnownBlock: laterBlockRef,
           approximateRealtimeDistance: 777,
-        } satisfies ChainIndexingFollowingStatus<SerializedBlockRef>;
+        } satisfies ChainIndexingFollowingStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -229,15 +219,15 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the latestIndexedBlock is after the latestKnownBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            startBlock: earlierSerializedBlockRef,
+            startBlock: earlierBlockRef,
           },
-          latestIndexedBlock: latestSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
+          latestIndexedBlock: latestBlockRef,
+          latestKnownBlock: laterBlockRef,
           approximateRealtimeDistance: 777,
-        } satisfies ChainIndexingFollowingStatus<SerializedBlockRef>;
+        } satisfies ChainIndexingFollowingStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -248,15 +238,15 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the latestKnownBlock is after the config.endBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: latestSerializedBlockRef,
-          latestKnownBlock: latestSerializedBlockRef,
-        } satisfies ChainIndexingCompletedStatus<SerializedBlockRef>;
+          latestIndexedBlock: latestBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingCompletedStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -267,15 +257,15 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the approximateRealtimeDistance was a negative integer", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            startBlock: earlierSerializedBlockRef,
+            startBlock: earlierBlockRef,
           },
-          latestIndexedBlock: earlierSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
+          latestIndexedBlock: earlierBlockRef,
+          latestKnownBlock: laterBlockRef,
           approximateRealtimeDistance: -1,
-        } satisfies ChainIndexingFollowingStatus<SerializedBlockRef>;
+        } satisfies ChainIndexingFollowingStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -289,15 +279,15 @@ describe("ENSIndexer: Indexing Status", () => {
     describe("ChainIndexingCompletedStatus", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: earlierSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
-        } satisfies ChainIndexingCompletedStatus<SerializedBlockRef>;
+          latestIndexedBlock: earlierBlockRef,
+          latestKnownBlock: laterBlockRef,
+        } satisfies ChainIndexingCompletedStatus;
 
         // act
         const parsed = makeChainIndexingStatusSchema().parse(serialized);
@@ -316,15 +306,15 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the config.startBlock is after the latestIndexedBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: earliestSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
-        } satisfies ChainIndexingCompletedStatus<SerializedBlockRef>;
+          latestIndexedBlock: earliestBlockRef,
+          latestKnownBlock: laterBlockRef,
+        } satisfies ChainIndexingCompletedStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -335,15 +325,15 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the latestIndexedBlock is after the latestKnownBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: latestSerializedBlockRef,
-          latestKnownBlock: laterSerializedBlockRef,
-        } satisfies ChainIndexingCompletedStatus<SerializedBlockRef>;
+          latestIndexedBlock: latestBlockRef,
+          latestKnownBlock: laterBlockRef,
+        } satisfies ChainIndexingCompletedStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
@@ -354,15 +344,15 @@ describe("ENSIndexer: Indexing Status", () => {
 
       it("won't parse if the latestKnownBlock is after the config.endBlock", () => {
         // arrange
-        const serialized: SerializedChainIndexingStatus = {
+        const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            startBlock: earlierSerializedBlockRef,
-            endBlock: laterSerializedBlockRef,
+            startBlock: earlierBlockRef,
+            endBlock: laterBlockRef,
           },
-          latestIndexedBlock: latestSerializedBlockRef,
-          latestKnownBlock: latestSerializedBlockRef,
-        } satisfies ChainIndexingCompletedStatus<SerializedBlockRef>;
+          latestIndexedBlock: latestBlockRef,
+          latestKnownBlock: latestBlockRef,
+        } satisfies ChainIndexingCompletedStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));

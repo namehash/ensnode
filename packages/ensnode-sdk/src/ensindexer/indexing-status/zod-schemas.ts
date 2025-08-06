@@ -5,10 +5,9 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
-import { BlockRef, deserializeChainId } from "../../shared";
+import { ChainId, deserializeChainId } from "../../shared";
 import * as blockRef from "../../shared/block-ref";
 import {
-  type ZodCheckFnInput,
   makeBlockRefSchema,
   makeChainIdStringSchema,
   makeDurationSchema,
@@ -20,8 +19,6 @@ import type {
   ChainIndexingFollowingStatus,
   ChainIndexingNotStartedStatus,
   ChainIndexingStatus,
-  ChainIndexingStatuses,
-  ENSIndexerIndexingStatus,
 } from "./types";
 
 /**
@@ -38,7 +35,7 @@ export const makeChainIndexingNotStartedStatusSchema = (valueLabel: string = "Va
     })
     .refine(
       ({ config }) =>
-        config.endBlock === null || blockRef.isBeforeOrSameAs(config.startBlock, config.endBlock),
+        config.endBlock === null || blockRef.isBeforeOrEqualTo(config.startBlock, config.endBlock),
       {
         error: `config.startBlock must be before or same as config.endBlock.`,
       },
@@ -61,28 +58,28 @@ export const makeChainIndexingBackfillStatusSchema = (valueLabel: string = "Valu
     })
     .refine(
       ({ config, latestIndexedBlock }) =>
-        blockRef.isBeforeOrSameAs(config.startBlock, latestIndexedBlock),
+        blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock),
       {
         error: `config.startBlock must be before or same as latestIndexedBlock.`,
       },
     )
     .refine(
       ({ latestIndexedBlock, latestKnownBlock }) =>
-        blockRef.isBeforeOrSameAs(latestIndexedBlock, latestKnownBlock),
+        blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestKnownBlock),
       {
         error: `latestIndexedBlock must be before or same as latestKnownBlock.`,
       },
     )
     .refine(
       ({ latestKnownBlock, backfillEndBlock }) =>
-        blockRef.isSameAs(latestKnownBlock, backfillEndBlock),
+        blockRef.isEqualTo(latestKnownBlock, backfillEndBlock),
       {
         error: `latestKnownBlock must be the same as backfillEndBlock.`,
       },
     )
     .refine(
       ({ config, backfillEndBlock }) =>
-        config.endBlock === null || blockRef.isSameAs(backfillEndBlock, config.endBlock),
+        config.endBlock === null || blockRef.isEqualTo(backfillEndBlock, config.endBlock),
       {
         error: `backfillEndBlock must be the same as config.endBlock.`,
       },
@@ -104,14 +101,14 @@ export const makeChainIndexingFollowingStatusSchema = (valueLabel: string = "Val
     })
     .refine(
       ({ config, latestIndexedBlock }) =>
-        blockRef.isBeforeOrSameAs(config.startBlock, latestIndexedBlock),
+        blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock),
       {
         error: `config.startBlock must be before or same as latestIndexedBlock.`,
       },
     )
     .refine(
       ({ latestIndexedBlock, latestKnownBlock }) =>
-        blockRef.isBeforeOrSameAs(latestIndexedBlock, latestKnownBlock),
+        blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestKnownBlock),
       {
         error: `latestIndexedBlock must be before or same as latestKnownBlock.`,
       },
@@ -133,21 +130,21 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
     })
     .refine(
       ({ config, latestIndexedBlock }) =>
-        blockRef.isBeforeOrSameAs(config.startBlock, latestIndexedBlock),
+        blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock),
       {
         error: `config.startBlock must be before or same as latestIndexedBlock.`,
       },
     )
     .refine(
       ({ latestIndexedBlock, latestKnownBlock }) =>
-        blockRef.isBeforeOrSameAs(latestIndexedBlock, latestKnownBlock),
+        blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestKnownBlock),
       {
         error: `latestIndexedBlock must be before or same as latestKnownBlock.`,
       },
     )
     .refine(
       ({ config, latestKnownBlock }) =>
-        config.endBlock === null || blockRef.isSameAs(latestKnownBlock, config.endBlock),
+        config.endBlock === null || blockRef.isEqualTo(latestKnownBlock, config.endBlock),
       {
         error: `latestKnownBlock must be the same as config.endBlock.`,
       },
@@ -173,7 +170,7 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
       error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
     })
     .transform((serializedChainsIndexingStatus) => {
-      const chainsIndexingStatus: ENSIndexerIndexingStatus["chains"] = new Map();
+      const chainsIndexingStatus = new Map<ChainId, ChainIndexingStatus>();
 
       for (const [chainIdString, chainStatus] of Object.entries(serializedChainsIndexingStatus)) {
         chainsIndexingStatus.set(deserializeChainId(chainIdString), chainStatus);
