@@ -34,7 +34,7 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  *     <div>
  *       <h3>Resolved Records for vitalik.eth</h3>
  *       {data.records.addresses && (
- *         <p>ETH Address: {data.records.addresses["60"]}</p>
+ *         <p>ETH Address: {data.records.addresses[60]}</p>
  *       )}
  *       {data.records.texts && (
  *         <div>
@@ -50,17 +50,19 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
 export function useRecords<SELECTION extends ResolverRecordsSelection>(
   parameters: UseRecordsParameters<SELECTION> & ConfigParameter,
 ) {
-  const { name, selection, query = {} } = parameters;
+  const { name, selection, trace, query = {} } = parameters;
   const config = useENSNodeConfig(parameters);
 
-  const queryOptions = name
-    ? createRecordsQueryOptions(config, name, selection)
+  const canEnable = name !== null;
+
+  const queryOptions = canEnable
+    ? createRecordsQueryOptions(config, { name, selection, trace })
     : { enabled: false, queryKey: ["disabled"] as const };
 
   const options = {
     ...queryOptions,
     ...query,
-    enabled: Boolean(name && (query.enabled ?? queryOptions.enabled)),
+    enabled: canEnable && (query.enabled ?? queryOptions.enabled),
   };
 
   return useQuery(options);

@@ -49,5 +49,5 @@ export interface ResolvePrimaryNameRequest extends ReverseResolutionArgs, Tracea
  * Resolve Primary Name Response Type
  */
 export interface ResolvePrimaryNameResponse extends TraceableResponse {
-  records: ReverseResolutionRecordsResponse;
+  records: ReverseResolutionRecordsResponse | null;
 }

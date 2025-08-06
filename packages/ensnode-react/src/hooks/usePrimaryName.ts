@@ -38,17 +38,19 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  * ```
  */
 export function usePrimaryName(parameters: UsePrimaryNameParameters & ConfigParameter) {
-  const { address, chainId, query = {} } = parameters;
+  const { address, chainId, trace, query = {} } = parameters;
   const config = useENSNodeConfig(parameters);
 
-  const queryOptions = address
-    ? createPrimaryNameQueryOptions(config, address, chainId)
+  const canEnable = address !== null;
+
+  const queryOptions = canEnable
+    ? createPrimaryNameQueryOptions(config, { address, chainId, trace })
     : { enabled: false, queryKey: ["disabled"] as const };
 
   const options = {
     ...queryOptions,
     ...query,
-    enabled: Boolean(address && (query.enabled ?? queryOptions.enabled)),
+    enabled: canEnable && (query.enabled ?? queryOptions.enabled),
   };
 
   return useQuery(options);

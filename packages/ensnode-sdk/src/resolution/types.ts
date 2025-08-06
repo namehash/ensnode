@@ -1,6 +1,7 @@
 import { Address } from "viem";
 
 import type { Name } from "../ens";
+import { ChainId } from "../shared";
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
 
 /**
@@ -16,5 +17,5 @@ export interface ForwardResolutionArgs<SELECTION extends ResolverRecordsSelectio
  */
 export interface ReverseResolutionArgs {
   address: Address;
-  chainId: number;
+  chainId: ChainId;
 }

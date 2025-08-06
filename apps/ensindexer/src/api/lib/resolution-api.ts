@@ -58,10 +58,14 @@ app.get("/records/:name", async (c) => {
 
     const { result: records, trace } = await captureTrace(() => resolveForward(name, selection));
 
-    const showTrace = !!c.req.param("trace");
-    return c.json({ records, ...(showTrace && { trace }) } as ResolveRecordsResponse<
-      typeof selection
-    >);
+    const showTrace = c.req.query("trace") === "true";
+
+    const response = {
+      records,
+      ...(showTrace && { trace }),
+    } satisfies ResolveRecordsResponse<typeof selection>;
+
+    return c.json(response);
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
@@ -98,8 +102,14 @@ app.get("/primary-name/:address/:chainId", async (c) => {
 
     const { result: records, trace } = await captureTrace(() => resolveReverse(address, chainId));
 
-    const showTrace = !!c.req.query("trace");
-    return c.json({ records, ...(showTrace && { trace }) } as ResolvePrimaryNameResponse);
+    const showTrace = c.req.query("trace") === "true";
+
+    const response = {
+      records,
+      ...(showTrace && { trace }),
+    } satisfies ResolvePrimaryNameResponse;
+
+    return c.json(response);
   } catch (error) {
     console.error(error);
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);

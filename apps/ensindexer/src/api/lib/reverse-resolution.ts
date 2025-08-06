@@ -1,4 +1,5 @@
 import {
+  ChainId,
   DEFAULT_EVM_COIN_TYPE,
   REVERSE_RESOLUTION_SELECTION,
   ReverseResolutionProtocolStep,
@@ -22,11 +23,11 @@ const tracer = trace.getTracer("reverse-resolution");
  * @see https://docs.ens.domains/ensip/19#primary-name-resolution-process
  *
  * @param address the adddress to lookup the Primary Name of
- * @param [chainId=1] fetch the Primary Name of the `address` in the context of this `chainId`
+ * @param chainId fetch the Primary Name of the `address` in the context of this `chainId`
  */
 export async function resolveReverse(
   address: Address,
-  chainId: number = 1,
+  chainId: ChainId,
   options: { accelerate?: boolean } = { accelerate: true },
 ): Promise<ReverseResolutionRecordsResponse | null> {
   // trace for external consumers

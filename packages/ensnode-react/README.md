@@ -21,7 +21,7 @@ Wrap your app with the `ENSNodeProvider`:
 ```tsx
 import { ENSNodeProvider, createConfig } from "@ensnode/ensnode-react";
 
-const config = createConfig({ url: "https://api.mainnet.ensnode.io" });
+const config = createConfig({ url: "https://api.alpha.ensnode.io" });
 
 function App() {
   return (
@@ -116,7 +116,7 @@ interface ENSNodeProviderProps {
 
 - `config`: ENSNode configuration object
 - `queryClient`: Optional TanStack Query client instance (requires manual QueryClientProvider setup)
-- `queryClientOptions`: Custom options for auto-created QueryClient (only used when queryClient is not provided)
+- `queryClientOptions`: Optional Custom options for auto-created QueryClient (only used when queryClient is not provided)
 
 ### createConfig
 
@@ -124,7 +124,7 @@ Helper function to create ENSNode configuration with defaults.
 
 ```tsx
 const config = createConfig({
-  url: "https://api.mainnet.ensnode.io",
+  url: "https://api.alpha.ensnode.io",
 });
 ```
 
@@ -138,7 +138,7 @@ Hook for resolving records for an ENS name (Forward Resolution).
 - `selection`: Optional selection of Resolver records
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
-- `query`: TanStack Query options for customization
+- `query`: Optional TanStack Query options for customization
 
 #### Example
 
@@ -231,8 +231,11 @@ Queries only execute if all required variables are provided:
 ```tsx
 const [address, setAddress] = useState("");
 
-// only executes when address and chainId are truthy
-const { data } = usePrimaryName({ address, chainId: 1 });
+// only executes when address is not null
+const { data } = usePrimaryName({
+  address: address || null,
+  chainId: 1
+});
 ```
 
 You can also conditionally enable/disable queries based on your own logic:
@@ -240,8 +243,9 @@ You can also conditionally enable/disable queries based on your own logic:
 ```tsx
 const [showPrimaryName, setShowPrimaryName] = useState(false);
 
+// will not execute until `showPrimaryName` is true
 const { data } = usePrimaryName({
-  address,
+  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   chainId: 1,
   query: { enabled: showPrimaryName },
 });

@@ -44,11 +44,12 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 normalize("example.eth");
 
 /**
- * Implements Forward Resolution of an ENS name, for a selection of records, on a specified chainId.
+ * Implements Forward Resolution of record values for a specified ENS Name.
  *
  * @param name the ENS name to resolve
  * @param selection selection specifying which records to resolve
- * @param chainId optional, the chain id from which to resolve records
+ * @param options Optional settings
+ * @param options.accelerate Whether to accelerate resolution (default: true)
  *
  * @example
  * await resolveForward("jesse.base.eth", {
@@ -59,7 +60,7 @@ normalize("example.eth");
  *
  * // results in
  * {
- *   name: { name: 'jesse.base.eth' },
+ *   name: 'jesse.base.eth',
  *   addresses: {
  *     60: '0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1',
  *     2147492101: null
@@ -73,9 +74,24 @@ normalize("example.eth");
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: Name,
   selection: SELECTION,
-  options: { chainId?: number; accelerate?: boolean } = {},
+  { accelerate }: { accelerate?: boolean } = {},
 ): Promise<ResolverRecordsResponse<SELECTION>> {
-  const { chainId = ensRootChainId, accelerate = true } = options;
+  // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `chainId` must
+  // initially be `ensRootChainId`: see `_resolveForward` for additional context.
+  return _resolveForward(name, selection, { chainId: ensRootChainId, accelerate });
+}
+
+/**
+ * Internal Forward Resolution implementation.
+ *
+ * NOTE: uses `chainId` parameter for internal Protocol Acceleration behavior (see recursive call below).
+ */
+async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
+  name: Name,
+  selection: SELECTION,
+  options: { chainId: number; accelerate?: boolean },
+): Promise<ResolverRecordsResponse<SELECTION>> {
+  const { chainId, accelerate = true } = options;
 
   // trace for external consumers
   return withProtocolStepAsync(
@@ -188,7 +204,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
-                () => resolveForward(name, selection, { ...options, chainId: defers.chainId }),
+                () => _resolveForward(name, selection, { ...options, chainId: defers.chainId }),
               );
             }
 
