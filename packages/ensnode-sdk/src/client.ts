@@ -44,7 +44,7 @@ export interface ClientOptions {
  * ```typescript
  * // Custom configuration
  * const client = new ENSNodeClient({
- *   url: new URL("https://custom-api.ensnode.io"),
+ *   url: new URL("https://my-ensnode-instance.com"),
  * });
  * ```
  */

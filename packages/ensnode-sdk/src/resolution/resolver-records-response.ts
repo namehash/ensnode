@@ -8,24 +8,25 @@ import { ResolverRecordsSelection } from "./resolver-records-selection";
  */
 export type ResolverRecordsResponseBase = {
   /**
-   * The name record.
+   * The name record, relevant in the context of Reverse Resolution. Null if no name record is set.
    */
   name: Name | null;
 
   /**
-   * Address records, keyed by CoinType.
+   * Address records, keyed by CoinType. Null if no record for the specified CoinType is set.
    */
   addresses: Record<CoinType, string | null>;
 
   /**
-   * Text records, keyed by key.
+   * Text records, keyed by key. Null if no record for the specified key is set.
    */
   texts: Record<string, string | null>;
 };
 
 /**
- * Example usage of ResolverRecordsResponse type:
+ * Represents the strongly-typed set of records based on the provided SELECTION
  *
+ * @example
  * ```typescript
  * const selection = {
  *   name: true,
