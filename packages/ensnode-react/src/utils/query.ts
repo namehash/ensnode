@@ -94,7 +94,7 @@ export function createPrimaryNameQueryOptions(
     queryKey: queryKeys.primaryName(config.client.url.href, args),
     queryFn: async () => {
       const client = new ENSNodeClient(config.client);
-      return client.resolvePrimaryName(args.address, args.chainId);
+      return client.resolvePrimaryName(args.address, args.chainId, args.trace);
     },
     enabled: true,
   };

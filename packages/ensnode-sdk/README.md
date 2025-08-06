@@ -62,7 +62,7 @@ const { records } = await client.resolveRecords("vitalik.eth", {
 
 ##### `resolvePrimaryName(address, chainId)`
 
-Resolves the primary name of a specified address (Reverse Resolution), via ENSNode, which implements Protocol Acceleration for indexed names.
+Resolves the primary name of a provided address on the specified chainId (Reverse Resolution), via ENSNode, which implements Protocol Acceleration for indexed names.
 
 - `address`: The Address whose Primary Name to resolve
 - `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
