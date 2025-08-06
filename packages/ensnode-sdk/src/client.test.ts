@@ -56,16 +56,16 @@ describe("ENSNodeClient", () => {
     });
   });
 
-  describe("resolveForward", () => {
+  describe("resolveRecords", () => {
     // TODO: integrate with default-case expectations from resolution api and test behavior
     it("should handle address and text selections", async () => {
       const mockResponse = { records: EXAMPLE_RECORDS_RESPONSE };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
       const client = new ENSNodeClient();
-      const response = await client.resolveForward(EXAMPLE_NAME, EXAMPLE_SELECTION);
+      const response = await client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION);
 
-      const expectedUrl = new URL(`/api/resolve/forward/${EXAMPLE_NAME}`, DEFAULT_ENSNODE_API_URL);
+      const expectedUrl = new URL(`/api/resolve/records/${EXAMPLE_NAME}`, DEFAULT_ENSNODE_API_URL);
       expectedUrl.searchParams.set("addresses", EXAMPLE_SELECTION.addresses.join(","));
       expectedUrl.searchParams.set("texts", EXAMPLE_SELECTION.texts.join(","));
 
@@ -77,22 +77,22 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
       const client = new ENSNodeClient();
-      await expect(client.resolveForward(EXAMPLE_NAME, EXAMPLE_SELECTION)).rejects.toThrow(
-        /Forward Resolution Failed/i,
+      await expect(client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION)).rejects.toThrow(
+        /Records Resolution Failed/i,
       );
     });
   });
 
-  describe("resolveReverse", () => {
-    it("should make correct API call for reverse resolution", async () => {
+  describe("resolvePrimaryName", () => {
+    it("should make correct API call for primary name resolution", async () => {
       const mockResponse = { records: { name: EXAMPLE_NAME } };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
 
       const client = new ENSNodeClient();
-      const response = await client.resolveReverse(EXAMPLE_ADDRESS);
+      const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS);
 
       const expectedUrl = new URL(
-        `/api/resolve/reverse/${EXAMPLE_ADDRESS}`,
+        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}`,
         DEFAULT_ENSNODE_API_URL,
       );
       expectedUrl.searchParams.set("chainId", "1");
@@ -107,10 +107,10 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ records: {} }) });
 
       const client = new ENSNodeClient();
-      await client.resolveReverse(EXAMPLE_ADDRESS, 10);
+      await client.resolvePrimaryName(EXAMPLE_ADDRESS, 10);
 
       const expectedUrl = new URL(
-        `/api/resolve/reverse/${EXAMPLE_ADDRESS}`,
+        `/api/resolve/primary-name/${EXAMPLE_ADDRESS}`,
         DEFAULT_ENSNODE_API_URL,
       );
       expectedUrl.searchParams.set("chainId", "10");
@@ -122,8 +122,8 @@ describe("ENSNodeClient", () => {
       mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
 
       const client = new ENSNodeClient();
-      await expect(client.resolveReverse(EXAMPLE_ADDRESS)).rejects.toThrow(
-        /Reverse Resolution Failed/i,
+      await expect(client.resolvePrimaryName(EXAMPLE_ADDRESS)).rejects.toThrow(
+        /Primary Name Resolution Failed/i,
       );
     });
   });

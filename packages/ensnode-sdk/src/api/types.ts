@@ -26,28 +26,28 @@ interface TraceableResponse {
 }
 
 /**
- * Forward Resolution Request Type
+ * Resolve Records Request Type
  */
-export interface ForwardResolutionRequest<SELECTION extends ResolverRecordsSelection>
+export interface ResolveRecordsRequest<SELECTION extends ResolverRecordsSelection>
   extends ForwardResolutionArgs<SELECTION>,
     TraceableRequest {}
 
 /**
- * Forward Resolution Response Type
+ * Resolve Records Response Type
  */
-export interface ForwardResolutionResponse<SELECTION extends ResolverRecordsSelection>
+export interface ResolveRecordsResponse<SELECTION extends ResolverRecordsSelection>
   extends TraceableResponse {
   records: ResolverRecordsResponse<SELECTION>;
 }
 
 /**
- * Reverse Resolution Request Type
+ * Resolve Primary Name Request Type
  */
-export interface ReverseResolutionRequest extends ReverseResolutionArgs, TraceableRequest {}
+export interface ResolvePrimaryNameRequest extends ReverseResolutionArgs, TraceableRequest {}
 
 /**
- * Reverse Resolution Response Type
+ * Resolve Primary Name Response Type
  */
-export interface ReverseResolutionResponse extends TraceableResponse {
+export interface ResolvePrimaryNameResponse extends TraceableResponse {
   records: ReverseResolutionRecordsResponse;
 }

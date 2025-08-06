@@ -1,7 +1,10 @@
-import type { Address } from "viem";
-
-import { ErrorResponse, ForwardResolutionResponse, ReverseResolutionResponse } from "./api/types";
-import type { Name } from "./ens";
+import {
+  ErrorResponse,
+  ResolvePrimaryNameRequest,
+  ResolvePrimaryNameResponse,
+  ResolveRecordsRequest,
+  ResolveRecordsResponse,
+} from "./api/types";
 import { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -31,11 +34,10 @@ export interface ClientOptions {
  * const client = new ENSNodeClient();
  *
  * // Use resolution methods
- * const nameResult = await client.resolveForward("vitalik.eth", {
+ * const { records } = await client.resolveRecords("vitalik.eth", {
  *   addresses: [60],
  *   texts: ["avatar"]
  * });
- *
  * ```
  *
  * @example
@@ -69,16 +71,16 @@ export class ENSNodeClient {
   }
 
   /**
-   * Forward Resolution: Resolve records for an ENS name.
+   * Resolves records for an ENS name (Forward Resolution).
    *
    * @param name The ENS Name whose records to resolve
    * @param selection Optional selection of Resolver records
-   * @returns ForwardResolutionResponse<SELECTION>
+   * @returns ResolveRecordsResponse<SELECTION>
    * @throws If the request fails or the ENSNode API returns an error response
    *
    * @example
    * ```typescript
-   * const { records } = await client.resolveForward("vitalik.eth", {
+   * const { records } = await client.resolveRecords("vitalik.eth", {
    *   addresses: [60],
    *   texts: ["avatar", "com.twitter"]
    * });
@@ -95,12 +97,12 @@ export class ENSNodeClient {
    * // }
    * ```
    */
-  async resolveForward<SELECTION extends ResolverRecordsSelection>(
-    name: Name,
-    selection: SELECTION,
-    trace = false,
-  ): Promise<ForwardResolutionResponse<SELECTION>> {
-    const url = new URL(`/api/resolve/forward/${encodeURIComponent(name)}`, this.options.url);
+  async resolveRecords<SELECTION extends ResolverRecordsSelection>(
+    name: ResolveRecordsRequest<SELECTION>["name"],
+    selection: ResolveRecordsRequest<SELECTION>["selection"],
+    trace: ResolveRecordsRequest<SELECTION>["trace"] = false,
+  ): Promise<ResolveRecordsResponse<SELECTION>> {
+    const url = new URL(`/api/resolve/records/${encodeURIComponent(name)}`, this.options.url);
 
     // Add query parameters based on selection
     if (selection.addresses && selection.addresses.length > 0) {
@@ -117,26 +119,26 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Forward Resolution Failed: ${error.error}`);
+      throw new Error(`Records Resolution Failed: ${error.error}`);
     }
 
     const data = await response.json();
-    return data as ForwardResolutionResponse<SELECTION>;
+    return data as ResolveRecordsResponse<SELECTION>;
   }
 
   /**
-   * Reverse Resolution: Resolve the Primary Name of an Address
+   * Resolves the primary name of a specified address (Reverse Resolution).
    *
    * @param address The Address whose Primary Name to resolve
    * @param chainId Optional chain id within which to query the address' ENSIP-19 Multichain Primary
    *   Name (defaulting to Ethereum Mainnet [1])
-   * @returns ReverseResolutionResponse
+   * @returns ResolvePrimaryNameResponse
    * @throws If the request fails or the ENSNode API returns an error response
    *
    * @example
    * ```typescript
    * // Resolve the address' Primary Name on Ethereum Mainnet
-   * const { records } = await client.resolveReverse("0xabcd...");
+   * const { records } = await client.resolvePrimaryName("0xabcd...");
    *
    * console.log(records);
    * // {
@@ -145,15 +147,15 @@ export class ENSNodeClient {
    * // }
    *
    * // Resolve the address' Primary Name on Optimism
-   * const { records } = await client.resolveReverse("0xabcd...", 10);
+   * const { records } = await client.resolvePrimaryName("0xabcd...", 10);
    * ```
    */
-  async resolveReverse(
-    address: Address,
-    chainId: number = 1,
-    trace = false,
-  ): Promise<ReverseResolutionResponse> {
-    const url = new URL(`/api/resolve/reverse/${address}`, this.options.url);
+  async resolvePrimaryName(
+    address: ResolvePrimaryNameRequest["address"],
+    chainId: ResolvePrimaryNameRequest["chainId"] = 1,
+    trace: ResolvePrimaryNameRequest["trace"] = false,
+  ): Promise<ResolvePrimaryNameResponse> {
+    const url = new URL(`/api/resolve/primary-name/${address}`, this.options.url);
     url.searchParams.set("chainId", chainId.toString());
 
     if (trace) url.searchParams.set("trace", "true");
@@ -162,10 +164,10 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Reverse Resolution Failed: ${error.error}`);
+      throw new Error(`Primary Name Resolution Failed: ${error.error}`);
     }
 
     const data = await response.json();
-    return data as ReverseResolutionResponse;
+    return data as ResolvePrimaryNameResponse;
   }
 }
