@@ -1,7 +1,7 @@
 import type { BlockRef, ChainId, Duration } from "../../shared";
 
 export const ChainIndexingStatusIds = {
-  NotStarted: "notStarted",
+  Unstarted: "unstarted",
   Backfill: "backfill",
   Following: "following",
   Completed: "completed",
@@ -35,17 +35,17 @@ export interface ChainIndexingStatusConfig {
 }
 
 /**
- * Chain Indexing: Not started status
+ * Chain Indexing: Unstarted status
  *
  * Notes:
- * - The "notStarted" status applies when using omnichain ordering and the
+ * - The "usntarted" status applies when using omnichain ordering and the
  *   overall progress checkpoint has not reached the startBlock of the chain.
  *
  * Invariants:
  * - `config.startBlock` is always before or the same as `config.endBlock` (if present)
  */
-export interface ChainIndexingNotStartedStatus {
-  status: typeof ChainIndexingStatusIds.NotStarted;
+export interface ChainIndexingUnstartedStatus {
+  status: typeof ChainIndexingStatusIds.Unstarted;
   config: ChainIndexingStatusConfig;
 }
 
@@ -112,7 +112,7 @@ export interface ChainIndexingCompletedStatus {
  * Chain Indexing might be in one of many statuses.
  */
 export type ChainIndexingStatus =
-  | ChainIndexingNotStartedStatus
+  | ChainIndexingUnstartedStatus
   | ChainIndexingBackfillStatus
   | ChainIndexingFollowingStatus
   | ChainIndexingCompletedStatus;

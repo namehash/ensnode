@@ -5,8 +5,8 @@ import { SerializedENSIndexerIndexingStatus } from "./serialized-types";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
   ChainIndexingBackfillStatus,
-  ChainIndexingNotStartedStatus,
   ChainIndexingStatusIds,
+  ChainIndexingUnstartedStatus,
   ENSIndexerIndexingStatus,
 } from "./types";
 
@@ -32,12 +32,12 @@ describe("ENSIndexer: Indexing Status", () => {
           [
             8453,
             {
-              status: ChainIndexingStatusIds.NotStarted,
+              status: ChainIndexingStatusIds.Unstarted,
               config: {
                 startBlock: earliestBlockRef,
                 endBlock: laterBlockRef,
               },
-            } satisfies ChainIndexingNotStartedStatus,
+            } satisfies ChainIndexingUnstartedStatus,
           ],
         ]),
       } satisfies ENSIndexerIndexingStatus;
@@ -59,7 +59,7 @@ describe("ENSIndexer: Indexing Status", () => {
             backfillEndBlock: latestBlockRef,
           },
           "8453": {
-            status: ChainIndexingStatusIds.NotStarted,
+            status: ChainIndexingStatusIds.Unstarted,
             config: {
               startBlock: earliestBlockRef,
               endBlock: laterBlockRef,

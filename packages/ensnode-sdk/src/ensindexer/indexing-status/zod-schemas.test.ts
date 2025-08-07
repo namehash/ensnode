@@ -5,9 +5,9 @@ import {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingFollowingStatus,
-  ChainIndexingNotStartedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusIds,
+  ChainIndexingUnstartedStatus,
 } from "./types";
 import { makeChainIndexingStatusSchema } from "./zod-schemas";
 
@@ -16,39 +16,39 @@ describe("ENSIndexer: Indexing Status", () => {
     const formatParseError = <T>(zodParseError: ZodSafeParseResult<T>) =>
       prettifyError(zodParseError.error!);
 
-    describe("ChainIndexingNotStartedStatus", () => {
+    describe("ChainIndexingUnstartedStatus", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.NotStarted,
+          status: ChainIndexingStatusIds.Unstarted,
           config: {
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingNotStartedStatus;
+        } satisfies ChainIndexingUnstartedStatus;
 
         // act
         const parsed = makeChainIndexingStatusSchema().parse(serialized);
 
         // assert
         expect(parsed).toStrictEqual({
-          status: ChainIndexingStatusIds.NotStarted,
+          status: ChainIndexingStatusIds.Unstarted,
           config: {
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingNotStartedStatus);
+        } satisfies ChainIndexingUnstartedStatus);
       });
 
       it("won't parse if the config.startBlock is after the config.endBlock", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.NotStarted,
+          status: ChainIndexingStatusIds.Unstarted,
           config: {
             startBlock: laterBlockRef,
             endBlock: earlierBlockRef,
           },
-        } satisfies ChainIndexingNotStartedStatus;
+        } satisfies ChainIndexingUnstartedStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));

@@ -12,8 +12,8 @@ import {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingFollowingStatus,
-  ChainIndexingNotStartedStatus,
   ChainIndexingStatus,
+  ChainIndexingUnstartedStatus,
   Duration,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -93,12 +93,12 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
         // status block, the chain has not started yet.
         if (chainBlocksConfig.startBlock.number === chainStatusBlock.number) {
           serializedChainIndexingStatuses[`${chainId}`] = {
-            status: "notStarted",
+            status: "unstarted",
             config: {
               startBlock: chainBlocksConfig.startBlock,
               endBlock: chainBlocksConfig.endBlock,
             },
-          } satisfies ChainIndexingNotStartedStatus;
+          } satisfies ChainIndexingUnstartedStatus;
 
           // go to next iteration
           continue;

@@ -17,17 +17,17 @@ import type {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingFollowingStatus,
-  ChainIndexingNotStartedStatus,
   ChainIndexingStatus,
+  ChainIndexingUnstartedStatus,
 } from "./types";
 
 /**
- * Makes Zod schema for {@link ChainIndexingNotStartedStatus} type.
+ * Makes Zod schema for {@link ChainIndexingUnstartedStatus} type.
  */
-export const makeChainIndexingNotStartedStatusSchema = (valueLabel: string = "Value") =>
+export const makeChainIndexingUnstartedStatusSchema = (valueLabel: string = "Value") =>
   z
     .strictObject({
-      status: z.literal(ChainIndexingStatusIds.NotStarted),
+      status: z.literal(ChainIndexingStatusIds.Unstarted),
       config: z.strictObject({
         startBlock: makeBlockRefSchema(valueLabel),
         endBlock: makeBlockRefSchema(valueLabel).nullable(),
@@ -155,7 +155,7 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
  */
 export const makeChainIndexingStatusSchema = (valueLabel: string = "Value") =>
   z.discriminatedUnion("status", [
-    makeChainIndexingNotStartedStatusSchema(valueLabel),
+    makeChainIndexingUnstartedStatusSchema(valueLabel),
     makeChainIndexingBackfillStatusSchema(valueLabel),
     makeChainIndexingFollowingStatusSchema(valueLabel),
     makeChainIndexingCompletedStatusSchema(valueLabel),
