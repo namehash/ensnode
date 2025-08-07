@@ -157,7 +157,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             await withProtocolStepAsync(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.FindResolver,
-              () => findResolver(chainId, name),
+              () => findResolver(chainId, name, { accelerate }),
             );
 
           // 1.2 Determine whether active resolver exists

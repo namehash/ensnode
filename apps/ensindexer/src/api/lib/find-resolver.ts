@@ -24,28 +24,40 @@ const NULL_RESULT: FindResolverResult = {
 };
 
 const tracer = trace.getTracer("find-resolver");
+const ensRootChainId = getENSRootChainId(config.namespace);
 
-export async function findResolver(chainId: ChainId, name: Name) {
-  // TODO: Accelerate names that are subnames of well-known registrar managed names (i.e. base.eth, .linea.eth)
-  // .base.eth -> ensroot.BasenamesL1Resolver.address;
-  // .linea.eth -> ensroot.LineanamesL1Resolver.address;
-  // note that with that acceleration approach we may need to explicitly not suppport or make a
-  // carve-out for those base.eth subdomains on mainnet
+/**
+ * Identifies the active resolver on `chainId` for `name`.
+ *
+ * NOTE: If calling `findResolver` for a chain other than the ENS Root Chain, it is the caller's
+ * responsibility to ensure that the appropriate Domain-Resolver relations are indexed for the
+ * specified chainId, or the resolver lookup will fail.
+ */
+export async function findResolver(
+  chainId: ChainId,
+  name: Name,
+  { accelerate }: { accelerate: boolean } = { accelerate: true },
+) {
+  if (chainId === ensRootChainId) {
+    // if we're on the ENS Root Chain, we have the option to accelerate resolver lookups iff the
+    // Subgraph plugin is active
+    if (accelerate && config.plugins.includes(PluginName.Subgraph)) {
+      return findResolverWithIndex(chainId, name);
+    }
 
-  // Implicit Invariant: findResolver is _always_ called for the ENSRoot Chain and then _ONLY_
-  // called with chains for which we are guaranteed to have the Domain-Resolver relations indexed.
-  // This is enforced by the requirement that `forwardResolve` with non-ENSRoot chain ids is only
-  // called when an known offchain lookup resolver defers to a plugin that is active.
-
-  // if the Subgraph plugin is not active, then we don't have Domain-Resolver relationships
-  // for the ENSRoot Chain
-  if (!config.plugins.includes(PluginName.Subgraph)) {
     // query the UniversalResolver on the ENSRoot Chain (via RPC)
     return findResolverWithUniversalResolver(chainId, name);
   }
 
-  // otherwise we _must_ have access to the indexed Domain-Resolver relations necessary to look up
-  // the Domain's configured Resolver (see invariant above)
+  // Implicit Invariant: calling `findResolver` in the context of a non-root chain only makes sense
+  // in the context of Protocol-Accelerated logic: besides the ENS Root Chain, `findResolver` should
+  // _ONLY_ called with chains for which we are guaranteed to have the Domain-Resolver relations indexed.
+  // This is enforced by the requirement that `forwardResolve` with non-ENSRoot chain ids is only
+  // called when an known offchain lookup resolver defers to a plugin that is active.
+
+  // at this point we _must_ have access to the indexed Domain-Resolver relations necessary to look up
+  // the Domain's configured Resolver (see invariant above), so retrieve the name's active resolver
+  // from the index.
   return findResolverWithIndex(chainId, name);
 }
 
@@ -62,8 +74,6 @@ async function findResolverWithUniversalResolver(
     "findResolverWithUniversalResolver",
     { chainId, name },
     async (span) => {
-      const ensRootChainId = getENSRootChainId(config.namespace);
-
       // Invariant: This must be the ENS Root Chain
       if (chainId !== ensRootChainId) {
         throw new Error(
