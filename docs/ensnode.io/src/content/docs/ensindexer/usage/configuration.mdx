@@ -10,9 +10,9 @@ import { Code } from '@astrojs/starlight/components';
 import envExample from '@workspace/apps/ensindexer/.env.local.example?raw';
 
 :::danger[Custom RPC Configuration Required]
-**ENSIndexer requires private RPC endpoints to function.** Public (rate limited) RPC endpoints will NOT provide acceptable performance.
+**ENSIndexer requires private RPC endpoints.** Public (rate limited) RPC endpoints will not provide acceptable performance.
 
-You must configure private (paid) RPC services from providers like Alchemy, Infura, or QuickNode or host your own RPC service that can handle high-volume requests.
+You must configure private (paid) RPC services from providers like drpc.org, Alchemy, QuickNode, or Infura or host your own RPC service that can handle high-volume requests.
 :::
 
 :::caution[Performance Tip: ENSRainbow Server]
