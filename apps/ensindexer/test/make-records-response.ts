@@ -1,11 +1,10 @@
+import type { CoinType, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { describe, expect, it } from "vitest";
 
 import {
-  type IndexedResolverRecords,
+  IndexedResolverRecords,
   makeRecordsResponseFromIndexedRecords,
-} from "@/api/lib/resolver-records-response";
-import type { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
-import type { CoinType } from "@ensnode/ensnode-sdk";
+} from "@/api/lib/make-records-response";
 
 describe("lib-resolution", () => {
   describe("makeRecordsResponseFromIndexedRecords", () => {

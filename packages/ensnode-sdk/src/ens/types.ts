@@ -1,21 +1,13 @@
 import type { Hex } from "viem";
 
-// re-export CoinType and EvmCoinType from @ensdomains/address-encoder so consumers don't need it as
-// a dependency
+// re-export CoinType and EvmCoinType from @ensdomains/address-encoder
+// so consumers don't need it as a dependency
 export type { CoinType, EvmCoinType } from "@ensdomains/address-encoder";
 
-/**
- * A PluginName is a unique id for a 'plugin': we use the notion of 'plugins' to describe bundles
- * of indexing logic.
- */
-export enum PluginName {
-  Subgraph = "subgraph",
-  Basenames = "basenames",
-  Lineanames = "lineanames",
-  ThreeDNS = "threedns",
-  ReverseResolvers = "reverse-resolvers",
-  Referrals = "referrals",
-}
+// re-export ENSNamespaceIds and ENSNamespaceId from @ensnode/datasources
+// so consumers don't need it as a dependency
+export { ENSNamespaceIds } from "@ensnode/datasources";
+export type { ENSNamespaceId } from "@ensnode/datasources";
 
 /**
  * A hash value that uniquely identifies a single ENS name.
@@ -28,6 +20,13 @@ export enum PluginName {
  * @link https://docs.ens.domains/ensip/1#namehash-algorithm
  */
 export type Node = Hex;
+
+/**
+ * A Name represents a human-readable ENS name.
+ *
+ * ex: vitalik.eth
+ */
+export type Name = string;
 
 /**
  * A LabelHash is the result of the labelhash function (which is just keccak256) on a Label.
@@ -51,10 +50,3 @@ export type Label = string;
  * @example [abcd].example.eth
  */
 export type EncodedLabelHash = `[${string}]`;
-
-/**
- * A Name represents a human-readable ENS name.
- *
- * ex: vitalik.eth
- */
-export type Name = string;

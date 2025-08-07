@@ -2,7 +2,7 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.13.1",
   "scripts": {
     "lint": "pnpm -r lint",
     "lint:ci": "pnpm -r lint:ci",
@@ -36,6 +36,8 @@
       "@graphiql/react>@headlessui/react": "2.2.0",
       "astro>esbuild": "0.25.0",
       "astro>vite": "6.2.7",
+      "eslint>@eslint/plugin-kit": ">=0.3.3",
+      "form-data": ">=4.0.4",
       "minimatch@9.0.5>brace-expansion": "2.0.2",
       "tsup>esbuild": "0.25.0",
       "tsx>esbuild": "0.25.0",

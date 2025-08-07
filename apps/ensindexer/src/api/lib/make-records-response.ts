@@ -1,6 +1,10 @@
 import { ResolveCallsAndResults } from "@/api/lib/resolve-calls-and-results";
-import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
-import { CoinType, bigintToCoinType } from "@ensnode/ensnode-sdk";
+import {
+  ResolverRecordsResponse,
+  ResolverRecordsResponseBase,
+  ResolverRecordsSelection,
+  bigintToCoinType,
+} from "@ensnode/ensnode-sdk";
 
 // TODO: replace with some sort of inferred typing from dizzle
 export interface IndexedResolverRecords {
@@ -8,55 +12,6 @@ export interface IndexedResolverRecords {
   addressRecords: { coinType: bigint; address: string }[];
   textRecords: { key: string; value: string }[];
 }
-
-type ResolverRecordsResponseBase = {
-  /**
-   * The name record.
-   */
-  name: string | null;
-
-  /**
-   * Address records, keyed by CoinType.
-   */
-  addresses: Record<CoinType, string | null>;
-
-  /**
-   * Text records, keyed by key.
-   */
-  texts: Record<string, string | null>;
-};
-
-/**
- * Example usage of ResolverRecordsResponse type:
- *
- * ```typescript
- * const selection = {
- *   name: true,
- *   addresses: [60],
- *   texts: ["com.twitter", "avatar"],
- * } as const satisfies ResolverRecordsSelection;
- *
- * type Response = ResolverRecordsResponse<typeof selection>;
- *
- * // results in the following type
- * type Response = {
- *   readonly name: string | null;
- *   readonly addresses: Record<"60", string | null>;
- *   readonly texts: Record<"avatar" | "com.twitter", string | null>;
- * }
- * ```
- */
-export type ResolverRecordsResponse<T extends ResolverRecordsSelection = ResolverRecordsSelection> =
-  {
-    [K in keyof T as T[K] extends true | any[] ? K : never]: K extends "addresses"
-      ? Record<
-          `${T["addresses"] extends readonly CoinType[] ? T["addresses"][number] : never}`,
-          string | null
-        >
-      : K extends "texts"
-        ? Record<T["texts"] extends readonly string[] ? T["texts"][number] : never, string | null>
-        : ResolverRecordsResponseBase[K & keyof ResolverRecordsResponseBase];
-  };
 
 /**
  * Formats IndexedResolverRecords into a ResolverRecordsResponse based on the provided selection.
@@ -69,7 +24,7 @@ export function makeRecordsResponseFromIndexedRecords<SELECTION extends Resolver
   selection: SELECTION,
   records: IndexedResolverRecords,
 ): ResolverRecordsResponse<SELECTION> {
-  const response: Partial<ResolverRecordsResponse<any>> = {};
+  const response: Partial<ResolverRecordsResponseBase> = {};
 
   if (selection.name) {
     response.name = records.name;
@@ -97,6 +52,7 @@ export function makeRecordsResponseFromIndexedRecords<SELECTION extends Resolver
     );
   }
 
+  // cast response as the inferred type based on SELECTION
   return response as ResolverRecordsResponse<SELECTION>;
 }
 
@@ -104,7 +60,7 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
   selection: SELECTION,
   results: ResolveCallsAndResults<SELECTION>,
 ): ResolverRecordsResponse<SELECTION> {
-  const response: Partial<ResolverRecordsResponse<any>> = {};
+  const response: Partial<ResolverRecordsResponseBase> = {};
 
   if (selection.name) {
     const nameResult = results.find(({ call: { functionName } }) => functionName === "name");
@@ -139,6 +95,7 @@ export function makeRecordsResponseFromResolveResults<SELECTION extends Resolver
     );
   }
 
+  // cast response as the inferred type based on SELECTION
   return response as ResolverRecordsResponse<SELECTION>;
 }
 

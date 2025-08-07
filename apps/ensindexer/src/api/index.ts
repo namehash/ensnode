@@ -53,7 +53,7 @@ app.onError((error, ctx) => {
 app.use("/", async (ctx) => {
   try {
     const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
-    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl);
+    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl.href);
 
     return ctx.redirect(ensAdminRedirectUrl);
   } catch (error) {
@@ -73,7 +73,7 @@ app.get(
     },
     env: {
       PLUGINS: config.plugins.join(","),
-      DATABASE_SCHEMA: config.ponderDatabaseSchema,
+      DATABASE_SCHEMA: config.databaseSchemaName,
       NAMESPACE: config.namespace,
     },
     db,

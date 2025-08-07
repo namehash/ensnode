@@ -1,6 +1,6 @@
 import config from "@/config";
 import { ENSNamespace, getENSNamespace } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import { Address, isAddressEqual } from "viem";
 
 // NOTE: typing as ENSNamespace so we can access possibly undefined Datasources
@@ -29,19 +29,23 @@ const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
  * resolverAddress to (sub-)Registry on a specified chain.
  */
 export function possibleKnownOffchainLookupResolverDefersTo(
-  chainId: number,
+  chainId: ChainId,
   resolverAddress: Address,
-): { pluginName: PluginName; chainId: number | undefined } | null {
+): { pluginName: PluginName; chainId: ChainId } | null {
   // on the ENS Deployment Chain
   if (chainId === ensNamespace.ensroot.chain.id) {
     const basenamesL1ResolverAddress = ensNamespace.ensroot.contracts.BasenamesL1Resolver
       ?.address as Address | undefined;
 
-    // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames plugin
-    if (basenamesL1ResolverAddress && isAddressEqual(resolverAddress, basenamesL1ResolverAddress)) {
+    // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames plugin,
+    if (
+      basenamesL1ResolverAddress &&
+      isAddressEqual(resolverAddress, basenamesL1ResolverAddress) &&
+      ensNamespace.basenames
+    ) {
       return {
         pluginName: PluginName.Basenames,
-        chainId: ensNamespace.basenames?.chain.id,
+        chainId: ensNamespace.basenames.chain.id,
       };
     }
 
@@ -51,11 +55,12 @@ export function possibleKnownOffchainLookupResolverDefersTo(
     // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Lineanames plugin
     if (
       lineanamesL1ResolverAddress &&
-      isAddressEqual(resolverAddress, lineanamesL1ResolverAddress)
+      isAddressEqual(resolverAddress, lineanamesL1ResolverAddress) &&
+      ensNamespace.lineanames
     ) {
       return {
         pluginName: PluginName.Lineanames,
-        chainId: ensNamespace.lineanames?.chain.id,
+        chainId: ensNamespace.lineanames.chain.id,
       };
     }
 

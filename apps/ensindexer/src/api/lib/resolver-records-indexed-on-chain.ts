@@ -1,6 +1,6 @@
 import config from "@/config";
 import { ENSNamespace, getENSNamespace } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 
 // NOTE: typing as ENSNamespace so we can access possibly undefined Datasources
 const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
@@ -22,7 +22,7 @@ const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
  * @param chainId
  * @returns
  */
-export function areResolverRecordsIndexedOnChain(chainId: number) {
+export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
   // config.indexAdditionalResolverRecords must be true, or we aren't indexing resolver records at all
   if (!config.indexAdditionalResolverRecords) return false;
 
