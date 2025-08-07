@@ -1,9 +1,10 @@
 import { prettifyError } from "zod/v4";
 import type { ChainIdString, UrlString } from "./serialized-types";
-import type { BlockNumber, BlockRef, ChainId, Datetime } from "./types";
+import type { BlockNumber, BlockRef, Blockrange, ChainId, Datetime } from "./types";
 import {
   makeBlockNumberSchema,
   makeBlockRefSchema,
+  makeBlockrangeSchema,
   makeChainIdStringSchema,
   makeDatetimeSchema,
   makeUnixTimestampSchema,
@@ -60,6 +61,31 @@ export function deserializeBlockNumber(maybeBlockNumber: number, valueLabel?: st
 
   if (parsed.error) {
     throw new Error(`Cannot deserialize BlockNumber:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializeBlockrange(maybeBlockrange: Partial<Blockrange>, valueLabel?: string) {
+  const schema = makeBlockrangeSchema(valueLabel);
+  const parsed = schema.safeParse(maybeBlockrange);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize Blockrange:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializeBlockRef(
+  maybeBlockRef: Partial<BlockRef>,
+  valueLabel?: string,
+): BlockRef {
+  const schema = makeBlockRefSchema(valueLabel);
+  const parsed = schema.safeParse(maybeBlockRef);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize BlockRef:\n${prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;

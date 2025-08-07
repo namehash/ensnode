@@ -117,10 +117,35 @@ export const makeBlockNumberSchema = (valueLabel: string = "Block number") =>
   makeNonNegativeIntegerSchema(valueLabel);
 
 /**
+ * Parses an object value as the {@link Blockrange} object.
+ */
+export const makeBlockrangeSchema = (valueLabel: string = "Value") =>
+  z
+    .strictObject(
+      {
+        startBlock: makeBlockNumberSchema(`${valueLabel}.startBlock`).optional(),
+        endBlock: makeBlockNumberSchema(`${valueLabel}.endBlock`).optional(),
+      },
+      {
+        error: `${valueLabel} must be a valid Blockrange object.`,
+      },
+    )
+    .refine(
+      (v) => {
+        if (v.startBlock && v.endBlock) {
+          return v.startBlock <= v.endBlock;
+        }
+
+        return true;
+      },
+      { error: `${valueLabel}: startBlock must be before or equal to endBlock` },
+    );
+
+/**
  * Parses an object value as the {@link BlockRef} object.
  */
 export const makeBlockRefSchema = (valueLabel: string = "Value") =>
-  z.object(
+  z.strictObject(
     {
       timestamp: makeUnixTimestampSchema(`${valueLabel}.timestamp`),
       number: makeBlockNumberSchema(`${valueLabel}.number`),

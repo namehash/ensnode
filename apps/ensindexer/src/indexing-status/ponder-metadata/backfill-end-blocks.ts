@@ -1,13 +1,7 @@
+import type { BlockNumber, Blockrange } from "@ensnode/ensnode-sdk";
 import type { PrometheusMetrics } from "@ensnode/ponder-metadata";
-import { fetchPonderMetrics } from "./helpers";
-import type {
-  BlockNumber,
-  Blockrange,
-  ChainName,
-  PonderBlockRef,
-  PonderChainBlockRefs,
-  PonderPublicClients,
-} from "./types";
+import { fetchPonderMetrics } from "./metrics";
+import type { ChainName } from "./types";
 
 /**
  * Get the backfillEndBlock number for each indexed chain.
@@ -19,8 +13,8 @@ import type {
  * - all values are valid {@link BlockNumber}s.
  */
 function getBackfillEndBlocks(
-  chainsBlockrange: Record<ChainName, Blockrange>,
   metrics: PrometheusMetrics,
+  chainsBlockrange: Record<ChainName, Blockrange>,
 ): Record<ChainName, BlockNumber> {
   const chainBackfillEndBlocks: Record<ChainName, BlockNumber> = {};
 
@@ -60,7 +54,7 @@ export const DEFAULT_METRICS_FETCH_INTERVAL = 1_000;
  * Invariants:
  * - every backfillEnd value is a valid {@link BlockNumber}.
  */
-async function tryGettingBackfillEndBlocks(
+export async function tryGettingBackfillEndBlocks(
   ponderAppUrl: URL,
   chainsBlockrange: Record<ChainName, Blockrange>,
   backfillEndBlockFetchTimeout = DEFAULT_METRICS_FETCH_TIMEOUT,
@@ -126,7 +120,7 @@ async function tryGettingBackfillEndBlocks(
         // 3. Get the backfillEndBlock values based on index chains blockrange
         //    configuration and Ponder app metrics.
         // NOTE: If getBackfillEndBlocks throws an error, we treat it as a recoverable one.
-        backfillEndBlocks = getBackfillEndBlocks(chainsBlockrange, ponderMetrics);
+        backfillEndBlocks = getBackfillEndBlocks(ponderMetrics, chainsBlockrange);
 
         // 4. Resolve with backfillEndBlocks value.
         return resolveWithValue(backfillEndBlocks);
@@ -137,65 +131,4 @@ async function tryGettingBackfillEndBlocks(
       }
     }, backfillEndBlockFetchInterval);
   });
-}
-
-/**
- * Fetch {@link IndexedChainBlockRefs} for indexed chains.
- */
-export async function fetchChainsBlockRefs(
-  ponderAppUrl: URL,
-  chainsBlockrange: Record<ChainName, Blockrange>,
-  publicClients: PonderPublicClients,
-): Promise<Record<ChainName, PonderChainBlockRefs>> {
-  const indexedChainsBlockRefs: Record<ChainName, PonderChainBlockRefs> = {};
-
-  const chainsBackfillEndBlock = await tryGettingBackfillEndBlocks(ponderAppUrl, chainsBlockrange);
-
-  for (const [chainName, blockrange] of Object.entries(chainsBlockrange)) {
-    const startBlock = blockrange.startBlock;
-    const endBlock = blockrange.endBlock;
-    const backfillEndBlock = chainsBackfillEndBlock[chainName];
-    const publicClient = publicClients[chainName];
-
-    if (typeof startBlock === "undefined") {
-      throw new Error(`startBlock not found for chain ${chainName}`);
-    }
-    if (typeof backfillEndBlock === "undefined") {
-      throw new Error(`backfillEndBlock not found for chain ${chainName}`);
-    }
-    if (typeof publicClient === "undefined") {
-      throw new Error(`publicClient not found for chain ${chainName}`);
-    }
-
-    const fetchBlock = async (blockNumber: BlockNumber): Promise<PonderBlockRef> => {
-      const block = await publicClient.getBlock({
-        blockNumber: BigInt(blockNumber),
-      });
-
-      if (!block) {
-        throw new Error(`Failed to fetch block #${blockNumber} for chain "${chainName}"`);
-      }
-
-      return {
-        number: Number(block.number),
-        timestamp: Number(block.timestamp),
-      } satisfies PonderBlockRef;
-    };
-
-    const [startBlockRef, endBlockRef, backfillEndBlockRef] = await Promise.all([
-      fetchBlock(startBlock),
-      endBlock ? fetchBlock(endBlock) : null,
-      fetchBlock(backfillEndBlock),
-    ]);
-
-    indexedChainsBlockRefs[chainName] = {
-      config: {
-        startBlock: startBlockRef,
-        endBlock: endBlockRef,
-      },
-      backfillEndBlock: backfillEndBlockRef,
-    } satisfies PonderChainBlockRefs;
-  }
-
-  return indexedChainsBlockRefs;
 }

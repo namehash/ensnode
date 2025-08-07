@@ -1,36 +1,16 @@
 import { publicClients } from "ponder:api";
-import config from "@/config";
-import { buildENSIndexerPublicConfig } from "@/config/public";
-import {
-  DEFAULT_METRICS_FETCH_TIMEOUT,
-  buildIndexingStatus,
-  fetchChainsBlockRefs,
-  fetchPonderMetrics,
-  fetchPonderStatus,
-  indexedChainsBlockrange,
-} from "@/indexing-status";
 import {
   serializeENSIndexerIndexingStatus,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
-import resolutionApi from "../lib/resolution-api";
 
-/**
- * ENSIndexer cannot start before all block refs for every indexed chain are known.
- * The block refs must be fetched before the {@link DEFAULT_METRICS_FETCH_TIMEOUT} timeout occurs.
- * Otherwise, the ENSIndexer process must crash.
- */
-export const indexedChainsBlockRefs = fetchChainsBlockRefs(
-  config.ensIndexerUrl,
-  indexedChainsBlockrange,
-  publicClients,
-).catch((error) => {
-  const errorMessage = error instanceof Error ? error.message : "Unknown error";
-  console.error(`Terminating ENSNode instance: ${errorMessage}`);
-  process.exit(1);
-});
+import config from "@/config";
+import { buildENSIndexerPublicConfig } from "@/config/public";
+import { buildIndexingStatus } from "@/indexing-status";
+
+import resolutionApi from "../lib/resolution-api";
 
 const app = new Hono();
 
@@ -48,20 +28,10 @@ app.get("/config", async (c) => {
 
 // include ENSIndexer Indexing Status endpoint
 app.get("/indexing-status", async (c) => {
-  // Get current Ponder metadata
-  const [metrics, status, chainsBlockRefs] = await Promise.all([
-    fetchPonderMetrics(config.ensIndexerUrl),
-    fetchPonderStatus(config.ensIndexerUrl),
-    indexedChainsBlockRefs,
-  ]);
+  // build the current indexing status object
+  const indexingStatus = await buildIndexingStatus(publicClients);
 
-  // Validate Ponder metadata and enforce invariants, then build IndexingStatus object.
-  const indexingStatus = await buildIndexingStatus({
-    metrics,
-    status,
-    chainsBlockRefs,
-  });
-
+  // respond with the serialized indexing status object
   return c.json(serializeENSIndexerIndexingStatus(indexingStatus));
 });
 

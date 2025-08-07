@@ -6,6 +6,7 @@
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
+import { ChainName } from "@/indexing-status/ponder-metadata/types";
 import {
   ChainIdString,
   ChainIndexingBackfillStatus,
@@ -16,11 +17,7 @@ import {
   Duration,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
-import {
-  makeBlockRefSchema,
-  makeChainIdSchema,
-  makeNonNegativeIntegerSchema,
-} from "@ensnode/ensnode-sdk/internal";
+import { makeBlockRefSchema, makeChainIdSchema } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
 
 const makeChainNameSchema = (indexedChainNames: string[]) => z.enum(indexedChainNames);
@@ -43,16 +40,10 @@ const PonderAppSettingsSchema = z.strictObject({
 
 const PonderMetricBooleanSchema = z.coerce.string().transform((v) => v === "1");
 
-const PonderMetricIntegerSchema = z.coerce.number().pipe(makeNonNegativeIntegerSchema());
-
 const PonderMetricSchema = z.object({
   isSyncComplete: PonderMetricBooleanSchema,
   isSyncRealtime: PonderMetricBooleanSchema,
   syncBlock: PonderBlockRefSchema,
-
-  historicalTotalBlocks: PonderMetricIntegerSchema,
-  historicalCachedBlocks: PonderMetricIntegerSchema,
-  historicalCompletedBlocks: PonderMetricIntegerSchema,
 });
 
 const PonderChainBlockRefsSchema = z.object({
@@ -66,48 +57,37 @@ const PonderChainBlockRefsSchema = z.object({
 export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
   const ChainNameSchema = makeChainNameSchema(indexedChainNames);
 
+  const invariant_definedEntryForEachIndexedChain = (v: Map<ChainName, unknown>) =>
+    indexedChainNames.every((chainName) => Array.from(v.keys()).includes(chainName));
+
   return z
     .object({
       appSettings: PonderAppSettingsSchema,
 
-      chainsBlockRefs: z
-        .record(ChainNameSchema, PonderChainBlockRefsSchema)
-        .refine((v) => indexedChainNames.every((chainName) => Object.keys(v).includes(chainName)), {
+      chains: z
+        .map(
+          ChainNameSchema,
+          z.strictObject({
+            blockRefs: PonderChainBlockRefsSchema,
+
+            metrics: PonderMetricSchema,
+
+            status: PonderChainStatus,
+          }),
+        )
+        .refine(invariant_definedEntryForEachIndexedChain, {
           error: "All `indexedChainNames` must be represented by Ponder Chains Block Refs object.",
-        }),
-
-      chainsMetrics: z
-        .record(ChainNameSchema, PonderMetricSchema)
-        .refine((v) => indexedChainNames.every((chainName) => Object.keys(v).includes(chainName)), {
-          error: "All `indexedChainNames` must be represented by Ponder Chains Metrics object.",
-        }),
-
-      chainsStatuses: z
-        .record(ChainNameSchema, PonderChainStatus)
-        .refine((v) => indexedChainNames.every((chainName) => Object.keys(v).includes(chainName)), {
-          error: "All `indexedChainNames` must be represented by Ponder Chains Status object.",
         }),
     })
     .transform((v) => {
       const serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
 
       for (const chainName of indexedChainNames) {
-        const { chainsBlockRefs, chainsMetrics, chainsStatuses } = v;
+        const { blockRefs, metrics, status } = v.chains.get(chainName)!;
 
-        const ponderChainBlockRefs = chainsBlockRefs[chainName]!;
-        const ponderChainMetrics = chainsMetrics[chainName]!;
-        const ponderChainStatus = chainsStatuses[chainName]!;
-
-        const { chainId, block: chainStatusBlock } = ponderChainStatus;
-        const {
-          historicalCompletedBlocks,
-          historicalTotalBlocks,
-          isSyncComplete,
-          isSyncRealtime,
-          syncBlock: chainSyncBlock,
-        } = ponderChainMetrics;
-        const { config: chainBlocksConfig, backfillEndBlock: chainBackfillEndBlock } =
-          ponderChainBlockRefs;
+        const { chainId, block: chainStatusBlock } = status;
+        const { isSyncComplete, isSyncRealtime, syncBlock: chainSyncBlock } = metrics;
+        const { config: chainBlocksConfig, backfillEndBlock: chainBackfillEndBlock } = blockRefs;
 
         // In omnichain ordering, if the startBlock is the same as the
         // status block, the chain has not started yet.

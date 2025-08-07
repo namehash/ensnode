@@ -1,6 +1,5 @@
-export { buildIndexingStatus, indexedChainsBlockrange } from "./build-index-status";
+export { buildIndexingStatus } from "./build-index-status";
 export {
-  fetchChainsBlockRefs,
   fetchPonderMetrics,
   fetchPonderStatus,
   DEFAULT_METRICS_FETCH_TIMEOUT,
