@@ -4,7 +4,7 @@ import { Hono } from "hono";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import resolutionApi from "../lib/resolution-api";
+import resolutionApi from "./resolution-api";
 
 const app = new Hono();
 
