@@ -1,6 +1,6 @@
 import { mergeAbis } from "@ponder/utils";
-import { LegacyPublicResolver } from "../abis/resolver/LegacyPublicResolver";
-import { Resolver } from "../abis/resolver/Resolver";
+import { LegacyPublicResolver } from "../abis/shared/LegacyPublicResolver";
+import { Resolver } from "../abis/shared/Resolver";
 import type { ContractConfig } from "./types";
 
 export const ResolverABI = mergeAbis([LegacyPublicResolver, Resolver]);
