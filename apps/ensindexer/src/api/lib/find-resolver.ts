@@ -1,8 +1,15 @@
-import { db, publicClients } from "ponder:api";
+import { db } from "ponder:api";
 import { DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
 import { ChainId, type Name, type Node, PluginName, getNameHierarchy } from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
-import { type Address, isAddressEqual, namehash, toHex, zeroAddress } from "viem";
+import {
+  type Address,
+  type PublicClient,
+  isAddressEqual,
+  namehash,
+  toHex,
+  zeroAddress,
+} from "viem";
 import { packetToBytes } from "viem/ens";
 
 import config from "@/config";
@@ -31,13 +38,14 @@ const ensRootChainId = getENSRootChainId(config.namespace);
  *
  * NOTE: If calling `findResolver` for a chain other than the ENS Root Chain, it is the caller's
  * responsibility to ensure that the appropriate Domain-Resolver relations are indexed for the
- * specified chainId, or the resolver lookup will fail.
+ * specified chainId, or the `findResolverWithIndex` will return null.
  */
-export async function findResolver(
-  chainId: ChainId,
-  name: Name,
-  { accelerate }: { accelerate: boolean } = { accelerate: true },
-) {
+export async function findResolver({
+  chainId,
+  name,
+  accelerate,
+  publicClient,
+}: { chainId: ChainId; name: Name; accelerate: boolean; publicClient: PublicClient }) {
   if (chainId === ensRootChainId) {
     // if we're on the ENS Root Chain, we have the option to accelerate resolver lookups iff the
     // Subgraph plugin is active
@@ -46,7 +54,7 @@ export async function findResolver(
     }
 
     // query the UniversalResolver on the ENSRoot Chain (via RPC)
-    return findResolverWithUniversalResolver(chainId, name);
+    return findResolverWithUniversalResolver(publicClient, name);
   }
 
   // Implicit Invariant: calling `findResolver` in the context of a non-root chain only makes sense
@@ -62,39 +70,35 @@ export async function findResolver(
 }
 
 /**
- * Queries the resolverAddress for the specified `name` using the UniversalResolver on the ENSRoot
- * via RPC.
+ * Queries the resolverAddress for the specified `name` using the UniversalResolver via RPC.
  */
 async function findResolverWithUniversalResolver(
-  chainId: ChainId,
+  publicClient: PublicClient,
   name: Name,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
     tracer,
     "findResolverWithUniversalResolver",
-    { chainId, name },
+    { name },
     async (span) => {
-      // Invariant: This must be the ENS Root Chain
-      if (chainId !== ensRootChainId) {
-        throw new Error(
-          `Invariant: findResolverWithUniversalResolver called in the context of a chainId "${chainId}" this is not the ENS Root Chain ("${ensRootChainId}").`,
-        );
-      }
-
       const {
         contracts: {
           UniversalResolver: { address, abi },
         },
       } = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 
-      const readContractSpan = tracer.startSpan("UniversalResolver#findResolver");
-      const [activeResolver, , _offset] = await publicClients[chainId]!.readContract({
-        address,
-        abi,
-        functionName: "findResolver",
-        args: [toHex(packetToBytes(name))],
-      });
-      readContractSpan.end();
+      const [activeResolver, , _offset] = await withSpanAsync(
+        tracer,
+        "UniversalResolver#findResolver",
+        { name },
+        () =>
+          publicClient.readContract({
+            address,
+            abi,
+            functionName: "findResolver",
+            args: [toHex(packetToBytes(name))],
+          }),
+      );
 
       if (isAddressEqual(activeResolver, zeroAddress)) {
         // TODO: is error status correct for this?

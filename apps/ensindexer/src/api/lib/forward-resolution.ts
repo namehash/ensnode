@@ -10,7 +10,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import { replaceBigInts } from "ponder";
-import { http, createPublicClient, namehash } from "viem";
+import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
 import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
@@ -24,6 +24,7 @@ import {
   makeRecordsResponseFromResolveResults,
 } from "@/api/lib/make-records-response";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
+import { getPublicClient } from "@/api/lib/public-client";
 import {
   executeResolveCalls,
   interpretRawCallsAndResults,
@@ -31,7 +32,7 @@ import {
 } from "@/api/lib/resolve-calls-and-results";
 import { areResolverRecordsIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
 import config from "@/config";
-import { withActiveSpanAsync, withSpan, withSpanAsync } from "@/lib/auto-span";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import { makeResolverId } from "@/lib/ids";
 
 const tracer = trace.getTracer("forward-resolution");
@@ -110,6 +111,9 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           "ens.protocol": TraceableENSProtocol.ForwardResolution,
         },
         async (span) => {
+          // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
+          const publicClient = getPublicClient(chainId);
+
           // TODO: possibly need to manage state drift between ENSIndexer and RPC
           // could acquire a "most recently indexed" blockNumber or blockHash for this operation based on
           // ponder indexing status and use that to fix any rpc calls made in this context BUT there's still
@@ -157,7 +161,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             await withProtocolStepAsync(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.FindResolver,
-              () => findResolver(chainId, name, { accelerate }),
+              () => findResolver({ chainId, name, accelerate, publicClient }),
             );
 
           // 1.2 Determine whether active resolver exists
@@ -271,15 +275,6 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //    NOTE: from here, MUST execute EVM code to be compliant with ENS Protocol.
           //    i.e. must execute resolve() to retrieve active record values
           //////////////////////////////////////////////////
-
-          // Invariant: ENSIndexer must have an rpcConfig for the `chainId` we're calling resolve() on.
-          const rpcConfig = config.rpcConfigs.get(chainId);
-          if (!rpcConfig) {
-            throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
-          }
-
-          // create an un-cached publicClient
-          const publicClient = createPublicClient({ transport: http(rpcConfig.url.href) });
 
           // 3.1 requireResolver() — verifies that the resolver supports ENSIP-10 if necessary
           await withProtocolStepAsync(
