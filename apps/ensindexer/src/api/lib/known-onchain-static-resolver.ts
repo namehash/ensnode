@@ -1,5 +1,6 @@
 import config from "@/config";
 import { ENSNamespace, getENSNamespace } from "@ensnode/datasources";
+import { ChainId } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 
 // NOTE: typing as ENSNamespace so we can access possibly undefined Datasources
@@ -19,7 +20,7 @@ const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
  *
  * TODO: these relationships could/should be encoded in an ENSIP
  */
-export function getKnownOnchainStaticResolverAddresses(chainId: number): Address[] {
+export function getKnownOnchainStaticResolverAddresses(chainId: ChainId): Address[] {
   // on the ENS Deployment Chain
   if (chainId === ensNamespace.ensroot.chain.id) {
     return [
