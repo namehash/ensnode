@@ -4,4 +4,4 @@
 "@docs/ensnode": patch
 ---
 
-chore: Enhance RPC configuration guidance.
+Enhance RPC configuration guidance.
