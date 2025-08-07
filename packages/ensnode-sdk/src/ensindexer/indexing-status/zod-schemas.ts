@@ -5,13 +5,15 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
-import { ChainId, deserializeChainId } from "../../shared";
+import { ChainId, Duration, deserializeChainId } from "../../shared";
 import * as blockRef from "../../shared/block-ref";
 import {
   makeBlockRefSchema,
   makeChainIdStringSchema,
   makeDurationSchema,
+  makeNonNegativeIntegerSchema,
 } from "../../shared/zod-schemas";
+import { getApproximateRealtimeDistances, getOverallStatus } from "./helpers";
 import { ChainIndexingStatusIds } from "./types";
 import type {
   ChainIndexingBackfillStatus,
@@ -188,6 +190,27 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
 export const makeENSIndexerIndexingStatusSchema = (
   valueLabel: string = "ENSIndexerIndexingStatus",
 ) =>
-  z.object({
-    chains: makeChainIndexingStatusesSchema(valueLabel),
-  });
+  z
+    .strictObject({
+      chains: makeChainIndexingStatusesSchema(valueLabel),
+      overallStatus: z.enum(Object.values(ChainIndexingStatusIds)),
+      approximateRealtimeDistance: makeNonNegativeIntegerSchema(valueLabel).prefault(0),
+    })
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        return getOverallStatus(chains) === indexingStatus.overallStatus;
+      },
+      { error: `${valueLabel} is an invalid overallStatus.` },
+    )
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        return (
+          getApproximateRealtimeDistances(chains) === indexingStatus.approximateRealtimeDistance
+        );
+      },
+      { error: `${valueLabel} is an invalid approximateRealtimeDistances.` },
+    );

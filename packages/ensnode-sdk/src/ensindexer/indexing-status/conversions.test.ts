@@ -40,6 +40,8 @@ describe("ENSIndexer: Indexing Status", () => {
             } satisfies ChainIndexingUnstartedStatus,
           ],
         ]),
+        overallStatus: ChainIndexingStatusIds.Backfill,
+        approximateRealtimeDistance: 0,
       } satisfies ENSIndexerIndexingStatus;
 
       // act
@@ -66,6 +68,8 @@ describe("ENSIndexer: Indexing Status", () => {
             },
           },
         },
+        overallStatus: ChainIndexingStatusIds.Backfill,
+        approximateRealtimeDistance: 0,
       } satisfies SerializedENSIndexerIndexingStatus);
 
       // bonus step: deserialize serialized

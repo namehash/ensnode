@@ -15,7 +15,10 @@ import {
   ChainIndexingStatus,
   ChainIndexingUnstartedStatus,
   Duration,
+  SerializedENSIndexerIndexingStatus,
   deserializeENSIndexerIndexingStatus,
+  getApproximateRealtimeDistances,
+  getOverallStatus,
 } from "@ensnode/ensnode-sdk";
 import { makeBlockRefSchema, makeChainIdSchema } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
@@ -153,8 +156,14 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
         } satisfies ChainIndexingBackfillStatus;
       }
 
-      return deserializeENSIndexerIndexingStatus({
+      const chains = Object.values(serializedChainIndexingStatuses);
+
+      const serializedIndexingStatus = {
         chains: serializedChainIndexingStatuses,
-      });
+        approximateRealtimeDistance: getApproximateRealtimeDistances(chains),
+        overallStatus: getOverallStatus(chains),
+      } satisfies SerializedENSIndexerIndexingStatus;
+
+      return deserializeENSIndexerIndexingStatus(serializedIndexingStatus);
     });
 };

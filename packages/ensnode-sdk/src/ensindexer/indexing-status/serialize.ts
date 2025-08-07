@@ -24,6 +24,8 @@ export function serializeENSIndexerIndexingStatus(
   indexingStatus: ENSIndexerIndexingStatus,
 ): SerializedENSIndexerIndexingStatus {
   return {
+    approximateRealtimeDistance: indexingStatus.approximateRealtimeDistance,
     chains: serializeChainIndexingStatuses(indexingStatus.chains),
+    overallStatus: indexingStatus.overallStatus,
   } satisfies SerializedENSIndexerIndexingStatus;
 }
