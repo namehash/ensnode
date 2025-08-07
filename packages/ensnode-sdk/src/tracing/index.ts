@@ -24,13 +24,9 @@ export enum ForwardResolutionProtocolStep {
  */
 export enum ReverseResolutionProtocolStep {
   Operation = "operation",
-  ForwardResolveCoinType = "forward-resolve-coinType",
-  SpecificNameRecordExists = "specific-name-record-exists-check",
-  ForwardResolveDefaultCoinType = "forward-resolve-default-coinType",
-  DefaultNameRecordExists = "default-name-record-exists-check",
+  ResolveReverseName = "resolve-reverse-name",
+  NameRecordExists = "name-record-exists-check",
   ForwardResolveAddressRecord = "forward-resolve-address-record",
-  VerifyResolvedAddressExistence = "verify-resolved-address-existence",
-  VerifyResolvedAddressValidity = "verify-resolved-address-validity",
   VerifyResolvedAddressMatchesAddress = "verify-resolved-address-matches-address",
 }
 

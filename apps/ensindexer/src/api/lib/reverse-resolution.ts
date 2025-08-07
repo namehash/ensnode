@@ -24,10 +24,10 @@ const tracer = trace.getTracer("reverse-resolution");
 /**
  * Implements ENS Reverse Resolution, including support for ENSIP-19 L2 Primary Names.
  *
- * @see https://docs.ens.domains/ensip/19#primary-name-resolution-process
+ * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  *
- * @param address the adddress to lookup the Primary Name of
- * @param chainId fetch the Primary Name of the `address` in the context of this `chainId`
+ * @param address the adddress whose Primary Name to resolve
+ * @param chainId the chainId within which to resolve the address' Primary Name
  */
 export async function resolveReverse(
   address: Address,
@@ -42,88 +42,66 @@ export async function resolveReverse(
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
-        `resolveReverse(${address}, chainId: ${chainId})`,
+        `resolveReverse(${address}, ${chainId})`,
         { address, chainId, "ens.protocol": TraceableENSProtocol.ReverseResolution },
         async (span) => {
-          let coinType = evmChainIdToCoinType(chainId);
+          /////////////////////////////////////////////////////////
+          // Reverse Resolution Steps
+          // https://docs.ens.domains/ensip/19/#reverse-resolution
+          /////////////////////////////////////////////////////////
 
-          // Steps 1-7 — Resolve coinType-specific name and avatar records
-          span.addEvent(`Resolving records for coinType "${coinType}"...`);
-          let records = await withProtocolStepAsync(
+          // Steps 1-3 — Resolve coinType-specific name record
+          const coinType = evmChainIdToCoinType(chainId);
+          const { name } = await withProtocolStepAsync(
             TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.ForwardResolveCoinType,
+            ReverseResolutionProtocolStep.ResolveReverseName,
             () =>
               resolveForward(reverseName(address, coinType), REVERSE_RESOLUTION_SELECTION, options),
           );
 
-          // Step 8 — Determine if name record exists
+          // Step 4 — Determine if name record exists
           addProtocolStepEvent(
             protocolTracingSpan,
             TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.SpecificNameRecordExists,
-            !!records.name,
+            ReverseResolutionProtocolStep.NameRecordExists,
+            !!name,
           );
-          if (!records.name) {
-            // Step 9 — Resolve default records if necessary
-            // TODO: perhaps this could be optimistically fetched in parallel to above, ensure that coinType
-            // is set correctly for whichever records ends up being used
-            coinType = DEFAULT_EVM_COIN_TYPE;
-            span.addEvent(
-              `No Primary Name for coinType "${coinType}", Resolving records for default coinType "${coinType}"`,
-            );
-            records = await withProtocolStepAsync(
-              TraceableENSProtocol.ReverseResolution,
-              ReverseResolutionProtocolStep.ForwardResolveDefaultCoinType,
-              () =>
-                resolveForward(
-                  reverseName(address, coinType),
-                  REVERSE_RESOLUTION_SELECTION,
-                  options,
-                ),
-            );
-          }
-
-          // Step 10 — If no name record, there is no Primary Name for this address
-          addProtocolStepEvent(
-            protocolTracingSpan,
-            TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.DefaultNameRecordExists,
-            !!records.name,
-          );
-          if (!records.name) {
+          if (!name) {
+            // If name is empty, no primary name exists for this address.
             span.setStatus({
               code: SpanStatusCode.ERROR,
-              message: `No Primary Name for coinType "${evmChainIdToCoinType(chainId)}" or default coinType.`,
+              message: `No Primary Name for coinType "${coinType}" or default coinType.`,
             });
             return null;
           }
 
-          const resolvedName = records.name;
-          span.setAttribute("resolvedName", resolvedName);
+          // set span's name attribute now that it's guaranteed to exist
+          span.setAttribute("name", name);
 
-          // Step 11 — Resolve address record for the given coinType
-          span.addEvent(
-            `Resolving Address for name "${resolvedName}" and coinType "${coinType}"...`,
-          );
+          // Step 5 — Everything below here is 'step 5'
+          // Step 6 — Internally handled as implementation detail of `resolveForward`
+
+          // Step 7 — Resolve the name's address record for the specified coinType
           const { addresses } = await withProtocolStepAsync(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ForwardResolveAddressRecord,
-            () => resolveForward(resolvedName, { addresses: [coinType] }, options),
+            () => resolveForward(name, { addresses: [coinType] }, options),
           );
 
           const resolvedAddress = addresses[coinType];
 
-          // Steps 12-13 — Check resolvedAddress validity
+          // Step 8 — Check resolvedAddress validity
 
-          // if there's no resolvedAddress, no Primary Name
+          // Step 8.1 — if there's no resolvedAddress, no Primary Name
           const resolvedAddressExists = !!resolvedAddress;
-          addProtocolStepEvent(
-            protocolTracingSpan,
-            TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.VerifyResolvedAddressExistence,
-            resolvedAddressExists,
-          );
           if (!resolvedAddressExists) {
+            addProtocolStepEvent(
+              protocolTracingSpan,
+              TraceableENSProtocol.ReverseResolution,
+              ReverseResolutionProtocolStep.VerifyResolvedAddressMatchesAddress,
+              false,
+            );
+
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: `No Resolved Address for coinType "${coinType}"`,
@@ -131,15 +109,19 @@ export async function resolveReverse(
             return null;
           }
 
-          // if the resolvedAddress is not an EVM address, no Primary Name
+          // set span's resolvedAddress attribute now that it's guaranteed to exist
+          span.setAttribute("resolvedAddress", resolvedAddress);
+
+          // Step 8.2 — if the resolvedAddress is not an EVM address, no Primary Name
           const resolvedAddressIsEVMAddress = isAddress(resolvedAddress);
-          addProtocolStepEvent(
-            protocolTracingSpan,
-            TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.VerifyResolvedAddressValidity,
-            resolvedAddressIsEVMAddress,
-          );
           if (!resolvedAddressIsEVMAddress) {
+            addProtocolStepEvent(
+              protocolTracingSpan,
+              TraceableENSProtocol.ReverseResolution,
+              ReverseResolutionProtocolStep.VerifyResolvedAddressMatchesAddress,
+              false,
+            );
+
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: `Resolved Address "${resolvedAddress}" is not EVM Address`,
@@ -147,15 +129,16 @@ export async function resolveReverse(
             return null;
           }
 
-          // if resolvedAddress does not match expected address, no Primary Name
+          // Step 8.3 — if resolvedAddress does not match expected address, no Primary Name
           const resolvedAddressMatchesAddress = isAddressEqual(resolvedAddress, address);
-          addProtocolStepEvent(
-            protocolTracingSpan,
-            TraceableENSProtocol.ReverseResolution,
-            ReverseResolutionProtocolStep.VerifyResolvedAddressMatchesAddress,
-            resolvedAddressIsEVMAddress,
-          );
           if (!resolvedAddressMatchesAddress) {
+            addProtocolStepEvent(
+              protocolTracingSpan,
+              TraceableENSProtocol.ReverseResolution,
+              ReverseResolutionProtocolStep.VerifyResolvedAddressMatchesAddress,
+              false,
+            );
+
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: `Resolved Address "${resolvedAddress}" does not match ${address}`,
@@ -163,9 +146,16 @@ export async function resolveReverse(
             return null;
           }
 
-          // finally, the records are valid for this address
-          span.setAttribute("records", JSON.stringify(records));
-          return records.name;
+          // otherwise
+          addProtocolStepEvent(
+            protocolTracingSpan,
+            TraceableENSProtocol.ReverseResolution,
+            ReverseResolutionProtocolStep.VerifyResolvedAddressMatchesAddress,
+            true,
+          );
+
+          // Step 9 —  name is the Primary Name
+          return name;
         },
       ),
   );
