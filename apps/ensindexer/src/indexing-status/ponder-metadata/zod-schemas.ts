@@ -79,11 +79,11 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
           error: "All `indexedChainNames` must be represented by Ponder Chains Block Refs object.",
         }),
     })
-    .transform((v) => {
+    .transform((ponderIndexingStatus) => {
       const serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
 
       for (const chainName of indexedChainNames) {
-        const { blockRefs, metrics, status } = v.chains.get(chainName)!;
+        const { blockRefs, metrics, status } = ponderIndexingStatus.chains.get(chainName)!;
 
         const { chainId, block: chainStatusBlock } = status;
         const { isSyncComplete, isSyncRealtime, syncBlock: chainSyncBlock } = metrics;
@@ -109,7 +109,7 @@ export const makePonderIndexingStatusSchema = (indexedChainNames: string[]) => {
             status: "completed",
             config: {
               startBlock: chainBlocksConfig.startBlock,
-              endBlock: chainBlocksConfig.endBlock,
+              endBlock: chainBlocksConfig.endBlock!,
             },
             latestIndexedBlock: chainStatusBlock,
             latestKnownBlock: chainStatusBlock,

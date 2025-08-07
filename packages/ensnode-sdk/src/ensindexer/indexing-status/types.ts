@@ -14,11 +14,9 @@ export type ChainIndexingStatusId =
   (typeof ChainIndexingStatusIds)[keyof typeof ChainIndexingStatusIds];
 
 /**
- * Chain Indexing Status Config
- *
- * Configuration applied for chain indexing.
+ * Chain Indexing Indefinite Config
  */
-export interface ChainIndexingStatusConfig {
+export interface ChainIndexingIndefiniteConfig {
   /**
    * Chain indexing begins from that block.
    *
@@ -27,12 +25,36 @@ export interface ChainIndexingStatusConfig {
   startBlock: BlockRef;
 
   /**
+   * There's never an endBlock in the indefinite config.
+   */
+  endBlock?: null;
+}
+
+/**
+ * Chain Indexing Indefinite Config
+ */
+export interface ChainIndexingDefiniteConfig {
+  /**
+   * Chain indexing begins from that block.
+   *
+   * `startBlock` must always be defined.
+   */
+  startBlock: BlockRef;
+
+  /**
    * Chain indexing ends at that block.
    *
-   * The `endBlock` definition for chain indexing is optional.
+   * `endBlock` must always be defined.
    */
-  endBlock: BlockRef | null;
+  endBlock: BlockRef;
 }
+
+/**
+ * Chain Indexing Status Config
+ *
+ * Configuration applied for chain indexing.
+ */
+export type ChainIndexingStatusConfig = ChainIndexingIndefiniteConfig | ChainIndexingDefiniteConfig;
 
 /**
  * Chain Indexing: Unstarted status
@@ -81,7 +103,7 @@ export interface ChainIndexingBackfillStatus {
  */
 export interface ChainIndexingFollowingStatus {
   status: typeof ChainIndexingStatusIds.Following;
-  config: Omit<ChainIndexingStatusConfig, "endBlock">;
+  config: ChainIndexingIndefiniteConfig;
   latestIndexedBlock: BlockRef;
   latestKnownBlock: BlockRef;
   approximateRealtimeDistance: Duration;
@@ -97,11 +119,11 @@ export interface ChainIndexingFollowingStatus {
  * Invariants:
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always the same as `latestKnownBlock`
- * - `latestKnownBlock` is always the same as `config.endBlock` (if present)
+ * - `latestKnownBlock` is always the same as `config.endBlock`
  */
 export interface ChainIndexingCompletedStatus {
   status: typeof ChainIndexingStatusIds.Completed;
-  config: ChainIndexingStatusConfig;
+  config: ChainIndexingDefiniteConfig;
   latestIndexedBlock: BlockRef;
   latestKnownBlock: BlockRef;
 }

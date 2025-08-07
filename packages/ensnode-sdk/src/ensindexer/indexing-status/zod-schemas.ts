@@ -123,7 +123,7 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
       status: z.literal(ChainIndexingStatusIds.Completed),
       config: z.strictObject({
         startBlock: makeBlockRefSchema(valueLabel),
-        endBlock: makeBlockRefSchema(valueLabel).nullable(),
+        endBlock: makeBlockRefSchema(valueLabel),
       }),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
       latestKnownBlock: makeBlockRefSchema(valueLabel),
