@@ -1,5 +1,6 @@
 import type { EnsNode } from "@/components/ensnode";
-import { type ENSNamespaceId, getChainName } from "@ensnode/datasources";
+import { type ENSNamespaceId } from "@ensnode/datasources";
+import { getChainName } from "@/lib/namespace-utils";
 import { fromUnixTime } from "date-fns";
 /**
  * Basic information about a block and its date.

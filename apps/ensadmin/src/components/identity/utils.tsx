@@ -1,4 +1,5 @@
-import { ENSNamespaceId, getAddressDetailsUrl, getNameDetailsUrl } from "@ensnode/datasources";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
 import { ExternalLink } from "lucide-react";
 import { Address } from "viem";
 

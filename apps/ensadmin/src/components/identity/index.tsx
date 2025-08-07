@@ -6,8 +6,8 @@ import {
   ENSNamespaceId,
   ENSNamespaceIds,
   getENSRootChainId,
-  getNameAvatarUrl,
 } from "@ensnode/datasources";
+import { getNameAvatarUrl } from "@/lib/namespace-utils";
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";

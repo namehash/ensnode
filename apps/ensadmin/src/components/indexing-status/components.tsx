@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
-import { getBlockExplorerUrlForBlock } from "@ensnode/datasources";
+import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
