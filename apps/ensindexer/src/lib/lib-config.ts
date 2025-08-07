@@ -1,8 +1,8 @@
 import type { ENSIndexerConfig, RpcConfigEnvironment } from "@/config/types";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
-// Default rate limit for private (paid) RPC services - assumes users have proper infrastructure
-// Public (rate limited) RPC endpoints are NOT supported and will fail with these limits
+// Default rate limit for RPC services
+// Public (rate limited) RPC endpoints are NOT supported.
 export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
 export const DEFAULT_PORT = 42069;

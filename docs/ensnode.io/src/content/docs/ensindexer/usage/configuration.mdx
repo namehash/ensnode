@@ -9,13 +9,10 @@ import { LinkCard } from '@astrojs/starlight/components';
 import { Code } from '@astrojs/starlight/components';
 import envExample from '@workspace/apps/ensindexer/.env.local.example?raw';
 
-:::danger[Critical: RPC Configuration Required]
-**ENSIndexer requires proper RPC endpoint configuration to function.** Public (rate limited) RPC endpoints will NOT provide acceptable performance due to:
-- Strict rate limits (typically 20 requests/second) - ENSIndexer needs 500+ RPS
-- Block range limitations (often less than 10k blocks per request)  
-- Query timeouts that cause indexing failures
+:::danger[Custom RPC Configuration Required]
+**ENSIndexer requires private RPC endpoints to function.** Public (rate limited) RPC endpoints will NOT provide acceptable performance.
 
-You MUST configure private (paid) RPC services from providers like Alchemy, Infura, or QuickNode that can handle high-volume requests.
+You must configure private (paid) RPC services from providers like Alchemy, Infura, or QuickNode or host your own RPC service that can handle high-volume requests.
 :::
 
 :::caution[Performance Tip: ENSRainbow Server]
