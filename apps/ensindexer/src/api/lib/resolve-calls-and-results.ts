@@ -1,4 +1,4 @@
-import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
+import { ResolverABI } from "@ensnode/datasources";
 import type { Name, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
@@ -20,11 +20,6 @@ import { packetToBytes } from "viem/ens";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
-
-// for all relevant eth_calls here, all Resolver contracts share the same abi, so just grab one from
-// @ensnode/datasources that is guaranted to exist
-const RESOLVER_ABI = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot).contracts
-  .Resolver.abi;
 
 /**
  * Represents a set of eth_call arguments to a Resolver
@@ -118,7 +113,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
   return withActiveSpanAsync(tracer, "executeResolveCalls", { name }, async (span) => {
-    const ResolverContract = { abi: RESOLVER_ABI, address: resolverAddress } as const;
+    const ResolverContract = { abi: ResolverABI, address: resolverAddress } as const;
 
     return await Promise.all(
       calls.map(async (call) => {
@@ -126,7 +121,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
           // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
           if (requiresWildcardSupport) {
             const encodedName = toHex(packetToBytes(name)); // DNS-encode `name` for resolve()
-            const encodedMethod = encodeFunctionData({ abi: RESOLVER_ABI, ...call });
+            const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
             const value = await withSpanAsync(
               tracer,
               `ENSIP-10 resolve(${call.functionName}, ${call.args})`,
@@ -146,7 +141,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
 
             // ENSIP-10 resolve() always returns bytes that need to be decoded
             const results = decodeAbiParameters(
-              getAbiItem({ abi: RESOLVER_ABI, name: call.functionName, args: call.args }).outputs,
+              getAbiItem({ abi: ResolverABI, name: call.functionName, args: call.args }).outputs,
               value,
             );
 
