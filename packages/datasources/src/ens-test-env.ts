@@ -2,7 +2,6 @@ import { Address, zeroAddress } from "viem";
 import { anvil } from "viem/chains";
 
 import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
-import { ResolverConfig } from "./lib/resolver";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
@@ -13,6 +12,9 @@ import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
+
+// Shared ABIs
+import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 const deploymentAddresses = getENSTestEnvDeploymentAddresses();
 
@@ -60,7 +62,8 @@ export default {
         startBlock: 0,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 0,
       },
       BaseRegistrar: {

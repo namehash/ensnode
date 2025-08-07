@@ -1,6 +1,5 @@
 import { holesky } from "viem/chains";
 
-import { ResolverConfig } from "./lib/resolver";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
@@ -11,6 +10,9 @@ import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
+
+// Shared ABIs
+import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 /**
  * The Holesky ENSNamespace
@@ -36,7 +38,8 @@ export default {
         startBlock: 801613,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 801536, // ignores any Resolver events prior to `startBlock` of RegistryOld on Holeksy
       },
       BaseRegistrar: {
