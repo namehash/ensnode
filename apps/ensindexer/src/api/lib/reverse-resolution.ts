@@ -1,6 +1,5 @@
 import {
   ChainId,
-  DEFAULT_EVM_COIN_TYPE,
   Name,
   ResolverRecordsSelection,
   ReverseResolutionProtocolStep,
@@ -24,7 +23,7 @@ const tracer = trace.getTracer("reverse-resolution");
 /**
  * Implements ENS Reverse Resolution, including support for ENSIP-19 L2 Primary Names.
  *
- * @see https://docs.ens.domains/ensip/19/#reverse-resolution
+ * @see https://docs.ens.domains/ensip/19/#algorithm
  *
  * @param address the adddress whose Primary Name to resolve
  * @param chainId the chainId within which to resolve the address' Primary Name
@@ -46,8 +45,8 @@ export async function resolveReverse(
         { address, chainId, "ens.protocol": TraceableENSProtocol.ReverseResolution },
         async (span) => {
           /////////////////////////////////////////////////////////
-          // Reverse Resolution Steps
-          // https://docs.ens.domains/ensip/19/#reverse-resolution
+          // Reverse Resolution
+          // https://docs.ens.domains/ensip/19/#algorithm
           /////////////////////////////////////////////////////////
 
           // Steps 1-3 — Resolve coinType-specific name record

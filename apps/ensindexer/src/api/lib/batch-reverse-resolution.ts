@@ -12,13 +12,13 @@ const tracer = trace.getTracer("batch-reverse-resolution");
 // TODO: replace with deriving from datasources
 const CHAIN_IDS_BY_NAMESPACE = {
   // Mainnet via https://docs.ens.domains/ensip/19/#mainnet
-  [ENSNamespaceIds.Mainnet]: [1, 10, 8453, 42161, 59144, 59144],
+  [ENSNamespaceIds.Mainnet]: [0, 1, 10, 8453, 42161, 59144, 59144],
 
   // Sepolia via https://docs.ens.domains/ensip/19/#sepolia
-  [ENSNamespaceIds.Sepolia]: [1, 11155420, 59141, 84532, 421614, 534351],
+  [ENSNamespaceIds.Sepolia]: [0, 1, 11155420, 59141, 84532, 421614, 534351],
 
-  [ENSNamespaceIds.Holesky]: [1],
-  [ENSNamespaceIds.EnsTestEnv]: [1],
+  [ENSNamespaceIds.Holesky]: [0, 1],
+  [ENSNamespaceIds.EnsTestEnv]: [0, 1],
 } as const;
 
 type PrimaryNames = Record<ChainId, Name | null>;
