@@ -2,6 +2,7 @@ import { ponder } from "ponder:registry";
 import config from "@/config";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
+import { toHex } from "viem";
 
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts. These contracts manage
@@ -18,10 +19,12 @@ export default function () {
         ? DEFAULT_EVM_COIN_TYPE
         : evmChainIdToCoinType(context.chain.id);
 
+    const isDeletion = !!name;
+
     console.log({
       on: "StandaloneReverseRegistrar:NameForAddrChanged",
       chainId: context.chain.id,
-      coinType,
+      coinType: toHex(coinType),
       address,
       name,
       standaloneReverseRegistrarAddress: event.log.address,

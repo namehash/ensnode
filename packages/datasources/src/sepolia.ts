@@ -205,7 +205,7 @@ export default {
   [DatasourceNames.ReverseResolverRoot]: {
     chain: sepolia,
     contracts: {
-      ReverseResolver: {
+      DefaultReverseResolver2: {
         abi: ResolverABI,
         address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
         startBlock: 3790251,
