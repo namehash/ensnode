@@ -1,4 +1,4 @@
-import { CoinType } from "@ensnode/ensnode-sdk";
+import { CoinType } from "../ens";
 
 /**
  * Encodes a selection of Resolver records in the context of a specific Name.

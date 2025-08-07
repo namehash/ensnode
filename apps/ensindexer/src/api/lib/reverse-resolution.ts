@@ -1,5 +1,8 @@
 import {
+  ChainId,
   DEFAULT_EVM_COIN_TYPE,
+  Name,
+  ResolverRecordsSelection,
   ReverseResolutionProtocolStep,
   TraceableENSProtocol,
   evmChainIdToCoinType,
@@ -10,13 +13,10 @@ import { Address, isAddress, isAddressEqual } from "viem";
 
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
-import { ResolverRecordsResponse } from "@/api/lib/resolver-records-response";
-import { ResolverRecordsSelection } from "@/api/lib/resolver-records-selection";
 import { withActiveSpanAsync } from "@/lib/auto-span";
 
-const REVERSE_SELECTION = {
+export const REVERSE_RESOLUTION_SELECTION = {
   name: true,
-  texts: ["avatar"],
 } as const satisfies ResolverRecordsSelection;
 
 const tracer = trace.getTracer("reverse-resolution");
@@ -27,13 +27,13 @@ const tracer = trace.getTracer("reverse-resolution");
  * @see https://docs.ens.domains/ensip/19#primary-name-resolution-process
  *
  * @param address the adddress to lookup the Primary Name of
- * @param [chainId=1] fetch the Primary Name of the `address` in the context of this `chainId`
+ * @param chainId fetch the Primary Name of the `address` in the context of this `chainId`
  */
 export async function resolveReverse(
   address: Address,
-  chainId: number = 1,
+  chainId: ChainId,
   options: { accelerate?: boolean } = { accelerate: true },
-): Promise<ResolverRecordsResponse<typeof REVERSE_SELECTION> | null> {
+): Promise<Name | null> {
   // trace for external consumers
   return withProtocolStepAsync(
     TraceableENSProtocol.ReverseResolution,
@@ -52,7 +52,8 @@ export async function resolveReverse(
           let records = await withProtocolStepAsync(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ForwardResolveCoinType,
-            () => resolveForward(reverseName(address, coinType), REVERSE_SELECTION, options),
+            () =>
+              resolveForward(reverseName(address, coinType), REVERSE_RESOLUTION_SELECTION, options),
           );
 
           // Step 8 — Determine if name record exists
@@ -73,7 +74,12 @@ export async function resolveReverse(
             records = await withProtocolStepAsync(
               TraceableENSProtocol.ReverseResolution,
               ReverseResolutionProtocolStep.ForwardResolveDefaultCoinType,
-              () => resolveForward(reverseName(address, coinType), REVERSE_SELECTION, options),
+              () =>
+                resolveForward(
+                  reverseName(address, coinType),
+                  REVERSE_RESOLUTION_SELECTION,
+                  options,
+                ),
             );
           }
 
@@ -159,7 +165,7 @@ export async function resolveReverse(
 
           // finally, the records are valid for this address
           span.setAttribute("records", JSON.stringify(records));
-          return records;
+          return records.name;
         },
       ),
   );

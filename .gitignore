@@ -30,3 +30,6 @@ generated
 # Terraform
 .terraform*
 terraform.tfstate*
+
+# CLAUDE.md
+CLAUDE.md

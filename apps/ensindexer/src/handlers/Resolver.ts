@@ -1,13 +1,13 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { ETH_COIN_TYPE, Node } from "@ensnode/ensnode-sdk";
+import { ETH_COIN_TYPE, Node, uniq } from "@ensnode/ensnode-sdk";
 import { type Address, Hash, type Hex } from "viem";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
+import { hasNullByte, stripNullBytes } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   handleResolverAddressRecordUpdate,
