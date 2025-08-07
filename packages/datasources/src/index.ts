@@ -127,8 +127,9 @@ export function getNameAvatarUrl(name: string, namespaceId: ENSNamespaceId): URL
  */
 export function getNameDetailsUrl(name: string, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
+  if (!baseUrl) return null;
 
-  return baseUrl ? new URL(name, baseUrl) : null;
+  return new URL(name, baseUrl);
 }
 
 /**
@@ -138,8 +139,9 @@ export function getNameDetailsUrl(name: string, namespaceId: ENSNamespaceId): UR
  */
 export function getAddressDetailsUrl(address: Address, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
+  if (!baseUrl) return null;
 
-  return baseUrl ? new URL(address, baseUrl) : null;
+  return new URL(address, baseUrl);
 }
 
 /**
@@ -165,10 +167,7 @@ const chainBlockExplorers = new Map<number, string>([
  */
 export const getChainBlockExplorerUrl = (chainId: number): URL | null => {
   const chainBlockExplorer = chainBlockExplorers.get(chainId);
-
-  if (!chainBlockExplorer) {
-    return null;
-  }
+  if (!chainBlockExplorer) return null;
 
   return new URL(chainBlockExplorer);
 };
@@ -181,10 +180,8 @@ export const getChainBlockExplorerUrl = (chainId: number): URL | null => {
  */
 export const getBlockExplorerUrlForBlock = (chainId: number, blockNumber: number): URL | null => {
   const chainBlockExplorer = getChainBlockExplorerUrl(chainId);
+  if (!chainBlockExplorer) return null;
 
-  if (!chainBlockExplorer) {
-    return null;
-  }
   return new URL(`block/${blockNumber}`, chainBlockExplorer.toString());
 };
 
