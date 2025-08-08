@@ -37,6 +37,10 @@ jobs:
       # Terraform keeps it's state inside S3 bucket. This bucket needs to be created before running Terraform apply.
       # AWS_REGION should be the same as Terraform S3 bucket state region.
       AWS_REGION: us-east-1
+      # For now only one Terraform environment is active. In future this will be calculated based on workflow input.
+      TF_VAR_render_environment: "yellow"
+      TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
+      TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID }}
       TF_VAR_railway_token: ${{ secrets.RAILWAY_TOKEN }}
       TF_VAR_mainnet_rpc_url: ${{ secrets.MAINNET_RPC_URL }}
       TF_VAR_sepolia_rpc_url: ${{ secrets.SEPOLIA_RPC_URL }}
@@ -44,6 +48,8 @@ jobs:
       TF_VAR_base_rpc_url: ${{ secrets.BASE_RPC_URL }}
       TF_VAR_linea_rpc_url: ${{ secrets.LINEA_RPC_URL }}
       TF_VAR_optimism_rpc_url: ${{ secrets.OPTIMISM_RPC_URL }}
+      TF_VAR_base_sepolia_rpc_url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+      TF_VAR_linea_sepolia_rpc_url: ${{ secrets.LINEA_SEPOLIA_RPC_URL }}
       TF_VAR_ensnode_version: ${{ inputs.tag }}
 
     steps:
@@ -232,6 +238,10 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: terraform
+
+      - name: Terraform Init
+        run: terraform workspace select ${{env.TF_VAR_render_environment}}
         working-directory: terraform
 
       - name: Terraform Validate

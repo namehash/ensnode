@@ -1,18 +1,12 @@
-# Railway variables
-variable "railway_token" {
-  type        = string
-  description = "API token generated for account workspace. Visit https://railway.com/account/tokens"
-}
-
-variable "railway_project_id" {
+variable "render_environment_id" {
   type = string
 }
 
-variable "railway_environment_id" {
+variable "render_region" {
   type = string
 }
 
-variable "railway_region" {
+variable "instance_type" {
   type = string
 }
 
@@ -29,8 +23,8 @@ variable "subdomain_prefix" {
 
 # ENSIndexer variables
 variable "instance_name" {
-  type = string
-  description = "Unique name for ensindexer to guarantee Railway instance name uniqueness"
+  type        = string
+  description = "Unique name for ensindexer to guarantee Render instance name uniqueness"
 }
 
 variable "database_url" {
@@ -80,5 +74,13 @@ variable "linea_rpc_url" {
 }
 
 variable "optimism_rpc_url" {
+  type = string
+}
+
+variable "base_sepolia_rpc_url" {
+  type = string
+}
+
+variable "linea_sepolia_rpc_url" {
   type = string
 }
