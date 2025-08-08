@@ -16,6 +16,9 @@ import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 /**
  * The Holesky ENSNamespace
+ *
+ * NOTE: The Holesky ENS namespace has no known Datasource for Basenames, Lineanames, or 3DNS.
+ * NOTE: The Holesky ENS namespace does not support ENSIP-19.
  */
 export default {
   /**
@@ -74,7 +77,4 @@ export default {
       },
     },
   },
-  /**
-   * The Holesky ENS namespace has no known Datasource for Basenames or Lineanames.
-   */
 } satisfies ENSNamespace;

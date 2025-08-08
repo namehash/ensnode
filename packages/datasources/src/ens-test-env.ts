@@ -39,6 +39,9 @@ const EMPTY_ADDRESS = "" as Address;
  * type-correctness: consumers of these ens-test-env Datasources, if using outside of the context
  * of the ens-test-env tool, should validate that an Address is provided, or they may experience
  * undefined runtime behavior.
+ *
+ * NOTE: The ens-test-env ENS namespace does not support Basenames, Lineanames, or 3DNS.
+ * NOTE: The ens-test-env ENS namespace does not support ENSIP-19 Reverse Resolvers.
  */
 export default {
   /**
@@ -112,7 +115,4 @@ export default {
       },
     },
   },
-  /**
-   * The 'ens-test-env' ENS namespace does not have any other Datasources.
-   */
 } satisfies ENSNamespace;

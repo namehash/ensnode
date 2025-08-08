@@ -304,6 +304,41 @@ export default {
         address: "0x283F227c4Bd38ecE252C4Ae7ECE650B0e913f1f9",
         startBlock: 22764819,
       },
+
+      BaseReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#80002105.reverse
+        address: "0xc800DBc8ff9796E58EfBa2d7b35028DdD1997E5e",
+        startBlock: 22764838,
+      },
+
+      LineaReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#8000e708.reverse
+        address: "0x0Ce08a41bdb10420FB5Cac7Da8CA508EA313aeF8",
+        startBlock: 22764840,
+      },
+
+      OptimismReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#8000000a.reverse
+        address: "0xF9Edb1A21867aC11b023CE34Abad916D29aBF107",
+        startBlock: 22764854,
+      },
+
+      ArbitrumReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#8000a4b1.reverse
+        address: "0x4b9572C03AAa8b0Efa4B4b0F0cc0f0992bEDB898",
+        startBlock: 22764837,
+      },
+
+      ScrollReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#80082750.reverse
+        address: "0xC4842814cA523E481Ca5aa85F719FEd1E9CaC614",
+        startBlock: 22921284,
+      },
     },
   },
 

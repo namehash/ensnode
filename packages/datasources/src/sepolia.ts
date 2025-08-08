@@ -36,6 +36,8 @@ import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 /**
  * The Sepolia ENSNamespace
+ *
+ * NOTE: The Sepolia ENS namespace does not support 3DNS.
  */
 export default {
   /**
@@ -217,6 +219,41 @@ export default {
         abi: StandaloneReverseRegistrar,
         address: "0x4F382928805ba0e23B30cFB75fC9E848e82DFD47",
         startBlock: 8579966,
+      },
+
+      BaseReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80014a34.reverse
+        address: "0xaF3b3f636bE80b6709F5Bd3A374d6ac0D0a7c7aA",
+        startBlock: 8580004,
+      },
+
+      LineaReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#8000e705.reverse
+        address: "0x083dA1Dbc0F379ccda6AC81A934207c3D8a8a205",
+        startBlock: 8580005,
+      },
+
+      OptimismReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80aa37dc.reverse
+        address: "0xc9Ae189772BD48e01410AB3Be933637ee9D3AA5f",
+        startBlock: 8580026,
+      },
+
+      ArbitrumReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80066eee.reverse
+        address: "0x926f94D2aDC77C86Cb0050892097D49AADd02e8B",
+        startBlock: 8580003,
+      },
+
+      ScrollReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#8008274f.reverse
+        address: "0x9Fa59673e43F15bDB8722Fdaf5C2107574B99062",
+        startBlock: 8580040,
       },
     },
   },
