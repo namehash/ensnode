@@ -1,5 +1,35 @@
 # ensindexer
 
+## 0.32.0
+
+### Minor Changes
+
+- [#870](https://github.com/namehash/ensnode/pull/870) [`29176f9`](https://github.com/namehash/ensnode/commit/29176f94e477a96a3dd9f98141cf8235bc135be2) Thanks [@notrab](https://github.com/notrab)! - remove ponder client sql endpoint
+
+- [#867](https://github.com/namehash/ensnode/pull/867) [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01) Thanks [@shrugs](https://github.com/shrugs)! - Index referrals from the new UnwrappedEthRegistrarController.
+
+- [#865](https://github.com/namehash/ensnode/pull/865) [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294) Thanks [@shrugs](https://github.com/shrugs)! - implements protocol tracing outputs for the resolution apis via ?trace query param
+
+- [#747](https://github.com/namehash/ensnode/pull/747) [`27c0ea0`](https://github.com/namehash/ensnode/commit/27c0ea0c834fcce6c45a04510ba56e4e86a82738) Thanks [@shrugs](https://github.com/shrugs)! - add forward/reverse resolution apis gated behind an EXPERIMENTAL_RESOLUTION config flag
+
+- [#867](https://github.com/namehash/ensnode/pull/867) [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01) Thanks [@shrugs](https://github.com/shrugs)! - integrate new UnwrappedEthRegistrarController indexing behavior
+
+- [#895](https://github.com/namehash/ensnode/pull/895) [`afb994c`](https://github.com/namehash/ensnode/commit/afb994cac1f2bf3aa18ec9ecc1b33e5a58b6525a) Thanks [@tk-o](https://github.com/tk-o)! - Introduce `GET /api/config` endpoint returning serialized ENSIndexerPublicConfig object.
+
+### Patch Changes
+
+- [#878](https://github.com/namehash/ensnode/pull/878) [`99bf615`](https://github.com/namehash/ensnode/commit/99bf6155772a298476ff380a99660191ac8728a4) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Deployed hosted instances of the latest Graph Node server running the latest ENS Subgraph across mainnet / sepolia / holesky.
+
+- [#890](https://github.com/namehash/ensnode/pull/890) [`95c9140`](https://github.com/namehash/ensnode/commit/95c91404bd699705602d5ec19e76242b05057a44) Thanks [@djstrong](https://github.com/djstrong)! - Enhance RPC configuration guidance.
+
+- Updated dependencies [[`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294), [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01), [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0), [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8), [`ad7fc8b`](https://github.com/namehash/ensnode/commit/ad7fc8bb4d12fe0ef1bb133eef9670d4eb84911b), [`f3eff8a`](https://github.com/namehash/ensnode/commit/f3eff8aef94cf6162ae4bab39059abd1e852352b)]:
+  - @ensnode/ensnode-sdk@0.32.0
+  - @ensnode/datasources@0.32.0
+  - @ensnode/ensrainbow-sdk@0.32.0
+  - @ensnode/ponder-metadata@0.32.0
+  - @ensnode/ensnode-schema@0.32.0
+  - @ensnode/ponder-subgraph@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes
