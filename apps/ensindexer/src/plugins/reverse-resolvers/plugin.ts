@@ -68,21 +68,12 @@ export default createPlugin({
         LegacyReverseResolver: {
           abi: ResolverABI,
           chain: {
-            // the Root chain's DefaultReverseResolver2
+            // the Root chain's DefaultReverseResolver2 is a LegacyReverseResolver
             ...chainConfigForContract(
               config.globalBlockrange,
               rrRoot.chain.id,
               rrRoot.contracts.DefaultReverseResolver2,
             ),
-            // TODO: i think we can simply ignore the legacy base reverse resolver, since they're
-            // fully migrating records to the new ENSIP-19 standalone registry
-            // // Base's ReverseResolver
-            // ...chainConfigForContract(
-            //   config.globalBlockrange,
-            //   rrBase.chain.id,
-            //   rrBase.contracts.ReverseResolver,
-            // ),
-            // TODO: Linea legacy reverse resolver if not migrating records
           },
         },
 

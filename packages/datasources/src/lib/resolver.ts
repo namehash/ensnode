@@ -4,8 +4,10 @@ import { Resolver } from "../abis/shared/Resolver";
 import type { ContractConfig } from "./types";
 
 /**
- * The Resolver ABI is the same across plugins, and includes the LegacyPublicResolver abi
- * (notably its altered `TextChanged` event) for full compatibility with Resolvers on mainnet.
+ * This Resolver ABI represents the set of all well-known Resolver events/methods, including the
+ * the LegacyPublicResolver's TextChanged event. A Resolver contract is a contract that emits
+ * _any_ (not _all_) of the events specified here and may or may not support any number of the
+ * methods available in this ABI.
  */
 export const ResolverABI = mergeAbis([LegacyPublicResolver, Resolver]);
 

@@ -276,13 +276,23 @@ export default {
         address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
         startBlock: 9380501,
       },
+
+      // this DefaultReverseResolver was enabled in the following proposal:
+      // https://discuss.ens.domains/t/ep3-5-executable-activate-new-eth-controller-and-reverse-registrar/16776
+      // https://www.tally.xyz/gov/ens/proposal/42973781582803845389836855775840822719678533376883030929209752909248937768242
+      // DefaultReverseResolver2 is the pre-ENSIP-19 DefaultReverseResolver and it emits
+      // Resolver#NameChanged events. We index these events to power aspects of Protocol Acceleration.
       DefaultReverseResolver2: {
         abi: ResolverABI,
         address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
         startBlock: 16925619,
       },
+
       // this DefaultReverseResolver was enabled in the following proposal:
       // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
+      // https://www.tally.xyz/gov/ens/proposal/42524979896803285837776370636134389407867034021879791462477783237030656381157
+      // NOTE: DefaultReverseResolver3 is not directly indexed: it simply reads data from
+      // DefaultReverseRegistrar, which IS indexed. We document it here for completeness.
       DefaultReverseResolver3: {
         abi: ResolverABI,
         address: "0xA7d635c8de9a58a228AA69353a1699C7Cc240DCF",
@@ -303,13 +313,6 @@ export default {
   [DatasourceNames.ReverseResolverBase]: {
     chain: base,
     contracts: {
-      // TODO: i think we can simply delete this after basenames ENSIP-19 migration
-      // ReverseResolver: {
-      //   abi: ResolverABI,
-      //   // NOTE: this is basenames L2Resolver, NOT ENSIP-19 Compliant
-      //   address: "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD", // TODO: update this address
-      //   startBlock: 17575714,
-      // },
       L2ReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
         address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
@@ -324,12 +327,6 @@ export default {
   [DatasourceNames.ReverseResolverLinea]: {
     chain: linea,
     contracts: {
-      // TODO: i think we can delete this after linea migrates
-      // ReverseResolver: {
-      //   abi: ResolverABI,
-      //   address: zeroAddress, // TODO: update this address
-      //   startBlock: 0, // TODO: set this correctly
-      // },
       L2ReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
         address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",

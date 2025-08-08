@@ -15,7 +15,7 @@ export const addrReverseLabel = (address: Address): Label => address.slice(2).to
  *
  * @see https://docs.ens.domains/ensip/19
  */
-export const coinTypeReverseLabel = (coinType: CoinType) => coinType.toString(16);
+export const coinTypeReverseLabel = (coinType: CoinType): Label => coinType.toString(16);
 
 /**
  * Gets the reverse name for an address according to ENSIP-11 & ENSIP-19.

@@ -4,6 +4,7 @@ import {
   ResolverRecordsSelection,
   ReverseResolutionProtocolStep,
   TraceableENSProtocol,
+  coinTypeReverseLabel,
   evmChainIdToCoinType,
   reverseName,
 } from "@ensnode/ensnode-sdk";
@@ -66,10 +67,10 @@ export async function resolveReverse(
             !!name,
           );
           if (!name) {
-            // If name is empty, no primary name exists for this address.
+            // If name is empty, there is no primary name for this coinType (or default coinType) for this address.
             span.setStatus({
               code: SpanStatusCode.ERROR,
-              message: `No Primary Name for coinType "${coinType}" or default coinType.`,
+              message: `No Primary Name for coinType "${coinTypeReverseLabel(coinType)}" or default coinType.`,
             });
             return null;
           }
@@ -103,7 +104,7 @@ export async function resolveReverse(
 
             span.setStatus({
               code: SpanStatusCode.ERROR,
-              message: `No Resolved Address for coinType "${coinType}"`,
+              message: `No Resolved Address for coinType "${coinTypeReverseLabel(coinType)}"`,
             });
             return null;
           }

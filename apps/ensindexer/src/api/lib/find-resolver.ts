@@ -61,7 +61,7 @@ export async function findResolver({
   // in the context of Protocol-Accelerated logic: besides the ENS Root Chain, `findResolver` should
   // _ONLY_ called with chains for which we are guaranteed to have the Domain-Resolver relations indexed.
   // This is enforced by the requirement that `forwardResolve` with non-ENSRoot chain ids is only
-  // called when an known offchain lookup resolver defers to a plugin that is active.
+  // called when a known offchain lookup resolver defers to a plugin that is active.
 
   // at this point we _must_ have access to the indexed Domain-Resolver relations necessary to look up
   // the Domain's configured Resolver (see invariant above), so retrieve the name's active resolver
@@ -81,12 +81,14 @@ async function findResolverWithUniversalResolver(
     "findResolverWithUniversalResolver",
     { name },
     async (span) => {
+      // 1. Retrieve the UniversalResolver's address/abi in the configured namespace
       const {
         contracts: {
           UniversalResolver: { address, abi },
         },
       } = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 
+      // 2. Call UniversalResolver#findResolver via RPC
       const [activeResolver, , _offset] = await withSpanAsync(
         tracer,
         "UniversalResolver#findResolver",
@@ -99,6 +101,8 @@ async function findResolverWithUniversalResolver(
             args: [toHex(packetToBytes(name))],
           }),
       );
+
+      // 3. Interpret results
 
       if (isAddressEqual(activeResolver, zeroAddress)) {
         // TODO: is error status correct for this?
