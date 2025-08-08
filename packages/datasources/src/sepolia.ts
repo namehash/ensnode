@@ -213,7 +213,11 @@ export default {
         address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
         startBlock: 3790251,
       },
-      // TODO: document Sepolia DefaultReverseResolver3
+      DefaultReverseResolver3: {
+        abi: ResolverABI,
+        address: "0x9DC60e7BD81cCc96774C55214fF389D42Ae5E9Ac",
+        startBlock: 8580041,
+      },
 
       DefaultReverseRegistrar: {
         abi: StandaloneReverseRegistrar,

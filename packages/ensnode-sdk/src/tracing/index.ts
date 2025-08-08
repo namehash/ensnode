@@ -13,6 +13,7 @@ export enum ForwardResolutionProtocolStep {
   Operation = "operation",
   FindResolver = "find-resolver",
   ActiveResolverExists = "active-resolver-exists",
+  AccelerateENSIP19ReverseResolver = "accelerate-ensip-19-reverse-resolver",
   AccelerateKnownOffchainLookupResolver = "accelerate-known-offchain-lookup-resolver",
   AccelerateKnownOnchainStaticResolver = "accelerate-known-onchain-static-resolver",
   RequireResolver = "require-resolver",

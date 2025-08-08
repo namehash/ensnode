@@ -2,7 +2,7 @@ import packageJson from "@/../package.json";
 
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { Hono, MiddlewareHandler } from "hono";
+import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { graphql as ponderGraphQL } from "ponder";
 

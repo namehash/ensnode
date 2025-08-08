@@ -1,8 +1,10 @@
 import { ponder } from "ponder:registry";
+import schema from "ponder:schema";
 import config from "@/config";
+import { makePrimaryNameId } from "@/lib/ids";
+import { hasNullByte } from "@/lib/lib-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
-import { toHex } from "viem";
 
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts. These contracts manage
@@ -12,6 +14,9 @@ export default function () {
   ponder.on("StandaloneReverseRegistrar:NameForAddrChanged", async ({ context, event }) => {
     const { addr: address, name } = event.args;
 
+    // TODO(null-bytes): represent null bytes correctly
+    if (hasNullByte(name)) return;
+
     // The DefaultReverseRegistrar on the ENS Root chain manages 'default' names under the default coinType.
     // On any other chain, the L2ReverseRegistrar manages names for that chain's coinType.
     const coinType =
@@ -19,18 +24,26 @@ export default function () {
         ? DEFAULT_EVM_COIN_TYPE
         : evmChainIdToCoinType(context.chain.id);
 
-    const isDeletion = !!name;
+    const id = makePrimaryNameId(address, coinType);
 
-    console.log({
-      on: "StandaloneReverseRegistrar:NameForAddrChanged",
-      chainId: context.chain.id,
-      coinType: toHex(coinType),
-      address,
-      name,
-      standaloneReverseRegistrarAddress: event.log.address,
-    });
-
-    // TODO: upsert entity representing (address, coinType) -> Name
-    // TODO: treat empty string name as deletion
+    // empty string is deletion
+    const isDeletion = name === "";
+    if (isDeletion) {
+      // delete
+      await context.db.delete(schema.ext_primaryName, { id });
+    } else {
+      // upsert
+      await context.db
+        .insert(schema.ext_primaryName)
+        // create a new primary name entity
+        .values({
+          id,
+          address,
+          coinType: BigInt(coinType),
+          name,
+        })
+        // or update the existing one
+        .onConflictDoUpdate({ name });
+    }
   });
 }

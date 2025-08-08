@@ -116,15 +116,17 @@ async function findResolverWithUniversalResolver(
           `Invariant: UniversalResolver returned an offset (${_offset}) larger than MAX_SAFE_INTEGER.`,
         );
       }
+
       const offset = Number(_offset);
 
-      const names = getNameHierarchy(name);
-      const activeName = names[offset];
-      if (!activeName) {
+      if (offset > name.length) {
         throw new Error(
-          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the set of possible names in the hierarchy.`,
+          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the number of characters in '${name}'.`,
         );
       }
+
+      // UniversalResolver returns the offset in characters where the activeName begins
+      const activeName = name.slice(offset);
 
       return {
         activeName,

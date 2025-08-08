@@ -1,9 +1,15 @@
 import config from "@/config";
-import { ENSNamespace, getENSNamespace } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource, getDatasourceInAnyNamespace } from "@ensnode/datasources";
 import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 
-// NOTE: typing as ENSNamespace so we can access possibly undefined Datasources
-const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
+const ensRoot = getDatasource(config.namespace, DatasourceNames.ENSRoot)!;
+const basenames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Basenames);
+const lineanames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Lineanames);
+const threeDNSOptimism = getDatasourceInAnyNamespace(
+  config.namespace,
+  DatasourceNames.ThreeDNSOptimism,
+);
+const threeDNSBase = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ThreeDNSBase);
 
 /**
  * Determines, for a given chain, whether all Resolver Record Values are indexed.
@@ -26,11 +32,11 @@ export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
   // config.indexAdditionalResolverRecords must be true, or we aren't indexing resolver records at all
   if (!config.indexAdditionalResolverRecords) return false;
 
-  const isENSRootChain = chainId === ensNamespace.ensroot.chain.id;
-  const isBasenamesChain = chainId === ensNamespace.basenames?.chain.id;
-  const isLineanamesChain = chainId === ensNamespace.lineanames?.chain.id;
-  const isThreeDNSOptimismChain = chainId === ensNamespace["threedns-optimism"]?.chain.id;
-  const isThreeDNSBaseChain = chainId === ensNamespace["threedns-base"]?.chain.id;
+  const isENSRootChain = chainId === ensRoot.chain.id;
+  const isBasenamesChain = chainId === basenames?.chain.id;
+  const isLineanamesChain = chainId === lineanames?.chain.id;
+  const isThreeDNSOptimismChain = chainId === threeDNSOptimism?.chain.id;
+  const isThreeDNSBaseChain = chainId === threeDNSBase?.chain.id;
 
   // on the ENS Root Chain, the Subgraph plugin includes multi-chain Resolver indexing behavior
   if (isENSRootChain && config.plugins.includes(PluginName.Subgraph)) {
