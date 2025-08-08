@@ -4,7 +4,7 @@ import {
   ENSNamespaceIds,
   getDatasource,
 } from "@ensnode/datasources";
-import { ChainId } from "@ensnode/ensnode-sdk";
+import { ChainId, Name } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 import {
   anvil,
@@ -64,10 +64,10 @@ export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null {
  * Get the avatar image URL for a name on the given ENS Namespace
  *
  * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @param {string} name - ENS name to get the avatar image URL for
+ * @param {Name} name - ENS name to get the avatar image URL for
  * @returns avatar image URL for the name on the given ENS Namespace, or null if the avatar image URL is not known
  */
-export function getNameAvatarUrl(name: string, namespaceId: ENSNamespaceId): URL | null {
+export function getNameAvatarUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
       return new URL(name, `https://metadata.ens.domains/mainnet/avatar/`);
@@ -87,7 +87,7 @@ export function getNameAvatarUrl(name: string, namespaceId: ENSNamespaceId): URL
  *
  * @returns URL to the name details page in the ENS Manager App for a given name and ENS Namespace, or null if this URL is not known
  */
-export function getNameDetailsUrl(name: string, namespaceId: ENSNamespaceId): URL | null {
+export function getNameDetailsUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
   if (!baseUrl) return null;
 
