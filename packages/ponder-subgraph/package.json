@@ -15,7 +15,7 @@
     "Subgraph"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"
   },
   "files": [
     "dist"
