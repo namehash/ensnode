@@ -181,19 +181,15 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
       return chainsIndexingStatus;
     });
 
-/**
- * ENSIndexer Indexing Status Schema
- *
- * Makes a Zod schema definition for validating indexing status
- * across all chains indexed by ENSIndexer instance.
- */
-export const makeENSIndexerIndexingStatusSchema = (
-  valueLabel: string = "ENSIndexerIndexingStatus",
-) =>
+const makeIndexingStatusSchema = (valueLabel?: string) =>
   z
     .strictObject({
       chains: makeChainIndexingStatusesSchema(valueLabel),
-      overallStatus: z.enum(Object.values(ChainIndexingStatusIds)),
+      overallStatus: z.enum(
+        Object.values(ChainIndexingStatusIds).filter(
+          (id) => id !== ChainIndexingStatusIds.IndexerError,
+        ),
+      ),
       approximateRealtimeDistance: makeNonNegativeIntegerSchema(valueLabel).prefault(0),
     })
     .refine(
@@ -214,3 +210,22 @@ export const makeENSIndexerIndexingStatusSchema = (
       },
       { error: `${valueLabel} is an invalid approximateRealtimeDistances.` },
     );
+
+const makeIndexingStatusErrorSchema = (valueLabel?: string) =>
+  z.strictObject({
+    overallStatus: z.literal(ChainIndexingStatusIds.IndexerError),
+  });
+
+/**
+ * ENSIndexer Indexing Status Schema
+ *
+ * Makes a Zod schema definition for validating indexing status
+ * across all chains indexed by ENSIndexer instance.
+ */
+export const makeENSIndexerIndexingStatusSchema = (
+  valueLabel: string = "ENSIndexerIndexingStatus",
+) =>
+  z.discriminatedUnion("overallStatus", [
+    makeIndexingStatusSchema(valueLabel),
+    makeIndexingStatusErrorSchema(valueLabel),
+  ]);

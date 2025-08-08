@@ -1,6 +1,8 @@
 import { makeBlockRefSchema, makeChainIdSchema } from "@ensnode/ensnode-sdk/internal";
-import { PonderStatus } from "@ensnode/ponder-metadata";
+import type { PonderStatus } from "@ensnode/ponder-metadata";
 import z, { prettifyError } from "zod/v4";
+
+export type { PonderStatus } from "@ensnode/ponder-metadata";
 
 /**
  * Ponder Data Schemas

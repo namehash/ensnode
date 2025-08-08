@@ -1,6 +1,9 @@
 import { prettifyError } from "zod/v4";
-import type { SerializedENSIndexerIndexingStatus } from "./serialized-types";
-import type { ENSIndexerIndexingStatus } from "./types";
+import type {
+  SerializedENSIndexerIndexingStatus,
+  SerializedENSIndexerIndexingStatusError,
+} from "./serialized-types";
+import type { ENSIndexerIndexingStatus, ENSIndexerIndexingStatusError } from "./types";
 import { makeENSIndexerIndexingStatusSchema } from "./zod-schemas";
 
 /**
@@ -9,7 +12,15 @@ import { makeENSIndexerIndexingStatusSchema } from "./zod-schemas";
 export function deserializeENSIndexerIndexingStatus(
   maybeConfig: SerializedENSIndexerIndexingStatus,
   valueLabel?: string,
-): ENSIndexerIndexingStatus {
+): ENSIndexerIndexingStatus;
+export function deserializeENSIndexerIndexingStatus(
+  maybeConfig: SerializedENSIndexerIndexingStatusError,
+  valueLabel?: string,
+): ENSIndexerIndexingStatusError;
+export function deserializeENSIndexerIndexingStatus(
+  maybeConfig: SerializedENSIndexerIndexingStatus | SerializedENSIndexerIndexingStatusError,
+  valueLabel?: string,
+): ENSIndexerIndexingStatus | ENSIndexerIndexingStatusError {
   const schema = makeENSIndexerIndexingStatusSchema(valueLabel);
   const parsed = schema.safeParse(maybeConfig);
 

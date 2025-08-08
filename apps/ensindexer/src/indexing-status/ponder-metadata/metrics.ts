@@ -1,5 +1,7 @@
 import { PrometheusMetrics } from "@ensnode/ponder-metadata";
 
+export { PrometheusMetrics } from "@ensnode/ponder-metadata";
+
 /**
  * Fetch metrics for requested Ponder instance.
  */

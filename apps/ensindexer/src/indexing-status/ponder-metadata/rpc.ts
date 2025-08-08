@@ -1,6 +1,7 @@
-import { deserializeBlockRef } from "@ensnode/ensnode-sdk";
-import { PublicClient } from "viem";
-import { BlockNumber, BlockRef } from "./types";
+import { type BlockNumber, type BlockRef, deserializeBlockRef } from "@ensnode/ensnode-sdk";
+import type { PublicClient } from "viem";
+
+export type { PublicClient } from "viem";
 
 /**
  * Fetch block ref from RPC.

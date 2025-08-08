@@ -1,7 +1,9 @@
 import { Duration } from "../../shared";
 import { ChainIndexingStatus, ChainIndexingStatusId, ChainIndexingStatusIds } from "./types";
 
-export function getOverallStatus(chains: ChainIndexingStatus[]): ChainIndexingStatusId {
+export function getOverallStatus(
+  chains: ChainIndexingStatus[],
+): Exclude<ChainIndexingStatusId, "indexer-error"> {
   const chainStatuses = chains.map((chain) => chain.status);
 
   let overallStatus: ChainIndexingStatusId;

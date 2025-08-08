@@ -1,5 +1,6 @@
 import { publicClients } from "ponder:api";
 import {
+  ChainIndexingStatusIds,
   serializeENSIndexerIndexingStatus,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
@@ -30,6 +31,11 @@ app.get("/config", async (c) => {
 app.get("/indexing-status", async (c) => {
   // build the current indexing status object
   const indexingStatus = await buildIndexingStatus(publicClients);
+
+  // return 503 error if ENSIndexer is not available
+  if (indexingStatus.overallStatus === ChainIndexingStatusIds.IndexerError) {
+    return c.json(serializeENSIndexerIndexingStatus(indexingStatus), 503);
+  }
 
   // respond with the serialized indexing status object
   return c.json(serializeENSIndexerIndexingStatus(indexingStatus));

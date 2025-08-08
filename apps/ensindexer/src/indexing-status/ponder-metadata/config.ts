@@ -1,6 +1,18 @@
-import { deserializeBlockNumber, deserializeBlockrange } from "@ensnode/ensnode-sdk";
+import {
+  type BlockNumber,
+  type Blockrange,
+  deserializeBlockNumber,
+  deserializeBlockrange,
+} from "@ensnode/ensnode-sdk";
 import { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
-import type { BlockNumber, Blockrange, ChainName } from "./types";
+
+/**
+ * Chain Name
+ *
+ * Often use as type for object keys expressing Ponder ideas, such as
+ * chain status, or chain metrics.
+ */
+export type ChainName = string;
 
 /**
  * Ponder config datasource with a flat `chain` value.

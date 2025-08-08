@@ -5,6 +5,7 @@ export const ChainIndexingStatusIds = {
   Backfill: "backfill",
   Following: "following",
   Completed: "completed",
+  IndexerError: "indexer-error",
 } as const;
 
 /**
@@ -187,10 +188,22 @@ export interface ENSIndexerIndexingStatus {
   /**
    * Overall Indexing Status
    */
-  overallStatus: ChainIndexingStatusId;
+  overallStatus: Exclude<ChainIndexingStatusId, typeof ChainIndexingStatusIds.IndexerError>;
 
   /**
    * Approximate Realtime Distance
    */
   approximateRealtimeDistance: Duration;
+}
+
+/**
+ * ENSIndexer Indexing Status Error
+ *
+ * Describes the state when ENSIndexer was not available.
+ */
+export interface ENSIndexerIndexingStatusError {
+  /**
+   * Overall Indexing Status
+   */
+  overallStatus: typeof ChainIndexingStatusIds.IndexerError;
 }

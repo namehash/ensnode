@@ -1,6 +1,14 @@
 import { ChainId, ChainIdString, serializeChainId } from "../../shared";
-import { SerializedENSIndexerIndexingStatus } from "./serialized-types";
-import { ChainIndexingStatus, type ENSIndexerIndexingStatus } from "./types";
+import {
+  SerializedENSIndexerIndexingStatus,
+  SerializedENSIndexerIndexingStatusError,
+} from "./serialized-types";
+import {
+  ChainIndexingStatus,
+  ChainIndexingStatusIds,
+  type ENSIndexerIndexingStatus,
+  ENSIndexerIndexingStatusError,
+} from "./types";
 
 /**
  * Serialize a {@link ChainIndexingStatuses} object.
@@ -22,7 +30,19 @@ export function serializeChainIndexingStatuses(
  */
 export function serializeENSIndexerIndexingStatus(
   indexingStatus: ENSIndexerIndexingStatus,
-): SerializedENSIndexerIndexingStatus {
+): SerializedENSIndexerIndexingStatus;
+export function serializeENSIndexerIndexingStatus(
+  indexingStatus: ENSIndexerIndexingStatusError,
+): SerializedENSIndexerIndexingStatusError;
+export function serializeENSIndexerIndexingStatus(
+  indexingStatus: ENSIndexerIndexingStatus | ENSIndexerIndexingStatusError,
+): SerializedENSIndexerIndexingStatus | SerializedENSIndexerIndexingStatusError {
+  if (indexingStatus.overallStatus === ChainIndexingStatusIds.IndexerError) {
+    return {
+      overallStatus: indexingStatus.overallStatus,
+    } satisfies SerializedENSIndexerIndexingStatusError;
+  }
+
   return {
     approximateRealtimeDistance: indexingStatus.approximateRealtimeDistance,
     chains: serializeChainIndexingStatuses(indexingStatus.chains),
