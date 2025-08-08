@@ -1,9 +1,16 @@
-import config from "@/config";
+import { publicClients } from "ponder:api";
+import {
+  ChainIndexingStatusIds,
+  serializeENSIndexerIndexingStatus,
+  serializeENSIndexerPublicConfig,
+} from "@ensnode/ensnode-sdk";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
+import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import { buildIndexingStatus } from "@/indexing-status";
+
 import resolutionApi from "../lib/resolution-api";
 
 const app = new Hono();
@@ -18,6 +25,20 @@ app.get("/config", async (c) => {
 
   // respond with the serialized public config object
   return c.json(serializeENSIndexerPublicConfig(publicConfig));
+});
+
+// include ENSIndexer Indexing Status endpoint
+app.get("/indexing-status", async (c) => {
+  // build the current indexing status object
+  const indexingStatus = await buildIndexingStatus(publicClients);
+
+  // return 503 error if ENSIndexer is not available
+  if (indexingStatus.overallStatus === ChainIndexingStatusIds.IndexerError) {
+    return c.json(serializeENSIndexerIndexingStatus(indexingStatus), 503);
+  }
+
+  // respond with the serialized indexing status object
+  return c.json(serializeENSIndexerIndexingStatus(indexingStatus));
 });
 
 // conditionally include experimental resolution api

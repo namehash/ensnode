@@ -17,12 +17,22 @@ export interface SerializedRpcConfig extends Omit<RpcConfig, "url"> {
 export interface SerializedENSIndexerConfig
   extends Omit<
     ENSIndexerConfig,
-    "ensAdminUrl" | "ensNodePublicUrl" | "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs"
+    | "ensAdminUrl"
+    | "ensNodePublicUrl"
+    | "ensIndexerUrl"
+    | "ensRainbowUrl"
+    | "indexedChainIds"
+    | "rpcConfigs"
   > {
   /**
    * String representation of {@link ENSIndexerConfig.ensAdminUrl}.
    */
   ensAdminUrl: UrlString;
+
+  /**
+   * String representation of {@link ENSIndexerConfig.ensIndexerUrl}.
+   */
+  ensIndexerUrl: UrlString;
 
   /**
    * String representation of {@link ENSIndexerConfig.ensNodePublicUrl}.

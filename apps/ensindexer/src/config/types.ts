@@ -175,6 +175,18 @@ export interface ENSIndexerConfig {
   databaseUrl: string | undefined;
 
   /**
+   * The endpoint of the ENSIndexer instance (ex: http://localhost:42069).
+   * This must be an instance of ENSIndexer using  either `ponder start`
+   * or `ponder dev, and not `ponder serve`.
+   *
+   * This URL is to fetch the status and metrics from the ENSIndexer.
+   * For ENSIndexer instances, this will typically be set to
+   * http://localhost:{port}. For ENSApi instances, this should be set to
+   * the local network URL of the corresponding ENSIndexer instance.
+   */
+  ensIndexerUrl: URL;
+
+  /**
    * Constrains the global blockrange for indexing, useful for testing purposes.
    *
    * This is strictly designed for testing and development and its usage in production will result
@@ -231,6 +243,7 @@ export interface ENSIndexerEnvironment {
   plugins: string | undefined;
   ensRainbowUrl: string | undefined;
   ensNodePublicUrl: string | undefined;
+  ensIndexerUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;

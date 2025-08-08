@@ -5,6 +5,7 @@ export * from "./serialize";
 export * from "./serialized-types";
 export {
   deserializeBlockNumber,
+  deserializeBlockrange,
   deserializeBlockRef,
   deserializeChainId,
   deserializeDatetime,

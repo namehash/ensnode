@@ -63,6 +63,7 @@ export function serializeRedactedENSIndexerConfig(
     databaseUrl: redactedConfig.databaseUrl,
     ensAdminUrl: serializeUrl(redactedConfig.ensAdminUrl),
     ensNodePublicUrl: serializeUrl(redactedConfig.ensNodePublicUrl),
+    ensIndexerUrl: serializeUrl(redactedConfig.ensIndexerUrl),
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     experimentalResolution: redactedConfig.experimentalResolution,
     globalBlockrange: redactedConfig.globalBlockrange,

@@ -12,6 +12,7 @@ const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
 
 const BASE_ENV = {
   ENSNODE_PUBLIC_URL: "http://localhost:42069",
+  ENSINDEXER_URL: "http://localhost:42069",
   ENSADMIN_URL: "https://admin.ensnode.io",
   DATABASE_SCHEMA: "ensnode",
   PLUGINS: "subgraph",
@@ -155,6 +156,34 @@ describe("config", () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", "https://someotherurl.com");
       const config = await getConfig();
       expect(config.ensNodePublicUrl).toStrictEqual(new URL("https://someotherurl.com"));
+    });
+  });
+
+  describe(".ensIndexerUrl", () => {
+    it("throws an error if ENSINDEXER_URL is not a valid URL", async () => {
+      vi.stubEnv("ENSINDEXER_URL", "invalid url");
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
+    });
+
+    it("throws an error if ENSINDEXER_URL is empty", async () => {
+      vi.stubEnv("ENSINDEXER_URL", "");
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
+    });
+
+    it("throws an error if ENSINDEXER_URL is undefined (explicitly testing the refine)", async () => {
+      vi.stubEnv("ENSINDEXER_URL", undefined);
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
+    });
+
+    it("returns the ENSINDEXER_URL if it is a valid URL", async () => {
+      const config = await getConfig();
+      expect(config.ensIndexerUrl).toStrictEqual(new URL("http://localhost:42069"));
+    });
+
+    it("returns a different valid ENSINDEXER_URL if set", async () => {
+      vi.stubEnv("ENSINDEXER_URL", "https://someotherurl.com");
+      const config = await getConfig();
+      expect(config.ensIndexerUrl).toStrictEqual(new URL("https://someotherurl.com"));
     });
   });
 
