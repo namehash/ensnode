@@ -149,10 +149,6 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             );
           }
 
-          span.addEvent("Resolve Calls Generated", {
-            calls: JSON.stringify(replaceBigInts(calls, String)),
-          });
-
           //////////////////////////////////////////////////
           // 1. Identify the active resolver for the name on the specified chain.
           //////////////////////////////////////////////////
