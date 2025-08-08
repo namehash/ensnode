@@ -75,6 +75,7 @@ const BlockrangeSchema = z
   );
 
 const EnsNodePublicUrlSchema = makeUrlSchema("ENSNODE_PUBLIC_URL");
+const EnsIndexerPrivateUrlSchema = makeUrlSchema("ENSINDEXER_PRIVATE_URL");
 const EnsAdminUrlSchema = makeUrlSchema("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL);
 
 const PonderDatabaseSchemaSchema = z
@@ -167,6 +168,7 @@ const ENSIndexerConfigSchema = z
   .object({
     namespace: ENSNamespaceSchema,
     globalBlockrange: BlockrangeSchema,
+    ensIndexerPrivateUrl: EnsIndexerPrivateUrlSchema,
     ensNodePublicUrl: EnsNodePublicUrlSchema,
     ensAdminUrl: EnsAdminUrlSchema,
     databaseSchemaName: PonderDatabaseSchemaSchema,
