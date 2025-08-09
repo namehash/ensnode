@@ -13,6 +13,14 @@ import { resolveReverse } from "@/api/lib/reverse-resolution";
 
 // TODO: use a zod middleware to parse out the arguments and conform to *ResolutionRequest typings
 
+function getShouldTrace(c: Context) {
+  return c.req.query("trace") === "true";
+}
+
+function getShouldAccelerate(c: Context) {
+  return c.req.query("accelerate") !== "false";
+}
+
 // TODO: replace with zod schema or validator
 function buildSelectionFromQueryParams(c: Context) {
   const selection: Partial<ResolverRecordsSelection> = {};
@@ -55,10 +63,12 @@ app.get("/records/:name", async (c) => {
 
     // TODO: default selection if none in query
     const selection = buildSelectionFromQueryParams(c);
+    const showTrace = getShouldTrace(c);
+    const accelerate = getShouldAccelerate(c);
 
-    const { result: records, trace } = await captureTrace(() => resolveForward(name, selection));
-
-    const showTrace = c.req.query("trace") === "true";
+    const { result: records, trace } = await captureTrace(() =>
+      resolveForward(name, selection, { accelerate }),
+    );
 
     const response = {
       records,
@@ -100,9 +110,12 @@ app.get("/primary-name/:address/:chainId", async (c) => {
       return c.json({ error: "chainId must be a valid number" }, 400);
     }
 
-    const { result: name, trace } = await captureTrace(() => resolveReverse(address, chainId));
+    const showTrace = getShouldTrace(c);
+    const accelerate = getShouldAccelerate(c);
 
-    const showTrace = c.req.query("trace") === "true";
+    const { result: name, trace } = await captureTrace(() =>
+      resolveReverse(address, chainId, { accelerate }),
+    );
 
     const response = {
       name,

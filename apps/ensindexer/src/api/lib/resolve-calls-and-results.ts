@@ -1,4 +1,4 @@
-import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
+import { ResolverABI } from "@ensnode/datasources";
 import type { Name, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
@@ -20,11 +20,6 @@ import { packetToBytes } from "viem/ens";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
-
-// for all relevant eth_calls here, all Resolver contracts share the same abi, so just grab one from
-// @ensnode/datasources that is guaranted to exist
-const RESOLVER_ABI = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot).contracts
-  .Resolver.abi;
 
 /**
  * Represents a set of eth_call arguments to a Resolver
@@ -102,7 +97,7 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
  * NOTE: viem#readContract implements CCIP-Read, so we get that behavior for free
  * NOTE: viem#multicall _doesn't_ implement CCIP-Read so maybe this can be optimized further
  *
- * NOTE: CCIP-Read Gateways can fail, should likely implement retries...
+ * TODO: CCIP-Read Gateways can fail, should likely implement retries?
  */
 export async function executeResolveCalls<SELECTION extends ResolverRecordsSelection>({
   name,
@@ -118,7 +113,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
   return withActiveSpanAsync(tracer, "executeResolveCalls", { name }, async (span) => {
-    const ResolverContract = { abi: RESOLVER_ABI, address: resolverAddress } as const;
+    const ResolverContract = { abi: ResolverABI, address: resolverAddress } as const;
 
     return await Promise.all(
       calls.map(async (call) => {
@@ -126,7 +121,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
           // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
           if (requiresWildcardSupport) {
             const encodedName = toHex(packetToBytes(name)); // DNS-encode `name` for resolve()
-            const encodedMethod = encodeFunctionData({ abi: RESOLVER_ABI, ...call });
+            const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
             const value = await withSpanAsync(
               tracer,
               `ENSIP-10 resolve(${call.functionName}, ${call.args})`,
@@ -144,14 +139,18 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
               return { call, result: null, reason: "returned empty response" };
             }
 
-            // ENSIP-10 resolve() always returns bytes that need to be decoded
+            // ENSIP-10 — resolve() always returns bytes that need to be decoded
             const results = decodeAbiParameters(
-              getAbiItem({ abi: RESOLVER_ABI, name: call.functionName, args: call.args }).outputs,
+              getAbiItem({ abi: ResolverABI, name: call.functionName, args: call.args }).outputs,
               value,
             );
 
-            // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length > 0)
-            return { call, result: results[0], reason: `resolve(${call.functionName})` };
+            // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length >= 1)
+            return {
+              call,
+              result: results[0],
+              reason: `.resolve(${call.functionName}, ${call.args})`,
+            };
           }
 
           // if not extended resolver, resolve directly
@@ -164,29 +163,31 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
                 return {
                   call,
                   result: await publicClient.readContract({ ...ResolverContract, ...call }),
-                  reason: ".name()",
+                  reason: `.name(${call.args})`,
                 };
               case "addr":
                 return {
                   call,
                   result: await publicClient.readContract({ ...ResolverContract, ...call }),
-                  reason: ".addr()",
+                  reason: `.addr(${call.args})`,
                 };
               case "text":
                 return {
                   call,
                   result: await publicClient.readContract({ ...ResolverContract, ...call }),
-                  reason: ".text()",
+                  reason: `.text(${call.args})`,
                 };
             }
           });
         } catch (error) {
+          if (error instanceof Error) span.recordException(error);
+
           // in general, reverts are expected behavior
           if (error instanceof ContractFunctionExecutionError) {
-            span.recordException(error);
             return { call, result: null, reason: error.shortMessage };
           }
 
+          // otherwise, rethrow
           throw error;
         }
       }),
@@ -194,6 +195,11 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
   });
 }
 
+/**
+ * Interprets the raw rpc results into more application-specific semantic values.
+ *
+ * ex: converting 0x, empty string, or zeroAddress to null, etc
+ */
 export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSelection>(
   callsAndRawResults: ResolveCallsAndRawResults<SELECTION>,
 ): ResolveCallsAndResults<SELECTION> {

@@ -1,5 +1,10 @@
 import config from "@/config";
-import { type LabelHash, type Node } from "@ensnode/ensnode-sdk";
+import {
+  type CoinType,
+  type LabelHash,
+  type Node,
+  coinTypeReverseLabel,
+} from "@ensnode/ensnode-sdk";
 import { type Address, getAddress } from "viem";
 
 /**
@@ -160,3 +165,13 @@ export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>
  */
 export const makeDomainResolverRelationId = (chainId: number, domainId: Node) =>
   [chainId, domainId].join("-");
+
+/**
+ * Makes a unique ID for a primary name record, keyed by (address, coinType).
+ *
+ * @param address the address for which the primary name is set
+ * @param coinType the coin type
+ * @returns a unique primary name id
+ */
+export const makePrimaryNameId = (address: Address, coinType: CoinType) =>
+  [address, coinTypeReverseLabel(coinType)].join("-");

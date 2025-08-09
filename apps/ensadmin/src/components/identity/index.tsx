@@ -2,12 +2,8 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  getENSRootChainId,
-  getNameAvatarUrl,
-} from "@ensnode/datasources";
+import { getNameAvatarUrl } from "@/lib/namespace-utils";
+import { ENSNamespaceId, ENSNamespaceIds, getENSRootChainId } from "@ensnode/datasources";
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";

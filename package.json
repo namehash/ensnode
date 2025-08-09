@@ -15,7 +15,8 @@
     "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
     "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
     "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
-    "docker:build:ensrainbow.data": "docker build -f apps/ensrainbow/Dockerfile.data -t ensrainbow-data:latest ."
+    "docker:build:ensrainbow.data": "docker build -f apps/ensrainbow/Dockerfile.data -t ensrainbow-data:latest .",
+    "otel-desktop-viewer": "docker run -p 8000:8000 -p 4317:4317 -p 4318:4318 davetron5000/otel-desktop-viewer:alpine-3"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

@@ -1,9 +1,5 @@
 import type { Hex } from "viem";
 
-// re-export CoinType and EvmCoinType from @ensdomains/address-encoder
-// so consumers don't need it as a dependency
-export type { CoinType, EvmCoinType } from "@ensdomains/address-encoder";
-
 // re-export ENSNamespaceIds and ENSNamespaceId from @ensnode/datasources
 // so consumers don't need it as a dependency
 export { ENSNamespaceIds } from "@ensnode/datasources";

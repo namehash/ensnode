@@ -1,4 +1,4 @@
-import { getChainName } from "@ensnode/datasources";
+import { getChainName } from "@/lib/namespace-utils";
 
 export interface ChainNameProps {
   chainId: number;

@@ -1,6 +1,5 @@
 import { holesky } from "viem/chains";
 
-import { ResolverConfig } from "./lib/resolver";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
@@ -12,8 +11,14 @@ import { UniversalResolver as root_UniversalResolver } from "./abis/root/Univers
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 
+// Shared ABIs
+import { ResolverABI, ResolverFilter } from "./lib/resolver";
+
 /**
  * The Holesky ENSNamespace
+ *
+ * NOTE: The Holesky ENS namespace has no known Datasource for Basenames, Lineanames, or 3DNS.
+ * NOTE: The Holesky ENS namespace does not support ENSIP-19.
  */
 export default {
   /**
@@ -36,7 +41,8 @@ export default {
         startBlock: 801613,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 801536, // ignores any Resolver events prior to `startBlock` of RegistryOld on Holeksy
       },
       BaseRegistrar: {
@@ -71,7 +77,4 @@ export default {
       },
     },
   },
-  /**
-   * The Holesky ENS namespace has no known Datasource for Basenames or Lineanames.
-   */
 } satisfies ENSNamespace;

@@ -1,10 +1,12 @@
 import config from "@/config";
-import { ENSNamespace, getENSNamespace } from "@ensnode/datasources";
+import { DatasourceNames, getDatasourceInAnyNamespace } from "@ensnode/datasources";
 import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import { Address, isAddressEqual } from "viem";
 
-// NOTE: typing as ENSNamespace so we can access possibly undefined Datasources
-const ensNamespace = getENSNamespace(config.namespace) as ENSNamespace;
+// NOTE: we know ensRoot is defined for all namespaces, so enforce that at runtime with !
+const ensRoot = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ENSRoot)!;
+const basenames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Basenames);
+const lineanames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Lineanames);
 
 /**
  * For a given `resolverAddress` on a specific `chainId`, return the `PluginName` that, if it were
@@ -33,34 +35,36 @@ export function possibleKnownOffchainLookupResolverDefersTo(
   resolverAddress: Address,
 ): { pluginName: PluginName; chainId: ChainId } | null {
   // on the ENS Deployment Chain
-  if (chainId === ensNamespace.ensroot.chain.id) {
-    const basenamesL1ResolverAddress = ensNamespace.ensroot.contracts.BasenamesL1Resolver
-      ?.address as Address | undefined;
+  if (chainId === ensRoot.chain.id) {
+    const basenamesL1ResolverAddress = ensRoot.contracts.BasenamesL1Resolver?.address as
+      | Address
+      | undefined;
 
     // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames plugin,
     if (
       basenamesL1ResolverAddress &&
       isAddressEqual(resolverAddress, basenamesL1ResolverAddress) &&
-      ensNamespace.basenames
+      basenames
     ) {
       return {
         pluginName: PluginName.Basenames,
-        chainId: ensNamespace.basenames.chain.id,
+        chainId: basenames.chain.id,
       };
     }
 
-    const lineanamesL1ResolverAddress = ensNamespace.ensroot.contracts.LineanamesL1Resolver
-      ?.address as Address | undefined;
+    const lineanamesL1ResolverAddress = ensRoot.contracts.LineanamesL1Resolver?.address as
+      | Address
+      | undefined;
 
     // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Lineanames plugin
     if (
       lineanamesL1ResolverAddress &&
       isAddressEqual(resolverAddress, lineanamesL1ResolverAddress) &&
-      ensNamespace.lineanames
+      lineanames
     ) {
       return {
         pluginName: PluginName.Lineanames,
-        chainId: ensNamespace.lineanames.chain.id,
+        chainId: lineanames.chain.id,
       };
     }
 

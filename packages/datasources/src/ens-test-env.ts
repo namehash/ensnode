@@ -2,7 +2,6 @@ import { Address, zeroAddress } from "viem";
 import { anvil } from "viem/chains";
 
 import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
-import { ResolverConfig } from "./lib/resolver";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
@@ -13,6 +12,9 @@ import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
+
+// Shared ABIs
+import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 const deploymentAddresses = getENSTestEnvDeploymentAddresses();
 
@@ -37,6 +39,9 @@ const EMPTY_ADDRESS = "" as Address;
  * type-correctness: consumers of these ens-test-env Datasources, if using outside of the context
  * of the ens-test-env tool, should validate that an Address is provided, or they may experience
  * undefined runtime behavior.
+ *
+ * NOTE: The ens-test-env ENS namespace does not support Basenames, Lineanames, or 3DNS.
+ * NOTE: The ens-test-env ENS namespace does not support ENSIP-19 Reverse Resolvers.
  */
 export default {
   /**
@@ -60,7 +65,8 @@ export default {
         startBlock: 0,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 0,
       },
       BaseRegistrar: {
@@ -109,7 +115,4 @@ export default {
       },
     },
   },
-  /**
-   * The 'ens-test-env' ENS namespace does not have any other Datasources.
-   */
 } satisfies ENSNamespace;
