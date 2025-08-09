@@ -1,7 +1,7 @@
 import { UnixTimestampInSeconds, unixTimestampToDate } from "@/components/datetime-utils";
 import { ensAdminVersion } from "@/lib/env";
-import { ENSNamespaceId } from "@ensnode/datasources";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
+import { ENSNamespaceId } from "@ensnode/datasources";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
