@@ -213,11 +213,15 @@ export default {
         startBlock: 8579966,
       },
 
-      // NOTE: DefaultReverseResolver1 does not exist on Sepolia (see mainnet.ts for context)
-      DefaultReverseResolver2: {
+      DefaultReverseResolver1: {
         abi: ResolverABI,
         address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
         startBlock: 3790251,
+      },
+      DefaultReverseResolver2: {
+        abi: ResolverABI,
+        address: "0x8948458626811dd0c23EB25Cc74291247077cC51",
+        startBlock: 7035086,
       },
       DefaultReverseResolver3: {
         abi: ResolverABI,
@@ -225,11 +229,15 @@ export default {
         startBlock: 8580041,
       },
 
-      // NOTE: DefaultPublicResolver1 isn't relevant on Sepolia
-      DefaultPublicResolver2: {
+      DefaultPublicResolver1: {
         abi: ResolverABI,
         address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
         startBlock: 3790251,
+      },
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x8948458626811dd0c23EB25Cc74291247077cC51",
+        startBlock: 7035086,
       },
       DefaultPublicResolver3: {
         abi: ResolverABI,

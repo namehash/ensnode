@@ -25,8 +25,7 @@ export function isKnownOnchainStaticResolver(chainId: ChainId, resolverAddress: 
   if (chainId === rrRoot?.chain.id) {
     return [
       // the Root LegacyDefaultResolver is an Onchain Static Resolver
-      // TODO(legacy-resolver): re-enable onchain-static-ness once we fetch values for legacy TextChanged events
-      // rrRoot.contracts.DefaultPublicResolver1?.address,
+      rrRoot.contracts.DefaultPublicResolver1?.address,
 
       // NOTE: this is _also_ the ENSIP-11 ReverseResolver (aka DefaultReverseResolver2)
       rrRoot.contracts.DefaultPublicResolver2?.address,

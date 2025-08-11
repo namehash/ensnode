@@ -37,7 +37,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
       with: { addressRecords: true, textRecords: true },
     });
 
-    // NOTE: fix the inferred drizzle types: always results in IndexedResolverRecords
+    // NOTE: fix the inferred drizzle types: always results in IndexedResolverRecords | undefined
     return record as IndexedResolverRecords | undefined;
   });
 

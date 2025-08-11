@@ -307,11 +307,9 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                     selection,
                   });
 
-                  // Invariant: resolver must exist here
+                  // if resolver doesn't exist here, there are no records in the index
                   if (!resolver) {
-                    throw new Error(
-                      `Invariant: Resolver records are indexed on chain ${chainId} and active resolver ${activeResolver} was identified, but does not exist in index.`,
-                    );
+                    return makeEmptyResolverRecordsResponse(selection);
                   }
 
                   // format into RecordsResponse and return
