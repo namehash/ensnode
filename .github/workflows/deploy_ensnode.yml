@@ -1,4 +1,4 @@
-name: "Deploy: ENSNode to Railway Environment"
+name: "Deploy: ENSNode to Railway and Render Environment"
 
 on:
   workflow_dispatch:
