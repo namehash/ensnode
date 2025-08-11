@@ -94,6 +94,12 @@ export default {
         address: "0xb7B7DAdF4D42a08B3eC1d3A1079959Dfbc8CFfCC",
         startBlock: 8515717,
       },
+      //
+      PublicResolver: {
+        abi: ResolverABI,
+        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
+        startBlock: 3790251,
+      },
     },
   },
 
