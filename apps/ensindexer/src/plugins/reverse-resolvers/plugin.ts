@@ -6,7 +6,8 @@ import { createPlugin, getDatasourceAsFullyDefinedAtCompileTime } from "@/lib/pl
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 
 /**
- * Describes the indexing behavior for known ENSIP-19 L2 Reverse Resolvers.
+ * Describes the indexing behavior for known ENSIP-19 L2 Reverse Resolvers & Legacy Reverse Resolvers,
+ * in order to power Protocol Accelerated resolution of `name` records on Reverse Names.
  */
 export const pluginName = PluginName.ReverseResolvers;
 

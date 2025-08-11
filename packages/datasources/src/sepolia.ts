@@ -94,12 +94,6 @@ export default {
         address: "0xb7B7DAdF4D42a08B3eC1d3A1079959Dfbc8CFfCC",
         startBlock: 8515717,
       },
-      //
-      PublicResolver: {
-        abi: ResolverABI,
-        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
-        startBlock: 3790251,
-      },
     },
   },
 
@@ -229,6 +223,18 @@ export default {
         abi: ResolverABI,
         address: "0x9DC60e7BD81cCc96774C55214fF389D42Ae5E9Ac",
         startBlock: 8580041,
+      },
+
+      // NOTE: DefaultPublicResolver1 isn't relevant on Sepolia
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
+        startBlock: 3790251,
+      },
+      DefaultPublicResolver3: {
+        abi: ResolverABI,
+        address: "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5",
+        startBlock: 8580001,
       },
 
       BaseReverseResolver: {

@@ -87,17 +87,6 @@ export default {
         address: "0xaBd80E8a13596fEeA40Fd26fD6a24c3fe76F05fB",
         startBlock: 22671701,
       },
-      //
-      LegacyPublicResolver: {
-        abi: ResolverABI,
-        address: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
-        startBlock: 9412610,
-      },
-      PublicResolver: {
-        abi: ResolverABI,
-        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
-        startBlock: 16925619,
-      },
       BasenamesL1Resolver: {
         abi: ResolverABI,
         address: "0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31",
@@ -303,6 +292,32 @@ export default {
         abi: ResolverABI,
         address: "0xA7d635c8de9a58a228AA69353a1699C7Cc240DCF",
         startBlock: 22764871,
+      },
+
+      // the original default public resolver aka LegacyPublicResolver
+      // it uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver1: {
+        abi: ResolverABI,
+        address: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+        startBlock: 9412610,
+      },
+
+      // this PublicResolver was enabled in the following proposal:
+      // https://discuss.ens.domains/t/ep3-5-executable-activate-new-eth-controller-and-reverse-registrar/16776
+      // https://www.tally.xyz/gov/ens/proposal/42973781582803845389836855775840822719678533376883030929209752909248937768242
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
+        startBlock: 16925619,
+      },
+
+      // this PublicResolver was enabled in the following proposal
+      // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
+      // https://www.tally.xyz/gov/ens/proposal/42524979896803285837776370636134389407867034021879791462477783237030656381157
+      DefaultPublicResolver3: {
+        abi: ResolverABI,
+        address: "0xF29100983E058B709F3D539b0c765937B804AC15",
+        startBlock: 22764828,
       },
 
       BaseReverseResolver: {

@@ -49,7 +49,7 @@ export async function handleResolverTextRecordUpdate(
   key: string,
   value: string | undefined | null,
 ) {
-  // if value is undefined, this is a LegacyPublicResolver event, nothing to do
+  // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event, nothing to do
   if (value === undefined) return;
 
   // TODO(null-bytes): store null bytes correctly
