@@ -15,12 +15,13 @@ import { replaceBigInts } from "ponder";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
+import { isKnownENSIP19ReverseResolver } from "@/api/lib/acceleration/known-ensip-19-reverse-resolvers";
+import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/acceleration/known-offchain-lookup-resolver";
+import { isKnownOnchainStaticResolver } from "@/api/lib/acceleration/known-onchain-static-resolver";
+import { areResolverRecordsIndexedOnChain } from "@/api/lib/acceleration/resolver-records-indexed-on-chain";
 import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
 import { findResolver } from "@/api/lib/find-resolver";
 import { getPrimaryNameFromIndex } from "@/api/lib/get-primary-name-from-index";
-import { isKnownENSIP19ReverseResolver } from "@/api/lib/known-ensip-19-reverse-resolvers";
-import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/known-offchain-lookup-resolver";
-import { isKnownOnchainStaticResolver } from "@/api/lib/known-onchain-static-resolver";
 import {
   IndexedResolverRecords,
   makeEmptyResolverRecordsResponse,
@@ -34,7 +35,6 @@ import {
   interpretRawCallsAndResults,
   makeResolveCalls,
 } from "@/api/lib/resolve-calls-and-results";
-import { areResolverRecordsIndexedOnChain } from "@/api/lib/resolver-records-indexed-on-chain";
 import config from "@/config";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import { makeResolverId } from "@/lib/ids";

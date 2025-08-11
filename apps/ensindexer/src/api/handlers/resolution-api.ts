@@ -7,10 +7,10 @@ import {
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
-import { batchResolveReverse } from "@/api/lib/batch-reverse-resolution";
-import { resolveForward } from "@/api/lib/forward-resolution";
+import { batchResolveReverse } from "@/api/lib/resolution/batch-reverse-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
-import { resolveReverse } from "@/api/lib/reverse-resolution";
+import { resolveForward } from "@/api/lib/resolution/forward-resolution";
+import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 
 // TODO: use a zod middleware to parse out the arguments and conform to *ResolutionRequest typings
 

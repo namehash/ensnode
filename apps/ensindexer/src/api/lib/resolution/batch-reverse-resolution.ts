@@ -2,7 +2,7 @@ import type { ChainId, Name } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import type { Address } from "viem";
 
-import { resolveReverse } from "@/api/lib/reverse-resolution";
+import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import config from "@/config";
 import { withActiveSpanAsync } from "@/lib/auto-span";
 import { ENSNamespaceIds } from "@ensnode/datasources";

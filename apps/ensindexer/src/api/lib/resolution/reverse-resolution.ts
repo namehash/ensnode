@@ -11,9 +11,9 @@ import {
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { Address, isAddress, isAddressEqual } from "viem";
 
-import { resolveForward } from "@/api/lib/forward-resolution";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
 import { withActiveSpanAsync } from "@/lib/auto-span";
+import { resolveForward } from "./forward-resolution";
 
 export const REVERSE_RESOLUTION_SELECTION = {
   name: true,

@@ -12,10 +12,10 @@ export async function getPrimaryNameFromIndex(
   address: Address,
   coinType: CoinType,
 ): Promise<Name | null> {
-  const specificCoinType = BigInt(coinType);
+  const _coinType = BigInt(coinType);
 
   // retrieve from index
-  const primaryNames = await withSpanAsync(
+  const records = await withSpanAsync(
     tracer,
     "ext_primaryName.findMany",
     { address, coinType: coinTypeReverseLabel(coinType) },
@@ -25,18 +25,17 @@ export async function getPrimaryNameFromIndex(
           and(
             // address = address
             eq(t.address, address),
-            // and coinType IN [coinType, DEFAULT_EVM_COIN_TYPE]
-            inArray(t.coinType, [specificCoinType, DEFAULT_EVM_COIN_TYPE_BIGINT]),
+            // AND coinType IN [_coinType, DEFAULT_EVM_COIN_TYPE]
+            inArray(t.coinType, [_coinType, DEFAULT_EVM_COIN_TYPE_BIGINT]),
           ),
         columns: { coinType: true, name: true },
       }),
   );
 
-  const coinTypeSpecificName =
-    primaryNames.find((pn) => pn.coinType === specificCoinType)?.name ?? null;
+  const coinTypeName = records.find((pn) => pn.coinType === _coinType)?.name ?? null;
 
   const defaultName =
-    primaryNames.find((pn) => pn.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT)?.name ?? null;
+    records.find((pn) => pn.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT)?.name ?? null;
 
-  return coinTypeSpecificName ?? defaultName;
+  return coinTypeName ?? defaultName;
 }
