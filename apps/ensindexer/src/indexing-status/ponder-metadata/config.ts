@@ -1,3 +1,11 @@
+/**
+ * Ponder Metadata: Config
+ *
+ * This file describes ideas and functionality related to Ponder configuration
+ * object and how it defines on-chain data sources to-be-indexed across all
+ * indexed chains.
+ */
+
 import {
   type BlockNumber,
   type Blockrange,

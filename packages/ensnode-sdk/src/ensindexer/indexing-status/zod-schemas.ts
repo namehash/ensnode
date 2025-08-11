@@ -1,27 +1,53 @@
 /**
- * Zod schemas can never be included in the NPM package for ENSNode SDK.
+ * All zod schemas we define must remain internal implementation details.
+ * We want the freedom to move away from zod in the future without impacting
+ * any users of the ensnode-sdk package.
  *
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
-import { ChainId, Duration, deserializeChainId } from "../../shared";
+import { ChainId, deserializeChainId } from "../../shared";
 import * as blockRef from "../../shared/block-ref";
 import {
   makeBlockRefSchema,
   makeChainIdStringSchema,
   makeDurationSchema,
-  makeNonNegativeIntegerSchema,
 } from "../../shared/zod-schemas";
-import { getApproximateRealtimeDistances, getOverallStatus } from "./helpers";
-import { ChainIndexingStatusIds } from "./types";
+import { getOverallApproxRealtimeDistance, getOverallIndexingStatus } from "./helpers";
+import {
+  ChainIndexingStatusIds,
+  ChainIndexingStrategyIds,
+  OverallIndexingStatusIds,
+} from "./types";
 import type {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
+  ChainIndexingConfig,
   ChainIndexingFollowingStatus,
   ChainIndexingStatus,
   ChainIndexingUnstartedStatus,
+  ENSIndexerOverallIndexingStatusError,
+  ENSIndexerOverallIndexingStatusOk,
+  ENSIndexerOverallIndexingStatusOkFollowing,
 } from "./types";
+
+/**
+ * Makes Zod schema for {@link ChainIndexingConfig} type.
+ */
+const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
+  z.discriminatedUnion("indexingStrategy", [
+    z.strictObject({
+      indexingStrategy: z.literal(ChainIndexingStrategyIds.Indefinite),
+      startBlock: makeBlockRefSchema(valueLabel),
+      endBlock: z.null().default(null),
+    }),
+    z.strictObject({
+      indexingStrategy: z.literal(ChainIndexingStrategyIds.Definite),
+      startBlock: makeBlockRefSchema(valueLabel),
+      endBlock: makeBlockRefSchema(valueLabel),
+    }),
+  ]);
 
 /**
  * Makes Zod schema for {@link ChainIndexingUnstartedStatus} type.
@@ -30,10 +56,7 @@ export const makeChainIndexingUnstartedStatusSchema = (valueLabel: string = "Val
   z
     .strictObject({
       status: z.literal(ChainIndexingStatusIds.Unstarted),
-      config: z.strictObject({
-        startBlock: makeBlockRefSchema(valueLabel),
-        endBlock: makeBlockRefSchema(valueLabel).nullable(),
-      }),
+      config: makeChainIndexingConfigSchema(valueLabel),
     })
     .refine(
       ({ config }) =>
@@ -50,12 +73,8 @@ export const makeChainIndexingBackfillStatusSchema = (valueLabel: string = "Valu
   z
     .strictObject({
       status: z.literal(ChainIndexingStatusIds.Backfill),
-      config: z.strictObject({
-        startBlock: makeBlockRefSchema(valueLabel),
-        endBlock: makeBlockRefSchema(valueLabel).nullable(),
-      }),
+      config: makeChainIndexingConfigSchema(valueLabel),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
-      latestKnownBlock: makeBlockRefSchema(valueLabel),
       backfillEndBlock: makeBlockRefSchema(valueLabel),
     })
     .refine(
@@ -66,17 +85,10 @@ export const makeChainIndexingBackfillStatusSchema = (valueLabel: string = "Valu
       },
     )
     .refine(
-      ({ latestIndexedBlock, latestKnownBlock }) =>
-        blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestKnownBlock),
+      ({ latestIndexedBlock, backfillEndBlock }) =>
+        blockRef.isBeforeOrEqualTo(latestIndexedBlock, backfillEndBlock),
       {
-        error: `latestIndexedBlock must be before or same as latestKnownBlock.`,
-      },
-    )
-    .refine(
-      ({ latestKnownBlock, backfillEndBlock }) =>
-        blockRef.isEqualTo(latestKnownBlock, backfillEndBlock),
-      {
-        error: `latestKnownBlock must be the same as backfillEndBlock.`,
+        error: `latestIndexedBlock must be before or same as backfillEndBlock.`,
       },
     )
     .refine(
@@ -95,6 +107,7 @@ export const makeChainIndexingFollowingStatusSchema = (valueLabel: string = "Val
     .strictObject({
       status: z.literal(ChainIndexingStatusIds.Following),
       config: z.strictObject({
+        indexingStrategy: z.literal(ChainIndexingStrategyIds.Indefinite),
         startBlock: makeBlockRefSchema(valueLabel),
       }),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
@@ -124,11 +137,11 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
     .strictObject({
       status: z.literal(ChainIndexingStatusIds.Completed),
       config: z.strictObject({
+        indexingStrategy: z.literal(ChainIndexingStrategyIds.Definite),
         startBlock: makeBlockRefSchema(valueLabel),
         endBlock: makeBlockRefSchema(valueLabel),
       }),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
-      latestKnownBlock: makeBlockRefSchema(valueLabel),
     })
     .refine(
       ({ config, latestIndexedBlock }) =>
@@ -138,17 +151,9 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
       },
     )
     .refine(
-      ({ latestIndexedBlock, latestKnownBlock }) =>
-        blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestKnownBlock),
+      ({ config, latestIndexedBlock }) => blockRef.isEqualTo(latestIndexedBlock, config.endBlock),
       {
-        error: `latestIndexedBlock must be before or same as latestKnownBlock.`,
-      },
-    )
-    .refine(
-      ({ config, latestKnownBlock }) =>
-        config.endBlock === null || blockRef.isEqualTo(latestKnownBlock, config.endBlock),
-      {
-        error: `latestKnownBlock must be the same as config.endBlock.`,
+        error: `latestIndexedBlock must be the same as config.endBlock.`,
       },
     );
 
@@ -181,43 +186,70 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
       return chainsIndexingStatus;
     });
 
-const makeIndexingStatusSchema = (valueLabel?: string) =>
-  z
+/**
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusOk}
+ */
+const makeOverallIndexingStatusWithDataSchema = (valueLabel?: string) => {
+  const expectedStatuses = Object.values(OverallIndexingStatusIds).filter(
+    (statusId) =>
+      statusId !== OverallIndexingStatusIds.IndexerError &&
+      statusId !== OverallIndexingStatusIds.Following,
+  );
+
+  return z
     .strictObject({
       chains: makeChainIndexingStatusesSchema(valueLabel),
       overallStatus: z.enum(
-        Object.values(ChainIndexingStatusIds).filter(
-          (id) => id !== ChainIndexingStatusIds.IndexerError,
+        Object.values(OverallIndexingStatusIds).filter(
+          (statusId) =>
+            statusId !== OverallIndexingStatusIds.IndexerError &&
+            statusId !== OverallIndexingStatusIds.Following,
         ),
+        {
+          error: `${valueLabel}.overallStatus must be one of ${expectedStatuses.join(", ")}`,
+        },
       ),
-      approximateRealtimeDistance: makeNonNegativeIntegerSchema(valueLabel).prefault(0),
     })
     .refine(
       (indexingStatus) => {
         const chains = Array.from(indexingStatus.chains.values());
 
-        return getOverallStatus(chains) === indexingStatus.overallStatus;
+        return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
-    )
+    );
+};
+
+/**
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusOkFollowing}
+ */
+const makeOverallIndexingStatusFollowing = (valueLabel?: string) =>
+  makeOverallIndexingStatusWithDataSchema(valueLabel)
+    .extend({
+      overallStatus: z.literal(OverallIndexingStatusIds.Following),
+      approximateRealtimeDistance: makeDurationSchema(valueLabel),
+    })
     .refine(
       (indexingStatus) => {
         const chains = Array.from(indexingStatus.chains.values());
 
         return (
-          getApproximateRealtimeDistances(chains) === indexingStatus.approximateRealtimeDistance
+          getOverallApproxRealtimeDistance(chains) === indexingStatus.approximateRealtimeDistance
         );
       },
       { error: `${valueLabel} is an invalid approximateRealtimeDistances.` },
     );
 
-const makeIndexingStatusErrorSchema = (valueLabel?: string) =>
+/**
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusError}
+ */
+const makeOverallIndexingStatusErrorSchema = (valueLabel?: string) =>
   z.strictObject({
-    overallStatus: z.literal(ChainIndexingStatusIds.IndexerError),
+    overallStatus: z.literal(OverallIndexingStatusIds.IndexerError),
   });
 
 /**
- * ENSIndexer Indexing Status Schema
+ * ENSIndexer Overall Indexing Status Schema
  *
  * Makes a Zod schema definition for validating indexing status
  * across all chains indexed by ENSIndexer instance.
@@ -226,6 +258,7 @@ export const makeENSIndexerIndexingStatusSchema = (
   valueLabel: string = "ENSIndexerIndexingStatus",
 ) =>
   z.discriminatedUnion("overallStatus", [
-    makeIndexingStatusSchema(valueLabel),
-    makeIndexingStatusErrorSchema(valueLabel),
+    makeOverallIndexingStatusWithDataSchema(valueLabel),
+    makeOverallIndexingStatusFollowing(valueLabel),
+    makeOverallIndexingStatusErrorSchema(valueLabel),
   ]);

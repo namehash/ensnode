@@ -180,9 +180,12 @@ export interface ENSIndexerConfig {
    * or `ponder dev, and not `ponder serve`.
    *
    * This URL is to fetch the status and metrics from the ENSIndexer.
-   * For ENSIndexer instances, this will typically be set to
-   * http://localhost:{port}. For ENSApi instances, this should be set to
-   * the local network URL of the corresponding ENSIndexer instance.
+   * For ENSIndexer instances started using `ponder start` or `ponder dev`,
+   * this should be configured so that ENSIndexer refers back to itself, ex:
+   * http://localhost:{port}. ENSIndexer instances started using
+   * `ponder serve`, this should be set to the hostname of
+   * the related ENSIndexer instance started using `ponder start` or
+   * `ponder serve` that is writing to the same ENSDb.
    */
   ensIndexerUrl: URL;
 

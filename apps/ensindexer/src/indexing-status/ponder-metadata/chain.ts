@@ -1,18 +1,24 @@
-import type {
-  BlockNumber,
-  BlockRef,
-  Blockrange,
-  ChainId,
-  ChainIndexingBackfillStatus,
-  ChainIndexingCompletedStatus,
-  ChainIndexingFollowingStatus,
-  ChainIndexingStatus,
-  ChainIndexingUnstartedStatus,
-  DeepPartial,
-  Duration,
+/**
+ * Ponder Metadata: Chains
+ *
+ * This file describes ideas and functionality related to metadata about chains
+ * indexing status.
+ */
+
+import {
+  type BlockRef,
+  type ChainId,
+  type ChainIndexingBackfillStatus,
+  type ChainIndexingCompletedStatus,
+  type ChainIndexingFollowingStatus,
+  type ChainIndexingStatus,
+  ChainIndexingStatusIds,
+  ChainIndexingStrategyIds,
+  type ChainIndexingUnstartedStatus,
+  type DeepPartial,
+  type Duration,
+  createIndexingConfig,
 } from "@ensnode/ensnode-sdk";
-import type { ChainName } from "./config";
-import type { PrometheusMetrics } from "./metrics";
 
 /**
  * Chain Metadata
@@ -101,31 +107,39 @@ export function getChainIndexingStatus(chainMetadata: ChainMetadata): ChainIndex
     statusBlock: chainStatusBlock,
   } = chainMetadata;
 
+  const { startBlock, endBlock } = chainBlocksConfig;
+  const config = createIndexingConfig(startBlock, endBlock);
+
   // In omnichain ordering, if the startBlock is the same as the
   // status block, the chain has not started yet.
   if (chainBlocksConfig.startBlock.number === chainStatusBlock.number) {
     return {
-      status: "unstarted",
-      config: {
-        startBlock: chainBlocksConfig.startBlock,
-        endBlock: chainBlocksConfig.endBlock,
-      },
+      status: ChainIndexingStatusIds.Unstarted,
+      config,
     } satisfies ChainIndexingUnstartedStatus;
   }
 
   if (isSyncComplete) {
+    if (config.indexingStrategy !== ChainIndexingStrategyIds.Definite) {
+      throw new Error(
+        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${ChainIndexingStrategyIds.Definite}' indexing strategy.`,
+      );
+    }
+
     return {
-      status: "completed",
-      config: {
-        startBlock: chainBlocksConfig.startBlock,
-        endBlock: chainBlocksConfig.endBlock!,
-      },
+      status: ChainIndexingStatusIds.Completed,
       latestIndexedBlock: chainStatusBlock,
-      latestKnownBlock: chainStatusBlock,
+      config,
     } satisfies ChainIndexingCompletedStatus;
   }
 
   if (isSyncRealtime) {
+    if (config.indexingStrategy !== ChainIndexingStrategyIds.Indefinite) {
+      throw new Error(
+        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${ChainIndexingStrategyIds.Indefinite}' indexing strategy.`,
+      );
+    }
+
     const nowUnixTimestamp = Math.floor(Date.now() / 1000);
     const approximateRealtimeDistance: Duration = Math.max(
       0,
@@ -133,25 +147,18 @@ export function getChainIndexingStatus(chainMetadata: ChainMetadata): ChainIndex
     );
 
     return {
-      status: "following",
-      config: {
-        startBlock: chainBlocksConfig.startBlock,
-      },
+      status: ChainIndexingStatusIds.Following,
       latestIndexedBlock: chainStatusBlock,
       latestKnownBlock: chainSyncBlock,
       approximateRealtimeDistance,
+      config,
     } satisfies ChainIndexingFollowingStatus;
   }
 
   return {
-    status: "backfill",
-    config: {
-      startBlock: chainBlocksConfig.startBlock,
-      endBlock: chainBlocksConfig.endBlock,
-    },
+    status: ChainIndexingStatusIds.Backfill,
     latestIndexedBlock: chainStatusBlock,
-    // During the backfill, the latestKnownBlock is the backfillEndBlock.
-    latestKnownBlock: chainBackfillEndBlock,
     backfillEndBlock: chainBackfillEndBlock,
+    config,
   } satisfies ChainIndexingBackfillStatus;
 }

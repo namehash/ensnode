@@ -1,13 +1,15 @@
 import { ChainId, ChainIdString, serializeChainId } from "../../shared";
 import {
-  SerializedENSIndexerIndexingStatus,
-  SerializedENSIndexerIndexingStatusError,
+  SerializedENSIndexerOverallIndexingStatus,
+  SerializedENSIndexerOverallIndexingStatusError,
+  SerializedENSIndexerOverallIndexingStatusOk,
+  SerializedENSIndexerOverallIndexingStatusOkFollowing,
 } from "./serialized-types";
 import {
   ChainIndexingStatus,
   ChainIndexingStatusIds,
-  type ENSIndexerIndexingStatus,
-  ENSIndexerIndexingStatusError,
+  ENSIndexerOverallIndexingStatus,
+  OverallIndexingStatusIds,
 } from "./types";
 
 /**
@@ -29,23 +31,25 @@ export function serializeChainIndexingStatuses(
  * Serialize a {@link ENSIndexerIndexingStatus} object.
  */
 export function serializeENSIndexerIndexingStatus(
-  indexingStatus: ENSIndexerIndexingStatus,
-): SerializedENSIndexerIndexingStatus;
-export function serializeENSIndexerIndexingStatus(
-  indexingStatus: ENSIndexerIndexingStatusError,
-): SerializedENSIndexerIndexingStatusError;
-export function serializeENSIndexerIndexingStatus(
-  indexingStatus: ENSIndexerIndexingStatus | ENSIndexerIndexingStatusError,
-): SerializedENSIndexerIndexingStatus | SerializedENSIndexerIndexingStatusError {
-  if (indexingStatus.overallStatus === ChainIndexingStatusIds.IndexerError) {
-    return {
-      overallStatus: indexingStatus.overallStatus,
-    } satisfies SerializedENSIndexerIndexingStatusError;
-  }
+  indexingStatus: ENSIndexerOverallIndexingStatus,
+): SerializedENSIndexerOverallIndexingStatus {
+  switch (indexingStatus.overallStatus) {
+    case OverallIndexingStatusIds.IndexerError:
+      return {
+        overallStatus: OverallIndexingStatusIds.IndexerError,
+      } satisfies SerializedENSIndexerOverallIndexingStatusError;
 
-  return {
-    approximateRealtimeDistance: indexingStatus.approximateRealtimeDistance,
-    chains: serializeChainIndexingStatuses(indexingStatus.chains),
-    overallStatus: indexingStatus.overallStatus,
-  } satisfies SerializedENSIndexerIndexingStatus;
+    case OverallIndexingStatusIds.Following:
+      return {
+        approximateRealtimeDistance: indexingStatus.approximateRealtimeDistance,
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        overallStatus: OverallIndexingStatusIds.Following,
+      } satisfies SerializedENSIndexerOverallIndexingStatusOkFollowing;
+
+    default:
+      return {
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        overallStatus: indexingStatus.overallStatus,
+      } satisfies SerializedENSIndexerOverallIndexingStatusOk;
+  }
 }

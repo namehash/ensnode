@@ -1,19 +1,38 @@
 import type { ChainIdString } from "../../shared";
 import type {
   ChainIndexingStatus,
-  ENSIndexerIndexingStatus,
-  ENSIndexerIndexingStatusError,
+  ENSIndexerOverallIndexingStatus,
+  ENSIndexerOverallIndexingStatusError,
+  ENSIndexerOverallIndexingStatusOk,
+  ENSIndexerOverallIndexingStatusOkFollowing,
 } from "./types";
 
 /**
- * Serialized representation of {@link ENSIndexerIndexingStatus}
+ * Serialized representation of {@link ENSIndexerOverallIndexingStatusOk}
  */
-export interface SerializedENSIndexerIndexingStatus
-  extends Omit<ENSIndexerIndexingStatus, "chains"> {
+export interface SerializedENSIndexerOverallIndexingStatusOk
+  extends Omit<ENSIndexerOverallIndexingStatus, "chains"> {
   chains: Record<ChainIdString, ChainIndexingStatus>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerIndexingStatusError}
+ * Serialized representation of {@link ENSIndexerOverallIndexingStatusOkFollowing}
  */
-export interface SerializedENSIndexerIndexingStatusError extends ENSIndexerIndexingStatusError {}
+export interface SerializedENSIndexerOverallIndexingStatusOkFollowing
+  extends Omit<ENSIndexerOverallIndexingStatusOkFollowing, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingStatus>;
+}
+
+/**
+ * Serialized representation of {@link ENSIndexerOverallIndexingStatusError}
+ */
+export interface SerializedENSIndexerOverallIndexingStatusError
+  extends ENSIndexerOverallIndexingStatusError {}
+
+/**
+ * Serialized representation of {@link ENSIndexerOverallIndexingStatus}
+ */
+export type SerializedENSIndexerOverallIndexingStatus =
+  | SerializedENSIndexerOverallIndexingStatusOk
+  | SerializedENSIndexerOverallIndexingStatusOkFollowing
+  | SerializedENSIndexerOverallIndexingStatusError;

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { deserializeENSIndexerIndexingStatus } from "./deserialize";
 import { serializeENSIndexerIndexingStatus } from "./serialize";
-import { SerializedENSIndexerIndexingStatus } from "./serialized-types";
+import { SerializedENSIndexerOverallIndexingStatus } from "./serialized-types";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingStatusIds,
   ChainIndexingUnstartedStatus,
-  ENSIndexerIndexingStatus,
+  ENSIndexerOverallIndexingStatus,
 } from "./types";
 
 describe("ENSIndexer: Indexing Status", () => {
@@ -21,11 +21,11 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               status: ChainIndexingStatusIds.Backfill,
               config: {
+                indexingStrategy: "indefinite",
                 startBlock: earliestBlockRef,
                 endBlock: null,
               },
               latestIndexedBlock: earlierBlockRef,
-              latestKnownBlock: latestBlockRef,
               backfillEndBlock: latestBlockRef,
             } satisfies ChainIndexingBackfillStatus,
           ],
@@ -34,6 +34,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               status: ChainIndexingStatusIds.Unstarted,
               config: {
+                indexingStrategy: "definite",
                 startBlock: earliestBlockRef,
                 endBlock: laterBlockRef,
               },
@@ -41,8 +42,7 @@ describe("ENSIndexer: Indexing Status", () => {
           ],
         ]),
         overallStatus: ChainIndexingStatusIds.Backfill,
-        approximateRealtimeDistance: 0,
-      } satisfies ENSIndexerIndexingStatus;
+      } satisfies ENSIndexerOverallIndexingStatus;
 
       // act
       const result = serializeENSIndexerIndexingStatus(indexingStatus);
@@ -53,24 +53,24 @@ describe("ENSIndexer: Indexing Status", () => {
           "1": {
             status: ChainIndexingStatusIds.Backfill,
             config: {
+              indexingStrategy: "indefinite",
               startBlock: earliestBlockRef,
               endBlock: null,
             },
             latestIndexedBlock: earlierBlockRef,
-            latestKnownBlock: latestBlockRef,
             backfillEndBlock: latestBlockRef,
           },
           "8453": {
             status: ChainIndexingStatusIds.Unstarted,
             config: {
+              indexingStrategy: "definite",
               startBlock: earliestBlockRef,
               endBlock: laterBlockRef,
             },
           },
         },
         overallStatus: ChainIndexingStatusIds.Backfill,
-        approximateRealtimeDistance: 0,
-      } satisfies SerializedENSIndexerIndexingStatus);
+      } satisfies SerializedENSIndexerOverallIndexingStatus);
 
       // bonus step: deserialize serialized
       // act

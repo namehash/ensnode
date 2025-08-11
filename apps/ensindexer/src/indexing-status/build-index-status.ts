@@ -1,7 +1,16 @@
+/**
+ * Build Indexing Status
+ *
+ * This file includes ideas and functionality integrating Ponder Metadata
+ * with ENSIndexer application. Here all Ponder Metadata concepts turn into
+ * the ENSIndexer data model.
+ */
+
 import {
   type BlockRef,
-  type ENSIndexerIndexingStatus,
-  ENSIndexerIndexingStatusError,
+  ENSIndexerOverallIndexingStatus,
+  ENSIndexerOverallIndexingStatusError,
+  OverallIndexingStatusIds,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
 import { prettifyError } from "zod/v4";
@@ -19,13 +28,10 @@ import {
   fetchPonderStatus,
   getChainsBlockrange,
 } from "./ponder-metadata";
-import {
-  PonderAppSettingsSchema,
-  makePonderChainMetadataSchema,
-} from "./ponder-metadata/zod-schemas";
+import { PonderAppSettingsSchema, makePonderChainMetadataSchema } from "./zod-schemas";
 
 /**
- * Ponder Chain Block Refs
+ * Chain Block Refs
  *
  * Represents information about indexing scope for an indexed chain.
  */
@@ -139,29 +145,34 @@ async function getChainsBlockRefs(
 }
 
 /**
- * Build {@link ENSIndexerIndexingStatus} object from Ponder metadata
+ * Build {@link ENSIndexerIndexingStatus} object from Ponder metadata.
+ *
+ * Note: Ponder metadata must come from an ENSIndexer instance that is
+ * guaranteed to provide indexing status data.
+ * @see https://ponder.sh/docs/api-reference/ponder/cli#dev
+ * @see https://ponder.sh/docs/api-reference/ponder/cli#start
  */
 export async function buildIndexingStatus(
   publicClients: Record<ChainName, PublicClient>,
-): Promise<ENSIndexerIndexingStatus | ENSIndexerIndexingStatusError> {
+): Promise<ENSIndexerOverallIndexingStatus> {
   let metrics: PrometheusMetrics;
   let status: PonderStatus;
 
   try {
     // Get current Ponder metadata (metrics, status)
-    const ensIndexerResponses = await Promise.all([
+    const [ponderMetrics, ponderStatus] = await Promise.all([
       fetchPonderMetrics(config.ensIndexerUrl),
       fetchPonderStatus(config.ensIndexerUrl),
     ]);
 
-    metrics = ensIndexerResponses[0];
-    status = ensIndexerResponses[1];
+    metrics = ponderMetrics;
+    status = ponderStatus;
   } catch (error) {
     console.error(`Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}`);
 
     return deserializeENSIndexerIndexingStatus({
-      overallStatus: "indexer-error",
-    } satisfies ENSIndexerIndexingStatusError);
+      overallStatus: OverallIndexingStatusIds.IndexerError,
+    } satisfies ENSIndexerOverallIndexingStatusError);
   }
 
   // Invariant: Ponder command & ordering are as expected

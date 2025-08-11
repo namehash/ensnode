@@ -5,13 +5,19 @@
  *
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
+ *
+ * This file defines Zod schemas required to validate data coming from
+ * Ponder metrics and Ponder status endpoints and make this data fit
+ * into the ENSIndexer application data model (and its constraints).
  */
 import {
   type ChainIdString,
   type ChainIndexingStatus,
-  type SerializedENSIndexerIndexingStatus,
-  getApproximateRealtimeDistances,
-  getOverallStatus,
+  OverallIndexingStatusIds,
+  SerializedENSIndexerOverallIndexingStatusOk,
+  SerializedENSIndexerOverallIndexingStatusOkFollowing,
+  getOverallApproxRealtimeDistance,
+  getOverallIndexingStatus,
 } from "@ensnode/ensnode-sdk";
 import {
   makeBlockRefSchema,
@@ -19,8 +25,8 @@ import {
   makeNonNegativeIntegerSchema,
 } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
-import { getChainIndexingStatus } from "./chain";
-import type { ChainName } from "./config";
+import { getChainIndexingStatus } from "./ponder-metadata/chain";
+import type { ChainName } from "./ponder-metadata/config";
 
 const makeChainNameSchema = (indexedChainNames: string[]) => z.enum(indexedChainNames);
 
@@ -78,13 +84,35 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
       }
 
       const chains = Object.values(serializedChainIndexingStatuses);
+      const overallStatus = getOverallIndexingStatus(chains);
 
-      const serializedIndexingStatus = {
+      if (overallStatus === OverallIndexingStatusIds.Following) {
+        return {
+          chains: serializedChainIndexingStatuses,
+          overallStatus: overallStatus,
+          approximateRealtimeDistance: getOverallApproxRealtimeDistance(chains),
+        } satisfies SerializedENSIndexerOverallIndexingStatusOkFollowing;
+      }
+
+      return {
         chains: serializedChainIndexingStatuses,
-        approximateRealtimeDistance: getApproximateRealtimeDistances(chains),
-        overallStatus: getOverallStatus(chains),
-      } satisfies SerializedENSIndexerIndexingStatus;
-
-      return serializedIndexingStatus;
+        overallStatus: overallStatus,
+      } satisfies SerializedENSIndexerOverallIndexingStatusOk;
     });
+};
+
+export const makePonderStatusSchema = (valueLabel?: "Value") => {
+  const chainIdSchema = makeChainIdSchema(valueLabel);
+  const blockRefSchema = makeBlockRefSchema(valueLabel);
+
+  return z.record(
+    z.string().transform(Number).pipe(chainIdSchema),
+    z.object({
+      id: chainIdSchema,
+      block: blockRefSchema,
+    }),
+    {
+      error: "Ponder Status must be an object mapping valid chain name to a chain status object.",
+    },
+  );
 };

@@ -1,3 +1,9 @@
+/**
+ * Ponder Metadata: RPC
+ *
+ * This file includes functionality required to read RPC data.
+ */
+
 import { type BlockNumber, type BlockRef, deserializeBlockRef } from "@ensnode/ensnode-sdk";
 import type { PublicClient } from "viem";
 

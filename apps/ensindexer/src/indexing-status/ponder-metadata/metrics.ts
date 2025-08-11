@@ -1,3 +1,10 @@
+/**
+ * Ponder Metadata: Metrics
+ *
+ * This file describes ideas and functionality related to Ponder metrics for
+ * each indexed chain.
+ */
+
 import { PrometheusMetrics } from "@ensnode/ponder-metadata";
 
 export { PrometheusMetrics } from "@ensnode/ponder-metadata";
