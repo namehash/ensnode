@@ -1,4 +1,4 @@
-import { Address, getAddress, hexToBigInt, hexToNumber, isAddress } from "viem";
+import { Address, getAddress, hexToBigInt } from "viem";
 import { CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE, bigintToCoinType } from "./coin-type";
 import { Name } from "./types";
 
@@ -37,6 +37,8 @@ export function parseReverseName(name: Name): { address: Address; coinType: Coin
 
   try {
     const [, addressLabel, coinTypeLabel] = match;
+    if (!addressLabel) return null;
+    if (!coinTypeLabel) return null;
 
     return {
       address: parseAddressLabel(addressLabel),

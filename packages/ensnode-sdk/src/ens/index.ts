@@ -4,4 +4,4 @@ export * from "./coin-type";
 export * from "./names";
 export * from "./reverse-name";
 export * from "./types";
-export * from "./ensip-19";
+export * from "./parse-reverse-name";
