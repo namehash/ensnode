@@ -1,4 +1,4 @@
-import {makeSubdomainNode, ETH_NODE} from "@ensnode/ensnode-sdk";
+import {makeSubdomainNode, ETH_NODE, ChainId} from "@ensnode/ensnode-sdk";
 import {Address, Hex} from "viem";
 import {
     base,
@@ -24,9 +24,24 @@ export {ResolverABI} from "./lib/resolver";
  * Identifies a specific address on a specific chain.
  */
 export interface ChainAddress {
-    chainId: number;
+    chainId: ChainId;
     address: Address;
 }
+
+export interface Currency {
+    symbol: string;
+    name: string;
+    decimals: number;
+    // For native currencies, address will be null
+    address: Address | null;
+}
+
+export interface ChainCurrency extends Currency {
+    chainId: ChainId;
+}
+
+// Add this constant after your existing constants
+const NATIVE_CURRENCY_SYMBOL = "NATIVE" as const;
 
 // internal map ENSNamespaceId -> ENSNamespace
 const ENSNamespacesById = {
@@ -279,6 +294,9 @@ export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): Chai
         }
         case ENSNamespaceIds.Sepolia: {
             const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
+            const basenamesDatasource = getDatasource(namespaceId, DatasourceNames.Basenames);
+            const lineanamesDatasource = getDatasource(namespaceId, DatasourceNames.Lineanames);
+
             return [
                 {
                     // ENS Token - Sepolia
@@ -289,6 +307,16 @@ export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): Chai
                     // NameWrapper Token - Sepolia
                     chainId: rootDatasource.chain.id,
                     address: rootDatasource.contracts["NameWrapper"].address,
+                },
+                {
+                    // Basenames Token - Base Sepolia
+                    chainId: basenamesDatasource.chain.id,
+                    address: basenamesDatasource.contracts["BaseRegistrar"].address,
+                },
+                {
+                    // Lineanames Token - Linea Sepolia
+                    chainId: lineanamesDatasource.chain.id,
+                    address: lineanamesDatasource.contracts["BaseRegistrar"].address,
                 },
             ];
         }
@@ -356,11 +384,13 @@ export const isEqualChainAddress = (address1: ChainAddress, address2: ChainAddre
 
 /**
  * Get the domainId by contract address and tokenId
+ * @param chainId - The chainId of the NFT
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @param contractAddress - contract address of the NFT
  * @param tokenIdHex - tokenId of the NFT in hex
  */
 export function getDomainIdByTokenId(
+    chainId: ChainId,
     namespaceId: ENSNamespaceId,
     contractAddress: Address,
     tokenIdHex: Hex,
@@ -376,3 +406,174 @@ export function getDomainIdByTokenId(
     // for other names we for now assume it is already namehash
     return tokenIdHex;
 }
+
+// Well-known currencies
+const ETH_CURRENCY = {
+    symbol: "ETH",
+    name: "Ethereum",
+    decimals: 18,
+    address: null,
+} as const;
+
+const CHAIN_CURRENCIES = {
+    // Mainnet
+    [mainnetChain.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0xA0b86a33E6417c5Dd4Baf8C54e5de49E293E9169" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0x6B175474E89094C44Da98b954EedeAC495271d0F" as Address,
+        },
+    ],
+    // Base
+    [base.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb" as Address,
+        },
+    ],
+    // Optimism
+    [optimism.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1" as Address,
+        },
+    ],
+    // Linea
+    [linea.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5" as Address,
+        },
+    ],
+    // Sepolia
+    [sepoliaChain.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6" as Address,
+        },
+    ],
+    // Holesky
+    [holeskyChain.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6" as Address,
+        },
+    ],
+    // Base Sepolia
+    [baseSepolia.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0x7368C6C68a4b2b68F90DB2e8F5E3b8E1E5e4F5c7" as Address,
+        },
+    ],
+    // Linea Sepolia
+    [lineaSepolia.id]: [
+        {
+            symbol: "USDC",
+            name: "USD Coin",
+            decimals: 6,
+            address: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff" as Address,
+        },
+        {
+            symbol: "DAI",
+            name: "Dai Stablecoin",
+            decimals: 18,
+            address: "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5" as Address,
+        },
+    ],
+} as const;
+
+/**
+ * Returns an array of supported currencies for a given chain ID.
+ *
+ * @param chainId - The chain ID to get supported currencies for
+ * @returns an array of ChainCurrency objects representing supported currencies on the chain
+ */
+export const getSupportedCurrencies = (chainId: ChainId): ChainCurrency[] => {
+    const chainCurrencies = CHAIN_CURRENCIES[chainId as keyof typeof CHAIN_CURRENCIES] || [];
+
+    // Always add ETH as the native currency
+    const currencies: ChainCurrency[] = [
+        {
+            ...ETH_CURRENCY,
+            chainId,
+        }
+    ];
+
+    // Add chain-specific currencies
+    currencies.push(...chainCurrencies.map(currency => ({
+        ...currency,
+        chainId,
+    })));
+
+    return currencies;
+};
+
+/**
+ * Returns a boolean indicating whether the provided address is a known supported currency contract.
+ *
+ * @param chainId - The chain ID
+ * @param address - The contract address to check
+ * @returns a boolean indicating whether the address is a known supported currency contract
+ */
+export const isKnownCurrencyContract = (chainId: ChainId, address: Address): boolean => {
+    const supportedCurrencies = getSupportedCurrencies(chainId);
+    return supportedCurrencies.some(currency =>
+        currency.address && currency.address.toLowerCase() === address.toLowerCase()
+    );
+};

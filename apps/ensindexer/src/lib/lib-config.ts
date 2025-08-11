@@ -1,8 +1,10 @@
-import type { ENSIndexerConfig, RpcConfigEnvironment } from "@/config/types";
+import type { RpcConfigEnvironment } from "@/config/types";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
+// Default rate limit for RPC services
+// Public (rate limited) RPC endpoints will not provide acceptable performance.
 export const DEFAULT_RPC_RATE_LIMIT = 500;
-export const DEFAULT_ENSADMIN_URL = "https://admin.ensnode.io";
+export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS = true;
@@ -44,24 +46,4 @@ export function getRpcConfigsFromEnv(): Record<number, RpcConfigEnvironment> {
   });
 
   return rpcConfigs;
-}
-
-export function prettyPrintConfig(config: ENSIndexerConfig) {
-  return JSON.stringify(
-    {
-      ...config,
-      databaseUrl: "*******",
-      rpcConfigs: Object.fromEntries(
-        Object.entries(config.rpcConfigs).map(([chainId, rpcConfig]) => [
-          chainId,
-          {
-            ...rpcConfig,
-            url: "*******",
-          },
-        ]),
-      ),
-    } as ENSIndexerConfig,
-    (key: string, value: unknown) => (key === "abi" ? `(truncated ABI output)` : value),
-    2,
-  );
 }

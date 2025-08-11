@@ -1,6 +1,6 @@
 import { db, publicClients } from "ponder:api";
 import { DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
-import { type Name, type Node, PluginName, getNameHierarchy } from "@ensnode/ensnode-sdk";
+import { ChainId, type Name, type Node, PluginName, getNameHierarchy } from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { type Address, isAddressEqual, namehash, toHex, zeroAddress } from "viem";
 import { packetToBytes } from "viem/ens";
@@ -25,7 +25,7 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
-export async function findResolver(chainId: number, name: Name) {
+export async function findResolver(chainId: ChainId, name: Name) {
   // TODO: Accelerate names that are subnames of well-known registrar managed names (i.e. base.eth, .linea.eth)
   // .base.eth -> ensroot.BasenamesL1Resolver.address;
   // .linea.eth -> ensroot.LineanamesL1Resolver.address;
@@ -54,7 +54,7 @@ export async function findResolver(chainId: number, name: Name) {
  * via RPC.
  */
 async function findResolverWithUniversalResolver(
-  chainId: number,
+  chainId: ChainId,
   name: Name,
 ): Promise<FindResolverResult> {
   return withActiveSpanAsync(
@@ -132,7 +132,7 @@ async function findResolverWithUniversalResolver(
  * // Returns: "0x123..." or null if no resolver found
  * ```
  */
-async function findResolverWithIndex(chainId: number, name: Name): Promise<FindResolverResult> {
+async function findResolverWithIndex(chainId: ChainId, name: Name): Promise<FindResolverResult> {
   return withActiveSpanAsync(tracer, "findResolverWithIndex", { chainId, name }, async (span) => {
     // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
     const names = getNameHierarchy(name);

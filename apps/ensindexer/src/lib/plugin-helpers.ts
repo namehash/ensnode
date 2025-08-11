@@ -1,7 +1,6 @@
 import type { ENSIndexerConfig } from "@/config/types";
-import { uniq } from "@/lib/lib-helpers";
 import { DatasourceName, ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import { createConfig as createPonderConfig } from "ponder";
 
 /**
