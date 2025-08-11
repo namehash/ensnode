@@ -1,6 +1,8 @@
-import type { ChainId, Name } from "@ensnode/ensnode-sdk";
+import type {
+  BatchReverseResolutionArgs,
+  BatchReverseResolutionResult,
+} from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
-import type { Address } from "viem";
 
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import config from "@/config";
@@ -21,8 +23,6 @@ const CHAIN_IDS_BY_NAMESPACE = {
   [ENSNamespaceIds.EnsTestEnv]: [0, 1],
 } as const;
 
-type PrimaryNames = Record<ChainId, Name | null>;
-
 /**
  * Implements batch resolution of an address' Primary Name across the provided `chainIds`. If
  * `chainIds` is undefined, defaults to the set of well-known ENSIP-19 chains.
@@ -33,10 +33,10 @@ type PrimaryNames = Record<ChainId, Name | null>;
  * @param chainIds the set of chainIds within which to resolve the address' Primary Name
  */
 export async function batchResolveReverse(
-  address: Address,
-  chainIds: ChainId[] | undefined,
+  address: BatchReverseResolutionArgs["address"],
+  chainIds: BatchReverseResolutionArgs["chainIds"],
   options: { accelerate?: boolean } = { accelerate: true },
-): Promise<PrimaryNames> {
+): Promise<BatchReverseResolutionResult> {
   const _chainIds = chainIds || CHAIN_IDS_BY_NAMESPACE[config.namespace];
 
   // parallel reverseResolve
@@ -49,5 +49,5 @@ export async function batchResolveReverse(
     // NOTE: names[i] guaranteed to be defined, silly typescript
     memo[chainId] = names[i]!;
     return memo;
-  }, {} as PrimaryNames);
+  }, {} as BatchReverseResolutionResult);
 }

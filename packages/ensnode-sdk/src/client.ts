@@ -2,10 +2,16 @@ import {
   ErrorResponse,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesRequest,
+  ResolvePrimaryNamesResponse,
   ResolveRecordsRequest,
   ResolveRecordsResponse,
 } from "./api/types";
-import { ResolverRecordsSelection } from "./resolution";
+import {
+  ForwardResolutionArgs,
+  ResolverRecordsSelection,
+  ReverseResolutionArgs,
+} from "./resolution";
 
 /**
  * Default ENSNode API endpoint URL
@@ -75,6 +81,9 @@ export class ENSNodeClient {
    *
    * @param name The ENS Name whose records to resolve
    * @param selection Optional selection of Resolver records
+   * @param options additional options
+   * @param options.accelerate whether to attempt Protocol Acceleration (default true)
+   * @param options.trace whether to include a trace in the response (default false)
    * @returns ResolveRecordsResponse<SELECTION>
    * @throws If the request fails or the ENSNode API returns an error response
    *
@@ -100,7 +109,7 @@ export class ENSNodeClient {
   async resolveRecords<SELECTION extends ResolverRecordsSelection>(
     name: ResolveRecordsRequest<SELECTION>["name"],
     selection: ResolveRecordsRequest<SELECTION>["selection"],
-    trace: ResolveRecordsRequest<SELECTION>["trace"] = false,
+    options?: Omit<ResolveRecordsRequest<SELECTION>, keyof ForwardResolutionArgs<SELECTION>>,
   ): Promise<ResolveRecordsResponse<SELECTION>> {
     const url = new URL(`/api/resolve/records/${encodeURIComponent(name)}`, this.options.url);
 
@@ -113,7 +122,8 @@ export class ENSNodeClient {
       url.searchParams.set("texts", selection.texts.join(","));
     }
 
-    if (trace) url.searchParams.set("trace", "true");
+    if (options?.trace) url.searchParams.set("trace", "true");
+    if (options?.accelerate === false) url.searchParams.set("accelerate", "false");
 
     const response = await fetch(url);
 
@@ -131,6 +141,9 @@ export class ENSNodeClient {
    *
    * @param address The Address whose Primary Name to resolve
    * @param chainId The chain id within which to query the address' ENSIP-19 Multichain Primary Name
+   * @param options additional options
+   * @param options.accelerate whether to attempt Protocol Acceleration (default true)
+   * @param options.trace whether to include a trace in the response (default false)
    * @returns ResolvePrimaryNameResponse
    * @throws If the request fails or the ENSNode API returns an error response
    *
@@ -149,11 +162,12 @@ export class ENSNodeClient {
   async resolvePrimaryName(
     address: ResolvePrimaryNameRequest["address"],
     chainId: ResolvePrimaryNameRequest["chainId"],
-    trace: ResolvePrimaryNameRequest["trace"] = false,
+    options?: Omit<ResolvePrimaryNameRequest, keyof ReverseResolutionArgs>,
   ): Promise<ResolvePrimaryNameResponse> {
     const url = new URL(`/api/resolve/primary-name/${address}/${chainId}`, this.options.url);
 
-    if (trace) url.searchParams.set("trace", "true");
+    if (options?.trace) url.searchParams.set("trace", "true");
+    if (options?.accelerate === false) url.searchParams.set("accelerate", "false");
 
     const response = await fetch(url);
 
@@ -164,5 +178,50 @@ export class ENSNodeClient {
 
     const data = await response.json();
     return data as ResolvePrimaryNameResponse;
+  }
+
+  /**
+   * Resolves the primary names of a specified address (Batch Reverse Resolution).
+   *
+   * @param address The Address whose Primary Name to resolve
+   * @param options additional options
+   * @param options.chainIds The set of chain ids within which to query the address' ENSIP-19
+   *  Multichain Primary Name (defaults to all well-known ENSIP-19 chain ids)
+   * @param options.accelerate whether to attempt Protocol Acceleration (default true)
+   * @param options.trace whether to include a trace in the response (default false)
+   * @returns ResolvePrimaryNamesResponse
+   * @throws If the request fails or the ENSNode API returns an error response
+   *
+   * @example
+   * ```typescript
+   * // Resolve the address' Primary Names on all well-known chain ids
+   * const { names } = await client.resolvePrimaryNames("0xabcd...");
+   *
+   * console.log(names);
+   * // { 0: 'jesse.base.eth', 1: 'jesse.base.eth', ... }
+   *
+   * // Resolve the address' Primary Names on specific chain Ids
+   * const { names } = await client.resolvePrimaryName("0xabcd...", [1, 10]);
+   * ```
+   */
+  async resolvePrimaryNames(
+    address: ResolvePrimaryNamesRequest["address"],
+    options?: Omit<ResolvePrimaryNamesRequest, "address">,
+  ): Promise<ResolvePrimaryNamesResponse> {
+    const url = new URL(`/api/resolve/primary-names/${address}`, this.options.url);
+
+    if (options?.chainIds) url.searchParams.set("chainIds", options.chainIds.join(","));
+    if (options?.trace) url.searchParams.set("trace", "true");
+    if (options?.accelerate === false) url.searchParams.set("accelerate", "false");
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const error = (await response.json()) as ErrorResponse;
+      throw new Error(`Primary Names Resolution Failed: ${error.error}`);
+    }
+
+    const data = await response.json();
+    return data as ResolvePrimaryNamesResponse;
   }
 }

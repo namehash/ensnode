@@ -1,15 +1,15 @@
 import {
-  ChainId,
-  Name,
   ResolverRecordsSelection,
+  ReverseResolutionArgs,
   ReverseResolutionProtocolStep,
+  ReverseResolutionResult,
   TraceableENSProtocol,
   coinTypeReverseLabel,
   evmChainIdToCoinType,
   reverseName,
 } from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
-import { Address, isAddress, isAddressEqual } from "viem";
+import { isAddress, isAddressEqual } from "viem";
 
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
 import { withActiveSpanAsync } from "@/lib/auto-span";
@@ -30,10 +30,10 @@ const tracer = trace.getTracer("reverse-resolution");
  * @param chainId the chainId within which to resolve the address' Primary Name
  */
 export async function resolveReverse(
-  address: Address,
-  chainId: ChainId,
+  address: ReverseResolutionArgs["address"],
+  chainId: ReverseResolutionArgs["chainId"],
   options: { accelerate?: boolean } = { accelerate: true },
-): Promise<Name | null> {
+): Promise<ReverseResolutionResult> {
   const { accelerate = true } = options;
 
   // trace for external consumers

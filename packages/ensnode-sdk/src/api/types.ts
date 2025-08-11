@@ -1,9 +1,12 @@
 import { Name } from "../ens";
 import type {
+  BatchReverseResolutionArgs,
+  BatchReverseResolutionResult,
   ForwardResolutionArgs,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   ReverseResolutionArgs,
+  ReverseResolutionResult,
 } from "../resolution";
 import type { ProtocolTrace } from "../tracing";
 
@@ -25,11 +28,16 @@ interface TraceableResponse {
   trace?: ProtocolTrace;
 }
 
+export interface AcceleratableRequest {
+  accelerate?: boolean;
+}
+
 /**
  * Resolve Records Request Type
  */
 export interface ResolveRecordsRequest<SELECTION extends ResolverRecordsSelection>
   extends ForwardResolutionArgs<SELECTION>,
+    AcceleratableRequest,
     TraceableRequest {}
 
 /**
@@ -43,11 +51,23 @@ export interface ResolveRecordsResponse<SELECTION extends ResolverRecordsSelecti
 /**
  * Resolve Primary Name Request Type
  */
-export interface ResolvePrimaryNameRequest extends ReverseResolutionArgs, TraceableRequest {}
+export interface ResolvePrimaryNameRequest
+  extends ReverseResolutionArgs,
+    AcceleratableRequest,
+    TraceableRequest {}
 
 /**
  * Resolve Primary Name Response Type
  */
 export interface ResolvePrimaryNameResponse extends TraceableResponse {
-  name: Name | null;
+  name: ReverseResolutionResult;
+}
+
+export interface ResolvePrimaryNamesRequest
+  extends BatchReverseResolutionArgs,
+    AcceleratableRequest,
+    TraceableRequest {}
+
+export interface ResolvePrimaryNamesResponse extends TraceableResponse {
+  names: BatchReverseResolutionResult;
 }

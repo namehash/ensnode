@@ -1,8 +1,8 @@
-import { db } from "ponder:api";
 import { getENSRootChainId } from "@ensnode/datasources";
 import {
+  ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
-  type Name,
+  ForwardResolutionResult,
   Node,
   PluginName,
   ResolverRecordsResponse,
@@ -24,7 +24,6 @@ import { findResolver } from "@/api/lib/find-resolver";
 import { getPrimaryNameFromIndex } from "@/api/lib/get-primary-name-from-index";
 import { getRecordsFromIndex } from "@/api/lib/get-records-from-index";
 import {
-  IndexedResolverRecords,
   makeEmptyResolverRecordsResponse,
   makeRecordsResponseFromIndexedRecords,
   makeRecordsResponseFromResolveResults,
@@ -38,7 +37,6 @@ import {
 } from "@/api/lib/resolve-calls-and-results";
 import config from "@/config";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
-import { makeResolverId } from "@/lib/ids";
 
 const tracer = trace.getTracer("forward-resolution");
 // const metric = metrics.getMeter("forward-resolution");
@@ -78,10 +76,10 @@ normalize("example.eth");
  * }
  */
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: Name,
-  selection: SELECTION,
+  name: ForwardResolutionArgs<SELECTION>["name"],
+  selection: ForwardResolutionArgs<SELECTION>["selection"],
   { accelerate }: { accelerate?: boolean } = {},
-): Promise<ResolverRecordsResponse<SELECTION>> {
+): Promise<ForwardResolutionResult<SELECTION>> {
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `chainId` must
   // initially be `ensRootChainId`: see `_resolveForward` for additional context.
   return _resolveForward(name, selection, { chainId: ensRootChainId, accelerate });
@@ -93,10 +91,10 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * NOTE: uses `chainId` parameter for internal Protocol Acceleration behavior (see recursive call below).
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: Name,
-  selection: SELECTION,
+  name: ForwardResolutionArgs<SELECTION>["name"],
+  selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { chainId: number; accelerate?: boolean },
-): Promise<ResolverRecordsResponse<SELECTION>> {
+): Promise<ForwardResolutionResult<SELECTION>> {
   const { chainId, accelerate = true } = options;
   const selectionString = JSON.stringify(selection);
 
