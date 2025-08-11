@@ -22,6 +22,7 @@ import { areResolverRecordsIndexedOnChain } from "@/api/lib/acceleration/resolve
 import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
 import { findResolver } from "@/api/lib/find-resolver";
 import { getPrimaryNameFromIndex } from "@/api/lib/get-primary-name-from-index";
+import { getRecordsFromIndex } from "@/api/lib/get-records-from-index";
 import {
   IndexedResolverRecords,
   makeEmptyResolverRecordsResponse,
@@ -290,36 +291,31 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               chainId,
               activeResolver,
             );
-            if (_isKnownOnchainStaticResolver && areResolverRecordsIndexedOnChain(chainId)) {
+
+            const resolverRecordsAreIndexed = areResolverRecordsIndexedOnChain(chainId);
+
+            if (_isKnownOnchainStaticResolver && resolverRecordsAreIndexed) {
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
                 {},
                 async () => {
-                  // fetch the Resolver and its records from index
-                  const resolverId = makeResolverId(chainId, activeResolver, node);
-
-                  const resolver = await withSpanAsync(tracer, "resolver.findFirst", {}, async () =>
-                    db.query.resolver.findFirst({
-                      where: (resolver, { eq }) => eq(resolver.id, resolverId),
-                      columns: { name: true },
-                      with: { addressRecords: true, textRecords: true },
-                    }),
-                  );
+                  const resolver = await getRecordsFromIndex({
+                    chainId,
+                    resolverAddress: activeResolver,
+                    node,
+                    selection,
+                  });
 
                   // Invariant: resolver must exist here
                   if (!resolver) {
                     throw new Error(
-                      `Invariant: chain ${chainId} is indexed and active resolver ${activeResolver} was identified, but no resolver exists with id ${resolverId}.`,
+                      `Invariant: Resolver records are indexed on chain ${chainId} and active resolver ${activeResolver} was identified, but does not exist in index.`,
                     );
                   }
 
                   // format into RecordsResponse and return
-                  return makeRecordsResponseFromIndexedRecords(
-                    selection,
-                    // TODO: drizzle types not inferred correctly for addressRecords/textRecords
-                    resolver as IndexedResolverRecords,
-                  );
+                  return makeRecordsResponseFromIndexedRecords(selection, resolver);
                 },
               );
             }
