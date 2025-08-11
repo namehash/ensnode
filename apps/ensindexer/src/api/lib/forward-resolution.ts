@@ -201,7 +201,10 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //   then we can just read the indexed name value directly from the index.
           //////////////////////////////////////////////////
           if (accelerate) {
-            const _isKnownENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(activeResolver);
+            const _isKnownENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(
+              chainId,
+              activeResolver,
+            );
             const isIndexingReverseRegistrars = config.plugins.includes(
               PluginName.ReverseResolvers,
             );

@@ -26,14 +26,16 @@ export function isKnownOnchainStaticResolver(chainId: ChainId, resolverAddress: 
     return [
       // the Root LegacyDefaultResolver is an Onchain Static Resolver
       // TODO(legacy-resolver): re-enable onchain-static-ness once we fetch values for legacy TextChanged events
-      // rrRoot.contracts.DefaultPublicResolver1?.address as Address | undefined,
+      // rrRoot.contracts.DefaultPublicResolver1?.address,
 
       // NOTE: this is _also_ the ENSIP-11 ReverseResolver (aka DefaultReverseResolver2)
-      rrRoot.contracts.DefaultPublicResolver2?.address as Address | undefined,
+      rrRoot.contracts.DefaultPublicResolver2?.address,
 
       // the ENSIP-19 default PublicResolver is an Onchain Static Resolver
-      rrRoot.contracts.DefaultPublicResolver3?.address as Address | undefined,
-    ].includes(resolverAddress);
+      rrRoot.contracts.DefaultPublicResolver3?.address,
+    ]
+      .filter((address): address is Address => !!address)
+      .includes(resolverAddress);
   }
 
   return false;
@@ -51,8 +53,10 @@ export function onchainStaticResolverImplementsDefaultAddress(
   if (chainId === rrRoot?.chain.id) {
     return [
       // the DefaultPublicResolver3 (ENSIP-19 default PublicResolver) implements address defaulting
-      rrRoot.contracts.DefaultPublicResolver3?.address as Address | undefined,
-    ].includes(resolverAddress);
+      rrRoot.contracts.DefaultPublicResolver3?.address,
+    ]
+      .filter((address): address is Address => !!address)
+      .includes(resolverAddress);
   }
 
   return false;
