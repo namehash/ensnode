@@ -94,6 +94,33 @@ function DisplayPrimaryNameAndAvatar() {
 }
 ```
 
+#### Primary Names Resolution — `usePrimaryNames`
+
+```tsx
+import { mainnet } from 'viem/chains';
+import { usePrimaryNames } from "@ensnode/ensnode-react";
+
+function DisplayPrimaryNames() {
+  const { data, isLoading, error } = usePrimaryNames({
+    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return (
+    <div>
+      {Object.entries(data.names).map(([chainId, name]) => (
+        <div key={chainId}>
+          <h3>Primary Name (Chain Id: {chainId})</h3>
+          <p>{name}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
 ## API Reference
 
 ### ENSNodeProvider
@@ -131,10 +158,12 @@ Hook for resolving records for an ENS name (Forward Resolution).
 #### Parameters
 
 - `name`: The ENS Name whose records to resolve
-- `selection`: Optional selection of Resolver records to resolve
+- `selection`: Selection of Resolver records to resolve
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
-- `query`: Optional TanStack Query options for customization
+- `trace`: (optional) Whether to include a trace in the response
+- `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
+- `query`: (optional) TanStack Query options for customization
 
 #### Example
 
@@ -144,9 +173,6 @@ const { data, isLoading, error, refetch } = useRecords({
   selection: {
     addresses: [60], // ETH
     texts: ["avatar", "description", "url"],
-  },
-  query: {
-    staleTime: 60000, // 1 minute
   },
 });
 ```
@@ -159,7 +185,9 @@ Hook for resolving the primary name of a specified address (Reverse Resolution).
 
 - `address`: The Address whose Primary Name to resolve
 - `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
-- `query`: TanStack Query options for customization
+- `trace`: (optional) Whether to include a trace in the response
+- `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
+- `query`: (optional) TanStack Query options for customization
 
 #### Example
 
@@ -167,6 +195,26 @@ Hook for resolving the primary name of a specified address (Reverse Resolution).
 const { data, isLoading, error, refetch } = usePrimaryName({
   address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   chainId: 10, // Optimism
+});
+```
+
+### `usePrimaryNames`
+
+Hook for resolving the primary names of a specified address (Batch Reverse Resolution).
+
+#### Parameters
+
+- `address`: The Address whose Primary Names to resolve
+- `chainIds`: (optional) Array of chain ids to query the address' ENSIP-19 Multichain Primary Names (defaults to all well-known chain ids)
+- `trace`: (optional) Whether to include a trace in the response
+- `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
+- `query`: (optional) TanStack Query options for customization
+
+#### Example
+
+```tsx
+const { data, isLoading, error, refetch } = usePrimaryNames({
+  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
 });
 ```
 

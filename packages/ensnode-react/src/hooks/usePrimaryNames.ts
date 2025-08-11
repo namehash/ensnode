@@ -1,24 +1,23 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ConfigParameter, UsePrimaryNameParameters } from "../types";
-import { createPrimaryNameQueryOptions } from "../utils/query";
+import type { ConfigParameter, UsePrimaryNamesParameters } from "../types";
+import { createPrimaryNamesQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 
 /**
- * Resolves the primary name of a specified address (Reverse Resolution).
+ * Resolves the primary names of a specified address (Batch Reverse Resolution).
  *
  * @param parameters - Configuration for the address resolution
- * @returns Query result with resolved primary name
+ * @returns Query result with resolved primary names
  *
  * @example
  * ```typescript
- * import { usePrimaryName } from "@ensnode/ensnode-react";
+ * import { usePrimaryNames } from "@ensnode/ensnode-react";
  *
- * function DisplayPrimaryNameAndAvatar() {
- *   const { data, isLoading, error } = usePrimaryName({
+ * function DisplayPrimaryNames() {
+ *   const { data, isLoading, error } = usePrimaryNames({
  *     address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
- *     chainId: 1, // Ethereum Mainnet
  *   });
  *
  *   if (isLoading) return <div>Loading...</div>;
@@ -26,21 +25,25 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  *
  *   return (
  *     <div>
- *       <h3>Primary Name (for Mainnet)</h3>
- *       <p>{data.name ?? "No Primary Name"}</p>
+ *       {Object.entries(data.names).map(([chainId, name]) => (
+ *         <div key={chainId}>
+ *           <h3>Primary Name (Chain Id: {chainId})</h3>
+ *           <p>{name}</p>
+ *         </div>
+ *       ))}
  *     </div>
  *   );
  * }
  * ```
  */
-export function usePrimaryName(parameters: UsePrimaryNameParameters & ConfigParameter) {
+export function usePrimaryNames(parameters: UsePrimaryNamesParameters & ConfigParameter) {
   const { config, query = {}, address, ...args } = parameters;
   const _config = useENSNodeConfig(config);
 
   const canEnable = address !== null;
 
   const queryOptions = canEnable
-    ? createPrimaryNameQueryOptions(_config, { ...args, address })
+    ? createPrimaryNamesQueryOptions(_config, { ...args, address })
     : { enabled: false, queryKey: ["disabled"] as const };
 
   const options = {
