@@ -268,6 +268,12 @@ export default {
   [DatasourceNames.ReverseResolverRoot]: {
     chain: mainnet,
     contracts: {
+      DefaultReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x283F227c4Bd38ecE252C4Ae7ECE650B0e913f1f9",
+        startBlock: 22764819,
+      },
+
       // NOTE: the DefaultReverseResolver1 (aka LegacyDefaultReverseResolver) does NOT emit events
       // and is effectively unindexable for the purposes of Reverse Resolution. We document it here
       // for completeness, but/and explicity do not index it.
@@ -297,12 +303,6 @@ export default {
         abi: ResolverABI,
         address: "0xA7d635c8de9a58a228AA69353a1699C7Cc240DCF",
         startBlock: 22764871,
-      },
-
-      DefaultReverseRegistrar: {
-        abi: StandaloneReverseRegistrar,
-        address: "0x283F227c4Bd38ecE252C4Ae7ECE650B0e913f1f9",
-        startBlock: 22764819,
       },
 
       BaseReverseResolver: {

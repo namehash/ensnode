@@ -207,6 +207,12 @@ export default {
   [DatasourceNames.ReverseResolverRoot]: {
     chain: sepolia,
     contracts: {
+      DefaultReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x4F382928805ba0e23B30cFB75fC9E848e82DFD47",
+        startBlock: 8579966,
+      },
+
       // NOTE: DefaultReverseResolver1 does not exist on Sepolia (see mainnet.ts for context)
       DefaultReverseResolver2: {
         abi: ResolverABI,
@@ -217,12 +223,6 @@ export default {
         abi: ResolverABI,
         address: "0x9DC60e7BD81cCc96774C55214fF389D42Ae5E9Ac",
         startBlock: 8580041,
-      },
-
-      DefaultReverseRegistrar: {
-        abi: StandaloneReverseRegistrar,
-        address: "0x4F382928805ba0e23B30cFB75fC9E848e82DFD47",
-        startBlock: 8579966,
       },
 
       BaseReverseResolver: {
