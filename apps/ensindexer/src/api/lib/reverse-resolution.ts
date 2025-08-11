@@ -34,16 +34,19 @@ export async function resolveReverse(
   chainId: ChainId,
   options: { accelerate?: boolean } = { accelerate: true },
 ): Promise<Name | null> {
+  const { accelerate = true } = options;
+
   // trace for external consumers
   return withProtocolStepAsync(
     TraceableENSProtocol.ReverseResolution,
     ReverseResolutionProtocolStep.Operation,
+    { address, chainId, accelerate },
     (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
-        `resolveReverse(${address}, ${chainId})`,
-        { address, chainId, "ens.protocol": TraceableENSProtocol.ReverseResolution },
+        `resolveReverse(${address}, chainId: ${chainId})`,
+        { address, chainId, accelerate },
         async (span) => {
           /////////////////////////////////////////////////////////
           // Reverse Resolution
@@ -52,11 +55,12 @@ export async function resolveReverse(
 
           // Steps 1-3 — Resolve coinType-specific name record
           const coinType = evmChainIdToCoinType(chainId);
+          const _reverseName = reverseName(address, coinType);
           const { name } = await withProtocolStepAsync(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ResolveReverseName,
-            () =>
-              resolveForward(reverseName(address, coinType), REVERSE_RESOLUTION_SELECTION, options),
+            { name: _reverseName },
+            () => resolveForward(_reverseName, REVERSE_RESOLUTION_SELECTION, options),
           );
 
           // Step 4 — Determine if name record exists
@@ -85,6 +89,7 @@ export async function resolveReverse(
           const { addresses } = await withProtocolStepAsync(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ForwardResolveAddressRecord,
+            { name },
             () => resolveForward(name, { addresses: [coinType] }, options),
           );
 

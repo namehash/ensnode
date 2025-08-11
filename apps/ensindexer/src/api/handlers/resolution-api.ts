@@ -7,6 +7,7 @@ import {
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
+import { batchResolveReverse } from "@/api/lib/batch-reverse-resolution";
 import { resolveForward } from "@/api/lib/forward-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { resolveReverse } from "@/api/lib/reverse-resolution";
@@ -22,7 +23,7 @@ function getShouldAccelerate(c: Context) {
 }
 
 // TODO: replace with zod schema or validator
-function buildSelectionFromQueryParams(c: Context) {
+function getSelectionFromQueryParams(c: Context) {
   const selection: Partial<ResolverRecordsSelection> = {};
 
   if (c.req.query("name") === "true") {
@@ -38,6 +39,21 @@ function buildSelectionFromQueryParams(c: Context) {
   }
 
   return selection;
+}
+
+// TODO: validate with zod obviously
+function getChainIdsFromQueryParams(c: Context): number[] | undefined {
+  const chainIdsParam = c.req.query("chainIds");
+  let chainIds: number[] | undefined;
+
+  if (chainIdsParam) {
+    chainIds = chainIdsParam.split(",").map(Number);
+    if (chainIds.some((id) => isNaN(id))) {
+      throw new Error("all chainIds must be valid numbers");
+    }
+  }
+
+  return chainIds;
 }
 
 const app = new Hono();
@@ -62,7 +78,7 @@ app.get("/records/:name", async (c) => {
     }
 
     // TODO: default selection if none in query
-    const selection = buildSelectionFromQueryParams(c);
+    const selection = getSelectionFromQueryParams(c);
     const showTrace = getShouldTrace(c);
     const accelerate = getShouldAccelerate(c);
 
@@ -121,6 +137,44 @@ app.get("/primary-name/:address/:chainId", async (c) => {
       name,
       ...(showTrace && { trace }),
     } satisfies ResolvePrimaryNameResponse;
+
+    return c.json(response);
+  } catch (error) {
+    console.error(error);
+    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
+  }
+});
+
+/**
+ * Example queries for /primary-names:
+ *
+ * 1. Batch ENSIP-19 Primary Name Lookup (default chains from namespace)
+ * GET /primary-names/0x1234...abcd
+ *
+ * 2. Batch ENSIP-19 Primary Name Lookup (specific chains)
+ * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
+ */
+app.get("/primary-names/:address", async (c) => {
+  try {
+    // TODO: correctly parse/validate with zod
+    const address = c.req.param("address") as Address;
+
+    if (!address) {
+      return c.json({ error: "address parameter is required" }, 400);
+    }
+
+    const showTrace = getShouldTrace(c);
+    const accelerate = getShouldAccelerate(c);
+    const chainIds = getChainIdsFromQueryParams(c);
+
+    const { result: primaryNames, trace } = await captureTrace(() =>
+      batchResolveReverse(address, chainIds, { accelerate }),
+    );
+
+    const response = {
+      primaryNames,
+      ...(showTrace && { trace }),
+    };
 
     return c.json(response);
   } catch (error) {

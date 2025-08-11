@@ -97,11 +97,13 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   options: { chainId: number; accelerate?: boolean },
 ): Promise<ResolverRecordsResponse<SELECTION>> {
   const { chainId, accelerate = true } = options;
+  const selectionString = JSON.stringify(selection);
 
   // trace for external consumers
   return withProtocolStepAsync(
     TraceableENSProtocol.ForwardResolution,
     ForwardResolutionProtocolStep.Operation,
+    { name, selection: selectionString, chainId, accelerate },
     (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
@@ -109,10 +111,9 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
         `resolveForward(${name}, chainId: ${chainId})`,
         {
           name,
-          selection: JSON.stringify(selection),
+          selection: selectionString,
           chainId,
           accelerate,
-          "ens.protocol": TraceableENSProtocol.ForwardResolution,
         },
         async (span) => {
           // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
@@ -161,6 +162,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             await withProtocolStepAsync(
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.FindResolver,
+              { name, chainId },
               () => findResolver({ chainId, name, accelerate, publicClient }),
             );
 
@@ -260,6 +262,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
+                {},
                 () => _resolveForward(name, selection, { ...options, chainId: defers.chainId }),
               );
             }
@@ -288,6 +291,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
+                {},
                 async () => {
                   // fetch the Resolver and its records from index
                   const resolverId = makeResolverId(chainId, activeResolver, node);
@@ -335,6 +339,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           await withProtocolStepAsync(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.RequireResolver,
+            {},
             async () => {
               const isExtendedResolver = await withSpanAsync(
                 tracer,
@@ -357,6 +362,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           const rawResults = await withProtocolStepAsync(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.ExecuteResolveCalls,
+            {},
             () =>
               executeResolveCalls<SELECTION>({
                 name,
