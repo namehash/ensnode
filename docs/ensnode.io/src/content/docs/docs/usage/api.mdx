@@ -7,9 +7,7 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-ENSNode exposes a GraphQL endpoint:
-
-- `/subgraph` — a subgraph-compatible GraphQL schema
+ENSNode exposes a Subgraph-Compatible GraphQL endpoint at `/subgraph`.
 
 :::note[Subgraph API Compatibility Reference]
 For details on subgraph compatibility, see the Subgraph Compatibility documentation.
@@ -32,8 +30,6 @@ To explore the schema and run queries, use the GraphiQL Playground below.
 ## GraphQL Examples
 
 Fetch data about the three most recently-created domains.
-
-### Subgraph-compatible API (`/subgraph`)
 
 ```gql
 {

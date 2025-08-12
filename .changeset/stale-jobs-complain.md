@@ -4,4 +4,4 @@
 "@docs/ensnode": patch
 ---
 
-refactor(api): remove `/ponder` endpoint and update documentation
+remove deprecated `/ponder` endpoint and update documentation
