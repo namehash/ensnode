@@ -81,6 +81,7 @@ jobs:
               #HOLESKY
               echo "HOLESKY_API_SVC_ID="${{ secrets.GREEN_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.GREEN_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+              ;;
             "blue")
               #ENVIRONMENT
               echo "RAILWAY_ENVIRONMENT_ID=${{ secrets.BLUE_RAILWAY_ENVIRONMENT_ID }}" >> $GITHUB_ENV
@@ -99,6 +100,7 @@ jobs:
               #HOLESKY
               echo "HOLESKY_API_SVC_ID="${{ secrets.BLUE_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.BLUE_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+              ;;
             *)
               echo "Environment not recognized, skipping workflow"
               exit 1
