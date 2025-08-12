@@ -43,6 +43,7 @@ function getSelectionFromQueryParams(c: Context) {
 }
 
 // TODO: validate with zod obviously
+// disallow DEFAULT_EMV_CHAIN_ID
 function getChainIdsFromQueryParams(c: Context): ChainId[] | undefined {
   const chainIdsParam = c.req.query("chainIds");
   let chainIds: ChainId[] | undefined;
@@ -107,6 +108,9 @@ app.get("/records/:name", async (c) => {
  *
  * 2. ENSIP-19 Multichain Primary Name (for specific Chain, e.g., Optimism)
  * GET /primary-name/0x1234...abcd/10
+ *
+ * 3. ENSIP-19 Multichain Primary Name (for 'default' EVM Chain)
+ * GET /primary-name/0x1234...abcd/0
  */
 app.get("/primary-name/:address/:chainId", async (c) => {
   try {

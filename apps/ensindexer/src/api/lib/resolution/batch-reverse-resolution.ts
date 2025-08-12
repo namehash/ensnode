@@ -1,31 +1,38 @@
-import type {
-  BatchReverseResolutionArgs,
-  BatchReverseResolutionResult,
+import {
+  type BatchReverseResolutionArgs,
+  type BatchReverseResolutionResult,
+  type ChainId,
+  uniq,
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import config from "@/config";
 import { withActiveSpanAsync } from "@/lib/auto-span";
-import { ENSNamespaceIds } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource, getDatasourceInAnyNamespace } from "@ensnode/datasources";
 
 const tracer = trace.getTracer("batch-reverse-resolution");
 
-// TODO: replace with deriving from datasources
-const CHAIN_IDS_BY_NAMESPACE = {
-  // Mainnet via https://docs.ens.domains/ensip/19/#mainnet
-  [ENSNamespaceIds.Mainnet]: [0, 1, 10, 8453, 42161, 59144, 59144],
+const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
+  [
+    // always include the ENS Root Chain
+    getDatasource(config.namespace, DatasourceNames.ENSRoot),
 
-  // Sepolia via https://docs.ens.domains/ensip/19/#sepolia
-  [ENSNamespaceIds.Sepolia]: [0, 1, 11155420, 59141, 84532, 421614, 534351],
-
-  [ENSNamespaceIds.Holesky]: [0, 1],
-  [ENSNamespaceIds.EnsTestEnv]: [0, 1],
-} as const;
+    // include all ENSIP-19 Supported Chains defined in this namespace
+    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverRoot),
+    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverBase),
+    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverLinea),
+    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverOptimism),
+    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverArbitrum),
+    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverScroll),
+  ]
+    .filter((ds) => ds !== undefined)
+    .map((ds) => ds.chain.id),
+);
 
 /**
  * Implements batch resolution of an address' Primary Name across the provided `chainIds`. If
- * `chainIds` is undefined, defaults to the set of well-known ENSIP-19 chains.
+ * `chainIds` is undefined, defaults to all ENSIP-19 supported chains.
  *
  * @see https://docs.ens.domains/ensip/19
  *
@@ -34,18 +41,16 @@ const CHAIN_IDS_BY_NAMESPACE = {
  */
 export async function batchResolveReverse(
   address: BatchReverseResolutionArgs["address"],
-  chainIds: BatchReverseResolutionArgs["chainIds"],
+  chainIds: BatchReverseResolutionArgs["chainIds"] = ENSIP19_SUPPORTED_CHAIN_IDS,
   options: { accelerate?: boolean } = { accelerate: true },
 ): Promise<BatchReverseResolutionResult> {
-  const _chainIds = chainIds || CHAIN_IDS_BY_NAMESPACE[config.namespace];
-
   // parallel reverseResolve
   const names = await withActiveSpanAsync(tracer, "batchResolveReverse", { address }, () =>
-    Promise.all(_chainIds.map((chainId) => resolveReverse(address, chainId, options))),
+    Promise.all(chainIds.map((chainId) => resolveReverse(address, chainId, options))),
   );
 
   // key results by chainId
-  return _chainIds.reduce((memo, chainId, i) => {
+  return chainIds.reduce((memo, chainId, i) => {
     // NOTE: names[i] guaranteed to be defined, silly typescript
     memo[chainId] = names[i]!;
     return memo;
