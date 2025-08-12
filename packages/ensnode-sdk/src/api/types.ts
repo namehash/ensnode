@@ -1,8 +1,8 @@
 import { Name } from "../ens";
 import type {
-  BatchReverseResolutionArgs,
-  BatchReverseResolutionResult,
   ForwardResolutionArgs,
+  MultichainPrimaryNameResolutionArgs,
+  MultichainPrimaryNameResolutionResult,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   ReverseResolutionArgs,
@@ -64,10 +64,10 @@ export interface ResolvePrimaryNameResponse extends TraceableResponse {
 }
 
 export interface ResolvePrimaryNamesRequest
-  extends BatchReverseResolutionArgs,
+  extends MultichainPrimaryNameResolutionArgs,
     AcceleratableRequest,
     TraceableRequest {}
 
 export interface ResolvePrimaryNamesResponse extends TraceableResponse {
-  names: BatchReverseResolutionResult;
+  names: MultichainPrimaryNameResolutionResult;
 }

@@ -200,7 +200,7 @@ const { data, isLoading, error, refetch } = usePrimaryName({
 
 ### `usePrimaryNames`
 
-Hook for resolving the primary names of a specified address (Batch Reverse Resolution).
+Hook for resolving the primary names of a specified address across multiple chains.
 
 #### Parameters
 

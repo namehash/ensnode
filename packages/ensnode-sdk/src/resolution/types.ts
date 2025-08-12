@@ -33,14 +33,14 @@ export interface ReverseResolutionArgs {
 export type ReverseResolutionResult = Name | null;
 
 /**
- * Arguments required to perform Batch Reverse Resolution
+ * Arguments required to perform Multichain Primary Name Resolution
  */
-export interface BatchReverseResolutionArgs {
+export interface MultichainPrimaryNameResolutionArgs {
   address: Address;
   chainIds?: ChainId[];
 }
 
 /**
- * The result of performing BatchReverseResolution
+ * The result of performing MultichainPrimaryNameResolution
  */
-export type BatchReverseResolutionResult = Record<ChainId, Name | null>;
+export type MultichainPrimaryNameResolutionResult = Record<ChainId, Name | null>;

@@ -1,7 +1,7 @@
 import {
-  type BatchReverseResolutionArgs,
-  type BatchReverseResolutionResult,
   type ChainId,
+  type MultichainPrimaryNameResolutionArgs,
+  type MultichainPrimaryNameResolutionResult,
   uniq,
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
@@ -11,7 +11,7 @@ import config from "@/config";
 import { withActiveSpanAsync } from "@/lib/auto-span";
 import { DatasourceNames, getDatasource, getDatasourceInAnyNamespace } from "@ensnode/datasources";
 
-const tracer = trace.getTracer("batch-reverse-resolution");
+const tracer = trace.getTracer("multichain-primary-name-resolution");
 
 const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
   [
@@ -39,13 +39,13 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
  * @param address the adddress whose Primary Names to resolve
  * @param chainIds the set of chainIds within which to resolve the address' Primary Name
  */
-export async function batchResolveReverse(
-  address: BatchReverseResolutionArgs["address"],
-  chainIds: BatchReverseResolutionArgs["chainIds"] = ENSIP19_SUPPORTED_CHAIN_IDS,
+export async function resolvePrimaryNames(
+  address: MultichainPrimaryNameResolutionArgs["address"],
+  chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = ENSIP19_SUPPORTED_CHAIN_IDS,
   options: { accelerate?: boolean } = { accelerate: true },
-): Promise<BatchReverseResolutionResult> {
+): Promise<MultichainPrimaryNameResolutionResult> {
   // parallel reverseResolve
-  const names = await withActiveSpanAsync(tracer, "batchResolveReverse", { address }, () =>
+  const names = await withActiveSpanAsync(tracer, "resolvePrimaryNames", { address }, () =>
     Promise.all(chainIds.map((chainId) => resolveReverse(address, chainId, options))),
   );
 
@@ -54,5 +54,5 @@ export async function batchResolveReverse(
     // NOTE: names[i] guaranteed to be defined, silly typescript
     memo[chainId] = names[i]!;
     return memo;
-  }, {} as BatchReverseResolutionResult);
+  }, {} as MultichainPrimaryNameResolutionResult);
 }

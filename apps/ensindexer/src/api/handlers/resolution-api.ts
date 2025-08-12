@@ -9,8 +9,8 @@ import { Context, Hono } from "hono";
 import { Address } from "viem";
 
 import { captureTrace } from "@/api/lib/protocol-tracing";
-import { batchResolveReverse } from "@/api/lib/resolution/batch-reverse-resolution";
 import { resolveForward } from "@/api/lib/resolution/forward-resolution";
+import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 
 // TODO: use a zod middleware to parse out the arguments and conform to *ResolutionRequest typings
@@ -153,10 +153,10 @@ app.get("/primary-name/:address/:chainId", async (c) => {
 /**
  * Example queries for /primary-names:
  *
- * 1. Batch ENSIP-19 Primary Name Lookup (defaults to all ENSIP-19 supported chains)
+ * 1. Multichain ENSIP-19 Primary Name Lookup (defaults to all ENSIP-19 supported chains)
  * GET /primary-names/0x1234...abcd
  *
- * 2. Batch ENSIP-19 Primary Name Lookup (specific chain ids)
+ * 2. Multichain ENSIP-19 Primary Name Lookup (specific chain ids)
  * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
  */
 app.get("/primary-names/:address", async (c) => {
@@ -173,7 +173,7 @@ app.get("/primary-names/:address", async (c) => {
     const chainIds = getChainIdsFromQueryParams(c);
 
     const { result: primaryNames, trace } = await captureTrace(() =>
-      batchResolveReverse(address, chainIds, { accelerate }),
+      resolvePrimaryNames(address, chainIds, { accelerate }),
     );
 
     const response = {

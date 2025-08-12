@@ -181,7 +181,7 @@ export class ENSNodeClient {
   }
 
   /**
-   * Resolves the primary names of a specified address (Batch Reverse Resolution).
+   * Resolves the primary names of a specified address across multiple chains.
    *
    * @param address The Address whose Primary Name to resolve
    * @param options additional options

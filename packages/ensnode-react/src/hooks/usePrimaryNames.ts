@@ -6,7 +6,7 @@ import { createPrimaryNamesQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 
 /**
- * Resolves the primary names of a specified address (Batch Reverse Resolution).
+ * Resolves the primary names of a specified address across multiple chains.
  *
  * @param parameters - Configuration for the address resolution
  * @returns Query result with resolved primary names
