@@ -27,7 +27,7 @@ const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
   names: { 1: EXAMPLE_NAME },
 } satisfies ResolvePrimaryNamesResponse;
 
-const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { error: "error" };
+const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 // Mock fetch globally
 const mockFetch = vi.fn();
