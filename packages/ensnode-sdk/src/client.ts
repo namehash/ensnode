@@ -186,7 +186,7 @@ export class ENSNodeClient {
    * @param address The Address whose Primary Name to resolve
    * @param options additional options
    * @param options.chainIds The set of chain ids within which to query the address' ENSIP-19
-   *  Multichain Primary Name (defaults to all well-known ENSIP-19 chain ids)
+   *  Multichain Primary Name (defaults to all ENSIP-19 supported chains)
    * @param options.accelerate whether to attempt Protocol Acceleration (default true)
    * @param options.trace whether to include a trace in the response (default false)
    * @returns ResolvePrimaryNamesResponse
@@ -198,7 +198,7 @@ export class ENSNodeClient {
    * const { names } = await client.resolvePrimaryNames("0xabcd...");
    *
    * console.log(names);
-   * // { 0: 'jesse.base.eth', 1: 'jesse.base.eth', ... }
+   * // { 1: 'jesse.base.eth', ... }
    *
    * // Resolve the address' Primary Names on specific chain Ids
    * const { names } = await client.resolvePrimaryName("0xabcd...", [1, 10]);

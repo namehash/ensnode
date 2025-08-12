@@ -47,7 +47,7 @@ export interface UseRecordsParameters<SELECTION extends ResolverRecordsSelection
 /**
  * Parameters for the usePrimaryName hook.
  *
- * * If `address` is null, the query will not be executed.
+ * If `address` is null, the query will not be executed.
  */
 export interface UsePrimaryNameParameters
   extends Omit<ResolvePrimaryNameRequest, "address">,
@@ -58,7 +58,7 @@ export interface UsePrimaryNameParameters
 /**
  * Parameters for the usePrimaryNames hook.
  *
- * * If `address` is null, the query will not be executed.
+ * If `address` is null, the query will not be executed.
  */
 export interface UsePrimaryNamesParameters
   extends Omit<ResolvePrimaryNamesRequest, "address">,

@@ -24,7 +24,7 @@ const EXAMPLE_RECORDS_RESPONSE = {
 const EXAMPLE_PRIMARY_NAME_RESPONSE = { name: EXAMPLE_NAME } satisfies ResolvePrimaryNameResponse;
 
 const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
-  names: { 0: EXAMPLE_NAME, 1: EXAMPLE_NAME },
+  names: { 1: EXAMPLE_NAME },
 } satisfies ResolvePrimaryNamesResponse;
 
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { error: "error" };

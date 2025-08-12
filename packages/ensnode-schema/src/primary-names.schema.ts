@@ -11,7 +11,19 @@ export const ext_primaryNames_domain_relations = relations(account, ({ one, many
   primaryNames: many(ext_primaryName),
 }));
 
-// tracks an Account's Primary Name by CoinType
+/**
+ * Tracks an Account's ENSIP-19 Primary Name by CoinType.
+ *
+ * NOTE: this is NOT a cohesive, materialized index of ALL of an account's names, it is ONLY the
+ * materialized index of its ENSIP-19 Primary Names backed by a StandaloneReverseRegistrar:
+ * - default.reverse
+ * - [coinType].reverse
+ * - NOT *.addr.reverse
+ *
+ * So these records CANNOT be queried directly and used as a source of truth — you MUST perform
+ * Forward Resolution to resolve a consistent set of an Account's ENSIP-19 Primary Names. These records
+ * are used to power Protocol Acceleration for those ReverseResolvers backed by a StandloneReverseRegistrar.
+ */
 export const ext_primaryName = onchainTable(
   "ext_primary_names",
   (t) => ({
