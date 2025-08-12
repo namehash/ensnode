@@ -10,6 +10,16 @@ variable "render_owner_id" {
   type = string
 }
 
+variable "ensnode_version" {
+  type = string
+}
+
+variable "ensdb_disk_size_gb" {
+  type    = number
+  default = 120
+}
+
+
 variable "mainnet_rpc_url" {
   type = string
 }
@@ -43,6 +53,18 @@ variable "linea_sepolia_rpc_url" {
   type = string
 }
 
-variable "ensnode_version" {
+variable "arbitrum_mainnet_rpc_url" {
+  type = string
+}
+variable "scroll_mainnet_rpc_url" {
+  type = string
+}
+variable "optimism_sepolia_rpc_url" {
+  type = string
+}
+variable "arbitrum_sepolia_rpc_url" {
+  type = string
+}
+variable "scroll_sepolia_rpc_url" {
   type = string
 }

@@ -84,3 +84,18 @@ variable "base_sepolia_rpc_url" {
 variable "linea_sepolia_rpc_url" {
   type = string
 }
+variable "arbitrum_mainnet_rpc_url" {
+  type = string
+}
+variable "scroll_mainnet_rpc_url" {
+  type = string
+}
+variable "optimism_sepolia_rpc_url" {
+  type = string
+}
+variable "arbitrum_sepolia_rpc_url" {
+  type = string
+}
+variable "scroll_sepolia_rpc_url" {
+  type = string
+}

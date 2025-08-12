@@ -16,7 +16,7 @@ resource "aws_route53_record" "ensindexer_validation" {
   records = [replace(render_web_service.ensindexer.url, "https://", "")]
 }
 
-resource "aws_route53_record" "ensapir_validation" {
+resource "aws_route53_record" "ensapi_validation" {
   zone_id = data.aws_route53_zone.ensnode.zone_id
   name    = local.full_ensindexer_api_hostname
   type    = "CNAME"

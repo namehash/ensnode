@@ -65,16 +65,19 @@ resource "render_project" "ensnode" {
   environments = {
     "default" : {
       name : var.render_environment,
+      # https://render.com/docs/projects#protected-environments
+      # Non-admin Render users might also make destructive changes to those resources
       protected_status : "unprotected"
     }
   }
 }
 
-module "database" {
-  source = "./modules/ensdatabase"
+module "ensdb" {
+  source = "./modules/ensdb"
 
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
+  disk_size_gb          = var.ensdb_disk_size_gb
 }
 
 module "ensrainbow" {
@@ -105,15 +108,20 @@ module "ensindexer" {
   ensrainbow_url   = module.ensrainbow.ensrainbow_url
 
   #Common envs
-  render_region         = local.render_region
-  render_environment_id = render_project.ensnode.environments["default"].id
-  database_url          = module.database.internal_connection_string
-  mainnet_rpc_url       = var.mainnet_rpc_url
-  sepolia_rpc_url       = var.sepolia_rpc_url
-  linea_rpc_url         = var.linea_rpc_url
-  holesky_rpc_url       = var.holesky_rpc_url
-  base_rpc_url          = var.base_rpc_url
-  optimism_rpc_url      = var.optimism_rpc_url
-  linea_sepolia_rpc_url = var.linea_sepolia_rpc_url
-  base_sepolia_rpc_url  = var.base_sepolia_rpc_url
+  render_region            = local.render_region
+  render_environment_id    = render_project.ensnode.environments["default"].id
+  database_url             = module.ensdb.internal_connection_string
+  mainnet_rpc_url          = var.mainnet_rpc_url
+  sepolia_rpc_url          = var.sepolia_rpc_url
+  linea_rpc_url            = var.linea_rpc_url
+  holesky_rpc_url          = var.holesky_rpc_url
+  base_rpc_url             = var.base_rpc_url
+  optimism_rpc_url         = var.optimism_rpc_url
+  linea_sepolia_rpc_url    = var.linea_sepolia_rpc_url
+  base_sepolia_rpc_url     = var.base_sepolia_rpc_url
+  arbitrum_mainnet_rpc_url = var.arbitrum_mainnet_rpc_url
+  scroll_mainnet_rpc_url   = var.scroll_mainnet_rpc_url
+  optimism_sepolia_rpc_url = var.optimism_sepolia_rpc_url
+  arbitrum_sepolia_rpc_url = var.arbitrum_sepolia_rpc_url
+  scroll_sepolia_rpc_url   = var.scroll_sepolia_rpc_url
 }
