@@ -9,7 +9,7 @@ import { Hono } from "hono";
 
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { buildIndexingStatus } from "@/indexing-status";
+import { assertRealtimeIndexingDistance, buildIndexingStatus } from "@/indexing-status";
 
 import { makeNonNegativeIntegerSchema } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
@@ -37,48 +37,35 @@ app.get("/indexing-status", async (c) => {
 
   // return 503 error if ENSIndexer is not available
   if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
+    console.error(
+      `Indexing Status is not currently available for '${OverallIndexingStatusIds.IndexerError}' overall status.`,
+    );
+
     return c.json(serializedIndexingStatus, 503);
   }
 
   const maxRealtimeDistanceQueryParam = c.req.query("maxRealtimeDistance");
 
-  // apply short circuit if no particular realtime indexing distance was requested
-  if (typeof maxRealtimeDistanceQueryParam === "undefined") {
-    // respond with the serialized indexing status object
-    return c.json(serializedIndexingStatus);
-  }
+  // assert realtime indexing distance if `maxRealtimeDistanceQueryParam` was provided
+  if (typeof maxRealtimeDistanceQueryParam !== "undefined") {
+    try {
+      assertRealtimeIndexingDistance(indexingStatus, maxRealtimeDistanceQueryParam);
+    } catch (error) {
+      // return bad request error if query param was not valid
+      if (error instanceof RangeError) {
+        return c.text(
+          `Could not parse "maxRealtimeDistance" query param. If provided, it must represent a non-negative integer.`,
+          400,
+        );
+      }
 
-  // otherwise,
-  // try parsing the optional "maxRealtimeDistance" query param
-  const maxRealtimeDistanceParsed = z.coerce
-    .number()
-    .pipe(makeNonNegativeIntegerSchema("maxRealtimeDistance"))
-    .optional()
-    .safeParse(maxRealtimeDistanceQueryParam);
+      // return 503 error if requested realtime indexing distance was not achieved
+      if (error instanceof Error) {
+        console.error(`Indexing Status is not currently available. ${error.message}`);
 
-  // return a bad request error if provided value was invalid
-  if (maxRealtimeDistanceParsed.error) {
-    return c.text(
-      `Could not parse "maxRealtimeDistance" query param. If provided, it must represent a non-negative integer.`,
-      400,
-    );
-  }
-
-  const requestedRealtimeIndexingDistance = maxRealtimeDistanceParsed.data!;
-
-  // return 503 error if the overall indexing status is other than 'following'
-  if (indexingStatus.overallStatus !== OverallIndexingStatusIds.Following) {
-    // return 503
-    return c.json(serializedIndexingStatus, 503);
-  }
-
-  const hasNotAchievedRequestedRealtimeIndexingDistance =
-    indexingStatus.maxApproximateRealtimeDistance > requestedRealtimeIndexingDistance;
-
-  // return 503 error if the requested realtime indexing distance
-  // has not been achieved yet
-  if (hasNotAchievedRequestedRealtimeIndexingDistance) {
-    return c.json(serializedIndexingStatus, 503);
+        return c.json(serializedIndexingStatus, 503);
+      }
+    }
   }
 
   // respond with the serialized indexing status object
