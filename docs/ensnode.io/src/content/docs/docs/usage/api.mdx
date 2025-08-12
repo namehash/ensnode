@@ -7,10 +7,9 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-ENSNode exposes two GraphQL endpoints:
+ENSNode exposes a GraphQL endpoint:
 
-- `/ponder` — uses a Ponder-native GraphQL schema
-- `/subgraph` — uses a subgraph-compatible GraphQL schema
+- `/subgraph` — a subgraph-compatible GraphQL schema
 
 :::note[Subgraph API Compatibility Reference]
 For details on subgraph compatibility, see the Subgraph Compatibility documentation.
@@ -23,12 +22,7 @@ For details on subgraph compatibility, see the Subgraph Compatibility documentat
 
 ## GraphiQL Playground
 
-To observe the full schema and play with each GraphQL API, use the provided GraphiQL Playground for each.
-
-<LinkCard
-  href="https://api.alpha.ensnode.io/ponder"
-  title="Ponder-native GraphiQL Playground"
-/>
+To explore the schema and run queries, use the GraphiQL Playground below.
 
 <LinkCard
   href="https://api.alpha.ensnode.io/subgraph"
@@ -38,42 +32,6 @@ To observe the full schema and play with each GraphQL API, use the provided Grap
 ## GraphQL Examples
 
 Fetch data about the three most recently-created domains.
-
-### Ponder-native API (`/ponder`)
-
-```gql
-{
-  domains(orderBy: "createdAt", orderDirection: "desc", limit: 3) {
-    items {
-      name
-      expiryDate
-    }
-  }
-}
-```
-
-```json
-{
-  "data": {
-    "domains": {
-      "items": [
-        {
-          "name": "ensanguo.eth",
-          "expiryDate": "1758170255"
-        },
-        {
-          "name": "fiffer.eth",
-          "expiryDate": "2041994243"
-        },
-        {
-          "name": "rifaisicilia.eth",
-          "expiryDate": "1758170039"
-        }
-      ]
-    }
-  }
-}
-```
 
 ### Subgraph-compatible API (`/subgraph`)
 
