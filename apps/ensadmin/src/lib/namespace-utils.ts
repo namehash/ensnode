@@ -8,6 +8,8 @@ import { ChainId, Name } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 import {
   anvil,
+  arbitrum,
+  arbitrumSepolia,
   base,
   baseSepolia,
   holesky,
@@ -15,6 +17,9 @@ import {
   lineaSepolia,
   mainnet,
   optimism,
+  optimismSepolia,
+  scroll,
+  scrollSepolia,
   sepolia,
 } from "viem/chains";
 
@@ -22,15 +27,42 @@ const ensTestEnv = { ...anvil, id: 1337, name: "ens-test-env" };
 
 const SUPPORTED_CHAINS = [
   ensTestEnv,
+  mainnet,
+  sepolia,
+  holesky,
   base,
   baseSepolia,
-  holesky,
   linea,
   lineaSepolia,
-  mainnet,
   optimism,
-  sepolia,
+  optimismSepolia,
+  arbitrum,
+  arbitrumSepolia,
+  scroll,
+  scrollSepolia,
 ];
+
+/**
+ * Mapping of chain id to prettified chain name.
+ *
+ * NOTE: We prefer our custom names here, rather than those provided by default in `Chain#name`.
+ */
+const CUSTOM_CHAIN_NAMES = new Map<number, string>([
+  [ensTestEnv.id, "Ethereum Local (ens-test-env)"],
+  [mainnet.id, "Ethereum"],
+  [sepolia.id, "Ethereum Sepolia"],
+  [holesky.id, "Ethereum Holesky"],
+  [base.id, "Base"],
+  [baseSepolia.id, "Base Sepolia"],
+  [linea.id, "Linea"],
+  [lineaSepolia.id, "Linea Sepolia"],
+  [optimism.id, "Optimism"],
+  [optimismSepolia.id, "Optimism Sepolia"],
+  [arbitrum.id, "Arbitrum"],
+  [arbitrumSepolia.id, "Arbitrum Sepolia"],
+  [scroll.id, "Scroll"],
+  [scrollSepolia.id, "Scroll Sepolia"],
+]);
 
 /**
  * Returns the Address of the NameWrapper contract within the requested namespace.
@@ -136,9 +168,9 @@ export const getBlockExplorerUrlForBlock = (chainId: ChainId, blockNumber: numbe
 };
 
 /**
- * Returns a prettified chain name for the provided chain ID, or 'Unknown'.
+ * Returns a prettified chain name for the provided chain id.
  */
 export function getChainName(chainId: ChainId): string {
-  const chain = SUPPORTED_CHAINS.find((chain) => chain.id === chainId);
-  return chain?.name ?? "Unknown Chain";
+  const name = CUSTOM_CHAIN_NAMES.get(chainId);
+  return name || `Unknown Chain (${chainId})`;
 }
