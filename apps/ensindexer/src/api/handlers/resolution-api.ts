@@ -1,4 +1,5 @@
 import {
+  ChainId,
   CoinType,
   ResolvePrimaryNameResponse,
   ResolveRecordsResponse,
@@ -7,8 +8,8 @@ import {
 import { Context, Hono } from "hono";
 import { Address } from "viem";
 
-import { batchResolveReverse } from "@/api/lib/resolution/batch-reverse-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
+import { batchResolveReverse } from "@/api/lib/resolution/batch-reverse-resolution";
 import { resolveForward } from "@/api/lib/resolution/forward-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 
@@ -42,9 +43,9 @@ function getSelectionFromQueryParams(c: Context) {
 }
 
 // TODO: validate with zod obviously
-function getChainIdsFromQueryParams(c: Context): number[] | undefined {
+function getChainIdsFromQueryParams(c: Context): ChainId[] | undefined {
   const chainIdsParam = c.req.query("chainIds");
-  let chainIds: number[] | undefined;
+  let chainIds: ChainId[] | undefined;
 
   if (chainIdsParam) {
     chainIds = chainIdsParam.split(",").map(Number);
@@ -148,10 +149,10 @@ app.get("/primary-name/:address/:chainId", async (c) => {
 /**
  * Example queries for /primary-names:
  *
- * 1. Batch ENSIP-19 Primary Name Lookup (default chains from namespace)
+ * 1. Batch ENSIP-19 Primary Name Lookup (defaulting to all well-known ENSIP-19 chain ids)
  * GET /primary-names/0x1234...abcd
  *
- * 2. Batch ENSIP-19 Primary Name Lookup (specific chains)
+ * 2. Batch ENSIP-19 Primary Name Lookup (specific chain ids)
  * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
  */
 app.get("/primary-names/:address", async (c) => {
