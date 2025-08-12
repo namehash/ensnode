@@ -89,8 +89,6 @@ app.get(
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
 
-
-
 // use our custom graphql middleware at /subgraph with description injection
 app.use("/subgraph", fixContentLengthMiddleware);
 app.use("/subgraph", makeApiDocumentationMiddleware("/subgraph"));
