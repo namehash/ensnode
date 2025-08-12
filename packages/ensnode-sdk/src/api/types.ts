@@ -1,4 +1,3 @@
-import { Name } from "../ens";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -14,10 +13,8 @@ import type { ProtocolTrace } from "../tracing";
  * API Error Response Type
  */
 export interface ErrorResponse {
-  error: string;
-  // TODO: the following?
-  // code?: string;
-  // details?: Record<string, unknown>;
+  message: string;
+  details?: unknown; // subject to change
 }
 
 interface TraceableRequest {

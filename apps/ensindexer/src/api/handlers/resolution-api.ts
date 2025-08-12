@@ -1,62 +1,18 @@
 import {
-  ChainId,
-  CoinType,
+  DEFAULT_RECORDS_SELECTION,
   ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,
-  ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
-import { Context, Hono } from "hono";
-import { Address } from "viem";
+import { Hono } from "hono";
 
+import { errorResponse } from "@/api/lib/error-response";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { resolveForward } from "@/api/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
-
-// TODO: use a zod middleware to parse out the arguments and conform to *ResolutionRequest typings
-
-function getShouldTrace(c: Context) {
-  return c.req.query("trace") === "true";
-}
-
-function getShouldAccelerate(c: Context) {
-  return c.req.query("accelerate") !== "false";
-}
-
-// TODO: replace with zod schema or validator
-function getSelectionFromQueryParams(c: Context) {
-  const selection: Partial<ResolverRecordsSelection> = {};
-
-  if (c.req.query("name") === "true") {
-    selection.name = true;
-  }
-
-  if (c.req.query("addresses")) {
-    selection.addresses = (c.req.query("addresses")!.split(",").map(Number) as CoinType[]) ?? [];
-  }
-
-  if (c.req.query("texts")) {
-    selection.texts = c.req.query("texts")?.split(",") ?? [];
-  }
-
-  return selection;
-}
-
-// TODO: validate with zod obviously
-// disallow DEFAULT_EMV_CHAIN_ID
-function getChainIdsFromQueryParams(c: Context): ChainId[] | undefined {
-  const chainIdsParam = c.req.query("chainIds");
-  let chainIds: ChainId[] | undefined;
-
-  if (chainIdsParam) {
-    chainIds = chainIdsParam.split(",").map(Number);
-    if (chainIds.some((id) => isNaN(id))) {
-      throw new Error("all chainIds must be valid numbers");
-    }
-  }
-
-  return chainIds;
-}
+import { validate } from "@/api/lib/validate";
+import { routes } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();
 
@@ -72,33 +28,31 @@ const app = new Hono();
  * 3. Combined resolution:
  * GET /records/example.eth&name=true&addresses=60,0&texts=avatar,com.twitter
  */
-app.get("/records/:name", async (c) => {
-  try {
-    const name = c.req.param("name");
-    if (!name) {
-      return c.json({ error: "name parameter is required" }, 400);
+app.get(
+  "/records/:name",
+  validate("param", routes.records.params),
+  validate("query", routes.records.query),
+  async (c) => {
+    const { name } = c.req.valid("param");
+    const { selection, trace: showTrace, accelerate } = c.req.valid("query");
+
+    try {
+      const { result, trace } = await captureTrace(() =>
+        resolveForward(name, selection, { accelerate }),
+      );
+
+      const response = {
+        records: result,
+        ...(showTrace && { trace }),
+      } satisfies ResolveRecordsResponse<typeof selection>;
+
+      return c.json(response);
+    } catch (error) {
+      console.error(error);
+      return errorResponse(c, error);
     }
-
-    // TODO: default selection if none in query
-    const selection = getSelectionFromQueryParams(c);
-    const showTrace = getShouldTrace(c);
-    const accelerate = getShouldAccelerate(c);
-
-    const { result: records, trace } = await captureTrace(() =>
-      resolveForward(name, selection, { accelerate }),
-    );
-
-    const response = {
-      records,
-      ...(showTrace && { trace }),
-    } satisfies ResolveRecordsResponse<typeof selection>;
-
-    return c.json(response);
-  } catch (error) {
-    console.error(error);
-    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
-  }
-});
+  },
+);
 
 /**
  * Example queries for /primary-name:
@@ -112,43 +66,31 @@ app.get("/records/:name", async (c) => {
  * 3. ENSIP-19 Multichain Primary Name (for 'default' EVM Chain)
  * GET /primary-name/0x1234...abcd/0
  */
-app.get("/primary-name/:address/:chainId", async (c) => {
-  try {
-    // TODO: correctly parse/validate with zod
-    const address = c.req.param("address") as Address;
-    const chainIdParam = c.req.param("chainId");
+app.get(
+  "/primary-name/:address/:chainId",
+  validate("param", routes.primaryName.params),
+  validate("query", routes.primaryName.query),
+  async (c) => {
+    const { address, chainId } = c.req.valid("param");
+    const { trace: showTrace, accelerate } = c.req.valid("query");
 
-    if (!address) {
-      return c.json({ error: "address parameter is required" }, 400);
+    try {
+      const { result, trace } = await captureTrace(() =>
+        resolveReverse(address, chainId, { accelerate }),
+      );
+
+      const response = {
+        name: result,
+        ...(showTrace && { trace }),
+      } satisfies ResolvePrimaryNameResponse;
+
+      return c.json(response);
+    } catch (error) {
+      console.error(error);
+      return errorResponse(c, error);
     }
-
-    if (!chainIdParam) {
-      return c.json({ error: "chainId parameter is required" }, 400);
-    }
-
-    const chainId = Number(chainIdParam);
-    if (isNaN(chainId)) {
-      return c.json({ error: "chainId must be a valid number" }, 400);
-    }
-
-    const showTrace = getShouldTrace(c);
-    const accelerate = getShouldAccelerate(c);
-
-    const { result: name, trace } = await captureTrace(() =>
-      resolveReverse(address, chainId, { accelerate }),
-    );
-
-    const response = {
-      name,
-      ...(showTrace && { trace }),
-    } satisfies ResolvePrimaryNameResponse;
-
-    return c.json(response);
-  } catch (error) {
-    console.error(error);
-    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
-  }
-});
+  },
+);
 
 /**
  * Example queries for /primary-names:
@@ -159,33 +101,30 @@ app.get("/primary-name/:address/:chainId", async (c) => {
  * 2. Multichain ENSIP-19 Primary Name Lookup (specific chain ids)
  * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
  */
-app.get("/primary-names/:address", async (c) => {
-  try {
-    // TODO: correctly parse/validate with zod
-    const address = c.req.param("address") as Address;
+app.get(
+  "/primary-names/:address",
+  validate("param", routes.primaryNames.params),
+  validate("query", routes.primaryNames.query),
+  async (c) => {
+    const { address } = c.req.valid("param");
+    const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
 
-    if (!address) {
-      return c.json({ error: "address parameter is required" }, 400);
+    try {
+      const { result, trace } = await captureTrace(() =>
+        resolvePrimaryNames(address, chainIds, { accelerate }),
+      );
+
+      const response = {
+        names: result,
+        ...(showTrace && { trace }),
+      } satisfies ResolvePrimaryNamesResponse;
+
+      return c.json(response);
+    } catch (error) {
+      console.error(error);
+      return errorResponse(c, error);
     }
-
-    const showTrace = getShouldTrace(c);
-    const accelerate = getShouldAccelerate(c);
-    const chainIds = getChainIdsFromQueryParams(c);
-
-    const { result: primaryNames, trace } = await captureTrace(() =>
-      resolvePrimaryNames(address, chainIds, { accelerate }),
-    );
-
-    const response = {
-      primaryNames,
-      ...(showTrace && { trace }),
-    };
-
-    return c.json(response);
-  } catch (error) {
-    console.error(error);
-    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
-  }
-});
+  },
+);
 
 export default app;

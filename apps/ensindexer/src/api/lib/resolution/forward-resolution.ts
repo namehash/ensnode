@@ -118,14 +118,6 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
           const publicClient = getPublicClient(chainId);
 
-          // TODO: possibly need to manage state drift between ENSIndexer and RPC
-          // could acquire a "most recently indexed" blockNumber or blockHash for this operation based on
-          // ponder indexing status and use that to fix any rpc calls made in this context BUT there's still
-          // multiple separate reads to the ENSIndexer schemas so state drift is somewhat unavoidable without
-          // locking writes during reads which seems like a really bad idea.
-          //
-          // but honestly the state drift is at max 1 block on L1 and a block or two on an L2, it's pretty negligible,
-          // so maybe we just ignore this issue entirely
           const normalizedName = normalize(name);
           if (name !== normalizedName) {
             throw new Error(`Name "${name}" must be normalized ("${normalizedName}").`);

@@ -7,11 +7,7 @@ import {
   ResolveRecordsRequest,
   ResolveRecordsResponse,
 } from "./api/types";
-import {
-  ForwardResolutionArgs,
-  ResolverRecordsSelection,
-  ReverseResolutionArgs,
-} from "./resolution";
+import { ResolverRecordsSelection } from "./resolution";
 
 /**
  * Default ENSNode API endpoint URL
@@ -80,7 +76,7 @@ export class ENSNodeClient {
    * Resolves records for an ENS name (Forward Resolution).
    *
    * @param name The ENS Name whose records to resolve
-   * @param selection Optional selection of Resolver records
+   * @param selection selection of Resolver records
    * @param options additional options
    * @param options.accelerate whether to attempt Protocol Acceleration (default true)
    * @param options.trace whether to include a trace in the response (default false)
@@ -109,11 +105,15 @@ export class ENSNodeClient {
   async resolveRecords<SELECTION extends ResolverRecordsSelection>(
     name: ResolveRecordsRequest<SELECTION>["name"],
     selection: ResolveRecordsRequest<SELECTION>["selection"],
-    options?: Omit<ResolveRecordsRequest<SELECTION>, keyof ForwardResolutionArgs<SELECTION>>,
+    options?: Omit<ResolveRecordsRequest<SELECTION>, "name" | "selection">,
   ): Promise<ResolveRecordsResponse<SELECTION>> {
     const url = new URL(`/api/resolve/records/${encodeURIComponent(name)}`, this.options.url);
 
     // Add query parameters based on selection
+    if (selection.name) {
+      url.searchParams.set("name", "true");
+    }
+
     if (selection.addresses && selection.addresses.length > 0) {
       url.searchParams.set("addresses", selection.addresses.join(","));
     }
@@ -129,7 +129,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Records Resolution Failed: ${error.error}`);
+      throw new Error(`Records Resolution Failed: ${error.message}`);
     }
 
     const data = await response.json();
@@ -162,7 +162,7 @@ export class ENSNodeClient {
   async resolvePrimaryName(
     address: ResolvePrimaryNameRequest["address"],
     chainId: ResolvePrimaryNameRequest["chainId"],
-    options?: Omit<ResolvePrimaryNameRequest, keyof ReverseResolutionArgs>,
+    options?: Omit<ResolvePrimaryNameRequest, "address" | "chainId">,
   ): Promise<ResolvePrimaryNameResponse> {
     const url = new URL(`/api/resolve/primary-name/${address}/${chainId}`, this.options.url);
 
@@ -173,7 +173,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Primary Name Resolution Failed: ${error.error}`);
+      throw new Error(`Primary Name Resolution Failed: ${error.message}`);
     }
 
     const data = await response.json();
@@ -218,7 +218,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Primary Names Resolution Failed: ${error.error}`);
+      throw new Error(`Primary Names Resolution Failed: ${error.message}`);
     }
 
     const data = await response.json();
