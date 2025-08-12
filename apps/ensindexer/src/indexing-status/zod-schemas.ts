@@ -14,8 +14,9 @@ import {
   type ChainIdString,
   type ChainIndexingStatus,
   OverallIndexingStatusIds,
-  SerializedENSIndexerOverallIndexingStatusOk,
-  SerializedENSIndexerOverallIndexingStatusOkFollowing,
+  SerializedENSIndexerOverallIndexingStatusBackfill,
+  SerializedENSIndexerOverallIndexingStatusCompleted,
+  SerializedENSIndexerOverallIndexingStatusFollowing,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -86,18 +87,27 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
       const chains = Object.values(serializedChainIndexingStatuses);
       const overallStatus = getOverallIndexingStatus(chains);
 
-      if (overallStatus === OverallIndexingStatusIds.Following) {
-        return {
-          chains: serializedChainIndexingStatuses,
-          overallStatus: overallStatus,
-          approximateRealtimeDistance: getOverallApproxRealtimeDistance(chains),
-        } satisfies SerializedENSIndexerOverallIndexingStatusOkFollowing;
-      }
+      switch (overallStatus) {
+        case OverallIndexingStatusIds.Following:
+          return {
+            chains: serializedChainIndexingStatuses,
+            overallStatus: overallStatus,
+            maxApproximateRealtimeDistance: getOverallApproxRealtimeDistance(chains),
+          } satisfies SerializedENSIndexerOverallIndexingStatusFollowing;
 
-      return {
-        chains: serializedChainIndexingStatuses,
-        overallStatus: overallStatus,
-      } satisfies SerializedENSIndexerOverallIndexingStatusOk;
+        case OverallIndexingStatusIds.Backfill:
+          return {
+            chains: serializedChainIndexingStatuses,
+            overallStatus: OverallIndexingStatusIds.Backfill,
+          } satisfies SerializedENSIndexerOverallIndexingStatusBackfill;
+
+        case OverallIndexingStatusIds.Completed: {
+          return {
+            chains: serializedChainIndexingStatuses,
+            overallStatus: OverallIndexingStatusIds.Completed,
+          } satisfies SerializedENSIndexerOverallIndexingStatusCompleted;
+        }
+      }
     });
 };
 

@@ -7,6 +7,7 @@ import {
   ChainIndexingFollowingStatus,
   ChainIndexingStatus,
   ChainIndexingStatusIds,
+  ChainIndexingStrategyIds,
   ChainIndexingUnstartedStatus,
 } from "./types";
 import { makeChainIndexingStatusSchema } from "./zod-schemas";
@@ -22,7 +23,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Unstarted,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -35,7 +36,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           status: ChainIndexingStatusIds.Unstarted,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -47,7 +48,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Unstarted,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: laterBlockRef,
             endBlock: earlierBlockRef,
           },
@@ -67,7 +68,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -82,7 +83,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -96,7 +97,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -116,7 +117,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -136,7 +137,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -158,7 +159,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: "indefinite",
+            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -173,7 +174,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: "indefinite",
+            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -187,7 +188,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: "indefinite",
+            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: laterBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
@@ -207,7 +208,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: "indefinite",
+            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
@@ -227,7 +228,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -246,7 +247,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: "indefinite",
+            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
@@ -269,7 +270,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -283,7 +284,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(parsed).toStrictEqual({
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
@@ -296,7 +297,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: latestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -315,7 +316,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: "definite",
+            indexingStrategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },

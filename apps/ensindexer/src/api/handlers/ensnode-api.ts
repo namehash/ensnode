@@ -73,7 +73,7 @@ app.get("/indexing-status", async (c) => {
   }
 
   const hasNotAchievedRequestedRealtimeIndexingDistance =
-    indexingStatus.approximateRealtimeDistance > requestedRealtimeIndexingDistance;
+    indexingStatus.maxApproximateRealtimeDistance > requestedRealtimeIndexingDistance;
 
   // return 503 error if the requested realtime indexing distance
   // has not been achieved yet

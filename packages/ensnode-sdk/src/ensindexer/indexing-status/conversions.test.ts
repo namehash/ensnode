@@ -6,6 +6,7 @@ import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingStatusIds,
+  ChainIndexingStrategyIds,
   ChainIndexingUnstartedStatus,
   ENSIndexerOverallIndexingStatus,
 } from "./types";
@@ -21,7 +22,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               status: ChainIndexingStatusIds.Backfill,
               config: {
-                indexingStrategy: "indefinite",
+                indexingStrategy: ChainIndexingStrategyIds.Indefinite,
                 startBlock: earliestBlockRef,
                 endBlock: null,
               },
@@ -34,7 +35,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               status: ChainIndexingStatusIds.Unstarted,
               config: {
-                indexingStrategy: "definite",
+                indexingStrategy: ChainIndexingStrategyIds.Definite,
                 startBlock: earliestBlockRef,
                 endBlock: laterBlockRef,
               },
@@ -53,7 +54,7 @@ describe("ENSIndexer: Indexing Status", () => {
           "1": {
             status: ChainIndexingStatusIds.Backfill,
             config: {
-              indexingStrategy: "indefinite",
+              indexingStrategy: ChainIndexingStrategyIds.Indefinite,
               startBlock: earliestBlockRef,
               endBlock: null,
             },
@@ -63,7 +64,7 @@ describe("ENSIndexer: Indexing Status", () => {
           "8453": {
             status: ChainIndexingStatusIds.Unstarted,
             config: {
-              indexingStrategy: "definite",
+              indexingStrategy: ChainIndexingStrategyIds.Definite,
               startBlock: earliestBlockRef,
               endBlock: laterBlockRef,
             },

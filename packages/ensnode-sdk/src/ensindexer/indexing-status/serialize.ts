@@ -1,9 +1,10 @@
 import { ChainId, ChainIdString, serializeChainId } from "../../shared";
 import {
   SerializedENSIndexerOverallIndexingStatus,
+  SerializedENSIndexerOverallIndexingStatusBackfill,
+  SerializedENSIndexerOverallIndexingStatusCompleted,
   SerializedENSIndexerOverallIndexingStatusError,
-  SerializedENSIndexerOverallIndexingStatusOk,
-  SerializedENSIndexerOverallIndexingStatusOkFollowing,
+  SerializedENSIndexerOverallIndexingStatusFollowing,
 } from "./serialized-types";
 import {
   ChainIndexingStatus,
@@ -39,17 +40,24 @@ export function serializeENSIndexerIndexingStatus(
         overallStatus: OverallIndexingStatusIds.IndexerError,
       } satisfies SerializedENSIndexerOverallIndexingStatusError;
 
+    case OverallIndexingStatusIds.Backfill:
+      return {
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        overallStatus: OverallIndexingStatusIds.Backfill,
+      } satisfies SerializedENSIndexerOverallIndexingStatusBackfill;
+
+    case OverallIndexingStatusIds.Completed: {
+      return {
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        overallStatus: OverallIndexingStatusIds.Completed,
+      } satisfies SerializedENSIndexerOverallIndexingStatusCompleted;
+    }
+
     case OverallIndexingStatusIds.Following:
       return {
-        approximateRealtimeDistance: indexingStatus.approximateRealtimeDistance,
+        maxApproximateRealtimeDistance: indexingStatus.maxApproximateRealtimeDistance,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
         overallStatus: OverallIndexingStatusIds.Following,
-      } satisfies SerializedENSIndexerOverallIndexingStatusOkFollowing;
-
-    default:
-      return {
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
-        overallStatus: indexingStatus.overallStatus,
-      } satisfies SerializedENSIndexerOverallIndexingStatusOk;
+      } satisfies SerializedENSIndexerOverallIndexingStatusFollowing;
   }
 }

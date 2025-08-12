@@ -1,25 +1,35 @@
 import type { ChainIdString } from "../../shared";
 import type {
+  ChainIndexingCompletedStatus,
   ChainIndexingStatus,
   ENSIndexerOverallIndexingStatus,
+  ENSIndexerOverallIndexingStatusBackfill,
+  ENSIndexerOverallIndexingStatusCompleted,
   ENSIndexerOverallIndexingStatusError,
-  ENSIndexerOverallIndexingStatusOk,
-  ENSIndexerOverallIndexingStatusOkFollowing,
+  ENSIndexerOverallIndexingStatusFollowing,
 } from "./types";
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingStatusOk}
+ * Serialized representation of {@link ENSIndexerOverallIndexingStatusBackfill}
  */
-export interface SerializedENSIndexerOverallIndexingStatusOk
-  extends Omit<ENSIndexerOverallIndexingStatus, "chains"> {
+export interface SerializedENSIndexerOverallIndexingStatusBackfill
+  extends Omit<ENSIndexerOverallIndexingStatusBackfill, "chains"> {
   chains: Record<ChainIdString, ChainIndexingStatus>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingStatusOkFollowing}
+ * Serialized representation of {@link ENSIndexerOverallIndexingStatusCompleted}
  */
-export interface SerializedENSIndexerOverallIndexingStatusOkFollowing
-  extends Omit<ENSIndexerOverallIndexingStatusOkFollowing, "chains"> {
+export interface SerializedENSIndexerOverallIndexingStatusCompleted
+  extends Omit<ENSIndexerOverallIndexingStatusCompleted, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingStatus>;
+}
+
+/**
+ * Serialized representation of {@link ENSIndexerOverallIndexingStatusFollowing}
+ */
+export interface SerializedENSIndexerOverallIndexingStatusFollowing
+  extends Omit<ENSIndexerOverallIndexingStatusFollowing, "chains"> {
   chains: Record<ChainIdString, ChainIndexingStatus>;
 }
 
@@ -33,6 +43,7 @@ export interface SerializedENSIndexerOverallIndexingStatusError
  * Serialized representation of {@link ENSIndexerOverallIndexingStatus}
  */
 export type SerializedENSIndexerOverallIndexingStatus =
-  | SerializedENSIndexerOverallIndexingStatusOk
-  | SerializedENSIndexerOverallIndexingStatusOkFollowing
+  | SerializedENSIndexerOverallIndexingStatusBackfill
+  | SerializedENSIndexerOverallIndexingStatusCompleted
+  | SerializedENSIndexerOverallIndexingStatusFollowing
   | SerializedENSIndexerOverallIndexingStatusError;

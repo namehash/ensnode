@@ -16,20 +16,19 @@ import {
 } from "../../shared/zod-schemas";
 import { getOverallApproxRealtimeDistance, getOverallIndexingStatus } from "./helpers";
 import {
-  ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
-  OverallIndexingStatusIds,
-} from "./types";
-import type {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingFollowingStatus,
   ChainIndexingStatus,
+  ChainIndexingStatusIds,
+  ChainIndexingStrategyIds,
   ChainIndexingUnstartedStatus,
+  ENSIndexerOverallIndexingStatusBackfill,
+  ENSIndexerOverallIndexingStatusCompleted,
   ENSIndexerOverallIndexingStatusError,
-  ENSIndexerOverallIndexingStatusOk,
-  ENSIndexerOverallIndexingStatusOkFollowing,
+  ENSIndexerOverallIndexingStatusFollowing,
+  OverallIndexingStatusIds,
 } from "./types";
 
 /**
@@ -40,7 +39,7 @@ const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
     z.strictObject({
       indexingStrategy: z.literal(ChainIndexingStrategyIds.Indefinite),
       startBlock: makeBlockRefSchema(valueLabel),
-      endBlock: z.null().default(null),
+      endBlock: z.null(),
     }),
     z.strictObject({
       indexingStrategy: z.literal(ChainIndexingStrategyIds.Definite),
@@ -169,7 +168,7 @@ export const makeChainIndexingStatusSchema = (valueLabel: string = "Value") =>
   ]);
 
 /**
- * Makes Zod schema for {@link ChainIndexingStatuses}
+ * Makes Zod schema for {@link ChainIndexingStatus}
  */
 export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
   z
@@ -187,28 +186,13 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
     });
 
 /**
- * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusOk}
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusBackfill}
  */
-const makeOverallIndexingStatusWithDataSchema = (valueLabel?: string) => {
-  const expectedStatuses = Object.values(OverallIndexingStatusIds).filter(
-    (statusId) =>
-      statusId !== OverallIndexingStatusIds.IndexerError &&
-      statusId !== OverallIndexingStatusIds.Following,
-  );
-
-  return z
+const makeOverallIndexingStatusBackfill = (valueLabel?: string) =>
+  z
     .strictObject({
       chains: makeChainIndexingStatusesSchema(valueLabel),
-      overallStatus: z.enum(
-        Object.values(OverallIndexingStatusIds).filter(
-          (statusId) =>
-            statusId !== OverallIndexingStatusIds.IndexerError &&
-            statusId !== OverallIndexingStatusIds.Following,
-        ),
-        {
-          error: `${valueLabel}.overallStatus must be one of ${expectedStatuses.join(", ")}`,
-        },
-      ),
+      overallStatus: z.literal(OverallIndexingStatusIds.Backfill),
     })
     .refine(
       (indexingStatus) => {
@@ -218,23 +202,49 @@ const makeOverallIndexingStatusWithDataSchema = (valueLabel?: string) => {
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
     );
-};
 
 /**
- * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusOkFollowing}
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusCompleted}
  */
-const makeOverallIndexingStatusFollowing = (valueLabel?: string) =>
-  makeOverallIndexingStatusWithDataSchema(valueLabel)
-    .extend({
-      overallStatus: z.literal(OverallIndexingStatusIds.Following),
-      approximateRealtimeDistance: makeDurationSchema(valueLabel),
+const makeOverallIndexingStatusCompleted = (valueLabel?: string) =>
+  z
+    .strictObject({
+      overallStatus: z.literal(OverallIndexingStatusIds.Completed),
+      chains: makeChainIndexingStatusesSchema(valueLabel),
     })
     .refine(
       (indexingStatus) => {
         const chains = Array.from(indexingStatus.chains.values());
 
+        return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
+      },
+      { error: `${valueLabel} is an invalid overallStatus.` },
+    );
+
+/**
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingStatusFollowing}
+ */
+const makeOverallIndexingStatusFollowing = (valueLabel?: string) =>
+  z
+    .strictObject({
+      overallStatus: z.literal(OverallIndexingStatusIds.Following),
+      chains: makeChainIndexingStatusesSchema(valueLabel),
+      maxApproximateRealtimeDistance: makeDurationSchema(valueLabel),
+    })
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
+      },
+      { error: `${valueLabel} is an invalid overallStatus.` },
+    )
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
         return (
-          getOverallApproxRealtimeDistance(chains) === indexingStatus.approximateRealtimeDistance
+          getOverallApproxRealtimeDistance(chains) === indexingStatus.maxApproximateRealtimeDistance
         );
       },
       { error: `${valueLabel} is an invalid approximateRealtimeDistances.` },
@@ -258,7 +268,8 @@ export const makeENSIndexerIndexingStatusSchema = (
   valueLabel: string = "ENSIndexerIndexingStatus",
 ) =>
   z.discriminatedUnion("overallStatus", [
-    makeOverallIndexingStatusWithDataSchema(valueLabel),
+    makeOverallIndexingStatusBackfill(valueLabel),
+    makeOverallIndexingStatusCompleted(valueLabel),
     makeOverallIndexingStatusFollowing(valueLabel),
     makeOverallIndexingStatusErrorSchema(valueLabel),
   ]);

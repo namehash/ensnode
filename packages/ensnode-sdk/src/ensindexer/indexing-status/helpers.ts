@@ -1,5 +1,6 @@
 import { BlockRef, Duration } from "../../shared";
 import {
+  ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingDefiniteConfig,
   ChainIndexingIndefiniteConfig,
@@ -14,25 +15,29 @@ import {
 /**
  * Get {@link OverallIndexingStatusId} based on indexed chains' statuses.
  *
- * Note: This function expects chain indexing statuses on input and will be
- * never called after indexer error. This is why we exclude indexer error
- * status from the set of possible statuses returned by this function.
+ * This function decides what is the current overall indexing status,
+ * based on provided chain indexing statuses. The fact that chain indexing
+ * statuses were provided to this function guarantees there was no indexer
+ * error, and that the overall indexing status is never
+ * an {@link OverallIndexingStatusIds.IndexerError}
  */
-export function getOverallIndexingStatus(chains: ChainIndexingStatus[]): ChainIndexingStatusId {
+export function getOverallIndexingStatus(
+  chains: ChainIndexingStatus[],
+): Exclude<OverallIndexingStatusId, typeof OverallIndexingStatusIds.IndexerError> {
   const chainStatuses = chains.map((chain) => chain.status);
 
-  let overallStatus: ChainIndexingStatusId;
+  let overallStatus: OverallIndexingStatusId;
 
   if (chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Following)) {
-    overallStatus = ChainIndexingStatusIds.Following;
+    overallStatus = OverallIndexingStatusIds.Following;
   } else if (chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Backfill)) {
-    overallStatus = ChainIndexingStatusIds.Backfill;
+    overallStatus = OverallIndexingStatusIds.Backfill;
   } else if (
     chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Unstarted)
   ) {
-    overallStatus = ChainIndexingStatusIds.Unstarted;
+    overallStatus = OverallIndexingStatusIds.Backfill;
   } else {
-    overallStatus = ChainIndexingStatusIds.Completed;
+    overallStatus = OverallIndexingStatusIds.Completed;
   }
 
   return overallStatus;
@@ -50,7 +55,7 @@ export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]):
 
   if (chainApproximateRealtimeDistances.length === 0) {
     throw new Error(
-      `The overall approximate realtime distance value remains unknown if no indexed chain is in the '${OverallIndexingStatusIds.Following}' status`,
+      `The overall approximate realtime distance value is undefined if no indexed chain is in the '${OverallIndexingStatusIds.Following}' status`,
     );
   }
 
