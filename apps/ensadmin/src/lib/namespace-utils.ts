@@ -76,7 +76,8 @@ export const getNameWrapperAddress = (namespaceId: ENSNamespaceId): Address =>
  * Get the ENS Manager App URL for the provided namespace.
  *
  * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @returns ENS Manager App URL for the provided namespace, or null if the provided namespace doesn't have a known ENS Manager App
+ * @returns ENS Manager App URL for the provided namespace, or null if the provided namespace
+ * doesn't have a known ENS Manager App
  */
 export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null {
   switch (namespaceId) {
@@ -97,7 +98,8 @@ export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null {
  *
  * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
  * @param {Name} name - ENS name to get the avatar image URL for
- * @returns avatar image URL for the name on the given ENS Namespace, or null if the avatar image URL is not known
+ * @returns avatar image URL for the name on the given ENS Namespace, or null if the avatar image
+ * URL is not known
  */
 export function getNameAvatarUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
   switch (namespaceId) {
@@ -117,7 +119,8 @@ export function getNameAvatarUrl(name: Name, namespaceId: ENSNamespaceId): URL |
 /**
  * Get the URL of the name details page in ENS Manager App for a given name and ENS Namespace.
  *
- * @returns URL to the name details page in the ENS Manager App for a given name and ENS Namespace, or null if this URL is not known
+ * @returns URL to the name details page in the ENS Manager App for a given name and ENS Namespace,
+ * or null if this URL is not known
  */
 export function getNameDetailsUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
@@ -129,7 +132,8 @@ export function getNameDetailsUrl(name: Name, namespaceId: ENSNamespaceId): URL 
 /**
  * Get the URL of the address details page in ENS Manager App for a given address and ENS Namespace.
  *
- * @returns URL to the address details page in the ENS Manager App for a given address and ENS Namespace, or null if this URL is not known
+ * @returns URL to the address details page in the ENS Manager App for a given address and ENS
+ * Namespace, or null if this URL is not known
  */
 export function getAddressDetailsUrl(address: Address, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
