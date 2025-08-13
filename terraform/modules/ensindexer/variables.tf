@@ -1,3 +1,9 @@
+# ENSNode configuration
+variable "ensnode_version" {
+  type = string
+}
+
+# Render configuration
 variable "render_environment_id" {
   type = string
 }
@@ -10,7 +16,7 @@ variable "instance_type" {
   type = string
 }
 
-# DNS variables
+# DNS configuration
 variable "base_domain_name" {
   type        = string
   description = "Base DNS domain (e.g. 'example.com' or 'namehash.io'). Combine with subdomain_prefix to build full domain name."
@@ -21,59 +27,67 @@ variable "subdomain_prefix" {
   description = "Subdomain prefix (e.g. 'mainnet.green' or 'staging'). Combine with base_domain_name to build full domain name."
 }
 
-# ENSIndexer variables
+# ENSIndexer configuration
 variable "instance_name" {
   type        = string
-  description = "Unique name for ensindexer to guarantee Render instance name uniqueness"
+  description = "Unique name for ensindexer instance to guarantee unique names for all Render instances"
 }
 
 variable "database_url" {
   type = string
 }
-variable "ensnode_version" {
-  type = string
-}
-variable "heal_reverse_addresses" {
-  type = string
-}
-variable "index_additional_resolver_records" {
+
+variable "database_schema" {
   type = string
 }
 
 variable "ensrainbow_url" {
   type = string
 }
-variable "database_schema" {
-  type = string
-}
+
 variable "plugins" {
   type = string
 }
+
 variable "namespace" {
   type = string
 }
 
-variable "mainnet_rpc_url" {
+variable "heal_reverse_addresses" {
   type = string
 }
 
-variable "sepolia_rpc_url" {
+variable "index_additional_resolver_records" {
   type = string
 }
 
-variable "holesky_rpc_url" {
+# Mainnet RPC URLs
+variable "etherum_mainnet_rpc_url" {
   type = string
 }
 
-variable "base_rpc_url" {
+variable "base_mainnet_rpc_url" {
   type = string
 }
 
-variable "linea_rpc_url" {
+variable "linea_mainnet_rpc_url" {
   type = string
 }
 
-variable "optimism_rpc_url" {
+variable "optimism_mainnet_rpc_url" {
+  type = string
+}
+
+variable "arbitrum_mainnet_rpc_url" {
+  type = string
+}
+
+variable "scroll_mainnet_rpc_url" {
+  type = string
+}
+
+# Sepolia RPC URLs
+variable "etherum_sepolia_rpc_url" {
   type = string
 }
 
@@ -84,18 +98,20 @@ variable "base_sepolia_rpc_url" {
 variable "linea_sepolia_rpc_url" {
   type = string
 }
-variable "arbitrum_mainnet_rpc_url" {
-  type = string
-}
-variable "scroll_mainnet_rpc_url" {
-  type = string
-}
+
 variable "optimism_sepolia_rpc_url" {
   type = string
 }
+
 variable "arbitrum_sepolia_rpc_url" {
   type = string
 }
+
 variable "scroll_sepolia_rpc_url" {
+  type = string
+}
+
+# Holesky RPC URLs
+variable "etherum_holesky_rpc_url" {
   type = string
 }

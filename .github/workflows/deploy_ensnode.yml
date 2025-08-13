@@ -37,13 +37,14 @@ jobs:
       # Terraform keeps it's state inside S3 bucket. This bucket needs to be created before running Terraform apply.
       # AWS_REGION should be the same as Terraform S3 bucket state region.
       AWS_REGION: us-east-1
+      TF_VAR_ensnode_version: ${{ inputs.tag }}
       # For now only one Terraform environment is active. In future this will be calculated based on workflow input.
       TF_VAR_render_environment: "yellow"
       TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
       TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID }}
       # RPC URLs
-      TF_VAR_mainnet_rpc_url: https://eth-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
-      TF_VAR_sepolia_rpc_url: https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
+      TF_VAR_etherum_mainnet_rpc_ur: https://eth-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
+      TF_VAR_etherum_sepolia_rpc_url: https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
       TF_VAR_holesky_rpc_url: https://eth-holesky.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
       TF_VAR_base_rpc_url: https://base-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
       TF_VAR_linea_rpc_url: https://linea-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
@@ -55,7 +56,6 @@ jobs:
       TF_VAR_optimism_sepolia_rpc_url: https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
       TF_VAR_arbitrum_sepolia_rpc_url: https://arb-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
       TF_VAR_scroll_sepolia_rpc_url: https://scroll-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
-      TF_VAR_ensnode_version: ${{ inputs.tag }}
 
     steps:
       - name: Checkout repository

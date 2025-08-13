@@ -66,7 +66,7 @@ resource "render_project" "ensnode" {
     "default" : {
       name : var.render_environment,
       # https://render.com/docs/projects#protected-environments
-      # Non-admin Render users might also make destructive changes to those resources
+       # "unprotected" allows all Render team members (not just admins) to make destructive changes to designated resources
       protected_status : "unprotected"
     }
   }
@@ -107,21 +107,27 @@ module "ensindexer" {
   ensnode_version  = var.ensnode_version
   ensrainbow_url   = module.ensrainbow.ensrainbow_url
 
-  #Common envs
-  render_region            = local.render_region
-  render_environment_id    = render_project.ensnode.environments["default"].id
-  database_url             = module.ensdb.internal_connection_string
-  mainnet_rpc_url          = var.mainnet_rpc_url
-  sepolia_rpc_url          = var.sepolia_rpc_url
-  linea_rpc_url            = var.linea_rpc_url
-  holesky_rpc_url          = var.holesky_rpc_url
-  base_rpc_url             = var.base_rpc_url
-  optimism_rpc_url         = var.optimism_rpc_url
-  linea_sepolia_rpc_url    = var.linea_sepolia_rpc_url
-  base_sepolia_rpc_url     = var.base_sepolia_rpc_url
+  # Common configuration
+  render_region         = local.render_region
+  render_environment_id = render_project.ensnode.environments["default"].id
+  database_url          = module.ensdb.internal_connection_string
+
+  # Mainnet RPC URLs
+  etherum_mainnet_rpc_url  = var.etherum_mainnet_rpc_url
+  base_mainnet_rpc_url     = var.base_mainnet_rpc_url
+  linea_mainnet_rpc_url    = var.linea_mainnet_rpc_url
+  optimism_mainnet_rpc_url = var.optimism_mainnet_rpc_url
   arbitrum_mainnet_rpc_url = var.arbitrum_mainnet_rpc_url
   scroll_mainnet_rpc_url   = var.scroll_mainnet_rpc_url
+
+  # Sepolia RPC URLs
+  etherum_sepolia_rpc_url  = var.etherum_sepolia_rpc_url
+  base_sepolia_rpc_url     = var.base_sepolia_rpc_url
+  linea_sepolia_rpc_url    = var.linea_sepolia_rpc_url
   optimism_sepolia_rpc_url = var.optimism_sepolia_rpc_url
   arbitrum_sepolia_rpc_url = var.arbitrum_sepolia_rpc_url
   scroll_sepolia_rpc_url   = var.scroll_sepolia_rpc_url
+
+  # Holesky RPC URLs
+  etherum_holesky_rpc_url = var.etherum_holesky_rpc_url
 }

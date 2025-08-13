@@ -33,22 +33,31 @@ These Terraform scripts are currently specific to ENSNode instances hosted by Na
 Copy `.env.sample` to `.env.local` and fill in your configuration values:
 
 ```bash
+# ENSNode configuration
+ensnode_version           = "latest"  # or specific version
+
+# Render configuration
 render_api_key            = "your_railway_token"
 render_owner_id           = "your_render_onwer_id"
 render_environment        = "your_render_environment"
-mainnet_rpc_url           = "your_mainnet_rpc_url"
-sepolia_rpc_url           = "your_sepolia_rpc_url"
-holesky_rpc_url           = "your_holesky_rpc_url"
-base_rpc_url              = "your_base_rpc_url"
-linea_rpc_url             = "your_linea_rpc_url"
-base_sepolia_rpc_url      = "your_base_sepolia_rpc_url "
+
+# Mainnet RPC URLs
+ethereum_mainnet_rpc_url  = "your_ethereum_mainnet_rpc_url"
+base_rpc_url              = "your_base_mainnet_rpc_url"
+linea_rpc_url             = "your_linea_mainnet_rpc_url"
+arbitrum_mainnet_rpc_url  = "your_arbitrum_mainnet_rpc_url"
+scroll_mainnet_rpc_url    = "your_scroll_mainnet_rpc_url"
+
+# Sepolia RPC URLs
+sepolia_rpc_url           = "your_etherum_sepolia_rpc_url"
+base_sepolia_rpc_url      = "your_base_sepolia_rpc_url"
 linea_sepolia_rpc_url     = "your_linea_sepolia_rpc_url"
-arbitrum_mainnet_rpc_url  = "arbitrum_mainnet_rpc_url"
-scroll_mainnet_rpc_url    = "scroll_mainnet_rpc_url"
-optimism_sepolia_rpc_url  = "optimism_sepolia_rpc_url"
-arbitrum_sepolia_rpc_url  = "arbitrum_sepolia_rpc_url"
-scroll_sepolia_rpc_url    = "scroll_sepolia_rpc_url"
-ensnode_version           = "latest"  # or specific version
+optimism_sepolia_rpc_url  = "your_optimism_sepolia_rpc_url"
+arbitrum_sepolia_rpc_url  = "your_arbitrum_sepolia_rpc_url"
+scroll_sepolia_rpc_url    = "your_scroll_sepolia_rpc_url"
+
+# Holesky RPC URLs
+holesky_rpc_url           = "your_etherum_holesky_rpc_url"
 ```
 
 ## Infrastructure Components
