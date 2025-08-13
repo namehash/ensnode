@@ -31,7 +31,6 @@ const stringarray = z
     message: "Must be a set of unique entries.",
   });
 
-// TODO: encoded label hashes
 const name = z
   .string()
   .refine(isNormalized, "Must be normalized, see https://docs.ens.domains/resolution/names/")
