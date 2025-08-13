@@ -15,6 +15,7 @@ import { packetToBytes } from "viem/ens";
 import config from "@/config";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import { parseResolverId } from "@/lib/ids";
+import { bytesToPacket } from "@ensdomains/ensjs/utils";
 
 type FindResolverResult =
   | {
@@ -89,6 +90,7 @@ async function findResolverWithUniversalResolver(
       } = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 
       // 2. Call UniversalResolver#findResolver via RPC
+      const dnsEncodedName = packetToBytes(name);
       const [activeResolver, , _offset] = await withSpanAsync(
         tracer,
         "UniversalResolver#findResolver",
@@ -98,7 +100,7 @@ async function findResolverWithUniversalResolver(
             address,
             abi,
             functionName: "findResolver",
-            args: [toHex(packetToBytes(name))],
+            args: [toHex(dnsEncodedName)],
           }),
       );
 
@@ -117,16 +119,17 @@ async function findResolverWithUniversalResolver(
         );
       }
 
+      // offset is byte offset into DNS-Encoded Name used for resolution
       const offset = Number(_offset);
 
-      if (offset > name.length) {
+      if (offset > dnsEncodedName.length) {
         throw new Error(
-          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the number of characters in '${name}'.`,
+          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the number of bytes in '${name}' ({dnsEncodedName.length}).`,
         );
       }
 
       // UniversalResolver returns the offset in characters where the activeName begins
-      const activeName = name.slice(offset);
+      const activeName: Name = bytesToPacket(dnsEncodedName.slice(offset));
 
       return {
         activeName,
@@ -199,8 +202,8 @@ async function findResolverWithIndex(chainId: ChainId, name: Name): Promise<Find
         if (isAddressEqual(resolverAddress, zeroAddress)) continue;
 
         // map the drr's domainId (node) back to its name in `names`
-        const offset = nodes.indexOf(drr.domainId as Node);
-        const activeName = names[offset];
+        const indexInHierarchy = nodes.indexOf(drr.domainId as Node);
+        const activeName = names[indexInHierarchy];
 
         // will never occur, exlusively for typechecking
         if (!activeName) {
@@ -213,7 +216,7 @@ async function findResolverWithIndex(chainId: ChainId, name: Name): Promise<Find
           activeName,
           activeResolver: resolverAddress,
           // this resolver must have wildcard support if it was not for the first node in our hierarchy
-          requiresWildcardSupport: offset > 0,
+          requiresWildcardSupport: indexInHierarchy > 0,
         };
       }
     }

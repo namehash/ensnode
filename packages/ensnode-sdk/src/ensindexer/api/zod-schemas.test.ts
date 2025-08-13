@@ -1,7 +1,7 @@
+import { labelhash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
-
-import { zeroAddress } from "viem";
 import { ZodError } from "zod/v4";
+
 import { DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { routes } from "./zod-schemas";
 
@@ -14,6 +14,11 @@ describe("routes.records", () => {
     expect(routes.records.params.parse({ name: "🔥🔥🔥🔥🔥.eth" })).toEqual({
       name: "🔥🔥🔥🔥🔥.eth",
     });
+
+    const nameWithLongLabel = `${new Array(256).join("🔥")}.eth`;
+    expect(routes.records.params.parse({ name: nameWithLongLabel })).toEqual({
+      name: nameWithLongLabel,
+    });
   });
 
   it("requires selection", () => {
@@ -25,6 +30,11 @@ describe("routes.records", () => {
     expect(() => routes.records.params.parse({ name: "unnormalizable|name.eth" })).toThrow(
       ZodError,
     );
+    expect(() =>
+      routes.records.params.parse({
+        name: `[${labelhash("vitalik")}].eth`,
+      }),
+    ).toThrow(ZodError);
   });
 
   it("parses query with defaults", () => {
