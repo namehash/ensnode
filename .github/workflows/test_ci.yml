@@ -49,6 +49,9 @@ jobs:
       - name: Run TypeScript type checks
         run: pnpm -r typecheck
 
+      - name: Check Terraform format
+        run: terraform fmt -recursive -check -diff
+
       - name: Build packages
         if: needs.changed-packages.outputs.packages == 'true'
         run: pnpm packages:prepublish
