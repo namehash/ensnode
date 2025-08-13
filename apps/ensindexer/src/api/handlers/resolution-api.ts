@@ -1,5 +1,4 @@
 import {
-  DEFAULT_RECORDS_SELECTION,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,

@@ -32,12 +32,12 @@ const { records } = await client.resolveRecords("jesse.base.eth", {
 });
 
 // Resolution API: Primary Name Resolution
-const { name } = await client.resolvePrimaryName("0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", mainnet.id);
-// name === 'jesse.base.eth'
+const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", mainnet.id);
+// name === 'gregskril.eth'
 
 // Resolution API: Primary Names Resolution
-const { names } = await client.resolvePrimaryNames("0x2211d1D0020DAEA8039E46Cf1367962070d77DA9");
-// names === { 1: 'jesse.base.eth' }
+const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF9e307980D19285");
+// names === { '1': 'gregskril.eth', "8453": "greg.base.eth", ... }
 ```
 
 ### API Methods
@@ -60,13 +60,25 @@ Resolves records for an ENS name (Forward Resolution), via ENSNode, which implem
 ```ts
 import { mainnet, base } from 'viem/chains';
 
-const { records } = await client.resolveRecords("jesse.base.eth", {
-  // Resolve jesse.base.eth's ETH Mainnet Address (if set) and Base Address (if set)
+const { records } = await client.resolveRecords("greg.base.eth", {
+  // Resolve ETH Mainnet Address (if set) and Base Address (if set)
   addresses: [evmChainIdToCoinType(mainnet.id), evmChainIdToCoinType(base.id)],
   // or pass the CoinTypes directly if you know them
   // addresses: [60, 2147492101],
   texts: ["avatar", "com.twitter"],
 });
+
+console.log(records);
+// {
+//   "addresses": {
+//     "60": "0x179A862703a4adfb29896552DF9e307980D19285",
+//     "2147492101": "0x179A862703a4adfb29896552DF9e307980D19285"
+//   },
+//   "texts": {
+//     "avatar": "https://...",
+//     "com.twitter": "gregskril"
+//   }
+// }
 ```
 
 ##### `resolvePrimaryName(address, chainId, options)`
@@ -79,12 +91,21 @@ Resolves the primary name of the provided `address` on the specified `chainId`, 
   - `trace`: (optional) Whether to include a trace in the response (default: false)
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 
-
 ```ts
-import { mainnet } from 'viem/chains';
+import { mainnet, base } from 'viem/chains';
+import { DEFAULT_EVM_CHAIN_ID } from '@ensnode/ensnode-sdk';
 
-// Resolve the Primary Name of 0x2211d1D0020DAEA8039E46Cf1367962070d77DA9 on ETH Mainnet
-const { name } = await client.resolvePrimaryName("0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", mainnet.id);
+// Resolve the address' Primary Name on Ethereum Mainnet
+const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", mainnet.id);
+// name === 'gregskril.eth'
+
+// Resolve the address' Primary Name on Base
+const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", base.id);
+// name === 'greg.base.eth'
+
+// Resolve the address' Default Primary Name
+const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", DEFAULT_EVM_CHAIN_ID);
+// name === 'gregskril.eth'
 ```
 
 ##### `resolvePrimaryNames(address, options)`
@@ -98,10 +119,31 @@ Resolves the primary names of the provided `address` on the specified chainIds, 
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 
 ```ts
-import { mainnet } from 'viem/chains';
+import { mainnet, base } from 'viem/chains';
 
-// Resolve the Primary Names of 0x2211d1D0020DAEA8039E46Cf1367962070d77DA9 on all ENSIP-19 supported chains
-const { names } = await client.resolvePrimaryName("0x2211d1D0020DAEA8039E46Cf1367962070d77DA9");
+// Resolve an address' Primary Names on all well-known chain ids
+const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF9e307980D19285");
+
+console.log(names);
+// {
+//   "1": "gregskril.eth",
+//   "10": "gregskril.eth",
+//   "8453": "greg.base.eth", // base-specific Primary Name!
+//   "42161": "gregskril.eth",
+//   "59144": "gregskril.eth",
+//   "534352": "gregskril.eth"
+// }
+
+// Resolve an address' Primary Names on specific chain Ids
+const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF9e307980D19285", {
+  chainIds: [mainnet.id, base.id],
+});
+
+console.log(names);
+// {
+//   "1": "gregskril.eth",
+//   "8453": "greg.base.eth", // base-specific Primary Name!
+// }
 ```
 
 

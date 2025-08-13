@@ -137,7 +137,7 @@ export class ENSNodeClient {
   }
 
   /**
-   * Resolves the primary name of a specified address (Reverse Resolution).
+   * Resolves the primary name of a specified address (Reverse Resolution) on a specific chain.
    *
    * @param address The Address whose Primary Name to resolve
    * @param chainId The chain id within which to query the address' ENSIP-19 Multichain Primary Name
@@ -150,13 +150,16 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Resolve the address' Primary Name on Ethereum Mainnet
-   * const { name } = await client.resolvePrimaryName("0xabcd...", 1);
+   * const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", 1);
+   * // name === 'gregskril.eth'
    *
-   * console.log(name);
-   * // 'jesse.base.eth'
+   * // Resolve the address' Primary Name on Base
+   * const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", 8453);
+   * // name === 'greg.base.eth'
    *
-   * // Resolve the address' Primary Name on Optimism
-   * const { name } = await client.resolvePrimaryName("0xabcd...", 10);
+   * // Resolve the address' Default Primary Name
+   * const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e307980D19285", 0);
+   * // name === 'gregskril.eth'
    * ```
    */
   async resolvePrimaryName(
@@ -195,13 +198,26 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Resolve the address' Primary Names on all well-known chain ids
-   * const { names } = await client.resolvePrimaryNames("0xabcd...");
+   * const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF9e307980D19285");
    *
    * console.log(names);
-   * // { 1: 'jesse.base.eth', ... }
+   * // {
+   * //   "1": "gregskril.eth",
+   * //   "10": "gregskril.eth",
+   * //   "8453": "greg.base.eth", // base-specific Primary Name!
+   * //   "42161": "gregskril.eth",
+   * //   "59144": "gregskril.eth",
+   * //   "534352": "gregskril.eth"
+   * // }
    *
    * // Resolve the address' Primary Names on specific chain Ids
-   * const { names } = await client.resolvePrimaryName("0xabcd...", [1, 10]);
+   * const { names } = await client.resolvePrimaryNames("0xabcd...", [1, 8453]);
+   *
+   * console.log(names);
+   * // {
+   * //   "1": "gregskril.eth",
+   * //   "8453": "greg.base.eth", // base-specific Primary Name!
+   * // }
    * ```
    */
   async resolvePrimaryNames(

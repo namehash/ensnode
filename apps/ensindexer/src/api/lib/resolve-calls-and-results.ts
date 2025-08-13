@@ -120,37 +120,48 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
         try {
           // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
           if (requiresWildcardSupport) {
-            const encodedName = toHex(packetToBytes(name)); // DNS-encode `name` for resolve()
-            const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
-            const value = await withSpanAsync(
+            return await withSpanAsync(
               tracer,
-              `ENSIP-10 resolve(${call.functionName}, ${call.args})`,
-              { encodedName, encodedMethod },
-              () =>
-                publicClient.readContract({
+              `resolve(${call.functionName}, ${call.args})`,
+              {},
+              async (span) => {
+                const encodedName = toHex(packetToBytes(name)); // DNS-encode `name` for resolve()
+                const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
+
+                span.setAttribute("encodedName", encodedName);
+                span.setAttribute("encodedMethod", encodedMethod);
+
+                const value = await publicClient.readContract({
                   ...ResolverContract,
                   functionName: "resolve",
                   args: [encodedName, encodedMethod],
-                }),
+                });
+
+                // if resolve() returned empty bytes or reverted, coalece to null
+                if (size(value) === 0) {
+                  span.setAttribute("result", "null");
+                  return { call, result: null, reason: "returned empty response" };
+                }
+
+                // ENSIP-10 — resolve() always returns bytes that need to be decoded
+                const results = decodeAbiParameters(
+                  getAbiItem({ abi: ResolverABI, name: call.functionName, args: call.args })
+                    .outputs,
+                  value,
+                );
+
+                // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length >= 1)
+                const result = results[0];
+
+                span.setAttribute("result", result);
+
+                return {
+                  call,
+                  result: result,
+                  reason: `.resolve(${call.functionName}, ${call.args})`,
+                };
+              },
             );
-
-            // if resolve() returned empty bytes or reverted, coalece to null
-            if (size(value) === 0) {
-              return { call, result: null, reason: "returned empty response" };
-            }
-
-            // ENSIP-10 — resolve() always returns bytes that need to be decoded
-            const results = decodeAbiParameters(
-              getAbiItem({ abi: ResolverABI, name: call.functionName, args: call.args }).outputs,
-              value,
-            );
-
-            // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length >= 1)
-            return {
-              call,
-              result: results[0],
-              reason: `.resolve(${call.functionName}, ${call.args})`,
-            };
           }
 
           // if not extended resolver, resolve directly
@@ -210,6 +221,9 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
     switch (call.functionName) {
       // make sure address is valid (i.e. specifically not empty bytes)
       case "addr": {
+        // coerce '0x' empty result to null
+        if (result === "0x") return { call, result: null };
+
         // if it is a valid EVM address...
         if (isAddress(result)) {
           // coerce zeroAddress to null
@@ -219,14 +233,21 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
           return { call, result: getAddress(result) };
         }
 
-        // otherwise, it's not an EVM address, so we coerce falsy string values to null
-        // but otherwise return it as-is
-        return { call, result: result || null };
+        // not an EVM address, just coerce falsy string values (i.e. empty string) to null
+        if (!result) return { call, result: null };
+
+        // and otherwise return it as-is
+        return { call, result };
       }
-      // for name and text recods, just coalesce falsy string values to null
+      // for name and text recods
       case "name":
-      case "text":
-        return { call, result: result || null };
+      case "text": {
+        // coalesce falsy string values (i.e. empty string) to null
+        if (!result) return { call, result: null };
+
+        // and otherwise return it as-is
+        return { call, result };
+      }
     }
   });
 }
