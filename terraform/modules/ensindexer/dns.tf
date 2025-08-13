@@ -13,7 +13,7 @@ resource "aws_route53_record" "ensindexer_validation" {
   name    = local.full_ensindexer_hostname
   type    = "CNAME"
   ttl     = 300
-records = [replace(render_web_service.ensindexer.url, "https://", "")]
+  records = [replace(render_web_service.ensindexer.url, "https://", "")]
 }
 
 resource "aws_route53_record" "ensapi_validation" {

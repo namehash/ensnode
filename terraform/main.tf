@@ -66,7 +66,7 @@ resource "render_project" "ensnode" {
     "default" : {
       name : var.render_environment,
       # https://render.com/docs/projects#protected-environments
-       # "unprotected" allows all Render team members (not just admins) to make destructive changes to designated resources
+      # "unprotected" allows all Render team members (not just admins) to make destructive changes to designated resources
       protected_status : "unprotected"
     }
   }
