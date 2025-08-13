@@ -32,6 +32,7 @@ export const ext_primaryName = onchainTable(
     address: t.hex().notNull(),
     coinType: t.bigint().notNull(),
 
+    // NOTE: this is the sanitized name record value (see @/lib/sanitize-name-record)
     name: t.text().notNull(),
   }),
   (t) => ({

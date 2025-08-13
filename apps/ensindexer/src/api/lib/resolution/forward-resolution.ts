@@ -8,6 +8,7 @@ import {
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
+  isNormalized,
   isSelectionEmpty,
   parseReverseName,
 } from "@ensnode/ensnode-sdk";
@@ -116,20 +117,17 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           accelerate,
         },
         async (span) => {
-          // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
-          const publicClient = getPublicClient(chainId);
+          //////////////////////////////////////////////////
+          // Validate Input
+          //////////////////////////////////////////////////
 
-          const normalizedName = normalize(name);
-          if (name !== normalizedName) {
-            throw new Error(`Name "${name}" must be normalized ("${normalizedName}").`);
+          // Invariant: Name must be normalized
+          if (!isNormalized(name)) {
+            throw new Error(`Invariant: Name "${name}" must be normalized.`);
           }
 
           const node: Node = namehash(name);
           span.setAttribute("node", node);
-
-          //////////////////////////////////////////////////
-          // Validate Input
-          //////////////////////////////////////////////////
 
           // if selection is empty, give them what they asked for
           if (isSelectionEmpty(selection)) {
@@ -150,6 +148,9 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
           // 1. Identify the active resolver for the name on the specified chain.
           //////////////////////////////////////////////////
+
+          // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
+          const publicClient = getPublicClient(chainId);
 
           const { activeName, activeResolver, requiresWildcardSupport } =
             await withProtocolStepAsync(

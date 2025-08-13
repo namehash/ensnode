@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import config from "@/config";
 import { makePrimaryNameId } from "@/lib/ids";
-import { hasNullByte } from "@/lib/lib-helpers";
+import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
 
@@ -12,10 +12,7 @@ import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sd
  */
 export default function () {
   ponder.on("StandaloneReverseRegistrar:NameForAddrChanged", async ({ context, event }) => {
-    const { addr: address, name } = event.args;
-
-    // TODO(null-bytes): represent null bytes correctly
-    if (hasNullByte(name)) return;
+    const { addr: address, name: _name } = event.args;
 
     // The DefaultReverseRegistrar on the ENS Root chain manages 'default' names under the default coinType.
     // On any other chain, the L2ReverseRegistrar manages names for that chain's coinType.
@@ -25,9 +22,10 @@ export default function () {
         : evmChainIdToCoinType(context.chain.id);
 
     const id = makePrimaryNameId(address, coinType);
+    const name = sanitizeNameRecordValue(_name);
 
     // empty string is deletion
-    const isDeletion = name === "";
+    const isDeletion = name === null;
     if (isDeletion) {
       // delete
       await context.db.delete(schema.ext_primaryName, { id });

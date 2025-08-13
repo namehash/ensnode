@@ -1,11 +1,10 @@
 import { Address, getAddress } from "viem";
-import { normalize } from "viem/ens";
 import { z } from "zod/v4";
 
 import { CoinType, DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
-import { ChainId } from "../../shared";
+import { ChainId, isNormalized } from "../../shared";
 
 const toName = (val: string) => val as Name;
 const toAddress = (val: string) => val as Address;
@@ -35,13 +34,7 @@ const stringarray = z
 // TODO: encoded label hashes
 const name = z
   .string()
-  .refine((value) => {
-    try {
-      return value === normalize(value);
-    } catch {
-      return false;
-    }
-  }, "Must be normalized, see https://docs.ens.domains/resolution/names/")
+  .refine(isNormalized, "Must be normalized, see https://docs.ens.domains/resolution/names/")
   .transform(toName);
 
 const address = z

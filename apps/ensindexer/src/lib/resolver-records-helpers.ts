@@ -2,6 +2,7 @@ import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { makeKeyedResolverRecordId } from "@/lib/ids";
 import { stripNullBytes } from "@/lib/lib-helpers";
+import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
 import { Address, isAddress, zeroAddress } from "viem";
 
 export async function handleResolverNameUpdate(
@@ -9,11 +10,9 @@ export async function handleResolverNameUpdate(
   resolverId: string,
   name: string | null,
 ) {
-  // TODO(null-bytes): represent null bytes correctly
-  // NOTE: additionally coalesce falsy values (empty string) into null
-  const sanitizedName = name === null ? null : stripNullBytes(name) || null;
-
-  await context.db.update(schema.resolver, { id: resolverId }).set({ name: sanitizedName });
+  await context.db
+    .update(schema.resolver, { id: resolverId })
+    .set({ name: sanitizeNameRecordValue(name) });
 }
 
 export async function handleResolverAddressRecordUpdate(
