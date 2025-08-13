@@ -59,9 +59,9 @@ export async function findResolver({
 
   // Implicit Invariant: calling `findResolver` in the context of a non-root chain only makes sense
   // in the context of Protocol-Accelerated logic: besides the ENS Root Chain, `findResolver` should
-  // _ONLY_ called with chains for which we are guaranteed to have the Domain-Resolver relations indexed.
-  // This is enforced by the requirement that `forwardResolve` with non-ENSRoot chain ids is only
-  // called when a known offchain lookup resolver defers to a plugin that is active.
+  // _ONLY_ be called with chains for which we are guaranteed to have the Domain-Resolver relations
+  // indexed. This is enforced by the requirement that `forwardResolve` with non-ENSRoot chain ids is
+  // only called when a known offchain lookup resolver defers to a plugin that is active.
 
   // at this point we _must_ have access to the indexed Domain-Resolver relations necessary to look up
   // the Domain's configured Resolver (see invariant above), so retrieve the name's active resolver

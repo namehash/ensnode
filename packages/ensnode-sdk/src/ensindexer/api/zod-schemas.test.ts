@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { zeroAddress } from "viem";
 import { ZodError } from "zod/v4";
+import { DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { routes } from "./zod-schemas";
 
 describe("routes.records", () => {
@@ -21,6 +22,9 @@ describe("routes.records", () => {
 
   it("requires normalized name", () => {
     expect(() => routes.records.params.parse({ name: "Vitalik.eth" })).toThrow(ZodError);
+    expect(() => routes.records.params.parse({ name: "unnormalizable|name.eth" })).toThrow(
+      ZodError,
+    );
   });
 
   it("parses query with defaults", () => {
@@ -57,6 +61,18 @@ describe("routes.primaryName", () => {
     expect(routes.primaryName.params.parse({ address: zeroAddress, chainId: "1" })).toEqual({
       address: zeroAddress,
       chainId: 1,
+    });
+  });
+
+  it("allows default evm chain id", () => {
+    expect(
+      routes.primaryName.params.parse({
+        address: zeroAddress,
+        chainId: DEFAULT_EVM_CHAIN_ID.toString(),
+      }),
+    ).toEqual({
+      address: zeroAddress,
+      chainId: DEFAULT_EVM_CHAIN_ID,
     });
   });
 
@@ -106,6 +122,10 @@ describe("routes.primaryNames", () => {
     const parsed = routes.primaryNames.query.parse({});
     expect(parsed.trace).toBe(false);
     expect(parsed.accelerate).toBe(true);
+  });
+
+  it("rejects duplicate chain ids", () => {
+    expect(() => routes.primaryNames.query.parse({ chainIds: "1,1" })).toThrow(ZodError);
   });
 
   it("rejects default EVM chain id in chainIds", () => {

@@ -27,7 +27,10 @@ const boolstring = z
 const stringarray = z
   .string()
   .transform((val) => val.split(","))
-  .pipe(z.array(z.string().min(1)).min(1));
+  .pipe(z.array(z.string().min(1)).min(1))
+  .refine((values) => new Set(values).size === values.length, {
+    message: "Must be a set of unique entries.",
+  });
 
 // TODO: encoded label hashes
 const name = z

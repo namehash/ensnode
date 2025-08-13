@@ -31,13 +31,13 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
 );
 
 /**
- * Implements batch resolution of an address' Primary Name across the provided `chainIds`. If
- * `chainIds` is undefined, defaults to all ENSIP-19 supported chains.
+ * Implements batch resolution of an address' Primary Name across the provided `chainIds`.
  *
  * @see https://docs.ens.domains/ensip/19
  *
  * @param address the adddress whose Primary Names to resolve
- * @param chainIds the set of chainIds within which to resolve the address' Primary Name
+ * @param chainIds the set of chainIds within which to resolve the address' Primary Name (default:
+ * all ENSIP-19 supported chains)
  */
 export async function resolvePrimaryNames(
   address: MultichainPrimaryNameResolutionArgs["address"],

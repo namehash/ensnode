@@ -57,13 +57,13 @@ app.get(
 /**
  * Example queries for /primary-name:
  *
- * 1. ENSIP-19 Primary Name Lookup (for ENS Root Chain Id)
+ * 1. ENSIP-19 Primary Name Lookup (for ETH Mainnet)
  * GET /primary-name/0x1234...abcd/1
  *
- * 2. ENSIP-19 Multichain Primary Name (for specific Chain, e.g., Optimism)
+ * 2. ENSIP-19 Primary Name (for specific Chain, e.g., Optimism)
  * GET /primary-name/0x1234...abcd/10
  *
- * 3. ENSIP-19 Multichain Primary Name (for 'default' EVM Chain)
+ * 3. ENSIP-19 Primary Name (for 'default' EVM Chain)
  * GET /primary-name/0x1234...abcd/0
  */
 app.get(
@@ -95,10 +95,10 @@ app.get(
 /**
  * Example queries for /primary-names:
  *
- * 1. Multichain ENSIP-19 Primary Name Lookup (defaults to all ENSIP-19 supported chains)
+ * 1. Multichain ENSIP-19 Primary Names Lookup (defaults to all ENSIP-19 supported chains)
  * GET /primary-names/0x1234...abcd
  *
- * 2. Multichain ENSIP-19 Primary Name Lookup (specific chain ids)
+ * 2. Multichain ENSIP-19 Primary Names Lookup (specific chain ids)
  * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
  */
 app.get(

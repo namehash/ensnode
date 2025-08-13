@@ -53,7 +53,7 @@ Resolves records for an ENS name (Forward Resolution), via ENSNode, which implem
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
 - `options`: (optional) additional options
-  - `trace`: (optional) Whether to include a trace in the response
+  - `trace`: (optional) Whether to include a trace in the response (default: false)
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 
 
@@ -71,12 +71,12 @@ const { records } = await client.resolveRecords("jesse.base.eth", {
 
 ##### `resolvePrimaryName(address, chainId, options)`
 
-Resolves the primary name of a provided address on the specified chainId (Reverse Resolution), via ENSNode, which implements Protocol Acceleration for indexed names.
+Resolves the primary name of the provided `address` on the specified `chainId`, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to determine the `address`'s Default Name directly.
 
 - `address`: The Address whose Primary Name to resolve
 - `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
 - `options`: (optional) additional options
-  - `trace`: (optional) Whether to include a trace in the response
+  - `trace`: (optional) Whether to include a trace in the response (default: false)
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 
 
@@ -89,12 +89,12 @@ const { name } = await client.resolvePrimaryName("0x2211d1D0020DAEA8039E46Cf1367
 
 ##### `resolvePrimaryNames(address, options)`
 
-Resolves the primary name of a provided address on the specified chainId (Reverse Resolution), via ENSNode, which implements Protocol Acceleration for indexed names.
+Resolves the primary names of the provided `address` on the specified chainIds, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned for all chainIds for which there is not a chain-specific Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and should rely on the aforementioned per-chain defaulting behavior.
 
-- `address`: The Address whose Primary Name to resolve
+- `address`: The Address whose Primary Names to resolve
 - `options`: (optional) additional options
-  - `chainIds`: The chain ids within which to query the address' ENSIP-19 Multichain Primary Name (defaults to all ENSIP-19 supported chains)
-  - `trace`: (optional) Whether to include a trace in the response
+  - `chainIds`: The chain ids within which to query the address' ENSIP-19 Multichain Primary Name (default: all ENSIP-19 supported chains)
+  - `trace`: (optional) Whether to include a trace in the response (default: false)
   - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 
 ```ts

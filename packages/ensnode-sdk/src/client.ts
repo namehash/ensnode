@@ -186,9 +186,9 @@ export class ENSNodeClient {
    * @param address The Address whose Primary Name to resolve
    * @param options additional options
    * @param options.chainIds The set of chain ids within which to query the address' ENSIP-19
-   *  Multichain Primary Name (defaults to all ENSIP-19 supported chains)
-   * @param options.accelerate whether to attempt Protocol Acceleration (default true)
-   * @param options.trace whether to include a trace in the response (default false)
+   *  Multichain Primary Name (default: all ENSIP-19 supported chains)
+   * @param options.accelerate whether to attempt Protocol Acceleration (default: true)
+   * @param options.trace whether to include a trace in the response (default: false)
    * @returns ResolvePrimaryNamesResponse
    * @throws If the request fails or the ENSNode API returns an error response
    *

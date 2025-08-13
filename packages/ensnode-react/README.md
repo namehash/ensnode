@@ -161,7 +161,7 @@ Hook for resolving records for an ENS name (Forward Resolution).
 - `selection`: Selection of Resolver records to resolve
   - `addresses`: Array of coin types to resolve addresses for
   - `texts`: Array of text record keys to resolve
-- `trace`: (optional) Whether to include a trace in the response
+- `trace`: (optional) Whether to include a trace in the response (default: false)
 - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 - `query`: (optional) TanStack Query options for customization
 
@@ -185,7 +185,7 @@ Hook for resolving the primary name of a specified address (Reverse Resolution).
 
 - `address`: The Address whose Primary Name to resolve
 - `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
-- `trace`: (optional) Whether to include a trace in the response
+- `trace`: (optional) Whether to include a trace in the response (default: false)
 - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 - `query`: (optional) TanStack Query options for customization
 
@@ -205,8 +205,8 @@ Hook for resolving the primary names of a specified address across multiple chai
 #### Parameters
 
 - `address`: The Address whose Primary Names to resolve
-- `chainIds`: (optional) Array of chain ids to query the address' ENSIP-19 Multichain Primary Names (defaults to all well-known chain ids)
-- `trace`: (optional) Whether to include a trace in the response
+- `chainIds`: (optional) Array of chain ids to query the address' ENSIP-19 Multichain Primary Names (default: all ENSIP-19 supported chains)
+- `trace`: (optional) Whether to include a trace in the response (default: false)
 - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
 - `query`: (optional) TanStack Query options for customization
 
