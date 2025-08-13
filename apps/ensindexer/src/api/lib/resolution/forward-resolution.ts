@@ -8,6 +8,7 @@ import {
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
+  isSelectionEmpty,
   parseReverseName,
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
@@ -123,9 +124,6 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             throw new Error(`Name "${name}" must be normalized ("${normalizedName}").`);
           }
 
-          // TODO: more name normalization logic (return values of `name` record for example)
-          // TODO: need to handle encoded label hashes in name, yeah?
-
           const node: Node = namehash(name);
           span.setAttribute("node", node);
 
@@ -133,15 +131,19 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // Validate Input
           //////////////////////////////////////////////////
 
+          // if selection is empty, give them what they asked for
+          if (isSelectionEmpty(selection)) {
+            return makeEmptyResolverRecordsResponse(selection);
+          }
+
           // construct the set of resolve() calls indicated by selection
           const calls = makeResolveCalls(node, selection);
           span.setAttribute("calls", JSON.stringify(replaceBigInts(calls, String)));
 
-          // empty selection? invalid input, nothing to do
+          // Invariant: a non-empty selection must have generated some resolve calls
           if (calls.length === 0) {
-            // TODO: maybe return some empty response instead of an error?
             throw new Error(
-              `Invalid selection: ${JSON.stringify(selection)} resulted in no resolution calls.`,
+              `Invariant: Selection ${JSON.stringify(selection)} is not empty but resulted in no resolution calls.`,
             );
           }
 
@@ -189,7 +191,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //   If:
           //    1) the activeResolver is a Known ENSIP-19 Reverse Resolver, and
           //    2) the ReverseResolvers plugin is active,
-          //   then we can just read the indexed name value directly from the index.
+          //   then we can just read the name record value directly from the index.
           //////////////////////////////////////////////////
           if (accelerate) {
             const _isKnownENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(
@@ -204,7 +206,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               // Invariant: consumer must be selecting the `name` record at this point
               if (selection.name !== true) {
                 throw new Error(
-                  `Invariant: ENSIP-19 Reverse Resolvers Protocol Acceleration expected 'name' record in selection but instead received: ${JSON.stringify(selection)}.`,
+                  `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected 'name' record in selection but instead received: ${JSON.stringify(selection)}.`,
                 );
               }
 
@@ -213,7 +215,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               // select more records than just 'name', so just warn if that happens.
               if (selection.addresses !== undefined || selection.texts !== undefined) {
                 console.warn(
-                  `Sanity Check: ENSIP-19 Reverse Resolvers Protocol Acceleration expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
+                  `Sanity Check(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
                 );
               }
 
@@ -221,7 +223,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               const parsed = parseReverseName(name);
               if (!parsed) {
                 throw new Error(
-                  `Invariant: ENSIP-19 Reverse Resolvers Protocol Acceleration expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
+                  `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
                 );
               }
 
@@ -323,27 +325,30 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           // 3.1 requireResolver() — verifies that the resolver supports ENSIP-10 if necessary
-          await withProtocolStepAsync(
+          const isExtendedResolver = await withProtocolStepAsync(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.RequireResolver,
-            {},
-            async () => {
+            { chainId, activeResolver, requiresWildcardSupport },
+            async (span) => {
               const isExtendedResolver = await withSpanAsync(
                 tracer,
                 "supportsENSIP10Interface",
-                {},
+                { chainId, address: activeResolver },
                 () => supportsENSIP10Interface({ address: activeResolver, publicClient }),
               );
 
-              if (!isExtendedResolver && requiresWildcardSupport) {
-                // requires exact match if not extended resolver
-                // TODO: should this return empty response instead?
-                throw new Error(
-                  `The active resolver for '${name}' MUST be a wildcard-capable IExtendedResolver, but ${chainId}:${activeResolver} (via '${activeName}') did not respond correctly to ENSIP-10 Wildcard Resolution supportsInterface().`,
-                );
-              }
+              span.setAttribute("isExtendedResolver", isExtendedResolver);
+
+              return isExtendedResolver;
             },
           );
+
+          // if we require wildcard support and this is NOT an extended resolver, the resolver is not
+          // valid, i.e. there is no active resolver for the name
+          // https://docs.ens.domains/ensip/10/#specification
+          if (requiresWildcardSupport && !isExtendedResolver) {
+            return makeEmptyResolverRecordsResponse(selection);
+          }
 
           // execute each record's call against the active Resolver
           const rawResults = await withProtocolStepAsync(
@@ -354,7 +359,9 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               executeResolveCalls<SELECTION>({
                 name,
                 resolverAddress: activeResolver,
-                requiresWildcardSupport,
+                // NOTE: ENSIP-10 specifies that if a resolver supports IExtendedResolver,
+                // the client MUST use the ENSIP-10 resolve() method over the legacy methods.
+                useENSIP10Resolve: isExtendedResolver,
                 calls,
                 publicClient,
               }),

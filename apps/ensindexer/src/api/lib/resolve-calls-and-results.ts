@@ -102,13 +102,13 @@ export function makeResolveCalls<SELECTION extends ResolverRecordsSelection>(
 export async function executeResolveCalls<SELECTION extends ResolverRecordsSelection>({
   name,
   resolverAddress,
-  requiresWildcardSupport,
+  useENSIP10Resolve,
   calls,
   publicClient,
 }: {
   name: Name;
   resolverAddress: Address;
-  requiresWildcardSupport: boolean;
+  useENSIP10Resolve: boolean;
   calls: ResolveCalls<SELECTION>;
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
@@ -119,7 +119,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
       calls.map(async (call) => {
         try {
           // NOTE: ENSIP-10 — If extended resolver, resolver.resolve(name, data)
-          if (requiresWildcardSupport) {
+          if (useENSIP10Resolve) {
             return await withSpanAsync(
               tracer,
               `resolve(${call.functionName}, ${call.args})`,

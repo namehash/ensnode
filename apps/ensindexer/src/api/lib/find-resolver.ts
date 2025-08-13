@@ -107,7 +107,6 @@ async function findResolverWithUniversalResolver(
       // 3. Interpret results
 
       if (isAddressEqual(activeResolver, zeroAddress)) {
-        // TODO: is error status correct for this?
         span.setStatus({ code: SpanStatusCode.ERROR, message: "activeResolver is zeroAddress" });
         return NULL_RESULT;
       }
@@ -119,7 +118,7 @@ async function findResolverWithUniversalResolver(
         );
       }
 
-      // offset is byte offset into DNS-Encoded Name used for resolution
+      // offset is byte offset into DNS Encoded Name used for resolution
       const offset = Number(_offset);
 
       if (offset > dnsEncodedName.length) {
@@ -128,7 +127,7 @@ async function findResolverWithUniversalResolver(
         );
       }
 
-      // UniversalResolver returns the offset in characters where the activeName begins
+      // UniversalResolver returns the offset in bytes within the DNS Encoded Name where the activeName begins
       const activeName: Name = bytesToPacket(dnsEncodedName.slice(offset));
 
       return {
@@ -156,12 +155,13 @@ async function findResolverWithUniversalResolver(
  * ```
  */
 async function findResolverWithIndex(chainId: ChainId, name: Name): Promise<FindResolverResult> {
-  return withActiveSpanAsync(tracer, "findResolverWithIndex", { chainId, name }, async (span) => {
+  return withActiveSpanAsync(tracer, "findResolverWithIndex", { chainId, name }, async () => {
     // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
     const names = getNameHierarchy(name);
 
+    // Invariant: there is at least 1 name in the hierarchy
     if (names.length === 0) {
-      throw new Error(`findResolverWithIndex: Invalid name provided: '${name}'`);
+      throw new Error(`Invariant(findResolverWithIndex): received an invalid name: '${name}'`);
     }
 
     // 2. compute node of each via namehash
