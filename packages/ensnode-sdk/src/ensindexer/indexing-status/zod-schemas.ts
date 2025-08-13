@@ -18,6 +18,7 @@ import {
   checkChainIndexingStatusesForBackfillOverallStatus,
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
+  checkChainIndexingStatusesForUnstartedOverallStatus,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
 } from "./helpers";
@@ -28,6 +29,7 @@ import {
   ChainIndexingFollowingStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
+  ChainIndexingStatusForUnstartedOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
   ChainIndexingUnstartedStatus,
@@ -193,9 +195,38 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
     });
 
 /**
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingUnstartedStatus}
+ */
+const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
+  z
+    .strictObject({
+      overallStatus: z.literal(OverallIndexingStatusIds.Unstarted),
+      chains: makeChainIndexingStatusesSchema(valueLabel)
+        .refine(
+          (chains) =>
+            checkChainIndexingStatusesForUnstartedOverallStatus(Array.from(chains.values())),
+          {
+            error: `${valueLabel} at least one chain must be in "unstarted" status and
+each chain has to have a status of either "unstarted", or "completed"`,
+          },
+        )
+        .transform(
+          (chains) => chains as Map<ChainId, ChainIndexingStatusForUnstartedOverallStatus>,
+        ),
+    })
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
+      },
+      { error: `${valueLabel} is an invalid overallStatus.` },
+    );
+
+/**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingBackfillStatus}
  */
-const makeOverallIndexingStatusBackfill = (valueLabel?: string) =>
+const makeBackfillOverallStatusSchema = (valueLabel?: string) =>
   z
     .strictObject({
       overallStatus: z.literal(OverallIndexingStatusIds.Backfill),
@@ -222,7 +253,7 @@ each chain has to have a status of either "unstarted", "backfill" or "completed"
 /**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingCompletedStatus}
  */
-const makeOverallIndexingStatusCompleted = (valueLabel?: string) =>
+const makeCompletedOverallStatusSchema = (valueLabel?: string) =>
   z
     .strictObject({
       overallStatus: z.literal(OverallIndexingStatusIds.Completed),
@@ -248,7 +279,7 @@ const makeOverallIndexingStatusCompleted = (valueLabel?: string) =>
 /**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingFollowingStatus}
  */
-const makeOverallIndexingStatusFollowing = (valueLabel?: string) =>
+const makeFollowingOverallStatusSchema = (valueLabel?: string) =>
   z
     .strictObject({
       overallStatus: z.literal(OverallIndexingStatusIds.Following),
@@ -286,7 +317,7 @@ const makeOverallIndexingStatusFollowing = (valueLabel?: string) =>
 /**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingErrorStatus}
  */
-const makeOverallIndexingStatusErrorSchema = (valueLabel?: string) =>
+const makeErrorSchemaOverallStatusSchema = (valueLabel?: string) =>
   z.strictObject({
     overallStatus: z.literal(OverallIndexingStatusIds.IndexerError),
   });
@@ -301,8 +332,9 @@ export const makeENSIndexerIndexingStatusSchema = (
   valueLabel: string = "ENSIndexerIndexingStatus",
 ) =>
   z.discriminatedUnion("overallStatus", [
-    makeOverallIndexingStatusBackfill(valueLabel),
-    makeOverallIndexingStatusCompleted(valueLabel),
-    makeOverallIndexingStatusFollowing(valueLabel),
-    makeOverallIndexingStatusErrorSchema(valueLabel),
+    makeUnstartedOverallStatusSchema(valueLabel),
+    makeBackfillOverallStatusSchema(valueLabel),
+    makeCompletedOverallStatusSchema(valueLabel),
+    makeFollowingOverallStatusSchema(valueLabel),
+    makeErrorSchemaOverallStatusSchema(valueLabel),
   ]);

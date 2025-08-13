@@ -53,7 +53,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
       expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Completed);
     });
 
-    it("can correctly derive 'backfill' status if all chains are either 'unstarted' or 'completed'", () => {
+    it("can correctly derive 'unstarted' status if all chains are either 'unstarted' or 'completed'", () => {
       // arrange
       const chainStatuses: ChainIndexingStatus[] = [
         {
@@ -80,7 +80,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
       const overallIndexingStatus = getOverallIndexingStatus(chainStatuses);
 
       // assert
-      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Backfill);
+      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Unstarted);
     });
 
     it("can correctly derive 'backfill' status if all chains are either 'unstarted', 'backfill' or 'completed'", () => {

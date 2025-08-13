@@ -186,7 +186,7 @@ export interface ENSIndexerConfig {
    * http://localhost:{port}. For ENSIndexer instances started using
    * `ponder serve`, this should be set to the hostname of
    * the related ENSIndexer instance started using `ponder start` or
-   * `ponder serve` that is writing to the same ENSDb.
+   * `ponder dev` that is writing to the same ENSDb.
    */
   ensIndexerUrl: URL;
 

@@ -3,12 +3,22 @@ import type {
   ChainIndexingCompletedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
+  ChainIndexingStatusForUnstartedOverallStatus,
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
   ENSIndexerOverallIndexingFollowingStatus,
   ENSIndexerOverallIndexingStatus,
+  ENSIndexerOverallIndexingUnstartedStatus,
 } from "./types";
+
+/**
+ * Serialized representation of {@link ENSIndexerOverallIndexingUnstartedStatus}
+ */
+export interface SerializedENSIndexerOverallIndexingUnstartedStatus
+  extends Omit<ENSIndexerOverallIndexingUnstartedStatus, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingStatusForUnstartedOverallStatus>;
+}
 
 /**
  * Serialized representation of {@link ENSIndexerOverallIndexingBackfillStatus}
@@ -44,6 +54,7 @@ export interface SerializedENSIndexerOverallIndexingErrorStatus
  * Serialized representation of {@link ENSIndexerOverallIndexingStatus}
  */
 export type SerializedENSIndexerOverallIndexingStatus =
+  | SerializedENSIndexerOverallIndexingUnstartedStatus
   | SerializedENSIndexerOverallIndexingBackfillStatus
   | SerializedENSIndexerOverallIndexingCompletedStatus
   | SerializedENSIndexerOverallIndexingFollowingStatus

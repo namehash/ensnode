@@ -15,13 +15,16 @@ import {
   ChainIndexingCompletedStatus,
   type ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
+  ChainIndexingStatusForUnstartedOverallStatus,
   OverallIndexingStatusIds,
   SerializedENSIndexerOverallIndexingBackfillStatus,
   SerializedENSIndexerOverallIndexingCompletedStatus,
   SerializedENSIndexerOverallIndexingFollowingStatus,
+  SerializedENSIndexerOverallIndexingUnstartedStatus,
   checkChainIndexingStatusesForBackfillOverallStatus,
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
+  checkChainIndexingStatusesForUnstartedOverallStatus,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -97,12 +100,15 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
       const overallStatus = getOverallIndexingStatus(chainStatuses);
 
       switch (overallStatus) {
-        case OverallIndexingStatusIds.Following:
+        case OverallIndexingStatusIds.Unstarted: {
           return {
-            overallStatus: OverallIndexingStatusIds.Following,
-            chains: serializedChainIndexingStatuses,
-            overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
-          } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
+            overallStatus: OverallIndexingStatusIds.Unstarted,
+            chains: serializedChainIndexingStatuses as Record<
+              ChainIdString,
+              ChainIndexingStatusForUnstartedOverallStatus
+            >, // forcing the type here, will be validated in the following 'check' step
+          } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
+        }
 
         case OverallIndexingStatusIds.Backfill: {
           return {
@@ -110,7 +116,7 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
             chains: serializedChainIndexingStatuses as Record<
               ChainIdString,
               ChainIndexingStatusForBackfillOverallStatus
-            >, // forcing the type here, will be validated in the following refine step
+            >, // forcing the type here, will be validated in the following 'check' step
           } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
         }
 
@@ -120,9 +126,16 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
             chains: serializedChainIndexingStatuses as Record<
               ChainIdString,
               ChainIndexingCompletedStatus
-            >, // forcing the type here, will be validated in the following refine step
+            >, // forcing the type here, will be validated in the following 'check' step
           } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
         }
+
+        case OverallIndexingStatusIds.Following:
+          return {
+            overallStatus: OverallIndexingStatusIds.Following,
+            chains: serializedChainIndexingStatuses,
+            overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
+          } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
       }
     })
     .check((ctx) => {
@@ -131,6 +144,10 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
       let hasValidChains = false;
 
       switch (overallStatus) {
+        case OverallIndexingStatusIds.Unstarted:
+          hasValidChains = checkChainIndexingStatusesForUnstartedOverallStatus(chainStatuses);
+          break;
+
         case OverallIndexingStatusIds.Backfill:
           hasValidChains = checkChainIndexingStatusesForBackfillOverallStatus(chainStatuses);
           break;

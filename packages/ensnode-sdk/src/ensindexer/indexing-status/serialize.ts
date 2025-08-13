@@ -5,11 +5,10 @@ import {
   SerializedENSIndexerOverallIndexingErrorStatus,
   SerializedENSIndexerOverallIndexingFollowingStatus,
   SerializedENSIndexerOverallIndexingStatus,
+  SerializedENSIndexerOverallIndexingUnstartedStatus,
 } from "./serialized-types";
 import {
-  ChainIndexingCompletedStatus,
   ChainIndexingStatus,
-  ChainIndexingStatusForBackfillOverallStatus,
   ENSIndexerOverallIndexingStatus,
   OverallIndexingStatusIds,
 } from "./types";
@@ -17,43 +16,10 @@ import {
 /**
  * Serialize chain indexing statuses.
  */
-export function serializeChainIndexingStatuses(
-  chainIndexingStatuses: Map<ChainId, ChainIndexingStatus>,
-): Record<ChainIdString, ChainIndexingStatus> {
-  const serializedChainsIndexingStatuses: Record<ChainIdString, ChainIndexingStatus> = {};
-
-  for (const [chainId, chainIndexingStatus] of chainIndexingStatuses.entries()) {
-    serializedChainsIndexingStatuses[serializeChainId(chainId)] = chainIndexingStatus;
-  }
-
-  return serializedChainsIndexingStatuses;
-}
-
-/**
- * Serialize chain indexing statuses for the 'backfill' overall status.
- */
-export function serializeChainIndexingStatusesForBackfillOverallStatus(
-  chainIndexingStatuses: Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>,
-): Record<ChainIdString, ChainIndexingStatusForBackfillOverallStatus> {
-  const serializedChainsIndexingStatuses: Record<
-    ChainIdString,
-    ChainIndexingStatusForBackfillOverallStatus
-  > = {};
-
-  for (const [chainId, chainIndexingStatus] of chainIndexingStatuses.entries()) {
-    serializedChainsIndexingStatuses[serializeChainId(chainId)] = chainIndexingStatus;
-  }
-
-  return serializedChainsIndexingStatuses;
-}
-
-/**
- * Serialize chain indexing statuses for the 'completed' overall status.
- */
-export function serializeChainIndexingStatusesForCompletedOverallStatus(
-  chainIndexingStatuses: Map<ChainId, ChainIndexingCompletedStatus>,
-): Record<ChainIdString, ChainIndexingCompletedStatus> {
-  const serializedChainsIndexingStatuses: Record<ChainIdString, ChainIndexingCompletedStatus> = {};
+export function serializeChainIndexingStatuses<ChainIndexingStatusType extends ChainIndexingStatus>(
+  chainIndexingStatuses: Map<ChainId, ChainIndexingStatusType>,
+): Record<ChainIdString, ChainIndexingStatusType> {
+  const serializedChainsIndexingStatuses: Record<ChainIdString, ChainIndexingStatusType> = {};
 
   for (const [chainId, chainIndexingStatus] of chainIndexingStatuses.entries()) {
     serializedChainsIndexingStatuses[serializeChainId(chainId)] = chainIndexingStatus;
@@ -74,16 +40,22 @@ export function serializeENSIndexerIndexingStatus(
         overallStatus: OverallIndexingStatusIds.IndexerError,
       } satisfies SerializedENSIndexerOverallIndexingErrorStatus;
 
+    case OverallIndexingStatusIds.Unstarted:
+      return {
+        overallStatus: OverallIndexingStatusIds.Unstarted,
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+      } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
+
     case OverallIndexingStatusIds.Backfill:
       return {
         overallStatus: OverallIndexingStatusIds.Backfill,
-        chains: serializeChainIndexingStatusesForBackfillOverallStatus(indexingStatus.chains),
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
       } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
 
     case OverallIndexingStatusIds.Completed: {
       return {
         overallStatus: OverallIndexingStatusIds.Completed,
-        chains: serializeChainIndexingStatusesForCompletedOverallStatus(indexingStatus.chains),
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
       } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
     }
 

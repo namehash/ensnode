@@ -158,6 +158,8 @@ async function getChainsBlockRefs(
  * guaranteed to provide indexing status data.
  * @see https://ponder.sh/docs/api-reference/ponder/cli#dev
  * @see https://ponder.sh/docs/api-reference/ponder/cli#start
+ *
+ * @throws error when fetched Ponder Metadata was invalid.
  */
 export async function buildIndexingStatus(
   publicClients: Record<ChainName, PublicClient>,

@@ -14,6 +14,7 @@ export type ChainIndexingStatusId =
   (typeof ChainIndexingStatusIds)[keyof typeof ChainIndexingStatusIds];
 
 export const OverallIndexingStatusIds = {
+  Unstarted: "unstarted",
   Backfill: "backfill",
   Following: "following",
   Completed: "completed",
@@ -220,6 +221,36 @@ export type ChainIndexingStatus =
   | ChainIndexingCompletedStatus;
 
 /**
+ * Chain Indexing Status allowed when overall status is 'unstarted'.
+ */
+export type ChainIndexingStatusForUnstartedOverallStatus =
+  | ChainIndexingUnstartedStatus
+  | ChainIndexingCompletedStatus;
+
+/**
+ * ENSIndexer Overall Indexing Status: Backfill
+ *
+ * Describes the current state of indexing operations across all indexed chains
+ * when the overall indexing status is {@link OverallIndexingStatusIds.Unstarted}.
+ */
+export interface ENSIndexerOverallIndexingUnstartedStatus {
+  /**
+   * Overall Indexing Status
+   */
+  overallStatus: typeof OverallIndexingStatusIds.Unstarted;
+
+  /**
+   * Indexing Status for each chain.
+   *
+   * At least one chain is guaranteed to be in the "unstarted" status.
+   * Each chain is guaranteed to have a status of either "unstarted",
+   * or "completed". It's impossible for any chain to have a status of either
+   * "backfill", or "following".
+   */
+  chains: Map<ChainId, ChainIndexingStatusForUnstartedOverallStatus>;
+}
+
+/**
  * Chain Indexing Status allowed when overall status is 'backfill'.
  */
 export type ChainIndexingStatusForBackfillOverallStatus =
@@ -292,7 +323,7 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
   /**
    * The maximum
    * {@link ChainIndexingFollowingStatus.approxRealtimeDistance} value
-   * across all chains with the 'following' status.
+   * across all chains with status: 'following'.
    */
   overallApproxRealtimeDistance: Duration;
 }
@@ -301,7 +332,9 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
  * ENSIndexer Overall Indexing Status: Error
  *
  * Describes the state when ENSIndexer failed to return the indexing status for
- * all indexed chains. This state suggests an error with ENSIndexer.
+ * all indexed chains.
+ *
+ * This state suggests an error with the "primary" ENSIndexer.
  */
 export interface ENSIndexerOverallIndexingErrorStatus {
   /**
@@ -313,10 +346,10 @@ export interface ENSIndexerOverallIndexingErrorStatus {
 /**
  * ENSIndexer Overall Indexing Status
  *
- * Describes the current state of indexing operations if possible.
- * Otherwise, presents the error status.
+ * Describes the overall state of indexing operations.
  */
 export type ENSIndexerOverallIndexingStatus =
+  | ENSIndexerOverallIndexingUnstartedStatus
   | ENSIndexerOverallIndexingBackfillStatus
   | ENSIndexerOverallIndexingCompletedStatus
   | ENSIndexerOverallIndexingFollowingStatus

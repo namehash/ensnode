@@ -6,6 +6,7 @@ import {
   ChainIndexingIndefiniteConfig,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
+  ChainIndexingStatusForUnstartedOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
   OverallIndexingStatusId,
@@ -35,9 +36,7 @@ export function getOverallIndexingStatus(
   } else if (
     chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Unstarted)
   ) {
-    // simplify state space for OverallIndexingStatusIds by treating Unstarted
-    // the same as Backfill
-    overallStatus = OverallIndexingStatusIds.Backfill;
+    overallStatus = OverallIndexingStatusIds.Unstarted;
   } else {
     overallStatus = OverallIndexingStatusIds.Completed;
   }
@@ -92,6 +91,31 @@ export function createIndexingConfig(
 }
 
 /**
+ * Check if Chain Indexing Statuses fit the 'unstarted' overall status
+ * requirements:
+ * - At least one chain is guaranteed to be in the "unstarted" status.
+ * - Each chain is guaranteed to have a status of either "unstarted",
+ *   "unstarted" or "completed".
+ *
+ * Note: This function narrows the {@linkChainIndexingStatus} type to
+ * {@link ChainIndexingStatusForUnstartedOverallStatus}.
+ */
+export function checkChainIndexingStatusesForUnstartedOverallStatus(
+  chains: ChainIndexingStatus[],
+): chains is ChainIndexingStatusForUnstartedOverallStatus[] {
+  const atLeastOneChainInTargetStatus = chains.some(
+    (chain) => chain.status === ChainIndexingStatusIds.Unstarted,
+  );
+  const otherChainsHaveValidStatuses = chains.every(
+    (chain) =>
+      chain.status === ChainIndexingStatusIds.Unstarted ||
+      chain.status === ChainIndexingStatusIds.Completed,
+  );
+
+  return atLeastOneChainInTargetStatus && otherChainsHaveValidStatuses;
+}
+
+/**
  * Check if Chain Indexing Statuses fit the 'backfill' overall status
  * requirements:
  * - At least one chain is guaranteed to be in the "backfill" status.
@@ -104,7 +128,7 @@ export function createIndexingConfig(
 export function checkChainIndexingStatusesForBackfillOverallStatus(
   chains: ChainIndexingStatus[],
 ): chains is ChainIndexingStatusForBackfillOverallStatus[] {
-  const atLeastOneChainInBackfillStatus = chains.some(
+  const atLeastOneChainInTargetStatus = chains.some(
     (chain) => chain.status === ChainIndexingStatusIds.Backfill,
   );
   const otherChainsHaveValidStatuses = chains.every(
@@ -114,7 +138,7 @@ export function checkChainIndexingStatusesForBackfillOverallStatus(
       chain.status === ChainIndexingStatusIds.Completed,
   );
 
-  return atLeastOneChainInBackfillStatus && otherChainsHaveValidStatuses;
+  return atLeastOneChainInTargetStatus && otherChainsHaveValidStatuses;
 }
 
 /**
@@ -123,7 +147,7 @@ export function checkChainIndexingStatusesForBackfillOverallStatus(
  * - Any chain is guaranteed to have a status of "completed".
  *
  * Note: This function narrows the {@linkChainIndexingStatus} type to
- * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ * {@link ChainIndexingCompletedStatus}.
  */
 export function checkChainIndexingStatusesForCompletedOverallStatus(
   chains: ChainIndexingStatus[],
