@@ -50,6 +50,7 @@ export function serializeENSIndexerIndexingStatus(
       return {
         overallStatus: OverallIndexingStatusIds.Backfill,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
       } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
 
     case OverallIndexingStatusIds.Completed: {
@@ -62,8 +63,9 @@ export function serializeENSIndexerIndexingStatus(
     case OverallIndexingStatusIds.Following:
       return {
         overallStatus: OverallIndexingStatusIds.Following,
-        overallApproxRealtimeDistance: indexingStatus.overallApproxRealtimeDistance,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        overallApproxRealtimeDistance: indexingStatus.overallApproxRealtimeDistance,
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
       } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
   }
 }

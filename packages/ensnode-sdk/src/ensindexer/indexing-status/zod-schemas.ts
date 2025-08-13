@@ -13,6 +13,7 @@ import {
   makeBlockRefSchema,
   makeChainIdStringSchema,
   makeDurationSchema,
+  makeUnixTimestampSchema,
 } from "../../shared/zod-schemas";
 import {
   checkChainIndexingStatusesForBackfillOverallStatus,
@@ -21,6 +22,7 @@ import {
   checkChainIndexingStatusesForUnstartedOverallStatus,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
+  getStandbyChains,
 } from "./helpers";
 import {
   ChainIndexingBackfillStatus,
@@ -240,6 +242,7 @@ each chain has to have a status of either "unstarted", "backfill" or "completed"
           },
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>),
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
     })
     .refine(
       (indexingStatus) => {
@@ -248,6 +251,23 @@ each chain has to have a status of either "unstarted", "backfill" or "completed"
         return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
+    )
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        const standbyChainStartBlocks = getStandbyChains(chains).map(
+          (chain) => chain.config.startBlock.timestamp,
+        );
+
+        const standbyChainEarliestStartBlocks = Math.min(...standbyChainStartBlocks);
+
+        return indexingStatus.omnichainIndexingCursor <= standbyChainEarliestStartBlocks;
+      },
+      {
+        error:
+          "omnichainIndexingCursor must be lower than or equal to the earliest config.startBlock across all standby chains",
+      },
     );
 
 /**
@@ -285,6 +305,7 @@ const makeFollowingOverallStatusSchema = (valueLabel?: string) =>
       overallStatus: z.literal(OverallIndexingStatusIds.Following),
       chains: makeChainIndexingStatusesSchema(valueLabel),
       overallApproxRealtimeDistance: makeDurationSchema(valueLabel),
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
     })
     .refine(
       (indexingStatus) => {
@@ -312,6 +333,23 @@ const makeFollowingOverallStatusSchema = (valueLabel?: string) =>
         );
       },
       { error: `${valueLabel} is an invalid overallApproxRealtimeDistance.` },
+    )
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        const standbyChainStartBlocks = getStandbyChains(chains).map(
+          (chain) => chain.config.startBlock.timestamp,
+        );
+
+        const standbyChainEarliestStartBlocks = Math.min(...standbyChainStartBlocks);
+
+        return indexingStatus.omnichainIndexingCursor <= standbyChainEarliestStartBlocks;
+      },
+      {
+        error:
+          "omnichainIndexingCursor must be lower than or equal to the earliest config.startBlock across all standby chains",
+      },
     );
 
 /**

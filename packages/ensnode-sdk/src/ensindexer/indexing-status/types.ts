@@ -1,4 +1,4 @@
-import type { BlockRef, ChainId, Duration } from "../../shared";
+import type { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 
 export const ChainIndexingStatusIds = {
   Unstarted: "unstarted",
@@ -102,8 +102,8 @@ export type ChainIndexingConfig = ChainIndexingIndefiniteConfig | ChainIndexingD
  * Chain Indexing Status: Unstarted
  *
  * Notes:
- * - The "unstarted" status applies when using omnichain ordering and the
- *   overall progress checkpoint has not reached the startBlock of the chain.
+ * - The "unstarted" status applies when using omnichain ordering and
+ *   the omnichainIndexingCursor has not reached the startBlock of the chain.
  */
 export interface ChainIndexingUnstartedStatus {
   status: typeof ChainIndexingStatusIds.Unstarted;
@@ -221,6 +221,24 @@ export type ChainIndexingStatus =
   | ChainIndexingCompletedStatus;
 
 /**
+ * Chain Indexing Status: Active
+ *
+ * Represents a chain for which indexing is happening currently.
+ * The `latestIndexedBlock` field applies in that status.
+ */
+export type ChainIndexingActiveStatus = ChainIndexingBackfillStatus | ChainIndexingFollowingStatus;
+
+/**
+ * Chain Indexing Status: Standby
+ *
+ * Represents a chain for which no indexing is happening at the moment.
+ * The `latestIndexedBlock` field is not applicable in that status.
+ */
+export type ChainIndexingStandbyStatus =
+  | ChainIndexingUnstartedStatus
+  | ChainIndexingCompletedStatus;
+
+/**
  * Chain Indexing Status allowed when overall status is 'unstarted'.
  */
 export type ChainIndexingStatusForUnstartedOverallStatus =
@@ -271,6 +289,19 @@ export interface ENSIndexerOverallIndexingBackfillStatus {
   overallStatus: typeof OverallIndexingStatusIds.Backfill;
 
   /**
+   * Omnichain Indexing Cursor
+   *
+   * Identifies the timestamp of the progress of omnichain indexing across
+   * all chains in {@link ChainIndexingBackfillStatus} status.
+   *
+   * Invariants:
+   * - the cursor value is guaranteed to be lower than or equal to
+   *   the timestamp of the earliest `config.startBlock` across all chains
+   *   in {@link ChainIndexingStandbyStatus} status.
+   */
+  omnichainIndexingCursor: UnixTimestamp;
+
+  /**
    * Indexing Status for each chain.
    *
    * At least one chain is guaranteed to be in the "backfill" status.
@@ -314,6 +345,19 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
    * Overall Indexing Status
    */
   overallStatus: typeof OverallIndexingStatusIds.Following;
+
+  /**
+   * Omnichain Indexing Cursor
+   *
+   * Identifies the timestamp of the progress of omnichain indexing across
+   * all chains in {@link ChainIndexingActiveStatus} status.
+   *
+   * Invariants:
+   * - the cursor value is guaranteed to be lower than or equal to
+   *   the timestamp of the earliest `config.startBlock` across all chains
+   *   in {@link ChainIndexingStandbyStatus} status.
+   */
+  omnichainIndexingCursor: UnixTimestamp;
 
   /**
    * Indexing Status for each chain.

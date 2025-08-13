@@ -5,6 +5,7 @@ import { SerializedENSIndexerOverallIndexingStatus } from "./serialized-types";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
   ChainIndexingBackfillStatus,
+  ChainIndexingFollowingStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
   ChainIndexingUnstartedStatus,
@@ -16,33 +17,48 @@ describe("ENSIndexer: Indexing Status", () => {
     it("can serialize and deserialize indexing status object", () => {
       // arrange
       const indexingStatus = {
+        overallStatus: ChainIndexingStatusIds.Following,
         chains: new Map([
           [
             1,
             {
-              status: ChainIndexingStatusIds.Backfill,
+              status: ChainIndexingStatusIds.Following,
               config: {
                 strategy: ChainIndexingStrategyIds.Indefinite,
                 startBlock: earliestBlockRef,
-                endBlock: null,
               },
               latestIndexedBlock: earlierBlockRef,
-              backfillEndBlock: latestBlockRef,
-            } satisfies ChainIndexingBackfillStatus,
+              latestKnownBlock: latestBlockRef,
+              approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
+            } satisfies ChainIndexingFollowingStatus,
           ],
           [
             8453,
             {
               status: ChainIndexingStatusIds.Unstarted,
               config: {
-                strategy: ChainIndexingStrategyIds.Definite,
-                startBlock: earliestBlockRef,
-                endBlock: laterBlockRef,
+                strategy: ChainIndexingStrategyIds.Indefinite,
+                startBlock: latestBlockRef,
+                endBlock: null,
               },
             } satisfies ChainIndexingUnstartedStatus,
           ],
+          [
+            10,
+            {
+              status: ChainIndexingStatusIds.Backfill,
+              config: {
+                strategy: ChainIndexingStrategyIds.Indefinite,
+                startBlock: earlierBlockRef,
+                endBlock: null,
+              },
+              latestIndexedBlock: laterBlockRef,
+              backfillEndBlock: latestBlockRef,
+            } satisfies ChainIndexingBackfillStatus,
+          ],
         ]),
-        overallStatus: ChainIndexingStatusIds.Backfill,
+        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
+        omnichainIndexingCursor: earlierBlockRef.timestamp,
       } satisfies ENSIndexerOverallIndexingStatus;
 
       // act
@@ -50,27 +66,39 @@ describe("ENSIndexer: Indexing Status", () => {
 
       // assert
       expect(result).toStrictEqual({
+        overallStatus: ChainIndexingStatusIds.Following,
         chains: {
           "1": {
-            status: ChainIndexingStatusIds.Backfill,
+            status: ChainIndexingStatusIds.Following,
             config: {
               strategy: ChainIndexingStrategyIds.Indefinite,
               startBlock: earliestBlockRef,
-              endBlock: null,
             },
             latestIndexedBlock: earlierBlockRef,
-            backfillEndBlock: latestBlockRef,
-          },
+            latestKnownBlock: latestBlockRef,
+            approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
+          } satisfies ChainIndexingFollowingStatus,
           "8453": {
             status: ChainIndexingStatusIds.Unstarted,
             config: {
-              strategy: ChainIndexingStrategyIds.Definite,
-              startBlock: earliestBlockRef,
-              endBlock: laterBlockRef,
+              strategy: ChainIndexingStrategyIds.Indefinite,
+              startBlock: latestBlockRef,
+              endBlock: null,
             },
-          },
+          } satisfies ChainIndexingUnstartedStatus,
+          "10": {
+            status: ChainIndexingStatusIds.Backfill,
+            config: {
+              strategy: ChainIndexingStrategyIds.Indefinite,
+              startBlock: earlierBlockRef,
+              endBlock: null,
+            },
+            latestIndexedBlock: laterBlockRef,
+            backfillEndBlock: latestBlockRef,
+          } satisfies ChainIndexingBackfillStatus,
         },
-        overallStatus: ChainIndexingStatusIds.Backfill,
+        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
+        omnichainIndexingCursor: earlierBlockRef.timestamp,
       } satisfies SerializedENSIndexerOverallIndexingStatus);
 
       // bonus step: deserialize serialized

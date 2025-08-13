@@ -1,9 +1,11 @@
-import { BlockRef, Duration } from "../../shared";
+import { BlockRef, Duration, UnixTimestamp } from "../../shared";
 import {
+  ChainIndexingActiveStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingDefiniteConfig,
   ChainIndexingIndefiniteConfig,
+  ChainIndexingStandbyStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusForUnstartedOverallStatus,
@@ -63,6 +65,36 @@ export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]):
   const approxRealtimeDistance = Math.max(...chainapproxRealtimeDistances);
 
   return approxRealtimeDistance;
+}
+
+/**
+ * Get Omnichain Indexing Cursor across all chains which status is
+ * {@link ChainIndexingActiveStatus}.
+ */
+export function getOmnichainIndexingCursor(chains: ChainIndexingActiveStatus[]): UnixTimestamp {
+  return Math.min(...chains.map((chain) => chain.latestIndexedBlock.timestamp));
+}
+
+/**
+ * Get all chains which status is {@link ChainIndexingActiveStatus}.
+ */
+export function getActiveChains(chains: ChainIndexingStatus[]): ChainIndexingActiveStatus[] {
+  return chains.filter(
+    (chain) =>
+      chain.status === ChainIndexingStatusIds.Backfill ||
+      chain.status === ChainIndexingStatusIds.Following,
+  );
+}
+
+/**
+ * Get all chains which status is {@link ChainIndexingStandbyStatus}.
+ */
+export function getStandbyChains(chains: ChainIndexingStatus[]): ChainIndexingStandbyStatus[] {
+  return chains.filter(
+    (chain) =>
+      chain.status === ChainIndexingStatusIds.Unstarted ||
+      chain.status === ChainIndexingStatusIds.Completed,
+  );
 }
 
 /**

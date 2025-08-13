@@ -61,6 +61,7 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
         } satisfies ChainIndexingFollowingStatus,
       },
       overallApproxRealtimeDistance: 99,
+      omnichainIndexingCursor: 123123124,
     } satisfies SerializedENSIndexerOverallIndexingFollowingStatus);
 
     const maxRealtimeDistance = 100 satisfies Duration;
@@ -105,12 +106,13 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
             strategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: {
               number: 23,
-              timestamp: 23123123,
+              timestamp: 123123125,
             },
             endBlock: null,
           },
         } satisfies ChainIndexingUnstartedStatus,
       },
+      omnichainIndexingCursor: 123123124,
     } satisfies SerializedENSIndexerOverallIndexingBackfillStatus);
 
     const maxRealtimeDistance = 15 satisfies Duration;
@@ -171,6 +173,7 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
         } satisfies ChainIndexingFollowingStatus,
       },
       overallApproxRealtimeDistance: 1,
+      omnichainIndexingCursor: 123123124,
     } satisfies SerializedENSIndexerOverallIndexingFollowingStatus);
 
     const maxRealtimeDistance = 0 satisfies Duration;
