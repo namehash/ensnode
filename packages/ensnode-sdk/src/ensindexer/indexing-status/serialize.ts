@@ -1,10 +1,10 @@
 import { ChainId, ChainIdString, serializeChainId } from "../../shared";
 import {
+  SerializedENSIndexerOverallIndexingBackfillStatus,
+  SerializedENSIndexerOverallIndexingCompletedStatus,
+  SerializedENSIndexerOverallIndexingErrorStatus,
+  SerializedENSIndexerOverallIndexingFollowingStatus,
   SerializedENSIndexerOverallIndexingStatus,
-  SerializedENSIndexerOverallIndexingStatusBackfill,
-  SerializedENSIndexerOverallIndexingStatusCompleted,
-  SerializedENSIndexerOverallIndexingStatusError,
-  SerializedENSIndexerOverallIndexingStatusFollowing,
 } from "./serialized-types";
 import {
   ChainIndexingStatus,
@@ -38,26 +38,26 @@ export function serializeENSIndexerIndexingStatus(
     case OverallIndexingStatusIds.IndexerError:
       return {
         overallStatus: OverallIndexingStatusIds.IndexerError,
-      } satisfies SerializedENSIndexerOverallIndexingStatusError;
+      } satisfies SerializedENSIndexerOverallIndexingErrorStatus;
 
     case OverallIndexingStatusIds.Backfill:
       return {
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
         overallStatus: OverallIndexingStatusIds.Backfill,
-      } satisfies SerializedENSIndexerOverallIndexingStatusBackfill;
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+      } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
 
     case OverallIndexingStatusIds.Completed: {
       return {
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
         overallStatus: OverallIndexingStatusIds.Completed,
-      } satisfies SerializedENSIndexerOverallIndexingStatusCompleted;
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+      } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
     }
 
     case OverallIndexingStatusIds.Following:
       return {
-        maxApproximateRealtimeDistance: indexingStatus.maxApproximateRealtimeDistance,
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
         overallStatus: OverallIndexingStatusIds.Following,
-      } satisfies SerializedENSIndexerOverallIndexingStatusFollowing;
+        overallApproxRealtimeDistance: indexingStatus.overallApproxRealtimeDistance,
+        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+      } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
   }
 }

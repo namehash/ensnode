@@ -2,14 +2,18 @@
  * Build Indexing Status
  *
  * This file includes ideas and functionality integrating Ponder Metadata
- * with ENSIndexer application. Here all Ponder Metadata concepts turn into
- * the ENSIndexer data model.
+ * with ENSIndexer application. Here all Ponder Metadata concepts, such as
+ * - chain configuration from `ponder.config.ts` file,
+ * - metrics from `/metrics` endpoint,
+ * - publicClients from `ponder:api` import,
+ * - status from `/status` endpoint,
+ * all turn into the ENSIndexer data model.
  */
 
 import {
   type BlockRef,
+  ENSIndexerOverallIndexingErrorStatus,
   ENSIndexerOverallIndexingStatus,
-  ENSIndexerOverallIndexingStatusError,
   OverallIndexingStatusIds,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -28,7 +32,10 @@ import {
   fetchPonderStatus,
   getChainsBlockrange,
 } from "./ponder-metadata";
-import { PonderAppSettingsSchema, makePonderChainMetadataSchema } from "./zod-schemas";
+import {
+  PonderAppSettingsSchema,
+  makePonderChainMetadataSchema,
+} from "./ponder-metadata/zod-schemas";
 
 /**
  * Chain Block Refs
@@ -172,13 +179,14 @@ export async function buildIndexingStatus(
 
     return deserializeENSIndexerIndexingStatus({
       overallStatus: OverallIndexingStatusIds.IndexerError,
-    } satisfies ENSIndexerOverallIndexingStatusError);
+    } satisfies ENSIndexerOverallIndexingErrorStatus);
   }
 
   // Invariant: Ponder command & ordering are as expected
   const parsedAppSettings = PonderAppSettingsSchema.safeParse({
     command: metrics.getLabel("ponder_settings_info", "command"),
     ordering: metrics.getLabel("ponder_settings_info", "ordering"),
+    systemDate: new Date(),
   });
 
   if (parsedAppSettings.error) {

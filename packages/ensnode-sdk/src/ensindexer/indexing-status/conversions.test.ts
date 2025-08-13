@@ -22,7 +22,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               status: ChainIndexingStatusIds.Backfill,
               config: {
-                indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+                strategy: ChainIndexingStrategyIds.Indefinite,
                 startBlock: earliestBlockRef,
                 endBlock: null,
               },
@@ -35,7 +35,7 @@ describe("ENSIndexer: Indexing Status", () => {
             {
               status: ChainIndexingStatusIds.Unstarted,
               config: {
-                indexingStrategy: ChainIndexingStrategyIds.Definite,
+                strategy: ChainIndexingStrategyIds.Definite,
                 startBlock: earliestBlockRef,
                 endBlock: laterBlockRef,
               },
@@ -54,7 +54,7 @@ describe("ENSIndexer: Indexing Status", () => {
           "1": {
             status: ChainIndexingStatusIds.Backfill,
             config: {
-              indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+              strategy: ChainIndexingStrategyIds.Indefinite,
               startBlock: earliestBlockRef,
               endBlock: null,
             },
@@ -64,7 +64,7 @@ describe("ENSIndexer: Indexing Status", () => {
           "8453": {
             status: ChainIndexingStatusIds.Unstarted,
             config: {
-              indexingStrategy: ChainIndexingStrategyIds.Definite,
+              strategy: ChainIndexingStrategyIds.Definite,
               startBlock: earliestBlockRef,
               endBlock: laterBlockRef,
             },

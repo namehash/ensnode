@@ -1,2 +1,2 @@
 export { buildIndexingStatus } from "./build-index-status";
-export { assertRealtimeIndexingDistance } from "./assert-realtime-indexing-distance";
+export { hasAchievedRealtimeIndexingDistance } from "./realtime-indexing-distance";

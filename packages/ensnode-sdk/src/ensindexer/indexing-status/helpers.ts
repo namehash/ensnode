@@ -35,6 +35,8 @@ export function getOverallIndexingStatus(
   } else if (
     chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Unstarted)
   ) {
+    // simplify state space for OverallIndexingStatusIds by treating Unstarted
+    // the same as Backfill
     overallStatus = OverallIndexingStatusIds.Backfill;
   } else {
     overallStatus = OverallIndexingStatusIds.Completed;
@@ -49,19 +51,19 @@ export function getOverallIndexingStatus(
  * @throws an error if none of the indexed chains was in the 'following' status.
  */
 export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]): Duration {
-  const chainApproximateRealtimeDistances = chains
+  const chainapproxRealtimeDistances = chains
     .filter((chain) => chain.status === ChainIndexingStatusIds.Following)
-    .map((chain) => chain.approximateRealtimeDistance);
+    .map((chain) => chain.approxRealtimeDistance);
 
-  if (chainApproximateRealtimeDistances.length === 0) {
+  if (chainapproxRealtimeDistances.length === 0) {
     throw new Error(
       `The overall approximate realtime distance value is undefined if no indexed chain is in the '${OverallIndexingStatusIds.Following}' status`,
     );
   }
 
-  const approximateRealtimeDistance = Math.max(...chainApproximateRealtimeDistances);
+  const approxRealtimeDistance = Math.max(...chainapproxRealtimeDistances);
 
-  return approximateRealtimeDistance;
+  return approxRealtimeDistance;
 }
 
 /**
@@ -76,14 +78,14 @@ export function createIndexingConfig(
 ): ChainIndexingConfig {
   if (endBlock) {
     return {
-      indexingStrategy: ChainIndexingStrategyIds.Definite,
+      strategy: ChainIndexingStrategyIds.Definite,
       startBlock,
       endBlock,
     } satisfies ChainIndexingDefiniteConfig;
   }
 
   return {
-    indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+    strategy: ChainIndexingStrategyIds.Indefinite,
     startBlock,
     endBlock: null,
   } satisfies ChainIndexingIndefiniteConfig;

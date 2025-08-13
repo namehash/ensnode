@@ -1,49 +1,48 @@
 import type { ChainIdString } from "../../shared";
 import type {
-  ChainIndexingCompletedStatus,
   ChainIndexingStatus,
+  ENSIndexerOverallIndexingBackfillStatus,
+  ENSIndexerOverallIndexingCompletedStatus,
+  ENSIndexerOverallIndexingErrorStatus,
+  ENSIndexerOverallIndexingFollowingStatus,
   ENSIndexerOverallIndexingStatus,
-  ENSIndexerOverallIndexingStatusBackfill,
-  ENSIndexerOverallIndexingStatusCompleted,
-  ENSIndexerOverallIndexingStatusError,
-  ENSIndexerOverallIndexingStatusFollowing,
 } from "./types";
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingStatusBackfill}
+ * Serialized representation of {@link ENSIndexerOverallIndexingBackfillStatus}
  */
-export interface SerializedENSIndexerOverallIndexingStatusBackfill
-  extends Omit<ENSIndexerOverallIndexingStatusBackfill, "chains"> {
+export interface SerializedENSIndexerOverallIndexingBackfillStatus
+  extends Omit<ENSIndexerOverallIndexingBackfillStatus, "chains"> {
   chains: Record<ChainIdString, ChainIndexingStatus>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingStatusCompleted}
+ * Serialized representation of {@link ENSIndexerOverallIndexingCompletedStatus}
  */
-export interface SerializedENSIndexerOverallIndexingStatusCompleted
-  extends Omit<ENSIndexerOverallIndexingStatusCompleted, "chains"> {
+export interface SerializedENSIndexerOverallIndexingCompletedStatus
+  extends Omit<ENSIndexerOverallIndexingCompletedStatus, "chains"> {
   chains: Record<ChainIdString, ChainIndexingStatus>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingStatusFollowing}
+ * Serialized representation of {@link ENSIndexerOverallIndexingFollowingStatus}
  */
-export interface SerializedENSIndexerOverallIndexingStatusFollowing
-  extends Omit<ENSIndexerOverallIndexingStatusFollowing, "chains"> {
+export interface SerializedENSIndexerOverallIndexingFollowingStatus
+  extends Omit<ENSIndexerOverallIndexingFollowingStatus, "chains"> {
   chains: Record<ChainIdString, ChainIndexingStatus>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingStatusError}
+ * Serialized representation of {@link ENSIndexerOverallIndexingErrorStatus}
  */
-export interface SerializedENSIndexerOverallIndexingStatusError
-  extends ENSIndexerOverallIndexingStatusError {}
+export interface SerializedENSIndexerOverallIndexingErrorStatus
+  extends ENSIndexerOverallIndexingErrorStatus {}
 
 /**
  * Serialized representation of {@link ENSIndexerOverallIndexingStatus}
  */
 export type SerializedENSIndexerOverallIndexingStatus =
-  | SerializedENSIndexerOverallIndexingStatusBackfill
-  | SerializedENSIndexerOverallIndexingStatusCompleted
-  | SerializedENSIndexerOverallIndexingStatusFollowing
-  | SerializedENSIndexerOverallIndexingStatusError;
+  | SerializedENSIndexerOverallIndexingBackfillStatus
+  | SerializedENSIndexerOverallIndexingCompletedStatus
+  | SerializedENSIndexerOverallIndexingFollowingStatus
+  | SerializedENSIndexerOverallIndexingErrorStatus;

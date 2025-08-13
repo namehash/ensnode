@@ -2,7 +2,7 @@
  * Ponder Metadata: Status
  *
  * This file describes ideas and functionality related to Ponder status for
- * each indexed chain.
+ * each indexed chain. Ponder status is defined by `/status` endpoint.
  */
 
 import type { PonderStatus } from "@ensnode/ponder-metadata";

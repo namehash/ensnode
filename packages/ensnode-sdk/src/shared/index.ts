@@ -9,5 +9,6 @@ export {
   deserializeBlockRef,
   deserializeChainId,
   deserializeDatetime,
+  deserializeDuration,
   deserializeUrl,
 } from "./deserialize";

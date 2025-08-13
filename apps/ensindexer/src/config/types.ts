@@ -175,14 +175,15 @@ export interface ENSIndexerConfig {
   databaseUrl: string | undefined;
 
   /**
-   * The endpoint of the ENSIndexer instance (ex: http://localhost:42069).
-   * This must be an instance of ENSIndexer using  either `ponder start`
-   * or `ponder dev, and not `ponder serve`.
-   *
-   * This URL is to fetch the status and metrics from the ENSIndexer.
+   * The "primary" ENSIndexer service URL
+   * This must be an instance of ENSIndexer using either `ponder start`
+   * or `ponder dev`, and not `ponder serve`.
+   * This URL is used to read Ponder's internal indexing state using
+   * the `/status` and `/metrics` endpoints that are served directly by Ponder
+   * within the specified ENSIndexer.
    * For ENSIndexer instances started using `ponder start` or `ponder dev`,
    * this should be configured so that ENSIndexer refers back to itself, ex:
-   * http://localhost:{port}. ENSIndexer instances started using
+   * http://localhost:{port}. For ENSIndexer instances started using
    * `ponder serve`, this should be set to the hostname of
    * the related ENSIndexer instance started using `ponder start` or
    * `ponder serve` that is writing to the same ENSDb.

@@ -2,6 +2,8 @@
  * Ponder Metadata: RPC
  *
  * This file includes functionality required to read RPC data.
+ * The `PublicClient` type matches the type used for values of
+ * the `publicClients` object imported by ENSIndexer from the `ponder:api`.
  */
 
 import { type BlockNumber, type BlockRef, deserializeBlockRef } from "@ensnode/ensnode-sdk";

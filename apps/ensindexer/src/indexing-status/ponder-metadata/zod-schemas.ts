@@ -14,9 +14,9 @@ import {
   type ChainIdString,
   type ChainIndexingStatus,
   OverallIndexingStatusIds,
-  SerializedENSIndexerOverallIndexingStatusBackfill,
-  SerializedENSIndexerOverallIndexingStatusCompleted,
-  SerializedENSIndexerOverallIndexingStatusFollowing,
+  SerializedENSIndexerOverallIndexingBackfillStatus,
+  SerializedENSIndexerOverallIndexingCompletedStatus,
+  SerializedENSIndexerOverallIndexingFollowingStatus,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -26,8 +26,8 @@ import {
   makeNonNegativeIntegerSchema,
 } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
-import { getChainIndexingStatus } from "./ponder-metadata/chain";
-import type { ChainName } from "./ponder-metadata/config";
+import { getChainIndexingStatus } from "./chains";
+import type { ChainName } from "./config";
 
 const makeChainNameSchema = (indexedChainNames: string[]) => z.enum(indexedChainNames);
 
@@ -40,6 +40,7 @@ const PonderOrderingSchema = z.literal("omnichain");
 export const PonderAppSettingsSchema = z.strictObject({
   command: PonderCommandSchema,
   ordering: PonderOrderingSchema,
+  systemDate: z.date(),
 });
 
 const PonderMetricBooleanSchema = z.coerce.string().transform((v) => v === "1");
@@ -76,12 +77,15 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
     })
     .transform((ponderIndexingStatus) => {
       const serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
+      const { systemDate } = ponderIndexingStatus.appSettings;
 
       for (const chainName of indexedChainNames) {
         const indexedChain = ponderIndexingStatus.chains.get(chainName)!;
 
-        serializedChainIndexingStatuses[indexedChain.chainId] =
-          getChainIndexingStatus(indexedChain);
+        serializedChainIndexingStatuses[indexedChain.chainId] = getChainIndexingStatus(
+          indexedChain,
+          systemDate,
+        );
       }
 
       const chains = Object.values(serializedChainIndexingStatuses);
@@ -90,22 +94,22 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
       switch (overallStatus) {
         case OverallIndexingStatusIds.Following:
           return {
+            overallStatus: OverallIndexingStatusIds.Following,
             chains: serializedChainIndexingStatuses,
-            overallStatus: overallStatus,
-            maxApproximateRealtimeDistance: getOverallApproxRealtimeDistance(chains),
-          } satisfies SerializedENSIndexerOverallIndexingStatusFollowing;
+            overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chains),
+          } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
 
         case OverallIndexingStatusIds.Backfill:
           return {
-            chains: serializedChainIndexingStatuses,
             overallStatus: OverallIndexingStatusIds.Backfill,
-          } satisfies SerializedENSIndexerOverallIndexingStatusBackfill;
+            chains: serializedChainIndexingStatuses,
+          } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
 
         case OverallIndexingStatusIds.Completed: {
           return {
-            chains: serializedChainIndexingStatuses,
             overallStatus: OverallIndexingStatusIds.Completed,
-          } satisfies SerializedENSIndexerOverallIndexingStatusCompleted;
+            chains: serializedChainIndexingStatuses,
+          } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
         }
       }
     });

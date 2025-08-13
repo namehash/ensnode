@@ -46,7 +46,7 @@ export interface ChainIndexingIndefiniteConfig {
   /**
    * Chain indexing strategy.
    */
-  indexingStrategy: typeof ChainIndexingStrategyIds.Indefinite;
+  strategy: typeof ChainIndexingStrategyIds.Indefinite;
 
   /**
    * The block where indexing of the chain starts.
@@ -73,7 +73,7 @@ export interface ChainIndexingDefiniteConfig {
   /**
    * Chain indexing strategy.
    */
-  indexingStrategy: typeof ChainIndexingStrategyIds.Definite;
+  strategy: typeof ChainIndexingStrategyIds.Definite;
 
   /**
    * The block where indexing of the chain starts.
@@ -98,7 +98,7 @@ export interface ChainIndexingDefiniteConfig {
 export type ChainIndexingConfig = ChainIndexingIndefiniteConfig | ChainIndexingDefiniteConfig;
 
 /**
- * Chain Indexing: Unstarted status
+ * Chain Indexing Status: Unstarted
  *
  * Notes:
  * - The "unstarted" status applies when using omnichain ordering and the
@@ -110,7 +110,7 @@ export interface ChainIndexingUnstartedStatus {
 }
 
 /**
- * Chain Indexing: Backfill status
+ * Chain Indexing Status: Backfill
  *
  * During a backfill, special performance optimizations are applied to
  * index all blocks between config.startBlock and backfillEndBlock
@@ -120,8 +120,11 @@ export interface ChainIndexingUnstartedStatus {
  * - The backfillEndBlock is either config.endBlock (if present) or
  *   the latest block on the chain when the ENSIndexer process started up.
  *   Note how this means the backfillEndBlock is always a "fixed target".
- * - After latestIndexedBlock reached backfillEndBlock, the backfill is complete.
- *   The status will change to "following" or "completed" depending on
+ * - When latestIndexedBlock reaches backfillEndBlock, the backfill is complete.
+ *   The moment backfill is complete the status does not immediately transition.
+ *   Instead, internal processing is completed for a period of time while
+ *   the status remains "backfill". After this internal processing is completed
+ *   the status will change to "following" or "completed" depending on
  *   the configured indexing strategy. If the strategy is indefinite,
  *   changes to "following", else if the strategy is definite, changes to
  *   "completed".
@@ -135,12 +138,20 @@ export interface ChainIndexingUnstartedStatus {
 export interface ChainIndexingBackfillStatus {
   status: typeof ChainIndexingStatusIds.Backfill;
   config: ChainIndexingConfig;
+
+  /**
+   * The block that was most recently indexed.
+   */
   latestIndexedBlock: BlockRef;
+
+  /**
+   * The block after which the backfill will be finished.
+   */
   backfillEndBlock: BlockRef;
 }
 
 /**
- * Chain Indexing: Following status
+ * Chain Indexing Status: Following
  *
  * Following occurs after the backfill of a chain is completed and represents
  * the process of indefinitely following (and indexing!) new blocks as they are
@@ -149,30 +160,36 @@ export interface ChainIndexingBackfillStatus {
  * Invariants:
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always before or the same as `latestKnownBlock`
- * - `approximateRealtimeDistance` is always a non-negative integer
  */
 export interface ChainIndexingFollowingStatus {
   status: typeof ChainIndexingStatusIds.Following;
 
   config: ChainIndexingIndefiniteConfig;
 
+  /**
+   * The block that was most recently indexed.
+   */
   latestIndexedBlock: BlockRef;
 
+  /**
+   * The block that was most recently fetched from chain into the RPC cache
+   * so it could be indexed.
+   */
   latestKnownBlock: BlockRef;
 
   /**
-   * The highest number of seconds between `latestIndexedBlock.timestamp` and
+   * The number of seconds between `latestIndexedBlock.timestamp` and
    * the current time in ENSIndexer. This represents the upper-bound worst case
    * distance approximation between the latest block on the chain (independent
    * of it becoming known to us) and the latest block that has completed
    * indexing. The true distance to the latest block on the chain will be less
    * if the latest block on the chain was not issued at the current second.
    */
-  approximateRealtimeDistance: Duration;
+  approxRealtimeDistance: Duration;
 }
 
 /**
- * Chain Indexing: Completed status
+ * Chain Indexing Status: Completed
  *
  * Indexing of a chain is completed after the backfill when the chain is
  * not configured to be indefinitely indexed.
@@ -184,6 +201,10 @@ export interface ChainIndexingFollowingStatus {
 export interface ChainIndexingCompletedStatus {
   status: typeof ChainIndexingStatusIds.Completed;
   config: ChainIndexingDefiniteConfig;
+
+  /**
+   * The block that was most recently indexed.
+   */
   latestIndexedBlock: BlockRef;
 }
 
@@ -204,7 +225,7 @@ export type ChainIndexingStatus =
  * Describes the current state of indexing operations across all indexed chains
  * when the overall indexing status is {@link OverallIndexingStatusIds.Backfill}.
  */
-export interface ENSIndexerOverallIndexingStatusBackfill {
+export interface ENSIndexerOverallIndexingBackfillStatus {
   /**
    * Overall Indexing Status
    */
@@ -212,6 +233,11 @@ export interface ENSIndexerOverallIndexingStatusBackfill {
 
   /**
    * Indexing Status for each chain.
+   *
+   * All chains are guaranteed to have a status of either:
+   * - {@link ChainIndexingStatusIds.Unstarted},
+   * - {@link ChainIndexingStatusIds.Backfill},
+   * - {@link ChainIndexingStatusIds.Completed}.
    */
   chains: Map<ChainId, ChainIndexingStatus>;
 }
@@ -220,9 +246,10 @@ export interface ENSIndexerOverallIndexingStatusBackfill {
  * ENSIndexer Overall Indexing Status: Completed
  *
  * Describes the final state of indexing operations across all indexed chains
- * when the overall indexing status is {@link OverallIndexingStatusIds.Completed}.
+ * when all indexed chains are configured for a definite indexing strategy and
+ * all indexing of that definite range is completed.
  */
-export interface ENSIndexerOverallIndexingStatusCompleted {
+export interface ENSIndexerOverallIndexingCompletedStatus {
   /**
    * Overall Indexing Status
    */
@@ -231,8 +258,8 @@ export interface ENSIndexerOverallIndexingStatusCompleted {
   /**
    * Indexing Status for each chain.
    *
-   * All chains are in
-   * the {@link OverallIndexingStatusIds.Completed} status by now.
+   * All chains are guaranteed to have a status of
+   * {@link ChainIndexingStatusIds.Completed}.
    */
   chains: Map<ChainId, ChainIndexingStatus>;
 }
@@ -243,7 +270,7 @@ export interface ENSIndexerOverallIndexingStatusCompleted {
  * Describes the state when the overall indexing status is
  * {@link OverallIndexingStatusIds.Following}.
  */
-export interface ENSIndexerOverallIndexingStatusFollowing {
+export interface ENSIndexerOverallIndexingFollowingStatus {
   /**
    * Overall Indexing Status
    */
@@ -256,10 +283,10 @@ export interface ENSIndexerOverallIndexingStatusFollowing {
 
   /**
    * The maximum
-   * {@link ChainIndexingFollowingStatus.approximateRealtimeDistance} value
+   * {@link ChainIndexingFollowingStatus.approxRealtimeDistance} value
    * across all chains with the 'following' status.
    */
-  maxApproximateRealtimeDistance: Duration;
+  overallApproxRealtimeDistance: Duration;
 }
 
 /**
@@ -268,7 +295,7 @@ export interface ENSIndexerOverallIndexingStatusFollowing {
  * Describes the state when ENSIndexer failed to return the indexing status for
  * all indexed chains. This state suggests an error with ENSIndexer.
  */
-export interface ENSIndexerOverallIndexingStatusError {
+export interface ENSIndexerOverallIndexingErrorStatus {
   /**
    * Overall Indexing Status
    */
@@ -282,7 +309,7 @@ export interface ENSIndexerOverallIndexingStatusError {
  * Otherwise, presents the error status.
  */
 export type ENSIndexerOverallIndexingStatus =
-  | ENSIndexerOverallIndexingStatusBackfill
-  | ENSIndexerOverallIndexingStatusCompleted
-  | ENSIndexerOverallIndexingStatusFollowing
-  | ENSIndexerOverallIndexingStatusError;
+  | ENSIndexerOverallIndexingBackfillStatus
+  | ENSIndexerOverallIndexingCompletedStatus
+  | ENSIndexerOverallIndexingFollowingStatus
+  | ENSIndexerOverallIndexingErrorStatus;

@@ -16,6 +16,31 @@ import type { BlockRef, ChainId, Datetime, Duration, UnixTimestamp } from "./typ
 export type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
 
 /**
+ * Coerce number from a non-empty string.
+ *
+ * Zod's `z.coerce.number()` turns empty string into `0`. We need to have
+ * empty strings turned into validation error.
+ */
+export const coerceNumberFromNonEmptyString = (labelValue: string = "Value") =>
+  z.preprocess((value) => {
+    if (typeof value === "string") {
+      if (value.trim() === "") {
+        throw new Error(`${labelValue} must represent an integer.`);
+      }
+
+      const intValue = Number.parseInt(value);
+
+      if (intValue.toString() !== value) {
+        throw new Error(`${labelValue} must represent an integer.`);
+      }
+
+      return intValue;
+    }
+
+    return value;
+  }, z.int());
+
+/**
  * Parses a string value as a boolean.
  */
 export const makeBooleanStringSchema = (valueLabel: string = "Value") =>
@@ -56,7 +81,11 @@ export const makeNonNegativeIntegerSchema = (valueLabel: string = "Value") =>
  * Parses a numeric value as {@link Duration}
  */
 export const makeDurationSchema = (valueLabel: string = "Value") =>
-  makeNonNegativeIntegerSchema(valueLabel);
+  z.coerce
+    .number({
+      error: `${valueLabel} must be a number.`,
+    })
+    .pipe(makeNonNegativeIntegerSchema(valueLabel));
 
 /**
  * Parses Chain ID

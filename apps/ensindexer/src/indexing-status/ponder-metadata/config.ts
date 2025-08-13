@@ -3,7 +3,8 @@
  *
  * This file describes ideas and functionality related to Ponder configuration
  * object and how it defines on-chain data sources to-be-indexed across all
- * indexed chains.
+ * indexed chains. The `PonderConfigType` type matches the type of value that
+ * is exported from `ponder.config.ts` file.
  */
 
 import {

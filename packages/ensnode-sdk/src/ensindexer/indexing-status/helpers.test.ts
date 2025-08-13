@@ -27,7 +27,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
 
             endBlock: latestBlockRef,
@@ -38,7 +38,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -59,7 +59,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Unstarted,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -68,7 +68,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -89,7 +89,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Unstarted,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -98,7 +98,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+            strategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
@@ -108,7 +108,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -129,18 +129,18 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+            strategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
           latestKnownBlock: latestBlockRef,
-          approximateRealtimeDistance: 123,
+          approxRealtimeDistance: 123,
         } satisfies ChainIndexingFollowingStatus,
 
         {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -151,7 +151,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Completed,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
@@ -174,18 +174,18 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+            strategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
           latestKnownBlock: latestBlockRef,
-          approximateRealtimeDistance: 123,
+          approxRealtimeDistance: 123,
         } satisfies ChainIndexingFollowingStatus,
 
         {
           status: ChainIndexingStatusIds.Backfill,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Definite,
+            strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
@@ -196,20 +196,20 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         {
           status: ChainIndexingStatusIds.Following,
           config: {
-            indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+            strategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
           latestKnownBlock: laterBlockRef,
-          approximateRealtimeDistance: 432,
+          approxRealtimeDistance: 432,
         } satisfies ChainIndexingFollowingStatus,
       ];
 
       // act
-      const maxApproxRealtimeDistance = getOverallApproxRealtimeDistance(chainStatuses);
+      const overallApproxRealtimeDistance = getOverallApproxRealtimeDistance(chainStatuses);
 
       // assert
-      expect(maxApproxRealtimeDistance).toBe(432);
+      expect(overallApproxRealtimeDistance).toBe(432);
     });
   });
 
@@ -224,7 +224,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
 
       // assert
       expect(indexingConfig).toStrictEqual({
-        indexingStrategy: ChainIndexingStrategyIds.Definite,
+        strategy: ChainIndexingStrategyIds.Definite,
         startBlock: earlierBlockRef,
         endBlock: laterBlockRef,
       } satisfies ChainIndexingDefiniteConfig);
@@ -240,7 +240,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
 
       // assert
       expect(indexingConfig).toStrictEqual({
-        indexingStrategy: ChainIndexingStrategyIds.Indefinite,
+        strategy: ChainIndexingStrategyIds.Indefinite,
         startBlock: earlierBlockRef,
         endBlock: null,
       } satisfies ChainIndexingIndefiniteConfig);

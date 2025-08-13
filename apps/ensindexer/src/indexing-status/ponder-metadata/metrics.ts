@@ -2,7 +2,7 @@
  * Ponder Metadata: Metrics
  *
  * This file describes ideas and functionality related to Ponder metrics for
- * each indexed chain.
+ * each indexed chain. Ponder metrics are defined by `/metrics` endpoint.
  */
 
 import { PrometheusMetrics } from "@ensnode/ponder-metadata";

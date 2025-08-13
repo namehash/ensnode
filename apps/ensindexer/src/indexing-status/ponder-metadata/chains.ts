@@ -2,7 +2,13 @@
  * Ponder Metadata: Chains
  *
  * This file describes ideas and functionality related to metadata about chains
- * indexing status.
+ * indexing status. In this module, ideas represented in other Ponder Metadata
+ * modules, such as:
+ * - Config
+ * - Metrics
+ * - RPC
+ * - Status
+ * all come together to form a single view about a chain's indexing status.
  */
 
 import {
@@ -97,7 +103,10 @@ export interface UnvalidatedChainMetadata
 /**
  * Get {@link ChainIndexingStatus} for the indexed chain metadata.
  */
-export function getChainIndexingStatus(chainMetadata: ChainMetadata): ChainIndexingStatus {
+export function getChainIndexingStatus(
+  chainMetadata: ChainMetadata,
+  systemDate: Date,
+): ChainIndexingStatus {
   const {
     config: chainBlocksConfig,
     backfillEndBlock: chainBackfillEndBlock,
@@ -120,7 +129,7 @@ export function getChainIndexingStatus(chainMetadata: ChainMetadata): ChainIndex
   }
 
   if (isSyncComplete) {
-    if (config.indexingStrategy !== ChainIndexingStrategyIds.Definite) {
+    if (config.strategy !== ChainIndexingStrategyIds.Definite) {
       throw new Error(
         `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${ChainIndexingStrategyIds.Definite}' indexing strategy.`,
       );
@@ -134,23 +143,23 @@ export function getChainIndexingStatus(chainMetadata: ChainMetadata): ChainIndex
   }
 
   if (isSyncRealtime) {
-    if (config.indexingStrategy !== ChainIndexingStrategyIds.Indefinite) {
+    if (config.strategy !== ChainIndexingStrategyIds.Indefinite) {
       throw new Error(
         `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${ChainIndexingStrategyIds.Indefinite}' indexing strategy.`,
       );
     }
 
-    const nowUnixTimestamp = Math.floor(Date.now() / 1000);
-    const approximateRealtimeDistance: Duration = Math.max(
+    const systemDateUnixTimestamp = Math.floor(systemDate.getTime() / 1000);
+    const approxRealtimeDistance: Duration = Math.max(
       0,
-      nowUnixTimestamp - chainStatusBlock.timestamp,
+      systemDateUnixTimestamp - chainStatusBlock.timestamp,
     );
 
     return {
       status: ChainIndexingStatusIds.Following,
       latestIndexedBlock: chainStatusBlock,
       latestKnownBlock: chainSyncBlock,
-      approximateRealtimeDistance,
+      approxRealtimeDistance,
       config,
     } satisfies ChainIndexingFollowingStatus;
   }

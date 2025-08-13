@@ -1,6 +1,8 @@
 import { publicClients } from "ponder:api";
 import {
+  Duration,
   OverallIndexingStatusIds,
+  deserializeDuration,
   serializeENSIndexerIndexingStatus,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
@@ -9,10 +11,8 @@ import { Hono } from "hono";
 
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { assertRealtimeIndexingDistance, buildIndexingStatus } from "@/indexing-status";
+import { buildIndexingStatus, hasAchievedRealtimeIndexingDistance } from "@/indexing-status";
 
-import { makeNonNegativeIntegerSchema } from "@ensnode/ensnode-sdk/internal";
-import z from "zod/v4";
 import resolutionApi from "../lib/resolution-api";
 
 const app = new Hono();
@@ -29,42 +29,41 @@ app.get("/config", async (c) => {
   return c.json(serializeENSIndexerPublicConfig(publicConfig));
 });
 
-// include ENSIndexer Overall Indexing Status endpoint
 app.get("/indexing-status", async (c) => {
-  // build the current indexing status object
   const indexingStatus = await buildIndexingStatus(publicClients);
   const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
 
-  // return 503 error if ENSIndexer is not available
+  // respond with 503 error if ENSIndexer is not available
   if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
-    console.error(
-      `Indexing Status is not currently available for '${OverallIndexingStatusIds.IndexerError}' overall status.`,
-    );
-
     return c.json(serializedIndexingStatus, 503);
   }
 
   const maxRealtimeDistanceQueryParam = c.req.query("maxRealtimeDistance");
 
-  // assert realtime indexing distance if `maxRealtimeDistanceQueryParam` was provided
-  if (typeof maxRealtimeDistanceQueryParam !== "undefined") {
+  // ensure the requested realtime indexing distance was achieved only if
+  // 'maxRealtimeDistance' value was provided
+  if (maxRealtimeDistanceQueryParam) {
+    let requestedRealtimeIndexingDistance: Duration;
+
+    // try deserializing duration
     try {
-      assertRealtimeIndexingDistance(indexingStatus, maxRealtimeDistanceQueryParam);
+      requestedRealtimeIndexingDistance = deserializeDuration(
+        maxRealtimeDistanceQueryParam,
+        "maxRealtimeDistance",
+      );
     } catch (error) {
-      // return bad request error if query param was not valid
-      if (error instanceof RangeError) {
-        return c.text(
-          `Could not parse "maxRealtimeDistance" query param. If provided, it must represent a non-negative integer.`,
-          400,
-        );
-      }
+      // respond with 400 error if query param didn't represent valid Duration
+      return c.text(`'maxRealtimeDistance' must be a valid Duration value.`, 400);
+    }
 
-      // return 503 error if requested realtime indexing distance was not achieved
-      if (error instanceof Error) {
-        console.error(`Indexing Status is not currently available. ${error.message}`);
+    const hasAchievedRequestedDistance = hasAchievedRealtimeIndexingDistance(
+      indexingStatus,
+      requestedRealtimeIndexingDistance,
+    );
 
-        return c.json(serializedIndexingStatus, 503);
-      }
+    // respond with 503 error if requested distance wasn't achieved
+    if (!hasAchievedRequestedDistance) {
+      return c.json(serializedIndexingStatus, 503);
     }
   }
 
