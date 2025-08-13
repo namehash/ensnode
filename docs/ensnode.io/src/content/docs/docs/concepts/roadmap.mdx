@@ -6,16 +6,14 @@ sidebar:
 
 ## First-Class ENS v2 Support
 
-With the launch of [ENSv2](https://roadmap.ens.domains/roadmap/), ENS names will increasingly live across multiple chains and require at-request-time resolution via [CCIP-Read](https://docs.ens.domains/resolvers/ccip-read). The ENS Subgraph, which can only index a single chain and lacks support for resolution of off-chain names, is unable to meet these emerging needs.
+With the launch of [ENSv2](https://roadmap.ens.domains/roadmap/), ENS names will increasingly live across multiple chains and require at-request-time resolution via [CCIP-Read](https://docs.ens.domains/resolvers/ccip-read). The ENS Subgraph, which can only index a single chain and lacks support for resolution of offchain names, is unable to meet these emerging needs.
 
-Built on [Ponder](https://ponder.sh), ENSNode provides multichain indexing and at-request-time resolution capabilities that are essential for ENSv2. It maintains backwards compatibility with Subgraph queries while enabling support for [Namechain](https://app.ens.domains/ens-v2) and off-chain names like `.uni.eth` and `.cb.id`.
+Built on [Ponder](https://ponder.sh), ENSNode provides multichain indexing and at-request-time resolution capabilities that are essential for ENSv2. It maintains backwards compatibility with Subgraph queries while enabling support for [Namechain](https://app.ens.domains/ens-v2) and offchain names like `.uni.eth` and `.cb.id`.
 
 ENSNode will introduce an ENSv2-optimized schema and custom API endpoints specifically designed for common ENSjs operations.
 
 ## Additional Chain / Integration Support
 
-- Tokenized DNS Names
-    - [Namefi](https://namefi.io/) Support
 - Offchain Names
     - `.cb.id`, `.uni.id`, + more
     - [NameStone](https://namestone.com/) Names
