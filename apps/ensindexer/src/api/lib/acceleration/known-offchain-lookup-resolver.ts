@@ -1,12 +1,12 @@
 import config from "@/config";
-import { DatasourceNames, getDatasourceInAnyNamespace } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import { Address, isAddressEqual } from "viem";
 
 // NOTE: we know ensRoot is defined for all namespaces, so enforce that at runtime with !
-const ensRoot = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ENSRoot)!;
-const basenames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Basenames);
-const lineanames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Lineanames);
+const ensRoot = maybeGetDatasource(config.namespace, DatasourceNames.ENSRoot)!;
+const basenames = maybeGetDatasource(config.namespace, DatasourceNames.Basenames);
+const lineanames = maybeGetDatasource(config.namespace, DatasourceNames.Lineanames);
 
 /**
  * For a given `resolverAddress` on a specific `chainId`, return the `PluginName` that, if it were

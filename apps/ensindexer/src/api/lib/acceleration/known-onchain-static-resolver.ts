@@ -1,9 +1,9 @@
 import config from "@/config";
-import { DatasourceNames, getDatasourceInAnyNamespace } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import { ChainId } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 
-const rrRoot = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverRoot);
+const rrRoot = maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot);
 
 /**
  * Returns whether `resolverAddress` on `chainId` is a Known Onchain Static Resolver.

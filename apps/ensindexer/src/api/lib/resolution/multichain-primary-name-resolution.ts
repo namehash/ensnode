@@ -9,7 +9,7 @@ import { trace } from "@opentelemetry/api";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import config from "@/config";
 import { withActiveSpanAsync } from "@/lib/auto-span";
-import { DatasourceNames, getDatasource, getDatasourceInAnyNamespace } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
@@ -19,12 +19,12 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
     getDatasource(config.namespace, DatasourceNames.ENSRoot),
 
     // include all ENSIP-19 Supported Chains defined in this namespace
-    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverRoot),
-    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverBase),
-    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverLinea),
-    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverOptimism),
-    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverArbitrum),
-    getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ReverseResolverScroll),
+    maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot),
+    maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverBase),
+    maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverLinea),
+    maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverOptimism),
+    maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverArbitrum),
+    maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverScroll),
   ]
     .filter((ds) => ds !== undefined)
     .map((ds) => ds.chain.id),

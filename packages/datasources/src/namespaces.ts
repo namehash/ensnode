@@ -50,15 +50,17 @@ export const getDatasource = <
  * Returns the `datasourceName` Datasource within the specified `namespaceId` namespace, or undefined
  * if it does not exist.
  *
- * NOTE: this is useful when the consumer wants to retrieve a Datasource from an arbitrary namespace.
- * If using {@link getDatasource}, with a `namespaceId: ENSNamespaceId`, the typechecker will enforce
- * that the only valid `datasourceName` is ENSRoot (the only Datasource present in all namespaces).
+ * This is useful when you want to retrieve a Datasource from an arbitrary namespace where it may
+ * or may not actually be defined. For example, if using {@link getDatasource}, with a
+ * `namespaceId: ENSNamespaceId`, the typechecker will enforce that the only valid `datasourceName`
+ * is ENSRoot (the only Datasource present in all namespaces). This method allows you to receive
+ * `Datasource | undefined` for a specified `datasourceName`.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to retrieve
  * @returns The Datasource object for the given name within the specified namespace, or undefined if it does not exist
  */
-export const getDatasourceInAnyNamespace = (
+export const maybeGetDatasource = (
   namespaceId: ENSNamespaceId,
   datasourceName: DatasourceName,
 ): Datasource | undefined => (getENSNamespace(namespaceId) as ENSNamespace)[datasourceName];

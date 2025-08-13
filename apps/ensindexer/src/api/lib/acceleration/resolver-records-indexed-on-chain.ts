@@ -1,15 +1,12 @@
 import config from "@/config";
-import { DatasourceNames, getDatasource, getDatasourceInAnyNamespace } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 
 const ensRoot = getDatasource(config.namespace, DatasourceNames.ENSRoot)!;
-const basenames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Basenames);
-const lineanames = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.Lineanames);
-const threeDNSOptimism = getDatasourceInAnyNamespace(
-  config.namespace,
-  DatasourceNames.ThreeDNSOptimism,
-);
-const threeDNSBase = getDatasourceInAnyNamespace(config.namespace, DatasourceNames.ThreeDNSBase);
+const basenames = maybeGetDatasource(config.namespace, DatasourceNames.Basenames);
+const lineanames = maybeGetDatasource(config.namespace, DatasourceNames.Lineanames);
+const threeDNSOptimism = maybeGetDatasource(config.namespace, DatasourceNames.ThreeDNSOptimism);
+const threeDNSBase = maybeGetDatasource(config.namespace, DatasourceNames.ThreeDNSBase);
 
 /**
  * Determines, for a given chain, whether all Resolver Record Values are indexed.
