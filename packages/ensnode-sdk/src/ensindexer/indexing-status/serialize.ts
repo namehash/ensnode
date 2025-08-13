@@ -7,19 +7,53 @@ import {
   SerializedENSIndexerOverallIndexingStatus,
 } from "./serialized-types";
 import {
+  ChainIndexingCompletedStatus,
   ChainIndexingStatus,
-  ChainIndexingStatusIds,
+  ChainIndexingStatusForBackfillOverallStatus,
   ENSIndexerOverallIndexingStatus,
   OverallIndexingStatusIds,
 } from "./types";
 
 /**
- * Serialize a {@link ChainIndexingStatuses} object.
+ * Serialize chain indexing statuses.
  */
 export function serializeChainIndexingStatuses(
   chainIndexingStatuses: Map<ChainId, ChainIndexingStatus>,
 ): Record<ChainIdString, ChainIndexingStatus> {
   const serializedChainsIndexingStatuses: Record<ChainIdString, ChainIndexingStatus> = {};
+
+  for (const [chainId, chainIndexingStatus] of chainIndexingStatuses.entries()) {
+    serializedChainsIndexingStatuses[serializeChainId(chainId)] = chainIndexingStatus;
+  }
+
+  return serializedChainsIndexingStatuses;
+}
+
+/**
+ * Serialize chain indexing statuses for the 'backfill' overall status.
+ */
+export function serializeChainIndexingStatusesForBackfillOverallStatus(
+  chainIndexingStatuses: Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>,
+): Record<ChainIdString, ChainIndexingStatusForBackfillOverallStatus> {
+  const serializedChainsIndexingStatuses: Record<
+    ChainIdString,
+    ChainIndexingStatusForBackfillOverallStatus
+  > = {};
+
+  for (const [chainId, chainIndexingStatus] of chainIndexingStatuses.entries()) {
+    serializedChainsIndexingStatuses[serializeChainId(chainId)] = chainIndexingStatus;
+  }
+
+  return serializedChainsIndexingStatuses;
+}
+
+/**
+ * Serialize chain indexing statuses for the 'completed' overall status.
+ */
+export function serializeChainIndexingStatusesForCompletedOverallStatus(
+  chainIndexingStatuses: Map<ChainId, ChainIndexingCompletedStatus>,
+): Record<ChainIdString, ChainIndexingCompletedStatus> {
+  const serializedChainsIndexingStatuses: Record<ChainIdString, ChainIndexingCompletedStatus> = {};
 
   for (const [chainId, chainIndexingStatus] of chainIndexingStatuses.entries()) {
     serializedChainsIndexingStatuses[serializeChainId(chainId)] = chainIndexingStatus;
@@ -43,13 +77,13 @@ export function serializeENSIndexerIndexingStatus(
     case OverallIndexingStatusIds.Backfill:
       return {
         overallStatus: OverallIndexingStatusIds.Backfill,
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        chains: serializeChainIndexingStatusesForBackfillOverallStatus(indexingStatus.chains),
       } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
 
     case OverallIndexingStatusIds.Completed: {
       return {
         overallStatus: OverallIndexingStatusIds.Completed,
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        chains: serializeChainIndexingStatusesForCompletedOverallStatus(indexingStatus.chains),
       } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
     }
 

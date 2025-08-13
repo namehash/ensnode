@@ -5,7 +5,7 @@ import {
   ChainIndexingDefiniteConfig,
   ChainIndexingIndefiniteConfig,
   ChainIndexingStatus,
-  ChainIndexingStatusId,
+  ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
   OverallIndexingStatusId,
@@ -89,4 +89,64 @@ export function createIndexingConfig(
     startBlock,
     endBlock: null,
   } satisfies ChainIndexingIndefiniteConfig;
+}
+
+/**
+ * Check if Chain Indexing Statuses fit the 'backfill' overall status
+ * requirements:
+ * - At least one chain is guaranteed to be in the "backfill" status.
+ * - Each chain is guaranteed to have a status of either "unstarted",
+ *   "backfill" or "completed".
+ *
+ * Note: This function narrows the {@linkChainIndexingStatus} type to
+ * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ */
+export function checkChainIndexingStatusesForBackfillOverallStatus(
+  chains: ChainIndexingStatus[],
+): chains is ChainIndexingStatusForBackfillOverallStatus[] {
+  const atLeastOneChainInBackfillStatus = chains.some(
+    (chain) => chain.status === ChainIndexingStatusIds.Backfill,
+  );
+  const otherChainsHaveValidStatuses = chains.every(
+    (chain) =>
+      chain.status === ChainIndexingStatusIds.Unstarted ||
+      chain.status === ChainIndexingStatusIds.Backfill ||
+      chain.status === ChainIndexingStatusIds.Completed,
+  );
+
+  return atLeastOneChainInBackfillStatus && otherChainsHaveValidStatuses;
+}
+
+/**
+ * Checks if Chain Indexing Statuses fit the 'completed' overall status
+ * requirements:
+ * - Any chain is guaranteed to have a status of "completed".
+ *
+ * Note: This function narrows the {@linkChainIndexingStatus} type to
+ * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ */
+export function checkChainIndexingStatusesForCompletedOverallStatus(
+  chains: ChainIndexingStatus[],
+): chains is ChainIndexingCompletedStatus[] {
+  const allChainsHaveValidStatuses = chains.every(
+    (chain) => chain.status === ChainIndexingStatusIds.Completed,
+  );
+
+  return allChainsHaveValidStatuses;
+}
+
+/**
+ * Checks Chain Indexing Statuses fit the 'completed' overall status
+ * requirements:
+ * - At least one chain is guaranteed to be in the "following" status.
+ * - Any other chain can have any status.
+ */
+export function checkChainIndexingStatusesForFollowingOverallStatus(
+  chains: ChainIndexingStatus[],
+): chains is ChainIndexingStatus[] {
+  const allChainsHaveValidStatuses = chains.some(
+    (chain) => chain.status === ChainIndexingStatusIds.Following,
+  );
+
+  return allChainsHaveValidStatuses;
 }

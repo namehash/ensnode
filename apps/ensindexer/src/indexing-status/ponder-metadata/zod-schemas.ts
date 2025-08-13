@@ -12,11 +12,16 @@
  */
 import {
   type ChainIdString,
+  ChainIndexingCompletedStatus,
   type ChainIndexingStatus,
+  ChainIndexingStatusForBackfillOverallStatus,
   OverallIndexingStatusIds,
   SerializedENSIndexerOverallIndexingBackfillStatus,
   SerializedENSIndexerOverallIndexingCompletedStatus,
   SerializedENSIndexerOverallIndexingFollowingStatus,
+  checkChainIndexingStatusesForBackfillOverallStatus,
+  checkChainIndexingStatusesForCompletedOverallStatus,
+  checkChainIndexingStatusesForFollowingOverallStatus,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -76,7 +81,7 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
         }),
     })
     .transform((ponderIndexingStatus) => {
-      const serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
+      let serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
       const { systemDate } = ponderIndexingStatus.appSettings;
 
       for (const chainName of indexedChainNames) {
@@ -88,29 +93,64 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
         );
       }
 
-      const chains = Object.values(serializedChainIndexingStatuses);
-      const overallStatus = getOverallIndexingStatus(chains);
+      const chainStatuses = Object.values(serializedChainIndexingStatuses);
+      const overallStatus = getOverallIndexingStatus(chainStatuses);
 
       switch (overallStatus) {
         case OverallIndexingStatusIds.Following:
           return {
             overallStatus: OverallIndexingStatusIds.Following,
             chains: serializedChainIndexingStatuses,
-            overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chains),
+            overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
           } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
 
-        case OverallIndexingStatusIds.Backfill:
+        case OverallIndexingStatusIds.Backfill: {
           return {
             overallStatus: OverallIndexingStatusIds.Backfill,
-            chains: serializedChainIndexingStatuses,
+            chains: serializedChainIndexingStatuses as Record<
+              ChainIdString,
+              ChainIndexingStatusForBackfillOverallStatus
+            >, // forcing the type here, will be validated in the following refine step
           } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
+        }
 
         case OverallIndexingStatusIds.Completed: {
           return {
             overallStatus: OverallIndexingStatusIds.Completed,
-            chains: serializedChainIndexingStatuses,
+            chains: serializedChainIndexingStatuses as Record<
+              ChainIdString,
+              ChainIndexingCompletedStatus
+            >, // forcing the type here, will be validated in the following refine step
           } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
         }
+      }
+    })
+    .check((ctx) => {
+      const { chains, overallStatus } = ctx.value;
+      const chainStatuses = Object.values(chains);
+      let hasValidChains = false;
+
+      switch (overallStatus) {
+        case OverallIndexingStatusIds.Backfill:
+          hasValidChains = checkChainIndexingStatusesForBackfillOverallStatus(chainStatuses);
+          break;
+
+        case OverallIndexingStatusIds.Completed:
+          hasValidChains = checkChainIndexingStatusesForCompletedOverallStatus(chainStatuses);
+          break;
+
+        case OverallIndexingStatusIds.Following:
+          hasValidChains = checkChainIndexingStatusesForFollowingOverallStatus(chainStatuses);
+          break;
+      }
+
+      if (!hasValidChains) {
+        ctx.issues.push({
+          code: "custom",
+          input: { chains, overallStatus },
+          message:
+            "Ponder Metadata includes 'chains' object misconfigured for selected 'overallStatus'",
+        });
       }
     });
 };

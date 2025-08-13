@@ -1,6 +1,8 @@
 import type { ChainIdString } from "../../shared";
 import type {
+  ChainIndexingCompletedStatus,
   ChainIndexingStatus,
+  ChainIndexingStatusForBackfillOverallStatus,
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
@@ -13,7 +15,7 @@ import type {
  */
 export interface SerializedENSIndexerOverallIndexingBackfillStatus
   extends Omit<ENSIndexerOverallIndexingBackfillStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingStatus>;
+  chains: Record<ChainIdString, ChainIndexingStatusForBackfillOverallStatus>;
 }
 
 /**
@@ -21,7 +23,7 @@ export interface SerializedENSIndexerOverallIndexingBackfillStatus
  */
 export interface SerializedENSIndexerOverallIndexingCompletedStatus
   extends Omit<ENSIndexerOverallIndexingCompletedStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingStatus>;
+  chains: Record<ChainIdString, ChainIndexingCompletedStatus>;
 }
 
 /**

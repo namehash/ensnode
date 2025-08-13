@@ -220,6 +220,14 @@ export type ChainIndexingStatus =
   | ChainIndexingCompletedStatus;
 
 /**
+ * Chain Indexing Status allowed when overall status is 'backfill'.
+ */
+export type ChainIndexingStatusForBackfillOverallStatus =
+  | ChainIndexingUnstartedStatus
+  | ChainIndexingBackfillStatus
+  | ChainIndexingCompletedStatus;
+
+/**
  * ENSIndexer Overall Indexing Status: Backfill
  *
  * Describes the current state of indexing operations across all indexed chains
@@ -234,12 +242,12 @@ export interface ENSIndexerOverallIndexingBackfillStatus {
   /**
    * Indexing Status for each chain.
    *
-   * All chains are guaranteed to have a status of either:
-   * - {@link ChainIndexingStatusIds.Unstarted},
-   * - {@link ChainIndexingStatusIds.Backfill},
-   * - {@link ChainIndexingStatusIds.Completed}.
+   * At least one chain is guaranteed to be in the "backfill" status.
+   * Each chain is guaranteed to have a status of either "unstarted",
+   * "backfill" or "completed". It's impossible for any chain to be
+   * in the "following" status.
    */
-  chains: Map<ChainId, ChainIndexingStatus>;
+  chains: Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>;
 }
 
 /**
@@ -258,10 +266,10 @@ export interface ENSIndexerOverallIndexingCompletedStatus {
   /**
    * Indexing Status for each chain.
    *
-   * All chains are guaranteed to have a status of
-   * {@link ChainIndexingStatusIds.Completed}.
+   * Each chain is guaranteed to have the "completed" status.
+   * It's impossible for any chain to have status other than "completed".
    */
-  chains: Map<ChainId, ChainIndexingStatus>;
+  chains: Map<ChainId, ChainIndexingCompletedStatus>;
 }
 
 /**

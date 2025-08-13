@@ -14,13 +14,20 @@ import {
   makeChainIdStringSchema,
   makeDurationSchema,
 } from "../../shared/zod-schemas";
-import { getOverallApproxRealtimeDistance, getOverallIndexingStatus } from "./helpers";
+import {
+  checkChainIndexingStatusesForBackfillOverallStatus,
+  checkChainIndexingStatusesForCompletedOverallStatus,
+  checkChainIndexingStatusesForFollowingOverallStatus,
+  getOverallApproxRealtimeDistance,
+  getOverallIndexingStatus,
+} from "./helpers";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingFollowingStatus,
   ChainIndexingStatus,
+  ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
   ChainIndexingUnstartedStatus,
@@ -191,8 +198,17 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
 const makeOverallIndexingStatusBackfill = (valueLabel?: string) =>
   z
     .strictObject({
-      chains: makeChainIndexingStatusesSchema(valueLabel),
       overallStatus: z.literal(OverallIndexingStatusIds.Backfill),
+      chains: makeChainIndexingStatusesSchema(valueLabel)
+        .refine(
+          (chains) =>
+            checkChainIndexingStatusesForBackfillOverallStatus(Array.from(chains.values())),
+          {
+            error: `${valueLabel} at least one chain must be in "backfill" status and
+each chain has to have a status of either "unstarted", "backfill" or "completed"`,
+          },
+        )
+        .transform((chains) => chains as Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>),
     })
     .refine(
       (indexingStatus) => {
@@ -210,7 +226,15 @@ const makeOverallIndexingStatusCompleted = (valueLabel?: string) =>
   z
     .strictObject({
       overallStatus: z.literal(OverallIndexingStatusIds.Completed),
-      chains: makeChainIndexingStatusesSchema(valueLabel),
+      chains: makeChainIndexingStatusesSchema(valueLabel)
+        .refine(
+          (chains) =>
+            checkChainIndexingStatusesForCompletedOverallStatus(Array.from(chains.values())),
+          {
+            error: `${valueLabel} all chains must have "completed" status`,
+          },
+        )
+        .transform((chains) => chains as Map<ChainId, ChainIndexingCompletedStatus>),
     })
     .refine(
       (indexingStatus) => {
@@ -238,6 +262,15 @@ const makeOverallIndexingStatusFollowing = (valueLabel?: string) =>
         return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
+    )
+    .refine(
+      (indexingStatus) =>
+        checkChainIndexingStatusesForFollowingOverallStatus(
+          Array.from(indexingStatus.chains.values()),
+        ),
+      {
+        error: `${valueLabel} at least one chain must be in "following" status`,
+      },
     )
     .refine(
       (indexingStatus) => {
