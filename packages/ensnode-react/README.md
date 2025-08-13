@@ -153,7 +153,7 @@ const config = createConfig({
 
 ### `useRecords`
 
-Hook for resolving records for an ENS name (Forward Resolution).
+Hook that resolves records for an ENS name (Forward Resolution), via ENSNode, which implements Protocol Acceleration for indexed names.
 
 #### Parameters
 
@@ -179,7 +179,7 @@ const { data, isLoading, error, refetch } = useRecords({
 
 ### `usePrimaryName`
 
-Hook for resolving the primary name of a specified address (Reverse Resolution).
+Hook that resolves the primary name of the provided `address` on the specified `chainId`, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to determine the `address`'s Default Name directly.
 
 #### Parameters
 
@@ -200,7 +200,7 @@ const { data, isLoading, error, refetch } = usePrimaryName({
 
 ### `usePrimaryNames`
 
-Hook for resolving the primary names of a specified address across multiple chains.
+Hook that resolves the primary names of the provided `address` on the specified chainIds, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned for all chainIds for which there is not a chain-specific Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and should rely on the aforementioned per-chain defaulting behavior.
 
 #### Parameters
 

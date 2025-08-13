@@ -1,8 +1,9 @@
 import config from "@/config";
-import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 
-const ensRoot = getDatasource(config.namespace, DatasourceNames.ENSRoot)!;
+// NOTE: we know ensRoot is defined for all namespaces, so enforce that at runtime with !
+const ensRoot = maybeGetDatasource(config.namespace, DatasourceNames.ENSRoot)!;
 const basenames = maybeGetDatasource(config.namespace, DatasourceNames.Basenames);
 const lineanames = maybeGetDatasource(config.namespace, DatasourceNames.Lineanames);
 const threeDNSOptimism = maybeGetDatasource(config.namespace, DatasourceNames.ThreeDNSOptimism);

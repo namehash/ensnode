@@ -26,6 +26,8 @@ const tracer = trace.getTracer("reverse-resolution");
  *
  * @see https://docs.ens.domains/ensip/19/#algorithm
  *
+ * The DEFAULT_EVM_CHAIN_ID (0) is a valid chainId in this context.
+ *
  * @param address the adddress whose Primary Name to resolve
  * @param chainId the chainId within which to resolve the address' Primary Name
  */

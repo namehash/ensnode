@@ -121,7 +121,7 @@ Resolves the primary names of the provided `address` on the specified chainIds, 
 ```ts
 import { mainnet, base } from 'viem/chains';
 
-// Resolve an address' Primary Names on all well-known chain ids
+// Resolve an address' Primary Names on all ENSIP-19 supported chain ids
 const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF9e307980D19285");
 
 console.log(names);

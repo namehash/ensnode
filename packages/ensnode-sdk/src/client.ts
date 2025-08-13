@@ -186,7 +186,7 @@ export class ENSNodeClient {
   /**
    * Resolves the primary names of a specified address across multiple chains.
    *
-   * @param address The Address whose Primary Name to resolve
+   * @param address The Address whose Primary Names to resolve
    * @param options additional options
    * @param options.chainIds The set of chain ids within which to query the address' ENSIP-19
    *  Multichain Primary Name (default: all ENSIP-19 supported chains)
@@ -197,7 +197,7 @@ export class ENSNodeClient {
    *
    * @example
    * ```typescript
-   * // Resolve the address' Primary Names on all well-known chain ids
+   * // Resolve the address' Primary Names on all ENSIP-19 supported chain ids
    * const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF9e307980D19285");
    *
    * console.log(names);
