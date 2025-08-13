@@ -139,6 +139,10 @@ export class ENSNodeClient {
   /**
    * Resolves the primary name of a specified address (Reverse Resolution) on a specific chain.
    *
+   * If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name),
+   * the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to
+   * determine the `address`'s Default Name directly.
+   *
    * @param address The Address whose Primary Name to resolve
    * @param chainId The chain id within which to query the address' ENSIP-19 Multichain Primary Name
    * @param options additional options
@@ -185,6 +189,11 @@ export class ENSNodeClient {
 
   /**
    * Resolves the primary names of a specified address across multiple chains.
+   *
+   * If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name),
+   * the Default Name will be returned for all chainIds for which there is not a chain-specific
+   * Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and
+   * should rely on the aforementioned per-chain defaulting behavior.
    *
    * @param address The Address whose Primary Names to resolve
    * @param options additional options
