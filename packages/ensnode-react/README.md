@@ -45,7 +45,7 @@ function DisplayNameRecords() {
   const { data, isLoading, error } = useRecords({
     name: "vitalik.eth",
     selection: {
-      addresses: [60], // ETH
+      addresses: [60], // ETH CoinType
       texts: ["avatar", "com.twitter"],
     },
   });
@@ -76,9 +76,9 @@ function DisplayNameRecords() {
 import { mainnet } from 'viem/chains';
 import { usePrimaryName } from "@ensnode/ensnode-react";
 
-function DisplayPrimaryNameAndAvatar() {
+function DisplayPrimaryName() {
   const { data, isLoading, error } = usePrimaryName({
-    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    address: "0x179A862703a4adfb29896552DF9e307980D19285",
     chainId: mainnet.id,
   });
 
@@ -102,7 +102,7 @@ import { usePrimaryNames } from "@ensnode/ensnode-react";
 
 function DisplayPrimaryNames() {
   const { data, isLoading, error } = usePrimaryNames({
-    address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    address: "0x179A862703a4adfb29896552DF9e307980D19285",
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -193,7 +193,7 @@ Hook for resolving the primary name of a specified address (Reverse Resolution).
 
 ```tsx
 const { data, isLoading, error, refetch } = usePrimaryName({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  address: "0x179A862703a4adfb29896552DF9e307980D19285",
   chainId: 10, // Optimism
 });
 ```
@@ -214,7 +214,7 @@ Hook for resolving the primary names of a specified address across multiple chai
 
 ```tsx
 const { data, isLoading, error, refetch } = usePrimaryNames({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  address: "0x179A862703a4adfb29896552DF9e307980D19285",
 });
 ```
 
@@ -289,7 +289,7 @@ const [showPrimaryName, setShowPrimaryName] = useState(false);
 
 // will not execute until `showPrimaryName` is true
 const { data } = usePrimaryName({
-  address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  address: "0x179A862703a4adfb29896552DF9e307980D19285",
   chainId: 1,
   query: { enabled: showPrimaryName },
 });
