@@ -1,0 +1,44 @@
+{
+  "name": "@ensnode/ensdb-compare",
+  "version": "0.1.0",
+  "description": "CLI tool to compare ENSDb databases using Drizzle ORM",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ensdb-compare": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "lint": "biome check --write",
+    "lint:ci": "biome ci"
+  },
+  "keywords": ["ENS", "database", "comparison", "drizzle", "CLI"],
+  "author": "ENSNode Team",
+  "license": "MIT",
+  "dependencies": {
+    "@ensnode/ensnode-schema": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "postgres": "^3.4.4",
+    "pg": "^8.11.3",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "table": "^6.8.1",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/fs-extra": "^11.0.4",
+    "@types/pg": "^8.10.9",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+} 
