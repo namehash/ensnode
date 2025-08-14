@@ -21,6 +21,7 @@ import {
   SerializedENSIndexerOverallIndexingCompletedStatus,
   SerializedENSIndexerOverallIndexingFollowingStatus,
   SerializedENSIndexerOverallIndexingUnstartedStatus,
+  UnixTimestamp,
   checkChainIndexingStatusesForBackfillOverallStatus,
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
@@ -50,7 +51,6 @@ const PonderOrderingSchema = z.literal("omnichain");
 export const PonderAppSettingsSchema = z.strictObject({
   command: PonderCommandSchema,
   ordering: PonderOrderingSchema,
-  systemDate: z.date(),
 });
 
 const PonderMetricBooleanSchema = z.coerce.string().transform((v) => v === "1");
@@ -69,7 +69,10 @@ const PonderChainMetadataSchema = z.strictObject({
   statusBlock: PonderBlockRefSchema,
 });
 
-export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
+export const makePonderChainMetadataSchema = (
+  indexedChainNames: string[],
+  systemTimestamp: UnixTimestamp,
+) => {
   const ChainNameSchema = makeChainNameSchema(indexedChainNames);
 
   const invariant_definedEntryForEachIndexedChain = (v: Map<ChainName, unknown>) =>
@@ -87,14 +90,13 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
     })
     .transform((ponderIndexingStatus) => {
       let serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
-      const { systemDate } = ponderIndexingStatus.appSettings;
 
       for (const chainName of indexedChainNames) {
         const indexedChain = ponderIndexingStatus.chains.get(chainName)!;
 
         serializedChainIndexingStatuses[indexedChain.chainId] = getChainIndexingStatus(
           indexedChain,
-          systemDate,
+          systemTimestamp,
         );
       }
 

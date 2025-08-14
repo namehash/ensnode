@@ -15,6 +15,7 @@ import {
   ENSIndexerOverallIndexingErrorStatus,
   ENSIndexerOverallIndexingStatus,
   OverallIndexingStatusIds,
+  UnixTimestamp,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
 import { prettifyError } from "zod/v4";
@@ -163,6 +164,7 @@ async function getChainsBlockRefs(
  */
 export async function buildIndexingStatus(
   publicClients: Record<ChainName, PublicClient>,
+  systemTimestamp: UnixTimestamp,
 ): Promise<ENSIndexerOverallIndexingStatus> {
   let metrics: PrometheusMetrics;
   let status: PonderStatus;
@@ -188,7 +190,6 @@ export async function buildIndexingStatus(
   const parsedAppSettings = PonderAppSettingsSchema.safeParse({
     command: metrics.getLabel("ponder_settings_info", "command"),
     ordering: metrics.getLabel("ponder_settings_info", "ordering"),
-    systemDate: new Date(),
   });
 
   if (parsedAppSettings.error) {
@@ -229,7 +230,7 @@ export async function buildIndexingStatus(
   }
 
   // parse chain metadata for each indexed chain
-  const schema = makePonderChainMetadataSchema(chainNames);
+  const schema = makePonderChainMetadataSchema(chainNames, systemTimestamp);
   const parsed = schema.safeParse({
     appSettings: parsedAppSettings.data,
     chains,

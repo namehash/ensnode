@@ -23,6 +23,7 @@ import {
   type ChainIndexingUnstartedStatus,
   type DeepPartial,
   type Duration,
+  type UnixTimestamp,
   createIndexingConfig,
 } from "@ensnode/ensnode-sdk";
 
@@ -102,10 +103,13 @@ export interface UnvalidatedChainMetadata
 
 /**
  * Get {@link ChainIndexingStatus} for the indexed chain metadata.
+ *
+ * This function uses the current system timestamp to calculate
+ * `approxRealtimeDistance` for chains in "following" status.
  */
 export function getChainIndexingStatus(
   chainMetadata: ChainMetadata,
-  systemDate: Date,
+  systemTimestamp: UnixTimestamp,
 ): ChainIndexingStatus {
   const {
     config: chainBlocksConfig,
@@ -149,8 +153,6 @@ export function getChainIndexingStatus(
       );
     }
 
-    const systemDateUnixTimestamp = Math.floor(systemDate.getTime() / 1000);
-
     /**
      * It's possible that the current system time of the ENSIndexer instance
      * is set to be ahead of the time agreed to by the blockchain and held in
@@ -161,7 +163,7 @@ export function getChainIndexingStatus(
      */
     const approxRealtimeDistance: Duration = Math.max(
       0,
-      systemDateUnixTimestamp - chainStatusBlock.timestamp,
+      systemTimestamp - chainStatusBlock.timestamp,
     );
 
     return {
