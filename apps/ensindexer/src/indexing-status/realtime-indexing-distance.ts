@@ -17,9 +17,14 @@ export function hasAchievedRequestedDistance(
   indexingStatus: ENSIndexerOverallIndexingStatus,
   requestedRealtimeIndexingDistance: Duration | undefined,
 ): boolean {
+  // return true if no particular distance value was requested
+  if (typeof requestedRealtimeIndexingDistance === "undefined") {
+    return true;
+  }
+
+  // otherwise, ensure the requested distance was achieved
   return (
-    typeof requestedRealtimeIndexingDistance === "undefined" ||
-    (indexingStatus.overallStatus === OverallIndexingStatusIds.Following &&
-      indexingStatus.overallApproxRealtimeDistance <= requestedRealtimeIndexingDistance)
+    indexingStatus.overallStatus === OverallIndexingStatusIds.Following &&
+    indexingStatus.overallApproxRealtimeDistance <= requestedRealtimeIndexingDistance
   );
 }

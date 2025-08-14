@@ -1,14 +1,14 @@
 import { publicClients } from "ponder:api";
 import {
-  Duration,
   OverallIndexingStatusIds,
-  deserializeDuration,
   serializeENSIndexerIndexingStatus,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
+import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
+import { validate } from "@/api/lib/validate";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/indexing-status";
@@ -28,7 +28,9 @@ app.get("/config", async (c) => {
   return c.json(serializeENSIndexerPublicConfig(publicConfig));
 });
 
-app.get("/indexing-status", async (c) => {
+app.get("/indexing-status", validate("query", routes.indexingStatus.query), async (c) => {
+  const { maxRealtimeDistance } = c.req.valid("query");
+
   const indexingStatus = await buildIndexingStatus(publicClients);
   const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
 
@@ -37,33 +39,14 @@ app.get("/indexing-status", async (c) => {
     return c.json(serializedIndexingStatus, 503);
   }
 
-  const maxRealtimeDistanceQueryParam = c.req.query("maxRealtimeDistance");
+  const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
+    indexingStatus,
+    maxRealtimeDistance,
+  );
 
-  // ensure the requested realtime indexing distance was achieved only if
-  // 'maxRealtimeDistance' value was provided
-  if (maxRealtimeDistanceQueryParam) {
-    let requestedRealtimeIndexingDistance: Duration;
-
-    // try deserializing duration
-    try {
-      requestedRealtimeIndexingDistance = deserializeDuration(
-        maxRealtimeDistanceQueryParam,
-        "maxRealtimeDistance",
-      );
-    } catch (error) {
-      // respond with 400 error if query param didn't represent valid Duration
-      return c.text(`'maxRealtimeDistance' must be a valid Duration value.`, 400);
-    }
-
-    const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
-      indexingStatus,
-      requestedRealtimeIndexingDistance,
-    );
-
-    // respond with 503 error if requested distance wasn't achieved
-    if (!hasAchievedRequestedRealtimeIndexingDistance) {
-      return c.json(serializedIndexingStatus, 503);
-    }
+  // respond with 503 error if requested distance wasn't achieved
+  if (!hasAchievedRequestedRealtimeIndexingDistance) {
+    return c.json(serializedIndexingStatus, 503);
   }
 
   // respond with the serialized indexing status object
