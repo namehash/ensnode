@@ -79,7 +79,7 @@ const chainsBlockrange = getChainsBlockrange(ponderConfig);
  *
  * {@link ChainBlockRefs} for each indexed chain.
  *
- * Note: works as cache for {@link fetchChainsBlockRefs}.
+ * Note: works as cache for {@link getChainsBlockRefs}.
  */
 const chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
 
@@ -89,7 +89,7 @@ const chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
  * Guaranteed to include {@link ChainBlockRefs} for each indexed chain.
  *
  * Note: performs a network request only once and caches response to
- * re-use it for further `fetchChainsBlockRefs` calls.
+ * re-use it for further `getChainsBlockRefs` calls.
  */
 async function getChainsBlockRefs(
   metrics: PrometheusMetrics,

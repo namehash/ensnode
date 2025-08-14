@@ -181,7 +181,7 @@ export function checkChainIndexingStatusesForCompletedOverallStatus(
 }
 
 /**
- * Checks Chain Indexing Statuses fit the 'completed' overall status
+ * Checks Chain Indexing Statuses fit the 'following' overall status
  * requirements:
  * - At least one chain is guaranteed to be in the "following" status.
  * - Any other chain can have any status.

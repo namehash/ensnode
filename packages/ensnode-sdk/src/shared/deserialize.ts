@@ -2,7 +2,6 @@ import { prettifyError } from "zod/v4";
 import type { ChainIdString, UrlString } from "./serialized-types";
 import type { BlockNumber, BlockRef, Blockrange, ChainId, Datetime, Duration } from "./types";
 import {
-  coerceNumberFromNonEmptyString,
   makeBlockNumberSchema,
   makeBlockRefSchema,
   makeBlockrangeSchema,

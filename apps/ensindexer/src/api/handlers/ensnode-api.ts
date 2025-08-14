@@ -48,7 +48,7 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
     maxRealtimeDistance,
   );
 
-  // respond with 503 error if requested distance wasn't achieved
+  // respond with 503 error if requested distance hasn't been achieved yet
   if (!hasAchievedRequestedRealtimeIndexingDistance) {
     return c.json(serializedIndexingStatus, 503);
   }
