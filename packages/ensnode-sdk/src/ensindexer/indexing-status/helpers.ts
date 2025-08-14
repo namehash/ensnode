@@ -52,17 +52,17 @@ export function getOverallIndexingStatus(
  * @throws an error if none of the indexed chains was in the 'following' status.
  */
 export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]): Duration {
-  const chainapproxRealtimeDistances = chains
+  const chainApproxRealtimeDistances = chains
     .filter((chain) => chain.status === ChainIndexingStatusIds.Following)
     .map((chain) => chain.approxRealtimeDistance);
 
-  if (chainapproxRealtimeDistances.length === 0) {
+  if (chainApproxRealtimeDistances.length === 0) {
     throw new Error(
       `The overall approximate realtime distance value is undefined if no indexed chain is in the '${OverallIndexingStatusIds.Following}' status`,
     );
   }
 
-  const approxRealtimeDistance = Math.max(...chainapproxRealtimeDistances);
+  const approxRealtimeDistance = Math.max(...chainApproxRealtimeDistances);
 
   return approxRealtimeDistance;
 }
@@ -176,7 +176,7 @@ export function checkChainIndexingStatusesForBackfillOverallStatus(
 /**
  * Checks if Chain Indexing Statuses fit the 'completed' overall status
  * requirements:
- * - Any chain is guaranteed to have a status of "completed".
+ * - All chains are guaranteed to have a status of "completed".
  *
  * Note: This function narrows the {@linkChainIndexingStatus} type to
  * {@link ChainIndexingCompletedStatus}.

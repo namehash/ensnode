@@ -11,7 +11,7 @@ import { Hono } from "hono";
 
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { buildIndexingStatus, hasAchievedRealtimeIndexingDistance } from "@/indexing-status";
+import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/indexing-status";
 
 import resolutionApi from "../lib/resolution-api";
 
@@ -56,13 +56,13 @@ app.get("/indexing-status", async (c) => {
       return c.text(`'maxRealtimeDistance' must be a valid Duration value.`, 400);
     }
 
-    const hasAchievedRequestedDistance = hasAchievedRealtimeIndexingDistance(
+    const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
       indexingStatus,
       requestedRealtimeIndexingDistance,
     );
 
     // respond with 503 error if requested distance wasn't achieved
-    if (!hasAchievedRequestedDistance) {
+    if (!hasAchievedRequestedRealtimeIndexingDistance) {
       return c.json(serializedIndexingStatus, 503);
     }
   }

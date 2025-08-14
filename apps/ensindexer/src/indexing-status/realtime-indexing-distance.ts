@@ -13,20 +13,13 @@ import {
 /**
  * Checks if the requested realtime indexing distance was achieved.
  */
-export function hasAchievedRealtimeIndexingDistance(
+export function hasAchievedRequestedDistance(
   indexingStatus: ENSIndexerOverallIndexingStatus,
-  requestedRealtimeIndexingDistance: Duration,
+  requestedRealtimeIndexingDistance: Duration | undefined,
 ): boolean {
-  if (indexingStatus.overallStatus !== OverallIndexingStatusIds.Following) {
-    return false;
-  }
-
-  const hasNotAchievedRequestedRealtimeIndexingDistance =
-    indexingStatus.overallApproxRealtimeDistance > requestedRealtimeIndexingDistance;
-
-  if (hasNotAchievedRequestedRealtimeIndexingDistance) {
-    return false;
-  }
-
-  return true;
+  return (
+    typeof requestedRealtimeIndexingDistance === "undefined" ||
+    (indexingStatus.overallStatus === OverallIndexingStatusIds.Following &&
+      indexingStatus.overallApproxRealtimeDistance <= requestedRealtimeIndexingDistance)
+  );
 }

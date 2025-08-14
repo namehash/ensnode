@@ -150,6 +150,15 @@ export function getChainIndexingStatus(
     }
 
     const systemDateUnixTimestamp = Math.floor(systemDate.getTime() / 1000);
+
+    /**
+     * It's possible that the current system time of the ENSIndexer instance
+     * is set to be ahead of the time agreed to by the blockchain and held in
+     * chainStatusBlock.timestamp.
+     *
+     * Here we enforce that the Duration value can never be negative,
+     * even if system clocks are misconfigured.
+     */
     const approxRealtimeDistance: Duration = Math.max(
       0,
       systemDateUnixTimestamp - chainStatusBlock.timestamp,

@@ -103,7 +103,7 @@ export type ChainIndexingConfig = ChainIndexingIndefiniteConfig | ChainIndexingD
  *
  * Notes:
  * - The "unstarted" status applies when using omnichain ordering and
- *   the omnichainIndexingCursor has not reached the startBlock of the chain.
+ *   the omnichainIndexingCursor from the overall indexing status <= config.startBlock.timestamp.
  */
 export interface ChainIndexingUnstartedStatus {
   status: typeof ChainIndexingStatusIds.Unstarted;
@@ -146,7 +146,7 @@ export interface ChainIndexingBackfillStatus {
   latestIndexedBlock: BlockRef;
 
   /**
-   * The block after which the backfill will be finished.
+   * The block that is the target for finishing the backfill.
    */
   backfillEndBlock: BlockRef;
 }
@@ -173,8 +173,8 @@ export interface ChainIndexingFollowingStatus {
   latestIndexedBlock: BlockRef;
 
   /**
-   * The block that was most recently fetched from chain into the RPC cache
-   * so it could be indexed.
+   * The "highest" block that has been fetched by RPC calls and stored in
+   * the RPC cache as part of the indexing process.
    */
   latestKnownBlock: BlockRef;
 
@@ -223,16 +223,16 @@ export type ChainIndexingStatus =
 /**
  * Chain Indexing Status: Active
  *
- * Represents a chain for which indexing is happening currently.
- * The `latestIndexedBlock` field applies in that status.
+ * Represents a chain where indexing is currently active.
+ * The `latestIndexedBlock` field will be available.
  */
 export type ChainIndexingActiveStatus = ChainIndexingBackfillStatus | ChainIndexingFollowingStatus;
 
 /**
  * Chain Indexing Status: Standby
  *
- * Represents a chain for which no indexing is happening at the moment.
- * The `latestIndexedBlock` field is not applicable in that status.
+ * Represents a chain where indexing is currently on standby (not happening).
+ * The `latestIndexedBlock` field will not be available.
  */
 export type ChainIndexingStandbyStatus =
   | ChainIndexingUnstartedStatus
@@ -246,7 +246,7 @@ export type ChainIndexingStatusForUnstartedOverallStatus =
   | ChainIndexingCompletedStatus;
 
 /**
- * ENSIndexer Overall Indexing Status: Backfill
+ * ENSIndexer Overall Indexing Status: Unstarted
  *
  * Describes the current state of indexing operations across all indexed chains
  * when the overall indexing status is {@link OverallIndexingStatusIds.Unstarted}.
@@ -361,6 +361,10 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
 
   /**
    * Indexing Status for each chain.
+   *
+   * At least one chain is guaranteed to be in the "following" status.
+   * Each chain is guaranteed to have a status of either "unstarted",
+   * "backfill", "following" or "completed".
    */
   chains: Map<ChainId, ChainIndexingStatus>;
 

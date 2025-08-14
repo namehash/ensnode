@@ -1,6 +1,6 @@
 import { setupConfigMock } from "./utils/mockConfig";
 setupConfigMock(); // setup config mock before importing dependent modules
-import { hasAchievedRealtimeIndexingDistance } from "@/indexing-status";
+import { hasAchievedRequestedDistance } from "@/indexing-status";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingFollowingStatus,
@@ -67,13 +67,13 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
     const maxRealtimeDistance = 100 satisfies Duration;
 
     // act
-    const hasAchievedRequestedDistance = hasAchievedRealtimeIndexingDistance(
+    const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
       indexingStatus,
       maxRealtimeDistance,
     );
 
     // assert
-    expect(hasAchievedRequestedDistance).toBe(true);
+    expect(hasAchievedRequestedRealtimeIndexingDistance).toBe(true);
   });
 
   it("throws error when overall status is not 'following'", () => {
@@ -118,14 +118,14 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
     const maxRealtimeDistance = 15 satisfies Duration;
 
     // act
-    const hasAchievedRequestedDistance = hasAchievedRealtimeIndexingDistance(
+    const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
       indexingStatus,
       maxRealtimeDistance,
     );
 
     // assert: overall status not following
     expect(indexingStatus.overallStatus).not.toEqual(OverallIndexingStatusIds.Following);
-    expect(hasAchievedRequestedDistance).toBe(false);
+    expect(hasAchievedRequestedRealtimeIndexingDistance).toBe(false);
   });
 
   it("throws error when requested realtime indexing distance was not achieved", () => {
@@ -179,12 +179,12 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
     const maxRealtimeDistance = 0 satisfies Duration;
 
     // act
-    const hasAchievedRequestedDistance = hasAchievedRealtimeIndexingDistance(
+    const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
       indexingStatus,
       maxRealtimeDistance,
     );
 
     // assert: requested realtime
-    expect(hasAchievedRequestedDistance).toBe(false);
+    expect(hasAchievedRequestedRealtimeIndexingDistance).toBe(false);
   });
 });

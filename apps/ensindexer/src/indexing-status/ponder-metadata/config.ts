@@ -1,10 +1,15 @@
 /**
  * Ponder Metadata: Config
  *
- * This file describes ideas and functionality related to Ponder configuration
- * object and how it defines on-chain data sources to-be-indexed across all
- * indexed chains. The `PonderConfigType` type matches the type of value that
- * is exported from `ponder.config.ts` file.
+ * This file is about parsing the object that is exported by `ponder.config.ts`.
+ *
+ * Each Ponder datasource defined in the aforementioned Ponder Config object
+ * can include information about startBlock and endBlock. This is to let
+ * Ponder know which blockrange to index for a particular Ponder Datasource.
+ *
+ * ENSIndexer, however, needs a blockrange for each indexed chain. This is why
+ * we examine Ponder Config object, looking for the "lowest" startBlock, and
+ * the "highest" endBlock defined for each of the indexed chains.
  */
 
 import {
