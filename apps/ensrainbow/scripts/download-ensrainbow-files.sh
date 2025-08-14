@@ -5,9 +5,7 @@ set -euo pipefail
 # Download ENSRainbow Labelset File
 #
 # Goal & Motivation:
-# This script downloads a specific ENSRainbow labelset file, which contains
-# a set of ENS names for a particular purpose or from a specific source (e.g., 'ens-test-env', 'subgraph').
-# These labelsets are used by the ENSRainbow application for populating its database and healing labelhashes.
+# This script downloads a specific ENSRainbow labelset file.
 #
 # The labelsets are identified by:
 #   - LABEL_SET_ID: The "namespace" or category of the data (e.g., 'ens-test-env').
@@ -47,7 +45,7 @@ BASE_URL="${ENSRAINBOW_LABELSET_SERVER_URL}"
 DATA_FILE_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.ensrainbow"
 SERVER_DATA_PATH="labelsets/${DATA_FILE_BASENAME}"
 SERVER_CHECKSUM_PATH="labelsets/${DATA_FILE_BASENAME}.sha256sum"
-SERVER_LICENSE_PATH="labelsets/${DATA_FILE_BASENAME}.LICENSE.txt" # Common license file
+SERVER_LICENSE_PATH="labelsets/${DATA_FILE_BASENAME}.LICENSE.txt"
 
 echo "Starting ENSRainbow labelset file download..."
 echo "Output Directory: $OUT_DIR"

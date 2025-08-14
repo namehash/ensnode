@@ -12,7 +12,7 @@ ENSRainbow consists of four primary layers working together to "heal" unknown la
 
 1. **Data Generation & Conversion** – legacy `.sql.gz` rainbow tables are converted to the modern `.ensrainbow` format.
 2. **Data Ingestion** – the `.ensrainbow` files are ingested into a LevelDB database using the `ingest-ensrainbow` CLI.
-3. **HTTP API Service** – the database is exposed through a lightweight Express server.
+3. **HTTP API Service** – state in the database is exposed through a lightweight HTTP API.
 4. **Client Integration** – applications call the API directly or via the TypeScript SDK.
 
 ```mermaid

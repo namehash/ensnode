@@ -27,7 +27,7 @@ interface VersionedRainbowRecord {
 // Encoded on disk as: "{labelSetVersion}:{label}"
 ```
 
-Storing the version alongside the label allows **incremental snapshots** to coexist. This makes historical healing and deterministic client-side caching straightforward.
+Storing the version alongside the label allows **incremental snapshots** to coexist. This makes deterministic client-side results across time straightforward, even as additional label set versions are ingested by ENSRainbow.
 
 ## Metadata Fields
 
@@ -56,7 +56,7 @@ The filename convention mirrors the header so humans can eyeball it quickly:
 
 ```text
 subgraph_0.ensrainbow     # labelSetId = "subgraph", version = 0
-subgraph_1.ensrainbow     # next version with new labelhash-to-label mappings added
+subgraph_1.ensrainbow     # next version with incremental labelhash-to-label mappings added
 ```
 
 ## Ingestion Process

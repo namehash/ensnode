@@ -14,13 +14,13 @@ The semantic version of the Node.js application itself (e.g. `v0.4.2`).
 - Shown in `/v1/version` under the `version` field.
 
 ## 2. Database Schema Version (`DB_SCHEMA_VERSION`)
-Specifies the on-disk structure of the LevelDB database as well as the format of the downloadable pre-built archives.
+Specifies the expected on-disk structure of the LevelDB database as well as the expected format of the downloadable pre-built LevelDB databases.
 - Passed as an **environment variable** when running the Docker image.
 
 ## 3. Label-set Version (`LABEL_SET_VERSION`)
-Represents chronological *data* versions inside a given label-set (`LABEL_SET_ID`).
-- Starts at **0** and increments by one.
-- Each increment contains **only the delta** from the previous version.
+Identifies incremental sets of rainbow records for a given label-set (`LABEL_SET_ID`).
+- For each label-set, starts at **0** and increments by one with each incremental set of rainbow records.
+- Each increment contains **only incremental additions** from all previous versions.
 - Enables deterministic, reproducible healing results across time.
 
 :::caution[Mixing versions]

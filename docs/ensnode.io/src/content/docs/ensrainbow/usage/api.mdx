@@ -52,7 +52,7 @@ Response:
 
 ### Advanced Usage with Query Parameters
 
-You can optionally specify `label_set_id` and `label_set_version` query parameters for additional validation:
+You can optionally specify `label_set_id` and `label_set_version` query parameters:
 
 ```bash
 curl "https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc?label_set_id=subgraph&label_set_version=0"
@@ -60,8 +60,8 @@ curl "https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd1442
 
 #### Query Parameters
 
-- **`label_set_id`** (optional): Validates that the request matches the database label set ID. Must be provided together with `label_set_version`.
-- **`label_set_version`** (optional): Specifies the highest label set version of label set ID to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, only labels from label sets with versions less than or equal to this value will be returned.
+- **`label_set_id`** (optional): Validates that the request matches the database label set ID.
+- **`label_set_version`** (optional): Specifies the highest label set version of label set ID to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, label_set_id is required and only labels from label sets with versions less than or equal to this value will be returned.
 
 Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
 

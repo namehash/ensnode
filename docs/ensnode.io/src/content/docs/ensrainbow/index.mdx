@@ -10,21 +10,21 @@ import { LinkCard } from '@astrojs/starlight/components';
 
 ENSRainbow is an open-source public good designed to make the "unknown, known" by healing millions of unknown ENS (Ethereum Name Service) names. It functions as a sidecar service for ENSNode, the multichain indexer for ENSv2.
 
-ENSRainbow builds upon foundational work from The Graph Protocol (original rainbow tables) and ENS Labs (ENS Subgraph development and maintenance). It is part of the Namehash Labs suite of tools dedicated to supporting the growth of the ENS Protocol.
+ENSRainbow builds upon work from The Graph Protocol (original ENS rainbow tables) and ENS Labs (ENS Subgraph development and maintenance). It is part of the Namehash Labs suite of tools dedicated to supporting the growth of the ENS Protocol.
 
 ## The Problem: Unknown Labels
 
-Many ENS names can appear with encoded labelhashes (e.g., `[428...b0b]`) in applications. These represent unknown labels that, without a service like ENSRainbow, would not display correctly, impacting user experience across the ENS ecosystem. A core value proposition of the ENS protocol is to provide human-readable names for blockchain addresses, effectively acting as a decentralized identity layer. These cryptic labels directly undermine this value by making names unintelligible, thereby eroding the user-friendliness and overall utility of ENS.
+The ENS Registry allows subnames to be created onchain without revealing onchain what those subnames are. As a result, when querying indexed ENS names, some names include labels represented as encoded labelhashes (e.g., `[428...b0b]`). These represent unknown labels and are an unfortunate user experience issue in the ENS ecosystem.
 
 ## How ENSRainbow Helps
 
-ENSRainbow significantly improves "name healing" coverage compared to relying solely on services like the ENS Subgraph. Its goal is to heal as many ENS names as possible, abstracting away technical complexities for the end-user.
+ENSRainbow significantly improves "name healing" coverage compared to relying solely on services like the ENS Subgraph. Its goal is to heal as many ENS names as possible, minimizing the probability that end-users encounter unknown labels.
 
 Key aspects of ENSRainbow include:
 
-*   **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable names.
-*   **Sidecar to ENSNode:** It integrates with ENSNode to provide comprehensive name data.
-*   **Improved Coverage:** Aims for a high percentage of name healing, far exceeding previous capabilities.
+*   **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable labels.
+*   **Sidecar to ENSNode:** It integrates with ENSNode to provide deterministic name healing across time.
+*   **Improved Healing Coverage:** Aims to minimize the probability that end-users encounter unknown labels, far exceeding previous capabilities.
 *   **Extensible and Decentralized Data Management:** Uses a label set ID and label set version system for enabling any number of different label sets (collections of rainbow records) to support incremental updates across time.
 
 ## Documentation Structure
