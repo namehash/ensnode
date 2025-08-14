@@ -133,6 +133,7 @@ export const resolver = onchainTable(
 
     // NOTE(resolver-records): include the value of the reverse-resolution name() record
     // https://docs.ens.domains/ensip/3
+    // NOTE: this is the sanitized name record value with  (see @/lib/sanitize-name-record)
     name: t.text(),
   }),
   (t) => ({

@@ -1,4 +1,4 @@
-import { CoinType } from "../ens";
+import { CoinType, ETH_COIN_TYPE } from "../ens";
 
 /**
  * Encodes a selection of Resolver records in the context of a specific Name.
@@ -24,3 +24,20 @@ export interface ResolverRecordsSelection {
 
   // TODO: include others as/if necessary
 }
+
+export const DEFAULT_RECORDS_SELECTION = {
+  addresses: [ETH_COIN_TYPE],
+  texts: [
+    "url",
+    "avatar",
+    "header",
+    "description",
+    "email",
+    "com.twitter",
+    "com.farcaster",
+    "com.github",
+  ],
+} as const satisfies ResolverRecordsSelection;
+
+export const isSelectionEmpty = (selection: ResolverRecordsSelection) =>
+  !selection.name && !selection.addresses?.length && !selection.texts?.length;
