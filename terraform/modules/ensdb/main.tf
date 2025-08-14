@@ -6,7 +6,7 @@ resource "render_postgres" "ensdb" {
   version        = "16"
 
   database_name = "ensdb"
-  database_user = "ensdb_user"
+  database_user = "ens_user"
 
   # Might be configured by an input variable 
   disk_size_gb = var.disk_size_gb
