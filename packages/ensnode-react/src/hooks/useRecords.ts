@@ -49,13 +49,13 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
 export function useRecords<SELECTION extends ResolverRecordsSelection>(
   parameters: UseRecordsParameters<SELECTION> & ConfigParameter,
 ) {
-  const { name, selection, trace, query = {} } = parameters;
-  const config = useENSNodeConfig(parameters);
+  const { config, query = {}, name, ...args } = parameters;
+  const _config = useENSNodeConfig(config);
 
   const canEnable = name !== null;
 
   const queryOptions = canEnable
-    ? createRecordsQueryOptions(config, { name, selection, trace })
+    ? createRecordsQueryOptions(_config, { ...args, name })
     : { enabled: false, queryKey: ["disabled"] as const };
 
   const options = {

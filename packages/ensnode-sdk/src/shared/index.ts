@@ -12,3 +12,4 @@ export {
   deserializeDuration,
   deserializeUrl,
 } from "./deserialize";
+export * from "./is-normalized";

@@ -12,8 +12,7 @@ import { Hono } from "hono";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/indexing-status";
-
-import resolutionApi from "../lib/resolution-api";
+import resolutionApi from "./resolution-api";
 
 const app = new Hono();
 
