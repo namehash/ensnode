@@ -1,12 +1,12 @@
 "use client";
 
+import { ChainIcon } from "@/components/chains/ChainIcon";
+import { ChainName } from "@/components/chains/ChainName";
 import { RelativeTime, unixTimestampToDate } from "@/components/datetime-utils";
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
-import { ChainIcon } from "@/components/ui/ChainIcon";
-import { ChainName } from "@/components/ui/ChainName";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
