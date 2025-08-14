@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import { ENSNodeContext } from "../context";
-import type { ConfigParameter, ENSNodeConfig } from "../types";
+import type { ENSNodeConfig } from "../types";
 
 /**
  * Hook to access the ENSNode configuration from context or parameters
@@ -12,10 +12,9 @@ import type { ConfigParameter, ENSNodeConfig } from "../types";
  * @throws Error if no config is available in context or parameters
  */
 export function useENSNodeConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
-  parameters: ConfigParameter<TConfig> = {},
+  config: TConfig | undefined,
 ): TConfig {
   const contextConfig = useContext(ENSNodeContext);
-  const { config } = parameters;
 
   // Use provided config or fall back to context
   const resolvedConfig = config ?? contextConfig;
