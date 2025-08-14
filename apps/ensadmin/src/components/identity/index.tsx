@@ -3,11 +3,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getNameAvatarUrl } from "@/lib/namespace-utils";
-import { ENSNamespaceId, ENSNamespaceIds, getENSRootChainId } from "@ensnode/datasources";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import { usePrimaryName } from "@ensnode/ensnode-react";
 import { cx } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { UseEnsNameReturnType, useEnsName } from "wagmi";
 import { AddressDisplay, NameDisplay } from "./utils";
 
 interface IdentityProps {
@@ -19,7 +19,7 @@ interface IdentityProps {
 }
 
 /**
- * Displays an ENS identity (name, avatar, etc.) for an Ethereum address on the provided ENS namespace.
+ * Displays an ENS identity (name, avatar, etc.) for an Ethereum address via ENSNode.
  *
  * If the provided address has a primary name set, displays that primary name and links to the profile for that name.
  * Else, if the provided address doesn't have a primary name, displays the truncated address and links to the profile for that address.
@@ -39,32 +39,19 @@ export function Identity({
     setMounted(true);
   }, []);
 
-  // if the ENS namespace is the ens-test-env, always show the truncated address and not look up the primary name.
-  if (namespaceId === ENSNamespaceIds.EnsTestEnv) {
-    // TODO: come back to this later only when ENSNode exposes its own APIs for primary name lookups
-
-    return <AddressDisplay address={address} namespaceId={namespaceId} />;
-  }
-
-  const ensRootChainId = getENSRootChainId(namespaceId);
-
-  // Lookup the primary name for address using wagmi
-  const {
-    data: ensName,
-    isLoading,
-    isError,
-  }: UseEnsNameReturnType<string> = useEnsName({
+  // Lookup the primary name for address using ENSNode
+  const { data, status } = usePrimaryName({
     address,
-    chainId: ensRootChainId,
+    chainId: 1,
   });
 
   // If not mounted yet (server-side), or still loading, show a skeleton
-  if (!mounted || isLoading) {
+  if (!mounted || status === "pending") {
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
   // If there is an error looking up the primary name, fallback to showing the address
-  if (isError) {
+  if (status === "error") {
     return (
       <AddressDisplay
         address={address}
@@ -74,6 +61,7 @@ export function Identity({
     );
   }
 
+  const ensName = data.name;
   const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
 
   return (

@@ -1,6 +1,7 @@
 import { BaseTestnetIcon } from "@/components/icons/BaseTestnetIcon";
 import { LineaTestnetIcon } from "@/components/icons/LineaTestnetIcon";
 import { ensTestEnv } from "@/lib/chains";
+import { useEffect } from "react";
 import {
   base,
   baseSepolia,
@@ -39,13 +40,14 @@ const chainIcons = new Map<number, React.ReactNode>([
 ]);
 
 /**
- * Renders an icon for the provided chain ID,
- * @throws an error if the provided chain id doesn't have an assigned icon.
+ * Renders an icon for the provided chain ID.
  */
 export function ChainIcon({ chainId }: ChainIconProps) {
-  if (!chainIcons.has(chainId)) {
-    throw new Error(`Chain ID "${chainId}" doesn't have an assigned icon`);
-  }
+  useEffect(() => {
+    if (!chainIcons.has(chainId)) {
+      console.warn(`Chain ID "${chainId}" doesn't have an assigned icon`);
+    }
+  }, [chainId]);
 
-  return chainIcons.get(chainId);
+  return chainIcons.get(chainId) || chainIcons.get(mainnet.id);
 }
