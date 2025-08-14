@@ -3,7 +3,7 @@ import type {
   ChainIndexingCompletedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingStatusForUnstartedOverallStatus,
+  ChainIndexingUnstartedStatus,
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
@@ -17,7 +17,7 @@ import type {
  */
 export interface SerializedENSIndexerOverallIndexingUnstartedStatus
   extends Omit<ENSIndexerOverallIndexingUnstartedStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingStatusForUnstartedOverallStatus>;
+  chains: Record<ChainIdString, ChainIndexingUnstartedStatus>;
 }
 
 /**

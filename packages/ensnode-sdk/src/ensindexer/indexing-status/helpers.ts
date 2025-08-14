@@ -8,9 +8,9 @@ import {
   ChainIndexingStandbyStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingStatusForUnstartedOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
+  ChainIndexingUnstartedStatus,
   OverallIndexingStatusId,
   OverallIndexingStatusIds,
 } from "./types";
@@ -125,26 +125,15 @@ export function createIndexingConfig(
 /**
  * Check if Chain Indexing Statuses fit the 'unstarted' overall status
  * requirements:
- * - At least one chain is guaranteed to be in the "unstarted" status.
- * - Each chain is guaranteed to have a status of either "unstarted",
- *   "unstarted" or "completed".
+ * - All chains are guaranteed to have a status of "unstarted".
  *
- * Note: This function narrows the {@linkChainIndexingStatus} type to
- * {@link ChainIndexingStatusForUnstartedOverallStatus}.
+ * Note: This function narrows the {@link ChainIndexingStatus} type to
+ * {@link ChainIndexingUnstartedStatus}.
  */
 export function checkChainIndexingStatusesForUnstartedOverallStatus(
   chains: ChainIndexingStatus[],
-): chains is ChainIndexingStatusForUnstartedOverallStatus[] {
-  const atLeastOneChainInTargetStatus = chains.some(
-    (chain) => chain.status === ChainIndexingStatusIds.Unstarted,
-  );
-  const otherChainsHaveValidStatuses = chains.every(
-    (chain) =>
-      chain.status === ChainIndexingStatusIds.Unstarted ||
-      chain.status === ChainIndexingStatusIds.Completed,
-  );
-
-  return atLeastOneChainInTargetStatus && otherChainsHaveValidStatuses;
+): chains is ChainIndexingUnstartedStatus[] {
+  return chains.every((chain) => chain.status === ChainIndexingStatusIds.Unstarted);
 }
 
 /**

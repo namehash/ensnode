@@ -31,7 +31,6 @@ import {
   ChainIndexingFollowingStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingStatusForUnstartedOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
   ChainIndexingUnstartedStatus,
@@ -39,6 +38,7 @@ import {
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
   ENSIndexerOverallIndexingFollowingStatus,
+  ENSIndexerOverallIndexingUnstartedStatus,
   OverallIndexingStatusIds,
 } from "./types";
 
@@ -212,9 +212,7 @@ const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
 each chain has to have a status of either "unstarted", or "completed"`,
           },
         )
-        .transform(
-          (chains) => chains as Map<ChainId, ChainIndexingStatusForUnstartedOverallStatus>,
-        ),
+        .transform((chains) => chains as Map<ChainId, ChainIndexingUnstartedStatus>),
     })
     .refine(
       (indexingStatus) => {

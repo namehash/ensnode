@@ -239,13 +239,6 @@ export type ChainIndexingStandbyStatus =
   | ChainIndexingCompletedStatus;
 
 /**
- * Chain Indexing Status allowed when overall status is 'unstarted'.
- */
-export type ChainIndexingStatusForUnstartedOverallStatus =
-  | ChainIndexingUnstartedStatus
-  | ChainIndexingCompletedStatus;
-
-/**
  * ENSIndexer Overall Indexing Status: Unstarted
  *
  * Describes the current state of indexing operations across all indexed chains
@@ -260,12 +253,10 @@ export interface ENSIndexerOverallIndexingUnstartedStatus {
   /**
    * Indexing Status for each chain.
    *
-   * At least one chain is guaranteed to be in the "unstarted" status.
-   * Each chain is guaranteed to have a status of either "unstarted",
-   * or "completed". It's impossible for any chain to have a status of either
-   * "backfill", or "following".
+   * Each chain is guaranteed to have the "unstarted" status.
+   * It's impossible for any chain to have status other than "unstarted".
    */
-  chains: Map<ChainId, ChainIndexingStatusForUnstartedOverallStatus>;
+  chains: Map<ChainId, ChainIndexingUnstartedStatus>;
 }
 
 /**
