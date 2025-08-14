@@ -227,12 +227,6 @@ jobs:
           #ENSRAINBOW
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
 
-      # Terraform deploy - apply Terraform template everytime new deployment is introduced to either green or blue environment
-      - name: Set full permissions to execute scripts (read / write / execute)
-        working-directory: terraform
-        run: |
-          chmod 777 ./healthcheck.sh
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
