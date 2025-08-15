@@ -3,7 +3,8 @@
 import { CodeBlock } from "@/components/code-block";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { TraceRenderer } from "@/components/tracing/renderer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,6 @@ import { useDebouncedValue } from "rooks";
 // TODO: sync form state to query params, current just defaulting is supported
 // TODO: allow configuration of selection criteria
 export default function ResolveRecordsInspector() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [name, setName] = useState(searchParams.get("name") || "vitalik.eth");
@@ -28,12 +28,17 @@ export default function ResolveRecordsInspector() {
 
   const canQuery = !!debouncedName && debouncedName.length > 0;
 
-  const { data, error, isPending, isFetched } = useRecords({
+  const { data, error, isPending, isFetched, isRefetching, refetch } = useRecords({
     name: debouncedName,
     accelerate,
     selection: DEFAULT_RECORDS_SELECTION,
     trace: true,
     query: {
+      staleTime: 0,
+      refetchInterval: 0,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
       enabled: canQuery,
       retry: false,
     },
@@ -78,19 +83,22 @@ export default function ResolveRecordsInspector() {
             </label>
           </div>
         </CardContent>
+        <CardFooter>
+          <Button onClick={() => refetch()}>Refresh</Button>
+        </CardFooter>
       </Card>
       {isFetched && (
         <Card className="w-full">
           <CardHeader>
             <CardTitle>ENSNode Response</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="h-96 overflow-y-scroll">
             {(() => {
               if (error) return <p>{error.message}</p>;
-              if (isPending)
+              if (isPending || isRefetching)
                 return (
-                  <div className="flex flex-row justify-center p-8">
-                    <LoadingSpinner className="h-8 w-8" />
+                  <div className="h-full w-full flex flex-col justify-center items-center p-8">
+                    <LoadingSpinner className="h-16 w-16" />
                   </div>
                 );
 
