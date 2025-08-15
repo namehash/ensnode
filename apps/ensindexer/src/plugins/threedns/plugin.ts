@@ -9,10 +9,10 @@ import {
 } from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames, ResolverABI } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
 
-const pluginName = PluginName.ThreeDNS;
+const pluginName = PluginNames.ThreeDNS;
 
 export default createPlugin({
   name: pluginName,

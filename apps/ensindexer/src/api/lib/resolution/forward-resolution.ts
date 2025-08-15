@@ -4,7 +4,7 @@ import {
   ForwardResolutionProtocolStep,
   ForwardResolutionResult,
   Node,
-  PluginName,
+  PluginNames,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
@@ -200,7 +200,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               activeResolver,
             );
             const isIndexingReverseRegistrars = config.plugins.includes(
-              PluginName.ReverseResolvers,
+              PluginNames.ReverseResolvers,
             );
 
             if (_isKnownENSIP19ReverseResolver && isIndexingReverseRegistrars) {

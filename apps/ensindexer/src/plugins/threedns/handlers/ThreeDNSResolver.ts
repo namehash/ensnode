@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 
 import {
   handleABIChanged,
@@ -24,7 +24,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.ThreeDNS;
+  const pluginName = PluginNames.ThreeDNS;
 
   ponder.on(namespaceContract(pluginName, "Resolver:AddrChanged"), handleAddrChanged);
   ponder.on(namespaceContract(pluginName, "Resolver:AddressChanged"), handleAddressChanged);

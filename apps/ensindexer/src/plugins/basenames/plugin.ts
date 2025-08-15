@@ -9,10 +9,10 @@ import {
 } from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
 
-const pluginName = PluginName.Basenames;
+const pluginName = PluginNames.Basenames;
 
 export default createPlugin({
   name: pluginName,

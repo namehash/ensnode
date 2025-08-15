@@ -2,13 +2,13 @@ import { ponder } from "ponder:registry";
 
 import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 
 /**
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.Subgraph;
+  const pluginName = PluginNames.Subgraph;
 
   const {
     handleExpiryExtended,

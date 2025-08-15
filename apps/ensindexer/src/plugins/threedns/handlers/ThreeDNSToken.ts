@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 
 import {
   handleNewOwner,
@@ -15,7 +15,7 @@ import { setupRootNode } from "@/lib/subgraph-helpers";
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.ThreeDNS;
+  const pluginName = PluginNames.ThreeDNS;
 
   ponder.on(namespaceContract(pluginName, "ThreeDNSToken:setup"), setupRootNode);
   ponder.on(namespaceContract(pluginName, "ThreeDNSToken:NewOwner"), handleNewOwner);

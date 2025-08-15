@@ -1,5 +1,5 @@
 import { DatasourceNames, ResolverABI, StandaloneReverseRegistrarABI } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 import { ChainConfig, createConfig } from "ponder";
 
 import { createPlugin, getDatasourceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
@@ -9,7 +9,7 @@ import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-hel
  * Describes the indexing behavior for known ENSIP-19 L2 Reverse Resolvers & Legacy Reverse Resolvers,
  * in order to power Protocol Accelerated resolution of `name` records on Reverse Names.
  */
-export const pluginName = PluginName.ReverseResolvers;
+export const pluginName = PluginNames.ReverseResolvers;
 
 const ALL_REVERSE_RESOLUTION_DATASOURCE_NAMES = [
   DatasourceNames.ReverseResolverRoot,

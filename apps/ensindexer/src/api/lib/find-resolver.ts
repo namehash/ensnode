@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import { DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
-import { ChainId, type Name, type Node, PluginName, getNameHierarchy } from "@ensnode/ensnode-sdk";
+import { ChainId, type Name, type Node, PluginNames, getNameHierarchy } from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type Address,
@@ -50,7 +50,7 @@ export async function findResolver({
   if (chainId === ensRootChainId) {
     // if we're on the ENS Root Chain, we have the option to accelerate resolver lookups iff the
     // Subgraph plugin is active
-    if (accelerate && config.plugins.includes(PluginName.Subgraph)) {
+    if (accelerate && config.plugins.includes(PluginNames.Subgraph)) {
       return findResolverWithIndex(chainId, name);
     }
 

@@ -1,6 +1,6 @@
 import config from "@/config";
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import { type ChainId, type PluginName, PluginNames } from "@ensnode/ensnode-sdk";
 import { Address, isAddressEqual } from "viem";
 
 // NOTE: we know ensRoot is defined for all namespaces, so enforce that at runtime with !
@@ -47,7 +47,7 @@ export function possibleKnownOffchainLookupResolverDefersTo(
       basenames
     ) {
       return {
-        pluginName: PluginName.Basenames,
+        pluginName: PluginNames.Basenames,
         chainId: basenames.chain.id,
       };
     }
@@ -63,7 +63,7 @@ export function possibleKnownOffchainLookupResolverDefersTo(
       lineanames
     ) {
       return {
-        pluginName: PluginName.Lineanames,
+        pluginName: PluginNames.Lineanames,
         chainId: lineanames.chain.id,
       };
     }

@@ -5,7 +5,7 @@ import { type Address, namehash } from "viem";
 import {
   type Label,
   type LabelHash,
-  PluginName,
+  type PluginName,
   isLabelIndexable,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";

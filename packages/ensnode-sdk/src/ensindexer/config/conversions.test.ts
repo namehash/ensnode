@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deserializeENSIndexerPublicConfig } from "./deserialize";
 import { serializeENSIndexerPublicConfig } from "./serialize";
 import type { SerializedENSIndexerPublicConfig } from "./serialized-types";
-import { type ENSIndexerPublicConfig, PluginName } from "./types";
+import { type ENSIndexerPublicConfig, PluginNames } from "./types";
 
 describe("ENSIndexer: Config", () => {
   describe("serialization", () => {
@@ -18,7 +18,7 @@ describe("ENSIndexer: Config", () => {
         indexedChainIds: new Set([1]),
         isSubgraphCompatible: true,
         namespace: "mainnet",
-        plugins: [PluginName.Subgraph],
+        plugins: [PluginNames.Subgraph],
         dependencyInfo: {
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
@@ -58,7 +58,7 @@ describe("ENSIndexer: Config", () => {
       indexedChainIds: [1, 10, 8453],
       isSubgraphCompatible: true,
       namespace: "mainnet",
-      plugins: [PluginName.Subgraph],
+      plugins: [PluginNames.Subgraph],
       dependencyInfo: {
         ensRainbow: "0.32.0",
         ensRainbowSchema: 2,
@@ -127,7 +127,7 @@ describe("ENSIndexer: Config", () => {
         structuredClone(correctSerializedConfig);
 
       serializedConfig.isSubgraphCompatible = true;
-      serializedConfig.plugins.push(PluginName.Lineanames);
+      serializedConfig.plugins.push(PluginNames.Lineanames);
 
       // act & assert
       expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(errorMessage);
@@ -138,7 +138,7 @@ describe("ENSIndexer: Config", () => {
       const serializedConfig: SerializedENSIndexerPublicConfig =
         structuredClone(correctSerializedConfig);
 
-      serializedConfig.plugins.push(PluginName.ReverseResolvers);
+      serializedConfig.plugins.push(PluginNames.ReverseResolvers);
 
       // act & assert
       expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(

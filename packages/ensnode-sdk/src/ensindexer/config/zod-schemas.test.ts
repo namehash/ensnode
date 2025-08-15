@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { type ZodSafeParseResult, prettifyError } from "zod/v4";
-import { DependencyInfo, PluginName } from "./types";
+import { DependencyInfo, PluginNames } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
   makeDependencyInfoSchema,
@@ -27,18 +27,22 @@ describe("ENSIndexer: Config", () => {
       it("can parse a list of plugin name values", () => {
         expect(
           makePluginsListSchema().parse([
-            `${PluginName.Subgraph}`,
-            `${PluginName.Referrals}`,
-            `${PluginName.ReverseResolvers}`,
+            `${PluginNames.Subgraph}`,
+            `${PluginNames.Referrals}`,
+            `${PluginNames.ReverseResolvers}`,
           ]),
-        ).toStrictEqual([PluginName.Subgraph, PluginName.Referrals, PluginName.ReverseResolvers]);
+        ).toStrictEqual([
+          PluginNames.Subgraph,
+          PluginNames.Referrals,
+          PluginNames.ReverseResolvers,
+        ]);
 
         expect(
           formatParseError(
             makePluginsListSchema().safeParse([
-              `${PluginName.Subgraph}`,
-              `${PluginName.Referrals}`,
-              `${PluginName.Subgraph}`,
+              `${PluginNames.Subgraph}`,
+              `${PluginNames.Referrals}`,
+              `${PluginNames.Subgraph}`,
             ]),
           ),
         ).toContain("Plugins cannot contain duplicate values");
@@ -109,9 +113,9 @@ describe("ENSIndexer: Config", () => {
         expect(
           formatParseError(
             makePluginsListSchema("PLUGINS env var").safeParse([
-              `${PluginName.Subgraph}`,
-              `${PluginName.Referrals}`,
-              `${PluginName.Subgraph}`,
+              `${PluginNames.Subgraph}`,
+              `${PluginNames.Referrals}`,
+              `${PluginNames.Subgraph}`,
             ]),
           ),
         ).toContain("PLUGINS env var cannot contain duplicate values");

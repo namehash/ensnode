@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { PluginNames, uniq } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
@@ -139,7 +139,7 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
 ) {
   const { value: config } = ctx;
 
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
+  const reverseResolversPluginActive = config.plugins.includes(PluginNames.ReverseResolvers);
 
   if (reverseResolversPluginActive && !config.indexAdditionalResolverRecords) {
     ctx.issues.push({
@@ -156,7 +156,7 @@ export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
 ) {
   const { value: config } = ctx;
 
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
+  const reverseResolversPluginActive = config.plugins.includes(PluginNames.ReverseResolvers);
 
   if (config.experimentalResolution && !reverseResolversPluginActive) {
     ctx.issues.push({

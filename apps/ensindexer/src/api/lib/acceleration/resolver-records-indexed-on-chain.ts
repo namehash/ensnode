@@ -1,6 +1,6 @@
 import config from "@/config";
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import { ChainId, PluginNames } from "@ensnode/ensnode-sdk";
 
 // NOTE: we know ensRoot is defined for all namespaces, so enforce that at runtime with !
 const ensRoot = maybeGetDatasource(config.namespace, DatasourceNames.ENSRoot)!;
@@ -37,27 +37,27 @@ export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
   const isThreeDNSBaseChain = chainId === threeDNSBase?.chain.id;
 
   // on the ENS Root Chain, the Subgraph plugin includes multi-chain Resolver indexing behavior
-  if (isENSRootChain && config.plugins.includes(PluginName.Subgraph)) {
+  if (isENSRootChain && config.plugins.includes(PluginNames.Subgraph)) {
     return true;
   }
 
   // on the Basenames chain, the Basenames plugin includes multi-chain Resolver indexing behavior
-  if (isBasenamesChain && config.plugins.includes(PluginName.Basenames)) {
+  if (isBasenamesChain && config.plugins.includes(PluginNames.Basenames)) {
     return true;
   }
 
   // on the Lineanames chain, the Lineanames plugin includes multi-chain Resolver indexing behavior
-  if (isLineanamesChain && config.plugins.includes(PluginName.Lineanames)) {
+  if (isLineanamesChain && config.plugins.includes(PluginNames.Lineanames)) {
     return true;
   }
 
   // on the ThreeDNSOptimism chain, the ThreeDNS plugin includes all known Resolver indexing behavior
-  if (isThreeDNSOptimismChain && config.plugins.includes(PluginName.ThreeDNS)) {
+  if (isThreeDNSOptimismChain && config.plugins.includes(PluginNames.ThreeDNS)) {
     return true;
   }
 
   // on the ThreeDNSBase chain, the ThreeDNS plugin includes all known Resolver indexing behavior
-  if (isThreeDNSBaseChain && config.plugins.includes(PluginName.ThreeDNS)) {
+  if (isThreeDNSBaseChain && config.plugins.includes(PluginNames.ThreeDNS)) {
     return true;
   }
 

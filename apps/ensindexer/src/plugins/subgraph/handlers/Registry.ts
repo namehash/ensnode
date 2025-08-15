@@ -1,7 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 
-import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
+import { type Node, PluginNames, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 import {
   handleNewOwner,
@@ -29,7 +29,7 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.Subgraph;
+  const pluginName = PluginNames.Subgraph;
 
   ponder.on(namespaceContract(pluginName, "RegistryOld:setup"), setupRootNode);
 

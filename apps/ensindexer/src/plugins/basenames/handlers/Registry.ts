@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 
 import {
   handleNewOwner,
@@ -15,7 +15,7 @@ import { setupRootNode } from "@/lib/subgraph-helpers";
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.Basenames;
+  const pluginName = PluginNames.Basenames;
 
   ponder.on(namespaceContract(pluginName, "Registry:setup"), setupRootNode);
   ponder.on(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));

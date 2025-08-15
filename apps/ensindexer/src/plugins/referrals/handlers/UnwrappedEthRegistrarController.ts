@@ -3,7 +3,7 @@ import { namehash } from "viem";
 
 import { handleRegistrationReferral, handleRenewalReferral } from "@/handlers/Referrals";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
+import { PluginNames, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 const ETH_NODE = namehash("eth");
 
@@ -11,7 +11,7 @@ const ETH_NODE = namehash("eth");
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.Referrals;
+  const pluginName = PluginNames.Referrals;
 
   //////////////////////////////////
   // UnwrappedEthRegistrarController

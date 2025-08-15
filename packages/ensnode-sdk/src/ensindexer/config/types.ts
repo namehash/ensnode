@@ -5,14 +5,19 @@ import type { ChainId } from "../../shared";
  * A PluginName is a unique id for a 'plugin': we use the notion of
  * 'plugins' to describe bundles of indexing logic.
  */
-export enum PluginName {
-  Subgraph = "subgraph",
-  Basenames = "basenames",
-  Lineanames = "lineanames",
-  ThreeDNS = "threedns",
-  ReverseResolvers = "reverse-resolvers",
-  Referrals = "referrals",
-}
+export const PluginNames = {
+  Subgraph: "subgraph",
+  Basenames: "basenames",
+  Lineanames: "lineanames",
+  ThreeDNS: "threedns",
+  ReverseResolvers: "reverse-resolvers",
+  Referrals: "referrals",
+} as const;
+
+/**
+ * PluginName is the derived string union of possible Plugin Names.
+ */
+export type PluginName = (typeof PluginNames)[keyof typeof PluginNames];
 
 /**
  * Information about ENSIndexer's dependencies.

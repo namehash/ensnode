@@ -2,7 +2,7 @@ import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
+import { type ChainId, PluginNames, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
 import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
@@ -93,15 +93,15 @@ const PluginsSchema = z.coerce
   .pipe(
     z
       .array(
-        z.enum(PluginName, {
+        z.enum(PluginNames, {
           error: `PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-            PluginName,
+            PluginNames,
           ).join(", ")}`,
         }),
       )
       .min(1, {
         error: `PLUGINS must be a comma separated list with at least one valid plugin name. Valid plugins are: ${Object.values(
-          PluginName,
+          PluginNames,
         ).join(", ")}`,
       }),
   )

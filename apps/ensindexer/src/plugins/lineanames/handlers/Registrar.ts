@@ -1,6 +1,6 @@
 import { ponder } from "ponder:registry";
 
-import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import { type LabelHash, PluginNames, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
@@ -20,7 +20,7 @@ const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenI
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.Lineanames;
+  const pluginName = PluginNames.Lineanames;
 
   const {
     handleNameRegistered,

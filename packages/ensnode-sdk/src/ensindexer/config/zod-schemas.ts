@@ -16,7 +16,7 @@ import {
   makeUrlSchema,
 } from "../../shared/zod-schemas";
 import { isSubgraphCompatible } from "./helpers";
-import { PluginName } from "./types";
+import { PluginNames } from "./types";
 import type { ENSIndexerPublicConfig } from "./types";
 
 /**
@@ -38,15 +38,15 @@ export const makeIndexedChainIdsSchema = (valueLabel: string = "Indexed Chain ID
 export const makePluginsListSchema = (valueLabel: string = "Plugins") =>
   z
     .array(
-      z.enum(PluginName, {
+      z.enum(PluginNames, {
         error: `${valueLabel} must be a list with at least one valid plugin name. Valid plugins are: ${Object.values(
-          PluginName,
+          PluginNames,
         ).join(", ")}`,
       }),
     )
     .min(1, {
       error: `${valueLabel} must be a list with at least one valid plugin name. Valid plugins are: ${Object.values(
-        PluginName,
+        PluginNames,
       ).join(", ")}`,
     })
     .refine((arr) => arr.length === uniq(arr).length, {
@@ -88,13 +88,13 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
 ) {
   const { value: config } = ctx;
 
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
+  const reverseResolversPluginActive = config.plugins.includes(PluginNames.ReverseResolvers);
 
   if (reverseResolversPluginActive && !config.indexAdditionalResolverRecords) {
     ctx.issues.push({
       code: "custom",
       input: config,
-      message: `The '${PluginName.ReverseResolvers}' plugin requires 'indexAdditionalResolverRecords' to be 'true'.`,
+      message: `The '${PluginNames.ReverseResolvers}' plugin requires 'indexAdditionalResolverRecords' to be 'true'.`,
     });
   }
 }
@@ -105,13 +105,13 @@ export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
 ) {
   const { value: config } = ctx;
 
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
+  const reverseResolversPluginActive = config.plugins.includes(PluginNames.ReverseResolvers);
 
   if (config.experimentalResolution && !reverseResolversPluginActive) {
     ctx.issues.push({
       code: "custom",
       input: config,
-      message: `'reverseResolversPluginActive' requires the ${PluginName.ReverseResolvers} plugin to be active.`,
+      message: `'reverseResolversPluginActive' requires the ${PluginNames.ReverseResolvers} plugin to be active.`,
     });
   }
 }
@@ -129,8 +129,8 @@ export function invariant_isSubgraphCompatibleRequirements(
 
   if (config.isSubgraphCompatible !== isSubgraphCompatible(config)) {
     const message = config.isSubgraphCompatible
-      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active. Also, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false'`
-      : `Both 'indexAdditionalResolverRecords' and 'healReverseAddresses' were set to 'false', and the only active plugin was the '${PluginName.Subgraph}' plugin. The 'isSubgraphCompatible' must be set to 'true'`;
+      ? `'isSubgraphCompatible' requires only the '${PluginNames.Subgraph}' plugin to be active. Also, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false'`
+      : `Both 'indexAdditionalResolverRecords' and 'healReverseAddresses' were set to 'false', and the only active plugin was the '${PluginNames.Subgraph}' plugin. The 'isSubgraphCompatible' must be set to 'true'`;
 
     ctx.issues.push({
       code: "custom",

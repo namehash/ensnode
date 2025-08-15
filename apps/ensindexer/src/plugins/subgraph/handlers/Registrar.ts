@@ -1,14 +1,8 @@
 import { ponder } from "ponder:registry";
-import {
-  type LabelHash,
-  PluginName,
-  makeSubdomainNode,
-  uint256ToHex32,
-} from "@ensnode/ensnode-sdk";
+import { type LabelHash, PluginNames, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { namehash } from "viem";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on
@@ -26,7 +20,7 @@ const registrarManagedName = "eth" as const;
  * Registers event handlers with Ponder.
  */
 export default function () {
-  const pluginName = PluginName.Subgraph;
+  const pluginName = PluginNames.Subgraph;
 
   const {
     handleNameRegistered,

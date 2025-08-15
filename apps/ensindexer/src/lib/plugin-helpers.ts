@@ -1,6 +1,6 @@
 import type { ENSIndexerConfig } from "@/config/types";
 import { DatasourceName, ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { type PluginName, PluginNames, uniq } from "@ensnode/ensnode-sdk";
 import { createConfig as createPonderConfig } from "ponder";
 
 /**
@@ -21,8 +21,8 @@ import { createConfig as createPonderConfig } from "ponder";
  *
  * @example
  * ```ts
- * namespaceContract(PluginName.Subgraph, "Registry"); // returns "subgraph/Registry"
- * namespaceContract(PluginName.Basenames, "Registry"); // returns "basenames/Registry");
+ * namespaceContract(PluginNames.Subgraph, "Registry"); // returns "subgraph/Registry"
+ * namespaceContract(PluginNames.Basenames, "Registry"); // returns "basenames/Registry");
  * ```
  *
  */
@@ -181,4 +181,4 @@ export function getRequiredDatasourceNames(plugins: ENSIndexerPlugin[]): Datasou
  * for further discussion.
  */
 export const pluginSupportsPremintedNames = (pluginName: PluginName) =>
-  [PluginName.Basenames, PluginName.Lineanames].includes(pluginName);
+  pluginName === PluginNames.Basenames || pluginName === PluginNames.Lineanames;

@@ -1,5 +1,5 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import type { PluginName } from "@ensnode/ensnode-sdk";
 import type * as PonderMetadata from "@ensnode/ponder-metadata";
 
 /**

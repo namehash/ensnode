@@ -1,4 +1,4 @@
-import { PluginName } from "@ensnode/ensnode-sdk";
+import type { PluginName } from "@ensnode/ensnode-sdk";
 
 import type { MergedTypes } from "@/lib/lib-helpers";
 import basenamesPlugin from "./basenames/plugin";

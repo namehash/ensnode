@@ -1,4 +1,4 @@
-import { type ENSIndexerPublicConfig, PluginName } from "./types";
+import { type ENSIndexerPublicConfig, PluginNames } from "./types";
 
 /**
  * Subgraph compatibility
@@ -14,7 +14,7 @@ export function isSubgraphCompatible(
 ): boolean {
   // 1. only the subgraph plugin is active
   const onlySubgraphPluginActivated =
-    config.plugins.length === 1 && config.plugins[0] === PluginName.Subgraph;
+    config.plugins.length === 1 && config.plugins[0] === PluginNames.Subgraph;
 
   // 2. healReverseAddresses = false
   // 3. indexAdditionalResolverRecords = false

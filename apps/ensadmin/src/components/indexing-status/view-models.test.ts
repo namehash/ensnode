@@ -1,4 +1,4 @@
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginNames } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { base, mainnet } from "viem/chains";
 import { describe, expect, it } from "vitest";
@@ -30,13 +30,13 @@ describe("View Models", () => {
   describe("ensNodeEnvViewModel", () => {
     it("should return the correct view model", () => {
       const result = ensNodeEnvViewModel({
-        PLUGINS: [PluginName.Subgraph],
+        PLUGINS: [PluginNames.Subgraph],
         DATABASE_SCHEMA: "public",
         NAMESPACE: "ens-test-env",
       });
 
       expect(result).toEqual([
-        { label: "Active Plugins", value: [PluginName.Subgraph] },
+        { label: "Active Plugins", value: [PluginNames.Subgraph] },
         { label: "ENS Namespace", value: "ens-test-env" },
         { label: "Database Schema", value: "public" },
       ]);
