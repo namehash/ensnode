@@ -9,13 +9,13 @@ import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { selectedEnsNodeUrl } from "@/lib/env";
+import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
+import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
 import { intlFormat } from "date-fns";
 import { Clock, ExternalLink } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
   ChainIndexingPhaseViewModel,
@@ -28,9 +28,8 @@ import {
 } from "./view-models";
 
 export function IndexingStatus() {
-  const searchParams = useSearchParams();
-  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
-  const indexingStatus = useIndexingStatusQuery(ensNodeUrl);
+  const activeENSNodeUrl = useActiveENSNodeUrl();
+  const indexingStatus = useIndexingStatusQuery(activeENSNodeUrl);
 
   return (
     <section className="flex flex-col gap-6 py-6">
@@ -251,8 +250,7 @@ interface ChainIndexingTimelineProps {
  */
 function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
   const { indexingStatus } = props;
-  const searchParams = useSearchParams();
-  const currentEnsNodeUrl = selectedEnsNodeUrl(searchParams);
+  const activeENSNodeUrl = useActiveENSNodeUrl();
 
   if (indexingStatus.isLoading) {
     return <ChainIndexingTimelineFallback />;
@@ -282,7 +280,7 @@ function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
         </CardHeader>
         <CardContent>
           <div className="text-sm text-muted-foreground pl-9 mb-4">
-            <span className="font-semibold">Connection:</span> {currentEnsNodeUrl.toString()}
+            <span className="font-semibold">Connection:</span> {activeENSNodeUrl.toString()}
           </div>
 
           <div className="space-y-6">

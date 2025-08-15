@@ -14,10 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { selectedEnsNodeUrl } from "@/lib/env";
+import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Clock } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
@@ -31,9 +30,8 @@ const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
  * Displays a list of the most recently indexed registrations and the date of the most recently indexed block
  */
 export function RecentRegistrations() {
-  const searchParams = useSearchParams();
-  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
-  const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
+  const activeENSNodeUrl = useActiveENSNodeUrl();
+  const indexingStatusQuery = useIndexingStatusQuery(activeENSNodeUrl);
 
   const [isClient, setIsClient] = useState(false);
 
@@ -92,7 +90,7 @@ export function RecentRegistrations() {
         {isClient && indexingStatusQuery.data && (
           <RegistrationsList
             ensNodeMetadata={indexingStatusQuery.data}
-            ensNodeUrl={ensNodeUrl}
+            ensNodeUrl={activeENSNodeUrl}
             maxRecords={MAX_NUMBER_OF_LATEST_REGISTRATIONS}
           />
         )}

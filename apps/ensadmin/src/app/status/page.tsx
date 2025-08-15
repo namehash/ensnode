@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 
 import { IndexingStatus } from "@/components/indexing-status/components";
-import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
 import { RecentRegistrations } from "@/components/recent-registrations";
 
 export default function Status() {
@@ -11,11 +10,9 @@ export default function Status() {
         <IndexingStatus />
       </Suspense>
       <Suspense>
-        <ENSNodeProvider>
-          <div className="px-6 pb-6">
-            <RecentRegistrations />
-          </div>
-        </ENSNodeProvider>
+        <div className="px-6 pb-6">
+          <RecentRegistrations />
+        </div>
       </Suspense>
     </>
   );

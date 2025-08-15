@@ -1,3 +1,5 @@
+// TODO: replace all of this validation with zod
+
 /**
  * Get ENSAdmin service public URL.
  *
@@ -96,21 +98,6 @@ function getVercelAppPublicUrl(): URL {
   return new URL(`https://${vercelAppHostname}`);
 }
 
-/**
- * Get URL of currently selected ENSNode instance.
- * @param params
- * @returns URL from `ensnode` search param or the first URL from default URLs list
- */
-export function selectedEnsNodeUrl(params: URLSearchParams): URL {
-  const ensnode = params.get("ensnode");
-
-  if (!ensnode) {
-    return defaultEnsNodeUrl();
-  }
-
-  return new URL(ensnode);
-}
-
 const DEFAULT_ENSNODE_URL = "https://api.alpha.ensnode.io";
 
 /**
@@ -147,14 +134,6 @@ export function defaultEnsNodeUrls(): Array<URL> {
       `Invalid ${envVarName} value "${envVarValue}" must contain a comma separated list of valid URLs.`,
     );
   }
-}
-
-/**
- * Get the first URL from a list of URLs for default ENSNode instances.
- * @returns URL for default ENSNode instance
- */
-export function defaultEnsNodeUrl(): URL {
-  return defaultEnsNodeUrls()[0];
 }
 
 /**
