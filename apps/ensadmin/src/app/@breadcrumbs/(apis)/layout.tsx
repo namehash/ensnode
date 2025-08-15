@@ -1,22 +1,9 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import BreadcrumbsGroup from "@/components/breadcrumbs/group";
 
-export default function BreadcrumbsGqlLayout({
+export default function BreadcrumbsAPIsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem className="hidden md:block">APIs</BreadcrumbItem>
-        <BreadcrumbSeparator className="hidden md:block" />
-        {children}
-      </BreadcrumbList>
-    </Breadcrumb>
-  );
+  return <BreadcrumbsGroup name="APIs">{children}</BreadcrumbsGroup>;
 }

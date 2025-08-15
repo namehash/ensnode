@@ -1,4 +1,3 @@
-import EdgeLabel from "@/app/inspector/custom-components/EdgeLabel";
 import {
   BaseEdge,
   type Edge,
@@ -7,6 +6,7 @@ import {
   getBezierPath,
 } from "@xyflow/react";
 import React, { type FC } from "react";
+import EdgeLabel from "./EdgeLabel";
 
 const CustomEdge: FC<
   EdgeProps<

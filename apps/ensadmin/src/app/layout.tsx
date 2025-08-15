@@ -3,10 +3,13 @@ import { Suspense } from "react";
 import "./globals.css";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
+import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { ENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
 import { ensAdminPublicUrl } from "@/lib/env";
 import { Inter } from "next/font/google";
 
@@ -61,20 +64,24 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <SidebarProvider>
-            <Suspense>
-              <AppSidebar />
-            </Suspense>
-            <SidebarInset>
-              <Header>
-                <HeaderNav>
-                  <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
-                </HeaderNav>
-                <HeaderActions>{actions}</HeaderActions>
-              </Header>
-              {children}
-            </SidebarInset>
-          </SidebarProvider>
+          <ENSNodeConnectionsProvider>
+            <RequireActiveENSNodeConnection>
+              <SidebarProvider>
+                <Suspense>
+                  <AppSidebar />
+                </Suspense>
+                <SidebarInset>
+                  <Header>
+                    <HeaderNav>
+                      <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                    </HeaderNav>
+                    <HeaderActions>{actions}</HeaderActions>
+                  </Header>
+                  <ENSNodeProvider>{children}</ENSNodeProvider>
+                </SidebarInset>
+              </SidebarProvider>
+            </RequireActiveENSNodeConnection>
+          </ENSNodeConnectionsProvider>
         </QueryClientProvider>
         <Toaster />
       </body>
