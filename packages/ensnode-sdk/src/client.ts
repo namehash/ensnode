@@ -1,5 +1,8 @@
-import {
+import type {
+  ConfigResponse,
   ErrorResponse,
+  IndexingStatusRequest,
+  IndexingStatusResponse,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesRequest,
@@ -7,6 +10,12 @@ import {
   ResolveRecordsRequest,
   ResolveRecordsResponse,
 } from "./api/types";
+import {
+  type SerializedENSIndexerOverallIndexingStatus,
+  type SerializedENSIndexerPublicConfig,
+  deserializeENSIndexerIndexingStatus,
+  deserializeENSIndexerPublicConfig,
+} from "./ensindexer";
 import { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -248,5 +257,67 @@ export class ENSNodeClient {
 
     const data = await response.json();
     return data as ResolvePrimaryNamesResponse;
+  }
+
+  /**
+   * Fetch ENSNode Config
+   *
+   * The Config API provides a complete view of an ENSNode instance’s public
+   * configuration, making it easy to understand and verify it’s configuration.
+   *
+   * @returns {ConfigResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   */
+  async config(): Promise<ConfigResponse> {
+    const url = new URL(`/api/config`, this.options.url);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const error = (await response.json()) as ErrorResponse;
+      throw new Error(`Fetching ENSNode Config Failed: ${error.message}`);
+    }
+
+    const data = (await response.json()) as SerializedENSIndexerPublicConfig;
+
+    return deserializeENSIndexerPublicConfig(data);
+  }
+
+  /**
+   * Fetch ENSNode Indexing Status
+   *
+   * Monitor an ENSNode’s indexing progress across multiple chains with
+   * the Indexing Status API. This endpoint provides detailed information about
+   * which chains are being indexed, each chain’s indexing status,
+   * and the overall multichain indexing status.
+   *
+   * @returns {IndexingStatusResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   */
+  async indexingStatus(options?: IndexingStatusRequest): Promise<IndexingStatusResponse> {
+    const url = new URL(`/api/indexing-status`, this.options.url);
+
+    if (typeof options?.maxRealtimeDistance !== "undefined") {
+      url.searchParams.set("maxRealtimeDistance", `${options.maxRealtimeDistance}`);
+    }
+
+    const response = await fetch(url);
+
+    // Indexing Status API uses the 503 response code to signal service availability
+    // while still returning the Overall Indexing Status object.
+    if (!response.ok && response.status !== 503) {
+      const error = (await response.json()) as ErrorResponse;
+      throw new Error(`Fetching ENSNode Indexing Status Failed: ${error.message}`);
+    }
+
+    const data = (await response.json()) as SerializedENSIndexerOverallIndexingStatus;
+
+    return deserializeENSIndexerIndexingStatus(data);
   }
 }

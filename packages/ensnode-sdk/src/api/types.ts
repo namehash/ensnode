@@ -1,3 +1,4 @@
+import type { ENSIndexerOverallIndexingStatus, ENSIndexerPublicConfig } from "../ensindexer";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -7,6 +8,7 @@ import type {
   ReverseResolutionArgs,
   ReverseResolutionResult,
 } from "../resolution";
+import type { Duration } from "../shared";
 import type { ProtocolTrace } from "../tracing";
 
 /**
@@ -68,3 +70,32 @@ export interface ResolvePrimaryNamesRequest
 export interface ResolvePrimaryNamesResponse extends TraceableResponse {
   names: MultichainPrimaryNameResolutionResult;
 }
+
+/**
+ * ENSIndexer Public Config Response
+ */
+export type ConfigResponse = ENSIndexerPublicConfig;
+
+/**
+ * ENSIndexer Overall Indexing Status Response
+ */
+export interface IndexingStatusRequest {
+  /**
+   * Max Realtime Distance (optional)
+   *
+   * A duration value in seconds, representing the max allowed distance
+   * between the latest indexed block of each chain and the “tip” of
+   * all indexed chains. Setting this parameter influences the HTTP response
+   * code as follows:
+   * - Success (200 OK): The latest indexed block of each chain
+   *   is within the requested distance from realtime.
+   * - Service Unavailable (503): The latest indexed block of each chain
+   *   is NOT within the requested distance from realtime.
+   */
+  maxRealtimeDistance?: Duration;
+}
+
+/**
+ * ENSIndexer Overall Indexing Status Response
+ */
+export type IndexingStatusResponse = ENSIndexerOverallIndexingStatus;
