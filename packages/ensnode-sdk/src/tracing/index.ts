@@ -46,14 +46,41 @@ export function hrTimeToMicroseconds(time: [number, number] /* api.HrTime */): n
   return time[0] * 1e6 + time[1] / 1e3;
 }
 
+interface SpanAttributes {
+  [key: string]: unknown;
+}
+
+interface SpanEvent {
+  name: string;
+  attributes: SpanAttributes;
+  time: number;
+}
+
+export interface ProtocolSpan {
+  id: string;
+  traceId: string;
+  parentSpanContext: {
+    traceId: string;
+    spanId: string;
+  };
+  name: string;
+  timestamp: number;
+  duration: number;
+  attributes: SpanAttributes;
+  status: string;
+  events: SpanEvent[];
+}
+
+export type ProtocolTrace = ProtocolSpan[];
+
 /**
- * Encodes a ReadableSpan as a consumer-friendly and externally-visible JSON-representable object.
+ * Encodes a ReadableSpan as a consumer-friendly and externally-visible JSON-representable ProtocolSpan.
  *
  * NOTE: to avoid a dependency on @opentelemetry/sdk-trace-base and an obscure typing issue related
  * to the patched version necessary for it to run in ENSIndexer, we type the span as `any`, but note
  * that it is ReadableSpan.
  */
-export const readableSpanToProtocolSpan = (span: any /* ReadableSpan */) => ({
+export const readableSpanToProtocolSpan = (span: any /* ReadableSpan */): ProtocolSpan => ({
   id: span.spanContext().spanId,
   traceId: span.spanContext().traceId,
   parentSpanContext: span.parentSpanContext,
@@ -67,8 +94,9 @@ export const readableSpanToProtocolSpan = (span: any /* ReadableSpan */) => ({
     ),
   ),
   status: span.status,
-  events: span.events,
+  events: span.events.map((event: any) => ({
+    name: event.name,
+    attributes: event.attributes,
+    time: hrTimeToMicroseconds(event.time),
+  })),
 });
-
-export type ProtocolSpan = ReturnType<typeof readableSpanToProtocolSpan>;
-export type ProtocolTrace = ProtocolSpan[];
