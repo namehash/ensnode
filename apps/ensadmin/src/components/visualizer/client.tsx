@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Background,
   Controls,
@@ -8,13 +10,13 @@ import {
 } from "@xyflow/react";
 import React from "react";
 import "@xyflow/react/dist/style.css";
-import CustomEdgeStartEnd from "@/app/inspector/custom-components/CustomEdgeStartEnd";
-import { LabeledGroupNode } from "@/app/inspector/custom-components/LabeledGroupNode";
-import MultipleHandlesNode from "@/app/inspector/custom-components/MultipleHandlesNode";
-import ParallelogramNode from "@/app/inspector/custom-components/ParallelogramNode";
-import { initialEdges } from "@/app/inspector/schema-elements/edges";
-import { initialNodes } from "@/app/inspector/schema-elements/nodes";
 import { AnimatedSVGEdge } from "./custom-components/AnimatedSVGEdge";
+import CustomEdgeStartEnd from "./custom-components/CustomEdgeStartEnd";
+import { LabeledGroupNode } from "./custom-components/LabeledGroupNode";
+import MultipleHandlesNode from "./custom-components/MultipleHandlesNode";
+import ParallelogramNode from "./custom-components/ParallelogramNode";
+import { initialEdges } from "./schema-elements/edges";
+import { initialNodes } from "./schema-elements/nodes";
 
 const edgeTypes = {
   animatedSvg: AnimatedSVGEdge,

@@ -17,8 +17,14 @@ const navItems = [
   },
   {
     title: "ENS Protocol Inspector",
-    url: "/inspector",
+    url: "#",
     icon: IconENS,
+    isActive: true,
+    items: [
+      { title: "Record Resolution", url: "/inspect/records" },
+      { title: "Primary Name Resolution", url: "/inspect/primary-name" },
+      { title: "Visualizer Example", url: "/inspect/visualizer" },
+    ],
   },
   {
     title: "APIs",
