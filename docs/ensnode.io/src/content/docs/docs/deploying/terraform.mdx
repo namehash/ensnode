@@ -5,9 +5,9 @@ sidebar:
   order: 4
 ---
 
-import { LinkCard } from '@astrojs/starlight/components';
+import { LinkCard } from "@astrojs/starlight/components";
 
-This guide will help you deploy ENSNode using Terraform to Railway. The Terraform configuration provides a complete infrastructure setup including database, ENSIndexer, ENSRainbow, and other required services.
+This guide will help you deploy ENSNode using Terraform to Render. The Terraform configuration provides a complete infrastructure setup including database, ENSIndexer, ENSRainbow, and other required services.
 
 :::note[Important]
 These Terraform scripts are currently specific to ENSNode instances hosted by NameHash Labs. While these scripts provide a good starting point for deploying your own ENSNode instance, you will need to make modifications to suit your specific deployment needs. We plan to generalize these scripts in the future to better support community deployments.
@@ -22,8 +22,8 @@ These Terraform scripts are currently specific to ENSNode instances hosted by Na
 ## Prerequisites
 
 - [Terraform](https://www.terraform.io/downloads.html) installed
-- [Railway](https://railway.app/) account
-- Railway API token (generate from https://railway.com/account/tokens)
+- [Render](https://https://render.com/) account
+- Render API token (generate from https://render.com/docs/api#1-create-an-api-key)
 - RPC URLs for the chains you want to support (Mainnet, Sepolia, Holesky, Base, Linea)
 - AWS account (for DNS management)
 - AWS S3 bucket defined inside AWS account - `ensnode-terraform` (for Terraform state)
@@ -33,21 +33,39 @@ These Terraform scripts are currently specific to ENSNode instances hosted by Na
 Copy `.env.sample` to `.env.local` and fill in your configuration values:
 
 ```bash
-railway_token    = "your_railway_token"
-mainnet_rpc_url  = "your_mainnet_rpc_url"
-sepolia_rpc_url  = "your_sepolia_rpc_url"
-holesky_rpc_url  = "your_holesky_rpc_url"
-base_rpc_url     = "your_base_rpc_url"
-linea_rpc_url    = "your_linea_rpc_url"
-ensnode_version  = "latest"  # or specific version
+# ENSNode configuration
+ensnode_version           = "latest"  # or specific version
+
+# Render configuration
+render_api_key            = "your_railway_token"
+render_owner_id           = "your_render_onwer_id"
+render_environment        = "your_render_environment"
+
+# Mainnet RPC URLs
+ethereum_mainnet_rpc_url  = "your_ethereum_mainnet_rpc_url"
+base_mainnet_rpc_url      = "your_base_mainnet_rpc_url"
+linea_mainnet_rpc_url     = "your_linea_mainnet_rpc_url"
+arbitrum_mainnet_rpc_url  = "your_arbitrum_mainnet_rpc_url"
+scroll_mainnet_rpc_url    = "your_scroll_mainnet_rpc_url"
+
+# Sepolia RPC URLs
+etherum_sepolia_rpc_url   = "your_etherum_sepolia_rpc_url"
+base_sepolia_rpc_url      = "your_base_sepolia_rpc_url"
+linea_sepolia_rpc_url     = "your_linea_sepolia_rpc_url"
+optimism_sepolia_rpc_url  = "your_optimism_sepolia_rpc_url"
+arbitrum_sepolia_rpc_url  = "your_arbitrum_sepolia_rpc_url"
+scroll_sepolia_rpc_url    = "your_scroll_sepolia_rpc_url"
+
+# Holesky RPC URLs
+etherum_holesky_rpc_url   = "your_etherum_holesky_rpc_url"
 ```
 
 ## Infrastructure Components
 
 The Terraform configuration sets up the following components:
 
-- Railway
-  - Railway project and environment
+- Render
+  - Render project and environment
   - PostgreSQL database
   - ENSIndexer services
   - ENSRainbow service
@@ -57,16 +75,19 @@ The Terraform configuration sets up the following components:
 ## Deployment Steps
 
 1. Initialize Terraform:
+
 ```bash
 terraform init
 ```
 
 2. Review the planned changes:
+
 ```bash
 terraform plan
 ```
 
 3. Apply the configuration:
+
 ```bash
 terraform apply
 ```

@@ -4,19 +4,22 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    railway = {
-      source  = "terraform-community-providers/railway"
-      version = "0.4.6"
+    render = {
+      source  = "render-oss/render"
+      version = "1.7.0"
     }
   }
 
   backend "s3" {
     bucket = "ensnode-terraform"
-    key    = "tfstate"
+    key    = "render-tfstate"
     region = "us-east-1"
   }
 }
 
-provider "railway" {
-  token = var.railway_token
+# https://registry.terraform.io/providers/render-oss/render/latest/docs
+provider "render" {
+  api_key                    = var.render_api_key
+  owner_id                   = var.render_owner_id
+  wait_for_deploy_completion = true
 }
