@@ -56,7 +56,11 @@ export const makeNonNegativeIntegerSchema = (valueLabel: string = "Value") =>
  * Parses a numeric value as {@link Duration}
  */
 export const makeDurationSchema = (valueLabel: string = "Value") =>
-  makeNonNegativeIntegerSchema(valueLabel);
+  z.coerce
+    .number({
+      error: `${valueLabel} must be a number.`,
+    })
+    .pipe(makeNonNegativeIntegerSchema(valueLabel));
 
 /**
  * Parses Chain ID
@@ -70,8 +74,9 @@ export const makeChainIdSchema = (valueLabel: string = "Chain ID") =>
  * Parses a string representation of {@link ChainId}.
  */
 export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") =>
-  z.coerce
-    .number({ error: `${valueLabel} must represent a positive integer (>0).` })
+  z
+    .string({ error: `${valueLabel} must be a string representing a chain ID.` })
+    .pipe(z.coerce.number({ error: `${valueLabel} must represent a positive integer (>0).` }))
     .pipe(makeChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
@@ -116,10 +121,35 @@ export const makeBlockNumberSchema = (valueLabel: string = "Block number") =>
   makeNonNegativeIntegerSchema(valueLabel);
 
 /**
+ * Parses an object value as the {@link Blockrange} object.
+ */
+export const makeBlockrangeSchema = (valueLabel: string = "Value") =>
+  z
+    .strictObject(
+      {
+        startBlock: makeBlockNumberSchema(`${valueLabel}.startBlock`).optional(),
+        endBlock: makeBlockNumberSchema(`${valueLabel}.endBlock`).optional(),
+      },
+      {
+        error: `${valueLabel} must be a valid Blockrange object.`,
+      },
+    )
+    .refine(
+      (v) => {
+        if (v.startBlock && v.endBlock) {
+          return v.startBlock <= v.endBlock;
+        }
+
+        return true;
+      },
+      { error: `${valueLabel}: startBlock must be before or equal to endBlock` },
+    );
+
+/**
  * Parses an object value as the {@link BlockRef} object.
  */
 export const makeBlockRefSchema = (valueLabel: string = "Value") =>
-  z.object(
+  z.strictObject(
     {
       timestamp: makeUnixTimestampSchema(`${valueLabel}.timestamp`),
       number: makeBlockNumberSchema(`${valueLabel}.number`),

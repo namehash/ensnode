@@ -5,6 +5,7 @@ import { CoinType, DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
 import { ChainId, isNormalized } from "../../shared";
+import { makeDurationSchema } from "../../shared/zod-schemas";
 
 const toName = (val: string) => val as Name;
 const toAddress = (val: string) => val as Address;
@@ -61,7 +62,32 @@ const selection = {
   texts: z.optional(stringarray),
 };
 
+/**
+ * Query Param Schema
+ *
+ * Allows treating a query param with no value as if the query param
+ * value was 'undefined'.
+ *
+ * Note: This overrides a default behavior when the default value for
+ * a query param is an empty string. Empty string causes an edge case
+ * for query param value coercion into numbers:
+ * ```ts
+ * // empty string coercion into Number type
+ * Number('') === 0;
+ * ```
+ *
+ * The `preprocess` method replaces an empty string with `undefined` value,
+ * and the output type is set to `unknown` to allow easy composition with
+ * other specialized Zod schemas.
+ */
+const queryParamSchema = z.preprocess((v) => (v === "" ? undefined : v), z.unknown());
+
 export const routes = {
+  indexingStatus: {
+    query: z.object({
+      maxRealtimeDistance: queryParamSchema.pipe(makeDurationSchema().optional()),
+    }),
+  },
   records: {
     params: z.object({ name }),
     query: z
