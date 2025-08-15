@@ -93,24 +93,31 @@ The response includes several important configuration categories:
 ```json
 {
   "ensAdminUrl": "https://admin.ensnode.io/",
-  "ensNodePublicUrl": "http://localhost:42069/",
-  "ensRainbowUrl": "http://localhost:3223/",
+  "ensNodePublicUrl": "https://api.alpha.ensnode.io/",
   "indexedChainIds": [
     1,
-    8453
+    8453,
+    59144,
+    10,
+    42161,
+    534352
   ],
-  "databaseSchemaName": "public",
-  "experimentalResolution": false,
+  "databaseSchemaName": "alphaSchema0.31.0",
+  "experimentalResolution": true,
   "healReverseAddresses": true,
   "indexAdditionalResolverRecords": true,
   "isSubgraphCompatible": false,
   "namespace": "mainnet",
   "plugins": [
     "subgraph",
-    "basenames"
+    "basenames",
+    "lineanames",
+    "threedns",
+    "reverse-resolvers",
+    "referrals"
   ],
   "dependencyInfo": {
-    "nodejs": "22.17.0",
+    "nodejs": "22.18.0",
     "ponder": "0.11.43",
     "ensRainbow": "0.31.0",
     "ensRainbowSchema": 2
