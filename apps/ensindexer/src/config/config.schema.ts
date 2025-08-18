@@ -22,6 +22,7 @@ import {
   invariant_requiredDatasources,
   invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
+  invariant_rpcConfigsSpecifiedForRootChain,
   invariant_validContractConfigs,
 } from "./validations";
 
@@ -198,6 +199,7 @@ const ENSIndexerConfigSchema = z
    * for the derived values of ENSIndexerConfig to be computed after all `.check()`s.
    */
   .check(invariant_requiredDatasources)
+  .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_validContractConfigs)
   .check(invariant_reverseResolversPluginNeedsResolverRecords)
