@@ -1,6 +1,6 @@
-import { NodeHandle } from "../schema-elements/nodes";
 import { cn } from "@/lib/utils";
 import { Handle, NodeProps } from "@xyflow/react";
+import { NodeHandle } from "../schema-elements/nodes";
 
 export default function MultipleHandlesNode({ data }: NodeProps) {
   const nodeHandles = data.handles as NodeHandle[];
