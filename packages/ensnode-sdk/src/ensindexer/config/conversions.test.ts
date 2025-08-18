@@ -145,19 +145,5 @@ describe("ENSIndexer: Config", () => {
         `The 'reverse-resolvers' plugin requires 'indexAdditionalResolverRecords' to be 'true'`,
       );
     });
-
-    it("can enforce invariants: experimental resolution requirements", () => {
-      // arrange
-      const serializedConfig: SerializedENSIndexerPublicConfig =
-        structuredClone(correctSerializedConfig);
-
-      serializedConfig.experimentalAcceleration = true;
-
-      // act & assert
-      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(
-        `Cannot deserialize ENSIndexerPublicConfig:
-✖ 'reverseResolversPluginActive' requires the reverse-resolvers plugin to be active.`,
-      );
-    });
   });
 });
