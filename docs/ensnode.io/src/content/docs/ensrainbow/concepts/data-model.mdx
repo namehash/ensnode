@@ -41,14 +41,59 @@ The database keeps a handful of **system keys** that do not clash with labelhash
 
 ## ENSRainbow File Format
 
-A **`.ensrainbow` file** is the _on-disk representation_ of a label set. It is a compressed, append-only collection with the following structure:
+A **`.ensrainbow` file** is the _on-disk representation_ of a label set. It is a compressed, append-only collection that uses **Protocol Buffers (protobuf)** as its serialization format.
 
-### 1. Header (fixed-size)
-- `labelSetId` – ASCII, 1-50 chars
-- `labelSetVersion` – uint32 LE
+#### About Protocol Buffers
 
-### 2. Body (streamed)
-Sequence of `labelhash → label` pairs.
+Protocol Buffers is Google's language-neutral, platform-neutral extensible mechanism for serializing structured data. ENSRainbow uses protobuf because it provides:
+
+- **Compact binary encoding** - Much smaller than JSON or XML
+- **Schema evolution** - Forward and backward compatibility as the format evolves  
+- **Cross-language support** - Can be read by any language with protobuf support
+- **Cross-system and cross-architecture compatibility** - Works seamlessly across different operating systems (Linux, Windows, macOS) and CPU architectures (x86, ARM, etc.) without endianness concerns
+- **Self-delimiting messages** - Protobuf uses **varint encoding** for field delimiters, where each field is prefixed with a tag that combines the field number and wire type. This eliminates the need for explicit field separators since the encoding itself contains all necessary boundary information.
+
+#### Protobuf Schema
+
+The `.ensrainbow` file format uses two main message types:
+
+```protobuf
+message RainbowRecord {
+  bytes labelhash = 1;    // 32-byte labelhash
+  string label = 2;       // original label string
+}
+
+message RainbowRecordCollection {
+  string format_identifier = 1;              // always "ensrainbow" 
+  uint32 ensrainbow_file_format_version = 2;  // file format version
+  string label_set_id = 3;                    // e.g., "subgraph" 
+  uint32 label_set_version = 4;               // version number
+  repeated RainbowRecord records = 5;         // the actual records
+}
+```
+
+#### Delimited Encoding
+
+ENSRainbow uses protobuf's **length-delimited encoding** (`encodeDelimited`/`decodeDelimited`) where each message is prefixed with its byte length as a varint. This allows streaming multiple messages in a single file without needing explicit separators between records.
+
+#### File Structure
+
+The `.ensrainbow` file consists of length-delimited protobuf messages in the following order:
+
+### 1. Header Message
+A single `RainbowRecordCollection` message containing metadata (with empty `records` array):
+- `format_identifier` – always "ensrainbow" (file format identifier)
+- `ensrainbow_file_format_version` – file format version number
+- `label_set_id` – identifier like "subgraph" (lowercase ASCII letters and hyphens, 1-50 chars)
+- `label_set_version` – version number 
+- `records` – empty array (records are stored separately)
+
+### 2. Record Stream  
+A sequence of individual `RainbowRecord` messages, each containing:
+- `labelhash` – 32-byte hash of the label
+- `label` – the original label string
+
+Each message (header and records) is prefixed with its byte length as a protobuf varint, enabling streaming reads without loading the entire file into memory.
 
 ### File Naming Convention
 
@@ -58,6 +103,16 @@ The filename convention mirrors the header so humans can eyeball it quickly:
 subgraph_0.ensrainbow     # labelSetId = "subgraph", version = 0
 subgraph_1.ensrainbow     # next version with incremental labelhash-to-label mappings added
 ```
+
+## Converting Legacy SQL Data
+
+If you have a legacy gzipped rainbow table (`ens_names.sql.gz`) from the ENS Subgraph, you can convert it to the `.ensrainbow` format:
+
+```bash title="Convert legacy SQL data"
+pnpm run convert --input-file path/to/ens_names.sql.gz --output-file subgraph-0.ensrainbow
+```
+
+This conversion process allows you to migrate existing rainbow table data that was previously stored in SQL format to ENSRainbow's optimized binary format. The resulting `.ensrainbow` file will be equivalent to the rainbow tables used by the ENS Subgraph, maintaining the same label-to-labelhash mappings while providing better performance and storage efficiency.
 
 ## Ingestion Process
 

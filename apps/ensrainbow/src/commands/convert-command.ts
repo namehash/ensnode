@@ -1,10 +1,19 @@
+/**
+ * ENSRAINBOW FILE CREATION COMMAND
+ *
+ * This is currently the ONLY way to create new .ensrainbow files from scratch.
+ */
+
 import { createReadStream, createWriteStream } from "fs";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
 import ProgressBar from "progress";
 
 import { logger } from "@/utils/logger";
-import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
+import {
+  CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
+  createRainbowProtobufRoot,
+} from "@/utils/protobuf-schema";
 import { buildRainbowRecord } from "@/utils/rainbow-record";
 import { type LabelSetId, type LabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
@@ -14,9 +23,6 @@ export interface ConvertCommandOptions {
   labelSetId: LabelSetId;
   labelSetVersion: LabelSetVersion;
 }
-
-// Current .ensrainbow protobuf file format version
-export const CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION = 1;
 
 /**
  * Logs the initial options for the conversion process.
@@ -75,6 +81,7 @@ function writeHeader(
   labelSetVersion: LabelSetVersion,
 ): void {
   const headerCollection = RainbowRecordCollectionType.fromObject({
+    format_identifier: "ensrainbow",
     ensrainbow_file_format_version: CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
     label_set_id: labelSetId,
     label_set_version: labelSetVersion,

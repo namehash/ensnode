@@ -91,6 +91,14 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
+  ```json
+  {
+    "status": "error",
+    "error": "Server label set ID \"subgraph\" does not match client's requested label set ID \"ens-test-env\".",
+    "errorCode": 400
+  }
+  ```
+
 - `404 Not Found`: When no label is found for the given labelhash
 
   ```json

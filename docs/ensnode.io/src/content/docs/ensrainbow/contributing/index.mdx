@@ -184,11 +184,7 @@ When using ENSRainbow with Docker, the following environment variables control w
 
 - **`LABEL_SET_ID`**: The identifier for a **Label Set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
   - **Goal**: To enable the extensible definition of new label sets (e.g., subgraph vs. production vs. test).
-  - **Configuration**: Choose the label set ID that matches your needs: 
-    - `subgraph` - Main production dataset from The Graph's ENS subgraph
-    - `searchlight` - Extended dataset with additional label discoveries
-    - `discovery-a` - Dataset for dynamically discovered labels (initially empty)
-    - `ens-test-env` - Small test dataset for development and testing. It is perfectly aligned with the set of labels expected by the [ens-test-env](https://github.com/ensdomains/ens-test-env).
+  - **Configuration**: See the [Available Label Sets](/ensrainbow/usage/available-label-sets) page for a complete list of currently available label set IDs and their descriptions.
 
 - **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
   - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
@@ -205,7 +201,7 @@ DB_SCHEMA_VERSION=3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 DB_SCHEMA_VERSION=3 LABEL_SET_ID=ens-test-env LABEL_SET_VERSION=0
 
 # Extended discovery data
-DB_SCHEMA_VERSION=3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=discovery-a LABEL_SET_VERSION=0
 ```
 
 ### Persistent Storage with Docker

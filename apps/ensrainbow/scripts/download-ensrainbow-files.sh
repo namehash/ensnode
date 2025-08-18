@@ -8,8 +8,8 @@ set -euo pipefail
 # This script downloads a specific ENSRainbow labelset file.
 #
 # The labelsets are identified by:
-#   - LABEL_SET_ID: The "namespace" or category of the data (e.g., 'ens-test-env').
-#   - LABEL_SET_VERSION: An incremental version for a given label set.
+#   - LABEL_SET_ID: The identifier for a label set, which is a collection of ENS labelhash-to-label mappings from a specific source.
+#   - LABEL_SET_VERSION: A non-negative integer representing the version of a label set.
 #
 # This script requires these two identifiers as command-line arguments to
 # download the correct labelset file (.ensrainbow), its checksum, and a

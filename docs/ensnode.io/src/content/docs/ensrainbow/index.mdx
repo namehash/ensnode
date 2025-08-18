@@ -72,25 +72,30 @@ Contributing to the project and running ENSRainbow locally for development.
 Ready to try ENSRainbow? Here are the fastest ways to get started:
 
 ### Try the Public API
-```bash
-# Heal a labelhash (returns "vitalik")
-curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
-```
+Start with a simple HTTP request to heal labelhashes immediately. The public API requires no setup and provides instant access to ENSRainbow's healing capabilities.
+
+<LinkCard
+  title="API Reference"
+  description="Complete HTTP API documentation with curl examples and response formats"
+  href="/ensrainbow/usage/api/"
+/>
 
 ### Use the TypeScript SDK
-```bash
-# Install the SDK
-pnpm add @ensnode/ensrainbow-sdk
-```
+Get type-safe integration with built-in error handling and caching. Perfect for JavaScript/TypeScript applications.
+
+<LinkCard
+  title="Client SDK Guide"
+  description="Installation instructions, usage examples, and TypeScript interfaces"
+  href="/ensrainbow/usage/client-sdk/"
+/>
 
 ### Deploy with Docker
-```bash
-# Run with test data (starts quickly)
-docker run --rm -p 3223:3223 \
-  -e DB_SCHEMA_VERSION=3 \
-  -e LABEL_SET_ID=ens-test-env \
-  -e LABEL_SET_VERSION=0 \
-  ghcr.io/namehash/ensnode/ensrainbow:latest
-```
+Run your own ENSRainbow instance for control, privacy, or high-volume usage. Starts quickly with test data.
+
+<LinkCard
+  title="Docker Deployment Guide"
+  description="Complete setup instructions, environment variables, and production configurations"
+  href="/ensrainbow/deploying/docker/"
+/>
 
 Choose your path above and dive into the relevant documentation section!

@@ -14,21 +14,16 @@ A **label set** is analogous to a _dataset snapshot_. Every time the upstream da
 ### 1. Deterministic Results
 Clients that pin _version `N`_ are guaranteed to get the _exact same_ heal response today, tomorrow, and two years from now.
 
-### 2. Safe Upgrades
-The server can ingest and start serving a newer version (`N+1`) _in parallel_ without breaking existing clients.
+### 2. Decentralized Ecosystem
+Anyone can create and publish their own labelsets, opening ENSRainbow as a solution for the wider ENS ecosystem. Distinct `labelSetId` values enable diverse data sources, community-driven curation, and maintenance of labelhash-to-label mappings.
 
-### 3. Historical Audits
-Researchers can spin up an ENSRainbow instance at any past version to reproduce historical state.
-
-### 4. Multiple Sources
-Distinct `labelSetId` values (e.g. `subgraph`, `discovery-a`) allow side-by-side datasets with different coverage or curation strategies.
-
-In short, **versions are the contract** that keeps **client caches**, **API responses**, and **database state** in sync across time.
+### 3. Extensibility Across Time
+Label sets can grow organically as new labelhash-to-label mappings are discovered. Each new version incrementally adds fresh data without invalidating previous versions, ensuring applications can evolve their data coverage while maintaining backward compatibility.
 
 ## Version Management
 
 ### Label Set IDs
-- String (1-50 chars) consisting of lowercase letters & dashes
+- String (1-50 chars) consisting of lowercase ASCII letters and hyphens
 - Examples: `subgraph`, `discovery-a`, `ens-test-env`
 - Each ID represents a different data source or curation strategy
 
@@ -40,7 +35,7 @@ In short, **versions are the contract** that keeps **client caches**, **API resp
 ### File Naming Convention
 ```text
 subgraph_0.ensrainbow     # labelSetId = "subgraph", version = 0
-subgraph_1.ensrainbow     # next version with new labelhash-to-label mappings added
+subgraph_1.ensrainbow     # next version with incremental labelhash-to-label mappings added
 discovery-a_0.ensrainbow  # different dataset, initial version
 ```
 
@@ -57,5 +52,5 @@ This flexibility ensures applications can choose between **staying current** wit
 ## Related Documentation
 
 - **[Glossary](/ensrainbow/concepts/glossary)** - Key terminology including version-related terms
-- **[TypeScript Interfaces](/ensrainbow/concepts/typescript-interfaces)** - Client and server label set objects
+- **[TypeScript Interfaces](/ensrainbow/concepts/typescript-interfaces)** - Type definitions for ENSRainbow's server and client
 - **[Data Model](/ensrainbow/concepts/data-model)** - How versions are stored in the database 

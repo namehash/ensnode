@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting & FAQ
+title: Troubleshooting
 sidebar:
   label: Troubleshooting
   order: 99
@@ -10,25 +10,14 @@ This page aggregates the most common issues users run into when operating ENSRai
 ## Common Startup Errors
 
 ### "Database schema mismatch"
-**Cause**: Your on-disk database was created with a newer/older schema than this binary understands.
-**Fix**: Upgrade ENSRainbow to the latest version *or* download a matching database archive.
+- **Cause**: Your on-disk database was created with a newer/older schema than this binary understands.
+- **Fix**: Upgrade ENSRainbow to the latest version *or* download a matching database archive.
 
 ### "Label set id mismatch"
-**Cause**: You attempted to ingest a `.ensrainbow` file whose `LABEL_SET_ID` differs from the database.
-**Fix**: Create a fresh data directory or ensure you ingest files that share the same label-set id.
+- **Cause**: You attempted to ingest a `.ensrainbow` file whose `LABEL_SET_ID` differs from the database.
+- **Fix**: Create a fresh data directory or ensure you ingest files that share the same label-set id.
 
 ### Port already in use
 Check that no other service is bound to `3223` (the default port). You can change the port via the `PORT` environment variable as documented in [Configuration](/ensrainbow/usage/configuration/).
 
-## Frequently Asked Questions
-
-### Can I use ENSRainbow without running my own server?
-Yes. NameHash Labs operates a free instance at `https://api.ensrainbow.io`.
-
-### How often are new labels added?
-New label-set versions are generated on an ad-hoc basis. Watch the **Releases** page on GitHub or query `/v1/version`.
-
-### Does ENSRainbow normalise labels?
-No. It returns labels exactly as stored. Your client should perform ENS Normalisation if required.
-
-Have a question that isn't answered here? [Open an issue](https://github.com/namehash/ensnode/issues/new) or hop into our Discord. 
+For frequently asked questions about ENSRainbow, please see the [FAQ page](/ensrainbow/faq/). 

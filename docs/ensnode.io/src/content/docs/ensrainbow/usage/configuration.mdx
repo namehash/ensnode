@@ -10,36 +10,40 @@ ENSRainbow can be configured via environment variables.
 
 ## Environment Variables
 
-### Server Configuration
+ENSRainbow uses two distinct categories of environment variables with different purposes and scopes.
 
-- `PORT`: Server port (default: 3223)
-- `LOG_LEVEL`: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
+### Runtime Configuration
 
-### Data Management (Docker Only)
+These variables are read by the ENSRainbow application during startup and operation:
 
-The following environment variables are required when running ENSRainbow with Docker for initial ENSRainbow database download and are used by the entrypoint script.
+- **`PORT`**: Server port (default: 3223)
+- **`LOG_LEVEL`**: Logging level, one of: "debug", "info", "warn", "error" (default: "info")
+
+### Database Download Configuration
+
+These variables are **only used by shell scripts** for downloading and setting up pre-built databases. **The ENSRainbow application itself does not read these environment variables** - it gets label set information from the database after setup is complete.
 
 - **`ENSRAINBOW_LABELSET_SERVER_URL`**: The base URL of the ENSRainbow Labelset Server.
   - **Goal**: To decentralize data sourcing. This allows any user to host their own pre-built ENSRainbow databases and configure their application to use them.
   - **Configuration**: Set this to the base URL of your chosen server. Defaults to `https://bucket.ensrainbow.io`.
+  - **Used by**: Docker entrypoint script and manual download scripts only.
 
 - **`DB_SCHEMA_VERSION`**: Specifies the database schema version (e.g., `3`). This determines the format and structure of the pre-built ENSRainbow database archives and is not related to the API version.
   - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of downloaded database files that are prebuilt for startup-time optimizations.
   - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
+  - **Used by**: Download scripts to fetch the correct database format.
 
 - **`LABEL_SET_ID`**: The identifier for a **label set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
   - **Goal**: To enable the extensible definition of new label sets (e.g., subgraph vs. production vs. test).
-  - **Configuration**: Choose the label set ID that matches your needs: 
-    - `subgraph` - Main production dataset from The Graph's ENS Subgraph
-    - `searchlight` - Extended dataset with additional label discoveries
-    - `discovery-a` - Dataset for dynamically discovered labels (initially empty)
-    - `ens-test-env` - Small test dataset for development and testing. It is perfectly aligned with the set of labels expected by the [ens-test-env](https://github.com/ensdomains/ens-test-env).
+  - **Configuration**: See the [Available Label Sets](/ensrainbow/usage/available-label-sets) page for a complete list of currently available label set IDs and their descriptions.
+  - **Used by**: Download scripts to fetch the correct label set.
 
 - **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **label set**.
   - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
   - **Configuration**: Use the highest available version number for the most up-to-date data. Versions are sequential and incremental:
     - `0` - The initial/base version of the **label set**.
     - `1`, `2`, etc. - Incremental updates to the **label set**.
+  - **Used by**: Download scripts to fetch the correct label set version.
 
 ### Example Combinations
 
@@ -51,9 +55,18 @@ DB_SCHEMA_VERSION=3 LABEL_SET_ID=subgraph LABEL_SET_VERSION=0
 DB_SCHEMA_VERSION=3 LABEL_SET_ID=ens-test-env LABEL_SET_VERSION=0
 
 # Extended discovery data
-DB_SCHEMA_VERSION=3 LABEL_SET_ID=searchlight LABEL_SET_VERSION=0
+DB_SCHEMA_VERSION=3 LABEL_SET_ID=discovery-a LABEL_SET_VERSION=0
 ```
 
-:::note[Environment Variables Usage]
-The data management environment variables (`ENSRAINBOW_LABELSET_SERVER_URL`, `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are only required for Docker deployments and are used by the container's entrypoint script to download the appropriate pre-built database archive on first run.
+:::caution[Environment Variables Scope]
+The database download variables (`ENSRAINBOW_LABELSET_SERVER_URL`, `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, `LABEL_SET_VERSION`) are **only used by download scripts** and Docker's entrypoint script to fetch pre-built databases. **The ENSRainbow application itself does not read these environment variables** - it gets label set information from the database after it's been set up.
+
+**When you need these variables:**
+- Running with Docker (handled automatically by entrypoint script)
+- Using manual download scripts to fetch pre-built databases
+- Initial database setup
+
+**When you DON'T need these variables:**
+- Running ENSRainbow directly after database is already set up
+- Normal ENSRainbow operations (server reads label set info from database)
 :::

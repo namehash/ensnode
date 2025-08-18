@@ -13,6 +13,6 @@ ENSRainbow listens for `SIGTERM` and `SIGINT`. Docker (and most PaaS) send these
 
 ## Database Maintenance
 
-* **Reset database** – stop the server, delete the data directory, and ingest again.
+* **Reset database** – stop the server, run `pnpm run purge --data-dir <path>`, and ingest again.
 * **Validate database** – `pnpm run validate --data-dir ./data` ensures record integrity.
 * **Upgrade label-set** – ingest the next `.ensrainbow` file (version +1). The highest version is reported by `GET /version`.

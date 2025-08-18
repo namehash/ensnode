@@ -5,11 +5,11 @@ sidebar:
   order: 2
 ---
 
-ENSRainbow can be run as a Docker image, which includes the application server and scripts to manage its data. Official images are hosted on GitHub Container Registry (GHCR) at `ghcr.io/namehash/ensnode/`.
+ENSRainbow can be run as a Docker image, which includes the application server and scripts to manage its data. Official images are hosted on GitHub Container Registry (GHCR) at `ghcr.io/namehash/ensnode/`. You can view all available image tags and versions on the [GitHub package page](https://github.com/namehash/ensnode/pkgs/container/ensnode%2Fensrainbow).
 
 **Key Data Handling Strategy:**
 
-The ENSRainbow Docker image is designed to be lightweight. The LevelDB database required for its operation is **not** baked into the image during the build process. Instead, the requested database is downloaded and managed at **runtime** by an `entrypoint.sh` script within the container. This process is triggered when you run the container with:
+The ENSRainbow Docker image is designed to be lightweight. The LevelDB database required for its operation is **not** baked into the image during the build process. Instead, the requested database is downloaded and managed at **runtime** by an `entrypoint.sh` script within the container. This process is triggered when you run the container with **both** of the following requirements:
 1.  A Docker volume mounted to `/app/apps/ensrainbow/data` (the internal data path).
 2.  Specific environment variables set: `DB_SCHEMA_VERSION`, `LABEL_SET_ID`, and `LABEL_SET_VERSION`.
 

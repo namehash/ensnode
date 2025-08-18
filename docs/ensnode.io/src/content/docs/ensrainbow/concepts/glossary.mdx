@@ -16,8 +16,8 @@ This page defines the **core terminology** used throughout the ENSRainbow codeba
 | **Heal** | The act of converting a _labelhash_ back to its original _label_ via a rainbow table lookup. | `heal('0xaf2c…') → 'vitalik'` |
 | **Rainbow Record** | An entry mapping a `labelhash` ➜ `label`. Persisted as a LevelDB key (labelhash bytes) and UTF-8 value (_see Data Model_). | – |
 | **Label Set** | A logical collection of rainbow records that share a common **source** and **versioning** scheme (e.g. subgraph v0). Identified by `labelSetId` & `labelSetVersion`. | id: `subgraph`, version: `0` |
-| **Label Set ID** | String (1-50 chars) consisting of lowercase letters & dashes that names a label set. | `subgraph`, `discovery-a` |
-| **Label Set Version** | Non-negative integer that monotonically increases when the underlying data source is re-exported. Enables deterministic healing across time. | `0`, `1`, `2` |
+| **Label Set ID** | String (1-50 chars) consisting of lowercase ASCII letters and hyphens that names a label set. | `subgraph`, `discovery-a` |
+| **Label Set Version** | Non-negative integer that monotonically increases when new labelhash-to-label mappings are added to a label set. Each version contains incremental additions since the previous version. Enables deterministic healing across time. | `0`, `1`, `2` |
 | **Healable Count** | Total number of labels that can currently be healed by the running server. Exposed via `/count`. | `7 892 001` |
 | **Status Code** | High-level outcome of an API call – either `success` or `error`. | – |
 | **Error Code** | HTTP-style numeric code describing the error (`400`, `404`, `500`). | – |

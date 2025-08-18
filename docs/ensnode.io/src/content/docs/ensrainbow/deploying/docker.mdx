@@ -61,7 +61,7 @@ The Docker deployment requires these three variables for data management:
 |----------|---------|---------|
 | `DB_SCHEMA_VERSION` | Identifies the expected on-disk database schema version | `3` |
 | `LABEL_SET_ID` | Chooses which label-set to download | `subgraph`, `ens-test-env` |
-| `LABEL_SET_VERSION` | Highest version of that label-set to include | `0` |
+| `LABEL_SET_VERSION` | Downloads prebuilt snapshot containing all data from version 0 through this version | `0` |
 
 ## Persistent Storage
 
@@ -154,6 +154,18 @@ volumes:
 1. **First Run**: When the container starts with an empty volume, it downloads the specified pre-built ENSRainbow database archive based on the environment variables
 2. **Subsequent Runs**: The container detects existing data and skips the download, using the persisted database
 3. **Data Validation**: The container validates the existing data on startup
+
+### Understanding Label Set Versions
+
+When you specify `LABEL_SET_VERSION=N`, the system:
+
+- **Downloads a single file**: `{LABEL_SET_ID}_{LABEL_SET_VERSION}.tgz` (e.g., `subgraph_2.tgz`)
+- **Contains cumulative data**: This file includes **all** label-to-labelhash mappings from version 0 through version N
+- **Provides deterministic results**: The server will only use data up through version N, ensuring consistent healing results even if newer versions become available
+
+:::note[Version Behavior]
+Setting `LABEL_SET_VERSION=2` does **not** download separate files for versions 0, 1, and 2. Instead, it downloads one prebuilt database snapshot that contains the cumulative data from all those versions.
+:::
 
 :::tip[Port Mapping]
 The port mapping (`-p 3223:3223` or `ports` in docker-compose) is only needed if you want to access ENSRainbow from the host machine. If you're only accessing it from other containers in the same network, you can omit the port mapping.

@@ -8,11 +8,28 @@ keywords: [ensrainbow, cli]
 
 | Command | Purpose | Most useful flags | Example |
 |---------|---------|-------------------|---------|
-| `convert` | Convert legacy `.sql.gz` rainbow tables to `.ensrainbow` | `--input-file`, `--output-file` | `pnpm run convert --input-file ens_names.sql.gz --output-file subgraph-0.ensrainbow` |
+| `convert` | Convert legacy `.sql.gz` rainbow tables to `.ensrainbow` format. **This is currently the only way to create new .ensrainbow files.** | `--input-file`, `--output-file`, `--label-set-id`, `--label-set-version` | `pnpm run convert --input-file ens_names.sql.gz --output-file subgraph-0.ensrainbow` |
 | `ingest-ensrainbow` | Stream a `.ensrainbow` file into LevelDB | `--input-file`, `--data-dir` | `pnpm run ingest-ensrainbow --input-file subgraph-0.ensrainbow --data-dir ./data` |
 | `validate` | Verify DB integrity | `--data-dir`, `--lite` | `pnpm run validate --lite` |
 | `purge` | Delete all DB files in a directory | `--data-dir` | `pnpm run purge --data-dir ./data` |
 | `serve` | Launch the HTTP API server | `--data-dir`, `--port` | `pnpm run serve --port 3223` |
+
+## Creating .ensrainbow Files
+
+:::note[Important]
+The `convert` command is **the only way** to create new `.ensrainbow` files from scratch. If you need to create custom label sets with your own data, you must use this command to convert from PostgreSQL dump format.
+
+You can download existing `.ensrainbow` files using the download scripts, but for creating entirely new files, `convert` is your only option.
+:::
+
+**Full convert command syntax:**
+```bash
+pnpm run convert \
+  --input-file path/to/your_data.sql.gz \
+  --output-file path/to/output.ensrainbow \
+  --label-set-id your-label-set-id \
+  --label-set-version 0
+```
 
 :::tip[Want more help?]
 Append `--help` to any command, e.g. `pnpm run serve --help`.

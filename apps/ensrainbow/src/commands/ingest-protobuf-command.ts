@@ -3,11 +3,13 @@ import ProgressBar from "progress";
 import protobuf from "protobufjs";
 import { ByteArray } from "viem";
 
-import { CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION } from "@/commands/convert-command";
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
-import { createRainbowProtobufRoot } from "@/utils/protobuf-schema";
+import {
+  CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
+  createRainbowProtobufRoot,
+} from "@/utils/protobuf-schema";
 import {
   type LabelSetId,
   type LabelSetVersion,
@@ -21,7 +23,7 @@ export interface IngestProtobufCommandOptions {
 }
 
 /**
- * Ingests rainbow tables from protobuf format into LevelDB
+ * Ingests rainbow tables from .ensrainbow format into LevelDB
  * Handles a stream of length-prefixed (delimited) protobuf messages
  *
  * This format is compatible with standard protobuf implementations across
@@ -57,13 +59,6 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
     }
 
     if (ingestionStatus === IngestionStatus.Finished) {
-      // const errorMessage =
-      //   "ENSRainbow currently only supports a single ingestion. We're working to enhance this soon!\n" +
-      //   "If you want to re-ingest data:\n" +
-      //   "1. Delete the data directory\n" +
-      //   "2. Run the ingestion command again: ensrainbow ingest-ensrainbow <input-file>";
-      // logger.error(errorMessage);
-      // throw new Error(errorMessage);
       logger.info("Ingestion to already pre-existing database.");
     }
 
@@ -135,6 +130,14 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
               bytes: Buffer.from,
               defaults: true,
             });
+
+            // Validate format identifier
+            if (headerObj.format_identifier !== "ensrainbow") {
+              const msg = `Invalid file format. Expected 'ensrainbow', got '${headerObj.format_identifier || "undefined"}'`;
+              logger.error(msg);
+              fileStream.destroy(new Error(msg)); // Stop processing
+              return;
+            }
 
             fileVersion = headerObj.ensrainbow_file_format_version;
             try {

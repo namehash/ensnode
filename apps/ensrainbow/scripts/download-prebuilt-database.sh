@@ -13,8 +13,8 @@ set -euo pipefail
 #
 # The database is versioned using a three-part system:
 #   - DB_SCHEMA_VERSION: The physical layout/structure of the database.
-#   - LABEL_SET_ID: The "namespace" or category of the data (e.g., 'ens-test-env').
-#   - LABEL_SET_VERSION: An incremental version for a given label set.
+#   - LABEL_SET_ID: The identifier for a label set, which is a collection of ENS labelhash-to-label mappings from a specific source.
+#   - LABEL_SET_VERSION: A non-negative integer representing the version of a label set.
 #
 # This script requires these three identifiers as command-line arguments to
 # download the correct pre-built database archive (.tgz), its checksum, and a
@@ -51,7 +51,7 @@ BASE_URL="${ENSRAINBOW_LABELSET_SERVER_URL}"
 DATA_FILE_BASENAME="${LABEL_SET_ID}_${LABEL_SET_VERSION}.tgz"
 SERVER_DATA_PATH="databases/${DB_SCHEMA_VERSION}/${DATA_FILE_BASENAME}"
 SERVER_CHECKSUM_PATH="databases/${DB_SCHEMA_VERSION}/${DATA_FILE_BASENAME}.sha256sum"
-SERVER_LICENSE_PATH="databases/${DB_SCHEMA_VERSION}/${DATA_FILE_BASENAME}.LICENSE.txt" # Common license file
+SERVER_LICENSE_PATH="databases/${DB_SCHEMA_VERSION}/${DATA_FILE_BASENAME}.LICENSE.txt"
 
 echo "Starting pre-built database download..."
 echo "Output Directory: $OUT_DIR"
