@@ -11,6 +11,7 @@ import { resolveForward } from "@/api/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import { validate } from "@/api/lib/validate";
+import config from "@/config";
 import { routes } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();
@@ -33,7 +34,9 @@ app.get(
   validate("query", routes.records.query),
   async (c) => {
     const { name } = c.req.valid("param");
-    const { selection, trace: showTrace, accelerate } = c.req.valid("query");
+    const { selection, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
+    // NOTE(experimental-acceleration): only allow acceleration if enabled
+    const accelerate = config.experimentalAcceleration && _accelerate;
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -71,7 +74,9 @@ app.get(
   validate("query", routes.primaryName.query),
   async (c) => {
     const { address, chainId } = c.req.valid("param");
-    const { trace: showTrace, accelerate } = c.req.valid("query");
+    const { trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
+    // NOTE(experimental-acceleration): only allow acceleration if enabled
+    const accelerate = config.experimentalAcceleration && _accelerate;
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -106,7 +111,9 @@ app.get(
   validate("query", routes.primaryNames.query),
   async (c) => {
     const { address } = c.req.valid("param");
-    const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
+    const { chainIds, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
+    // NOTE(experimental-acceleration): only allow acceleration if enabled
+    const accelerate = config.experimentalAcceleration && _accelerate;
 
     try {
       const { result, trace } = await captureTrace(() =>
