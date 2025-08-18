@@ -60,7 +60,13 @@ export function generateYearMarkers(timelineStart: Date, timelineEnd: Date): Arr
  */
 export function currentPhase(
   date: Date | null,
-  chainStatus: ChainStatusViewModel,
+  chainStatus: {
+    phases: Array<{
+      startDate: Date;
+      endDate: Date;
+      state: "queued" | "indexing";
+    }>;
+  },
 ): ChainIndexingPhaseViewModel {
   // if the chain is not indexed yet, return the first phase
   if (!date) {

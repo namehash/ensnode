@@ -278,7 +278,7 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
-    let responseData: ConfigResponse | ErrorResponse;
+    let responseData: unknown;
 
     // ENSNode API should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
@@ -289,13 +289,11 @@ export class ENSNodeClient {
     }
 
     if (!response.ok) {
-      const ErrorResponse = deserializeErrorResponse(responseData);
-      throw new Error(`Fetching ENSNode Config Failed: ${ErrorResponse.message}`);
+      const errorResponse = deserializeErrorResponse(responseData);
+      throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
     }
 
-    const data = (await response.json()) as SerializedENSIndexerPublicConfig;
-
-    return deserializeENSIndexerPublicConfig(data);
+    return deserializeENSIndexerPublicConfig(responseData as SerializedENSIndexerPublicConfig);
   }
 
   /**
@@ -321,7 +319,7 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
-    let responseData: IndexingStatusResponse | ErrorResponse;
+    let responseData: unknown;
 
     // ENSNode API should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
@@ -351,8 +349,8 @@ export class ENSNodeClient {
         }
 
         default: {
-          const ErrorResponse = deserializeErrorResponse(responseData);
-          throw new Error(`Fetching ENSNode Indexing Status Failed: ${ErrorResponse.message}`);
+          const errorResponse = deserializeErrorResponse(responseData);
+          throw new Error(`Fetching ENSNode Indexing Status Failed: ${errorResponse.message}`);
         }
       }
     }

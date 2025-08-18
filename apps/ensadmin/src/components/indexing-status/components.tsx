@@ -119,11 +119,11 @@ function ChainIndexingStatsCard({ chainStatus }: ChainIndexingStatsCardProps) {
             label="Last indexed block"
             block={chainStatus.lastIndexedBlock}
           />
-          <BlockStats
+          {/* <BlockStats
             chainId={chainStatus.chainId}
             label="Latest safe block"
             block={chainStatus.latestSafeBlock}
-          />
+          /> */}
         </div>
       </CardContent>
     </Card>

@@ -68,6 +68,49 @@ export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]):
 }
 
 /**
+ * Get the earliest block timestamp all chains which status is
+ * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ */
+export function getOmnichainIndexingEarliestIndexedBlockTimestamp(
+  chains: ChainIndexingStatusForBackfillOverallStatus[],
+): UnixTimestamp {
+  const earliestKnownBlockTimestamps: UnixTimestamp[] = chains.map(
+    (chain) => chain.config.startBlock.timestamp,
+  );
+
+  return Math.min(...earliestKnownBlockTimestamps);
+}
+
+/**
+ * Get Omnichain Indexing Ends At value across all chains which status is
+ * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ *
+ * @throws when none of chains is using the definite strategy.
+ */
+export function getOmnichainIndexingLatestIndexedBlockTimestamp(
+  chains: ChainIndexingStatusForBackfillOverallStatus[],
+): UnixTimestamp {
+  const latestKnownBlockTimestamps: UnixTimestamp[] = [];
+
+  for (const chain of chains) {
+    switch (chain.status) {
+      case ChainIndexingStatusIds.Unstarted:
+      case ChainIndexingStatusIds.Backfill:
+        if (chain.config.endBlock) {
+          latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
+        }
+        break;
+
+      case ChainIndexingStatusIds.Completed:
+        latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
+        break;
+    }
+  }
+
+  return Math.max(...latestKnownBlockTimestamps);
+}
+
+/**
  * Get Omnichain Indexing Cursor across all chains which status is
  * {@link ChainIndexingActiveStatus}.
  */
