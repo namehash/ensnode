@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-sdk",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "type": "module",
   "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",
@@ -18,7 +18,8 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./internal": "./src/internal.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -50,5 +51,10 @@
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@ensdomains/address-encoder": "^1.1.2",
+    "@ensnode/datasources": "workspace:*",
+    "zod": "catalog:"
   }
 }

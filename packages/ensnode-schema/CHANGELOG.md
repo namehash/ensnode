@@ -1,5 +1,11 @@
 # @ensnode/ensnode-schema
 
+## 0.32.0
+
+### Minor Changes
+
+- [#902](https://github.com/namehash/ensnode/pull/902) [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485) Thanks [@shrugs](https://github.com/shrugs)! - include schema to index an account's primary name records as emitted by StandaloneReverseRegistrars
+
 ## 0.31.0
 
 ## 0.30.0

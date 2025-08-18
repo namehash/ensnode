@@ -1,0 +1,68 @@
+{
+  "name": "@ensnode/ensnode-react",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "React hooks and providers for ENSNode",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ensnode-react"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ensnode-react",
+  "keywords": [
+    "ENS",
+    "ENSNode",
+    "React"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "dev": "tsup --watch",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@ensnode/shared-configs": "workspace:*",
+    "@tanstack/react-query": "^5.62.14",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "catalog:",
+    "@types/react": "^18.3.17",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "^26.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.3.6",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*"
+  }
+}

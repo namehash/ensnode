@@ -2,10 +2,10 @@ import packageJson from "@/../package.json";
 
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { Hono, MiddlewareHandler } from "hono";
+import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { client, graphql as ponderGraphQL } from "ponder";
 
+import { sdk } from "@/api/lib/instrumentation";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
@@ -23,27 +23,24 @@ import {
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
 
+import ensNodeApi from "@/api/handlers/ensnode-api";
+
 const schemaWithoutExtensions = filterSchemaExtensions(schema);
 
 const app = new Hono();
 
-const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
+// set the X-ENSNode-Version header to the current version
+app.use(async (ctx, next) => {
   ctx.header("x-ensnode-version", packageJson.version);
   return next();
-};
+});
 
-app.use(
-  // set the X-ENSNode-Version header to the current version
-  ensNodeVersionResponseHeader,
+// use CORS middleware
+app.use(cors({ origin: "*" }));
 
-  // use CORS middleware
-  cors({ origin: "*" }),
-);
-
+// log hono errors to console
 app.onError((error, ctx) => {
-  // log the error for operators
   console.error(error);
-
   return ctx.text("Internal server error", 500);
 });
 
@@ -51,7 +48,7 @@ app.onError((error, ctx) => {
 app.use("/", async (ctx) => {
   try {
     const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
-    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl);
+    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl.href);
 
     return ctx.redirect(ensAdminRedirectUrl);
   } catch (error) {
@@ -71,7 +68,7 @@ app.get(
     },
     env: {
       PLUGINS: config.plugins.join(","),
-      DATABASE_SCHEMA: config.ponderDatabaseSchema,
+      DATABASE_SCHEMA: config.databaseSchemaName,
       NAMESPACE: config.namespace,
     },
     db,
@@ -85,13 +82,8 @@ app.get(
   }),
 );
 
-// use ponder client support
-app.use("/sql/*", client({ db, schema: schemaWithoutExtensions }));
-
-// use ponder middleware at `/ponder` with description injection
-app.use("/ponder", fixContentLengthMiddleware);
-app.use("/ponder", makeApiDocumentationMiddleware("/ponder"));
-app.use("/ponder", ponderGraphQL({ db, schema: schemaWithoutExtensions }));
+// use ENSNode HTTP API at /api
+app.route("/api", ensNodeApi);
 
 // use our custom graphql middleware at /subgraph with description injection
 app.use("/subgraph", fixContentLengthMiddleware);
@@ -141,5 +133,14 @@ app.use(
     }),
   }),
 );
+
+// start ENSNode API OpenTelemetry SDK
+sdk.start();
+
+// gracefully shut down the SDK on process interrupt/exit
+const shutdownOpenTelemetry = () =>
+  sdk.shutdown().catch((error) => console.error("Error terminating tracing", error));
+process.on("SIGINT", shutdownOpenTelemetry);
+process.on("SIGTERM", shutdownOpenTelemetry);
 
 export default app;

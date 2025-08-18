@@ -1,16 +1,20 @@
 "use client";
 
+import { RelativeTime, unixTimestampToDate } from "@/components/datetime-utils";
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { useIndexingStatusQuery } from "@/components/ensnode";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
+import { ChainIcon } from "@/components/ui/ChainIcon";
+import { ChainName } from "@/components/ui/ChainName";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { selectedEnsNodeUrl } from "@/lib/env";
+import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import type { BlockInfo } from "@ensnode/ponder-metadata";
-import { fromUnixTime, intlFormat } from "date-fns";
-import { Clock } from "lucide-react";
+import { intlFormat } from "date-fns";
+import { Clock, ExternalLink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { currentPhase, generateYearMarkers, getTimelinePosition } from "./utils";
 import {
@@ -25,7 +29,8 @@ import {
 
 export function IndexingStatus() {
   const searchParams = useSearchParams();
-  const indexingStatus = useIndexingStatusQuery(searchParams);
+  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
+  const indexingStatus = useIndexingStatusQuery(ensNodeUrl);
 
   return (
     <section className="flex flex-col gap-6 py-6">
@@ -65,11 +70,11 @@ function ChainIndexingStats(props: ChainIndexingStatsProps) {
       <Card className="w-full flex flex-col gap-2">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Indexing Stats</span>
+            <span>Indexed Chains</span>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-row gap-8">
+        <CardContent className="flex flex-row flex-wrap gap-8">
           {globalIndexingStatusViewModel(chainIndexingStatuses, namespace).chainStatuses.map(
             (chainStatus) => (
               <ChainIndexingStatsCard key={chainStatus.chainId} chainStatus={chainStatus} />
@@ -86,34 +91,47 @@ interface ChainIndexingStatsCardProps {
 }
 
 /**
- * Component to display chain indexing stats for a single chain.
- * @param props
+ * Component to display indexing stats for a single chain.
+ * @param ChainIdexingStatsCardProps
  * @returns
  */
-function ChainIndexingStatsCard(props: ChainIndexingStatsCardProps) {
-  const { chainStatus } = props;
-
+function ChainIndexingStatsCard({ chainStatus }: ChainIndexingStatsCardProps) {
   return (
-    <Card key={chainStatus.chainId}>
+    <Card key={`Chain#${chainStatus.chainId}`}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">{chainStatus.chainName}</span>
+            <div className="flex flex-row justify-start items-center gap-2">
+              <ChainName
+                chainId={chainStatus.chainId}
+                className="font-semibold text-left"
+              ></ChainName>
+              <ChainIcon chainId={chainStatus.chainId} />
+            </div>
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
         <div className="grid grid-cols-2 gap-8">
-          <BlockStats label="Last indexed block" block={chainStatus.lastIndexedBlock} />
-          <BlockStats label="Latest safe block" block={chainStatus.latestSafeBlock} />
+          <BlockStats
+            chainId={chainStatus.chainId}
+            label="Last indexed block"
+            block={chainStatus.lastIndexedBlock}
+          />
+          <BlockStats
+            chainId={chainStatus.chainId}
+            label="Latest safe block"
+            block={chainStatus.latestSafeBlock}
+          />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-interface BlockSatsProps {
+interface BlockStatsProps {
+  chainId: number;
   label: string;
   block: BlockInfo | null;
 }
@@ -121,7 +139,8 @@ interface BlockSatsProps {
 /**
  * Component to display requested block stats.
  */
-function BlockStats({ label, block }: BlockSatsProps) {
+function BlockStats({ chainId, label, block }: BlockStatsProps) {
+  // return a fallback for undefined block
   if (!block) {
     return (
       <div>
@@ -131,18 +150,54 @@ function BlockStats({ label, block }: BlockSatsProps) {
     );
   }
 
+  // if the block is defined, return its details
   return (
     <div>
       <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="text-lg font-semibold">{block.number ? `#${block.number}` : "N/A"}</div>
-      <div className="text-sm text-muted-foreground">
-        {block.timestamp ? intlFormat(fromUnixTime(block.timestamp)) : "N/A"}
+      <BlockNumber block={block} chainId={chainId} />
+      <div className="text-xs text-muted-foreground">
+        <RelativeTime
+          date={unixTimestampToDate(block.timestamp.toString())}
+          enforcePast={true}
+          conciseFormatting={true}
+          includeSeconds={true}
+        />
       </div>
     </div>
   );
 }
 
-interface FallbackViewProps {
+interface BlockNumberProps {
+  chainId: number;
+  block: BlockInfo;
+}
+
+/**
+ * Displays the block number for a BlockInfo.
+ *
+ * Optionally provides a link to the block details page on the chain's designated block explorer page.
+ * If the chain has no known block explorer, just displays the block number (without link).
+ **/
+function BlockNumber({ chainId, block }: BlockNumberProps) {
+  const blockExplorerUrl = getBlockExplorerUrlForBlock(chainId, block.number);
+  if (blockExplorerUrl) {
+    return (
+      <a
+        href={blockExplorerUrl.toString()}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="w-fit text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
+      >
+        #{block.number}
+        <ExternalLink size={16} className="inline-block flex-shrink-0" />
+      </a>
+    );
+  }
+
+  return <div className="text-lg font-semibold">#${block.number}</div>;
+}
+
+interface LoadingViewProps {
   /** Number of placeholders to display. */
   placeholderCount?: number;
 }
@@ -150,7 +205,7 @@ interface FallbackViewProps {
 /**
  * Component to display loading state for chain indexing stats.
  */
-function ChainIndexingStatsFallback(props: FallbackViewProps) {
+function ChainIndexingStatsFallback(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -318,7 +373,7 @@ function InlineSummaryItem(props: InlineSummaryItemProps) {
 /**
  * Component to display loading state for the chain indexing timeline.
  */
-function ChainIndexingTimelineFallback(props: FallbackViewProps) {
+function ChainIndexingTimelineFallback(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (
@@ -480,9 +535,9 @@ function ChainIndexingStatus(props: ChainIndexingStatusProps) {
 
   return (
     <div key={chainStatus.chainId} className="flex items-center">
-      {/* Chain label */}
-      <div className="w-24 pr-3 text-sm font-medium flex flex-col">
-        <span>{chainStatus.chainName}</span>
+      {/* ChainName label */}
+      <div className="w-24 pr-3 flex flex-col">
+        <ChainName chainId={chainStatus.chainId} className="text-sm font-medium"></ChainName>
       </div>
 
       {/* Chain timeline bar */}
@@ -574,7 +629,7 @@ function ChainIndexingPhase({
 /**
  * Component to display loading state for the indexing timeline.
  */
-function IndexingTimelineFallback(props: FallbackViewProps) {
+function IndexingTimelineLoading(props: LoadingViewProps) {
   const { placeholderCount = 3 } = props;
 
   return (

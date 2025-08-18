@@ -8,7 +8,7 @@ import {
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainConnectionConfig } from "@/lib/ponder-helpers";
+import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import * as ponder from "ponder";
@@ -25,9 +25,7 @@ export default createPlugin({
     );
 
     return ponder.createConfig({
-      chains: {
-        ...chainConnectionConfig(config.rpcConfigs, chain.id),
-      },
+      chains: chainsConnectionConfig(config.rpcConfigs, chain.id),
       contracts: {
         [namespaceContract(pluginName, "RegistryOld")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.RegistryOld),
@@ -41,21 +39,29 @@ export default createPlugin({
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),
           abi: contracts.BaseRegistrar.abi,
         },
-        [namespaceContract(pluginName, "EthRegistrarControllerOld")]: {
+        [namespaceContract(pluginName, "LegacyEthRegistrarController")]: {
           chain: chainConfigForContract(
             config.globalBlockrange,
             chain.id,
-            contracts.EthRegistrarControllerOld,
+            contracts.LegacyEthRegistrarController,
           ),
-          abi: contracts.EthRegistrarControllerOld.abi,
+          abi: contracts.LegacyEthRegistrarController.abi,
         },
-        [namespaceContract(pluginName, "EthRegistrarController")]: {
+        [namespaceContract(pluginName, "WrappedEthRegistrarController")]: {
           chain: chainConfigForContract(
             config.globalBlockrange,
             chain.id,
-            contracts.EthRegistrarController,
+            contracts.WrappedEthRegistrarController,
           ),
-          abi: contracts.EthRegistrarController.abi,
+          abi: contracts.WrappedEthRegistrarController.abi,
+        },
+        [namespaceContract(pluginName, "UnwrappedEthRegistrarController")]: {
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            chain.id,
+            contracts.UnwrappedEthRegistrarController,
+          ),
+          abi: contracts.UnwrappedEthRegistrarController.abi,
         },
         [namespaceContract(pluginName, "NameWrapper")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.NameWrapper),

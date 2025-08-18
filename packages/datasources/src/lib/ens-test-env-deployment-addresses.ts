@@ -4,9 +4,18 @@ interface ENSTestEnvDeploymentAddresses {
   LegacyENSRegistry: Address;
   ENSRegistry: Address;
   BaseRegistrarImplementation: Address;
-  LegacyETHRegistrarController: Address;
-  ETHRegistrarController: Address;
   NameWrapper: Address;
+  UniversalResolver: Address;
+
+  // pre-UnwrappedEthRegistrarController naming for the EthRegistrarControllers
+  // TODO: delete any time after ens-test-env is updated to support the new UnwrappedEthRegistrarController
+  ETHRegistrarControllerOld: Address;
+  ETHRegistrarController: Address;
+
+  // post-UnwrappedEthRegistrarController naming for the EthRegistrarControllers
+  LegacyETHRegistrarController: Address;
+  WrappedETHRegistrarController: Address;
+  UnwrappedETHRegistrarController: Address;
 }
 
 /**

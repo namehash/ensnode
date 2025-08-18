@@ -9,12 +9,14 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   namespace: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
+  ensIndexerUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
-  ponderDatabaseSchema: "test_schema",
+  databaseSchemaName: "test_schema",
   plugins: "subgraph",
-  ensRainbowEndpointUrl: "https://api.ensrainbow.io",
+  ensRainbowUrl: "https://api.ensrainbow.io",
   healReverseAddresses: "true",
   indexAdditionalResolverRecords: "true",
+  experimentalResolution: "false",
   port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: {
@@ -109,7 +111,7 @@ export function setChainConfig(
   updateMockConfig({
     rpcConfigs: {
       ...(currentMockConfig.rpcConfigs || {}),
-      [chainId]: { url, maxRequestsPerSecond },
+      [chainId]: { url: new URL(url), maxRequestsPerSecond },
     },
   });
 }

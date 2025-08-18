@@ -1,20 +1,8 @@
-import config from "@/config";
+import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 import type { Label, LabelHash } from "@ensnode/ensnode-sdk";
-import { EnsRainbowApiClient, ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
+import { ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 
-const ensRainbowApiClient = new EnsRainbowApiClient({
-  endpointUrl: new URL(config.ensRainbowEndpointUrl),
-});
-
-if (
-  ensRainbowApiClient.getOptions().endpointUrl === EnsRainbowApiClient.defaultOptions().endpointUrl
-) {
-  console.warn(
-    `Using default public ENSRainbow server which may cause increased network latency.
-    For production, use your own ENSRainbow server that runs on the same network
-    as the ENSIndexer server.`,
-  );
-}
+const ensRainbowApiClient = getENSRainbowApiClient();
 
 /**
  * Attempt to heal a labelHash to its original label.

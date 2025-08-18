@@ -78,7 +78,15 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegisteredByController({
         context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
+        event: {
+          ...event,
+          args: {
+            // EARegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            cost: 0n,
+          },
+        },
       });
     },
   );
@@ -88,7 +96,15 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegisteredByController({
         context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
+        event: {
+          ...event,
+          args: {
+            // RegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            cost: 0n,
+          },
+        },
       });
     },
   );
@@ -98,7 +114,15 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRenewedByController({
         context,
-        event: { ...event, args: { ...event.args, cost: 0n } },
+        event: {
+          ...event,
+          args: {
+            // RegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            cost: 0n,
+          },
+        },
       });
     },
   );

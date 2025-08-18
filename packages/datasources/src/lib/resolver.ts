@@ -1,39 +1,39 @@
 import { mergeAbis } from "@ponder/utils";
-import { LegacyPublicResolver } from "../abis/resolver/LegacyPublicResolver";
-import { Resolver } from "../abis/resolver/Resolver";
+import { LegacyPublicResolver } from "../abis/shared/LegacyPublicResolver";
+import { Resolver } from "../abis/shared/Resolver";
 import type { ContractConfig } from "./types";
 
 /**
- * The Resolver ABI is the same across plugins, and includes the LegacyPublicResolver abi
- * (notably its altered `TextChanged` event) for full compatibility with Resolvers on mainnet.
- *
- * Individual plugins will specify their preferred `startBlock`s for Resolvers, so `startBlock`
- * is omitted in this ContractConfig.
+ * This Resolver ABI represents the set of all well-known Resolver events/methods, including the
+ * the LegacyPublicResolver's TextChanged event. A Resolver contract is a contract that emits
+ * _any_ (not _all_) of the events specified here and may or may not support any number of the
+ * methods available in this ABI.
  */
-export const ResolverConfig = {
-  abi: mergeAbis([LegacyPublicResolver, Resolver]),
-  // NOTE: a Resolver is any contract that matches this `filter`
-  filter: [
-    { event: "AddrChanged", args: {} },
-    { event: "AddressChanged", args: {} },
-    { event: "NameChanged", args: {} },
-    { event: "ABIChanged", args: {} },
-    { event: "PubkeyChanged", args: {} },
-    {
-      event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
-      args: {},
-    },
-    {
-      event:
-        "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
-      args: {},
-    },
-    { event: "ContenthashChanged", args: {} },
-    { event: "InterfaceChanged", args: {} },
-    { event: "AuthorisationChanged", args: {} },
-    { event: "VersionChanged", args: {} },
-    { event: "DNSRecordChanged", args: {} },
-    { event: "DNSRecordDeleted", args: {} },
-    { event: "DNSZonehashChanged", args: {} },
-  ],
-} as const satisfies Omit<ContractConfig, "startBlock">;
+export const ResolverABI = mergeAbis([LegacyPublicResolver, Resolver]);
+
+/**
+ * This is the ContractConfig['filter'] describing the set of events that Resolver contracts emit.
+ * It is not technically necessary for Ponder to function, but we explicitly document it here.
+ */
+export const ResolverFilter = [
+  { event: "AddrChanged", args: {} },
+  { event: "AddressChanged", args: {} },
+  { event: "NameChanged", args: {} },
+  { event: "ABIChanged", args: {} },
+  { event: "PubkeyChanged", args: {} },
+  {
+    event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key)",
+    args: {},
+  },
+  {
+    event: "TextChanged(bytes32 indexed node, string indexed indexedKey, string key, string value)",
+    args: {},
+  },
+  { event: "ContenthashChanged", args: {} },
+  { event: "InterfaceChanged", args: {} },
+  { event: "AuthorisationChanged", args: {} },
+  { event: "VersionChanged", args: {} },
+  { event: "DNSRecordChanged", args: {} },
+  { event: "DNSRecordDeleted", args: {} },
+  { event: "DNSZonehashChanged", args: {} },
+] as const satisfies ContractConfig["filter"];

@@ -1,8 +1,7 @@
-import {
-  UnixTimestampInSeconds,
-  unixTimestampToDate,
-} from "@/components/recent-registrations/utils";
+import { UnixTimestampInSeconds, unixTimestampToDate } from "@/components/datetime-utils";
 import { ensAdminVersion } from "@/lib/env";
+import { getNameWrapperAddress } from "@/lib/namespace-utils";
+import { ENSNamespaceId } from "@ensnode/datasources";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
@@ -27,17 +26,16 @@ interface RegistrationResult {
 }
 
 /**
- * The NameWrapper contract address
- */
-const NAME_WRAPPER_ADDRESS = "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401";
-
-/**
  * Determines the effective owner of a domain.
- * If the owner is the NameWrapper contract, returns the wrapped owner instead.
+ * If the owner is the NameWrapper contract with the specified ENS namespace, returns the wrapped owner instead.
  */
-function getEffectiveOwner(registrationResult: RegistrationResult): Address {
+function getEffectiveOwner(
+  registrationResult: RegistrationResult,
+  namespaceId: ENSNamespaceId,
+): Address {
+  const nameWrapperAddress = getNameWrapperAddress(namespaceId);
   // Use the regular owner if it's not the NameWrapper contract
-  if (!isAddressEqual(registrationResult.domain.owner.id, NAME_WRAPPER_ADDRESS)) {
+  if (!isAddressEqual(registrationResult.domain.owner.id, nameWrapperAddress)) {
     return getAddress(registrationResult.domain.owner.id);
   }
 
@@ -54,7 +52,10 @@ function getEffectiveOwner(registrationResult: RegistrationResult): Address {
 /**
  * Transforms a RegistrationResult into a Registration
  */
-function toRegistration(registrationResult: RegistrationResult): Registration {
+function toRegistration(
+  registrationResult: RegistrationResult,
+  namespaceId: ENSNamespaceId,
+): Registration {
   return {
     registeredAt: unixTimestampToDate(registrationResult.registrationDate),
     expiresAt: unixTimestampToDate(registrationResult.expiryDate),
@@ -63,14 +64,18 @@ function toRegistration(registrationResult: RegistrationResult): Registration {
     ownerInNameWrapper: registrationResult.domain.wrappedOwner
       ? getAddress(registrationResult.domain.wrappedOwner.id)
       : undefined,
-    owner: getEffectiveOwner(registrationResult),
+    owner: getEffectiveOwner(registrationResult, namespaceId),
   };
 }
 
 /**
  * Fetches info about the most recent registrations that have been indexed.
  */
-async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promise<Registration[]> {
+async function fetchRecentRegistrations(
+  ensNodeUrl: URL,
+  maxResults: number,
+  namespaceId: ENSNamespaceId,
+): Promise<Registration[]> {
   const query = `
     query RecentRegistrationsQuery {
       registrations(first: ${maxResults}, orderBy: registrationDate, orderDirection: desc) {
@@ -93,7 +98,7 @@ async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promi
     }
   `;
 
-  const response = await fetch(new URL(`/subgraph`, baseUrl), {
+  const response = await fetch(new URL(`/subgraph`, ensNodeUrl), {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -110,7 +115,7 @@ async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promi
   const data = await response.json();
 
   return data.data.registrations.map((registration: RegistrationResult) =>
-    toRegistration(registration),
+    toRegistration(registration, namespaceId),
   );
 }
 
@@ -118,12 +123,17 @@ async function fetchRecentRegistrations(baseUrl: URL, maxResults: number): Promi
  * Hook to fetch info about most recently registered domains that have been indexed.
  *
  * @param ensNodeURL The URL of the selected ENS node instance.
- * @param maxResults the max number of recent registrations to retrieve
+ * @param maxResults The max number of recent registrations to retrieve
+ * @param namespaceId The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  */
-export function useRecentRegistrations(ensNodeURL: URL, maxResults: number) {
+export function useRecentRegistrations(
+  ensNodeURL: URL,
+  maxResults: number,
+  namespaceId: ENSNamespaceId,
+) {
   return useQuery({
-    queryKey: ["recent-registrations", ensNodeURL],
-    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults),
+    queryKey: [ensNodeURL, namespaceId, "recent-registrations", maxResults],
+    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults, namespaceId),
     throwOnError(error) {
       throw new Error(
         `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,

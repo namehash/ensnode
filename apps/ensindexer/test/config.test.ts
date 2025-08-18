@@ -1,3 +1,4 @@
+import type { RpcConfig } from "@/config/types";
 import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
@@ -11,6 +12,7 @@ const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
 
 const BASE_ENV = {
   ENSNODE_PUBLIC_URL: "http://localhost:42069",
+  ENSINDEXER_URL: "http://localhost:42069",
   ENSADMIN_URL: "https://admin.ensnode.io",
   DATABASE_SCHEMA: "ensnode",
   PLUGINS: "subgraph",
@@ -42,13 +44,13 @@ describe("config", () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual({ startBlock: undefined, endBlock: undefined });
-      expect(config.ensNodePublicUrl).toBe("http://localhost:42069");
-      expect(config.ensAdminUrl).toBe("https://admin.ensnode.io");
-      expect(config.ponderDatabaseSchema).toBe("ensnode");
+      expect(config.ensNodePublicUrl).toStrictEqual(new URL("http://localhost:42069"));
+      expect(config.ensAdminUrl).toStrictEqual(new URL("https://admin.ensnode.io"));
+      expect(config.databaseSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.healReverseAddresses).toBe(true);
       expect(config.port).toBe(3000);
-      expect(config.ensRainbowEndpointUrl).toBe("https://api.ensrainbow.io");
+      expect(config.ensRainbowUrl).toStrictEqual(new URL("https://api.ensrainbow.io"));
     });
 
     it("refreshes config when module is re-imported with new environment variables", async () => {
@@ -147,13 +149,41 @@ describe("config", () => {
 
     it("returns the ENSNODE_PUBLIC_URL if it is a valid URL", async () => {
       const config = await getConfig();
-      expect(config.ensNodePublicUrl).toBe("http://localhost:42069");
+      expect(config.ensNodePublicUrl).toStrictEqual(new URL("http://localhost:42069"));
     });
 
     it("returns a different valid ENSNODE_PUBLIC_URL if set", async () => {
       vi.stubEnv("ENSNODE_PUBLIC_URL", "https://someotherurl.com");
       const config = await getConfig();
-      expect(config.ensNodePublicUrl).toBe("https://someotherurl.com");
+      expect(config.ensNodePublicUrl).toStrictEqual(new URL("https://someotherurl.com"));
+    });
+  });
+
+  describe(".ensIndexerUrl", () => {
+    it("throws an error if ENSINDEXER_URL is not a valid URL", async () => {
+      vi.stubEnv("ENSINDEXER_URL", "invalid url");
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
+    });
+
+    it("throws an error if ENSINDEXER_URL is empty", async () => {
+      vi.stubEnv("ENSINDEXER_URL", "");
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
+    });
+
+    it("throws an error if ENSINDEXER_URL is undefined (explicitly testing the refine)", async () => {
+      vi.stubEnv("ENSINDEXER_URL", undefined);
+      await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
+    });
+
+    it("returns the ENSINDEXER_URL if it is a valid URL", async () => {
+      const config = await getConfig();
+      expect(config.ensIndexerUrl).toStrictEqual(new URL("http://localhost:42069"));
+    });
+
+    it("returns a different valid ENSINDEXER_URL if set", async () => {
+      vi.stubEnv("ENSINDEXER_URL", "https://someotherurl.com");
+      const config = await getConfig();
+      expect(config.ensIndexerUrl).toStrictEqual(new URL("https://someotherurl.com"));
     });
   });
 
@@ -166,17 +196,17 @@ describe("config", () => {
     it("returns the provided ENSADMIN_URL if it is a valid URL", async () => {
       vi.stubEnv("ENSADMIN_URL", "https://customadmin.com");
       const config = await getConfig();
-      expect(config.ensAdminUrl).toBe("https://customadmin.com");
+      expect(config.ensAdminUrl).toStrictEqual(new URL("https://customadmin.com"));
     });
 
     it("returns the default ENSADMIN_URL if it is not set", async () => {
       vi.stubEnv("ENSADMIN_URL", undefined);
       const config = await getConfig();
-      expect(config.ensAdminUrl).toBe(DEFAULT_ENSADMIN_URL);
+      expect(config.ensAdminUrl).toStrictEqual(DEFAULT_ENSADMIN_URL);
     });
   });
 
-  describe(".ensRainbowEndpointUrl", () => {
+  describe(".ensRainbowUrl", () => {
     it("throws an error if ENSRAINBOW_URL is not a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "invalid url");
       await expect(getConfig()).rejects.toThrow(/ENSRAINBOW_URL must be a valid URL string/i);
@@ -185,7 +215,7 @@ describe("config", () => {
     it("returns the ENSRAINBOW_URL if it is a valid URL", async () => {
       vi.stubEnv("ENSRAINBOW_URL", "https://customrainbow.com");
       const config = await getConfig();
-      expect(config.ensRainbowEndpointUrl).toBe("https://customrainbow.com");
+      expect(config.ensRainbowUrl).toStrictEqual(new URL("https://customrainbow.com"));
     });
 
     it("throws an error if ENSRAINBOW_URL is not set", async () => {
@@ -194,11 +224,11 @@ describe("config", () => {
     });
   });
 
-  describe(".ponderDatabaseSchema", () => {
+  describe(".databaseSchemaName", () => {
     it("returns the DATABASE_SCHEMA if set", async () => {
       vi.stubEnv("DATABASE_SCHEMA", "someschema");
       const config = await getConfig();
-      expect(config.ponderDatabaseSchema).toBe("someschema");
+      expect(config.databaseSchemaName).toBe("someschema");
     });
 
     it("throws an error when DATABASE_SCHEMA is not set", async () => {
@@ -360,12 +390,17 @@ describe("config", () => {
     it("returns the chains if it is a valid object", async () => {
       vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
       const config = await getConfig();
-      expect(config.rpcConfigs).toEqual({
-        1: {
-          url: VALID_RPC_URL,
-          maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
-        },
-      });
+      expect(config.rpcConfigs).toStrictEqual(
+        new Map([
+          [
+            1,
+            {
+              url: new URL(VALID_RPC_URL),
+              maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
+            } satisfies RpcConfig,
+          ],
+        ]),
+      );
     });
 
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
@@ -378,13 +413,13 @@ describe("config", () => {
     it("returns the RPC_REQUEST_RATE_LIMIT_1 if it is a valid number", async () => {
       vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", "100");
       const config = await getConfig();
-      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(100);
+      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(100);
     });
 
     it("returns the default if it is not set", async () => {
       vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", undefined);
       const config = await getConfig();
-      expect(config.rpcConfigs[1]!.maxRequestsPerSecond).toBe(DEFAULT_RPC_RATE_LIMIT);
+      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(DEFAULT_RPC_RATE_LIMIT);
     });
   });
 
@@ -502,5 +537,18 @@ describe("config", () => {
       vi.stubEnv("END_BLOCK", "1");
       await expect(getConfig()).rejects.toThrow(/multiple chains/i);
     });
+  });
+
+  it("reverse-resolvers plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be true", async () => {
+    vi.stubEnv("PLUGINS", "reverse-resolvers");
+    vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_42161", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_534352", VALID_RPC_URL);
+    vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
+    vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
+
+    await expect(getConfig()).rejects.toThrow(/requires INDEX_ADDITIONAL_RESOLVER_RECORDS/i);
   });
 });
