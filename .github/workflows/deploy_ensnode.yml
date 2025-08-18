@@ -55,6 +55,7 @@ jobs:
       - name: Check if Docker images exists
         run: |
           docker manifest inspect ${{ env.ENSINDEXER_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSINDEXER_DOCKER_IMAGE }}"; exit 1; }
+          docker manifest inspect ${{ env.ENSRAINBOW_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}"; exit 1; }
 
       - name: Print switch target
         run: |
@@ -81,6 +82,9 @@ jobs:
               #HOLESKY
               echo "HOLESKY_API_SVC_ID="${{ secrets.GREEN_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.GREEN_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+              #ENSRAINBOW
+              echo "ENSRAINBOW_SVC_ID="${{ secrets.GREEN_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=':large_green_circle: GREEN environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
               ;;
             "blue")
               #ENVIRONMENT
@@ -100,6 +104,9 @@ jobs:
               #HOLESKY
               echo "HOLESKY_API_SVC_ID="${{ secrets.BLUE_HOLESKY_API_SVC_ID }} >> "$GITHUB_ENV"
               echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.BLUE_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
+              #ENSRAINBOW
+              echo "ENSRAINBOW_SVC_ID="${{ secrets.BLUE_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
+              echo "SLACK_TITLE=':large_blue_circle: BLUE environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
               ;;
             *)
               echo "Environment not recognized, skipping workflow"
@@ -146,6 +153,8 @@ jobs:
           #HOLESKY
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          #ENSRAINBOW
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}      ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
 
       # Update DATABASE_SCHEMA for each indexer based on input tag
       - name: Update shared environment variable
@@ -201,6 +210,8 @@ jobs:
           #HOLESKY
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
+          #ENSRAINBOW
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
 
       # Terraform deploy - apply Terraform template everytime new deployment is introduced to either green or blue environment
       - name: Set full permissions to execute scripts (read / write / execute)
