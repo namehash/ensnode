@@ -2,6 +2,8 @@ import type {
   ClientOptions,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesRequest,
+  ResolvePrimaryNamesResponse,
   ResolveRecordsRequest,
   ResolveRecordsResponse,
   ResolverRecordsSelection,
@@ -45,10 +47,21 @@ export interface UseRecordsParameters<SELECTION extends ResolverRecordsSelection
 /**
  * Parameters for the usePrimaryName hook.
  *
- * * If `address` is null, the query will not be executed.
+ * If `address` is null, the query will not be executed.
  */
 export interface UsePrimaryNameParameters
   extends Omit<ResolvePrimaryNameRequest, "address">,
     QueryParameter<ResolvePrimaryNameResponse> {
   address: ResolvePrimaryNameRequest["address"] | null;
+}
+
+/**
+ * Parameters for the usePrimaryNames hook.
+ *
+ * If `address` is null, the query will not be executed.
+ */
+export interface UsePrimaryNamesParameters
+  extends Omit<ResolvePrimaryNamesRequest, "address">,
+    QueryParameter<ResolvePrimaryNamesResponse> {
+  address: ResolvePrimaryNamesRequest["address"] | null;
 }

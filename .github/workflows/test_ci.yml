@@ -49,6 +49,9 @@ jobs:
       - name: Run TypeScript type checks
         run: pnpm -r typecheck
 
+      - name: Check Terraform format
+        run: terraform fmt -recursive -check -diff
+
       - name: Build packages
         if: needs.changed-packages.outputs.packages == 'true'
         run: pnpm packages:prepublish
@@ -78,6 +81,7 @@ jobs:
           HEALTH_CHECK_TIMEOUT: 60
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSNODE_PUBLIC_URL: http://localhost:42069
+          ENSINDEXER_URL: http://localhost:42069
         run: |
           chmod +x ./.github/scripts/run_ensindexer_healthcheck.sh
           ./.github/scripts/run_ensindexer_healthcheck.sh

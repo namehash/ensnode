@@ -175,6 +175,22 @@ export interface ENSIndexerConfig {
   databaseUrl: string | undefined;
 
   /**
+   * The "primary" ENSIndexer service URL
+   * This must be an instance of ENSIndexer using either `ponder start`
+   * or `ponder dev`, and not `ponder serve`.
+   * This URL is used to read Ponder's internal indexing state using
+   * the `/status` and `/metrics` endpoints that are served directly by Ponder
+   * within the specified ENSIndexer.
+   * For ENSIndexer instances started using `ponder start` or `ponder dev`,
+   * this should be configured so that ENSIndexer refers back to itself, ex:
+   * http://localhost:{port}. For ENSIndexer instances started using
+   * `ponder serve`, this should be set to the hostname of
+   * the related ENSIndexer instance started using `ponder start` or
+   * `ponder dev` that is writing to the same ENSDb.
+   */
+  ensIndexerUrl: URL;
+
+  /**
    * Constrains the global blockrange for indexing, useful for testing purposes.
    *
    * This is strictly designed for testing and development and its usage in production will result
@@ -231,6 +247,7 @@ export interface ENSIndexerEnvironment {
   plugins: string | undefined;
   ensRainbowUrl: string | undefined;
   ensNodePublicUrl: string | undefined;
+  ensIndexerUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;

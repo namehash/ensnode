@@ -7,10 +7,8 @@ sidebar:
 
 import { LinkCard } from "@astrojs/starlight/components";
 
-ENSNode exposes two GraphQL endpoints:
-
-- `/ponder` — uses a Ponder-native GraphQL schema
-- `/subgraph` — uses a subgraph-compatible GraphQL schema
+## Subgraph API
+ENSNode exposes a Subgraph-Compatible GraphQL endpoint at `/subgraph`.
 
 :::note[Subgraph API Compatibility Reference]
 For details on subgraph compatibility, see the Subgraph Compatibility documentation.
@@ -21,61 +19,18 @@ For details on subgraph compatibility, see the Subgraph Compatibility documentat
 />
 :::
 
-## GraphiQL Playground
+### GraphiQL Playground
 
-To observe the full schema and play with each GraphQL API, use the provided GraphiQL Playground for each.
-
-<LinkCard
-  href="https://api.alpha.ensnode.io/ponder"
-  title="Ponder-native GraphiQL Playground"
-/>
+To explore the schema and run queries, use the GraphiQL Playground below.
 
 <LinkCard
   href="https://api.alpha.ensnode.io/subgraph"
   title="Subgraph-compatible GraphiQL Playground"
 />
 
-## GraphQL Examples
+### GraphQL Examples
 
 Fetch data about the three most recently-created domains.
-
-### Ponder-native API (`/ponder`)
-
-```gql
-{
-  domains(orderBy: "createdAt", orderDirection: "desc", limit: 3) {
-    items {
-      name
-      expiryDate
-    }
-  }
-}
-```
-
-```json
-{
-  "data": {
-    "domains": {
-      "items": [
-        {
-          "name": "ensanguo.eth",
-          "expiryDate": "1758170255"
-        },
-        {
-          "name": "fiffer.eth",
-          "expiryDate": "2041994243"
-        },
-        {
-          "name": "rifaisicilia.eth",
-          "expiryDate": "1758170039"
-        }
-      ]
-    }
-  }
-}
-```
-
-### Subgraph-compatible API (`/subgraph`)
 
 ```gql
 {
@@ -106,3 +61,145 @@ Fetch data about the three most recently-created domains.
   }
 }
 ```
+
+## Config API
+
+The Config API provides a complete view of an ENSNode instance's public
+configuration, making it easy to understand and verify it's configuration.
+
+**Endpoint:** `GET /api/config`
+
+This endpoint returns the public configuration object containing all
+the essential information about an ENSNode instance,
+including ENS namespace, indexed chains, enabled features, active plugins,
+and dependency versions.
+
+### Key Configuration Details
+
+The response includes several important configuration categories:
+
+- **ENS**: current ENS namespace 
+- **Network Configuration**: URLs for ENSAdmin interface, public ENSNode API,
+  and ENSRainbow service
+- **Chains**: Lists of indexed chains
+- **Feature Flags**: Boolean settings for experimental features and optional
+  functionality
+- **Plugins**: Activated plugins
+- **Dependency Information**: Node.js version, Ponder framework version, and
+  ENSRainbow schema details
+
+### Example response
+
+```json
+{
+  "ensAdminUrl": "https://admin.ensnode.io/",
+  "ensNodePublicUrl": "https://api.alpha.ensnode.io/",
+  "indexedChainIds": [
+    1,
+    8453,
+    59144,
+    10,
+    42161,
+    534352
+  ],
+  "databaseSchemaName": "alphaSchema0.31.0",
+  "experimentalResolution": true,
+  "healReverseAddresses": true,
+  "indexAdditionalResolverRecords": true,
+  "isSubgraphCompatible": false,
+  "namespace": "mainnet",
+  "plugins": [
+    "subgraph",
+    "basenames",
+    "lineanames",
+    "threedns",
+    "reverse-resolvers",
+    "referrals"
+  ],
+  "dependencyInfo": {
+    "nodejs": "22.18.0",
+    "ponder": "0.11.43",
+    "ensRainbow": "0.31.0",
+    "ensRainbowSchema": 2
+  }
+}
+```
+
+## Indexing Status API
+
+Monitor an ENSNode's indexing progress across multiple chains with
+the Indexing Status API. This endpoint provides detailed information
+about which chains are being indexed, each chain's indexing status,
+and the overall multichain indexing status.
+
+**Endpoint:** `GET /api/indexing-status`
+
+Perfect for building monitoring dashboards, health checks, or determining
+whether your ENSNode has caught up with recent onchain activity.
+
+### Understanding the Response
+
+The status response provides both overall and chain-specific information.
+
+### Example response
+
+```json
+{
+  "overallStatus": "backfill",
+  "chains": {
+    "1": {
+      "status": "backfill",
+      "config": {
+        "strategy": "indefinite",
+        "startBlock": {
+          "timestamp": 1489165544,
+          "number": 3327417
+        },
+        "endBlock": null
+      },
+      "latestIndexedBlock": {
+        "timestamp": 1496124933,
+        "number": 3791243
+      },
+      "backfillEndBlock": {
+        "timestamp": 1755182591,
+        "number": 23139951
+      }
+    },
+    "8453": {
+      "status": "unstarted",
+      "config": {
+        "strategy": "indefinite",
+        "startBlock": {
+          "timestamp": 1721932307,
+          "number": 17571480
+        },
+        "endBlock": null
+      }
+    }
+  },
+  "omnichainIndexingCursor": 1496124933
+}
+```
+
+### Realtime Indexing Distance
+
+When monitoring indexing or performing time-sensitive operations, you may wish to
+verify that an ENSNode instance has indexed sufficient blocks to be within
+an acceptable distance from the current "tip" of all indexed chains.
+
+The Indexing Status API supports an optional `maxRealtimeDistance` query
+parameter that enables this verification.
+
+#### How it works
+
+The `maxRealtimeDistance` parameter accepts a duration value in seconds,
+representing the max allowed distance between the latest indexed block of each chain and the "tip" of all indexed chains.
+When you include this parameter it influences the HTTP response code as follows:
+
+- **Success (200 OK)**: The latest indexed block of each chain is within the requested distance from realtime.
+- **Service Unavailable (503)**: The latest indexed block of each chain is NOT within the requested distance from realtime.
+
+This allows your client to programmatically determine whether the ENSNode
+instance is sufficiently synchronized for your use case before proceeding with
+operations that depend on the latest onchain data.

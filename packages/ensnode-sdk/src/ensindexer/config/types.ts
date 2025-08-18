@@ -66,16 +66,6 @@ export interface ENSIndexerPublicConfig {
   ensNodePublicUrl: URL;
 
   /**
-   * An ENSRainbow API Endpoint (ex: http://localhost:3223). ENSIndexer uses
-   * ENSRainbow to 'heal' unknown labelhashes.
-   * @see https://ensnode.io/ensrainbow/overview/what-is-ensrainbow
-   *
-   * For best performance, ENSRainbow should be colocated with ENSIndexer and
-   * use private/internal networking to minimize latency.
-   */
-  ensRainbowUrl: URL;
-
-  /**
    * A Postgres database schema name. This instance of ENSIndexer will write
    * indexed data to the tables in this schema.
    *
