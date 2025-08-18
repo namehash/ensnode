@@ -17,7 +17,6 @@ export async function buildENSIndexerPublicConfig(
     databaseSchemaName: config.databaseSchemaName,
     ensAdminUrl: config.ensAdminUrl,
     ensNodePublicUrl: config.ensNodePublicUrl,
-    experimentalAcceleration: config.experimentalAcceleration,
     healReverseAddresses: config.healReverseAddresses,
     indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
     indexedChainIds: config.indexedChainIds,

@@ -116,11 +116,6 @@ export interface ENSIndexerPublicConfig {
   indexAdditionalResolverRecords: boolean;
 
   /**
-   * Experiment to allow Protocol Accelerated Resolution API endpoints.
-   */
-  experimentalAcceleration: boolean;
-
-  /**
    * Indexed Chain IDs
    *
    * Includes the {@link ChainId} for each chain being indexed.

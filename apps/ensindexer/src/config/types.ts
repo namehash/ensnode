@@ -134,11 +134,6 @@ export interface ENSIndexerConfig {
   indexAdditionalResolverRecords: boolean;
 
   /**
-   * Experiment to allow Protocol Accelerated Resolution API endpoints.
-   */
-  experimentalAcceleration: boolean;
-
-  /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
    *
    * Invariants:
@@ -251,7 +246,6 @@ export interface ENSIndexerEnvironment {
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;
-  experimentalAcceleration: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;

@@ -34,9 +34,7 @@ app.get(
   validate("query", routes.records.query),
   async (c) => {
     const { name } = c.req.valid("param");
-    const { selection, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    // NOTE(experimental-acceleration): only allow acceleration if enabled
-    const accelerate = config.experimentalAcceleration && _accelerate;
+    const { selection, trace: showTrace, accelerate } = c.req.valid("query");
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -74,9 +72,7 @@ app.get(
   validate("query", routes.primaryName.query),
   async (c) => {
     const { address, chainId } = c.req.valid("param");
-    const { trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    // NOTE(experimental-acceleration): only allow acceleration if enabled
-    const accelerate = config.experimentalAcceleration && _accelerate;
+    const { trace: showTrace, accelerate } = c.req.valid("query");
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -111,9 +107,7 @@ app.get(
   validate("query", routes.primaryNames.query),
   async (c) => {
     const { address } = c.req.valid("param");
-    const { chainIds, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    // NOTE(experimental-acceleration): only allow acceleration if enabled
-    const accelerate = config.experimentalAcceleration && _accelerate;
+    const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
 
     try {
       const { result, trace } = await captureTrace(() =>
