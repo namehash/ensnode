@@ -1,17 +1,20 @@
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 import { anvil } from "viem/chains";
 
 import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
-import { ResolverConfig } from "./lib/resolver";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
-import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
+
+// Shared ABIs
+import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 const deploymentAddresses = getENSTestEnvDeploymentAddresses();
 
@@ -36,6 +39,9 @@ const EMPTY_ADDRESS = "" as Address;
  * type-correctness: consumers of these ens-test-env Datasources, if using outside of the context
  * of the ens-test-env tool, should validate that an Address is provided, or they may experience
  * undefined runtime behavior.
+ *
+ * NOTE: The ens-test-env ENS namespace does not support Basenames, Lineanames, or 3DNS.
+ * NOTE: The ens-test-env ENS namespace does not support ENSIP-19 Reverse Resolvers.
  */
 export default {
   /**
@@ -59,7 +65,8 @@ export default {
         startBlock: 0,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 0,
       },
       BaseRegistrar: {
@@ -67,14 +74,33 @@ export default {
         address: deploymentAddresses?.BaseRegistrarImplementation ?? EMPTY_ADDRESS,
         startBlock: 0,
       },
-      EthRegistrarControllerOld: {
-        abi: root_EthRegistrarControllerOld,
-        address: deploymentAddresses?.LegacyETHRegistrarController ?? EMPTY_ADDRESS,
+      LegacyEthRegistrarController: {
+        abi: root_LegacyEthRegistrarController,
+        address:
+          // NOTE: prefer the post-UnwrappedEthRegistrarController naming
+          deploymentAddresses?.LegacyETHRegistrarController ??
+          // TODO: remove deploymentAddresses?.ETHRegistrarControllerOld after ens-test-env is updated
+          deploymentAddresses?.ETHRegistrarControllerOld ??
+          EMPTY_ADDRESS,
         startBlock: 0,
       },
-      EthRegistrarController: {
-        abi: root_EthRegistrarController,
-        address: deploymentAddresses?.ETHRegistrarController ?? EMPTY_ADDRESS,
+      WrappedEthRegistrarController: {
+        abi: root_WrappedEthRegistrarController,
+        address:
+          // NOTE: prefer the post-UnwrappedEthRegistrarController naming
+          deploymentAddresses?.WrappedETHRegistrarController ??
+          // TODO: remove deploymentAddresses?.ETHRegistrarController after ens-test-env is updated
+          deploymentAddresses?.ETHRegistrarController ??
+          EMPTY_ADDRESS,
+        startBlock: 0,
+      },
+      UnwrappedEthRegistrarController: {
+        abi: root_UnwrappedEthRegistrarController,
+        // TODO: once ens-test-env is updated with the new UnwrappedEthRegistrarController, update
+        // this reference here
+        // NOTE: using zeroAddress so indexing proceeds as expected in ens-test-env pre-UnwrappedEthRegistrarController
+        // TODO: change zeroAddress to EMPTY_ADDRESS after ens-test-env is updated
+        address: deploymentAddresses?.UnwrappedETHRegistrarController ?? zeroAddress,
         startBlock: 0,
       },
       NameWrapper: {
@@ -89,7 +115,4 @@ export default {
       },
     },
   },
-  /**
-   * The 'ens-test-env' ENS namespace does not have any other Datasources.
-   */
 } satisfies ENSNamespace;

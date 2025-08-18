@@ -76,7 +76,12 @@ export async function withProtocolStepAsync<
       ? ReverseResolutionProtocolStep
       : never,
   Fn extends (span: Span) => Promise<any>,
->(protocol: PROTOCOL, step: STEP, fn: Fn): Promise<ReturnType<Fn>> {
+>(
+  protocol: PROTOCOL,
+  step: STEP,
+  args: Record<string, AttributeValue>,
+  fn: Fn,
+): Promise<ReturnType<Fn>> {
   return withActiveSpanAsync(
     tracer,
     `${protocol}:${step}`,
@@ -84,6 +89,7 @@ export async function withProtocolStepAsync<
     {
       [ATTR_PROTOCOL_NAME]: protocol,
       [ATTR_PROTOCOL_STEP]: step,
+      ...args,
     },
     fn,
   );
@@ -112,7 +118,7 @@ export function addProtocolStepEvent<
  */
 export async function captureTrace<Fn extends () => Promise<any>>(
   fn: Fn,
-): Promise<{ trace: ProtocolTrace; result: ReturnType<Awaited<Fn>> }> {
+): Promise<{ trace: ProtocolTrace; result: Awaited<ReturnType<Fn>> }> {
   // TODO: make sure there are no race conditions here, not sure how hono & otel work
   const traceId = trace.getActiveSpan()?.spanContext().traceId;
 

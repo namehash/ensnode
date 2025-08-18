@@ -1,11 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: {
-    middleware: "src/middleware.ts",
-    graphql: "src/graphql.ts",
-    helpers: "src/helpers.ts",
-  },
+  entry: ["src/index.ts"],
   platform: "node",
   format: ["esm"],
   target: "node16",

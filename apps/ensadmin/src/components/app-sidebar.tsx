@@ -30,10 +30,6 @@ const navItems = [
         title: "Subgraph (GraphQL)",
         url: "/api/subgraph",
       },
-      {
-        title: "Ponder Client",
-        url: "/ponder-client-api",
-      },
     ],
   },
 ];

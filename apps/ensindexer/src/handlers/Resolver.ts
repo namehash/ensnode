@@ -1,13 +1,13 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { ETH_COIN_TYPE, Node } from "@ensnode/ensnode-sdk";
+import { ETH_COIN_TYPE, Node, uniq } from "@ensnode/ensnode-sdk";
 import { type Address, Hash, type Hex } from "viem";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
-import { hasNullByte, stripNullBytes, uniq } from "@/lib/lib-helpers";
+import { hasNullByte, stripNullBytes } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   handleResolverAddressRecordUpdate,
@@ -200,8 +200,8 @@ export async function handleTextChanged({
   // TODO(null-bytes): represent null bytes in the database correctly
   const sanitizedKey = stripNullBytes(key);
 
-  // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver event, and the subgraph
-  // indexes that as `null`.
+  // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver (DefaultPublicResolver1)
+  // event, and the subgraph indexes that as `null`.
   //
   // NOTE(subgraph-compat): ponder's (viem's) event parsing produces empty string for some TextChanged events
   // (which is strictly correct) but the subgraph represents these instances as null, so we coalesce

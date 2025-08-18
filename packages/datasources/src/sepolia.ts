@@ -11,11 +11,12 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { EthRegistrarController as root_EthRegistrarController } from "./abis/root/EthRegistrarController";
-import { EthRegistrarControllerOld as root_EthRegistrarControllerOld } from "./abis/root/EthRegistrarControllerOld";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
@@ -29,11 +30,14 @@ import { EthRegistrarController as linea_EthRegistrarController } from "./abis/l
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 
-// Shared Resolver Config
-import { ResolverConfig } from "./lib/resolver";
+// Shared ABIs
+import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 /**
  * The Sepolia ENSNamespace
+ *
+ * NOTE: The Sepolia ENS namespace does not support 3DNS.
  */
 export default {
   /**
@@ -56,7 +60,8 @@ export default {
         startBlock: 3702728,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 3702721, // ignores any Resolver events prior to `startBlock` of RegistryOld on Sepolia
       },
       BaseRegistrar: {
@@ -64,15 +69,20 @@ export default {
         address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
         startBlock: 3702731,
       },
-      EthRegistrarControllerOld: {
-        abi: root_EthRegistrarControllerOld,
+      LegacyEthRegistrarController: {
+        abi: root_LegacyEthRegistrarController,
         address: "0x7e02892cfc2Bfd53a75275451d73cF620e793fc0",
         startBlock: 3790197,
       },
-      EthRegistrarController: {
-        abi: root_EthRegistrarController,
+      WrappedEthRegistrarController: {
+        abi: root_WrappedEthRegistrarController,
         address: "0xFED6a969AaA60E4961FCD3EBF1A2e8913ac65B72",
         startBlock: 3790244,
+      },
+      UnwrappedEthRegistrarController: {
+        abi: root_UnwrappedEthRegistrarController,
+        address: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968",
+        startBlock: 8579988,
       },
       NameWrapper: {
         abi: root_NameWrapper,
@@ -117,7 +127,8 @@ export default {
         startBlock: 13012458,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 13012458,
       },
       BaseRegistrar: {
@@ -168,7 +179,8 @@ export default {
         startBlock: 2395094,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 2395094, // based on startBlock of Registry on Linea Sepolia
       },
       BaseRegistrar: {
@@ -190,27 +202,94 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on the (Sepolia) ENS Root chain.
+   * Contracts that power Reverse Resolution on the (Sepolia) ENS Root chain.
    */
   [DatasourceNames.ReverseResolverRoot]: {
     chain: sepolia,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
+      DefaultReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x4F382928805ba0e23B30cFB75fC9E848e82DFD47",
+        startBlock: 8579966,
+      },
+
+      DefaultReverseResolver1: {
+        abi: ResolverABI,
         address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
         startBlock: 3790251,
+      },
+      DefaultReverseResolver2: {
+        abi: ResolverABI,
+        address: "0x8948458626811dd0c23EB25Cc74291247077cC51",
+        startBlock: 7035086,
+      },
+      DefaultReverseResolver3: {
+        abi: ResolverABI,
+        address: "0x9DC60e7BD81cCc96774C55214fF389D42Ae5E9Ac",
+        startBlock: 8580041,
+      },
+
+      DefaultPublicResolver1: {
+        abi: ResolverABI,
+        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
+        startBlock: 3790251,
+      },
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x8948458626811dd0c23EB25Cc74291247077cC51",
+        startBlock: 7035086,
+      },
+      DefaultPublicResolver3: {
+        abi: ResolverABI,
+        address: "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5",
+        startBlock: 8580001,
+      },
+
+      BaseReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80014a34.reverse
+        address: "0xaF3b3f636bE80b6709F5Bd3A374d6ac0D0a7c7aA",
+        startBlock: 8580004,
+      },
+
+      LineaReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#8000e705.reverse
+        address: "0x083dA1Dbc0F379ccda6AC81A934207c3D8a8a205",
+        startBlock: 8580005,
+      },
+
+      OptimismReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80aa37dc.reverse
+        address: "0xc9Ae189772BD48e01410AB3Be933637ee9D3AA5f",
+        startBlock: 8580026,
+      },
+
+      ArbitrumReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80066eee.reverse
+        address: "0x926f94D2aDC77C86Cb0050892097D49AADd02e8B",
+        startBlock: 8580003,
+      },
+
+      ScrollReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#8008274f.reverse
+        address: "0x9Fa59673e43F15bDB8722Fdaf5C2107574B99062",
+        startBlock: 8580040,
       },
     },
   },
 
   /**
-   * The Reverse Resolver on Base Sepolia.
+   * Contracts that power Reverse Resolution on Base Sepolia.
    */
   [DatasourceNames.ReverseResolverBase]: {
     chain: baseSepolia,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
+      L2ReverseRegistrar: {
+        abi: ResolverABI,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 21788010,
       },
@@ -218,13 +297,13 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on Optimism Sepolia.
+   * Contracts that power Reverse Resolution on Optimism Sepolia.
    */
   [DatasourceNames.ReverseResolverOptimism]: {
     chain: optimismSepolia,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
+      L2ReverseRegistrar: {
+        abi: ResolverABI,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 23770766,
       },
@@ -232,13 +311,13 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on Arbitrum Sepolia.
+   * Contracts that power Reverse Resolution on Arbitrum Sepolia.
    */
   [DatasourceNames.ReverseResolverArbitrum]: {
     chain: arbitrumSepolia,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
+      L2ReverseRegistrar: {
+        abi: ResolverABI,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 123142726,
       },
@@ -246,13 +325,13 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on Scroll Sepolia.
+   * Contracts that power Reverse Resolution on Scroll Sepolia.
    */
   [DatasourceNames.ReverseResolverScroll]: {
     chain: scrollSepolia,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
+      L2ReverseRegistrar: {
+        abi: ResolverABI,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 8175276,
       },
@@ -260,13 +339,13 @@ export default {
   },
 
   /**
-   * The Reverse Resolver on Linea Sepolia.
+   * Contracts that power Reverse Resolution on Linea Sepolia.
    */
   [DatasourceNames.ReverseResolverLinea]: {
     chain: lineaSepolia,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
+      L2ReverseRegistrar: {
+        abi: ResolverABI,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 9267966,
       },

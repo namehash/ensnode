@@ -73,7 +73,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            ...event.args,
+            // EthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
             // Linea allows the owner of the EthRegistrarController to register subnames for free
             cost: 0n,
           },
@@ -90,7 +92,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            ...event.args,
+            // EthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
             // Linea allows any wallet address holding a Proof of Humanity (Poh) to register one subname for free
             cost: 0n,
           },
@@ -107,7 +111,9 @@ export default function () {
         event: {
           ...event,
           args: {
-            ...event.args,
+            // EthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
             // the new registrar controller uses baseCost + premium to compute cost
             cost: event.args.baseCost + event.args.premium,
           },
@@ -118,6 +124,19 @@ export default function () {
 
   ponder.on(
     namespaceContract(pluginName, "EthRegistrarController:NameRenewed"),
-    handleNameRenewedByController,
+    async ({ context, event }) => {
+      await handleNameRenewedByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            ...event.args,
+            // EthRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+          },
+        },
+      });
+    },
   );
 }

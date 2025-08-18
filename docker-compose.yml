@@ -15,6 +15,7 @@ services:
       ENSNODE_PUBLIC_URL: http://localhost:42069
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
+      # Copy .env.local.example to .env.local and configure all required values
       - path: ./apps/ensindexer/.env.local
         required: true
     depends_on:
@@ -29,7 +30,7 @@ services:
     ports:
       - "42069:42069"
     environment:
-      # Start ensindexer instance in "serve" mode. This environment variable is intercepted by the ensindexer Docker image to modify the ensindexer start command. This special strategy for dynamically configuring the ensindexer start command is used due to limitations with Railway Terraform.
+      # Start ensindexer instance in "serve" mode. This environment variable is intercepted by the ensindexer Docker image to modify the ensindexer start command.
       PONDER_COMMAND: serve
       # Same DATABASE_URL as ensindexer instance
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
@@ -43,6 +44,7 @@ services:
       ENSNODE_PUBLIC_URL: http://localhost:42069
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example). Requires same env configuration as ensindexer
+      # Copy .env.local.example to .env.local and configure all required values
       - path: ./apps/ensindexer/.env.local
         required: true
     depends_on:
