@@ -1,5 +1,34 @@
 # ensadmin
 
+## 0.32.0
+
+### Minor Changes
+
+- [#915](https://github.com/namehash/ensnode/pull/915) [`79ba4cd`](https://github.com/namehash/ensnode/commit/79ba4cda9f9048c568f4f57b129b0c291e6fd788) Thanks [@shrugs](https://github.com/shrugs)! - integrate new ENSNode React SDK to power primary name resolution
+
+- [#915](https://github.com/namehash/ensnode/pull/915) [`79ba4cd`](https://github.com/namehash/ensnode/commit/79ba4cda9f9048c568f4f57b129b0c291e6fd788) Thanks [@shrugs](https://github.com/shrugs)! - RPC_URLs are no longer required to run ENSAdmin
+
+- [#915](https://github.com/namehash/ensnode/pull/915) [`79ba4cd`](https://github.com/namehash/ensnode/commit/79ba4cda9f9048c568f4f57b129b0c291e6fd788) Thanks [@shrugs](https://github.com/shrugs)! - Support for ens-test-env has been added to ENSAdmin
+
+- [#870](https://github.com/namehash/ensnode/pull/870) [`29176f9`](https://github.com/namehash/ensnode/commit/29176f94e477a96a3dd9f98141cf8235bc135be2) Thanks [@notrab](https://github.com/notrab)! - remove ponder client examples page
+
+### Patch Changes
+
+- [#812](https://github.com/namehash/ensnode/pull/812) [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8) Thanks [@Y3drk](https://github.com/Y3drk)! - Fixed support for all ENS namespaces in ENSAdmin
+
+- [#890](https://github.com/namehash/ensnode/pull/890) [`95c9140`](https://github.com/namehash/ensnode/commit/95c91404bd699705602d5ec19e76242b05057a44) Thanks [@djstrong](https://github.com/djstrong)! - Enhance RPC configuration guidance.
+
+- [#740](https://github.com/namehash/ensnode/pull/740) [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0) Thanks [@Y3drk](https://github.com/Y3drk)! - Improve 'Indexed Chains' panel's UI
+
+- [#912](https://github.com/namehash/ensnode/pull/912) [`886f8ca`](https://github.com/namehash/ensnode/commit/886f8ca27dfab5302fae4e04a89d1b3fce21cf04) Thanks [@djstrong](https://github.com/djstrong)! - remove deprecated `/ponder` endpoint and update documentation
+
+- Updated dependencies [[`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`2b60fad`](https://github.com/namehash/ensnode/commit/2b60fad313e31735c77372c514d22523f9d2cbc3), [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294), [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01), [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0), [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8), [`ad7fc8b`](https://github.com/namehash/ensnode/commit/ad7fc8bb4d12fe0ef1bb133eef9670d4eb84911b), [`ad7fc8b`](https://github.com/namehash/ensnode/commit/ad7fc8bb4d12fe0ef1bb133eef9670d4eb84911b), [`f3eff8a`](https://github.com/namehash/ensnode/commit/f3eff8aef94cf6162ae4bab39059abd1e852352b), [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485)]:
+  - @ensnode/ensnode-schema@0.32.0
+  - @ensnode/ensnode-sdk@0.32.0
+  - @ensnode/datasources@0.32.0
+  - @ensnode/ensnode-react@1.0.0
+  - @ensnode/ponder-metadata@0.32.0
+
 ## 0.31.0
 
 ### Minor Changes
