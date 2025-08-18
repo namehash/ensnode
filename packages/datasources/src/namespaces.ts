@@ -11,12 +11,17 @@ import mainnet from "./mainnet";
 import sepolia from "./sepolia";
 
 // internal map ENSNamespaceId -> ENSNamespace
-const ENSNamespacesById = {
+const ENSNamespacesById: {
+  readonly mainnet: typeof mainnet;
+  readonly sepolia: typeof sepolia;
+  readonly holesky: typeof holesky;
+  readonly "ens-test-env": typeof ensTestEnv;
+} = {
   mainnet,
   sepolia,
   holesky,
   "ens-test-env": ensTestEnv,
-} as const satisfies Record<ENSNamespaceId, ENSNamespace>;
+} as const;
 
 /**
  * Returns the ENSNamespace for a specified `namespaceId`.
@@ -44,7 +49,7 @@ export const getDatasource = <
 >(
   namespaceId: N,
   datasourceName: D,
-) => getENSNamespace(namespaceId)[datasourceName];
+): ReturnType<typeof getENSNamespace<N>>[D] => getENSNamespace(namespaceId)[datasourceName];
 
 /**
  * Returns the `datasourceName` Datasource within the specified `namespaceId` namespace, or undefined

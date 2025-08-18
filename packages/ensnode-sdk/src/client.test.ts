@@ -143,20 +143,20 @@ describe("ENSNodeClient", () => {
       expect(response).toEqual(mockResponse);
     });
 
-    it("should include accelerate=false if specified", async () => {
+    it("should include accelerate=true if specified", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => EXAMPLE_PRIMARY_NAME_RESPONSE,
       });
 
       const client = new ENSNodeClient();
-      await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1, { accelerate: false });
+      await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1, { accelerate: true });
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
         DEFAULT_ENSNODE_API_URL,
       );
-      expectedUrl.searchParams.set("accelerate", "false");
+      expectedUrl.searchParams.set("accelerate", "true");
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
     });
@@ -225,20 +225,20 @@ describe("ENSNodeClient", () => {
       expect(response).toEqual(mockResponse);
     });
 
-    it("should include accelerate=false if specified", async () => {
+    it("should include accelerate=true if specified", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => EXAMPLE_PRIMARY_NAMES_RESPONSE,
       });
 
       const client = new ENSNodeClient();
-      await client.resolvePrimaryNames(EXAMPLE_ADDRESS, { accelerate: false });
+      await client.resolvePrimaryNames(EXAMPLE_ADDRESS, { accelerate: true });
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
         DEFAULT_ENSNODE_API_URL,
       );
-      expectedUrl.searchParams.set("accelerate", "false");
+      expectedUrl.searchParams.set("accelerate", "true");
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
     });

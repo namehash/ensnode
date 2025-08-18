@@ -99,23 +99,6 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
   }
 }
 
-// Invariant: experimentalResolution requires ReverseResolvers plugin
-export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerPublicConfig, "plugins" | "experimentalResolution">>,
-) {
-  const { value: config } = ctx;
-
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
-
-  if (config.experimentalResolution && !reverseResolversPluginActive) {
-    ctx.issues.push({
-      code: "custom",
-      input: config,
-      message: `'reverseResolversPluginActive' requires the ${PluginName.ReverseResolvers} plugin to be active.`,
-    });
-  }
-}
-
 // Invariant: isSubgraphCompatible requires Subgraph plugin only, and no extra indexing features
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
@@ -151,7 +134,6 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
-      experimentalResolution: z.boolean({ error: `${valueLabel}.experimentalResolution` }),
       healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
       indexAdditionalResolverRecords: z.boolean({
         error: `${valueLabel}.indexAdditionalResolverRecords`,
@@ -169,5 +151,4 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
      * All required data validations must be performed below.
      */
     .check(invariant_reverseResolversPluginNeedsResolverRecords)
-    .check(invariant_experimentalResolutionNeedsReverseResolversPlugin)
     .check(invariant_isSubgraphCompatibleRequirements);
