@@ -151,7 +151,6 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
-      ensRainbowUrl: makeUrlSchema(`${valueLabel}.ensRainbowUrl`),
       experimentalResolution: z.boolean({ error: `${valueLabel}.experimentalResolution` }),
       healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
       indexAdditionalResolverRecords: z.boolean({

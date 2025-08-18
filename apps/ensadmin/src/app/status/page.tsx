@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { IndexingStatus } from "@/components/indexing-status/components";
-import { WagmiProvider } from "@/components/providers/wagmi-provider";
+import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
 import { RecentRegistrations } from "@/components/recent-registrations";
 
 export default function Status() {
@@ -11,11 +11,11 @@ export default function Status() {
         <IndexingStatus />
       </Suspense>
       <Suspense>
-        <WagmiProvider>
+        <ENSNodeProvider>
           <div className="px-6 pb-6">
             <RecentRegistrations />
           </div>
-        </WagmiProvider>
+        </ENSNodeProvider>
       </Suspense>
     </>
   );
