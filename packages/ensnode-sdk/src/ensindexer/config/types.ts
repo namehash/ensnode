@@ -116,7 +116,7 @@ export interface ENSIndexerPublicConfig {
   indexAdditionalResolverRecords: boolean;
 
   /**
-   * Experiment to enable forward/reverse resolution APIs.
+   * Experiment to allow Protocol Accelerated Resolution API endpoints.
    */
   experimentalAcceleration: boolean;
 
