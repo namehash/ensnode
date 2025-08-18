@@ -8,7 +8,7 @@ export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS = true;
-export const DEFAULT_EXPERIMENTAL_RESOLUTION = false;
+export const DEFAULT_EXPERIMENTAL_ACCELERATION = false;
 export const DEFAULT_NAMESPACE = ENSNamespaceIds.Mainnet;
 
 /**

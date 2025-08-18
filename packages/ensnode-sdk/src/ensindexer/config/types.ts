@@ -118,7 +118,7 @@ export interface ENSIndexerPublicConfig {
   /**
    * Experiment to enable forward/reverse resolution APIs.
    */
-  experimentalResolution: boolean;
+  experimentalAcceleration: boolean;
 
   /**
    * Indexed Chain IDs

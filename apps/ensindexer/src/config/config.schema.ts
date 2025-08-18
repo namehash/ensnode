@@ -7,7 +7,7 @@ import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
   DEFAULT_ENSADMIN_URL,
-  DEFAULT_EXPERIMENTAL_RESOLUTION,
+  DEFAULT_EXPERIMENTAL_ACCELERATION,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
   DEFAULT_NAMESPACE,
@@ -18,7 +18,6 @@ import {
 import { derive_indexedChainIds, derive_isSubgraphCompatible } from "./derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
 import {
-  invariant_experimentalResolutionNeedsReverseResolversPlugin,
   invariant_globalBlockrange,
   invariant_requiredDatasources,
   invariant_reverseResolversPluginNeedsResolverRecords,
@@ -116,8 +115,8 @@ const IndexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
   "INDEX_ADDITIONAL_RESOLVER_RECORDS",
 ).default(DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS);
 
-const ExperimentalResolutionSchema = makeEnvStringBoolSchema("EXPERIMENTAL_RESOLUTION").default(
-  DEFAULT_EXPERIMENTAL_RESOLUTION,
+const ExperimentalAccelerationSchema = makeEnvStringBoolSchema("EXPERIMENTAL_ACCELERATION").default(
+  DEFAULT_EXPERIMENTAL_ACCELERATION,
 );
 
 const PortSchema = z.coerce
@@ -175,7 +174,7 @@ const ENSIndexerConfigSchema = z
     plugins: PluginsSchema,
     healReverseAddresses: HealReverseAddressesSchema,
     indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
-    experimentalResolution: ExperimentalResolutionSchema,
+    experimentalAcceleration: ExperimentalAccelerationSchema,
     port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     rpcConfigs: RpcConfigsSchema,
@@ -202,7 +201,6 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_validContractConfigs)
   .check(invariant_reverseResolversPluginNeedsResolverRecords)
-  .check(invariant_experimentalResolutionNeedsReverseResolversPlugin)
   /**
    * Derived configuration
    *

@@ -136,7 +136,7 @@ export interface ENSIndexerConfig {
   /**
    * Experiment to enable forward/reverse resolution APIs.
    */
-  experimentalResolution: boolean;
+  experimentalAcceleration: boolean;
 
   /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
@@ -251,7 +251,7 @@ export interface ENSIndexerEnvironment {
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;
-  experimentalResolution: string | undefined;
+  experimentalAcceleration: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;
