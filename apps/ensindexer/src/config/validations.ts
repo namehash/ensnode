@@ -42,7 +42,7 @@ export function invariant_requiredDatasources(
   }
 }
 
-// Invariant: rpcConfig is specified for each indexed chain
+// Invariant: rpcConfig is specified for the ENS Root Chain of the configured namespace
 export function invariant_rpcConfigsSpecifiedForRootChain(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "rpcConfigs">>,
 ) {
