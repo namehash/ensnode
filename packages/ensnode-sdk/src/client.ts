@@ -1,14 +1,16 @@
-import type {
-  ConfigResponse,
-  ErrorResponse,
-  IndexingStatusRequest,
-  IndexingStatusResponse,
-  ResolvePrimaryNameRequest,
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesRequest,
-  ResolvePrimaryNamesResponse,
-  ResolveRecordsRequest,
-  ResolveRecordsResponse,
+import { deserializeErrorResponse } from "./api";
+import {
+  type ConfigResponse,
+  type ErrorResponse,
+  type IndexingStatusRequest,
+  type IndexingStatusResponse,
+  IndexingStatusResponseCodes,
+  type ResolvePrimaryNameRequest,
+  type ResolvePrimaryNameResponse,
+  type ResolvePrimaryNamesRequest,
+  type ResolvePrimaryNamesResponse,
+  type ResolveRecordsRequest,
+  type ResolveRecordsResponse,
 } from "./api/types";
 import {
   type SerializedENSIndexerOverallIndexingStatus,
@@ -276,9 +278,19 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
+    let responseData: ConfigResponse | ErrorResponse;
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
     if (!response.ok) {
-      const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Fetching ENSNode Config Failed: ${error.message}`);
+      const ErrorResponse = deserializeErrorResponse(responseData);
+      throw new Error(`Fetching ENSNode Config Failed: ${ErrorResponse.message}`);
     }
 
     const data = (await response.json()) as SerializedENSIndexerPublicConfig;
@@ -309,15 +321,44 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
-    // Indexing Status API uses the 503 response code to signal service availability
-    // while still returning the Overall Indexing Status object.
-    if (!response.ok && response.status !== 503) {
-      const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Fetching ENSNode Indexing Status Failed: ${error.message}`);
+    let responseData: IndexingStatusResponse | ErrorResponse;
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
     }
 
-    const data = (await response.json()) as SerializedENSIndexerOverallIndexingStatus;
+    // handle application errors accordingly
+    if (!response.ok) {
+      switch (response.status) {
+        case IndexingStatusResponseCodes.IndexerError: {
+          console.error("Indexing Status API: indexer error");
+          return deserializeENSIndexerIndexingStatus(
+            responseData as SerializedENSIndexerOverallIndexingStatus,
+          );
+        }
 
-    return deserializeENSIndexerIndexingStatus(data);
+        case IndexingStatusResponseCodes.RequestedDistanceNotAchievedError: {
+          console.error(
+            "Indexing Status API: Requested realtime indexing distance not achieved error",
+          );
+          return deserializeENSIndexerIndexingStatus(
+            responseData as SerializedENSIndexerOverallIndexingStatus,
+          );
+        }
+
+        default: {
+          const ErrorResponse = deserializeErrorResponse(responseData);
+          throw new Error(`Fetching ENSNode Indexing Status Failed: ${ErrorResponse.message}`);
+        }
+      }
+    }
+
+    return deserializeENSIndexerIndexingStatus(
+      responseData as SerializedENSIndexerOverallIndexingStatus,
+    );
   }
 }

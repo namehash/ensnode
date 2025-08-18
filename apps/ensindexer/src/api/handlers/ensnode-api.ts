@@ -1,5 +1,6 @@
 import { publicClients } from "ponder:api";
 import {
+  IndexingStatusResponseCodes,
   OverallIndexingStatusIds,
   serializeENSIndexerIndexingStatus,
   serializeENSIndexerPublicConfig,
@@ -13,6 +14,7 @@ import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/indexing-status";
 import { getUnixTime } from "date-fns";
+import type { UnofficialStatusCode } from "hono/utils/http-status";
 import resolutionApi from "./resolution-api";
 
 const app = new Hono();
@@ -40,7 +42,10 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
 
   // respond with 503 error if ENSIndexer is not available
   if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
-    return c.json(serializedIndexingStatus, 503);
+    return c.json(
+      serializedIndexingStatus,
+      IndexingStatusResponseCodes.IndexerError as UnofficialStatusCode,
+    );
   }
 
   const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
@@ -50,7 +55,10 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
 
   // respond with 503 error if requested distance hasn't been achieved yet
   if (!hasAchievedRequestedRealtimeIndexingDistance) {
-    return c.json(serializedIndexingStatus, 503);
+    return c.json(
+      serializedIndexingStatus,
+      IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
+    );
   }
 
   // respond with the serialized indexing status object

@@ -1,6 +1,11 @@
 import type { Address } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ErrorResponse, ResolvePrimaryNameResponse, ResolvePrimaryNamesResponse } from "./api";
+import {
+  ErrorResponse,
+  IndexingStatusResponseCodes,
+  ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesResponse,
+} from "./api";
 import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
 import { Name } from "./ens";
 import {
@@ -9,6 +14,7 @@ import {
   OverallIndexingStatusIds,
   PluginName,
   type SerializedENSIndexerOverallIndexingBackfillStatus,
+  SerializedENSIndexerOverallIndexingErrorStatus,
   type SerializedENSIndexerOverallIndexingFollowingStatus,
   type SerializedENSIndexerPublicConfig,
   deserializeENSIndexerIndexingStatus,
@@ -67,7 +73,11 @@ const EXAMPLE_CONFIG_RESPONSE = {
   },
 } satisfies SerializedENSIndexerPublicConfig;
 
-const EXAMPLE_INDEXING_CONFIG_BACKFILL_RESPONSE = {
+const EXAMPLE_INDEXING_STATUS_INDEXER_ERROR_RESPONSE = {
+  overallStatus: OverallIndexingStatusIds.IndexerError,
+} satisfies SerializedENSIndexerOverallIndexingErrorStatus;
+
+const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
   overallStatus: OverallIndexingStatusIds.Backfill,
   chains: {
     "1": {
@@ -104,7 +114,7 @@ const EXAMPLE_INDEXING_CONFIG_BACKFILL_RESPONSE = {
   omnichainIndexingCursor: 1496124933,
 } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
 
-const EXAMPLE_INDEXING_CONFIG_FOLLOWING_RESPONSE = {
+const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
   overallStatus: OverallIndexingStatusIds.Following,
   chains: {
     "1": {
@@ -405,7 +415,7 @@ describe("ENSNodeClient", () => {
     it("can fetch overall indexing 'backfill' status object successfully", async () => {
       // arrange
       const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-      const serializedMockedResponse = EXAMPLE_INDEXING_CONFIG_BACKFILL_RESPONSE;
+      const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
       const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
       const client = new ENSNodeClient();
 
@@ -436,7 +446,7 @@ describe("ENSNodeClient", () => {
         // arrange
         const client = new ENSNodeClient();
 
-        const serializedMockedResponse = EXAMPLE_INDEXING_CONFIG_FOLLOWING_RESPONSE;
+        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE;
         const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
 
         // set the requested duration to the actual approx realtime distance
@@ -448,7 +458,6 @@ describe("ENSNodeClient", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          status: 200,
           json: async () => serializedMockedResponse,
         });
 
@@ -460,11 +469,11 @@ describe("ENSNodeClient", () => {
         expect(mockFetch).toHaveBeenCalledWith(requestUrl);
       });
 
-      it("should fetch overall indexing status object 503 response code when status is 'following' and requested distance is not achieved", async () => {
+      it("should fetch overall indexing status object with custom response code when status is 'following' and requested distance is not achieved", async () => {
         // arrange
         const client = new ENSNodeClient();
 
-        const serializedMockedResponse = EXAMPLE_INDEXING_CONFIG_FOLLOWING_RESPONSE;
+        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE;
         const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
 
         // set the requested duration to just exceed the actual approx realtime distance
@@ -476,7 +485,7 @@ describe("ENSNodeClient", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: false,
-          status: 503,
+          status: IndexingStatusResponseCodes.RequestedDistanceNotAchievedError,
           json: async () => serializedMockedResponse,
         });
 
@@ -487,11 +496,11 @@ describe("ENSNodeClient", () => {
         expect(mockFetch).toHaveBeenCalledWith(requestUrl);
       });
 
-      it("should fetch overall indexing status object with 503 response code when status is not 'following' ", async () => {
+      it("should fetch overall indexing status object with custom response code when status is not 'following' ", async () => {
         // arrange
         const client = new ENSNodeClient();
 
-        const serializedMockedResponse = EXAMPLE_INDEXING_CONFIG_BACKFILL_RESPONSE;
+        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
         const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
 
         const maxRealtimeDistance: Duration = 0;
@@ -500,7 +509,7 @@ describe("ENSNodeClient", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: false,
-          status: 503,
+          status: IndexingStatusResponseCodes.RequestedDistanceNotAchievedError,
           json: async () => serializedMockedResponse,
         });
 
@@ -508,6 +517,26 @@ describe("ENSNodeClient", () => {
         await expect(client.indexingStatus({ maxRealtimeDistance })).resolves.toStrictEqual(
           mockedResponse,
         );
+        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
+      });
+
+      it("should fetch overall indexing status object with custom response code when indexer error happens", async () => {
+        // arrange
+        const client = new ENSNodeClient();
+
+        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_INDEXER_ERROR_RESPONSE;
+        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
+
+        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: IndexingStatusResponseCodes.IndexerError,
+          json: async () => serializedMockedResponse,
+        });
+
+        // act & assert
+        await expect(client.indexingStatus()).resolves.toStrictEqual(mockedResponse);
         expect(mockFetch).toHaveBeenCalledWith(requestUrl);
       });
     });

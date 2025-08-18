@@ -99,3 +99,13 @@ export interface IndexingStatusRequest {
  * ENSIndexer Overall Indexing Status Response
  */
 export type IndexingStatusResponse = ENSIndexerOverallIndexingStatus;
+
+/**
+ * ENSIndexer Overall Indexing Status Response Codes
+ *
+ * Define a custom response code for known responses.
+ */
+export const IndexingStatusResponseCodes = {
+  IndexerError: 512,
+  RequestedDistanceNotAchievedError: 513,
+} as const;
