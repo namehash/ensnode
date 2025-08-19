@@ -22,7 +22,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.60.0",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-react": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",

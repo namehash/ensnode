@@ -1,30 +1,101 @@
 ---
-title: ENSRainbow Quickstart
-description: Get started healing unknown labels with ENSRainbow.
+title: What is ENSRainbow?
+description: ENSRainbow is an open-source service that heals unknown ENS names by converting encoded labelhashes back to human-readable labels.
 sidebar:
-  label: Quickstart
+  label: Overview
   order: 1
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
 
+ENSRainbow is an open-source public good designed to make the "unknown, known" by healing millions of unknown ENS (Ethereum Name Service) names. It functions as a sidecar service for ENSNode, the multichain indexer for ENSv2.
 
-## Client SDK
+ENSRainbow builds upon work from The Graph Protocol (original ENS rainbow tables) and ENS Labs (ENS Subgraph development and maintenance). It is part of the Namehash Labs suite of tools dedicated to supporting the growth of the ENS Protocol.
 
-ENSRainbow provides an official TypeScript client SDK to simplify integrations with the API.
+## The Problem: Unknown Labels
+
+The ENS Registry allows subnames to be created onchain without revealing onchain what those subnames are. As a result, when querying indexed ENS names, some names include labels represented as encoded labelhashes (e.g., `[428...b0b]`). These represent unknown labels and are an unfortunate user experience issue in the ENS ecosystem.
+
+## How ENSRainbow Helps
+
+ENSRainbow significantly improves "name healing" coverage compared to relying solely on services like the ENS Subgraph. Its goal is to heal as many ENS names as possible, minimizing the probability that end-users encounter unknown labels.
+
+Key aspects of ENSRainbow include:
+
+*   **Resolving Encoded Labelhashes:** It translates cryptic labelhashes into human-readable labels.
+*   **Sidecar to ENSNode:** It integrates with ENSNode to provide deterministic name healing across time.
+*   **Improved Healing Coverage:** Aims to minimize the probability that end-users encounter unknown labels, far exceeding previous capabilities.
+*   **Extensible and Decentralized Data Management:** Uses a label set ID and label set version system for enabling any number of different label sets (collections of rainbow records) to support incremental updates across time.
+
+## Documentation Structure
+
+This documentation is organized into focused sections to help you find what you need quickly:
+
+### 📚 Concepts
+Understanding the fundamentals - terminology, data models, and why ENSRainbow works the way it does.
+
+<LinkCard
+  title="Core Concepts"
+  description="Terminology, data models, versioning, and architectural concepts"
+  href="/ensrainbow/concepts/"
+/>
+
+### 🛠️ Usage
+Practical guides for integrating ENSRainbow into your applications.
+
+<LinkCard
+  title="Integration Guides"
+  description="API reference, SDK usage, configuration, and usage patterns"
+  href="/ensrainbow/usage/"
+/>
+
+### 🚀 Deployment
+Running your own ENSRainbow instance for control, privacy, or scale.
+
+<LinkCard
+  title="Deployment Guide"
+  description="Learn how to deploy your own ENSRainbow instance"
+  href="/ensrainbow/deploying/"
+/>
+
+### 👥 Contributing
+Contributing to the project and running ENSRainbow locally for development.
+
+<LinkCard
+  title="Contributing Guide"
+  description="Learn how to run ENSRainbow locally and contribute to the project"
+  href="/ensrainbow/contributing/"
+/>
+
+## Quick Start
+
+Ready to try ENSRainbow? Here are the fastest ways to get started:
+
+### Try the Public API
+Start with a simple HTTP request to heal labelhashes immediately. The public API requires no setup and provides instant access to ENSRainbow's healing capabilities.
 
 <LinkCard
   title="API Reference"
-  description="View the complete ENSRainbow API documentation"
+  description="Complete HTTP API documentation with curl examples and response formats"
+  href="/ensrainbow/usage/api/"
+/>
+
+### Use the TypeScript SDK
+Get type-safe integration with built-in error handling and caching. Perfect for JavaScript/TypeScript applications.
+
+<LinkCard
+  title="Client SDK Guide"
+  description="Installation instructions, usage examples, and TypeScript interfaces"
   href="/ensrainbow/usage/client-sdk/"
 />
 
-## HTTP API
-
-ENSRainbow serves an HTTP API, documented below.
+### Deploy with Docker
+Run your own ENSRainbow instance for control, privacy, or high-volume usage. Starts quickly with test data.
 
 <LinkCard
-  title="API Reference"
-  description="View the complete ENSRainbow API documentation"
-  href="/ensrainbow/usage/api/"
+  title="Docker Deployment Guide"
+  description="Complete setup instructions, environment variables, and production configurations"
+  href="/ensrainbow/deploying/docker/"
 />
+
+Choose your path above and dive into the relevant documentation section!

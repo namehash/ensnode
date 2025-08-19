@@ -2,8 +2,22 @@ import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
 import { ByteArray, Hex, labelhash } from "viem";
 
+import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 import { Label } from "@ensnode/ensnode-sdk";
+import {
+  EnsRainbowServerLabelSet,
+  type LabelSetId,
+  type LabelSetVersion,
+  buildLabelSetId,
+  buildLabelSetVersion,
+  parseNonNegativeInteger,
+} from "@ensnode/ensrainbow-sdk";
+import {
+  type VersionedRainbowRecord,
+  buildEncodedVersionedRainbowRecord,
+  decodeEncodedVersionedRainbowRecord,
+} from "./rainbow-record";
 
 // System keys must have a byte length different from 32 to avoid collisions with labelHashes
 export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
@@ -18,7 +32,19 @@ export const SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT = new Uint8Array([
  */
 export const SYSTEM_KEY_INGESTION_STATUS = new Uint8Array([0xff, 0xff, 0xff, 0xfe]) as ByteArray;
 export const SYSTEM_KEY_SCHEMA_VERSION = new Uint8Array([0xff, 0xff, 0xff, 0xfd]) as ByteArray;
-export const SCHEMA_VERSION = 2;
+/**
+ * Key for storing the highest label set version
+ * Stores the current label set version as a string
+ */
+export const SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION = new Uint8Array([
+  0xff, 0xff, 0xff, 0xfc,
+]) as ByteArray;
+/**
+ * Key for storing the label set ID
+ * Stores the label set ID as a string
+ */
+export const SYSTEM_KEY_LABEL_SET_ID = new Uint8Array([0xff, 0xff, 0xff, 0xfb]) as ByteArray;
+export const DB_SCHEMA_VERSION = 3;
 
 // Ingestion status values
 export const IngestionStatus = {
@@ -39,7 +65,9 @@ export function isSystemKey(key: ByteArray): boolean {
     !isRainbowRecordKey(key) &&
     (byteArraysEqual(key, SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT) ||
       byteArraysEqual(key, SYSTEM_KEY_INGESTION_STATUS) ||
-      byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION))
+      byteArraysEqual(key, SYSTEM_KEY_SCHEMA_VERSION) ||
+      byteArraysEqual(key, SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION) ||
+      byteArraysEqual(key, SYSTEM_KEY_LABEL_SET_ID))
   );
 }
 
@@ -122,7 +150,7 @@ export class ENSRainbowDB {
       logger.info("Opening database...");
       await db.open();
       const dbInstance = new ENSRainbowDB(db, dataDir);
-      await dbInstance.setDatabaseSchemaVersion(SCHEMA_VERSION);
+      await dbInstance.setDatabaseSchemaVersion(DB_SCHEMA_VERSION);
       return dbInstance;
     } catch (error) {
       if (
@@ -147,16 +175,14 @@ export class ENSRainbowDB {
    * Opens an existing ENSRainbowDB instance.
    * This function:
    * 1. Opens an existing LevelDB database at the specified directory
-   * 2. Initializes an ENSRainbowDB instance with the database
-   * 3. Verifies the database schema version matches the expected version
+   * 2. Verifies the database
    *
-   * If the schema version doesn't match the expected version, an error is thrown
-   * to prevent operations on an incompatible database.
+   * If the database is not valid, an error is thrown to prevent operations on an incompatible database.
    *
    * @throws Error in the following cases:
    * - If the database directory does not exist
    * - If the database is locked by another process
-   * - If the schema version doesn't match the expected version
+   * - If the database is not valid
    * - If there are insufficient permissions to read the database
    */
   public static async open(dataDir: string): Promise<ENSRainbowDB> {
@@ -172,10 +198,11 @@ export class ENSRainbowDB {
       await db.open();
       const dbInstance = new ENSRainbowDB(db, dataDir);
 
-      // Verify schema version
-      await dbInstance.validateSchemaVersion();
+      if (await dbInstance.validate({ lite: true })) {
+        return dbInstance;
+      }
 
-      return dbInstance;
+      throw new Error("Database validation failed");
     } catch (error) {
       if (error instanceof Error && error.message.includes("does not exist")) {
         logger.error(`No database found at ${dataDir}`);
@@ -186,8 +213,38 @@ export class ENSRainbowDB {
         logger.error("If you're certain no other process is using it, try removing the lock file");
       } else {
         logger.error("Failed to open database:", error);
+        logger.error(`No database found at ${dataDir}`);
+        logger.error("If you want to create a new database, start the ingestion step");
         logger.error(`Please ensure you have read permissions for ${dataDir}`);
       }
+      throw error;
+    }
+  }
+
+  /**
+   * Opens an existing database or creates a new one if it doesn't exist.
+   *
+   * This function:
+   * 1. Attempts to open an existing database using the open() method
+   * 2. If the database doesn't exist, creates a new one using the create() method
+   * 3. If opening fails for any other reason (e.g., permission issues), throws the error
+   *
+   * @param dataDir The directory path where the database is or should be located
+   * @returns An instance of ENSRainbowDB
+   * @throws Error if there are permission issues or other errors not related to database existence
+   */
+  public static async openOrCreate(dataDir: string): Promise<ENSRainbowDB> {
+    try {
+      // First try to open the existing database
+      return await ENSRainbowDB.open(dataDir);
+    } catch (error) {
+      // If database doesn't exist, create a new one
+      if (error instanceof Error && error.message.includes("Database is not open")) {
+        logger.info(`Database doesn't exist at ${dataDir}, creating a new one`);
+        return await ENSRainbowDB.create(dataDir);
+      }
+
+      // For any other error, propagate it upward
       throw error;
     }
   }
@@ -245,6 +302,46 @@ export class ENSRainbowDB {
   }
 
   /**
+   * Set the highest label set version directly
+   * @param labelSetVersion The label set version to set
+   */
+  public async setHighestLabelSetVersion(labelSetVersion: LabelSetVersion): Promise<void> {
+    await this.db.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, labelSetVersion.toString());
+  }
+
+  /**
+   * Get the label set from the database
+   * @returns The label set
+   * @throws Error if the label set ID or highest label set version is not set
+   */
+  public async getLabelSet(): Promise<EnsRainbowServerLabelSet> {
+    const labelSetIdStr = await this.get(SYSTEM_KEY_LABEL_SET_ID);
+    if (labelSetIdStr === null) {
+      throw new Error("Label set ID not found in the database");
+    }
+    const labelSetId = buildLabelSetId(labelSetIdStr);
+
+    const labelSetVersionStr = await this.get(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION);
+    if (labelSetVersionStr === null) {
+      throw new Error("Highest label set version not found in the database");
+    }
+    const highestLabelSetVersion = buildLabelSetVersion(labelSetVersionStr);
+    return {
+      labelSetId,
+      highestLabelSetVersion,
+    };
+  }
+
+  /**
+   * Set the label set ID in the database
+   * @param labelSetId The label set ID string to set
+   * @throws Error if the label set ID is empty
+   */
+  public async setLabelSetId(labelSetId: LabelSetId): Promise<void> {
+    await this.db.put(SYSTEM_KEY_LABEL_SET_ID, labelSetId);
+  }
+
+  /**
    * Get the batch interface for the underlying LevelDB.
    * This is exposed for pragmatic reasons to simplify the ingestion process.
    */
@@ -274,19 +371,26 @@ export class ENSRainbowDB {
   }
 
   /**
-   * Retrieves a label from the database by its labelHash.
+   * Retrieves a versioned rainbow record from the database by its labelHash.
    *
    * @param labelHash The ByteArray labelHash to look up
-   * @returns The label as a string if found, null if not found
+   * @returns A VersionedRainbowRecord object if found, null if not found
    * @throws Error if the provided key is a system key or if any database error occurs
    */
-  public async getLabel(labelHash: ByteArray): Promise<Label | null> {
+  public async getVersionedRainbowRecord(
+    labelHash: ByteArray,
+  ): Promise<VersionedRainbowRecord | null> {
     // Verify that the key has the correct length for a labelHash (32 bytes) which means it is not a system key
     if (!isRainbowRecordKey(labelHash)) {
       throw new Error(`Invalid labelHash length: expected 32 bytes, got ${labelHash.length} bytes`);
     }
 
-    return this.get(labelHash);
+    const encodedVersionedRainbowRecord = await this.get(labelHash);
+    if (encodedVersionedRainbowRecord === null) {
+      return null;
+    }
+
+    return decodeEncodedVersionedRainbowRecord(encodedVersionedRainbowRecord);
   }
 
   /**
@@ -381,8 +485,8 @@ export class ENSRainbowDB {
    */
   public async validateSchemaVersion(): Promise<void> {
     const schemaVersion = await this.getDatabaseSchemaVersion();
-    if (schemaVersion !== SCHEMA_VERSION) {
-      const schemaVersionMismatchError = `Database schema version mismatch: expected=${SCHEMA_VERSION}, actual=${schemaVersion}`;
+    if (schemaVersion !== DB_SCHEMA_VERSION) {
+      const schemaVersionMismatchError = `Database schema version mismatch: expected=${DB_SCHEMA_VERSION}, actual=${schemaVersion}`;
       const errorMsg = generatePurgeErrorMessage(schemaVersionMismatchError);
       logger.error(errorMsg);
       // await this.close();
@@ -420,14 +524,16 @@ export class ENSRainbowDB {
     const isLiteMode = options.lite === true;
 
     logger.info(`Starting database validation${isLiteMode ? " (lite mode)" : ""}...`);
-    // Verify that the attached db fully completed its ingestion (ingestion not interrupted)
 
+    // --- Basic Checks (Run in both Lite and Full mode) ---
+
+    // 1. Check Ingestion Status
     let ingestionStatus: IngestionStatus;
     try {
       ingestionStatus = await this.getIngestionStatus();
     } catch (e) {
       const errorMsg = generatePurgeErrorMessage(
-        `Database has an unknown ingestion status: ${e instanceof Error ? e.message : String(e)}`,
+        `Database has an unknown ingestion status: ${getErrorMessage(e)}`,
       );
       logger.error(errorMsg);
       return false;
@@ -448,6 +554,7 @@ export class ENSRainbowDB {
       return false;
     }
 
+    // 2. Check Schema Version
     try {
       await this.validateSchemaVersion();
     } catch (error) {
@@ -455,47 +562,89 @@ export class ENSRainbowDB {
       return false;
     }
 
-    //TODO should we validate if the count is TOTAL_EXPECTED_RECORDS?
+    // 3. Check Label Set ID and Highest Label Set Version Existence and Validity
+    let labelSet: EnsRainbowServerLabelSet;
+    try {
+      labelSet = await this.getLabelSet();
+      logger.info(
+        `Label set verified - ID: ${labelSet.labelSetId}, highest version: ${labelSet.highestLabelSetVersion}`,
+      );
+    } catch (error) {
+      const errorMsg = generatePurgeErrorMessage(`Error checking label set: ${error}`);
+      logger.error(errorMsg);
+      return false;
+    }
+
+    // 4. Check Precalculated Count Existence (even in lite mode, the key should exist)
+    try {
+      const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+      // Only log the count if we pass validation later
+
+      // --- Lite Mode Completion ---
+      if (isLiteMode) {
+        // Lite mode passed basic checks
+        logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
+        logger.info("\nLite validation successful! Basic checks passed.");
+        return true;
+      }
+    } catch (error) {
+      const errorMsg = generatePurgeErrorMessage(
+        `Database is in an invalid state: failed to get precalculated rainbow record count key: ${error}`,
+      );
+      logger.error(errorMsg);
+      return false;
+    }
+
+    // --- Full Validation (Requires iterating through records) ---
+    logger.info("Starting full validation (iterating through records)...");
 
     let rainbowRecordCount = 0;
     let validHashes = 0;
     let invalidHashes = 0;
     let hashMismatches = 0;
+    let invalidLabelFormats = 0;
+    let labelSetVersionMismatches = 0;
 
-    // In lite mode, just verify we can get the precalculated rainbow record count
-    if (isLiteMode) {
-      try {
-        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
-        logger.info(`Precalculated rainbow record count: ${precalculatedCount}`);
-        return true;
-      } catch (error) {
-        const errorMsg = generatePurgeErrorMessage(
-          `Database is in an invalid state: failed to get precalculated rainbow record count: ${error}`,
-        );
-        logger.error(errorMsg);
-        return false;
+    for await (const [key, value] of this.db.iterator()) {
+      // Skip keys not associated with rainbow records
+      if (isSystemKey(key)) {
+        continue;
       }
-    } else {
-      // Full validation of each key-value pair
-      for await (const [key, value] of this.db.iterator()) {
-        // Skip keys not associated with rainbow records
-        if (isSystemKey(key)) {
-          continue;
-        }
-        rainbowRecordCount++;
-        // Verify key is a valid labelHash by converting it to hex string
-        const keyHex = `0x${Buffer.from(key).toString("hex")}` as Hex;
-        try {
-          labelHashToBytes(keyHex);
-          validHashes++;
-        } catch (e) {
-          logger.error(`Invalid labelHash key format: ${keyHex}`);
-          invalidHashes++;
-          continue;
+      rainbowRecordCount++;
+
+      // --- Key Validation (LabelHash Format) ---
+      const keyHex = `0x${Buffer.from(key).toString("hex")}` as Hex;
+      try {
+        labelHashToBytes(keyHex); // Ensures key is 32 bytes and valid hex
+        validHashes++;
+      } catch (e) {
+        logger.error(`Invalid labelHash key format: ${keyHex}`);
+        invalidHashes++;
+        continue; // Skip further checks for this invalid record
+      }
+
+      // --- Value Validation (Label Format & Set Number) ---
+      let versionedRainbowRecord: VersionedRainbowRecord | null = null;
+      try {
+        versionedRainbowRecord = decodeEncodedVersionedRainbowRecord(value);
+      } catch (error) {
+        logger.error(`Invalid label format: "${value}" - ${error}`);
+        invalidLabelFormats++;
+      }
+
+      if (versionedRainbowRecord) {
+        // Only proceed with further checks if decoding was successful
+
+        // Label set version comparison
+        if (versionedRainbowRecord.labelSetVersion > labelSet.highestLabelSetVersion) {
+          logger.error(
+            `Label set version mismatch for label "${value}": record set ${versionedRainbowRecord.labelSetVersion} > highest set ${labelSet.highestLabelSetVersion}`,
+          );
+          labelSetVersionMismatches++;
         }
 
-        // Verify hash matches label
-        const computedHash = labelHashToBytes(labelhash(value));
+        // Key-Value Validation (Hash Match)
+        const computedHash = labelHashToBytes(labelhash(versionedRainbowRecord.label));
         if (!byteArraysEqual(computedHash, key)) {
           logger.error(
             `Hash mismatch for label "${value}": stored=${keyHex}, computed=0x${Buffer.from(
@@ -505,44 +654,64 @@ export class ENSRainbowDB {
           hashMismatches++;
         }
       }
+    }
 
-      // Verify precalculated rainbow record count
-      try {
-        const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
+    // --- Final Count Verification ---
+    let precalculatedCount: number | undefined;
+    try {
+      precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
 
-        if (precalculatedCount !== rainbowRecordCount) {
-          const errorMsg = generatePurgeErrorMessage(
-            `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
-          );
-          logger.error(errorMsg);
-          return false;
-        }
-        logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
-      } catch (error) {
+      if (precalculatedCount !== rainbowRecordCount) {
         const errorMsg = generatePurgeErrorMessage(
-          `Error verifying precalculated rainbow record count: ${error}`,
+          `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
         );
         logger.error(errorMsg);
-        return false;
+        // Don't return immediately, report all errors first
+      } else {
+        logger.info(`Precalculated count verified: ${rainbowRecordCount} rainbow records`);
       }
-
-      // Report results
-      logger.info("\nValidation Results:");
-      logger.info(`Total keys: ${rainbowRecordCount}`);
-      logger.info(`Valid rainbow records: ${validHashes}`);
-      logger.info(`Invalid rainbow records: ${invalidHashes}`);
-      logger.info(`labelHash mismatches: ${hashMismatches}`);
-
-      // Return false if any validation errors were found
-      if (invalidHashes > 0 || hashMismatches > 0) {
-        const errorMsg = generatePurgeErrorMessage("Validation failed! See errors above.");
-        logger.error(errorMsg);
-        return false;
-      }
-
-      logger.info("\nValidation successful! No errors found.");
-      return true;
+    } catch (error) {
+      // Should not happen due to early check, but handle defensively
+      const errorMsg = generatePurgeErrorMessage(
+        `Error verifying precalculated rainbow record count: ${error}`,
+      );
+      logger.error(errorMsg);
+      // Don't return immediately, report all errors first
     }
+
+    // --- Report Results ---
+    logger.info("\nValidation Results:");
+    logger.info(`Total rainbow records iterated: ${rainbowRecordCount}`);
+    logger.info(`Valid labelHash keys: ${validHashes}`);
+    logger.info(`Invalid labelHash keys: ${invalidHashes}`);
+    logger.info(`Labels with hash mismatches: ${hashMismatches}`);
+    logger.info(`Labels with invalid format/set prefix: ${invalidLabelFormats}`);
+    logger.info(`Labels with set number > highest set: ${labelSetVersionMismatches}`);
+    if (precalculatedCount !== undefined && precalculatedCount !== rainbowRecordCount) {
+      logger.error(
+        `Count mismatch: precalculated=${precalculatedCount}, actual=${rainbowRecordCount}`,
+      );
+    }
+
+    // --- Determine Final Outcome ---
+    const hasErrors =
+      precalculatedCount === undefined || // Error if we couldn't get the precalculated count
+      invalidHashes > 0 ||
+      hashMismatches > 0 ||
+      invalidLabelFormats > 0 ||
+      labelSetVersionMismatches > 0 ||
+      (precalculatedCount !== undefined && precalculatedCount !== rainbowRecordCount); // Check count mismatch if count was retrieved
+
+    if (hasErrors) {
+      const errorMsg = generatePurgeErrorMessage(
+        "Full validation failed! See errors above. Database is inconsistent.",
+      );
+      logger.error(errorMsg);
+      return false;
+    }
+
+    logger.info("\nFull validation successful! No errors found.");
+    return true;
   }
 
   /**
@@ -590,56 +759,18 @@ export class ENSRainbowDB {
     return count;
   }
 
-  public async addRainbowRecord(label: string) {
-    const key = labelHashToBytes(labelhash(label));
-    await this.db.put(key, label);
+  /**
+   * Adds a rainbow record to the database. Labelhash is computed from the label.
+   *
+   * @param label The label to add
+   * @param labelSetVersion The label set version number to associate with this label
+   */
+  public async addRainbowRecord(label: string, labelSetVersion: LabelSetVersion): Promise<void> {
+    const encodedValue = buildEncodedVersionedRainbowRecord(label, labelSetVersion);
+    await this.db.put(labelHashToBytes(labelhash(label)), encodedValue);
   }
 }
 
 export function byteArraysEqual(a: ByteArray, b: ByteArray): boolean {
   return a.length === b.length && a.every((val, i) => val === b[i]);
-}
-
-/**
- * Parses a string into a non-negative integer.
- * @param input The string to parse
- * @returns The parsed non-negative integer
- * @throws Error if the input is not a valid non-negative integer
- */
-export function parseNonNegativeInteger(maybeNumber: string): number {
-  const trimmed = maybeNumber.trim();
-
-  // Check for empty strings
-  if (!trimmed) {
-    throw new Error("Input cannot be empty");
-  }
-
-  // Check for -0
-  if (trimmed === "-0") {
-    throw new Error("Negative zero is not a valid non-negative integer");
-  }
-
-  const num = Number(maybeNumber);
-
-  // Check if it's not a number
-  if (Number.isNaN(num)) {
-    throw new Error(`"${maybeNumber}" is not a valid number`);
-  }
-
-  // Check if it's not finite
-  if (!Number.isFinite(num)) {
-    throw new Error(`"${maybeNumber}" is not a finite number`);
-  }
-
-  // Check if it's not an integer
-  if (!Number.isInteger(num)) {
-    throw new Error(`"${maybeNumber}" is not an integer`);
-  }
-
-  // Check if it's negative
-  if (num < 0) {
-    throw new Error(`"${maybeNumber}" is not a non-negative integer`);
-  }
-
-  return num;
 }
