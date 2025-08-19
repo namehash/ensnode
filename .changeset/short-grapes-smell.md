@@ -1,5 +1,5 @@
 ---
-"ensrainbow": minor
+"ensrainbow": patch
 "@docs/ensnode": patch
 ---
 
