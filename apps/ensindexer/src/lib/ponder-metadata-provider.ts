@@ -27,7 +27,8 @@ export const fetchEnsRainbowVersion = async (): Promise<EnsRainbow.VersionInfo> 
 
   return {
     version: versionResponse.versionInfo.version,
-    schema_version: versionResponse.versionInfo.schema_version,
+    dbSchemaVersion: versionResponse.versionInfo.dbSchemaVersion,
+    labelSet: versionResponse.versionInfo.labelSet,
   };
 };
 
