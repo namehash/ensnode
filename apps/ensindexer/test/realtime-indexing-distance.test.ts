@@ -95,6 +95,10 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
             number: 124,
             timestamp: 123123124,
           },
+          latestSyncedBlock: {
+            number: 126,
+            timestamp: 123123126,
+          },
           backfillEndBlock: {
             number: 128,
             timestamp: 123123128,

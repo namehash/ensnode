@@ -146,6 +146,11 @@ export interface ChainIndexingBackfillStatus {
   latestIndexedBlock: BlockRef;
 
   /**
+   * The block that was most recently synced into RPC cache.
+   */
+  latestSyncedBlock: BlockRef;
+
+  /**
    * The block that is the target for finishing the backfill.
    */
   backfillEndBlock: BlockRef;

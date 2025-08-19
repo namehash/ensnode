@@ -52,7 +52,6 @@ const EXAMPLE_CONFIG_RESPONSE = {
   ensNodePublicUrl: "https://api.alpha.ensnode.io/",
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
   databaseSchemaName: "alphaSchema0.31.0",
-  experimentalResolution: true,
   healReverseAddresses: true,
   indexAdditionalResolverRecords: true,
   isSubgraphCompatible: false,
@@ -93,6 +92,10 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
       latestIndexedBlock: {
         timestamp: 1496124933,
         number: 3791243,
+      },
+      latestSyncedBlock: {
+        timestamp: 1496125933,
+        number: 3791777,
       },
       backfillEndBlock: {
         timestamp: 1755182591,
@@ -149,6 +152,10 @@ const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
       latestIndexedBlock: {
         timestamp: 1_496_124_536,
         number: 17_599_999,
+      },
+      latestSyncedBlock: {
+        timestamp: 1_496_125_933,
+        number: 17_600_777,
       },
       backfillEndBlock: {
         timestamp: 1_499_456_537,
