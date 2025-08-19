@@ -1,5 +1,16 @@
 # ensadmin
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.0.0
+  - @ensnode/ponder-metadata@1.0.0
+  - @ensnode/ensnode-schema@1.0.0
+  - @ensnode/ensnode-react@1.0.0
+  - @ensnode/ensnode-sdk@1.0.0
+
 ## 0.33.0
 
 ### Patch Changes

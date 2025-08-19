@@ -1,5 +1,28 @@
 # ensrainbow
 
+## 1.0.0
+
+### Minor Changes
+
+- [#612](https://github.com/namehash/ensnode/pull/612) [`20322cd`](https://github.com/namehash/ensnode/commit/20322cdd0cccd2b14eb8789acd1f0bd42da5bc3b) Thanks [@djstrong](https://github.com/djstrong)! - Introduced ENSRainbow v2 data format.
+
+  This change addresses large Docker image sizes and data management challenges.
+
+  Key changes:
+
+  - A new .ensrainbow data format replaces SQL dumps, supporting label set IDs and versioned label sets for incremental data updates.
+  - ENSRainbow is now distributed as a lightweight, data-less Docker image.
+  - On first startup, the application downloads a pre-ingested database from R2, significantly reducing setup time.
+  - This new architecture allows for deterministic data healing and easier data evolution.
+
+- [#612](https://github.com/namehash/ensnode/pull/612) [`20322cd`](https://github.com/namehash/ensnode/commit/20322cdd0cccd2b14eb8789acd1f0bd42da5bc3b) Thanks [@djstrong](https://github.com/djstrong)! - Reduce size of the ENSRainbow docker image
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@1.0.0
+  - @ensnode/ensnode-sdk@1.0.0
+
 ## 0.33.0
 
 ### Patch Changes
