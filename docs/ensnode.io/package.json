@@ -2,8 +2,8 @@
   "name": "@docs/ensnode",
   "private": true,
   "type": "module",
-  "version": "0.0.2",
-  "packageManager": "pnpm@10.10.0",
+  "version": "0.33.0",
+  "packageManager": "pnpm@10.15.0",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
