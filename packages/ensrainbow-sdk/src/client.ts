@@ -281,17 +281,14 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    */
   async heal(labelHash: LabelHash): Promise<EnsRainbow.HealResponse> {
     const cachedResult = this.cache.get(labelHash);
-
-    if (cachedResult) {
-      return cachedResult;
-    }
+    if (cachedResult) return cachedResult;
 
     const url = new URL(`/v1/heal/${labelHash}`, this.options.endpointUrl);
 
     // Apply pre-computed label set query parameters
-    for (const [key, value] of this.labelSetSearchParams) {
+    this.labelSetSearchParams.forEach((value, key) => {
       url.searchParams.append(key, value);
-    }
+    });
 
     const response = await fetch(url);
     const healResponse = (await response.json()) as EnsRainbow.HealResponse;

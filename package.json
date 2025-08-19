@@ -10,7 +10,7 @@
     "typecheck": "pnpm -r --parallel typecheck",
     "changeset": "changeset",
     "changeset-publish": "changeset publish",
-    "packages:prepublish": "pnpm -r --filter='@ensnode/*' prepublish",
+    "packages:prepublish": "pnpm -r prepublish",
     "docker:build:ensnode": "pnpm run docker:build:ensindexer && pnpm run docker:build:ensrainbow && pnpm run docker:build:ensadmin",
     "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
     "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
