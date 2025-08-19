@@ -1,20 +1,13 @@
 import { Suspense } from "react";
 
-// import { IndexingStatus } from "@/components/indexing-status/components";
-import { IndexingStatus } from "@/components/indexing-status/components.beta";
+import { IndexingStatus } from "@/components/indexing-status/indexing-status";
 import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
-import { RecentRegistrations } from "@/components/recent-registrations";
 
 export default function Status() {
   return (
     <ENSNodeProvider>
       <Suspense fallback={<Loading />}>
         <IndexingStatus />
-      </Suspense>
-      <Suspense>
-        <div className="px-6 pb-6">
-          <RecentRegistrations />
-        </div>
       </Suspense>
     </ENSNodeProvider>
   );

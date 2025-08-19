@@ -1,8 +1,3 @@
-import { getChainById } from "@/lib/chains";
-import { ENSNamespaceId } from "@ensnode/datasources";
-import { BlockInfo } from "@ensnode/ponder-metadata";
-import { ChainIndexingPhaseViewModel, ChainStatusViewModel } from "./view-models";
-
 /**
  * Calculate the position of a date in a timeline.
  *
@@ -51,33 +46,4 @@ export function generateYearMarkers(timelineStart: Date, timelineEnd: Date): Arr
   }
 
   return markers;
-}
-
-/**
- * Get the current phase of the chain indexing.
- * @param date current indexing date
- * @param chainStatus view model
- */
-export function currentPhase(
-  date: Date | null,
-  chainStatus: {
-    phases: Array<{
-      startDate: Date;
-      endDate: Date;
-      state: "queued" | "indexing";
-    }>;
-  },
-): ChainIndexingPhaseViewModel {
-  // if the chain is not indexed yet, return the first phase
-  if (!date) {
-    return chainStatus.phases[0];
-  }
-
-  for (let i = chainStatus.phases.length - 1; i >= 0; i--) {
-    if (date >= chainStatus.phases[i].startDate) {
-      return chainStatus.phases[i];
-    }
-  }
-
-  return chainStatus.phases[0];
 }

@@ -1,4 +1,4 @@
-import { BlockRef, Duration, UnixTimestamp } from "../../shared";
+import { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 import {
   ChainIndexingActiveStatus,
   ChainIndexingCompletedStatus,
@@ -68,11 +68,11 @@ export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]):
 }
 
 /**
- * Get the earliest block timestamp all chains which status is
- * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ * Get lowest of the highest end block across all chains which status is
+ * {@link ChainIndexingStatus}.
  */
-export function getOmnichainIndexingEarliestIndexedBlockTimestamp(
-  chains: ChainIndexingStatusForBackfillOverallStatus[],
+export function getTimestampForLowestOmnichainStartBlock(
+  chains: ChainIndexingStatus[],
 ): UnixTimestamp {
   const earliestKnownBlockTimestamps: UnixTimestamp[] = chains.map(
     (chain) => chain.config.startBlock.timestamp,
@@ -82,27 +82,33 @@ export function getOmnichainIndexingEarliestIndexedBlockTimestamp(
 }
 
 /**
- * Get Omnichain Indexing Ends At value across all chains which status is
+ * Get timestamp of the highest known block across all chains which status is
  * {@link ChainIndexingStatusForBackfillOverallStatus}.
- *
- * @throws when none of chains is using the definite strategy.
  */
-export function getOmnichainIndexingLatestIndexedBlockTimestamp(
-  chains: ChainIndexingStatusForBackfillOverallStatus[],
+export function getTimestampForHighestOmnichainKnownBlock(
+  chains: ChainIndexingStatus[],
 ): UnixTimestamp {
   const latestKnownBlockTimestamps: UnixTimestamp[] = [];
 
   for (const chain of chains) {
     switch (chain.status) {
       case ChainIndexingStatusIds.Unstarted:
-      case ChainIndexingStatusIds.Backfill:
         if (chain.config.endBlock) {
           latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
         }
         break;
 
+      case ChainIndexingStatusIds.Backfill:
+        latestKnownBlockTimestamps.push(chain.backfillEndBlock.timestamp);
+
+        break;
+
       case ChainIndexingStatusIds.Completed:
-        latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
+        latestKnownBlockTimestamps.push(chain.latestIndexedBlock.timestamp);
+        break;
+
+      case ChainIndexingStatusIds.Following:
+        latestKnownBlockTimestamps.push(chain.latestKnownBlock.timestamp);
         break;
     }
   }
@@ -237,4 +243,20 @@ export function checkChainIndexingStatusesForFollowingOverallStatus(
   );
 
   return allChainsHaveValidStatuses;
+}
+
+/**
+ * Sort a list of [{@link ChainId}, {@link ChainIndexingStatus}] tuples
+ * by start block timestamp in ascending order.
+ */
+export function sortAscChainStatusesByStartBlock<ChainStatusType extends ChainIndexingStatus>(
+  chains: [ChainId, ChainStatusType][],
+): [ChainId, ChainStatusType][] {
+  // Sort the chain statuses by the first block to index timestamp
+  chains.sort(
+    ([, chainA], [, chainB]) =>
+      chainA.config.startBlock.timestamp - chainB.config.startBlock.timestamp,
+  );
+
+  return chains;
 }

@@ -20,6 +20,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { prettifyError } from "zod/v4";
 
+import { parse } from "node:path";
 import config from "@/config";
 import ponderConfig from "@/ponder/config";
 import {

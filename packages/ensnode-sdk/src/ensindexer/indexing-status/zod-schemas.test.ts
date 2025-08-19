@@ -249,25 +249,6 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as latestKnownBlock.`);
       });
 
-      it("won't parse if the latestIndexedBlock is after the config.endBlock", () => {
-        // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Completed,
-          config: {
-            strategy: ChainIndexingStrategyIds.Definite,
-            startBlock: earlierBlockRef,
-            endBlock: laterBlockRef,
-          },
-          latestIndexedBlock: latestBlockRef,
-        } satisfies ChainIndexingCompletedStatus;
-
-        // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
-
-        // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be the same as config.endBlock.`);
-      });
-
       it("won't parse if the approxRealtimeDistance was a negative integer", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
@@ -353,7 +334,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be the same as config.endBlock.`);
+        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as config.endBlock.`);
       });
     });
   });
