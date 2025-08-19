@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { IndexingStatus } from "@/components/indexing-status/indexing-status";
+import { IndexingStatus } from "@/components/indexing-status";
 import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
 
 export default function Status() {

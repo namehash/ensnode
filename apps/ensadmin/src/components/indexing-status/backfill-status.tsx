@@ -23,7 +23,7 @@ import {
   getTimelinePosition,
 } from "@/components/indexing-status/indexing-timeline-utils";
 import { blockViewModel } from "./block-refs";
-import { ChainIndexingTimeline } from "./chain-indexing-timeline";
+import { ChainIndexingTimeline } from "./indexing-timeline";
 
 interface ChainIndexingPhaseViewModel {
   status: typeof ChainIndexingStatusIds.Unstarted | typeof ChainIndexingStatusIds.Backfill;
@@ -31,14 +31,14 @@ interface ChainIndexingPhaseViewModel {
   endDate: Date;
 }
 
-interface BackfillStatusTimelineProps {
+interface BackfillStatusProps {
   indexingStatus: ENSIndexerOverallIndexingBackfillStatus;
 }
 
 /**
- * Timeline presenting progress of indexing when overall status is "backfill".
+ * Presents indexing status when overall status is "backfill".
  */
-export function BackfillStatusTimeline({ indexingStatus }: BackfillStatusTimelineProps) {
+export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
   const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
   const chains = chainEntries.map(([, chain]) => chain);
 

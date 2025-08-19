@@ -11,7 +11,7 @@ import { useENSIndexerConfig, useIndexingStatus } from "@/components/ensindexer/
 import { RecentRegistrations } from "@/components/recent-registrations";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-import { BackfillStatusTimeline } from "./backfill-status-timeline";
+import { BackfillStatus } from "./backfill-status";
 import { ENSIndexerDependencyInfo } from "./dependecy-info";
 import {
   IndexingStatsForBackfillStatus,
@@ -63,7 +63,7 @@ export function IndexingStatus() {
 
   let indexingStats: ReactElement;
   let maybeRecentRegistrations: ReactElement | undefined;
-  let maybeIndexingProgressTimeline: ReactElement | undefined;
+  let maybeIndexingTimeline: ReactElement | undefined;
 
   switch (indexingStatus.overallStatus) {
     case OverallIndexingStatusIds.IndexerError:
@@ -77,7 +77,7 @@ export function IndexingStatus() {
     case OverallIndexingStatusIds.Backfill:
       indexingStats = <IndexingStatsForBackfillStatus indexingStatus={indexingStatus} />;
 
-      maybeIndexingProgressTimeline = <BackfillStatusTimeline indexingStatus={indexingStatus} />;
+      maybeIndexingTimeline = <BackfillStatus indexingStatus={indexingStatus} />;
       break;
 
     case OverallIndexingStatusIds.Completed:
@@ -114,7 +114,7 @@ export function IndexingStatus() {
     <section className="flex flex-col gap-6 p-6">
       <ENSIndexerDependencyInfo ensIndexerConfig={ensIndexerConfig} />
 
-      {maybeIndexingProgressTimeline}
+      {maybeIndexingTimeline}
 
       <IndexingStatsShell overallStatus={indexingStatus.overallStatus}>
         {indexingStats}

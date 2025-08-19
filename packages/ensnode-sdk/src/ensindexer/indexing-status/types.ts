@@ -132,7 +132,8 @@ export interface ChainIndexingUnstartedStatus {
  *
  * Invariants:
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
- * - `latestIndexedBlock` is always before or the same as `backfillEndBlock`
+ * - `latestIndexedBlock` is always before or the same as `latestSyncedBlock`
+ * - `latestSyncedBlock` is always before or the same as `backfillEndBlock`
  * - `backfillEndBlock` is the same as `config.endBlock` if and only if
  *   the config is definite.
  */
