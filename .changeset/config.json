@@ -26,6 +26,5 @@
   "privatePackages": {
     "version": true,
     "tag": true
-  },
-  "ignore": []
+  }
 }
