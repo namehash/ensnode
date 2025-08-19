@@ -40,7 +40,7 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
   const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
   const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
 
-  // respond with 503 error if ENSIndexer is not available
+  // respond with custom server error if ENSIndexer is not available
   if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
     return c.json(
       serializedIndexingStatus,
@@ -53,7 +53,7 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
     maxRealtimeDistance,
   );
 
-  // respond with 503 error if requested distance hasn't been achieved yet
+  // respond with custom server error if requested distance hasn't been achieved yet
   if (!hasAchievedRequestedRealtimeIndexingDistance) {
     return c.json(
       serializedIndexingStatus,
