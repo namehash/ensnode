@@ -1,38 +1,65 @@
-import type { ProtocolTrace } from "@ensnode/ensnode-sdk";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { renderMicroseconds } from "@/lib/time";
+import { renderProtocolStep, renderTraceDuration } from "@/lib/tracing";
+import {
+  ATTR_PROTOCOL_STEP,
+  ForwardResolutionProtocolStep,
+  type ProtocolTrace,
+  ReverseResolutionProtocolStep,
+} from "@ensnode/ensnode-sdk";
 
-const renderMilliseconds = (us: number) => (us / 1000).toFixed(2) + "ms";
+const asPercentInDuration = (value: number, duration: number) =>
+  `${((value / duration) * 100).toFixed(2)}%`;
 
 export function TraceRenderer({ trace }: { trace: ProtocolTrace }) {
-  function renderSpan(span: ProtocolTrace[number]) {
+  const totalDuration = renderTraceDuration(trace);
+
+  function renderSpan(parent: ProtocolTrace[number]) {
+    const protocolStep = parent.attributes[ATTR_PROTOCOL_STEP] as
+      | ForwardResolutionProtocolStep
+      | ReverseResolutionProtocolStep;
+    const { title, description } = renderProtocolStep(protocolStep);
+
     return (
-      <div key={span.id} className="flex flex-col gap-2 w-full">
+      <div key={parent.id} className="flex flex-col gap-2 w-full">
         {/* render this span */}
-        <div
-          className="w-full flex flex-col justify-center bg-blue-100 border border-blue-300 rounded text-xs whitespace-nowrap overflow-ellipsis overflow-hidden py-1 px-2 flex-shrink-0"
-          title={span.name}
-        >
-          <span>
-            {span.name} <span className="text-gray-400">({renderMilliseconds(span.duration)})</span>
-          </span>
-        </div>
+        <HoverCard openDelay={0} closeDelay={0}>
+          <HoverCardTrigger>
+            <div className="w-full flex flex-col justify-center bg-blue-100 border border-blue-300 rounded text-xs whitespace-nowrap py-1 px-2 flex-shrink-0 cursor-pointer">
+              <span>
+                {title}{" "}
+                <span className="text-gray-400">({renderMicroseconds(parent.duration)})</span>
+              </span>
+            </div>
+          </HoverCardTrigger>
+          <HoverCardContent className="flex flex-col gap-2 w-full max-w-sm" collisionPadding={16}>
+            <h3 className="text-md font-medium">{title}</h3>
+            <p className="text-sm">
+              Duration: <span className="font-mono">{renderMicroseconds(parent.duration)}</span>
+            </p>
+            <p>{description}</p>
+          </HoverCardContent>
+        </HoverCard>
 
         {/* render its children */}
-        {span.children.length > 0 && (
+        {parent.children.length > 0 && (
           <div className="flex flex-col gap-2">
-            {span.children.map((child, i) => {
-              const sibling = i > 0 ? span.children[i - 1] : undefined;
-              const offsetUs = child.timestamp - span.timestamp; // - (sibling?.duration ?? 0);
-              const startOffsetPercent = sibling?.duration ? (offsetUs / span.duration) * 100 : 0;
-              const widthPercent = (child.duration / span.duration) * 100;
+            {parent.children.map((child, i) => {
+              const marginLeft = asPercentInDuration(
+                child.timestamp - parent.timestamp,
+                parent.duration,
+              );
+              let width = asPercentInDuration(child.duration, parent.duration);
+
+              // sometimes with microsecond level timing, it occurs that the children would overflow the
+              // parent, so we constrain it here for visual reasons, just making the child take up
+              // the rest of the available space, after its starting timestamp
+              if (child.timestamp + child.duration > parent.timestamp + parent.duration) {
+                width = asPercentInDuration(parent.timestamp - child.timestamp, parent.duration);
+              }
 
               return (
-                <div
-                  key={child.id}
-                  style={{
-                    marginLeft: `${startOffsetPercent.toFixed(4)}%`,
-                    width: `${widthPercent.toFixed(4)}%`,
-                  }}
-                >
+                <div key={child.id} style={{ marginLeft, width }}>
                   {renderSpan(child)}
                 </div>
               );
@@ -44,7 +71,7 @@ export function TraceRenderer({ trace }: { trace: ProtocolTrace }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 overflow-hidden">
+    <div className="flex flex-col gap-2 overflow-hidden bg-muted p-4 rounded">
       {trace.map((span) => renderSpan(span))}
     </div>
   );

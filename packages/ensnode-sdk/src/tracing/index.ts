@@ -10,7 +10,7 @@ export enum TraceableENSProtocol {
  * Encodes the set of well-known steps in the ENS Forward Resolution protocol.
  */
 export enum ForwardResolutionProtocolStep {
-  Operation = "operation",
+  Operation = "forward-resolution",
   FindResolver = "find-resolver",
   ActiveResolverExists = "active-resolver-exists",
   AccelerateENSIP19ReverseResolver = "accelerate-ensip-19-reverse-resolver",
@@ -24,7 +24,7 @@ export enum ForwardResolutionProtocolStep {
  * Encodes the set of well-known steps in the ENS Reverse Resolution protocol.
  */
 export enum ReverseResolutionProtocolStep {
-  Operation = "operation",
+  Operation = "reverse-resolution",
   ResolveReverseName = "resolve-reverse-name",
   NameRecordExists = "name-record-exists-check",
   ForwardResolveAddressRecord = "forward-resolve-address-record",

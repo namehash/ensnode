@@ -1,5 +1,6 @@
 "use client";
 
+import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { CodeBlock } from "@/components/code-block";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { TraceRenderer } from "@/components/tracing/renderer";
@@ -11,38 +12,56 @@ import { Label } from "@/components/ui/label";
 import { useRecords } from "@ensnode/ensnode-react";
 import { DEFAULT_RECORDS_SELECTION } from "@ensnode/ensnode-sdk";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
 
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
-// TODO: allow configuration of selection criteria
 export default function ResolveRecordsInspector() {
   const searchParams = useSearchParams();
 
   const [name, setName] = useState(searchParams.get("name") || "vitalik.eth");
-  const [accelerate, setAccelerate] = useState(searchParams.get("accelerate") !== "false");
-
   const [debouncedName] = useDebouncedValue(name, 150);
 
   const canQuery = !!debouncedName && debouncedName.length > 0;
 
-  const { data, error, isPending, isFetched, isRefetching, refetch } = useRecords({
+  const accelerated = useRecords({
     name: debouncedName,
-    accelerate,
+    accelerate: true,
     selection: DEFAULT_RECORDS_SELECTION,
     trace: true,
     query: {
+      enabled: canQuery,
       staleTime: 0,
       refetchInterval: 0,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      enabled: canQuery,
       retry: false,
     },
   });
+
+  const unaccelerated = useRecords({
+    name: debouncedName,
+    accelerate: false,
+    selection: DEFAULT_RECORDS_SELECTION,
+    trace: true,
+    query: {
+      enabled: canQuery,
+      staleTime: 0,
+      refetchInterval: 0,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: false,
+    },
+  });
+
+  const refetch = () => {
+    accelerated.refetch();
+    unaccelerated.refetch();
+  };
 
   return (
     <main className="flex flex-col gap-4 p-4">
@@ -69,54 +88,17 @@ export default function ResolveRecordsInspector() {
               <Input id="selection" value={JSON.stringify(DEFAULT_RECORDS_SELECTION)} disabled />
             </Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="accelerate"
-              checked={accelerate}
-              onCheckedChange={(checked) => setAccelerate(checked as boolean)}
-            />
-            <label
-              htmlFor="accelerate"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Enable Protocol Acceleration
-            </label>
-          </div>
         </CardContent>
         <CardFooter>
           <Button onClick={() => refetch()}>Refresh</Button>
         </CardFooter>
       </Card>
-      {isFetched && (
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>ENSNode Response</CardTitle>
-          </CardHeader>
-          <CardContent className="h-96 overflow-y-scroll">
-            {(() => {
-              if (error) return <p>{error.message}</p>;
-              if (isPending || isRefetching)
-                return (
-                  <div className="h-full w-full flex flex-col justify-center items-center p-8">
-                    <LoadingSpinner className="h-16 w-16" />
-                  </div>
-                );
 
-              return <CodeBlock>{JSON.stringify(data.records, null, 2)}</CodeBlock>;
-            })()}
-          </CardContent>
-        </Card>
-      )}
-      {data?.trace && (
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Protocol Tracing</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TraceRenderer trace={data.trace} />
-          </CardContent>
-        </Card>
-      )}
+      <RenderRequestsOutput
+        dataKey="records"
+        accelerated={accelerated}
+        unaccelerated={unaccelerated}
+      />
     </main>
   );
 }
