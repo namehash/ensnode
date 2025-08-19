@@ -55,14 +55,13 @@ jobs:
         with:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
-          # Script to select app packages.
+          # filter publishedPackages for apps (projects whose artifact is a docker image)
           script: |-
-            map(
-              {
-                "name": .name,
-                "version": .version
-              }
-            ) | map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+            map(select(
+                 .name == "ensindexer"
+              or .name == "ensadmin"
+              or .name == "ensrainbow"
+            ))
 
       - name: Filter Published Packages For NPM Packages
         uses: cloudposse/github-action-jq@main
@@ -70,10 +69,19 @@ jobs:
         with:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
-          # filters changesets' publishedPackages for those not in our 'apps'
-          # and also filter out our private packages we don't want visible in release notes
+          # filter publishedPackages for packages (projects whose artifact is an NPM package)
+          # 1. filter out publishedApps (see above)
+          # 2. filter out private packages that were not actually published to NPM
+          #   a. @ensnode/shared-configs
+          #   b. @docs/*
           script: |-
-            map(select(.name != "ensindexer" and .name != "ensadmin" and .name != "ensrainbow" and .name != "@ensnode/shared-configs"))
+            map(select(
+                  .name != "ensindexer"
+              and .name != "ensadmin"
+              and .name != "ensrainbow"
+              and .name != "@ensnode/shared-configs"
+              and (.name | startswith("@docs") | not)
+            ))
 
   build-and-push-ensnode:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }}
