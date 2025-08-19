@@ -129,11 +129,6 @@ export function starlight(): AstroIntegration {
               autogenerate: { directory: "ensrainbow/concepts" },
             },
             {
-              label: "FAQ",
-              collapsed: false,
-              autogenerate: { directory: "/ensrainbow/faq" },
-            },
-            {
               label: "Using ENSRainbow",
               collapsed: false,
               autogenerate: { directory: "ensrainbow/usage" },
@@ -147,6 +142,10 @@ export function starlight(): AstroIntegration {
               label: "Contributing",
               collapsed: true,
               autogenerate: { directory: "ensrainbow/contributing" },
+            },
+            {
+              label: "FAQ",
+              link: "ensrainbow/faq",
             },
           ],
         },
