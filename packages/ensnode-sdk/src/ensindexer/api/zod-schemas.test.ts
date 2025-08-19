@@ -51,18 +51,18 @@ describe("routes.records", () => {
         texts: ["example", "hello"],
       },
       trace: false,
-      accelerate: true,
+      accelerate: false,
     });
   });
 
   it("allows overriding of defaults", () => {
-    expect(
-      routes.records.query.parse({ name: "true", trace: "true", accelerate: "false" }),
-    ).toEqual({
-      selection: { name: true },
-      trace: true,
-      accelerate: false,
-    });
+    expect(routes.records.query.parse({ name: "true", trace: "true", accelerate: "true" })).toEqual(
+      {
+        selection: { name: true },
+        trace: true,
+        accelerate: true,
+      },
+    );
   });
 });
 
@@ -101,14 +101,14 @@ describe("routes.primaryName", () => {
   it("parses query with defaults", () => {
     expect(routes.primaryName.query.parse({})).toEqual({
       trace: false,
-      accelerate: true,
+      accelerate: false,
     });
   });
 
   it("allows overriding of defaults", () => {
-    expect(routes.primaryName.query.parse({ trace: "true", accelerate: "false" })).toEqual({
+    expect(routes.primaryName.query.parse({ trace: "true", accelerate: "true" })).toEqual({
       trace: true,
-      accelerate: false,
+      accelerate: true,
     });
   });
 });
@@ -124,14 +124,14 @@ describe("routes.primaryNames", () => {
     expect(routes.primaryNames.query.parse({ chainIds: "1,10,8453" })).toEqual({
       chainIds: [1, 10, 8453],
       trace: false,
-      accelerate: true,
+      accelerate: false,
     });
   });
 
   it("defaults trace and accelerate", () => {
     const parsed = routes.primaryNames.query.parse({});
     expect(parsed.trace).toBe(false);
-    expect(parsed.accelerate).toBe(true);
+    expect(parsed.accelerate).toBe(false);
   });
 
   it("rejects duplicate chain ids", () => {

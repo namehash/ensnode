@@ -54,7 +54,7 @@ Resolves records for an ENS name (Forward Resolution), via ENSNode, which implem
   - `texts`: Array of text record keys to resolve
 - `options`: (optional) additional options
   - `trace`: (optional) Whether to include a trace in the response (default: false)
-  - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
+  - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: false)
 
 
 ```ts
@@ -89,7 +89,7 @@ Resolves the primary name of the provided `address` on the specified `chainId`, 
 - `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
 - `options`: (optional) additional options
   - `trace`: (optional) Whether to include a trace in the response (default: false)
-  - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
+  - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: false)
 
 ```ts
 import { mainnet, base } from 'viem/chains';
@@ -116,7 +116,7 @@ Resolves the primary names of the provided `address` on the specified chainIds, 
 - `options`: (optional) additional options
   - `chainIds`: The chain ids within which to query the address' ENSIP-19 Multichain Primary Name (default: all ENSIP-19 supported chains)
   - `trace`: (optional) Whether to include a trace in the response (default: false)
-  - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: true)
+  - `accelerate`: (optional) Whether to attempt Protocol Acceleration (default: false)
 
 ```ts
 import { mainnet, base } from 'viem/chains';

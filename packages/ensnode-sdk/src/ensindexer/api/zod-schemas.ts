@@ -94,7 +94,7 @@ export const routes = {
       .object({
         ...selection,
         trace: z.optional(trace).default(false),
-        accelerate: z.optional(accelerate).default(true),
+        accelerate: z.optional(accelerate).default(false),
       })
       .transform((query, ctx) => {
         const { name, addresses, texts, ...rest } = query;
@@ -121,7 +121,7 @@ export const routes = {
     params: z.object({ address, chainId }),
     query: z.object({
       trace: z.optional(trace).default(false),
-      accelerate: z.optional(accelerate).default(true),
+      accelerate: z.optional(accelerate).default(false),
     }),
   },
   primaryNames: {
@@ -129,7 +129,7 @@ export const routes = {
     query: z.object({
       chainIds: z.optional(stringarray.pipe(z.array(chainId.pipe(excludingDefaultChainId)))),
       trace: z.optional(trace).default(false),
-      accelerate: z.optional(accelerate).default(true),
+      accelerate: z.optional(accelerate).default(false),
     }),
   },
 };

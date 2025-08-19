@@ -116,11 +116,6 @@ export interface ENSIndexerPublicConfig {
   indexAdditionalResolverRecords: boolean;
 
   /**
-   * Experiment to enable forward/reverse resolution APIs.
-   */
-  experimentalResolution: boolean;
-
-  /**
    * Indexed Chain IDs
    *
    * Includes the {@link ChainId} for each chain being indexed.

@@ -42,7 +42,7 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
 export async function resolvePrimaryNames(
   address: MultichainPrimaryNameResolutionArgs["address"],
   chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = ENSIP19_SUPPORTED_CHAIN_IDS,
-  options: { accelerate?: boolean } = { accelerate: true },
+  options: { accelerate: boolean } = { accelerate: true },
 ): Promise<MultichainPrimaryNameResolutionResult> {
   // parallel reverseResolve
   const names = await withActiveSpanAsync(tracer, "resolvePrimaryNames", { address }, () =>

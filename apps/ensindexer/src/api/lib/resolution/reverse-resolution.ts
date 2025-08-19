@@ -30,11 +30,13 @@ const tracer = trace.getTracer("reverse-resolution");
  *
  * @param address the adddress whose Primary Name to resolve
  * @param chainId the chainId within which to resolve the address' Primary Name
+ * @param options Optional settings
+ * @param options.accelerate Whether to accelerate resolution (default: true)
  */
 export async function resolveReverse(
   address: ReverseResolutionArgs["address"],
   chainId: ReverseResolutionArgs["chainId"],
-  options: { accelerate?: boolean } = { accelerate: true },
+  options: { accelerate: boolean } = { accelerate: true },
 ): Promise<ReverseResolutionResult> {
   const { accelerate = true } = options;
 

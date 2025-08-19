@@ -1,5 +1,11 @@
 # @ensnode/ens-deployments
 
+## 0.33.0
+
+### Minor Changes
+
+- [#927](https://github.com/namehash/ensnode/pull/927) [`748a16e`](https://github.com/namehash/ensnode/commit/748a16e3a74798b21ccf1881dcf36d411ee6a27c) Thanks [@shrugs](https://github.com/shrugs)! - fix type serialization issue that was preventing build
+
 ## 0.32.0
 
 ### Minor Changes

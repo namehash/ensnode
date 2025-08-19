@@ -1,5 +1,12 @@
 # @ensnode/ensnode-sdk
 
+## 0.33.0
+
+### Patch Changes
+
+- Updated dependencies [[`748a16e`](https://github.com/namehash/ensnode/commit/748a16e3a74798b21ccf1881dcf36d411ee6a27c)]:
+  - @ensnode/datasources@0.33.0
+
 ## 0.32.0
 
 ### Minor Changes

@@ -1,5 +1,23 @@
 # ensindexer
 
+## 0.33.0
+
+### Minor Changes
+
+- [#931](https://github.com/namehash/ensnode/pull/931) [`d4f401c`](https://github.com/namehash/ensnode/commit/d4f401c131b57047e293a757e915249d8a8de81e) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer now requires an RPC*URL*\* for the ENS Root Chain (i.e. mainnet, sepolia, holesky, or anvil) in order to power the Resolution API
+
+- [#931](https://github.com/namehash/ensnode/pull/931) [`d4f401c`](https://github.com/namehash/ensnode/commit/d4f401c131b57047e293a757e915249d8a8de81e) Thanks [@shrugs](https://github.com/shrugs)! - Enables Resolution API by default, with acceleration defaulting to false
+
+### Patch Changes
+
+- Updated dependencies [[`748a16e`](https://github.com/namehash/ensnode/commit/748a16e3a74798b21ccf1881dcf36d411ee6a27c)]:
+  - @ensnode/datasources@0.33.0
+  - @ensnode/ensnode-sdk@0.33.0
+  - @ensnode/ensrainbow-sdk@0.33.0
+  - @ensnode/ponder-metadata@0.33.0
+  - @ensnode/ensnode-schema@0.33.0
+  - @ensnode/ponder-subgraph@0.33.0
+
 ## 0.32.0
 
 ### Minor Changes

@@ -78,7 +78,7 @@ export class ENSNodeClient {
    * @param name The ENS Name whose records to resolve
    * @param selection selection of Resolver records
    * @param options additional options
-   * @param options.accelerate whether to attempt Protocol Acceleration (default true)
+   * @param options.accelerate whether to attempt Protocol Acceleration (default false)
    * @param options.trace whether to include a trace in the response (default false)
    * @returns ResolveRecordsResponse<SELECTION>
    * @throws If the request fails or the ENSNode API returns an error response
@@ -123,7 +123,7 @@ export class ENSNodeClient {
     }
 
     if (options?.trace) url.searchParams.set("trace", "true");
-    if (options?.accelerate === false) url.searchParams.set("accelerate", "false");
+    if (options?.accelerate) url.searchParams.set("accelerate", "true");
 
     const response = await fetch(url);
 
@@ -146,7 +146,7 @@ export class ENSNodeClient {
    * @param address The Address whose Primary Name to resolve
    * @param chainId The chain id within which to query the address' ENSIP-19 Multichain Primary Name
    * @param options additional options
-   * @param options.accelerate whether to attempt Protocol Acceleration (default true)
+   * @param options.accelerate whether to attempt Protocol Acceleration (default false)
    * @param options.trace whether to include a trace in the response (default false)
    * @returns ResolvePrimaryNameResponse
    * @throws If the request fails or the ENSNode API returns an error response
@@ -174,7 +174,7 @@ export class ENSNodeClient {
     const url = new URL(`/api/resolve/primary-name/${address}/${chainId}`, this.options.url);
 
     if (options?.trace) url.searchParams.set("trace", "true");
-    if (options?.accelerate === false) url.searchParams.set("accelerate", "false");
+    if (options?.accelerate) url.searchParams.set("accelerate", "true");
 
     const response = await fetch(url);
 
@@ -237,7 +237,7 @@ export class ENSNodeClient {
 
     if (options?.chainIds) url.searchParams.set("chainIds", options.chainIds.join(","));
     if (options?.trace) url.searchParams.set("trace", "true");
-    if (options?.accelerate === false) url.searchParams.set("accelerate", "false");
+    if (options?.accelerate) url.searchParams.set("accelerate", "true");
 
     const response = await fetch(url);
 
