@@ -139,7 +139,7 @@ export function RenderRequestsOutput<KEY extends string>({
         <CardHeader>
           <CardTitle>ENSNode Response</CardTitle>
         </CardHeader>
-        <CardContent className="h-96 overflow-scroll">
+        <CardContent className="h-[30rem] overflow-scroll">
           {(() => {
             if (someError) {
               return (
@@ -149,7 +149,9 @@ export function RenderRequestsOutput<KEY extends string>({
               );
             }
             if (result) {
-              return <CodeBlock>{JSON.stringify(result, null, 2)}</CodeBlock>;
+              return (
+                <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>
+              );
             }
             throw new Error("idk shouldnt happen");
           })()}

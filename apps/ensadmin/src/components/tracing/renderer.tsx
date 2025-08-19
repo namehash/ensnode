@@ -71,7 +71,7 @@ export function TraceRenderer({ trace }: { trace: ProtocolTrace }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 overflow-hidden bg-muted p-4 rounded">
+    <div className="flex flex-col gap-2 overflow-hidden bg-muted p-4 rounded-lg">
       {trace.map((span) => renderSpan(span))}
     </div>
   );

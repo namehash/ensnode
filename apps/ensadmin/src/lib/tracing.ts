@@ -34,7 +34,7 @@ const FORWARD_STEPS: Record<ForwardResolutionProtocolStep, { title: string; desc
     },
     [ForwardResolutionProtocolStep.RequireResolver]: {
       title: "Require Resolver",
-      description: "", // NOTE: events not yet rendered, not necessary
+      description: "Determine whether the Resolver supports ENSIP-10 (Wildcard Resolution).",
     },
     [ForwardResolutionProtocolStep.ExecuteResolveCalls]: {
       title: "Execute Resolve Calls",

@@ -1,16 +1,12 @@
 "use client";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
-import { CodeBlock } from "@/components/code-block";
-import { LoadingSpinner } from "@/components/loading-spinner";
-import { TraceRenderer } from "@/components/tracing/renderer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRecords } from "@ensnode/ensnode-react";
-import { DEFAULT_RECORDS_SELECTION } from "@ensnode/ensnode-sdk";
+import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -26,10 +22,13 @@ export default function ResolveRecordsInspector() {
 
   const canQuery = !!debouncedName && debouncedName.length > 0;
 
+  // TODO: switch on connected ensnode's configured namespace
+  const selection = DefaultRecordsSelection.mainnet;
+
   const accelerated = useRecords({
     name: debouncedName,
     accelerate: true,
-    selection: DEFAULT_RECORDS_SELECTION,
+    selection,
     trace: true,
     query: {
       enabled: canQuery,
@@ -45,7 +44,7 @@ export default function ResolveRecordsInspector() {
   const unaccelerated = useRecords({
     name: debouncedName,
     accelerate: false,
-    selection: DEFAULT_RECORDS_SELECTION,
+    selection,
     trace: true,
     query: {
       enabled: canQuery,
@@ -85,7 +84,7 @@ export default function ResolveRecordsInspector() {
             </Label>
             <Label htmlFor="selection" className="flex-1 flex flex-col gap-1">
               Records Selection
-              <Input id="selection" value={JSON.stringify(DEFAULT_RECORDS_SELECTION)} disabled />
+              <Input id="selection" value={JSON.stringify(selection)} disabled />
             </Label>
           </div>
         </CardContent>
