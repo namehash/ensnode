@@ -64,7 +64,7 @@ export default function ResolveRecordsInspector() {
   };
 
   return (
-    <main className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4 min-w-0">
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Record Resolution Inspector</CardTitle>
@@ -99,6 +99,6 @@ export default function ResolveRecordsInspector() {
         accelerated={accelerated}
         unaccelerated={unaccelerated}
       />
-    </main>
+    </div>
   );
 }

@@ -32,7 +32,7 @@ export default function ConnectPage() {
 
   if (addAndSelectConnection.isError) {
     return (
-      <main className="flex h-full flex-col items-center justify-center gap-4">
+      <div className="flex h-full flex-col items-center justify-center gap-4">
         <h2 className="text-center">Something went wrong while connecting to ENSNode</h2>
         <p className="flex flex-row items-center justify-center gap-2">
           <span>Provided URL:</span>
@@ -41,7 +41,7 @@ export default function ConnectPage() {
         <Link href="/">
           <Button>Go Home</Button>
         </Link>
-      </main>
+      </div>
     );
   }
 

@@ -70,7 +70,7 @@ export default function Layout({
                 <Suspense>
                   <AppSidebar />
                 </Suspense>
-                <SidebarInset>
+                <SidebarInset className="min-w-0">
                   <Header>
                     <HeaderNav>
                       <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>

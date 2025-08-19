@@ -75,7 +75,6 @@ export function RenderRequestsOutput<KEY extends string>({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* <Tabs defaultValue="accelerated"> */}
               <TabsContent value="accelerated">
                 {(() => {
                   switch (accelerated.status) {
