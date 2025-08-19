@@ -5,11 +5,11 @@ import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
 
 export default function Status() {
   return (
-    <ENSNodeProvider>
-      <Suspense fallback={<Loading />}>
+    <Suspense fallback={<Loading />}>
+      <ENSNodeProvider>
         <IndexingStatus />
-      </Suspense>
-    </ENSNodeProvider>
+      </ENSNodeProvider>
+    </Suspense>
   );
 }
 
