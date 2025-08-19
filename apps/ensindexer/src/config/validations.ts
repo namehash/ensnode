@@ -1,4 +1,4 @@
-import { DatasourceName } from "@ensnode/datasources";
+import { DatasourceName, getENSRootChainId } from "@ensnode/datasources";
 import { Address, isAddress } from "viem";
 import { z } from "zod/v4";
 
@@ -39,6 +39,23 @@ export function invariant_requiredDatasources(
         } namespace are: [${availableDatasourceNames.join(", ")}].`,
       });
     }
+  }
+}
+
+// Invariant: rpcConfig is specified for the ENS Root Chain of the configured namespace
+export function invariant_rpcConfigsSpecifiedForRootChain(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "rpcConfigs">>,
+) {
+  const { value: config } = ctx;
+
+  const ensRootChainId = getENSRootChainId(config.namespace);
+
+  if (!config.rpcConfigs.has(ensRootChainId)) {
+    ctx.issues.push({
+      code: "custom",
+      input: config,
+      message: `An RPC_URL_${ensRootChainId} (for the ENS Root Chain) is required, but none was specified.`,
+    });
   }
 }
 
@@ -146,23 +163,6 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
       code: "custom",
       input: config,
       message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
-    });
-  }
-}
-
-// Invariant: experimentalResolution requires ReverseResolvers plugin
-export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "experimentalResolution">>,
-) {
-  const { value: config } = ctx;
-
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
-
-  if (config.experimentalResolution && !reverseResolversPluginActive) {
-    ctx.issues.push({
-      code: "custom",
-      input: config,
-      message: `EXPERIMENTAL_RESOLUTION requires the reverse-resolvers plugin to be active.`,
     });
   }
 }

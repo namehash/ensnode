@@ -80,7 +80,7 @@ normalize("example.eth");
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: ForwardResolutionArgs<SELECTION>["name"],
   selection: ForwardResolutionArgs<SELECTION>["selection"],
-  { accelerate }: { accelerate?: boolean } = {},
+  { accelerate }: { accelerate: boolean } = { accelerate: true },
 ): Promise<ForwardResolutionResult<SELECTION>> {
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `chainId` must
   // initially be `ensRootChainId`: see `_resolveForward` for additional context.
@@ -95,9 +95,9 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: ForwardResolutionArgs<SELECTION>["name"],
   selection: ForwardResolutionArgs<SELECTION>["selection"],
-  options: { chainId: number; accelerate?: boolean },
+  options: { chainId: number; accelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
-  const { chainId, accelerate = true } = options;
+  const { chainId, accelerate = false } = options;
   const selectionString = JSON.stringify(selection);
 
   // trace for external consumers

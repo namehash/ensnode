@@ -11,6 +11,7 @@ import { resolveForward } from "@/api/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import { validate } from "@/api/lib/validate";
+import config from "@/config";
 import { routes } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();

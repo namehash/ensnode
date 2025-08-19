@@ -65,9 +65,7 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
   return c.json(serializedIndexingStatus);
 });
 
-// conditionally include experimental resolution api
-if (config.experimentalResolution) {
-  app.route("/resolve", resolutionApi);
-}
+// Resolution API
+app.route("/resolve", resolutionApi);
 
 export default app;
