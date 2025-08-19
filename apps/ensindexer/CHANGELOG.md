@@ -1,5 +1,19 @@
 # ensindexer
 
+## 0.33.1
+
+### Patch Changes
+
+- [#612](https://github.com/namehash/ensnode/pull/612) [`20322cd`](https://github.com/namehash/ensnode/commit/20322cdd0cccd2b14eb8789acd1f0bd42da5bc3b) Thanks [@djstrong](https://github.com/djstrong)! - Updated ENSIndexer for compatibility with ENSRainbow v2 data format. ENSIndexer can now leverage versioned label sets with label set IDs, enabling deterministic indexing results over time as the set of healable labels evolves.
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.33.1
+  - @ensnode/ensrainbow-sdk@0.33.1
+  - @ensnode/ponder-metadata@0.33.1
+  - @ensnode/ensnode-schema@0.33.1
+  - @ensnode/ponder-subgraph@0.33.1
+  - @ensnode/ensnode-sdk@0.33.1
+
 ## 0.33.0
 
 ### Minor Changes

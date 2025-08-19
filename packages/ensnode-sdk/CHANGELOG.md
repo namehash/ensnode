@@ -1,5 +1,12 @@
 # @ensnode/ensnode-sdk
 
+## 0.33.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.33.1
+
 ## 0.33.0
 
 ### Patch Changes
