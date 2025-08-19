@@ -35,7 +35,7 @@
   "scripts": {
     "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check --write",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "dependencies": {

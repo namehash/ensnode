@@ -33,7 +33,7 @@
   },
   "scripts": {
     "prepublish": "tsup",
-    "lint": "biome check --write",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "dependencies": {

@@ -22,7 +22,8 @@
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
     "./consts": "./src/consts.ts",
-    "./label-utils": "./src/label-utils.ts"
+    "./label-utils": "./src/label-utils.ts",
+    "./utils/parsing": "./src/utils/parsing.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -42,6 +43,10 @@
       "./label-utils": {
         "types": "./dist/label-utils.d.ts",
         "default": "./dist/label-utils.js"
+      },
+      "./utils/parsing": {
+        "types": "./dist/utils/parsing.d.ts",
+        "default": "./dist/utils/parsing.js"
       }
     },
     "main": "./dist/index.js",
@@ -52,7 +57,7 @@
     "prepublish": "tsup",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check --write",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "peerDependencies": {

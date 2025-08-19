@@ -1,15 +1,27 @@
-import { type EnsRainbow, ErrorCode, StatusCode, labelHashToBytes } from "@ensnode/ensrainbow-sdk";
+import {
+  type EnsRainbow,
+  type EnsRainbowClientLabelSet,
+  type EnsRainbowServerLabelSet,
+  ErrorCode,
+  StatusCode,
+  labelHashToBytes,
+  validateSupportedLabelSetAndVersion,
+} from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 
 import { ENSRainbowDB } from "@/lib/database";
+import { VersionedRainbowRecord } from "@/lib/rainbow-record";
+import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 import { LabelHash } from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
+  private readonly serverLabelSet: EnsRainbowServerLabelSet;
 
-  private constructor(db: ENSRainbowDB) {
+  private constructor(db: ENSRainbowDB, serverLabelSet: EnsRainbowServerLabelSet) {
     this.db = db;
+    this.serverLabelSet = serverLabelSet;
   }
 
   /**
@@ -19,31 +31,74 @@ export class ENSRainbowServer {
    * @throws Error if a "lite" validation of the database fails
    */
   public static async init(db: ENSRainbowDB): Promise<ENSRainbowServer> {
-    const server = new ENSRainbowServer(db);
+    // Using the Factory method pattern to workaround the limitation of Javascript not supporting `await` within a constructor.
+    // We do all async work in this `init` function and then make the synchronous call to the constructor when ready.
 
     if (!(await db.validate({ lite: true }))) {
       throw new Error("Database is in an invalid state");
     }
 
-    return server;
+    const serverLabelSet = await db.getLabelSet();
+
+    return new ENSRainbowServer(db, serverLabelSet);
   }
 
-  async heal(labelHash: LabelHash): Promise<EnsRainbow.HealResponse> {
+  /**
+   * Returns the server's EnsRainbowServerLabelSet.
+   * @returns The server's label set configuration
+   */
+  public getServerLabelSet(): EnsRainbowServerLabelSet {
+    return this.serverLabelSet;
+  }
+
+  /**
+   * Determines if a versioned rainbow record should be treated as unhealable
+   * based on the client's label set version requirements, ignoring the label set ID.
+   */
+  public static needToSimulateAsUnhealable(
+    versionedRainbowRecord: VersionedRainbowRecord,
+    clientLabelSet: EnsRainbowClientLabelSet,
+  ): boolean {
+    // Only return the label if its label set version is less than or equal to the client's requested labelSetVersion
+    return (
+      clientLabelSet.labelSetVersion !== undefined &&
+      versionedRainbowRecord.labelSetVersion > clientLabelSet.labelSetVersion
+    );
+  }
+
+  async heal(
+    labelHash: LabelHash,
+    clientLabelSet: EnsRainbowClientLabelSet,
+  ): Promise<EnsRainbow.HealResponse> {
     let labelHashBytes: ByteArray;
     try {
       labelHashBytes = labelHashToBytes(labelHash);
     } catch (error) {
-      const defaultErrorMsg = "Invalid labelHash - must be a valid hex string";
+      const defaultErrorMsg = "Invalid labelhash - must be a valid hex string";
       return {
         status: StatusCode.Error,
-        error: (error as Error).message ?? defaultErrorMsg,
+        error: getErrorMessage(error) ?? defaultErrorMsg,
         errorCode: ErrorCode.BadRequest,
       } satisfies EnsRainbow.HealError;
     }
 
     try {
-      const label = await this.db.getLabel(labelHashBytes);
-      if (label === null) {
+      validateSupportedLabelSetAndVersion(this.serverLabelSet, clientLabelSet);
+    } catch (error) {
+      logger.info(getErrorMessage(error));
+      return {
+        status: StatusCode.Error,
+        error: getErrorMessage(error),
+        errorCode: ErrorCode.BadRequest,
+      } satisfies EnsRainbow.HealError;
+    }
+
+    try {
+      const versionedRainbowRecord = await this.db.getVersionedRainbowRecord(labelHashBytes);
+      if (
+        versionedRainbowRecord === null ||
+        ENSRainbowServer.needToSimulateAsUnhealable(versionedRainbowRecord, clientLabelSet)
+      ) {
         logger.info(`Unhealable labelHash request: ${labelHash}`);
         return {
           status: StatusCode.Error,
@@ -52,10 +107,14 @@ export class ENSRainbowServer {
         } satisfies EnsRainbow.HealError;
       }
 
-      logger.info(`Successfully healed labelHash ${labelHash} to label "${label}"`);
+      const { labelSetVersion: labelSetVersionNumber, label: actualLabel } = versionedRainbowRecord;
+
+      logger.info(
+        `Successfully healed labelHash ${labelHash} to label "${actualLabel}" (set ${labelSetVersionNumber})`,
+      );
       return {
         status: StatusCode.Success,
-        label,
+        label: actualLabel,
       } satisfies EnsRainbow.HealSuccess;
     } catch (error) {
       logger.error("Error healing label:", error);

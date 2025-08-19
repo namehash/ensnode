@@ -55,24 +55,13 @@ jobs:
         with:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
-          # the following jq script expands the `ensrainbow` package into its 3 variants.
-          # TODO: this can be removed once variants are runtime-behavior and not build-behavior and this
-          # script can become: map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
-          # TODO: once ensrainbow-v2-data can be built, include '"ensrainbow-v2-data",' in the variants list below
+          # filter publishedPackages for apps (projects whose artifact is a docker image)
           script: |-
-            map(
-              if .name == "ensrainbow" then
-                . as $parent
-                | ["ensrainbow-data", "ensrainbow-test-data"]
-                  | map({
-                    "name": $parent.name,
-                    "version": $parent.version,
-                    "ensrainbow_data_image": .
-                  })
-              else
-                [.]
-              end
-            ) | flatten | map(select(.name == "ensindexer" or .name == "ensadmin" or .name == "ensrainbow"))
+            map(select(
+                 .name == "ensindexer"
+              or .name == "ensadmin"
+              or .name == "ensrainbow"
+            ))
 
       - name: Filter Published Packages For NPM Packages
         uses: cloudposse/github-action-jq@main
@@ -80,13 +69,22 @@ jobs:
         with:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
-          # filters changesets' publishedPackages for those not in our 'apps'
-          # and also filter out our private packages we don't want visible in release notes
+          # filter publishedPackages for packages (projects whose artifact is an NPM package)
+          # 1. filter out publishedApps (see above)
+          # 2. filter out private packages that were not actually published to NPM
+          #   a. @ensnode/shared-configs
+          #   b. @docs/*
           script: |-
-            map(select(.name != "ensindexer" and .name != "ensadmin" and .name != "ensrainbow" and .name != "@ensnode/shared-configs"))
+            map(select(
+                  .name != "ensindexer"
+              and .name != "ensadmin"
+              and .name != "ensrainbow"
+              and .name != "@ensnode/shared-configs"
+              and (.name | startswith("@docs") | not)
+            ))
 
   build-and-push-ensnode:
-    name: ${{ matrix.apps.name }} ${{ matrix.apps.version }} (w/ ${{ matrix.apps.ensrainbow_data_image }})
+    name: ${{ matrix.apps.name }} ${{ matrix.apps.version }}
     # if changesets published our npm packages, also build docker images
     needs: changesets
     if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedApps != '[]'
@@ -109,8 +107,6 @@ jobs:
           dockerfile: apps/${{ matrix.apps.name }}/Dockerfile
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
-          build_args: |
-            DATA_IMAGE_NAME=${{ matrix.apps.ensrainbow_data_image }}
           # construct docker tag using the changesets-reported version
           tags: |
             type=semver,pattern={{version}},value=${{ matrix.apps.version }}

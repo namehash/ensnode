@@ -1,0 +1,23 @@
+---
+title: Troubleshooting
+sidebar:
+  label: Troubleshooting
+  order: 99
+---
+
+This page aggregates the most common issues users run into when operating ENSRainbow.
+
+## Common Startup Errors
+
+### "Database schema mismatch"
+- **Cause**: Your on-disk database was created with a newer/older schema than this binary understands.
+- **Fix**: Upgrade ENSRainbow to the latest version *or* download a matching database archive.
+
+### "Label set id mismatch"
+- **Cause**: You attempted to ingest a `.ensrainbow` file whose `LABEL_SET_ID` differs from the database.
+- **Fix**: Create a fresh data directory or ensure you ingest files that share the same label-set id.
+
+### Port already in use
+Check that no other service is bound to `3223` (the default port). You can change the port via the `PORT` environment variable as documented in [Configuration](/ensrainbow/usage/configuration/).
+
+For frequently asked questions about ENSRainbow, please see the [FAQ page](/ensrainbow/faq/). 

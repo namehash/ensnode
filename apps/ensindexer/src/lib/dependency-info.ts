@@ -70,7 +70,7 @@ export async function getDependencyInfo(): Promise<DependencyInfo> {
   const schema = makeDependencyInfoSchema();
   const data = {
     ensRainbow: ensRainbowDependencyInfo.version,
-    ensRainbowSchema: ensRainbowDependencyInfo.schema_version,
+    ensRainbowSchema: ensRainbowDependencyInfo.dbSchemaVersion,
     nodejs: process.versions.node,
     ponder: getPackageVersion("ponder"),
   } satisfies DependencyInfo;

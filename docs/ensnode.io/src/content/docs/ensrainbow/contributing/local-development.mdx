@@ -1,0 +1,57 @@
+---
+title: Local Development
+sidebar:
+  label: Local Development
+  order: 2
+keywords: [ensrainbow, development, local setup]
+---
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+## Prerequisites
+
+1. Clone the monorepo and install dependencies (see the main ENSNode [Contribution Guide](/docs/contributing/)).
+2. Make sure `pnpm`, `Node.js >= 18`, and Docker (optional) are installed.
+
+## 1  Download a `.ensrainbow` file
+
+ENSRainbow stores label-hash-to-label pairs in compressed snapshots with the file extension `.ensrainbow`.
+Use the helper script located in `apps/ensrainbow/scripts/`:
+
+```bash title="Download .ensrainbow files"
+cd apps/ensrainbow
+
+# Syntax: download-ensrainbow-files.sh <LABEL_SET_ID> <LABEL_SET_VERSION>
+./scripts/download-ensrainbow-files.sh subgraph 0   # classic ENS Subgraph labelset, version 0
+```
+
+:::tip[Discover Available Label Sets]
+Not sure which label set IDs and versions are available? You can check the [Available Label Sets](/ensrainbow/usage/available-label-sets) page for a complete list.
+:::
+
+The script will:
+* fetch the `.ensrainbow` file
+* verify its SHA-256 checksum
+* place it in `apps/ensrainbow/labelsets/`
+
+## 2  Ingest into LevelDB
+
+```bash title="Ingest data into LevelDB"
+pnpm run ingest-ensrainbow \
+  --input-file subgraph-0.ensrainbow \
+  --data-dir ./my-subgraph-data
+```
+
+Important rules:
+1. The **first** ingest for a new directory must be *version 0* of a label-set.
+2. All subsequent ingests must belong to the **same** `LABEL_SET_ID`.
+3. Label-set versions must increment by **exactly +1** each time.
+
+## 3  Start the API server
+
+```bash title="Start the API server"
+pnpm run serve --data-dir ./my-subgraph-data --port 3223
+```
+Visit `http://localhost:3223/health` → `{ "status": "ok" }`.
+
+<LinkCard title="CLI Reference" href="/ensrainbow/contributing/cli-reference" /> 
