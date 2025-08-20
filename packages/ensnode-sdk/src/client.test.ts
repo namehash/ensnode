@@ -2,9 +2,9 @@ import type { Address } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorResponse, ResolvePrimaryNameResponse, ResolvePrimaryNamesResponse } from "./api";
 import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
+import { ClientError } from "./client-error";
 import { Name } from "./ens";
 import { ResolverRecordsSelection } from "./resolution";
-import { ClientError } from "./client-error";
 
 const EXAMPLE_NAME: Name = "example.eth";
 const EXAMPLE_ADDRESS: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
