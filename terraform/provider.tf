@@ -22,4 +22,5 @@ provider "render" {
   api_key                    = var.render_api_key
   owner_id                   = var.render_owner_id
   wait_for_deploy_completion = true
+  skip_deploy_after_service_update = false
 }
