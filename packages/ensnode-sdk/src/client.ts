@@ -264,8 +264,7 @@ export class ENSNodeClient {
   /**
    * Fetch ENSNode Config
    *
-   * The Config API provides a complete view of an ENSNode instance’s public
-   * configuration, making it easy to understand and verify it’s configuration.
+   * Fetch the ENSNode's configuration.
    *
    * @returns {ConfigResponse}
    *
@@ -299,10 +298,16 @@ export class ENSNodeClient {
   /**
    * Fetch ENSNode Indexing Status
    *
-   * Monitor an ENSNode’s indexing progress across multiple chains with
-   * the Indexing Status API. This endpoint provides detailed information about
-   * which chains are being indexed, each chain’s indexing status,
-   * and the overall multichain indexing status.
+   * Fetch the ENSNode's multichain indexing status.
+   *
+   * @param options additional options
+   * @param options.maxRealtimeDistance the max allowed distance between the
+   *  latest indexed block of each chain and the "tip" of all indexed chains.
+   *  Setting this parameter influences the HTTP response code as follows:
+   *  - Success (200 OK): The latest indexed block of each chain is within the
+   *    requested distance from realtime.
+   *  - Service Unavailable (503): The latest indexed block of each chain is NOT
+   *    within the requested distance from realtime.
    *
    * @returns {IndexingStatusResponse}
    *

@@ -147,7 +147,8 @@ export interface ChainIndexingBackfillStatus {
   latestIndexedBlock: BlockRef;
 
   /**
-   * The block that was most recently synced into RPC cache.
+   * The "highest" block that has been synced into RPC cache. Backfill indexing
+   * is accelerated by cached RPC calls through this block height.
    */
   latestSyncedBlock: BlockRef;
 

@@ -139,8 +139,6 @@ interface UseRecentRegistrationsProps {
 
 /**
  * Hook to fetch info about most recently registered domains that have been indexed.
- *
- * @param maxResults The max number of recent registrations to retrieve
  */
 export function useRecentRegistrations({
   ensNodeUrl,

@@ -27,7 +27,7 @@ import { useRecentRegistrations } from "./hooks";
 import type { Registration } from "./types";
 
 /**
- * Maximal number of latest registrations to be displayed in the panel
+ * Max number of latest registrations to display
  */
 const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
@@ -40,10 +40,10 @@ interface RecentRegistrationsProps {
 }
 
 /**
- * Displays a list of the most recently indexed registrations and the date
- * of the most recently indexed block.
+ * Displays a panel containing the list of the most recently indexed
+ * registrations and the date of the most recently indexed block.
  *
- * Note: Recent Registrations can only be presented when
+ * Note: The Recent Registrations Panel is only visible when the
  * overall indexing status is either "completed", or "following".
  */
 export function RecentRegistrations({
@@ -113,7 +113,11 @@ interface RegistrationsListProps {
  * @param ensNodeUrl URL of currently selected ENSNode instance
  */
 function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: RegistrationsListProps) {
-  const recentRegistrationsQuery = useRecentRegistrations({ ensNodeUrl, namespaceId, maxRecords });
+  const recentRegistrationsQuery = useRecentRegistrations({
+    ensNodeUrl,
+    namespaceId,
+    maxRecords,
+  });
 
   if (recentRegistrationsQuery.isLoading) {
     return <RegistrationsListLoading rowCount={maxRecords} />;

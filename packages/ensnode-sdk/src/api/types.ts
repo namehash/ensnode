@@ -77,7 +77,7 @@ export interface ResolvePrimaryNamesResponse extends TraceableResponse {
 export type ConfigResponse = ENSIndexerPublicConfig;
 
 /**
- * ENSIndexer Overall Indexing Status Response
+ * ENSIndexer Overall Indexing Status Request
  */
 export interface IndexingStatusRequest {
   /**

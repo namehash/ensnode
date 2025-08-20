@@ -1,5 +1,5 @@
 /**
- * This file describes UI components presenting {@link BlockRef} data.
+ * This file defines UI components for presenting {@link BlockRef}.
  */
 
 import { RelativeTime } from "@/components/datetime-utils";

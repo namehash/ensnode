@@ -247,12 +247,12 @@ export function checkChainIndexingStatusesForFollowingOverallStatus(
 
 /**
  * Sort a list of [{@link ChainId}, {@link ChainIndexingStatus}] tuples
- * by start block timestamp in ascending order.
+ * by the omnichain start block timestamp in ascending order.
  */
 export function sortAscChainStatusesByStartBlock<ChainStatusType extends ChainIndexingStatus>(
   chains: [ChainId, ChainStatusType][],
 ): [ChainId, ChainStatusType][] {
-  // Sort the chain statuses by the first block to index timestamp
+  // Sort the chain statuses by the omnichain first block to index timestamp
   chains.sort(
     ([, chainA], [, chainB]) =>
       chainA.config.startBlock.timestamp - chainB.config.startBlock.timestamp,
