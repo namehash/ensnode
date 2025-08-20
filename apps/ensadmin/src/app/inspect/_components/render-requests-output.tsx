@@ -4,7 +4,7 @@ import { TraceRenderer } from "@/components/tracing/renderer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { renderTraceDuration } from "@/lib/tracing";
-import { ProtocolTrace } from "@ensnode/ensnode-sdk";
+import { ClientError, ProtocolTrace } from "@ensnode/ensnode-sdk";
 import { UseQueryResult } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -35,6 +35,10 @@ export function RenderRequestsOutput<KEY extends string>({
     (unaccelerated.isPending || unaccelerated.isRefetching);
 
   if (showLoading) {
+    // if we're loading but there's no active fetch, the query is unable to be executed, so render null
+    if (accelerated.fetchStatus === "idle") return null;
+
+    // otherwise, we're in-flight, render loading
     return (
       <Card className="w-full">
         <CardContent className="h-96">
@@ -139,21 +143,31 @@ export function RenderRequestsOutput<KEY extends string>({
         <CardHeader>
           <CardTitle>ENSNode Response</CardTitle>
         </CardHeader>
-        <CardContent className="h-[30rem] overflow-scroll">
+        <CardContent className="overflow-scroll">
           {(() => {
             if (someError) {
               return (
-                <div className="h-64 w-full flex flex-col justify-center items-center p-8">
-                  <span className="text-muted-foreground">{someError.message}</span>
-                </div>
+                <CodeBlock className="rounded-lg">
+                  {JSON.stringify(
+                    {
+                      message: someError.message,
+                      ...(someError instanceof ClientError &&
+                        !!someError.details && { details: someError.details }),
+                    },
+                    null,
+                    2,
+                  )}
+                </CodeBlock>
               );
             }
+
             if (result) {
               return (
                 <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>
               );
             }
-            throw new Error("idk shouldnt happen");
+
+            throw new Error("this state shouldn't occur");
           })()}
         </CardContent>
       </Card>

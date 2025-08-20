@@ -1,6 +1,7 @@
 "use client";
 
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
+import { Pill } from "@/components/pill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,9 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
 
+const EXAMPLE_NAMES = ["vitalik.eth", "gregskril.eth", "jesse.base.eth", "🔥🔥🔥🔥🔥.eth"];
+
+// TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
 // TODO: sync form state to query params, current just defaulting is supported
 export default function ResolveRecordsInspector() {
@@ -86,6 +90,17 @@ export default function ResolveRecordsInspector() {
               Records Selection
               <Input id="selection" value={JSON.stringify(selection)} disabled />
             </Label>
+          </div>
+          <div className="flex flex-col gap-2 justify-center">
+            <span className="text-sm font-medium leading-none">Examples:</span>
+            {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
+            <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
+              {EXAMPLE_NAMES.map((name) => (
+                <Pill key={name} onClick={() => setName(name)} className="font-mono">
+                  {name}
+                </Pill>
+              ))}
+            </div>
           </div>
         </CardContent>
         <CardFooter>

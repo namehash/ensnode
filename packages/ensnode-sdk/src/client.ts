@@ -7,6 +7,7 @@ import {
   ResolveRecordsRequest,
   ResolveRecordsResponse,
 } from "./api/types";
+import { ClientError } from "./client-error";
 import { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -129,7 +130,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Records Resolution Failed: ${error.message}`);
+      throw ClientError.fromErrorResponse(error);
     }
 
     const data = await response.json();
@@ -180,7 +181,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Primary Name Resolution Failed: ${error.message}`);
+      throw ClientError.fromErrorResponse(error);
     }
 
     const data = await response.json();
@@ -243,7 +244,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Primary Names Resolution Failed: ${error.message}`);
+      throw ClientError.fromErrorResponse(error);
     }
 
     const data = await response.json();
