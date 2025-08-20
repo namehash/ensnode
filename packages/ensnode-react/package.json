@@ -41,7 +41,6 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*",
     "@tanstack/react-query": "^5.0.0",
     "react": "^18.0.0"
   },
