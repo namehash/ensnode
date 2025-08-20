@@ -23,7 +23,7 @@ const navItems = [
     items: [
       { title: "Record Resolution", url: "/inspect/records" },
       { title: "Primary Name Resolution", url: "/inspect/primary-name" },
-      { title: "Visualizer Example", url: "/inspect/visualizer" },
+      { title: "Primary Names Resolution", url: "/inspect/primary-names" },
     ],
   },
   {

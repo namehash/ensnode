@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { makeKeyedResolverRecordId } from "@/lib/ids";
 import { stripNullBytes } from "@/lib/lib-helpers";
 import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
-import { Address, isAddress, zeroAddress } from "viem";
+import { getAddress, isAddress, zeroAddress } from "viem";
 
 export async function handleResolverNameUpdate(
   context: Context,
@@ -19,14 +19,17 @@ export async function handleResolverAddressRecordUpdate(
   context: Context,
   resolverId: string,
   coinType: bigint,
-  address: Address,
+  address: string,
 ) {
   const recordId = makeKeyedResolverRecordId(resolverId, coinType.toString());
-  const isDeletion = !isAddress(address) || address === zeroAddress;
+  const isDeletion = !!address || address === zeroAddress;
   if (isDeletion) {
     // delete
     await context.db.delete(schema.ext_resolverAddressRecords, { id: recordId });
   } else {
+    // checksum the stored value if it is an EVM address
+    const addressRecordValue = isAddress(address) ? getAddress(address) : address;
+
     // upsert
     await context.db
       .insert(schema.ext_resolverAddressRecords)
@@ -35,10 +38,10 @@ export async function handleResolverAddressRecordUpdate(
         id: recordId,
         resolverId,
         coinType,
-        address,
+        address: addressRecordValue,
       })
       // or update the existing one
-      .onConflictDoUpdate({ address });
+      .onConflictDoUpdate({ address: addressRecordValue });
   }
 }
 

@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
 
-const EXAMPLE_NAMES = ["vitalik.eth", "gregskril.eth", "jesse.base.eth", "🔥🔥🔥🔥🔥.eth"];
+const EXAMPLE_INPUT = ["vitalik.eth", "gregskril.eth", "jesse.base.eth", "🔥🔥🔥🔥🔥.eth"];
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
@@ -21,7 +21,7 @@ const EXAMPLE_NAMES = ["vitalik.eth", "gregskril.eth", "jesse.base.eth", "🔥�
 export default function ResolveRecordsInspector() {
   const searchParams = useSearchParams();
 
-  const [name, setName] = useState(searchParams.get("name") || "vitalik.eth");
+  const [name, setName] = useState(searchParams.get("name") || EXAMPLE_INPUT[0]);
   const [debouncedName] = useDebouncedValue(name, 150);
 
   const canQuery = !!debouncedName && debouncedName.length > 0;
@@ -78,7 +78,7 @@ export default function ResolveRecordsInspector() {
               ENS Name
               <Input
                 id="name"
-                placeholder="vitalik.eth"
+                placeholder={EXAMPLE_INPUT[0]}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="off"
@@ -95,7 +95,7 @@ export default function ResolveRecordsInspector() {
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {EXAMPLE_NAMES.map((name) => (
+              {EXAMPLE_INPUT.map((name) => (
                 <Pill key={name} onClick={() => setName(name)} className="font-mono">
                   {name}
                 </Pill>
