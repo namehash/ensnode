@@ -1,5 +1,4 @@
 import { UnixTimestampInSeconds, unixTimestampToDate } from "@/components/datetime-utils";
-import { useENSIndexerConfig, useIndexingStatus } from "@/components/ensindexer/hooks";
 import { ensAdminVersion } from "@/lib/env";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
 import { ENSNamespace, ENSNamespaceId } from "@ensnode/datasources";
