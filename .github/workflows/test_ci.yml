@@ -8,21 +8,8 @@ on:
   pull_request:
 
 jobs:
-  changed-packages:
-    runs-on: blacksmith-4vcpu-ubuntu-2204
-    outputs:
-      packages: ${{ steps.changes.outputs.packages }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check for package changes
-        id: changes
-        uses: dorny/paths-filter@v2
-        with:
-          filters: |
-            packages:
-              - 'packages/**'
-
   static-analysis:
+    name: "Static Analysis"
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
@@ -52,8 +39,7 @@ jobs:
       - name: Check Terraform format
         run: terraform fmt -recursive -check -diff
 
-      - name: Build packages
-        if: needs.changed-packages.outputs.packages == 'true'
+      - name: Build NPM Packages
         run: pnpm packages:prepublish
 
       # This will run the dev command in background, and wait up to
@@ -87,6 +73,7 @@ jobs:
           ./.github/scripts/run_ensindexer_healthcheck.sh
 
   unit-tests:
+    name: "Unit Tests"
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:

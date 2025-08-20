@@ -1,0 +1,33 @@
+---
+title: Glossary
+description: Comprehensive terminology and definitions used throughout ENSRainbow.
+sidebar:
+  label: Glossary
+  order: 1
+keywords: [ensrainbow, glossary, terminology, definitions]
+---
+
+This page defines the **core terminology** used throughout the ENSRainbow codebase and documentation. If you notice an unfamiliar word elsewhere in the docs, come back to this page – it is probably defined here.
+
+| Term | Definition | Example |
+|------|------------|---------|
+| **Label** | A single component of an ENS name (characters between two dots). Can contain **any** valid UTF-8 string – it may or may not be ENS-normalised. | `vitalik`, `😺`, `example.eth` has labels `example` & `eth` |
+| **Labelhash** | `keccak256` hash of the UTF-8 bytes of a label (no pre-normalisation), represented as a **0x-prefixed 64-digit lowercase hex** string (32 bytes). | `0xaf2caa…03cc` |
+| **Heal** | The act of converting a _labelhash_ back to its original _label_ via a rainbow table lookup. | `heal('0xaf2c…') → 'vitalik'` |
+| **Rainbow Record** | An entry mapping a `labelhash` ➜ `label`. Persisted as a LevelDB key (labelhash bytes) and UTF-8 value (_see Data Model_). | – |
+| **Label Set** | A logical collection of rainbow records that share a common **source** and **versioning** scheme (e.g. subgraph v0). Identified by `labelSetId` & `labelSetVersion`. | id: `subgraph`, version: `0` |
+| **Label Set ID** | String (1-50 chars) consisting of lowercase ASCII letters and hyphens that names a label set. | `subgraph`, `discovery-a` |
+| **Label Set Version** | Non-negative integer that monotonically increases when new labelhash-to-label mappings are added to a label set. Each version contains incremental additions since the previous version. Enables deterministic healing across time. | `0`, `1`, `2` |
+| **Healable Count** | Total number of labels that can currently be healed by the running server. Exposed via `/count`. | `7 892 001` |
+| **Status Code** | High-level outcome of an API call – either `success` or `error`. | – |
+| **Error Code** | HTTP-style numeric code describing the error (`400`, `404`, `500`). | – |
+| **Rainbow Table** | A pre-computed set of `labelhash → label` pairs used for healing. | – |
+| **Ingestion** | One-off process that streams a `.ensrainbow` snapshot into LevelDB. | `pnpm run ingest subgraph_0.ensrainbow` |
+| **System Key** | Special LevelDB key (length ≠ 32 bytes) storing metadata such as schema version, label set id, etc. | `0xff 0xff 0xff 0xfd` |
+| **ENS Normalization** | The ENSIP-15 canonicalisation process; ENSRainbow stores labels **as-is**, even if not normalised. | – |
+
+## Related Documentation
+
+- **[Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning)** - Understanding the versioning system
+- **[Data Model](/ensrainbow/concepts/data-model)** - How data is stored and organized
+- **[TypeScript Interfaces](/ensrainbow/concepts/typescript-interfaces)** - Type definitions for APIs 

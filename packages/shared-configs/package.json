@@ -6,6 +6,7 @@
   "description": "Shared configs for the ENSNode project.",
   "license": "MIT",
   "scripts": {
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "files": [
