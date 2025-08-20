@@ -30,12 +30,7 @@ const readableSpanToProtocolSpan = (span: ReadableSpan): ProtocolSpan => ({
   name: span.name,
   timestamp: hrTimeToMicroseconds(span.startTime),
   duration: hrTimeToMicroseconds(span.duration),
-  // only export correctly-prefixed attributes to avoid leaking internal details
-  attributes: Object.fromEntries(
-    Object.entries(span.attributes).filter(([key]) =>
-      key.startsWith(`${PROTOCOL_ATTRIBUTE_PREFIX}.`),
-    ),
-  ),
+  attributes: span.attributes,
   status: span.status,
   events: span.events.map((event: any) => ({
     name: event.name,

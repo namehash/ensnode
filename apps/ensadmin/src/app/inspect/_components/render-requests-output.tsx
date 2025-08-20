@@ -3,7 +3,9 @@ import { LoadingSpinner } from "@/components/loading-spinner";
 import { TraceRenderer } from "@/components/tracing/renderer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { renderTraceDuration } from "@/lib/tracing";
+import { renderMicroseconds } from "@/lib/time";
+import { getTraceDuration } from "@/lib/tracing";
+import { cn } from "@/lib/utils";
 import { ClientError, ProtocolTrace } from "@ensnode/ensnode-sdk";
 import { UseQueryResult } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -11,6 +13,8 @@ import { useMemo } from "react";
 type QueryResult<K extends string> = UseQueryResult<
   { [key in K]: unknown } & { trace?: ProtocolTrace }
 >;
+
+const renderTraceDuration = (trace: ProtocolTrace) => renderMicroseconds(getTraceDuration(trace));
 
 export function RenderRequestsOutput<KEY extends string>({
   dataKey,
@@ -34,6 +38,22 @@ export function RenderRequestsOutput<KEY extends string>({
     (accelerated.isPending || accelerated.isRefetching) &&
     (unaccelerated.isPending || unaccelerated.isRefetching);
 
+  const multipleDiff = useMemo(() => {
+    if (accelerated.status !== "success") return null;
+    if (unaccelerated.status !== "success") return null;
+
+    if (!accelerated.data.trace) return null;
+    if (!unaccelerated.data.trace) return null;
+
+    const acceleratedDuration = getTraceDuration(accelerated.data.trace);
+    const unacceleratedDuration = getTraceDuration(unaccelerated.data.trace);
+
+    if (acceleratedDuration === 0) return null;
+
+    const multiple = unacceleratedDuration / acceleratedDuration;
+    return multiple;
+  }, [accelerated, unaccelerated]);
+
   if (showLoading) {
     // if we're loading but there's no active fetch, the query is unable to be executed, so render null
     if (accelerated.fetchStatus === "idle") return null;
@@ -52,12 +72,56 @@ export function RenderRequestsOutput<KEY extends string>({
 
   return (
     <>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>ENSNode Response</CardTitle>
+        </CardHeader>
+        <CardContent className="max-h-[30rem] overflow-scroll">
+          {(() => {
+            if (someError) {
+              return (
+                <CodeBlock className="rounded-lg">
+                  {JSON.stringify(
+                    {
+                      message: someError.message,
+                      ...(someError instanceof ClientError &&
+                        !!someError.details && { details: someError.details }),
+                    },
+                    null,
+                    2,
+                  )}
+                </CodeBlock>
+              );
+            }
+
+            if (result) {
+              return (
+                <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>
+              );
+            }
+
+            throw new Error("this state shouldn't occur");
+          })()}
+        </CardContent>
+      </Card>
       {(accelerated.data?.trace || unaccelerated.data?.trace) && (
         <Tabs defaultValue="accelerated">
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="flex flex-row items-center justify-between gap-4">
-                <span>Protocol Tracing</span>
+                <span>Execution Trace</span>
+                {multipleDiff && (
+                  <span
+                    className={cn(
+                      "bg-muted py-1 px-2 rounded-lg text-sm",
+                      multipleDiff > 1.15 ? "text-green-500" : "text-muted-foreground",
+                    )}
+                  >
+                    {multipleDiff > 1.15
+                      ? `Acclerated request was ${multipleDiff.toFixed(2)}x faster.`
+                      : "Timings are equivalent"}
+                  </span>
+                )}
                 <TabsList>
                   <TabsTrigger value="accelerated" className="flex flex-row gap-2">
                     <span>Accelerated</span>
@@ -139,38 +203,6 @@ export function RenderRequestsOutput<KEY extends string>({
           </Card>
         </Tabs>
       )}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>ENSNode Response</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-scroll">
-          {(() => {
-            if (someError) {
-              return (
-                <CodeBlock className="rounded-lg">
-                  {JSON.stringify(
-                    {
-                      message: someError.message,
-                      ...(someError instanceof ClientError &&
-                        !!someError.details && { details: someError.details }),
-                    },
-                    null,
-                    2,
-                  )}
-                </CodeBlock>
-              );
-            }
-
-            if (result) {
-              return (
-                <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>
-              );
-            }
-
-            throw new Error("this state shouldn't occur");
-          })()}
-        </CardContent>
-      </Card>
     </>
   );
 }

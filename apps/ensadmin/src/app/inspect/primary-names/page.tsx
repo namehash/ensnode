@@ -6,21 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { getChainName } from "@/lib/namespace-utils";
-import {
-  DatasourceNames,
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  maybeGetDatasource,
-} from "@ensnode/datasources";
-import { usePrimaryName } from "@ensnode/ensnode-react";
+import { usePrimaryNames } from "@ensnode/ensnode-react";
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -28,20 +14,10 @@ import { useDebouncedValue } from "rooks";
 import { Address } from "viem";
 
 const EXAMPLE_INPUT = [
-  { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet
-  { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "8453" }, // greg base
+  "0x179A862703a4adfb29896552DF9e307980D19285", // greg
+  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", // vitalik
+  "0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", // jesse
 ];
-
-const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
-  [
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverBase),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverLinea),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverOptimism),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverArbitrum),
-    maybeGetDatasource(namespace, DatasourceNames.ReverseResolverScroll),
-  ]
-    .filter((ds) => ds !== undefined)
-    .map((ds) => ds.chain.id);
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
@@ -49,18 +25,14 @@ const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
 export default function ResolvePrimaryNameInspector() {
   const searchParams = useSearchParams();
 
-  const [address, setAddress] = useState(searchParams.get("address") || EXAMPLE_INPUT[0].address);
-  const [chainId, setChainId] = useState(searchParams.get("chainId") || EXAMPLE_INPUT[0].chainId);
+  const [address, setAddress] = useState(searchParams.get("address") || EXAMPLE_INPUT[0]);
   const [debouncedAddress] = useDebouncedValue(address, 150);
-
-  const additionalChainIds = getENSIP19SupportedChainIds(ENSNamespaceIds.Mainnet);
 
   const canQuery =
     !!debouncedAddress && debouncedAddress.length > 0 && debouncedAddress.startsWith("0x");
 
-  const accelerated = usePrimaryName({
+  const accelerated = usePrimaryNames({
     address: debouncedAddress as Address,
-    chainId: Number(chainId),
     accelerate: true,
     trace: true,
     query: {
@@ -74,9 +46,8 @@ export default function ResolvePrimaryNameInspector() {
     },
   });
 
-  const unaccelerated = usePrimaryName({
+  const unaccelerated = usePrimaryNames({
     address: debouncedAddress as Address,
-    chainId: Number(chainId),
     accelerate: false,
     trace: true,
     query: {
@@ -99,7 +70,7 @@ export default function ResolvePrimaryNameInspector() {
     <div className="flex flex-col gap-4 p-4 min-w-0">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Primary Name Inspector</CardTitle>
+          <CardTitle>Primary Names Inspector</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-row gap-4">
@@ -107,7 +78,7 @@ export default function ResolvePrimaryNameInspector() {
               EVM Address
               <Input
                 id="name"
-                placeholder={EXAMPLE_INPUT[0].address}
+                placeholder={EXAMPLE_INPUT[0]}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 autoComplete="off"
@@ -115,38 +86,14 @@ export default function ResolvePrimaryNameInspector() {
                 data-1p-ignore
               />
             </Label>
-            <Label htmlFor="chainId" className="flex-1 flex flex-col gap-1">
-              ENSIP-19 Chain ID
-              <Select value={chainId} onValueChange={setChainId}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">0 (Default EVM Chain Address)</SelectItem>
-                  <SelectItem value="1">1 (Mainnet)</SelectItem>
-                  {additionalChainIds.map((chainId) => (
-                    <SelectItem key={chainId} value={chainId.toString()}>
-                      {chainId} ({getChainName(chainId)})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Label>
           </div>
           <div className="flex flex-col gap-2 justify-center">
             <span className="text-sm font-medium leading-none">Examples:</span>
             {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
-              {EXAMPLE_INPUT.map(({ address, chainId }) => (
-                <Pill
-                  key={`${address}-${chainId}`}
-                  onClick={() => {
-                    setAddress(address);
-                    setChainId(chainId);
-                  }}
-                  className="font-mono"
-                >
-                  {address} ({getChainName(Number(chainId))})
+              {EXAMPLE_INPUT.map((address) => (
+                <Pill key={address} onClick={() => setAddress(address)} className="font-mono">
+                  {address}
                 </Pill>
               ))}
             </div>
@@ -158,7 +105,7 @@ export default function ResolvePrimaryNameInspector() {
       </Card>
 
       <RenderRequestsOutput
-        dataKey="name"
+        dataKey="names"
         accelerated={accelerated}
         unaccelerated={unaccelerated}
       />

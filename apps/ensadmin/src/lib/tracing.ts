@@ -1,4 +1,3 @@
-import { renderMicroseconds } from "@/lib/time";
 import type { ProtocolTrace } from "@ensnode/ensnode-sdk";
 
 import { ForwardResolutionProtocolStep, ReverseResolutionProtocolStep } from "@ensnode/ensnode-sdk";
@@ -15,7 +14,8 @@ const FORWARD_STEPS: Record<ForwardResolutionProtocolStep, { title: string; desc
     },
     [ForwardResolutionProtocolStep.ActiveResolverExists]: {
       title: "Active Resolver Exists",
-      description: "", // NOTE: events not yet rendered, not necessary
+      description:
+        "Determine whether an active resolver responsible for a name's record was found.",
     },
     [ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver]: {
       title: "Accelerate ENSIP-19 Reverse Resolver",
@@ -56,7 +56,7 @@ const REVERSE_STEPS: Record<ReverseResolutionProtocolStep, { title: string; desc
     },
     [ReverseResolutionProtocolStep.NameRecordExists]: {
       title: "Name Record Exists Check",
-      description: "", // NOTE: events not yet rendered, not necessary
+      description: "Determine whether the Reverse Name's 'name' record exists.",
     },
     [ReverseResolutionProtocolStep.ForwardResolveAddressRecord]: {
       title: "Forward Resolve Address Record",
@@ -65,11 +65,12 @@ const REVERSE_STEPS: Record<ReverseResolutionProtocolStep, { title: string; desc
     },
     [ReverseResolutionProtocolStep.VerifyResolvedAddressMatchesAddress]: {
       title: "Verify Resolved Address Matches Address",
-      description: "", // NOTE: events not yet rendered, not necessary
+      description:
+        "The resolved 'address' record must match the input address for the 'name' record to be considered the address' Primary Name.",
     },
   };
 
-export function renderProtocolStep(
+export function getProtocolStepInfo(
   step: ForwardResolutionProtocolStep | ReverseResolutionProtocolStep,
 ) {
   return (
@@ -78,7 +79,6 @@ export function renderProtocolStep(
   );
 }
 
-export function renderTraceDuration(trace: ProtocolTrace) {
-  if (trace.length === 0) throw new Error("Invariant: provided trace has no root span.");
-  return renderMicroseconds(trace[0].duration);
+export function getTraceDuration(trace: ProtocolTrace) {
+  return Math.max(...trace.map((span) => span.duration), 0);
 }
