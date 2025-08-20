@@ -1,6 +1,6 @@
 ---
-"ensrainbow": patch
-"@docs/ensnode": patch
+"ensrainbow": minor
+"@docs/ensnode": minor
 ---
 
 Introduced ENSRainbow v2 data format.
