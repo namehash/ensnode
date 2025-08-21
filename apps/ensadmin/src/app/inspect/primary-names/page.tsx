@@ -15,6 +15,7 @@ import { Address } from "viem";
 
 const EXAMPLE_INPUT = [
   "0x179A862703a4adfb29896552DF9e307980D19285", // greg
+  "0xe7a863d7cdC48Cc0CcB135c9c0B4c1fafA3a2e69", // katzman
   "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", // vitalik
   "0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", // jesse
 ];

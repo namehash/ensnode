@@ -13,7 +13,19 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
 
-const EXAMPLE_INPUT = ["vitalik.eth", "gregskril.eth", "jesse.base.eth", "🔥🔥🔥🔥🔥.eth"];
+const EXAMPLE_INPUT = [
+  "vitalik.eth",
+  "gregskril.eth",
+  "katzman.base.eth",
+  "jesse.base.eth",
+  "alain.linea.eth",
+  "goinfrex.linea.eth",
+  "gift.box",
+  "barmstrong.cb.id",
+  "argent.xyz",
+  "lens.xyz",
+  "🔥🔥🔥🔥🔥.eth",
+];
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board

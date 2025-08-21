@@ -16,6 +16,8 @@ type QueryResult<K extends string> = UseQueryResult<
 
 const renderTraceDuration = (trace: ProtocolTrace) => renderMicroseconds(getTraceDuration(trace));
 
+const MULTIPLE_THRESHOLD = 1.3; // accelerated requests must be 1.3x faster to be considered green
+
 export function RenderRequestsOutput<KEY extends string>({
   dataKey,
   accelerated,
@@ -114,12 +116,14 @@ export function RenderRequestsOutput<KEY extends string>({
                   <span
                     className={cn(
                       "bg-muted py-1 px-2 rounded-lg text-sm",
-                      multipleDiff > 1.15 ? "text-green-500" : "text-muted-foreground",
+                      multipleDiff > MULTIPLE_THRESHOLD
+                        ? "text-green-500"
+                        : "text-muted-foreground",
                     )}
                   >
-                    {multipleDiff > 1.15
+                    {multipleDiff > MULTIPLE_THRESHOLD
                       ? `Acclerated request was ${multipleDiff.toFixed(2)}x faster.`
-                      : "Timings are equivalent"}
+                      : "Timings are more or less equivalent."}
                   </span>
                 )}
                 <TabsList>

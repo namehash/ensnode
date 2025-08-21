@@ -30,6 +30,7 @@ import { Address } from "viem";
 const EXAMPLE_INPUT = [
   { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet
   { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "8453" }, // greg base
+  { address: "0xe7a863d7cdC48Cc0CcB135c9c0B4c1fafA3a2e69", chainId: "1" }, // katzman mainnet
 ];
 
 const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
