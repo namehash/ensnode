@@ -3,6 +3,7 @@ export * from "./ensindexer";
 export * from "./shared";
 export * from "./tracing";
 export * from "./client";
+export * from "./client-error";
 export * from "./resolution";
 export * from "./api";
 

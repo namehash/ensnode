@@ -1,14 +1,12 @@
 import { Suspense } from "react";
 
 import { IndexingStatus } from "@/components/indexing-status";
-import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 export default function Status() {
   return (
     <Suspense fallback={<Loading />}>
-      <ENSNodeProvider>
-        <IndexingStatus />
-      </ENSNodeProvider>
+      <IndexingStatus />
     </Suspense>
   );
 }
@@ -16,7 +14,7 @@ export default function Status() {
 function Loading() {
   return (
     <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      <LoadingSpinner className="h-32 w-32" />
     </div>
   );
 }

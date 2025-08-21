@@ -2,7 +2,7 @@
  * This file gathers ideas for UI components presenting chain indexing timeline.
  */
 
-import { ChainName } from "@/components/ui/ChainName";
+import { ChainName } from "@/components/chains/ChainName";
 import { cn } from "@/lib/utils";
 import { ChainId, ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { intlFormat } from "date-fns";
