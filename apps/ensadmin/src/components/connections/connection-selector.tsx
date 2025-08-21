@@ -42,12 +42,12 @@ export function ConnectionSelector() {
 
   const {
     connections,
-    addConnection: _addConnection,
+    addAndSelectConnection: _addAndSelectConnection,
     removeConnection,
     selectConnection,
   } = useENSNodeConnections();
   const activeENSNodeUrl = useActiveENSNodeUrl().toString();
-  const addConnection = useMutation({ mutationFn: _addConnection });
+  const addAndSelectConnection = useMutation({ mutationFn: _addAndSelectConnection });
 
   const [newUrl, setNewUrl] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -55,19 +55,16 @@ export function ConnectionSelector() {
   const handleSelect = (url: string) => {
     selectConnection(url);
     setDialogOpen(false);
-
-    // TODO: remove this and the listener in Error if deemed not necessary
-    // window.dispatchEvent(new CustomEvent("ensnode/connection/set", { detail: { url } }));
   };
 
   const handleAdd = () => {
-    addConnection.mutate(newUrl, {
+    addAndSelectConnection.mutate(newUrl, {
       onSuccess: (url) => {
-        selectConnection(url);
-
         setNewUrl("");
         setDialogOpen(false);
-        toast.success(`You are now connected to ${newUrl}.`);
+        toast.success(`You are now connected to ${url}`);
+
+        addAndSelectConnection.reset();
       },
     });
   };
@@ -210,12 +207,15 @@ export function ConnectionSelector() {
               value={newUrl}
               onChange={(e) => {
                 setNewUrl(e.target.value);
-                addConnection.reset();
+                addAndSelectConnection.reset();
               }}
-              className={cn("font-mono", addConnection.isError ? "border-destructive" : "")}
+              className={cn(
+                "font-mono",
+                addAndSelectConnection.isError ? "border-destructive" : "",
+              )}
             />
-            {addConnection.isError && (
-              <p className="text-xs text-destructive">{addConnection.error.message}</p>
+            {addAndSelectConnection.isError && (
+              <p className="text-xs text-destructive">{addAndSelectConnection.error.message}</p>
             )}
           </div>
         </form>
@@ -226,13 +226,17 @@ export function ConnectionSelector() {
             onClick={() => {
               setDialogOpen(false);
               setNewUrl("");
-              addConnection.reset();
+              addAndSelectConnection.reset();
             }}
           >
             Cancel
           </Button>
-          <Button type="submit" onClick={handleAdd} disabled={addConnection.isPending || !newUrl}>
-            {addConnection.isPending ? (
+          <Button
+            type="submit"
+            onClick={handleAdd}
+            disabled={addAndSelectConnection.isPending || !newUrl}
+          >
+            {addAndSelectConnection.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Adding...

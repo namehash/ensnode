@@ -80,7 +80,8 @@ function _useENSNodeConnections() {
   const addAndSelectConnection = useCallback(
     async (url: string) => {
       const added = await addConnection(url);
-      return selectConnection(added);
+      setSelected(added);
+      return added;
     },
     [addConnection, selectConnection],
   );
@@ -101,7 +102,9 @@ function _useENSNodeConnections() {
 
   // clear selected if it is invalid
   useEffect(() => {
-    if (selected && !isInConnections(selected)) clearSelected();
+    if (selected && !isInConnections(selected)) {
+      clearSelected();
+    }
   }, [selected, isInConnections]);
 
   return {
