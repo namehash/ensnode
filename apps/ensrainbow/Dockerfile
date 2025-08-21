@@ -15,6 +15,7 @@ WORKDIR /app
 # Copy package files for dependency installation
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/ packages/
+COPY patches/ patches/
 COPY apps/ensrainbow/package.json apps/ensrainbow/
 
 # Install dependencies
