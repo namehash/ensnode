@@ -60,7 +60,7 @@ export function TraceRenderer({ trace }: { trace: ProtocolTrace }) {
                 const { title, description } = getProtocolStepInfo(protocolStep);
 
                 return (
-                  <HoverCard openDelay={0} closeDelay={0}>
+                  <HoverCard key={event.name} openDelay={0} closeDelay={0}>
                     <HoverCardTrigger asChild>
                       <div
                         className="w-2 z-10 rounded bg-gray-400 bg-opacity-20 text-xs whitespace-nowrap flex-shrink-0 cursor-pointer absolute top-0 bottom-0"
