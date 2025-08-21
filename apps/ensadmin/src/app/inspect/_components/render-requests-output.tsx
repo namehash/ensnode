@@ -27,7 +27,6 @@ export function RenderRequestsOutput<KEY extends string>({
   accelerated: QueryResult<KEY>;
   unaccelerated: QueryResult<KEY>;
 }) {
-  // TODO: render a % faster in green/red for comparison
   // TODO: produce a diff between accelerated/not-accelerated and display any differences
   const result = useMemo(() => {
     return accelerated.data?.[dataKey] || unaccelerated.data?.[dataKey];
