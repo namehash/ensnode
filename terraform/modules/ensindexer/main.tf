@@ -63,6 +63,9 @@ resource "render_web_service" "ensindexer" {
     {
       ENSNODE_PUBLIC_URL = {
         value = "https://${local.full_ensindexer_hostname}"
+      },
+      ENSINDEXER_URL = {
+        value = "http://localhost:1000"
       }
     }
   )
@@ -91,7 +94,9 @@ resource "render_web_service" "ensindexer_api" {
     {
       ENSNODE_PUBLIC_URL = {
         value = "https://${local.full_ensindexer_api_hostname}"
-
+      },
+      ENSINDEXER_URL = {
+        value = "http://ensindexer_${var.instance_name}:1000"
       },
       PONDER_COMMAND = {
         value = "serve"

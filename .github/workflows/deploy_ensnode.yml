@@ -242,7 +242,7 @@ jobs:
         run: terraform init
         working-directory: terraform
 
-      - name: Terraform Init
+      - name: Terraform workspace
         run: terraform workspace select ${{env.TF_VAR_render_environment}}
         working-directory: terraform
 
