@@ -96,13 +96,7 @@ export function RenderRequestsOutput<KEY extends string>({
               );
             }
 
-            if (result) {
-              return (
-                <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>
-              );
-            }
-
-            throw new Error("this state shouldn't occur");
+            return <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>;
           })()}
         </CardContent>
       </Card>
