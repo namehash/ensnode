@@ -1,23 +1,20 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { IndexingStatusDisplay } from "@/components/indexing-status";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
-  deserializeENSIndexerIndexingStatus,
-  SerializedENSIndexerOverallIndexingStatus,
   ENSIndexerPublicConfig,
   PluginName,
+  SerializedENSIndexerOverallIndexingStatus,
+  deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
-import { ENSNamespaceIds } from "@ensnode/datasources";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { IndexingStatusDisplay } from "@/components/indexing-status";
+import { useMemo, useState } from "react";
 
 import mockDataJson from "./data.json";
 
-const mockStatusData = mockDataJson as Record<
-  string,
-  SerializedENSIndexerOverallIndexingStatus
->;
+const mockStatusData = mockDataJson as Record<string, SerializedENSIndexerOverallIndexingStatus>;
 
 type StatusVariant = keyof typeof mockStatusData;
 
@@ -40,18 +37,14 @@ const mockConfig: ENSIndexerPublicConfig = {
 };
 
 export default function StatusMockPage() {
-  const [selectedVariant, setSelectedVariant] =
-    useState<StatusVariant>("unstarted");
+  const [selectedVariant, setSelectedVariant] = useState<StatusVariant>("unstarted");
 
   const { deserializedStatus, validationError } = useMemo(() => {
     try {
-      const status = deserializeENSIndexerIndexingStatus(
-        mockStatusData[selectedVariant]
-      );
+      const status = deserializeENSIndexerIndexingStatus(mockStatusData[selectedVariant]);
       return { deserializedStatus: status, validationError: null };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown validation error";
+      const errorMessage = error instanceof Error ? error.message : "Unknown validation error";
       return { deserializedStatus: null, validationError: errorMessage };
     }
   }, [selectedVariant]);
@@ -77,9 +70,7 @@ export default function StatusMockPage() {
             <CardTitle className="text-red-800">Validation Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="text-sm text-red-700 whitespace-pre-wrap">
-              {validationError}
-            </pre>
+            <pre className="text-sm text-red-700 whitespace-pre-wrap">{validationError}</pre>
           </CardContent>
         </Card>
       )}

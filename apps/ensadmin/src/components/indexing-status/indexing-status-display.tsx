@@ -60,25 +60,17 @@ export function IndexingStatusDisplay({
       break;
 
     case OverallIndexingStatusIds.Unstarted:
-      indexingStats = (
-        <IndexingStatsForUnstartedStatus indexingStatus={indexingStatus} />
-      );
+      indexingStats = <IndexingStatsForUnstartedStatus indexingStatus={indexingStatus} />;
       break;
 
     case OverallIndexingStatusIds.Backfill:
-      indexingStats = (
-        <IndexingStatsForBackfillStatus indexingStatus={indexingStatus} />
-      );
+      indexingStats = <IndexingStatsForBackfillStatus indexingStatus={indexingStatus} />;
 
-      maybeIndexingTimeline = (
-        <BackfillStatus indexingStatus={indexingStatus} />
-      );
+      maybeIndexingTimeline = <BackfillStatus indexingStatus={indexingStatus} />;
       break;
 
     case OverallIndexingStatusIds.Completed:
-      indexingStats = (
-        <IndexingStatsForCompletedStatus indexingStatus={indexingStatus} />
-      );
+      indexingStats = <IndexingStatsForCompletedStatus indexingStatus={indexingStatus} />;
 
       if (showRecentRegistrations) {
         maybeRecentRegistrations = (
@@ -93,9 +85,7 @@ export function IndexingStatusDisplay({
       break;
 
     case OverallIndexingStatusIds.Following:
-      indexingStats = (
-        <IndexingStatsForFollowingStatus indexingStatus={indexingStatus} />
-      );
+      indexingStats = <IndexingStatsForFollowingStatus indexingStatus={indexingStatus} />;
 
       if (showRecentRegistrations) {
         maybeRecentRegistrations = (
