@@ -64,6 +64,7 @@ jobs:
           RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
           RPC_URL_8453: ${{ secrets.BASE_RPC_URL || 'https://base.drpc.org' }}
           RPC_URL_59144: ${{ secrets.LINEA_RPC_URL || 'https://linea.drpc.org' }}
+          RPC_URL_42161: ${{ secrets.ARBITRUM_RPC_URL || 'https://arbitrum.drpc.org' }}
           RPC_URL_534352: ${{ secrets.SCROLL_RPC_URL || 'https://scroll.drpc.org' }}
           HEALTH_CHECK_TIMEOUT: 60
           ENSRAINBOW_URL: https://api.ensrainbow.io
