@@ -85,6 +85,7 @@ export const makeChainIndexingBackfillStatusSchema = (valueLabel: string = "Valu
       status: z.literal(ChainIndexingStatusIds.Backfill),
       config: makeChainIndexingConfigSchema(valueLabel),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
+      latestSyncedBlock: makeBlockRefSchema(valueLabel),
       backfillEndBlock: makeBlockRefSchema(valueLabel),
     })
     .refine(
@@ -95,10 +96,17 @@ export const makeChainIndexingBackfillStatusSchema = (valueLabel: string = "Valu
       },
     )
     .refine(
-      ({ latestIndexedBlock, backfillEndBlock }) =>
-        blockRef.isBeforeOrEqualTo(latestIndexedBlock, backfillEndBlock),
+      ({ latestIndexedBlock, latestSyncedBlock }) =>
+        blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestSyncedBlock),
       {
-        error: `latestIndexedBlock must be before or same as backfillEndBlock.`,
+        error: `latestIndexedBlock must be before or same as latestSyncedBlock.`,
+      },
+    )
+    .refine(
+      ({ latestSyncedBlock, backfillEndBlock }) =>
+        blockRef.isBeforeOrEqualTo(latestSyncedBlock, backfillEndBlock),
+      {
+        error: `latestSyncedBlock must be before or same as backfillEndBlock.`,
       },
     )
     .refine(
@@ -161,9 +169,10 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
       },
     )
     .refine(
-      ({ config, latestIndexedBlock }) => blockRef.isEqualTo(latestIndexedBlock, config.endBlock),
+      ({ config, latestIndexedBlock }) =>
+        blockRef.isBeforeOrEqualTo(latestIndexedBlock, config.endBlock),
       {
-        error: `latestIndexedBlock must be the same as config.endBlock.`,
+        error: `latestIndexedBlock must be before or same as config.endBlock.`,
       },
     );
 

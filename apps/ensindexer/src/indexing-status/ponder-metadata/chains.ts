@@ -171,13 +171,17 @@ export function getChainIndexingStatus(
       latestIndexedBlock: chainStatusBlock,
       latestKnownBlock: chainSyncBlock,
       approxRealtimeDistance,
-      config,
+      config: {
+        strategy: config.strategy,
+        startBlock: config.startBlock,
+      },
     } satisfies ChainIndexingFollowingStatus;
   }
 
   return {
     status: ChainIndexingStatusIds.Backfill,
     latestIndexedBlock: chainStatusBlock,
+    latestSyncedBlock: chainSyncBlock,
     backfillEndBlock: chainBackfillEndBlock,
     config,
   } satisfies ChainIndexingBackfillStatus;

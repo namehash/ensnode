@@ -1,7 +1,7 @@
 import { UnixTimestampInSeconds, unixTimestampToDate } from "@/components/datetime-utils";
 import { ensAdminVersion } from "@/lib/env";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
-import { ENSNamespaceId } from "@ensnode/datasources";
+import { ENSNamespace, ENSNamespaceId } from "@ensnode/datasources";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
@@ -119,24 +119,37 @@ async function fetchRecentRegistrations(
   );
 }
 
+interface UseRecentRegistrationsProps {
+  /**
+   * The URL of the selected ENS node instance.
+   */
+  ensNodeUrl: URL;
+
+  /**
+   * The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+   */
+  namespaceId: ENSNamespaceId;
+
+  /**
+   * The max number of recent registrations to retrieve.
+   */
+  maxRecords: number;
+}
+
 /**
  * Hook to fetch info about most recently registered domains that have been indexed.
- *
- * @param ensNodeURL The URL of the selected ENS node instance.
- * @param maxResults The max number of recent registrations to retrieve
- * @param namespaceId The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  */
-export function useRecentRegistrations(
-  ensNodeURL: URL,
-  maxResults: number,
-  namespaceId: ENSNamespaceId,
-) {
+export function useRecentRegistrations({
+  ensNodeUrl,
+  namespaceId,
+  maxRecords,
+}: UseRecentRegistrationsProps) {
   return useQuery({
-    queryKey: [ensNodeURL, namespaceId, "recent-registrations", maxResults],
-    queryFn: () => fetchRecentRegistrations(ensNodeURL, maxResults, namespaceId),
+    queryKey: [ensNodeUrl, namespaceId, "recent-registrations", maxRecords],
+    queryFn: () => fetchRecentRegistrations(ensNodeUrl, maxRecords, namespaceId),
     throwOnError(error) {
       throw new Error(
-        `Could not fetch recent registrations from '${ensNodeURL}'. Cause: ${error.message}`,
+        `Could not fetch recent registrations from '${ensNodeUrl}'. Cause: ${error.message}`,
       );
     },
   });

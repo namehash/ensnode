@@ -132,7 +132,8 @@ export interface ChainIndexingUnstartedStatus {
  *
  * Invariants:
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
- * - `latestIndexedBlock` is always before or the same as `backfillEndBlock`
+ * - `latestIndexedBlock` is always before or the same as `latestSyncedBlock`
+ * - `latestSyncedBlock` is always before or the same as `backfillEndBlock`
  * - `backfillEndBlock` is the same as `config.endBlock` if and only if
  *   the config is definite.
  */
@@ -144,6 +145,12 @@ export interface ChainIndexingBackfillStatus {
    * The block that was most recently indexed.
    */
   latestIndexedBlock: BlockRef;
+
+  /**
+   * The "highest" block that has been synced into RPC cache. Backfill indexing
+   * is accelerated by cached RPC calls through this block height.
+   */
+  latestSyncedBlock: BlockRef;
 
   /**
    * The block that is the target for finishing the backfill.

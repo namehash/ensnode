@@ -102,6 +102,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
+          latestSyncedBlock: latestBlockRef,
           backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus,
 
@@ -145,6 +146,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
             endBlock: latestBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
+          latestSyncedBlock: latestBlockRef,
           backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus,
 
@@ -189,7 +191,8 @@ describe("ENSIndexer: Indexing Status helpers", () => {
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
-          latestIndexedBlock: laterBlockRef,
+          latestIndexedBlock: earlierBlockRef,
+          latestSyncedBlock: laterBlockRef,
           backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus,
 
