@@ -6,7 +6,7 @@ interface InlineSummaryProps {
 
 export function InlineSummary(props: InlineSummaryProps) {
   return (
-    <ul className="text-sm text-muted-foreground mt-1 flex gap-4">
+    <ul className="text-sm text-muted-foreground mt-1 flex flex-row flex-wrap gap-4">
       {props.items.map((item) => (
         <InlineSummaryItem key={item.label} label={item.label} value={item.value} />
       ))}
