@@ -40,7 +40,7 @@ export default function StatusMockPage() {
       <Card>
         <CardHeader>
           <CardTitle>Mock: Indexing Status</CardTitle>
-          <CardDescription>Select an mock indexing status scenario</CardDescription>
+          <CardDescription>Select a mock indexing status scenario</CardDescription>
         </CardHeader>
 
         <CardContent>
