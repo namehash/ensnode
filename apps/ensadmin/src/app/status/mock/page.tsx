@@ -22,6 +22,10 @@ const mockConfig: ENSIndexerPublicConfig = {
   namespace: ENSNamespaceIds.Mainnet,
   ensAdminUrl: new URL("https://admin.ensnode.io"),
   ensNodePublicUrl: new URL("https://ensnode.run.tko.box"),
+  labelSet: {
+    labelSetId: "subgraph",
+    labelSetVersion: 0,
+  },
   databaseSchemaName: "aug20--d09f7d77ec32aba8c789c8ac059241b45b99addc",
   plugins: [PluginName.Subgraph],
   healReverseAddresses: false,
