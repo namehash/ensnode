@@ -12,6 +12,7 @@ import {
   ZodCheckFnInput,
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
+  makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
   makeUrlSchema,
 } from "../../shared/zod-schemas";
@@ -67,39 +68,122 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
     });
 
 /**
+ * Makes a schema for parsing a label set ID.
+ *
+ * The label set ID is guaranteed to be a string between 1-50 characters
+ * containing only lowercase letters (a-z) and hyphens (-).
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set ID", "LABEL_SET_ID")
+ * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
+ */
+export const makeLabelSetIdSchema = (
+  valueLabel: string = "Label set ID",
+  directErrorMessages: boolean = false,
+) => {
+  const getError = (field: string, message: string) => {
+    if (directErrorMessages) {
+      return `LABEL_SET_ID ${message}`;
+    }
+    return `${valueLabel}.labelSetId ${message}`;
+  };
+
+  return z
+    .string({ error: getError("labelSetId", "must be a string") })
+    .min(1, { error: getError("labelSetId", "must be 1-50 characters long") })
+    .max(50, { error: getError("labelSetId", "must be 1-50 characters long") })
+    .regex(/^[a-z-]+$/, {
+      error: getError("labelSetId", "can only contain lowercase letters (a-z) and hyphens (-)"),
+    });
+};
+
+/**
+ * Makes a schema for parsing a label set version.
+ *
+ * The label set version is guaranteed to be a non-negative integer.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
+ * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
+ */
+export const makeLabelSetVersionSchema = (
+  valueLabel: string = "Label set version",
+  directErrorMessages: boolean = false,
+) => {
+  const getError = (field: string, message: string) => {
+    if (directErrorMessages) {
+      return `LABEL_SET_VERSION ${message}`;
+    }
+    return `${valueLabel}.labelSetVersion ${message}`;
+  };
+
+  return z.coerce
+    .number({ error: getError("labelSetVersion", "must be a non-negative integer") })
+    .int({ error: getError("labelSetVersion", "must be a non-negative integer") })
+    .min(0, { error: getError("labelSetVersion", "must be a non-negative integer") });
+};
+
+/**
+ * Makes a schema for parsing a label set in universal context.
+ *
+ * This schema allows for either both fields undefined, or label set ID defined but label set version undefined.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
+ * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
+ */
+export const makeLabelSetUniversalSchema = (
+  valueLabel: string = "Label set",
+  directErrorMessages: boolean = false,
+) => {
+  return z
+    .object({
+      labelSetId: makeLabelSetIdSchema(valueLabel, directErrorMessages).optional(),
+      labelSetVersion: makeLabelSetVersionSchema(valueLabel, directErrorMessages).optional(),
+    })
+    .refine(
+      (data) => {
+        // Either both undefined, or labelSetId defined but labelSetVersion undefined
+        return (
+          (data.labelSetId === undefined && data.labelSetVersion === undefined) ||
+          (data.labelSetId !== undefined && data.labelSetVersion === undefined)
+        );
+      },
+      {
+        message: `${valueLabel} must have either both fields undefined, or labelSetId defined but labelSetVersion undefined.`,
+      },
+    );
+};
+
+/**
+ * Makes a schema for parsing a label set where both label set ID and label set version are required.
+ *
+ * This schema is what we'll probably be using in this PR, similar to Required<X>.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
+ * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
+ */
+export const makeLabelSetRequiredSchema = (
+  valueLabel: string = "Label set",
+  directErrorMessages: boolean = false,
+) => {
+  return z.object({
+    labelSetId: makeLabelSetIdSchema(valueLabel, directErrorMessages),
+    labelSetVersion: makeLabelSetVersionSchema(valueLabel, directErrorMessages),
+  });
+};
+
+/**
  * Makes a schema for parsing a label set configuration.
  *
  * The label set configuration is guaranteed to have valid labelSetId and labelSetVersion.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
  * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
+ * @deprecated Use makeLabelSetRequiredSchema instead for better modularity
  */
 export const makeLabelSetSchema = (
   valueLabel: string = "Label set",
   directErrorMessages: boolean = false,
 ) => {
-  const getError = (field: string, message: string) => {
-    if (directErrorMessages) {
-      // For environment variable context, use the environment variable names
-      const envVarName = field === "labelSetId" ? "LABEL_SET_ID" : "LABEL_SET_VERSION";
-      return `${envVarName} ${message}`;
-    }
-    return `${valueLabel}.${field} ${message}`;
-  };
-
-  return z.object({
-    labelSetId: z
-      .string({ error: getError("labelSetId", "must be a string") })
-      .min(1, { error: getError("labelSetId", "must be 1-50 characters long") })
-      .max(50, { error: getError("labelSetId", "must be 1-50 characters long") })
-      .regex(/^[a-z-]+$/, {
-        error: getError("labelSetId", "can only contain lowercase letters (a-z) and hyphens (-)"),
-      }),
-    labelSetVersion: z.coerce
-      .number({ error: getError("labelSetVersion", "must be a non-negative integer") })
-      .int({ error: getError("labelSetVersion", "must be a non-negative integer") })
-      .min(0, { error: getError("labelSetVersion", "must be a non-negative integer") }),
-  });
+  return makeLabelSetRequiredSchema(valueLabel, directErrorMessages);
 };
 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
