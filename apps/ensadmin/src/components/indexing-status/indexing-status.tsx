@@ -21,6 +21,7 @@ import {
   IndexingStatsForUnstartedStatus,
   IndexingStatsShell,
 } from "./indexing-stats";
+import { IndexingStatusPlaceholder } from "./indexing-status-placeholder";
 
 export function IndexingStatus() {
   const ensIndexerConfigQuery = useENSIndexerConfig();
