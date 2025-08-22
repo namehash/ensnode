@@ -86,7 +86,7 @@ module "ensrainbow" {
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
   ensnode_version       = var.ensnode_version
-  
+
   # Label Set Configuration for ENSRainbow
   ensrainbow_label_set_id      = var.ensrainbow_label_set_id
   ensrainbow_label_set_version = var.ensrainbow_label_set_version
