@@ -18,9 +18,7 @@ export function hasAchievedRequestedDistance(
   requestedRealtimeIndexingDistance: Duration | undefined,
 ): boolean {
   // return true if no particular distance value was requested
-  if (typeof requestedRealtimeIndexingDistance === "undefined") {
-    return true;
-  }
+  if (requestedRealtimeIndexingDistance === undefined) return true;
 
   // otherwise, ensure the requested distance was achieved
   return (
