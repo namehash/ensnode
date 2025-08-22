@@ -56,13 +56,13 @@ export function MockIndexingStatusDisplay({ indexingStatus }: MockIndexingStatus
   }
 
   return (
-    <section className="flex flex-col gap-6 p-6">
+    <>
       {maybeIndexingTimeline}
 
       <IndexingStatsShell overallStatus={indexingStatus.overallStatus}>
         {indexingStats}
       </IndexingStatsShell>
-    </section>
+    </>
   );
 }
 

@@ -1,11 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ENSNamespaceIds } from "@ensnode/datasources";
 import {
-  ENSIndexerPublicConfig,
-  PluginName,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   SerializedENSIndexerOverallIndexingStatus,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -17,24 +21,6 @@ import mockDataJson from "./data.json";
 const mockStatusData = mockDataJson as Record<string, SerializedENSIndexerOverallIndexingStatus>;
 
 type StatusVariant = keyof typeof mockStatusData;
-
-const mockConfig: ENSIndexerPublicConfig = {
-  namespace: ENSNamespaceIds.Mainnet,
-  ensAdminUrl: new URL("https://admin.ensnode.io"),
-  ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
-  databaseSchemaName: "aug20--d09f7d77ec32aba8c789c8ac059241b45b99addc",
-  plugins: [PluginName.Subgraph],
-  healReverseAddresses: false,
-  indexAdditionalResolverRecords: false,
-  indexedChainIds: new Set([1, 10, 8453, 59144, 11155111]), // masp to mocks tko sent
-  isSubgraphCompatible: true,
-  dependencyInfo: {
-    nodejs: "22.11.0",
-    ponder: "0.11.43",
-    ensRainbow: "0.33.0",
-    ensRainbowSchema: 2,
-  },
-};
 
 export default function StatusMockPage() {
   const [selectedVariant, setSelectedVariant] = useState<StatusVariant>("unstarted");
@@ -50,19 +36,28 @@ export default function StatusMockPage() {
   }, [selectedVariant]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex flex-wrap gap-2 mb-4 p-6">
-        {Object.keys(mockStatusData).map((variant) => (
-          <Button
-            key={variant}
-            variant={selectedVariant === variant ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedVariant(variant as StatusVariant)}
-          >
-            {variant}
-          </Button>
-        ))}
-      </div>
+    <section className="flex flex-col gap-6 p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Mock: Indexing Status</CardTitle>
+          <CardDescription>Select an mock indexing status scenario</CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {Object.keys(mockStatusData).map((variant) => (
+              <Button
+                key={variant}
+                variant={selectedVariant === variant ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedVariant(variant as StatusVariant)}
+              >
+                {variant}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {validationError && (
         <Card className="border-red-200 bg-red-50">
@@ -78,6 +73,6 @@ export default function StatusMockPage() {
       {deserializedStatus && (
         <MockIndexingStatusDisplayWithProps indexingStatus={deserializedStatus} />
       )}
-    </div>
+    </section>
   );
 }
