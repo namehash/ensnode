@@ -62,7 +62,7 @@ export default function StatusMockPage() {
       {validationError && (
         <Card className="border-red-200 bg-red-50">
           <CardHeader>
-            <CardTitle className="text-red-800">Mock JSON Data Validation</CardTitle>
+            <CardTitle className="text-red-800">Mock JSON Data Validation Error</CardTitle>
           </CardHeader>
           <CardContent>
             <pre className="text-sm text-red-700 whitespace-pre-wrap">{validationError}</pre>
