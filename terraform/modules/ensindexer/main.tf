@@ -6,6 +6,8 @@ locals {
     "DATABASE_URL"                      = { value = var.database_url },
     "DATABASE_SCHEMA"                   = { value = var.database_schema },
     "ENSRAINBOW_URL"                    = { value = var.ensrainbow_url },
+    "LABEL_SET_ID"                      = { value = var.label_set_id },
+    "LABEL_SET_VERSION"                 = { value = var.label_set_version },
     "PLUGINS"                           = { value = var.plugins },
     "NAMESPACE"                         = { value = var.namespace },
     "INDEX_ADDITIONAL_RESOLVER_RECORDS" = { value = var.index_additional_resolver_records },

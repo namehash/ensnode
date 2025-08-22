@@ -3,6 +3,7 @@ import { prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
+import { makeLabelSetSchema } from "@ensnode/ensnode-sdk";
 import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
@@ -124,6 +125,8 @@ const PortSchema = z.coerce
 
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
+const LabelSetSchema = makeLabelSetSchema("LABEL_SET", true);
+
 const RpcConfigsSchema = z
   .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
     error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
@@ -172,6 +175,7 @@ const ENSIndexerConfigSchema = z
     indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
     port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
+    labelSet: LabelSetSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
   })

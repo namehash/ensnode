@@ -1,4 +1,5 @@
 import type { ChainId, ChainIdString, UrlString } from "@ensnode/ensnode-sdk";
+import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 import type { ENSIndexerConfig, RpcConfig } from "./types";
 
 /**
@@ -43,6 +44,11 @@ export interface SerializedENSIndexerConfig
    * String representation of {@link ENSIndexerConfig.ensRainbowUrl}.
    */
   ensRainbowUrl: UrlString;
+
+  /**
+   * The label set configuration that ENSIndexer will use for deterministic label healing.
+   */
+  labelSet: EnsRainbowClientLabelSet;
 
   /**
    * String representation of {@link ENSIndexerConfig.indexedChainIds}.

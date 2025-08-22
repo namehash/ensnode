@@ -14,6 +14,10 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   databaseSchemaName: "test_schema",
   plugins: "subgraph",
   ensRainbowUrl: "https://api.ensrainbow.io",
+  labelSet: {
+    labelSetId: "ens-test-env",
+    labelSetVersion: "0",
+  },
   healReverseAddresses: "true",
   indexAdditionalResolverRecords: "true",
   port: DEFAULT_PORT.toString(),

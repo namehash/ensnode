@@ -1,5 +1,6 @@
 import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -69,6 +70,23 @@ export interface ENSIndexerConfig {
    * - localhost urls are allowed (and expected).
    */
   ensRainbowUrl: URL;
+
+  /**
+   * The label set configuration that ENSIndexer will use for deterministic label healing. This ensures
+   * that ENSIndexer operates against a known, stable set of label mappings from ENSRainbow.
+   *
+   * This configuration is REQUIRED and must match the label set configuration in your ENSRainbow
+   * server. The labelSetId must match the label set ID configured in the ENSRainbow server, and
+   * the labelSetVersion must be less than or equal to the highest available version.
+   *
+   * Invariants:
+   * - labelSetId must be a non-empty string that is a valid label set ID
+   * - labelSetId must be 1-50 characters long and contain only lowercase letters (a-z) and hyphens (-)
+   * - labelSetId must match the label set ID configured in the ENSRainbow server
+   * - labelSetVersion must be a non-negative integer
+   * - labelSetVersion must be less than or equal to the highest available version in the ENSRainbow server
+   */
+  labelSet: EnsRainbowClientLabelSet;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
@@ -241,6 +259,10 @@ export interface ENSIndexerEnvironment {
   namespace: string | undefined;
   plugins: string | undefined;
   ensRainbowUrl: string | undefined;
+  labelSet: {
+    labelSetId: string | undefined;
+    labelSetVersion: string | undefined;
+  };
   ensNodePublicUrl: string | undefined;
   ensIndexerUrl: string | undefined;
   ensAdminUrl: string | undefined;

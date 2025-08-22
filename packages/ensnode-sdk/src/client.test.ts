@@ -51,6 +51,10 @@ const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 const EXAMPLE_CONFIG_RESPONSE = {
   ensAdminUrl: "https://admin.ensnode.io/",
   ensNodePublicUrl: "https://api.alpha.ensnode.io/",
+  labelSet: {
+    labelSetId: "subgraph",
+    labelSetVersion: 0,
+  },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
   databaseSchemaName: "alphaSchema0.31.0",
   healReverseAddresses: true,

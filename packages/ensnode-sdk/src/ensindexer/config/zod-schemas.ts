@@ -66,6 +66,43 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
       error: `${valueLabel} is required and must be a non-empty string.`,
     });
 
+/**
+ * Makes a schema for parsing a label set configuration.
+ *
+ * The label set configuration is guaranteed to have valid labelSetId and labelSetVersion.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
+ * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
+ */
+export const makeLabelSetSchema = (
+  valueLabel: string = "Label set",
+  directErrorMessages: boolean = false,
+) => {
+  const getError = (field: string, message: string) => {
+    if (directErrorMessages) {
+      // For environment variable context, use the environment variable names
+      const envVarName = field === "labelSetId" ? "LABEL_SET_ID" : "LABEL_SET_VERSION";
+      return `${envVarName} ${message}`;
+    }
+    return `${valueLabel}.${field} ${message}`;
+  };
+
+  return z.object({
+    labelSetId: z
+      .string({ error: getError("labelSetId", "must be a string") })
+      .trim()
+      .min(1, { error: getError("labelSetId", "must be 1-50 characters long") })
+      .max(50, { error: getError("labelSetId", "must be 1-50 characters long") })
+      .regex(/^[a-z-]+$/, {
+        error: getError("labelSetId", "can only contain lowercase letters (a-z) and hyphens (-)"),
+      }),
+    labelSetVersion: z.coerce
+      .number({ error: getError("labelSetVersion", "must be a non-negative integer") })
+      .int({ error: getError("labelSetVersion", "must be a non-negative integer") })
+      .min(0, { error: getError("labelSetVersion", "must be a non-negative integer") }),
+  });
+};
+
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
@@ -134,6 +171,7 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
+      labelSet: makeLabelSetSchema(`${valueLabel}.labelSet`),
       healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
       indexAdditionalResolverRecords: z.boolean({
         error: `${valueLabel}.indexAdditionalResolverRecords`,

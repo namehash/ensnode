@@ -12,6 +12,10 @@ describe("ENSIndexer: Config", () => {
         databaseSchemaName: "public",
         ensAdminUrl: new URL("https://admin.ensnode.io"),
         ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
+        labelSet: {
+          labelSetId: "subgraph",
+          labelSetVersion: 0,
+        },
         healReverseAddresses: false,
         indexAdditionalResolverRecords: false,
         indexedChainIds: new Set([1]),
@@ -51,6 +55,10 @@ describe("ENSIndexer: Config", () => {
       databaseSchemaName: "public",
       ensAdminUrl: "https://admin.ensnode.io",
       ensNodePublicUrl: "https://api.alpha.ensnode.io",
+      labelSet: {
+        labelSetId: "subgraph",
+        labelSetVersion: 0,
+      },
       healReverseAddresses: false,
       indexAdditionalResolverRecords: false,
       indexedChainIds: [1, 10, 8453],

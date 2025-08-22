@@ -3,3 +3,4 @@ export * from "./types";
 export { isSubgraphCompatible } from "./helpers";
 export * from "./serialize";
 export * from "./serialized-types";
+export * from "./zod-schemas";
