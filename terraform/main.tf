@@ -86,6 +86,10 @@ module "ensrainbow" {
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
   ensnode_version       = var.ensnode_version
+  
+  # Label Set Configuration for ENSRainbow
+  ensrainbow_label_set_id      = var.ensrainbow_label_set_id
+  ensrainbow_label_set_version = var.ensrainbow_label_set_version
 }
 
 module "ensindexer" {
@@ -132,6 +136,6 @@ module "ensindexer" {
   etherum_holesky_rpc_url = var.etherum_holesky_rpc_url
 
   # Label Set Configuration
-  label_set_id      = var.label_set_id
-  label_set_version = var.label_set_version
+  label_set_id      = var.ensindexer_label_set_id
+  label_set_version = var.ensindexer_label_set_version
 }

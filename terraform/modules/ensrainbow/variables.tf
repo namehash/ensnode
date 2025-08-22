@@ -10,3 +10,14 @@ variable "render_environment_id" {
 variable "render_region" {
   type = string
 }
+
+# Label set configuration for ENSRainbow
+variable "ensrainbow_label_set_id" {
+  type        = string
+  description = "The label set ID that ENSRainbow will use for its own operations (e.g., 'subgraph', 'ens-test-env')"
+}
+
+variable "ensrainbow_label_set_version" {
+  type        = string
+  description = "The label set version that ENSRainbow will use for its own operations (e.g., '0', '1')"
+}

@@ -76,12 +76,23 @@ variable "etherum_holesky_rpc_url" {
 }
 
 # Deterministically pinned label set that ENSIndexer will request from ENSRainbow
-variable "label_set_id" {
+variable "ensindexer_label_set_id" {
   type        = string
   description = "The label set ID that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"
 }
 
-variable "label_set_version" {
+variable "ensindexer_label_set_version" {
   type        = string
   description = "The label set version that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., '0', '1')"
+}
+
+# Label set configuration for ENSRainbow itself
+variable "ensrainbow_label_set_id" {
+  type        = string
+  description = "The label set ID that ENSRainbow will use for its own operations (e.g., 'subgraph', 'ens-test-env')"
+}
+
+variable "ensrainbow_label_set_version" {
+  type        = string
+  description = "The label set version that ENSRainbow will use for its own operations (e.g., '0', '1')"
 }
