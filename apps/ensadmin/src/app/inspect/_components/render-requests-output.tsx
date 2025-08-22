@@ -100,7 +100,11 @@ export function RenderRequestsOutput<KEY extends string>({
               );
             }
 
-            return <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>;
+            return (
+              <CodeBlock className="rounded-lg text-xs">
+                {JSON.stringify(result, null, 2)}
+              </CodeBlock>
+            );
           })()}
         </CardContent>
       </Card>
