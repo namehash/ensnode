@@ -22,27 +22,6 @@ import {
   IndexingStatsShell,
 } from "./indexing-stats";
 
-/**
- * Component to display a placeholder for the indexing status.
- */
-function IndexingStatusPlaceholder() {
-  return (
-    <section className="flex flex-col gap-6 p-6">
-      <Card className="animate-pulse">
-        <CardHeader>
-          <div className="h-6 bg-muted rounded w-1/3" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="h-4 bg-muted rounded w-1/2" />
-            <div className="h-4 bg-muted rounded w-2/3" />
-          </div>
-        </CardContent>
-      </Card>
-    </section>
-  );
-}
-
 export function IndexingStatus() {
   const ensIndexerConfigQuery = useENSIndexerConfig();
   const indexingStatusQuery = useIndexingStatus();

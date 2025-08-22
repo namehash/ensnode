@@ -1,6 +1,5 @@
 "use client";
 
-import { IndexingStatusDisplay } from "@/components/indexing-status";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ENSNamespaceIds } from "@ensnode/datasources";
@@ -11,6 +10,7 @@ import {
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
 import { useMemo, useState } from "react";
+import { MockIndexingStatusDisplayWithProps } from "./indexing-status-display";
 
 import mockDataJson from "./data.json";
 
@@ -21,13 +21,13 @@ type StatusVariant = keyof typeof mockStatusData;
 const mockConfig: ENSIndexerPublicConfig = {
   namespace: ENSNamespaceIds.Mainnet,
   ensAdminUrl: new URL("https://admin.ensnode.io"),
-  ensNodePublicUrl: new URL("https://ensnode.run.tko.box"),
+  ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
   databaseSchemaName: "aug20--d09f7d77ec32aba8c789c8ac059241b45b99addc",
   plugins: [PluginName.Subgraph],
   healReverseAddresses: false,
   indexAdditionalResolverRecords: false,
   indexedChainIds: new Set([1, 10, 8453, 59144, 11155111]), // masp to mocks tko sent
-  isSubgraphCompatible: false,
+  isSubgraphCompatible: true,
   dependencyInfo: {
     nodejs: "22.11.0",
     ponder: "0.11.43",
@@ -67,7 +67,7 @@ export default function StatusMockPage() {
       {validationError && (
         <Card className="border-red-200 bg-red-50">
           <CardHeader>
-            <CardTitle className="text-red-800">Validation Error</CardTitle>
+            <CardTitle className="text-red-800">Mock JSON Data Validation</CardTitle>
           </CardHeader>
           <CardContent>
             <pre className="text-sm text-red-700 whitespace-pre-wrap">{validationError}</pre>
@@ -76,11 +76,7 @@ export default function StatusMockPage() {
       )}
 
       {deserializedStatus && (
-        <IndexingStatusDisplay
-          ensIndexerConfig={mockConfig}
-          indexingStatus={deserializedStatus}
-          showRecentRegistrations={false}
-        />
+        <MockIndexingStatusDisplayWithProps indexingStatus={deserializedStatus} />
       )}
     </div>
   );
