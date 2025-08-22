@@ -9,7 +9,7 @@ import { type ENSIndexerPublicConfig, PluginName } from "./types";
 export function isSubgraphCompatible(
   config: Pick<
     ENSIndexerPublicConfig,
-    "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords"
+    "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords" | "labelSet"
   >,
 ): boolean {
   // 1. only the subgraph plugin is active
@@ -21,5 +21,13 @@ export function isSubgraphCompatible(
   const indexingBehaviorIsSubgraphCompatible =
     !config.healReverseAddresses && !config.indexAdditionalResolverRecords;
 
-  return onlySubgraphPluginActivated && indexingBehaviorIsSubgraphCompatible;
+  // 4. label set id must be "subgraph" and version must be 0
+  const labelSetIsSubgraphCompatible =
+    config.labelSet.labelSetId === "subgraph" && config.labelSet.labelSetVersion === 0;
+
+  return (
+    onlySubgraphPluginActivated &&
+    indexingBehaviorIsSubgraphCompatible &&
+    labelSetIsSubgraphCompatible
+  );
 }

@@ -219,12 +219,16 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
   }
 }
 
-// Invariant: isSubgraphCompatible requires Subgraph plugin only, and no extra indexing features
+// Invariant: isSubgraphCompatible requires Subgraph plugin only, no extra indexing features, and subgraph label set
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
     Pick<
       ENSIndexerPublicConfig,
-      "plugins" | "isSubgraphCompatible" | "healReverseAddresses" | "indexAdditionalResolverRecords"
+      | "plugins"
+      | "isSubgraphCompatible"
+      | "healReverseAddresses"
+      | "indexAdditionalResolverRecords"
+      | "labelSet"
     >
   >,
 ) {
@@ -232,8 +236,8 @@ export function invariant_isSubgraphCompatibleRequirements(
 
   if (config.isSubgraphCompatible !== isSubgraphCompatible(config)) {
     const message = config.isSubgraphCompatible
-      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active. Also, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false'`
-      : `Both 'indexAdditionalResolverRecords' and 'healReverseAddresses' were set to 'false', and the only active plugin was the '${PluginName.Subgraph}' plugin. The 'isSubgraphCompatible' must be set to 'true'`;
+      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`
+      : `Both 'indexAdditionalResolverRecords' and 'healReverseAddresses' were set to 'false', the only active plugin was the '${PluginName.Subgraph}' plugin, and labelSet was {labelSetId: "subgraph", labelSetVersion: 0}. The 'isSubgraphCompatible' must be set to 'true'`;
 
     ctx.issues.push({
       code: "custom",

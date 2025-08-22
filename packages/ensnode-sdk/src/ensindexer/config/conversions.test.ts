@@ -101,7 +101,7 @@ describe("ENSIndexer: Config", () => {
     });
 
     const errorMessage = `Cannot deserialize ENSIndexerPublicConfig:
-✖ 'isSubgraphCompatible' requires only the 'subgraph' plugin to be active. Also, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false'`;
+✖ 'isSubgraphCompatible' requires only the 'subgraph' plugin to be active, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`;
 
     it("can enforce invariants: broken subgraph-compatibility (healReverseAddresses = 'true')", () => {
       // arrange

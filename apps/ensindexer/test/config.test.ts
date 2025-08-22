@@ -493,6 +493,8 @@ describe("config", () => {
       vi.stubEnv("PLUGINS", "subgraph");
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
       vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
+      vi.stubEnv("LABEL_SET_ID", "subgraph");
+      vi.stubEnv("LABEL_SET_VERSION", "0");
     });
 
     it("is true when compatible", async () => {
