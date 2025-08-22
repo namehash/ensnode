@@ -9,10 +9,10 @@ import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
+import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/api/lib/indexing-status";
 import { validate } from "@/api/lib/validate";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/indexing-status";
 import { getUnixTime } from "date-fns";
 import type { UnofficialStatusCode } from "hono/utils/http-status";
 import resolutionApi from "./resolution-api";

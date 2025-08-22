@@ -6,12 +6,12 @@ import {
 import { Hono } from "hono";
 
 import { errorResponse } from "@/api/lib/error-response";
+import { canAccelerateResolution } from "@/api/lib/indexing-status/can-accelerate-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { resolveForward } from "@/api/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import { validate } from "@/api/lib/validate";
-import { canAccelerateResolution } from "@/indexing-status/can-accelerate-resolution";
 import { simpleMemoized } from "@/lib/simple-memoized";
 import { routes } from "@ensnode/ensnode-sdk/internal";
 

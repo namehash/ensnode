@@ -1,6 +1,6 @@
 import { publicClients } from "ponder:api";
-import { buildIndexingStatus } from "@/indexing-status/build-index-status";
-import { hasAchievedRequestedDistance } from "@/indexing-status/realtime-indexing-distance";
+import { buildIndexingStatus } from "@/api/lib/indexing-status/build-index-status";
+import { hasAchievedRequestedDistance } from "@/api/lib/indexing-status/realtime-indexing-distance";
 import { OverallIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { getUnixTime } from "date-fns";
 
