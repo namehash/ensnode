@@ -47,12 +47,12 @@ variable "ensrainbow_url" {
 
 variable "label_set_id" {
   type        = string
-  description = "The label set ID that ENSIndexer will use for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"
+  description = "The label set ID that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"
 }
 
 variable "label_set_version" {
   type        = string
-  description = "The label set version that ENSIndexer will use for deterministic label healing (e.g., '0', '1')"
+  description = "The label set version that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., '0', '1')"
 }
 
 variable "plugins" {

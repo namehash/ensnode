@@ -109,7 +109,7 @@ export interface ENSIndexerPublicConfig {
    * This ensures that ENSIndexer operates against a known, stable set of label mappings
    * from ENSRainbow.
    */
-  labelSet: EnsRainbowClientLabelSet;
+  labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write

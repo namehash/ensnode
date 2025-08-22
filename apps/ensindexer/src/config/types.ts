@@ -72,12 +72,12 @@ export interface ENSIndexerConfig {
   ensRainbowUrl: URL;
 
   /**
-   * The label set configuration that ENSIndexer will use for deterministic label healing. This ensures
-   * that ENSIndexer operates against a known, stable set of label mappings from ENSRainbow.
+   * The label set configuration that ENSIndexer will request from ENSRainbow for deterministic label healing. This ensures
+   * that ENSIndexer operates against a known, stable set of rainbow records from ENSRainbow.
    *
-   * This configuration is REQUIRED and must match the label set configuration in your ENSRainbow
-   * server. The labelSetId must match the label set ID configured in the ENSRainbow server, and
-   * the labelSetVersion must be less than or equal to the highest available version.
+   * This configuration is REQUIRED and must be compatible with the label set configuration in your ENSRainbow
+   * server. To be compatible, the labelSetId must match the label set ID configured in the ENSRainbow server, and
+   * the labelSetVersion must be less than or equal to the highest available version in the ENSRainbow server.
    *
    * Invariants:
    * - labelSetId must be a non-empty string that is a valid label set ID
@@ -86,7 +86,7 @@ export interface ENSIndexerConfig {
    * - labelSetVersion must be a non-negative integer
    * - labelSetVersion must be less than or equal to the highest available version in the ENSRainbow server
    */
-  labelSet: EnsRainbowClientLabelSet;
+  labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the

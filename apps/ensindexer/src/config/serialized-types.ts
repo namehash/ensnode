@@ -48,7 +48,7 @@ export interface SerializedENSIndexerConfig
   /**
    * The label set configuration that ENSIndexer will use for deterministic label healing.
    */
-  labelSet: EnsRainbowClientLabelSet;
+  labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
    * String representation of {@link ENSIndexerConfig.indexedChainIds}.
