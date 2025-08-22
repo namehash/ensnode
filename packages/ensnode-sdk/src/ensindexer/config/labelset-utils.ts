@@ -35,8 +35,6 @@ export function buildLabelSetVersion(maybeLabelSetVersion: number | string): Lab
   if (typeof maybeLabelSetVersion === "string") {
     try {
       versionNumber = parseNonNegativeInteger(maybeLabelSetVersion);
-      if (isNaN(versionNumber)) {
-        throw new Error("Invalid number");
     } catch (error) {
       throw new Error(
         `Invalid label set version: ${maybeLabelSetVersion}: ${
