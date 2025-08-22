@@ -116,7 +116,7 @@ export function RenderRequestsOutput<KEY extends string>({
                 <span>Execution Trace</span>
                 {(() => {
                   // if accelerated request was not actually accelerated, notify the user
-                  if (accelerated.data && !accelerated.data.accelerated) {
+                  if (accelerated.data && !accelerated.data.accelerationAttempted) {
                     return (
                       <span className="bg-muted py-1 px-2 rounded-lg text-sm text-muted-foreground">
                         Unable to accelerate request (ENSNode not realtime).

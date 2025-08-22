@@ -32,7 +32,7 @@ export interface AcceleratableRequest {
 }
 
 export interface AcceleratableResponse {
-  accelerated: boolean;
+  accelerationAttempted: boolean;
 }
 
 /**
