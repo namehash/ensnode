@@ -96,9 +96,7 @@ export interface ChainIndexingDefiniteConfig {
  *
  * Configuration of an indexed chain.
  */
-export type ChainIndexingConfig =
-  | ChainIndexingIndefiniteConfig
-  | ChainIndexingDefiniteConfig;
+export type ChainIndexingConfig = ChainIndexingIndefiniteConfig | ChainIndexingDefiniteConfig;
 
 /**
  * Chain Indexing Status: Unstarted
@@ -235,9 +233,7 @@ export type ChainIndexingStatus =
  * Represents a chain where indexing is currently active.
  * The `latestIndexedBlock` field will be available.
  */
-export type ChainIndexingActiveStatus =
-  | ChainIndexingBackfillStatus
-  | ChainIndexingFollowingStatus;
+export type ChainIndexingActiveStatus = ChainIndexingBackfillStatus | ChainIndexingFollowingStatus;
 
 /**
  * Chain Indexing Status: Standby
