@@ -8,10 +8,9 @@ import {
   OverallIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
-import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Duration, FormattedDate, RelativeTime } from "@/components/datetime-utils";
+import { Duration, RelativeTime } from "@/components/datetime-utils";
 import { NameDisplay } from "@/components/identity/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -69,22 +68,6 @@ export function RecentRegistrations({
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Latest indexed registrations</span>
-          {currentIndexingDate && (
-            <div className="flex items-center gap-1.5">
-              <Clock size={16} className="text-blue-600" />
-              <span className="text-sm font-medium">
-                Last indexed block on{" "}
-                <FormattedDate
-                  date={currentIndexingDate}
-                  options={{
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  }}
-                />
-              </span>
-            </div>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
