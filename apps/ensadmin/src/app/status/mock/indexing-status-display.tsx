@@ -1,11 +1,7 @@
 // Temporary mock page until indexing-status is detached from data loading
 "use client";
 
-import {
-  ENSIndexerOverallIndexingStatus,
-  ENSIndexerPublicConfig,
-  OverallIndexingStatusIds,
-} from "@ensnode/ensnode-sdk";
+import { ENSIndexerOverallIndexingStatus, OverallIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { type ReactElement } from "react";
 
 import { BackfillStatus } from "@/components/indexing-status/backfill-status";

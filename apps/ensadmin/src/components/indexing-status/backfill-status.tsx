@@ -118,7 +118,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               >
                 <div className="absolute -bottom-8 -translate-x-1/2 whitespace-nowrap">
                   <Badge className="text-xs bg-green-800 text-white flex flex-col">
-                    <span>Processing data</span> <span>{timelinePosition}%</span>
+                    <span>Indexing data</span> <span>{timelinePosition}%</span>
                   </Badge>
                 </div>
               </div>
