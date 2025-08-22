@@ -21,6 +21,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren } from "react";
 
+import { cn } from "@/lib/utils";
 import { BlockStats, blockViewModel } from "./block-refs";
 
 interface IndexingStatusProps<IndexingStatusType extends ENSIndexerOverallIndexingStatus> {
@@ -31,7 +32,13 @@ interface IndexingStatusProps<IndexingStatusType extends ENSIndexerOverallIndexi
  * Indexing stats for {@link OverallIndexingStatusIds.IndexerError}.
  */
 export function IndexingStatsForIndexerErrorStatus() {
-  return <p className="px-6">Indexer error occurred.</p>;
+  return (
+    <p>
+      It appears that the indexing of new blocks has been interrupted. API requests to this ENSNode
+      should continue working successfully but may serve data that isn't updated to the latest
+      onchain state.
+    </p>
+  );
 }
 
 /**
@@ -57,7 +64,7 @@ export function IndexingStatsForUnstartedStatus({
             </div>
 
             <Badge
-              className="uppercase text-xs leading-none"
+              className={cn("uppercase text-xs leading-none")}
               title={`Chain indexing status: ${chain.status}`}
             >
               {chain.status}
