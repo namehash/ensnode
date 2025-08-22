@@ -11,8 +11,17 @@ resource "render_web_service" "ensrainbow" {
     }
   }
 
+  disk = {
+    name       = "ensrainbow-data"
+    size_gb    = 30
+    mount_path = "/app/apps/ensrainbow/data"
+  }
+
   env_vars = {
-    "LOG_LEVEL" = { value = "error" }
+    "LOG_LEVEL"         = { value = "error" },
+    "DB_SCHEMA_VERSION" = { value = var.db_schema_version },
+    "LABEL_SET_ID"      = { value = var.label_set_id },
+    "LABEL_SET_VERSION" = { value = var.label_set_version }
   }
 
 }
