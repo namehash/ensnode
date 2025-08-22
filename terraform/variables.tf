@@ -74,3 +74,16 @@ variable "scroll_sepolia_rpc_url" {
 variable "etherum_holesky_rpc_url" {
   type = string
 }
+
+# Label Set Configuration
+variable "label_set_id" {
+  type        = string
+  description = "The label set ID that ENSIndexer will use for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"
+  default     = "subgraph"
+}
+
+variable "label_set_version" {
+  type        = string
+  description = "The label set version that ENSIndexer will use for deterministic label healing (e.g., '0', '1')"
+  default     = "0"
+}

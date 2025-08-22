@@ -130,4 +130,8 @@ module "ensindexer" {
 
   # Holesky RPC URLs
   etherum_holesky_rpc_url = var.etherum_holesky_rpc_url
+
+  # Label Set Configuration
+  label_set_id      = var.label_set_id
+  label_set_version = var.label_set_version
 }
