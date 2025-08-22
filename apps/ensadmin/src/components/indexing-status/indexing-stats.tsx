@@ -34,9 +34,9 @@ interface IndexingStatusProps<IndexingStatusType extends ENSIndexerOverallIndexi
 export function IndexingStatsForIndexerErrorStatus() {
   return (
     <p>
-      It appears that indexing of new blocks has been interrupted. API requests to this ENSNode
-      should continue working successfully but may serve data that is not fully updated to the
-      latest onchain state.
+      It appears that the indexing of new blocks has been interrupted. API requests to this ENSNode
+      should continue working successfully but may serve data that isn't updated to the latest
+      onchain state.
     </p>
   );
 }
