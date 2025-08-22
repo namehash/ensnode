@@ -19,7 +19,10 @@ const app = new Hono();
 
 // memoizes the result of canAccelerateResolution within a 30s window to avoid
 // this means that the effective maxRealtimeDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
-const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000);
+// and the initial request(s) in between ENSApi startup and the first resolution of
+// canAccelerateResolution will NOT be accelerated (prefers correctness in responses)
+// it also means that
+const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000, false);
 
 /**
  * Example queries for /records:
@@ -40,7 +43,7 @@ app.get(
   async (c) => {
     const { name } = c.req.valid("param");
     const { selection, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    const accelerate = _accelerate && (await getCanAccelerateResolution());
+    const accelerate = _accelerate && getCanAccelerateResolution();
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -49,6 +52,7 @@ app.get(
 
       const response = {
         records: result,
+        accelerated: accelerate,
         ...(showTrace && { trace }),
       } satisfies ResolveRecordsResponse<typeof selection>;
 
@@ -79,7 +83,7 @@ app.get(
   async (c) => {
     const { address, chainId } = c.req.valid("param");
     const { trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    const accelerate = _accelerate && (await getCanAccelerateResolution());
+    const accelerate = _accelerate && getCanAccelerateResolution();
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -88,6 +92,7 @@ app.get(
 
       const response = {
         name: result,
+        accelerated: accelerate,
         ...(showTrace && { trace }),
       } satisfies ResolvePrimaryNameResponse;
 
@@ -115,7 +120,7 @@ app.get(
   async (c) => {
     const { address } = c.req.valid("param");
     const { chainIds, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    const accelerate = _accelerate && (await getCanAccelerateResolution());
+    const accelerate = _accelerate && getCanAccelerateResolution();
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -124,6 +129,7 @@ app.get(
 
       const response = {
         names: result,
+        accelerated: accelerate,
         ...(showTrace && { trace }),
       } satisfies ResolvePrimaryNamesResponse;
 
