@@ -79,12 +79,7 @@ export interface ENSIndexerConfig {
    * server. To be compatible, the labelSetId must match the label set ID configured in the ENSRainbow server, and
    * the labelSetVersion must be less than or equal to the highest available version in the ENSRainbow server.
    *
-   * Invariants:
-   * - labelSetId must be a non-empty string that is a valid label set ID
-   * - labelSetId must be 1-50 characters long and contain only lowercase letters (a-z) and hyphens (-)
-   * - labelSetId must match the label set ID configured in the ENSRainbow server
-   * - labelSetVersion must be a non-negative integer
-   * - labelSetVersion must be less than or equal to the highest available version in the ENSRainbow server
+   * See {@link EnsRainbowClientLabelSet} for the type definition and constraints.
    */
   labelSet: Required<EnsRainbowClientLabelSet>;
 

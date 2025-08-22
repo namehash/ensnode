@@ -564,7 +564,7 @@ describe("config", () => {
 
     it("throws an error when LABEL_SET_ID is only whitespace", async () => {
       vi.stubEnv("LABEL_SET_ID", "   ");
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID must be 1-50 characters long/);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID can only contain lowercase letters/);
     });
 
     it("throws an error when LABEL_SET_ID is too long", async () => {

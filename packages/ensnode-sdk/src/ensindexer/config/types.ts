@@ -41,6 +41,23 @@ export interface EnsRainbowClientLabelSet {
 }
 
 /**
+ * The state of label sets managed by an ENSRainbow server.
+ */
+export interface EnsRainbowServerLabelSet {
+  /**
+   * The LabelSetId managed by the ENSRainbow server.
+   */
+  labelSetId: LabelSetId;
+
+  /**
+   * The highest label set version available on the ENSRainbow server for the current
+   * label set ID. This represents the most recent version of the label set that the
+   * server has ingested and can provide label healing results for.
+   */
+  highestLabelSetVersion: LabelSetVersion;
+}
+
+/**
  * A PluginName is a unique id for a 'plugin': we use the notion of
  * 'plugins' to describe bundles of indexing logic.
  */
@@ -105,8 +122,8 @@ export interface ENSIndexerPublicConfig {
   ensNodePublicUrl: URL;
 
   /**
-   * The label set configuration that ENSIndexer will use for deterministic label healing.
-   * This ensures that ENSIndexer operates against a known, stable set of label mappings
+   * The label set configuration that ENSIndexer will request from ENSRainbow for deterministic label healing.
+   * This ensures that ENSIndexer operates against a known, stable set of rainbow records
    * from ENSRainbow.
    */
   labelSet: Required<EnsRainbowClientLabelSet>;

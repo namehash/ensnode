@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
+import type { LabelHash } from "../../ens";
 import {
-  type EnsRainbowClientLabelSet,
-  type EnsRainbowServerLabelSet,
   buildEnsRainbowClientLabelSet,
   buildLabelSetId,
   buildLabelSetVersion,
   validateSupportedLabelSetAndVersion,
-} from "./labelset";
+} from "./labelset-utils";
+import { type EnsRainbowClientLabelSet, type EnsRainbowServerLabelSet } from "./types";
 
 describe("buildLabelSetId", () => {
   it("should return a valid label set id", () => {

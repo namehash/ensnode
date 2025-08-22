@@ -46,7 +46,7 @@ export interface SerializedENSIndexerConfig
   ensRainbowUrl: UrlString;
 
   /**
-   * The label set configuration that ENSIndexer will use for deterministic label healing.
+   * The label set configuration that ENSIndexer will request from ENSRainbow for deterministic label healing.
    */
   labelSet: Required<EnsRainbowClientLabelSet>;
 

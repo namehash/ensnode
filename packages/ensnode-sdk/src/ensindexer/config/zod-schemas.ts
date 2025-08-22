@@ -90,7 +90,6 @@ export const makeLabelSetSchema = (
   return z.object({
     labelSetId: z
       .string({ error: getError("labelSetId", "must be a string") })
-      .trim()
       .min(1, { error: getError("labelSetId", "must be 1-50 characters long") })
       .max(50, { error: getError("labelSetId", "must be 1-50 characters long") })
       .regex(/^[a-z-]+$/, {

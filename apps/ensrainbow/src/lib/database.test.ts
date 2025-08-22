@@ -1,6 +1,6 @@
 import { tmpdir } from "os";
 import { join } from "path";
-import { labelHashToBytes, parseNonNegativeInteger } from "@ensnode/ensrainbow-sdk";
+import { labelHashToBytes, parseNonNegativeInteger } from "@ensnode/ensnode-sdk";
 import { mkdtemp, rm } from "fs/promises";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
