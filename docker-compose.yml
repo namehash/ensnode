@@ -19,8 +19,10 @@ services:
       - path: ./apps/ensindexer/.env.local
         required: true
     depends_on:
-      - ensrainbow
-      - postgres
+      ensrainbow:
+        condition: service_healthy
+      postgres:
+        condition: service_started
 
   # Instance of ENSIndexer started in Ponder's "serve" mode. This mode causes the ENSIndexer instance to skip the execution of any indexing logic and instead to exclusively focus on the responsibility of serving the main "public-facing" API endpoints for the overall ENSNode deployment. This division of "start" vs "serve" responsibilities between ENSIndexer instances ensures API availability continues uninterrupted for the overall ENSNode deployment through ensnode-api even if an indexing error in ensindexer causes it to crash. The following docs explain more about Ponder's "start" vs "serve" modes: https://ponder.sh/docs/api-reference/ponder-cli#serve.
   ensnode-api:
@@ -30,7 +32,7 @@ services:
     ports:
       - "42069:42069"
     environment:
-      # Start ensindexer instance in "serve" mode. This environment variable is intercepted by the ensindexer Docker image to modify the ensindexer start command. This special strategy for dynamically configuring the ensindexer start command is used due to limitations with Railway Terraform.
+      # Start ensindexer instance in "serve" mode. This environment variable is intercepted by the ensindexer Docker image to modify the ensindexer start command.
       PONDER_COMMAND: serve
       # Same DATABASE_URL as ensindexer instance
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
@@ -48,8 +50,10 @@ services:
       - path: ./apps/ensindexer/.env.local
         required: true
     depends_on:
-      - ensrainbow
-      - postgres
+      ensrainbow:
+        condition: service_healthy
+      postgres:
+        condition: service_started
 
   ensrainbow:
     container_name: ensrainbow
@@ -60,7 +64,16 @@ services:
       # NOTE: can define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
       - path: ./apps/ensrainbow/.env.local
         required: false
+    volumes:
+      - ensrainbow_data:/app/apps/ensrainbow/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3223/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20m
+      start_interval: 30s
 
   ensadmin:
     container_name: ensadmin
@@ -95,4 +108,6 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  ensrainbow_data:
     driver: local

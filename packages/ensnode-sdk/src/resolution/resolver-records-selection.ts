@@ -1,4 +1,4 @@
-import { CoinType } from "../ens";
+import type { CoinType } from "../ens";
 
 /**
  * Encodes a selection of Resolver records in the context of a specific Name.
@@ -24,3 +24,6 @@ export interface ResolverRecordsSelection {
 
   // TODO: include others as/if necessary
 }
+
+export const isSelectionEmpty = (selection: ResolverRecordsSelection) =>
+  !selection.name && !selection.addresses?.length && !selection.texts?.length;

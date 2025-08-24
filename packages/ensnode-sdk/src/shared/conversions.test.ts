@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  deserializeBlockRef,
-  deserializeChainId,
-  deserializeDatetime,
-  deserializeUrl,
-} from "./deserialize";
+import { deserializeChainId, deserializeDatetime, deserializeUrl } from "./deserialize";
 import { serializeChainId, serializeDatetime, serializeUrl } from "./serialize";
 import type { BlockRef } from "./types";
 
@@ -32,34 +27,6 @@ describe("ENSIndexer: Shared", () => {
   });
 
   describe("deserialization", () => {
-    it("can deserialize BlockRef", () => {
-      // arrange
-      const serializedBlockRef = {
-        timestamp: 1754390708,
-        number: 123,
-      } satisfies BlockRef;
-
-      // act
-      const result = deserializeBlockRef(serializedBlockRef);
-
-      // assert
-      expect(result).toStrictEqual(serializedBlockRef);
-    });
-
-    it("refuses to deserialize SerializedBlockRef for invalid input", () => {
-      expect(() =>
-        deserializeBlockRef(
-          {
-            timestamp: 21.5,
-            number: 123,
-          } satisfies BlockRef,
-          "Block Ref",
-        ),
-      ).toThrowError(`Cannot deserialize BlockRef:
-✖ Block Ref.timestamp must be an integer.
-  → at timestamp`);
-    });
-
     it("can deserialize ChainId from its string representation", () => {
       expect(deserializeChainId("8543")).toStrictEqual(8543);
     });

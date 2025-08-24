@@ -9,13 +9,13 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   namespace: "mainnet",
   ensNodePublicUrl: "http://localhost:42069",
+  ensIndexerUrl: "http://localhost:42069",
   ensAdminUrl: "http://localhost:3000",
   databaseSchemaName: "test_schema",
   plugins: "subgraph",
   ensRainbowUrl: "https://api.ensrainbow.io",
   healReverseAddresses: "true",
   indexAdditionalResolverRecords: "true",
-  experimentalResolution: "false",
   port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: {

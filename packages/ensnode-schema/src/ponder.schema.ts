@@ -6,3 +6,4 @@ export * from "./resolver-records.schema";
 export * from "./tokenscope.schema";
 export * from "./resolver-relations.schema";
 export * from "./referrals.schema";
+export * from "./primary-names.schema";

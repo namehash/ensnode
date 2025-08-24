@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 
 import { handleRegistrationReferral, handleRenewalReferral } from "@/handlers/Referrals";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { PluginName, makeSubdomainNode, ETH_NODE } from "@ensnode/ensnode-sdk";
+import { ETH_NODE, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 /**
  * Registers event handlers with Ponder.

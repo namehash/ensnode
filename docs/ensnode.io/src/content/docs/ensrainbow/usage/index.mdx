@@ -1,0 +1,79 @@
+---
+title: Using ENSRainbow
+description: Guides for integrating and using ENSRainbow in your applications.
+sidebar:
+  label: Overview
+  order: 1
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+This section covers everything you need to know about using ENSRainbow in your applications, from quick API calls to advanced client SDK integration.
+
+## Getting Started
+
+<LinkCard
+  title="API Reference"
+  description="Complete HTTP API documentation with examples and error handling"
+  href="/ensrainbow/usage/api/"
+/>
+
+<LinkCard
+  title="Client SDK"
+  description="TypeScript SDK for easy integration with type safety and caching"
+  href="/ensrainbow/usage/client-sdk/"
+/>
+
+## Configuration & Setup
+
+<LinkCard
+  title="Configuration"
+  description="Configure ENSRainbow for different environments and use cases"
+  href="/ensrainbow/usage/configuration/"
+/>
+
+<LinkCard
+  title="Hosted Instances"
+  description="Public ENSRainbow instances you can use immediately"
+  href="/ensrainbow/usage/hosted-ensrainbow-instances/"
+/>
+
+## Support & Troubleshooting
+
+<LinkCard
+  title="Troubleshooting"
+  description="Common issues and their solutions"
+  href="/ensrainbow/usage/troubleshooting/"
+/>
+
+## Usage Patterns
+
+### Quick API Integration
+If you just need to heal a few labelhashes occasionally, the HTTP API is perfect:
+
+```bash
+curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+```
+
+### Production Applications
+For production applications with consistent usage, consider:
+
+1. **Use the [Client SDK](/ensrainbow/usage/client-sdk/)** for type safety and built-in retry logic
+2. **Pin to specific [label set versions](/ensrainbow/concepts/label-sets-and-versioning/)** for deterministic results
+3. **Implement client-side caching** to reduce API calls
+4. **Consider [self-hosting](/ensrainbow/deploying/)** which is required when running your own ENSNode or for other high-volume use cases
+
+### Enterprise Integration
+For enterprise or high-volume applications:
+
+1. **Deploy your own instance** using our [deployment guides](/ensrainbow/deploying/)
+2. **Configure appropriate [system requirements](/ensrainbow/contributing/system-requirements/)**
+3. **Set up monitoring** with the `/health` and `/count` endpoints
+4. **Review [performance characteristics](/ensrainbow/concepts/performance/)**
+
+## Next Steps
+
+- **New to ENSRainbow?** Start with the [API Reference](/ensrainbow/usage/api/) to understand the basics
+- **Building an app?** Check out the [Client SDK](/ensrainbow/usage/client-sdk/) for the best developer experience  
+- **Need high availability?** Review our [deployment options](/ensrainbow/deploying/)
+- **Want to contribute?** See our [contributing guide](/ensrainbow/contributing/) 

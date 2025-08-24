@@ -1,5 +1,13 @@
 # @ensnode/ponder-subgraph
 
+## 0.33.0
+
+## 0.32.0
+
+### Minor Changes
+
+- [#926](https://github.com/namehash/ensnode/pull/926) [`7c27fb8`](https://github.com/namehash/ensnode/commit/7c27fb80d93bc053534cef1223e81efdf88e636a) Thanks [@shrugs](https://github.com/shrugs)! - Fixes entrypoint issue that prevented users from correctly importing the built package.
+
 ## 0.31.0
 
 ## 0.30.0

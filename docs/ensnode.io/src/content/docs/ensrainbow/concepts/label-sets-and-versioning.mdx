@@ -1,0 +1,56 @@
+---
+title: Label Sets & Versioning
+description: Understanding ENSRainbow's versioning system and why it's essential for deterministic healing.
+sidebar:
+  label: Label Sets & Versioning
+  order: 3
+keywords: [ensrainbow, versioning, label sets, deterministic]
+---
+
+## Why Label Sets & Versions?
+
+A **label set** is analogous to a _dataset snapshot_. Every time the upstream data (e.g. an on-chain subgraph export) changes, we mint a new **label set version** so that:
+
+### 1. Deterministic Results
+Clients that pin _version `N`_ are guaranteed to get the _exact same_ heal response today, tomorrow, and two years from now.
+
+### 2. Decentralized Ecosystem
+Anyone can create and publish their own labelsets, opening ENSRainbow as a solution for the wider ENS ecosystem. Distinct `labelSetId` values enable diverse data sources, community-driven curation, and maintenance of labelhash-to-label mappings.
+
+### 3. Extensibility Across Time
+Label sets can grow organically as new labelhash-to-label mappings are discovered. Each new version incrementally adds fresh data without invalidating previous versions, ensuring applications can evolve their data coverage while maintaining backward compatibility.
+
+## Version Management
+
+### Label Set IDs
+- String (1-50 chars) consisting of lowercase ASCII letters and hyphens
+- Examples: `subgraph`, `discovery-a`, `ens-test-env`
+- Each ID represents a different data source or curation strategy
+
+### Label Set Versions
+- Non-negative integers that increase monotonically: `0`, `1`, `2`, etc.
+- Version `0` is always the initial dataset for a given label set ID
+- Each new version contains only the new labelhash-to-label mappings added since the previous version
+
+### File Naming Convention
+```text
+subgraph_0.ensrainbow     # labelSetId = "subgraph", version = 0
+subgraph_1.ensrainbow     # next version with incremental labelhash-to-label mappings added
+discovery-a_0.ensrainbow  # different dataset, initial version
+```
+
+## Client Behavior
+
+When constructing an ENSRainbow client, you can specify versioning preferences:
+
+1. **No constraints** → Always use the latest available version
+2. **Pin to label set ID** → Use a specific dataset but stay current
+3. **Pin to exact version** → Lock to a specific snapshot for deterministic results
+
+This flexibility ensures applications can choose between **staying current** with the latest data or **maintaining consistency** for reproducible results.
+
+## Related Documentation
+
+- **[Glossary](/ensrainbow/concepts/glossary)** - Key terminology including version-related terms
+- **[TypeScript Interfaces](/ensrainbow/concepts/typescript-interfaces)** - Type definitions for ENSRainbow's server and client
+- **[Data Model](/ensrainbow/concepts/data-model)** - How versions are stored in the database 

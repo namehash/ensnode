@@ -1,8 +1,9 @@
 terraform {
   required_providers {
-    railway = {
-      source  = "terraform-community-providers/railway"
-      version = "0.4.6"
+    render = {
+      source  = "render-oss/render"
+      version = "1.7.0"
     }
   }
 }
+

@@ -1,122 +1,110 @@
 locals {
-  application_port       = 80
   rpc_request_rate_limit = "1000"
-  rpc_url_1              = var.mainnet_rpc_url
-  rpc_url_17000          = var.holesky_rpc_url
-  rpc_url_8453           = var.base_rpc_url
-  rpc_url_59144          = var.linea_rpc_url
-  rpc_url_11155111       = var.sepolia_rpc_url
-  rpc_url_10             = var.optimism_rpc_url
-  common_variables = [
-    {
-      name  = "DATABASE_URL"
-      value = var.database_url
-    },
-    {
-      name  = "RPC_REQUEST_RATE_LIMIT_1"
-      value = local.rpc_request_rate_limit
-    },
-    {
-      name  = "RPC_REQUEST_RATE_LIMIT_59144"
-      value = local.rpc_request_rate_limit
-    },
-    {
-      name  = "RPC_REQUEST_RATE_LIMIT_8453"
-      value = local.rpc_request_rate_limit
-    },
-    {
-      name  = "RPC_REQUEST_RATE_LIMIT_17000"
-      value = local.rpc_request_rate_limit
-    },
-    {
-      name  = "RPC_REQUEST_RATE_LIMIT_10"
-      value = local.rpc_request_rate_limit
-    },
-    {
-      name  = "RPC_URL_1"
-      value = local.rpc_url_1
-    },
-    {
-      name  = "RPC_URL_59144"
-      value = local.rpc_url_59144
-    },
-    {
-      name  = "RPC_URL_8453"
-      value = local.rpc_url_8453
-    },
-    {
-      name  = "RPC_URL_17000"
-      value = local.rpc_url_17000
-    },
-    {
-      name  = "RPC_URL_10"
-      value = local.rpc_url_10
-    },
-    {
-      name  = "RPC_URL_11155111"
-      value = local.rpc_url_11155111
-    },
-    {
-      name  = "ENSNODE_PUBLIC_URL"
-      value = "https://${local.full_ensindexer_hostname}"
-    },
-    {
-      name  = "ENSRAINBOW_URL"
-      value = var.ensrainbow_url
-    },
-    {
-      name  = "DATABASE_SCHEMA"
-      value = var.database_schema
-    },
-    {
-      name  = "PLUGINS"
-      value = var.plugins
-    },
-    {
-      name  = "NAMESPACE"
-      value = var.namespace
-    },
-    {
-      name  = "HEAL_REVERSE_ADDRESSES"
-      value = var.heal_reverse_addresses
-    },
-    {
-      name  = "INDEX_ADDITIONAL_RESOLVER_RECORDS"
-      value = var.index_additional_resolver_records
-    },
-    {
-      name  = "PORT"
-      value = local.application_port
+
+  common_variables = {
+    # Common configuration
+    "DATABASE_URL"                      = { value = var.database_url },
+    "DATABASE_SCHEMA"                   = { value = var.database_schema },
+    "ENSRAINBOW_URL"                    = { value = var.ensrainbow_url },
+    "PLUGINS"                           = { value = var.plugins },
+    "NAMESPACE"                         = { value = var.namespace },
+    "INDEX_ADDITIONAL_RESOLVER_RECORDS" = { value = var.index_additional_resolver_records },
+    "HEAL_REVERSE_ADDRESSES"            = { value = var.heal_reverse_addresses },
+
+    # Mainnet networks
+    "RPC_URL_1"                     = { value = var.etherum_mainnet_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_1"      = { value = local.rpc_request_rate_limit },
+    "RPC_URL_8453"                  = { value = var.base_mainnet_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_8453"   = { value = local.rpc_request_rate_limit },
+    "RPC_URL_59144"                 = { value = var.linea_mainnet_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_59144"  = { value = local.rpc_request_rate_limit },
+    "RPC_URL_10"                    = { value = var.optimism_mainnet_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_10"     = { value = local.rpc_request_rate_limit },
+    "RPC_URL_42161"                 = { value = var.arbitrum_mainnet_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_42161"  = { value = local.rpc_request_rate_limit },
+    "RPC_URL_534352"                = { value = var.scroll_mainnet_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_534352" = { value = local.rpc_request_rate_limit },
+
+    # Sepolia networks
+    "RPC_URL_11155111"                = { value = var.etherum_sepolia_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_11155111" = { value = local.rpc_request_rate_limit },
+    "RPC_URL_84532"                   = { value = var.base_sepolia_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_84532"    = { value = local.rpc_request_rate_limit },
+    "RPC_URL_59141"                   = { value = var.linea_sepolia_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_59141"    = { value = local.rpc_request_rate_limit },
+    "RPC_URL_11155420"                = { value = var.optimism_sepolia_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_11155420" = { value = local.rpc_request_rate_limit },
+    "RPC_URL_421614"                  = { value = var.arbitrum_sepolia_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_421614"   = { value = local.rpc_request_rate_limit },
+    "RPC_URL_534351"                  = { value = var.scroll_sepolia_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_534351"   = { value = local.rpc_request_rate_limit },
+
+    # Holesky networks
+    "RPC_URL_17000"                = { value = var.etherum_holesky_rpc_url },
+    "RPC_REQUEST_RATE_LIMIT_17000" = { value = local.rpc_request_rate_limit },
+  }
+}
+
+resource "render_web_service" "ensindexer" {
+  name           = "ensindexer_${var.instance_name}"
+  plan           = var.instance_type
+  region         = var.render_region
+  environment_id = var.render_environment_id
+
+  runtime_source = {
+    image = {
+      image_url = "ghcr.io/namehash/ensnode/ensindexer"
+      tag       = var.ensnode_version
     }
+  }
+
+  env_vars = merge(
+    local.common_variables,
+    {
+      ENSNODE_PUBLIC_URL = {
+        value = "https://${local.full_ensindexer_hostname}"
+      },
+      ENSINDEXER_URL = {
+        value = "http://localhost:1000"
+      }
+    }
+  )
+  custom_domains = [
+    { name : local.full_ensindexer_hostname },
   ]
+
 }
 
-resource "railway_service" "ensindexer" {
-  name         = "ensindexer_${var.instance_name}"
-  source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
-  project_id   = var.railway_project_id
-  region       = var.railway_region
-}
 
-# Instance of ENSIndexer started in Ponder's "serve" mode. This mode causes the ENSIndexer instance to skip the execution of any indexing logic and instead to exclusively focus on the responsibility of serving the main "public-facing" API endpoints for the overall ENSNode deployment.
-# This division of "start" vs "serve" responsibilities between ENSIndexer instances ensures API availability continues uninterrupted for the overall ENSNode deployment through ensnode-api even if an indexing error in ensindexer causes it to crash.
-# The following docs explain more about Ponder's "start" vs "serve" modes: https://ponder.sh/docs/api-reference/ponder-cli#serve.
-resource "railway_service" "ensindexer_api" {
-  name         = "ensindexer_api_${var.instance_name}"
-  source_image = "ghcr.io/namehash/ensnode/ensindexer:${var.ensnode_version}"
-  project_id   = var.railway_project_id
-  region       = var.railway_region
-}
+resource "render_web_service" "ensindexer_api" {
+  name           = "ensindexer_api_${var.instance_name}"
+  plan           = "starter"
+  region         = var.render_region
+  environment_id = var.render_environment_id
 
-resource "railway_variable_collection" "ensindexer" {
-  environment_id = var.railway_environment_id
-  service_id     = railway_service.ensindexer.id
-  variables      = local.common_variables
-}
+  runtime_source = {
+    image = {
+      image_url = "ghcr.io/namehash/ensnode/ensindexer"
+      tag       = var.ensnode_version
+    }
+  }
 
-# The following block of code defines the same set of variables as ensindexer, with the addition of the "PONDER_COMMAND" variable set to "serve".
-resource "railway_variable_collection" "ensindexer_api" {
-  environment_id = var.railway_environment_id
-  service_id     = railway_service.ensindexer_api.id
-  variables      = concat(local.common_variables, [{ name = "PONDER_COMMAND", value = "serve" }])
+  env_vars = merge(
+    local.common_variables,
+    {
+      ENSNODE_PUBLIC_URL = {
+        value = "https://${local.full_ensindexer_api_hostname}"
+      },
+      ENSINDEXER_URL = {
+        value = "http://ensindexer_${var.instance_name}:1000"
+      },
+      PONDER_COMMAND = {
+        value = "serve"
+      }
+    }
+  )
+  custom_domains = [
+    { name : local.full_ensindexer_api_hostname },
+  ]
+
 }

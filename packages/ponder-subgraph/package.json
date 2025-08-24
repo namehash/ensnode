@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-subgraph",
-  "version": "0.31.0",
+  "version": "0.33.0",
   "type": "module",
   "description": "A Hono middleware for generating Subgraph-compatible GraphQL schema.",
   "license": "MIT",
@@ -35,7 +35,7 @@
   "scripts": {
     "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check --write",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "dependencies": {
