@@ -1,6 +1,6 @@
 import config from "@/config";
-import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import { ChainId, DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { Address, isAddressEqual } from "viem";
 
 // NOTE: we know ensRoot is defined for all namespaces, so enforce that at runtime with !

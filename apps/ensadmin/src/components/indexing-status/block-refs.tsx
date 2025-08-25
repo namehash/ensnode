@@ -4,7 +4,8 @@
 
 import { RelativeTime } from "@/components/datetime-utils";
 import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
-import { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
+import { ChainId } from "@ensnode/datasources";
+import { BlockRef } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { ExternalLink } from "lucide-react";
 

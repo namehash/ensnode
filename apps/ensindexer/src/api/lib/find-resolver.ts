@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
-import { DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
-import { ChainId, type Name, type Node, PluginName, getNameHierarchy } from "@ensnode/ensnode-sdk";
+import { ChainId, DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
+import { type Name, type Node, PluginName, getNameHierarchy } from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type Address,

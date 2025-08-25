@@ -1,4 +1,5 @@
-import type { ChainId, ChainIdString, UrlString } from "@ensnode/ensnode-sdk";
+import { ChainId } from "@ensnode/datasources";
+import type { ChainIdString, UrlString } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig, RpcConfig } from "./types";
 
 /**

@@ -1,4 +1,5 @@
-import { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
+import { ChainId } from "@ensnode/datasources";
+import { BlockRef, Duration, UnixTimestamp } from "../../shared";
 import {
   ChainIndexingActiveStatus,
   ChainIndexingCompletedStatus,

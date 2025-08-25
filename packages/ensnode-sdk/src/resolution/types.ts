@@ -1,7 +1,7 @@
 import { Address } from "viem";
 
+import { ChainId } from "@ensnode/datasources";
 import type { Name } from "../ens";
-import { ChainId } from "../shared";
 import { ResolverRecordsResponse } from "./resolver-records-response";
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
 

@@ -6,8 +6,9 @@
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
+import { ChainId } from "@ensnode/datasources";
 import z from "zod/v4";
-import { ChainId, deserializeChainId } from "../../shared";
+import { deserializeChainId } from "../../shared";
 import * as blockRef from "../../shared/block-ref";
 import {
   makeBlockRefSchema,

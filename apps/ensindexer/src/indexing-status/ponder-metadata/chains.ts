@@ -11,9 +11,9 @@
  * all come together to form a single view about a chain's indexing status.
  */
 
+import { ChainId } from "@ensnode/datasources";
 import {
   type BlockRef,
-  type ChainId,
   type ChainIndexingBackfillStatus,
   type ChainIndexingCompletedStatus,
   type ChainIndexingFollowingStatus,

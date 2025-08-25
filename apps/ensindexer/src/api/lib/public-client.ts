@@ -1,5 +1,5 @@
 import config from "@/config";
-import { ChainId } from "@ensnode/ensnode-sdk";
+import { ChainId } from "@ensnode/datasources";
 import { http, createPublicClient } from "viem";
 
 export function getPublicClient(chainId: ChainId) {

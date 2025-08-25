@@ -3,8 +3,8 @@ import { onchainStaticResolverImplementsDefaultAddress } from "@/api/lib/acceler
 import type { IndexedResolverRecords } from "@/api/lib/make-records-response";
 import { withSpanAsync } from "@/lib/auto-span";
 import { makeResolverId } from "@/lib/ids";
+import { ChainId } from "@ensnode/datasources";
 import {
-  ChainId,
   DEFAULT_EVM_COIN_TYPE,
   Node,
   ResolverRecordsSelection,
