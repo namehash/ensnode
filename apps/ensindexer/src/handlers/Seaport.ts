@@ -1,9 +1,7 @@
 import { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import { ItemType as SeaportItemType } from "@opensea/seaport-js/lib/constants";
 
 import config from "@/config";
-import { upsertAccount } from "@/lib/db-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   CurrencyIds,
@@ -15,11 +13,10 @@ import {
   TokenTypes,
   getCurrencyIdForContract,
   getKnownTokenIssuer,
+  indexSupportedSale,
   makeEventId,
-  makeTokenRef,
 } from "@/lib/tokenscope-helpers";
 import { ChainId, ENSNamespaceId } from "@ensnode/datasources";
-import { uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { Address, Hex } from "viem";
 
 type SeaportOfferItem = {
@@ -382,37 +379,6 @@ const getSupportedSale = (
     // unsupported sale
     return null;
   }
-};
-
-/**
- * Indexes a supported sale transaction
- */
-const indexSupportedSale = async (context: Context, sale: SupportedSale): Promise<void> => {
-  // Ensure buyer and seller accounts exist
-  await upsertAccount(context, sale.seller);
-  await upsertAccount(context, sale.buyer);
-
-  const nameSoldRecord = {
-    id: sale.event.eventId,
-    chainId: sale.nft.contract.chainId,
-    blockNumber: sale.event.blockNumber,
-    logIndex: sale.event.logIndex,
-    transactionHash: sale.event.transactionHash,
-    orderHash: sale.orderHash,
-    contractAddress: sale.nft.contract.address,
-    tokenId: uint256ToHex32(sale.nft.tokenId),
-    tokenType: sale.nft.tokenType,
-    tokenRef: makeTokenRef(sale.nft.contract.chainId, sale.nft.contract.address, sale.nft.tokenId),
-    domainId: sale.nft.domainId,
-    buyer: sale.buyer,
-    seller: sale.seller,
-    currency: sale.payment.price.currency,
-    amount: sale.payment.price.amount,
-    timestamp: sale.event.timestamp,
-  } satisfies typeof schema.nameSales.$inferInsert;
-
-  // Index the sale
-  await context.db.insert(schema.nameSales).values(nameSoldRecord);
 };
 
 /**
