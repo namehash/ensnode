@@ -11,6 +11,13 @@ variable "render_region" {
   type = string
 }
 
+# Database schema configuration
+variable "db_schema_version" {
+  type        = string
+  description = "The database schema version to use for ENSRainbow
+  default     = "3"
+}
+
 # Label set configuration for ENSRainbow
 variable "ensrainbow_label_set_id" {
   type        = string
