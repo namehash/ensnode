@@ -73,12 +73,6 @@ export interface ENSIndexerConfig {
 
   /**
    * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
-   *
-   * This configuration is REQUIRED and must be compatible with the label set configuration in your ENSRainbow
-   * server. To be compatible, the labelSetId must match the label set ID configured in the ENSRainbow server, and
-   * the labelSetVersion must be less than or equal to the highest available version in the ENSRainbow server.
-   *
-   * See {@link EnsRainbowClientLabelSet} for the type definition and constraints.
    */
   labelSet: Required<EnsRainbowClientLabelSet>;
 
