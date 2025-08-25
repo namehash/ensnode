@@ -15,14 +15,7 @@ import {
 import { getKnownTokenIssuer } from "@/lib/tokenscope/token-issuers";
 import { TokenType, TokenTypes } from "@/lib/tokenscope/tokens";
 import { ChainId, ENSNamespaceId } from "@ensnode/datasources";
-
-/**
- * The file has the responsibility of maping from Seaport-specific data models into our more generic
- * TokenScope data models as found in the `@/lib/tokenscope-helpers` file.
- *
- * TokenScope aims to deliver a simpler datamodel than Seaport provides but still support the
- * majority of real-world use cases.
- */
+import { uniq } from "@ensnode/ensnode-sdk";
 
 /**
  * Gets the supported TokenScope token type for a given Seaport item type.
@@ -58,18 +51,14 @@ const getSupportedNFT = (
 ): SupportedNFT | null => {
   // validate item as an ERC721/ERC1155 NFT
   const tokenType = getSupportedTokenType(item.itemType);
-  if (!tokenType) {
-    return null;
-  }
+  if (!tokenType) return null;
 
   // validate that the token is a known token issuing contract
   const tokenIssuer = getKnownTokenIssuer(namespaceId, {
     chainId,
     address: item.token,
   });
-  if (!tokenIssuer) {
-    return null;
-  }
+  if (!tokenIssuer) return null;
 
   const contract = tokenIssuer.contract;
   const tokenId = item.identifier;
@@ -95,9 +84,8 @@ const getSupportedPayment = (
 
   // validate that the item is a supported currency
   const currencyId = getCurrencyIdForContract(namespaceId, currencyContract);
-  if (!currencyId) {
-    return null; // Unsupported currency
-  }
+
+  if (!currencyId) return null; // Unsupported currency
 
   // validate the Seaport item type is supported and matches the currencyId
   if (item.itemType === SeaportItemType.NATIVE) {
@@ -113,9 +101,7 @@ const getSupportedPayment = (
     return null;
   }
 
-  if (item.amount < 0n) {
-    return null; // Invalid amount
-  }
+  if (item.amount < 0n) return null; // Invalid amount
 
   return {
     price: {
@@ -167,20 +153,18 @@ const getSeaportItemExtractions = (
 };
 
 const consolidateSupportedNFTs = (nfts: SupportedNFT[]): SupportedNFT | null => {
-  if (nfts.length !== 1) {
-    return null; // Either no NFT or multiple NFTs
-  }
-
+  // Either no NFT or multiple NFTs
+  if (nfts.length !== 1) return null;
   return nfts[0]!;
 };
 
 const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPayment | null => {
   // Get the set of distinct currencies in the payment
   const paymentCurrencies = payments.map((payment) => payment.price.currency);
-  const uniqueCurrencies = [...new Set(paymentCurrencies)];
-  if (uniqueCurrencies.length !== 1) {
-    return null; // Either no payment or multiple payments in mixed currencies
-  }
+  const uniqueCurrencies = uniq(paymentCurrencies);
+
+  // Either no payment or multiple payments in mixed currencies
+  if (uniqueCurrencies.length !== 1) return null;
 
   // consolidate multiple payments in the same currency into one.
   const totalAmount = payments.reduce((total, payment) => total + payment.price.amount, 0n);
@@ -202,11 +186,13 @@ const buildOnchainEventRef = (
       `Error building onchain event ref: block timestamp is too large: ${event.block.timestamp}`,
     );
   }
+
   if (event.block.number > BigInt(Number.MAX_SAFE_INTEGER)) {
     throw new Error(
       `Error building onchain event ref: block number is too large: ${event.block.number}`,
     );
   }
+
   const blockNumber = Number(event.block.number);
   const timestamp = Number(event.block.timestamp);
 
@@ -220,6 +206,11 @@ const buildOnchainEventRef = (
   } satisfies OnchainEventRef;
 };
 
+/**
+ * Maps from Seaport-specific OrderFulfilled event into our more generic TokenScope `SupportedSale`,
+ * if possible. TokenScope aims to deliver a simpler datamodel than Seaport provides but still
+ * support the majority of real-world use cases.
+ */
 export const getSupportedSaleFromOrderFulfilledEvent = (
   namespaceId: ENSNamespaceId,
   chainId: ChainId,
@@ -232,6 +223,7 @@ export const getSupportedSaleFromOrderFulfilledEvent = (
     chainId,
     offer,
   );
+
   const { nfts: considerationNFTs, payments: considerationPayments } = getSeaportItemExtractions(
     namespaceId,
     chainId,
