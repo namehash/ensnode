@@ -251,6 +251,15 @@ const getSupportedPayment = (
 
 interface SeaportItemExtractions {
   nfts: SupportedNFT[];
+
+  /**
+   * Seaport supports multiple payments in a single order.
+   * 
+   * Example cases include:
+   * - Payments are being made in multiple currencies.
+   * - Multiple payments in the same currency, but where payment is for marketplace fees while
+   *   other payments are for the seller.
+   */
   payments: SupportedPayment[];
 }
 
@@ -297,6 +306,7 @@ const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPa
     return null; // Either no payment or multiple payments in mixed currencies
   }
 
+  // consolidate multiple payments in the same currency into one.
   const totalAmount = payments.reduce((total, payment) => total + payment.price.amount, 0n);
 
   return {
