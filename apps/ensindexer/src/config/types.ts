@@ -1,5 +1,6 @@
 import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -69,6 +70,11 @@ export interface ENSIndexerConfig {
    * - localhost urls are allowed (and expected).
    */
   ensRainbowUrl: URL;
+
+  /**
+   * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
+   */
+  labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
@@ -241,6 +247,10 @@ export interface ENSIndexerEnvironment {
   namespace: string | undefined;
   plugins: string | undefined;
   ensRainbowUrl: string | undefined;
+  labelSet: {
+    labelSetId: string | undefined;
+    labelSetVersion: string | undefined;
+  };
   ensNodePublicUrl: string | undefined;
   ensIndexerUrl: string | undefined;
   ensAdminUrl: string | undefined;

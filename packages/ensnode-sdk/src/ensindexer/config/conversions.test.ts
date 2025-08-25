@@ -12,6 +12,10 @@ describe("ENSIndexer: Config", () => {
         databaseSchemaName: "public",
         ensAdminUrl: new URL("https://admin.ensnode.io"),
         ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
+        labelSet: {
+          labelSetId: "subgraph",
+          labelSetVersion: 0,
+        },
         healReverseAddresses: false,
         indexAdditionalResolverRecords: false,
         indexedChainIds: new Set([1]),
@@ -51,6 +55,10 @@ describe("ENSIndexer: Config", () => {
       databaseSchemaName: "public",
       ensAdminUrl: "https://admin.ensnode.io",
       ensNodePublicUrl: "https://api.alpha.ensnode.io",
+      labelSet: {
+        labelSetId: "subgraph",
+        labelSetVersion: 0,
+      },
       healReverseAddresses: false,
       indexAdditionalResolverRecords: false,
       indexedChainIds: [1, 10, 8453],
@@ -93,7 +101,7 @@ describe("ENSIndexer: Config", () => {
     });
 
     const errorMessage = `Cannot deserialize ENSIndexerPublicConfig:
-✖ 'isSubgraphCompatible' requires only the 'subgraph' plugin to be active. Also, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false'`;
+✖ 'isSubgraphCompatible' requires only the 'subgraph' plugin to be active, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`;
 
     it("can enforce invariants: broken subgraph-compatibility (healReverseAddresses = 'true')", () => {
       // arrange

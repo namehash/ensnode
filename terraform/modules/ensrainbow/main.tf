@@ -12,7 +12,10 @@ resource "render_web_service" "ensrainbow" {
   }
 
   env_vars = {
-    "LOG_LEVEL" = { value = "error" }
+    "LOG_LEVEL"         = { value = "error" }
+    "LABEL_SET_ID"      = { value = var.ensrainbow_label_set_id }
+    "LABEL_SET_VERSION" = { value = var.ensrainbow_label_set_version }
+    "DB_SCHEMA_VERSION" = { value = var.db_schema_version }
   }
 
 }

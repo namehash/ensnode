@@ -15,7 +15,7 @@ import {
   type LabelSetVersion,
   buildLabelSetId,
   buildLabelSetVersion,
-} from "@ensnode/ensrainbow-sdk";
+} from "@ensnode/ensnode-sdk";
 
 export interface IngestProtobufCommandOptions {
   inputFile: string;

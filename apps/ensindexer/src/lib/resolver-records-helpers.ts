@@ -22,7 +22,7 @@ export async function handleResolverAddressRecordUpdate(
   address: string,
 ) {
   const recordId = makeKeyedResolverRecordId(resolverId, coinType.toString());
-  const isDeletion = !!address || address === zeroAddress;
+  const isDeletion = address === "" || address === zeroAddress;
   if (isDeletion) {
     // delete
     await context.db.delete(schema.ext_resolverAddressRecords, { id: recordId });

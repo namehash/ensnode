@@ -1,14 +1,12 @@
 import {
-  type EnsRainbow,
-  EnsRainbowClientLabelSet,
-  ErrorCode,
+  type EnsRainbowClientLabelSet,
   type LabelSetId,
   type LabelSetVersion,
-  StatusCode,
   buildEnsRainbowClientLabelSet,
   buildLabelSetId,
   buildLabelSetVersion,
-} from "@ensnode/ensrainbow-sdk";
+} from "@ensnode/ensnode-sdk";
+import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";

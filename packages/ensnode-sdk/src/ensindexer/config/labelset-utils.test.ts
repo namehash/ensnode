@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
+import type { LabelHash } from "../../ens";
+import { type EnsRainbowClientLabelSet, type EnsRainbowServerLabelSet } from "../../ensrainbow";
 import {
-  type EnsRainbowClientLabelSet,
-  type EnsRainbowServerLabelSet,
   buildEnsRainbowClientLabelSet,
   buildLabelSetId,
   buildLabelSetVersion,
   validateSupportedLabelSetAndVersion,
-} from "./labelset";
+} from "./labelset-utils";
 
 describe("buildLabelSetId", () => {
   it("should return a valid label set id", () => {
@@ -18,33 +18,29 @@ describe("buildLabelSetId", () => {
   });
 
   it("should throw an error for an empty string", () => {
-    expect(() => buildLabelSetId("")).toThrow(
-      "LabelSetId must be between 1 and 50 characters long.",
-    );
+    expect(() => buildLabelSetId("")).toThrow("LabelSetId must be 1-50 characters long");
   });
 
   it("should throw an error for a string that is too long", () => {
     const longString = "a".repeat(51);
-    expect(() => buildLabelSetId(longString)).toThrow(
-      "LabelSetId must be between 1 and 50 characters long.",
-    );
+    expect(() => buildLabelSetId(longString)).toThrow("LabelSetId must be 1-50 characters long");
   });
 
   it("should throw an error for a string with uppercase letters", () => {
     expect(() => buildLabelSetId("Subgraph")).toThrow(
-      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
+      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-)",
     );
   });
 
   it("should throw an error for a string with numbers", () => {
     expect(() => buildLabelSetId("subgraph-1")).toThrow(
-      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
+      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-)",
     );
   });
 
   it("should throw an error for a string with symbols", () => {
     expect(() => buildLabelSetId("subgraph_1")).toThrow(
-      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
+      "LabelSetId can only contain lowercase letters (a-z) and hyphens (-)",
     );
   });
 });
@@ -57,26 +53,20 @@ describe("buildLabelSetVersion", () => {
 
   it("should throw an error for a negative number", () => {
     expect(() => buildLabelSetVersion(-1)).toThrow(
-      "LabelSetVersion must be a non-negative integer.",
+      "LabelSetVersion must be a non-negative integer (>=0)",
     );
   });
 
   it("should throw an error for a floating-point number", () => {
-    expect(() => buildLabelSetVersion(1.5)).toThrow(
-      "LabelSetVersion must be a non-negative integer.",
-    );
+    expect(() => buildLabelSetVersion(1.5)).toThrow("LabelSetVersion must be an integer");
   });
 
   it("should throw an error for NaN", () => {
-    expect(() => buildLabelSetVersion(NaN)).toThrow(
-      "LabelSetVersion must be a non-negative integer.",
-    );
+    expect(() => buildLabelSetVersion(NaN)).toThrow("LabelSetVersion must be an integer");
   });
 
   it("should throw an error for Infinity", () => {
-    expect(() => buildLabelSetVersion(Infinity)).toThrow(
-      "LabelSetVersion must be a non-negative integer.",
-    );
+    expect(() => buildLabelSetVersion(Infinity)).toThrow("LabelSetVersion must be an integer");
   });
 
   it("should return a valid label set version for a string input", () => {

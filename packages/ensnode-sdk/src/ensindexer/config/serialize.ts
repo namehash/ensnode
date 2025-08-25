@@ -18,6 +18,7 @@ export function serializeENSIndexerPublicConfig(
   const {
     ensAdminUrl,
     ensNodePublicUrl,
+    labelSet,
     indexedChainIds,
     databaseSchemaName,
     healReverseAddresses,
@@ -31,6 +32,7 @@ export function serializeENSIndexerPublicConfig(
   return {
     ensAdminUrl: serializeUrl(ensAdminUrl),
     ensNodePublicUrl: serializeUrl(ensNodePublicUrl),
+    labelSet,
     indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     databaseSchemaName,
     healReverseAddresses,

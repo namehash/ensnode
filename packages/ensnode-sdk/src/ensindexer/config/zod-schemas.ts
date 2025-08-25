@@ -12,6 +12,7 @@ import {
   ZodCheckFnInput,
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
+  makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
   makeUrlSchema,
 } from "../../shared/zod-schemas";
@@ -66,6 +67,59 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
       error: `${valueLabel} is required and must be a non-empty string.`,
     });
 
+/**
+ * Makes a schema for parsing a label set ID.
+ *
+ * The label set ID is guaranteed to be a string between 1-50 characters
+ * containing only lowercase letters (a-z) and hyphens (-).
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set ID", "LABEL_SET_ID")
+ */
+export const makeLabelSetIdSchema = (valueLabel: string) => {
+  return z
+    .string({ error: `${valueLabel} must be a string` })
+    .min(1, { error: `${valueLabel} must be 1-50 characters long` })
+    .max(50, { error: `${valueLabel} must be 1-50 characters long` })
+    .regex(/^[a-z-]+$/, {
+      error: `${valueLabel} can only contain lowercase letters (a-z) and hyphens (-)`,
+    });
+};
+
+/**
+ * Makes a schema for parsing a label set version.
+ *
+ * The label set version is guaranteed to be a non-negative integer.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
+
+ */
+export const makeLabelSetVersionSchema = (valueLabel: string) => {
+  return z.coerce
+    .number({ error: `${valueLabel} must be an integer.` })
+    .pipe(makeNonNegativeIntegerSchema(valueLabel));
+};
+
+/**
+ * Makes a schema for parsing a label set where both label set ID and label set version are required.
+ *
+ * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
+ */
+export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") => {
+  let valueLabelLabelSetId = valueLabel;
+  let valueLabelLabelSetVersion = valueLabel;
+  if (valueLabel == "LABEL_SET") {
+    valueLabelLabelSetId = "LABEL_SET_ID";
+    valueLabelLabelSetVersion = "LABEL_SET_VERSION";
+  } else {
+    valueLabelLabelSetId = valueLabel + ".labelSetId";
+    valueLabelLabelSetVersion = valueLabel + ".labelSetVersion";
+  }
+  return z.object({
+    labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),
+    labelSetVersion: makeLabelSetVersionSchema(valueLabelLabelSetVersion),
+  });
+};
+
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
@@ -99,12 +153,16 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
   }
 }
 
-// Invariant: isSubgraphCompatible requires Subgraph plugin only, and no extra indexing features
+// Invariant: isSubgraphCompatible requires Subgraph plugin only, no extra indexing features, and subgraph label set
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
     Pick<
       ENSIndexerPublicConfig,
-      "plugins" | "isSubgraphCompatible" | "healReverseAddresses" | "indexAdditionalResolverRecords"
+      | "plugins"
+      | "isSubgraphCompatible"
+      | "healReverseAddresses"
+      | "indexAdditionalResolverRecords"
+      | "labelSet"
     >
   >,
 ) {
@@ -112,8 +170,8 @@ export function invariant_isSubgraphCompatibleRequirements(
 
   if (config.isSubgraphCompatible !== isSubgraphCompatible(config)) {
     const message = config.isSubgraphCompatible
-      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active. Also, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false'`
-      : `Both 'indexAdditionalResolverRecords' and 'healReverseAddresses' were set to 'false', and the only active plugin was the '${PluginName.Subgraph}' plugin. The 'isSubgraphCompatible' must be set to 'true'`;
+      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`
+      : `Both 'indexAdditionalResolverRecords' and 'healReverseAddresses' were set to 'false', the only active plugin was the '${PluginName.Subgraph}' plugin, and labelSet was {labelSetId: "subgraph", labelSetVersion: 0}. The 'isSubgraphCompatible' must be set to 'true'`;
 
     ctx.issues.push({
       code: "custom",
@@ -134,6 +192,7 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
+      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
       indexAdditionalResolverRecords: z.boolean({
         error: `${valueLabel}.indexAdditionalResolverRecords`,

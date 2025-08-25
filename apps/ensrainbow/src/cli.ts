@@ -17,7 +17,7 @@ import {
   type LabelSetVersion,
   buildLabelSetId,
   buildLabelSetVersion,
-} from "@ensnode/ensrainbow-sdk";
+} from "@ensnode/ensnode-sdk";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;

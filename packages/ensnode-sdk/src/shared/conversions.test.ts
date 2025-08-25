@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { deserializeChainId, deserializeDatetime, deserializeUrl } from "./deserialize";
 import { serializeChainId, serializeDatetime, serializeUrl } from "./serialize";
-import type { BlockRef } from "./types";
 
 describe("ENSIndexer: Shared", () => {
   describe("serialization", () => {
@@ -16,12 +15,12 @@ describe("ENSIndexer: Shared", () => {
     });
 
     it("can serialize URL into its string representation", () => {
-      const url = new URL("https://admin.ensnode.io/status");
+      const url = new URL("https://admin.ensnode.io/connect");
 
       url.searchParams.set("ensnode", "https://indexer.alpha.ensnode.io");
 
       expect(serializeUrl(url)).toBe(
-        "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Findexer.alpha.ensnode.io",
+        "https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Findexer.alpha.ensnode.io",
       );
     });
   });
@@ -62,9 +61,9 @@ describe("ENSIndexer: Shared", () => {
 
     it("can deserialize URL from its string representation", () => {
       const serializedUrl =
-        "https://admin.ensnode.io/status?ensnode=https%3A%2F%2Findexer.alpha.ensnode.io";
+        "https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Findexer.alpha.ensnode.io";
 
-      const resultUrl = new URL("https://admin.ensnode.io/status");
+      const resultUrl = new URL("https://admin.ensnode.io/connect");
 
       resultUrl.searchParams.set("ensnode", "https://indexer.alpha.ensnode.io");
 
