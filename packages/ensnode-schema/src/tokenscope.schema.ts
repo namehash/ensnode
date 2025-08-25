@@ -1,13 +1,6 @@
 import schema from "ponder:schema";
 import { index, onchainTable } from "ponder";
 
-export const TokenTypes = {
-  ERC721: "ERC721",
-  ERC1155: "ERC1155",
-} as const;
-
-export type TokenType = (typeof TokenTypes)[keyof typeof TokenTypes];
-
 const sharedEventColumns = (t: any) => ({
   /**
    * The unique identifier of the event.
@@ -121,7 +114,7 @@ export const nameSold = onchainTable(
     /**
      * The type of token being sold (ERC721 or ERC1155).
      */
-    tokenType: t.text().notNull().$type<TokenType>(),
+    tokenType: t.text().notNull(),
   }),
   (t) => ({
     idx_from: index().on(t.fromOwnerId),

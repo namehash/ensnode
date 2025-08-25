@@ -25,6 +25,18 @@ export interface ChainAddress {
   address: Address;
 }
 
+export const TokenTypes = {
+  ERC721: "ERC721",
+  ERC1155: "ERC1155",
+} as const;
+
+export type TokenType = (typeof TokenTypes)[keyof typeof TokenTypes];
+
+/**
+ * A uint256 value that identifies a specific token within a NFT contract.
+ */
+export type TokenId = bigint;
+
 /**
  * Identifies a specific currency.
  */

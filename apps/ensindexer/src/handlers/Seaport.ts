@@ -6,11 +6,12 @@ import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
+  TokenTypes,
   getDomainIdByTokenId,
   getSupportedCurrencies,
   isKnownTokenIssuingContract,
 } from "@/lib/tokenscope-helpers";
-import { NameSoldInsert, TokenTypes } from "@ensnode/ensnode-schema";
+import { NameSoldInsert } from "@ensnode/ensnode-schema";
 import { ChainId, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { Address, Hex, zeroAddress } from "viem";
 
