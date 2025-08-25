@@ -1,3 +1,3 @@
 output "ensrainbow_url" {
-  value = render_web_service.ensrainbow.name
+  value = "http://${render_web_service.ensrainbow.name}:1000"
 }
