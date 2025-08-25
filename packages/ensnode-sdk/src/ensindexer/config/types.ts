@@ -1,4 +1,4 @@
-import type { ENSNamespaceId } from "@ensnode/datasources";
+import { ENSNamespaceId } from "@ensnode/datasources";
 
 import type { EnsRainbowClientLabelSet } from "../../ensrainbow";
 import { ChainId } from "../../shared";

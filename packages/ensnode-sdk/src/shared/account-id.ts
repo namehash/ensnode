@@ -1,5 +1,5 @@
-import { AccountId } from "@ensnode/ensnode-sdk";
 import { isAddressEqual } from "viem";
+import { AccountId } from "./types";
 
 /**
  * Determines where the provided AccountId values represent the same address on the same chain.
