@@ -1,33 +1,33 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { ItemType } from "@opensea/seaport-js/lib/constants";
+import { ItemType as SeaportItemType } from "@opensea/seaport-js/lib/constants";
 
 import config from "@/config";
-import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
+import { upsertAccount } from "@/lib/db-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   CurrencyIds,
-  Price,
-  TokenId,
+  OnchainEventRef,
+  SupportedNFT,
+  SupportedPayment,
+  SupportedSale,
   TokenType,
   TokenTypes,
   getCurrencyIdForContract,
-  getDomainIdByTokenId,
   getKnownTokenIssuer,
-  isKnownTokenIssuer,
+  makeSaleId,
+  makeTokenRef,
 } from "@/lib/tokenscope-helpers";
-import { ChainAddress, ChainId, ENSNamespaceId } from "@ensnode/datasources";
-import { NameSoldInsert } from "@ensnode/ensnode-schema";
-import type { Node } from "@ensnode/ensnode-sdk";
+import { ChainId, ENSNamespaceId } from "@ensnode/datasources";
+import { uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { Address, Hex } from "viem";
-import { PrivateKeyToAccountErrorType } from "viem/accounts";
 
 type SeaportOfferItem = {
   /**
    * The type of item in the offer.
    * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
    */
-  itemType: ItemType;
+  itemType: SeaportItemType;
 
   /**
    * The contract address of the token.
@@ -60,7 +60,7 @@ type SeaportConsiderationItem = {
    * The type of item in the consideration.
    * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
    */
-  itemType: ItemType;
+  itemType: SeaportItemType;
 
   /**
    * The contract address of the token.
@@ -137,17 +137,6 @@ interface SeaportOrderFulfilledEvent
     consideration: readonly SeaportConsiderationItem[];
   }> {}
 
-interface SupportedNFT {
-  tokenType: TokenType;
-  contract: ChainAddress;
-  tokenId: TokenId;
-  domainId: Node;
-}
-
-interface SupportedPayment {
-  price: Price;
-}
-
 /**
  * Gets the supported TokenScope token type for a given Seaport item type.
  *
@@ -155,10 +144,10 @@ interface SupportedPayment {
  * @returns the supported TokenScope token type for the given SeaPort item type, or null
  *          if the item type is not supported
  */
-const getSupportedTokenType = (itemType: ItemType): TokenType | null => {
-  if (itemType === ItemType.ERC721) {
+const getSupportedTokenType = (itemType: SeaportItemType): TokenType | null => {
+  if (itemType === SeaportItemType.ERC721) {
     return TokenTypes.ERC721;
-  } else if (itemType === ItemType.ERC1155) {
+  } else if (itemType === SeaportItemType.ERC1155) {
     return TokenTypes.ERC1155;
   } else {
     return null;
@@ -224,11 +213,11 @@ const getSupportedPayment = (
   }
 
   // validate the Seaport item type is supported and matches the currencyId
-  if (item.itemType === ItemType.NATIVE) {
+  if (item.itemType === SeaportItemType.NATIVE) {
     if (currencyId !== CurrencyIds.ETH) {
       return null; // Seaport item type doesn't match currencyId
     }
-  } else if (item.itemType === ItemType.ERC20) {
+  } else if (item.itemType === SeaportItemType.ERC20) {
     if (currencyId === CurrencyIds.ETH) {
       return null; // Seaport item type doesn't match currencyId
     }
@@ -307,12 +296,32 @@ const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPa
   } satisfies SupportedPayment;
 };
 
-interface SupportedSale {
-  nft: SupportedNFT;
-  payment: SupportedPayment;
-  seller: Address;
-  buyer: Address;
-}
+const buildOnchainEventRef = (
+  chainId: ChainId,
+  event: SeaportOrderFulfilledEvent,
+): OnchainEventRef => {
+  if (event.block.timestamp > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(
+      `Error building onchain event ref: block timestamp is too large: ${event.block.timestamp}`,
+    );
+  }
+  if (event.block.number > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(
+      `Error building onchain event ref: block number is too large: ${event.block.number}`,
+    );
+  }
+  const blockNumber = Number(event.block.number);
+  const timestamp = Number(event.block.timestamp);
+
+  return {
+    eventId: makeSaleId(chainId, event.block.number, event.log.logIndex),
+    chainId,
+    blockNumber,
+    logIndex: event.log.logIndex,
+    timestamp,
+    transactionHash: event.transaction.hash,
+  } satisfies OnchainEventRef;
+};
 
 const getSupportedSale = (
   namespaceId: ENSNamespaceId,
@@ -346,6 +355,8 @@ const getSupportedSale = (
     // offer is exactly 1 supported NFT and consideration consolidates to 1 supported payment
     // therefore the offerer is the seller and the recipient is the buyer
     return {
+      event: buildOnchainEventRef(chainId, event),
+      orderHash,
       nft: consolidatedOfferNFT,
       payment: consolidatedOfferPayment,
       seller: offerer,
@@ -360,6 +371,8 @@ const getSupportedSale = (
     // consideration is exactly 1 supported NFT and offer consolidates to 1 supported payment
     // therefore the recipient is the seller and the offerer is the buyer
     return {
+      event: buildOnchainEventRef(chainId, event),
+      orderHash,
       nft: consolidatedConsiderationNFT,
       payment: consolidatedConsiderationPayment,
       seller: recipient,
@@ -374,33 +387,32 @@ const getSupportedSale = (
 /**
  * Indexes a supported sale transaction
  */
-const indexSupportedSale = async (
-  context: Context,
-  event: SeaportOrderFulfilledEvent,
-  sale: SupportedSale,
-): Promise<void> => {
-  // Ensure buyer and selleraccounts exist
+const indexSupportedSale = async (context: Context, sale: SupportedSale): Promise<void> => {
+  // Ensure buyer and seller accounts exist
   await upsertAccount(context, sale.seller);
   await upsertAccount(context, sale.buyer);
 
-  const saleData: NameSoldInsert = {
-    ...sharedEventValues(context.chain.id, event),
-    logIndex: event.log.logIndex,
-    chainId: context.chain.id,
-    orderHash: event.args.orderHash,
-    timestamp: event.block.timestamp,
-    fromOwnerId: sale.seller,
-    newOwnerId: sale.buyer,
+  const nameSoldRecord = {
+    id: sale.event.eventId,
+    chainId: sale.nft.contract.chainId,
+    blockNumber: sale.event.blockNumber,
+    logIndex: sale.event.logIndex,
+    transactionHash: sale.event.transactionHash,
+    orderHash: sale.orderHash,
     contractAddress: sale.nft.contract.address,
-    tokenId: sale.nft.tokenId.toString(), // TODO: store as a bigint?
+    tokenId: uint256ToHex32(sale.nft.tokenId),
     tokenType: sale.nft.tokenType,
+    tokenRef: makeTokenRef(sale.nft.contract.chainId, sale.nft.contract.address, sale.nft.tokenId),
     domainId: sale.nft.domainId,
-    currencyId: sale.payment.price.currency,
-    price: sale.payment.price.amount,
-  };
+    buyer: sale.buyer,
+    seller: sale.seller,
+    currency: sale.payment.price.currency,
+    amount: sale.payment.price.amount,
+    timestamp: sale.event.timestamp,
+  } satisfies typeof schema.nameSales.$inferInsert;
 
   // Index the sale
-  await context.db.insert(schema.nameSold).values(saleData);
+  await context.db.insert(schema.nameSales).values(nameSoldRecord);
 };
 
 /**
@@ -415,6 +427,6 @@ export async function handleOrderFulfilled({
 }) {
   const supportedSale = getSupportedSale(config.namespace, context.chain.id, event);
   if (supportedSale) {
-    await indexSupportedSale(context, event, supportedSale);
+    await indexSupportedSale(context, supportedSale);
   }
 }

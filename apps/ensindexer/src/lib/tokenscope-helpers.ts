@@ -1,3 +1,4 @@
+import { Price, TokenId, TokenType } from "@/lib/tokenscope-helpers";
 import {
   ChainAddress,
   ChainId,
@@ -13,10 +14,11 @@ import {
   LINEANAMES_NODE,
   LabelHash,
   type Node,
+  UnixTimestamp,
   makeSubdomainNode,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
-import { Address, zeroAddress } from "viem";
+import { Address, Hex, zeroAddress } from "viem";
 import {
   base,
   baseSepolia,
@@ -243,6 +245,32 @@ export function getDomainIdByTokenId(
   return tokenIssuer.getDomainId(tokenId);
 }
 
+/**
+ * Makes a unique and deterministic Sale Id.
+ *
+ * @example `${chainId}-${blockNumber}-${logIndex}`
+ *
+ * @param chainId
+ * @param blockNumber
+ * @param logIndex
+ * @returns a unique and deterministic Sale Id
+ */
+export const makeSaleId = (chainId: ChainId, blockNumber: bigint, logIndex: number) =>
+  [chainId.toString(), blockNumber.toString(), logIndex.toString()].join("-");
+
+/**
+ * Makes a unique and deterministic TokenRef.
+ *
+ * @example `${chainId}-${contractAddress}-${tokenId}`
+ *
+ * @param chainId
+ * @param contractAddress
+ * @param tokenId
+ * @returns a unique and deterministic TokenRef
+ */
+export const makeTokenRef = (chainId: ChainId, contractAddress: Address, tokenId: TokenId) =>
+  `${chainId}-${contractAddress}-${uint256ToHex32(tokenId)}`;
+
 // TODO: Add support for WETH
 /**
  * Identifiers for supported currencies.
@@ -434,3 +462,36 @@ export const getCurrencyIdForContract = (
 
   return null;
 };
+export interface SupportedSale {
+  /**
+   * Event.id set as the unique and deterministic identifier of the onchain event
+   * associated with the sale.
+   *
+   * Composite key format: "{chainId}-{blockNumber}-{logIndex}" (e.g., "1-1234567-5").
+   *
+   * @example "1-1234567-5"
+   */
+  event: OnchainEventRef;
+  orderHash: Hex;
+  nft: SupportedNFT;
+  payment: SupportedPayment;
+  seller: Address;
+  buyer: Address;
+}
+export interface OnchainEventRef {
+  eventId: string;
+  chainId: ChainId;
+  blockNumber: number;
+  logIndex: number;
+  timestamp: UnixTimestamp;
+  transactionHash: Hex;
+}
+export interface SupportedPayment {
+  price: Price;
+}
+export interface SupportedNFT {
+  tokenType: TokenType;
+  contract: ChainAddress;
+  tokenId: TokenId;
+  domainId: Node;
+}
