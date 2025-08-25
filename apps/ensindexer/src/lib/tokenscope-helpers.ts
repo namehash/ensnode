@@ -15,7 +15,7 @@ import {
   makeSubdomainNode,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
-import { Address } from "viem";
+import { Address, isAddressEqual } from "viem";
 import {
   base,
   baseSepolia,
@@ -403,15 +403,14 @@ export const getSupportedCurrencies = (chainId: ChainId): ChainCurrency[] => {
 };
 
 /**
- * Returns a boolean indicating whether the provided address is a known supported currency contract.
+ * Identifies if the provided ChainAddress is a supported currency contract.
  *
- * @param chainId - The chain ID
- * @param address - The contract address to check
- * @returns a boolean indicating whether the address is a known supported currency contract
+ * @param contract - The ChainAddress of the contract to check
+ * @returns a boolean indicating if the provided ChainAddress is a supported currency contract
  */
-export const isKnownCurrencyContract = (chainId: ChainId, address: Address): boolean => {
-  const supportedCurrencies = getSupportedCurrencies(chainId);
+export const isSupportedCurrencyContract = (contract: ChainAddress): boolean => {
+  const supportedCurrencies = getSupportedCurrencies(contract.chainId);
   return supportedCurrencies.some(
-    (currency) => currency.address && currency.address.toLowerCase() === address.toLowerCase(),
+    (currency) => currency.address && isAddressEqual(currency.address, contract.address),
   );
 };
