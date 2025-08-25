@@ -32,6 +32,11 @@ import {
   sepolia,
 } from "viem/chains";
 
+/**
+ * This file has the responsibility for "core" TokenScope data models and logic that are generic and
+ * are not specifically related only to a single marketplace. Ex: Seaport.
+ */
+
 export const TokenTypes = {
   ERC721: "ERC721",
   ERC1155: "ERC1155",

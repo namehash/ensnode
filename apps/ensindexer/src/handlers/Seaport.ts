@@ -19,6 +19,11 @@ import {
 import { ChainId, ENSNamespaceId } from "@ensnode/datasources";
 import { Address, Hex } from "viem";
 
+/**
+ * The file has the responsibility for logic that maps from Seaport-specific data models
+ * into our more generic Tokenscope data models as found in the `@/lib/tokenscope-helpers` file.
+ */
+
 type SeaportOfferItem = {
   /**
    * The type of item in the offer.
