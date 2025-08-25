@@ -44,7 +44,7 @@ describe("ENSIndexer: Config", () => {
         ).toContain("Plugins cannot contain duplicate values");
 
         expect(formatParseError(makePluginsListSchema().safeParse([]))).toContain(
-          "Plugins must be a list with at least one valid plugin name. Valid plugins are: subgraph, basenames, lineanames, threedns, reverse-resolvers, referrals",
+          "Plugins must be a list with at least one valid plugin name. Valid plugins are: subgraph, basenames, lineanames, threedns, reverse-resolvers, referrals, tokenscope",
         );
       });
 

@@ -59,7 +59,7 @@ jobs:
           # We use private RPC URLs from GitHub Secrets to avoid rate limits.
           # Public RPC URLs are used as fallbacks for repository forks
           # that don't have the relevant secrets configured.
-          PLUGINS: subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals
+          PLUGINS: subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope
           RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
           RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
           RPC_URL_8453: ${{ secrets.BASE_RPC_URL || 'https://base.drpc.org' }}
