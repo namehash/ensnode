@@ -1,152 +1,28 @@
-import { Context } from "ponder:registry";
-import { ItemType as SeaportItemType } from "@opensea/seaport-js/lib/constants";
-
-import config from "@/config";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+import { CurrencyIds, getCurrencyIdForContract } from "@/lib/currencies";
+import { makeEventId } from "@/lib/ids";
 import {
-  CurrencyIds,
   OnchainEventRef,
   SupportedNFT,
   SupportedPayment,
   SupportedSale,
-  TokenType,
-  TokenTypes,
-  getCurrencyIdForContract,
-  getKnownTokenIssuer,
-  indexSupportedSale,
-  makeEventId,
-} from "@/lib/tokenscope-helpers";
+} from "@/lib/tokenscope/sales";
+import {
+  SeaportConsiderationItem,
+  SeaportItemType,
+  SeaportOfferItem,
+  SeaportOrderFulfilledEvent,
+} from "@/lib/tokenscope/seaport-types";
+import { getKnownTokenIssuer } from "@/lib/tokenscope/token-issuers";
+import { TokenType, TokenTypes } from "@/lib/tokenscope/tokens";
 import { ChainId, ENSNamespaceId } from "@ensnode/datasources";
-import { Address, Hex } from "viem";
 
 /**
- * The file has the responsibility for logic that maps from Seaport-specific data models
- * into our more generic TokenScope data models as found in the `@/lib/tokenscope-helpers` file.
+ * The file has the responsibility of maping from Seaport-specific data models into our more generic
+ * TokenScope data models as found in the `@/lib/tokenscope-helpers` file.
  *
- * Seaport's data model supports complexity that has more negatives than benefits. TokenScope aims
- * to deliver a more simple data model for developers to build ENS apps with. This simplified data
- * model is anticipated to still support the vast majority of real-world use cases.
- *
- * In this file we examine each indexed Seaport event to determine if it fits within the TokenScope
- * data model. If it does, we extract the relevant data and map it into the TokenScope data model.
- *
- * If it does not, we ignore the event.
+ * TokenScope aims to deliver a simpler datamodel than Seaport provides but still support the
+ * majority of real-world use cases.
  */
-
-type SeaportOfferItem = {
-  /**
-   * The type of item in the offer.
-   * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
-   */
-  itemType: SeaportItemType;
-
-  /**
-   * The contract address of the token.
-   * - For ERC721/ERC1155: The NFT contract address
-   * - For ERC20: The token contract address
-   * - For NATIVE (ETH): Zero address (0x0000000000000000000000000000000000000000)
-   */
-  token: Address;
-
-  /**
-   * The identifier field has different meanings based on itemType:
-   * - For ERC721/ERC1155: The specific token ID of the NFT
-   * - For ERC20: Always 0 (not used for fungible tokens)
-   * - For NATIVE (ETH): Always 0 (not used for native currency)
-   */
-  identifier: bigint;
-
-  /**
-   * The amount field has different meanings based on itemType:
-   * - For ERC721: Always 1 (you can only transfer 1 unique NFT)
-   * - For ERC1155: The quantity of tokens with the specified identifier (for our purposes, always 1)
-   * - For ERC20: The amount of tokens (in wei/smallest unit)
-   * - For NATIVE (ETH): The amount of ETH (in wei)
-   */
-  amount: bigint;
-};
-
-type SeaportConsiderationItem = {
-  /**
-   * The type of item in the consideration.
-   * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
-   */
-  itemType: SeaportItemType;
-
-  /**
-   * The contract address of the token.
-   * - For ERC721/ERC1155: The NFT contract address
-   * - For ERC20: The token contract address
-   * - For NATIVE (ETH): Zero address (0x0000000000000000000000000000000000000000)
-   */
-  token: Address;
-
-  /**
-   * The identifier field has different meanings based on itemType:
-   * - For ERC721/ERC1155: The specific token ID of the NFT
-   * - For ERC20: Always 0 (not used for fungible tokens)
-   * - For NATIVE (ETH): Always 0 (not used for native currency)
-   */
-  identifier: bigint;
-
-  /**
-   * The amount field has different meanings based on itemType:
-   * - For ERC721: Always 1 (you can only transfer 1 unique NFT)
-   * - For ERC1155: The quantity of tokens with the specified identifier
-   * - For ERC20: The amount of tokens (in wei/smallest unit)
-   * - For NATIVE (ETH): The amount of ETH (in wei)
-   */
-  amount: bigint;
-
-  /**
-   * The address that receives the consideration items from the order.
-   * This is typically the order fulfiller or their designated recipient.
-   */
-  recipient: Address;
-};
-
-interface SeaportOrderFulfilledEvent
-  extends EventWithArgs<{
-    /**
-     * The unique hash identifier of the fulfilled order within Seaport.
-     * Used to track and reference specific orders on-chain.
-     */
-    orderHash: Hex;
-
-    /**
-     * The address of the account that created and signed the original order.
-     * This is the party offering items for trade.
-     */
-    offerer: Address;
-
-    /**
-     * The address of the zone contract that implements custom validation rules.
-     * Zones can enforce additional restrictions like allowlists, time windows,
-     * or other custom logic before order fulfillment. Can be zero address if
-     * no additional validation is required.
-     */
-    zone: Address;
-
-    /**
-     * The address that receives the offered items from the order.
-     * This is typically the order fulfiller or their designated recipient.
-     */
-    recipient: Address;
-
-    /**
-     * Array of items that the offerer is giving up in this order.
-     * For listings: NFTs/tokens being sold
-     * For offers: ETH/ERC20 tokens being offered as payment
-     */
-    offer: readonly SeaportOfferItem[];
-
-    /**
-     * Array of items that the offerer expects to receive in return.
-     * For listings: ETH/ERC20 tokens expected as payment
-     * For offers: NFTs/tokens being requested in exchange
-     */
-    consideration: readonly SeaportConsiderationItem[];
-  }> {}
 
 /**
  * Gets the supported TokenScope token type for a given Seaport item type.
@@ -344,7 +220,7 @@ const buildOnchainEventRef = (
   } satisfies OnchainEventRef;
 };
 
-const getSupportedSale = (
+export const getSupportedSaleFromOrderFulfilledEvent = (
   namespaceId: ENSNamespaceId,
   chainId: ChainId,
   event: SeaportOrderFulfilledEvent,
@@ -367,14 +243,14 @@ const getSupportedSale = (
   const consolidatedOfferPayment = consolidateSupportedPayments(offerPayments);
   const consolidatedConsiderationPayment = consolidateSupportedPayments(considerationPayments);
 
+  // offer is exactly 1 supported NFT and consideration consolidates to 1 supported payment
+  // therefore the offerer is the seller and the recipient is the buyer
   if (
     consolidatedOfferNFT &&
     !consolidatedConsiderationNFT &&
     consolidatedOfferPayment &&
     !consolidatedConsiderationPayment
   ) {
-    // offer is exactly 1 supported NFT and consideration consolidates to 1 supported payment
-    // therefore the offerer is the seller and the recipient is the buyer
     return {
       event: buildOnchainEventRef(chainId, event),
       orderHash,
@@ -383,14 +259,16 @@ const getSupportedSale = (
       seller: offerer,
       buyer: recipient,
     } satisfies SupportedSale;
-  } else if (
+  }
+
+  // consideration is exactly 1 supported NFT and offer consolidates to 1 supported payment
+  // therefore the recipient is the seller and the offerer is the buyer
+  if (
     !consolidatedOfferNFT &&
     consolidatedConsiderationNFT &&
     !consolidatedOfferPayment &&
     consolidatedConsiderationPayment
   ) {
-    // consideration is exactly 1 supported NFT and offer consolidates to 1 supported payment
-    // therefore the recipient is the seller and the offerer is the buyer
     return {
       event: buildOnchainEventRef(chainId, event),
       orderHash,
@@ -399,24 +277,8 @@ const getSupportedSale = (
       seller: recipient,
       buyer: offerer,
     } satisfies SupportedSale;
-  } else {
-    // unsupported sale
-    return null;
   }
-};
 
-/**
- * Handles each Seaport OrderFulfilled event
- */
-export async function handleOrderFulfilled({
-  context,
-  event,
-}: {
-  context: Context;
-  event: SeaportOrderFulfilledEvent;
-}) {
-  const supportedSale = getSupportedSale(config.namespace, context.chain.id, event);
-  if (supportedSale) {
-    await indexSupportedSale(context, supportedSale);
-  }
-}
+  // otherwise, unsupported sale
+  return null;
+};

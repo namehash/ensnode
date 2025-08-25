@@ -30,7 +30,6 @@
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
-    "@opensea/seaport-js": "^4.0.5",
     "@hono/otel": "^0.2.2",
     "@hono/zod-validator": "^0.7.2",
     "@opentelemetry/api": "^1.9.0",

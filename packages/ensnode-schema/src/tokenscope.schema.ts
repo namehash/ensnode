@@ -1,4 +1,3 @@
-import schema from "ponder:schema";
 import { index, onchainTable } from "ponder";
 
 export const nameSales = onchainTable(
@@ -50,10 +49,8 @@ export const nameSales = onchainTable(
      * Interpretation depends on 'tokenType':
      * - ERC721: Unique token within contract
      * - ERC1155: Token type identifier (multiple copies may exist)
-     *
-     * The tokenId is formatted as a hex string representing a uint256.
      */
-    tokenId: t.text().notNull(),
+    tokenId: t.bigint().notNull(),
 
     /**
      * The type of token that was sold (ERC721 or ERC1155).
