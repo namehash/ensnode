@@ -1,4 +1,4 @@
-import type { ChainId,ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
+import type { ChainId, ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import type { Blockrange, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
 
 /**

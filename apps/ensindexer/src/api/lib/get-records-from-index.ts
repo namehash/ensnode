@@ -4,11 +4,7 @@ import type { IndexedResolverRecords } from "@/api/lib/make-records-response";
 import { withSpanAsync } from "@/lib/auto-span";
 import { makeResolverId } from "@/lib/ids";
 import { ChainId } from "@ensnode/datasources";
-import {
-  DEFAULT_EVM_COIN_TYPE,
-  Node,
-  ResolverRecordsSelection,
-} from "@ensnode/ensnode-sdk";
+import { DEFAULT_EVM_COIN_TYPE, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import { Address } from "viem";
 
