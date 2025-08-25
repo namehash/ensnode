@@ -4,7 +4,7 @@ import {
   ENSNamespaceIds,
   getDatasource,
 } from "@ensnode/datasources";
-import {BASE_NODE, ChainId, ETH_NODE, makeSubdomainNode} from "@ensnode/ensnode-sdk";
+import { BASE_NODE, ChainId, ETH_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 import { Address, Hex } from "viem";
 import {
   base,
