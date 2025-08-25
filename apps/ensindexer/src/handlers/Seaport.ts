@@ -22,14 +22,14 @@ import { Address, Hex } from "viem";
 /**
  * The file has the responsibility for logic that maps from Seaport-specific data models
  * into our more generic TokenScope data models as found in the `@/lib/tokenscope-helpers` file.
- * 
+ *
  * Seaport's data model supports complexity that has more negatives than benefits. TokenScope aims
  * to deliver a more simple data model for developers to build ENS apps with. This simplified data
  * model is anticipated to still support the vast majority of real-world use cases.
- * 
+ *
  * In this file we examine each indexed Seaport event to determine if it fits within the TokenScope
  * data model. If it does, we extract the relevant data and map it into the TokenScope data model.
- * 
+ *
  * If it does not, we ignore the event.
  */
 
@@ -254,7 +254,7 @@ interface SeaportItemExtractions {
 
   /**
    * Seaport supports multiple payments in a single order.
-   * 
+   *
    * Example cases include:
    * - Payments are being made in multiple currencies.
    * - Multiple payments in the same currency, but where payment is for marketplace fees while
