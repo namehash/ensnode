@@ -46,7 +46,7 @@ locals {
 }
 
 resource "render_web_service" "ensindexer" {
-  name           = "ensindexer_${var.instance_name}"
+  name           = "ensindexer-${var.instance_name}"
   plan           = var.instance_type
   region         = var.render_region
   environment_id = var.render_environment_id
@@ -96,7 +96,7 @@ resource "render_web_service" "ensindexer_api" {
         value = "https://${local.full_ensindexer_api_hostname}"
       },
       ENSINDEXER_URL = {
-        value = "http://ensindexer_${var.instance_name}:1000"
+        value = "http://ensindexer-${var.instance_name}:1000"
       },
       PONDER_COMMAND = {
         value = "serve"

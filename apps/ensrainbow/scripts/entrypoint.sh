@@ -9,7 +9,7 @@ PORT="${PORT:-3223}"
 DATA_DIR_NAME="data" # Name of the data directory within /app/apps/ensrainbow
 APP_DIR="/app/apps/ensrainbow"
 FINAL_DATA_DIR="${APP_DIR}/${DATA_DIR_NAME}"
-DOWNLOAD_TEMP_DIR="/tmp/ensrainbow_download_temp"
+DOWNLOAD_TEMP_DIR="${DOWNLOAD_TEMP_DIR:-/tmp/ensrainbow_download_temp}"
 MARKER_FILE="${FINAL_DATA_DIR}/ensrainbow_db_ready"
 
 # Path for the data subdirectory, relative to APP_DIR.
