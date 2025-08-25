@@ -169,10 +169,12 @@ function isPaymentToken(item: OfferItem | ConsiderationItem): boolean {
 }
 
 /**
- * Determines if a Seaport order fulfillment represents an indexable sale
- * and extracts the sale data if so.
+ * Determines if a Seaport order fulfillment meets our criteria for indexing.
+ *
+ * @returns indexable sale data, or `null` if the order fulfilled event does
+ *          not meet our criteria for indexing.
  */
-function getSaleIndexable(
+function getIndexableSale(
   event: SeaportOrderFulfilledEvent,
   chainId: ChainId,
 ): NameSoldInsert | null {
@@ -292,7 +294,7 @@ export async function handleOrderFulfilled({
   context: Context;
   event: SeaportOrderFulfilledEvent;
 }) {
-  const indexableSale = getSaleIndexable(event, context.chain.id);
+  const indexableSale = getIndexableSale(event, context.chain.id);
   if (indexableSale) {
     await handleSale(context, indexableSale);
   }
