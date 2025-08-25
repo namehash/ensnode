@@ -13,7 +13,7 @@ import {
   TraceableResponse,
 } from "@ensnode/ensnode-sdk";
 import { UseQueryResult } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 type QueryResult<K extends string> = UseQueryResult<
   { [key in K]: unknown } & AcceleratableResponse & TraceableResponse
@@ -32,10 +32,20 @@ export function RenderRequestsOutput<KEY extends string>({
   accelerated: QueryResult<KEY>;
   unaccelerated: QueryResult<KEY>;
 }) {
+  const [tab, setTab] = useState("accelerated");
+
   // TODO: produce a diff between accelerated/not-accelerated and display any differences
   const result = useMemo(() => {
+    if (tab === "accelerated" && accelerated.status === "success") {
+      return accelerated.data[dataKey];
+    }
+
+    if (tab === "unaccelerated" && unaccelerated.status === "success") {
+      return unaccelerated.data[dataKey];
+    }
+
     return accelerated.data?.[dataKey] || unaccelerated.data?.[dataKey];
-  }, [accelerated]);
+  }, [accelerated, unaccelerated, tab]);
 
   const someError = accelerated.error || unaccelerated.error;
 
@@ -109,7 +119,7 @@ export function RenderRequestsOutput<KEY extends string>({
         </CardContent>
       </Card>
       {!someError && (accelerated.data?.trace || unaccelerated.data?.trace) && (
-        <Tabs defaultValue="accelerated">
+        <Tabs value={tab} onValueChange={setTab}>
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="flex flex-row items-center justify-between gap-4">
