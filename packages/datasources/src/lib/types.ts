@@ -121,30 +121,3 @@ export type ContractConfig =
 export type ENSNamespace = {
   [DatasourceNames.ENSRoot]: Datasource;
 } & Partial<Record<Exclude<DatasourceName, "ensroot">, Datasource>>;
-
-/**
- * Chain ID
- *
- * Represents a unique identifier for a chain.
- * Guaranteed to be a positive integer.
- **/
-export type ChainId = number;
-
-/**
- * Identifies a specific address on a specific chain.
- */
-export interface ChainAddress {
-  chainId: ChainId;
-  address: Address;
-}
-
-/**
- * Identifies if the provided ChainAddress values are equal.
- *
- * @param ca1 - The first ChainAddress to compare
- * @param ca2 - The second ChainAddress to compare
- * @returns a boolean indicating if the provided ChainAddress values are equal
- */
-export const isChainAddressEqual = (ca1: ChainAddress, ca2: ChainAddress): boolean => {
-  return ca1.chainId === ca2.chainId && isAddressEqual(ca1.address, ca2.address);
-};

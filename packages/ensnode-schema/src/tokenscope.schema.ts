@@ -53,16 +53,19 @@ export const nameSales = onchainTable(
     tokenId: t.bigint().notNull(),
 
     /**
-     * The type of token that was sold (ERC721 or ERC1155).
+     * The CAIP-19 Asset Namespace of the token that was sold. Either `erc721` or `erc1155`.
+     *
+     * @see https://chainagnostic.org/CAIPs/caip-19
      */
-    tokenType: t.text().notNull(),
+    assetNamespace: t.text().notNull(),
 
     /**
-     * Unique and deterministic identifier of token that was sold.
+     * The CAIP-19 Asset ID of token that was sold. This is a globally unique reference to the
+     * specific asset in question.
      *
-     * Composite key format: "{chainId}-{contractAddress}-{tokenId}"
+     * @see https://chainagnostic.org/CAIPs/caip-19
      */
-    tokenRef: t.text().notNull(),
+    assetId: t.text().notNull(),
 
     /**
      * The namehash of the ENS domain that was sold.
@@ -105,7 +108,7 @@ export const nameSales = onchainTable(
   }),
   (t) => ({
     idx_domainId: index().on(t.domainId),
-    idx_tokenRef: index().on(t.tokenRef),
+    idx_assetId: index().on(t.assetId),
     idx_buyer: index().on(t.buyer),
     idx_seller: index().on(t.seller),
     idx_timestamp: index().on(t.timestamp),

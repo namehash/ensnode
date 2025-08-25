@@ -1,17 +1,14 @@
-import { TokenId } from "@/lib/tokenscope/tokens";
+import { maybeGetDatasourceContract } from "@/lib/datasource-helpers";
+import { TokenId } from "@/lib/tokenscope/assets";
+import { DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
 import {
-  ChainAddress,
-  DatasourceNames,
-  ENSNamespaceId,
-  isChainAddressEqual,
-  maybeGetDatasourceContractChainAddress,
-} from "@ensnode/datasources";
-import {
+  AccountId,
   BASENAMES_NODE,
   ETH_NODE,
   LINEANAMES_NODE,
   LabelHash,
   type Node,
+  accountIdEqual,
   makeSubdomainNode,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
@@ -21,9 +18,9 @@ import {
  */
 export interface TokenIssuer {
   /**
-   * The ChainAddress of the token issuer contract.
+   * The ContractAddress of the token issuer contract.
    */
-  contract: ChainAddress;
+  contract: AccountId;
 
   /**
    * Applies the token issuer contract's logic for converting from the token id
@@ -66,32 +63,32 @@ export const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: No
  * @returns an array of 0 or more known TokenIssuer for the specified namespace
  */
 export const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
-  const ethBaseRegistrar = maybeGetDatasourceContractChainAddress(
+  const ethBaseRegistrar = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.ENSRoot,
     "BaseRegistrar",
   );
-  const nameWrapper = maybeGetDatasourceContractChainAddress(
+  const nameWrapper = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.ENSRoot,
     "NameWrapper",
   );
-  const threeDnsBaseRegistrar = maybeGetDatasourceContractChainAddress(
+  const threeDnsBaseRegistrar = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.ThreeDNSBase,
     "ThreeDNSToken",
   );
-  const threeDnsOptimismRegistrar = maybeGetDatasourceContractChainAddress(
+  const threeDnsOptimismRegistrar = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.ThreeDNSOptimism,
     "ThreeDNSToken",
   );
-  const lineanamesRegistrar = maybeGetDatasourceContractChainAddress(
+  const lineanamesRegistrar = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.Lineanames,
     "BaseRegistrar",
   );
-  const basenamesRegistrar = maybeGetDatasourceContractChainAddress(
+  const basenamesRegistrar = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.Basenames,
     "BaseRegistrar",
@@ -167,28 +164,10 @@ export const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[]
  */
 export const getKnownTokenIssuer = (
   namespaceId: ENSNamespaceId,
-  contract: ChainAddress,
+  contract: AccountId,
 ): TokenIssuer | null => {
   const tokenIssuers = getKnownTokenIssuers(namespaceId);
-  return (
-    tokenIssuers.find((tokenIssuer) => isChainAddressEqual(tokenIssuer.contract, contract)) ?? null
-  );
-};
-
-/**
- * Identifies if the provided ChainAddress is a known token issuer.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *  'ens-test-env')
- * @param chainAddress - The ChainAddress to check
- * @returns a boolean indicating if the provided ChainAddress is a known token issuer in
- *          the specified namespace.
- */
-export const isKnownTokenIssuer = (
-  namespaceId: ENSNamespaceId,
-  chainAddress: ChainAddress,
-): boolean => {
-  return getKnownTokenIssuer(namespaceId, chainAddress) !== null;
+  return tokenIssuers.find((tokenIssuer) => accountIdEqual(tokenIssuer.contract, contract)) ?? null;
 };
 
 /**
@@ -203,12 +182,12 @@ export const isKnownTokenIssuer = (
  */
 export function getDomainIdByTokenId(
   namespaceId: ENSNamespaceId,
-  contract: ChainAddress,
+  contract: AccountId,
   tokenId: TokenId,
 ): Node {
   const tokenIssuers = getKnownTokenIssuers(namespaceId);
   const tokenIssuer = tokenIssuers.find((tokenIssuer) =>
-    isChainAddressEqual(tokenIssuer.contract, contract),
+    accountIdEqual(tokenIssuer.contract, contract),
   );
 
   if (!tokenIssuer) {

@@ -13,3 +13,4 @@ export {
   deserializeUrl,
 } from "./deserialize";
 export * from "./is-normalized";
+export * from "./account-id";

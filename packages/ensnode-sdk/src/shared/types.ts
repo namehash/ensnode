@@ -1,7 +1,22 @@
-import { ChainId } from "@ensnode/datasources";
+import { Address } from "viem";
 
-// re-export ChainId for backwards compatibility
-export { type ChainId };
+/**
+ * Chain ID
+ *
+ * Represents a unique identifier for a chain.
+ * Guaranteed to be a positive integer.
+ **/
+export type ChainId = number;
+
+/**
+ * Represents an account (contract or EOA) at `address` on chain `chainId`.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-10
+ */
+export interface AccountId {
+  chainId: ChainId;
+  address: Address;
+}
 
 /**
  * Block Number

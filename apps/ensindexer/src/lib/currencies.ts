@@ -9,13 +9,9 @@ import {
   sepolia,
 } from "viem/chains";
 
-import {
-  ChainAddress,
-  ChainId,
-  ENSNamespaceId,
-  getChainIdsForNamespace,
-  isChainAddressEqual,
-} from "@ensnode/datasources";
+import { getChainIdsInNamespace } from "@/lib/datasource-helpers";
+import { ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
+import { AccountId, ChainId, accountIdEqual, uniq } from "@ensnode/ensnode-sdk";
 import { Address, zeroAddress } from "viem";
 
 /**
@@ -95,6 +91,7 @@ const knownCurrencyContracts: Record<ChainId, Record<CurrencyId, Address>> = {
     [CurrencyIds.USDC]: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
     [CurrencyIds.DAI]: "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5",
   },
+
   /** sepolia namespace */
   [sepolia.id]: {
     [CurrencyIds.ETH]: zeroAddress,
@@ -122,23 +119,21 @@ const knownCurrencyContracts: Record<ChainId, Record<CurrencyId, Address>> = {
  * Gets the supported currency contracts for a given chain.
  *
  * @param chainId - The chain ID to get supported currency contracts for
- * @returns a record of currency ids to ChainAddresses for the given chain
+ * @returns a record of currency ids to AccountIds for the given chain
  */
 export const getSupportedCurrencyContractsForChain = (
   chainId: ChainId,
-): Record<CurrencyId, ChainAddress> => {
-  let result = {} as Record<CurrencyId, ChainAddress>;
+): Record<CurrencyId, AccountId> => {
+  let result = {} as Record<CurrencyId, AccountId>;
 
   const knownCurrencyContractsForChain = knownCurrencyContracts[chainId];
-  if (!knownCurrencyContractsForChain) {
-    return result;
-  }
+  if (!knownCurrencyContractsForChain) return result;
 
   for (const [currencyId, address] of Object.entries(knownCurrencyContractsForChain)) {
     result[currencyId as CurrencyId] = {
       address,
       chainId,
-    } as ChainAddress;
+    } as AccountId;
   }
 
   return result;
@@ -149,13 +144,13 @@ export const getSupportedCurrencyContractsForChain = (
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  * 'ens-test-env')
- * @returns a record of currency ids to ChainAddresses for the given namespace
+ * @returns a record of currency ids to AccountIds for the given namespace
  */
 export const getSupportedCurrencyContractsForNamespace = (
   namespaceId: ENSNamespaceId,
-): Record<CurrencyId, ChainAddress> => {
-  let result = {} as Record<CurrencyId, ChainAddress>;
-  const chainIds = getChainIdsForNamespace(namespaceId);
+): Record<CurrencyId, AccountId> => {
+  let result = {} as Record<CurrencyId, AccountId>;
+  const chainIds = getChainIdsInNamespace(namespaceId);
   for (const chainId of chainIds) {
     const supportedCurrencyContractsForChain = getSupportedCurrencyContractsForChain(chainId);
     result = { ...result, ...supportedCurrencyContractsForChain };
@@ -165,22 +160,21 @@ export const getSupportedCurrencyContractsForNamespace = (
 };
 
 /**
- * Identifies if the provided ChainAddress is a supported currency contract in the
- * specified namespace.
+ * Identifies if the provided AccountId is a supported currency contract in the specified namespace.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  *  'ens-test-env')
- * @param contract - The ChainAddress of the contract to check
- * @returns a boolean indicating if the provided ChainAddress is a supported currency
+ * @param contract - The AccountId of the contract to check
+ * @returns a boolean indicating if the provided AccountId is a supported currency
  *          contract in the specified namespace
  */
 export const isSupportedCurrencyContract = (
   namespaceId: ENSNamespaceId,
-  contract: ChainAddress,
+  contract: AccountId,
 ): boolean => {
   const supportedCurrencyContracts = getSupportedCurrencyContractsForNamespace(namespaceId);
   return Object.values(supportedCurrencyContracts).some((supportedCurrencyContract) =>
-    isChainAddressEqual(supportedCurrencyContract, contract),
+    accountIdEqual(supportedCurrencyContract, contract),
   );
 };
 
@@ -189,21 +183,21 @@ export const isSupportedCurrencyContract = (
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  * 'ens-test-env')
- * @param contract - The ChainAddress of the contract to get the currency id for
+ * @param contract - The AccountId of the contract to get the currency id for
  * @returns the currency id for the given contract in the specified namespace, or
  *          null if the contract is not a supported currency contract in the
  *          specified namespace
  */
 export const getCurrencyIdForContract = (
   namespaceId: ENSNamespaceId,
-  contract: ChainAddress,
+  contract: AccountId,
 ): CurrencyId | null => {
   const supportedCurrencyContracts = getSupportedCurrencyContractsForNamespace(namespaceId);
 
   for (const [currencyId, supportedCurrencyContract] of Object.entries(
     supportedCurrencyContracts,
   )) {
-    if (isChainAddressEqual(supportedCurrencyContract, contract)) {
+    if (accountIdEqual(supportedCurrencyContract, contract)) {
       return currencyId as CurrencyId;
     }
   }

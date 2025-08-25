@@ -1,8 +1,6 @@
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
 import {
-  ChainAddress,
-  ChainId,
   Datasource,
   DatasourceName,
   DatasourceNames,
@@ -73,35 +71,6 @@ export const maybeGetDatasource = (
 ): Datasource | undefined => (getENSNamespace(namespaceId) as ENSNamespace)[datasourceName];
 
 /**
- * Gets the chain address for the specified namespace, datasource, and
- * contract name, or undefined if it is not defined or is not a single chain address.
- *
- * This is useful when you want to retrieve a single ChainAddress for an arbitrary contract
- * where it may or may not actually be defined.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *                      'ens-test-env')
- * @param datasourceName - The name of the Datasource to search for contractName in
- * @param contractName - The name of the contract to retrieve the chain address for
- * @returns The ChainAddress for the given namespace, datasource, and contract
- *          name, or undefined if it does not exist or is not a single chain address
- */
-export const maybeGetDatasourceContractChainAddress = (
-  namespaceId: ENSNamespaceId,
-  datasourceName: DatasourceName,
-  contractName: string,
-): ChainAddress | undefined => {
-  const datasource = maybeGetDatasource(namespaceId, datasourceName);
-  if (!datasource) return undefined;
-  const maybeAddress = datasource.contracts[contractName]?.address;
-  if (maybeAddress === undefined || Array.isArray(maybeAddress)) return undefined;
-  return {
-    chainId: datasource.chain.id,
-    address: maybeAddress,
-  } satisfies ChainAddress;
-};
-
-/**
  * Returns the chain for the ENS Root Datasource within the selected namespace.
  *
  * @returns the chain that hosts the ENS Root
@@ -115,17 +84,3 @@ export const getENSRootChain = (namespaceId: ENSNamespaceId) =>
  * @returns the chain ID that hosts the ENS Root
  */
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) => getENSRootChain(namespaceId).id;
-
-/**
- * Gets all the distinct chainIds with datasources in the specified namespace.
- * Note: This takes no consideration of which datasources are configured for indexing.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- * 'ens-test-env')
- * @returns an array of distinct chainIds with datasources in the specified namespace
- */
-export const getChainIdsForNamespace = (namespaceId: ENSNamespaceId): ChainId[] => {
-  const namespace = getENSNamespace(namespaceId);
-  const chainIds = Object.values(namespace).map((datasource) => datasource.chain.id);
-  return [...new Set(chainIds)];
-};

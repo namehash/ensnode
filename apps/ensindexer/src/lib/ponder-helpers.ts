@@ -11,7 +11,6 @@ import { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
 import { ContractConfig } from "@ensnode/datasources";
-import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
 import { ENSIndexerConfig } from "@/config/types";

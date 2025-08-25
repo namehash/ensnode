@@ -1,11 +1,6 @@
 import { CurrencyIds, getCurrencyIdForContract } from "@/lib/currencies";
-import { makeEventId } from "@/lib/ids";
-import {
-  OnchainEventRef,
-  SupportedNFT,
-  SupportedPayment,
-  SupportedSale,
-} from "@/lib/tokenscope/sales";
+import { AssetNamespace, AssetNamespaces } from "@/lib/tokenscope/assets";
+import { SupportedNFT, SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
 import {
   SeaportConsiderationItem,
   SeaportItemType,
@@ -13,24 +8,24 @@ import {
   SeaportOrderFulfilledEvent,
 } from "@/lib/tokenscope/seaport-types";
 import { getKnownTokenIssuer } from "@/lib/tokenscope/token-issuers";
-import { TokenType, TokenTypes } from "@/lib/tokenscope/tokens";
-import { ChainId, ENSNamespaceId } from "@ensnode/datasources";
-import { uniq } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import { ChainId, uniq } from "@ensnode/ensnode-sdk";
 
 /**
- * Gets the supported TokenScope token type for a given Seaport item type.
+ * Gets the supported TokenScope Asset Namespace for a given Seaport ItemType.
  *
  * @param itemType - The Seaport item type to get the supported TokenScope token type for
- * @returns the supported TokenScope token type for the given SeaPort item type, or null
- *          if the item type is not supported
+ * @returns the supported TokenScope Asset Namespace for the given Seaport ItemType, or null
+ *          if the ItemType is not supported.
  */
-const getSupportedTokenType = (itemType: SeaportItemType): TokenType | null => {
-  if (itemType === SeaportItemType.ERC721) {
-    return TokenTypes.ERC721;
-  } else if (itemType === SeaportItemType.ERC1155) {
-    return TokenTypes.ERC1155;
-  } else {
-    return null;
+const getAssetNamespace = (itemType: SeaportItemType): AssetNamespace | null => {
+  switch (itemType) {
+    case SeaportItemType.ERC721:
+      return AssetNamespaces.ERC721;
+    case SeaportItemType.ERC1155:
+      return AssetNamespaces.ERC1155;
+    default:
+      return null;
   }
 };
 
@@ -50,7 +45,7 @@ const getSupportedNFT = (
   item: SeaportOfferItem | SeaportConsiderationItem,
 ): SupportedNFT | null => {
   // validate item as an ERC721/ERC1155 NFT
-  const tokenType = getSupportedTokenType(item.itemType);
+  const tokenType = getAssetNamespace(item.itemType);
   if (!tokenType) return null;
 
   // validate that the token is a known token issuing contract
@@ -65,7 +60,7 @@ const getSupportedNFT = (
   const domainId = tokenIssuer.getDomainId(tokenId);
 
   return {
-    tokenType,
+    assetNamespace: tokenType,
     contract,
     tokenId,
     domainId,
@@ -77,13 +72,11 @@ const getSupportedPayment = (
   chainId: ChainId,
   item: SeaportOfferItem | SeaportConsiderationItem,
 ): SupportedPayment | null => {
-  const currencyContract = {
+  // validate that the item is a supported currency
+  const currencyId = getCurrencyIdForContract(namespaceId, {
     chainId,
     address: item.token,
-  };
-
-  // validate that the item is a supported currency
-  const currencyId = getCurrencyIdForContract(namespaceId, currencyContract);
+  });
 
   if (!currencyId) return null; // Unsupported currency
 
@@ -177,35 +170,6 @@ const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPa
   } satisfies SupportedPayment;
 };
 
-const buildOnchainEventRef = (
-  chainId: ChainId,
-  event: SeaportOrderFulfilledEvent,
-): OnchainEventRef => {
-  if (event.block.timestamp > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error(
-      `Error building onchain event ref: block timestamp is too large: ${event.block.timestamp}`,
-    );
-  }
-
-  if (event.block.number > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error(
-      `Error building onchain event ref: block number is too large: ${event.block.number}`,
-    );
-  }
-
-  const blockNumber = Number(event.block.number);
-  const timestamp = Number(event.block.timestamp);
-
-  return {
-    eventId: makeEventId(chainId, event.block.number, event.log.logIndex),
-    chainId,
-    blockNumber,
-    logIndex: event.log.logIndex,
-    timestamp,
-    transactionHash: event.transaction.hash,
-  } satisfies OnchainEventRef;
-};
-
 /**
  * Maps from Seaport-specific OrderFulfilled event into our more generic TokenScope `SupportedSale`,
  * if possible. TokenScope aims to deliver a simpler datamodel than Seaport provides but still
@@ -244,7 +208,6 @@ export const getSupportedSaleFromOrderFulfilledEvent = (
     !consolidatedConsiderationPayment
   ) {
     return {
-      event: buildOnchainEventRef(chainId, event),
       orderHash,
       nft: consolidatedOfferNFT,
       payment: consolidatedOfferPayment,
@@ -262,7 +225,6 @@ export const getSupportedSaleFromOrderFulfilledEvent = (
     consolidatedConsiderationPayment
   ) {
     return {
-      event: buildOnchainEventRef(chainId, event),
       orderHash,
       nft: consolidatedConsiderationNFT,
       payment: consolidatedConsiderationPayment,
