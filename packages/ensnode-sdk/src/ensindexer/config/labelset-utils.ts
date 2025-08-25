@@ -4,7 +4,7 @@ import {
   type LabelSetId,
   type LabelSetVersion,
 } from "../../ensrainbow";
-import { parseNonNegativeInteger } from "./parsing";
+import { makeLabelSetIdSchema, makeLabelSetVersionSchema } from "./zod-schemas";
 
 /**
  * Builds a valid LabelSetId from a string.
@@ -13,15 +13,7 @@ import { parseNonNegativeInteger } from "./parsing";
  * @throws If the input string is not a valid LabelSetId.
  */
 export function buildLabelSetId(maybeLabelSetId: string): LabelSetId {
-  if (maybeLabelSetId.length < 1 || maybeLabelSetId.length > 50) {
-    throw new Error("LabelSetId must be between 1 and 50 characters long.");
-  }
-  if (!/^[a-z-]+$/.test(maybeLabelSetId)) {
-    throw new Error(
-      `LabelSetId can only contain lowercase letters (a-z) and hyphens (-). LabelSetId: ${maybeLabelSetId}`,
-    );
-  }
-  return maybeLabelSetId;
+  return makeLabelSetIdSchema("LabelSetId").parse(maybeLabelSetId);
 }
 
 /**
@@ -31,25 +23,7 @@ export function buildLabelSetId(maybeLabelSetId: string): LabelSetId {
  * @throws If the input is not a valid LabelSetVersion.
  */
 export function buildLabelSetVersion(maybeLabelSetVersion: number | string): LabelSetVersion {
-  let versionNumber: number;
-  if (typeof maybeLabelSetVersion === "string") {
-    try {
-      versionNumber = parseNonNegativeInteger(maybeLabelSetVersion);
-    } catch (error) {
-      throw new Error(
-        `Invalid label set version: ${maybeLabelSetVersion}: ${
-          error instanceof Error ? error.message : error
-        }`,
-      );
-    }
-  } else {
-    if (maybeLabelSetVersion < 0 || !Number.isInteger(maybeLabelSetVersion)) {
-      throw new Error(`LabelSetVersion must be a non-negative integer.`);
-    }
-    versionNumber = maybeLabelSetVersion;
-  }
-
-  return versionNumber;
+  return makeLabelSetVersionSchema("LabelSetVersion").parse(maybeLabelSetVersion);
 }
 
 /**

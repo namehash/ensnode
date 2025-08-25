@@ -301,7 +301,7 @@ describe("Database", () => {
         batch.put(SYSTEM_KEY_LABEL_SET_ID, "Invalid Label Set ID");
         await batch.write();
         await expect(db.getLabelSet()).rejects.toThrow(
-          "LabelSetId can only contain lowercase letters (a-z) and hyphens (-).",
+          "LabelSetId can only contain lowercase letters (a-z) and hyphens (-)",
         );
       } finally {
         await db.close();
@@ -316,7 +316,7 @@ describe("Database", () => {
         batch.put(SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION, "-1");
         await batch.write();
         await expect(db.getLabelSet()).rejects.toThrow(
-          'Invalid label set version: -1: "-1" is not a non-negative integer',
+          "LabelSetVersion must be a non-negative integer (>=0)",
         );
       } finally {
         await db.close();
