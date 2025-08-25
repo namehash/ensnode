@@ -5,8 +5,8 @@ import {
   makeDatabaseSchemaNameSchema,
   makeDependencyInfoSchema,
   makeENSIndexerPublicConfigSchema,
-  makeIndexedChainIdsSchema,
   makeFullyPinnedLabelSetSchema,
+  makeIndexedChainIdsSchema,
   makePluginsListSchema,
 } from "./zod-schemas";
 

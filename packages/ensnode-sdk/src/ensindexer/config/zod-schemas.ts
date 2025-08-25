@@ -74,25 +74,14 @@ export const makeDatabaseSchemaNameSchema = (valueLabel: string = "Database sche
  * containing only lowercase letters (a-z) and hyphens (-).
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set ID", "LABEL_SET_ID")
- * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
  */
-export const makeLabelSetIdSchema = (
-  valueLabel: string = "Label set ID",
-  directErrorMessages: boolean = false,
-) => {
-  const getError = (field: string, message: string) => {
-    if (directErrorMessages) {
-      return `LABEL_SET_ID ${message}`;
-    }
-    return `${valueLabel}.labelSetId ${message}`;
-  };
-
+export const makeLabelSetIdSchema = (valueLabel: string) => {
   return z
-    .string({ error: getError("labelSetId", "must be a string") })
-    .min(1, { error: getError("labelSetId", "must be 1-50 characters long") })
-    .max(50, { error: getError("labelSetId", "must be 1-50 characters long") })
+    .string({ error: `${valueLabel} must be a string` })
+    .min(1, { error: `${valueLabel} must be 1-50 characters long` })
+    .max(50, { error: `${valueLabel} must be 1-50 characters long` })
     .regex(/^[a-z-]+$/, {
-      error: getError("labelSetId", "can only contain lowercase letters (a-z) and hyphens (-)"),
+      error: `${valueLabel} can only contain lowercase letters (a-z) and hyphens (-)`,
     });
 };
 
@@ -102,23 +91,13 @@ export const makeLabelSetIdSchema = (
  * The label set version is guaranteed to be a non-negative integer.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set version", "LABEL_SET_VERSION")
- * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
- */
-export const makeLabelSetVersionSchema = (
-  valueLabel: string = "Label set version",
-  directErrorMessages: boolean = false,
-) => {
-  const getError = (field: string, message: string) => {
-    if (directErrorMessages) {
-      return `LABEL_SET_VERSION ${message}`;
-    }
-    return `${valueLabel}.labelSetVersion ${message}`;
-  };
 
+ */
+export const makeLabelSetVersionSchema = (valueLabel: string) => {
   return z.coerce
-    .number({ error: getError("labelSetVersion", "must be a non-negative integer") })
-    .int({ error: getError("labelSetVersion", "must be a non-negative integer") })
-    .min(0, { error: getError("labelSetVersion", "must be a non-negative integer") });
+    .number({ error: `${valueLabel} must be a non-negative integer` })
+    .int({ error: `${valueLabel} must be a non-negative integer` })
+    .min(0, { error: `${valueLabel} must be a non-negative integer` });
 };
 
 /**
@@ -129,14 +108,20 @@ export const makeLabelSetVersionSchema = (
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
  * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
  */
-export const makeLabelSetSchema = (
-  valueLabel: string = "Label set",
-  directErrorMessages: boolean = false,
-) => {
+export const makeLabelSetSchema = (valueLabel: string, directErrorMessages: boolean = false) => {
+  let valueLabellabelSetId = valueLabel;
+  let valueLabellabelSetVersion = valueLabel;
+  if (directErrorMessages) {
+    valueLabellabelSetId = "LABEL_SET_ID";
+    valueLabellabelSetVersion = "LABEL_SET_VERSION";
+  } else {
+    valueLabellabelSetId = valueLabel + ".labelSetId";
+    valueLabellabelSetVersion = valueLabel + ".labelSetVersion";
+  }
   return z
     .object({
-      labelSetId: makeLabelSetIdSchema(valueLabel, directErrorMessages).optional(),
-      labelSetVersion: makeLabelSetVersionSchema(valueLabel, directErrorMessages).optional(),
+      labelSetId: makeLabelSetIdSchema(valueLabellabelSetId).optional(),
+      labelSetVersion: makeLabelSetVersionSchema(valueLabellabelSetVersion).optional(),
     })
     .refine(
       (data) => {
@@ -163,9 +148,18 @@ export const makeFullyPinnedLabelSetSchema = (
   valueLabel: string = "Label set",
   directErrorMessages: boolean = false,
 ) => {
+  let valueLabellabelSetId = valueLabel;
+  let valueLabellabelSetVersion = valueLabel;
+  if (directErrorMessages) {
+    valueLabellabelSetId = "LABEL_SET_ID";
+    valueLabellabelSetVersion = "LABEL_SET_VERSION";
+  } else {
+    valueLabellabelSetId = valueLabel + ".labelSetId";
+    valueLabellabelSetVersion = valueLabel + ".labelSetVersion";
+  }
   return z.object({
-    labelSetId: makeLabelSetIdSchema(valueLabel, directErrorMessages),
-    labelSetVersion: makeLabelSetVersionSchema(valueLabel, directErrorMessages),
+    labelSetId: makeLabelSetIdSchema(valueLabellabelSetId),
+    labelSetVersion: makeLabelSetVersionSchema(valueLabellabelSetVersion),
   });
 };
 
