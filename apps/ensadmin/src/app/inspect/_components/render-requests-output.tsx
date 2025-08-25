@@ -129,7 +129,7 @@ export function RenderRequestsOutput<KEY extends string>({
                   if (accelerated.data && !accelerated.data.accelerationAttempted) {
                     return (
                       <span className="bg-muted py-1 px-2 rounded-lg text-sm text-muted-foreground">
-                        ENSNode did not attempt acceleration for this request.
+                        ENSNode did not attempt to accelerate this request.
                       </span>
                     );
                   }
