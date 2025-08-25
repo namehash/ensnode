@@ -1,5 +1,28 @@
 # ensadmin
 
+## 0.34.0
+
+### Minor Changes
+
+- [#924](https://github.com/namehash/ensnode/pull/924) [`2da3215`](https://github.com/namehash/ensnode/commit/2da321500487759f92d158744c53f1fdffe05ba4) Thanks [@shrugs](https://github.com/shrugs)! - Added Resolution API Inspectors w/ Protocol Tracing for Records, Primary Name, and Primary Names endpoints
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Integrates new ENSNode APIs: Config API and Indexing Status API. Removes dependency on the legacy ENSNode `/metadata` endpoint.
+
+### Patch Changes
+
+- [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set information display to ENSAdmin status UI
+
+  - Update ENSIndexerDependencyInfo component to display label set details
+  - Enhance the configuration and UI representation of ENS indexing status
+  - Add mock data support for label set information in status page
+
+- Updated dependencies [[`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa)]:
+  - @ensnode/ensnode-sdk@0.34.0
+  - @ensnode/ensnode-react@0.34.0
+  - @ensnode/datasources@0.34.0
+  - @ensnode/ponder-metadata@0.34.0
+  - @ensnode/ensnode-schema@0.34.0
+
 ## 0.33.0
 
 ### Patch Changes
