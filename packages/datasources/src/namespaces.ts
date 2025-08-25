@@ -117,7 +117,8 @@ export const getENSRootChain = (namespaceId: ENSNamespaceId) =>
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) => getENSRootChain(namespaceId).id;
 
 /**
- * Gets all the chainIds with datasources in the specified namespace.
+ * Gets all the distinct chainIds with datasources in the specified namespace.
+ * Note: This takes no consideration of which datasources are configured for indexing.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  * 'ens-test-env')
