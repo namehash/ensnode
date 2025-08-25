@@ -11,8 +11,8 @@ import {
   getSupportedCurrencies,
   isKnownTokenIssuingContract,
 } from "@/lib/tokenscope-helpers";
+import { ChainAddress, ChainId } from "@ensnode/datasources";
 import { NameSoldInsert } from "@ensnode/ensnode-schema";
-import { ChainId, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { Address, Hex, zeroAddress } from "viem";
 
 type OfferItem = {
@@ -243,16 +243,19 @@ function getIndexableSale(
   }
 
   // Extract NFT details
-  const contractAddress = nftItem.token;
   const tokenId = nftItem.identifier.toString();
-  const tokenIdHex = uint256ToHex32(BigInt(tokenId));
+
+  const contract: ChainAddress = {
+    chainId,
+    address: nftItem.token,
+  };
 
   // Get domain ID
   let domainId;
   try {
-    domainId = getDomainIdByTokenId(chainId, config.namespace, contractAddress, tokenIdHex);
-  } catch (e) {
-    // should we log here?
+    domainId = getDomainIdByTokenId(config.namespace, contract, nftItem.identifier);
+  } catch {
+    // unsupported NFT contract
     return null;
   }
 
@@ -264,8 +267,8 @@ function getIndexableSale(
     timestamp: event.block.timestamp,
     fromOwnerId: seller,
     newOwnerId: buyer,
-    contractAddress: contractAddress,
-    tokenId: tokenId,
+    contractAddress: contract.address,
+    tokenId,
     tokenType: nftItem.itemType === ItemType.ERC721 ? TokenTypes.ERC721 : TokenTypes.ERC1155,
     domainId,
     currency: currencySymbol,

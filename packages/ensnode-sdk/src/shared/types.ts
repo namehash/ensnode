@@ -1,12 +1,4 @@
 /**
- * Chain ID
- *
- * Represents a unique identifier for a chain.
- * Guaranteed to be a positive integer.
- **/
-export type ChainId = number;
-
-/**
  * Block Number
  *
  * Guaranteed to be a non-negative integer.

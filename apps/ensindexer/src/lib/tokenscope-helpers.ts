@@ -1,11 +1,21 @@
 import {
+  ChainAddress,
+  ChainId,
   DatasourceNames,
   ENSNamespaceId,
-  ENSNamespaceIds,
-  getDatasource,
+  isChainAddressEqual,
+  maybeGetDatasourceContractChainAddress,
 } from "@ensnode/datasources";
-import { BASE_NODE, ChainId, ETH_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
-import { Address, Hex, isAddressEqual } from "viem";
+import {
+  BASENAMES_NODE,
+  ETH_NODE,
+  LINEANAMES_NODE,
+  LabelHash,
+  type Node,
+  makeSubdomainNode,
+  uint256ToHex32,
+} from "@ensnode/ensnode-sdk";
+import { Address } from "viem";
 import {
   base,
   baseSepolia,
@@ -16,14 +26,6 @@ import {
   optimism,
   sepolia,
 } from "viem/chains";
-
-/**
- * Identifies a specific address on a specific chain.
- */
-export interface ChainAddress {
-  chainId: ChainId;
-  address: Address;
-}
 
 export const TokenTypes = {
   ERC721: "ERC721",
@@ -56,180 +58,189 @@ export interface ChainCurrency extends Currency {
 }
 
 /**
- * Returns an array of 0 or more ChainAddress objects that are known to provide tokenized name ownership.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns an array of 0 or more ChainAddress objects
+ * A contract that issues tokenized ENS names.
  */
-export const getKnownTokenIssuingContracts = (namespaceId: ENSNamespaceId): ChainAddress[] => {
-  switch (namespaceId) {
-    case ENSNamespaceIds.Mainnet: {
-      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
-      const lineanamesDatasource = getDatasource(namespaceId, DatasourceNames.Lineanames);
-      const basenamesDatasource = getDatasource(namespaceId, DatasourceNames.Basenames);
-      const threeDnsBaseDatasource = getDatasource(namespaceId, DatasourceNames.ThreeDNSBase);
-      const threeDnsOptimismDatasource = getDatasource(
-        namespaceId,
-        DatasourceNames.ThreeDNSOptimism,
-      );
-      return [
-        // Eth Token - Mainnet
-        {
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["BaseRegistrar"].address,
-        },
-        // NameWrapper Token - Mainnet
-        {
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["NameWrapper"].address,
-        },
-        // 3DNS Token - Optimism
-        {
-          chainId: threeDnsOptimismDatasource.chain.id,
-          address: threeDnsOptimismDatasource.contracts["ThreeDNSToken"].address,
-        },
-        // 3DNS Token - Base
-        {
-          chainId: threeDnsBaseDatasource.chain.id,
-          address: threeDnsBaseDatasource.contracts["ThreeDNSToken"].address,
-        },
-        // Linea Names Token - Linea
-        {
-          chainId: lineanamesDatasource.chain.id,
-          address: lineanamesDatasource.contracts["BaseRegistrar"].address,
-        },
-        // Base Names Token - Base
-        {
-          chainId: basenamesDatasource.chain.id,
-          address: basenamesDatasource.contracts["BaseRegistrar"].address,
-        },
-      ];
-    }
-    case ENSNamespaceIds.Sepolia: {
-      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
-      const basenamesDatasource = getDatasource(namespaceId, DatasourceNames.Basenames);
-      const lineanamesDatasource = getDatasource(namespaceId, DatasourceNames.Lineanames);
+export interface TokenIssuingContract {
+  /**
+   * The ChainAddress of the token issuing contract.
+   */
+  contract: ChainAddress;
 
-      return [
-        {
-          // ENS Token - Sepolia
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["BaseRegistrar"].address,
-        },
-        {
-          // NameWrapper Token - Sepolia
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["NameWrapper"].address,
-        },
-        {
-          // Basenames Token - Base Sepolia
-          chainId: basenamesDatasource.chain.id,
-          address: basenamesDatasource.contracts["BaseRegistrar"].address,
-        },
-        {
-          // Lineanames Token - Linea Sepolia
-          chainId: lineanamesDatasource.chain.id,
-          address: lineanamesDatasource.contracts["BaseRegistrar"].address,
-        },
-      ];
-    }
-    case ENSNamespaceIds.Holesky: {
-      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
-      return [
-        {
-          // ENS Token - Holesky
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["BaseRegistrar"].address,
-        },
-        {
-          // NameWrapper Token - Holesky
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["NameWrapper"].address,
-        },
-      ];
-    }
-    case ENSNamespaceIds.EnsTestEnv: {
-      const rootDatasource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
-      return [
-        {
-          // ENS Token - EnsTestEnv
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["BaseRegistrar"].address,
-        },
-        {
-          // NameWrapper Token - EnsTestEnv
-          chainId: rootDatasource.chain.id,
-          address: rootDatasource.contracts["NameWrapper"].address,
-        },
-      ];
-    }
-  }
+  /**
+   * Applies the contract's logic for converting from the token id
+   * representation of a name to the domain id (Node) of the name.
+   */
+  getDomainId: (tokenId: TokenId) => Node;
+}
+
+/**
+ * Converts the tokenId from an ENS name token-issuing contract to a Node
+ * for the case that the contract generates each tokenId using namehash of
+ * the full name.
+ *
+ * @param tokenId - The tokenId to convert
+ * @returns The Node of the tokenId
+ */
+export const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
+  return uint256ToHex32(tokenId);
 };
 
 /**
- * Returns a boolean indicating whether the provided ChainAddress is a known token issuing contract.
+ * Converts the tokenId from an ENS name token-issuing contract to a Node
+ * for the case that the contract generates each tokenId using labelhash of
+ * the direct subname of the parent node.
+ *
+ * @param tokenId - The tokenId to convert
+ * @param parentNode - the parent Node that the token issuing contract issues subnames under
+ * @returns The Node of the tokenId issued under the parentNode
+ */
+export const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: Node): Node => {
+  const labelHash: LabelHash = uint256ToHex32(tokenId);
+  return makeSubdomainNode(labelHash, parentNode);
+};
+
+/**
+ * Gets the contracts known to provide tokenized name ownership within the
+ * specified namespace.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @returns an array of 0 or more known TokenIssuingContract for the specified namespace
+ */
+export const getKnownTokenIssuingContracts = (
+  namespaceId: ENSNamespaceId,
+): TokenIssuingContract[] => {
+  const ethBaseRegistrar = maybeGetDatasourceContractChainAddress(
+    namespaceId,
+    DatasourceNames.ENSRoot,
+    "BaseRegistrar",
+  );
+  const nameWrapper = maybeGetDatasourceContractChainAddress(
+    namespaceId,
+    DatasourceNames.ENSRoot,
+    "NameWrapper",
+  );
+  const threeDnsBaseRegistrar = maybeGetDatasourceContractChainAddress(
+    namespaceId,
+    DatasourceNames.ThreeDNSBase,
+    "ThreeDNSToken",
+  );
+  const threeDnsOptimismRegistrar = maybeGetDatasourceContractChainAddress(
+    namespaceId,
+    DatasourceNames.ThreeDNSOptimism,
+    "ThreeDNSToken",
+  );
+  const lineanamesRegistrar = maybeGetDatasourceContractChainAddress(
+    namespaceId,
+    DatasourceNames.Lineanames,
+    "BaseRegistrar",
+  );
+  const basenamesRegistrar = maybeGetDatasourceContractChainAddress(
+    namespaceId,
+    DatasourceNames.Basenames,
+    "BaseRegistrar",
+  );
+
+  const result: TokenIssuingContract[] = [];
+
+  if (ethBaseRegistrar) {
+    result.push({
+      contract: ethBaseRegistrar,
+      getDomainId: (tokenId: TokenId): Node => {
+        return labelHashGeneratedTokenIdToNode(tokenId, ETH_NODE);
+      },
+    });
+  }
+
+  if (nameWrapper) {
+    result.push({
+      contract: nameWrapper,
+      getDomainId: (tokenId: TokenId): Node => {
+        return nameHashGeneratedTokenIdToNode(tokenId);
+      },
+    });
+  }
+
+  if (threeDnsBaseRegistrar) {
+    result.push({
+      contract: threeDnsBaseRegistrar,
+      getDomainId: (tokenId: TokenId): Node => {
+        return nameHashGeneratedTokenIdToNode(tokenId);
+      },
+    });
+  }
+
+  if (threeDnsOptimismRegistrar) {
+    result.push({
+      contract: threeDnsOptimismRegistrar,
+      getDomainId: (tokenId: TokenId): Node => {
+        return nameHashGeneratedTokenIdToNode(tokenId);
+      },
+    });
+  }
+
+  if (lineanamesRegistrar) {
+    result.push({
+      contract: lineanamesRegistrar,
+      getDomainId: (tokenId: TokenId): Node => {
+        return labelHashGeneratedTokenIdToNode(tokenId, LINEANAMES_NODE);
+      },
+    });
+  }
+
+  if (basenamesRegistrar) {
+    result.push({
+      contract: basenamesRegistrar,
+      getDomainId: (tokenId: TokenId): Node => {
+        return labelHashGeneratedTokenIdToNode(tokenId, BASENAMES_NODE);
+      },
+    });
+  }
+
+  return result;
+};
+
+/**
+ * Identifies if the provided ChainAddress is a known token issuing contract.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @param chainAddress - The ChainAddress to check
- * @returns a boolean indicating whether the provided ChainAddress is a known token issuing contract
+ * @returns a boolean indicating if the provided ChainAddress is a known token issuing contract
  */
 export const isKnownTokenIssuingContract = (
   namespaceId: ENSNamespaceId,
   chainAddress: ChainAddress,
 ): boolean => {
-  const knownContracts = getKnownTokenIssuingContracts(namespaceId);
-  return knownContracts.some((contract) => isEqualChainAddress(contract, chainAddress));
+  const knownTokenIssuingContracts = getKnownTokenIssuingContracts(namespaceId);
+  return knownTokenIssuingContracts.some((tokenIssuingContract) =>
+    isChainAddressEqual(tokenIssuingContract.contract, chainAddress),
+  );
 };
 
 /**
- * Returns a boolean indicating whether the provided ChainAddress objects are equal.
+ * Gets the domainId (Node) for a given NFT from contract with tokenId on the specified namespace.
  *
- * @param ca1 - The first ChainAddress to compare
- * @param ca2 - The second ChainAddress to compare
- * @returns a boolean indicating whether the provided ChainAddress objects are equal
- */
-export const isEqualChainAddress = (ca1: ChainAddress, ca2: ChainAddress): boolean => {
-  return ca1.chainId === ca2.chainId && isAddressEqual(ca1.address, ca2.address);
-};
-
-/**
- * Get the domainId by contract address and tokenId
- * @param chainId - The chainId of the NFT
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @param contractAddress - contract address of the NFT
- * @param tokenIdHex - tokenId of the NFT in hex
+ * @param contract - The ChainAddress of the NFT contract
+ * @param tokenId - The tokenId of the NFT
+ * @returns the domainId (Node) for ENS name associated with the NFT
+ * @throws an error if the contract is not a known token issuing contract in the specified namespace
  */
 export function getDomainIdByTokenId(
-  chainId: ChainId,
   namespaceId: ENSNamespaceId,
-  contractAddress: Address,
-  tokenIdHex: Hex,
-): Hex {
-  const ensDataSource = getDatasource(namespaceId, DatasourceNames.ENSRoot);
-  if (ensDataSource.chain.id !== chainId) {
-    throw new Error(`Namespace ${namespaceId} is not deployed on chain ${chainId}`);
-  }
-  const baseRegistrarContractAddress = ensDataSource.contracts["BaseRegistrar"].address;
-
-  // OLD ENS Registry: tokenId is labelhash so need to convert to namehash
-  if (contractAddress === baseRegistrarContractAddress) {
-    return makeSubdomainNode(tokenIdHex, ETH_NODE);
-  }
-
-  const baseNamesDataSource = getDatasource(namespaceId, DatasourceNames.Basenames);
-  if (baseNamesDataSource.chain.id !== chainId) {
-    throw new Error(`Namespace ${namespaceId} is not deployed on chain ${chainId}`);
-  }
-  const basenamesContractAddress = baseNamesDataSource.contracts["BaseRegistrar"].address;
-
-  // basenames: tokenId is labelhash so need to convert to namehash
-  if (contractAddress === basenamesContractAddress) {
-    return makeSubdomainNode(tokenIdHex, BASE_NODE);
+  contract: ChainAddress,
+  tokenId: TokenId,
+): Node {
+  const knownTokenIssuingContracts = getKnownTokenIssuingContracts(namespaceId);
+  const knownTokenIssuingContract = knownTokenIssuingContracts.find((tokenIssuingContract) =>
+    isChainAddressEqual(tokenIssuingContract.contract, contract),
+  );
+  if (!knownTokenIssuingContract) {
+    throw new Error(
+      `The contract at address ${contract.address} on chain ${contract.chainId} is not a known token issuing contract in the ${namespaceId} namespace`,
+    );
   }
 
-  // 3dns token id is already derived from namehash
-  // linea token id is already derived from namehash
-  return tokenIdHex;
+  return knownTokenIssuingContract.getDomainId(tokenId);
 }
 
 // Well-known currencies

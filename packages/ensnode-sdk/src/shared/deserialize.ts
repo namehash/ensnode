@@ -1,6 +1,7 @@
+import { ChainId } from "@ensnode/datasources";
 import { prettifyError } from "zod/v4";
 import type { ChainIdString, UrlString } from "./serialized-types";
-import type { BlockNumber, BlockRef, Blockrange, ChainId, Datetime, Duration } from "./types";
+import type { BlockNumber, BlockRef, Blockrange, Datetime, Duration } from "./types";
 import {
   makeBlockNumberSchema,
   makeBlockRefSchema,
