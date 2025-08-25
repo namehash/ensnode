@@ -4,4 +4,4 @@
 "ensindexer": minor
 ---
 
-Added new Plugin: TokenScope. This Plugin for now will index Seaport-Sales across all other name-plugins we support (ENS, 3dns etc)
+Initial launch of ENS TokenScope with support for indexing seaport sales.
