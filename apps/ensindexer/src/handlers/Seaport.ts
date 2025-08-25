@@ -15,7 +15,7 @@ import {
   TokenTypes,
   getCurrencyIdForContract,
   getKnownTokenIssuer,
-  makeSaleId,
+  makeEventId,
   makeTokenRef,
 } from "@/lib/tokenscope-helpers";
 import { ChainId, ENSNamespaceId } from "@ensnode/datasources";
@@ -314,7 +314,7 @@ const buildOnchainEventRef = (
   const timestamp = Number(event.block.timestamp);
 
   return {
-    eventId: makeSaleId(chainId, event.block.number, event.log.logIndex),
+    eventId: makeEventId(chainId, event.block.number, event.log.logIndex),
     chainId,
     blockNumber,
     logIndex: event.log.logIndex,

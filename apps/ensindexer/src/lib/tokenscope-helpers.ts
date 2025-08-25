@@ -1,4 +1,3 @@
-import { Price, TokenId, TokenType } from "@/lib/tokenscope-helpers";
 import {
   ChainAddress,
   ChainId,
@@ -246,16 +245,16 @@ export function getDomainIdByTokenId(
 }
 
 /**
- * Makes a unique and deterministic Sale Id.
+ * Makes a unique and deterministic event id.
  *
  * @example `${chainId}-${blockNumber}-${logIndex}`
  *
  * @param chainId
  * @param blockNumber
  * @param logIndex
- * @returns a unique and deterministic Sale Id
+ * @returns a unique and deterministic event id.
  */
-export const makeSaleId = (chainId: ChainId, blockNumber: bigint, logIndex: number) =>
+export const makeEventId = (chainId: ChainId, blockNumber: bigint, logIndex: number) =>
   [chainId.toString(), blockNumber.toString(), logIndex.toString()].join("-");
 
 /**
@@ -462,6 +461,27 @@ export const getCurrencyIdForContract = (
 
   return null;
 };
+
+export interface OnchainEventRef {
+  eventId: string;
+  chainId: ChainId;
+  blockNumber: number;
+  logIndex: number;
+  timestamp: UnixTimestamp;
+  transactionHash: Hex;
+}
+
+export interface SupportedNFT {
+  tokenType: TokenType;
+  contract: ChainAddress;
+  tokenId: TokenId;
+  domainId: Node;
+}
+
+export interface SupportedPayment {
+  price: Price;
+}
+
 export interface SupportedSale {
   /**
    * Event.id set as the unique and deterministic identifier of the onchain event
@@ -477,21 +497,4 @@ export interface SupportedSale {
   payment: SupportedPayment;
   seller: Address;
   buyer: Address;
-}
-export interface OnchainEventRef {
-  eventId: string;
-  chainId: ChainId;
-  blockNumber: number;
-  logIndex: number;
-  timestamp: UnixTimestamp;
-  transactionHash: Hex;
-}
-export interface SupportedPayment {
-  price: Price;
-}
-export interface SupportedNFT {
-  tokenType: TokenType;
-  contract: ChainAddress;
-  tokenId: TokenId;
-  domainId: Node;
 }
