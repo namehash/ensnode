@@ -13,9 +13,7 @@ services:
       # Override ENSNODE_PUBLIC_URL to point to docker compose ensindexer
       # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
       ENSNODE_PUBLIC_URL: http://localhost:42069
-      # Deterministically pinned label set to request from ENSRainbow (REQUIRED)
-      LABEL_SET_ID: subgraph
-      LABEL_SET_VERSION: 0
+
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example)
       # Copy .env.local.example to .env.local and configure all required values
@@ -45,9 +43,6 @@ services:
       # Override ENSNODE_PUBLIC_URL to point to the docker compose ensindexer-api
       # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
       ENSNODE_PUBLIC_URL: http://localhost:42069
-      # Deterministically pinned label set to request from ENSRainbow (REQUIRED)
-      LABEL_SET_ID: subgraph
-      LABEL_SET_VERSION: 0
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example). Requires same env configuration as ensindexer
       # Copy .env.local.example to .env.local and configure all required values
