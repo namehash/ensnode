@@ -3,7 +3,7 @@ import { prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
-import { makeLabelSetSchema } from "@ensnode/ensnode-sdk";
+import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
 import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
@@ -125,7 +125,7 @@ const PortSchema = z.coerce
 
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
-const LabelSetSchema = makeLabelSetSchema("LABEL_SET", true);
+const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET", true);
 
 const RpcConfigsSchema = z
   .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {

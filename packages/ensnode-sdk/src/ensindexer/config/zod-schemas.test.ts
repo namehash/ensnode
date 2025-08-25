@@ -6,7 +6,7 @@ import {
   makeDependencyInfoSchema,
   makeENSIndexerPublicConfigSchema,
   makeIndexedChainIdsSchema,
-  makeLabelSetSchema,
+  makeFullyPinnedLabelSetSchema,
   makePluginsListSchema,
 } from "./zod-schemas";
 
@@ -66,7 +66,7 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse label set configuration values", () => {
         expect(
-          makeLabelSetSchema().parse({
+          makeFullyPinnedLabelSetSchema().parse({
             labelSetId: "subgraph",
             labelSetVersion: 0,
           }),
@@ -77,7 +77,7 @@ describe("ENSIndexer: Config", () => {
 
         expect(
           formatParseError(
-            makeLabelSetSchema().safeParse({
+            makeFullyPinnedLabelSetSchema().safeParse({
               labelSetId: "",
               labelSetVersion: 0,
             }),
@@ -86,7 +86,7 @@ describe("ENSIndexer: Config", () => {
 
         expect(
           formatParseError(
-            makeLabelSetSchema().safeParse({
+            makeFullyPinnedLabelSetSchema().safeParse({
               labelSetId: "subgraph",
               labelSetVersion: -1,
             }),

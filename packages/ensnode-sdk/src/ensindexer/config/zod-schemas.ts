@@ -129,7 +129,7 @@ export const makeLabelSetVersionSchema = (
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
  * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
  */
-export const makeLabelSetUniversalSchema = (
+export const makeLabelSetSchema = (
   valueLabel: string = "Label set",
   directErrorMessages: boolean = false,
 ) => {
@@ -160,7 +160,7 @@ export const makeLabelSetUniversalSchema = (
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
  * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
  */
-export const makeLabelSetRequiredSchema = (
+export const makeFullyPinnedLabelSetSchema = (
   valueLabel: string = "Label set",
   directErrorMessages: boolean = false,
 ) => {
@@ -168,22 +168,6 @@ export const makeLabelSetRequiredSchema = (
     labelSetId: makeLabelSetIdSchema(valueLabel, directErrorMessages),
     labelSetVersion: makeLabelSetVersionSchema(valueLabel, directErrorMessages),
   });
-};
-
-/**
- * Makes a schema for parsing a label set configuration.
- *
- * The label set configuration is guaranteed to have valid labelSetId and labelSetVersion.
- *
- * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
- * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
- * @deprecated Use makeLabelSetRequiredSchema instead for better modularity
- */
-export const makeLabelSetSchema = (
-  valueLabel: string = "Label set",
-  directErrorMessages: boolean = false,
-) => {
-  return makeLabelSetRequiredSchema(valueLabel, directErrorMessages);
 };
 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
@@ -258,7 +242,7 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
-      labelSet: makeLabelSetSchema(`${valueLabel}.labelSet`),
+      labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
       indexAdditionalResolverRecords: z.boolean({
         error: `${valueLabel}.indexAdditionalResolverRecords`,
