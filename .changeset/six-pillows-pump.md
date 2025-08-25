@@ -4,4 +4,4 @@
 "ensindexer": minor
 ---
 
-Initial launch of ENS TokenScope with support for indexing seaport sales.
+Initial launch of ENS TokenScope with support for indexing Seaport sales.
