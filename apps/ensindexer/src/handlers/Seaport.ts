@@ -151,7 +151,7 @@ function getCurrencySymbol(chainId: number, currencyAddress: Address): string | 
 /**
  * Checks if an item is a supported NFT (ERC721/ERC1155 from known contracts)
  */
-function isSupportedNFT(chainId: number, item: OfferItem | ConsiderationItem): boolean {
+function isSupportedNFT(chainId: ChainId, item: OfferItem | ConsiderationItem): boolean {
   const isValidItemType = item.itemType === ItemType.ERC721 || item.itemType === ItemType.ERC1155;
   const isSupportedContract = isKnownTokenIssuingContract(config.namespace, {
     chainId,
