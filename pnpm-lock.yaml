@@ -6,45 +6,15 @@ settings:
 
 catalogs:
   default:
-    '@astrojs/react':
-      specifier: ^4.2.0
-      version: 4.2.0
-    '@astrojs/tailwind':
-      specifier: ^6.0.0
-      version: 6.0.0
     '@biomejs/biome':
       specifier: ^1.9.4
       version: 1.9.4
-    '@namehash/namekit-react':
-      specifier: 0.12.0
-      version: 0.12.0
     '@ponder/utils':
       specifier: 0.2.10
       version: 0.2.10
     '@types/node':
       specifier: ^22.14.0
       version: 22.15.3
-    '@vitest/coverage-v8':
-      specifier: ^3.1.1
-      version: 3.1.1
-    astro-font:
-      specifier: ^1.0.0
-      version: 1.0.0
-    astro-seo:
-      specifier: ^0.8.4
-      version: 0.8.4
-    date-fns:
-      specifier: ^4.1.0
-      version: 4.1.0
-    drizzle-orm:
-      specifier: '=0.41.0'
-      version: 0.41.0
-    hono:
-      specifier: ^4.7.6
-      version: 4.7.8
-    ponder:
-      specifier: 0.11.43
-      version: 0.11.43
     tsup:
       specifier: ^8.3.6
       version: 8.3.6
@@ -54,12 +24,6 @@ catalogs:
     viem:
       specifier: ^2.22.13
       version: 2.23.2
-    vitest:
-      specifier: ^3.1.1
-      version: 3.1.1
-    zod:
-      specifier: ^3.25.7
-      version: 3.25.7
 
 overrides:
   '@graphiql/react>@headlessui/react': 2.2.0
@@ -572,9 +536,6 @@ importers:
 
   packages/datasources:
     dependencies:
-      '@ensnode/ensnode-sdk':
-        specifier: workspace:*
-        version: link:../ensnode-sdk
       '@ponder/utils':
         specifier: 'catalog:'
         version: 0.2.10(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))
