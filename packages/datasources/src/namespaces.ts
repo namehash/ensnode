@@ -73,14 +73,14 @@ export const maybeGetDatasource = (
 ): Datasource | undefined => (getENSNamespace(namespaceId) as ENSNamespace)[datasourceName];
 
 /**
- * Returns the chain address for the specified namespace, datasource, and
- * contract name, or undefined if it does not exist or is not a single chain address.
+ * Gets the chain address for the specified namespace, datasource, and
+ * contract name, or undefined if it is not defined or is not a single chain address.
  *
- * This is useful when you want to retrieve the ChainAddress for an arbitrary contract
+ * This is useful when you want to retrieve a single ChainAddress for an arbitrary contract
  * where it may or may not actually be defined.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g.
- *                      'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
+ *                      'ens-test-env')
  * @param datasourceName - The name of the Datasource to search for contractName in
  * @param contractName - The name of the contract to retrieve the chain address for
  * @returns The ChainAddress for the given namespace, datasource, and contract
