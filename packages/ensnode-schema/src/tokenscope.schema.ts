@@ -53,12 +53,11 @@ export const nameSold = onchainTable(
     newOwnerId: t.hex().notNull(),
 
     /**
-     * Currency address of the payment (ETH, USDC, WETH, or DAI).
+     * Currency id of the payment (ETH, USDC or DAI).
      *
-     * Works in conjunction with 'price' field to define the complete payment amount.
-     * Currency contract address varies by chainId - same token has different addresses on different chains.
+     * Works in conjunction with the 'price' field to define the payment.
      */
-    currency: t.text().notNull(),
+    currencyId: t.text().notNull(),
 
     /**
      * The payment amount denominated in the smallest unit of the currency specified in 'currency' field.

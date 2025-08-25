@@ -2,6 +2,7 @@ import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
 import {
   ChainAddress,
+  ChainId,
   Datasource,
   DatasourceName,
   DatasourceNames,
@@ -114,3 +115,16 @@ export const getENSRootChain = (namespaceId: ENSNamespaceId) =>
  * @returns the chain ID that hosts the ENS Root
  */
 export const getENSRootChainId = (namespaceId: ENSNamespaceId) => getENSRootChain(namespaceId).id;
+
+/**
+ * Gets all the chainIds with datasources in the specified namespace.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
+ * 'ens-test-env')
+ * @returns an array of distinct chainIds with datasources in the specified namespace
+ */
+export const getChainIdsForNamespace = (namespaceId: ENSNamespaceId): ChainId[] => {
+  const namespace = getENSNamespace(namespaceId);
+  const chainIds = Object.values(namespace).map((datasource) => datasource.chain.id);
+  return [...new Set(chainIds)];
+};

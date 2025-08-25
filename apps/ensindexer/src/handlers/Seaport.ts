@@ -7,8 +7,8 @@ import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   TokenTypes,
+  getCurrencyIdForContract,
   getDomainIdByTokenId,
-  getSupportedCurrencies,
   isKnownTokenIssuingContract,
 } from "@/lib/tokenscope-helpers";
 import { ChainAddress, ChainId } from "@ensnode/datasources";
@@ -131,25 +131,6 @@ interface SeaportOrderFulfilledEvent
   }> {}
 
 /**
- * Gets the currency symbol for a given address on a specific chain.
- */
-function getCurrencySymbol(chainId: number, currencyAddress: Address): string | null {
-  const supportedCurrencies = getSupportedCurrencies(chainId);
-
-  if (currencyAddress === zeroAddress) {
-    const ethCurrency = supportedCurrencies.find((currency) => currency.address === null);
-    return ethCurrency?.symbol || null;
-  }
-
-  const matchingCurrency = supportedCurrencies.find(
-    (currency) =>
-      currency.address && currency.address.toLowerCase() === currencyAddress.toLowerCase(),
-  );
-
-  return matchingCurrency?.symbol || null;
-}
-
-/**
  * Checks if an item is a supported NFT (ERC721/ERC1155 from known contracts)
  */
 function isSupportedNFT(chainId: ChainId, item: OfferItem | ConsiderationItem): boolean {
@@ -230,9 +211,13 @@ function getIndexableSale(
     return null; // Mixed currencies not supported
   }
 
-  const currencyAddress = paymentItems[0]!.token;
-  const currencySymbol = getCurrencySymbol(chainId, currencyAddress);
-  if (!currencySymbol) {
+  const currencyContract: ChainAddress = {
+    chainId,
+    address: paymentItems[0]!.token,
+  };
+
+  const currencyId = getCurrencyIdForContract(config.namespace, currencyContract);
+  if (!currencyId) {
     return null; // Unsupported currency
   }
 
@@ -245,7 +230,7 @@ function getIndexableSale(
   // Extract NFT details
   const tokenId = nftItem.identifier.toString();
 
-  const contract: ChainAddress = {
+  const nftContract: ChainAddress = {
     chainId,
     address: nftItem.token,
   };
@@ -253,7 +238,7 @@ function getIndexableSale(
   // Get domain ID
   let domainId;
   try {
-    domainId = getDomainIdByTokenId(config.namespace, contract, nftItem.identifier);
+    domainId = getDomainIdByTokenId(config.namespace, nftContract, nftItem.identifier);
   } catch {
     // unsupported NFT contract
     return null;
@@ -267,11 +252,11 @@ function getIndexableSale(
     timestamp: event.block.timestamp,
     fromOwnerId: seller,
     newOwnerId: buyer,
-    contractAddress: contract.address,
+    contractAddress: nftContract.address,
     tokenId,
     tokenType: nftItem.itemType === ItemType.ERC721 ? TokenTypes.ERC721 : TokenTypes.ERC1155,
     domainId,
-    currency: currencySymbol,
+    currencyId,
     price: totalAmount,
   };
 }
