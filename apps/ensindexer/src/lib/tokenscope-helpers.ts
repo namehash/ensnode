@@ -43,15 +43,15 @@ export type TokenId = bigint;
 /**
  * A contract that issues tokenized ENS names.
  */
-export interface TokenIssuingContract {
+export interface TokenIssuer {
   /**
-   * The ChainAddress of the token issuing contract.
+   * The ChainAddress of the token issuer contract.
    */
   contract: ChainAddress;
 
   /**
-   * Applies the contract's logic for converting from the token id
-   * representation of a name to the domain id (Node) of the name.
+   * Applies the token issuer contract's logic for converting from the token id
+   * representation of a domain to the domain id (Node) representation of a domain.
    */
   getDomainId: (tokenId: TokenId) => Node;
 }
@@ -87,11 +87,9 @@ export const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: No
  * specified namespace.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns an array of 0 or more known TokenIssuingContract for the specified namespace
+ * @returns an array of 0 or more known TokenIssuer for the specified namespace
  */
-export const getKnownTokenIssuingContracts = (
-  namespaceId: ENSNamespaceId,
-): TokenIssuingContract[] => {
+export const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
   const ethBaseRegistrar = maybeGetDatasourceContractChainAddress(
     namespaceId,
     DatasourceNames.ENSRoot,
@@ -123,7 +121,7 @@ export const getKnownTokenIssuingContracts = (
     "BaseRegistrar",
   );
 
-  const result: TokenIssuingContract[] = [];
+  const result: TokenIssuer[] = [];
 
   if (ethBaseRegistrar) {
     result.push({
@@ -183,26 +181,45 @@ export const getKnownTokenIssuingContracts = (
 };
 
 /**
- * Identifies if the provided ChainAddress is a known token issuing contract.
+ * Gets the known token issuer for the given ChainAddress in the specified namespace.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @param chainAddress - The ChainAddress to check
- * @returns a boolean indicating if the provided ChainAddress is a known token issuing contract
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
+ *  'ens-test-env')
+ * @param contract - The ChainAddress to get the known token issuer for
+ * @returns the known token issuer for the given ChainAddress, or null
+ *          if the ChainAddress is not a known token issuer in the specified namespace
  */
-export const isKnownTokenIssuingContract = (
+export const getKnownTokenIssuer = (
+  namespaceId: ENSNamespaceId,
+  contract: ChainAddress,
+): TokenIssuer | null => {
+  const tokenIssuers = getKnownTokenIssuers(namespaceId);
+  return (
+    tokenIssuers.find((tokenIssuer) => isChainAddressEqual(tokenIssuer.contract, contract)) ?? null
+  );
+};
+
+/**
+ * Identifies if the provided ChainAddress is a known token issuer.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
+ *  'ens-test-env')
+ * @param chainAddress - The ChainAddress to check
+ * @returns a boolean indicating if the provided ChainAddress is a known token issuer in
+ *          the specified namespace.
+ */
+export const isKnownTokenIssuer = (
   namespaceId: ENSNamespaceId,
   chainAddress: ChainAddress,
 ): boolean => {
-  const knownTokenIssuingContracts = getKnownTokenIssuingContracts(namespaceId);
-  return knownTokenIssuingContracts.some((tokenIssuingContract) =>
-    isChainAddressEqual(tokenIssuingContract.contract, chainAddress),
-  );
+  return getKnownTokenIssuer(namespaceId, chainAddress) !== null;
 };
 
 /**
  * Gets the domainId (Node) for a given NFT from contract with tokenId on the specified namespace.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
+ *  'ens-test-env')
  * @param contract - The ChainAddress of the NFT contract
  * @param tokenId - The tokenId of the NFT
  * @returns the domainId (Node) for ENS name associated with the NFT
@@ -213,17 +230,17 @@ export function getDomainIdByTokenId(
   contract: ChainAddress,
   tokenId: TokenId,
 ): Node {
-  const knownTokenIssuingContracts = getKnownTokenIssuingContracts(namespaceId);
-  const knownTokenIssuingContract = knownTokenIssuingContracts.find((tokenIssuingContract) =>
-    isChainAddressEqual(tokenIssuingContract.contract, contract),
+  const tokenIssuers = getKnownTokenIssuers(namespaceId);
+  const tokenIssuer = tokenIssuers.find((tokenIssuer) =>
+    isChainAddressEqual(tokenIssuer.contract, contract),
   );
-  if (!knownTokenIssuingContract) {
+  if (!tokenIssuer) {
     throw new Error(
-      `The contract at address ${contract.address} on chain ${contract.chainId} is not a known token issuing contract in the ${namespaceId} namespace`,
+      `The contract at address ${contract.address} on chain ${contract.chainId} is not a known token issuer in the ${namespaceId} namespace`,
     );
   }
 
-  return knownTokenIssuingContract.getDomainId(tokenId);
+  return tokenIssuer.getDomainId(tokenId);
 }
 
 // TODO: Add support for WETH
@@ -237,6 +254,18 @@ export const CurrencyIds = {
 } as const;
 
 export type CurrencyId = (typeof CurrencyIds)[keyof typeof CurrencyIds];
+
+export interface Price {
+  currency: CurrencyId;
+
+  /**
+   * The amount of the currency in the smallest unit of the currency. (see
+   * decimals of the CurrencyConfig for the currency).
+   *
+   * Guaranteed to be non-negative.
+   */
+  amount: bigint;
+}
 
 export interface CurrencyConfig {
   id: CurrencyId;

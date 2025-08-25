@@ -6,16 +6,23 @@ import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
+  CurrencyIds,
+  Price,
+  TokenId,
+  TokenType,
   TokenTypes,
   getCurrencyIdForContract,
   getDomainIdByTokenId,
-  isKnownTokenIssuingContract,
+  getKnownTokenIssuer,
+  isKnownTokenIssuer,
 } from "@/lib/tokenscope-helpers";
-import { ChainAddress, ChainId } from "@ensnode/datasources";
+import { ChainAddress, ChainId, ENSNamespaceId } from "@ensnode/datasources";
 import { NameSoldInsert } from "@ensnode/ensnode-schema";
-import { Address, Hex, zeroAddress } from "viem";
+import type { Node } from "@ensnode/ensnode-sdk";
+import { Address, Hex } from "viem";
+import { PrivateKeyToAccountErrorType } from "viem/accounts";
 
-type OfferItem = {
+type SeaportOfferItem = {
   /**
    * The type of item in the offer.
    * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
@@ -48,7 +55,7 @@ type OfferItem = {
   amount: bigint;
 };
 
-type ConsiderationItem = {
+type SeaportConsiderationItem = {
   /**
    * The type of item in the consideration.
    * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
@@ -90,7 +97,7 @@ type ConsiderationItem = {
 interface SeaportOrderFulfilledEvent
   extends EventWithArgs<{
     /**
-     * The unique hash identifier of the fulfilled order.
+     * The unique hash identifier of the fulfilled order within Seaport.
      * Used to track and reference specific orders on-chain.
      */
     orderHash: Hex;
@@ -120,161 +127,284 @@ interface SeaportOrderFulfilledEvent
      * For listings: NFTs/tokens being sold
      * For offers: ETH/ERC20 tokens being offered as payment
      */
-    offer: readonly OfferItem[];
+    offer: readonly SeaportOfferItem[];
 
     /**
      * Array of items that the offerer expects to receive in return.
      * For listings: ETH/ERC20 tokens expected as payment
      * For offers: NFTs/tokens being requested in exchange
      */
-    consideration: readonly ConsiderationItem[];
+    consideration: readonly SeaportConsiderationItem[];
   }> {}
 
+interface SupportedNFT {
+  tokenType: TokenType;
+  contract: ChainAddress;
+  tokenId: TokenId;
+  domainId: Node;
+}
+
+interface SupportedPayment {
+  price: Price;
+}
+
 /**
- * Checks if an item is a supported NFT (ERC721/ERC1155 from known contracts)
+ * Gets the supported TokenScope token type for a given Seaport item type.
+ *
+ * @param itemType - The Seaport item type to get the supported TokenScope token type for
+ * @returns the supported TokenScope token type for the given SeaPort item type, or null
+ *          if the item type is not supported
  */
-function isSupportedNFT(chainId: ChainId, item: OfferItem | ConsiderationItem): boolean {
-  const isValidItemType = item.itemType === ItemType.ERC721 || item.itemType === ItemType.ERC1155;
-  const isSupportedContract = isKnownTokenIssuingContract(config.namespace, {
+const getSupportedTokenType = (itemType: ItemType): TokenType | null => {
+  if (itemType === ItemType.ERC721) {
+    return TokenTypes.ERC721;
+  } else if (itemType === ItemType.ERC1155) {
+    return TokenTypes.ERC1155;
+  } else {
+    return null;
+  }
+};
+
+/**
+ * Gets the supported NFT from a given Seaport item.
+ *
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
+ *  'ens-test-env')
+ * @param chainId - The chain ID of the Seaport item
+ * @param item - The Seaport item to get the supported NFT from
+ * @returns the supported NFT from the given Seaport item, or `null` if the Seaport item is
+ *          not a supported NFT
+ */
+const getSupportedNFT = (
+  namespaceId: ENSNamespaceId,
+  chainId: ChainId,
+  item: SeaportOfferItem | SeaportConsiderationItem,
+): SupportedNFT | null => {
+  // validate item as an ERC721/ERC1155 NFT
+  const tokenType = getSupportedTokenType(item.itemType);
+  if (!tokenType) {
+    return null;
+  }
+
+  // validate that the token is a known token issuing contract
+  const tokenIssuer = getKnownTokenIssuer(namespaceId, {
     chainId,
     address: item.token,
   });
+  if (!tokenIssuer) {
+    return null;
+  }
 
-  return isValidItemType && isSupportedContract;
-}
+  const contract = tokenIssuer.contract;
+  const tokenId = item.identifier;
+  const domainId = tokenIssuer.getDomainId(tokenId);
 
-/**
- * Checks if an item is a payment token (ETH or ERC20)
- */
-function isPaymentToken(item: OfferItem | ConsiderationItem): boolean {
-  return item.itemType === ItemType.NATIVE || item.itemType === ItemType.ERC20;
-}
+  return {
+    tokenType,
+    contract,
+    tokenId,
+    domainId,
+  } satisfies SupportedNFT;
+};
 
-/**
- * Determines if a Seaport order fulfillment meets our criteria for indexing.
- *
- * @returns indexable sale data, or `null` if the order fulfilled event does
- *          not meet our criteria for indexing.
- */
-function getIndexableSale(
-  event: SeaportOrderFulfilledEvent,
+const getSupportedPayment = (
+  namespaceId: ENSNamespaceId,
   chainId: ChainId,
-): NameSoldInsert | null {
-  const { offer, consideration, orderHash, offerer, recipient } = event.args;
-
-  // Find all NFTs and payment items
-  const nftsInOffer = offer.filter((item) => isSupportedNFT(chainId, item));
-  const nftsInConsideration = consideration.filter((item) => isSupportedNFT(chainId, item));
-  const paymentsInOffer = offer.filter(isPaymentToken);
-  const paymentsInConsideration = consideration.filter(isPaymentToken);
-
-  let nftItem: OfferItem | ConsiderationItem;
-  let paymentItems: (OfferItem | ConsiderationItem)[];
-  let seller: Address;
-  let buyer: Address;
-
-  // Determine transaction type and validate structure
-  if (
-    nftsInOffer.length === 1 &&
-    nftsInConsideration.length === 0 &&
-    paymentsInConsideration.length > 0
-  ) {
-    // Listing: NFT in offer, payment in consideration
-    nftItem = nftsInOffer[0]!;
-    paymentItems = paymentsInConsideration;
-    seller = offerer;
-    buyer = recipient;
-  } else if (
-    nftsInConsideration.length === 1 &&
-    nftsInOffer.length === 0 &&
-    paymentsInOffer.length > 0
-  ) {
-    // Offer: payment in offer, NFT in consideration
-    nftItem = nftsInConsideration[0]!;
-    paymentItems = paymentsInOffer;
-    seller = recipient;
-    buyer = offerer;
-  } else {
-    // Invalid structure
-    return null;
-  }
-
-  // Validate payment structure
-  if (paymentItems.length === 0) {
-    return null;
-  }
-
-  // Check for mixed currencies
-  const paymentTokens = paymentItems.map((item) => item.token.toLowerCase());
-  const uniqueTokens = [...new Set(paymentTokens)];
-  if (uniqueTokens.length > 1) {
-    return null; // Mixed currencies not supported
-  }
-
-  const currencyContract: ChainAddress = {
+  item: SeaportOfferItem | SeaportConsiderationItem,
+): SupportedPayment | null => {
+  const currencyContract = {
     chainId,
-    address: paymentItems[0]!.token,
+    address: item.token,
   };
 
-  const currencyId = getCurrencyIdForContract(config.namespace, currencyContract);
+  // validate that the item is a supported currency
+  const currencyId = getCurrencyIdForContract(namespaceId, currencyContract);
   if (!currencyId) {
     return null; // Unsupported currency
   }
 
-  // Calculate total payment amount
-  const totalAmount = paymentItems.reduce((total, item) => total + item.amount, 0n);
-  if (totalAmount <= 0n) {
+  // validate the Seaport item type is supported and matches the currencyId
+  if (item.itemType === ItemType.NATIVE) {
+    if (currencyId !== CurrencyIds.ETH) {
+      return null; // Seaport item type doesn't match currencyId
+    }
+  } else if (item.itemType === ItemType.ERC20) {
+    if (currencyId === CurrencyIds.ETH) {
+      return null; // Seaport item type doesn't match currencyId
+    }
+  } else {
+    // unsupported Seaport item type
     return null;
   }
 
-  // Extract NFT details
-  const tokenId = nftItem.identifier.toString();
-
-  const nftContract: ChainAddress = {
-    chainId,
-    address: nftItem.token,
-  };
-
-  // Get domain ID
-  let domainId;
-  try {
-    domainId = getDomainIdByTokenId(config.namespace, nftContract, nftItem.identifier);
-  } catch {
-    // unsupported NFT contract
-    return null;
+  if (item.amount < 0n) {
+    return null; // Invalid amount
   }
 
   return {
-    ...sharedEventValues(chainId, event),
-    logIndex: event.log.logIndex,
+    price: {
+      currency: currencyId,
+      amount: item.amount,
+    },
+  } satisfies SupportedPayment;
+};
+
+interface SeaportItemExtractions {
+  nfts: SupportedNFT[];
+  payments: SupportedPayment[];
+}
+
+const getSeaportItemExtractions = (
+  namespaceId: ENSNamespaceId,
+  chainId: ChainId,
+  items: readonly (SeaportOfferItem | SeaportConsiderationItem)[],
+): SeaportItemExtractions => {
+  let nfts: SupportedNFT[] = [];
+  let payments: SupportedPayment[] = [];
+
+  // each item is either a supported NFT, a supported payment, or unsupported
+  for (const item of items) {
+    const nft = getSupportedNFT(namespaceId, chainId, item);
+    if (nft) {
+      nfts.push(nft);
+    } else {
+      const payment = getSupportedPayment(namespaceId, chainId, item);
+      if (payment) {
+        payments.push(payment);
+      }
+    }
+  }
+
+  return {
+    nfts,
+    payments,
+  } satisfies SeaportItemExtractions;
+};
+
+const consolidateSupportedNFTs = (nfts: SupportedNFT[]): SupportedNFT | null => {
+  if (nfts.length !== 1) {
+    return null; // Either no NFT or multiple NFTs
+  }
+
+  return nfts[0]!;
+};
+
+const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPayment | null => {
+  // Get the set of distinct currencies in the payment
+  const paymentCurrencies = payments.map((payment) => payment.price.currency);
+  const uniqueCurrencies = [...new Set(paymentCurrencies)];
+  if (uniqueCurrencies.length !== 1) {
+    return null; // Either no payment or multiple payments in mixed currencies
+  }
+
+  const totalAmount = payments.reduce((total, payment) => total + payment.price.amount, 0n);
+
+  return {
+    price: {
+      currency: uniqueCurrencies[0]!, // we verified above there's exactly one currency
+      amount: totalAmount,
+    },
+  } satisfies SupportedPayment;
+};
+
+interface SupportedSale {
+  nft: SupportedNFT;
+  payment: SupportedPayment;
+  seller: Address;
+  buyer: Address;
+}
+
+const getSupportedSale = (
+  namespaceId: ENSNamespaceId,
+  chainId: ChainId,
+  event: SeaportOrderFulfilledEvent,
+): SupportedSale | null => {
+  const { offer, consideration, orderHash, offerer, recipient } = event.args;
+
+  const { nfts: offerNFTs, payments: offerPayments } = getSeaportItemExtractions(
+    namespaceId,
     chainId,
-    orderHash,
-    timestamp: event.block.timestamp,
-    fromOwnerId: seller,
-    newOwnerId: buyer,
-    contractAddress: nftContract.address,
-    tokenId,
-    tokenType: nftItem.itemType === ItemType.ERC721 ? TokenTypes.ERC721 : TokenTypes.ERC1155,
-    domainId,
-    currencyId,
-    price: totalAmount,
-  };
-}
+    offer,
+  );
+  const { nfts: considerationNFTs, payments: considerationPayments } = getSeaportItemExtractions(
+    namespaceId,
+    chainId,
+    consideration,
+  );
+
+  const consolidatedOfferNFT = consolidateSupportedNFTs(offerNFTs);
+  const consolidatedConsiderationNFT = consolidateSupportedNFTs(considerationNFTs);
+  const consolidatedOfferPayment = consolidateSupportedPayments(offerPayments);
+  const consolidatedConsiderationPayment = consolidateSupportedPayments(considerationPayments);
+
+  if (
+    consolidatedOfferNFT &&
+    !consolidatedConsiderationNFT &&
+    consolidatedOfferPayment &&
+    !consolidatedConsiderationPayment
+  ) {
+    // offer is exactly 1 supported NFT and consideration consolidates to 1 supported payment
+    // therefore the offerer is the seller and the recipient is the buyer
+    return {
+      nft: consolidatedOfferNFT,
+      payment: consolidatedOfferPayment,
+      seller: offerer,
+      buyer: recipient,
+    } satisfies SupportedSale;
+  } else if (
+    !consolidatedOfferNFT &&
+    consolidatedConsiderationNFT &&
+    !consolidatedOfferPayment &&
+    consolidatedConsiderationPayment
+  ) {
+    // consideration is exactly 1 supported NFT and offer consolidates to 1 supported payment
+    // therefore the recipient is the seller and the offerer is the buyer
+    return {
+      nft: consolidatedConsiderationNFT,
+      payment: consolidatedConsiderationPayment,
+      seller: recipient,
+      buyer: offerer,
+    } satisfies SupportedSale;
+  } else {
+    // unsupported sale
+    return null;
+  }
+};
 
 /**
- * Processes a validated sale transaction
+ * Indexes a supported sale transaction
  */
-async function handleSale(context: Context, saleData: NameSoldInsert): Promise<void> {
-  // Ensure accounts exist
-  await upsertAccount(context, saleData.fromOwnerId);
-  await upsertAccount(context, saleData.newOwnerId);
+const indexSupportedSale = async (
+  context: Context,
+  event: SeaportOrderFulfilledEvent,
+  sale: SupportedSale,
+): Promise<void> => {
+  // Ensure buyer and selleraccounts exist
+  await upsertAccount(context, sale.seller);
+  await upsertAccount(context, sale.buyer);
 
-  // Record the sale
+  const saleData: NameSoldInsert = {
+    ...sharedEventValues(context.chain.id, event),
+    logIndex: event.log.logIndex,
+    chainId: context.chain.id,
+    orderHash: event.args.orderHash,
+    timestamp: event.block.timestamp,
+    fromOwnerId: sale.seller,
+    newOwnerId: sale.buyer,
+    contractAddress: sale.nft.contract.address,
+    tokenId: sale.nft.tokenId.toString(), // TODO: store as a bigint?
+    tokenType: sale.nft.tokenType,
+    domainId: sale.nft.domainId,
+    currencyId: sale.payment.price.currency,
+    price: sale.payment.price.amount,
+  };
+
+  // Index the sale
   await context.db.insert(schema.nameSold).values(saleData);
-}
+};
 
 /**
- * Main handler for Seaport OrderFulfilled events
+ * Handles each Seaport OrderFulfilled event
  */
 export async function handleOrderFulfilled({
   context,
@@ -283,8 +413,8 @@ export async function handleOrderFulfilled({
   context: Context;
   event: SeaportOrderFulfilledEvent;
 }) {
-  const indexableSale = getIndexableSale(event, context.chain.id);
-  if (indexableSale) {
-    await handleSale(context, indexableSale);
+  const supportedSale = getSupportedSale(config.namespace, context.chain.id, event);
+  if (supportedSale) {
+    await indexSupportedSale(context, event, supportedSale);
   }
 }
