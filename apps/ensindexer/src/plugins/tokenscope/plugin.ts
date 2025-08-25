@@ -33,10 +33,10 @@ export default createPlugin({
             ...chainConfigForContract(
               config.globalBlockrange,
               seaport.chain.id,
-              seaport.contracts.Seaport,
+              seaport.contracts.Seaport1_5,
             ),
           },
-          abi: seaport.contracts.Seaport.abi,
+          abi: seaport.contracts.Seaport1_5.abi,
         },
       },
     });
