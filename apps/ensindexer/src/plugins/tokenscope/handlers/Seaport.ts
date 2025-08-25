@@ -37,8 +37,6 @@ export default function () {
     // no supported sale detected in event, no-op
     if (!sale) return;
 
-    console.log(sale);
-
     // upsert buyer and seller accounts
     await upsertAccount(context, sale.seller);
     await upsertAccount(context, sale.buyer);
