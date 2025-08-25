@@ -1,3 +1,8 @@
+import { ChainId } from "@ensnode/datasources";
+
+// re-export ChainId for backwards compatibility
+export { type ChainId };
+
 /**
  * Block Number
  *

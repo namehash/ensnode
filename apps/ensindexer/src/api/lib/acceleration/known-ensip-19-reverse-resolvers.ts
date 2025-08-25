@@ -1,5 +1,6 @@
 import config from "@/config";
-import { ChainId, DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import { ChainId } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 
 const rrRoot = maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot);

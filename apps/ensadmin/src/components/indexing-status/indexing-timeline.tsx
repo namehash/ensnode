@@ -4,8 +4,7 @@
 
 import { ChainName } from "@/components/chains/ChainName";
 import { cn } from "@/lib/utils";
-import { ChainId } from "@ensnode/datasources";
-import { ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { ChainId, ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { intlFormat } from "date-fns";
 
 import { BlockRefViewModel } from "@/components/indexing-status/block-refs";

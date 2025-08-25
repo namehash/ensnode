@@ -3,7 +3,7 @@ import {
   coinTypeToEvmChainId as _coinTypeToEvmChainId,
   evmChainIdToCoinType as _evmChainIdToCoinType,
 } from "@ensdomains/address-encoder/utils";
-import { ChainId } from "@ensnode/datasources";
+import { ChainId } from "../shared";
 
 // re-export CoinType and EvmCoinType from @ensdomains/address-encoder
 // so consumers don't need it as a dependency

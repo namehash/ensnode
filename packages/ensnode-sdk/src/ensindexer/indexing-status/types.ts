@@ -1,5 +1,4 @@
-import type { ChainId } from "@ensnode/datasources";
-import type { BlockRef, Duration, UnixTimestamp } from "../../shared";
+import type { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 
 export const ChainIndexingStatusIds = {
   Unstarted: "unstarted",

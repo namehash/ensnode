@@ -1,5 +1,5 @@
-import type { ChainId, ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
-import type { Blockrange, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
+import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.

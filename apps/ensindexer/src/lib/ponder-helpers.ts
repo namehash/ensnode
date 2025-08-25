@@ -10,11 +10,12 @@ import type { ChainConfig } from "ponder";
 import { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
-import { ChainId, ContractConfig } from "@ensnode/datasources";
+import { ContractConfig } from "@ensnode/datasources";
+import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
 import { ENSIndexerConfig } from "@/config/types";
-import type { Blockrange } from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;

@@ -1,6 +1,4 @@
-import { ChainId } from "@ensnode/datasources";
-import { ChainIdString, serializeChainId } from "../../shared";
-
+import { ChainId, ChainIdString, serializeChainId } from "../../shared";
 import {
   SerializedENSIndexerOverallIndexingBackfillStatus,
   SerializedENSIndexerOverallIndexingCompletedStatus,

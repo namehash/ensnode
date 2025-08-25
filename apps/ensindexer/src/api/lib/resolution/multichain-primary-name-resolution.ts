@@ -1,4 +1,5 @@
 import {
+  type ChainId,
   type MultichainPrimaryNameResolutionArgs,
   type MultichainPrimaryNameResolutionResult,
   uniq,
@@ -8,12 +9,7 @@ import { trace } from "@opentelemetry/api";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import config from "@/config";
 import { withActiveSpanAsync } from "@/lib/auto-span";
-import {
-  type ChainId,
-  DatasourceNames,
-  getDatasource,
-  maybeGetDatasource,
-} from "@ensnode/datasources";
+import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 

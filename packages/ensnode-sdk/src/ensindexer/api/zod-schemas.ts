@@ -1,11 +1,10 @@
 import { Address, getAddress } from "viem";
 import { z } from "zod/v4";
 
-import { ChainId } from "@ensnode/datasources";
 import { CoinType, DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
-import { isNormalized } from "../../shared";
+import { ChainId, isNormalized } from "../../shared";
 import { makeDurationSchema } from "../../shared/zod-schemas";
 
 const toName = (val: string) => val as Name;

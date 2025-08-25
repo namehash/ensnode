@@ -1,11 +1,10 @@
 import {
-  ChainId,
   DatasourceNames,
   ENSNamespaceId,
   ENSNamespaceIds,
   getDatasource,
 } from "@ensnode/datasources";
-import { Name } from "@ensnode/ensnode-sdk";
+import { ChainId, Name } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 import {
   anvil,

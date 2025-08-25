@@ -1,4 +1,4 @@
-import { ChainId } from "@ensnode/datasources";
+import { ChainId } from "../../shared";
 import { serializeUrl } from "../../shared/serialize";
 import { SerializedENSIndexerPublicConfig, SerializedIndexedChainIds } from "./serialized-types";
 import { ENSIndexerPublicConfig } from "./types";

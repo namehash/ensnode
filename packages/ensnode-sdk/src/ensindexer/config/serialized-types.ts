@@ -1,5 +1,4 @@
-import type { ChainId } from "@ensnode/datasources";
-import type { UrlString } from "../../shared";
+import type { ChainId, UrlString } from "../../shared";
 import type { ENSIndexerPublicConfig } from "./types";
 
 export type SerializedIndexedChainIds = Array<ChainId>;
