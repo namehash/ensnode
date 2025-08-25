@@ -234,6 +234,14 @@ jobs:
           set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID} "subgraph" "0"
           set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID} "subgraph" "0"
 
+          # Set label set variables for each API service
+          # Both API and Indexer services need these variables for deterministic ENSRainbow requests
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID} "subgraph" "0"
+
       # Update DB_SCHEMA_VERSION for ENSRainbow service
       - name: Update ENSRainbow database schema version
         run: |
