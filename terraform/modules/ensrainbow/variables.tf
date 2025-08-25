@@ -14,7 +14,7 @@ variable "render_region" {
 # Database schema configuration
 variable "db_schema_version" {
   type        = string
-  description = "The database schema version to use for ENSRainbow
+  description = "The database schema version to use for ENSRainbow"
   default     = "3"
 }
 
