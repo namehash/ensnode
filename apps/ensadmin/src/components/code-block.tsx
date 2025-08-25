@@ -5,8 +5,8 @@ export function CodeBlock({ children, className }: PropsWithChildren<{ className
   return (
     <pre
       className={cn(
-        className,
         "bg-muted font-mono text-sm p-4 overflow-auto whitespace-pre break-normal overflow-x-auto",
+        className,
       )}
     >
       {children}

@@ -19,16 +19,20 @@ export interface ErrorResponse {
   details?: unknown; // subject to change
 }
 
-interface TraceableRequest {
+export interface TraceableRequest {
   trace?: boolean;
 }
 
-interface TraceableResponse {
+export interface TraceableResponse {
   trace?: ProtocolTrace;
 }
 
 export interface AcceleratableRequest {
   accelerate?: boolean;
+}
+
+export interface AcceleratableResponse {
+  accelerationAttempted: boolean;
 }
 
 /**
@@ -43,7 +47,8 @@ export interface ResolveRecordsRequest<SELECTION extends ResolverRecordsSelectio
  * Resolve Records Response Type
  */
 export interface ResolveRecordsResponse<SELECTION extends ResolverRecordsSelection>
-  extends TraceableResponse {
+  extends AcceleratableResponse,
+    TraceableResponse {
   records: ResolverRecordsResponse<SELECTION>;
 }
 
@@ -58,7 +63,7 @@ export interface ResolvePrimaryNameRequest
 /**
  * Resolve Primary Name Response Type
  */
-export interface ResolvePrimaryNameResponse extends TraceableResponse {
+export interface ResolvePrimaryNameResponse extends AcceleratableResponse, TraceableResponse {
   name: ReverseResolutionResult;
 }
 
@@ -67,7 +72,7 @@ export interface ResolvePrimaryNamesRequest
     AcceleratableRequest,
     TraceableRequest {}
 
-export interface ResolvePrimaryNamesResponse extends TraceableResponse {
+export interface ResolvePrimaryNamesResponse extends AcceleratableResponse, TraceableResponse {
   names: MultichainPrimaryNameResolutionResult;
 }
 

@@ -198,6 +198,67 @@ jobs:
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "ALPHA-SEPOLIA_DATABASE_SCHEMA" "alphaSepoliaSchema${TAG}"
           set_shared_variable ${RAILWAY_ENVIRONMENT_ID} "SEPOLIA_DATABASE_SCHEMA" "sepoliaSchema${TAG}"
 
+      # Update label set environment variables for each ENSIndexer service
+      - name: Update label set environment variables
+        run: |
+          set_label_set_variables() {
+            local environment_id=$1
+            local service_id=$2
+            local label_set_id=$3
+            local label_set_version=$4
+            
+            echo "Setting label set variables for $service_id"
+            
+            # Set LABEL_SET_ID
+            curl --request POST \
+              --silent \
+              --fail \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"LABEL_SET_ID\", value: \"'${label_set_id}'\" }) }"}'
+            
+            # Set LABEL_SET_VERSION
+            curl --request POST \
+              --silent \
+              --fail \
+              --url https://backboard.railway.app/graphql/v2 \
+              --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+              --header 'Content-Type: application/json' \
+              --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${environment_id}'\", name: \"LABEL_SET_VERSION\", value: \"'${label_set_version}'\" }) }"}'
+            
+            echo "Finished setting label set variables for $service_id"
+          }
+
+          # Set label set variables for each indexer service
+          # Using "subgraph" and "0" for full subgraph backwards compatibility
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID} "subgraph" "0"
+
+          # Set label set variables for each API service
+          # Both API and Indexer services need these variables for deterministic ENSRainbow requests
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID} "subgraph" "0"
+          set_label_set_variables ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID} "subgraph" "0"
+
+      # Update DB_SCHEMA_VERSION for ENSRainbow service
+      - name: Update ENSRainbow database schema version
+        run: |
+          echo "Setting DB_SCHEMA_VERSION for ENSRainbow service"
+          curl --request POST \
+            --silent \
+            --fail \
+            --url https://backboard.railway.app/graphql/v2 \
+            --header 'Authorization: Bearer '${{ env.RAILWAY_TOKEN }} \
+            --header 'Content-Type: application/json' \
+            --data '{"query": "mutation variableUpsert { variableUpsert(input: { projectId: \"'${{ env.RAILWAY_PROJECT_ID }}'\", environmentId: \"'${RAILWAY_ENVIRONMENT_ID}'\", name: \"DB_SCHEMA_VERSION\", value: \"3\" }) }"}'
+          echo "Finished setting DB_SCHEMA_VERSION for ENSRainbow"
+
       - name: Redeploy ENSNode instances
         run: |
           redeploy_service() {
