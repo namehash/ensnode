@@ -122,9 +122,9 @@ export const makeLabelSetVersionSchema = (
 };
 
 /**
- * Makes a schema for parsing a label set in universal context.
+ * Makes a schema for parsing a label set.
  *
- * This schema allows for either both fields undefined, or label set ID defined but label set version undefined.
+ * This schema allows for either both fields defined or both fields undefined, or label set ID defined but label set version undefined.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
  * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
@@ -140,22 +140,21 @@ export const makeLabelSetSchema = (
     })
     .refine(
       (data) => {
-        // Either both undefined, or labelSetId defined but labelSetVersion undefined
+        // Either both defined or both undefined, or labelSetId defined but labelSetVersion undefined
         return (
           (data.labelSetId === undefined && data.labelSetVersion === undefined) ||
-          (data.labelSetId !== undefined && data.labelSetVersion === undefined)
+          (data.labelSetId !== undefined && data.labelSetVersion === undefined) ||
+          (data.labelSetId !== undefined && data.labelSetVersion !== undefined)
         );
       },
       {
-        message: `${valueLabel} must have either both fields undefined, or labelSetId defined but labelSetVersion undefined.`,
+        message: `${valueLabel} must have either both fields defined or both fields undefined, or labelSetId defined but labelSetVersion undefined.`,
       },
     );
 };
 
 /**
  * Makes a schema for parsing a label set where both label set ID and label set version are required.
- *
- * This schema is what we'll probably be using in this PR, similar to Required<X>.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
  * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
