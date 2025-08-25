@@ -46,7 +46,7 @@ export interface SerializedENSIndexerConfig
   ensRainbowUrl: UrlString;
 
   /**
-   * The label set configuration that ENSIndexer will request from ENSRainbow for deterministic label healing.
+   * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
    */
   labelSet: Required<EnsRainbowClientLabelSet>;
 

@@ -14,10 +14,10 @@ variable "render_region" {
 # Label set configuration for ENSRainbow
 variable "ensrainbow_label_set_id" {
   type        = string
-  description = "The label set ID that ENSRainbow will use for its own operations (e.g., 'subgraph', 'ens-test-env')"
+  description = "The label set ID that ENSRainbow will offer to its clients (e.g., 'subgraph', 'ens-test-env')"
 }
 
 variable "ensrainbow_label_set_version" {
   type        = string
-  description = "The label set version that ENSRainbow will use for its own operations (e.g., '0', '1')"
+  description = "The highest label set version that ENSRainbow will offer to its clients (e.g., '0', '1')"
 }

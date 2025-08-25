@@ -87,7 +87,7 @@ module "ensrainbow" {
   render_region         = local.render_region
   ensnode_version       = var.ensnode_version
 
-  # Label Set Configuration for ENSRainbow
+  # Label set that ENSRainbow will offer to its clients
   ensrainbow_label_set_id      = var.ensrainbow_label_set_id
   ensrainbow_label_set_version = var.ensrainbow_label_set_version
 }
@@ -135,7 +135,7 @@ module "ensindexer" {
   # Holesky RPC URLs
   etherum_holesky_rpc_url = var.etherum_holesky_rpc_url
 
-  # Label Set Configuration
+  # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
   label_set_id      = var.ensindexer_label_set_id
   label_set_version = var.ensindexer_label_set_version
 }
