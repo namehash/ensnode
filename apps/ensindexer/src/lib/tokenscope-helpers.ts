@@ -5,7 +5,7 @@ import {
   getDatasource,
 } from "@ensnode/datasources";
 import { BASE_NODE, ChainId, ETH_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
-import { Address, Hex } from "viem";
+import { Address, Hex, isAddressEqual } from "viem";
 import {
   base,
   baseSepolia,
@@ -184,15 +184,12 @@ export const isKnownTokenIssuingContract = (
 /**
  * Returns a boolean indicating whether the provided ChainAddress objects are equal.
  *
- * @param address1 - The first ChainAddress to compare
- * @param address2 - The second ChainAddress to compare
+ * @param ca1 - The first ChainAddress to compare
+ * @param ca2 - The second ChainAddress to compare
  * @returns a boolean indicating whether the provided ChainAddress objects are equal
  */
-export const isEqualChainAddress = (address1: ChainAddress, address2: ChainAddress): boolean => {
-  return (
-    address1.chainId === address2.chainId &&
-    address1.address.toLowerCase() === address2.address.toLowerCase()
-  );
+export const isEqualChainAddress = (ca1: ChainAddress, ca2: ChainAddress): boolean => {
+  return ca1.chainId === ca2.chainId && isAddressEqual(ca1.address, ca2.address);
 };
 
 /**
