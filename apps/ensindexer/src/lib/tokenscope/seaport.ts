@@ -64,7 +64,7 @@ const getSupportedNFT = (
     contract,
     tokenId,
     domainId,
-  } satisfies SupportedNFT;
+  };
 };
 
 const getSupportedPayment = (
@@ -101,7 +101,7 @@ const getSupportedPayment = (
       currency: currencyId,
       amount: item.amount,
     },
-  } satisfies SupportedPayment;
+  };
 };
 
 interface SeaportItemExtractions {
@@ -123,26 +123,25 @@ const getSeaportItemExtractions = (
   chainId: ChainId,
   items: readonly (SeaportOfferItem | SeaportConsiderationItem)[],
 ): SeaportItemExtractions => {
-  let nfts: SupportedNFT[] = [];
-  let payments: SupportedPayment[] = [];
+  const extractions: SeaportItemExtractions = {
+    nfts: [],
+    payments: [],
+  };
 
   // each item is either a supported NFT, a supported payment, or unsupported
   for (const item of items) {
     const nft = getSupportedNFT(namespaceId, chainId, item);
     if (nft) {
-      nfts.push(nft);
+      extractions.nfts.push(nft);
     } else {
       const payment = getSupportedPayment(namespaceId, chainId, item);
       if (payment) {
-        payments.push(payment);
+        extractions.payments.push(payment);
       }
     }
   }
 
-  return {
-    nfts,
-    payments,
-  } satisfies SeaportItemExtractions;
+  return extractions;
 };
 
 const consolidateSupportedNFTs = (nfts: SupportedNFT[]): SupportedNFT | null => {
@@ -167,7 +166,7 @@ const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPa
       currency: uniqueCurrencies[0]!, // we verified above there's exactly one currency
       amount: totalAmount,
     },
-  } satisfies SupportedPayment;
+  };
 };
 
 /**
@@ -213,7 +212,7 @@ export const getSupportedSaleFromOrderFulfilledEvent = (
       payment: consolidatedOfferPayment,
       seller: offerer,
       buyer: recipient,
-    } satisfies SupportedSale;
+    };
   }
 
   // consideration is exactly 1 supported NFT and offer consolidates to 1 supported payment
@@ -230,7 +229,7 @@ export const getSupportedSaleFromOrderFulfilledEvent = (
       payment: consolidatedConsiderationPayment,
       seller: recipient,
       buyer: offerer,
-    } satisfies SupportedSale;
+    };
   }
 
   // otherwise, unsupported sale
