@@ -95,9 +95,9 @@ export const makeLabelSetIdSchema = (valueLabel: string) => {
  */
 export const makeLabelSetVersionSchema = (valueLabel: string) => {
   return z.coerce
-    .number({ error: `${valueLabel} must be a non-negative integer` })
-    .int({ error: `${valueLabel} must be a non-negative integer` })
-    .min(0, { error: `${valueLabel} must be a non-negative integer` });
+    .number({ error: `${valueLabel} must be an integer.` })
+    .int({ error: `${valueLabel} must be an integer.` })
+    .min(0, { error: `${valueLabel} must be a non-negative integer (>=0).` });
 };
 
 /**

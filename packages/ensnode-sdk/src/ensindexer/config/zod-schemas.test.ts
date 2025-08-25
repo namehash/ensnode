@@ -189,7 +189,7 @@ describe("ENSIndexer: Config", () => {
               labelSet: { ...validConfig.labelSet, labelSetVersion: "not-a-number" },
             }),
           ),
-        ).toContain("labelSet.labelSetVersion must be a non-negative integer");
+        ).toContain("labelSet.labelSetVersion must be an integer");
       });
     });
 

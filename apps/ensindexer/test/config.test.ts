@@ -592,7 +592,7 @@ describe("config", () => {
 
     it("throws an error when LABEL_SET_VERSION is not set", async () => {
       vi.stubEnv("LABEL_SET_VERSION", undefined);
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be a non-negative integer/);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
     });
 
     it("throws an error when LABEL_SET_VERSION is negative", async () => {
@@ -602,12 +602,12 @@ describe("config", () => {
 
     it("throws an error when LABEL_SET_VERSION is not an integer", async () => {
       vi.stubEnv("LABEL_SET_VERSION", "5.5");
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be a non-negative integer/);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
     });
 
     it("throws an error when LABEL_SET_VERSION is not a number", async () => {
       vi.stubEnv("LABEL_SET_VERSION", "not-a-number");
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be a non-negative integer/);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
     });
 
     it("accepts zero as a valid LABEL_SET_VERSION", async () => {
