@@ -67,7 +67,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
     echo "Preparing directories for download..."
     rm -rf "${FINAL_DATA_DIR}"/* # Ensure clean state if previous attempt failed mid-way
     mkdir -p "${FINAL_DATA_DIR}"
-    rm -rf "${DOWNLOAD_TEMP_DIR}/*" # Clean up temp dir from previous runs if any
+    rm -rf "${DOWNLOAD_TEMP_DIR}"/{*,.*} # Clean up temp dir from previous runs if any
     mkdir -p "${DOWNLOAD_TEMP_DIR}"
 
     # 3. Download the database archive
@@ -78,7 +78,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
         "${APP_DIR}/scripts/download-prebuilt-database.sh" "$DB_SCHEMA_VERSION" "$LABEL_SET_ID" "$LABEL_SET_VERSION"; then
       echo "Error: Failed to download database."
       ls -R "${DOWNLOAD_TEMP_DIR}" # List contents for debugging
-      rm -rf "${DOWNLOAD_TEMP_DIR}"
+      rm -rf "${DOWNLOAD_TEMP_DIR}"/{*,.*}
       exit 1
     fi
 
@@ -88,7 +88,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
     if [ ! -f "$DB_ARCHIVE_PATH" ]; then
         echo "Error: Expected database archive file not found at $DB_ARCHIVE_PATH after download attempt."
         ls -R "${DOWNLOAD_TEMP_DIR}"
-        rm -rf "${DOWNLOAD_TEMP_DIR}"
+        rm -rf "${DOWNLOAD_TEMP_DIR}"/{*,.*}
         exit 1
     fi
     echo "Database archive downloaded to: $DB_ARCHIVE_PATH"
@@ -98,7 +98,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
     if ! tar -xzf "${DB_ARCHIVE_PATH}" -C "${FINAL_DATA_DIR}" --strip-components=1; then
         echo "Error: Failed to extract database archive."
         rm -f "${DB_ARCHIVE_PATH}"
-        rm -rf "${DOWNLOAD_TEMP_DIR}"
+        rm -rf "${DOWNLOAD_TEMP_DIR}"/{*,.*}
         exit 1
     fi
     echo "Database archive extracted to ${FINAL_DATA_DIR}"
@@ -106,7 +106,7 @@ if [ ! -f "${MARKER_FILE}" ]; then
     # 5. Clean up downloaded archive and temporary directory
     echo "Cleaning up downloaded files..."
     rm -f "${DB_ARCHIVE_PATH}"
-    rm -rf "${DOWNLOAD_TEMP_DIR}"
+    rm -rf "${DOWNLOAD_TEMP_DIR}"/{*,.*}
     echo "Cleanup complete."
 
     # 6. Validate the newly extracted database
