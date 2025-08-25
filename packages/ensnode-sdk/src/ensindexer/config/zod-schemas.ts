@@ -96,70 +96,27 @@ export const makeLabelSetIdSchema = (valueLabel: string) => {
 export const makeLabelSetVersionSchema = (valueLabel: string) => {
   return z.coerce
     .number({ error: `${valueLabel} must be an integer.` })
-    .int({ error: `${valueLabel} must be an integer.` })
-    .min(0, { error: `${valueLabel} must be a non-negative integer (>=0).` });
-};
-
-/**
- * Makes a schema for parsing a label set.
- *
- * This schema allows for either both fields defined or both fields undefined, or label set ID defined but label set version undefined.
- *
- * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
- * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
- */
-export const makeLabelSetSchema = (valueLabel: string, directErrorMessages: boolean = false) => {
-  let valueLabellabelSetId = valueLabel;
-  let valueLabellabelSetVersion = valueLabel;
-  if (directErrorMessages) {
-    valueLabellabelSetId = "LABEL_SET_ID";
-    valueLabellabelSetVersion = "LABEL_SET_VERSION";
-  } else {
-    valueLabellabelSetId = valueLabel + ".labelSetId";
-    valueLabellabelSetVersion = valueLabel + ".labelSetVersion";
-  }
-  return z
-    .object({
-      labelSetId: makeLabelSetIdSchema(valueLabellabelSetId).optional(),
-      labelSetVersion: makeLabelSetVersionSchema(valueLabellabelSetVersion).optional(),
-    })
-    .refine(
-      (data) => {
-        // Either both defined or both undefined, or labelSetId defined but labelSetVersion undefined
-        return (
-          (data.labelSetId === undefined && data.labelSetVersion === undefined) ||
-          (data.labelSetId !== undefined && data.labelSetVersion === undefined) ||
-          (data.labelSetId !== undefined && data.labelSetVersion !== undefined)
-        );
-      },
-      {
-        message: `${valueLabel} must have either both fields defined or both fields undefined, or labelSetId defined but labelSetVersion undefined.`,
-      },
-    );
+    .pipe(makeNonNegativeIntegerSchema(valueLabel));
 };
 
 /**
  * Makes a schema for parsing a label set where both label set ID and label set version are required.
  *
  * @param valueLabel - The label to use in error messages (e.g., "Label set", "LABEL_SET")
- * @param directErrorMessages - If true, uses direct error messages instead of valueLabel prefix
  */
-export const makeFullyPinnedLabelSetSchema = (
-  valueLabel: string = "Label set",
-  directErrorMessages: boolean = false,
-) => {
-  let valueLabellabelSetId = valueLabel;
-  let valueLabellabelSetVersion = valueLabel;
-  if (directErrorMessages) {
-    valueLabellabelSetId = "LABEL_SET_ID";
-    valueLabellabelSetVersion = "LABEL_SET_VERSION";
+export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") => {
+  let valueLabelLabelSetId = valueLabel;
+  let valueLabelLabelSetVersion = valueLabel;
+  if (valueLabel == "LABEL_SET") {
+    valueLabelLabelSetId = "LABEL_SET_ID";
+    valueLabelLabelSetVersion = "LABEL_SET_VERSION";
   } else {
-    valueLabellabelSetId = valueLabel + ".labelSetId";
-    valueLabellabelSetVersion = valueLabel + ".labelSetVersion";
+    valueLabelLabelSetId = valueLabel + ".labelSetId";
+    valueLabelLabelSetVersion = valueLabel + ".labelSetVersion";
   }
   return z.object({
-    labelSetId: makeLabelSetIdSchema(valueLabellabelSetId),
-    labelSetVersion: makeLabelSetVersionSchema(valueLabellabelSetVersion),
+    labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),
+    labelSetVersion: makeLabelSetVersionSchema(valueLabelLabelSetVersion),
   });
 };
 

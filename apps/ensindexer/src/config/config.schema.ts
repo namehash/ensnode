@@ -125,7 +125,7 @@ const PortSchema = z.coerce
 
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
-const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET", true);
+const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
 
 const RpcConfigsSchema = z
   .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
