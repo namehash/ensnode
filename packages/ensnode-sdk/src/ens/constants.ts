@@ -4,6 +4,7 @@ import type { Node } from "./types";
 
 export const ROOT_NODE: Node = namehash("");
 export const ETH_NODE = namehash("eth");
+export const BASE_NODE = namehash("base.eth");
 
 /**
  * A set of nodes whose children are used for reverse resolution.

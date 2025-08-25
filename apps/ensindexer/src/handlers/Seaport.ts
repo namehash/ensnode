@@ -9,7 +9,7 @@ import {
   getDomainIdByTokenId,
   getSupportedCurrencies,
   isKnownTokenIssuingContract,
-} from "@ensnode/datasources";
+} from "@/lib/tokenscope-helpers";
 import { NameSoldInsert, TokenTypes } from "@ensnode/ensnode-schema";
 import { ChainId, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { Address, Hex, zeroAddress } from "viem";
@@ -197,7 +197,7 @@ function getSaleIndexable(
     paymentsInConsideration.length > 0
   ) {
     // Listing: NFT in offer, payment in consideration
-    nftItem = nftsInOffer[0];
+    nftItem = nftsInOffer[0]!;
     paymentItems = paymentsInConsideration;
     seller = offerer;
     buyer = recipient;
@@ -207,7 +207,7 @@ function getSaleIndexable(
     paymentsInOffer.length > 0
   ) {
     // Offer: payment in offer, NFT in consideration
-    nftItem = nftsInConsideration[0];
+    nftItem = nftsInConsideration[0]!;
     paymentItems = paymentsInOffer;
     seller = recipient;
     buyer = offerer;
@@ -228,7 +228,7 @@ function getSaleIndexable(
     return null; // Mixed currencies not supported
   }
 
-  const currencyAddress = paymentItems[0].token;
+  const currencyAddress = paymentItems[0]!.token;
   const currencySymbol = getCurrencySymbol(chainId, currencyAddress);
   if (!currencySymbol) {
     return null; // Unsupported currency
@@ -244,7 +244,15 @@ function getSaleIndexable(
   const contractAddress = nftItem.token;
   const tokenId = nftItem.identifier.toString();
   const tokenIdHex = uint256ToHex32(BigInt(tokenId));
-  const domainId = getDomainIdByTokenId(chainId, config.namespace, contractAddress, tokenIdHex);
+
+  // Get domain ID
+  let domainId;
+  try {
+    domainId = getDomainIdByTokenId(chainId, config.namespace, contractAddress, tokenIdHex);
+  } catch (e) {
+    // should we log here?
+    return null;
+  }
 
   return {
     ...sharedEventValues(context.chain.id, event),
