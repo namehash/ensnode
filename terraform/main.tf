@@ -136,6 +136,6 @@ module "ensindexer" {
   etherum_holesky_rpc_url = var.etherum_holesky_rpc_url
 
   # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
-  label_set_id      = var.ensindexer_label_set_id
-  label_set_version = var.ensindexer_label_set_version
+  ensindexer_label_set_id      = var.ensindexer_label_set_id
+  ensindexer_label_set_version = var.ensindexer_label_set_version
 }

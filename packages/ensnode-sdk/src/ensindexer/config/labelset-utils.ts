@@ -1,10 +1,10 @@
-import { parseNonNegativeInteger } from "./parsing";
 import {
   type EnsRainbowClientLabelSet,
   type EnsRainbowServerLabelSet,
   type LabelSetId,
   type LabelSetVersion,
-} from "./types";
+} from "../../ensrainbow";
+import { parseNonNegativeInteger } from "./parsing";
 
 /**
  * Builds a valid LabelSetId from a string.
