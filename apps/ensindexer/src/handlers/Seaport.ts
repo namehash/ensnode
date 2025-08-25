@@ -173,7 +173,6 @@ function isPaymentToken(item: OfferItem | ConsiderationItem): boolean {
  * and extracts the sale data if so.
  */
 function getSaleIndexable(
-  context: Context,
   event: SeaportOrderFulfilledEvent,
   chainId: ChainId,
 ): NameSoldInsert | null {
@@ -255,7 +254,7 @@ function getSaleIndexable(
   }
 
   return {
-    ...sharedEventValues(context.chain.id, event),
+    ...sharedEventValues(chainId, event),
     logIndex: event.log.logIndex,
     chainId,
     orderHash,
@@ -293,9 +292,7 @@ export async function handleOrderFulfilled({
   context: Context;
   event: SeaportOrderFulfilledEvent;
 }) {
-  const chainId = context.chain.id;
-
-  const indexableSale = getSaleIndexable(context, event, chainId);
+  const indexableSale = getSaleIndexable(event, context.chain.id);
   if (indexableSale) {
     await handleSale(context, indexableSale);
   }
