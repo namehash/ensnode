@@ -30,6 +30,7 @@ import { EthRegistrarController as linea_EthRegistrarController } from "./abis/l
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 
+import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
@@ -348,6 +349,17 @@ export default {
         abi: ResolverABI,
         address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
         startBlock: 9267966,
+      },
+    },
+  },
+
+  [DatasourceNames.Seaport]: {
+    chain: sepolia,
+    contracts: {
+      Seaport1_5: {
+        abi: Seaport1_5, // Seaport 1.5
+        address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+        startBlock: 3365529,
       },
     },
   },

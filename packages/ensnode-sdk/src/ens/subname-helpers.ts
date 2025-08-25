@@ -1,4 +1,4 @@
-import { Address, concat, isAddress, isHash, keccak256, toHex } from "viem";
+import { Address, Hex, concat, isAddress, isHash, keccak256, toHex } from "viem";
 
 import { labelhash } from "viem/ens";
 import { addrReverseLabel } from "./reverse-name";
@@ -60,7 +60,7 @@ export const maybeHealLabelByReverseAddress = ({
  * into Node or LabelHash, which is a common behavior in the ENS ecosystem.
  * (see NameWrapper, ETHRegistrarController)
  */
-export const uint256ToHex32 = (num: bigint) => toHex(num, { size: 32 });
+export const uint256ToHex32 = (num: bigint): Hex => toHex(num, { size: 32 });
 
 /**
  * These characters are prohibited in normalized ENS names per the ENSIP-15

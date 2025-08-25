@@ -8,7 +8,7 @@
  */
 import z from "zod/v4";
 import { ENSNamespaceIds } from "../ens";
-import type { BlockRef, ChainId, Datetime, Duration, UnixTimestamp } from "./types";
+import type { BlockRef, Datetime, Duration, UnixTimestamp } from "./types";
 
 /**
  * Zod `.check()` function input.

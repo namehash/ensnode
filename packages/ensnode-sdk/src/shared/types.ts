@@ -1,10 +1,7 @@
-/**
- * Chain ID
- *
- * Represents a unique identifier for a chain.
- * Guaranteed to be a positive integer.
- **/
-export type ChainId = number;
+import { ChainId } from "@ensnode/datasources";
+
+// re-export ChainId for backwards compatibility
+export { type ChainId };
 
 /**
  * Block Number
