@@ -14,7 +14,7 @@ locals {
     "HEAL_REVERSE_ADDRESSES"            = { value = var.heal_reverse_addresses },
 
     # Mainnet networks
-    "RPC_URL_1"                     = { value = var.etherum_mainnet_rpc_url },
+    "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_1"      = { value = local.rpc_request_rate_limit },
     "RPC_URL_8453"                  = { value = var.base_mainnet_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_8453"   = { value = local.rpc_request_rate_limit },
@@ -28,7 +28,7 @@ locals {
     "RPC_REQUEST_RATE_LIMIT_534352" = { value = local.rpc_request_rate_limit },
 
     # Sepolia networks
-    "RPC_URL_11155111"                = { value = var.etherum_sepolia_rpc_url },
+    "RPC_URL_11155111"                = { value = var.ethereum_sepolia_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_11155111" = { value = local.rpc_request_rate_limit },
     "RPC_URL_84532"                   = { value = var.base_sepolia_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_84532"    = { value = local.rpc_request_rate_limit },
@@ -42,7 +42,7 @@ locals {
     "RPC_REQUEST_RATE_LIMIT_534351"   = { value = local.rpc_request_rate_limit },
 
     # Holesky networks
-    "RPC_URL_17000"                = { value = var.etherum_holesky_rpc_url },
+    "RPC_URL_17000"                = { value = var.ethereum_holesky_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_17000" = { value = local.rpc_request_rate_limit },
   }
 }
