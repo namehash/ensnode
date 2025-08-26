@@ -1,6 +1,6 @@
 import React from "react";
 
-export const UnrecognizedIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const UnrecognizedChainIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="18"
     height="20"
