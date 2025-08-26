@@ -123,9 +123,7 @@ const knownCurrencyContracts: Record<ChainId, Record<CurrencyId, Address>> = {
  * @param chainId - The chain ID to get supported currency contracts for
  * @returns a record of currency ids to AccountIds for the given chain
  */
-const getSupportedCurrencyContractsForChain = (
-  chainId: ChainId,
-): Record<CurrencyId, AccountId> => {
+const getSupportedCurrencyContractsForChain = (chainId: ChainId): Record<CurrencyId, AccountId> => {
   let result = {} as Record<CurrencyId, AccountId>;
 
   const knownCurrencyContractsForChain = knownCurrencyContracts[chainId];
