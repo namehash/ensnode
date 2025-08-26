@@ -31,7 +31,7 @@ export const nameSales = onchainTable(
     transactionHash: t.hex().notNull(),
 
     /**
-     * The order hash of the sale order within contractAddress.
+     * The Seaport order hash.
      */
     orderHash: t.hex().notNull(),
 
@@ -43,12 +43,9 @@ export const nameSales = onchainTable(
     /**
      * The tokenId managed by contractAddress that was sold.
      *
-     * Combined with `chainId` and `contractAddress`, creates unique NFT identifier
-     * for the domain being transferred.
-     *
-     * Interpretation depends on 'tokenType':
-     * - ERC721: Unique token within contract
-     * - ERC1155: Token type identifier (multiple copies may exist)
+     * Interpretation depends on 'assetNamespace':
+     * - erc721: Unique token within contract
+     * - erc1155: Token type identifier (multiple copies may exist)
      */
     tokenId: t.bigint().notNull(),
 
