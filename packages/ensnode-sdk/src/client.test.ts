@@ -63,6 +63,7 @@ const EXAMPLE_CONFIG_RESPONSE = {
   databaseSchemaName: "alphaSchema0.31.0",
   healReverseAddresses: true,
   indexAdditionalResolverRecords: true,
+  replaceUnnormalized: true,
   isSubgraphCompatible: false,
   namespace: "mainnet",
   plugins: [

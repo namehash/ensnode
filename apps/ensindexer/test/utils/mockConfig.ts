@@ -20,6 +20,7 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   },
   healReverseAddresses: "true",
   indexAdditionalResolverRecords: "true",
+  replaceUnnormalized: "true",
   port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: {

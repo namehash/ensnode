@@ -138,6 +138,7 @@ describe("ENSIndexer: Config", () => {
           },
           healReverseAddresses: false,
           indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
           indexedChainIds: [1],
           isSubgraphCompatible: true,
           namespace: "mainnet" as const,

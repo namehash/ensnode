@@ -124,6 +124,18 @@ export interface ENSIndexerPublicConfig {
   indexAdditionalResolverRecords: boolean;
 
   /**
+   * Prevention of unnormalized ENS name values from being returned in API requests.
+   *
+   * When set to `false`, ensures full subgraph backwards compatibility by allowing unnormalized names to be returned.
+   * When set to `true`, guarantees certain nasty edge cases are impossible, including labels containing null bytes,
+   * full-stop characters (periods), or exotic unicode characters.
+   *
+   * Note that this does not prevent unnormalized names entirely - unnormalized names can still exist if labels are
+   * encoded labelhashes.
+   */
+  replaceUnnormalized: boolean;
+
+  /**
    * Indexed Chain IDs
    *
    * Includes the {@link ChainId} for each chain being indexed.

@@ -162,6 +162,7 @@ export function invariant_isSubgraphCompatibleRequirements(
       | "isSubgraphCompatible"
       | "healReverseAddresses"
       | "indexAdditionalResolverRecords"
+      | "replaceUnnormalized"
       | "labelSet"
     >
   >,
@@ -170,8 +171,8 @@ export function invariant_isSubgraphCompatibleRequirements(
 
   if (config.isSubgraphCompatible !== isSubgraphCompatible(config)) {
     const message = config.isSubgraphCompatible
-      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`
-      : `Both 'indexAdditionalResolverRecords' and 'healReverseAddresses' were set to 'false', the only active plugin was the '${PluginName.Subgraph}' plugin, and labelSet was {labelSetId: "subgraph", labelSetVersion: 0}. The 'isSubgraphCompatible' must be set to 'true'`;
+      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active, 'indexAdditionalResolverRecords', 'healReverseAddresses', and 'replaceUnnormalized' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`
+      : `'indexAdditionalResolverRecords', 'healReverseAddresses', and 'replaceUnnormalized' were set to 'false', the only active plugin was the '${PluginName.Subgraph}' plugin, and labelSet was {labelSetId: "subgraph", labelSetVersion: 0}. The 'isSubgraphCompatible' must be set to 'true'`;
 
     ctx.issues.push({
       code: "custom",
@@ -197,6 +198,7 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       indexAdditionalResolverRecords: z.boolean({
         error: `${valueLabel}.indexAdditionalResolverRecords`,
       }),
+      replaceUnnormalized: z.boolean({ error: `${valueLabel}.replaceUnnormalized` }),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),

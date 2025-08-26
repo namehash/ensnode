@@ -14,6 +14,7 @@ describe("ENSIndexer: Config helpers", () => {
         isSubgraphCompatible({
           healReverseAddresses: false,
           indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -25,6 +26,7 @@ describe("ENSIndexer: Config helpers", () => {
         isSubgraphCompatible({
           healReverseAddresses: false,
           indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
           plugins: [],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -34,6 +36,7 @@ describe("ENSIndexer: Config helpers", () => {
         isSubgraphCompatible({
           healReverseAddresses: false,
           indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph, PluginName.Lineanames],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -45,6 +48,7 @@ describe("ENSIndexer: Config helpers", () => {
         isSubgraphCompatible({
           healReverseAddresses: true,
           indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -56,6 +60,19 @@ describe("ENSIndexer: Config helpers", () => {
         isSubgraphCompatible({
           healReverseAddresses: false,
           indexAdditionalResolverRecords: true,
+          replaceUnnormalized: false,
+          plugins: [PluginName.Subgraph],
+          labelSet: subgraphCompatibleLabelSet,
+        }),
+      ).toBe(false);
+    });
+
+    it(`returns 'false' when 'replaceUnnormalized' is set to 'true'`, () => {
+      expect(
+        isSubgraphCompatible({
+          healReverseAddresses: false,
+          indexAdditionalResolverRecords: false,
+          replaceUnnormalized: true,
           plugins: [PluginName.Subgraph],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -67,6 +84,7 @@ describe("ENSIndexer: Config helpers", () => {
         isSubgraphCompatible({
           healReverseAddresses: false,
           indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph],
           labelSet: {
             labelSetId: "other-label-set",
@@ -81,6 +99,7 @@ describe("ENSIndexer: Config helpers", () => {
         isSubgraphCompatible({
           healReverseAddresses: false,
           indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph],
           labelSet: {
             labelSetId: "subgraph",

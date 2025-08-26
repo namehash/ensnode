@@ -20,6 +20,7 @@ export async function buildENSIndexerPublicConfig(
     labelSet: config.labelSet,
     healReverseAddresses: config.healReverseAddresses,
     indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
+    replaceUnnormalized: config.replaceUnnormalized,
     indexedChainIds: config.indexedChainIds,
     isSubgraphCompatible: config.isSubgraphCompatible,
     namespace: config.namespace,

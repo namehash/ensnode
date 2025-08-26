@@ -140,6 +140,19 @@ export interface ENSIndexerConfig {
   indexAdditionalResolverRecords: boolean;
 
   /**
+   * Prevents unnormalized ENS name values from being indexed or returned in API requests,
+   * defaulting to true (DEFAULT_REPLACE_UNNORMALIZED).
+   *
+   * If this is set to false, ENSIndexer may store and return names with unnormalized labels.
+   * If this is set to true, ENSIndexer will encoded unnormalized labels as encoded labelhashes,
+   * avoiding edge cases related to null bytes, full-stop characters (periods), or exotic unicode characters.
+   *
+   * Note that this does not prevent unnormalized names entirely — unnormalized names can still exist
+   * if labels are encoded labelhashes.
+   */
+  replaceUnnormalized: boolean;
+
+  /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
    *
    * Invariants:
@@ -256,6 +269,7 @@ export interface ENSIndexerEnvironment {
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;
+  replaceUnnormalized: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;

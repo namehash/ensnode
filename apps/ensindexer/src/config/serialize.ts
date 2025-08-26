@@ -69,6 +69,7 @@ export function serializeRedactedENSIndexerConfig(
     globalBlockrange: redactedConfig.globalBlockrange,
     healReverseAddresses: redactedConfig.healReverseAddresses,
     indexAdditionalResolverRecords: redactedConfig.indexAdditionalResolverRecords,
+    replaceUnnormalized: redactedConfig.replaceUnnormalized,
     indexedChainIds: serializeIndexedChainIds(redactedConfig.indexedChainIds),
     isSubgraphCompatible: redactedConfig.isSubgraphCompatible,
     namespace: redactedConfig.namespace,

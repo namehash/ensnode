@@ -493,6 +493,7 @@ describe("config", () => {
       vi.stubEnv("PLUGINS", "subgraph");
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
       vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
+      vi.stubEnv("REPLACE_UNNORMALIZED", "false");
       vi.stubEnv("LABEL_SET_ID", "subgraph");
       vi.stubEnv("LABEL_SET_VERSION", "0");
     });
@@ -518,6 +519,12 @@ describe("config", () => {
 
     it("is false when HEAL_REVERSE_ADDRESSES is true", async () => {
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
+      const config = await getConfig();
+      expect(config.isSubgraphCompatible).toBe(false);
+    });
+
+    it("is false when REPLACE_UNNORMALIZED is true", async () => {
+      vi.stubEnv("REPLACE_UNNORMALIZED", "true");
       const config = await getConfig();
       expect(config.isSubgraphCompatible).toBe(false);
     });

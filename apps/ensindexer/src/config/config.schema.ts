@@ -12,6 +12,7 @@ import {
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
   DEFAULT_NAMESPACE,
   DEFAULT_PORT,
+  DEFAULT_REPLACE_UNNORMALIZED,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 
@@ -116,6 +117,9 @@ const IndexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
   "INDEX_ADDITIONAL_RESOLVER_RECORDS",
 ).default(DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS);
 
+const ReplaceUnnormalizedSchema = makeEnvStringBoolSchema("REPLACE_UNNORMALIZED") //
+  .default(DEFAULT_REPLACE_UNNORMALIZED);
+
 const PortSchema = z.coerce
   .number({ error: "PORT must be an integer." })
   .int({ error: "PORT must be an integer." })
@@ -173,6 +177,7 @@ const ENSIndexerConfigSchema = z
     plugins: PluginsSchema,
     healReverseAddresses: HealReverseAddressesSchema,
     indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
+    replaceUnnormalized: ReplaceUnnormalizedSchema,
     port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,

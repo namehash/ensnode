@@ -18,6 +18,7 @@ describe("ENSIndexer: Config", () => {
         },
         healReverseAddresses: false,
         indexAdditionalResolverRecords: false,
+        replaceUnnormalized: false,
         indexedChainIds: new Set([1]),
         isSubgraphCompatible: true,
         namespace: "mainnet",
@@ -61,6 +62,7 @@ describe("ENSIndexer: Config", () => {
       },
       healReverseAddresses: false,
       indexAdditionalResolverRecords: false,
+      replaceUnnormalized: false,
       indexedChainIds: [1, 10, 8453],
       isSubgraphCompatible: true,
       namespace: "mainnet",
@@ -101,7 +103,7 @@ describe("ENSIndexer: Config", () => {
     });
 
     const errorMessage = `Cannot deserialize ENSIndexerPublicConfig:
-✖ 'isSubgraphCompatible' requires only the 'subgraph' plugin to be active, both 'indexAdditionalResolverRecords' and 'healReverseAddresses' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`;
+✖ 'isSubgraphCompatible' requires only the 'subgraph' plugin to be active, 'indexAdditionalResolverRecords', 'healReverseAddresses', and 'replaceUnnormalized' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`;
 
     it("can enforce invariants: broken subgraph-compatibility (healReverseAddresses = 'true')", () => {
       // arrange
@@ -122,6 +124,18 @@ describe("ENSIndexer: Config", () => {
 
       serializedConfig.isSubgraphCompatible = true;
       serializedConfig.indexAdditionalResolverRecords = true;
+
+      // act & assert
+      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(errorMessage);
+    });
+
+    it("can enforce invariants: broken subgraph-compatibility (replaceUnnormalized = 'true')", () => {
+      // arrange
+      const serializedConfig: SerializedENSIndexerPublicConfig =
+        structuredClone(correctSerializedConfig);
+
+      serializedConfig.isSubgraphCompatible = true;
+      serializedConfig.replaceUnnormalized = true;
 
       // act & assert
       expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(errorMessage);
