@@ -162,25 +162,6 @@ const getSupportedCurrencyContractsForNamespace = (
 };
 
 /**
- * Identifies if the provided AccountId is a supported currency contract in the specified namespace.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *  'ens-test-env')
- * @param contract - The AccountId of the contract to check
- * @returns a boolean indicating if the provided AccountId is a supported currency
- *          contract in the specified namespace
- */
-const isSupportedCurrencyContract = (
-  namespaceId: ENSNamespaceId,
-  contract: AccountId,
-): boolean => {
-  const supportedCurrencyContracts = getSupportedCurrencyContractsForNamespace(namespaceId);
-  return Object.values(supportedCurrencyContracts).some((supportedCurrencyContract) =>
-    accountIdEqual(supportedCurrencyContract, contract),
-  );
-};
-
-/**
  * Gets the currency id for the given contract in the specified namespace.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
