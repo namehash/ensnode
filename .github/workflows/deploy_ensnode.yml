@@ -49,21 +49,21 @@ jobs:
       TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID }}
       # RPC URLs
       # Mainnet
-      TF_VAR_etherum_mainnet_rpc_url:   ${{ secrets.ETH_MAINNET_RPC_URL }}
+      TF_VAR_ethereum_mainnet_rpc_url:   ${{ secrets.ETH_MAINNET_RPC_URL }}
       TF_VAR_base_mainnet_rpc_url:      ${{ secrets.BASE_MAINNET_RPC_URL }}
       TF_VAR_linea_mainnet_rpc_url:     ${{ secrets.LINEA_MAINNET_RPC_URL }}
       TF_VAR_optimism_mainnet_rpc_url:  ${{ secrets.OPTIMISM_MAINNET_RPC_URL }}
       TF_VAR_arbitrum_mainnet_rpc_url:  ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
       TF_VAR_scroll_mainnet_rpc_url:    ${{ secrets.SCROLL_MAINNET_RPC_URL }}
       # Sepolia
-      TF_VAR_etherum_sepolia_rpc_url:   ${{ secrets.ETH_SEPOLIA_RPC_URL }}
+      TF_VAR_ethereum_sepolia_rpc_url:   ${{ secrets.ETH_SEPOLIA_RPC_URL }}
       TF_VAR_base_sepolia_rpc_url:      ${{ secrets.BASE_SEPOLIA_RPC_URL }}
       TF_VAR_linea_sepolia_rpc_url:     ${{ secrets.LINEA_SEPOLIA_RPC_URL }}
       TF_VAR_optimism_sepolia_rpc_url:  ${{ secrets.OPTIMISM_SEPOLIA_RPC_URL }}
       TF_VAR_arbitrum_sepolia_rpc_url:  ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
       TF_VAR_scroll_sepolia_rpc_url:    ${{ secrets.SCROLL_SEPOLIA_RPC_URL }}
       # Holesky
-      TF_VAR_etherum_holesky_rpc_url:   ${{ secrets.ETH_HOLESKY_RPC_URL }}
+      TF_VAR_ethereum_holesky_rpc_url:   ${{ secrets.ETH_HOLESKY_RPC_URL }}
 
     steps:
       - name: Checkout repository

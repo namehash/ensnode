@@ -72,7 +72,7 @@ variable "index_additional_resolver_records" {
 }
 
 # Mainnet RPC URLs
-variable "etherum_mainnet_rpc_url" {
+variable "ethereum_mainnet_rpc_url" {
   type = string
 }
 
@@ -97,7 +97,7 @@ variable "scroll_mainnet_rpc_url" {
 }
 
 # Sepolia RPC URLs
-variable "etherum_sepolia_rpc_url" {
+variable "ethereum_sepolia_rpc_url" {
   type = string
 }
 
@@ -122,6 +122,6 @@ variable "scroll_sepolia_rpc_url" {
 }
 
 # Holesky RPC URLs
-variable "etherum_holesky_rpc_url" {
+variable "ethereum_holesky_rpc_url" {
   type = string
 }

@@ -1,8 +1,21 @@
+import { ArbitrumIcon } from "@/components/icons/ArbitrumIcon";
+import { ArbitrumTestnetIcon } from "@/components/icons/ArbitrumTestnetIcon";
+import { BaseIcon } from "@/components/icons/BaseIcon";
 import { BaseTestnetIcon } from "@/components/icons/BaseTestnetIcon";
+import { EthereumIcon } from "@/components/icons/EthereumIcon";
+import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
+import { EthereumTestnetIcon } from "@/components/icons/EthereumTestnetIcon";
+import { LineaIcon } from "@/components/icons/LineaIcon";
 import { LineaTestnetIcon } from "@/components/icons/LineaTestnetIcon";
+import { OptimismIcon } from "@/components/icons/OptimismIcon";
+import { OptimismTestnetIcon } from "@/components/icons/OptimismTestnetIcon";
+import { ScrollIcon } from "@/components/icons/ScrollIcon";
+import { ScrollTestnetIcon } from "@/components/icons/ScrollTestnetIcon";
+import { UnrecognizedChainIcon } from "@/components/icons/UnrecognizedChainIcon";
 import { ensTestEnv } from "@/lib/chains";
-import { useEffect } from "react";
 import {
+  arbitrum,
+  arbitrumSepolia,
   base,
   baseSepolia,
   holesky,
@@ -10,14 +23,11 @@ import {
   lineaSepolia,
   mainnet,
   optimism,
+  optimismSepolia,
+  scroll,
+  scrollSepolia,
   sepolia,
 } from "viem/chains";
-import { BaseIcon } from "../icons/BaseIcon";
-import { EthereumIcon } from "../icons/EthereumIcon";
-import { EthereumLocalIcon } from "../icons/EthereumLocalIcon";
-import { EthereumTestnetIcon } from "../icons/EthereumTestnetIcon";
-import { LineaIcon } from "../icons/LineaIcon";
-import { OptimismIcon } from "../icons/OptimismIcon";
 
 export interface ChainIconProps {
   chainId: number;
@@ -28,26 +38,32 @@ export interface ChainIconProps {
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
 const chainIcons = new Map<number, React.ReactNode>([
-  [mainnet.id, <EthereumIcon width={18} height={18} />],
-  [base.id, <BaseIcon width={18} height={18} />],
-  [sepolia.id, <EthereumTestnetIcon width={18} height={18} />],
-  [optimism.id, <OptimismIcon width={18} height={18} />],
-  [linea.id, <LineaIcon width={18} height={18} />],
-  [holesky.id, <EthereumTestnetIcon width={18} height={18} />],
-  [ensTestEnv.id, <EthereumLocalIcon width={18} height={18} />],
-  [baseSepolia.id, <BaseTestnetIcon width={18} height={18} />],
-  [lineaSepolia.id, <LineaTestnetIcon width={18} height={18} />],
+  // mainnet
+  [mainnet.id, <EthereumIcon width={20} height={20} />],
+  [base.id, <BaseIcon width={20} height={20} />],
+  [linea.id, <LineaIcon width={20} height={20} />],
+  [optimism.id, <OptimismIcon width={20} height={20} />],
+  [arbitrum.id, <ArbitrumIcon width={20} height={20} />],
+  [scroll.id, <ScrollIcon width={20} height={20} />],
+
+  // sepolia
+  [sepolia.id, <EthereumTestnetIcon width={20} height={20} />],
+  [baseSepolia.id, <BaseTestnetIcon width={20} height={20} />],
+  [lineaSepolia.id, <LineaTestnetIcon width={20} height={20} />],
+  [optimismSepolia.id, <OptimismTestnetIcon width={20} height={20} />],
+  [arbitrumSepolia.id, <ArbitrumTestnetIcon width={20} height={20} />],
+  [scrollSepolia.id, <ScrollTestnetIcon width={20} height={20} />],
+
+  // holesky
+  [holesky.id, <EthereumTestnetIcon width={20} height={20} />],
+
+  // ens-test-env
+  [ensTestEnv.id, <EthereumLocalIcon width={20} height={20} />],
 ]);
 
 /**
  * Renders an icon for the provided chain ID.
  */
 export function ChainIcon({ chainId }: ChainIconProps) {
-  useEffect(() => {
-    if (!chainIcons.has(chainId)) {
-      console.warn(`Chain ID "${chainId}" doesn't have an assigned icon`);
-    }
-  }, [chainId]);
-
-  return chainIcons.get(chainId) || chainIcons.get(mainnet.id);
+  return chainIcons.get(chainId) || <UnrecognizedChainIcon width={20} height={20} />;
 }

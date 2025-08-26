@@ -117,7 +117,7 @@ module "ensindexer" {
   database_url          = module.ensdb.internal_connection_string
 
   # Mainnet RPC URLs
-  etherum_mainnet_rpc_url  = var.etherum_mainnet_rpc_url
+  ethereum_mainnet_rpc_url = var.ethereum_mainnet_rpc_url
   base_mainnet_rpc_url     = var.base_mainnet_rpc_url
   linea_mainnet_rpc_url    = var.linea_mainnet_rpc_url
   optimism_mainnet_rpc_url = var.optimism_mainnet_rpc_url
@@ -125,7 +125,7 @@ module "ensindexer" {
   scroll_mainnet_rpc_url   = var.scroll_mainnet_rpc_url
 
   # Sepolia RPC URLs
-  etherum_sepolia_rpc_url  = var.etherum_sepolia_rpc_url
+  ethereum_sepolia_rpc_url = var.ethereum_sepolia_rpc_url
   base_sepolia_rpc_url     = var.base_sepolia_rpc_url
   linea_sepolia_rpc_url    = var.linea_sepolia_rpc_url
   optimism_sepolia_rpc_url = var.optimism_sepolia_rpc_url
@@ -133,7 +133,7 @@ module "ensindexer" {
   scroll_sepolia_rpc_url   = var.scroll_sepolia_rpc_url
 
   # Holesky RPC URLs
-  etherum_holesky_rpc_url = var.etherum_holesky_rpc_url
+  ethereum_holesky_rpc_url = var.ethereum_holesky_rpc_url
 
   # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
   ensindexer_label_set_id      = var.ensindexer_label_set_id

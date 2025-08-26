@@ -21,7 +21,7 @@ variable "ensdb_disk_size_gb" {
 }
 
 # Mainnet Variables
-variable "etherum_mainnet_rpc_url" {
+variable "ethereum_mainnet_rpc_url" {
   type = string
 }
 
@@ -46,7 +46,7 @@ variable "scroll_mainnet_rpc_url" {
 }
 
 # Sepolia Variables
-variable "etherum_sepolia_rpc_url" {
+variable "ethereum_sepolia_rpc_url" {
   type = string
 }
 
@@ -71,7 +71,7 @@ variable "scroll_sepolia_rpc_url" {
 }
 
 # Holesky Variables
-variable "etherum_holesky_rpc_url" {
+variable "ethereum_holesky_rpc_url" {
   type = string
 }
 
