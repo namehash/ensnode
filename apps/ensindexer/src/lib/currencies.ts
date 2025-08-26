@@ -108,6 +108,8 @@ const knownCurrencyContracts: Record<ChainId, Record<CurrencyId, Address>> = {
     [CurrencyIds.USDC]: "0x176211869cA2b568f2A7D4EE941E073a821EE1ff",
     [CurrencyIds.DAI]: "0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5",
   },
+
+  /** holesky namespace */
   [holesky.id]: {
     [CurrencyIds.ETH]: zeroAddress,
     [CurrencyIds.USDC]: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
@@ -121,7 +123,7 @@ const knownCurrencyContracts: Record<ChainId, Record<CurrencyId, Address>> = {
  * @param chainId - The chain ID to get supported currency contracts for
  * @returns a record of currency ids to AccountIds for the given chain
  */
-export const getSupportedCurrencyContractsForChain = (
+const getSupportedCurrencyContractsForChain = (
   chainId: ChainId,
 ): Record<CurrencyId, AccountId> => {
   let result = {} as Record<CurrencyId, AccountId>;
@@ -146,7 +148,7 @@ export const getSupportedCurrencyContractsForChain = (
  * 'ens-test-env')
  * @returns a record of currency ids to AccountIds for the given namespace
  */
-export const getSupportedCurrencyContractsForNamespace = (
+const getSupportedCurrencyContractsForNamespace = (
   namespaceId: ENSNamespaceId,
 ): Record<CurrencyId, AccountId> => {
   let result = {} as Record<CurrencyId, AccountId>;
@@ -168,7 +170,7 @@ export const getSupportedCurrencyContractsForNamespace = (
  * @returns a boolean indicating if the provided AccountId is a supported currency
  *          contract in the specified namespace
  */
-export const isSupportedCurrencyContract = (
+const isSupportedCurrencyContract = (
   namespaceId: ENSNamespaceId,
   contract: AccountId,
 ): boolean => {
