@@ -14,9 +14,9 @@ import { ChainId, uniq } from "@ensnode/ensnode-sdk";
 /**
  * Gets the supported TokenScope Asset Namespace for a given Seaport ItemType.
  *
- * @param itemType - The Seaport item type to get the supported TokenScope token type for
+ * @param itemType - The Seaport item type to get the supported TokenScope asset namespace for
  * @returns the supported TokenScope Asset Namespace for the given Seaport ItemType, or null
- *          if the ItemType is not supported.
+ *          if the Seaport item type is not supported.
  */
 const getAssetNamespace = (itemType: SeaportItemType): AssetNamespace | null => {
   switch (itemType) {
