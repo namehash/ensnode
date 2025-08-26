@@ -134,6 +134,14 @@ The query structure in Pattern 2 remains the same as Pattern 1, except the norma
 
 ## Unnormalized Labels
 
+:::note[Configuration Note]
+ENSNode's handling of unnormalized labels is controlled by the `REPLACE_UNNORMALIZED` configuration option:
+- `REPLACE_UNNORMALIZED=false` allows unnormalized labels to be returned (required for full ENS Subgraph compatibility)
+- `REPLACE_UNNORMALIZED=true` (default) encodes unnormalized labels as labelhashes, improving security
+
+For more details, see [Subgraph Compatibility](/docs/reference/subgraph-compatibility/#replace_unnormalized).
+:::
+
 ENSNode may return unnormalized labels associated with indexed names. It is important to note that **ENSNode clients should never attempt to normalize labels returned by ENSNode**. This is because when ENSNode returns an unnormalized label, that label is associated with a specific node that has been indexed. Normalizing an unnormalized label in this context would represent a different node.
 
 There are effectively two distinct query patterns to consider:
