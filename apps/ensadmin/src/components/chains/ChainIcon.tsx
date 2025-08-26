@@ -28,7 +28,7 @@ import { EthereumLocalIcon } from "../icons/EthereumLocalIcon";
 import { EthereumTestnetIcon } from "../icons/EthereumTestnetIcon";
 import { LineaIcon } from "../icons/LineaIcon";
 import { OptimismIcon } from "../icons/OptimismIcon";
-import { UnrecognizedIcon } from "../icons/UnrecognizedIcon";
+import { UnrecognizedChainIcon } from "../icons/UnrecognizedChainIcon";
 
 export interface ChainIconProps {
   chainId: number;
@@ -59,5 +59,5 @@ const chainIcons = new Map<number, React.ReactNode>([
  * Renders an icon for the provided chain ID.
  */
 export function ChainIcon({ chainId }: ChainIconProps) {
-  return chainIcons.get(chainId) || <UnrecognizedIcon width={20} height={20} />;
+  return chainIcons.get(chainId) || <UnrecognizedChainIcon width={20} height={20} />;
 }
