@@ -1,12 +1,18 @@
 import { ArbitrumIcon } from "@/components/icons/ArbitrumIcon";
 import { ArbitrumTestnetIcon } from "@/components/icons/ArbitrumTestnetIcon";
+import { BaseIcon } from "@/components/icons/BaseIcon";
 import { BaseTestnetIcon } from "@/components/icons/BaseTestnetIcon";
+import { EthereumIcon } from "@/components/icons/EthereumIcon";
+import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
+import { EthereumTestnetIcon } from "@/components/icons/EthereumTestnetIcon";
+import { LineaIcon } from "@/components/icons/LineaIcon";
 import { LineaTestnetIcon } from "@/components/icons/LineaTestnetIcon";
+import { OptimismIcon } from "@/components/icons/OptimismIcon";
 import { OptimismTestnetIcon } from "@/components/icons/OptimismTestnetIcon";
 import { ScrollIcon } from "@/components/icons/ScrollIcon";
 import { ScrollTestnetIcon } from "@/components/icons/ScrollTestnetIcon";
+import { UnrecognizedChainIcon } from "@/components/icons/UnrecognizedChainIcon";
 import { ensTestEnv } from "@/lib/chains";
-
 import {
   arbitrum,
   arbitrumSepolia,
@@ -22,13 +28,6 @@ import {
   scrollSepolia,
   sepolia,
 } from "viem/chains";
-import { BaseIcon } from "../icons/BaseIcon";
-import { EthereumIcon } from "../icons/EthereumIcon";
-import { EthereumLocalIcon } from "../icons/EthereumLocalIcon";
-import { EthereumTestnetIcon } from "../icons/EthereumTestnetIcon";
-import { LineaIcon } from "../icons/LineaIcon";
-import { OptimismIcon } from "../icons/OptimismIcon";
-import { UnrecognizedChainIcon } from "../icons/UnrecognizedChainIcon";
 
 export interface ChainIconProps {
   chainId: number;
@@ -39,7 +38,6 @@ export interface ChainIconProps {
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
 const chainIcons = new Map<number, React.ReactNode>([
-
   // mainnet
   [mainnet.id, <EthereumIcon width={20} height={20} />],
   [base.id, <BaseIcon width={20} height={20} />],
@@ -47,7 +45,7 @@ const chainIcons = new Map<number, React.ReactNode>([
   [optimism.id, <OptimismIcon width={20} height={20} />],
   [arbitrum.id, <ArbitrumIcon width={20} height={20} />],
   [scroll.id, <ScrollIcon width={20} height={20} />],
-  
+
   // sepolia
   [sepolia.id, <EthereumTestnetIcon width={20} height={20} />],
   [baseSepolia.id, <BaseTestnetIcon width={20} height={20} />],
