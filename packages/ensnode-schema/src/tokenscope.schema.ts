@@ -18,7 +18,7 @@ export const nameSales = onchainTable(
     /**
      * The block number on chainId where the sale occurred.
      */
-    blockNumber: t.integer().notNull(),
+    blockNumber: t.bigint().notNull(),
 
     /**
      * The log index position of the sale event within blockNumber.
@@ -104,7 +104,7 @@ export const nameSales = onchainTable(
     /**
      * Unix timestamp of the block timestamp when the sale occurred.
      */
-    timestamp: t.integer().notNull(),
+    timestamp: t.bigint().notNull(),
   }),
   (t) => ({
     idx_domainId: index().on(t.domainId),

@@ -30,22 +30,6 @@ export default function () {
     // building apps on TokenScope than supporting these more complex and uncommon cases.
     if (!sale) return;
 
-    // TODO: remove these invariants and just store as bigint like god intended
-    if (event.block.timestamp > BigInt(Number.MAX_SAFE_INTEGER)) {
-      throw new Error(
-        `Error building onchain event ref: block timestamp is too large: ${event.block.timestamp}`,
-      );
-    }
-
-    if (event.block.number > BigInt(Number.MAX_SAFE_INTEGER)) {
-      throw new Error(
-        `Error building onchain event ref: block number is too large: ${event.block.number}`,
-      );
-    }
-
-    const blockNumber = Number(event.block.number);
-    const timestamp = Number(event.block.timestamp);
-
     // upsert buyer and seller accounts
     await upsertAccount(context, sale.seller);
     await upsertAccount(context, sale.buyer);
@@ -54,7 +38,7 @@ export default function () {
     await context.db.insert(schema.nameSales).values({
       id: makeEventId(context.chain.id, event.block.number, event.log.logIndex),
       chainId: sale.nft.contract.chainId,
-      blockNumber,
+      blockNumber: event.block.number,
       logIndex: event.log.logIndex,
       transactionHash: event.transaction.hash,
       orderHash: sale.orderHash,
@@ -74,7 +58,7 @@ export default function () {
       seller: sale.seller,
       currency: sale.payment.price.currency,
       amount: sale.payment.price.amount,
-      timestamp,
+      timestamp: event.block.timestamp,
     });
   });
 }
