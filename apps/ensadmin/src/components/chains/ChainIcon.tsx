@@ -1,7 +1,7 @@
 import { BaseTestnetIcon } from "@/components/icons/BaseTestnetIcon";
 import { LineaTestnetIcon } from "@/components/icons/LineaTestnetIcon";
 import { ensTestEnv } from "@/lib/chains";
-import { useEffect } from "react";
+
 import {
   base,
   baseSepolia,
@@ -18,6 +18,7 @@ import { EthereumLocalIcon } from "../icons/EthereumLocalIcon";
 import { EthereumTestnetIcon } from "../icons/EthereumTestnetIcon";
 import { LineaIcon } from "../icons/LineaIcon";
 import { OptimismIcon } from "../icons/OptimismIcon";
+import { UnrecognizedIcon } from "../icons/UnrecognizedIcon";
 
 export interface ChainIconProps {
   chainId: number;
@@ -43,11 +44,5 @@ const chainIcons = new Map<number, React.ReactNode>([
  * Renders an icon for the provided chain ID.
  */
 export function ChainIcon({ chainId }: ChainIconProps) {
-  useEffect(() => {
-    if (!chainIcons.has(chainId)) {
-      console.warn(`Chain ID "${chainId}" doesn't have an assigned icon`);
-    }
-  }, [chainId]);
-
-  return chainIcons.get(chainId) || chainIcons.get(mainnet.id);
+  return chainIcons.get(chainId) || <UnrecognizedIcon width={18} height={18} />;
 }
