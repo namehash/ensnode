@@ -311,10 +311,15 @@ export function IndexingStatsShell({
           <span>Indexing Status</span>
 
           <Badge
-            className="uppercase text-xs leading-none"
+            className={cn(
+              "uppercase text-xs leading-none",
+              overallStatus === OverallIndexingStatusIds.IndexerError && "bg-red-600 text-white",
+            )}
             title={`Overall indexing status: ${overallStatus}`}
           >
-            {overallStatus}
+            {overallStatus === OverallIndexingStatusIds.IndexerError
+              ? "Indexer Error"
+              : overallStatus}
           </Badge>
         </CardTitle>
       </CardHeader>
