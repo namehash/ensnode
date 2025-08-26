@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
-import { AssetId, ChainId } from "caip";
+import { AssetId } from "caip";
 
 import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
@@ -46,10 +46,7 @@ export default function () {
       tokenId: sale.nft.tokenId,
       assetNamespace: sale.nft.assetNamespace,
       assetId: AssetId.format({
-        chainId: ChainId.format({
-          namespace: "eip155",
-          reference: sale.nft.contract.chainId.toString(),
-        }),
+        chainId: { namespace: "eip155", reference: sale.nft.contract.chainId.toString() },
         assetName: { namespace: sale.nft.assetNamespace, reference: sale.nft.contract.address },
         tokenId: uint256ToHex32(sale.nft.tokenId),
       }),

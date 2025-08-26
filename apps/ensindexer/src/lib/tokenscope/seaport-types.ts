@@ -9,7 +9,7 @@ import { Address, Hex } from "viem";
  *
  * @see https://github.com/ProjectOpenSea/seaport-js/blob/c4d4756c8000a7143fc1ed9a5aad71b444ae90b4/src/constants.ts#L89
  */
-export enum SeaportItemType {
+export enum ItemType {
   NATIVE = 0,
   ERC20 = 1,
   ERC721 = 2,
@@ -21,7 +21,7 @@ export enum SeaportItemType {
 /**
  * A Seaport OrderFulfilled Event from Ponder, semantically typed with descriptions.
  */
-export type SeaportOrderFulfilledEvent = EventWithArgs<{
+export type OrderFulfilledEvent = EventWithArgs<{
   /**
    * The unique hash identifier of the fulfilled order within Seaport.
    * Used to track and reference specific orders on-chain.
@@ -53,22 +53,22 @@ export type SeaportOrderFulfilledEvent = EventWithArgs<{
    * For listings: NFTs/tokens being sold
    * For offers: ETH/ERC20 tokens being offered as payment
    */
-  offer: readonly SeaportOfferItem[];
+  offer: readonly OfferItem[];
 
   /**
    * Array of items that the offerer expects to receive in return.
    * For listings: ETH/ERC20 tokens expected as payment
    * For offers: NFTs/tokens being requested in exchange
    */
-  consideration: readonly SeaportConsiderationItem[];
+  consideration: readonly ConsiderationItem[];
 }>;
 
-export type SeaportOfferItem = {
+export type OfferItem = {
   /**
    * The type of item in the offer.
    * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
    */
-  itemType: SeaportItemType;
+  itemType: ItemType;
 
   /**
    * The contract address of the token.
@@ -96,12 +96,12 @@ export type SeaportOfferItem = {
   amount: bigint;
 };
 
-export type SeaportConsiderationItem = {
+export type ConsiderationItem = {
   /**
    * The type of item in the consideration.
    * For example, ERC20, ERC721, ERC1155, or NATIVE (ETH)
    */
-  itemType: SeaportItemType;
+  itemType: ItemType;
 
   /**
    * The contract address of the token.

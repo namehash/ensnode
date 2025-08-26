@@ -2,10 +2,10 @@ import { CurrencyIds, getCurrencyIdForContract } from "@/lib/currencies";
 import { AssetNamespace, AssetNamespaces } from "@/lib/tokenscope/assets";
 import { SupportedNFT, SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
 import {
-  SeaportConsiderationItem,
-  SeaportItemType,
-  SeaportOfferItem,
-  SeaportOrderFulfilledEvent,
+  ConsiderationItem,
+  ItemType,
+  OfferItem,
+  OrderFulfilledEvent,
 } from "@/lib/tokenscope/seaport-types";
 import { getKnownTokenIssuer } from "@/lib/tokenscope/token-issuers";
 import { ENSNamespaceId } from "@ensnode/datasources";
@@ -18,11 +18,11 @@ import { ChainId, uniq } from "@ensnode/ensnode-sdk";
  * @returns the supported TokenScope Asset Namespace for the given Seaport ItemType, or null
  *          if the Seaport item type is not supported.
  */
-const getAssetNamespace = (itemType: SeaportItemType): AssetNamespace | null => {
+const getAssetNamespace = (itemType: ItemType): AssetNamespace | null => {
   switch (itemType) {
-    case SeaportItemType.ERC721:
+    case ItemType.ERC721:
       return AssetNamespaces.ERC721;
-    case SeaportItemType.ERC1155:
+    case ItemType.ERC1155:
       return AssetNamespaces.ERC1155;
     default:
       return null;
@@ -42,7 +42,7 @@ const getAssetNamespace = (itemType: SeaportItemType): AssetNamespace | null => 
 const getSupportedNFT = (
   namespaceId: ENSNamespaceId,
   chainId: ChainId,
-  item: SeaportOfferItem | SeaportConsiderationItem,
+  item: OfferItem | ConsiderationItem,
 ): SupportedNFT | null => {
   // validate as exactly 1 item
   if (item.amount !== 1n) return null;
@@ -73,7 +73,7 @@ const getSupportedNFT = (
 const getSupportedPayment = (
   namespaceId: ENSNamespaceId,
   chainId: ChainId,
-  item: SeaportOfferItem | SeaportConsiderationItem,
+  item: OfferItem | ConsiderationItem,
 ): SupportedPayment | null => {
   // validate that the item is a supported currency
   const currency = getCurrencyIdForContract(namespaceId, {
@@ -84,11 +84,11 @@ const getSupportedPayment = (
   if (!currency) return null; // Unsupported currency
 
   // validate the Seaport item type is supported and matches the currency
-  if (item.itemType === SeaportItemType.NATIVE) {
+  if (item.itemType === ItemType.NATIVE) {
     if (currency !== CurrencyIds.ETH) {
       return null; // Seaport item type doesn't match currency
     }
-  } else if (item.itemType === SeaportItemType.ERC20) {
+  } else if (item.itemType === ItemType.ERC20) {
     if (currency === CurrencyIds.ETH) {
       return null; // Seaport item type doesn't match currency
     }
@@ -124,7 +124,7 @@ interface SeaportItemExtractions {
 const getSeaportItemExtractions = (
   namespaceId: ENSNamespaceId,
   chainId: ChainId,
-  items: readonly (SeaportOfferItem | SeaportConsiderationItem)[],
+  items: readonly (OfferItem | ConsiderationItem)[],
 ): SeaportItemExtractions => {
   const extractions: SeaportItemExtractions = {
     nfts: [],
@@ -155,8 +155,7 @@ const consolidateSupportedNFTs = (nfts: SupportedNFT[]): SupportedNFT | null => 
 
 const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPayment | null => {
   // Get the set of distinct currencies in the payment
-  const paymentCurrencies = payments.map((payment) => payment.price.currency);
-  const uniqueCurrencies = uniq(paymentCurrencies);
+  const uniqueCurrencies = uniq(payments.map((payment) => payment.price.currency));
 
   // Either no payment or multiple payments in mixed currencies
   if (uniqueCurrencies.length !== 1) return null;
@@ -180,7 +179,7 @@ const consolidateSupportedPayments = (payments: SupportedPayment[]): SupportedPa
 export const getSupportedSaleFromOrderFulfilledEvent = (
   namespaceId: ENSNamespaceId,
   chainId: ChainId,
-  event: SeaportOrderFulfilledEvent,
+  event: OrderFulfilledEvent,
 ): SupportedSale | null => {
   const { offer, consideration, orderHash, offerer, recipient } = event.args;
 
