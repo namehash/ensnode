@@ -44,6 +44,9 @@ const getSupportedNFT = (
   chainId: ChainId,
   item: SeaportOfferItem | SeaportConsiderationItem,
 ): SupportedNFT | null => {
+  // validate as exactly 1 item
+  if (item.amount !== 1n) return null;
+
   // validate item as an ERC721/ERC1155 NFT
   const tokenType = getAssetNamespace(item.itemType);
   if (!tokenType) return null;
