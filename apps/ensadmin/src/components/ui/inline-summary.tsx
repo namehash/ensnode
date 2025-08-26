@@ -23,7 +23,7 @@ function InlineSummaryItem(props: InlineSummaryItemProps) {
   return (
     <li>
       <strong>{props.label}</strong>{" "}
-      <pre className="inline-block">{props.value ? props.value.toString() : "unknown"}</pre>
+      <pre className="inline-block">{props.value != null ? props.value.toString() : "unknown"}</pre>
     </li>
   );
 }
