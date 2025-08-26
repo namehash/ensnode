@@ -76,21 +76,21 @@ const getSupportedPayment = (
   item: SeaportOfferItem | SeaportConsiderationItem,
 ): SupportedPayment | null => {
   // validate that the item is a supported currency
-  const currencyId = getCurrencyIdForContract(namespaceId, {
+  const currency = getCurrencyIdForContract(namespaceId, {
     chainId,
     address: item.token,
   });
 
-  if (!currencyId) return null; // Unsupported currency
+  if (!currency) return null; // Unsupported currency
 
-  // validate the Seaport item type is supported and matches the currencyId
+  // validate the Seaport item type is supported and matches the currency
   if (item.itemType === SeaportItemType.NATIVE) {
-    if (currencyId !== CurrencyIds.ETH) {
-      return null; // Seaport item type doesn't match currencyId
+    if (currency !== CurrencyIds.ETH) {
+      return null; // Seaport item type doesn't match currency
     }
   } else if (item.itemType === SeaportItemType.ERC20) {
-    if (currencyId === CurrencyIds.ETH) {
-      return null; // Seaport item type doesn't match currencyId
+    if (currency === CurrencyIds.ETH) {
+      return null; // Seaport item type doesn't match currency
     }
   } else {
     // unsupported Seaport item type
@@ -101,7 +101,7 @@ const getSupportedPayment = (
 
   return {
     price: {
-      currency: currencyId,
+      currency,
       amount: item.amount,
     },
   };
