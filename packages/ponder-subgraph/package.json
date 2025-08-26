@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@escape.tech/graphql-armor-max-aliases": "^2.6.0",
-    "@escape.tech/graphql-armor-max-depth": "^2.4.0",
+    "@escape.tech/graphql-armor-max-depth": "^2.4.2",
     "@escape.tech/graphql-armor-max-tokens": "^2.5.0",
     "dataloader": "^2.2.3",
     "drizzle-orm": "catalog:",
