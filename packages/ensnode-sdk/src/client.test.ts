@@ -40,10 +40,14 @@ const EXAMPLE_RECORDS_RESPONSE = {
   },
 };
 
-const EXAMPLE_PRIMARY_NAME_RESPONSE = { name: EXAMPLE_NAME } satisfies ResolvePrimaryNameResponse;
+const EXAMPLE_PRIMARY_NAME_RESPONSE = {
+  name: EXAMPLE_NAME,
+  accelerationAttempted: false,
+} satisfies ResolvePrimaryNameResponse;
 
 const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
   names: { 1: EXAMPLE_NAME },
+  accelerationAttempted: false,
 } satisfies ResolvePrimaryNamesResponse;
 
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
@@ -51,6 +55,10 @@ const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 const EXAMPLE_CONFIG_RESPONSE = {
   ensAdminUrl: "https://admin.ensnode.io/",
   ensNodePublicUrl: "https://api.alpha.ensnode.io/",
+  labelSet: {
+    labelSetId: "subgraph",
+    labelSetVersion: 0,
+  },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
   databaseSchemaName: "alphaSchema0.31.0",
   healReverseAddresses: true,

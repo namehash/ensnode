@@ -15,7 +15,7 @@ interface ENSIndexerDependencyInfoProps {
 }
 
 export function ENSIndexerDependencyInfo({ ensIndexerConfig }: ENSIndexerDependencyInfoProps) {
-  const { dependencyInfo, plugins, namespace, databaseSchemaName } = ensIndexerConfig;
+  const { dependencyInfo, plugins, namespace, databaseSchemaName, labelSet } = ensIndexerConfig;
 
   return (
     <Card className="w-full">
@@ -52,6 +52,13 @@ export function ENSIndexerDependencyInfo({ ensIndexerConfig }: ENSIndexerDepende
                   { label: "ENS Namespace", value: namespace },
                   { label: "Activated Plugins", value: plugins },
                   { label: "Database Schema Name", value: databaseSchemaName },
+                ]}
+              />
+
+              <InlineSummary
+                items={[
+                  { label: "ENSRainbow Label Set ID", value: labelSet.labelSetId },
+                  { label: "ENSRainbow Label Set Version", value: labelSet.labelSetVersion },
                 ]}
               />
             </CardContent>

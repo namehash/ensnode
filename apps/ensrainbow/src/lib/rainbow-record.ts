@@ -1,10 +1,6 @@
 import { getErrorMessage } from "@/utils/error-utils";
 import { Label } from "@ensnode/ensnode-sdk";
-import {
-  type LabelSetVersion,
-  buildLabelSetVersion,
-  parseNonNegativeInteger,
-} from "@ensnode/ensrainbow-sdk";
+import { type LabelSetVersion, buildLabelSetVersion } from "@ensnode/ensnode-sdk";
 
 /**
  * A versioned rainbow record.

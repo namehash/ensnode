@@ -1,4 +1,10 @@
 import type { ENSNamespaceId } from "../../ens";
+import type {
+  EnsRainbowClientLabelSet,
+  EnsRainbowServerLabelSet,
+  LabelSetId,
+  LabelSetVersion,
+} from "../../ensrainbow";
 import type { ChainId } from "../../shared";
 
 /**
@@ -64,6 +70,11 @@ export interface ENSIndexerPublicConfig {
    * state about the ENSNode instance.
    */
   ensNodePublicUrl: URL;
+
+  /**
+   * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
+   */
+  labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write

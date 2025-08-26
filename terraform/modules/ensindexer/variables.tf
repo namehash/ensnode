@@ -45,6 +45,16 @@ variable "ensrainbow_url" {
   type = string
 }
 
+variable "ensindexer_label_set_id" {
+  type        = string
+  description = "The label set ID that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"
+}
+
+variable "ensindexer_label_set_version" {
+  type        = string
+  description = "The label set version that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., '0', '1')"
+}
+
 variable "plugins" {
   type = string
 }

@@ -6,12 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { renderMicroseconds } from "@/lib/time";
 import { getTraceDuration } from "@/lib/tracing";
 import { cn } from "@/lib/utils";
-import { ClientError, ProtocolTrace } from "@ensnode/ensnode-sdk";
+import {
+  AcceleratableResponse,
+  ClientError,
+  ProtocolTrace,
+  TraceableResponse,
+} from "@ensnode/ensnode-sdk";
 import { UseQueryResult } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 type QueryResult<K extends string> = UseQueryResult<
-  { [key in K]: unknown } & { trace?: ProtocolTrace }
+  { [key in K]: unknown } & AcceleratableResponse & TraceableResponse
 >;
 
 const renderTraceDuration = (trace: ProtocolTrace) => renderMicroseconds(getTraceDuration(trace));
@@ -27,10 +32,20 @@ export function RenderRequestsOutput<KEY extends string>({
   accelerated: QueryResult<KEY>;
   unaccelerated: QueryResult<KEY>;
 }) {
+  const [tab, setTab] = useState("accelerated");
+
   // TODO: produce a diff between accelerated/not-accelerated and display any differences
   const result = useMemo(() => {
+    if (tab === "accelerated" && accelerated.status === "success") {
+      return accelerated.data[dataKey];
+    }
+
+    if (tab === "unaccelerated" && unaccelerated.status === "success") {
+      return unaccelerated.data[dataKey];
+    }
+
     return accelerated.data?.[dataKey] || unaccelerated.data?.[dataKey];
-  }, [accelerated]);
+  }, [accelerated, unaccelerated, tab]);
 
   const someError = accelerated.error || unaccelerated.error;
 
@@ -81,7 +96,7 @@ export function RenderRequestsOutput<KEY extends string>({
           {(() => {
             if (someError) {
               return (
-                <CodeBlock className="rounded-lg">
+                <CodeBlock className="rounded-lg text-xs">
                   {JSON.stringify(
                     {
                       message: someError.message,
@@ -95,30 +110,50 @@ export function RenderRequestsOutput<KEY extends string>({
               );
             }
 
-            return <CodeBlock className="rounded-lg">{JSON.stringify(result, null, 2)}</CodeBlock>;
+            return (
+              <CodeBlock className="rounded-lg text-xs">
+                {JSON.stringify(result, null, 2)}
+              </CodeBlock>
+            );
           })()}
         </CardContent>
       </Card>
-      {(accelerated.data?.trace || unaccelerated.data?.trace) && (
-        <Tabs defaultValue="accelerated">
+      {!someError && (accelerated.data?.trace || unaccelerated.data?.trace) && (
+        <Tabs value={tab} onValueChange={setTab}>
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="flex flex-row items-center justify-between gap-4">
                 <span>Execution Trace</span>
-                {multipleDiff && (
-                  <span
-                    className={cn(
-                      "bg-muted py-1 px-2 rounded-lg text-sm",
-                      multipleDiff > MULTIPLE_THRESHOLD
-                        ? "text-green-500"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {multipleDiff > MULTIPLE_THRESHOLD
-                      ? `Acclerated request was ${multipleDiff.toFixed(2)}x faster.`
-                      : "Timings are more or less equivalent."}
-                  </span>
-                )}
+                {(() => {
+                  // if accelerated request was not actually accelerated, notify the user
+                  if (accelerated.data && !accelerated.data.accelerationAttempted) {
+                    return (
+                      <span className="bg-muted py-1 px-2 rounded-lg text-sm text-muted-foreground">
+                        ENSNode did not attempt to accelerate this request.
+                      </span>
+                    );
+                  }
+
+                  // it was accelerated, show diff
+                  if (multipleDiff) {
+                    return (
+                      <span
+                        className={cn(
+                          "bg-muted py-1 px-2 rounded-lg text-sm",
+                          multipleDiff > MULTIPLE_THRESHOLD
+                            ? "text-green-500"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        {multipleDiff > MULTIPLE_THRESHOLD
+                          ? `Acclerated request was ${multipleDiff.toFixed(2)}x faster.`
+                          : "Timings are more or less equivalent."}
+                      </span>
+                    );
+                  }
+
+                  return null;
+                })()}
                 <TabsList>
                   <TabsTrigger value="accelerated" className="flex flex-row gap-2">
                     <span>Accelerated</span>
@@ -150,13 +185,6 @@ export function RenderRequestsOutput<KEY extends string>({
                         </div>
                       );
                     }
-                    case "error": {
-                      return (
-                        <div className="h-64 w-full flex flex-col justify-center items-center p-8">
-                          <span className="text-muted-foreground">{accelerated.error.message}</span>
-                        </div>
-                      );
-                    }
                     case "success": {
                       if (accelerated.data.trace)
                         return <TraceRenderer trace={accelerated.data.trace} />;
@@ -174,15 +202,6 @@ export function RenderRequestsOutput<KEY extends string>({
                       return (
                         <div className="h-64 w-full flex flex-col justify-center items-center p-8">
                           <LoadingSpinner className="h-16 w-16" />
-                        </div>
-                      );
-                    }
-                    case "error": {
-                      return (
-                        <div className="h-64 w-full flex flex-col justify-center items-center p-8">
-                          <span className="text-muted-foreground">
-                            {unaccelerated.error.message}
-                          </span>
                         </div>
                       );
                     }

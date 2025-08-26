@@ -10,6 +10,10 @@ const environment = {
   namespace: process.env.NAMESPACE,
   plugins: process.env.PLUGINS,
   ensRainbowUrl: process.env.ENSRAINBOW_URL,
+  labelSet: {
+    labelSetId: process.env.LABEL_SET_ID,
+    labelSetVersion: process.env.LABEL_SET_VERSION,
+  },
   ensNodePublicUrl: process.env.ENSNODE_PUBLIC_URL,
   ensIndexerUrl: process.env.ENSINDEXER_URL,
   ensAdminUrl: process.env.ENSADMIN_URL,

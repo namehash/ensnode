@@ -70,6 +70,9 @@ jobs:
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSNODE_PUBLIC_URL: http://localhost:42069
           ENSINDEXER_URL: http://localhost:42069
+          # Label Set Configuration (REQUIRED)
+          LABEL_SET_ID: ens-test-env
+          LABEL_SET_VERSION: 0
         run: |
           chmod +x ./.github/scripts/run_ensindexer_healthcheck.sh
           ./.github/scripts/run_ensindexer_healthcheck.sh

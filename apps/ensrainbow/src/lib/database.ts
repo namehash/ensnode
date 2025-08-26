@@ -1,4 +1,3 @@
-import { labelHashToBytes } from "@ensnode/ensrainbow-sdk/label-utils";
 import { ClassicLevel } from "classic-level";
 import { ByteArray, Hex, labelhash } from "viem";
 
@@ -11,8 +10,9 @@ import {
   type LabelSetVersion,
   buildLabelSetId,
   buildLabelSetVersion,
+  labelHashToBytes,
   parseNonNegativeInteger,
-} from "@ensnode/ensrainbow-sdk";
+} from "@ensnode/ensnode-sdk";
 import {
   type VersionedRainbowRecord,
   buildEncodedVersionedRainbowRecord,

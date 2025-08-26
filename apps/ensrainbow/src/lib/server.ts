@@ -4,8 +4,6 @@ import {
   type EnsRainbowServerLabelSet,
   ErrorCode,
   StatusCode,
-  labelHashToBytes,
-  validateSupportedLabelSetAndVersion,
 } from "@ensnode/ensrainbow-sdk";
 import { ByteArray } from "viem";
 
@@ -13,7 +11,11 @@ import { ENSRainbowDB } from "@/lib/database";
 import { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
-import { LabelHash } from "@ensnode/ensnode-sdk";
+import {
+  LabelHash,
+  labelHashToBytes,
+  validateSupportedLabelSetAndVersion,
+} from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;

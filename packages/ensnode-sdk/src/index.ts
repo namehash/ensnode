@@ -1,5 +1,6 @@
 export * from "./ens";
 export * from "./ensindexer";
+export * from "./ensrainbow";
 export * from "./shared";
 export * from "./tracing";
 export * from "./client";
