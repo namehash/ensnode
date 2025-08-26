@@ -201,13 +201,13 @@ export const getSupportedSaleFromOrderFulfilledEvent = (
   if (
     consolidatedOfferNFT &&
     !consolidatedConsiderationNFT &&
-    consolidatedOfferPayment &&
-    !consolidatedConsiderationPayment
+    !consolidatedOfferPayment &&
+    consolidatedConsiderationPayment
   ) {
     return {
       orderHash,
       nft: consolidatedOfferNFT,
-      payment: consolidatedOfferPayment,
+      payment: consolidatedConsiderationPayment,
       seller: offerer,
       buyer: recipient,
     };
@@ -218,13 +218,13 @@ export const getSupportedSaleFromOrderFulfilledEvent = (
   if (
     !consolidatedOfferNFT &&
     consolidatedConsiderationNFT &&
-    !consolidatedOfferPayment &&
-    consolidatedConsiderationPayment
+    consolidatedOfferPayment &&
+    !consolidatedConsiderationPayment
   ) {
     return {
       orderHash,
       nft: consolidatedConsiderationNFT,
-      payment: consolidatedConsiderationPayment,
+      payment: consolidatedOfferPayment,
       seller: recipient,
       buyer: offerer,
     };
