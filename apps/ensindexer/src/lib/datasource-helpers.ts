@@ -22,18 +22,18 @@ export const getChainIdsInNamespace = (namespaceId: ENSNamespaceId): ChainId[] =
 };
 
 /**
- * Gets the AccountId of the requested contract for the specified namespace, datasource, and
+ * Gets the AccountId for the contract in the specified namespace, datasource, and
  * contract name, or undefined if it is not defined or is not a single AccountId.
  *
- * This is useful when you want to retrieve a single AccountId for an arbitrary contract
- * where it may or may not actually be defined.
+ * This is useful when you want to retrieve the AccountId for a contract by its name
+ * where it may or may not actually be defined for the given namespace and datasource.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  *                      'ens-test-env')
  * @param datasourceName - The name of the Datasource to search for contractName in
- * @param contractName - The name of the contract to retrieve the AccountId for
- * @returns The AccountId of the requested contract for the given namespace, datasource,
- *          and contract name, or undefined if it does not exist or is not a single AccountId
+ * @param contractName - The name of the contract to retrieve
+ * @returns The AccountId of the contract with the given namespace, datasource,
+ *          and contract name, or undefined if it is not found or is not a single AccountId
  */
 export const maybeGetDatasourceContract = (
   namespaceId: ENSNamespaceId,
@@ -43,11 +43,11 @@ export const maybeGetDatasourceContract = (
   const datasource = maybeGetDatasource(namespaceId, datasourceName);
   if (!datasource) return undefined;
 
-  const maybeAddress = datasource.contracts[contractName]?.address;
-  if (maybeAddress === undefined || Array.isArray(maybeAddress)) return undefined;
+  const address = datasource.contracts[contractName]?.address;
+  if (address === undefined || Array.isArray(address)) return undefined;
 
   return {
     chainId: datasource.chain.id,
-    address: maybeAddress,
+    address,
   };
 };
