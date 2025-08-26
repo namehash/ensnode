@@ -1,11 +1,8 @@
 import { ponder } from "ponder:registry";
-import { namehash } from "viem";
 
 import { handleRegistrationReferral, handleRenewalReferral } from "@/handlers/Referrals";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
-
-const ETH_NODE = namehash("eth");
+import { ETH_NODE, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 /**
  * Registers event handlers with Ponder.

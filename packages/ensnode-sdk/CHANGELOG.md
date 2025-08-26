@@ -1,5 +1,25 @@
 # @ensnode/ensnode-sdk
 
+## 0.34.0
+
+### Minor Changes
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Includes `latestSyncedBlock` field in `ChainIndexingBackfillStatus` data model.
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Extends `ENSNodeClient` with new methods: `.config()` and `.indexingStatus()`.
+
+### Patch Changes
+
+- [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set configuration support to ENSNode SDK
+
+  - Add label set configuration types to ENSIndexerConfig
+  - Update configuration serialization and deserialization
+  - Add Zod schema validation for label set configuration
+  - Update configuration conversion utilities and tests
+
+- Updated dependencies [[`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2)]:
+  - @ensnode/datasources@0.34.0
+
 ## 0.33.0
 
 ### Patch Changes

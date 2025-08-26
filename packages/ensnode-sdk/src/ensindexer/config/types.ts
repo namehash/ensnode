@@ -1,11 +1,7 @@
-import type { ENSNamespaceId } from "../../ens";
-import type {
-  EnsRainbowClientLabelSet,
-  EnsRainbowServerLabelSet,
-  LabelSetId,
-  LabelSetVersion,
-} from "../../ensrainbow";
-import type { ChainId } from "../../shared";
+import { ENSNamespaceId } from "@ensnode/datasources";
+
+import type { EnsRainbowClientLabelSet } from "../../ensrainbow";
+import { ChainId } from "../../shared";
 
 /**
  * A PluginName is a unique id for a 'plugin': we use the notion of
@@ -18,6 +14,7 @@ export enum PluginName {
   ThreeDNS = "threedns",
   ReverseResolvers = "reverse-resolvers",
   Referrals = "referrals",
+  TokenScope = "tokenscope",
 }
 
 /**
