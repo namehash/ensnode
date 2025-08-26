@@ -115,8 +115,8 @@ interface SeaportItemExtractions {
    *
    * Example cases include:
    * - Payments are being made in multiple currencies.
-   * - Multiple payments in the same currency, but where payment is for marketplace fees while
-   *   other payments are for the seller.
+   * - Multiple payments in the same currency, but where one payment is for marketplace fees while
+   *   another payment is for the seller.
    */
   payments: SupportedPayment[];
 }
