@@ -129,10 +129,8 @@ const getSupportedCurrencyContractsForChain = (chainId: ChainId): Record<Currenc
 };
 
 /**
- * Gets the currency id for the given contract in the specified namespace.
+ * Gets the currency id for the given contract
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- * 'ens-test-env')
  * @param contract - The AccountId of the contract to get the currency id for
  * @returns the currency id for the given contract in the specified namespace, or
  *          null if the contract is not a supported currency contract in the
