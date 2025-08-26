@@ -1,5 +1,42 @@
 # ensindexer
 
+## 0.34.0
+
+### Minor Changes
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Integrates `latestSyncedBlock` field in `ChainIndexingBackfillStatus` data model.
+
+- [#964](https://github.com/namehash/ensnode/pull/964) [`bc05198`](https://github.com/namehash/ensnode/commit/bc051988f47d45a2d1bf4bc0fe13d14eae678d41) Thanks [@shrugs](https://github.com/shrugs)! - Protocol Acceleration is now disabled if ENSIndexer is too far behind realtime (60s)
+
+- [#612](https://github.com/namehash/ensnode/pull/612) [`20322cd`](https://github.com/namehash/ensnode/commit/20322cdd0cccd2b14eb8789acd1f0bd42da5bc3b) Thanks [@djstrong](https://github.com/djstrong)! - Updated ENSIndexer for compatibility with ENSRainbow v2 data format. ENSIndexer can now leverage versioned label sets with label set IDs, enabling deterministic indexing results over time as the set of healable labels evolves.
+
+- [#970](https://github.com/namehash/ensnode/pull/970) [`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Initial launch of ENS TokenScope with support for indexing Seaport sales.
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Uses custom response codes for building Indexing Status API response.
+
+### Patch Changes
+
+- [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add LABEL_SET_ID and LABEL_SET_VERSION environment variables to ENSIndexer
+
+  - Add label set configuration to ENSIndexerConfig, SerializedENSIndexerConfig, and ENSIndexerPublicConfig
+  - Update indexing behavior dependencies to prevent starting with different label set configurations
+  - Add configuration schema validation and serialization support
+  - Enforce Ponder build id changes if configured label set changes
+
+- [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set configuration to Terraform infrastructure
+
+  - Add label_set_id and label_set_version variables to ENSIndexer Terraform module
+  - Update main Terraform configuration to support label set configuration
+  - Enhance deterministic label healing capabilities through infrastructure configuration
+
+- Updated dependencies [[`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa), [`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2)]:
+  - @ensnode/ensnode-sdk@0.34.0
+  - @ensnode/ensnode-schema@0.34.0
+  - @ensnode/datasources@0.34.0
+  - @ensnode/ensrainbow-sdk@0.34.0
+  - @ensnode/ponder-metadata@0.34.0
+  - @ensnode/ponder-subgraph@0.34.0
+
 ## 0.33.0
 
 ### Minor Changes
