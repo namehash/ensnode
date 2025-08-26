@@ -58,35 +58,35 @@ For the _normalized_ name `vitalik.eth`, its **node** is `0xee6c4522aab0003e8d14
 https://docs.ens.domains/resolution/names#namehash
 
 
-## labels, labelhash, labelhash function
+## Labels, LabelHashes, labelhash function
 
-A **label** is a human-readable string used as a segment of a **name** — i.e. `vitalik` and `eth` are the **labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_ or _unnormalized_, _known_ or _unknown_.
+A **Label** is a human-readable string used as a segment of a **name** — i.e. `vitalik` and `eth` are the **Labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_ or _unnormalized_, _known_ or _unknown_.
 
-In the ENS `Registry` contract, only the **name**'s **node** is registered on-chain. Because of this there is no guarantee that a registered **node** is composed of _normalized_ labels or that those labels are _known_. That is, when observing the `Registry` in isolation, the human-readable **labels** that make up a **name** are not available (either on-chain or off-chain). That said, in many cases the **labels** that make up a name can be made **known**: human-readable **labels** can be emitted by contracts (i.e. the `ETHRegistrarController` or the `NameWrapper`), and in other cases the human-readable **label** for a given **labelhash** can be determined via rainbow table lookups and other strategies.
+In the ENS `Registry` contract, only the **name**'s **node** is registered on-chain. Because of this there is no guarantee that a registered **node** is composed of _normalized_ Labels or that those Labels are _known_. That is, when observing the `Registry` in isolation, the human-readable **Labels** that make up a **name** are not available (either on-chain or off-chain). That said, in many cases the **Labels** that make up a name can be made **known**: human-readable **Labels** can be emitted by contracts (i.e. the `ETHRegistrarController` or the `NameWrapper`), and in other cases the human-readable **Label** for a given **LabelHash** can be determined via rainbow table lookups and other strategies.
 
 ### Rendering _Unknown_ Labels
 
-When rendering a **name**, one must take care to differentiate between an _unknown_ **label** (only identifiable by its 32-byte **labelhash**) and a _known_ **label** potentially composed of hex characters. To do so, the _known_ **label**'s **labelhash** is _encoded_ as `[{labelhash}]`. Examples are likely helpful:
+When rendering a **name**, one must take care to differentiate between an _unknown_ **Label** (only identifiable by its 32-byte **LabelHash**) and a _known_ **Label** potentially composed of hex characters. To do so, the _unknown_ **Label**'s **LabelHash** is _encoded_ as `[{LabelHash}]`. Examples are likely helpful:
 
-- `vitalik.eth` — a _normalized_ **name** w/ _normalized_ & _known_ labels
-- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth` — a **name** composed of two labels
-  1. an _unknown_ label (of unknown _normalization_): `0x731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
-  2. a _normalized_, _known_ label: `eth`
-- `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22.eth` — a _normalized_ **name** composed of two labels
-  1. a _normalized_, _known_ label (that just so happens to be a set of 64 literal hex characters): `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
-  2. a _normalized_, _known_ label: `eth`
+- `vitalik.eth` — a _normalized_ **name** w/ _normalized_ & _known_ Labels
+- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth` — a **name** composed of two Labels
+  1. an _unknown_ Label (of unknown _normalization_): `0x731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
+  2. a _normalized_, _known_ Label: `eth`
+- `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22.eth` — a _normalized_ **name** composed of two Labels
+  1. a _normalized_, _known_ Label (that just so happens to be a set of 64 literal hex characters): `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
+  2. a _normalized_, _known_ Label: `eth`
 
-## labelhash, labelhash function
+## LabelHash, labelhash function
 
-In this terminology reference, we say that the **labelhash** of a **label** is the 32-byte hashed result of calling the **labelhash function** with that **label** as input.
+In this terminology reference, we say that the **LabelHash** of a **Label** is the 32-byte hashed result of calling the **`labelhash` function** with that **Label** as input.
 
-That is, `0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc` is the **labelhash** of `vitalik`, which is the result of calling the **labelhash function** like so:
+That is, `0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc` is the **LabelHash** of `vitalik`, which is the result of calling the **`labelhash` function** like so:
 
 ```ts
-import { labelhash as _labelhash } from 'viem';
-const labelhash = _labelhash("vitalik");
+import { labelhash } from 'viem';
+const labelHash = labelhash("vitalik");
 ```
 
-:::caution[Labelhash Terminology Outside of this Reference]
+:::caution[LabelHash Terminology Outside of this Reference]
 Outside of this terminology reference & ENSNode, the word 'labelhash' may refer to either the function or the result of the function.
 :::
