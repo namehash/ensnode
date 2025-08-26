@@ -48,8 +48,8 @@ const getSupportedNFT = (
   if (item.amount !== 1n) return null;
 
   // validate item as an ERC721/ERC1155 NFT
-  const tokenType = getAssetNamespace(item.itemType);
-  if (!tokenType) return null;
+  const assetNamespace = getAssetNamespace(item.itemType);
+  if (!assetNamespace) return null;
 
   // validate that the token is a known token issuing contract
   const tokenIssuer = getKnownTokenIssuer(namespaceId, {
@@ -63,7 +63,7 @@ const getSupportedNFT = (
   const domainId = tokenIssuer.getDomainId(tokenId);
 
   return {
-    assetNamespace: tokenType,
+    assetNamespace,
     contract,
     tokenId,
     domainId,
