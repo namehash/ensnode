@@ -18,7 +18,7 @@ import {
  */
 export interface TokenIssuer {
   /**
-   * The ContractAddress of the token issuer contract.
+   * The AccountId of the token issuer contract.
    */
   contract: AccountId;
 
@@ -154,13 +154,13 @@ export const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[]
 };
 
 /**
- * Gets the known token issuer for the given ChainAddress in the specified namespace.
+ * Gets the known token issuer for the given contract in the specified namespace.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  *  'ens-test-env')
- * @param contract - The ChainAddress to get the known token issuer for
- * @returns the known token issuer for the given ChainAddress, or null
- *          if the ChainAddress is not a known token issuer in the specified namespace
+ * @param contract - The AccountId of the contract to get the known token issuer for
+ * @returns the known token issuer for the given contract, or null
+ *          if the contract is not a known token issuer in the specified namespace
  */
 export const getKnownTokenIssuer = (
   namespaceId: ENSNamespaceId,
@@ -175,7 +175,7 @@ export const getKnownTokenIssuer = (
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  *  'ens-test-env')
- * @param contract - The ChainAddress of the NFT contract
+ * @param contract - The AccountId of the NFT contract
  * @param tokenId - The tokenId of the NFT
  * @returns the domainId (Node) for ENS name associated with the NFT
  * @throws an error if the contract is not a known token issuing contract in the specified namespace

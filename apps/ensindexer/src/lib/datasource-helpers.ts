@@ -22,18 +22,18 @@ export const getChainIdsInNamespace = (namespaceId: ENSNamespaceId): ChainId[] =
 };
 
 /**
- * Gets the chain address for the specified namespace, datasource, and
- * contract name, or undefined if it is not defined or is not a single chain address.
+ * Gets the AccountId of the requested contract for the specified namespace, datasource, and
+ * contract name, or undefined if it is not defined or is not a single AccountId.
  *
- * This is useful when you want to retrieve a single ChainAddress for an arbitrary contract
+ * This is useful when you want to retrieve a single AccountId for an arbitrary contract
  * where it may or may not actually be defined.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  *                      'ens-test-env')
  * @param datasourceName - The name of the Datasource to search for contractName in
- * @param contractName - The name of the contract to retrieve the chain address for
- * @returns The ChainAddress for the given namespace, datasource, and contract
- *          name, or undefined if it does not exist or is not a single chain address
+ * @param contractName - The name of the contract to retrieve the AccountId for
+ * @returns The AccountId of the requested contract for the given namespace, datasource,
+ *          and contract name, or undefined if it does not exist or is not a single AccountId
  */
 export const maybeGetDatasourceContract = (
   namespaceId: ENSNamespaceId,
