@@ -71,13 +71,17 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
             <div className="flex items-center gap-1.5">
               <Clock size={16} className="text-blue-600" />
               <span className="text-sm font-medium">
-                Last indexed block on{" "}
+                Indexed through{" "}
                 <FormattedDate
                   date={omnichainIndexingCursorDate}
                   options={{
                     year: "numeric",
                     month: "short",
                     day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                    second: "numeric",
+                    hour12: true,
                   }}
                 />
               </span>
