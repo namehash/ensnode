@@ -169,32 +169,3 @@ export const getKnownTokenIssuer = (
   const tokenIssuers = getKnownTokenIssuers(namespaceId);
   return tokenIssuers.find((tokenIssuer) => accountIdEqual(tokenIssuer.contract, contract)) ?? null;
 };
-
-/**
- * Gets the domainId (Node) for a given NFT from contract with tokenId on the specified namespace.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *  'ens-test-env')
- * @param contract - The AccountId of the NFT contract
- * @param tokenId - The tokenId of the NFT
- * @returns the domainId (Node) for ENS name associated with the NFT
- * @throws an error if the contract is not a known token issuing contract in the specified namespace
- */
-export function getDomainIdByTokenId(
-  namespaceId: ENSNamespaceId,
-  contract: AccountId,
-  tokenId: TokenId,
-): Node {
-  const tokenIssuers = getKnownTokenIssuers(namespaceId);
-  const tokenIssuer = tokenIssuers.find((tokenIssuer) =>
-    accountIdEqual(tokenIssuer.contract, contract),
-  );
-
-  if (!tokenIssuer) {
-    throw new Error(
-      `The contract at address ${contract.address} on chain ${contract.chainId} is not a known token issuer in the ${namespaceId} namespace`,
-    );
-  }
-
-  return tokenIssuer.getDomainId(tokenId);
-}
