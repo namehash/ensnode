@@ -9,9 +9,7 @@ import {
   sepolia,
 } from "viem/chains";
 
-import { getChainIdsInNamespace } from "@/lib/datasource-helpers";
-import { ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
-import { AccountId, ChainId, accountIdEqual, uniq } from "@ensnode/ensnode-sdk";
+import { AccountId, ChainId, accountIdEqual } from "@ensnode/ensnode-sdk";
 import { Address, zeroAddress } from "viem";
 
 /**
@@ -39,13 +37,13 @@ export interface Price {
   amount: bigint;
 }
 
-export interface CurrencyConfig {
+export interface CurrencyInfo {
   id: CurrencyId;
   name: string;
   decimals: number;
 }
 
-const currencyConfigs: Record<CurrencyId, CurrencyConfig> = {
+const currencyInfo: Record<CurrencyId, CurrencyInfo> = {
   [CurrencyIds.ETH]: {
     id: CurrencyIds.ETH,
     name: "Ethereum",
@@ -63,13 +61,11 @@ const currencyConfigs: Record<CurrencyId, CurrencyConfig> = {
   },
 };
 
-export const getCurrencyConfig = (currencyId: CurrencyId): CurrencyConfig => {
-  return currencyConfigs[currencyId];
-};
+export const getCurrencyInfo = (currencyId: CurrencyId): CurrencyInfo => currencyInfo[currencyId];
 
 // NOTE: this mapping currently only considers the subset of chains where we have
 // supported token issuing contracts.
-const knownCurrencyContracts: Record<ChainId, Record<CurrencyId, Address>> = {
+const KNOWN_CURRENCY_CONTRACTS: Record<ChainId, Record<CurrencyId, Address>> = {
   /** mainnet namespace */
   [mainnet.id]: {
     [CurrencyIds.ETH]: zeroAddress,
@@ -118,45 +114,18 @@ const knownCurrencyContracts: Record<ChainId, Record<CurrencyId, Address>> = {
 } as const;
 
 /**
- * Gets the supported currency contracts for a given chain.
+ * Gets the supported currency contracts for a given chain as a Record<CurrencyId, AccountId>
  *
  * @param chainId - The chain ID to get supported currency contracts for
  * @returns a record of currency ids to AccountIds for the given chain
  */
 const getSupportedCurrencyContractsForChain = (chainId: ChainId): Record<CurrencyId, AccountId> => {
-  let result = {} as Record<CurrencyId, AccountId>;
-
-  const knownCurrencyContractsForChain = knownCurrencyContracts[chainId];
-  if (!knownCurrencyContractsForChain) return result;
-
-  for (const [currencyId, address] of Object.entries(knownCurrencyContractsForChain)) {
-    result[currencyId as CurrencyId] = {
-      address,
-      chainId,
-    } as AccountId;
-  }
-
-  return result;
-};
-
-/**
- * Gets the supported currency contracts for a given namespace.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- * 'ens-test-env')
- * @returns a record of currency ids to AccountIds for the given namespace
- */
-const getSupportedCurrencyContractsForNamespace = (
-  namespaceId: ENSNamespaceId,
-): Record<CurrencyId, AccountId> => {
-  let result = {} as Record<CurrencyId, AccountId>;
-  const chainIds = getChainIdsInNamespace(namespaceId);
-  for (const chainId of chainIds) {
-    const supportedCurrencyContractsForChain = getSupportedCurrencyContractsForChain(chainId);
-    result = { ...result, ...supportedCurrencyContractsForChain };
-  }
-
-  return result;
+  return Object.fromEntries(
+    Object.entries(KNOWN_CURRENCY_CONTRACTS[chainId] ?? {}).map(([currencyId, address]) => [
+      currencyId,
+      { chainId, address },
+    ]),
+  ) as Record<CurrencyId, AccountId>;
 };
 
 /**
@@ -169,19 +138,14 @@ const getSupportedCurrencyContractsForNamespace = (
  *          null if the contract is not a supported currency contract in the
  *          specified namespace
  */
-export const getCurrencyIdForContract = (
-  namespaceId: ENSNamespaceId,
-  contract: AccountId,
-): CurrencyId | null => {
-  const supportedCurrencyContracts = getSupportedCurrencyContractsForNamespace(namespaceId);
+export const getCurrencyIdForContract = (contract: AccountId): CurrencyId | null => {
+  const supportedCurrencyContracts = getSupportedCurrencyContractsForChain(contract.chainId);
 
-  for (const [currencyId, supportedCurrencyContract] of Object.entries(
-    supportedCurrencyContracts,
-  )) {
-    if (accountIdEqual(supportedCurrencyContract, contract)) {
-      return currencyId as CurrencyId;
-    }
-  }
+  const found = Object.entries(supportedCurrencyContracts).find(([, accountId]) =>
+    accountIdEqual(accountId, contract),
+  );
 
-  return null;
+  if (!found) return null;
+
+  return found[0] as CurrencyId;
 };

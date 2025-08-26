@@ -71,37 +71,29 @@ const getSupportedNFT = (
 };
 
 const getSupportedPayment = (
-  namespaceId: ENSNamespaceId,
   chainId: ChainId,
   item: OfferItem | ConsiderationItem,
 ): SupportedPayment | null => {
+  // only NATIVE and ERC20 Payments are supported at the moment
+  if (item.itemType !== ItemType.NATIVE && item.itemType !== ItemType.ERC20) return null;
+
   // validate that the item is a supported currency
-  const currency = getCurrencyIdForContract(namespaceId, {
-    chainId,
-    address: item.token,
-  });
+  const currencyId = getCurrencyIdForContract({ chainId, address: item.token });
+  if (!currencyId) return null;
 
-  if (!currency) return null; // Unsupported currency
+  // Sanity Check: if ItemType.NATIVE, the inferred Currency must be ETH
+  if (item.itemType === ItemType.NATIVE && currencyId !== CurrencyIds.ETH) return null;
 
-  // validate the Seaport item type is supported and matches the currency
-  if (item.itemType === ItemType.NATIVE) {
-    if (currency !== CurrencyIds.ETH) {
-      return null; // Seaport item type doesn't match currency
-    }
-  } else if (item.itemType === ItemType.ERC20) {
-    if (currency === CurrencyIds.ETH) {
-      return null; // Seaport item type doesn't match currency
-    }
-  } else {
-    // unsupported Seaport item type
-    return null;
-  }
+  // Sanity Check: if ItemType.ERC20, the inferred Currency must NOT be ETH
+  if (item.itemType === ItemType.ERC20 && currencyId === CurrencyIds.ETH) return null;
 
-  if (item.amount < 0n) return null; // Invalid amount
+  // Sanity Check: amount of currency must be >=0
+  if (item.amount < 0n) return null;
 
+  // finally, a valid, SupportedPayment
   return {
     price: {
-      currency,
+      currency: currencyId,
       amount: item.amount,
     },
   };
@@ -133,14 +125,18 @@ const getSeaportItemExtractions = (
 
   // each item is either a supported NFT, a supported payment, or unsupported
   for (const item of items) {
+    // if the item is an nft, push to nfts
     const nft = getSupportedNFT(namespaceId, chainId, item);
     if (nft) {
       extractions.nfts.push(nft);
-    } else {
-      const payment = getSupportedPayment(namespaceId, chainId, item);
-      if (payment) {
-        extractions.payments.push(payment);
-      }
+      continue;
+    }
+
+    // if the item is a payment, push to payments
+    const payment = getSupportedPayment(chainId, item);
+    if (payment) {
+      extractions.payments.push(payment);
+      continue;
     }
   }
 

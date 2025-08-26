@@ -7,21 +7,6 @@ import {
 import { AccountId, ChainId, uniq } from "@ensnode/ensnode-sdk";
 
 /**
- * Gets all the distinct chainIds used in the specified namespace.
- *
- * NOTE: This takes no consideration of which datasources are configured for indexing.
- *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- * 'ens-test-env')
- * @returns an array of distinct chainIds with datasources in the specified namespace
- */
-export const getChainIdsInNamespace = (namespaceId: ENSNamespaceId): ChainId[] => {
-  const namespace = getENSNamespace(namespaceId);
-  const chainIds = Object.values(namespace).map((datasource) => datasource.chain.id);
-  return uniq(chainIds);
-};
-
-/**
  * Gets the AccountId for the contract in the specified namespace, datasource, and
  * contract name, or undefined if it is not defined or is not a single AccountId.
  *
