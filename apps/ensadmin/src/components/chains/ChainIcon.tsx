@@ -39,20 +39,28 @@ export interface ChainIconProps {
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
 const chainIcons = new Map<number, React.ReactNode>([
+
+  // mainnet
   [mainnet.id, <EthereumIcon width={20} height={20} />],
   [base.id, <BaseIcon width={20} height={20} />],
-  [sepolia.id, <EthereumTestnetIcon width={20} height={20} />],
-  [optimism.id, <OptimismIcon width={20} height={20} />],
-  [optimismSepolia.id, <OptimismTestnetIcon width={20} height={20} />],
   [linea.id, <LineaIcon width={20} height={20} />],
-  [holesky.id, <EthereumTestnetIcon width={20} height={20} />],
-  [ensTestEnv.id, <EthereumLocalIcon width={20} height={20} />],
+  [optimism.id, <OptimismIcon width={20} height={20} />],
+  [arbitrum.id, <ArbitrumIcon width={20} height={20} />],
+  [scroll.id, <ScrollIcon width={20} height={20} />],
+  
+  // sepolia
+  [sepolia.id, <EthereumTestnetIcon width={20} height={20} />],
   [baseSepolia.id, <BaseTestnetIcon width={20} height={20} />],
   [lineaSepolia.id, <LineaTestnetIcon width={20} height={20} />],
-  [arbitrum.id, <ArbitrumIcon width={20} height={20} />],
+  [optimismSepolia.id, <OptimismTestnetIcon width={20} height={20} />],
   [arbitrumSepolia.id, <ArbitrumTestnetIcon width={20} height={20} />],
-  [scroll.id, <ScrollIcon width={20} height={20} />],
   [scrollSepolia.id, <ScrollTestnetIcon width={20} height={20} />],
+
+  // holesky
+  [holesky.id, <EthereumTestnetIcon width={20} height={20} />],
+
+  // ens-test-env
+  [ensTestEnv.id, <EthereumLocalIcon width={20} height={20} />],
 ]);
 
 /**
