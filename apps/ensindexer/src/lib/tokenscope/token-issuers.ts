@@ -37,7 +37,7 @@ export interface TokenIssuer {
  * @param tokenId - The tokenId to convert
  * @returns The Node of the tokenId
  */
-export const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
+const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
   return uint256ToHex32(tokenId);
 };
 
@@ -50,7 +50,7 @@ export const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
  * @param parentNode - the parent Node that the token issuing contract issues subnames under
  * @returns The Node of the tokenId issued under the parentNode
  */
-export const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: Node): Node => {
+const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: Node): Node => {
   const labelHash: LabelHash = uint256ToHex32(tokenId);
   return makeSubdomainNode(labelHash, parentNode);
 };
@@ -62,7 +62,7 @@ export const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: No
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
  * @returns an array of 0 or more known TokenIssuer for the specified namespace
  */
-export const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
+const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
   const ethBaseRegistrar = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.ENSRoot,
