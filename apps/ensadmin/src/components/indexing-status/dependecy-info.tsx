@@ -15,7 +15,8 @@ interface ENSIndexerDependencyInfoProps {
 }
 
 export function ENSIndexerDependencyInfo({ ensIndexerConfig }: ENSIndexerDependencyInfoProps) {
-  const { dependencyInfo, plugins, namespace, databaseSchemaName, labelSet } = ensIndexerConfig;
+  const { dependencyInfo, plugins, namespace, databaseSchemaName, labelSet, isSubgraphCompatible } =
+    ensIndexerConfig;
 
   return (
     <Card className="w-full">
@@ -52,6 +53,10 @@ export function ENSIndexerDependencyInfo({ ensIndexerConfig }: ENSIndexerDepende
                   { label: "ENS Namespace", value: namespace },
                   { label: "Activated Plugins", value: plugins },
                   { label: "Database Schema Name", value: databaseSchemaName },
+                  {
+                    label: "Subgraph Compatibility Mode?",
+                    value: isSubgraphCompatible ? "on" : "off",
+                  },
                 ]}
               />
 

@@ -28,10 +28,11 @@ const ponderConfig = activePlugins.reduce(
 (ponderConfig as any).indexingBehaviorDependencies = {
   healReverseAddresses: config.healReverseAddresses,
   indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
+  replaceUnnormalized: config.replaceUnnormalized,
   labelSet: config.labelSet,
 } satisfies Pick<
   ENSIndexerConfig,
-  "healReverseAddresses" | "indexAdditionalResolverRecords" | "labelSet"
+  "healReverseAddresses" | "indexAdditionalResolverRecords" | "replaceUnnormalized" | "labelSet"
 >;
 
 ////////
