@@ -16,6 +16,11 @@ export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespac
  */
 export type TokenId = bigint;
 
+/**
+ * A struct representing a NFT that is minted by a SupportedNFTIssuer.
+ *
+ * Any ERC1155 SupportedNFT we create is guaranteed to never have a balance > 1.
+ */
 export interface SupportedNFT {
   assetNamespace: AssetNamespace;
   contract: AccountId;

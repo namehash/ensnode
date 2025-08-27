@@ -89,7 +89,8 @@ export type OfferItem = {
   /**
    * The amount field has different meanings based on itemType:
    * - For ERC721: Always 1 (you can only transfer 1 unique NFT)
-   * - For ERC1155: The quantity of tokens with the specified identifier (for our purposes, always 1)
+   * - For ERC1155: The quantity of tokens with the specified identifier.
+   *   All ERC1155 SupportedNFTs we create must never have a balance or amount > 1.
    * - For ERC20: The amount of tokens (in wei/smallest unit)
    * - For NATIVE (ETH): The amount of ETH (in wei)
    */
@@ -123,6 +124,7 @@ export type ConsiderationItem = {
    * The amount field has different meanings based on itemType:
    * - For ERC721: Always 1 (you can only transfer 1 unique NFT)
    * - For ERC1155: The quantity of tokens with the specified identifier
+   *   All ERC1155 SupportedNFTs we create must never have a balance or amount > 1.
    * - For ERC20: The amount of tokens (in wei/smallest unit)
    * - For NATIVE (ETH): The amount of ETH (in wei)
    */

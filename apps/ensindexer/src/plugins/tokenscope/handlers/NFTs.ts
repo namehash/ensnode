@@ -7,7 +7,7 @@ import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { upsertAccount } from "@/lib/db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { AssetNamespaces, SupportedNFT, buildSupportedNFTAssetId } from "@/lib/tokenscope/assets";
-import { labelHashGeneratedTokenIdToNode } from "@/lib/tokenscope/token-issuers";
+import { labelHashGeneratedTokenIdToNode } from "@/lib/tokenscope/nft-issuers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { Address, isAddressEqual, zeroAddress } from "viem";
 

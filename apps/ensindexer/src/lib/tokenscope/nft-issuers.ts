@@ -1,5 +1,5 @@
 import { maybeGetDatasourceContract } from "@/lib/datasource-helpers";
-import { TokenId } from "@/lib/tokenscope/assets";
+import { AssetNamespace, AssetNamespaces, TokenId } from "@/lib/tokenscope/assets";
 import { DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
 import {
   AccountId,
@@ -14,16 +14,25 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 /**
- * A contract that issues tokenized ENS names.
+ * A contract that issues tokenized ENS names in a manner that is supported by
+ * TokenScope.
  */
-export interface TokenIssuer {
+export interface SupportedNFTIssuer {
   /**
-   * The AccountId of the token issuer contract.
+   * The CAIP-19 Asset Namespace of all the NFTs minted by the SupportedNFTIssuer.
+   */
+  assetNamespace: AssetNamespace;
+
+  /**
+   * The AccountId of the SupportedNFTIssuer contract.
+   *
+   * To qualify as a SupportedNFTIssuer, if the assetNamespace is `erc1155` the
+   * contract must never have a balance or amount > 1 for any tokenId.
    */
   contract: AccountId;
 
   /**
-   * Applies the token issuer contract's logic for converting from the token id
+   * Applies the SupportedNFTIssuer contract's logic for converting from the token id
    * representation of a domain to the domain id (Node) representation of a domain.
    */
   getDomainId: (tokenId: TokenId) => Node;
@@ -56,13 +65,12 @@ export const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: No
 };
 
 /**
- * Gets the contracts known to provide tokenized name ownership within the
- * specified namespace.
+ * Gets all the SupportedNFTIssuer for the specified namespace.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns an array of 0 or more known TokenIssuer for the specified namespace
+ * @returns an array of 0 or more SupportedNFTIssuer for the specified namespace
  */
-const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
+const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer[] => {
   const ethBaseRegistrar = maybeGetDatasourceContract(
     namespaceId,
     DatasourceNames.ENSRoot,
@@ -94,10 +102,11 @@ const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
     "BaseRegistrar",
   );
 
-  const result: TokenIssuer[] = [];
+  const result: SupportedNFTIssuer[] = [];
 
   if (ethBaseRegistrar) {
     result.push({
+      assetNamespace: AssetNamespaces.ERC721,
       contract: ethBaseRegistrar,
       getDomainId: (tokenId: TokenId): Node => {
         return labelHashGeneratedTokenIdToNode(tokenId, ETH_NODE);
@@ -107,6 +116,7 @@ const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
 
   if (nameWrapper) {
     result.push({
+      assetNamespace: AssetNamespaces.ERC1155,
       contract: nameWrapper,
       getDomainId: (tokenId: TokenId): Node => {
         return nameHashGeneratedTokenIdToNode(tokenId);
@@ -116,6 +126,7 @@ const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
 
   if (threeDnsBaseRegistrar) {
     result.push({
+      assetNamespace: AssetNamespaces.ERC1155,
       contract: threeDnsBaseRegistrar,
       getDomainId: (tokenId: TokenId): Node => {
         return nameHashGeneratedTokenIdToNode(tokenId);
@@ -125,6 +136,7 @@ const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
 
   if (threeDnsOptimismRegistrar) {
     result.push({
+      assetNamespace: AssetNamespaces.ERC1155,
       contract: threeDnsOptimismRegistrar,
       getDomainId: (tokenId: TokenId): Node => {
         return nameHashGeneratedTokenIdToNode(tokenId);
@@ -134,6 +146,7 @@ const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
 
   if (lineanamesRegistrar) {
     result.push({
+      assetNamespace: AssetNamespaces.ERC721,
       contract: lineanamesRegistrar,
       getDomainId: (tokenId: TokenId): Node => {
         return labelHashGeneratedTokenIdToNode(tokenId, LINEANAMES_NODE);
@@ -143,6 +156,7 @@ const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
 
   if (basenamesRegistrar) {
     result.push({
+      assetNamespace: AssetNamespaces.ERC721,
       contract: basenamesRegistrar,
       getDomainId: (tokenId: TokenId): Node => {
         return labelHashGeneratedTokenIdToNode(tokenId, BASENAMES_NODE);
@@ -154,18 +168,18 @@ const getKnownTokenIssuers = (namespaceId: ENSNamespaceId): TokenIssuer[] => {
 };
 
 /**
- * Gets the known token issuer for the given contract in the specified namespace.
+ * Gets the SupportedNFTIssuer for the given contract in the specified namespace.
  *
  * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
  *  'ens-test-env')
- * @param contract - The AccountId of the contract to get the known token issuer for
- * @returns the known token issuer for the given contract, or null
- *          if the contract is not a known token issuer in the specified namespace
+ * @param contract - The AccountId of the contract to get the SupportedNFTIssuer for
+ * @returns the SupportedNFTIssuer for the given contract, or null
+ *          if the contract is not a SupportedNFTIssuer in the specified namespace
  */
-export const getKnownTokenIssuer = (
+export const getSupportedNFTIssuer = (
   namespaceId: ENSNamespaceId,
   contract: AccountId,
-): TokenIssuer | null => {
-  const tokenIssuers = getKnownTokenIssuers(namespaceId);
-  return tokenIssuers.find((tokenIssuer) => accountIdEqual(tokenIssuer.contract, contract)) ?? null;
+): SupportedNFTIssuer | null => {
+  const nftIssuers = getSupportedNFTIssuers(namespaceId);
+  return nftIssuers.find((nftIssuer) => accountIdEqual(nftIssuer.contract, contract)) ?? null;
 };

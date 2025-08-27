@@ -43,9 +43,9 @@ export const nameSales = onchainTable(
     /**
      * The tokenId managed by contractAddress that was sold.
      *
-     * Interpretation depends on 'assetNamespace':
-     * - erc721: Unique token within contract
-     * - erc1155: Token type identifier (multiple copies may exist)
+     * In a general context (outside of TokenScope) ERC1155 NFTs may have
+     * multiple copies, however TokenScope guarantees that all indexed NFTs
+     * never have an amount / balance > 1.
      */
     tokenId: t.bigint().notNull(),
 
@@ -134,11 +134,12 @@ export const nameTokens = onchainTable(
      */
     contractAddress: t.hex().notNull(),
 
-    // TODO: For erc1155 this is Token type identifier (multiple copies may exist)
-    // but for tokenscope we want to guarantee the tokenId is unique for the
-    // chainId and contractAddress. Advice appreciated.
     /**
      * The tokenId of the token managed by contractAddress.
+     *
+     * In a general context (outside of TokenScope) ERC1155 NFTs may have
+     * multiple copies, however TokenScope guarantees that all indexed NFTs
+     * never have an amount / balance > 1.
      */
     tokenId: t.bigint().notNull(),
 
