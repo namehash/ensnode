@@ -125,6 +125,25 @@ export const nameTokens = onchainTable(
     id: t.text().primaryKey(),
 
     /**
+     * The namehash (Node) of the ENS name associated with the token.
+     * 
+     * An ENS name may have more than one distinct token across time. It is
+     * also possible for multiple distinct tokens for an ENS name to have
+     * a mintStatus of `minted` at the same time.
+     * 
+     * Examples include:
+     * - When a direct subname of .eth is wrapped by the NameWrapper. This state
+     *   has one minted token for the name managed by the BaseRegistrar (this
+     *   token will be owned by the NameWrapper) and another minted token for
+     *   the name managed by the NameWrapper (owned by the effective owner of
+     *   the name).
+     * - When a direct subname of .eth is wrapped by the NameWrapper and then
+     *   unwrapped. This state has one minted token (managed by the BaseRegistrar)
+     *   and another burned token (managed by the NameWrapper).
+     */
+    domainId: t.hex().notNull(),
+
+    /**
      * The chain that manages the token.
      */
     chainId: t.integer().notNull(),
@@ -149,11 +168,6 @@ export const nameTokens = onchainTable(
      * @see https://chainagnostic.org/CAIPs/caip-19
      */
     assetNamespace: t.text().notNull(),
-
-    /**
-     * The namehash (Node) of the ENS name associated with the token.
-     */
-    domainId: t.hex().notNull(),
 
     /**
      * The account that owns the token.
