@@ -29,7 +29,6 @@
   },
   "pnpm": {
     "overrides": {
-      "astro>devalue": "5.3.2",
       "@graphiql/react>@headlessui/react": "2.2.0",
       "@eslint/plugin-kit@<0.3.4": ">=0.3.4",
       "esbuild@<=0.24.2": ">=0.25.0",
