@@ -32,7 +32,11 @@ export const ext_primaryName = onchainTable(
     address: t.hex().notNull(),
     coinType: t.bigint().notNull(),
 
-    // NOTE: this is the sanitized name record value (see @/lib/sanitize-name-record)
+    /**
+     * Represents the ENSIP-19 Primary Name value for a given (address, coinType).
+     *
+     * The value of this field is guaranteed to be a non-empty-string normalized ENS name.
+     */
     name: t.text().notNull(),
   }),
   (t) => ({

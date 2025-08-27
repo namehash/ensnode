@@ -131,9 +131,13 @@ export const resolver = onchainTable(
     // NOTE: we avoid .notNull.default([]) to match subgraph behavior
     coinTypes: t.bigint().array(),
 
-    // NOTE(resolver-records): include the value of the reverse-resolution name() record
-    // https://docs.ens.domains/ensip/3
-    // NOTE: this is the sanitized name record value with  (see @/lib/sanitize-name-record)
+    /**
+     * Represents the value of the reverse-resolution (ENSIP-3) name() record.
+     *
+     * The value of this field is guaranteed to be either:
+     * a) null, representing an empty or invalid on-chain name record value, or
+     * b) a non-empty-string normalized ENS name.
+     */
     name: t.text(),
   }),
   (t) => ({

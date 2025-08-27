@@ -1,18 +1,15 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { makeKeyedResolverRecordId } from "@/lib/ids";
-import { stripNullBytes } from "@/lib/lib-helpers";
-import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
 import { getAddress, isAddress, zeroAddress } from "viem";
 
-export async function handleResolverNameUpdate(
-  context: Context,
-  resolverId: string,
-  name: string | null,
-) {
+import { makeKeyedResolverRecordId } from "@/lib/ids";
+import { stripNullBytes } from "@/lib/lib-helpers";
+import { validNameRecordOrNull } from "@ensnode/ensnode-sdk";
+
+export async function handleResolverNameUpdate(context: Context, resolverId: string, name: string) {
   await context.db
     .update(schema.resolver, { id: resolverId })
-    .set({ name: sanitizeNameRecordValue(name) });
+    .set({ name: validNameRecordOrNull(name) });
 }
 
 export async function handleResolverAddressRecordUpdate(
@@ -52,6 +49,7 @@ export async function handleResolverTextRecordUpdate(
   value: string | undefined | null,
 ) {
   // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event, nothing to do
+  // TODO: fetch the resolver value using ponder's cached publicClient
   if (value === undefined) return;
 
   // TODO(null-bytes): store null bytes correctly
@@ -59,19 +57,16 @@ export async function handleResolverTextRecordUpdate(
 
   const recordId = makeKeyedResolverRecordId(resolverId, sanitizedKey);
 
+  // sanitize the incoming text record value by stripping null bytes
+  const sanitizedValue = value ? stripNullBytes(value) : value;
+
   // consider this a deletion iff value is null or is empty string
-  const isDeletion = value === null || value === "";
+  const isDeletion = sanitizedValue === null || sanitizedValue === "";
   if (isDeletion) {
     // delete
     await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
   } else {
     // upsert
-    // if no sanitized value to index, don't create a record
-    // TODO(null-bytes): represent null bytes correctly or stripNullBytes and store them anyway
-    //  but that's not technically correct, so idk
-    const sanitizedValue = stripNullBytes(value);
-    if (!sanitizedValue) return;
-
     await context.db
       .insert(schema.ext_resolverTextRecords)
       // create a new text record entity

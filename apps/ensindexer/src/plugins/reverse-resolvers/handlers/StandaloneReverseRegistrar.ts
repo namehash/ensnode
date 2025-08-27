@@ -2,9 +2,12 @@ import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import config from "@/config";
 import { makePrimaryNameId } from "@/lib/ids";
-import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
 import { getENSRootChainId } from "@ensnode/datasources";
-import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
+import {
+  DEFAULT_EVM_COIN_TYPE,
+  evmChainIdToCoinType,
+  validNameRecordOrNull,
+} from "@ensnode/ensnode-sdk";
 
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts. These contracts manage
@@ -22,9 +25,11 @@ export default function () {
         : evmChainIdToCoinType(context.chain.id);
 
     const id = makePrimaryNameId(address, coinType);
-    const name = sanitizeNameRecordValue(_name);
 
-    // empty string is deletion
+    // enforce that the name record value emitted in the event is a valid name record (or null)
+    const name = validNameRecordOrNull(_name);
+
+    // if the coerced value is null, consider it a deletion
     const isDeletion = name === null;
     if (isDeletion) {
       // delete
