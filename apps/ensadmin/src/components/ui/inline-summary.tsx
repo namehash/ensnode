@@ -20,10 +20,10 @@ interface InlineSummaryItemProps {
 }
 
 function InlineSummaryItem(props: InlineSummaryItemProps) {
+  const propValue = props.value?.toString() ?? "unknown";
   return (
     <li>
-      <strong>{props.label}</strong>{" "}
-      <pre className="inline-block">{props.value ? props.value.toString() : "unknown"}</pre>
+      <strong>{props.label}</strong> <pre className="inline-block">{propValue}</pre>
     </li>
   );
 }

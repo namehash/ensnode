@@ -1,5 +1,11 @@
 # @ensnode/ens-deployments
 
+## 0.34.0
+
+### Minor Changes
+
+- [#970](https://github.com/namehash/ensnode/pull/970) [`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Initial launch of ENS TokenScope with support for indexing Seaport sales.
+
 ## 0.33.0
 
 ### Minor Changes
