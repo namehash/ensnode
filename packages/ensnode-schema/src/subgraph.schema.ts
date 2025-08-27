@@ -181,7 +181,17 @@ export const registration = onchainTable(
     cost: t.bigint(),
     // The account that registered the domain
     registrantId: t.hex().notNull(),
-    // The human-readable label name associated with the domain registration
+    /**
+     * The human-readable Label associated with the domain registration.
+     *
+     * This value is guaranteed to be either:
+     * a) null, representing an invalid label (i.e. empty string)
+     * b) a non-empty-string, normalized label, or
+     * c) an Encoded LabelHash
+     *
+     * TODO: can Registration.labelName ever be invalid? if so, the type of this field will always be
+     * null | string because subgraph type constraints but in practice labelName would never be null.
+     */
     labelName: t.text(),
   }),
   (t) => ({
@@ -224,9 +234,13 @@ export const wrappedDomain = onchainTable(
     ownerId: t.hex().notNull(),
     /**
      * The name of the wrapped domain. This value is guaranteed to be either:
-     * a) null, // TODO: can NameWrapper emit invalid dns-encoded names?
+     * a) null, representing an invalid Name emitted by the NameWrapper
      * b) a Name consisting entirely of Labels that are either normalized or represented as
      *    Encoded LabelHashes.
+     *
+     * TODO: can NameWrapper even emit invalid dns-encoded names? if so, the type of this must be null
+     * because the name is set in a later transaction than the creation BUT in practice it would
+     * never be null.
      */
     name: t.text(),
   }),

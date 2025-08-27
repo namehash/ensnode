@@ -8,8 +8,10 @@ import {
   PluginName,
   isLabelIndexable,
   makeSubdomainNode,
+  validLabelOrNull,
 } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import { handleNewOwner } from "@/handlers/Registry";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
@@ -41,8 +43,21 @@ export const makeRegistrarHandlers = ({
     labelHash: LabelHash,
     cost: bigint,
   ) {
-    // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
-    if (!isLabelIndexable(label)) return;
+    if (!config.replaceUnnormalized) {
+      // NOTE(replace-unnormalized): here we implement the legacy behavior:
+      // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
+      if (!isLabelIndexable(label)) return;
+    } else {
+      // NOTE(replace-unnormalized): here we coerce the provided label into either:
+      // a) null, b) a normalized label, or c) an encoded labelHash
+      const _label = validLabelOrNull(label);
+
+      // if the label is invalid, we no-op as well, similar to legacy behavior
+      if (_label === null) return;
+
+      // otherwise, set the label var to the valid label and continue as normal
+      label = _label;
+    }
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });

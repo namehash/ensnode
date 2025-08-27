@@ -8,6 +8,8 @@ import {
   type Node,
   isLabelIndexable,
   makeSubdomainNode,
+  validLabelOrNull,
+  validNameRecordOrNull,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -200,26 +202,29 @@ export async function handleRegistrationCreated({
 
   await upsertAccount(context, registrant);
 
-  const [label, name] = decodeDNSPacketBytes(hexToBytes(fqdn));
+  const [_label, _name] = decodeDNSPacketBytes(hexToBytes(fqdn));
 
   // Invariant: ThreeDNS always emits a valid DNS Packet
-  if (!label || !name) {
+  if (!_label || !_name) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Expected valid DNSPacketBytes: "${fqdn}"`);
+    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
   }
 
-  // Invariant: ThreeDNS validates that labels only use alphanumeric characters and hypens
+  // NOTE(replace-unnormalized): this is redundant because we know ThreeDNS always emits labels with
+  // alphanumeric characters and hypens, which always results in a valid label and name, but we
+  // explicitly enforce this behavior here for consistency.
+  //
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  if (!isLabelIndexable(label)) {
-    console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Expected indexable label, got "${label}"`);
+  const name = validNameRecordOrNull(_name);
+  const label = validLabelOrNull(_label);
+  if (!label || !name) {
+    throw new Error(`Invariant: expected valid name record in DNSPacketBytes: "${fqdn}"`);
   }
 
-  // Invariant: >2LDs never emit RegistrationCreated
-  // TODO: is this invariant exactly correct? it seems to be, but unclear
+  // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
   if (name.split(".").length > 2) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`>2LD emitted RegistrationCreated: ${name}`);
+    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${name}`);
   }
 
   const labelHash = labelhash(label);
