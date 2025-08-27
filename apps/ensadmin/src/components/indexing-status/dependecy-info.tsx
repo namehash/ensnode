@@ -54,8 +54,8 @@ export function ENSIndexerDependencyInfo({ ensIndexerConfig }: ENSIndexerDepende
                   { label: "Activated Plugins", value: plugins },
                   { label: "Database Schema Name", value: databaseSchemaName },
                   {
-                    label: "Subgraph Compatibility Mode?",
-                    value: isSubgraphCompatible ? "on" : "off",
+                    label: "Subgraph Compatible?",
+                    value: isSubgraphCompatible ? "yes" : "no",
                   },
                 ]}
               />
