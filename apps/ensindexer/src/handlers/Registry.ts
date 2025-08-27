@@ -194,7 +194,8 @@ export const handleNewOwner =
         healedLabel = await labelByLabelHash(labelHash);
       }
 
-      // ensure we have a valid label, falling back to the known labelHash that was emitted otherwise
+      // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
+      // that was emitted otherwise
       const label = validLabelOrNull(healedLabel) ?? encodeLabelHash(labelHash);
 
       // to construct `Domain.name` use the parent's Name and the valid Label

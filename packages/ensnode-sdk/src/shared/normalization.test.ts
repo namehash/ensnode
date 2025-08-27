@@ -17,6 +17,7 @@ const VALID_LABELS = [
 ];
 
 const INVALID_LABELS = [
+  null,
   "", // Empty string
 ];
 

@@ -8,7 +8,7 @@ import {
   encodeLabelHash,
   makeSubdomainNode,
   validLabelOrNull,
-  validNameRecordOrNull,
+  validNameOrNull,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -204,22 +204,18 @@ export async function handleRegistrationCreated({
   await upsertAccount(context, registrant);
 
   const [_label, _name] = decodeDNSPacketBytes(hexToBytes(fqdn));
+  const name = validNameOrNull(_name);
+  const label = validLabelOrNull(_label);
 
-  // Invariant: ThreeDNS always emits a valid DNS Packet
-  if (!_label || !_name) {
-    console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
-  }
-
+  // Invariant: ThreeDNS always emits a valid DNS Packet and valid label/name
   // NOTE(replace-unnormalized): this is redundant because we know ThreeDNS always emits labels with
   // alphanumeric characters and hypens, which always results in a valid label and name, but we
   // explicitly enforce this behavior here for consistency.
   //
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  const name = validNameRecordOrNull(_name);
-  const label = validLabelOrNull(_label);
   if (!label || !name) {
-    throw new Error(`Invariant: expected valid name record in DNSPacketBytes: "${fqdn}"`);
+    console.table({ ...event.args, tx: event.transaction.hash });
+    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
   }
 
   // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs

@@ -6,6 +6,7 @@ import {
   type Label,
   type LabelHash,
   PluginName,
+  encodeLabelHash,
   isLabelIndexable,
   makeSubdomainNode,
   validLabelOrNull,
@@ -43,21 +44,15 @@ export const makeRegistrarHandlers = ({
     labelHash: LabelHash,
     cost: bigint,
   ) {
-    if (!config.replaceUnnormalized) {
-      // NOTE(replace-unnormalized): here we implement the legacy behavior:
-      // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
-      if (!isLabelIndexable(label)) return;
-    } else {
-      // NOTE(replace-unnormalized): here we coerce the provided label into either:
-      // a) null, b) a normalized label, or c) an encoded labelHash
-      const _label = validLabelOrNull(label);
-
-      // if the label is invalid, we no-op as well, similar to legacy behavior
-      if (_label === null) return;
-
-      // otherwise, set the label var to the valid label and continue as normal
-      label = _label;
+    if (config.replaceUnnormalized) {
+      // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
+      // that was emitted otherwise
+      label = validLabelOrNull(label) ?? encodeLabelHash(labelHash);
     }
+
+    // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
+    // NOTE(replace-unnormalized): if config.replaceUnnormalized is true, label will always be indexable
+    if (!isLabelIndexable(label)) return;
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });

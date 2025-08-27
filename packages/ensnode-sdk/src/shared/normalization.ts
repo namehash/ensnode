@@ -2,14 +2,20 @@ import { labelhash, normalize } from "viem/ens";
 
 import type { EncodedLabelHash, Label, LabelHash, Name } from "../ens";
 
-export function isNormalized(name: Name) {
+/**
+ * Determines whether the input Name or Label is normalized.
+ */
+export function isNormalized(input: Name | Label) {
   try {
-    return name === normalize(name);
+    return input === normalize(input);
   } catch {
     return false;
   }
 }
 
+/**
+ * Represents a LabelHash as an Encoded LabelHash.
+ */
 export function encodeLabelHash(labelHash: LabelHash): EncodedLabelHash {
   if (!labelHash.startsWith("0x")) throw new Error("Expected labelhash to start with 0x");
   if (labelHash.length !== 66) throw new Error("Expected labelhash to have a length of 66");
@@ -45,7 +51,7 @@ export function validLabelOrNull(label: string | null): Label | EncodedLabelHash
  *   i. normalized, or
  *   ii. Encoded LabelHashes
  */
-export function normalizedNameOrWithEncodedLabelHash(name: string | null): Name | null {
+export function validNameOrNull(name: string | null): Name | null {
   // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
   // pattern at this method's callsites, minimizing hard-to-read ternary statements.
   if (name === null) return null;
@@ -60,18 +66,19 @@ export function normalizedNameOrWithEncodedLabelHash(name: string | null): Name 
 }
 
 /**
- * Interprets the provided name record `value` as either:
+ * Processes the provided name record `value`, ensuring that it is either:
  * a) a normalized, non-empty-string Name
  * b) or null.
  */
 export function validNameRecordOrNull(value: string): Name | null {
   // empty string is technically a normalized name, representing the ens root node, but in the
   // context of a name record value, we want to coerce empty string to null, to represent the
-  // non-existence of a record value, so we check for it here
+  // non-existence of a record value.
   if (value === "") return null;
 
   // if not normalized, is not valid `name` record value
   if (!isNormalized(value)) return null;
 
+  // otherwise, this is a non-empty-string normalized Name that can be used as a name() record value
   return value as Name;
 }
