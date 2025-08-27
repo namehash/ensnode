@@ -181,6 +181,8 @@ const { data, isLoading, error, refetch } = useRecords({
 
 Hook that resolves the primary name of the provided `address` on the specified `chainId`, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to determine the `address`'s Default Name directly.
 
+The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+
 #### Parameters
 
 - `address`: The Address whose Primary Name to resolve
@@ -201,6 +203,8 @@ const { data, isLoading, error, refetch } = usePrimaryName({
 ### `usePrimaryNames`
 
 Hook that resolves the primary names of the provided `address` on the specified chainIds, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned for all chainIds for which there is not a chain-specific Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and should rely on the aforementioned per-chain defaulting behavior.
+
+Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
 
 #### Parameters
 
