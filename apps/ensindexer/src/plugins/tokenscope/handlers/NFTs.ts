@@ -6,8 +6,7 @@ import config from "@/config";
 import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { upsertAccount } from "@/lib/db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { AssetNamespaces, SupportedNFT, TokenId, buildSupportedNFTAssetId } from "@/lib/tokenscope/assets";
+import { AssetNamespaces, SupportedNFT, buildSupportedNFTAssetId } from "@/lib/tokenscope/assets";
 import { labelHashGeneratedTokenIdToNode } from "@/lib/tokenscope/token-issuers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { Address, isAddressEqual, zeroAddress } from "viem";
@@ -35,39 +34,27 @@ export default function () {
         domainId,
       };
 
-      return handleERC721Transfer({ context, event, nft });
+      handleERC721Transfer(context, event.args.from, event.args.to, nft);
     },
   );
 
   ponder.on(
     namespaceContract(pluginName, "BaseBaseRegistrar:Transfer"),
     async ({ context, event }) => {
-      const tokenId = event.args.id;
-
-      // rename id field to tokenId to match standard event args for ERC721 transfers
-      const eventWithStandardizedArgs = {
-        ...event,
-        args: {
-          to: event.args.to,
-          from: event.args.from,
-          tokenId,
-        },
-      };
-
       const contract = getDatasourceContract(
         config.namespace,
         DatasourceNames.Basenames,
         "BaseRegistrar",
       );
-      const domainId = labelHashGeneratedTokenIdToNode(tokenId, BASENAMES_NODE);
+      const domainId = labelHashGeneratedTokenIdToNode(event.args.id, BASENAMES_NODE);
       const nft: SupportedNFT = {
         contract,
-        tokenId,
+        tokenId: event.args.id,
         assetNamespace: AssetNamespaces.ERC721,
         domainId,
       };
 
-      return handleERC721Transfer({ context, event: eventWithStandardizedArgs, nft });
+      handleERC721Transfer(context, event.args.from, event.args.to, nft);
     },
   );
 
@@ -87,27 +74,17 @@ export default function () {
         domainId,
       };
 
-      return handleERC721Transfer({ context, event, nft });
+      handleERC721Transfer(context, event.args.from, event.args.to, nft);
     },
   );
 }
 
-const handleERC721Transfer = async ({
-  context,
-  event,
-  nft,
-}: {
-  context: Context;
-  event: EventWithArgs<{ from: Address; to: Address; tokenId: TokenId }>;
-  nft: SupportedNFT;
-}) => {
-  const { from, to, tokenId } = event.args;
-
-  // invariant sanity check: tokenId values must match
-  if (tokenId !== nft.tokenId) {
-    throw new Error(`Token ID mismatch in handleERC721Transfer: ${tokenId} !== ${nft.tokenId}`);
-  }
-
+const handleERC721Transfer = async (
+  context: Context,
+  from: Address,
+  to: Address,
+  nft: SupportedNFT,
+): Promise<void> => {
   const assetId = buildSupportedNFTAssetId(nft);
 
   if (isAddressEqual(from, zeroAddress)) {
