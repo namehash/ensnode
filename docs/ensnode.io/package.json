@@ -29,7 +29,7 @@
     "@tailwindcss/vite": "^4.1.5",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "astro": "^5.13.2",
+    "astro": "^5.13.4",
     "astro-font": "catalog:",
     "astro-icon": "^1.1.5",
     "astro-mermaid": "^1.0.4",
