@@ -65,7 +65,7 @@ export const nameSales = onchainTable(
     assetId: t.text().notNull(),
 
     /**
-     * The namehash of the ENS domain that was sold.
+     * The namehash (Node) of the ENS domain that was sold.
      */
     domainId: t.hex().notNull(),
 
@@ -127,11 +127,9 @@ export const nameTokens = onchainTable(
     /**
      * The namehash (Node) of the ENS name associated with the token.
      * 
-     * An ENS name may have more than one distinct token across time. It is
+     * Note: An ENS name may have more than one distinct token across time. It is
      * also possible for multiple distinct tokens for an ENS name to have
-     * a mintStatus of `minted` at the same time.
-     * 
-     * Examples include:
+     * a mintStatus of `minted` at the same time. For example:
      * - When a direct subname of .eth is wrapped by the NameWrapper. This state
      *   has one minted token for the name managed by the BaseRegistrar (this
      *   token will be owned by the NameWrapper) and another minted token for
@@ -173,6 +171,20 @@ export const nameTokens = onchainTable(
      * The account that owns the token.
      *
      * Value is zeroAddress if and only if mintStatus is `burned`.
+     * 
+     * Note: The owner of the token for a given domainId may differ from the
+     * owner of the associated node in the registry. For example:
+     * - Consider the case where address X owns the ENS name `foo.eth` in
+     *   both the BaseRegistrar and the Registry. If X sends a request directly
+     *   to the Registry to transfer ownership to Y, ownership of `foo.eth` will
+     *   be transferred to Y in the Registry but not in the BaseRegistrar.
+     * - ... for the case above, the BaseRegistrar implements a `reclaim`
+     *   allowing the owner of the name in the BaseRegistrar to reclaim ownership
+     *   of the name in the Registry.
+     * 
+     * Note: When a name is wrapped by the NameWrapper, the owner of the token
+     * in the BaseRegistrar is the NameWrapper, while a new token for the name is
+     * minted by the NameWrapper and owned by the effective owner of the name.
      */
     owner: t.hex().notNull(),
 
