@@ -8,7 +8,7 @@ import {
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
-  isNormalized,
+  isNormalizedName,
   isSelectionEmpty,
   parseReverseName,
 } from "@ensnode/ensnode-sdk";
@@ -122,7 +122,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           // Invariant: Name must be normalized
-          if (!isNormalized(name)) {
+          if (!isNormalizedName(name)) {
             throw new Error(`Invariant: Name "${name}" must be normalized.`);
           }
 

@@ -7,7 +7,7 @@ import {
   type LabelHash,
   PluginName,
   encodeLabelHash,
-  interpretLabel,
+  interpretLiteralLabel,
   isLabelIndexable,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
@@ -45,13 +45,13 @@ export const makeRegistrarHandlers = ({
     cost: bigint,
   ) {
     if (config.replaceUnnormalized) {
-      // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
-      // that was emitted otherwise
-      label = interpretLabel(label) ?? encodeLabelHash(labelHash);
+      // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
+      // see https://ensnode.io/docs/reference/terminology#literal-label
+      // see https://ensnode.io/docs/reference/terminology#interpreted-label
+      label = interpretLiteralLabel(label) ?? encodeLabelHash(labelHash);
     }
 
     // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
-    // NOTE(replace-unnormalized): if config.replaceUnnormalized is true, label will always be indexable
     if (!isLabelIndexable(label)) return;
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
@@ -147,20 +147,25 @@ export const makeRegistrarHandlers = ({
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
       const healedLabel = await labelByLabelHash(labelHash);
 
-      // only update the label if it is healed & indexable
-      // undefined value means no change to the label
-      const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+      // Interpret the `healedLabel` Literal Label into an Interpreted Label
+      // see https://ensnode.io/docs/reference/terminology#literal-label
+      // see https://ensnode.io/docs/reference/terminology#interpreted-label
+      const label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
 
       // only update the name if the label is healed & indexable
       // undefined value means no change to the name
-      const name = validLabel ? `${validLabel}.${registrarManagedName}` : undefined;
+      const name = `${label}.${registrarManagedName}`;
+
+      // NOTE(subgraph-compat): if config.replaceUnnormalized is false, only update the name and label
+      // if the label is healed & indexable
+      const updateNameAndLabelValues = config.replaceUnnormalized || isLabelIndexable(healedLabel);
 
       // update Domain
       await context.db.update(schema.domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName: validLabel,
-        name,
+        labelName: updateNameAndLabelValues ? label : undefined,
+        name: updateNameAndLabelValues ? name : undefined,
       });
 
       // upsert registration
@@ -173,7 +178,7 @@ export const makeRegistrarHandlers = ({
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-        labelName: validLabel,
+        labelName: updateNameAndLabelValues ? label : undefined,
       });
 
       // log RegistrationEvent

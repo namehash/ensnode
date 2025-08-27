@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 import { CoinType, DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
-import { ChainId, isNormalized } from "../../shared";
+import { ChainId, isNormalizedName } from "../../shared";
 import { makeDurationSchema } from "../../shared/zod-schemas";
 
 const toName = (val: string) => val as Name;
@@ -34,7 +34,7 @@ const stringarray = z
 
 const name = z
   .string()
-  .refine(isNormalized, "Must be normalized, see https://docs.ens.domains/resolution/names/")
+  .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
   .transform(toName);
 
 const address = z

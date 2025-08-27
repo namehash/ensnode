@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { interpretLabel } from "./interpretation";
+import { interpretLiteralLabel } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -45,16 +45,16 @@ const INVALID_ENCODABLE_LABELS = [
 describe("interpretation", () => {
   describe("interpretLabel", () => {
     it("should return normalized labels unchanged", () => {
-      VALID_LABELS.forEach((label) => expect(interpretLabel(label)).toBe(label));
+      VALID_LABELS.forEach((label) => expect(interpretLiteralLabel(label)).toBe(label));
     });
 
     it("should return null for invalid labels", () => {
-      INVALID_LABELS.forEach((label) => expect(interpretLabel(label)).toBeNull());
+      INVALID_LABELS.forEach((label) => expect(interpretLiteralLabel(label)).toBeNull());
     });
 
     it("should encode non-normalized encodable labels as labelhashes", () => {
       INVALID_ENCODABLE_LABELS.forEach((label) =>
-        expect(interpretLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
+        expect(interpretLiteralLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
       );
     });
   });

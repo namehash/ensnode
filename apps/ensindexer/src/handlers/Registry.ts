@@ -8,7 +8,7 @@ import {
   type Node,
   REVERSE_ROOT_NODES,
   encodeLabelHash,
-  interpretLabel,
+  interpretLiteralLabel,
   isLabelIndexable,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
@@ -177,7 +177,7 @@ export const handleNewOwner =
 
           if (!healedLabel) {
             // by this point, we have exhausted all our strategies for healing
-            // the reverse address and we still don't have a valid label,
+            // the reverse address and we still don't have a healed label,
             // so we throw an error to bring visibility to not achieving
             // the expected 100% success rate
             throw new Error(
@@ -194,21 +194,17 @@ export const handleNewOwner =
         healedLabel = await labelByLabelHash(labelHash);
       }
 
-      // NOTE(replace-unnormalized): Transform the Literal Label into an Interpreted Label
-      // The healedLabel represents a Literal Label as emitted by the contract.
-      // We now process it to create an Interpreted Label:
-      // - If the healedLabel is valid (normalized), use it as the Interpreted Label
-      // - If not valid/normalized, convert to an Unknown Label using encodeLabelHash
-      // This transition from Literal -> Interpreted follows the terminology defined in
-      // docs/ensnode.io/src/content/docs/docs/reference/terminology.mdx
-      const label = interpretLabel(healedLabel) ?? encodeLabelHash(labelHash);
+      // Interpret the `healedLabel` Literal Label into an Interpreted Label
+      // see https://ensnode.io/docs/reference/terminology#literal-label
+      // see https://ensnode.io/docs/reference/terminology#interpreted-label
+      const label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
 
-      // to construct `Domain.name` use the parent's Name and the valid Label
+      // to construct `Domain.name` use the parent's Name and the Interpreted Label
       // NOTE: for a TLD, the parent is null, so we just use the Label value as is
       const name = parent?.name ? `${label}.${parent.name}` : label;
 
       if (config.replaceUnnormalized) {
-        // NOTE(replace-unnormalized): always update labelName to the valid label
+        // NOTE(replace-unnormalized): always update labelName to the Interpreted Label
         await context.db.update(schema.domain, { id: node }).set({ name, labelName: label });
       } else {
         // NOTE(replace-unnormalized, subgraph-compat): only update Domain.labelName iff label is healed and indexable

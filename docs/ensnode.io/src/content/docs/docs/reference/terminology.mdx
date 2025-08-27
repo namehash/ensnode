@@ -97,6 +97,12 @@ An **Encoded LabelHash** is a **LabelHash** that has been formatted for display 
 
 For example, if a **LabelHash** is `0x731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`, its **Encoded LabelHash** representation would be `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22]`.
 
+## Encoded NameHash
+
+An **Encoded NameHash** is a **NameHash** that has been formatted for display when the corresponding **Name** is _unknown_ or not human-readable. The encoding format wraps the hex representation of the **NameHash** in square brackets: `[{NameHash}]`.
+
+For example, if a **NameHash** is `0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835`, its **Encoded NameHash** representation would be `[ee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835]`.
+
 ## Normalized Label
 
 A **Normalized Label** is a **Label** that has been processed through the ENS normalization algorithm and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.

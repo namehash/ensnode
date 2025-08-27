@@ -3,7 +3,12 @@ import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { type Node, interpretLabel, interpretName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import {
+  type Node,
+  interpretLiteralLabel,
+  interpretLiteralName,
+  uint256ToHex32,
+} from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
@@ -120,10 +125,12 @@ export const makeNameWrapperHandlers = ({
       // decode the name emitted by NameWrapper
       let [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
 
-      // NOTE(replace-unnormalized): ensures that the decoded label/name values are valid
+      // NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
+      // see https://ensnode.io/docs/reference/terminology#interpreted-label
+      // see https://ensnode.io/docs/reference/terminology#interpreted-name
       if (config.replaceUnnormalized) {
-        name = interpretLabel(label);
-        name = interpretName(name);
+        name = interpretLiteralLabel(label);
+        name = interpretLiteralName(name);
       }
 
       const domain = await context.db.find(schema.domain, { id: node });

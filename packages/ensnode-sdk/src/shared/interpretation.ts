@@ -5,18 +5,21 @@ import {
   type Label,
   type Name,
   encodeLabelHash,
-  isNormalized,
+  isNormalizedLabel,
+  isNormalizedName,
 } from "../ens";
 
 /**
- * Interprets a Label, ensuring that it is either:
- * a) invalid: null, or
- * b) valid: normalized or represented as an Encoded LabelHash
+ * Interprets a Literal Label into an Interpreted Label or null if the Literal Label is null, empty
+ * string, or not normalized.
  *
- * @param label - The label string to validate, or null
- * @returns A valid normalized Label, an EncodedLabelHash if the label contains dots or isn't normalized, or null if invalid
+ * @see https://ensnode.io/docs/reference/terminology#literal-label
+ * @see https://ensnode.io/docs/reference/terminology#interpreted-label
+ *
+ * @param label - The Literal Label string to validate
+ * @returns An Interpreted Label or null if the Literal Label is null, empty string, or not normalized.
  */
-export function interpretLabel(label: string | null): Label | EncodedLabelHash | null {
+export function interpretLiteralLabel(label: string | null): Label | EncodedLabelHash | null {
   // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
   // pattern at this method's callsites, minimizing hard-to-read ternary statements.
   if (label === null) return null;
@@ -24,39 +27,41 @@ export function interpretLabel(label: string | null): Label | EncodedLabelHash |
   // empty string is an invalid Label
   if (label === "") return null;
 
-  // if the label contains '.' or is not normalized, represent as encoded LabelHash
-  if (label.includes(".") || !isNormalized(label)) return encodeLabelHash(labelhash(label));
+  // if the label is not normalized, represent as encoded LabelHash
+  if (!isNormalizedLabel(label)) return encodeLabelHash(labelhash(label));
 
-  // otherwise, the label is normalized and doesn't contain '.'
+  // otherwise, the label is normalized
   return label as Label;
 }
 
 /**
- * Interprets a Name value, ensuring that it is either:
- * a) invalid: null, or
- * b) valid: composed entirely of valid Labels (Labels that are normalized or an Encoded LabelHash).
+ * Interprets a Literal Name value into an Interpreted Name or null, if the Literal Name is null or
+ * composed of un-interpretable Labels.
  *
- * @param name - The ENS name string to validate, or null
- * @returns A valid Name composed of valid labels, or null if any label is invalid
+ * @see https://ensnode.io/docs/reference/terminology#literal-name
+ * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+ *
+ * @param name - The ENS name string to validate
+ * @returns An Interpreted Name that is either normalized or consists entirely of Interpreted Labels
  */
-export function interpretName(name: string | null): Name | null {
+export function interpretLiteralName(name: string | null): Name | null {
   // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
   // pattern at this method's callsites, minimizing hard-to-read ternary statements.
   if (name === null) return null;
 
-  const labels = name.split(".").map(interpretLabel);
+  const labels = name.split(".").map(interpretLiteralLabel);
 
   // if any of the labels resulted in null (were not valid, for whatever reason, this name is not valid)
   if (labels.some((label) => label === null)) return null;
 
-  // otherwise the name is composed of non-empty labels adhering to `validLabelOrNull` guarantees
+  // otherwise the name is composed of Interpreted Labels and is an Interpreted Name
   return labels.join(".") as Name;
 }
 
 /**
  * Interprets the provided name record value, ensuring that it is either:
- * a) invalid: null, or
- * b) valid: a normalized, non-empty-string Name.
+ * a) null, or
+ * b) a normalized, non-empty-string Name.
  *
  * @param value - The name record value string to validate
  * @returns A valid normalized Name for use as a name record, or null if invalid (empty string or not normalized)
@@ -68,7 +73,7 @@ export function interpretNameRecord(value: string): Name | null {
   if (value === "") return null;
 
   // if not normalized, is not valid `name` record value
-  if (!isNormalized(value)) return null;
+  if (!isNormalizedName(value)) return null;
 
   // otherwise, this is a non-empty-string normalized Name that can be used as a name() record value
   return value as Name;

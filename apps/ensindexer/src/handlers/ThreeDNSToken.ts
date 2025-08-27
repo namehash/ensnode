@@ -6,8 +6,8 @@ import {
   type LabelHash,
   type Node,
   encodeLabelHash,
-  interpretLabel,
-  interpretName,
+  interpretLiteralLabel,
+  interpretLiteralName,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -137,7 +137,7 @@ export async function handleNewOwner({
 
     // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
     // that was emitted otherwise
-    const label = interpretLabel(healedLabel) ?? encodeLabelHash(labelHash);
+    const label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
 
     // to construct `Domain.name` use the parent's Name and the valid Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
@@ -204,14 +204,15 @@ export async function handleRegistrationCreated({
   await upsertAccount(context, registrant);
 
   const [_label, _name] = decodeDNSPacketBytes(hexToBytes(fqdn));
-  const name = interpretName(_name);
-  const label = interpretLabel(_label);
 
-  // Invariant: ThreeDNS always emits a valid DNS Packet and valid label/name
-  // NOTE(replace-unnormalized): this is redundant because we know ThreeDNS always emits labels with
-  // alphanumeric characters and hypens, which always results in a valid label and name, but we
-  // explicitly enforce this behavior here for consistency.
-  //
+  // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
+  // see https://ensnode.io/docs/reference/terminology#interpreted-label
+  // see https://ensnode.io/docs/reference/terminology#interpreted-name
+  const label = interpretLiteralLabel(_label);
+  const name = interpretLiteralName(_name);
+
+  // ThreeDNS always emits a valid DNS Packet and an Interpreted Name/Label but/and we explicitly
+  // enforce this invariant here.
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
   if (!label || !name) {
     console.table({ ...event.args, tx: event.transaction.hash });
