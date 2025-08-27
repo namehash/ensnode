@@ -1,8 +1,7 @@
 import { type ENSIndexerPublicConfig, PluginName } from "./types";
 
 /**
- * Determines whether the provided `config` should be run in subgraph-compatibility mode (maintains
- * backwards compatibility with the ENS Subgraph's resulting index/api).
+ * Determines if the provided `config` produces an index equivalent to the ENS Subgraph.
  *
  * @see https://ensnode.io/docs/reference/subgraph-compatibility/
  */
