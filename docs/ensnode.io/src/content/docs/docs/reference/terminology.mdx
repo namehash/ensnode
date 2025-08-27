@@ -6,7 +6,11 @@ sidebar:
 
 New terminology (beyond the [official ENS glossary](https://docs.ens.domains/terminology)) has been needed in the course of building ENSNode. The following should be understood as a draft that is open to community feedback. Each definition below aims to maximize alignment with the official ENS glossary where possible, and reduce instances where a piece of terminology may have multiple meanings in the context of the protocol.
 
-## Subregistry
+## Core Protocol Extension Concepts
+
+The following concepts extend the core ENS protocol to handle multichain and off-chain scenarios that arise in modern ENS usage.
+
+### Subregistry
 
 A **Subregistry** is any data structure outside of the [Registry](https://docs.ens.domains/terminology#registry) that manages supplemental state for a set of [subnames](https://docs.ens.domains/terminology#subname-subdomain). Each [name](https://docs.ens.domains/terminology#name) has the potential for association with at least 1 subregistry (through the [Name Wrapper](https://docs.ens.domains/terminology#name-wrapper)) and may optionally be associated with multiple subregistries. When a name is associated with multiple subregistries, this means that the full state of a name must be combined across the Registry and each associated subregistry. For example, the state of all direct subnames of .eth is distributed across the Registry and two subregistries: the BaseRegistrar and the Name Wrapper. The ENS protocol does not currently define standards for subregistries: subregistries currently exist outside the scope of ENS protocol standards. For example, subregistries could live on L1, on L2s, or offchain (in a database or even in a Google Sheet). The ENS protocol currently provides no standardized mechanism to discover subregistries or to interact with subregistries.
 
@@ -22,7 +26,7 @@ Some specific implementations of subregistries include:
 * The offchain databases that manage supplemental state for direct subnames of [cb.id](https://help.coinbase.com/en/wallet/managing-account/coinbase-ens-support).
 * DNS nameservers for (essentially) all DNS names. Since ENS is a superset of DNS, (essentially) any DNS name is an ENS name. Therefore, whenever supplemental state associated with a DNS name is updated in a DNS nameserver, a subregistry is being updated.
 
-## Subregistrar
+### Subregistrar
 
 A **Subregistrar** is any system that is a [Registrar](https://docs.ens.domains/terminology#registrar) or that writes to a subregistry.
 
@@ -34,7 +38,7 @@ This definition expands the definition of Registrar to include cases such as:
 * Any NFT marketplace that supports the exchange of an NFT representing ownership of an ENS name. Each time a NFT is exchanged, state about that NFT must be updated within a related subregistry. Therefore the marketplace enabling that trade is a Subregistrar.
 * Any DNS registrar, as ENS is a superset of DNS.
 
-## Shadow Registry
+### Shadow Registry
 
 A **Shadow Registry** is a Subregistry meeting ALL of the following constraints:
 1. Not the Registry;
@@ -43,7 +47,11 @@ A **Shadow Registry** is a Subregistry meeting ALL of the following constraints:
 
 A specific implementation of a Shadow Registry can be found in [this contract](https://github.com/base-org/basenames/blob/v1.0.4/src/L2/Registry.sol) storing a subset of the state of base.eth subnames on Base.
 
-## name, node, namehash
+## ENS Name Resolution Fundamentals
+
+Understanding how ENS names are processed and displayed requires precise terminology around name components and their various states. The following sections build from basic name resolution concepts to the specific classification and encoding systems used in ENSNode.
+
+### name, node, namehash
 
 A **name** is a human-readable string like `"vitalik.eth"` composed of **labels**. A **name** may or may not be _normalized_.
 
@@ -57,14 +65,17 @@ For the _normalized_ name `vitalik.eth`, its **node** is `0xee6c4522aab0003e8d14
 
 https://docs.ens.domains/resolution/names#namehash
 
+## Label Processing and Classification
 
-## Labels, LabelHashes, labelhash function
+ENSNode must process labels from various onchain and offchain sources, each potentially in different states of normalization and availability. This section defines the core label processing concepts.
+
+### Labels, LabelHashes, labelhash function
 
 A **Label** is a human-readable string used as a segment of a **name** — i.e. `vitalik` and `eth` are the **Labels** of `vitalik.eth`. Labels are arbitrary unicode strings and may or may not be: _normalized_ or _unnormalized_, _known_ or _unknown_.
 
 In the ENS `Registry` contract, only the **name**'s **node** is registered on-chain. Because of this there is no guarantee that a registered **node** is composed of _normalized_ Labels or that those Labels are _known_. That is, when observing the `Registry` in isolation, the human-readable **Labels** that make up a **name** are not available (either on-chain or off-chain). That said, in many cases the **Labels** that make up a name can be made **known**: human-readable **Labels** can be emitted by contracts (i.e. the `ETHRegistrarController` or the `NameWrapper`), and in other cases the human-readable **Label** for a given **LabelHash** can be determined via rainbow table lookups and other strategies.
 
-### Rendering _Unknown_ Labels
+#### Rendering _Unknown_ Labels
 
 When rendering a **name**, one must take care to differentiate between an _unknown_ **Label** (only identifiable by its 32-byte **LabelHash**) and a _known_ **Label** potentially composed of hex characters. To do so, the _unknown_ **Label**'s **LabelHash** is _encoded_ as `[{LabelHash}]`. Examples are likely helpful:
 
@@ -76,7 +87,7 @@ When rendering a **name**, one must take care to differentiate between an _unkno
   1. a _normalized_, _known_ Label (that just so happens to be a set of 64 literal hex characters): `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`
   2. a _normalized_, _known_ Label: `eth`
 
-## LabelHash, labelhash function
+### LabelHash, labelhash function
 
 In this terminology reference, we say that the **LabelHash** of a **Label** is the 32-byte hashed result of calling the **`labelhash` function** with that **Label** as input.
 
@@ -91,43 +102,53 @@ const labelHash = labelhash("vitalik");
 Outside of this terminology reference & ENSNode, the word 'labelhash' may refer to either the function or the result of the function.
 :::
 
-## Encoded LabelHash
+## Name and Label State Classifications
+
+As ENSNode processes ENS data from multiple sources, labels and names exist in various states depending on normalization and data availability. These classifications are essential for proper display and validation.
+
+### Normalized Label
+
+A **Normalized Label** is a **Label** that has been processed through the ENS normalization algorithm and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.
+
+### Unnormalized Label
+
+An **Unnormalized Label** is a **Label** that has not been processed through the ENS normalization algorithm, or one that would change if processed through normalization.
+
+### Unknown Label
+
+An **Unknown Label** is a **Label** for which the human-readable string is not available, and only the **LabelHash** is known. These labels are displayed using the **Encoded LabelHash** format: `[{LabelHash}]`.
+
+### Normalized Name
+
+A **Normalized Name** is a **name** composed entirely of **Normalized Labels**. This represents the canonical form of a name that can be safely processed through the `namehash` function to produce a valid **node**.
+
+### Unnormalized Name
+
+An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the ENS normalization algorithm.
+
+### Unknown Name
+
+An **Unknown Name** is a **name** that contains one or more **Unknown Labels**, meaning the human-readable form of at least one label is not available and must be displayed using **Encoded LabelHash** format.
+
+## Display Encoding Formats
+
+When human-readable names or labels are unavailable, ENSNode uses specific encoding formats for consistent display. These formats ensure users can distinguish between actual hex content and placeholder representations.
+
+### Encoded LabelHash
 
 An **Encoded LabelHash** is a **LabelHash** that has been formatted for display when the corresponding **Label** is _unknown_. The encoding format wraps the hex representation of the **LabelHash** in square brackets: `[{LabelHash}]`.
 
 For example, if a **LabelHash** is `0x731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`, its **Encoded LabelHash** representation would be `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22]`.
 
-## Encoded NameHash
+### Encoded NameHash
 
 An **Encoded NameHash** is a **NameHash** that has been formatted for display when the corresponding **Name** is _unknown_ or not human-readable. The encoding format wraps the hex representation of the **NameHash** in square brackets: `[{NameHash}]`.
 
 For example, if a **NameHash** is `0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835`, its **Encoded NameHash** representation would be `[ee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835]`.
 
-## Normalized Label
+## Data Processing Pipeline
 
-A **Normalized Label** is a **Label** that has been processed through the ENS normalization algorithm and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.
-
-## Unnormalized Label
-
-An **Unnormalized Label** is a **Label** that has not been processed through the ENS normalization algorithm, or one that would change if processed through normalization.
-
-## Unknown Label
-
-An **Unknown Label** is a **Label** for which the human-readable string is not available, and only the **LabelHash** is known. These labels are displayed using the **Encoded LabelHash** format: `[{LabelHash}]`.
-
-## Normalized Name
-
-A **Normalized Name** is a **name** composed entirely of **Normalized Labels**. This represents the canonical form of a name that can be safely processed through the `namehash` function to produce a valid **node**.
-
-## Unnormalized Name
-
-An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the ENS normalization algorithm.
-
-## Unknown Name
-
-An **Unknown Name** is a **name** that contains one or more **Unknown Labels**, meaning the human-readable form of at least one label is not available and must be displayed using **Encoded LabelHash** format.
-
-## Literal vs. Interpreted Labels and Names
+ENSNode's indexing pipeline transforms raw blockchain data into user-friendly formats. This requires distinguishing between literal onchain data and the interpreted forms used in applications.
 
 When processing ENS data, it's important to distinguish between the literal data read from blockchain sources and the interpreted form used in applications:
 
