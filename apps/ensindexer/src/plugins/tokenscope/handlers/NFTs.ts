@@ -86,8 +86,13 @@ const handleERC721Transfer = async (
   nft: SupportedNFT,
 ): Promise<void> => {
   const assetId = buildSupportedNFTAssetId(nft);
+  const isMint = isAddressEqual(from, zeroAddress);
+  const isBurn = isAddressEqual(to, zeroAddress);
 
-  if (isAddressEqual(from, zeroAddress)) {
+  // sanity check, handle theoretical mint to zero address with no-op
+  if (isMint && isBurn) return;
+
+  if (isMint) {
     // a transfer from the zero address means `nft` was minted
     await upsertAccount(context, to);
 
@@ -101,7 +106,7 @@ const handleERC721Transfer = async (
       domainId: nft.domainId,
       owner: to,
     });
-  } else if (isAddressEqual(to, zeroAddress)) {
+  } else if (isBurn) {
     // a transfer to the zero address means `nft` was burned
     // delete the record of the burned `nft`
     await context.db.delete(schema.nameTokens, { id: assetId });
