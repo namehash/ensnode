@@ -25,9 +25,8 @@ export function encodeLabelHash(labelHash: LabelHash): EncodedLabelHash {
 
 /**
  * Processes a Label, ensuring that it is either:
- * a) an invalid label (null),
- * b) normalized, or
- * c) represented as an Encoded LabelHash.
+ * a) invalid: null, or
+ * b) valid: normalized or represented as an Encoded LabelHash
  */
 export function validLabelOrNull(label: string | null): Label | EncodedLabelHash | null {
   // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
@@ -46,10 +45,8 @@ export function validLabelOrNull(label: string | null): Label | EncodedLabelHash
 
 /**
  * Processes a Name value, ensuring that it is either:
- * a) an invalid Name (null), or
- * b) composed entirely of Labels that are either:
- *   i. normalized, or
- *   ii. Encoded LabelHashes
+ * a) invalid: null, or
+ * b) valid: composed entirely of valid Labels (Labels that are normalized or an Encoded LabelHash).
  */
 export function validNameOrNull(name: string | null): Name | null {
   // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
@@ -67,8 +64,8 @@ export function validNameOrNull(name: string | null): Name | null {
 
 /**
  * Processes the provided name record `value`, ensuring that it is either:
- * a) a normalized, non-empty-string Name
- * b) or null.
+ * a) invalid: null, or
+ * b) valid: a normalized, non-empty-string Name.
  */
 export function validNameRecordOrNull(value: string): Name | null {
   // empty string is technically a normalized name, representing the ens root node, but in the
