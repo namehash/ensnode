@@ -3,8 +3,13 @@ import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { type Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import {
+  type Node,
+  normalizedNameOrWithEncodedLabelHash,
+  uint256ToHex32,
+} from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
@@ -117,7 +122,13 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       // decode the name emitted by NameWrapper
-      const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
+      let [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
+
+      // NOTE(replace-unnormalized): process the decoded name, ensuring that it is entirely composed
+      // of labels that are either normalized or represented as encoded labelhashes
+      if (config.replaceUnnormalized && name !== null) {
+        name = normalizedNameOrWithEncodedLabelHash(name);
+      }
 
       const domain = await context.db.find(schema.domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");

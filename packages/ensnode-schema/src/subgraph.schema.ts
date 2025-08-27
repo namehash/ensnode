@@ -222,7 +222,12 @@ export const wrappedDomain = onchainTable(
     fuses: t.integer().notNull(),
     // The account that owns this WrappedDomain
     ownerId: t.hex().notNull(),
-    // The name of the wrapped domain
+    /**
+     * The name of the wrapped domain. This value is guaranteed to be either:
+     * a) null, // TODO: can NameWrapper emit invalid dns-encoded names?
+     * b) a Name consisting entirely of Labels that are either normalized or represented as
+     *    Encoded LabelHashes.
+     */
     name: t.text(),
   }),
   (t) => ({

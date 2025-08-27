@@ -15,11 +15,8 @@ export function isNormalized(name: Name) {
  * a) an invalid label (null),
  * b) normalized, or
  * c) represented as an Encoded LabelHash.
- *
- * @param label
- * @returns
  */
-export function normalizedLabelOrEncodedLabelHash(label: string): Label | EncodedLabelHash | null {
+export function validLabelOrNull(label: string): Label | EncodedLabelHash | null {
   // empty string is an invalid Label
   if (label === "") return null;
 
@@ -34,7 +31,26 @@ export function normalizedLabelOrEncodedLabelHash(label: string): Label | Encode
 }
 
 /**
- * Interprets the provided name record `value` as a normalized, non-empty string or null.
+ * Processes a Name value, ensuring that it is either:
+ * a) an invalid Name (null), or
+ * b) composed entirely of Labels that are either:
+ *   i. normalized, or
+ *   ii. Encoded LabelHashes
+ */
+export function normalizedNameOrWithEncodedLabelHash(name: string): Name | null {
+  const labels = name.split(".").map(validLabelOrNull);
+
+  // if any of the labels resulted in null (were not valid, for whatever reason, this name is not valid)
+  if (labels.some((label) => label === null)) return null;
+
+  // otherwise the name is composed of non-empty labels adhering to `validLabelOrNull` guarantees
+  return labels.join(".") as Name;
+}
+
+/**
+ * Interprets the provided name record `value` as either:
+ * a) a normalized, non-empty-string Name
+ * b) or null.
  */
 export function validNameRecordOrNull(value: string): Name | null {
   // empty string is technically a normalized name, representing the ens root node, but in the
