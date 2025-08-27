@@ -1,6 +1,6 @@
 import { CurrencyIds, getCurrencyIdForContract } from "@/lib/currencies";
 import { AssetNamespace, AssetNamespaces } from "@/lib/tokenscope/assets";
-import { SupportedNFT, SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
+import { SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
 import {
   ConsiderationItem,
   ItemType,
@@ -10,6 +10,7 @@ import {
 import { getKnownTokenIssuer } from "@/lib/tokenscope/token-issuers";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { ChainId, uniq } from "@ensnode/ensnode-sdk";
+import { SupportedNFT } from "./assets";
 
 /**
  * Gets the supported TokenScope Asset Namespace for a given Seaport ItemType.

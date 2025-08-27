@@ -111,3 +111,58 @@ export const nameSales = onchainTable(
     idx_timestamp: index().on(t.timestamp),
   }),
 );
+
+export const nameTokens = onchainTable(
+  "ext_name_tokens",
+  (t) => ({
+    /**
+     * The CAIP-19 Asset ID of the token.
+     *
+     * This is a globally unique reference to the token.
+     *
+     * @see https://chainagnostic.org/CAIPs/caip-19
+     */
+    id: t.text().primaryKey(),
+
+    /**
+     * The chain that manages the token.
+     */
+    chainId: t.integer().notNull(),
+
+    /**
+     * The address of the contract on chainId that manages the token.
+     */
+    contractAddress: t.hex().notNull(),
+
+    // TODO: For erc1155 this is Token type identifier (multiple copies may exist)
+    // but for tokenscope we want to guarantee the tokenId is unique for the
+    // chainId and contractAddress. Advice appreciated.
+    /**
+     * The tokenId of the token managed by contractAddress.
+     */
+    tokenId: t.bigint().notNull(),
+
+    /**
+     * The CAIP-19 Asset Namespace of the token. Either `erc721` or `erc1155`.
+     *
+     * @see https://chainagnostic.org/CAIPs/caip-19
+     */
+    assetNamespace: t.text().notNull(),
+
+    /**
+     * The namehash (Node) of the ENS name associated with the token.
+     */
+    domainId: t.hex().notNull(),
+
+    /**
+     * The account that owns the token.
+     *
+     * Never zeroAddress.
+     */
+    owner: t.hex().notNull(),
+  }),
+  (t) => ({
+    idx_domainId: index().on(t.domainId),
+    idx_owner: index().on(t.owner),
+  }),
+);
