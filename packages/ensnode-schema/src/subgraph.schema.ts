@@ -9,10 +9,34 @@ import { monkeypatchCollate } from "./collate";
 export const domain = onchainTable("domains", (t) => ({
   // The namehash of the name
   id: t.hex().primaryKey(),
-  // The human readable name, if known. Unknown portions replaced with hash in square brackets (eg, foo.[1234].eth)
+
+  /**
+   * The human readable name that this Domain represents.
+   *
+   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be a Name consisting entirely of
+   * Labels that are either normalized or represented as Encoded LabelHashes. Note that the type of
+   * the column will remain string | null, for legacy subgraph compatibility.
+   *
+   * If REPLACE_UNNORMALIZED is false, this value may contain:
+   * a) null (in the case of the root node), or
+   * b) a name that may or may not be normalized and may or may not contain Encoded LabelHashes.
+   */
   name: t.text(),
-  // The human readable label name (imported from CSV), if known
+
+  /**
+   * The human-readable Label associated with the Domain.
+   *
+   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
+   * a) null, representing an invalid label (i.e. empty string)
+   * b) a non-empty-string, normalized label, or
+   * c) an Encoded LabelHash
+   *
+   * If REPLACE_UNNORMALIZED is false, this value could contain an unnormalized Label.
+   *
+   * TODO: can labelName ever be invalid? likely not, so in practice labelName would never be null.
+   */
   labelName: t.text(),
+
   // keccak256(labelName)
   labelhash: t.hex(),
   // The namehash (id) of the parent name
@@ -184,13 +208,15 @@ export const registration = onchainTable(
     /**
      * The human-readable Label associated with the domain registration.
      *
-     * This value is guaranteed to be either:
+     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
      * a) null, representing an invalid label (i.e. empty string)
      * b) a non-empty-string, normalized label, or
      * c) an Encoded LabelHash
      *
-     * TODO: can Registration.labelName ever be invalid? if so, the type of this field will always be
-     * null | string because subgraph type constraints but in practice labelName would never be null.
+     * If REPLACE_UNNORMALIZED is false, this value could contain an unnormalized Label.
+     *
+     * TODO: can Registration.labelName ever be invalid? likely not, so in practice labelName would
+     * never be null.
      */
     labelName: t.text(),
   }),
@@ -233,10 +259,14 @@ export const wrappedDomain = onchainTable(
     // The account that owns this WrappedDomain
     ownerId: t.hex().notNull(),
     /**
-     * The name of the wrapped domain. This value is guaranteed to be either:
+     * The name of the wrapped domain.
+     *
+     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
      * a) null, representing an invalid Name emitted by the NameWrapper
      * b) a Name consisting entirely of Labels that are either normalized or represented as
      *    Encoded LabelHashes.
+     *
+     * If REPLACE_UNNORMALIZED is false, this value could contain an unnormalized Name.
      *
      * TODO: can NameWrapper even emit invalid dns-encoded names? if so, the type of this must be null
      * because the name is set in a later transaction than the creation BUT in practice it would

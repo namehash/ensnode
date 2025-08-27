@@ -1,12 +1,11 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
   type LabelHash,
   type Node,
-  isLabelIndexable,
+  encodeLabelHash,
   makeSubdomainNode,
   validLabelOrNull,
   validNameRecordOrNull,
@@ -122,7 +121,7 @@ export async function handleNewOwner({
   if (!domain.name) {
     const parent = await context.db.find(schema.domain, { id: parentNode });
 
-    let healedLabel = null;
+    let healedLabel: string | null = null;
 
     // 1. attempt metadata retrieval
     if (!healedLabel) {
@@ -136,13 +135,15 @@ export async function handleNewOwner({
       healedLabel = await labelByLabelHash(labelHash);
     }
 
-    const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
-    // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
-    // NOTE: for a TLD, the parent is null, so we just use the label value as is
-    const label = validLabel || encodeLabelhash(labelHash);
+    // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
+    // that was emitted otherwise
+    const label = validLabelOrNull(healedLabel) ?? encodeLabelHash(labelHash);
+
+    // to construct `Domain.name` use the parent's Name and the valid Label
+    // NOTE: for a TLD, the parent is null, so we just use the Label value as is
     const name = parent?.name ? `${label}.${parent.name}` : label;
 
-    await context.db.update(schema.domain, { id: node }).set({ name, labelName: validLabel });
+    await context.db.update(schema.domain, { id: node }).set({ name, labelName: label });
   }
 
   // log DomainEvent

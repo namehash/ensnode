@@ -1,6 +1,6 @@
 import { labelhash, normalize } from "viem/ens";
 
-import type { EncodedLabelHash, Label, Name } from "../ens";
+import type { EncodedLabelHash, Label, LabelHash, Name } from "../ens";
 
 export function isNormalized(name: Name) {
   try {
@@ -10,21 +10,29 @@ export function isNormalized(name: Name) {
   }
 }
 
+export function encodeLabelHash(labelHash: LabelHash): EncodedLabelHash {
+  if (!labelHash.startsWith("0x")) throw new Error("Expected labelhash to start with 0x");
+  if (labelHash.length !== 66) throw new Error("Expected labelhash to have a length of 66");
+
+  return `[${labelHash.slice(2)}]`;
+}
+
 /**
  * Processes a Label, ensuring that it is either:
  * a) an invalid label (null),
  * b) normalized, or
  * c) represented as an Encoded LabelHash.
  */
-export function validLabelOrNull(label: string): Label | EncodedLabelHash | null {
+export function validLabelOrNull(label: string | null): Label | EncodedLabelHash | null {
+  // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
+  // pattern at this method's callsites, minimizing hard-to-read ternary statements.
+  if (label === null) return null;
+
   // empty string is an invalid Label
   if (label === "") return null;
 
   // if the label contains '.' or is not normalized, represent as encoded LabelHash
-  if (label.includes(".") || !isNormalized(label)) {
-    // note: lowercase/length/etc checks are not necessary — `labelhash` is well-behaved
-    return `[${labelhash(label).slice(2)}]` as EncodedLabelHash;
-  }
+  if (label.includes(".") || !isNormalized(label)) return encodeLabelHash(labelhash(label));
 
   // otherwise, the label is normalized and doesn't contain '.'
   return label as Label;
@@ -37,7 +45,11 @@ export function validLabelOrNull(label: string): Label | EncodedLabelHash | null
  *   i. normalized, or
  *   ii. Encoded LabelHashes
  */
-export function normalizedNameOrWithEncodedLabelHash(name: string): Name | null {
+export function normalizedNameOrWithEncodedLabelHash(name: string | null): Name | null {
+  // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
+  // pattern at this method's callsites, minimizing hard-to-read ternary statements.
+  if (name === null) return null;
+
   const labels = name.split(".").map(validLabelOrNull);
 
   // if any of the labels resulted in null (were not valid, for whatever reason, this name is not valid)

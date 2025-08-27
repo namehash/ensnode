@@ -65,18 +65,16 @@ export const makeRegistrarHandlers = ({
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
 
-    // update the domain's labelName with label
+    // materialize the domain's name and labelName using the emitted values
     if (domain.labelName !== label) {
       await context.db
         .update(schema.domain, { id: node })
         .set({ labelName: label, name: `${label}.${registrarManagedName}` });
     }
 
-    // materialize the registration's labelName as well
+    // update the registration's labelName
     await context.db
-      .update(schema.registration, {
-        id: makeRegistrationId(labelHash, node),
-      })
+      .update(schema.registration, { id: makeRegistrationId(labelHash, node) })
       .set({ labelName: label, cost });
   }
 

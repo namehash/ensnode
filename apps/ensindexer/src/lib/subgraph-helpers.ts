@@ -1,5 +1,6 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
+import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
 import { Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
 import { zeroAddress } from "viem";
@@ -27,12 +28,18 @@ export async function setupRootNode({ context }: { context: Context }) {
       id: ROOT_NODE,
       ownerId: zeroAddress,
       createdAt: 0n,
+
       // NOTE: we initialize the root node as migrated because:
       // 1. this matches subgraph's existing behavior, despite the root node not technically being
       //    migrated until the new registry is deployed and
-      // 2. other plugins (Basenames, Lineanames) don't have the concept of migration but defaulting to true
-      //    is a reasonable behavior
+      // 2. other plugins (Basenames, Lineanames) don't have the concept of migration and defaulting
+      //    to true is reasonable
       isMigrated: true,
+
+      // NOTE(replace-unnormalized, subgraph-compat): the subgraph datamodel expects that the
+      // value for the root node's name is `null`. with config.replaceUnnormalized, however, we
+      // enforce that the root node's name is empty string, the technically correct value.
+      name: config.replaceUnnormalized ? "" : null,
     })
     .onConflictDoNothing();
 }
