@@ -1,6 +1,6 @@
 import { index, onchainTable } from "ponder";
 
-export const nameSales = onchainTable(
+export const ext_nameSales = onchainTable(
   "ext_name_sales",
   (t) => ({
     /**
@@ -112,7 +112,7 @@ export const nameSales = onchainTable(
   }),
 );
 
-export const nameTokens = onchainTable(
+export const ext_nameTokens = onchainTable(
   "ext_name_tokens",
   (t) => ({
     /**
@@ -126,7 +126,7 @@ export const nameTokens = onchainTable(
 
     /**
      * The namehash (Node) of the ENS name associated with the token.
-     * 
+     *
      * Note: An ENS name may have more than one distinct token across time. It is
      * also possible for multiple distinct tokens for an ENS name to have
      * a mintStatus of `minted` at the same time. For example:
@@ -171,7 +171,7 @@ export const nameTokens = onchainTable(
      * The account that owns the token.
      *
      * Value is zeroAddress if and only if mintStatus is `burned`.
-     * 
+     *
      * Note: The owner of the token for a given domainId may differ from the
      * owner of the associated node in the registry. For example:
      * - Consider the case where address X owns the ENS name `foo.eth` in
@@ -181,7 +181,7 @@ export const nameTokens = onchainTable(
      * - ... for the case above, the BaseRegistrar implements a `reclaim`
      *   allowing the owner of the name in the BaseRegistrar to reclaim ownership
      *   of the name in the Registry.
-     * 
+     *
      * Note: When a name is wrapped by the NameWrapper, the owner of the token
      * in the BaseRegistrar is the NameWrapper, while a new token for the name is
      * minted by the NameWrapper and owned by the effective owner of the name.

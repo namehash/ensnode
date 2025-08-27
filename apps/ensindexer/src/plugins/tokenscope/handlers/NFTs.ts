@@ -99,7 +99,7 @@ const handleERC721Transfer = async (
   const isBurn = isAddressEqual(to, zeroAddress);
 
   // get the currently indexed record for the assetId (if it exists)
-  const indexedNft = await context.db.find(schema.nameTokens, { id: assetId });
+  const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
 
   if (!indexedNft) {
     // this NFT has never been minted (or indexed) before
@@ -120,7 +120,7 @@ const handleERC721Transfer = async (
       // state transition from never minted -> minted
       // insert a record of the `nft` that has been minted for the first time
       await upsertAccount(context, to);
-      await context.db.insert(schema.nameTokens).values({
+      await context.db.insert(schema.ext_nameTokens).values({
         id: assetId,
         chainId: nft.contract.chainId,
         contractAddress: nft.contract.address,
@@ -151,7 +151,7 @@ const handleERC721Transfer = async (
     // state transition from burned -> minted
     // update the mint status and owner of the `nft`
     await upsertAccount(context, to);
-    await context.db.update(schema.nameTokens, { id: assetId }).set({
+    await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
       owner: to,
       mintStatus: NFTMintStatuses.Minted,
     });
@@ -163,7 +163,7 @@ const handleERC721Transfer = async (
     // update the mint status and owner of the `nft`
     // TODO: should we remove this upsertAccount call?
     await upsertAccount(context, zeroAddress);
-    await context.db.update(schema.nameTokens, { id: assetId }).set({
+    await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
       owner: zeroAddress,
       mintStatus: NFTMintStatuses.Burned,
     });
@@ -176,7 +176,7 @@ const handleERC721Transfer = async (
     // state transition from minted -> transferred (still minted)
     // update owner of the `nft`
     await upsertAccount(context, to);
-    await context.db.update(schema.nameTokens, { id: assetId }).set({
+    await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
       owner: to,
     });
   }
