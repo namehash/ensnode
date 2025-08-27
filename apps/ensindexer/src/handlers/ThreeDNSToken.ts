@@ -6,9 +6,9 @@ import {
   type LabelHash,
   type Node,
   encodeLabelHash,
+  interpretLabel,
+  interpretName,
   makeSubdomainNode,
-  validLabelOrNull,
-  validNameOrNull,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -137,7 +137,7 @@ export async function handleNewOwner({
 
     // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
     // that was emitted otherwise
-    const label = validLabelOrNull(healedLabel) ?? encodeLabelHash(labelHash);
+    const label = interpretLabel(healedLabel) ?? encodeLabelHash(labelHash);
 
     // to construct `Domain.name` use the parent's Name and the valid Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
@@ -204,8 +204,8 @@ export async function handleRegistrationCreated({
   await upsertAccount(context, registrant);
 
   const [_label, _name] = decodeDNSPacketBytes(hexToBytes(fqdn));
-  const name = validNameOrNull(_name);
-  const label = validLabelOrNull(_label);
+  const name = interpretName(_name);
+  const label = interpretLabel(_label);
 
   // Invariant: ThreeDNS always emits a valid DNS Packet and valid label/name
   // NOTE(replace-unnormalized): this is redundant because we know ThreeDNS always emits labels with

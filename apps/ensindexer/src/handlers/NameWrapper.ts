@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { type Node, uint256ToHex32, validLabelOrNull, validNameOrNull } from "@ensnode/ensnode-sdk";
+import { type Node, interpretLabel, interpretName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
@@ -122,8 +122,8 @@ export const makeNameWrapperHandlers = ({
 
       // NOTE(replace-unnormalized): ensures that the decoded label/name values are valid
       if (config.replaceUnnormalized) {
-        name = validLabelOrNull(label);
-        name = validNameOrNull(name);
+        name = interpretLabel(label);
+        name = interpretName(name);
       }
 
       const domain = await context.db.find(schema.domain, { id: node });

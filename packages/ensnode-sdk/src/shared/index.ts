@@ -12,5 +12,6 @@ export {
   deserializeDuration,
   deserializeUrl,
 } from "./deserialize";
-export * from "./normalization";
+export * from "../ens/is-normalized";
 export * from "./account-id";
+export * from "./interpretation";

@@ -3,7 +3,7 @@ import {
   type Name,
   type Node,
   type ResolverRecordsSelection,
-  validNameRecordOrNull,
+  interpretNameRecord,
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
@@ -246,7 +246,7 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
       }
       case "name": {
         // for name records, we coerce unnormalized values to null
-        return { call, result: validNameRecordOrNull(result) };
+        return { call, result: interpretNameRecord(result) };
       }
       case "text": {
         // coalesce falsy string values (i.e. empty string) to null

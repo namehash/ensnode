@@ -8,10 +8,10 @@ import {
   type Node,
   REVERSE_ROOT_NODES,
   encodeLabelHash,
+  interpretLabel,
   isLabelIndexable,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
-  validLabelOrNull,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -201,7 +201,7 @@ export const handleNewOwner =
       // - If not valid/normalized, convert to an Unknown Label using encodeLabelHash
       // This transition from Literal -> Interpreted follows the terminology defined in
       // docs/ensnode.io/src/content/docs/docs/reference/terminology.mdx
-      const label = validLabelOrNull(healedLabel) ?? encodeLabelHash(labelHash);
+      const label = interpretLabel(healedLabel) ?? encodeLabelHash(labelHash);
 
       // to construct `Domain.name` use the parent's Name and the valid Label
       // NOTE: for a TLD, the parent is null, so we just use the Label value as is

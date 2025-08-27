@@ -6,7 +6,7 @@ import { getENSRootChainId } from "@ensnode/datasources";
 import {
   DEFAULT_EVM_COIN_TYPE,
   evmChainIdToCoinType,
-  validNameRecordOrNull,
+  interpretNameRecord,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -27,7 +27,7 @@ export default function () {
     const id = makePrimaryNameId(address, coinType);
 
     // enforce that the name record value emitted in the event is a valid name record (or null)
-    const name = validNameRecordOrNull(_name);
+    const name = interpretNameRecord(_name);
 
     // if the coerced value is null, consider it a deletion
     const isDeletion = name === null;

@@ -7,9 +7,9 @@ import {
   type LabelHash,
   PluginName,
   encodeLabelHash,
+  interpretLabel,
   isLabelIndexable,
   makeSubdomainNode,
-  validLabelOrNull,
 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
@@ -47,7 +47,7 @@ export const makeRegistrarHandlers = ({
     if (config.replaceUnnormalized) {
       // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
       // that was emitted otherwise
-      label = validLabelOrNull(label) ?? encodeLabelHash(labelHash);
+      label = interpretLabel(label) ?? encodeLabelHash(labelHash);
     }
 
     // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
