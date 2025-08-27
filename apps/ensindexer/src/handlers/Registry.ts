@@ -194,8 +194,13 @@ export const handleNewOwner =
         healedLabel = await labelByLabelHash(labelHash);
       }
 
-      // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
-      // that was emitted otherwise
+      // NOTE(replace-unnormalized): Transform the Literal Label into an Interpreted Label
+      // The healedLabel represents a Literal Label as emitted by the contract.
+      // We now process it to create an Interpreted Label:
+      // - If the healedLabel is valid (normalized), use it as the Interpreted Label
+      // - If not valid/normalized, convert to an Unknown Label using encodeLabelHash
+      // This transition from Literal -> Interpreted follows the terminology defined in
+      // docs/ensnode.io/src/content/docs/docs/reference/terminology.mdx
       const label = validLabelOrNull(healedLabel) ?? encodeLabelHash(labelHash);
 
       // to construct `Domain.name` use the parent's Name and the valid Label

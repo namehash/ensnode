@@ -90,3 +90,51 @@ const labelHash = labelhash("vitalik");
 :::caution[LabelHash Terminology Outside of this Reference]
 Outside of this terminology reference & ENSNode, the word 'labelhash' may refer to either the function or the result of the function.
 :::
+
+## Encoded LabelHash
+
+An **Encoded LabelHash** is a **LabelHash** that has been formatted for display when the corresponding **Label** is _unknown_. The encoding format wraps the hex representation of the **LabelHash** in square brackets: `[{LabelHash}]`.
+
+For example, if a **LabelHash** is `0x731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22`, its **Encoded LabelHash** representation would be `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22]`.
+
+## Normalized Label
+
+A **Normalized Label** is a **Label** that has been processed through the ENS normalization algorithm and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.
+
+## Unnormalized Label
+
+An **Unnormalized Label** is a **Label** that has not been processed through the ENS normalization algorithm, or one that would change if processed through normalization.
+
+## Unknown Label
+
+An **Unknown Label** is a **Label** for which the human-readable string is not available, and only the **LabelHash** is known. These labels are displayed using the **Encoded LabelHash** format: `[{LabelHash}]`.
+
+## Normalized Name
+
+A **Normalized Name** is a **name** composed entirely of **Normalized Labels**. This represents the canonical form of a name that can be safely processed through the `namehash` function to produce a valid **node**.
+
+## Unnormalized Name
+
+An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the ENS normalization algorithm.
+
+## Unknown Name
+
+An **Unknown Name** is a **name** that contains one or more **Unknown Labels**, meaning the human-readable form of at least one label is not available and must be displayed using **Encoded LabelHash** format.
+
+## Literal vs. Interpreted Labels and Names
+
+When processing ENS data, it's important to distinguish between the literal data read from blockchain sources and the interpreted form used in applications:
+
+### Literal Label
+A **Literal Label** is the raw label data as it exists in onchain storage or event data, before any processing or interpretation. This represents the exact bytes or string as emitted by contracts.
+
+### Interpreted Label
+An **Interpreted Label** is a **Literal Label** that has been processed and classified as either:
+- A **Normalized Label** (if it passes normalization)
+- An **Unknown Label** (if it cannot be normalized or the human-readable form is unavailable)
+
+### Literal Name
+A **Literal Name** is composed of **Literal Labels** as they appear in raw onchain data.
+
+### Interpreted Name
+An **Interpreted Name** is composed of **Interpreted Labels** after processing, where each label has been classified and potentially converted to its appropriate display format (using **Encoded LabelHash** for unknown labels).
